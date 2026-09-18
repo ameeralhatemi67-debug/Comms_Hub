@@ -1,3 +1,29 @@
+---
+type: synthesis
+tags:
+  - comms-hub
+  - comms-hub/discussions
+  - comms-hub/secrets
+  - comms-hub/integrations
+  - comms-hub/oauth
+  - comms-hub/security
+  - type/specification-foundation
+  - stage/architecture-design
+  - status/active
+created: 2026-08-18
+updated: 2026-09-18
+status: active
+parent: "[[Comms Hub]]"
+aliases:
+  - Connected-Account and Secrets Management
+  - Secrets and Integrations Architecture
+  - إدارة الحسابات المتصلة والأسرار
+---
+
+[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]] | [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]]
+
+---
+
 # Connected-Account and Secrets Management — Communication Department Hub
 
 > **Status: Discussion record — not final integration/security specification**
@@ -5,6 +31,100 @@
 > This document preserves the current discussion about connected organizational accounts, OAuth, dynamic secrets, credential encryption, integration health, token lifecycle, environment separation, service isolation, revocation, and recovery.
 >
 > The concepts below are architectural directions only. Exact providers, OAuth implementations, encryption mechanisms, key-management systems, refresh behavior, health-check frequency, service boundaries, and production policies are still under discussion.
+
+---
+
+## Structure Tree & Document Map
+
+- [[#Connected-Account and Secrets Management — Communication Department Hub|Overview & Security Scope]]
+- **Part I: Organizational Resource & Secret Separation**
+  - [[#1. A Connected Account Is an Organizational Resource|1. A Connected Account Is an Organizational Resource]]
+  - [[#2. ConnectedAccount Should Be a First-Class Object|2. ConnectedAccount Should Be a First-Class Object]]
+  - [[#3. Account Metadata and Secret Material Must Be Separate|3. Account Metadata and Secret Material Must Be Separate]]
+  - [[#4. Secret Categories|4. Secret Categories]]
+    - [[#Application Secrets|Application Secrets]]
+    - [[#Organizational OAuth Tokens|Organizational OAuth Tokens]]
+    - [[#Infrastructure Credentials|Infrastructure Credentials]]
+    - [[#Cryptographic Secrets|Cryptographic Secrets]]
+  - [[#5. Static Secrets vs Dynamic Secrets|5. Static Secrets vs Dynamic Secrets]]
+  - [[#6. Dynamic Token Storage Options|6. Dynamic Token Storage Options]]
+    - [[#Option A — Controlled Vault Storage|Option A — Controlled Vault Storage]]
+    - [[#Option B — Application-Level Encryption|Option B — Application-Level Encryption]]
+  - [[#7. Do Not Invent Cryptography|7. Do Not Invent Cryptography]]
+  - [[#8. Plaintext Secret Lifetime Should Be Minimal|8. Plaintext Secret Lifetime Should Be Minimal]]
+  - [[#9. Humans Should Not Normally View Secrets|9. Humans Should Not Normally View Secrets]]
+- **Part II: OAuth Security, Permissions & Connection States**
+  - [[#10. OAuth Should Be the Standard Connection Mechanism|10. OAuth Should Be the Standard Connection Mechanism]]
+  - [[#11. Protect the OAuth Flow|11. Protect the OAuth Flow]]
+  - [[#12. Minimum Provider Scopes|12. Minimum Provider Scopes]]
+  - [[#13. Show Granted Permissions|13. Show Granted Permissions]]
+  - [[#14. Provider Permissions and Internal Permissions Are Separate|14. Provider Permissions and Internal Permissions Are Separate]]
+  - [[#15. Connected Accounts Need Internal Usage Policy|15. Connected Accounts Need Internal Usage Policy]]
+  - [[#16. Rich Connection States|16. Rich Connection States]]
+  - [[#17. Reconnect the Existing Logical Account|17. Reconnect the Existing Logical Account]]
+  - [[#18. Token Metadata|18. Token Metadata]]
+- **Part III: Lifecycle Automation, Token Rotation & Health Verification**
+  - [[#19. Token Maintenance as Background Jobs|19. Token Maintenance as Background Jobs]]
+  - [[#20. Refresh-Token Rotation|20. Refresh-Token Rotation]]
+  - [[#21. Secret Updates Must Be Atomic|21. Secret Updates Must Be Atomic]]
+  - [[#22. Integration Health|22. Integration Health]]
+  - [[#23. Health Checks Must Be Non-Destructive|23. Health Checks Must Be Non-Destructive]]
+  - [[#24. Publishing Preflight Checks Integration Health|24. Publishing Preflight Checks Integration Health]]
+  - [[#25. Pre-Schedule Readiness Checks|25. Pre-Schedule Readiness Checks]]
+  - [[#26. Disable vs Disconnect / Revoke|26. Disable vs Disconnect / Revoke]]
+    - [[#Disable|Disable]]
+    - [[#Disconnect / Revoke|Disconnect / Revoke]]
+  - [[#27. Disconnect Must Show Impact|27. Disconnect Must Show Impact]]
+  - [[#28. Disconnect Must Preserve History|28. Disconnect Must Preserve History]]
+  - [[#29. Account Replacement|29. Account Replacement]]
+- **Part IV: Multi-Account Scope, Channel Types & Credential Brokerage**
+  - [[#30. Multiple Accounts Per Provider|30. Multiple Accounts Per Provider]]
+  - [[#31. Use Stable Provider IDs|31. Use Stable Provider IDs]]
+  - [[#32. Connected Account Types Beyond Social Media|32. Connected Account Types Beyond Social Media]]
+  - [[#33. Mail Integrations Are Especially Sensitive|33. Mail Integrations Are Especially Sensitive]]
+  - [[#34. Service Isolation|34. Service Isolation]]
+  - [[#35. Credential Service / Secret Broker|35. Credential Service / Secret Broker]]
+  - [[#36. AI Must Never Receive Raw Secrets|36. AI Must Never Receive Raw Secrets]]
+  - [[#37. Never Log Plaintext Secrets|37. Never Log Plaintext Secrets]]
+  - [[#38. Error Messages Must Not Leak Secrets|38. Error Messages Must Not Leak Secrets]]
+  - [[#39. Credential Lifecycle Events Should Be Audited|39. Credential Lifecycle Events Should Be Audited]]
+  - [[#40. Secret Metadata vs Secret Material|40. Secret Metadata vs Secret Material]]
+- **Part V: Encryption Architecture, Key Management & Environment Hygiene**
+  - [[#41. Secret Rotation|41. Secret Rotation]]
+  - [[#42. Master Encryption Key|42. Master Encryption Key]]
+  - [[#43. Development Must Not Use Production Connected Accounts|43. Development Must Not Use Production Connected Accounts]]
+  - [[#44. Environment Separation|44. Environment Separation]]
+  - [[#45. Database Copies Must Strip Live Secrets|45. Database Copies Must Strip Live Secrets]]
+  - [[#46. Webhook Secrets|46. Webhook Secrets]]
+  - [[#47. Webhook Rotation|47. Webhook Rotation]]
+  - [[#48. NAS Credentials|48. NAS Credentials]]
+  - [[#49. Backup Credentials|49. Backup Credentials]]
+  - [[#50. AI Provider Credentials|50. AI Provider Credentials]]
+- **Part VI: Governance Workflows, Compromise Response & Health Orchestration**
+  - [[#51. Connected-Account Ownership Metadata|51. Connected-Account Ownership Metadata]]
+  - [[#52. Reauthorization Workflow|52. Reauthorization Workflow]]
+  - [[#53. Suspected Credential Compromise Workflow|53. Suspected Credential Compromise Workflow]]
+  - [[#54. Provider Outage vs Credential Failure|54. Provider Outage vs Credential Failure]]
+  - [[#55. Track Expected Scopes|55. Track Expected Scopes]]
+  - [[#56. Connection Health Feeds Other Systems|56. Connection Health Feeds Other Systems]]
+  - [[#57. Central Integrations Page|57. Central Integrations Page]]
+  - [[#58. Connection and Permission Should Be Shown Separately|58. Connection and Permission Should Be Shown Separately]]
+  - [[#59. Secret Recovery|59. Secret Recovery]]
+  - [[#60. Backups Containing Secrets Are Highly Sensitive|60. Backups Containing Secrets Are Highly Sensitive]]
+  - [[#61. Secrets Committed to Git Must Be Rotated|61. Secrets Committed to Git Must Be Rotated]]
+  - [[#62. Codex Does Not Need Production Secret Values|62. Codex Does Not Need Production Secret Values]]
+- **Part VII: Architecture Synthesis, Security Tiers & Foundations**
+  - [[#63. OAuth App Configuration Is Infrastructure|63. OAuth App Configuration Is Infrastructure]]
+  - [[#64. Security Tiers for Connected-Account Actions|64. Security Tiers for Connected-Account Actions]]
+  - [[#65. Provider State Is Ultimately External|65. Provider State Is Ultimately External]]
+  - [[#66. Connected Accounts Need Periodic Verification|66. Connected Accounts Need Periodic Verification]]
+  - [[#67. Service-to-Service Credentials|67. Service-to-Service Credentials]]
+  - [[#68. Prefer Short-Lived Credentials Where Practical|68. Prefer Short-Lived Credentials Where Practical]]
+  - [[#69. Conceptual Connected-Account Architecture|69. Conceptual Connected-Account Architecture]]
+  - [[#70. Practical Early Architecture|70. Practical Early Architecture]]
+  - [[#71. Recommended First Production Foundations|71. Recommended First Production Foundations]]
+  - [[#72. Core Principle|72. Core Principle]]
+  - [[#73. Still Unresolved|73. Still Unresolved]]
 
 ---
 
@@ -47,6 +167,9 @@ This distinction matters when an employee:
 - loses publishing permission
 
 ---
+
+> [!tip] Institutional Ownership
+> Connected social media accounts and publishing credentials belong exclusively to the organization, not to the personal profiles of the employees who connected them. See [[disscussios/organizational_role_discussion#10. مسؤول النشر وإدارة الحسابات — High-Risk Operational Role|Publishing & Account Officer Role]].
 
 # 2. ConnectedAccount Should Be a First-Class Object
 
@@ -143,6 +266,33 @@ client_secret
 This reduces accidental exposure.
 
 ---
+
+
+### Metadata vs Secret Material Encryption Pipeline
+```mermaid
+flowchart TD
+    AccountEntity[Connected Account Entity] --> MetaBranch[Public Metadata Branch]
+    AccountEntity --> SecretBranch[Secret Material Branch]
+    
+    subgraph CleartextStorage["PostgreSQL Relational DB"]
+        MetaBranch --> DB_Meta[Account ID, Provider, Account Handle, Scopes, Status, Health]
+    end
+    
+    subgraph EncryptedStorage["Encrypted Secret Envelope"]
+        SecretBranch --> CipherEngine[AES-GCM-256 Envelope Encryption Engine]
+        KMS[(Master Encryption Key / KMS)] --> CipherEngine
+        CipherEngine --> CipherBlob[Encrypted Access Token, Refresh Token, Salt, IV]
+    end
+    
+    subgraph AppIsolation["Application Boundary"]
+        DB_Meta -.-> API_Client[Frontend / Operations UI: Display Only]
+        CipherBlob -.-> SecretBroker[Secret Broker: Ephemeral Decryption for Worker Only]
+    end
+```
+
+> [!important] Separation of Secrets
+> Database dumps and application logs must only ever contain public metadata; secret tokens are encrypted with AES-GCM-256 and never surfaced in cleartext. See [[MVP_draft#38. Settings Page|MVP Settings Page]].
+
 
 # 4. Secret Categories
 
@@ -390,6 +540,9 @@ Our system receives delegated authorization.
 
 ---
 
+> [!important] Standardize on OAuth 2.0
+> Never store raw passwords or human credentials in the platform; authenticate third-party platforms strictly via OAuth 2.0 PKCE. See [[MVP_draft#38. Settings Page|MVP Settings Page]].
+
 # 11. Protect the OAuth Flow
 
 The OAuth authorization flow should use modern protections such as:
@@ -557,6 +710,29 @@ User-facing labels may be simpler.
 
 ---
 
+
+### Connection State Lifecycle Machine
+```mermaid
+stateDiagram-v2
+    [*] --> DISCONNECTED : Initial account definition
+    DISCONNECTED --> AUTHORIZING : Admin initiates OAuth PKCE flow
+    AUTHORIZING --> CONNECTED : Token exchange verified
+    AUTHORIZING --> DISCONNECTED : User cancels or OAuth callback fails
+    CONNECTED --> EXPIRING : Refresh token window near expiry
+    EXPIRING --> CONNECTED : Successful automated token refresh
+    EXPIRING --> NEEDS_REAUTH : Refresh token rejected or expired
+    CONNECTED --> DISABLED : Administrator soft-disables usage
+    DISABLED --> CONNECTED : Administrator re-enables
+    CONNECTED --> SUSPECTED_COMPROMISE : Security incident declared
+    SUSPECTED_COMPROMISE --> REVOKED : RFC 7009 token revocation dispatched
+    NEEDS_REAUTH --> CONNECTED : Interactive reauthorization completed
+    REVOKED --> [*] : Credentials permanently purged
+```
+
+> [!tip] Connection Observability
+> For preflight publishing warnings when an account is in `EXPIRING` or `NEEDS_REAUTH`, see [[MVP_draft#25. Publishing Tab|MVP Publishing Preflight Tab]].
+
+
 # 17. Reconnect the Existing Logical Account
 
 If a token expires and the user presses:
@@ -637,6 +813,30 @@ retire previous token version
 Do not assume refresh tokens remain static forever.
 
 ---
+
+
+### Refresh-Token Rotation Sequence
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Scheduler as Maintenance Cron Worker
+    participant Broker as Secret Broker Service
+    participant Vault as Encrypted Secret Store
+    participant Provider as External Platform OAuth API
+    participant Audit as Immutable Audit Log
+    
+    Scheduler->>Broker: Check Accounts Needing Token Refresh
+    Broker->>Vault: Fetch Current Refresh Token (Decrypted in Memory)
+    Broker->>Provider: POST /oauth/token (grant_type=refresh_token)
+    Provider-->>Broker: Return New Access Token + New Refresh Token
+    Broker->>Vault: Atomic Overwrite(New Encrypted Envelope, Version++)
+    Broker->>Audit: Record TokenRotationEvent(Account ID, Timestamp, Success)
+    Note over Broker,Provider: Previous refresh token immediately invalidated
+```
+
+> [!note] Token Rotation Safety
+> Using automated background jobs prevents token expiration during critical publishing schedules. See [[disscussios/failure_handling_background_jobs#19. Retry Policy by Failure Type|Failure Handling - Retry Policy]].
+
 
 # 21. Secret Updates Must Be Atomic
 
@@ -722,6 +922,29 @@ Instagram account requires reconnection.
 ```
 
 ---
+
+
+### Publishing Preflight & Connection Health Gate
+```mermaid
+flowchart TD
+    Preflight([Release Scheduled for Dispatch]) --> InspectAccount{Inspect Target Account Health}
+    
+    InspectAccount -->|Status: CONNECTED and Healthy| PingAPI[Non-Destructive API Health Ping]
+    InspectAccount -->|Status: NEEDS_REAUTH / DISABLED| BlockRelease[Halt Preflight: Block Release]
+    
+    PingAPI --> CheckScope{Verify Expected Scopes}
+    CheckScope -->|Scope Valid & Rate Limits Normal| PassPreflight[Preflight Passed: Authorize Worker]
+    CheckScope -->|Scope Revoked / Insufficient| ScopeAlert[Preflight Failed: Missing Publishing Scope]
+    
+    BlockRelease --> AlertOfficer[Alert Publishing Officer via Urgent Notification]
+    ScopeAlert --> AlertOfficer
+    
+    AlertOfficer --> QueueTriage[Action Item Created in Needs Attention Queue]
+```
+
+> [!warning] Preflight Health Gate
+> Preflight health checks must never publish mock test posts; use lightweight `/me` or account status endpoints. See [[disscussios/approval_policy_design#22. Exact Account Binding|Approval Policy - Exact Account Binding]].
+
 
 # 25. Pre-Schedule Readiness Checks
 
@@ -982,6 +1205,46 @@ Initially this may be implemented as a clean backend module rather than a separa
 
 ---
 
+
+### Secret Broker & AI Air-Gap Architecture
+```mermaid
+graph TD
+    subgraph UI["User & Admin Interface"]
+        Officer[Publishing Officer]
+        Admin[System Admin]
+    end
+    
+    subgraph CoreEngine["Hub Application Core"]
+        AppServer[Application Server]
+        SecretBroker[Credential Broker / Secrets Vault]
+    end
+    
+    subgraph ExecutionPlane["Execution Worker Plane"]
+        PubWorker[Publishing Worker: High Security Sandbox]
+    end
+    
+    subgraph AIPlane["AI Advisory Plane (Air-Gapped)"]
+        AIService[AI Model: Copywriting & Inspection]
+    end
+    
+    subgraph ExternalServices["External Social APIs"]
+        SocialAPI[Meta / X / LinkedIn APIs]
+    end
+    
+    Officer -->|Trigger Release| AppServer
+    AppServer -->|Job ID & Metadata| PubWorker
+    PubWorker -->|Request Short-Lived Token| SecretBroker
+    SecretBroker -->|In-Memory Ephemeral Secret| PubWorker
+    PubWorker -->|Dispatch Signed Request| SocialAPI
+    
+    AppServer -.->|Draft Content Only (Zero Credentials)| AIService
+    AIService -.->|Suggestions & Critiques Only| AppServer
+```
+
+> [!caution] AI Air-Gap Rule
+> Artificial intelligence modules must never receive API keys, OAuth tokens, or administrative credentials in context windows. See [[MVP_draft#15. Work Page|MVP Work Page]].
+
+
 # 36. AI Must Never Receive Raw Secrets
 
 Hard rule:
@@ -1139,6 +1402,9 @@ Loss of the key may make encrypted OAuth credentials unusable.
 Compromise of the key significantly increases exposure risk.
 
 ---
+
+> [!caution] Master Key Governance
+> The master encryption key must never be stored in the database or committed to version control; it must reside in external environment secrets or a managed KMS.
 
 # 43. Development Must Not Use Production Connected Accounts
 
@@ -1347,6 +1613,29 @@ Possible incident path:
 Admin may eventually have an emergency revoke action.
 
 ---
+
+
+### Suspected Compromise & Emergency Revocation Protocol
+```mermaid
+flowchart TD
+    Incident([Security Breach / Account Compromise Detected]) --> Declare[Admin / Officer Invokes Emergency Revocation]
+    Declare --> Confirm[Mandatory Re-Authentication / Step-Up Confirmation]
+    Confirm --> RevokeAPI[Issue RFC 7009 Revoke Call to Provider API]
+    Confirm --> ShredLocal[Cryptographically Invalidate Local Secret Envelope]
+    Confirm --> KillJobs[Drain and Cancel Pending Publishing Jobs for Account]
+    
+    RevokeAPI --> SetState[Set Account Status: SUSPECTED_COMPROMISE]
+    ShredLocal --> SetState
+    KillJobs --> SetState
+    
+    SetState --> UrgentAlert[Broadcast Urgent Critical Alert to Leadership]
+    SetState --> AuditLog[(Tamper-Evident Immutable Audit Log)]
+    SetState --> Investigate[Mandatory Post-Incident Security Review]
+```
+
+> [!caution] Compromise Containment
+> Once compromise is suspected, revoking external provider tokens takes precedence over preserving scheduled releases. See [[disscussios/emergency_workflows#17. Emergency Control Panel|Emergency Workflows - Control Panel]].
+
 
 # 54. Provider Outage vs Credential Failure
 
@@ -1730,6 +2019,54 @@ Incident Response
 
 ---
 
+
+### Conceptual Connected-Account Entity Architecture
+```mermaid
+erDiagram
+    CONNECTED_ACCOUNT ||--|| ACCOUNT_METADATA : describes
+    CONNECTED_ACCOUNT ||--|| ENCRYPTED_SECRET_ENVELOPE : secures
+    CONNECTED_ACCOUNT ||--o{ USAGE_POLICY : governed_by
+    CONNECTED_ACCOUNT ||--o{ TOKEN_ROTATION_AUDIT : logs
+    CONNECTED_ACCOUNT ||--o{ INTEGRATION_HEALTH_LOG : records
+    
+    CONNECTED_ACCOUNT {
+        string id PK
+        string provider_id
+        string stable_account_id
+        string connection_status
+        timestamp created_at
+        timestamp updated_at
+    }
+    ACCOUNT_METADATA {
+        string id PK
+        string account_id FK
+        string display_name
+        string username_handle
+        string granted_scopes
+        string avatar_url
+    }
+    ENCRYPTED_SECRET_ENVELOPE {
+        string id PK
+        string account_id FK
+        int key_version
+        string ciphertext_blob
+        string iv_nonce
+        string auth_tag
+        timestamp expires_at
+    }
+    USAGE_POLICY {
+        string id PK
+        string account_id FK
+        string allowed_role_ids
+        string campaign_restriction
+        boolean require_approval
+    }
+```
+
+> [!note] Data Model Isolation
+> Decoupling `AccountMetadata` from `EncryptedSecretEnvelope` ensures user dashboards render instantly without touching cryptographic key infrastructure. See [[MVP_draft#38. Settings Page|MVP Settings Page]].
+
+
 # 70. Practical Early Architecture
 
 A first implementation can conceptually use:
@@ -1806,6 +2143,9 @@ Users may authorize and use that authority according to policy, but they do not 
 
 ---
 
+> [!important] Foundational Principle
+> Secrets are dangerous liabilities. Handle them with minimal lifetime, zero plaintext visibility, and complete cryptographic lifecycle isolation.
+
 # 73. Still Unresolved
 
 We still need to decide:
@@ -1828,3 +2168,21 @@ We still need to decide:
 - Provider-specific permission mappings
 
 This document preserves the connected-account and secrets-management discussion only. It is not yet the final integration-security architecture.
+
+---
+
+^connected-accounts-secrets-boundary
+
+> [!important] Connected Accounts & Secrets Management Hub
+> Cross-reference with [[discussions_list#3. Connected Accounts and Secrets Management|Discussions List - Connected Accounts]], [[MVP_draft#38. Settings Page|MVP Settings Page]], and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+
+---
+
+## External Architectural & Standards References
+
+- **OAuth 2.0 Security Best Current Practice**: [IETF OAuth Security Topics](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics)
+- **OAuth 2.0 Token Revocation**: [RFC 7009](https://datatracker.ietf.org/doc/html/rfc7009)
+- **NIST Key Management Guidelines**: [NIST SP 800-57 Part 1](https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-5/final)
+- **Web Cryptography API & AES-GCM Specifications**: [W3C Web Cryptography](https://www.w3.org/TR/WebCryptoAPI/)
+- **Mermaid Sequence & State Diagram Documentation**: [Mermaid.js Documentation](https://mermaid.js.org/)
+

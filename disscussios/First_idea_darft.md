@@ -1,10 +1,78 @@
+---
+type: synthesis
+tags:
+  - comms-hub
+  - comms-hub/ideation
+  - comms-hub/discussions
+  - comms-hub/draft-1
+  - type/brainstorm
+  - stage/early-draft
+  - status/active
+created: 2026-08-18
+updated: 2026-09-18
+status: active
+parent: "[[Comms Hub]]"
+aliases:
+  - First Idea Draft
+  - Comms Hub Working Draft 1
+  - Initial Architecture Synthesis
+---
+
+
+[[Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept Genesis]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/Second_discussion_draft|Second Discussion Draft]]
+
+---
+
 # First Idea Draft — Communication Department Working Hub
 
+> [!note] Status: Early discussion draft
 > **Status: Early discussion draft**
 >
 > This document preserves the current brainstorming state of the project. It is **not a final specification** and we have **not agreed on all items yet**.
 >
 > The architecture, scope, workflows, permissions, storage strategy, automation behavior, AI use, publishing behavior, monitoring rules, and MVP boundaries are still under discussion and may change substantially before implementation in Codex.
+
+---
+
+
+## Structure Tree & Document Map
+
+- [[#First Idea Draft — Communication Department Working Hub|Overview & Brainstorm Status]]
+- **Part I: Strategic Foundations & Operating Model**
+  - [[#1. Main Idea|1. Main Idea]]
+  - [[#2. Main Problems We Want to Solve|2. Main Problems We Want to Solve]]
+  - [[#3. Current Scope|3. Current Scope]]
+  - [[#4. Product Model|4. Product Model]]
+- **Part II: Core Work Management & Media Entities**
+  - [[#5. Proposed Main Navigation|5. Proposed Main Navigation]]
+  - [[#6. Work Page|6. Work Page]]
+  - [[#7. Media Library|7. Media Library]]
+  - [[#8. Universal Work Item|8. Universal Work Item]]
+- **Part III: Governance, Approvals & Communication**
+  - [[#9. Approval Workflow|9. Approval Workflow]]
+  - [[#10. Editing and Versioning|10. Editing and Versioning]]
+  - [[#11. Internal Communication|11. Internal Communication]]
+  - [[#12. External Communication and Shared Mail|12. External Communication and Shared Mail]]
+- **Part IV: Automation, Intelligence & Dashboards**
+  - [[#13. Calendar|13. Calendar]]
+  - [[#14. Automation Engine Concept|14. Automation Engine Concept]]
+  - [[#15. AI Assistance|15. AI Assistance]]
+  - [[#16. Home Dashboard|16. Home Dashboard]]
+- **Part V: Operational Infrastructure & Data Architecture**
+  - [[#17. Roles and Permissions|17. Roles and Permissions]]
+  - [[#18. Monitoring Philosophy|18. Monitoring Philosophy]]
+  - [[#19. Activity and Audit Log|19. Activity and Audit Log]]
+  - [[#20. Storage Architecture Concept|20. Storage Architecture Concept]]
+- **Part VI: Creation, Ideation & Analytics Modules**
+  - [[#21. Create Page Concept|21. Create Page Concept]]
+  - [[#22. Ideas Page|22. Ideas Page]]
+  - [[#23. Analytics|23. Analytics]]
+  - [[#24. Campaigns|24. Campaigns]]
+- **Part VII: Architectural Synthesis & Research Questions**
+  - [[#25. Conceptual Architecture|25. Conceptual Architecture]]
+  - [[#26. Current Product Definition|26. Current Product Definition]]
+  - [[#27. Important Open Questions|27. Important Open Questions]]
+  - [[#28. Draft Status|28. Draft Status]]
 
 ---
 
@@ -19,6 +87,22 @@ A healthy work lifecycle could look like:
 **Request → Plan → Assign → Create → Review → Revise → Approve → Schedule / Send / Publish → Monitor → Analyze → Archive**
 
 Every page should support part of this lifecycle rather than behaving as an isolated tool.
+
+### Department Operating System Lifecycle Diagram
+
+```mermaid
+flowchart LR
+    Step1[Request] --> Step2[Plan]
+    Step2 --> Step3[Assign]
+    Step3 --> Step4[Create]
+    Step4 --> Step5[Review]
+    Step5 --> Step6[Revise]
+    Step6 --> Step7[Approve]
+    Step7 --> Step8[Schedule / Send / Publish]
+    Step8 --> Step9[Monitor]
+    Step9 --> Step10[Analyze]
+    Step10 --> Step11[Archive]
+```
 
 ---
 
@@ -131,6 +215,39 @@ The product can be understood as six connected systems.
 
 The main value comes from connecting all six together.
 
+### Product Model Interconnection Diagram
+
+```mermaid
+graph TD
+    Hub([Comms Hub Operating System])
+    
+    subgraph CorePillars [The Six Systems]
+        P[1. People: Employees, Roles, Presence]
+        W[2. Work: Requests, Tasks, Campaigns]
+        C[3. Content: Posts, Announcements, Videos]
+        A[4. Assets: Images, Documents, Versions]
+        Ch[5. Channels: Social Media, Email, Web]
+        Ops[6. Operations: Approvals, Automations, Logs]
+    end
+    
+    Hub --- P
+    Hub --- W
+    Hub --- C
+    Hub --- A
+    Hub --- Ch
+    Hub --- Ops
+    
+    P <--> W
+    W <--> C
+    C <--> A
+    C <--> Ch
+    Ch <--> Ops
+    Ops <--> W
+```
+
+> [!note] Downstream Architectural Refinement
+> This six-system foundation was formalized in [[Comms Hub#The Six Foundational Subsystems|Comms Hub Master Architecture]] and operationalized in [[MVP_draft#7. Main Information Architecture|MVP Main Information Architecture]].
+
 ---
 
 # 5. Proposed Main Navigation
@@ -217,6 +334,9 @@ A file should eventually be able to show where it was used, for example:
 - X — Sep 17
 - Website article — Sep 19
 
+> [!tip] Dedicated Storage Discussion
+> Comprehensive asset versioning, checksum validation, and cloud-to-NAS replication workflows are detailed in [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]].
+
 ---
 
 # 8. Universal Work Item
@@ -272,6 +392,34 @@ Examples:
 
 This idea is promising but still subject to refinement.
 
+### Universal Work Item Topology Diagram
+
+```mermaid
+graph TD
+    WI[Universal Work Item]
+    
+    subgraph Consumers [Referencing Modules]
+        Cal[Calendar: Schedules by Date]
+        Med[Media Library: Attaches File Versions]
+        An[Analytics: Collects Reach and Engagement]
+        Notif[Notifications: Alerts Assignees and Reviewers]
+        Mail[Mail: Creates Tasks from Inbound Requests]
+        AI[AI Engine: Generates Copy and Variants]
+        Appr[Approvals: Enforces Multi-Stage Sign-Off]
+    end
+    
+    WI --> Cal
+    WI --> Med
+    WI --> An
+    WI --> Notif
+    WI --> Mail
+    WI --> AI
+    WI --> Appr
+```
+
+> [!note] Prototype Implementation
+> For the visual layout and card structures of the Work Item, see [[MVP_draft#16. Work List|MVP Work List]] and [[MVP_draft#17. Work Item Detail|MVP Work Item Detail]].
+
 ---
 
 # 9. Approval Workflow
@@ -309,6 +457,24 @@ Example:
 ```
 
 Approvals should be lightweight enough that they improve workflow rather than creating unnecessary bureaucracy.
+
+### Approval Lifecycle State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT : Initialize Content
+    DRAFT --> READY_FOR_REVIEW : Author Completion
+    READY_FOR_REVIEW --> IN_REVIEW : Reviewer Pick-up
+    IN_REVIEW --> CHANGES_REQUESTED : Feedback Provided
+    CHANGES_REQUESTED --> DRAFT : Author Revision
+    IN_REVIEW --> APPROVED : Sign-Off Granted
+    APPROVED --> SCHEDULED : Queue for Target Time
+    SCHEDULED --> PUBLISHED : Publish Action Complete
+    PUBLISHED --> [*]
+```
+
+> [!tip] Dedicated Approval Specification
+> Detailed approval policies, version-binding rules, delegation during leave, and emergency publishing bypasses are analyzed in [[disscussios/approval_policy_design|Approval Policy Design]].
 
 ---
 
@@ -508,6 +674,18 @@ Notify Communications Manager
 
 The full automation builder does not need to be built in the first version, but the architecture should allow automation later.
 
+### Trigger-Condition-Action Automation Pipeline
+
+```mermaid
+flowchart TD
+    Trigger[WHEN: Event Trigger Occurs<br/>e.g. Content Approved / Email Received] --> Condition{IF: Conditions Match<br/>e.g. Channel is Instagram / Due in 24h}
+    Condition -->|True| Action[DO: Execute Action<br/>Schedule Post / Dispatch Alert / Create Task]
+    Condition -->|False| EndState[No Action Executed]
+```
+
+> [!note] Job Execution Engine
+> For the technical worker implementation, retry mechanisms, and idempotency guarantees, see [[disscussios/failure_handling_background_jobs|Failure Handling and Background Jobs]].
+
 ---
 
 # 15. AI Assistance
@@ -557,6 +735,9 @@ Possible uses:
 - Create draft briefs
 
 AI behavior, permissions, and automation levels are still under discussion.
+
+> [!tip] AI Administrative Controls
+> The governance model, trust levels, and cost safeguards for AI are explored in [[disscussios/Second_discussion_draft#1. AI and Automation Should Be Administratively Controlled|Second Discussion Draft (AI Controls)]].
 
 ---
 
@@ -676,6 +857,9 @@ The target model is:
 
 rather than hard-coding role names throughout the application.
 
+> [!important] Role Model Upgrade
+> The early 3-role assumption (`Admin`, `Manager`, `Employee`) was superseded when management provided confirmed departmental positions. See the full model in [[disscussios/organizational_role_discussion|Organizational Role Discussion]].
+
 ---
 
 # 18. Monitoring Philosophy
@@ -762,6 +946,9 @@ This event/activity system could later power:
 
 This is likely to become one of the architectural foundations of the platform.
 
+> [!note] Event-Driven Architecture
+> How system events trigger the four-tier attention model is detailed in [[disscussios/notification_model#3. Notifications Should Originate From Events|Notification Model (Event Foundation)]]. Security audit compliance is addressed in [[disscussios/security_discussion|Security Architecture]].
+
 ---
 
 # 20. Storage Architecture Concept
@@ -798,6 +985,25 @@ Related Work Item
 The actual large video/image/document does not need to live directly inside the relational database.
 
 The final storage approach is still under discussion.
+
+### Abstracted Storage Layer Diagram
+
+```mermaid
+graph TD
+    AppDB[(Application Database: Metadata, Versions, Checksums)]
+    
+    subgraph StorageAbstraction [Storage Provider Abstraction Layer]
+        Cloud[Cloud Object Storage: S3 / Supabase]
+        Local[Local On-Prem Server]
+        NAS[High-Capacity Video NAS]
+        Archive[Cold Storage Archive]
+    end
+    
+    AppDB <--> StorageAbstraction
+```
+
+> [!tip] Hybrid Storage Implementation
+> For the complete transition from Supabase Storage to On-Prem NAS and Disaster Recovery runbooks, see [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]].
 
 ---
 
@@ -988,6 +1194,43 @@ A campaign acts as a container connecting work, assets, publishing, calendar ite
                                  Monitoring / AI
 ```
 
+### Conceptual Architecture Diagram
+
+```mermaid
+graph TD
+    Hub([COMMUNICATION HUB])
+    
+    subgraph DomainLayer [Domain Foundation]
+        People[PEOPLE: Users and Roles]
+        Work[WORK: Campaigns and Tasks]
+        Channels[CHANNELS: Social and Email]
+    end
+    
+    subgraph AssetContentLayer [Content and Media]
+        Content[CONTENT: Copy and Formats]
+        Assets[ASSETS: Media and Versions]
+    end
+    
+    subgraph OperationsPipeline [Operational Engine]
+        Approvals[APPROVALS: Multi-Stage Sign-Off]
+        Publishing[PUBLISHING: Channel Dispatch]
+        Automation[AUTOMATION ENGINE: Rule Execution]
+    end
+    
+    subgraph DownstreamInsights [Intelligence and Feedback]
+        Analytics[ANALYTICS: Content and Operations]
+        Events[EVENTS: Notifications, Audit, AI, Monitoring]
+    end
+    
+    Hub --> DomainLayer
+    DomainLayer --> AssetContentLayer
+    AssetContentLayer --> OperationsPipeline
+    OperationsPipeline --> DownstreamInsights
+```
+
+
+---
+
 ---
 
 # 26. Current Product Definition
@@ -1050,4 +1293,14 @@ We are still discussing the system and expect to revise:
 - Infrastructure
 - MVP priorities
 
-A later document should turn agreed ideas into a formal product specification only after the main design questions are resolved.
+A later document should turn agreed ideas into a formal product specification only after the main design questions are resolved. ^first-draft-synthesis
+
+---
+
+## Technical Framework References
+- Modern Web Platform: [Next.js App Router Documentation](https://nextjs.org/docs)
+- Storage & Relational Database: [Supabase Documentation](https://supabase.com/docs)
+- Asynchronous Workers: [BullMQ Architecture](https://docs.bullmq.io/)
+- UI Design System: [Radix UI Primitives](https://www.radix-ui.com/) & [Tailwind CSS](https://tailwindcss.com/)
+- Visual Modeling Engine: [Mermaid.js Documentation](https://mermaid.js.org/)
+

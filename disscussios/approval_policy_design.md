@@ -1,10 +1,108 @@
+---
+type: synthesis
+tags:
+  - comms-hub
+  - comms-hub/discussions
+  - comms-hub/approval
+  - comms-hub/governance
+  - comms-hub/workflows
+  - comms-hub/policies
+  - type/specification-foundation
+  - stage/architecture-design
+  - status/active
+created: 2026-08-18
+updated: 2026-09-18
+status: active
+parent: "[[Comms Hub]]"
+aliases:
+  - Approval Policy Design
+  - Approval and Release Architecture
+  - سياسات الاعتماد والموافقات
+---
+
+[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/organizational_role_discussion|Organizational Role Discussion]] | [[disscussios/emergency_workflows|Emergency Workflows]] | [[disscussios/Second_discussion_draft|Second Discussion Draft]]
+
+---
+
 # Approval Policy Design — Communication Department Hub
 
+> [!note] Status: Discussion record — not final approval specification
 > **Status: Discussion record — not final approval specification**
 >
 > This document preserves the current discussion about review, approval, release authorization, approval policies, delegation, version binding, emergency overrides, and approval analytics.
 >
 > The ideas below are architectural directions. Exact roles, policy rules, approval stages, content categories, expiry rules, escalation behavior, and permissions are still under discussion.
+
+---
+
+## Structure Tree & Document Map
+
+- [[#Approval Policy Design — Communication Department Hub|Overview & Scope]]
+- **Part I: Foundational Concepts & Version Binding**
+  - [[#1. Review, Approval, and Release Are Different|1. Review, Approval, and Release Are Different]]
+  - [[#2. Approval Must Bind to a Specific Version|2. Approval Must Bind to a Specific Version]]
+  - [[#3. Changes After Approval|3. Changes After Approval]]
+  - [[#4. Approval Scope|4. Approval Scope]]
+  - [[#5. Conservative First-Version Rule|5. Conservative First-Version Rule]]
+- **Part II: Dynamic Approval Policies & Multi-Stage Engines**
+  - [[#6. Approval Policies Instead of Hard-Coded Logic|6. Approval Policies Instead of Hard-Coded Logic]]
+  - [[#7. Conditional Policy Selection|7. Conditional Policy Selection]]
+  - [[#8. Explain Why Approval Is Required|8. Explain Why Approval Is Required]]
+  - [[#9. Sequential and Parallel Approval Stages|9. Sequential and Parallel Approval Stages]]
+  - [[#10. Approval Request as Its Own Object|10. Approval Request as Its Own Object]]
+  - [[#11. Approval Decision Object|11. Approval Decision Object]]
+  - [[#12. Decision Types|12. Decision Types]]
+  - [[#13. Request Changes vs Reject|13. Request Changes vs Reject]]
+  - [[#14. Contextual Review Comments|14. Contextual Review Comments]]
+  - [[#15. Preserve Every Approval Cycle|15. Preserve Every Approval Cycle]]
+  - [[#16. Changes During Multi-Stage Approval|16. Changes During Multi-Stage Approval]]
+- **Part III: Release Authority, Publishing Binding & Post-Approval Lifecycle**
+  - [[#17. Approval Status and Release Status Should Be Separate|17. Approval Status and Release Status Should Be Separate]]
+  - [[#18. Approval and Publication Should Be Separate Actions|18. Approval and Publication Should Be Separate Actions]]
+  - [[#19. Configurable Post-Approval Behavior|19. Configurable Post-Approval Behavior]]
+  - [[#20. Schedule Changes May Affect Approval|20. Schedule Changes May Affect Approval]]
+  - [[#21. Destination Changes May Affect Approval|21. Destination Changes May Affect Approval]]
+  - [[#22. Exact Account Binding|22. Exact Account Binding]]
+  - [[#23. Some Work Requires No Formal Approval|23. Some Work Requires No Formal Approval]]
+- **Part IV: Risk Classification, Scoping & Governance Controls**
+  - [[#24. Risk-Based Approval|24. Risk-Based Approval]]
+  - [[#25. Contextual Approval Authority|25. Contextual Approval Authority]]
+  - [[#26. Delegation|26. Delegation]]
+  - [[#27. Delegation Scope|27. Delegation Scope]]
+  - [[#28. Self-Approval|28. Self-Approval]]
+  - [[#29. Separation of Duties|29. Separation of Duties]]
+- **Part V: Operations, Timers, Escalations & UI Queues**
+  - [[#30. Approval Expiry|30. Approval Expiry]]
+  - [[#31. Stuck Approval Escalation|31. Stuck Approval Escalation]]
+  - [[#32. Approval Reminders as Background Jobs|32. Approval Reminders as Background Jobs]]
+  - [[#33. Approval Queue UX|33. Approval Queue UX]]
+  - [[#34. Show Exactly What Is Being Approved|34. Show Exactly What Is Being Approved]]
+  - [[#35. Approval Comments|35. Approval Comments]]
+- **Part VI: Emergency Overrides, Policy Versioning & Determinism**
+  - [[#36. Emergency Override|36. Emergency Override]]
+  - [[#37. Emergency Override Permission|37. Emergency Override Permission]]
+  - [[#38. Approval Policy Versioning|38. Approval Policy Versioning]]
+  - [[#39. Policy Changes Do Not Rewrite History|39. Policy Changes Do Not Rewrite History]]
+  - [[#40. Pending Requests During Policy Changes|40. Pending Requests During Policy Changes]]
+  - [[#41. Deterministic Policy Resolution|41. Deterministic Policy Resolution]]
+  - [[#42. Safe Fallback Policy|42. Safe Fallback Policy]]
+- **Part VII: Automation, Conceptual Data Model & Starting Matrix**
+  - [[#43. Pre-Submission Quality Checks|43. Pre-Submission Quality Checks]]
+  - [[#44. AI Assistance During Review|44. AI Assistance During Review]]
+  - [[#45. Approval Engine and Job System Separation|45. Approval Engine and Job System Separation]]
+  - [[#46. Approval, Audit, and Job Are Different|46. Approval, Audit, and Job Are Different]]
+  - [[#47. Conceptual Data Model|47. Conceptual Data Model]]
+  - [[#48. Employee Experience Should Remain Simple|48. Employee Experience Should Remain Simple]]
+  - [[#49. Approval Workload Management|49. Approval Workload Management]]
+  - [[#50. Approval Analytics|50. Approval Analytics]]
+  - [[#51. Avoid Building a Full Workflow Designer Initially|51. Avoid Building a Full Workflow Designer Initially]]
+  - [[#52. Proposed Starting Approval Model|52. Proposed Starting Approval Model]]
+    - [[#Internal Low-Risk Work|Internal Low-Risk Work]]
+    - [[#Routine External Content|Routine External Content]]
+    - [[#Higher-Risk External Content|Higher-Risk External Content]]
+    - [[#Emergency|Emergency]]
+  - [[#53. Core Principle|53. Core Principle]]
+  - [[#54. Still Unresolved|54. Still Unresolved]]
 
 ---
 
@@ -40,6 +138,32 @@ PUBLISH / SEND
 These should not necessarily use the same permission.
 
 ---
+
+
+### Approval Stage Separation Architecture
+```mermaid
+flowchart TD
+    Create[Creator: Draft Content / Assets] --> Review[Reviewer: Quality & Brand Review]
+    Review --> Approval[Authorized Approver: Formal Policy Approval]
+    Approval --> Release[Release Operator: Release Authorization]
+    Release --> Publish[Publisher Adapter: External Platform Dispatch]
+    
+    subgraph S1["Stage 1: Content Quality"]
+        Create
+        Review
+    end
+    subgraph S2["Stage 2: Governance & Authority"]
+        Approval
+        Release
+    end
+    subgraph S3["Stage 3: External Execution"]
+        Publish
+    end
+```
+
+> [!tip] Architectural Separation
+> For operational role mappings, see [[disscussios/organizational_role_discussion#11. Publishing Officer as Release Operator|Publishing Officer as Release Operator]] and the [[MVP_draft#22. Approvals Tab|MVP Approvals Tab]].
+
 
 # 2. Approval Must Bind to a Specific Version
 
@@ -125,6 +249,23 @@ The system should clearly display:
 This must be enforced by the backend, not only the UI.
 
 ---
+
+
+### Version-Bound Invalidation State Machine
+```mermaid
+stateDiagram-v2
+    [*] --> Draft : Author creates revision
+    Draft --> InReview : Submit for approval
+    InReview --> Approved : Approver signs off on Rev_N
+    Approved --> ReleaseReady : Bound to immutable package
+    Approved --> Draft : Edit detected -> Invalidates Rev_N -> Generates Rev_N_plus_1
+    ReleaseReady --> Published : Dispatched without mutations
+    ReleaseReady --> Draft : Scope or destination altered -> Triggers re-approval
+```
+
+> [!warning] Invalidation Rule
+> Any post-approval mutation strictly invalidates the existing approval signature. See [[disscussios/storage_lifecycle_disaster_recovery#15. Asset Version Immutability|Storage Lifecycle & Asset Version Immutability]] and [[MVP_draft#17. Work Item Lifecycle|MVP Work Item Lifecycle]].
+
 
 # 4. Approval Scope
 
@@ -316,6 +457,33 @@ The architecture should support both concepts even if MVP mostly uses sequential
 
 ---
 
+
+### Sequential vs Parallel Multi-Stage Pipeline
+```mermaid
+flowchart LR
+    subgraph Sequential["Sequential Routing"]
+        S_Start([Submission]) --> S_L1[Stage 1: Team Lead Review]
+        S_L1 --> S_L2[Stage 2: Department Manager]
+        S_L2 --> S_Pass([Approved])
+    end
+    
+    subgraph Parallel["Parallel Multi-Domain Routing"]
+        P_Start([Submission]) --> Fork{Fan Out}
+        Fork --> P_Legal[Legal Compliance]
+        Fork --> P_Brand[Brand / Visual Policy]
+        Fork --> P_PR[Public Relations]
+        P_Legal --> Join{Consensus Gate}
+        P_Brand --> Join
+        P_PR --> Join
+        Join --> P_Exec[Final Executive Sign-Off]
+        P_Exec --> P_Pass([Approved])
+    end
+```
+
+> [!note] Policy Routing
+> For concrete role-policy assignments, see [[disscussios/organizational_role_discussion#19. Approval Policies with Real Roles|Approval Policies with Real Roles]].
+
+
 # 10. Approval Request as Its Own Object
 
 Avoid a single field such as:
@@ -427,6 +595,26 @@ REJECT
 ```
 
 ---
+
+
+### Decision Outcomes & Review Transitions
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING : Approval Request created
+    PENDING --> IN_REVIEW : Approver opens review queue
+    IN_REVIEW --> APPROVED : Authorize current version
+    IN_REVIEW --> CHANGES_REQUESTED : Request revisions (non-fatal)
+    IN_REVIEW --> REJECTED : Terminal denial
+    IN_REVIEW --> EXPIRED : SLA timer elapsed
+    CHANGES_REQUESTED --> PENDING : Creator submits revised version
+    EXPIRED --> PENDING : Re-queued or escalated
+    APPROVED --> [*] : Locked for release
+    REJECTED --> [*] : Closed
+```
+
+> [!important] Non-Fatal Review Cycle
+> Requesting changes does not terminate the work item; it returns the draft to the author with structured feedback. See [[MVP_draft#19. Work Item Detail Drawer|MVP Work Item Detail Drawer]].
+
 
 # 14. Contextual Review Comments
 
@@ -557,6 +745,9 @@ Automatic post-approval publishing can exist as an explicit policy choice.
 
 ---
 
+> [!tip] Publishing Decoupling
+> Decoupling approval sign-off from platform dispatch allows release queue scheduling. See [[disscussios/Second_discussion_draft#19. Publishing Orchestrator Architecture|Second Discussion Draft - Publishing Orchestrator Architecture]] and [[MVP_draft#25. Publishing Tab|MVP Publishing Preflight Tab]].
+
 # 19. Configurable Post-Approval Behavior
 
 Example policy setting:
@@ -638,6 +829,9 @@ should not silently become:
 The release package should include exact destination accounts.
 
 ---
+
+> [!important] Target Binding
+> Approvals must bind to exact target destination credentials. See [[disscussios/connected_account_secrets_management#2. Target Account Binding|Target Account Binding]].
 
 # 23. Some Work Requires No Formal Approval
 
@@ -739,6 +933,29 @@ Mohammed
 ```
 
 ---
+
+
+### Temporary Authority Delegation Sequence
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Director as مدير الاتصال المؤسسي
+    actor System as Governance Engine
+    actor Assistant as مساعد مدير الاتصال
+    actor Creator as Content Author
+    
+    Director->>System: Define Delegation(Target: Assistant, Scope: Routine Posts, Expiry: 7 Days)
+    System->>System: Activate Time-Bounded Delegation Record
+    Creator->>System: Submit Approval Request #901
+    System->>Assistant: Route to Assistant Review Queue (Delegated Authority)
+    Assistant->>System: Approve Release Package (as Delegate for Director)
+    System->>System: Log Decision with Delegation Metadata & Audit Trail
+    Note over Director,System: Auto-expires on deadline or on Director revocation
+```
+
+> [!tip] Delegation Governance
+> Temporary delegation must maintain an unbroken audit trail identifying both the original role owner and the acting delegate. See [[disscussios/organizational_role_discussion#25. Temporary Position Assignment|Temporary Position Assignment]].
+
 
 # 27. Delegation Scope
 
@@ -889,6 +1106,9 @@ Once approved, remaining reminder jobs should be cancelled.
 
 ---
 
+> [!note] Reminder Scheduling
+> Timers and escalation reminders are executed by delayed job queues. See [[disscussios/failure_handling_background_jobs#15. Delayed and Scheduled Jobs|Failure Handling - Scheduled Jobs]] and [[disscussios/notification_model#12. Urgent vs Digest Routing|Notification Model - Urgent Routing]].
+
 # 33. Approval Queue UX
 
 Possible Manager view:
@@ -1011,6 +1231,24 @@ Follow-up review required
 Emergency override should never pretend the normal workflow occurred.
 
 ---
+
+
+### Emergency Override & Incident Audit Pipeline
+```mermaid
+flowchart TD
+    Incident([Critical Incident / Crisis Event]) --> Trigger[Authorized Executive / Admin Invokes Override]
+    Trigger --> StepUp[Mandatory Re-Authentication / Step-Up Confirmation]
+    StepUp --> Reason[Mandatory Structured Incident Reason Input]
+    Reason --> Bypass[Immediate Bypass of Standard Multi-Stage Approval]
+    Bypass --> Dispatch[Instant High-Priority Publishing Dispatch]
+    Dispatch --> NotifyEngine[Urgent Incident Broadcast to Leadership]
+    Dispatch --> AuditLog[(Tamper-Evident Immutable Audit Log)]
+    AuditLog --> ReviewGate[Mandatory Retrospective Post-Incident Review]
+```
+
+> [!warning] Emergency Governance
+> Emergency overrides bypass standard gating but require mandatory post-incident audit reviews. See [[disscussios/emergency_workflows#1. What Counts as an Emergency|Emergency Workflows - Emergency Definition]] and [[disscussios/emergency_workflows#17. Emergency Control Panel|Emergency Control Panel]].
+
 
 # 37. Emergency Override Permission
 
@@ -1193,6 +1431,9 @@ Auto-publish enabled
 
 ---
 
+> [!note] Engine Separation
+> Approval state evaluation must remain synchronous in database transactions, while side effects run asynchronously. See [[disscussios/failure_handling_background_jobs#1. Why Background Jobs Are Mandatory|Failure Handling - Background Jobs]].
+
 # 46. Approval, Audit, and Job Are Different
 
 Example:
@@ -1256,6 +1497,27 @@ Publication Jobs
 ```
 
 ---
+
+
+### Approval Governance Conceptual Data Model
+```mermaid
+erDiagram
+    WORK_ITEM ||--o{ WORK_ITEM_VERSION : contains
+    WORK_ITEM_VERSION ||--o{ RELEASE_PACKAGE : packaged_as
+    APPROVAL_POLICY ||--o{ APPROVAL_STAGE : defines
+    APPROVAL_POLICY ||--o{ APPROVAL_REQUEST : governs
+    APPROVAL_REQUEST ||--|| WORK_ITEM_VERSION : binds_to
+    APPROVAL_REQUEST ||--o| RELEASE_PACKAGE : authorizes
+    APPROVAL_REQUEST ||--o{ APPROVAL_DECISION : records
+    APPROVAL_STAGE ||--o{ APPROVAL_DECISION : requires
+    USER ||--o{ APPROVAL_DECISION : decides
+    USER ||--o{ DELEGATION_RECORD : grants
+    DELEGATION_RECORD ||--o{ APPROVAL_DECISION : authorizes_via
+```
+
+> [!note] Data Model Alignment
+> For job system separation and async queue integration, see [[disscussios/failure_handling_background_jobs#1. Why Background Jobs Are Mandatory|Failure Handling - Mandatory Background Jobs]] and [[MVP_draft#15. Work Page|MVP Work Page]].
+
 
 # 48. Employee Experience Should Remain Simple
 
@@ -1420,6 +1682,11 @@ This is substantially safer and more auditable than simply saying:
 
 ---
 
+^approval-policy-boundary
+
+> [!important] Policy Governance Hub
+> Cross-reference with [[discussions_list#4. Approval Policies and Dynamic Routing|Discussions List - Approval Policies]] and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+
 # 54. Still Unresolved
 
 We still need to decide:
@@ -1441,3 +1708,13 @@ We still need to decide:
 - Which approval metrics belong in Manager analytics
 
 This document preserves the approval-policy discussion only and is not yet the final approval architecture.
+
+---
+
+## External Architectural & Standards References
+
+- **NIST Attribute Based Access Control**: [NIST SP 800-162 ABAC Guide](https://csrc.nist.gov/publications/detail/sp/800-162/final)
+- **ISO/IEC 27001 Access Control & Separation of Duties**: [ISO/IEC 27001 Security Standards](https://www.iso.org/standard/27001)
+- **RFC 4949 Internet Security Glossary (Authorization & Duties)**: [RFC 4949 Specification](https://datatracker.ietf.org/doc/html/rfc4949)
+- **Mermaid Diagrams Specification**: [Mermaid Sequence and State Documentation](https://mermaid.js.org/)
+

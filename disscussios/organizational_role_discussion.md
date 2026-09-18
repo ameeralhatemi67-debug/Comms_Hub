@@ -1,10 +1,86 @@
+---
+type: synthesis
+tags:
+  - comms-hub
+  - comms-hub/discussions
+  - comms-hub/roles
+  - comms-hub/permissions
+  - comms-hub/governance
+  - type/specification-foundation
+  - stage/confirmed-roles
+  - status/active
+created: 2026-08-18
+updated: 2026-09-18
+status: active
+parent: "[[Comms Hub]]"
+aliases:
+  - Organizational Role Discussion
+  - Roles and Permissions Architecture
+  - الهيكل التنظيمي والصلاحيات
+---
+
+
+[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/Second_discussion_draft|Second Discussion Draft]]
+
+---
+
 # Organizational Role Discussion — Communication Department Hub
 
+> [!note] Status: Discussion record — not final permission specification
 > **Status: Discussion record — not final permission specification**
 >
 > This document preserves the current discussion about the real Communication Department roles provided by management, plus the additional system Admin role.
 >
 > The goal is to separate organizational position, system permissions, resource access, temporary authority, and technical administration so the future platform can reflect the real department without hard-coding the application around simplistic role levels.
+
+---
+
+
+## Structure Tree & Document Map
+
+- [[#Organizational Role Discussion — Communication Department Hub|Overview & Role Separation Context]]
+- **Part I: Confirmed Roles & Authority Separation**
+  - [[#1. Confirmed Organizational Roles|1. Confirmed Organizational Roles]]
+  - [[#2. Organizational Role Is Not the Same as System Authority|2. Organizational Role Is Not the Same as System Authority]]
+  - [[#3. Two Different Kinds of Authority|3. Two Different Kinds of Authority]]
+  - [[#4. مدير الاتصال المؤسسي — Business Authority|4. مدير الاتصال المؤسسي — Business Authority]]
+  - [[#5. مساعد مدير الاتصال المؤسسي — Operational Leadership|5. مساعد مدير الاتصال المؤسسي — Operational Leadership]]
+- **Part II: Specialist Contributors & Peer Model**
+  - [[#6. Specialist Roles Are Peers, Not Levels|6. Specialist Roles Are Peers, Not Levels]]
+  - [[#7. كاتب المحتوى — Content Writer|7. كاتب المحتوى — Content Writer]]
+  - [[#8. المصمم — Designer|8. المصمم — Designer]]
+  - [[#9. المنتج الإعلامي — Media Producer|9. المنتج الإعلامي — Media Producer]]
+  - [[#10. مسؤول النشر وإدارة الحسابات — High-Risk Operational Role|10. مسؤول النشر وإدارة الحسابات — High-Risk Operational Role]]
+  - [[#11. Publishing Officer as Release Operator|11. Publishing Officer as Release Operator]]
+  - [[#12. عضو — General Member|12. عضو — General Member]]
+  - [[#13. Admin — System Administration|13. Admin — System Administration]]
+- **Part III: Permissions, Resource Access & Scoping**
+  - [[#14. Default Permission Profiles|14. Default Permission Profiles]]
+  - [[#15. Role Permission and Resource Access Are Separate|15. Role Permission and Resource Access Are Separate]]
+  - [[#16. Campaign Teams|16. Campaign Teams]]
+  - [[#17. Organizational Role and Campaign Responsibility Are Different|17. Organizational Role and Campaign Responsibility Are Different]]
+  - [[#18. Direct Manager Relationships|18. Direct Manager Relationships]]
+- **Part IV: Approval Integration & Duty Separation**
+  - [[#19. Approval Policies with Real Roles|19. Approval Policies with Real Roles]]
+  - [[#20. Self-Approval|20. Self-Approval]]
+  - [[#21. Publishing Officer and Post-Approval Editing|21. Publishing Officer and Post-Approval Editing]]
+  - [[#22. Specialist “Ready” States|22. Specialist “Ready” States]]
+  - [[#23. Work Items May Need Multiple Participants|23. Work Items May Need Multiple Participants]]
+  - [[#24. One User May Hold Multiple Positions|24. One User May Hold Multiple Positions]]
+- **Part V: Lifecycle, Delegation & Account Governance**
+  - [[#25. Temporary Position Assignment|25. Temporary Position Assignment]]
+  - [[#26. Employee Departure|26. Employee Departure]]
+  - [[#27. Possible User States|27. Possible User States]]
+  - [[#28. Multiple Admins|28. Multiple Admins]]
+  - [[#29. Organizational and System Roles Must Not Self-Escalate|29. Organizational and System Roles Must Not Self-Escalate]]
+- **Part VI: Contextual Workflows & Identity Model**
+  - [[#30. Role-Aware Notification Routing|30. Role-Aware Notification Routing]]
+  - [[#31. Role-Aware Home Dashboards|31. Role-Aware Home Dashboards]]
+  - [[#32. Preferred Identity Model|32. Preferred Identity Model]]
+  - [[#33. Avoid Numeric Role Levels|33. Avoid Numeric Role Levels]]
+  - [[#34. The Eight Roles Are Enough as Global Roles|34. The Eight Roles Are Enough as Global Roles]]
+  - [[#35. Core Principle|35. Core Principle]]
+  - [[#36. Still Unresolved|36. Still Unresolved]]
 
 ---
 
@@ -120,6 +196,34 @@ Admin
 
 But neither role should automatically imply the other.
 
+### Dual Authority Model Architecture
+
+```mermaid
+graph TD
+    User([Platform User])
+    
+    subgraph BusinessAuthority [Organizational / Business Authority]
+        Director[مدير الاتصال المؤسسي: Editorial Oversight, Campaign Assignment, High-Impact Sign-Off]
+        AsstDirector[مساعد مدير الاتصال: Operational Queue, Approvals, Acting Authority]
+        
+        subgraph Specialists [Specialist Contributors - Peers]
+            Writer[كاتب المحتوى: Text & Platform Variants]
+            Designer[المصمم: Visual & Asset Versions]
+            Producer[المنتج الإعلامي: Video, Photo & Media Exports]
+        end
+        
+        Publisher[مسؤول النشر وإدارة الحسابات: Release Dispatch, Channel Health]
+        Member[عضو: General Contributor]
+    end
+    
+    subgraph TechnicalAuthority [System / Technical Authority]
+        Admin[System Admin: User Accounts, KMS Secrets, Storage Tiers, Infrastructure]
+    end
+    
+    User --- BusinessAuthority
+    User -.->|Independent Orthogonal Role| TechnicalAuthority
+```
+
 ---
 
 # 4. مدير الاتصال المؤسسي — Business Authority
@@ -227,6 +331,23 @@ WORK ITEM
 Workflow determines who participates.
 
 The system should not assume one fixed specialist pipeline.
+
+### Specialist Peer Collaboration Model
+
+```mermaid
+graph TD
+    WorkItem[Shared Work Item: e.g. National Day Main Reel]
+    
+    subgraph SpecialistPeers [Specialist Horizontal Contributors]
+        W[كاتب المحتوى: Drafts Arabic Copy & Platform Variants]
+        D[المصمم: Creates Title Cards & Posters]
+        P[المنتج الإعلامي: Cuts Video, Transcodes & Color Grades]
+    end
+    
+    WorkItem <--> W
+    WorkItem <--> D
+    WorkItem <--> P
+```
 
 ---
 
@@ -432,6 +553,28 @@ Publishing Officer
 
 Exceptions can still exist through permissions and policy.
 
+### Tripartite Separation of Duties Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Creator as Specialists (Writer / Designer / Producer)
+    actor Authorizer as Authorizer (Director / Assistant Director)
+    actor ReleaseOp as Release Operator (Publishing Officer)
+    participant Hub as Comms Hub Engine
+    participant Channel as Social Network API
+
+    Creator->>Hub: Complete Draft Assets & Mark Ready for Review
+    Hub->>Authorizer: Route to Approval Queue
+    Authorizer->>Hub: Review Content & Grant Release Sign-Off
+    Hub->>ReleaseOp: Move to Ready to Publish Queue
+    ReleaseOp->>Hub: Validate Formatting & Trigger Scheduled Publish
+    Hub->>Channel: Execute API Dispatch
+```
+
+> [!tip] In-Depth Policy Binding
+> How multi-tier approvals, SLAs, and release authorizers interact in code is defined in [[disscussios/approval_policy_design|Approval Policy Design]].
+
 ---
 
 # 12. عضو — General Member
@@ -547,6 +690,19 @@ Authorization therefore asks:
 ```
 
 Both must succeed.
+
+### Dual-Gate Authorization Evaluation Model
+
+```mermaid
+flowchart TD
+    Request[User Attempts Action on Resource] --> Gate1{Gate 1: Functional Permission?}
+    
+    Gate1 -->|Denied| Deny[403 Forbidden: Action Not Permitted]
+    Gate1 -->|Granted| Gate2{Gate 2: Resource Access Scope?}
+    
+    Gate2 -->|Not Assigned / No Campaign Access| Deny
+    Gate2 -->|Access Confirmed| Allow[Execute Action Successfully]
+```
 
 ---
 
@@ -863,6 +1019,24 @@ Task reassignment prompts
 Notification routing changes
 ```
 
+### User Lifecycle & Account State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> INVITED : Admin Invite
+    INVITED --> ACTIVE : First Login / Auth Complete
+    ACTIVE --> ON_LEAVE : Scheduled Leave (Delegates Authority)
+    ON_LEAVE --> ACTIVE : Leave Concluded
+    ACTIVE --> SUSPENDED : Security Anomaly / Investigation
+    SUSPENDED --> ACTIVE : Incident Resolved
+    ACTIVE --> DISABLED : Employee Departure / Offboarding
+    DISABLED --> ARCHIVED : Retention Period Elapsed
+    ARCHIVED --> [*]
+```
+
+> [!warning] Account Compromise Protocols
+> Rapid session revocation and break-glass disablement for departing or compromised users are detailed in [[disscussios/emergency_workflows#39. Account Compromise Workflow|Emergency Workflows]].
+
 ---
 
 # 28. Multiple Admins
@@ -987,6 +1161,27 @@ TEMPORARY / DELEGATED AUTHORITY
 
 System administration exists as a separate authority dimension.
 
+### Five-Dimension Preferred Identity Model
+
+```mermaid
+graph TD
+    UserEntity[User Account]
+    
+    subgraph IdentityDimensions [The 5 Identity Dimensions]
+        Dim1[1. Organizational Position: Director, Writer, Designer, etc.]
+        Dim2[2. Functional Permission Profile: content.create, media.upload]
+        Dim3[3. Resource Access Scope: Campaign #82, Department Workspace]
+        Dim4[4. Temporary / Delegated Authority: Acting Manager Period]
+        Dim5[5. Technical System Authority: Admin Flag]
+    end
+    
+    UserEntity --> Dim1
+    UserEntity --> Dim2
+    UserEntity --> Dim3
+    UserEntity --> Dim4
+    UserEntity --> Dim5
+```
+
 ---
 
 # 33. Avoid Numeric Role Levels
@@ -1068,4 +1263,13 @@ We still need management/process discovery to confirm:
 - Which campaigns are restricted
 - Which specialist roles can own Work Items vs contribute only
 
-This document preserves the organizational-role discussion only. It is not yet the final permission matrix.
+This document preserves the organizational-role discussion only. It is not yet the final permission matrix. ^org-roles-governance-model
+
+---
+
+## Technical Framework References
+- Role-Based Access Control Standard: [NIST RBAC Standard](https://csrc.nist.gov/projects/role-based-access-control)
+- Attribute-Based Access Control Architecture: [NIST ABAC Guide](https://www.nist.gov/publications/guide-attribute-based-access-control-abac-definition-and-considerations)
+- Database Security & Row Level Security: [Supabase RLS Documentation](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- Diagrams & Visual Modeling: [Mermaid.js Documentation](https://mermaid.js.org/)
+

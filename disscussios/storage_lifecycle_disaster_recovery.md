@@ -1,10 +1,124 @@
+---
+type: synthesis
+tags:
+  - comms-hub
+  - comms-hub/discussions
+  - comms-hub/storage
+  - comms-hub/disaster-recovery
+  - comms-hub/backup
+  - comms-hub/infrastructure
+  - type/specification-foundation
+  - stage/architecture-design
+  - status/active
+created: 2026-08-18
+updated: 2026-09-18
+status: active
+parent: "[[Comms Hub]]"
+aliases:
+  - Storage Lifecycle and Disaster Recovery
+  - Storage Architecture and Backup Design
+  - دورة حياة التخزين والتعافي من الكوارث
+---
+
+[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]] | [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]]
+
+---
+
 # Storage Lifecycle and Disaster Recovery — Communication Department Hub
 
+> [!note] Status: Discussion record — not final storage/recovery specification
 > **Status: Discussion record — not final storage/recovery specification**
 >
 > This document preserves the current discussion about storage lifecycle, asset versions, multiple storage locations, backups, NAS usage, snapshots, archive policy, retention, restore procedures, and disaster recovery.
 >
 > The concepts below are architectural directions only. Exact retention periods, backup destinations, recovery targets, NAS configuration, cloud providers, restore procedures, and production policies are still under discussion.
+
+---
+
+## Structure Tree & Document Map
+
+- [[#Storage Lifecycle and Disaster Recovery — Communication Department Hub|Overview & Core Scope]]
+- **Part I: Storage Differentiation & Multi-Tier Foundations**
+  - [[#1. Storage, Backup, Archive, Sync, Snapshots, RAID, and Trash Are Different|1. Storage, Backup, Archive, Sync, Snapshots, RAID, and Trash Are Different]]
+  - [[#2. File Lifecycle|2. File Lifecycle]]
+  - [[#3. Asset and File Are Not the Same Thing|3. Asset and File Are Not the Same Thing]]
+  - [[#4. One Storage Provider Is Not Enough as a Long-Term Model|4. One Storage Provider Is Not Enough as a Long-Term Model]]
+  - [[#5. Authoritative Copies|5. Authoritative Copies]]
+- **Part II: Independent Backup Architecture & Recovery Decoupling**
+  - [[#6. Cloud-Only Production Still Needs an Independent Backup Strategy|6. Cloud-Only Production Still Needs an Independent Backup Strategy]]
+  - [[#7. Independent Object Backup|7. Independent Object Backup]]
+  - [[#8. Database Recovery and File Recovery Should Be Independent|8. Database Recovery and File Recovery Should Be Independent]]
+  - [[#9. Point-in-Time Database Recovery Is Mainly for Database Disasters|9. Point-in-Time Database Recovery Is Mainly for Database Disasters]]
+  - [[#10. Delete Needs a Lifecycle|10. Delete Needs a Lifecycle]]
+- **Part III: Retention Policies, Checksums & Asset Integrity**
+  - [[#11. Archive, Trash, Purge, and Backup Expiry Are Different|11. Archive, Trash, Purge, and Backup Expiry Are Different]]
+    - [[#Archive|Archive]]
+    - [[#Trash|Trash]]
+    - [[#Purge|Purge]]
+    - [[#Backup Expiry|Backup Expiry]]
+  - [[#12. Campaign Closeout Can Trigger Archival|12. Campaign Closeout Can Trigger Archival]]
+  - [[#13. Retention Policies|13. Retention Policies]]
+  - [[#14. Permanent / No-Auto-Purge Assets|14. Permanent / No-Auto-Purge Assets]]
+  - [[#15. Originals and Derivatives Need Different Protection|15. Originals and Derivatives Need Different Protection]]
+  - [[#16. Do Not Overprotect Regeneratable Files|16. Do Not Overprotect Regeneratable Files]]
+  - [[#17. Checksums|17. Checksums]]
+  - [[#18. Storage Health in the Asset Record|18. Storage Health in the Asset Record]]
+- **Part IV: Hardware Evolution, 3-2-1 Strategy & NAS Integration**
+  - [[#19. NAS Snapshots|19. NAS Snapshots]]
+  - [[#20. Snapshots Are Fast Recovery, Not Full Disaster Recovery|20. Snapshots Are Fast Recovery, Not Full Disaster Recovery]]
+  - [[#21. NAS + Snapshots Are Still Not Enough|21. NAS + Snapshots Are Still Not Enough]]
+  - [[#22. Long-Term Direction: 3-2-1 Style Protection|22. Long-Term Direction: 3-2-1 Style Protection]]
+  - [[#23. The NAS May Become Primary Production Storage|23. The NAS May Become Primary Production Storage]]
+  - [[#24. Suggested Transition Stages|24. Suggested Transition Stages]]
+    - [[#Phase A — Early Development|Phase A — Early Development]]
+    - [[#Phase B — Initial Production|Phase B — Initial Production]]
+    - [[#Phase C — NAS Arrives|Phase C — NAS Arrives]]
+    - [[#Phase D — Mature Hybrid System|Phase D — Mature Hybrid System]]
+  - [[#25. Avoid Uncontrolled Two-Way Sync|25. Avoid Uncontrolled Two-Way Sync]]
+  - [[#26. The Application Should Own Asset Movement|26. The Application Should Own Asset Movement]]
+  - [[#27. Manual NAS Changes Will Still Happen|27. Manual NAS Changes Will Still Happen]]
+- **Part V: Disaster Recovery Objectives, Scenarios & Restore Protocols**
+  - [[#28. Recovery Point Objective (RPO)|28. Recovery Point Objective (RPO)]]
+  - [[#29. Recovery Time Objective (RTO)|29. Recovery Time Objective (RTO)]]
+  - [[#30. Different Data Can Have Different Recovery Priorities|30. Different Data Can Have Different Recovery Priorities]]
+  - [[#31. Disaster Scenarios|31. Disaster Scenarios]]
+  - [[#32. Accidental File Deletion Recovery Order|32. Accidental File Deletion Recovery Order]]
+  - [[#33. Ransomware Recovery|33. Ransomware Recovery]]
+  - [[#34. Database Recovery|34. Database Recovery]]
+  - [[#35. Database Restore Can Create External-State Conflicts|35. Database Restore Can Create External-State Conflicts]]
+  - [[#36. Recovery Mode|36. Recovery Mode]]
+  - [[#37. Restore Order|37. Restore Order]]
+  - [[#38. Configuration Backups Matter|38. Configuration Backups Matter]]
+  - [[#39. Secret Recovery|39. Secret Recovery]]
+- **Part VI: Operational Health, Staging & Governance**
+  - [[#40. Backup Monitoring|40. Backup Monitoring]]
+  - [[#41. Restore Testing|41. Restore Testing]]
+  - [[#42. Storage Dashboard|42. Storage Dashboard]]
+  - [[#43. Capacity Planning|43. Capacity Planning]]
+  - [[#44. Archived Assets Should Remain Searchable|44. Archived Assets Should Remain Searchable]]
+  - [[#45. Tiered Storage|45. Tiered Storage]]
+  - [[#46. Publishing Staging Has Its Own Lifecycle|46. Publishing Staging Has Its Own Lifecycle]]
+  - [[#47. Temporary Storage Cleanup|47. Temporary Storage Cleanup]]
+  - [[#48. Retention Holds|48. Retention Holds]]
+  - [[#49. User Deletion Must Not Delete Organizational Assets|49. User Deletion Must Not Delete Organizational Assets]]
+  - [[#50. Disaster Recovery Documentation Must Exist Outside the Hub|50. Disaster Recovery Documentation Must Exist Outside the Hub]]
+  - [[#51. Manual Business-Continuity Fallback|51. Manual Business-Continuity Fallback]]
+- **Part VII: Architecture Synthesis & Hybrid Storage Strategy**
+  - [[#52. Conceptual Storage Architecture|52. Conceptual Storage Architecture]]
+  - [[#53. Key Architectural Changes From This Discussion|53. Key Architectural Changes From This Discussion]]
+    - [[#1. One Asset Version Can Exist in Multiple Storage Locations|1. One Asset Version Can Exist in Multiple Storage Locations]]
+    - [[#2. Storage Lifecycle and Recovery State Should Be Known by the Application|2. Storage Lifecycle and Recovery State Should Be Known by the Application]]
+  - [[#54. Still Unresolved|54. Still Unresolved]]
+  - [[#The simple architecture|Alternative Practical Storage: Google Shared Drive]]
+  - [[#I would use a Google **Shared Drive**, not someone's personal Drive|Google Shared Drive vs Personal Drive]]
+  - [[#How would we connect our website?|Connecting Google Drive via OAuth 2.0]]
+  - [[#What happens when Sara uploads a file?|Upload Ingestion Flow]]
+  - [[#Opening and downloading works too|Binary Streaming & Downloads]]
+  - [[#Could employees still access the Shared Drive normally?|Dual-Access Governance & Source of Truth]]
+  - [[#Could Google Drive become our temporary bridge to the NAS later?|Google Drive as Bridge to NAS Transition]]
+    - [[#Version 1|Bridge: Version 1]]
+    - [[#Transition|Bridge: Transition]]
+  - [[#Would I choose Google Drive instead of Supabase Storage?|Comparison Matrix: Google Drive vs Supabase Storage]]
 
 ---
 
@@ -80,6 +194,27 @@ Trash
 ```
 
 ---
+
+
+### Complete Asset & File Lifecycle State Machine
+```mermaid
+stateDiagram-v2
+    [*] --> UPLOADING : Client initiates direct upload
+    UPLOADING --> ACTIVE : Upload verified via SHA-256
+    ACTIVE --> ARCHIVED : Campaign closeout or inactivity
+    ACTIVE --> TRASH : User soft delete
+    ARCHIVED --> ACTIVE : Explicit restore or unarchive
+    ARCHIVED --> TRASH : Retention policy expiry
+    TRASH --> ACTIVE : Trash restore before window expires
+    TRASH --> PURGED : Retention window elapses
+    ACTIVE --> RETENTION_HOLD : Legal or Compliance Hold applied
+    RETENTION_HOLD --> ACTIVE : Compliance Hold released
+    PURGED --> [*] : Object storage delete and DB cleanup
+```
+
+> [!tip] Asset Lifecycle Integration
+> For user interface integration and media library trash management, see [[MVP_draft#27. Media Library|MVP Media Library]] and [[disscussios/approval_policy_design#2. Approval Must Bind to a Specific Version|Approval Policy - Version Binding]].
+
 
 # 3. Asset and File Are Not the Same Thing
 
@@ -201,6 +336,9 @@ Status: VERIFIED
 
 ---
 
+> [!note] Provider Independence
+> Avoiding vendor lock-in allows seamless migration between Supabase Storage, S3-compatible cloud storage, and on-prem NAS. See [[MVP_draft#38. Settings Page|MVP Settings Page]].
+
 # 5. Authoritative Copies
 
 When multiple copies exist, the system should know which copy is authoritative.
@@ -303,6 +441,36 @@ The architecture should therefore support restoring individual assets independen
 
 ---
 
+
+### Relational DB & Object Storage Independent Disaster Decoupling
+```mermaid
+flowchart TD
+    App[Communication Hub Core] --> DB[(Supabase PostgreSQL)]
+    App --> StorageEngine[Storage Abstraction Service]
+    StorageEngine --> HotStorage[(Production Object Storage)]
+    
+    subgraph DB_Backup["Database Backup Stream"]
+        DB --> WAL[Write-Ahead Log Archival]
+        WAL --> PITR[Continuous Point-in-Time Recovery Window]
+        DB --> DailyDumps[Daily Encrypted pg_dump Snapshots]
+    end
+    
+    subgraph File_Backup["Object Storage Backup Stream"]
+        HotStorage --> SyncTool[Scheduled Object Replication Engine]
+        SyncTool --> IndependentCold[(Independent Backup Target: S3/R2/NAS)]
+    end
+    
+    subgraph RecoveryDecoupled["Disaster Recovery Isolation"]
+        PITR -.-> ReconcileGate{Reconciliation Gate}
+        IndependentCold -.-> ReconcileGate
+        ReconcileGate --> RestoredState[Reconciled Functional System]
+    end
+```
+
+> [!warning] Independent Failure Domains
+> Database point-in-time restore must never assume object storage state rolls back with it. See [[disscussios/failure_handling_background_jobs#1. Why Background Jobs Are Mandatory|Failure Handling - Background Jobs]].
+
+
 # 9. Point-in-Time Database Recovery Is Mainly for Database Disasters
 
 Typical database-recovery scenarios include:
@@ -375,6 +543,9 @@ Old backup copies eventually age out according to backup-retention rules.
 These should not be treated as one operation.
 
 ---
+
+> [!important] Lifecycle Terminology
+> Ensure clear UI distinction between soft Trash (user reversible) and permanent Purge (compliance irreversible). See [[MVP_draft#27. Media Library|MVP Media Library]].
 
 # 12. Campaign Closeout Can Trigger Archival
 
@@ -524,6 +695,38 @@ Disposable
 Not every derivative requires the same backup strength.
 
 ---
+
+
+### Tier 1 Master Originals vs Tier 2 Ephemeral Derivatives
+```mermaid
+flowchart TD
+    Ingest([Raw Media Ingestion]) --> Master[Master Original: High-Res Video / RAW / PSD]
+    Master --> Generator[Derivative Generation Worker: BullMQ]
+    
+    Generator --> Deriv_Web[Web Preview 1080p MP4]
+    Generator --> Deriv_Thumb[Image Thumbnails WebP]
+    Generator --> Deriv_Crop[Social Aspect Ratios 1:1, 9:16]
+    
+    subgraph HighProtection["Tier 1: High-Durability Protection (Irreplaceable)"]
+        Master
+        Master --> Hash[SHA-256 Immutable Checksum]
+        Master --> MultiLoc[3-2-1 Multi-Location Replication]
+        Master --> SnapshotPolicy[Immutable Write-Once / Snapshots]
+    end
+    
+    subgraph EphemeralProtection["Tier 2: Ephemeral / Regeneratable Derivatives"]
+        Deriv_Web
+        Deriv_Thumb
+        Deriv_Crop
+        Deriv_Web --> CacheCDN[Temporary Fast Cache / CDN Storage]
+        Deriv_Thumb --> CacheCDN
+        Deriv_Crop --> CacheCDN
+    end
+```
+
+> [!important] Derivative Protection Philosophy
+> Protecting derivative thumbnails with multi-region replication wastes bandwidth and storage budget; protect the master original, regenerate derivatives on demand. See [[MVP_draft#15. Work Page|MVP Work Page]].
+
 
 # 16. Do Not Overprotect Regeneratable Files
 
@@ -707,6 +910,38 @@ Exact roles may change over time.
 
 ---
 
+
+### 3-2-1 Hybrid Evolution Stages
+```mermaid
+flowchart LR
+    subgraph PhaseA["Phase A: Early Dev"]
+        A_Cloud[(Cloud Storage)]
+    end
+    
+    subgraph PhaseB["Phase B: Initial Production"]
+        B_Cloud[(Cloud Storage)] --> B_Sync[Scheduled Sync]
+        B_Sync --> B_Cold[(Independent Cloud Backup)]
+    end
+    
+    subgraph PhaseC["Phase C: NAS Arrival"]
+        C_Cloud[(Cloud Primary)] --> C_Rep[Replication Pipeline]
+        C_Rep --> C_NAS[(Office UGREEN NAS Primary Copy)]
+        C_NAS --> C_Snap[Btrfs / ZFS Snapshots]
+    end
+    
+    subgraph PhaseD["Phase D: Mature 3-2-1 Hybrid"]
+        D_NAS[(1. Local NAS Primary)] --> D_Snap[(Local Snapshots)]
+        D_NAS --> D_Offsite[(2. Cloud Primary Mirror)]
+        D_NAS --> D_Cold[(3. Independent Cold Cloud Archive)]
+    end
+    
+    PhaseA --> PhaseB --> PhaseC --> PhaseD
+```
+
+> [!tip] 3-2-1 Principle
+> Maintain 3 copies of data, across 2 different storage media types, with 1 copy residing off-site. See [[disscussios/Second_discussion_draft#10. Multi-Stage Storage Strategy|Second Discussion Draft - Multi-Stage Storage Strategy]].
+
+
 # 23. The NAS May Become Primary Production Storage
 
 If the NAS becomes the primary original-media store, it is no longer “the backup.”
@@ -810,6 +1045,9 @@ RESTORE_FROM_NAS
 ```
 
 ---
+
+> [!warning] Two-Way Sync Conflict Risk
+> Unmanaged two-way background sync creates split-brain race conditions. The application must remain the single source of truth for asset movement. See [[discussions_list#1. Source of Truth|Discussions List - Source of Truth]].
 
 # 26. The Application Should Own Asset Movement
 
@@ -995,6 +1233,9 @@ Do not allow corrupted/encrypted files to propagate outward during recovery.
 
 ---
 
+> [!caution] Ransomware Air-Gap
+> Snapshots and secondary backups must have immutable read-only retention policies to defeat ransomware encryption routines.
+
 # 34. Database Recovery
 
 Possible flow:
@@ -1071,6 +1312,9 @@ Admin resumes components deliberately after verification.
 
 ---
 
+> [!important] Recovery Mode State
+> In recovery mode, write operations and publishing triggers are suspended to prevent external platform divergence. See [[disscussios/emergency_workflows#17. Emergency Control Panel|Emergency Control Panel]].
+
 # 37. Restore Order
 
 Possible recovery order:
@@ -1101,6 +1345,24 @@ Possible recovery order:
 The exact runbook will be defined later.
 
 ---
+
+
+### Disaster Recovery Restore Sequence
+```mermaid
+flowchart TD
+    Crisis([Disaster Event: Ransomware / Storage Failure]) --> Step1[Step 1: Isolate and Secure Clean Infrastructure]
+    Step1 --> Step2[Step 2: Recover Environment Secrets and Configuration]
+    Step2 --> Step3[Step 3: Restore PostgreSQL Database from Point-in-Time Backup]
+    Step3 --> Step4[Step 4: Verify Identity, User Accounts and ACL Rules]
+    Step4 --> Step5[Step 5: Connect and Verify Object Storage Locations]
+    Step5 --> Step6[Step 6: Execute Checksum Audit and Reconcile Missing Files]
+    Step6 --> Step7[Step 7: Regenerate Lost Ephemeral Derivatives]
+    Step7 --> Step8[Step 8: Lift Recovery Mode and Resume Public Hub Operations]
+```
+
+> [!important] Restore Governance
+> Always restore secrets and database state before re-enabling external platform connectors or lifting read-only recovery mode. See [[disscussios/emergency_workflows#17. Emergency Control Panel|Emergency Control Panel]] and [[disscussios/connected_account_secrets_management#2. Target Account Binding|Target Account Binding]].
+
 
 # 38. Configuration Backups Matter
 
@@ -1389,6 +1651,9 @@ Automated cleanup must skip held data.
 
 ---
 
+> [!caution] Legal and Retention Holds
+> Any asset tagged with an active retention hold must be strictly locked against automated purge or manual deletion. See [[disscussios/approval_policy_design#4. Approval Scope|Approval Policy Scope]].
+
 # 49. User Deletion Must Not Delete Organizational Assets
 
 If Ahmed leaves:
@@ -1514,6 +1779,53 @@ Needs Attention
 ```
 
 ---
+
+
+### Conceptual Multi-Location Asset Architecture
+```mermaid
+erDiagram
+    ASSET ||--o{ ASSET_VERSION : contains
+    ASSET_VERSION ||--o{ ASSET_LOCATION : stored_in
+    ASSET_VERSION ||--o{ ASSET_DERIVATIVE : generates
+    STORAGE_PROVIDER ||--o{ ASSET_LOCATION : hosts
+    
+    ASSET {
+        string id PK
+        string title
+        string campaign_id FK
+        string content_type
+        string current_version_id
+        string retention_tier
+    }
+    ASSET_VERSION {
+        string id PK
+        string asset_id FK
+        int version_number
+        string checksum_sha256
+        int file_size_bytes
+        string uploaded_by FK
+        timestamp created_at
+    }
+    ASSET_LOCATION {
+        string id PK
+        string version_id FK
+        string provider_id FK
+        string uri_or_key
+        string health_status
+        string storage_role
+        timestamp last_verified_at
+    }
+    STORAGE_PROVIDER {
+        string id PK
+        string provider_name
+        string provider_type
+        boolean is_active
+    }
+```
+
+> [!note] Data Model Decoupling
+> Decoupling `AssetVersion` from physical `AssetLocation` ensures zero database schema refactoring when migrating between Google Drive, Supabase, and on-premises NAS. See [[MVP_draft#27. Media Library|MVP Media Library]].
+
 
 # 53. Key Architectural Changes From This Discussion
 
@@ -1889,6 +2201,33 @@ Maybe a separate area can remain available for ordinary team file sharing.
 
 # Could Google Drive become our temporary bridge to the NAS later?
 
+
+### Google Drive Bridge to On-Premises NAS Multiplexing Pipeline
+```mermaid
+flowchart TD
+    subgraph V1["Version 1: Cloud and Workspace Ingestion"]
+        HubCore[Communication Hub Core]
+        HubCore --> DB[(Supabase PostgreSQL)]
+        HubCore --> DriveAdapter[Google Drive API Adapter]
+        DriveAdapter --> SharedDrive[(Google Workspace Shared Drive)]
+        SharedDrive --> OrgFolders[Campaigns / Videos / Posters / Archive]
+    end
+    
+    subgraph Bridge["Evolution: Storage Multiplexing"]
+        HubCore2[Communication Hub Asset Service]
+        HubCore2 --> RemoteCollab[(Google Shared Drive: Fast Remote Collaboration)]
+        HubCore2 --> LocalNAS[(UGREEN NAS: Heavy RAW Video and Primary Vault)]
+        HubCore2 --> ColdArchive[(Cold Object Storage: Immutable Disaster Backup)]
+    end
+    
+    V1 -->|Phase C Integration| Bridge
+```
+
+> [!tip] Transitional Pragmatism
+> Google Shared Drive solves immediate team file accessibility during early hub development, and natively evolves into the remote collaboration layer once on-prem NAS arrives.
+
+
+
 Yes — and this is the part I like.
 
 We could go:
@@ -2011,3 +2350,22 @@ VERSION 2+
 ```
 
 So, yes: **completely possible, connectable, and potentially a very practical transitional architecture for your project.**
+
+---
+
+^storage-lifecycle-boundary
+
+> [!important] Storage Architecture Hub
+> Cross-reference with [[discussions_list#5. Storage Lifecycle and Disaster Recovery|Discussions List - Storage Lifecycle]], [[MVP_draft#27. Media Library|MVP Media Library]], and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+
+---
+
+## External Architectural & Standards References
+
+- **Supabase Storage Architecture & S3 Compatibility**: [Supabase Storage Documentation](https://supabase.com/docs/guides/storage)
+- **Google Workspace Shared Drive API & Resumable Uploads**: [Google Drive API Guides](https://developers.google.com/workspace/drive/api/guides/about-sdk)
+- **NIST Contingency Planning Guide for Information Systems**: [NIST SP 800-34 Rev. 1](https://csrc.nist.gov/publications/detail/sp/800-34/rev-1/final)
+- **CISA Data Backup Options & 3-2-1 Strategy**: [CISA Backup Guidelines](https://www.cisa.gov/news-events/news/data-backup-options)
+- **TrueNAS OpenZFS Snapshots and Replication**: [TrueNAS Documentation Hub](https://www.truenas.com/docs/)
+- **Mermaid State and Flowchart Documentation**: [Mermaid.js Official Docs](https://mermaid.js.org/)
+

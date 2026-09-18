@@ -1,10 +1,77 @@
+---
+type: synthesis
+tags:
+  - comms-hub
+  - comms-hub/discussions
+  - comms-hub/draft-2
+  - comms-hub/ai-controls
+  - comms-hub/storage-architecture
+  - comms-hub/publishing
+  - type/brainstorm
+  - stage/early-draft
+  - status/active
+created: 2026-08-18
+updated: 2026-09-18
+status: active
+parent: "[[Comms Hub]]"
+aliases:
+  - Second Discussion Draft
+  - Comms Hub Working Draft 2
+  - AI Storage and Publishing Synthesis
+---
+
+
+[[Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept Genesis]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/First_idea_darft|First Idea Draft]] | [[disscussios/organizational_role_discussion|Organizational Role Discussion]]
+
+---
+
 # Second Discussion Draft — AI Controls, Automation, Storage, NAS Transition, and Multi-Platform Publishing
 
+> [!note] Status: Discussion record — not final architecture
 > **Status: Discussion record — not final architecture**
 >
 > This document preserves the second major architecture discussion for the Communication Department Working Hub.
 >
 > Nothing in this document should be treated as an agreed implementation specification yet. We are still discussing tradeoffs, policies, technical limits, security, workflow behavior, infrastructure, and MVP boundaries.
+
+---
+
+
+## Structure Tree & Document Map
+
+- [[#Second Discussion Draft — AI Controls, Automation, Storage, NAS Transition, and Multi-Platform Publishing|Overview & Discussion Context]]
+- **Part I: AI Governance & Automation Trust Tiers**
+  - [[#1. AI and Automation Should Be Administratively Controlled|1. AI and Automation Should Be Administratively Controlled]]
+  - [[#2. Automation Trust Levels|2. Automation Trust Levels]]
+  - [[#3. Automation Rules Should Have Individual Controls|3. Automation Rules Should Have Individual Controls]]
+- **Part II: Foundation Storage & Cloud-to-NAS Migration**
+  - [[#4. Initial Storage Architecture: Vercel + Supabase|4. Initial Storage Architecture: Vercel + Supabase]]
+  - [[#5. Why Supabase Storage Fits the First Version|5. Why Supabase Storage Fits the First Version]]
+  - [[#6. Storage vs. Application Features|6. Storage vs. Application Features]]
+  - [[#7. File Previewing|7. File Previewing]]
+  - [[#8. File Editing|8. File Editing]]
+  - [[#9. Future NAS: UGREEN NASync DXP2800|9. Future NAS: UGREEN NASync DXP2800]]
+  - [[#10. Stage 1 — Cloud Only|10. Stage 1 — Cloud Only]]
+  - [[#11. Stage 2 — Cloud + NAS Backup|11. Stage 2 — Cloud + NAS Backup]]
+  - [[#12. Stage 3 — Hybrid Storage|12. Stage 3 — Hybrid Storage]]
+  - [[#13. Storage Abstraction Should Exist From Day One|13. Storage Abstraction Should Exist From Day One]]
+  - [[#14. Storage Provider Interface|14. Storage Provider Interface]]
+  - [[#15. Hybrid Publishing Storage|15. Hybrid Publishing Storage]]
+  - [[#16. NAS Does Not Replace Backup|16. NAS Does Not Replace Backup]]
+- **Part III: Multi-Platform Publishing & Orchestration**
+  - [[#17. One-Button Multi-Platform Publishing|17. One-Button Multi-Platform Publishing]]
+  - [[#18. Publishing Orchestrator|18. Publishing Orchestrator]]
+  - [[#19. Platform-Specific Content Variants|19. Platform-Specific Content Variants]]
+  - [[#20. Publication Bundle|20. Publication Bundle]]
+  - [[#21. Preflight Check Before Publishing|21. Preflight Check Before Publishing]]
+  - [[#22. Partial Publishing Failure|22. Partial Publishing Failure]]
+  - [[#23. Publication Data Model|23. Publication Data Model]]
+  - [[#24. Manual, Scheduled, and Automated Publishing Should Use the Same Engine|24. Manual, Scheduled, and Automated Publishing Should Use the Same Engine]]
+  - [[#25. AI and Automation Policy Connects to Publishing|25. AI and Automation Policy Connects to Publishing]]
+- **Part IV: Synthesis Architecture & Evolution Roadmaps**
+  - [[#26. Combined Conceptual Architecture|26. Combined Conceptual Architecture]]
+  - [[#27. Important Principles Preserved From This Discussion|27. Important Principles Preserved From This Discussion]]
+  - [[#28. Still Unresolved|28. Still Unresolved]]
 
 ---
 
@@ -110,6 +177,30 @@ Higher-risk actions such as:
 
 may remain human-controlled even if other automation is enabled.
 
+### Hierarchical Policy & Automation Trust Model
+
+```mermaid
+graph TD
+    subgraph GovernanceHierarchy [Hierarchical Control Model]
+        L1[Admin Policy - Global Boundaries] --> L2[Manager / Team Policy - Scoped Restrictions]
+        L2 --> L3[Workflow Policy - Per-Action Permissions]
+        L3 --> L4[Individual Action - Runtime Execution]
+    end
+
+    subgraph TrustLevels [Automation Trust Levels]
+        T0[Level 0: Disabled]
+        T1[Level 1: Assist - Suggest Actions]
+        T2[Level 2: Prepare - Draft for Approval]
+        T3[Level 3: Trusted Internal Automation]
+        T4[Level 4: Approved External Automation]
+    end
+
+    L1 -.-> TrustLevels
+```
+
+> [!tip] Downstream Governance Design
+> For administrative policy UI and kill-switch controls, see [[MVP_draft#38. Settings Page|MVP Settings Page]] and [[disscussios/emergency_workflows#17. Emergency Control Panel|Emergency Control Panel]].
+
 ---
 
 # 3. Automation Rules Should Have Individual Controls
@@ -185,6 +276,29 @@ Database records metadata
 ```
 
 This keeps the application server from becoming a bottleneck for large files.
+
+### Direct-to-Storage Client Upload Architecture
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User Browser
+    participant App as Vercel / Next.js API
+    participant DB as Supabase PostgreSQL
+    participant Storage as Object Storage (Supabase / S3)
+
+    User->>App: Request Signed Upload URL (Filename, MIME, Size)
+    App->>DB: Check User Permissions & Storage Quota
+    App-->>User: Return Short-Lived Signed Upload URL
+    User->>Storage: Direct Stream Upload (PUT binary payload)
+    Storage-->>User: Upload Confirmed (200 OK + ETag)
+    User->>App: Notify Upload Complete (ETag, Key, Metadata)
+    App->>DB: Record Asset Metadata, Version & Checksum
+    App-->>User: Asset Ready in Media Library
+```
+
+> [!note] Technical Implementation
+> Direct-to-storage streaming avoids memory bottlenecks in serverless functions (e.g. Vercel 4.5MB payload limits). See technical details in [Supabase Storage Documentation](https://supabase.com/docs/guides/storage).
 
 ---
 
@@ -487,6 +601,30 @@ Cloud-accessible application
 
 This allows remote users to review media without transferring the full original file.
 
+### Three-Stage Storage Evolution Roadmap
+
+```mermaid
+flowchart LR
+    subgraph Stage1 [Stage 1: Cloud Only]
+        Vercel1[Vercel Web] --> SupaStorage1[(Supabase Storage: Hot Previews + Files)]
+    end
+
+    subgraph Stage2 [Stage 2: Cloud + NAS Backup]
+        SupaStorage2[(Supabase Storage)] -->|Periodic Background Sync| NAS2[(UGREEN NASync DXP2800 Local Backup)]
+    end
+
+    subgraph Stage3 [Stage 3: True Hybrid Storage]
+        App3[Comms Hub Asset Layer]
+        App3 -->|Working Previews & Publishing Staging| Cloud3[(Cloud Storage)]
+        App3 -->|RAW 4K Media & Master Originals| NAS3[(On-Prem NAS Storage)]
+    end
+
+    Stage1 --> Stage2 --> Stage3
+```
+
+> [!tip] Dedicated Storage Architecture
+> Full specifications for cloud-NAS sync, checksum verification, proxy generation, and disaster recovery are detailed in [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]].
+
 ---
 
 # 13. Storage Abstraction Should Exist From Day One
@@ -591,6 +729,21 @@ Long-term originals / archives / heavy media
 
 Cloud
 Application / previews / active working assets / publishing staging
+```
+
+### Air-Gapped Hybrid Publishing Staging Pipeline
+
+```mermaid
+flowchart TD
+    NAS[(UGREEN NAS - Master Heavy Archive)] -->|Promote Approved Media| CloudStaging[(Cloud Staging Storage - Temporary)]
+    CloudStaging -->|Deliver Presigned Payload| Adapters{Publishing Orchestrator}
+    
+    Adapters -->|Publish| IG[Instagram Graph API]
+    Adapters -->|Publish| X[X API v2]
+    Adapters -->|Publish| LI[LinkedIn API]
+    Adapters -->|Publish| YT[YouTube Data API]
+    
+    Adapters -.->|Lifecycle Cleanup Policy| CloudStaging
 ```
 
 ---
@@ -709,6 +862,30 @@ publishToYouTube()
 The user sees one action.
 
 The backend handles each platform independently.
+
+### Publishing Orchestrator Architecture
+
+```mermaid
+graph TD
+    Bundle[Publication Bundle #184] --> Orch[Publishing Orchestrator]
+    
+    subgraph Adapters [Platform Specific Worker Adapters]
+        Orch --> Job_X[Job 1: X Adapter]
+        Orch --> Job_IG[Job 2: Instagram Adapter]
+        Orch --> Job_FB[Job 3: Facebook Adapter]
+        Orch --> Job_LI[Job 4: LinkedIn Adapter]
+        Orch --> Job_YT[Job 5: YouTube Adapter]
+    end
+
+    Job_X --> Out_X[X Post Live]
+    Job_IG --> Out_IG[Instagram Post Live]
+    Job_FB --> Out_FB[Facebook Post Live]
+    Job_LI --> Out_LI[LinkedIn Post Live]
+    Job_YT --> Out_YT[YouTube Video Live]
+```
+
+> [!note] Background Worker Jobs
+> The orchestrator delegates each platform publish action to dedicated background jobs. See [[disscussios/failure_handling_background_jobs#9. Multi-Platform Publishing as Separate Jobs|Failure Handling Background Jobs]].
 
 ---
 
@@ -865,6 +1042,33 @@ instead of:
 
 This prevents duplicate posts.
 
+### Partial Publishing Failure State Matrix
+
+```mermaid
+stateDiagram-v2
+    [*] --> PREFLIGHT : Run Preflight Checks
+    PREFLIGHT --> DISPATCHING : User Confirms Publish
+    
+    state DISPATCHING {
+        [*] --> JobX : Dispatch X
+        [*] --> JobIG : Dispatch Instagram
+        [*] --> JobLI : Dispatch LinkedIn
+        
+        JobX --> PublishedX : HTTP 200 (Remote ID 89271)
+        JobIG --> PublishedIG : HTTP 200 (Remote ID 18372)
+        JobLI --> FailedLI : HTTP 401 (Token Expired)
+    }
+
+    DISPATCHING --> PARTIAL_FAILURE : One or More Failed
+    PARTIAL_FAILURE --> REAUTHORIZING : Admin Reconnects Account
+    REAUTHORIZING --> RETRY_FAILED_ONLY : Click [Retry LinkedIn]
+    RETRY_FAILED_ONLY --> COMPLETE : All Destinations Live
+    COMPLETE --> [*]
+```
+
+> [!warning] Error Recovery & Account Secrets
+> Token refresh failures and credential rotation workflows are documented in [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]].
+
 ---
 
 # 23. Publication Data Model
@@ -976,6 +1180,33 @@ The three discussions — AI controls, storage, and publishing — connect toget
  Instagram      X      LinkedIn  Supabase   NAS    Future
 ```
 
+### Combined Triad Architecture Diagram
+
+```mermaid
+graph TD
+    AdminPolicy[ADMIN POLICY: AI and Automation Limits] --> WorkPipeline[WORK PIPELINE: Tasks and Content Creation]
+    WorkPipeline --> ApprovalGate[APPROVAL GATE: Multi-Stage Sign-Off]
+    ApprovalGate --> PreflightCheck[PRE-FLIGHT CHECK: Format and Token Validation]
+    
+    PreflightCheck --> PublishBranch[PUBLISHING ORCHESTRATOR]
+    PreflightCheck --> StorageBranch[STORAGE ABSTRACTION LAYER]
+    
+    subgraph PublishingChannels [Channel Adapters]
+        PublishBranch --> P_IG[Instagram API]
+        PublishBranch --> P_X[X API]
+        PublishBranch --> P_LI[LinkedIn API]
+    end
+    
+    subgraph StorageProviders [Storage Targets]
+        StorageBranch --> S_Cloud[Cloud / Supabase]
+        StorageBranch --> S_NAS[UGREEN NASync DXP2800]
+        StorageBranch --> S_Future[S3-Compatible / Archive]
+    end
+```
+
+
+---
+
 ---
 
 # 27. Important Principles Preserved From This Discussion
@@ -1030,4 +1261,14 @@ We have **not yet agreed** on:
 - MVP scope
 - Final technology stack
 
-This file exists only to preserve the current discussion before we continue into additional blind spots and architecture questions.
+This file exists only to preserve the current discussion before we continue into additional blind spots and architecture questions. ^second-draft-synthesis
+
+---
+
+## Technical Framework References
+- Object Storage & Direct Client Uploads: [Supabase Storage Architecture](https://supabase.com/docs/guides/storage)
+- Serverless Web Hosting: [Next.js Documentation](https://nextjs.org/docs)
+- High-Capacity Network Attached Storage: [UGREEN NASync DXP2800 Guide](https://nas.ugreen.com/)
+- Secure OAuth Token Lifecycle: [RFC 7009 OAuth 2.0 Token Revocation](https://datatracker.ietf.org/doc/html/rfc7009)
+- Diagrams & Visual Modeling: [Mermaid.js Documentation](https://mermaid.js.org/)
+

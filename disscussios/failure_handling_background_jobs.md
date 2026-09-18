@@ -1,10 +1,111 @@
+---
+type: synthesis
+tags:
+  - comms-hub
+  - comms-hub/discussions
+  - comms-hub/jobs
+  - comms-hub/background-workers
+  - comms-hub/reliability
+  - comms-hub/queues
+  - type/specification-foundation
+  - stage/architecture-design
+  - status/active
+created: 2026-08-18
+updated: 2026-09-18
+status: active
+parent: "[[Comms Hub]]"
+aliases:
+  - Failure Handling and Background Jobs
+  - Background Jobs and Reliability Architecture
+  - إدارة الأخطاء والمهام الخلفية
+---
+
+[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]]
+
+---
+
 # Failure Handling and Background Jobs — Communication Department Hub
 
+> [!note] Status: Discussion record — not final architecture
 > **Status: Discussion record — not final architecture**
 >
 > This document preserves the current discussion about background jobs, reliability, retries, failure handling, scheduling, and human intervention for the Communication Department Hub.
 >
 > The concepts below are architectural directions, not yet final implementation requirements.
+
+---
+
+## Structure Tree & Document Map
+
+- [[#Failure Handling and Background Jobs — Communication Department Hub|Overview & Core Purpose]]
+- **Part I: Async Execution Foundations & Job Lifecycle**
+  - [[#1. Core Principle|1. Core Principle]]
+  - [[#2. What Is a Background Job?|2. What Is a Background Job?]]
+  - [[#3. Generic Job Model|3. Generic Job Model]]
+  - [[#4. Universal Job States|4. Universal Job States]]
+- **Part II: Failure Classification, Idempotency & Reconciliation**
+  - [[#5. Failure Classes|5. Failure Classes]]
+    - [[#Transient Failure|Transient Failure]]
+    - [[#Authentication Failure|Authentication Failure]]
+    - [[#Validation Failure|Validation Failure]]
+    - [[#Rate-Limit Failure|Rate-Limit Failure]]
+    - [[#Permission Failure|Permission Failure]]
+    - [[#Internal Failure|Internal Failure]]
+    - [[#Ambiguous Failure|Ambiguous Failure]]
+  - [[#6. Failure Classification Table|6. Failure Classification Table]]
+  - [[#7. Idempotency|7. Idempotency]]
+  - [[#8. Reconciliation|8. Reconciliation]]
+- **Part III: Granular Decomposition, Parent-Child Topologies & Scheduling**
+  - [[#9. Multi-Platform Publishing as Separate Jobs|9. Multi-Platform Publishing as Separate Jobs]]
+  - [[#10. Small Jobs Are Better Than One Giant Job|10. Small Jobs Are Better Than One Giant Job]]
+  - [[#11. Parent and Child Jobs|11. Parent and Child Jobs]]
+  - [[#12. Dependencies|12. Dependencies]]
+  - [[#13. Scheduled Actions Are Future Jobs|13. Scheduled Actions Are Future Jobs]]
+  - [[#14. Automation Creates Jobs|14. Automation Creates Jobs]]
+  - [[#15. Combined Job Architecture|15. Combined Job Architecture]]
+- **Part IV: Retry Strategies, Timeouts, Throttling & Priority**
+  - [[#16. User Experience Should Remain Simple|16. User Experience Should Remain Simple]]
+  - [[#17. Manager/Admin Operations View|17. Manager/Admin Operations View]]
+  - [[#18. Detailed Technical Logs|18. Detailed Technical Logs]]
+  - [[#19. Retry Policy by Failure Type|19. Retry Policy by Failure Type]]
+  - [[#20. Retry Backoff|20. Retry Backoff]]
+  - [[#21. Retry Storm Protection|21. Retry Storm Protection]]
+  - [[#22. Priority|22. Priority]]
+  - [[#23. Time Zones|23. Time Zones]]
+  - [[#24. Worker Downtime and Late Jobs|24. Worker Downtime and Late Jobs]]
+  - [[#25. Cancellation|25. Cancellation]]
+  - [[#26. Commit Point / Point of No Return|26. Commit Point / Point of No Return]]
+- **Part V: Specialized Job Handlers (Storage, Media, Email & AI)**
+  - [[#27. Email Jobs|27. Email Jobs]]
+  - [[#28. File Upload and Processing Should Be Separate|28. File Upload and Processing Should Be Separate]]
+  - [[#29. Resumable Upload vs Job Retry|29. Resumable Upload vs Job Retry]]
+  - [[#30. NAS Transfers as Jobs|30. NAS Transfers as Jobs]]
+  - [[#31. Checksums|31. Checksums]]
+- **Part VI: Concurrency, Deadlocks, Timeouts & Human Escalation**
+  - [[#32. Prevent Duplicate Worker Execution|32. Prevent Duplicate Worker Execution]]
+  - [[#33. Stuck Jobs|33. Stuck Jobs]]
+  - [[#34. Job-Specific Timeouts|34. Job-Specific Timeouts]]
+  - [[#35. Needs Attention Queue|35. Needs Attention Queue]]
+  - [[#36. Attempt History|36. Attempt History]]
+  - [[#37. Operational Analytics from Jobs|37. Operational Analytics from Jobs]]
+  - [[#38. Notification Jobs Should Be Separate|38. Notification Jobs Should Be Separate]]
+  - [[#39. Analytics Collection as Future Jobs|39. Analytics Collection as Future Jobs]]
+  - [[#40. AI Jobs|40. AI Jobs]]
+  - [[#41. Recovery Strategy by Job Type|41. Recovery Strategy by Job Type]]
+- **Part VII: Consistency, Distributed Tracing & Operations Model**
+  - [[#42. Transactional Consistency|42. Transactional Consistency]]
+  - [[#43. Audit vs Job vs Activity|43. Audit vs Job vs Activity]]
+    - [[#Audit|Audit]]
+    - [[#Job|Job]]
+    - [[#Activity|Activity]]
+  - [[#44. Duplicate User Clicks|44. Duplicate User Clicks]]
+  - [[#45. Correlation IDs|45. Correlation IDs]]
+  - [[#46. Actionable User Error Messages|46. Actionable User Error Messages]]
+  - [[#47. Failure Ownership|47. Failure Ownership]]
+  - [[#48. Business Block vs Technical Failure|48. Business Block vs Technical Failure]]
+  - [[#49. Proposed Architecture|49. Proposed Architecture]]
+  - [[#50. Important Product Principle|50. Important Product Principle]]
+  - [[#51. Still Unresolved|51. Still Unresolved]]
 
 ---
 
@@ -52,6 +153,9 @@ The work must continue even if the user:
 - logs out
 
 ---
+
+> [!tip] Core Tenet
+> The frontend web client is strictly an orchestration interface; all non-trivial state mutations, external calls, and file processing are executed asynchronously by durable workers. See [[MVP_draft#15. Work Page|MVP Work Page]].
 
 # 2. What Is a Background Job?
 
@@ -186,6 +290,31 @@ Notification Job
 
 ---
 
+
+### Universal Job State Machine
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING : Job Enqueued
+    PENDING --> SCHEDULED : Future run_at timestamp
+    SCHEDULED --> READY : Due time reached
+    PENDING --> READY : Immediate execution
+    READY --> PROCESSING : Worker claims lock
+    PROCESSING --> COMPLETED : Execution successful
+    PROCESSING --> RETRYING : Transient failure (retries left)
+    RETRYING --> READY : Backoff delay expired
+    PROCESSING --> NEEDS_ATTENTION : Non-retryable failure or retries exhausted
+    NEEDS_ATTENTION --> READY : Operator manually retries
+    NEEDS_ATTENTION --> CANCELLED : Operator cancels job
+    READY --> CANCELLED : Cancelled before pick-up
+    PROCESSING --> CANCELLED : Aborted at safe checkpoint
+    COMPLETED --> [*]
+    CANCELLED --> [*]
+```
+
+> [!tip] Lifecycle Observability
+> For UI representation of job statuses, see [[MVP_draft#15. Work Page|MVP Work Page]] and [[MVP_draft#38. Settings Page|MVP Settings Page]].
+
+
 # 5. Failure Classes
 
 Not every failure should be treated the same way.
@@ -302,6 +431,36 @@ Typical response:
 
 ---
 
+
+### Failure Classification & Handling Engine
+```mermaid
+flowchart TD
+    Error([Worker Catches Error]) --> Classify{Inspect Error Class}
+    
+    Classify -->|Transient / Network / 503| Route_Transient[Transient Failure]
+    Classify -->|Auth Token Expired / 401| Route_Auth[Authentication Failure]
+    Classify -->|Payload Invalid / 400 / 422| Route_Validation[Validation Failure]
+    Classify -->|Rate Limited / 429| Route_Rate[Rate-Limit Failure]
+    Classify -->|Account Missing Scope / 403| Route_Perm[Permission Failure]
+    Classify -->|Timeout During Commit / Ambiguous| Route_Ambig[Ambiguous Failure]
+    
+    Route_Transient --> RetryExp[Exponential Backoff with Jitter]
+    Route_Rate --> RetryRate[Pause Queue until Reset Timestamp]
+    Route_Auth --> RefreshToken[Trigger Token Refresh Job]
+    RefreshToken -->|Success| RetryAuth[Retry Original Job]
+    RefreshToken -->|Failure| NeedsAttn[Move to Needs Attention Queue]
+    
+    Route_Validation --> FailTerminal[Mark Failed: Alert Author]
+    Route_Perm --> NeedsAttn
+    Route_Ambig --> ReconCheck{Reconcile External API State}
+    ReconCheck -->|Already Published| MarkDone[Mark Completed via Reconciliation]
+    ReconCheck -->|Not Published| RetryExp
+```
+
+> [!important] Error Classification Philosophy
+> Never retry blind 400 or 403 errors; retries are exclusively reserved for transient network hiccups and managed token refresh flows. See [[disscussios/connected_account_secrets_management#12. Token Refresh Failures|Token Refresh Failures]].
+
+
 # 7. Idempotency
 
 A safer engineering principle is:
@@ -339,6 +498,9 @@ This is critical for:
 - other non-reversible operations
 
 ---
+
+> [!important] Idempotency Keys
+> Every external mutation job must carry a unique idempotency key (e.g. `work_item_id + version_number + platform_id`) to prevent duplicate posts during retry loops. See [[disscussios/approval_policy_design#2. Approval Must Bind to a Specific Version|Approval Policy - Version Binding]].
 
 # 8. Reconciliation
 
@@ -420,6 +582,31 @@ PARTIALLY PUBLISHED
 This allows independent retry and prevents one slow provider from blocking all others.
 
 ---
+
+
+### Parent-Child Multi-Platform Job Fan-Out
+```mermaid
+flowchart TD
+    Parent[Parent Job: Publish Release Package #R7] --> Fork{Orchestrator Fan Out}
+    
+    Fork --> Child_X[Child Job: Post to X / Twitter]
+    Fork --> Child_Insta[Child Job: Post to Instagram]
+    Fork --> Child_YT[Child Job: Post to YouTube]
+    
+    Child_X --> Status_X[Status: Completed]
+    Child_Insta --> Status_Insta[Status: Completed]
+    Child_YT --> Status_YT[Status: Retrying - Video Processing]
+    
+    Status_X --> Aggregator{Parent Aggregator}
+    Status_Insta --> Aggregator
+    Status_YT --> Aggregator
+    
+    Aggregator --> ParentStatus[Parent Status: PARTIALLY_PUBLISHED]
+```
+
+> [!note] Granular Publishing Isolation
+> If YouTube video processing fails or delays, it must never block or roll back successful posts on Instagram or X. See [[disscussios/Second_discussion_draft#19. Publishing Orchestrator Architecture|Publishing Orchestrator Architecture]] and [[MVP_draft#25. Publishing Tab|MVP Publishing Preflight Tab]].
+
 
 # 10. Small Jobs Are Better Than One Giant Job
 
@@ -530,6 +717,9 @@ Publish Friday at 18:00
 The main difference is the scheduled time.
 
 ---
+
+> [!note] Scheduled Queuing
+> Scheduled publication uses delayed job queues with precise UTC timestamps. See [[disscussios/approval_policy_design#32. Approval Reminders as Background Jobs|Approval Reminders as Background Jobs]].
 
 # 14. Automation Creates Jobs
 
@@ -747,6 +937,23 @@ Backoff should normally include jitter.
 
 ---
 
+
+### Exponential Backoff with Jitter & Throttling
+```mermaid
+flowchart LR
+    Attempt1[Attempt 1: Immediate] -->|Fail: Network Timeout| Delay1[Delay: 2s + Jitter]
+    Delay1 --> Attempt2[Attempt 2]
+    Attempt2 -->|Fail: 503 Service Unavailable| Delay2[Delay: 8s + Jitter]
+    Delay2 --> Attempt3[Attempt 3]
+    Attempt3 -->|Fail: Rate Limited 429| Delay3[Delay: 32s + Retry-After Header]
+    Delay3 --> Attempt4[Attempt 4]
+    Attempt4 -->|Fail: Max Attempts Reached| Escalation[Escalate: Needs Attention Queue]
+```
+
+> [!tip] Anti-Throttling Guard
+> Adding random jitter prevents thousands of delayed worker retries from hammering an external platform simultaneously in a "thundering herd" retry storm.
+
+
 # 21. Retry Storm Protection
 
 If an external provider is unavailable, many jobs may fail simultaneously.
@@ -916,6 +1123,9 @@ A later delete/unpublish action may need to be a separate operation.
 
 ---
 
+> [!warning] Point of No Return
+> Once a worker sends a payload to an external social network API, the job has crossed the commit point. Cancellation cannot pull the post back from the platform; it must transition to post-publication deletion workflows. See [[disscussios/emergency_workflows#17. Emergency Control Panel|Emergency Workflows - Control Panel]].
+
 # 27. Email Jobs
 
 Email has similar external-action behavior.
@@ -1027,6 +1237,34 @@ Archive complete
 
 ---
 
+
+### Asynchronous Media Processing & NAS Transfer Pipeline
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Creator as Content Author
+    actor Client as Browser Client
+    participant API as Hub Backend API
+    participant Worker as Background Worker
+    participant S3 as Hot Cloud Storage
+    participant NAS as Office UGREEN NAS
+    
+    Creator->>Client: Upload Video (2.8 GB)
+    Client->>S3: Direct Resumable Upload
+    S3-->>API: Webhook: Upload Complete (checksum verified)
+    API->>Worker: Enqueue DerivativeGenerationJob
+    Worker->>Worker: Generate 1080p Preview & Social Thumbnails
+    Worker->>API: Register Derivative Assets
+    API->>Worker: Enqueue NASTransferJob(Priority: Low/Nightly)
+    Worker->>NAS: Stream Transfer Master File to Local Volume
+    NAS-->>Worker: Transfer Verified with Checksum SHA-256
+    Worker->>API: Add Location Record (UGREEN NAS, Status: VERIFIED)
+```
+
+> [!note] Storage Decoupling
+> Heavy NAS transfers and derivative generation execute entirely out-of-band without degrading user responsiveness. See [[disscussios/storage_lifecycle_disaster_recovery#15. Originals and Derivatives Need Different Protection|Storage Lifecycle - Derivatives Protection]] and [[disscussios/storage_lifecycle_disaster_recovery#17. Checksums|Storage Lifecycle - Checksums]].
+
+
 # 31. Checksums
 
 Checksums can verify that important files moved correctly.
@@ -1065,6 +1303,9 @@ cannot claim it
 This is especially critical for publishing and sending email.
 
 ---
+
+> [!caution] Distributed Locks
+> Use Redis redlock or PostgreSQL advisory locks to guarantee only one worker executes a specific job instance at any given millisecond.
 
 # 33. Stuck Jobs
 
@@ -1141,6 +1382,30 @@ Invalid YouTube video format
 This should be a first-class concept in the product.
 
 ---
+
+
+### Needs Attention Queue & Human Remediation Flow
+```mermaid
+flowchart TD
+    FailedJob([Job Exhausts Automatic Retries]) --> MoveQueue[Route to Needs Attention Queue]
+    MoveQueue --> TagOwner[Attribute Failure Ownership: Assigned Operator]
+    MoveQueue --> AlertDispatcher[Dispatch Urgent Notification]
+    
+    AlertDispatcher --> OpsInbox[Manager / Operator Inbox & Dashboard Alert]
+    OpsInbox --> OperatorReview[Operator Reviews Failure Context & Diagnostics]
+    
+    OperatorReview --> Decision{Remediation Action}
+    Decision -->|Fix External Issue: e.g. Re-auth| Act_Retry[Action: Re-authenticate & Retry Now]
+    Decision -->|Temporary Platform Down| Act_Snooze[Action: Snooze / Reschedule]
+    Decision -->|Invalid Content / Canceled| Act_Cancel[Action: Cancel Job & Inform Author]
+    
+    Act_Retry --> WorkerResume[Worker Resumes Execution]
+    Act_Cancel --> AuditRecord[Log Cancellation in Immutable Audit Trail]
+```
+
+> [!warning] Human Intervention Required
+> The "Needs Attention" queue ensures technical failures never silently rot in a black hole. See [[disscussios/notification_model#12. Urgent vs Digest Routing|Notification Model - Urgent Routing]] and [[MVP_draft#38. Settings Page|MVP Settings Page]].
+
 
 # 36. Attempt History
 
@@ -1307,6 +1572,9 @@ The final architecture needs a reliable pattern to keep related database state a
 
 ---
 
+> [!note] Transactional Outbox Pattern
+> Save job records inside the same database transaction as the business object mutation, then publish to Redis asynchronously to ensure zero lost jobs.
+
 # 43. Audit vs Job vs Activity
 
 These are separate concepts.
@@ -1381,6 +1649,9 @@ audit events
 and simplify troubleshooting.
 
 ---
+
+> [!tip] Distributed Tracing
+> Pass a unique `correlation_id` through every HTTP request, job payload, worker log, and audit record for instant cross-tier debugging.
 
 # 46. Actionable User Error Messages
 
@@ -1515,6 +1786,68 @@ This makes operational dashboards more truthful.
 
 ---
 
+
+### End-to-End Distributed Background Job Architecture
+```mermaid
+graph TD
+    subgraph ClientLayer["User Interaction & Presentation"]
+        Web[Next.js Web App]
+        AdminUI[Operations & Monitoring UI]
+    end
+    
+    subgraph CoreBackend["Application Core"]
+        API[FastAPI / Next.js Server Actions]
+        DB[(Supabase PostgreSQL: Jobs & Audit Table)]
+    end
+    
+    subgraph QueueBroker["Reliable Message Broker"]
+        Redis[(Redis BullMQ Cluster)]
+        Q_Crit[Critical Queue: Emergency & Security]
+        Q_High[High Priority: Approvals & Publishing]
+        Q_Def[Default Priority: Notifications & Email]
+        Q_Bulk[Bulk Priority: Derivative Transcoding & NAS Sync]
+        Redis --- Q_Crit
+        Redis --- Q_High
+        Redis --- Q_Def
+        Redis --- Q_Bulk
+    end
+    
+    subgraph WorkerPool["Distributed Worker Pool"]
+        W1[Publishing Worker]
+        W2[Media Processing Worker]
+        W3[Notification Worker]
+        W4[Storage Replication Worker]
+    end
+    
+    subgraph ExternalPlatforms["External Ecosystem"]
+        Social[Social Platform APIs: X, Meta, LinkedIn]
+        NAS_HW[Office UGREEN NAS]
+        EmailGW[Enterprise Email Gateway]
+    end
+    
+    Web -->|Create Work| API
+    API -->|Write Job Intent| DB
+    API -->|Enqueue Task| Redis
+    
+    Q_Crit --> W1
+    Q_High --> W1
+    Q_Def --> W3
+    Q_Bulk --> W2
+    Q_Bulk --> W4
+    
+    W1 --> Social
+    W2 --> DB
+    W3 --> EmailGW
+    W4 --> NAS_HW
+    
+    WorkerPool -.->|State & Heartbeat| DB
+    AdminUI -->|Inspect & Retry| API
+```
+
+> [!important] Architectural Synthesis
+> Decoupling queue transport (Redis) from durable state persistence (PostgreSQL) ensures resilience against container restarts and network partitions. See [[discussions_list#2. Background Jobs and Failure Handling|Discussions List - Background Jobs]].
+
+
 # 50. Important Product Principle
 
 A strong product-level model is:
@@ -1537,6 +1870,9 @@ Large media upload incomplete            1
 This directly supports the original goal of making departmental situation monitoring easier.
 
 ---
+
+> [!important] Product Principle
+> Make the happy path invisible, the failure path actionable, and the technical logs exhaustive. See [[MVP_draft#15. Work Page|MVP Work Page]].
 
 # 51. Still Unresolved
 
@@ -1563,3 +1899,22 @@ We still need to decide:
 - Which jobs support checkpoints/resume
 
 This document preserves the reliability discussion only and is not yet the final implementation architecture.
+
+---
+
+^failure-handling-jobs-boundary
+
+> [!important] Reliability & Background Operations Hub
+> Cross-reference with [[discussions_list#2. Background Jobs and Failure Handling|Discussions List - Background Jobs]], [[MVP_draft#38. Settings Page|MVP Settings Page]], and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+
+---
+
+## External Architectural & Standards References
+
+- **BullMQ Distributed Queue Architecture**: [BullMQ Documentation](https://docs.bullmq.io/)
+- **Redis Reliable Message Streaming**: [Redis Message Queues](https://redis.io/docs/latest/develop/data-types/streams/)
+- **AWS Reliability Pillar — Exponential Backoff & Jitter**: [AWS Architecture Blog](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/)
+- **RFC 7807 Problem Details for HTTP APIs**: [RFC 7807 Specification](https://datatracker.ietf.org/doc/html/rfc7807)
+- **Transactional Outbox Pattern**: [Microservices.io Transactional Outbox](https://microservices.io/patterns/data/transactional-outbox.html)
+- **Mermaid Sequence & State Documentation**: [Mermaid.js Official Docs](https://mermaid.js.org/)
+

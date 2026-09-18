@@ -1,10 +1,71 @@
+---
+type: synthesis
+tags:
+  - comms-hub
+  - comms-hub/architecture
+  - comms-hub/discussions
+  - type/checklist
+  - stage/discovery
+  - status/active
+created: 2026-08-18
+updated: 2026-09-18
+status: active
+parent: "[[Comms Hub]]"
+aliases:
+  - Discussions List
+  - Master Discussions Index
+  - Architectural Open Questions
+---
+
+
+[[Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept]] | [[MVP_draft|MVP Draft UI Shell]]
+
+---
+
 # Discussions List — Communication Department Hub
 
+> [!note] Status: Open discussion topics
 > **Status: Open discussion topics**
 >
 > This document preserves the major blind spots and unresolved questions identified before formal architecture planning begins.
 >
 > These are **not final decisions or requirements**. They are topics that should be discussed, validated against real department workflows, and resolved progressively before implementation.
+
+---
+
+
+## Structure Tree & Document Map
+
+- [[#Discussions List — Communication Department Hub|Overview & Discussion Status]]
+- **Part I: Data Boundaries & Reliability**
+  - [[#1. Source of Truth and External Systems|1. Source of Truth and External Systems]]
+  - [[#2. Failure Handling|2. Failure Handling]]
+  - [[#3. Background Jobs, Queues, and Workers|3. Background Jobs, Queues, and Workers]]
+- **Part II: Identity, Governance & Security**
+  - [[#4. Identity Beyond Basic Roles|4. Identity Beyond Basic Roles]]
+  - [[#5. Organizational Ownership vs User Ownership|5. Organizational Ownership vs User Ownership]]
+  - [[#6. Connected Account Security|6. Connected Account Security]]
+  - [[#7. Integration Ownership|7. Integration Ownership]]
+- **Part III: Attention, Discovery & Collaboration**
+  - [[#8. Notification Overload|8. Notification Overload]]
+  - [[#9. Global Search|9. Global Search]]
+  - [[#10. Metadata and Taxonomy|10. Metadata and Taxonomy]]
+  - [[#11. Concurrent Editing|11. Concurrent Editing]]
+- **Part IV: Policy, Compliance & Resilience**
+  - [[#12. Flexible Approval Policies|12. Flexible Approval Policies]]
+  - [[#13. Emergency Overrides|13. Emergency Overrides]]
+  - [[#14. Deletion, Archive, and Retention|14. Deletion, Archive, and Retention]]
+  - [[#15. Security Architecture|15. Security Architecture]]
+- **Part V: Operational Discipline & Infrastructure**
+  - [[#16. Employee Monitoring Philosophy|16. Employee Monitoring Philosophy]]
+  - [[#17. Disaster Recovery|17. Disaster Recovery]]
+  - [[#18. System Health and Operational Monitoring|18. System Health and Operational Monitoring]]
+  - [[#19. Cost Controls|19. Cost Controls]]
+  - [[#20. Development, Staging, and Production Separation|20. Development, Staging, and Production Separation]]
+- **Part VI: Roadmapping & Topic Catalog**
+  - [[#21. Real Workflow Discovery|21. Real Workflow Discovery]]
+  - [[#22. Recommended Next Discussions|22. Recommended Next Discussions]]
+  - [[#23. Status|23. Status]]
 
 ---
 
@@ -32,6 +93,30 @@ Questions:
 - Do we periodically reconcile external state?
 - How do we display external modifications?
 - How are conflicts resolved?
+
+### Source of Truth Dual-Domain Boundary Diagram
+
+```mermaid
+graph TD
+    subgraph HubManaged [Hub Managed Domain - Authoritative Source]
+        M1[Work Items & Tasks]
+        M2[Draft Copy & Media Versions]
+        M3[Approval Audit Trail]
+        M4[Scheduled Dispatch Queue]
+    end
+
+    subgraph ExternalObserved [External Observed Domain - Reconciliation Required]
+        E1[Instagram / Social Platforms - Direct In-App Edits]
+        E2[Outlook / Exchange - External Email Replies]
+        E3[On-Prem NAS - Direct File Removals]
+        E4[Meta Business Suite - Modified Schedules]
+    end
+
+    HubManaged <-->|Bi-directional Sync & Conflict Alerts| ExternalObserved
+```
+
+> [!tip] In-Depth Synthesis
+> See foundational considerations in [[disscussios/First_idea_darft|First Idea Draft]] and [[disscussios/Second_discussion_draft|Second Discussion Draft]].
 
 ---
 
@@ -125,6 +210,27 @@ Related Work Item:
 #827
 ```
 
+### Background Job Lifecycle State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Queued : Dispatch Job
+    Queued --> Running : Worker Pick-up
+    Running --> Succeeded : Action Executed
+    Running --> Failed : Error or Timeout
+    Failed --> Retrying : Retry Counter < Max
+    Retrying --> Running : Backoff Delay
+    Failed --> Needs_Attention : Retries Exhausted
+    Needs_Attention --> Queued : Manual Resubmit
+    Needs_Attention --> Cancelled : Admin Cancel
+    Succeeded --> [*]
+    Cancelled --> [*]
+```
+
+> [!note] Dedicated Discussion Note
+> Full error classification, backoff formulas, and dead-letter queue architectures are specified in [[disscussios/failure_handling_background_jobs|Failure Handling and Background Jobs]].
+> See also technical reference: [BullMQ Queue Architecture](https://docs.bullmq.io/).
+
 ---
 
 # 4. Identity Beyond Basic Roles
@@ -177,6 +283,9 @@ Questions:
 - How is ownership transferred?
 - Can a user account be disabled while their work remains?
 - Which data belongs to the user personally, if any?
+
+> [!tip] Dedicated Discussion Note
+> Role models, acting managers, delegation during leave, and ownership succession are analyzed in [[disscussios/organizational_role_discussion|Organizational Role Discussion]].
 
 ---
 
@@ -249,6 +358,10 @@ Questions:
 - What happens if the authorizing employee leaves?
 - Which roles may publish through it?
 
+> [!note] Dedicated Discussion Note
+> OAuth scopes, refresh loops, KMS credential encryption, and department account governance are resolved in [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]].
+> See also technical reference: [OAuth 2.0 Security BCP](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics).
+
 ---
 
 # 8. Notification Overload
@@ -285,6 +398,20 @@ Questions:
 - Which are informational only?
 - Can users configure notification channels?
 - How do we avoid alert fatigue?
+
+### Three-Tier Attention Architecture Diagram
+
+```mermaid
+flowchart TD
+    Event[System / User Event] --> Classifier{Attention Classifier}
+    
+    Classifier -->|Urgent Action Required| T1[Tier 1: INBOX<br/>Pending Approvals, Review Requests, Overdue Work]
+    Classifier -->|Informational Awareness| T2[Tier 2: NOTIFICATIONS<br/>Task Comments, Mentions, Assignment Updates]
+    Classifier -->|Background Record| T3[Tier 3: ACTIVITY STREAM<br/>Successful Posts, Sync Logs, System Status Changes]
+```
+
+> [!tip] Dedicated Discussion Note
+> Event schemas, routing channels, and user digest preferences are defined in [[disscussios/notification_model|Notification Model]].
 
 ---
 
@@ -376,6 +503,9 @@ Questions:
 - Who can create tags/categories?
 - Should taxonomy be centrally controlled?
 
+> [!note] Dedicated Discussion Note
+> Unified tag schemas, search indexing, and metadata filters are established in [[disscussios/search_and_metadata|Search and Metadata Architecture]].
+
 ---
 
 # 11. Concurrent Editing
@@ -450,6 +580,26 @@ Questions:
 - Does any content require external review?
 - What happens if an approver is unavailable?
 
+### Multi-Policy Approval Matrix Diagram
+
+```mermaid
+graph LR
+    subgraph NormalSocial [Policy 1: Standard Social Post]
+        W1[Writer / Specialist] --> M1[Manager] --> P1[Publish]
+    end
+
+    subgraph PressRelease [Policy 2: Press Release]
+        W2[Writer] --> M2[Manager] --> D2[Director] --> P2[Publish]
+    end
+
+    subgraph SensitiveContent [Policy 3: Sensitive / High Impact]
+        W3[Specialist] --> M3[Manager] --> D3[Director] --> L3[Legal / Executive] --> P3[Publish]
+    end
+```
+
+> [!tip] Dedicated Discussion Note
+> Flexible sign-off stages, SLA timers, parallel reviews, and delegation protocols are modeled in [[disscussios/approval_policy_design|Approval Policy Design]].
+
 ---
 
 # 13. Emergency Overrides
@@ -482,6 +632,9 @@ Questions:
 - Is a reason mandatory?
 - Who is notified afterward?
 
+> [!warning] Dedicated Discussion Note
+> Kill switches, emergency retraction of published posts, and incident escalation channels are detailed in [[disscussios/emergency_workflows|Emergency Workflows]].
+
 ---
 
 # 14. Deletion, Archive, and Retention
@@ -510,6 +663,16 @@ Some records, especially audit logs, may not be editable or deletable through no
 A more accurate principle than “everything is editable” may be:
 
 > Everything appropriate should be correctable, but important historical records must remain traceable.
+
+### Data Lifecycle & Retention Hierarchy Diagram
+
+```mermaid
+flowchart LR
+    Active[Active Content / File] -->|Employee Action| Archive[Archived - Read Only]
+    Archive -->|Employee / Manager Action| Trash[Trash - Soft Delete Window]
+    Trash -->|Manager Action| Active
+    Trash -->|Admin Only| Purge[Permanent Destruction]
+```
 
 ---
 
@@ -547,6 +710,10 @@ Integration credential security
 ```
 
 High-privilege accounts require special attention because one compromised Admin account may expose files, communication, and publishing capabilities.
+
+> [!important] Dedicated Discussion Note
+> Zero-trust boundaries, session invalidation, MFA requirements, and audit storage are detailed in [[disscussios/security_discussion|Security Architecture]].
+> See also technical reference: [Supabase Row Level Security Guide](https://supabase.com/docs/guides/database/postgres/row-level-security).
 
 ---
 
@@ -597,6 +764,9 @@ We need to discuss:
 - Acceptable data-loss window
 
 A backup that has never been tested should not be assumed reliable.
+
+> [!tip] Dedicated Discussion Note
+> Cloud backup cadences, point-in-time recovery, cold NAS storage tiers, and drill runbooks are analyzed in [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]].
 
 ---
 
@@ -729,21 +899,55 @@ We should map approximately 3–5 real department workflows before finalizing th
 
 Before formal implementation planning, the major topics should include:
 
-1. Security architecture #
-2. Real current department workflows
-3. Source-of-truth rules
-4. Failure handling and background jobs #
-5. Identity and organizational ownership
-6. Approval policy design #
-7. Storage lifecycle and disaster recovery @
-8. Connected-account and secrets management @
-9. Notification model @
-10. Search and metadata @
-11. Monitoring/privacy boundaries
-12. Production/staging separation
-13. Cost controls
-14. Emergency workflows @
-15. MVP boundaries
+1. Security architecture # — [[disscussios/security_discussion|Security Architecture Discussion]]
+2. Real current department workflows — [[MVP_draft#55. Relationship With Astra Workflow Discovery|Astra Workflow Discovery]]
+3. Source-of-truth rules — [[disscussios/First_idea_darft|First Idea Draft]] & [[disscussios/Second_discussion_draft|Second Discussion Draft]]
+4. Failure handling and background jobs # — [[disscussios/failure_handling_background_jobs|Failure Handling & Background Jobs]]
+5. Identity and organizational ownership — [[disscussios/organizational_role_discussion|Organizational Role Discussion]]
+6. Approval policy design # — [[disscussios/approval_policy_design|Approval Policy Design]]
+7. Storage lifecycle and disaster recovery @ — [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]]
+8. Connected-account and secrets management @ — [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]]
+9. Notification model @ — [[disscussios/notification_model|Notification Model]]
+10. Search and metadata @ — [[disscussios/search_and_metadata|Search and Metadata Architecture]]
+11. Monitoring/privacy boundaries — [[#16. Employee Monitoring Philosophy|Monitoring Philosophy]]
+12. Production/staging separation — [[#20. Development, Staging, and Production Separation|Environment Separation]]
+13. Cost controls — [[#19. Cost Controls|Cost Controls]]
+14. Emergency workflows @ — [[disscussios/emergency_workflows|Emergency Workflows]]
+15. MVP boundaries — [[MVP_draft#53. Recommended Prototype MVP 0.1 Boundary|MVP Draft 0.1 Boundary]]
+
+### Master Architectural Discussions Topology
+
+```mermaid
+graph TD
+    Hub[Comms Hub Master Architecture]
+    
+    subgraph DiscoveryNotes [In-Depth Discussion Documents]
+        D_Role[disscussios/organizational_role_discussion.md]
+        D_Appr[disscussios/approval_policy_design.md]
+        D_Fail[disscussios/failure_handling_background_jobs.md]
+        D_Sec[disscussios/security_discussion.md]
+        D_Secr[disscussios/connected_account_secrets_management.md]
+        D_Stor[disscussios/storage_lifecycle_disaster_recovery.md]
+        D_Notif[disscussios/notification_model.md]
+        D_Srch[disscussios/search_and_metadata.md]
+        D_Emerg[disscussios/emergency_workflows.md]
+        D_Draft1[disscussios/First_idea_darft.md]
+        D_Draft2[disscussios/Second_discussion_draft.md]
+    end
+
+    Hub --> D_Role
+    Hub --> D_Appr
+    Hub --> D_Fail
+    Hub --> D_Sec
+    Hub --> D_Secr
+    Hub --> D_Stor
+    Hub --> D_Notif
+    Hub --> D_Srch
+    Hub --> D_Emerg
+    Hub --> D_Draft1
+    Hub --> D_Draft2
+```
+
 
 ---
 
@@ -751,4 +955,4 @@ Before formal implementation planning, the major topics should include:
 
 This document is a **discussion checklist**.
 
-It is intentionally broader than the current product specification so that important blind spots are explored **before implementation begins**.
+It is intentionally broader than the current product specification so that important blind spots are explored **before implementation begins**. ^discussions-checklist-scope

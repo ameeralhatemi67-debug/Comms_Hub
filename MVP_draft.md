@@ -1,5 +1,32 @@
+---
+type: project
+tags:
+  - comms-hub
+  - comms-hub/mvp
+  - comms-hub/ui-ux
+  - type/specification
+  - stage/prototype
+  - lang/ar-rtl
+  - status/draft
+created: 2026-09-18
+updated: 2026-09-18
+status: draft
+version: "0.1.0-ui-shell"
+parent: "[[Comms Hub]]"
+aliases:
+  - Comms Hub MVP
+  - Comms Hub MVP UI Shell Draft
+  - مسودة نموذج واجهة مركز الاتصال
+---
+
+
+[[Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept]] | [[discussions_list|Discussions Index]]
+
+---
+
 # Comms Hub — MVP UI Shell Draft
 
+> [!note] Status: Prototype MVP draft — UI/UX only
 > **Status: Prototype MVP draft — UI/UX only**
 >
 > This document defines the first MVP as the **skeleton and skin** of the Communication Hub.
@@ -7,6 +34,76 @@
 > It intentionally excludes the real backend logic, database, integrations, automation, authentication enforcement, and external services.
 >
 > The goal is to validate the product structure, pages, navigation, workflows, role experiences, terminology, and responsive UI before building the system’s “nervous system” and “brain.”
+
+---
+
+
+## Structure Tree & Document Map
+
+- [[#Comms Hub — MVP UI Shell Draft|Overview & Prototype Scope]]
+- **Part I: Strategic Foundations & Boundaries**
+  - [[#1. Goal of This MVP|1. Goal of This MVP]]
+  - [[#2. MVP Definition|2. MVP Definition]]
+  - [[#3. Explicitly Out of Scope|3. Explicitly Out of Scope]]
+  - [[#4. Mock Data|4. Mock Data]]
+  - [[#5. Prototype “View As” Role Switcher|5. Prototype “View As” Role Switcher]]
+- **Part II: User Experience Shell & Roles**
+  - [[#6. Role-Specific Home Experience|6. Role-Specific Home Experience]]
+  - [[#7. Main Information Architecture|7. Main Information Architecture]]
+  - [[#8. Page Priority|8. Page Priority]]
+  - [[#9. Main Application Shell|9. Main Application Shell]]
+  - [[#10. Visual Direction|10. Visual Direction]]
+  - [[#11. Sidebar|11. Sidebar]]
+  - [[#12. Global Top Bar|12. Global Top Bar]]
+- **Part III: Core Operational Screens**
+  - [[#13. Home Page|13. Home Page]]
+  - [[#14. Specialist Home|14. Specialist Home]]
+  - [[#15. Work Page|15. Work Page]]
+  - [[#16. Work List|16. Work List]]
+  - [[#17. Work Item Detail|17. Work Item Detail]]
+  - [[#18. Create Page|18. Create Page]]
+  - [[#19. Social Post Form|19. Social Post Form]]
+  - [[#20. Platform Variants|20. Platform Variants]]
+  - [[#21. Media Attachment UI|21. Media Attachment UI]]
+- **Part IV: Approval, Publishing & Operations**
+  - [[#22. Approvals / Publishing Page|22. Approvals / Publishing Page]]
+  - [[#23. Approvals Tab|23. Approvals Tab]]
+  - [[#24. Review Screen|24. Review Screen]]
+  - [[#25. Publishing Tab|25. Publishing Tab]]
+  - [[#26. Mock Publishing Interaction|26. Mock Publishing Interaction]]
+  - [[#27. Calendar|27. Calendar]]
+  - [[#28. Media Library|28. Media Library]]
+  - [[#29. Media Card|29. Media Card]]
+  - [[#30. Asset Detail|30. Asset Detail]]
+- **Part V: Secondary & Administrative Modules**
+  - [[#31. Mail Page|31. Mail Page]]
+  - [[#32. Ideas Page|32. Ideas Page]]
+  - [[#33. Analytics Page|33. Analytics Page]]
+  - [[#34. Monitoring Page|34. Monitoring Page]]
+  - [[#35. Admin Page|35. Admin Page]]
+  - [[#36. Users Page|36. Users Page]]
+  - [[#37. Integrations Page|37. Integrations Page]]
+  - [[#38. Settings Page|38. Settings Page]]
+  - [[#39. Account Page|39. Account Page]]
+- **Part VI: Cross-Cutting Interactions & Mobile**
+  - [[#40. Notification Center|40. Notification Center]]
+  - [[#41. Global Search|41. Global Search]]
+  - [[#42. UI States to Prototype|42. UI States to Prototype]]
+  - [[#43. Responsive Targets|43. Responsive Targets]]
+  - [[#44. Mobile Priorities|44. Mobile Priorities]]
+  - [[#45. Mobile Work Item|45. Mobile Work Item]]
+  - [[#46. Prototype Interactions|46. Prototype Interactions]]
+- **Part VII: Verification Scenario & Standards**
+  - [[#47. One Coherent Demo Scenario|47. One Coherent Demo Scenario]]
+  - [[#48. Use Real-Looking Arabic Content|48. Use Real-Looking Arabic Content]]
+  - [[#49. Keep Clean Internal Status Vocabulary|49. Keep Clean Internal Status Vocabulary]]
+  - [[#50. Features Not Worth Deep Prototyping Yet|50. Features Not Worth Deep Prototyping Yet]]
+  - [[#51. Provisional End-to-End Demo Workflow|51. Provisional End-to-End Demo Workflow]]
+  - [[#52. What Success Looks Like|52. What Success Looks Like]]
+  - [[#53. Recommended Prototype MVP 0.1 Boundary|53. Recommended Prototype MVP 0.1 Boundary]]
+  - [[#54. Development Sequence|54. Development Sequence]]
+  - [[#55. Relationship With Astra Workflow Discovery|55. Relationship With Astra Workflow Discovery]]
+  - [[#56. Core MVP Principle|56. Core MVP Principle]]
 
 ---
 
@@ -93,6 +190,9 @@ A refresh may reset the mock state.
 ---
 
 # 3. Explicitly Out of Scope
+
+> [!important] Scope Enforcement & Deferred Systems
+> See architectural context in [[disscussios/security_discussion|Security Architecture]] and [[disscussios/First_idea_darft|First Idea Draft]].
 
 The prototype must **not** accidentally become a backend implementation project.
 
@@ -202,6 +302,9 @@ Pending approvals:
 ---
 
 # 5. Prototype “View As” Role Switcher
+
+> [!tip] Role Architecture
+> Complete role models, permissions, and operational duties are defined in [[disscussios/organizational_role_discussion|Organizational Role Discussion]].
 
 A development-only role switcher should allow the prototype to show different role experiences.
 
@@ -406,7 +509,39 @@ Account
 
 These only need enough UI to establish structure and future configuration direction.
 
+### Information Architecture & Priority Map
+
+```mermaid
+graph TD
+    subgraph Level_A [Level A: Fully Designed Prototype Pages]
+        Home[Home / الرئيسية]
+        Work[Work / العمل]
+        Create[Create / إنشاء]
+        Approvals[Approvals and Publishing / الموافقات والنشر]
+        Calendar[Calendar / التقويم]
+        Media[Media Library / مكتبة الوسائط]
+    end
+
+    subgraph Level_B [Level B: Believable but Lighter Pages]
+        Mail[Mail / البريد]
+        Ideas[Ideas / الأفكار]
+        Analytics[Analytics / التحليلات]
+        Monitoring[Monitoring / المراقبة]
+    end
+
+    subgraph Level_C [Level C: Configuration Shell]
+        Admin[Admin / الإدارة]
+        Settings[Settings / الإعدادات]
+        Account[Account / الحساب]
+    end
+
+    Hub[Comms Hub Main Navigation] --> Level_A
+    Hub --> Level_B
+    Hub --> Level_C
+```
+
 ---
+
 
 # 9. Main Application Shell
 
@@ -443,7 +578,34 @@ Arabic should be the primary UI direction.
 
 The component system should still be designed so English/LTR can be supported later.
 
+### Shell Architecture & Responsive Diagram
+
+```mermaid
+flowchart TB
+    subgraph Viewport [Desktop Application Shell - RTL Direction]
+        TopBar[Top Bar: Global Search | Quick Create | Notifications | Profile]
+        
+        subgraph MainBody [Main Workspace Layout]
+            Sidebar[Sidebar Navigation: Home, Work, Create, Approvals, Calendar, Mail, Media, Ideas, Analytics, Monitoring, Admin, Settings, Account]
+            ContentArea[Page Content Viewport]
+            DrawersModals[Contextual Drawers and Modals: Work Item Details, Asset View, Creation Forms]
+        end
+        
+        TopBar --- MainBody
+        Sidebar --- ContentArea
+        ContentArea -.-> DrawersModals
+    end
+```
+
+> [!note] Technical Framework References
+> - [Next.js App Router Documentation](https://nextjs.org/docs)
+> - [Tailwind CSS Direction & RTL Guide](https://tailwindcss.com/docs/hover-focus-and-other-states#rtl-support)
+> - [Radix UI Accessible Primitives](https://www.radix-ui.com/primitives)
+> - [Lucide Icons Library](https://lucide.dev/icons)
+> - [Mermaid.js Documentation](https://mermaid.js.org/)
+
 ---
+
 
 # 10. Visual Direction
 
@@ -795,7 +957,25 @@ Buttons:
 [Submit for Review]
 ```
 
+### Work Item Lifecycle State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT : Create Work Item
+    DRAFT --> IN_PRODUCTION : Assign Specialist
+    IN_PRODUCTION --> IN_REVIEW : Submit for Review
+    IN_REVIEW --> CHANGES_REQUESTED : Request Changes
+    CHANGES_REQUESTED --> IN_PRODUCTION : Revision Work
+    IN_REVIEW --> APPROVED : Approve Release
+    APPROVED --> SCHEDULED : Schedule Publication
+    SCHEDULED --> PUBLISHED : Publish Job Complete
+    SCHEDULED --> FAILED : API or Network Failure
+    FAILED --> SCHEDULED : Retry Publication
+    PUBLISHED --> [*]
+```
+
 ---
+
 
 # 18. Create Page
 
@@ -927,6 +1107,9 @@ No real cloud upload is required.
 ---
 
 # 22. Approvals / Publishing Page
+
+> [!note] Policy Reference
+> See comprehensive approval criteria and multi-stage sign-off rules in [[disscussios/approval_policy_design|Approval Policy Design]].
 
 Use two major tabs initially:
 
@@ -1094,7 +1277,11 @@ LinkedIn ✕
 
 This lets us test partial-failure UX before APIs exist.
 
+> [!warning] Asynchronous Queue & Failure Handling
+> Background failure recovery, retry policies, and worker queues are analyzed in [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]].
+
 ---
+
 
 # 27. Calendar
 
@@ -1249,7 +1436,11 @@ Available
 
 Later this can be backed by Google Drive, Supabase Storage, or NAS.
 
+> [!note] Storage Architecture
+> See storage tiers, quotas, and NAS/Cloud replication details in [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle & Disaster Recovery]].
+
 ---
+
 
 # 31. Mail Page
 
@@ -1467,7 +1658,11 @@ Clicking:
 
 opens a mock connection flow.
 
+> [!note] Secret Management & OAuth Architecture
+> Token refreshing, scopes, and credential isolation are detailed in [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]].
+
 ---
+
 
 # 38. Settings Page
 
@@ -1510,6 +1705,9 @@ Sessions are mock data.
 ---
 
 # 40. Notification Center
+
+> [!note] Notification Framework
+> Category definitions, mute rules, and channel routing are outlined in [[disscussios/notification_model|Notification Model]].
 
 Use the notification model already discussed.
 
@@ -1570,7 +1768,11 @@ National Day Instagram Post
 
 This allows search UX to be validated before building a real search index.
 
+> [!note] Metadata Taxonomy & Indexing
+> Entity search queries, tagging hierarchies, and filtering schemas are documented in [[disscussios/search_and_metadata|Search and Metadata]].
+
 ---
+
 
 # 42. UI States to Prototype
 
@@ -1787,7 +1989,42 @@ Older mock publication data
 
 Everything should tell one coherent story.
 
+### Saudi National Day 2026 Demo Topology
+
+```mermaid
+graph LR
+    Campaign[Campaign: Saudi National Day 2026]
+    
+    subgraph WorkItems [Work Items]
+        WI1[Main Reel - Video]
+        WI2[Poster - Design]
+        WI3[X Copy - Content]
+        WI4[Instagram Carousel - Media]
+        WI5[Event Photography - Production]
+    end
+    
+    subgraph TeamRoles [Assigned Roles]
+        R1[Mohammed: Director]
+        R2[Sara: Designer]
+        R3[Ahmed: Media Producer]
+        R4[Khalid: Content Writer]
+        R5[Publishing Officer]
+    end
+    
+    subgraph Assets [Media Assets]
+        A1[poster-v3.psd]
+        A2[poster-final.jpg]
+        A3[main-reel-v4.mp4]
+        A4[drone-shot.mov]
+    end
+    
+    Campaign --> WorkItems
+    WorkItems --> TeamRoles
+    WorkItems --> Assets
+```
+
 ---
+
 
 # 48. Use Real-Looking Arabic Content
 
@@ -1871,7 +2108,11 @@ Complex taxonomy administration
 
 These have already been discussed conceptually and can be implemented later.
 
+> [!note] Emergency Protocol Handling
+> Kill switches, urgent publishing overrides, and crisis modes are addressed in [[disscussios/emergency_workflows|Emergency Workflows]].
+
 ---
+
 
 # 51. Provisional End-to-End Demo Workflow
 
@@ -1905,7 +2146,37 @@ Activity / Analytics update visually
 
 Once real workflow discovery is complete, this flow should be revised to match actual department practice.
 
+### End-to-End Workflow Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Manager as Manager / Director
+    actor Specialist as Specialists (Writer/Designer/Producer)
+    actor Reviewer as Reviewer (Director / Asst. Director)
+    actor Publisher as Publishing Officer
+    participant System as Comms Hub Prototype
+    participant Channels as Social Channels (IG, X, LinkedIn)
+
+    Manager->>System: Create Campaign and Work Items
+    Manager->>Specialist: Assign Work Item
+    Specialist->>System: Upload Mock Assets and Copy
+    Specialist->>System: Submit for Review
+    System->>Reviewer: Notify: Pending Review
+    alt Changes Requested
+        Reviewer->>Specialist: Request Changes (Feedback Modal)
+    else Approved
+        Reviewer->>System: Approve Release
+        System->>Publisher: Move to Ready to Publish
+        Publisher->>System: Schedule / Trigger Publication
+        System->>Channels: Simulate Publishing Action
+        Channels-->>System: Return Mock Result (Success / Partial Failure)
+        System-->>Manager: Update Analytics and Feed
+    end
+```
+
 ---
+
 
 # 52. What Success Looks Like
 
@@ -1993,7 +2264,18 @@ Real integrations / publishing / storage
 
 The MVP should remain intentionally UI-first.
 
+### Development Sequence Flowchart
+
+```mermaid
+flowchart LR
+    Phase1[NOW: Skeleton + Skin<br/>UI Shell, RTL System, Mock Data] --> Phase2[NEXT: Validate Anatomy<br/>Compare Prototype vs Real Department Workflows]
+    Phase2 --> Phase3[THEN: Nervous System<br/>Database, Events, Permissions, Jobs, APIs]
+    Phase3 --> Phase4[THEN: Brain<br/>Automation, AI Orchestration, Analytics Engine]
+    Phase4 --> Phase5[THEN: Muscles<br/>Production Integrations, Cloud Storage, Publishing]
+```
+
 ---
+
 
 # 55. Relationship With Astra Workflow Discovery
 
@@ -2021,4 +2303,4 @@ And:
 
 > **The prototype should look like the future Communication Hub, but it should not pretend that its integrations, security, publishing, automation, storage, or analytics are real yet.**
 
-This document defines the MVP shell only. It is not yet the Version 1 technical specification or implementation roadmap.
+This document defines the MVP shell only. It is not yet the Version 1 technical specification or implementation roadmap. ^core-mvp-boundary
