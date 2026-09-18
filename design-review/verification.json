@@ -1,0 +1,592 @@
+{
+  "checkedAt": "2026-09-18T19:08:47.133Z",
+  "checks": [
+    {
+      "width": 1440,
+      "direction": "A",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "صباح الخير، محمد"
+    },
+    {
+      "width": 1440,
+      "direction": "A",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 1440,
+      "direction": "A",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 1440,
+      "direction": "A",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 1440,
+      "direction": "A",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 1440,
+      "direction": "A",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 1440,
+      "direction": "B",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "صباح الخير، محمد.حكاية الوطن تبدأ من هنا."
+    },
+    {
+      "width": 1440,
+      "direction": "B",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 1440,
+      "direction": "B",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 1440,
+      "direction": "B",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 1440,
+      "direction": "B",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 1440,
+      "direction": "B",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 1440,
+      "direction": "C",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "نظرة تشغيلية"
+    },
+    {
+      "width": 1440,
+      "direction": "C",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 1440,
+      "direction": "C",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 1440,
+      "direction": "C",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 1440,
+      "direction": "C",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 1440,
+      "direction": "C",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 1280,
+      "direction": "A",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "صباح الخير، محمد"
+    },
+    {
+      "width": 1280,
+      "direction": "A",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 1280,
+      "direction": "A",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 1280,
+      "direction": "A",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 1280,
+      "direction": "A",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 1280,
+      "direction": "A",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 1280,
+      "direction": "B",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "صباح الخير، محمد.حكاية الوطن تبدأ من هنا."
+    },
+    {
+      "width": 1280,
+      "direction": "B",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 1280,
+      "direction": "B",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 1280,
+      "direction": "B",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 1280,
+      "direction": "B",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 1280,
+      "direction": "B",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 1280,
+      "direction": "C",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "نظرة تشغيلية"
+    },
+    {
+      "width": 1280,
+      "direction": "C",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 1280,
+      "direction": "C",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 1280,
+      "direction": "C",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 1280,
+      "direction": "C",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 1280,
+      "direction": "C",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 900,
+      "direction": "A",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "صباح الخير، محمد"
+    },
+    {
+      "width": 900,
+      "direction": "A",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 900,
+      "direction": "A",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 900,
+      "direction": "A",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 900,
+      "direction": "A",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 900,
+      "direction": "A",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 900,
+      "direction": "B",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "صباح الخير، محمد.حكاية الوطن تبدأ من هنا."
+    },
+    {
+      "width": 900,
+      "direction": "B",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 900,
+      "direction": "B",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 900,
+      "direction": "B",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 900,
+      "direction": "B",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 900,
+      "direction": "B",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 900,
+      "direction": "C",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "نظرة تشغيلية"
+    },
+    {
+      "width": 900,
+      "direction": "C",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 900,
+      "direction": "C",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 900,
+      "direction": "C",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 900,
+      "direction": "C",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 900,
+      "direction": "C",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 390,
+      "direction": "A",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "صباح الخير، محمد"
+    },
+    {
+      "width": 390,
+      "direction": "A",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 390,
+      "direction": "A",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 390,
+      "direction": "A",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 390,
+      "direction": "A",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 390,
+      "direction": "A",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 390,
+      "direction": "B",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "صباح الخير، محمد.حكاية الوطن تبدأ من هنا."
+    },
+    {
+      "width": 390,
+      "direction": "B",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 390,
+      "direction": "B",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 390,
+      "direction": "B",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 390,
+      "direction": "B",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 390,
+      "direction": "B",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    },
+    {
+      "width": 390,
+      "direction": "C",
+      "screen": "home",
+      "overflow": false,
+      "rtl": true,
+      "heading": "نظرة تشغيلية"
+    },
+    {
+      "width": 390,
+      "direction": "C",
+      "screen": "work",
+      "overflow": false,
+      "rtl": true,
+      "heading": "العمل"
+    },
+    {
+      "width": 390,
+      "direction": "C",
+      "screen": "detail",
+      "overflow": false,
+      "rtl": true,
+      "heading": "إعداد الفيديو الرئيسي"
+    },
+    {
+      "width": 390,
+      "direction": "C",
+      "screen": "create",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مساحة الإنشاء"
+    },
+    {
+      "width": 390,
+      "direction": "C",
+      "screen": "approvals",
+      "overflow": false,
+      "rtl": true,
+      "heading": "الموافقات والنشر"
+    },
+    {
+      "width": 390,
+      "direction": "C",
+      "screen": "media",
+      "overflow": false,
+      "rtl": true,
+      "heading": "مكتبة الوسائط"
+    }
+  ],
+  "errors": [],
+  "failed": [],
+  "interactionChecks": [
+    "direction switch",
+    "screen selector",
+    "work detail navigation",
+    "phone preview",
+    "notice dialog",
+    "Escape closes dialog",
+    "mobile more menu"
+  ]
+}

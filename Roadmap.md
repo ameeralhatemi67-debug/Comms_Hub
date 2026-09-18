@@ -9,7 +9,7 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-active_version: "Version 1 MVP"
+active_version: "Version 0 UI Prototype"
 planning_horizon: "1–12 months"
 parent: "[[Comms Hub]]"
 aliases:
@@ -67,24 +67,16 @@ flowchart LR
 
 ## Delivery Horizons
 
-The high-level delivery horizons outline the path from specification to production readiness.
+The active scope is the UI Prototype MVP 0.1 in [[MVP_draft]]. Validate the prototype with department users before platform implementation. Future production work remains planned below; dates will be set after validation.
 
 ```mermaid
-gantt
-    title Communication Department Hub Delivery Horizons
-    dateFormat YYYY-MM-DD
-    axisFormat %Y-%m
-    section Architecture
-        Specifications and Documentation Foundation :done, arch1, 2026-08-18, 2026-09-18
-    section Platform Setup
-        Repository and Environment Scaffolding      :active, env1, 2026-09-19, 2026-09-26
-    section Core Development
-        Data Layer and Storage Adapter Integration  :crit, dev1, after env1, 14d
-        Work Pipeline and Approval Engine           :dev2, after dev1, 14d
-        Multi-Channel Publishing Integration        :dev3, after dev2, 14d
-    section Operational Hardening
-        Security Controls and Disaster Recovery     :ops1, after dev3, 10d
-        Pilot Testing and Production Readiness      :ops2, after ops1, 10d
+flowchart LR
+    Spec[Specification foundation] --> UI[UI Prototype MVP 0.1]
+    UI --> Validate[Department workflow validation]
+    Validate --> Platform[Platform and database foundations]
+    Platform --> Core[Work and approval engine]
+    Core --> Integrations[Publishing and storage integrations]
+    Integrations --> Hardening[Security, recovery and production pilot]
 ```
 
 > [!important] Scope and Planning Boundaries
@@ -142,7 +134,7 @@ When work items are scheduled in future planning iterations, use these standardi
 
 1. **Evidence Over Assertion:** A feature is never marked completed simply because code was written or a mock interface was rendered. A capability is verified only when its real execution path runs successfully against real or realistic test fixtures.
 2. **Recoverable Baselines:** Every significant file mutation must be preceded by a clean, recoverable baseline (Git commit or verified backup snapshot). Uncommitted work must never be silently overwritten, merged, or discarded.
-3. **Frontend as Orchestration Only:** The frontend web application is strictly an interaction and review interface. All long-running, failure-prone, or external platform interactions must execute as durable background jobs.
+3. **Prototype Boundary:** Version 0 uses local mock state only. For future production versions, long-running or external platform interactions belong in durable background jobs. This rule does not authorize workers or integrations in MVP 0.1.
 4. **Zero Data Loss:** All modifications to documentation and code must preserve existing institutional context, Arabic terminology, and domain requirements.
 
 ---
@@ -167,11 +159,51 @@ When starting active implementation on the Communication Department Hub, follow 
 
 ---
 
-## Version 1 MVP
+## Version 0: UI prototype
+
+### Checkpoint 0.1: UI Prototype MVP 0.1
+
+**State:** Active. **Authority:** [[MVP_draft]].
+**Outcome:** A runnable Arabic RTL product prototype for eight roles, using one connected Saudi National Day 2026 scenario.
+**Exit gate:** Selected design; six high-fidelity Level A pages; lighter B/C pages; role simulation; verified end-to-end mock workflow and responsive layouts. No real backend, authentication, integrations, or publishing.
+
+#### Phase 0.1.1: Scope and visual decision
+
+- [x] 0.1.1.1 Inspect specifications and reconcile UI-first scope. Evidence: repository review and this reordered roadmap, baseline commit `7e45e2b`.
+- [x] 0.1.1.2 Produce three distinct visual directions, each with Home, Work, Work detail, Create, Approvals/Publishing, and Media at desktop and mobile. Evidence: `design-review/index.html`, 36 screenshots, three desktop boards, and `design-review/verification.json` with 72 viewport checks passing. Visual boards inspected.
+- [ ] 0.1.1.3 Record the user's selected or combined direction. Explicit gate: stop before application implementation until the user chooses.
+
+#### Phase 0.1.2: Selected foundation
+
+- [ ] 0.1.2.1 Scaffold Next.js, TypeScript and Tailwind; establish selected RTL tokens, shell and responsive navigation. Evidence: start/build checks and browser navigation.
+- [ ] 0.1.2.2 Add coherent mock entities and eight-role View As simulation. Evidence: linked campaign data and visible role-specific priorities.
+
+#### Phase 0.1.3: Core workflow
+
+- [ ] 0.1.3.1 Implement Home, Work, Work detail and Create with forms, tabs, search, comments and mock review submission. Evidence: browser interaction walkthrough.
+- [ ] 0.1.3.2 Implement Approvals/Publishing, Calendar and Media Library with revision review, scheduling, previews and per-channel results. Evidence: approve/schedule/publish/partial-failure walkthrough.
+
+#### Phase 0.1.4: Supporting experiences
+
+- [ ] 0.1.4.1 Add believable Mail, Ideas, Analytics and Monitoring, plus Admin, Settings and Account shells. Evidence: page and central-action checks.
+- [ ] 0.1.4.2 Connect notifications, activity, empty/loading/error states and mock outcomes. Evidence: cross-page state checks; notification read state separate from approval state.
+
+#### Phase 0.1.5: Acceptance and handoff
+
+- [ ] 0.1.5.1 Verify 1440/1280 desktop, 768–1024 tablet and approximately 390 mobile; test central dialogs, roles and keyboard navigation. Evidence: screenshots and focused QA log.
+- [ ] 0.1.5.2 Demonstrate the full mock workflow, run build checks, verify no production services/secrets, and synchronize tracking. Evidence: acceptance record and runnable instructions.
+
+Budget control: use the stricter 60% five-hour ceiling from the request. Initial account usage was 2%; treat 60% total account usage as a conservative stop threshold. Account usage is shared, so the delta is approximate. No subagents planned for the design gate. Preserve implementation effort for one selected direction.
+
+### Checkpoint 0.2: Department validation
+
+Planned after 0.1. Compare the provisional workflow with actual department work, record corrections, then authorize the production plan. This is a separate validation gate, not backend work in this run.
+
+## Version 1 MVP (future, after prototype validation)
 
 **Goal:** Establish the foundational production release of the Communication Department Hub, delivering a reliable, secure workspace for departmental campaign planning, collaborative creation, multi-tier approval governance, and automated multi-channel publishing.
 
-**Status:** Scaffolding Baseline / Ready for Implementation
+**Status:** Planned, blocked on prototype validation. Preserve database, permissions, durable jobs, real publishing, storage, security and recovery as future work.
 
 > [!note] Checkpoints, Phases, and Tasks Definition
 > Detailed checkpoints, phases, and atomic tasks for Version 1 MVP will be defined sequentially as active development commences, adhering to the Work Hierarchy & Breakdown Standards and informed by real engineering feedback.

@@ -33,7 +33,7 @@ related:
 ## Current Objective
 
 > [!important] Current Objective
-> Transition from the completed architectural specification foundation into active codebase scaffolding and core platform implementation, establishing an auditable, reliable Communication Department Hub.
+> Build the skeleton and skin first: UI Prototype MVP 0.1, following [[MVP_draft]]. The current session stops after three visual directions for the user's design decision. Backend/platform work follows prototype validation.
 
 ---
 
@@ -55,23 +55,29 @@ The project has achieved a complete, verified architectural foundation. All 15 f
 | **Search & Arabic Taxonomy** | Specified | Full-text search with Arabic morphological normalization and GIN index integration in [[disscussios/search_and_metadata]]. |
 | **Security & Threat Defense** | Specified | NIST Zero-Trust ABAC architecture, tamper-evident hash-chained audit logging in [[disscussios/security_discussion]]. |
 | **Crisis Management & Kill-Switch**| Specified | Channel-specific and global freeze, emergency fast-track, and retrospective post-mortem in [[disscussios/emergency_workflows]]. |
-| **Codebase Implementation** | Ready for Scaffolding | Implementation begins with repository setup and environment configuration. |
+| **Codebase Implementation** | Not started | Application scaffold follows visual selection. No production backend is in scope. |
+| **Visual directions** | Produced and checked; selection pending | `design-review/` contains three directions, six screens each, and desktop/mobile screenshots. 72 viewport checks passed. |
+| **Mock workflows and role simulation** | Planned | Local client state only; not implemented or verified yet. |
 
 ---
 
 ## Active Focus
 
-The current phase is **Platform Setup & Initial Environment Scaffolding**.
-
-Detailed versioning, milestone checkpoints, and specific task breakdowns will be established as development begins.
+**Active checkpoint:** 0.1, UI Prototype MVP 0.1.
+**Active phase:** 0.1.1, scope and visual decision.
+**Current focus:** Paused at the requested design decision gate. Gallery available at `http://127.0.0.1:4173` while the local server runs, or by opening `design-review/index.html`.
+**Blockers:** No technical blocker identified. Full implementation requires the user's visual selection.
+**Recoverable baseline:** Git commit `7e45e2b`; existing untracked `.serena/` is left untouched.
+**Budget:** Starting five-hour account usage 2%; last pre-handoff check 42%, approximately 40 percentage points consumed and 18 points below the conservative 60% total threshold. Shared account figures are approximate and include other activity. No subagents used. Recheck before implementation and preserve the core workflow before secondary polish.
 
 ---
 
 ## Next Recommended Actions
 
-1. **Repository Setup & Tooling Configuration:** Initialize the production codebase repository with package management, TypeScript, linting, and formatting standards.
-2. **Database Schema & Migration Scaffolding:** Create the initial relational schema in PostgreSQL/Supabase based on the conceptual data models defined in the specification notes.
-3. **Frontend Shell Scaffolding:** Establish the Next.js application shell matching the layout, navigation drawer, and viewport specifications in [[MVP_draft]].
+1. Receive the user's A/B/C selection or combination instructions. Do not begin application implementation before that decision.
+2. After selection, establish one lightweight design system and a Next.js/TypeScript/Tailwind application shell.
+3. Implement and verify the connected local mock workflow, with Level A pages first.
+4. Validate with department users before planning database migrations or production services.
 
 ---
 

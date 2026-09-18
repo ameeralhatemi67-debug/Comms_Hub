@@ -32,6 +32,18 @@ related:
 
 ## Progress Entries
 
+### 2026-09-18 — UI-first scope aligned and three visual directions checked
+
+- **Milestone:** Checkpoint 0.1, Phase 0.1.1, tasks 0.1.1.1 and 0.1.1.2.
+- **Scope:** Read the six requested root documents; inspected relevant sections across all nine requested discussion documents. `MVP_draft.md` remains authoritative. Reordered the roadmap so prototype validation precedes platform and database work; retained future production horizons.
+- **Recoverability:** Existing tracked baseline was clean at commit `7e45e2b`. Pre-existing untracked `.serena/` was untouched. Discussion files and the authoritative MVP specification were not edited.
+- **Deliverable:** A local browser gallery in `design-review/`, with A (operations workspace), B (campaign studio), and C (compact operations desk). Each has Home, Work, Work detail, Create, Approvals/Publishing, and Media Library with a connected National Day scenario and mobile adaptation. Custom CSS artwork is illustrative, not an official national campaign identity.
+- **Verified evidence:** `node --check design-review/gallery.js` passed. HTTP server returned 200. `node design-review/verify.cjs` passed 72 page/viewport combinations at 1440, 1280, 900, and 390px, with zero JavaScript errors and zero document-width overflow. Direction switch, screen selector, Work detail navigation, phone preview, notice dialog, Escape dismissal, and mobile More menu passed. Captured 36 screenshots and inspected three six-screen desktop boards plus representative full-size desktop/mobile views. `git diff --check` passed.
+- **Correction during QA:** Initial verification selected an invisible navigation control; narrowed the test to the visible notification control and reran successfully. Aligned Instagram review state and ready-to-publish count across the sample screens.
+- **Limits:** These are visual alternatives with navigation, editable sample fields and explicit preview notices. They are not three MVP implementations. No Next.js scaffold, role behavior, working review/publishing transitions, calendar, or Level B/C pages are claimed complete. Comprehensive accessibility and MVP workflow acceptance remain future tasks.
+- **Budget/delegation:** No subagents. Opening five-hour account usage 2%; pre-handoff check 42%. Using the stricter 60% ceiling. Figures are shared-account estimates, not per-task accounting.
+- **Next action:** Wait for the user's selected/combined direction, then implement only that direction. Favor shared shell, centralized local mock state and the connected acceptance workflow; avoid more alternate-design polish.
+
 ### 2026-09-18 — Vault Architecture & Specification Foundation Complete
 
 - **Milestone Reference:** Inception & Architectural Foundation across all 15 vault documents.
