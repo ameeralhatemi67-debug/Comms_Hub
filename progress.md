@@ -105,3 +105,13 @@ When recording future implementation outcomes, follow this standardized template
 
 ^comms-hub-progress-boundary
 
+
+### 2026-09-19 — Runnable UI prototype and verified core journey
+
+- Selected A with B only for larger media canvases, recorded in DESIGN.md. Next.js/TypeScript/Tailwind app added with shared client state and reusable shell/components.
+- Core screens and lighter supporting shells implemented. One Luna subagent handled supporting.tsx; primary agent integrated and verified.
+- Evidence: production build passes; typecheck passes after Next applied its standard skipLibCheck setting; npm test passes 3 domain tests. qa/verification.json records a passing browser acceptance journey and 60 route/viewport checks, zero captured JavaScript errors and zero horizontal document overflow.
+- Browser journey: create, request revision, edit, resubmit, approve revision 2, schedule, calendar, partial publish and failed-channel retry. Admin separation also checked. Initial browser checks exposed selector and navigation-timing issues, corrected in QA; composer received an explicit accessible textarea label.
+- Screenshots saved locally under ignored qa/artifacts. These are not a completed visual/accessibility audit.
+- Limitations and next actions are enumerated in Status.md. Media upload/playback, retained historical release snapshots, full persona/supporting-action QA and broad department-validation signoff remain incomplete. No production services were added.
+- Usage: started 53%; last pre-reset reading 89%; window reset during work. Reduced finishing instruction measured 2% then 12%, approximately 10 further points. Exact full-run delta unavailable. Work stopped to preserve revised limit.

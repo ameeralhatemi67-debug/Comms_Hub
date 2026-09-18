@@ -1,0 +1,307 @@
+{
+  "journey": "PASS: create > revision request > edit > resubmit > approve > schedule > calendar > partial publish > retry; Admin separation",
+  "views": [
+    {
+      "width": 1440,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/work",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/work/CH-241",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/create",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/approvals",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/calendar",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/media",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/media/poster",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/mail",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/ideas",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/analytics",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/monitoring",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/settings",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "route": "/admin",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/work",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/work/CH-241",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/create",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/approvals",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/calendar",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/media",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/media/poster",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/mail",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/ideas",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/analytics",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/monitoring",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/settings",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 1280,
+      "route": "/admin",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/work",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/work/CH-241",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/create",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/approvals",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/calendar",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/media",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/media/poster",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/mail",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/ideas",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/analytics",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/monitoring",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/settings",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 900,
+      "route": "/admin",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/work",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/work/CH-241",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/create",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/approvals",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/calendar",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/media",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/media/poster",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/mail",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/ideas",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/analytics",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/monitoring",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/settings",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/account",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/admin",
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "failed": []
+}

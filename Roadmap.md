@@ -171,27 +171,27 @@ When starting active implementation on the Communication Department Hub, follow 
 
 - [x] 0.1.1.1 Inspect specifications and reconcile UI-first scope. Evidence: repository review and this reordered roadmap, baseline commit `7e45e2b`.
 - [x] 0.1.1.2 Produce three distinct visual directions, each with Home, Work, Work detail, Create, Approvals/Publishing, and Media at desktop and mobile. Evidence: `design-review/index.html`, 36 screenshots, three desktop boards, and `design-review/verification.json` with 72 viewport checks passing. Visual boards inspected.
-- [ ] 0.1.1.3 Record the user's selected or combined direction. Explicit gate: stop before application implementation until the user chooses.
+- [x] 0.1.1.3 Record the user's selected or combined direction. User selected A on 2026-09-19; B contributes only larger media previews. Exact boundary recorded in `DESIGN.md`.
 
 #### Phase 0.1.2: Selected foundation
 
-- [ ] 0.1.2.1 Scaffold Next.js, TypeScript and Tailwind; establish selected RTL tokens, shell and responsive navigation. Evidence: start/build checks and browser navigation.
-- [ ] 0.1.2.2 Add coherent mock entities and eight-role View As simulation. Evidence: linked campaign data and visible role-specific priorities.
+- [x] 0.1.2.1 Scaffold Next.js, TypeScript and Tailwind; establish selected RTL tokens, shell and responsive navigation. Evidence: start/build checks and browser navigation.
+- [/] 0.1.2.2 Add coherent mock entities and eight-role View As simulation. Evidence: linked campaign data and visible role-specific priorities.
 
 #### Phase 0.1.3: Core workflow
 
-- [ ] 0.1.3.1 Implement Home, Work, Work detail and Create with forms, tabs, search, comments and mock review submission. Evidence: browser interaction walkthrough.
-- [ ] 0.1.3.2 Implement Approvals/Publishing, Calendar and Media Library with revision review, scheduling, previews and per-channel results. Evidence: approve/schedule/publish/partial-failure walkthrough.
+- [/] 0.1.3.1 Implement Home, Work, Work detail and Create with forms, tabs, search, comments and mock review submission. Evidence: browser interaction walkthrough.
+- [/] 0.1.3.2 Implement Approvals/Publishing, Calendar and Media Library with revision review, scheduling, previews and per-channel results. Evidence: approve/schedule/publish/partial-failure walkthrough.
 
 #### Phase 0.1.4: Supporting experiences
 
-- [ ] 0.1.4.1 Add believable Mail, Ideas, Analytics and Monitoring, plus Admin, Settings and Account shells. Evidence: page and central-action checks.
-- [ ] 0.1.4.2 Connect notifications, activity, empty/loading/error states and mock outcomes. Evidence: cross-page state checks; notification read state separate from approval state.
+- [/] 0.1.4.1 Add believable Mail, Ideas, Analytics and Monitoring, plus Admin, Settings and Account shells. Evidence: page and central-action checks.
+- [/] 0.1.4.2 Connect notifications, activity, empty/loading/error states and mock outcomes. Evidence: cross-page state checks; notification read state separate from approval state.
 
 #### Phase 0.1.5: Acceptance and handoff
 
-- [ ] 0.1.5.1 Verify 1440/1280 desktop, 768–1024 tablet and approximately 390 mobile; test central dialogs, roles and keyboard navigation. Evidence: screenshots and focused QA log.
-- [ ] 0.1.5.2 Demonstrate the full mock workflow, run build checks, verify no production services/secrets, and synchronize tracking. Evidence: acceptance record and runnable instructions.
+- [/] 0.1.5.1 Verify 1440/1280 desktop, 768–1024 tablet and approximately 390 mobile; test central dialogs, roles and keyboard navigation. Evidence: screenshots and focused QA log.
+- [/] 0.1.5.2 Demonstrate the full mock workflow, run build checks, verify no production services/secrets, and synchronize tracking. Evidence: acceptance record and runnable instructions.
 
 Budget control: use the stricter 60% five-hour ceiling from the request. Initial account usage was 2%; treat 60% total account usage as a conservative stop threshold. Account usage is shared, so the delta is approximate. No subagents planned for the design gate. Preserve implementation effort for one selected direction.
 
@@ -211,3 +211,8 @@ Planned after 0.1. Compare the provisional workflow with actual department work,
 ---
 
 ^comms-hub-roadmap-boundary
+
+## 2026-09-19 implementation evidence
+
+Design gate complete. Scaffold build/typecheck pass. Core acceptance journey passes in browser, including revision, approval, schedule, calendar, partial publish and retry. 60 route/viewport checks pass. Remaining task checkboxes stay partial because all eight role experiences, every supporting action, complete keyboard/accessibility review and visual QA are not fully verified. See qa/verification.json and Status.md. Earlier 60% budget wording applies to the design session only; implementation used the subsequent user limits.
+

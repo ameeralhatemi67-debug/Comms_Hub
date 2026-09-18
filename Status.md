@@ -25,70 +25,33 @@ related:
 
 # Communication Department Hub — Current Status
 
-> [!note] Update as you work
-> This document records the live operational status, current baseline, and immediate next steps for the Communication Department Hub. Update this record at the conclusion of every active work session.
+Updated 2026-09-19. Active checkpoint 0.1, UI Prototype MVP 0.1. Active phase 0.1.5, bounded verification and handoff. Implementation paused at the user's usage limit.
 
----
+Design: Direction A throughout. B contributes only larger media previews. See DESIGN.md. No horizontal primary navigation or editorial global layout.
 
-## Current Objective
+## Verified capability
 
-> [!important] Current Objective
-> Build the skeleton and skin first: UI Prototype MVP 0.1, following [[MVP_draft]]. The current session stops after three visual directions for the user's design decision. Backend/platform work follows prototype validation.
+- Next.js 16.3.5, React 19.3.0, TypeScript and Tailwind 4.3.3 application builds and starts locally at http://127.0.0.1:3000.
+- Shared local campaign/work/notification state, eight defined roles, separate review/publishing/Admin capabilities.
+- Browser acceptance passes: writer creates, reviewer requests changes, writer edits/resubmits, assistant approves exact revision, publisher schedules, calendar shows it, simulated partial publication succeeds after failed-channel retry.
+- 60 route/viewport combinations at 1440/1280/900/390 pass overflow checks; no captured JavaScript errors. Mobile menu and dialog Escape checked.
+- Three domain tests pass. Approved edits invalidate approval/schedule; notification read does not approve; Admin cannot approve/publish.
 
----
+## Remaining work and limitations
 
-## Current Operational Baseline
+- All eight personas exist, but browser journey explicitly exercised writer, director, assistant, publisher and Admin only. Complete designer/producer/member persona checks.
+- Media contains fixed illustrative assets and selectable versions. No local upload or playable video yet. Historical release content snapshots are not retained after edits; activity and revision numbers remain.
+- Calendar supports month/agenda; no week/day view or date-level creation. Mobile month view lists dates with events.
+- Supporting pages exist with local interactions, but their central actions need browser verification. Settings provide a local preview, not app-wide preferences. Admin shell is minimal.
+- No comprehensive visual, contrast, or keyboard audit completed. Automated overflow checks do not establish visual polish or full accessibility.
+- State resets on refresh. No production authentication, authorization, database, integrations, workers, storage or real publishing.
 
-The project has achieved a complete, verified architectural foundation. All 15 foundational documents across the vault have been unified under Obsidian standards with zero data loss, zero added emojis, and 95 native Mermaid diagrams modeling domain processes, state machines, and topologies.
+## Next action
 
-### Recorded Foundation & Capability Condition
+Complete Phase 0.1.5 acceptance review first: visually inspect saved QA screenshots, verify remaining roles and supporting actions, then address release-history retention and media upload if required before department validation. Suitable for a supervised core-flow demonstration; not yet signed off for broad department validation.
 
-| Domain Area | Current Baseline Status | Notes & Specifications |
-|---|---|---|
-| **Product Purpose & UI Shell** | Specified | Complete 56-section functional UI specification and component layout in [[MVP_draft]]. |
-| **Organizational Roles & Access** | Specified | 8 confirmed roles with clear separation between departmental rank and system authority in [[disscussios/organizational_role_discussion]]. |
-| **Approval & Release Governance** | Specified | Multi-stage policy routing, strict version-binding, delegation, and emergency override in [[disscussios/approval_policy_design]]. |
-| **Storage & Disaster Recovery** | Specified | 3-2-1 hybrid cloud/NAS architecture, SHA-256 checksums, and Google Workspace bridge in [[disscussios/storage_lifecycle_disaster_recovery]]. |
-| **Background Execution & Queues** | Specified | Redis/BullMQ worker queues, failure classification, exponential backoff, and idempotency in [[disscussios/failure_handling_background_jobs]]. |
-| **Secrets & Connected Accounts** | Specified | AES-GCM-256 envelope encryption, OAuth 2.0 PKCE, and automated token rotation in [[disscussios/connected_account_secrets_management]]. |
-| **Attention & Notifications** | Specified | Three-tier attention architecture (Inbox, Attention, Notifications) with quiet-hours filtering in [[disscussios/notification_model]]. |
-| **Search & Arabic Taxonomy** | Specified | Full-text search with Arabic morphological normalization and GIN index integration in [[disscussios/search_and_metadata]]. |
-| **Security & Threat Defense** | Specified | NIST Zero-Trust ABAC architecture, tamper-evident hash-chained audit logging in [[disscussios/security_discussion]]. |
-| **Crisis Management & Kill-Switch**| Specified | Channel-specific and global freeze, emergency fast-track, and retrospective post-mortem in [[disscussios/emergency_workflows]]. |
-| **Codebase Implementation** | Not started | Application scaffold follows visual selection. No production backend is in scope. |
-| **Visual directions** | Produced and checked; selection pending | `design-review/` contains three directions, six screens each, and desktop/mobile screenshots. 72 viewport checks passed. |
-| **Mock workflows and role simulation** | Planned | Local client state only; not implemented or verified yet. |
+## Usage and recoverability
 
----
+Implementation started at 53%. Last reading before the five-hour reset was 89%; exact reset-boundary consumption is unavailable. At the user's reduced finishing instruction the new window read 2%; final pre-handoff reading is 12%, approximately 10 additional points, below the revised 12-point maximum but above the preferred five. Total run delta cannot be accurately computed across the reset. No more feature work is authorized in this session.
 
-## Active Focus
-
-**Active checkpoint:** 0.1, UI Prototype MVP 0.1.
-**Active phase:** 0.1.1, scope and visual decision.
-**Current focus:** Paused at the requested design decision gate. Gallery available at `http://127.0.0.1:4173` while the local server runs, or by opening `design-review/index.html`.
-**Blockers:** No technical blocker identified. Full implementation requires the user's visual selection.
-**Recoverable baseline:** Git commit `7e45e2b`; existing untracked `.serena/` is left untouched.
-**Budget:** Starting five-hour account usage 2%; final handoff check 48%, approximately 46 percentage points consumed and 12 points below the conservative 60% total threshold. Shared account figures are approximate and include other activity. No subagents used. Recheck before implementation and preserve the core workflow before secondary polish.
-
----
-
-## Next Recommended Actions
-
-1. Receive the user's A/B/C selection or combination instructions. Do not begin application implementation before that decision.
-2. After selection, establish one lightweight design system and a Next.js/TypeScript/Tailwind application shell.
-3. Implement and verify the connected local mock workflow, with Level A pages first.
-4. Validate with department users before planning database migrations or production services.
-
----
-
-## Status Update Rules
-
-- Update this document at the end of every active work session.
-- Keep the capability condition table truthful: do not mark items as implemented or operational until backed by executable code and passing tests.
-- Record dated outcomes and verification evidence in [[progress]].
-- Keep future milestone directions and horizons aligned with [[Roadmap]].
-
----
-
-^comms-hub-status-boundary
-
+One Luna subagent implemented and corrected supporting-page shells. Main agent owned domain, core UI and verification. Changes saved as a local implementation checkpoint; no remote push.

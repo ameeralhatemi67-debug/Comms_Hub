@@ -1,0 +1,12 @@
+'use client';
+import {useEffect,useRef,type ReactNode} from 'react';
+import {Play,Image as ImageIcon} from 'lucide-react';
+import {assets,statusLabels,type Status} from '@/lib/domain';
+export function Title({title,sub,children}:{title:string;sub?:string;children?:ReactNode}){return <header className="page-heading"><div><span className="eyebrow">مركز الاتصال المؤسسي</span><h1>{title}</h1>{sub&&<p>{sub}</p>}</div><div className="actions">{children}</div></header>}
+export function Panel({title,children,className=''}:{title?:string;children:ReactNode;className?:string}){return <section className={`panel ${className}`}>{title&&<h2>{title}</h2>}{children}</section>}
+export function StatusChip({status}:{status:Status}){return <span className={`chip status-${status}`}>{statusLabels[status]}</span>}
+export function Empty({children}:{children:ReactNode}){return <div className="empty"><ImageIcon/><h3>لا توجد نتائج هنا</h3><p>{children}</p></div>}
+export function MediaPreview({assetId='poster',version=5,large=false}:{assetId?:string;version?:number;large?:boolean}){const a=assets.find(x=>x.id===assetId)||assets[0];return <div className={`media-preview ${a.kind} ${large?'media-large':''}`} role="img" aria-label={`${a.title}، الإصدار ${version}، رسم توضيحي تجريبي`}><div className="art-brand"><span>الاتصال المؤسسي</span><span>2026 / v{version}</span></div><div className="art-lines"/><div className="art-copy"><span>23 سبتمبر · اليوم الوطني السعودي</span><strong>{a.kind==='video'?'حكاية وطن':a.kind==='raw'?'من الميدان':'وطنٌ نعتزّ به'}</strong><p>نحتفي بمنجزاتنا، ونصنع مستقبلنا معاً.</p></div><div className="art-base"><span>تصوّر تجريبي · ليس هوية رسمية</span><b>96</b></div>{a.kind==='video'&&<Play className="play"/>}</div>}
+export function Modal({title,children,onClose}:{title:string;children:ReactNode;onClose:()=>void}){const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{const dialog=ref.current;dialog?.showModal();return()=>dialog?.close()},[]);return <dialog ref={ref} onCancel={onClose} onClick={e=>{if(e.target===ref.current)onClose()}} aria-label={title}><div className="between"><h2>{title}</h2><button onClick={onClose} aria-label="إغلاق">×</button></div>{children}</dialog>}
+export function Tabs({items,value,onChange}:{items:{id:string;label:string}[];value:string;onChange:(s:string)=>void}){return <div className="tabs" role="group" aria-label="عرض المحتوى">{items.map(t=><button type="button" key={t.id} aria-pressed={value===t.id} className={value===t.id?'active':''} onClick={()=>onChange(t.id)}>{t.label}</button>)}</div>}
+
