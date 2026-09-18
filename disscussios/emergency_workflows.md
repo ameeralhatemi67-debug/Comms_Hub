@@ -1,3 +1,29 @@
+---
+type: synthesis
+tags:
+  - comms-hub
+  - comms-hub/discussions
+  - comms-hub/emergency
+  - comms-hub/crisis-management
+  - comms-hub/kill-switch
+  - comms-hub/governance
+  - type/specification-foundation
+  - stage/architecture-design
+  - status/active
+created: 2026-08-18
+updated: 2026-09-18
+status: active
+parent: "[[Comms Hub]]"
+aliases:
+  - Emergency Workflows
+  - Crisis Governance and Emergency Controls
+  - مسارات العمل في حالات الطوارئ
+---
+
+[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/security_discussion|Security Architecture]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]] | [[disscussios/approval_policy_design|Approval Policy Design]]
+
+---
+
 # Emergency Workflows — Communication Department Hub
 
 > **Status: Discussion record — not final emergency-response specification**
@@ -5,6 +31,101 @@
 > This document preserves the current discussion about urgent work, emergency incidents, break-glass permissions, containment, recovery, degraded modes, emergency publishing, security incidents, system outages, and continuity.
 >
 > The concepts below are architectural directions only. Exact emergency permissions, severity levels, escalation rules, incident roles, continuity procedures, and recovery behavior are still under discussion.
+
+---
+
+---
+
+## Structure Tree & Document Map
+
+- [[#Emergency Workflows — Communication Department Hub|Overview & Governance Scope]]
+- **Part I: Crisis Governance, Incident Classification & Severity Matrix**
+  - [[#1. Urgent and Emergency Are Different|1. Urgent and Emergency Are Different]]
+  - [[#2. Emergency Categories|2. Emergency Categories]]
+  - [[#3. Incident as a First-Class Object|3. Incident as a First-Class Object]]
+  - [[#4. Incident Severity|4. Incident Severity]]
+  - [[#5. Report vs Declare|5. Report vs Declare]]
+  - [[#6. Emergency Powers Must Be Scoped|6. Emergency Powers Must Be Scoped]]
+- **Part II: Break-Glass Authorization & Emergency Publishing Protocols**
+  - [[#7. Break-Glass Permissions|7. Break-Glass Permissions]]
+  - [[#8. Step-Up Authentication|8. Step-Up Authentication]]
+  - [[#9. Emergency Release Still Uses an Immutable Version|9. Emergency Release Still Uses an Immutable Version]]
+  - [[#10. Record What Was Bypassed|10. Record What Was Bypassed]]
+  - [[#11. Mandatory Follow-Up Review|11. Mandatory Follow-Up Review]]
+  - [[#12. Emergency Correction Workflow|12. Emergency Correction Workflow]]
+  - [[#13. Cross-Platform Incident Control|13. Cross-Platform Incident Control]]
+  - [[#14. Preserve Incident Evidence|14. Preserve Incident Evidence]]
+- **Part III: Security Containment, Emergency Control Panel & System Operating Modes**
+  - [[#15. Security Emergency Workflow|15. Security Emergency Workflow]]
+  - [[#16. Containment vs Recovery|16. Containment vs Recovery]]
+    - [[#Containment|Containment]]
+    - [[#Recovery|Recovery]]
+  - [[#17. Emergency Control Panel|17. Emergency Control Panel]]
+  - [[#18. Prefer Pause Over Delete|18. Prefer Pause Over Delete]]
+  - [[#19. System Operating Modes|19. System Operating Modes]]
+  - [[#20. Read-Only Mode|20. Read-Only Mode]]
+- **Part IV: Business Continuity, Degraded Operations & Direct Access**
+  - [[#21. Hub-Outage Continuity|21. Hub-Outage Continuity]]
+  - [[#22. Direct Access Must Remain Available|22. Direct Access Must Remain Available]]
+  - [[#23. Reconcile Manual Emergency Actions|23. Reconcile Manual Emergency Actions]]
+  - [[#24. Provider Outage = Degraded Integration, Not Whole-System Emergency|24. Provider Outage = Degraded Integration, Not Whole-System Emergency]]
+  - [[#25. Publication Consistency Policy|25. Publication Consistency Policy]]
+  - [[#26. Pre-Approved Emergency Templates|26. Pre-Approved Emergency Templates]]
+  - [[#27. Emergency Contact Groups|27. Emergency Contact Groups]]
+- **Part V: Incident Leadership, Priority Scheduling & Lifecycle Governance**
+  - [[#28. Incident Leadership|28. Incident Leadership]]
+  - [[#29. Incident Roles Are Temporary|29. Incident Roles Are Temporary]]
+  - [[#30. Emergency Jobs Receive Priority|30. Emergency Jobs Receive Priority]]
+  - [[#31. Emergency Mode Does Not Remove Core Safety|31. Emergency Mode Does Not Remove Core Safety]]
+  - [[#32. Emergency Permission Model|32. Emergency Permission Model]]
+  - [[#33. Incident Lifecycle|33. Incident Lifecycle]]
+  - [[#34. Resolved vs Closed|34. Resolved vs Closed]]
+  - [[#35. Post-Incident Review|35. Post-Incident Review]]
+  - [[#36. Incident Timeline|36. Incident Timeline]]
+- **Part VI: Infrastructure Incidents: Secrets, Sessions, Storage & Database Failures**
+  - [[#37. Incident Coordinates Existing Systems|37. Incident Coordinates Existing Systems]]
+  - [[#38. Preserve Security Evidence|38. Preserve Security Evidence]]
+  - [[#39. Account Compromise Workflow|39. Account Compromise Workflow]]
+  - [[#40. Revoke User Sessions vs Revoke All Sessions|40. Revoke User Sessions vs Revoke All Sessions]]
+  - [[#41. NAS/Ransomware Incident|41. NAS/Ransomware Incident]]
+  - [[#42. NAS Failure Should Degrade, Not Necessarily Stop, the Hub|42. NAS Failure Should Degrade, Not Necessarily Stop, the Hub]]
+  - [[#43. Database Emergency|43. Database Emergency]]
+  - [[#44. Bad Deployment Rollback|44. Bad Deployment Rollback]]
+  - [[#45. Maintenance Is Not an Incident|45. Maintenance Is Not an Incident]]
+- **Part VII: Out-of-Band Runbooks, Mobile Controls, UX Safety & Emergency Drills**
+  - [[#46. Out-of-Band Contact Tree|46. Out-of-Band Contact Tree]]
+  - [[#47. Emergency Documentation Must Exist Outside the Hub|47. Emergency Documentation Must Exist Outside the Hub]]
+  - [[#48. Mobile Emergency Controls|48. Mobile Emergency Controls]]
+  - [[#49. Emergency UX Must Be Clear|49. Emergency UX Must Be Clear]]
+  - [[#50. Confirmation Must Explain Consequences|50. Confirmation Must Explain Consequences]]
+  - [[#51. Emergency Templates Need Lifecycle Too|51. Emergency Templates Need Lifecycle Too]]
+  - [[#52. Drill / Simulation Mode|52. Drill / Simulation Mode]]
+  - [[#53. Emergency Drills|53. Emergency Drills]]
+- **Part VIII: AI Incident Assistance, Alert Fan-Out, Escalation & Crisis Communications**
+  - [[#54. AI During Emergencies|54. AI During Emergencies]]
+  - [[#55. AI Incident Assistant|55. AI Incident Assistant]]
+  - [[#56. Critical Incidents May Need Multiple Notification Channels|56. Critical Incidents May Need Multiple Notification Channels]]
+  - [[#57. Group Incident Notifications|57. Group Incident Notifications]]
+  - [[#58. Needs Attention Can Escalate Into an Incident|58. Needs Attention Can Escalate Into an Incident]]
+  - [[#59. Incidents Create Action Items|59. Incidents Create Action Items]]
+  - [[#60. Incident Sensitivity|60. Incident Sensitivity]]
+  - [[#61. Public Crisis Communication Remains Human-Led|61. Public Crisis Communication Remains Human-Led]]
+  - [[#62. Resilience Metrics|62. Resilience Metrics]]
+  - [[#63. Recurring Incidents Should Produce Improvement Work|63. Recurring Incidents Should Produce Improvement Work]]
+- **Part IX: State Durability, Worker Execution Gates & Safe Resumption Workflows**
+  - [[#64. Emergency State Must Be Durable|64. Emergency State Must Be Durable]]
+  - [[#65. Jobs Must Check Emergency State Before Execution|65. Jobs Must Check Emergency State Before Execution]]
+  - [[#66. Emergency Policy Overrides Automation|66. Emergency Policy Overrides Automation]]
+  - [[#67. Resuming Must Not Blindly Release Backlog|67. Resuming Must Not Blindly Release Backlog]]
+  - [[#68. Resume Is a Workflow|68. Resume Is a Workflow]]
+  - [[#69. Active Emergency Controls Must Stay Visible|69. Active Emergency Controls Must Stay Visible]]
+- **Part X: Architectural Synthesis, Foundational Principles & Open Decisions**
+  - [[#70. Conceptual Emergency Architecture|70. Conceptual Emergency Architecture]]
+  - [[#71. Recommended Early Foundations|71. Recommended Early Foundations]]
+  - [[#72. Core Principle|72. Core Principle]]
+  - [[#73. Additional Topic Identified|73. Additional Topic Identified]]
+  - [[#74. Still Unresolved|74. Still Unresolved]]
+- [[#External Architectural & Standards References|External Architectural & Standards References]]
 
 ---
 
@@ -34,6 +155,10 @@ Core principle:
 > **Bypass bureaucracy, not protection.**
 
 ---
+> [!important] Governance Principle: Bypass Bureaucracy, Not Protection
+> Urgency accelerates priority queues and escalates notification timeouts without skipping verification steps. In contrast, an Emergency activates specialized break-glass controls with dual-authorization and strict retrospective audit trails. Refer to [[disscussios/approval_policy_design#36. Emergency Override|Approval Policy - Emergency Override]] for granular policy rules.
+
+---
 
 # 2. Emergency Categories
 
@@ -51,6 +176,8 @@ Possible categories include:
 | Business-continuity emergency | Office internet/power unavailable |
 
 Different incidents need different controls.
+
+---
 
 ---
 
@@ -106,6 +233,8 @@ recovery
 
 ---
 
+---
+
 # 4. Incident Severity
 
 Conceptual levels:
@@ -132,6 +261,53 @@ emergency controls
 escalation
 incident leadership
 ```
+
+---
+```mermaid
+flowchart TD
+    subgraph DetectionPhase["Phase 1: Detection and Reporting"]
+        D1["Anomaly Detected or Staff Report Submitted"] --> D2{"Initial Triage: Incident Qualification"}
+        D2 -->|Below Incident Threshold| D3["Standard Operations Ticket"]
+        D2 -->|Qualifies as Incident| D4["Formal Severity Classification"]
+    end
+
+    subgraph EscalationMatrix["Phase 2: Escalation and Declaration"]
+        D4 --> S4["SEV-4: Minor Degradation<br/>Notification: Tech Lead"]
+        D4 --> S3["SEV-3: Operational Disruption<br/>Notification: Comms Manager"]
+        D4 --> S2["SEV-2: Major Risk / Multi-Channel<br/>Notification: Director + Security Lead"]
+        D4 --> S1["SEV-1: Critical Security / Outage<br/>Notification: Executive Team + All Leads"]
+        
+        S4 --> DEC["Formal Incident Declaration<br/>Role: Incident Lead Assigned"]
+        S3 --> DEC
+        S2 --> DEC
+        S1 --> DEC
+    end
+
+    subgraph ContainmentPhase["Phase 3: Containment and Lockdown"]
+        DEC --> C1{"Containment Action Required?"}
+        C1 -->|Account Compromise| C2["Channel Isolation and Token Revocation"]
+        C1 -->|Erroneous Publication| C3["Emergency Retraction and Pause Queue"]
+        C1 -->|System Instability| C4["Global Publishing Kill-Switch Activated"]
+    end
+
+    subgraph ResolutionPhase["Phase 4: Response and Eradication"]
+        C2 --> R1["Mitigation Workflows Executed"]
+        C3 --> R1
+        C4 --> R1
+        R1 --> R2["Verification and Health Clearance"]
+    end
+
+    subgraph RetrospectivePhase["Phase 5: Post-Mortem and Closure"]
+        R2 --> P1["Incident Status: RESOLVED<br/>Immediate Threat Eradicated"]
+        P1 --> P2["Controlled Staggered Unfreezing"]
+        P2 --> P3["Retrospective Post-Mortem Review"]
+        P3 --> P4["Action Items Logged and Completed"]
+        P4 --> P5["Incident Status: CLOSED"]
+    end
+```
+
+> [!note] Severity Alignment Matrix
+> Severity dictates notification fan-out, incident lead selection, and authorization scope. Critical SEV-1 incidents automatically broadcast across out-of-band channels and require executive sign-off before unfreezing.
 
 ---
 
@@ -161,6 +337,8 @@ Then a Manager/Admin with `incident.declare` can formally activate emergency beh
 
 ---
 
+---
+
 # 6. Emergency Powers Must Be Scoped
 
 If Instagram is compromised, relevant controls may include:
@@ -180,6 +358,29 @@ Incident Type
       ↓
 Allowed Emergency Controls
 ```
+
+---
+```mermaid
+flowchart LR
+    subgraph IncidentTrigger["Incident Declaration Scope"]
+        TR["Incident Type & Blast Radius"] --> EVAL{"Evaluate Incident Scope"}
+    end
+
+    subgraph ChannelIsolation["Scope A: Channel-Specific Isolation"]
+        EVAL -->|Single Account Compromised| CS["Targeted Channel Freeze"]
+        CS --> CS_ACT["Revoke Instagram OAuth Token<br/>Pause Instagram Dispatch Queue<br/>Lock Instagram Content Packages"]
+        CS_ACT --> CS_SAFE["Unaffected Channels Continue<br/>(LinkedIn, X, Web CMS Operational)"]
+    end
+
+    subgraph GlobalLockdown["Scope B: Global System Lockdown"]
+        EVAL -->|Systemic Outage / Broad Attack| GL["Global Emergency Freeze"]
+        GL --> GL_ACT["Halt All Background Schedulers<br/>Suspend All Outbound Social Adapters<br/>Enforce Read-Only Mode Vault-Wide"]
+        GL_ACT --> GL_SILENCE["Complete Platform Silence<br/>(Zero Outbound Traffic Allowed)"]
+    end
+```
+
+> [!warning] Blast Radius Isolation
+> Emergency authority is strictly bounded by incident classification. A localized compromise on a single social channel must never unlock system-wide administrative controls or affect independent channels.
 
 ---
 
@@ -203,6 +404,10 @@ reason-required
 ```
 
 and not part of everyday workflow.
+
+---
+> [!caution] Break-Glass Control Boundary
+> Break-glass permissions (`release.emergency`, `security.emergency_revoke`, `system.emergency_pause`) bypass standard approval matrices but require cryptographic authentication, explicit justification, and immutable event logging. Configure roles via [[MVP_draft#38. Settings Page|MVP Settings Page]] and [[disscussios/approval_policy_design#36. Emergency Override|Approval Policy - Emergency Override]].
 
 ---
 
@@ -241,6 +446,47 @@ Correction to incorrect public information
 ```
 
 ---
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Operator as Emergency Operator
+    participant UI as Comms Hub Web / Mobile
+    participant Auth as Auth & Session Service
+    participant Policy as Policy Engine
+    actor Witness as Approver / Witness Lead
+    participant Audit as Immutable Audit Log
+    participant Worker as Background Dispatcher
+    participant External as Social Media APIs
+
+    Operator->>UI: Select Emergency Release Package
+    UI->>Policy: Evaluate Permission: release.emergency
+    Policy-->>UI: Require Step-Up Authentication & Justification
+    
+    UI->>Operator: Prompt: Enter Mandatory Business Reason & MFA Code
+    Operator->>UI: Submit Reason ("Urgent correction of misstatement") + TOTP
+    UI->>Auth: Verify MFA TOTP Token
+    Auth-->>UI: MFA Verification Confirmed
+    
+    UI->>Policy: Check Dual-Key Multi-Sign Policy
+    Policy-->>UI: Dual-Key Required: Request Witness Sign-Off
+    
+    UI->>Witness: Push Emergency Sign-Off Request with Immutable Diff
+    Witness->>UI: Review Immutable Content Package & Counter-Sign (MFA)
+    
+    UI->>Audit: Append Break-Glass Override Event (Dual Signatures, Hash, Reason)
+    Audit-->>UI: Audit Confirmation (Hash Receipt)
+    
+    UI->>Worker: Enqueue Emergency Job (Priority: CRITICAL)
+    Worker->>External: Dispatch Content Package to Social Channels
+    External-->>Worker: HTTP 201 Created / Published
+    Worker->>UI: Broadcast Emergency Release Completed
+    UI->>Policy: Open Mandatory Post-Incident Review Ticket
+```
+
+> [!important] Step-Up Multi-Factor and Dual-Key Authorization
+> Single-operator emergency releases require dual-key counter-authorization from a designated incident witness or manager whenever external broadcast impact exceeds SEV-2 thresholds.
+
+---
 
 # 9. Emergency Release Still Uses an Immutable Version
 
@@ -268,6 +514,10 @@ Correction to inaccurate announcement
 Publish exactly that package.
 
 ---
+> [!note] Immutability Under Emergency Conditions
+> Even under extreme time pressure, releases publish an immutable cryptographic bundle (pinned text revision, media asset hashes, target account IDs). Unfrozen drafts or dirty editor buffers are rejected by [[MVP_draft#25. Publishing Tab|MVP Publishing Preflight Tab]].
+
+---
 
 # 10. Record What Was Bypassed
 
@@ -290,6 +540,10 @@ Time:
 Required normal policy:
 Manager → Director
 ```
+
+---
+> [!important] Non-Repudiation Audit Invariant
+> Emergency releases must explicitly document the bypassed approval stages, recording the operator identity, witness co-signature, justification, and timestamp in [[disscussios/security_discussion#30. Tamper-Evident Immutable Audit Logging Pipeline|Security Audit Logging]].
 
 ---
 
@@ -316,6 +570,8 @@ Any correction required
 ```
 
 This prevents emergency mode becoming a permanent shortcut.
+
+---
 
 ---
 
@@ -350,6 +606,41 @@ Pause related scheduled content
 ```
 
 ---
+```mermaid
+flowchart TD
+    subgraph RetractionInitiation["Retraction Trigger"]
+        T1["Operator Initiates Emergency Retraction"] --> T2["Select Target Publication Package"]
+        T2 --> T3{"Verify Authority:<br/>release.emergency_retract"}
+        T3 -->|Authorized| T4["Capture Content Evidence Snapshot<br/>(Hashes, External Post IDs, Metrics)"]
+    end
+
+    subgraph ParallelTakeDown["Parallel API Dispatcher"]
+        T4 --> D1["Parallel Retraction Dispatcher Engine"]
+        D1 --> P1["X / Twitter Adapter<br/>DELETE /2/tweets/:id"]
+        D1 --> P2["Instagram Adapter<br/>DELETE /{media-id}"]
+        D1 --> P3["LinkedIn Adapter<br/>DELETE /rest/posts/:id"]
+        D1 --> P4["Web CMS Adapter<br/>POST /api/unpublish"]
+    end
+
+    subgraph ResponseAggregation["Status Reconciliation & Audit"]
+        P1 --> AGG["Response Aggregator"]
+        P2 --> AGG
+        P3 --> AGG
+        P4 --> AGG
+        
+        AGG --> R_STATUS{"All Retractions Succeeded?"}
+        R_STATUS -->|All Confirmed| S_CONF["Status: RETRACTED_CONFIRMED"]
+        R_STATUS -->|Partial / Failed| S_FAIL["Status: PARTIAL_FAILURE<br/>Trigger Out-of-Band Direct Admin Alert"]
+        
+        S_CONF --> AUD["Write Immutable Audit Record<br/>Log External Deletion Receipts"]
+        S_FAIL --> AUD
+    end
+```
+
+> [!warning] Retraction Latency and API Degradation
+> External platform APIs handle deletion requests asynchronously. The retraction engine polls platform status up to 3 times before escalating partial failures to human operators for direct portal removal.
+
+---
 
 # 13. Cross-Platform Incident Control
 
@@ -377,6 +668,8 @@ Each action becomes a background job.
 
 ---
 
+---
+
 # 14. Preserve Incident Evidence
 
 Do not erase history after correction.
@@ -392,6 +685,8 @@ Example timeline:
 ```
 
 Historical truth should remain intact.
+
+---
 
 ---
 
@@ -416,6 +711,10 @@ Reconcile external account
               ↓
 Resume publishing
 ```
+
+---
+> [!caution] Immediate Token Quarantine
+> Upon suspected account compromise, immediately trigger the quarantine sequence documented in [[disscussios/connected_account_secrets_management#53. Suspected Credential Compromise Workflow|Compromise Workflow]] to revoke tokens and terminate upstream sessions.
 
 ---
 
@@ -449,6 +748,8 @@ Resume jobs
 ```
 
 These are distinct phases.
+
+---
 
 ---
 
@@ -486,6 +787,49 @@ NORMAL
 Every action should be confirmed and audited.
 
 ---
+```mermaid
+flowchart TD
+    subgraph TriggerLayer["Kill-Switch Invocation"]
+        A1["Authorized Operator<br/>(Admin / Incident Lead)"] -->|Requests Kill-Switch| A2["Emergency Control API<br/>POST /api/v1/emergency/kill-switch"]
+        A2 --> A3{"Operator Authorization<br/>Check permission: system.emergency_pause"}
+    end
+
+    subgraph EnforcementEngine["Atomic State Broadcast"]
+        A3 -->|Authorized| B1["Atomic Database Transaction<br/>Set system_state = EMERGENCY_FREEZE"]
+        B1 --> B2["Redis PubSub Distributed Broadcast<br/>channel: 'emergency-events'"]
+        B1 --> B3["Audit Log Written<br/>Tamper-evident break-glass event"]
+    end
+
+    subgraph WorkerInterception["Worker Queue Interception"]
+        B2 --> W1["Worker Node 1"]
+        B2 --> W2["Worker Node 2"]
+        B2 --> W3["Worker Node N"]
+        
+        W1 --> CHK{"In-Flight Preflight Check:<br/>Is System Frozen?"}
+        W2 --> CHK
+        W3 --> CHK
+        
+        CHK -->|Yes: Freeze Active| HLT["Halt Job Execution<br/>Status: SUSPENDED_BY_EMERGENCY"]
+        CHK -->|No| DIS["Dispatch to Social APIs"]
+    end
+
+    subgraph TargetChannels["External Channel Suspension"]
+        HLT --> Q1["Queue: Instagram Dispatches HALTED"]
+        HLT --> Q2["Queue: X / Twitter Dispatches HALTED"]
+        HLT --> Q3["Queue: LinkedIn Dispatches HALTED"]
+        HLT --> Q4["Queue: Email Blasts HALTED"]
+    end
+
+    subgraph OperatorFeedback["UI and Alert Feedback"]
+        B1 --> U1["Global UI Emergency Banner Displayed"]
+        B1 --> U2["Out-of-Band Incident Lead Notification"]
+    end
+```
+
+> [!important] Global Kill-Switch and Emergency Controls UI
+> The Emergency Control Panel provides coarse-grained and fine-grained switches accessible to emergency administrators. See [[MVP_draft#50. Emergency Mode|MVP Emergency Mode]] and [[MVP_draft#38. Settings Page|MVP Settings Page]].
+
+---
 
 # 18. Prefer Pause Over Delete
 
@@ -505,6 +849,8 @@ Containment should preserve evidence and ease recovery.
 
 ---
 
+---
+
 # 19. System Operating Modes
 
 Possible states:
@@ -518,6 +864,8 @@ SECURITY_LOCKDOWN
 ```
 
 These describe operational state, not casual user preferences.
+
+---
 
 ---
 
@@ -539,6 +887,10 @@ Users cannot:
 ```
 
 Useful during suspected database or security issues.
+
+---
+> [!note] Read-Only Mode Execution Guarantees
+> In read-only mode, database write transactions are rejected at the application middleware level. Edge caching and local browser state ensure search, asset inspection, and runbook viewing remain fully operational.
 
 ---
 
@@ -563,6 +915,10 @@ Reconcile actions back into Hub
 ```
 
 ---
+> [!tip] Outage Continuity Protocol
+> Departmental staff maintain offline exportable emergency operating procedures and direct portal access credentials to ensure social media communications continue even if the Hub infrastructure is completely offline.
+
+---
 
 # 22. Direct Access Must Remain Available
 
@@ -575,6 +931,8 @@ critical external services
 ```
 
 The Hub must not become a single point of operational paralysis.
+
+---
 
 ---
 
@@ -604,6 +962,10 @@ Occurred:
 After restoration, import/reconcile it into Hub history and analytics.
 
 ---
+> [!important] Mandatory Reconciliation Invariant
+> Any external social post or deletion performed directly on native platforms during a Hub outage must be reconciled into the Comms Hub repository upon system restoration to maintain historical integrity.
+
+---
 
 # 24. Provider Outage = Degraded Integration, Not Whole-System Emergency
 
@@ -620,6 +982,8 @@ Operating normally
 ```
 
 The Hub can continue in degraded mode.
+
+---
 
 ---
 
@@ -642,6 +1006,8 @@ This can be a property of a Publication Bundle or campaign.
 
 ---
 
+---
+
 # 26. Pre-Approved Emergency Templates
 
 Possible future templates:
@@ -655,6 +1021,8 @@ Technical outage
 ```
 
 Templates speed drafting but should not auto-publish.
+
+---
 
 ---
 
@@ -674,6 +1042,8 @@ Different incident types may notify different groups.
 
 ---
 
+---
+
 # 28. Incident Leadership
 
 Possible roles:
@@ -688,6 +1058,8 @@ One person should own coordination.
 
 ---
 
+---
+
 # 29. Incident Roles Are Temporary
 
 Incident-specific authority should be:
@@ -699,6 +1071,8 @@ incident-specific
 ```
 
 Do not permanently promote someone to Admin just because they lead one incident.
+
+---
 
 ---
 
@@ -722,6 +1096,10 @@ old thumbnail generation
 The background-job system can enforce this.
 
 ---
+> [!tip] Emergency Priority Queue Preemption
+> Background worker queues prioritize emergency containment jobs and retraction commands ahead of standard publication schedules. See [[disscussios/failure_handling_background_jobs#25. Cancellation|Failure Handling - Cancellation]].
+
+---
 
 # 31. Emergency Mode Does Not Remove Core Safety
 
@@ -736,6 +1114,10 @@ input validation
 ```
 
 Emergency workflow may bypass selected approval steps, not fundamental safety properties.
+
+---
+> [!caution] Non-Negotiable Safety Checks
+> Even under active emergency bypass, the publishing engine strictly enforces idempotency keys, target account existence checks, and media format compliance to prevent corrupt or duplicate dispatches.
 
 ---
 
@@ -763,6 +1145,8 @@ sessions.revoke_all
 
 ---
 
+---
+
 # 33. Incident Lifecycle
 
 Possible lifecycle:
@@ -787,11 +1171,15 @@ CLOSED
 
 ---
 
+---
+
 # 34. Resolved vs Closed
 
 `RESOLVED` means immediate danger is gone.
 
 `CLOSED` means follow-up review and improvement work are complete.
+
+---
 
 ---
 
@@ -817,6 +1205,54 @@ Follow-up actions:
 Focus on system/process improvement.
 
 ---
+```mermaid
+stateDiagram-v2
+    [*] --> IncidentResolved: Threat Contained & Mitigated
+    
+    IncidentResolved --> AuditReconciliation: Initiate Reconciliation Workflow
+    
+    state AuditReconciliation {
+        [*] --> HarvestExternalActions: Detect Out-of-Band Direct Portal Changes
+        HarvestExternalActions --> CompareState: Contrast Vault DB vs Live External Platforms
+        CompareState --> SyncRecords: Align Package Histories and External IDs
+        SyncRecords --> [*]
+    }
+    
+    AuditReconciliation --> PostMortemDrafting: Prepare Incident Report
+    
+    state PostMortemDrafting {
+        [*] --> CompileTimeline: Assemble System Logs & Human Decisions
+        CompileTimeline --> AnalyzeRootCause: Determine Contributing Factors
+        AnalyzeRootCause --> FormulateActionItems: Define Engineering & Policy Remediations
+        FormulateActionItems --> [*]
+    }
+    
+    PostMortemDrafting --> GovernanceSignOff: Executive Review
+    
+    state GovernanceSignOff {
+        [*] --> ReviewLead: Incident Lead Sign-Off
+        ReviewLead --> ReviewSecurity: Security Officer Sign-Off
+        ReviewSecurity --> ReviewDirector: Communications Director Sign-Off
+        ReviewDirector --> [*]
+    }
+    
+    GovernanceSignOff --> StaggeredUnfreeze: Authorization to Resume
+    
+    state StaggeredUnfreeze {
+        [*] --> InspectBacklog: Review Queued / Paused Publications
+        InspectBacklog --> PurgeObsolete: Discard Time-Sensitive Outdated Content
+        PurgeObsolete --> StaggerExecution: Reschedule Backlog with Rate-Limiting
+        StaggerExecution --> [*]
+    }
+    
+    StaggeredUnfreeze --> IncidentClosed: All Mitigations & Audits Complete
+    IncidentClosed --> [*]
+```
+
+> [!important] Blameless Post-Mortem and Governance Gate
+> The post-incident review follows blameless inquiry standards, focusing on systemic resilience, architectural safeguards, and root causes. Unfreezing queues requires explicit governance sign-off.
+
+---
 
 # 36. Incident Timeline
 
@@ -837,6 +1273,8 @@ Example:
 ```
 
 Events, Jobs, Audit, and Approval records can populate this automatically.
+
+---
 
 ---
 
@@ -864,6 +1302,8 @@ Incidents coordinate existing systems rather than replacing them.
 
 ---
 
+---
+
 # 38. Preserve Security Evidence
 
 For suspected account compromise:
@@ -878,6 +1318,8 @@ Preserve access events
 ```
 
 Containment should not destroy investigation evidence.
+
+---
 
 ---
 
@@ -902,6 +1344,10 @@ Restore trusted access
 ```
 
 ---
+> [!caution] Compromise Containment Procedures
+> For suspected staff account breaches, follow [[disscussios/connected_account_secrets_management#53. Suspected Credential Compromise Workflow|Compromise Workflow]] and record all session terminations in [[disscussios/security_discussion#30. Tamper-Evident Immutable Audit Logging Pipeline|Security Audit Logging]].
+
+---
 
 # 40. Revoke User Sessions vs Revoke All Sessions
 
@@ -918,6 +1364,8 @@ Revoke ALL sessions
 ```
 
 These should be clearly distinct.
+
+---
 
 ---
 
@@ -946,6 +1394,10 @@ Re-enable NAS
 ```
 
 ---
+> [!caution] Storage Ransomware Isolation
+> When storage anomalies or encryption spikes are detected on the NAS, the Hub immediately severs SMB/NFS mount handles and transitions media asset delivery to immutable cloud cold storage replicas.
+
+---
 
 # 42. NAS Failure Should Degrade, Not Necessarily Stop, the Hub
 
@@ -958,6 +1410,8 @@ Mail                     ✓
 Publishing               ✓ for cloud assets
 Archived originals       ✕ temporarily unavailable
 ```
+
+---
 
 ---
 
@@ -985,6 +1439,8 @@ Resume deliberately
 
 ---
 
+---
+
 # 44. Bad Deployment Rollback
 
 A severe deployment regression should support:
@@ -996,6 +1452,8 @@ rollback application version
 without automatically rolling back database state.
 
 Code rollback and data rollback are different operations.
+
+---
 
 ---
 
@@ -1013,6 +1471,8 @@ Use incident/recovery modes only for real failures or emergency response.
 
 ---
 
+---
+
 # 46. Out-of-Band Contact Tree
 
 The emergency runbook should contain protected contact information for critical roles outside the Hub.
@@ -1023,6 +1483,8 @@ This is necessary if:
 Hub down
 Mail integration down
 ```
+
+---
 
 ---
 
@@ -1041,6 +1503,8 @@ How to begin recovery
 
 ---
 
+---
+
 # 48. Mobile Emergency Controls
 
 Mobile may support selected high-value actions:
@@ -1053,6 +1517,8 @@ Approve emergency correction
 ```
 
 with strong authentication and clear confirmation.
+
+---
 
 ---
 
@@ -1074,6 +1540,8 @@ It will NOT:
 [Cancel]
 [Pause Publishing]
 ```
+
+---
 
 ---
 
@@ -1102,6 +1570,10 @@ Historical publication records will remain.
 ```
 
 ---
+> [!warning] Friction Design for Emergency Actions
+> Critical buttons require explicit confirmation dialogs that summarize exact blast-radius consequences (number of paused jobs, disconnected platforms, and affected campaigns) rather than generic prompts.
+
+---
 
 # 51. Emergency Templates Need Lifecycle Too
 
@@ -1115,6 +1587,8 @@ valid status
 ```
 
 Search should prioritize current/canonical emergency templates.
+
+---
 
 ---
 
@@ -1140,6 +1614,8 @@ without affecting the real integration.
 
 ---
 
+---
+
 # 53. Emergency Drills
 
 Possible simulations:
@@ -1153,6 +1629,8 @@ Social platform outage
 ```
 
 An untested emergency plan is only theoretical.
+
+---
 
 ---
 
@@ -1177,6 +1655,8 @@ publish emergency statement
 ```
 
 Human/deterministic authorization remains required.
+
+---
 
 ---
 
@@ -1205,6 +1685,8 @@ Assistive, not authoritative.
 
 ---
 
+---
+
 # 56. Critical Incidents May Need Multiple Notification Channels
 
 Selected SEV-1 alerts may use:
@@ -1217,6 +1699,8 @@ Possibly SMS / external channel
 ```
 
 depending on organizational needs.
+
+---
 
 ---
 
@@ -1241,6 +1725,8 @@ Mohammed
 
 ---
 
+---
+
 # 58. Needs Attention Can Escalate Into an Incident
 
 Example:
@@ -1257,6 +1743,8 @@ If impact grows:
 ```
 
 Not every warning needs full incident-management overhead.
+
+---
 
 ---
 
@@ -1279,6 +1767,8 @@ Assigned: Ahmed
 ```
 
 Notifications inform; Action Items hold responsibility.
+
+---
 
 ---
 
@@ -1306,6 +1796,8 @@ Suspected OAuth token compromise.
 
 ---
 
+---
+
 # 61. Public Crisis Communication Remains Human-Led
 
 The Hub can support:
@@ -1319,6 +1811,8 @@ Correction Tracking
 ```
 
 but should not automatically decide communication strategy.
+
+---
 
 ---
 
@@ -1340,6 +1834,8 @@ The goal is process resilience, not employee ranking.
 
 ---
 
+---
+
 # 63. Recurring Incidents Should Produce Improvement Work
 
 Example:
@@ -1350,6 +1846,8 @@ Add T-48h token readiness check.
 ```
 
 Incident history can drive system/process improvement.
+
+---
 
 ---
 
@@ -1370,6 +1868,8 @@ They belong in durable state, not server memory.
 
 ---
 
+---
+
 # 65. Jobs Must Check Emergency State Before Execution
 
 Before a queued job acts:
@@ -1385,6 +1885,10 @@ BLOCKED_BY_INCIDENT
 ```
 
 Do not execute merely because the job was created earlier.
+
+---
+> [!caution] Atomic Preflight State Checks
+> Every worker job queries the distributed emergency freeze state immediately prior to dispatching network payloads. Jobs caught in freeze state transition to suspended status as outlined in [[disscussios/failure_handling_background_jobs#25. Cancellation|Failure Handling - Cancellation]].
 
 ---
 
@@ -1403,6 +1907,8 @@ Job Execution
 ```
 
 Emergency policy wins.
+
+---
 
 ---
 
@@ -1425,6 +1931,10 @@ cancel
 Do not automatically flood platforms with stale content.
 
 ---
+> [!warning] Thundering Herd Prevention During Resume
+> When an emergency freeze is lifted, queued jobs must not execute simultaneously. An automated triage pass purges expired posts and staggers valid releases using exponential rate-limiting.
+
+---
 
 # 68. Resume Is a Workflow
 
@@ -1443,6 +1953,10 @@ Monitor
        ↓
 Return to Normal
 ```
+
+---
+> [!important] Structured Resumption Gate
+> Resuming normal operations requires a verified 4-step checklist: Integration health verification, backlog content review, rate-limited job schedule generation, and executive unfreeze confirmation.
 
 ---
 
@@ -1464,6 +1978,8 @@ Mohammed
 ```
 
 Emergency state should be impossible to forget.
+
+---
 
 ---
 
@@ -1521,6 +2037,73 @@ Security
 ```
 
 ---
+```mermaid
+erDiagram
+    EmergencyIncident ||--o{ FreezePolicy : enforces
+    EmergencyIncident ||--o{ OverrideAuthorization : authorizes
+    EmergencyIncident ||--o{ RetractionLog : tracks
+    EmergencyIncident ||--|| PostMortemRecord : documents
+    EmergencyIncident ||--o{ IncidentTimelineEvent : records
+
+    EmergencyIncident {
+        string incidentId PK
+        string incidentType
+        string severityLevel
+        string status
+        string declaredBy
+        timestamp startedAt
+        timestamp resolvedAt
+        timestamp closedAt
+    }
+    FreezePolicy {
+        string policyId PK
+        string incidentId FK
+        string freezeScope
+        string targetChannels
+        boolean haltScheduledJobs
+        boolean enforceReadOnly
+        timestamp appliedAt
+    }
+    OverrideAuthorization {
+        string overrideId PK
+        string incidentId FK
+        string requestedBy
+        string authorizedBy
+        string bypassReason
+        string mfaVerificationId
+        string packageId FK
+        timestamp executedAt
+    }
+    RetractionLog {
+        string retractionId PK
+        string incidentId FK
+        string packageId FK
+        string targetPlatform
+        string externalPostId
+        string status
+        timestamp requestedAt
+        timestamp confirmedAt
+    }
+    PostMortemRecord {
+        string recordId PK
+        string incidentId FK
+        string rootCause
+        string actionsTaken
+        string followUpTickets
+        boolean governanceSignedOff
+        timestamp finalizedAt
+    }
+    IncidentTimelineEvent {
+        string eventId PK
+        string incidentId FK
+        string eventType
+        string actorId
+        string description
+        timestamp recordedAt
+    }
+```
+
+---
 
 # 71. Recommended Early Foundations
 
@@ -1539,6 +2122,10 @@ But preserve:
 - deliberate reconciliation/resume workflow
 
 ---
+> [!tip] Pragmatic Foundation Roadmap
+> Early development must prioritize durable pause states and immutable package snapshots before introducing automated multi-channel retraction or AI incident assistance.
+
+---
 
 # 72. Core Principle
 
@@ -1547,6 +2134,10 @@ But preserve:
 And:
 
 > **The Hub must help the Communication Department during an emergency, but it must never become the reason the department cannot operate during one.**
+
+---
+> [!important] Foundational Resilience Invariant
+> The Hub must help the Communication Department during an emergency, but it must never become the reason the department cannot operate during one.
 
 ---
 
@@ -1565,6 +2156,8 @@ Business continuity asks:
 > How does the department keep working while the system is unavailable?
 
 This may deserve a smaller dedicated design pass later.
+
+---
 
 ---
 
@@ -1589,3 +2182,21 @@ We still need to decide:
 - post-incident review requirements
 
 This document preserves the emergency-workflow discussion only. It is not yet the final incident-response architecture.
+
+---
+
+---
+
+^emergency-workflows-boundary
+
+> [!important] Emergency Workflows & Crisis Governance Navigation
+> Cross-reference with [[discussions_list#9. Emergency Workflows|Discussions List - Emergency Workflows]], [[MVP_draft#50. Emergency Mode|MVP Emergency Mode]], and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+
+---
+
+## External Architectural & Standards References
+
+- **NIST SP 800-61 Rev. 2**: [Computer Security Incident Handling Guide](https://csrc.nist.gov/publications/detail/sp/800-61/rev-2/final)
+- **ISO 22301:2019**: [Security and Resilience — Business Continuity Management Systems](https://www.iso.org/standard/75106.html)
+- **CISA Incident Response Guidelines**: [Cybersecurity Incident & Vulnerability Response Playbooks](https://www.cisa.gov/resources-tools/resources/cybersecurity-incident-and-vulnerability-response-playbooks)
+- **Mermaid.js Flowchart & Sequence Specifications**: [Mermaid Documentation](https://mermaid.js.org/)

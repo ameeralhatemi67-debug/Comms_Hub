@@ -1,10 +1,122 @@
+---
+type: synthesis
+tags:
+  - comms-hub
+  - comms-hub/discussions
+  - comms-hub/notifications
+  - comms-hub/attention-model
+  - comms-hub/ui-ux
+  - type/specification-foundation
+  - stage/architecture-design
+  - status/active
+created: 2026-08-18
+updated: 2026-09-18
+status: active
+parent: "[[Comms Hub]]"
+aliases:
+  - Notification Model
+  - Attention and Notification Architecture
+  - نموذج الإشعارات وإدارة الانتباه
+---
+
+[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]] | [[disscussios/search_and_metadata|Search and Metadata]]
+
+---
+
 # Notification Model — Communication Department Hub
 
+> [!note] Status: Discussion record — not final notification specification
 > **Status: Discussion record — not final notification specification**
 >
 > This document preserves the current discussion about notifications, actions, Needs Attention, activity, reminders, escalation, delivery channels, preferences, grouping, deduplication, incident handling, localization, and mobile behavior.
 >
 > The concepts below are architectural directions only. Exact notification categories, mandatory alerts, email behavior, reminder timing, quiet hours, escalation rules, delivery providers, and MVP boundaries are still under discussion.
+
+---
+
+## Structure Tree & Document Map
+
+- [[#Notification Model — Communication Department Hub|Overview & Scope]]
+- **Part I: Attention Model Foundations & Taxonomy**
+  - [[#1. Notification, Action, and Activity Are Different|1. Notification, Action, and Activity Are Different]]
+  - [[#2. Needs Attention Is a Fourth Concept|2. Needs Attention Is a Fourth Concept]]
+  - [[#3. Notifications Should Originate From Events|3. Notifications Should Originate From Events]]
+  - [[#4. Events and Notifications Remain Separate|4. Events and Notifications Remain Separate]]
+  - [[#5. Do Not Notify Everyone About Everything|5. Do Not Notify Everyone About Everything]]
+  - [[#6. Notifications Should Follow Responsibility|6. Notifications Should Follow Responsibility]]
+  - [[#7. Importance Levels|7. Importance Levels]]
+  - [[#8. Category and Priority Are Different|8. Category and Priority Are Different]]
+- **Part II: Notification Center UX, Lifecycles & State Decoupling**
+  - [[#9. Notification Center|9. Notification Center]]
+  - [[#10. Action Required Should Also Be Prominent Elsewhere|10. Action Required Should Also Be Prominent Elsewhere]]
+  - [[#11. Read State and Workflow State Are Separate|11. Read State and Workflow State Are Separate]]
+  - [[#12. Lifecycle States|12. Lifecycle States]]
+  - [[#13. Acknowledgment for Critical Warnings|13. Acknowledgment for Critical Warnings]]
+  - [[#14. Grouping|14. Grouping]]
+  - [[#15. Deduplication|15. Deduplication]]
+  - [[#16. Update Existing Attention Items|16. Update Existing Attention Items]]
+- **Part III: Reminders, Background Timers & Escalation Policies**
+  - [[#17. Reminders Are Different From Notifications|17. Reminders Are Different From Notifications]]
+  - [[#18. Reminder Jobs Should Cancel Automatically|18. Reminder Jobs Should Cancel Automatically]]
+  - [[#19. Escalation Policies|19. Escalation Policies]]
+  - [[#20. Escalation Does Not Always Mean Notify the Boss|20. Escalation Does Not Always Mean Notify the Boss]]
+- **Part IV: Governance, Preferences, Quiet Hours & Delivery Channels**
+  - [[#21. User Preferences Within Organizational Policy|21. User Preferences Within Organizational Policy]]
+  - [[#22. Mandatory Notifications|22. Mandatory Notifications]]
+  - [[#23. Delivery Channels|23. Delivery Channels]]
+  - [[#24. In-App Should Be the Primary Channel|24. In-App Should Be the Primary Channel]]
+  - [[#25. Email Should Not Mirror Every Notification|25. Email Should Not Mirror Every Notification]]
+  - [[#26. Digests|26. Digests]]
+  - [[#27. Urgent Events Should Not Wait for a Digest|27. Urgent Events Should Not Wait for a Digest]]
+  - [[#28. Quiet Hours|28. Quiet Hours]]
+  - [[#29. Future Work-Schedule Awareness|29. Future Work-Schedule Awareness]]
+- **Part V: Content Framing, Sensitivity, Push Rules & Localization**
+  - [[#30. Deep Links|30. Deep Links]]
+  - [[#31. Enough Context, Not Too Much|31. Enough Context, Not Too Much]]
+  - [[#32. Sensitivity-Aware Notifications|32. Sensitivity-Aware Notifications]]
+  - [[#33. Push Notifications Need the Same Sensitivity Rules|33. Push Notifications Need the Same Sensitivity Rules]]
+  - [[#34. Localization|34. Localization]]
+  - [[#35. Time Localization|35. Time Localization]]
+  - [[#36. Notification Template History|36. Notification Template History]]
+- **Part VI: Realtime Delivery, Actor Filtering, Social & Workflow Signals**
+  - [[#37. Realtime Delivery and Persistence Are Separate|37. Realtime Delivery and Persistence Are Separate]]
+  - [[#38. Toasts and Notifications Are Different|38. Toasts and Notifications Are Different]]
+  - [[#39. Do Not Notify Users About Their Own Actions by Default|39. Do Not Notify Users About Their Own Actions by Default]]
+  - [[#40. Mentions|40. Mentions]]
+  - [[#41. Following / Watching|41. Following / Watching]]
+  - [[#42. Aggregate Child Job Events|42. Aggregate Child Job Events]]
+  - [[#43. Notify on Stable Parent Workflow State|43. Notify on Stable Parent Workflow State]]
+- **Part VII: Incident Handling, Security Routing & Delivery Assurance**
+  - [[#44. Incident Grouping|44. Incident Grouping]]
+  - [[#45. Root-Cause Alerts|45. Root-Cause Alerts]]
+  - [[#46. Security Routing|46. Security Routing]]
+  - [[#47. Delivery Confirmation for Critical Alerts|47. Delivery Confirmation for Critical Alerts]]
+  - [[#48. Read Receipts Should Not Become Surveillance|48. Read Receipts Should Not Become Surveillance]]
+  - [[#49. Notification Delivery Jobs|49. Notification Delivery Jobs]]
+- **Part VIII: Domain Data Model, Keys, Admin Policies & Broadcasts**
+  - [[#50. Notification Data Model|50. Notification Data Model]]
+  - [[#51. Action Items Should Be Separate|51. Action Items Should Be Separate]]
+  - [[#52. Needs Attention Records|52. Needs Attention Records]]
+  - [[#53. Connected Model|53. Connected Model]]
+  - [[#54. Dedupe and Group Keys|54. Dedupe and Group Keys]]
+  - [[#55. User-Friendly Preference Categories|55. User-Friendly Preference Categories]]
+  - [[#56. Admin Notification Policy|56. Admin Notification Policy]]
+  - [[#57. Mass Notifications Should Be Intentional|57. Mass Notifications Should Be Intentional]]
+  - [[#58. Broadcast Announcements Are a Separate Product Feature|58. Broadcast Announcements Are a Separate Product Feature]]
+- **Part IX: Observability, Correlation, Loops & Mobile Experience**
+  - [[#59. Notification Analytics Should Improve the System|59. Notification Analytics Should Improve the System]]
+  - [[#60. Notification System Health|60. Notification System Health]]
+  - [[#61. Correlation IDs|61. Correlation IDs]]
+  - [[#62. Prevent Recursive Notification Loops|62. Prevent Recursive Notification Loops]]
+  - [[#63. Notification Policy Changes Should Be Auditable|63. Notification Policy Changes Should Be Auditable]]
+  - [[#64. Some Reminder Rules Belong to Workflow Policies|64. Some Reminder Rules Belong to Workflow Policies]]
+  - [[#65. Mobile Notification Design|65. Mobile Notification Design]]
+  - [[#66. Home Dashboard Should Summarize|66. Home Dashboard Should Summarize]]
+- **Part X: Architectural Synthesis, MVP Boundaries & Unresolved Decisions**
+  - [[#67. Conceptual Architecture|67. Conceptual Architecture]]
+  - [[#68. Recommended MVP|68. Recommended MVP]]
+  - [[#69. Core Principle|69. Core Principle]]
+  - [[#70. Still Unresolved|70. Still Unresolved]]
 
 ---
 
@@ -48,6 +160,9 @@ at 18:00.
 ```
 
 Combining all three into one notification stream would create noise.
+
+> [!note] Semantic Separation of Concerns
+> Merging actionable obligations with passive informational notifications destroys prioritization. Action items represent workflow commitments requiring user decisions, while notifications represent ambient situational awareness. Cross-reference: [[discussions_list#6. Three-Tier Attention Architecture|Discussions List - Attention Architecture]] and [[MVP_draft#15. Work Page|MVP Work Page]].
 
 ---
 
@@ -99,6 +214,34 @@ Sara uploaded Version 4
 → ACTIVITY
 ```
 
+> [!important] Attention Taxonomy and Classification Flow
+> Operational health blockers (such as expired OAuth tokens or stalled queues) must not hide in informational streams, nor can they always be mapped to an individual user's task inbox. They constitute shared operational debt requiring explicit resolution.
+
+```mermaid
+flowchart TD
+    subgraph AttentionTiers["Attention Architecture Taxonomy"]
+        direction TB
+        subgraph Tier1["1. Action Required (Work Page / Inbox)"]
+            ActionDesc["Direct Personal Responsibility<br/>Requires Human Decision or Execution<br/>E.g., Approval Request, Assigned Revision"]
+        end
+        subgraph Tier2["2. Needs Attention (System / Health Alerts)"]
+            AttentionDesc["Operational Blockers and Degraded States<br/>Shared or Role-Group Resolution Queue<br/>E.g., Disconnected Account, Expired Token"]
+        end
+        subgraph Tier3["3. Notifications (Bell Drawer)"]
+            NotifDesc["Relevant Informational Updates<br/>Direct Mentions, Comments, State Changes<br/>E.g., Sara mentioned you in Campaign #42"]
+        end
+        subgraph Tier4["4. Activity Stream (Audit and Event Log)"]
+            ActivityDesc["Historical Immutable Event Stream<br/>Zero Interruption / Passive Query Log<br/>E.g., Instagram post published at 18:00"]
+        end
+    end
+
+    RawEvent["System Domain Event"] --> Classifier["Attention Classifier and Router"]
+    Classifier -->|"Assigned Task / Gate"| Tier1
+    Classifier -->|"System Blocker / Degraded"| Tier2
+    Classifier -->|"Targeted Mention / Update"| Tier3
+    Classifier -->|"Passive Historical Record"| Tier4
+```
+
 ---
 
 # 3. Notifications Should Originate From Events
@@ -140,6 +283,39 @@ National Day
 ```
 
 The notification system interprets structured events.
+
+> [!tip] Event-Driven Notification Engine Architecture
+> Direct notification invocation from domain services couples features to messaging channels. Instead, domain services emit structured immutable events into an event bus. The notification dispatch engine applies recipient resolution, policy matrix checks, and multi-channel routing asynchronously.
+
+```mermaid
+flowchart TD
+    subgraph Ingestion["1. Event Ingestion and Interpretation"]
+        DomainEvent["Domain Event<br/>(e.g., APPROVAL_REQUESTED, TOKEN_EXPIRED)"] --> EventBus["Event Bus / Transactional Outbox"]
+        EventBus --> Router["Notification Dispatch and Routing Engine"]
+    end
+
+    subgraph Evaluation["2. Policy and Responsibility Evaluation"]
+        Router --> ResponsibilityCheck{"Evaluate Responsibility Matrix<br/>(Actor vs Approver vs Admin)"}
+        ResponsibilityCheck --> RoleResolution["Resolve Target Recipients and Roles"]
+        RoleResolution --> OrgPolicy{"Mandatory Policy Check<br/>(Is Alert Non-Muted?)"}
+        OrgPolicy --> UserPrefs{"User Channel Preferences<br/>and Quiet Hours Filter"}
+    end
+
+    subgraph Matrix["3. Channel Dispatch Matrix"]
+        UserPrefs --> RoutingDecision{"Importance and Channel Rules"}
+        RoutingDecision -->|"All Active Notifications"| InAppQueue["In-App Notification Queue"]
+        RoutingDecision -->|"Actionable / High / Urgent"| EmailQueue["Transactional Email Queue"]
+        RoutingDecision -->|"Mobile Urgency / Security"| PushQueue["Web / Mobile Push Queue"]
+        RoutingDecision -->|"Batchable Low-Priority"| DigestBuffer["Digest Aggregation Buffer"]
+    end
+
+    subgraph Delivery["4. Channel Delivery Execution"]
+        InAppQueue --> InAppWorker["In-App Storage and Realtime SSE/WS"]
+        EmailQueue --> EmailWorker["SMTP / Transactional Email Worker"]
+        PushQueue --> PushWorker["Web Push / APNS / FCM Worker"]
+        DigestBuffer --> DigestJob["Scheduled Digest Consolidator"]
+    end
+```
 
 ---
 
@@ -219,6 +395,9 @@ System backup failed
 ```
 
 This follows failure ownership.
+
+> [!important] Role-Aware Responsibility Routing
+> Broadcast notification flooding causes alert fatigue. Alerts must pinpoint the exact role and capability responsible for taking remediation action. See [[disscussios/organizational_role_discussion#30. Role-Aware Notification Routing|Role-Aware Notification Routing]] for granular mapping of role permissions to operational events.
 
 ---
 
@@ -317,6 +496,9 @@ Your Instagram post published successfully.
 [View]
 ```
 
+> [!note] In-App Notification Center Drawer Specification
+> The Notification Center UI serves as the primary notification hub across the application shell. See detailed drawer UI specifications, tabs, and action integration in [[MVP_draft#40. Notification Center Drawer|MVP Notification Center Drawer]].
+
 ---
 
 # 10. Action Required Should Also Be Prominent Elsewhere
@@ -343,6 +525,9 @@ NEEDS YOUR ATTENTION
 1 disconnected account
 ```
 
+> [!important] Action Visibility Beyond the Bell
+> Bell icons are easily ignored or dismissed. Real operational workload items (approvals, revisions, assignments) must be rendered prominently on the dedicated [[MVP_draft#15. Work Page|MVP Work Page]] and executive dashboard widgets.
+
 ---
 
 # 11. Read State and Workflow State Are Separate
@@ -364,6 +549,9 @@ PENDING
 ```
 
 Only the real workflow action changes the workflow state.
+
+> [!caution] Non-Destructive Read State Rule
+> A notification read event is strictly a viewport tracking event, indicating the user's client rendered or opened the notification item. It does NOT constitute workflow task completion, acknowledgment of duty, or resolution of an operational blocker.
 
 ---
 
@@ -396,6 +584,44 @@ RESOLVED
 ```
 
 These should remain distinct.
+
+> [!important] Tripartite Lifecycle Separation and State Machine
+> Conflating notification states with domain workflow states creates dangerous phantom task completions. The system enforces three distinct lifecycle state machines operating in complete isolation.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Unread : Event Emitted and Notification Created
+
+    state NotificationLifecycle {
+        Unread --> Read : User Views Drawer / Opens Link
+        Read --> Unread : Mark as Unread (Manual Reversion)
+        Read --> Archived : Explicit Archive Action / Auto-Pruning
+        Unread --> Archived : Archive from Drawer Action
+        Read --> Dismissed : User Dismisses Notification
+        Unread --> Dismissed : User Dismisses Notification
+    }
+
+    note right of NotificationLifecycle
+        Notification Read State changes NEVER mutate
+        underlying Workflow or Action State.
+    end note
+
+    state ActionItemLifecycle {
+        [*] --> ActionOpen : Action Request Emitted
+        ActionOpen --> ActionCompleted : User Performs Decision (Approve / Reject)
+        ActionOpen --> ActionCancelled : Workflow Aborted by Author
+        ActionOpen --> ActionExpired : Expiration Timer Reached
+    }
+
+    state NeedsAttentionLifecycle {
+        [*] --> AttentionOpen : Degradation or Blocker Detected
+        AttentionOpen --> AttentionAcknowledged : On-Duty Staff Clicks Acknowledge
+        AttentionAcknowledged --> AttentionResolved : Underlying Fault Healed or Resolved
+        AttentionOpen --> AttentionResolved : Auto-Recovery Detected
+    }
+```
+
+Cross-reference: Integrates directly with the [[MVP_draft#40. Notification Center Drawer|MVP Notification Center Drawer]].
 
 ---
 
@@ -448,6 +674,37 @@ Similarly:
 ```text
 5 new comments in
 National Day Campaign
+```
+
+> [!tip] Grouping and Debouncing Sequence
+> Rapid-fire consecutive actions on the same entity should be debounced and consolidated within a sliding batch window rather than flooding user channels with individual events.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant EB as Domain Event Bus
+    participant DE as Deduplication Engine
+    participant GB as Grouping and Batch Buffer
+    participant WE as Window Timer Service
+    participant DS as Delivery Service
+    participant User as Recipient Client
+
+    EB->>DE: Publish Event 1 (File uploaded by Sara)
+    DE->>GB: Check Dedupe Key (Unique event: pass)
+    GB->>WE: Initialize Batch Window (e.g., 5-minute sliding window)
+    
+    EB->>DE: Publish Event 2 (File uploaded by Sara)
+    DE->>GB: Group Key Match (campaign_id=42, actor=Sara)
+    GB->>GB: Increment Counter (Count: 2)
+
+    Note over GB,WE: Additional file uploads arrive within window...
+    EB->>DE: Publish Event 15 (File uploaded by Sara)
+    DE->>GB: Group Key Match
+    GB->>GB: Increment Counter (Count: 15)
+
+    WE->>GB: Batch Window Timer Expires
+    GB->>DS: Flush Consolidated Payload ("Sara uploaded 15 files to Campaign #42")
+    DS->>User: Deliver Grouped Notification (In-App Card / Digest Item)
 ```
 
 ---
@@ -539,6 +796,9 @@ Reminder:
 Approval still waiting.
 ```
 
+> [!note] Scheduled Reminder Decoupling
+> Reminders are not generated spontaneously; they are registered as scheduled background jobs linked to a parent workflow entity. See [[disscussios/approval_policy_design#32. Approval Reminders as Background Jobs|Approval Reminders as Background Jobs]].
+
 ---
 
 # 18. Reminder Jobs Should Cancel Automatically
@@ -550,6 +810,9 @@ cancel remaining reminder jobs
 ```
 
 This prevents stale reminders.
+
+> [!tip] Automatic Job Cancellation Pattern
+> Whenever the lifecycle state of an Action Item transitions to `COMPLETED` or `CANCELLED`, the system publishes a state-change event that triggers immediate cancellation of any pending background reminder jobs registered for that entity. See [[disscussios/approval_policy_design#32. Approval Reminders as Background Jobs|Approval Reminders as Background Jobs]].
 
 ---
 
@@ -648,6 +911,9 @@ Backup failure over threshold
 Mandatory means the intended recipient cannot mute it.
 
 It does not mean everyone receives it.
+
+> [!warning] Mandatory Alert Policy Boundary
+> Critical security alerts, emergency announcements, and blocking compliance tasks must be designated non-suppressible at the organizational policy tier. Users may configure delivery channels (e.g., mobile push vs email) where permitted, but cannot mute the notification itself.
 
 ---
 
@@ -783,6 +1049,51 @@ Ordinary external alerts may be delayed.
 
 Critical notifications may still be delivered according to organizational policy.
 
+> [!warning] Quiet Hours and Escalation Boundary State Machine
+> The notification subsystem must respect off-duty hours without blinding the organization to emergency outages. Critical incident policies override user quiet-hour mutes, while non-critical alerts are buffered until the quiet-hours window concludes.
+
+```mermaid
+stateDiagram-v2
+    [*] --> EvaluatingSchedule
+
+    state EvaluatingSchedule {
+        [*] --> CheckLeaveStatus
+        CheckLeaveStatus --> OnLeave : User marked on leave or vacation
+        CheckLeaveStatus --> CheckQuietHours : User active or on duty
+        
+        OnLeave --> RerouteDelegate : Active delegation policy exists
+        OnLeave --> EscalateSecondary : No active delegation configured
+        RerouteDelegate --> [*]
+        EscalateSecondary --> [*]
+    }
+
+    state CheckQuietHours {
+        [*] --> NormalHours : Local time within active window
+        [*] --> QuietHoursActive : Local time within quiet hours (e.g., 22:00-07:00)
+    }
+
+    state NormalHours {
+        [*] --> DispatchNormalChannels
+        DispatchNormalChannels --> InAppDelivery
+        DispatchNormalChannels --> ExternalPushEmail
+    }
+
+    state QuietHoursActive {
+        [*] --> CheckCriticalBypass
+        CheckCriticalBypass --> ImmediateDelivery : Emergency or Critical Incident (Policy Override)
+        CheckCriticalBypass --> BufferNotification : Standard / Low / Informational Alert
+        
+        BufferNotification --> InAppSilently : In-app feed updated without alert sound
+        BufferNotification --> DeliveryDelayedQueue : External channels held in buffer
+    }
+
+    DeliveryDelayedQueue --> ReleaseBufferOnWake : Quiet hours window expires (07:00)
+    ReleaseBufferOnWake --> [*]
+    ImmediateDelivery --> [*]
+    InAppDelivery --> [*]
+    ExternalPushEmail --> [*]
+```
+
 ---
 
 # 29. Future Work-Schedule Awareness
@@ -876,6 +1187,9 @@ in Communication Hub.
 ```
 
 Notification templates should support sensitivity-aware rendering.
+
+> [!caution] Information Leakage Prevention
+> Push notifications and unencrypted transactional emails travel through third-party infrastructure (APNs, FCM, SMTP relays) and render on lock screens. High-sensitivity notifications must omit confidential draft content, preview images, or embargoed campaign titles, providing only an opaque reference and deep link.
 
 ---
 
@@ -981,6 +1295,9 @@ Mohammed requested changes.
 Durable.
 
 Do not create permanent notifications for obvious self-confirming actions.
+
+> [!note] Ephemeral vs Persistent Interaction Surfaces
+> Toasts represent ephemeral feedback confirming immediate synchronous user interaction within the active browser session. Notifications represent durable state changes delivered asynchronously that persist until explicitly addressed.
 
 ---
 
@@ -1089,6 +1406,9 @@ Current status:
 Recovering
 ```
 
+> [!caution] Critical Incident Blast Radius Control
+> A downstream platform outage (such as an API rate limit or database blip) must never trigger an alert storm of individual failure notifications. The incident aggregator groups child failures under a unified incident entity, routed via [[disscussios/emergency_workflows#17. Emergency Control Panel|Emergency Workflows - Control Panel]].
+
 ---
 
 # 45. Root-Cause Alerts
@@ -1157,6 +1477,44 @@ Push accepted ✓
 
 This does not prove a human read it, but confirms channel delivery.
 
+> [!important] Multi-Channel Broadcast and Verification Pipeline
+> For critical emergency declarations and security alerts, the notification system initiates a multi-channel broadcast with explicit delivery verification, bypassing user quiet-hours and tracking downstream channel acceptance.
+
+```mermaid
+flowchart TD
+    subgraph Detection["1. Detection and Root-Cause Aggregation"]
+        Alarm["Critical Infrastructure Alarm / Security Incident"] --> Aggregator["Incident Aggregator and Root-Cause Engine"]
+        ChildJobs["300+ Cascading Job Failures"] -.->|Suppressed and Grouped| Aggregator
+        Aggregator --> IncidentDoc["Consolidated Incident Record<br/>(e.g., INCIDENT: Database Outage / Token Revoked)"]
+    end
+
+    subgraph AuthGate["2. Authorization and Broadcast Gate"]
+        IncidentDoc --> Gate{"Emergency Broadcast Gate<br/>([[disscussios/emergency_workflows#17. Emergency Control Panel|Emergency Workflows - Control Panel]])"}
+        Gate -->|"Pre-configured Critical Alert"| PolicyAuto["Automated Escalation Rule"]
+        Gate -->|"Manual Department Broadcast"| StepUpAuth["Step-Up Verification and Audit Preview"]
+        PolicyAuto --> DispatchPipeline["Emergency Broadcast Engine"]
+        StepUpAuth --> DispatchPipeline
+    end
+
+    subgraph MultiChannel["3. Bypass and Multi-Channel Broadcast"]
+        DispatchPipeline --> BypassCheck["Quiet Hours Bypass (Mandatory Override)"]
+        BypassCheck --> ChanInApp["In-App Emergency Modal / Persistent Banner"]
+        BypassCheck --> ChanPush["High-Priority Push Notification (APNS/FCM)"]
+        BypassCheck --> ChanEmail["High-Priority Transactional Email"]
+        BypassCheck --> ChanSMS["Urgent SMS / Phone Fallback"]
+    end
+
+    subgraph Confirmation["4. Delivery Tracking and Human Acknowledgment"]
+        ChanInApp --> DeliveryAck["Channel Delivery Tracking<br/>(In-app created, Push accepted, SMTP accepted)"]
+        ChanPush --> DeliveryAck
+        ChanEmail --> DeliveryAck
+        ChanSMS --> DeliveryAck
+        DeliveryAck --> RecipientUI["Recipient Attention Screen"]
+        RecipientUI --> HumanAck["Explicit Human Acknowledgment<br/>(Timestamped and Recorded in Audit Log)"]
+        HumanAck --> ResolvedState["Incident Lifecycle: Acknowledged -> Resolved"]
+    end
+```
+
 ---
 
 # 48. Read Receipts Should Not Become Surveillance
@@ -1177,6 +1535,9 @@ Acknowledged
 
 is an intentional workflow action.
 
+> [!important] Privacy and Trust Boundary
+> Read receipts should be reserved for high-severity emergency broadcasts and auditable legal compliance workflows. Implementing universal read surveillance on routine team interactions undermines organizational trust and distorts communication patterns.
+
 ---
 
 # 49. Notification Delivery Jobs
@@ -1192,6 +1553,9 @@ Notification #100
 ```
 
 If email fails, the in-app notification still exists.
+
+> [!important] Worker Isolation for Notification Deliveries
+> Notification delivery jobs must never block core transaction threads or share worker pools with resource-heavy media processing. See [[disscussios/failure_handling_background_jobs#38. Notification Jobs Should Be Separate|Notification Jobs Separation]] for dedicated queue isolation patterns.
 
 ---
 
@@ -1326,6 +1690,94 @@ ACTIVITY
 Historical view of events
 ```
 
+> [!note] Domain Schema Relationships and Entity Architecture
+> The data model bridges domain events, actionable workload obligations, system attention items, and notification dispatches across delivery channels.
+
+```mermaid
+erDiagram
+    DomainEvent ||--o{ Notification : "triggers"
+    DomainEvent ||--o{ ActionItem : "generates"
+    DomainEvent ||--o{ AttentionItem : "initiates"
+    
+    Notification ||--|{ NotificationDelivery : "dispatches across"
+    User ||--o{ Notification : "receives"
+    User ||--o{ ActionItem : "assigned to"
+    User ||--o{ NotificationPreference : "configures"
+
+    DomainEvent {
+        uuid id PK
+        string event_type
+        uuid actor_id FK
+        string target_type
+        uuid target_id
+        jsonb payload
+        datetime created_at
+    }
+
+    Notification {
+        uuid id PK
+        uuid recipient_user_id FK
+        string notification_type
+        string category
+        string priority
+        string title
+        text body
+        uuid source_event_id FK
+        string target_type
+        uuid target_id
+        datetime created_at
+        datetime read_at
+        datetime archived_at
+        string group_key
+        string dedupe_key
+        string sensitivity
+    }
+
+    NotificationDelivery {
+        uuid id PK
+        uuid notification_id FK
+        string channel
+        string status
+        int attempt_count
+        datetime sent_at
+        datetime failed_at
+        string provider_message_id
+    }
+
+    ActionItem {
+        uuid id PK
+        string action_type
+        uuid assigned_to FK
+        string target_type
+        uuid target_id
+        datetime due_at
+        string status
+        uuid created_from_event_id FK
+    }
+
+    AttentionItem {
+        uuid id PK
+        string category
+        string severity
+        string root_cause
+        jsonb affected_entities
+        string responsible_role
+        string status
+        datetime first_detected_at
+        datetime last_detected_at
+        datetime resolved_at
+    }
+
+    NotificationPreference {
+        uuid id PK
+        uuid user_id FK
+        string category
+        string channel
+        boolean is_enabled
+        boolean allow_quiet_hours
+    }
+```
+
 ---
 
 # 54. Dedupe and Group Keys
@@ -1395,6 +1847,9 @@ After                    24 hours
 ```
 
 Team policies and user preferences operate within Admin boundaries.
+
+> [!warning] Administrative Governance Boundary
+> Global notification policies established by administrators override team and user-level defaults to ensure regulatory compliance, SLA enforcement, and business continuity during operational disruptions.
 
 ---
 
@@ -1508,6 +1963,9 @@ Notification delivery failed
 ```
 
 Channel failure handling must avoid recursive alert creation.
+
+> [!caution] Cascading Loop Prevention
+> A notification delivery failure or delivery event must NEVER trigger another standard notification. Failure handling must be routed strictly to dedicated error-tracking logs or consolidated operational dashboards to prevent catastrophic recursive loops.
 
 ---
 
@@ -1640,6 +2098,9 @@ Reminder / Escalation Event
 Notification Policy
 ```
 
+> [!tip] Conceptual System Architecture Integration
+> The notification model forms an integral pillar of the overall communications platform. For high-level architectural interactions, cross-reference [[discussions_list#6. Three-Tier Attention Architecture|Discussions List - Attention Architecture]].
+
 ---
 
 # 68. Recommended MVP
@@ -1708,6 +2169,11 @@ etc.
 
 Reading or deleting a notification must never delete the underlying responsibility.
 
+^notification-model-boundary
+
+> [!important] Attention Model Governance Anchor
+> Cross-reference with [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]] and [[MVP_draft#40. Notification Center Drawer|MVP Notification Center Drawer]].
+
 ---
 
 # 70. Still Unresolved
@@ -1733,3 +2199,14 @@ We still need to decide:
 - Which security alerts cannot be muted
 
 This document preserves the notification-model discussion only. It is not yet the final notification architecture.
+
+
+---
+
+## External Architectural & Standards References
+
+- **W3C Web Notifications API Specification**: [W3C Web Notifications Spec](https://www.w3.org/TR/notifications/)
+- **IETF RFC 8030 Generic Event Delivery Using Web Push**: [RFC 8030 Specification](https://datatracker.ietf.org/doc/html/rfc8030)
+- **Courier Multi-Channel Notification Architecture Patterns**: [Courier Architecture Guide](https://www.courier.com/docs/)
+- **Novu Open-Source Notification Infrastructure**: [Novu Engineering Handbook](https://docs.novu.co/)
+- **Mermaid.js Flowchart, State, and ER Specifications**: [Mermaid Documentation](https://mermaid.js.org/)
