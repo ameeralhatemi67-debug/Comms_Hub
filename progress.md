@@ -41,7 +41,8 @@ related:
 - **Verified evidence:** `node --check design-review/gallery.js` passed. HTTP server returned 200. `node design-review/verify.cjs` passed 72 page/viewport combinations at 1440, 1280, 900, and 390px, with zero JavaScript errors and zero document-width overflow. Direction switch, screen selector, Work detail navigation, phone preview, notice dialog, Escape dismissal, and mobile More menu passed. Captured 36 screenshots and inspected three six-screen desktop boards plus representative full-size desktop/mobile views. `git diff --check` passed.
 - **Correction during QA:** Initial verification selected an invisible navigation control; narrowed the test to the visible notification control and reran successfully. Aligned Instagram review state and ready-to-publish count across the sample screens.
 - **Limits:** These are visual alternatives with navigation, editable sample fields and explicit preview notices. They are not three MVP implementations. No Next.js scaffold, role behavior, working review/publishing transitions, calendar, or Level B/C pages are claimed complete. Comprehensive accessibility and MVP workflow acceptance remain future tasks.
-- **Budget/delegation:** No subagents. Opening five-hour account usage 2%; pre-handoff check 42%. Using the stricter 60% ceiling. Figures are shared-account estimates, not per-task accounting.
+- **Budget/delegation:** No subagents. Opening five-hour account usage 2%; final handoff check 48%. Approximately 12 percentage points remain under the conservative ceiling. The design stage cost more than planned; recommend continuing full implementation after the window resets if needed to preserve the complete core scope. Using the stricter 60% ceiling. Figures are shared-account estimates, not per-task accounting.
+- **Local checkpoint commit:** `040f8a4` saves the gallery and scope alignment. No remote push.
 - **Next action:** Wait for the user's selected/combined direction, then implement only that direction. Favor shared shell, centralized local mock state and the connected acceptance workflow; avoid more alternate-design polish.
 
 ### 2026-09-18 — Vault Architecture & Specification Foundation Complete
@@ -103,3 +104,4 @@ When recording future implementation outcomes, follow this standardized template
 ---
 
 ^comms-hub-progress-boundary
+

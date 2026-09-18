@@ -68,7 +68,7 @@ The project has achieved a complete, verified architectural foundation. All 15 f
 **Current focus:** Paused at the requested design decision gate. Gallery available at `http://127.0.0.1:4173` while the local server runs, or by opening `design-review/index.html`.
 **Blockers:** No technical blocker identified. Full implementation requires the user's visual selection.
 **Recoverable baseline:** Git commit `7e45e2b`; existing untracked `.serena/` is left untouched.
-**Budget:** Starting five-hour account usage 2%; last pre-handoff check 42%, approximately 40 percentage points consumed and 18 points below the conservative 60% total threshold. Shared account figures are approximate and include other activity. No subagents used. Recheck before implementation and preserve the core workflow before secondary polish.
+**Budget:** Starting five-hour account usage 2%; final handoff check 48%, approximately 46 percentage points consumed and 12 points below the conservative 60% total threshold. Shared account figures are approximate and include other activity. No subagents used. Recheck before implementation and preserve the core workflow before secondary polish.
 
 ---
 
@@ -91,3 +91,4 @@ The project has achieved a complete, verified architectural foundation. All 15 f
 ---
 
 ^comms-hub-status-boundary
+
