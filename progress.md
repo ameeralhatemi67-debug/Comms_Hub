@@ -38,7 +38,9 @@ related:
 - **Scope:** Read the six requested root documents; inspected relevant sections across all nine requested discussion documents. `MVP_draft.md` remains authoritative. Reordered the roadmap so prototype validation precedes platform and database work; retained future production horizons.
 - **Recoverability:** Existing tracked baseline was clean at commit `7e45e2b`. Pre-existing untracked `.serena/` was untouched. Discussion files and the authoritative MVP specification were not edited.
 - **Deliverable:** A local browser gallery in `design-review/`, with A (operations workspace), B (campaign studio), and C (compact operations desk). Each has Home, Work, Work detail, Create, Approvals/Publishing, and Media Library with a connected National Day scenario and mobile adaptation. Custom CSS artwork is illustrative, not an official national campaign identity.
-- **Verified evidence:** `node --check design-review/gallery.js` passed. HTTP server returned 200. `node design-review/verify.cjs` passed 72 page/viewport combinations at 1440, 1280, 900, and 390px, with zero JavaScript errors and zero document-width overflow. Direction switch, screen selector, Work detail navigation, phone preview, notice dialog, Escape dismissal, and mobile More menu passed. Captured 36 screenshots and inspected three six-screen desktop boards plus representative full-size desktop/mobile views. `git diff --check` passed.
+- **Verified evidence:** 
+ode --check design-review/gallery.js` passed. HTTP server returned 200. 
+ode design-review/verify.cjs` passed 72 page/viewport combinations at 1440, 1280, 900, and 390px, with zero JavaScript errors and zero document-width overflow. Direction switch, screen selector, Work detail navigation, phone preview, notice dialog, Escape dismissal, and mobile More menu passed. Captured 36 screenshots and inspected three six-screen desktop boards plus representative full-size desktop/mobile views. `git diff --check` passed.
 - **Correction during QA:** Initial verification selected an invisible navigation control; narrowed the test to the visible notification control and reran successfully. Aligned Instagram review state and ready-to-publish count across the sample screens.
 - **Limits:** These are visual alternatives with navigation, editable sample fields and explicit preview notices. They are not three MVP implementations. No Next.js scaffold, role behavior, working review/publishing transitions, calendar, or Level B/C pages are claimed complete. Comprehensive accessibility and MVP workflow acceptance remain future tasks.
 - **Budget/delegation:** No subagents. Opening five-hour account usage 2%; final handoff check 48%. Approximately 12 percentage points remain under the conservative ceiling. The design stage cost more than planned; recommend continuing full implementation after the window resets if needed to preserve the complete core scope. Using the stricter 60% ceiling. Figures are shared-account estimates, not per-task accounting.
@@ -67,7 +69,8 @@ related:
   9. `storage_lifecycle_disaster_recovery.md`: 54 sections + addenda, 7 diagrams, 3-2-1 hybrid storage.
   10. `failure_handling_background_jobs.md`: 51 sections, 7 diagrams, background queue and failure routing.
   11. `connected_account_secrets_management.md`: 73 sections, 7 diagrams, OAuth and secret envelopes.
-  12. `notification_model.md`: 70 sections, 7 diagrams, three-tier attention architecture.
+  12. 
+otification_model.md`: 70 sections, 7 diagrams, three-tier attention architecture.
   13. `search_and_metadata.md`: 74 sections, 7 diagrams, full-text search and Arabic taxonomy.
   14. `security_discussion.md`: 42 sections, 7 diagrams, defense-in-depth and immutable audit log.
   15. `emergency_workflows.md`: 74 sections, 7 diagrams, crisis governance and kill-switch freeze.
@@ -115,3 +118,15 @@ When recording future implementation outcomes, follow this standardized template
 - Screenshots saved locally under ignored qa/artifacts. These are not a completed visual/accessibility audit.
 - Limitations and next actions are enumerated in Status.md. Media upload/playback, retained historical release snapshots, full persona/supporting-action QA and broad department-validation signoff remain incomplete. No production services were added.
 - Usage: started 53%; last pre-reset reading 89%; window reset during work. Reduced finishing instruction measured 2% then 12%, approximately 10 further points. Exact full-run delta unavailable. Work stopped to preserve revised limit.
+
+### 2026-09-19 — Phase 0.1.5 accepted
+
+- **Result:** READY FOR CHECKPOINT 0.2. No blocking prototype defect remains; actual department validation is pending. Checkpoint 0.2 preparation was not started to preserve the usage reserve.
+- **Fixes:** retained local submitted/reviewed release snapshots with exact content/asset versions; dialog focus return; modal mobile navigation; mobile search accessible name; empty-month message; reduced-motion handling.
+- **Evidence:** production build/typecheck pass; five domain tests pass; complete publication journey and 60 viewport checks pass; eight personas and B/C main actions pass; 14 Level A desktop/mobile screenshots and three additional mobile views visually inspected. Focused keyboard/form/RTL/contrast review completed. qa/final-interactions.json reports eight passing interaction groups, zero console/page errors and no external origins. qa/scope.json reports no source/config findings. Full record: qa/ACCEPTANCE.md.
+- **Decisions:** historical content necessary for credible exact-version review, now retained in memory. Upload/playback deferred because illustrative versioned media is sufficient for workflow evaluation. Other accepted limits are listed in the acceptance record; no production infrastructure added.
+- **QA portability:** local Playwright resolution, optional CODEX_NODE_MODULES fallback, configurable QA_BROWSER/QA_BASE_URL. Corrected select-label matching in final QA; restarted stopped local server before successful rerun.
+- **Usage:** began 18%; pre-documentation/commit reading 81%, about 63 points, same reset timestamp 1789793735. No reset observed; no subagent. Optional work stopped at soft boundary. Final handoff supplies closing measurement. Baseline 893cef5, separate local acceptance commit, no push.
+- **Next:** 0.2.1 assumption mapping and human walkthrough preparation; 0.2.2 must involve actual department participants. No Version 1 work.
+
+- **Closing pre-commit usage:** 85% versus 18% start, approximately 67 points; no reset. Required documentation/handoff consumed reserve beyond the soft stop, below the 75-point hard maximum.

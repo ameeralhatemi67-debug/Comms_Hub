@@ -167,14 +167,12 @@ When starting active implementation on the Communication Department Hub, follow 
 
 ### Checkpoint 0.1: UI Prototype MVP 0.1
 
-**State:** Active. **Authority:** [[MVP_draft]].  
+**State:** Complete and verified (2026-09-19). **Authority:** [[MVP_draft]].
 **Outcome:** A runnable Arabic RTL product prototype for eight roles, using one connected Saudi National Day 2026 scenario.  
 **Exit Gate:** Selected design; six high-fidelity Level A pages; lighter B/C pages; role simulation; verified end-to-end mock workflow and responsive layouts. No real backend, authentication, integrations, or publishing.
 
-> [!note] Implementation & Verification State (2026-09-19)
-> The visual design gate is complete (Direction A selected; B contributes larger media previews). The Next.js 16.3.5 / Tailwind 4 prototype builds and starts at `http://127.0.0.1:3000`. The core acceptance journey (create, edit, approve, schedule, calendar, partial publish and retry) passes in the browser with 60 route/viewport checks passing and zero horizontal overflow.
-> 
-> Tasks in Phases 0.1.2–0.1.5 remain marked in-progress (`[/]`) because exhaustive 8-role persona walkthroughs, full accessibility/contrast audits, and remaining edge actions are still pending formal sign-off. Full details and limits are tracked in `[[Status]]` and `[[progress]]`.
+> [!note] Acceptance State (2026-09-19)
+> READY FOR CHECKPOINT 0.2. All eight personas and central supporting actions verified; 14 Level A desktop/mobile screenshots visually inspected; complete publication journey and 60 viewport checks pass. Build, typecheck and five domain tests pass. Focused keyboard/contrast review complete, not a formal accessibility certification. Retained local release snapshots added; upload/playback deliberately deferred. Evidence and accepted limitations: `qa/ACCEPTANCE.md`. No production services.
 
 #### Phase 0.1.1: Scope and visual decision
 
@@ -185,31 +183,31 @@ When starting active implementation on the Communication Department Hub, follow 
 #### Phase 0.1.2: Selected foundation
 
 - [x] 0.1.2.1 Scaffold Next.js, TypeScript and Tailwind; establish selected RTL tokens, shell and responsive navigation. Evidence: start/build checks and browser navigation.
-- [/] 0.1.2.2 Add coherent mock entities and eight-role View As simulation. Evidence: linked campaign data and visible role-specific priorities.
+- [x] 0.1.2.2 Add coherent mock entities and eight-role View As simulation. Evidence: linked campaign data and visible role-specific priorities.
 
 #### Phase 0.1.3: Core workflow
 
-- [/] 0.1.3.1 Implement Home, Work, Work detail and Create with forms, tabs, search, comments and mock review submission. Evidence: browser interaction walkthrough.
-- [/] 0.1.3.2 Implement Approvals/Publishing, Calendar and Media Library with revision review, scheduling, previews and per-channel results. Evidence: approve/schedule/publish/partial-failure walkthrough.
+- [x] 0.1.3.1 Implement Home, Work, Work detail and Create with forms, tabs, search, comments and mock review submission. Evidence: browser interaction walkthrough.
+- [x] 0.1.3.2 Implement Approvals/Publishing, Calendar and Media Library with revision review, scheduling, previews and per-channel results. Evidence: approve/schedule/publish/partial-failure walkthrough.
 
 #### Phase 0.1.4: Supporting experiences
 
-- [/] 0.1.4.1 Add believable Mail, Ideas, Analytics and Monitoring, plus Admin, Settings and Account shells. Evidence: page and central-action checks.
-- [/] 0.1.4.2 Connect notifications, activity, empty/loading/error states and mock outcomes. Evidence: cross-page state checks; notification read state separate from approval state.
+- [x] 0.1.4.1 Add believable Mail, Ideas, Analytics and Monitoring, plus Admin, Settings and Account shells. Evidence: page and central-action checks.
+- [x] 0.1.4.2 Connect notifications, activity, empty/loading/error states and mock outcomes. Evidence: cross-page state checks; notification read state separate from approval state.
 
 #### Phase 0.1.5: Acceptance and handoff
 
 > [!note] Phase Scope & Execution
 > Phase 0.1.5 is executed as a unified verification and handoff package. Astra completes both the remaining multi-persona/accessibility verification in 0.1.5.1 and the final acceptance, demonstration, and documentation closure in 0.1.5.2.
 
-- [/] 0.1.5.1 Persona, responsive, keyboard, and QA verification. Verify remaining persona experiences (designer, producer, member), 1440/1280 desktop, 768–1024 tablet and ~390 mobile layouts, central dialogs, and keyboard/accessibility navigation. Evidence: screenshots, verification test fixtures, and focused QA log.
-- [/] 0.1.5.2 Final prototype acceptance, handoff, and tracking closure. Demonstrate the complete mock workflow end-to-end, verify clean production build and absence of production secrets/services, document verified limits, and synchronize tracking across Status, progress, and Roadmap. Evidence: acceptance walkthrough record and runnable setup instructions.
+- [x] 0.1.5.1 Persona, responsive, keyboard, and QA verification. Verify remaining persona experiences (designer, producer, member), 1440/1280 desktop, 768–1024 tablet and ~390 mobile layouts, central dialogs, and keyboard/accessibility navigation. Evidence: screenshots, verification test fixtures, and focused QA log.
+- [x] 0.1.5.2 Final prototype acceptance, handoff, and tracking closure. Demonstrate the complete mock workflow end-to-end, verify clean production build and absence of production secrets/services, document verified limits, and synchronize tracking across Status, progress, and Roadmap. Evidence: acceptance walkthrough record and runnable setup instructions.
 
 ---
 
 ### Checkpoint 0.2: Department Validation
 
-**State:** Planned (following Checkpoint 0.1 completion).  
+**State:** Ready to start; not started. Checkpoint 0.1 accepted.
 **Outcome:** Validate the prototype against actual Communication Department work, record operational corrections, and authorize production architecture planning.  
 **Exit Gate:** The department can complete the agreed representative workflows through the prototype without major structural confusion.
 

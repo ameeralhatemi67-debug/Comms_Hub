@@ -1,0 +1,69 @@
+{
+  "personas": [
+    {
+      "role": "director",
+      "priority": "قراراتك اليوم ومتابعة الحملة",
+      "ownWorkComment": false,
+      "review": true,
+      "publish": false,
+      "result": "PASS"
+    },
+    {
+      "role": "assistant",
+      "priority": "تنسيق العمل ومراجعة التسليمات",
+      "ownWorkComment": false,
+      "review": true,
+      "publish": false,
+      "result": "PASS"
+    },
+    {
+      "role": "writer",
+      "priority": "المحتوى المطلوب وملاحظات المراجعة",
+      "ownWorkComment": true,
+      "review": false,
+      "publish": false,
+      "result": "PASS"
+    },
+    {
+      "role": "designer",
+      "priority": "التصاميم وإصدارات الوسائط",
+      "ownWorkComment": true,
+      "review": false,
+      "publish": false,
+      "result": "PASS"
+    },
+    {
+      "role": "producer",
+      "priority": "الإنتاج والتسليم والمراجعة",
+      "ownWorkComment": true,
+      "review": false,
+      "publish": false,
+      "result": "PASS"
+    },
+    {
+      "role": "publisher",
+      "priority": "الإصدارات المعتمدة ومواعيد النشر",
+      "ownWorkComment": false,
+      "review": false,
+      "publish": true,
+      "result": "PASS"
+    },
+    {
+      "role": "member",
+      "priority": "أعمالك ومشاركات الفريق",
+      "ownWorkComment": true,
+      "review": false,
+      "publish": false,
+      "result": "PASS"
+    },
+    {
+      "role": "admin",
+      "priority": "حالة النظام وإعدادات المستخدمين",
+      "ownWorkComment": false,
+      "review": false,
+      "publish": false,
+      "result": "PASS"
+    }
+  ],
+  "errors": []
+}

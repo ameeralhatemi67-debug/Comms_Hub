@@ -1,0 +1,15 @@
+{
+  "checks": [
+    "Keyboard skip link visibly focused; document RTL",
+    "Mobile navigation traps focus, Escape returns focus, links navigate",
+    "Media filter, list, version preview and empty search",
+    "Browser edit invalidates approval and keeps original approved content and asset v5",
+    "Notification read changes read state without approving work",
+    "Work status filter, board and empty search",
+    "Calendar event dialog and mobile empty month",
+    "Named mobile global search and empty result"
+  ],
+  "errors": [],
+  "externalOrigins": [],
+  "result": "PASS"
+}

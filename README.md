@@ -17,10 +17,10 @@ Open http://127.0.0.1:3000. For development use npm run dev. State resets on ref
     npm run typecheck
     npm test
 
-qa/verify.cjs uses the Codex desktop bundled Playwright and Edge. Run it against the running production app. See qa/verification.json for results and Status.md for limitations.
+Browser QA: node qa/verify.cjs, node qa/acceptance.cjs, and node qa/final-interactions.cjs against the running app. Local Playwright is preferred; optional Codex fallback and browser/base URL configuration are documented in qa/ACCEPTANCE.md.
 
 ## Demo
 
 Use View As to switch writer → reviewer → writer → assistant → publisher. Create a post, request changes, edit and resubmit, approve the revision, schedule, then simulate partial failure and retry. Calendar, notifications and analytics use the same local records.
 
-Not yet signed off for broad department validation. See Status.md for the exact next work.
+READY FOR CHECKPOINT 0.2 — prototype acceptance complete. Actual department validation remains pending. See qa/ACCEPTANCE.md and Status.md.

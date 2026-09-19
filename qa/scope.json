@@ -1,0 +1,6 @@
+{
+  "inspectedFiles": 17,
+  "findings": [],
+  "productionConfigurationCandidates": [],
+  "note": "Focused source/configuration scan; excludes architecture documents and dependencies. No secret values are logged."
+}

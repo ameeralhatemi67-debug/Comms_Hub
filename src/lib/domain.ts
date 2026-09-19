@@ -18,7 +18,8 @@ export type Asset={id:string;title:string;kind:'poster'|'video'|'raw';versions:n
 export const assets:Asset[]=[{id:'poster',title:'الملصق النهائي',kind:'poster',versions:[3,4,5],approved:5,filename:'poster-final.jpg',creator:'سارة'},{id:'reel',title:'الفيديو الرئيسي',kind:'video',versions:[3,4],approved:null,filename:'main-reel.mp4',creator:'أحمد'},{id:'footage',title:'لقطات التغطية',kind:'raw',versions:[1],approved:null,filename:'drone-shot.mov',creator:'أحمد'}];
 export type Content={title:string;body:string;type:string;owner:Role;due:string;channels:Channel[];assetId:string;assetVersion:number;variants:Record<Channel,string>};
 export type Release=Content & {revision:number;submittedBy:Role;approvedBy?:Role};
-export type Work=Content & {id:string;revision:number;status:Status;release?:Release;scheduled?:string;results:Partial<Record<Channel,'SUCCESS'|'FAILED'>>;comments:{by:string;text:string}[];activity:string[];checklist:boolean[]};
+export type ReleaseRecord={release:Release;decision:"SUBMITTED"|"APPROVED"|"CHANGES_REQUESTED"|"REJECTED";by:Role;note?:string};
+export type Work=Content & {id:string;revision:number;status:Status;release?:Release;history:ReleaseRecord[];scheduled?:string;results:Partial<Record<Channel,'SUCCESS'|'FAILED'>>;comments:{by:string;text:string}[];activity:string[];checklist:boolean[]};
 export type Notice={id:string;kind:'action'|'attention'|'info'|'mention';title:string;workId:string;read:boolean};
 export type State={role:Role;work:Work[];notices:Notice[];message:string};
 export type Action={type:'role';role:Role}|{type:'create';content:Content;submit:boolean}|{type:'edit';id:string;content:Content}|{type:'submit'|'approve'|'publish'|'retry';id:string}|{type:'changes'|'reject'|'comment';id:string;text:string}|{type:'schedule';id:string;date:string}|{type:'result';id:string;mode:'success'|'partial'|'failure'}|{type:'check';id:string;index:number}|{type:'read';id:string}|{type:'clear'}|{type:'reset'};
@@ -26,7 +27,7 @@ const blankVariants={Instagram:'',X:'',LinkedIn:''};
 const baseCopy='في يومنا الوطني، نحتفي بوطن يجمعنا على الطموح والعطاء. نفخر بمنجزاتنا، ونواصل العمل معاً لمستقبل يستحقه وطننا. #اليوم_الوطني_السعودي';
 export function initialState():State {
  const rows:[string,Role,Status,string][]=[['إعداد الفيديو الرئيسي','producer','IN_REVIEW','reel'],['تصميم الملصق','designer','APPROVED','poster'],['كتابة محتوى X','writer','CHANGES_REQUESTED','poster'],['إعداد منشور Instagram','designer','IN_PRODUCTION','poster'],['تغطية الحدث','member','DRAFT','footage']];
- return {role:'director',message:'',work:rows.map((r,i)=>{const w:Work={id:`CH-${241+i}`,title:r[0],owner:r[1],status:r[2],type:i===0?'فيديو':i===1?'تصميم':'منشور اجتماعي',body:baseCopy,due:`2026-09-${i===4?'23':'22'}`,channels:[...channels],assetId:r[3],assetVersion:r[3]==='reel'?4:r[3]==='poster'?5:1,variants:{...blankVariants},revision:i===0?4:1,results:{},comments:i===2?[{by:'محمد',text:'يرجى اختصار النص وإبراز مشاركة الفريق.'}]:[],activity:['أُنشئ العمل ضمن حملة اليوم الوطني'],checklist:[true,true,false,false]};if(['IN_REVIEW','APPROVED'].includes(w.status))w.release={...pickContent(w),revision:w.revision,submittedBy:w.owner,...(w.status==='APPROVED'?{approvedBy:'director' as Role}:{})};return w}),notices:[{id:'n1',kind:'action',title:'الفيديو الرئيسي يحتاج مراجعتك',workId:'CH-241',read:false},{id:'n2',kind:'mention',title:'محمد طلب تعديل محتوى X',workId:'CH-243',read:false}]};
+ return {role:'director',message:'',work:rows.map((r,i)=>{const w:Work={id:`CH-${241+i}`,title:r[0],owner:r[1],status:r[2],type:i===0?'فيديو':i===1?'تصميم':'منشور اجتماعي',body:baseCopy,due:`2026-09-${i===4?'23':'22'}`,channels:[...channels],assetId:r[3],assetVersion:r[3]==='reel'?4:r[3]==='poster'?5:1,variants:{...blankVariants},revision:i===0?4:1,history:[],results:{},comments:i===2?[{by:'محمد',text:'يرجى اختصار النص وإبراز مشاركة الفريق.'}]:[],activity:['أُنشئ العمل ضمن حملة اليوم الوطني'],checklist:[true,true,false,false]};if(['IN_REVIEW','APPROVED'].includes(w.status))w.release={...pickContent(w),revision:w.revision,submittedBy:w.owner,...(w.status==='APPROVED'?{approvedBy:'director' as Role}:{})};if(w.release)w.history=[{release:{...pickContent(w.release),revision:w.release.revision,submittedBy:w.release.submittedBy,approvedBy:w.release.approvedBy},decision:w.status==='APPROVED'?'APPROVED':'SUBMITTED',by:w.release.approvedBy||w.owner}];return w}),notices:[{id:'n1',kind:'action',title:'الفيديو الرئيسي يحتاج مراجعتك',workId:'CH-241',read:false},{id:'n2',kind:'mention',title:'محمد طلب تعديل محتوى X',workId:'CH-243',read:false}]};
 }
 export function pickContent(w:Content):Content{return {title:w.title,body:w.body,type:w.type,owner:w.owner,due:w.due,channels:[...w.channels],assetId:w.assetId,assetVersion:w.assetVersion,variants:{...w.variants}}}
 export function canEdit(role:Role,w:Work){return roles[role].create&&(roles[role].review||role===w.owner)}
@@ -41,8 +42,8 @@ export function reducer(state:State,a:Action):State {
   if(!actor.create)return fail('هذا الدور لا ينشئ المحتوى.');
   if(!a.content.title.trim()||!a.content.body.trim()||!a.content.channels.length)return fail('أكمل العنوان والمحتوى وقنوات النشر.');
   const id=`CH-${Math.max(...state.work.map(w=>Number(w.id.slice(3))))+1}`;
-  const w:Work={...a.content,id,revision:1,status:a.submit?'IN_REVIEW':'DRAFT',results:{},comments:[],activity:[`أنشأ ${actor.user} العمل`],checklist:[false,false,false,false]};
-  if(a.submit)w.release={...pickContent(w),revision:1,submittedBy:state.role};
+  const w:Work={...a.content,id,revision:1,status:a.submit?'IN_REVIEW':'DRAFT',history:[],results:{},comments:[],activity:[`أنشأ ${actor.user} العمل`],checklist:[false,false,false,false]};
+  if(a.submit){w.release={...pickContent(w),revision:1,submittedBy:state.role};w.history=[{release:{...w.release,...pickContent(w.release)},decision:'SUBMITTED',by:state.role}]}
   return {...state,work:[w,...state.work],message:`تم إنشاء ${id}`,notices:a.submit?[{id:`${id}-1`,kind:'action',title:`طلب مراجعة: ${w.title}`,workId:id,read:false},...state.notices]:state.notices};
  }
  const original=state.work.find(w=>w.id===a.id);if(!original)return fail('العمل غير موجود.');
@@ -60,6 +61,10 @@ export function reducer(state:State,a:Action):State {
  case 'publish':if(!actor.publish||!ready(w)||!['APPROVED','SCHEDULED'].includes(w.status))return fail('النشر يتطلب إصداراً معتمداً ودور مسؤول النشر.');w.status='PUBLISHING';message='بدأت محاكاة النشر';break;
  case 'retry':if(!actor.publish||!ready(w)||!['PARTIAL','FAILED'].includes(w.status))return fail('لا توجد قنوات فاشلة قابلة لإعادة المحاولة.');w.status='PUBLISHING';message='إعادة محاولة القنوات الفاشلة فقط';break;
  case 'result':if(w.status!=='PUBLISHING')return state;w.channels.forEach((c,i)=>{if(w.results[c]!=='SUCCESS')w.results[c]=a.mode==='failure'||(a.mode==='partial'&&i===w.channels.length-1)?'FAILED':'SUCCESS'});{const count=w.channels.filter(c=>w.results[c]==='SUCCESS').length;w.status=count===w.channels.length?'PUBLISHED':count===0?'FAILED':'PARTIAL'}message=w.status==='PUBLISHED'?'اكتمل النشر التجريبي':w.status==='PARTIAL'?'نُشرت بعض القنوات. راجع القنوات الفاشلة.':'تعذر النشر التجريبي. أعد المحاولة.';kind=w.status==='PUBLISHED'?'info':'attention';break;
+ }
+ if(w.release&&['submit','approve','changes','reject'].includes(a.type)) {
+ const decision = a.type==='submit'?'SUBMITTED':a.type==='approve'?'APPROVED':a.type==='changes'?'CHANGES_REQUESTED':'REJECTED';
+ w.history=[...w.history,{release:{...w.release,...pickContent(w.release)},decision,by:state.role,...('text' in a?{note:a.text}:{})}];
  }
  w.activity=[`${actor.user}: ${message}`, ...w.activity];
  return {...state,work:state.work.map(x=>x.id===w.id?w:x),message,notices:a.type==='check'?state.notices:[{id:`n-${Date.now()}-${state.notices.length}`,kind,title:`${w.title}: ${message}`,workId:w.id,read:false},...state.notices]};
