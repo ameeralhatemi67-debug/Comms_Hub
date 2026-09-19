@@ -1,0 +1,29 @@
+# Normalize line endings so CRLF/LF differences never appear as content changes.
+# Repository stores LF; working copies check out LF on every platform.
+* text=auto eol=lf
+
+*.md      text eol=lf
+*.ts      text eol=lf
+*.tsx     text eol=lf
+*.mjs     text eol=lf
+*.cjs     text eol=lf
+*.js      text eol=lf
+*.json    text eol=lf
+*.css     text eol=lf
+*.html    text eol=lf
+*.yml     text eol=lf
+*.txt     text eol=lf
+.gitignore      text eol=lf
+.gitattributes  text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.mp4 binary
+*.mov binary
+*.psd binary
+*.ico binary
+*.woff  binary
+*.woff2 binary
