@@ -7,9 +7,9 @@ tags:
   - status/active
   - planning/foundation
 created: 2026-08-18
-updated: 2026-09-18
+updated: 2026-09-19
 status: active
-active_version: "Version 0 UI Prototype"
+active_version: "Version 0: UI Prototype"
 planning_horizon: "1–12 months"
 parent: "[[Comms Hub]]"
 aliases:
@@ -144,32 +144,41 @@ When work items are scheduled in future planning iterations, use these standardi
 When starting active implementation on the Communication Department Hub, follow this sequence:
 
 1. **Review Current Status:** Consult `Status.md` to confirm the baseline state and identify the current active focus.
-2. **Consult Architectural Specifications:** Reference the 11 detailed companion documents in `disscussios/` for deep architectural guidance:
-   - [[disscussios/organizational_role_discussion|Organizational Roles & Permissions]]
-   - [[disscussios/approval_policy_design|Approval Policies & Version Binding]]
-   - [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle & 3-2-1 Disaster Recovery]]
-   - [[disscussios/failure_handling_background_jobs|Background Jobs & Reliability Architecture]]
-   - [[disscussios/connected_account_secrets_management|Connected Accounts & Secrets Management]]
-   - [[disscussios/notification_model|Three-Tier Attention & Notification Model]]
-   - [[disscussios/search_and_metadata|Search, Metadata & Arabic Taxonomy]]
-   - [[disscussios/security_discussion|Security, Zero-Trust & Audit Logging]]
-   - [[disscussios/emergency_workflows|Emergency Workflows & Kill-Switch Controls]]
+2. **Consult Architectural Specifications:** Reference the 11 companion documents in `disscussios/` for deep architectural guidance:
+   - **Foundational Ideation Drafts:**
+     - [[disscussios/First_idea_darft|First Idea Draft]] — Foundational technical ideation.
+     - [[disscussios/Second_discussion_draft|Second Discussion Draft]] — Storage, AI controls, and publishing.
+   - **Detailed Architecture Specifications:**
+     - [[disscussios/organizational_role_discussion|Organizational Roles & Permissions]] — 8 confirmed roles and authority model.
+     - [[disscussios/approval_policy_design|Approval Policies & Version Binding]] — Multi-stage approval and version binding.
+     - [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle & 3-2-1 Disaster Recovery]] — Hybrid storage and backup.
+     - [[disscussios/failure_handling_background_jobs|Background Jobs & Reliability Architecture]] — Queue and failure routing.
+     - [[disscussios/connected_account_secrets_management|Connected Accounts & Secrets Management]] — OAuth and secret envelopes.
+     - [[disscussios/notification_model|Three-Tier Attention & Notification Model]] — Action, Attention, Notification.
+     - [[disscussios/search_and_metadata|Search, Metadata & Arabic Taxonomy]] — Full-text search and Arabic taxonomy.
+     - [[disscussios/security_discussion|Security, Zero-Trust & Audit Logging]] — Defense-in-depth and immutable audit log.
+     - [[disscussios/emergency_workflows|Emergency Workflows & Kill-Switch Controls]] — Crisis governance and freeze switch.
 3. **Structure Initial Work Packages:** When ready to commence coding, define the initial milestone block with clear acceptance criteria and exit gates.
 4. **Maintain Cadence:** Work on one bounded problem at a time, verify the result, log evidence in `progress.md`, update `Status.md`, and advance `Roadmap.md`.
 
 ---
 
-## Version 0: UI prototype
+## Version 0: UI Prototype
 
 ### Checkpoint 0.1: UI Prototype MVP 0.1
 
-**State:** Active. **Authority:** [[MVP_draft]].
-**Outcome:** A runnable Arabic RTL product prototype for eight roles, using one connected Saudi National Day 2026 scenario.
-**Exit gate:** Selected design; six high-fidelity Level A pages; lighter B/C pages; role simulation; verified end-to-end mock workflow and responsive layouts. No real backend, authentication, integrations, or publishing.
+**State:** Active. **Authority:** [[MVP_draft]].  
+**Outcome:** A runnable Arabic RTL product prototype for eight roles, using one connected Saudi National Day 2026 scenario.  
+**Exit Gate:** Selected design; six high-fidelity Level A pages; lighter B/C pages; role simulation; verified end-to-end mock workflow and responsive layouts. No real backend, authentication, integrations, or publishing.
+
+> [!note] Implementation & Verification State (2026-09-19)
+> The visual design gate is complete (Direction A selected; B contributes larger media previews). The Next.js 16.3.5 / Tailwind 4 prototype builds and starts at `http://127.0.0.1:3000`. The core acceptance journey (create, edit, approve, schedule, calendar, partial publish and retry) passes in the browser with 60 route/viewport checks passing and zero horizontal overflow.
+> 
+> Tasks in Phases 0.1.2–0.1.5 remain marked in-progress (`[/]`) because exhaustive 8-role persona walkthroughs, full accessibility/contrast audits, and remaining edge actions are still pending formal sign-off. Full details and limits are tracked in `[[Status]]` and `[[progress]]`.
 
 #### Phase 0.1.1: Scope and visual decision
 
-- [x] 0.1.1.1 Inspect specifications and reconcile UI-first scope. Evidence: repository review and this reordered roadmap, baseline commit `7e45e2b`.
+- [x] 0.1.1.1 Inspect specifications and reconcile UI-first scope. Evidence: repository review and reordered roadmap, baseline commit `7e45e2b`.
 - [x] 0.1.1.2 Produce three distinct visual directions, each with Home, Work, Work detail, Create, Approvals/Publishing, and Media at desktop and mobile. Evidence: `design-review/index.html`, 36 screenshots, three desktop boards, and `design-review/verification.json` with 72 viewport checks passing. Visual boards inspected.
 - [x] 0.1.1.3 Record the user's selected or combined direction. User selected A on 2026-09-19; B contributes only larger media previews. Exact boundary recorded in `DESIGN.md`.
 
@@ -193,26 +202,201 @@ When starting active implementation on the Communication Department Hub, follow 
 - [/] 0.1.5.1 Verify 1440/1280 desktop, 768–1024 tablet and approximately 390 mobile; test central dialogs, roles and keyboard navigation. Evidence: screenshots and focused QA log.
 - [/] 0.1.5.2 Demonstrate the full mock workflow, run build checks, verify no production services/secrets, and synchronize tracking. Evidence: acceptance record and runnable instructions.
 
-Budget control: use the stricter 60% five-hour ceiling from the request. Initial account usage was 2%; treat 60% total account usage as a conservative stop threshold. Account usage is shared, so the delta is approximate. No subagents planned for the design gate. Preserve implementation effort for one selected direction.
+---
 
-### Checkpoint 0.2: Department validation
+### Checkpoint 0.2: Department Validation
 
-Planned after 0.1. Compare the provisional workflow with actual department work, record corrections, then authorize the production plan. This is a separate validation gate, not backend work in this run.
+**State:** Planned (following Checkpoint 0.1 completion).  
+**Outcome:** Validate the prototype against actual Communication Department work, record operational corrections, and authorize production architecture planning.  
+**Exit Gate:** The department can complete the agreed representative workflows through the prototype without major structural confusion.
 
-## Version 1 MVP (future, after prototype validation)
+#### Phase 0.2.1 — Workflow Mapping
+- [ ] Map representative real workflows using the confirmed eight department roles.
+- [ ] Compare actual workflow to MVP assumptions.
+- [ ] Record exceptions, bottlenecks, and terminology corrections.
 
-**Goal:** Establish the foundational production release of the Communication Department Hub, delivering a reliable, secure workspace for departmental campaign planning, collaborative creation, multi-tier approval governance, and automated multi-channel publishing.
+#### Phase 0.2.2 — Guided Department Validation
+- [ ] Director / Assistant Director strategic and review validation.
+- [ ] Content Writer, Designer, and Media Producer specialist validation.
+- [ ] Publishing Officer release and scheduling validation.
+- [ ] Department Member and Admin operational validation.
+- [ ] Mobile workflow validation where relevant.
 
-**Status:** Planned, blocked on prototype validation. Preserve database, permissions, durable jobs, real publishing, storage, security and recovery as future work.
+#### Phase 0.2.3 — Prototype Corrections
+- [ ] Apply only evidence-based workflow/UI corrections.
+- [ ] Remove or simplify unneeded interactions.
+- [ ] Correct role-specific experiences and Arabic terminology.
 
-> [!note] Checkpoints, Phases, and Tasks Definition
-> Detailed checkpoints, phases, and atomic tasks for Version 1 MVP will be defined sequentially as active development commences, adhering to the Work Hierarchy & Breakdown Standards and informed by real engineering feedback.
+#### Phase 0.2.4 — Product Freeze Gate
+- [ ] Freeze Version 1 product workflow assumptions.
+- [ ] Record unresolved questions separately.
+- [ ] Authorize production architecture planning.
+
+---
+
+## Version 1: Production Foundation
+
+**State:** Planned (blocked on prototype validation).  
+**Authority:** Architectural specifications in `disscussios/`.  
+**Goal:** Convert the validated prototype into a secure, persistent, deployable multi-user application foundation.
+
+### Checkpoint 1.1 — Platform & Environment Foundation
+
+**Outcome:** Reproducible development, staging, and deployment environment with hardened boundaries.
+
+Phases:
+- **1.1.1 Codebase & Tooling Cleanup:** Production build configuration, linting, and dependency sanitization.
+- **1.1.2 Vercel Environment Setup:** Deployment targets, preview branches, and edge runtime configuration.
+- **1.1.3 Supabase Environment Setup:** Project initialization, database connection pooling, and client SDK bindings.
+- **1.1.4 Configuration & Secrets Boundary:** Strict separation of client/server environment variables and key management.
+- **1.1.5 Migration & Seed Baseline:** Deterministic database migration tooling and baseline test seed data.
+- **1.1.6 Build & CI Verification:** Continuous integration pipeline running typecheck, unit tests, and build checks.
+
+**Exit Gate:** Fresh environment can be configured, migrated, built, and deployed reproducibly.
+
+### Checkpoint 1.2 — Identity & Organizational Authorization
+
+**Outcome:** Real authenticated users operate under the confirmed institutional organizational model.
+
+Phases:
+- **1.2.1 Authentication & Session Management:** Supabase Auth integration, session tokens, and refresh flows.
+- **1.2.2 User Profile & Lifecycle:** Account states (active, suspended, offboarded) and profile metadata.
+- **1.2.3 Organizational Positions & Hierarchy:** Department positions, reporting lines, and organizational units.
+- **1.2.4 Role Permissions & Capabilities:** Fine-grained permission assignments mapping to the eight confirmed roles.
+- **1.2.5 Resource-Level Access Control:** Scoped access to campaigns, work items, and internal documents.
+- **1.2.6 Delegation Foundations:** Temporary and delegated authority mechanisms for review and approvals.
+- **1.2.7 Server-Side & RLS Enforcement:** Row-Level Security policies ensuring no client can bypass authorization rules.
+
+**Exit Gate:** Authorization tests prove users cannot read or mutate data exceeding their verified authority.
+
+### Checkpoint 1.3 — Persistent Core Domain
+
+**Outcome:** Campaigns, Work Items, participants, comments, and core Asset metadata persist durably.
+
+Phases:
+- **1.3.1 Relational Schema & Constraints:** Tables, foreign keys, constraints, and indexes for core entities.
+- **1.3.2 Domain Repositories & Services:** Clean application service layer mediating between UI and database.
+- **1.3.3 Migration Pipeline & Baseline:** Fully versioned, reversible schema migration scripts.
+- **1.3.4 Realistic Seed Fixtures:** Realistic department test data reflecting institutional workflows.
+- **1.3.5 UI State Binding:** Replacement of local mock state with server-backed data fetching and mutations.
+- **1.3.6 Concurrency Controls & Data Validation:** Optimistic locking, input validation, and transaction boundaries.
+
+**Exit Gate:** Core work survives browser sessions and redeploys, maintaining full consistency across concurrent users.
+
+### Checkpoint 1.4 — Event & Audit Foundation
+
+**Outcome:** Meaningful organizational changes emit structured events and durable, immutable audit records.
+
+Phases:
+- **1.4.1 Structured Event Vocabulary & Schemas:** Defined event types covering all state transitions and governance actions.
+- **1.4.2 Immutable Audit Logging Model:** Append-only audit table tracking actor, timestamp, action, and payload diffs.
+- **1.4.3 Actor & Resource Context Propagation:** Request context tracing ensuring every mutation captures the initiating identity.
+- **1.4.4 Sensitive Action & Security Records:** Dedicated audit capture for permission changes, emergency actions, and logins.
+- **1.4.5 Audit Query & Compliance Display Foundation:** Admin interface for querying and inspecting audit trails.
+
+**Exit Gate:** Representative workflows produce complete, tamper-resistant, and trustworthy audit histories.
+
+### Checkpoint 1.5 — Version 1 Acceptance Gate
+
+**Outcome:** Secure, persistent multi-user foundation fully validated against staging environments.  
+**Exit Gate:** Real authentication, roles, persistent database, core work workflows, audit logging, and automated deployment operate correctly without external publishing integrations.
+
+---
+
+## Version 2: Workflow & Operations
+
+**State:** Planned (follows Version 1).  
+**Goal:** Turn the production foundation into the department's real internal operating system.
+
+### Checkpoint 2.1 — Work & Campaign Engine
+- **Scope:** Campaigns, Work Items, participants, priorities, deadlines, comments, revision tracking, and complete lifecycle states.
+- **Outcome:** Full operational tracking of all departmental content initiatives from concept to readiness.
+
+### Checkpoint 2.2 — Asset Management Core
+- **Scope:** Digital assets, versioning, storage locations, MIME validation, thumbnail extraction, and Work/Campaign bindings.
+- **Outcome:** Unified asset repository organized by campaigns and production formats with version immutability.
+
+### Checkpoint 2.3 — Approval & Release Engine
+- **Scope:** Version-bound release packages, multi-stage approval requests, formal decisions, delegation, and revision invalidation.
+- **Outcome:** Strict governance ensuring approved content cannot be modified without re-triggering the approval chain.
+
+### Checkpoint 2.4 — Actions, Attention & Notifications
+- **Scope:** Three-tier attention model: Action Items (blocking), Attention Items (informational), and Notifications (activity feed).
+- **Outcome:** Role-tailored operational inbox preventing notification fatigue while ensuring critical approvals are never missed.
+
+### Checkpoint 2.5 — Search & Metadata
+- **Scope:** Permission-aware global search, tag taxonomy, faceted filtering, full-text indexing, and Arabic text normalization.
+- **Outcome:** Fast discovery across campaigns, work items, and media assets with full dialectal Arabic tolerance.
+
+### Checkpoint 2.6 — Durable Job Foundation
+- **Scope:** Background job execution, scheduled triggers, retry policies, exponential backoff, dead-letter queues, and Needs Attention triage.
+- **Outcome:** Resilient asynchronous task engine capable of handling media processing and batch tasks without data loss.
+
+### Checkpoint 2.7 — Internal Operations Pilot
+
+**Exit Gate:** The department can plan, assign, create, review, revise, approve, and track real internal work end-to-end without external publishing integrations.
+
+---
+
+## Version 3: Connected Operations
+
+**State:** Planned (follows Version 2).  
+**Goal:** Safely connect Comms Hub to external storage, communication channels, and publishing systems.
+
+### Checkpoint 3.1 — Connected Account Infrastructure
+- **Scope:** OAuth 2.0 flows, token encryption envelopes, token refresh workers, health monitoring, reauthorization alerts, and revocation.
+- **Outcome:** Secure external platform connection management without exposing raw secrets to client code.
+
+### Checkpoint 3.2 — Production Storage Adapter
+- **Scope:** AssetLocation / Storage Adapter implementation with the selected first provider (Google Shared Drive / S3 hybrid).
+- **Outcome:** Seamless large-file asset preservation adhering to the 3-2-1 backup lifecycle specification.
+
+### Checkpoint 3.3 — Publication Orchestrator
+- **Scope:** Publication bundles, platform adapters (X/Twitter, LinkedIn, Instagram, etc.), preflight checks, and child publication records.
+- **Outcome:** Unified multi-channel publishing interface with channel-specific validation rules.
+
+### Checkpoint 3.4 — Scheduling & Failure Recovery
+- **Scope:** Durable scheduling, platform rate limit respect, idempotency keys, transient error retries, and partial failure isolation.
+- **Outcome:** Dependable publishing that isolates failed channels without re-publishing or duplicating successful ones.
+
+### Checkpoint 3.5 — External Mail & Intake
+- **Scope:** Inbound press releases, media inquiries, official correspondence intake, and automatic work item drafting.
+- **Outcome:** Direct translation of inbound external communications into actionable departmental work items.
+
+### Checkpoint 3.6 — External Reconciliation
+- **Scope:** Webhook receivers and polling workers to track and reconcile posts modified, scheduled, or deleted directly on native platforms.
+- **Outcome:** Synchronized truth between external social channels and the internal Comms Hub calendar.
+
+### Checkpoint 3.7 — Real Analytics Collection
+- **Scope:** Platform metrics collection (impressions, engagement, clicks, reach), campaign-level rollups, and reporting exports.
+- **Outcome:** Automated performance reporting linked directly to originating campaigns and work items.
+
+### Checkpoint 3.8 — Controlled Production Pilot
+
+**Exit Gate:** Selected real departmental communication workflows can be planned, approved, scheduled, executed, reconciled, and monitored live through Comms Hub.
+
+---
+
+## Version 4: Intelligence & Automation
+
+**State:** Future / intentionally un-decomposed.  
+**Goal:** Use the trusted data, workflows, and external execution capability from Versions 1–3 to provide controlled automation and contextual intelligence.
+
+### Candidate Capabilities
+- Rule-based workflow automation and routing.
+- AI drafting assistance and Arabic-language stylistic refinement.
+- Automated diff comparison between approval revisions.
+- Inbound mail summarization and metadata extraction.
+- Automatic OCR, speech-to-text transcription, and video captioning.
+- Semantic vector search across institutional media archives.
+- AI-derived taxonomy tagging and tone compliance checks.
+- Executive analytics summarization and trend explanations.
+- Human-in-the-loop policy boundaries and AI confidence scoring.
+- AI usage, latency, and cost governance controls.
+
+> [!important] Planning Rule for Version 4
+> Detailed checkpoints, phases, and atomic tasks for Version 4 will not be defined until empirical operational evidence and user feedback from the Version 3 production pilot have been collected and analyzed.
 
 ---
 
 ^comms-hub-roadmap-boundary
-
-## 2026-09-19 implementation evidence
-
-Design gate complete. Scaffold build/typecheck pass. Core acceptance journey passes in browser, including revision, approval, schedule, calendar, partial publish and retry. 60 route/viewport checks pass. Remaining task checkboxes stay partial because all eight role experiences, every supporting action, complete keyboard/accessibility review and visual QA are not fully verified. See qa/verification.json and Status.md. Earlier 60% budget wording applies to the design session only; implementation used the subsequent user limits.
-
