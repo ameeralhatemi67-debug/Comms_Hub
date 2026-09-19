@@ -32,18 +32,57 @@ related:
 
 ## Progress Entries
 
+### 2026-09-19 — Phase 0.2.1 workflow mapping and pre-validation corrections
+
+- **Milestone:** Checkpoint 0.2, Phase 0.2.1, tasks 0.2.1.1 through 0.2.1.5. Phase 0.2.2 was not started: it requires real department participants and cannot be simulated.
+- **Recoverability:** Baseline committed before any change. Line endings normalized first in its own commit, then the code corrections in `079cd5d` and `221477c`. No remote push. `disscussios/` was read and cited but never edited.
+- **Deliverables:** `validation/workflow-map.md` (nine representative workflows, 25 prototype assumptions classified as 15 supported, 6 partial, 4 unsupported, 11 exceptions, 7 bottlenecks, 9 terminology items, seven open questions), `validation/validation-scripts.md` (seven guided session scripts with fixed setup, unaided-success criteria and participant-facing Arabic wording), and `validation/feedback-rubric.md` (four-level severity rubric, per-session capture sheet, consolidated findings register, exit gate roll-up).
+- **Corrections applied (task 0.2.1.5), each against a named specification section:**
+  - Role home experiences differentiated per section 6; notices now carry an explicit role audience so each role reads only its own queue. Previously all eight roles saw near-identical tiles and one shared notification list, which contradicted the "eight role experiences" claim.
+  - Admin built out per sections 35 to 37: Users, Roles and Permissions, Integrations, System Health, Storage, Security, Automation, Notification Policy. Connected account health added to the Publishing Officer's home.
+  - Calendar grid corrected: weekday headers and leading pad cells, so a month starts on its real weekday instead of always placing day 1 in the first column. Month and year are now chosen through Arabic selects rather than the browser's own locale label.
+  - Post-publication editing: approval invalidation retained as `disscussios/approval_policy_design.md` section 3 requires, but the dispatch outcome is now preserved in a publication record instead of being wiped. The previous behaviour silently destroyed the record of what the department had actually published.
+  - Settings expanded to the eight sections in section 38. Account shows the Arabic role name instead of the raw role key, plus email, language, permissions and mock sessions per section 39.
+  - Seed data aligned with section 47: the 23 Sep 18:00 publication is pre-scheduled, per-item activity lines vary, the hard-coded home schedule entry is gone, section 4 campaign figures appear on home, and a campaign creation step matches the section 51 provisional flow.
+  - Every `src` file and the test suite reformatted from single-line source to normal line breaks, so Phase 0.2.3 corrections are reviewable. No behaviour change.
+  - `package.json` gained `"type": "module"`, removing the module-type warning on every `npm test`.
+- **Repository hygiene:** added `.gitattributes` pinning text files to LF in index and working tree, and renormalized, so CRLF drift no longer shows whole files as modified. Added the project's working rules to `AGENTS.md`: document ownership, the prohibition on editing `disscussios/`, Arabic terminology, the zero-emoji policy, evidence over assertion, recoverable baselines, the Version 0 prototype boundary, and the shell-quoting rule that caused the corruption repaired below.
+- **Document repairs:** three lines of this log had been corrupted by a double-quoted PowerShell string consuming a backtick and the letter n; `node --check ...`, `node design-review/verify.cjs` and `notification_model.md` are restored. The two 2026-09-19 entries that had been stranded after the `^comms-hub-progress-boundary` anchor and the protocol template were moved back into chronological order. Usage-meter narration was removed from this log and from `Status.md`; it belongs in a handoff message, not the vault. All verified content and evidence were preserved.
+- **Roadmap:** Checkpoint 0.2 now carries `X.Y.Z.W` task identifiers with a definition of done and an evidence requirement per task, as the Work Hierarchy rules require, and a measurable exit gate: five role groups covered, at least six distinct participants with two in leadership, unaided scenario completion, an 80 percent scenario pass threshold, zero unresolved Severity 1 findings, and a completed rubric sheet per session.
+- **Verification & evidence:** `npm run typecheck` clean. `npm run build` clean. `npm test` 8 of 8 passing, including two new tests: one asserting that editing a published item invalidates the approval *and* preserves the publication record, and one asserting that all eight roles present distinct home tiles. `node qa/checkpoint-02-corrections.cjs` reports 34 of 34 browser checks passing, covering calendar weekday alignment across two months, per-role tiles for all eight roles, notice scoping, the admin and settings sections, the account role name and the derived home schedule; zero page or console errors. Responsive re-check at 1440 and 390 shows zero horizontal overflow on home, calendar and admin. Results in `qa/checkpoint-02-corrections.json`.
+- **Key decision:** the post-publication edit behaviour was treated as a genuine defect rather than intended policy. `approval_policy_design.md` requires invalidating the *approval*; it says nothing about erasing the *publication*, and the state diagram there does not route Published back to Draft. Approval invalidation and publication preservation are now two separate, separately tested rules, and the reasoning is written into `src/lib/domain.ts` at the `edit` case.
+- **Remaining limitations:** no human validation has occurred. Upload and playback remain deferred; delegation and an urgent path remain absent; the composer is still one form for every content type; the calendar still has no week, day or date-level creation. None of the seven open questions was answered, and no Arabic term was changed, because both depend on findings only real participants can produce.
+- **Next action:** arrange department participants and run Phase 0.2.2 from `validation/validation-scripts.md`. No Version 1 work.
+
+### 2026-09-19 — Phase 0.1.5 accepted
+
+- **Result:** READY FOR CHECKPOINT 0.2. No blocking prototype defect remains; actual department validation is pending. Checkpoint 0.2 preparation was not started to preserve the usage reserve.
+- **Fixes:** retained local submitted/reviewed release snapshots with exact content/asset versions; dialog focus return; modal mobile navigation; mobile search accessible name; empty-month message; reduced-motion handling.
+- **Evidence:** production build/typecheck pass; five domain tests pass; complete publication journey and 60 viewport checks pass; eight personas and B/C main actions pass; 14 Level A desktop/mobile screenshots and three additional mobile views visually inspected. Focused keyboard/form/RTL/contrast review completed. qa/final-interactions.json reports eight passing interaction groups, zero console/page errors and no external origins. qa/scope.json reports no source/config findings. Full record: qa/ACCEPTANCE.md.
+- **Decisions:** historical content necessary for credible exact-version review, now retained in memory. Upload/playback deferred because illustrative versioned media is sufficient for workflow evaluation. Other accepted limits are listed in the acceptance record; no production infrastructure added.
+- **QA portability:** local Playwright resolution, optional CODEX_NODE_MODULES fallback, configurable QA_BROWSER/QA_BASE_URL. Corrected select-label matching in final QA; restarted stopped local server before successful rerun.
+- **Recoverability:** Baseline `893cef5`; acceptance changes saved in a separate local commit. No remote push. No subagent used.
+- **Next:** 0.2.1 assumption mapping and human walkthrough preparation; 0.2.2 must involve actual department participants. No Version 1 work.
+
+### 2026-09-19 — Runnable UI prototype and verified core journey
+
+- Selected A with B only for larger media canvases, recorded in DESIGN.md. Next.js/TypeScript/Tailwind app added with shared client state and reusable shell/components.
+- Core screens and lighter supporting shells implemented. One Luna subagent handled supporting.tsx; primary agent integrated and verified.
+- Evidence: production build passes; typecheck passes after Next applied its standard skipLibCheck setting; npm test passes 3 domain tests. qa/verification.json records a passing browser acceptance journey and 60 route/viewport checks, zero captured JavaScript errors and zero horizontal document overflow.
+- Browser journey: create, request revision, edit, resubmit, approve revision 2, schedule, calendar, partial publish and failed-channel retry. Admin separation also checked. Initial browser checks exposed selector and navigation-timing issues, corrected in QA; composer received an explicit accessible textarea label.
+- Screenshots saved locally under ignored qa/artifacts. These are not a completed visual/accessibility audit.
+- Limitations and next actions are enumerated in Status.md. Media upload/playback, retained historical release snapshots, full persona/supporting-action QA and broad department-validation signoff remain incomplete. No production services were added.
+
 ### 2026-09-18 — UI-first scope aligned and three visual directions checked
 
 - **Milestone:** Checkpoint 0.1, Phase 0.1.1, tasks 0.1.1.1 and 0.1.1.2.
 - **Scope:** Read the six requested root documents; inspected relevant sections across all nine requested discussion documents. `MVP_draft.md` remains authoritative. Reordered the roadmap so prototype validation precedes platform and database work; retained future production horizons.
 - **Recoverability:** Existing tracked baseline was clean at commit `7e45e2b`. Pre-existing untracked `.serena/` was untouched. Discussion files and the authoritative MVP specification were not edited.
 - **Deliverable:** A local browser gallery in `design-review/`, with A (operations workspace), B (campaign studio), and C (compact operations desk). Each has Home, Work, Work detail, Create, Approvals/Publishing, and Media Library with a connected National Day scenario and mobile adaptation. Custom CSS artwork is illustrative, not an official national campaign identity.
-- **Verified evidence:** 
-ode --check design-review/gallery.js` passed. HTTP server returned 200. 
-ode design-review/verify.cjs` passed 72 page/viewport combinations at 1440, 1280, 900, and 390px, with zero JavaScript errors and zero document-width overflow. Direction switch, screen selector, Work detail navigation, phone preview, notice dialog, Escape dismissal, and mobile More menu passed. Captured 36 screenshots and inspected three six-screen desktop boards plus representative full-size desktop/mobile views. `git diff --check` passed.
+- **Verified evidence:** `node --check design-review/gallery.js` passed. HTTP server returned 200. `node design-review/verify.cjs` passed 72 page/viewport combinations at 1440, 1280, 900, and 390px, with zero JavaScript errors and zero document-width overflow. Direction switch, screen selector, Work detail navigation, phone preview, notice dialog, Escape dismissal, and mobile More menu passed. Captured 36 screenshots and inspected three six-screen desktop boards plus representative full-size desktop/mobile views. `git diff --check` passed.
 - **Correction during QA:** Initial verification selected an invisible navigation control; narrowed the test to the visible notification control and reran successfully. Aligned Instagram review state and ready-to-publish count across the sample screens.
 - **Limits:** These are visual alternatives with navigation, editable sample fields and explicit preview notices. They are not three MVP implementations. No Next.js scaffold, role behavior, working review/publishing transitions, calendar, or Level B/C pages are claimed complete. Comprehensive accessibility and MVP workflow acceptance remain future tasks.
-- **Budget/delegation:** No subagents. Opening five-hour account usage 2%; final handoff check 48%. Approximately 12 percentage points remain under the conservative ceiling. The design stage cost more than planned; recommend continuing full implementation after the window resets if needed to preserve the complete core scope. Using the stricter 60% ceiling. Figures are shared-account estimates, not per-task accounting.
+- **Delegation:** No subagents were used. The design stage cost more than planned; full implementation was recommended to continue in a later session to preserve the complete core scope.
 - **Local checkpoint commit:** `040f8a4` saves the gallery and scope alignment. No remote push.
 - **Next action:** Wait for the user's selected/combined direction, then implement only that direction. Favor shared shell, centralized local mock state and the connected acceptance workflow; avoid more alternate-design polish.
 
@@ -69,8 +108,7 @@ ode design-review/verify.cjs` passed 72 page/viewport combinations at 1440, 1280
   9. `storage_lifecycle_disaster_recovery.md`: 54 sections + addenda, 7 diagrams, 3-2-1 hybrid storage.
   10. `failure_handling_background_jobs.md`: 51 sections, 7 diagrams, background queue and failure routing.
   11. `connected_account_secrets_management.md`: 73 sections, 7 diagrams, OAuth and secret envelopes.
-  12. 
-otification_model.md`: 70 sections, 7 diagrams, three-tier attention architecture.
+  12. `notification_model.md`: 70 sections, 7 diagrams, three-tier attention architecture.
   13. `search_and_metadata.md`: 74 sections, 7 diagrams, full-text search and Arabic taxonomy.
   14. `security_discussion.md`: 42 sections, 7 diagrams, defense-in-depth and immutable audit log.
   15. `emergency_workflows.md`: 74 sections, 7 diagrams, crisis governance and kill-switch freeze.
@@ -107,26 +145,3 @@ When recording future implementation outcomes, follow this standardized template
 ---
 
 ^comms-hub-progress-boundary
-
-
-### 2026-09-19 — Runnable UI prototype and verified core journey
-
-- Selected A with B only for larger media canvases, recorded in DESIGN.md. Next.js/TypeScript/Tailwind app added with shared client state and reusable shell/components.
-- Core screens and lighter supporting shells implemented. One Luna subagent handled supporting.tsx; primary agent integrated and verified.
-- Evidence: production build passes; typecheck passes after Next applied its standard skipLibCheck setting; npm test passes 3 domain tests. qa/verification.json records a passing browser acceptance journey and 60 route/viewport checks, zero captured JavaScript errors and zero horizontal document overflow.
-- Browser journey: create, request revision, edit, resubmit, approve revision 2, schedule, calendar, partial publish and failed-channel retry. Admin separation also checked. Initial browser checks exposed selector and navigation-timing issues, corrected in QA; composer received an explicit accessible textarea label.
-- Screenshots saved locally under ignored qa/artifacts. These are not a completed visual/accessibility audit.
-- Limitations and next actions are enumerated in Status.md. Media upload/playback, retained historical release snapshots, full persona/supporting-action QA and broad department-validation signoff remain incomplete. No production services were added.
-- Usage: started 53%; last pre-reset reading 89%; window reset during work. Reduced finishing instruction measured 2% then 12%, approximately 10 further points. Exact full-run delta unavailable. Work stopped to preserve revised limit.
-
-### 2026-09-19 — Phase 0.1.5 accepted
-
-- **Result:** READY FOR CHECKPOINT 0.2. No blocking prototype defect remains; actual department validation is pending. Checkpoint 0.2 preparation was not started to preserve the usage reserve.
-- **Fixes:** retained local submitted/reviewed release snapshots with exact content/asset versions; dialog focus return; modal mobile navigation; mobile search accessible name; empty-month message; reduced-motion handling.
-- **Evidence:** production build/typecheck pass; five domain tests pass; complete publication journey and 60 viewport checks pass; eight personas and B/C main actions pass; 14 Level A desktop/mobile screenshots and three additional mobile views visually inspected. Focused keyboard/form/RTL/contrast review completed. qa/final-interactions.json reports eight passing interaction groups, zero console/page errors and no external origins. qa/scope.json reports no source/config findings. Full record: qa/ACCEPTANCE.md.
-- **Decisions:** historical content necessary for credible exact-version review, now retained in memory. Upload/playback deferred because illustrative versioned media is sufficient for workflow evaluation. Other accepted limits are listed in the acceptance record; no production infrastructure added.
-- **QA portability:** local Playwright resolution, optional CODEX_NODE_MODULES fallback, configurable QA_BROWSER/QA_BASE_URL. Corrected select-label matching in final QA; restarted stopped local server before successful rerun.
-- **Usage:** began 18%; pre-documentation/commit reading 81%, about 63 points, same reset timestamp 1789793735. No reset observed; no subagent. Optional work stopped at soft boundary. Final handoff supplies closing measurement. Baseline 893cef5, separate local acceptance commit, no push.
-- **Next:** 0.2.1 assumption mapping and human walkthrough preparation; 0.2.2 must involve actual department participants. No Version 1 work.
-
-- **Closing pre-commit usage:** 85% versus 18% start, approximately 67 points; no reset. Required documentation/handoff consumed reserve beyond the soft stop, below the 75-point hard maximum.

@@ -96,6 +96,7 @@ The vault maintains a strict separation of document concerns across four core op
 | `Status.md` | Present condition, active focus, capability health matrix, and next actions. | At the conclusion of every active work session. |
 | `progress.md` | Dated outcomes, verified evidence, benchmark results, and limitations. | Whenever a meaningful change is completed and verified. |
 | `MVP_draft.md` | Authoritative UI shell layout, page specifications, and user flows. | When interface requirements or user interactions change. |
+| `validation/` | Checkpoint 0.2 workflow map, guided session scripts, and feedback rubric. | During Checkpoint 0.2; frozen at the 0.2.4 gate. |
 
 ### Work Hierarchy & Breakdown Standards
 
@@ -136,6 +137,8 @@ When work items are scheduled in future planning iterations, use these standardi
 2. **Recoverable Baselines:** Every significant file mutation must be preceded by a clean, recoverable baseline (Git commit or verified backup snapshot). Uncommitted work must never be silently overwritten, merged, or discarded.
 3. **Prototype Boundary:** Version 0 uses local mock state only. For future production versions, long-running or external platform interactions belong in durable background jobs. This rule does not authorize workers or integrations in MVP 0.1.
 4. **Zero Data Loss:** All modifications to documentation and code must preserve existing institutional context, Arabic terminology, and domain requirements.
+
+The agent-facing copy of these principles, together with the zero-emoji policy, the Arabic terminology rules, and the prohibition on editing `disscussios/`, is kept in `AGENTS.md`. Keep the two in step.
 
 ---
 
@@ -207,36 +210,110 @@ When starting active implementation on the Communication Department Hub, follow 
 
 ### Checkpoint 0.2: Department Validation
 
-**State:** Ready to start; not started. Checkpoint 0.1 accepted.
-**Outcome:** Validate the prototype against actual Communication Department work, record operational corrections, and authorize production architecture planning.  
-**Exit Gate:** The department can complete the agreed representative workflows through the prototype without major structural confusion.
+**State:** In progress. Phase 0.2.1 complete (2026-09-19); Phase 0.2.2 blocked on human department participants.
+**Outcome:** Validate the prototype against actual Communication Department work, record operational corrections, and authorize production architecture planning.
+
+**Exit Gate (measurable).** All six criteria must hold before Checkpoint 0.2 closes:
+
+1. **Role coverage.** At least one real participant has completed a guided session in each of these five role groups: Director, Assistant Director, a content specialist (Content Writer or Designer), Media Producer, and Publishing Officer. Department Member and Admin sessions are recorded when available but do not block the gate.
+2. **Participant count.** At least six distinct human participants in total, of whom at least two hold department leadership positions (Director or Assistant Director). No participant may be counted for more than one role group.
+3. **Scenario completion.** In each session the participant completes the assigned end-to-end scenario in `validation/validation-scripts.md` unaided, meaning without the facilitator naming the control to use. A session where the facilitator must intervene on more than two steps is recorded as a failed scenario.
+4. **Pass threshold.** At least 80 percent of attempted scenarios complete without a structural blocker, where a structural blocker is any finding scored Severity 1 in `validation/feedback-rubric.md` (the participant cannot complete the task, or the model contradicts how the department actually works).
+5. **Zero unresolved Severity 1 findings.** Every Severity 1 finding is either corrected in Phase 0.2.3 and re-checked with the participant who raised it, or explicitly deferred with a written, dated reason in `progress.md` and a recorded decision in `disscussios/` follow-up notes.
+6. **Recorded evidence.** Every session has a completed rubric sheet, a dated findings entry in `progress.md`, and a named facilitator and participant role. Sessions without a completed rubric do not count toward criteria 1 or 2.
 
 > [!important] Agent vs. Human Responsibilities in Checkpoint 0.2
 > - **Astra / Agent Responsibility:** Conduct pre-validation workflow mapping (0.2.1), analyze prototype interaction bottlenecks, prepare structured guided interview scripts, validation rubrics, and feedback collection instruments, and synthesize evidence-based corrections into the specification and freeze gate (0.2.3, 0.2.4).
 > - **Human Department Responsibility:** The actual execution of Phase 0.2.2 (Guided Department Validation) requires real human department leadership (Director, Assistant Director) and staff specialists (Writers, Designers, Producers, Publishing Officers) testing and evaluating the prototype against their real day-to-day operational realities. An agent cannot simulate or substitute for real department validation.
 
 #### Phase 0.2.1 — Workflow Mapping
-- [ ] Map representative real workflows using the confirmed seven department roles plus Admin (system authority).
-- [ ] Compare actual workflow to MVP assumptions.
-- [ ] Record exceptions, bottlenecks, and terminology corrections.
-- [ ] Prepare structured validation scripts and feedback rubrics for human department reviewers.
+
+**State:** Complete (2026-09-19). Agent-executed; no human participation required.
+
+- [x] **0.2.1.1 Map representative real workflows for the eight confirmed roles.**
+  *Definition of done:* Each of the seven department roles plus Admin has at least one documented end-to-end workflow, written as ordered steps with the acting role, the trigger, the decision points, and the handoff to the next role. Workflows cite the specification section or discussion document each step rests on.
+  *Evidence:* `validation/workflow-map.md`, sections 2 and 3.
+  *Status:* Nine workflows recorded (W1 to W9), covering campaign inception, content authoring, design, production, review, release, member contribution, intake, and system administration.
+
+- [x] **0.2.1.2 Compare the mapped workflow to the prototype's current assumptions.**
+  *Definition of done:* Every mapped step is marked as supported, partially supported, or unsupported by the prototype, with the specific screen or reducer action that implements it, or a statement that none does.
+  *Evidence:* `validation/workflow-map.md`, section 4 (assumption comparison table, one row per assumption).
+  *Status:* 25 assumptions classified: 15 supported, 6 partially supported, 4 unsupported.
+
+- [x] **0.2.1.3 Record exceptions, bottlenecks, and terminology corrections.**
+  *Definition of done:* A numbered register in which each entry states what was observed, why it matters to the department, and whether it is a question for the human sessions or an agent-side correction. Terminology entries give the current string and the proposed Arabic wording.
+  *Evidence:* `validation/workflow-map.md`, sections 5, 6 and 7.
+  *Status:* 11 exceptions, 7 bottlenecks and 9 terminology items recorded, each tagged with the validation question that will test it.
+
+- [x] **0.2.1.4 Prepare structured validation scripts and feedback rubrics.**
+  *Definition of done:* One runnable session script per role group, each with a fixed setup state, timed tasks, unaided-success criteria, and the exact questions to ask; plus a scoring rubric with defined severity levels and a per-session capture sheet a non-technical facilitator can fill in.
+  *Evidence:* `validation/validation-scripts.md` and `validation/feedback-rubric.md`.
+  *Status:* Seven session scripts and a four-level severity rubric with a per-session capture sheet and a consolidated findings register.
+
+- [x] **0.2.1.5 Correct the defects found in the pre-validation review.**
+  *Definition of done:* Defects identified by review of the prototype against `MVP_draft.md` before human validation are corrected to the Phase 0.2.3 standard, meaning evidence-based only, each recorded with what changed and why. Corrections must not pre-empt findings that belong to the human sessions.
+  *Evidence:* Commits `079cd5d` and `221477c`; `qa/checkpoint-02-corrections.cjs` with `qa/checkpoint-02-corrections.json` (34 browser checks passing); `npm test` 8 of 8 passing; clean `npm run typecheck` and `npm run build`; dated entry in `progress.md`.
+  *Status:* Role-specific home experiences, notice scoping, Admin and Settings shells, calendar weekday alignment, post-publication edit policy, source reformatting and the smaller content gaps. Workflow questions raised by the mapping are left open for Phase 0.2.2 rather than decided here.
 
 #### Phase 0.2.2 — Guided Department Validation (Human Department Execution)
-- [ ] Director / Assistant Director strategic and review validation with human leadership.
-- [ ] Content Writer, Designer, and Media Producer specialist validation with operational team members.
-- [ ] Publishing Officer release, scheduling, and channel governance validation.
-- [ ] Administrative and department member operational feedback collection.
-- [ ] Mobile workflow review where relevant to on-call or remote operational scenarios.
+
+**State:** Not started. Blocked: requires real department participants. An agent cannot execute, simulate or substitute for this phase.
+
+- [ ] **0.2.2.1 Director and Assistant Director strategic and review validation.**
+  *Definition of done:* Both leadership roles complete scripts S1 and S2 unaided, including approving an exact revision and rejecting a superseded one.
+  *Evidence:* Two completed rubric sheets with named participants and dated findings in `progress.md`.
+
+- [ ] **0.2.2.2 Content Writer, Designer and Media Producer specialist validation.**
+  *Definition of done:* At least one participant per specialism completes scripts S3, S4 and S5, including a revision round after a change request.
+  *Evidence:* Three completed rubric sheets and the recorded terminology verdicts from section 7 of the workflow map.
+
+- [ ] **0.2.2.3 Publishing Officer release, scheduling and channel governance validation.**
+  *Definition of done:* The publishing officer completes script S6, including scheduling, a partial failure, and a retry that does not republish a successful channel.
+  *Evidence:* One completed rubric sheet plus the participant's verdict on the connected-account health surface.
+
+- [ ] **0.2.2.4 Department member and administrative feedback collection.**
+  *Definition of done:* Script S7 completed by a department member, and the Admin surfaces reviewed by whoever actually administers systems for the department.
+  *Evidence:* Completed rubric sheets, or a dated record that no such administrator exists yet, which is itself a finding.
+
+- [ ] **0.2.2.5 Mobile workflow review for on-call and remote scenarios.**
+  *Definition of done:* At least two participants, one of them leadership, complete their approval or release steps on a real phone.
+  *Evidence:* Rubric sheets marked mobile, with the device and browser recorded.
 
 #### Phase 0.2.3 — Prototype Corrections
-- [ ] Synthesize human validation findings and apply only evidence-based workflow/UI corrections.
-- [ ] Remove or simplify unneeded interactions identified during department testing.
-- [ ] Correct role-specific experiences and Arabic terminology.
+
+**State:** Not started. Depends on 0.2.2 findings.
+
+- [ ] **0.2.3.1 Synthesize human validation findings into a single ranked register.**
+  *Definition of done:* Every finding from every session appears once, deduplicated, severity-scored, and attributed to the session that raised it.
+  *Evidence:* Consolidated findings register in `validation/feedback-rubric.md`, plus a dated summary entry in `progress.md`.
+
+- [ ] **0.2.3.2 Apply evidence-based workflow and interface corrections only.**
+  *Definition of done:* Each applied correction cites the finding that justifies it. Changes with no finding behind them are not made. Typecheck, tests, build and a browser check pass after each correction.
+  *Evidence:* Commits referencing finding identifiers, and passing `qa/` runs recorded in `progress.md`.
+
+- [ ] **0.2.3.3 Remove or simplify interactions the department did not need.**
+  *Definition of done:* Each removal names the sessions in which the interaction went unused or caused confusion.
+  *Evidence:* Dated entry in `progress.md` listing what was removed and on what observation.
+
+- [ ] **0.2.3.4 Correct role-specific experiences and Arabic terminology.**
+  *Definition of done:* Every terminology item from section 7 of the workflow map has a recorded department verdict, and accepted corrections are applied across interface strings and `MVP_draft.md` consistently.
+  *Evidence:* Terminology table with verdicts, and a passing browser check of the corrected strings.
 
 #### Phase 0.2.4 — Product Freeze Gate
-- [ ] Freeze Version 1 product workflow assumptions based on human sign-off.
-- [ ] Record unresolved questions separately in discussions.
-- [ ] Authorize production architecture planning.
+
+**State:** Not started. Depends on 0.2.3.
+
+- [ ] **0.2.4.1 Freeze the Version 1 workflow assumptions on human sign-off.**
+  *Definition of done:* A named department representative signs off the corrected workflow, and the frozen assumption set is written down as the Version 1 input.
+  *Evidence:* Dated sign-off record and a frozen assumption list in `progress.md`.
+
+- [ ] **0.2.4.2 Record unresolved questions separately.**
+  *Definition of done:* Every question the sessions raised but did not settle is captured as a new discussion note, not silently dropped.
+  *Evidence:* New follow-up notes referenced from `discussions_list.md`. Existing `disscussios/` documents are not edited.
+
+- [ ] **0.2.4.3 Authorize production architecture planning.**
+  *Definition of done:* All six Exit Gate criteria above are demonstrably met and recorded, and Checkpoint 1.1 is opened.
+  *Evidence:* Exit gate checklist completed in `Status.md` with a pointer to the evidence for each criterion.
 
 ---
 
