@@ -199,8 +199,11 @@ When starting active implementation on the Communication Department Hub, follow 
 
 #### Phase 0.1.5: Acceptance and handoff
 
-- [/] 0.1.5.1 Verify 1440/1280 desktop, 768–1024 tablet and approximately 390 mobile; test central dialogs, roles and keyboard navigation. Evidence: screenshots and focused QA log.
-- [/] 0.1.5.2 Demonstrate the full mock workflow, run build checks, verify no production services/secrets, and synchronize tracking. Evidence: acceptance record and runnable instructions.
+> [!note] Phase Scope & Execution
+> Phase 0.1.5 is executed as a unified verification and handoff package. Astra completes both the remaining multi-persona/accessibility verification in 0.1.5.1 and the final acceptance, demonstration, and documentation closure in 0.1.5.2.
+
+- [/] 0.1.5.1 Persona, responsive, keyboard, and QA verification. Verify remaining persona experiences (designer, producer, member), 1440/1280 desktop, 768–1024 tablet and ~390 mobile layouts, central dialogs, and keyboard/accessibility navigation. Evidence: screenshots, verification test fixtures, and focused QA log.
+- [/] 0.1.5.2 Final prototype acceptance, handoff, and tracking closure. Demonstrate the complete mock workflow end-to-end, verify clean production build and absence of production secrets/services, document verified limits, and synchronize tracking across Status, progress, and Roadmap. Evidence: acceptance walkthrough record and runnable setup instructions.
 
 ---
 
@@ -210,26 +213,31 @@ When starting active implementation on the Communication Department Hub, follow 
 **Outcome:** Validate the prototype against actual Communication Department work, record operational corrections, and authorize production architecture planning.  
 **Exit Gate:** The department can complete the agreed representative workflows through the prototype without major structural confusion.
 
+> [!important] Agent vs. Human Responsibilities in Checkpoint 0.2
+> - **Astra / Agent Responsibility:** Conduct pre-validation workflow mapping (0.2.1), analyze prototype interaction bottlenecks, prepare structured guided interview scripts, validation rubrics, and feedback collection instruments, and synthesize evidence-based corrections into the specification and freeze gate (0.2.3, 0.2.4).
+> - **Human Department Responsibility:** The actual execution of Phase 0.2.2 (Guided Department Validation) requires real human department leadership (Director, Assistant Director) and staff specialists (Writers, Designers, Producers, Publishing Officers) testing and evaluating the prototype against their real day-to-day operational realities. An agent cannot simulate or substitute for real department validation.
+
 #### Phase 0.2.1 — Workflow Mapping
-- [ ] Map representative real workflows using the confirmed eight department roles.
+- [ ] Map representative real workflows using the confirmed seven department roles plus Admin (system authority).
 - [ ] Compare actual workflow to MVP assumptions.
 - [ ] Record exceptions, bottlenecks, and terminology corrections.
+- [ ] Prepare structured validation scripts and feedback rubrics for human department reviewers.
 
-#### Phase 0.2.2 — Guided Department Validation
-- [ ] Director / Assistant Director strategic and review validation.
-- [ ] Content Writer, Designer, and Media Producer specialist validation.
-- [ ] Publishing Officer release and scheduling validation.
-- [ ] Department Member and Admin operational validation.
-- [ ] Mobile workflow validation where relevant.
+#### Phase 0.2.2 — Guided Department Validation (Human Department Execution)
+- [ ] Director / Assistant Director strategic and review validation with human leadership.
+- [ ] Content Writer, Designer, and Media Producer specialist validation with operational team members.
+- [ ] Publishing Officer release, scheduling, and channel governance validation.
+- [ ] Administrative and department member operational feedback collection.
+- [ ] Mobile workflow review where relevant to on-call or remote operational scenarios.
 
 #### Phase 0.2.3 — Prototype Corrections
-- [ ] Apply only evidence-based workflow/UI corrections.
-- [ ] Remove or simplify unneeded interactions.
+- [ ] Synthesize human validation findings and apply only evidence-based workflow/UI corrections.
+- [ ] Remove or simplify unneeded interactions identified during department testing.
 - [ ] Correct role-specific experiences and Arabic terminology.
 
 #### Phase 0.2.4 — Product Freeze Gate
-- [ ] Freeze Version 1 product workflow assumptions.
-- [ ] Record unresolved questions separately.
+- [ ] Freeze Version 1 product workflow assumptions based on human sign-off.
+- [ ] Record unresolved questions separately in discussions.
 - [ ] Authorize production architecture planning.
 
 ---
@@ -313,8 +321,8 @@ Phases:
 - **Outcome:** Full operational tracking of all departmental content initiatives from concept to readiness.
 
 ### Checkpoint 2.2 — Asset Management Core
-- **Scope:** Digital assets, versioning, storage locations, MIME validation, thumbnail extraction, and Work/Campaign bindings.
-- **Outcome:** Unified asset repository organized by campaigns and production formats with version immutability.
+- **Scope:** Provider-agnostic core domain logic. Establishes the Asset, Version, Location abstraction (`AssetLocation`), metadata schemas, MIME validation, thumbnail extraction pipeline, and Work/Campaign bindings. Real external storage integrations (Google Drive, NAS, etc.) are strictly deferred to Checkpoint 3.2.
+- **Outcome:** Unified, provider-agnostic asset domain model supporting version immutability and multi-format bindings without external provider lock-in.
 
 ### Checkpoint 2.3 — Approval & Release Engine
 - **Scope:** Version-bound release packages, multi-stage approval requests, formal decisions, delegation, and revision invalidation.
@@ -348,8 +356,8 @@ Phases:
 - **Outcome:** Secure external platform connection management without exposing raw secrets to client code.
 
 ### Checkpoint 3.2 — Production Storage Adapter
-- **Scope:** AssetLocation / Storage Adapter implementation with the selected first provider (Google Shared Drive / S3 hybrid).
-- **Outcome:** Seamless large-file asset preservation adhering to the 3-2-1 backup lifecycle specification.
+- **Scope:** Implement the `AssetLocation` / Storage Adapter interface with the selected first production storage provider (evaluating Google Shared Drive as the primary institutional candidate, without locking into an unearned S3/hybrid decision prematurely).
+- **Outcome:** Seamless large-file asset preservation adhering to the 3-2-1 backup lifecycle specification with the chosen initial storage provider.
 
 ### Checkpoint 3.3 — Publication Orchestrator
 - **Scope:** Publication bundles, platform adapters (X/Twitter, LinkedIn, Instagram, etc.), preflight checks, and child publication records.
@@ -360,8 +368,8 @@ Phases:
 - **Outcome:** Dependable publishing that isolates failed channels without re-publishing or duplicating successful ones.
 
 ### Checkpoint 3.5 — External Mail & Intake
-- **Scope:** Inbound press releases, media inquiries, official correspondence intake, and automatic work item drafting.
-- **Outcome:** Direct translation of inbound external communications into actionable departmental work items.
+- **Scope:** Inbound press releases, media inquiries, official correspondence intake, and automatic work item drafting. Delivery sequence and depth are subject to validated department priority established in Checkpoint 0.2 (retaining its position if email intake is central to daily operations, or deferred/reordered if other integrations take precedence).
+- **Outcome:** Direct translation of inbound external communications into actionable departmental work items aligned with verified department intake habits.
 
 ### Checkpoint 3.6 — External Reconciliation
 - **Scope:** Webhook receivers and polling workers to track and reconcile posts modified, scheduled, or deleted directly on native platforms.
