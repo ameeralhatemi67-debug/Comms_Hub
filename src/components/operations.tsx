@@ -288,12 +288,30 @@ export function Calendar() {
           <button type="button" aria-label="الشهر التالي" onClick={() => setMonth(shiftMonth(month, 1))}>
             ›
           </button>
-          <input
+          {/* Arabic selects rather than a native month input, whose label the
+              browser renders in its own locale ("September 2026"). */}
+          <select
             aria-label="اختيار الشهر"
-            type="month"
-            value={month}
-            onChange={(e) => e.target.value && setMonth(e.target.value)}
-          />
+            value={String(monthIndex)}
+            onChange={(e) => setMonth(`${year}-${String(Number(e.target.value) + 1).padStart(2, '0')}`)}
+          >
+            {monthNames.map((name, i) => (
+              <option key={name} value={i}>
+                {name}
+              </option>
+            ))}
+          </select>
+          <select
+            aria-label="اختيار السنة"
+            value={String(year)}
+            onChange={(e) => setMonth(`${e.target.value}-${String(monthIndex + 1).padStart(2, '0')}`)}
+          >
+            {[2025, 2026, 2027].map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
         </div>
       </Title>
       <div className="filters">

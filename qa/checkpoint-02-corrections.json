@@ -1,0 +1,188 @@
+{
+  "ranAt": "2026-09-19T11:02:50.211Z",
+  "baseURL": "http://127.0.0.1:3000",
+  "passed": 34,
+  "failed": 0,
+  "tileSets": {
+    "director": "بانتظار اعتمادك | حمل القسم | نشر اليوم | يحتاج انتباه | حالة الحملة",
+    "assistant": "قائمة التشغيل | المراجعات | الإسنادات | الأعضاء المشغولون | مواعيد قريبة",
+    "writer": "مهام التحرير | تعديلات مطلوبة | مواعيد قريبة | بانتظار المراجعة",
+    "designer": "مهام التصميم | تعديلات مطلوبة | وسائط بانتظار الاعتماد | مواعيد قريبة",
+    "producer": "مهام الإنتاج | المواد المرفوعة | قيد المعالجة | مواعيد قريبة | حالة المراجعة",
+    "publisher": "جاهز للنشر | مجدول اليوم | إخفاقات النشر | صحة الحسابات",
+    "member": "أعمالي | مواعيد قريبة | تعليقات على أعمالك | مواعيد التقويم",
+    "admin": "حالة النظام | المستخدمون | صحة التكاملات | التخزين | أحداث الأمن"
+  },
+  "checks": [
+    {
+      "name": "calendar weekday headers present",
+      "pass": true,
+      "detail": "found 7: الأحد, الاثنين, الثلاثاء, الأربعاء, الخميس, الجمعة, السبت"
+    },
+    {
+      "name": "calendar first header is Sunday",
+      "pass": true,
+      "detail": "first header is الأحد"
+    },
+    {
+      "name": "calendar month label is Arabic",
+      "pass": true,
+      "detail": "label is سبتمبر 2026"
+    },
+    {
+      "name": "leading pad cells equal the starting weekday",
+      "pass": true,
+      "detail": "pads=2, expected=2"
+    },
+    {
+      "name": "day 1 sits in the correct weekday column",
+      "pass": true,
+      "detail": "day 1 at grid index 9 (7 headers + 2 pads)"
+    },
+    {
+      "name": "next month re-aligns",
+      "pass": true,
+      "detail": "أكتوبر 2026: pads=4, expected=4"
+    },
+    {
+      "name": "director home shows at least four tiles",
+      "pass": true,
+      "detail": "5 tiles: بانتظار اعتمادك, حمل القسم, نشر اليوم, يحتاج انتباه, حالة الحملة"
+    },
+    {
+      "name": "assistant home shows at least four tiles",
+      "pass": true,
+      "detail": "5 tiles: قائمة التشغيل, المراجعات, الإسنادات, الأعضاء المشغولون, مواعيد قريبة"
+    },
+    {
+      "name": "writer home shows at least four tiles",
+      "pass": true,
+      "detail": "4 tiles: مهام التحرير, تعديلات مطلوبة, مواعيد قريبة, بانتظار المراجعة"
+    },
+    {
+      "name": "designer home shows at least four tiles",
+      "pass": true,
+      "detail": "4 tiles: مهام التصميم, تعديلات مطلوبة, وسائط بانتظار الاعتماد, مواعيد قريبة"
+    },
+    {
+      "name": "producer home shows at least four tiles",
+      "pass": true,
+      "detail": "5 tiles: مهام الإنتاج, المواد المرفوعة, قيد المعالجة, مواعيد قريبة, حالة المراجعة"
+    },
+    {
+      "name": "publisher home shows at least four tiles",
+      "pass": true,
+      "detail": "4 tiles: جاهز للنشر, مجدول اليوم, إخفاقات النشر, صحة الحسابات"
+    },
+    {
+      "name": "member home shows at least four tiles",
+      "pass": true,
+      "detail": "4 tiles: أعمالي, مواعيد قريبة, تعليقات على أعمالك, مواعيد التقويم"
+    },
+    {
+      "name": "admin home shows at least four tiles",
+      "pass": true,
+      "detail": "5 tiles: حالة النظام, المستخدمون, صحة التكاملات, التخزين, أحداث الأمن"
+    },
+    {
+      "name": "all eight roles show distinct home tiles",
+      "pass": true,
+      "detail": "8 distinct tile sets"
+    },
+    {
+      "name": "admin is not shown the content review queue",
+      "pass": true,
+      "detail": "admin notices: تفويض LinkedIn منتهٍ · إعادة الربط مطلوبة قبل النشر / استخدام التخزين المؤسسي بلغ 69 بالمئة"
+    },
+    {
+      "name": "publisher is not shown the director review queue",
+      "pass": true,
+      "detail": "publisher notices: إصدار معتمد بانتظار الجدولة: تصميم الملصق / تفويض LinkedIn منتهٍ · إعادة الربط مطلوبة قبل النشر"
+    },
+    {
+      "name": "director is shown the review queue",
+      "pass": true,
+      "detail": "director notices: الفيديو الرئيسي يحتاج مراجعتك / محمد طلب تعديل محتوى X"
+    },
+    {
+      "name": "notice sets differ between roles",
+      "pass": true,
+      "detail": "director and publisher notice lists are identical"
+    },
+    {
+      "name": "publisher home shows connected account health",
+      "pass": true,
+      "detail": "connected account health panel missing on publisher home"
+    },
+    {
+      "name": "admin exposes all eight sections",
+      "pass": true,
+      "detail": "found: المستخدمون, الأدوار والصلاحيات, التكاملات, حالة النظام, التخزين, الأمن, الأتمتة, سياسة الإشعارات"
+    },
+    {
+      "name": "admin section renders: المستخدمون",
+      "pass": true,
+      "detail": "no panel rendered"
+    },
+    {
+      "name": "admin section renders: الأدوار والصلاحيات",
+      "pass": true,
+      "detail": "no panel rendered"
+    },
+    {
+      "name": "admin section renders: التكاملات",
+      "pass": true,
+      "detail": "no panel rendered"
+    },
+    {
+      "name": "admin section renders: حالة النظام",
+      "pass": true,
+      "detail": "no panel rendered"
+    },
+    {
+      "name": "admin section renders: التخزين",
+      "pass": true,
+      "detail": "no panel rendered"
+    },
+    {
+      "name": "admin section renders: الأمن",
+      "pass": true,
+      "detail": "no panel rendered"
+    },
+    {
+      "name": "admin section renders: الأتمتة",
+      "pass": true,
+      "detail": "no panel rendered"
+    },
+    {
+      "name": "admin section renders: سياسة الإشعارات",
+      "pass": true,
+      "detail": "no panel rendered"
+    },
+    {
+      "name": "settings exposes eight sections",
+      "pass": true,
+      "detail": "found 8"
+    },
+    {
+      "name": "account shows the Arabic role name, not the raw key",
+      "pass": true,
+      "detail": "raw role key still visible on the account page"
+    },
+    {
+      "name": "home schedule panel is derived from state",
+      "pass": true,
+      "detail": "hard-coded schedule entry still present"
+    },
+    {
+      "name": "home shows the campaign figures from the specification",
+      "pass": true,
+      "detail": "campaign figures missing"
+    },
+    {
+      "name": "no page or console errors captured",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}

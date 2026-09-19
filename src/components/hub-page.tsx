@@ -40,9 +40,13 @@ function Home() {
         ? 'سلطة النظام'
         : 'أولويات العمل';
 
-  // Specialists see only blockers on their own work; oversight roles see the department's.
-  const oversight = actor.review || actor.publish || actor.admin;
-  const attention = state.work.filter((w) => needsAttention(w) && (oversight || w.owner === state.role));
+  // Reviewers see the department's blockers, the publishing officer sees only
+  // release failures, and specialists see only blockers on their own work.
+  const attention = state.work.filter((w) =>
+    actor.publish
+      ? ['FAILED', 'PARTIAL'].includes(w.status)
+      : needsAttention(w) && (actor.review || actor.admin || w.owner === state.role),
+  );
   const scheduled = state.work.filter((w) => w.scheduled);
   const myNotices = noticesFor(state.role, state.notices).filter((n) => !n.read);
 
