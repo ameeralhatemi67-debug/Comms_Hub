@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Logo Bloom Loader — Motion Lab</title>
+<style>
+  :root{
+    color-scheme: light;
+    --ui-bg:#f6f6f3;
+    --panel:#ffffff;
+    --ink:#1c1c1a;
+    --muted:#77776f;
+    --line:#deded8;
+    --accent:#b99445;
+    --stage:#ffffff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--ui-bg);color:var(--ink)}
+  body{min-height:100vh}
+  button,input,select{font:inherit}
+  .app{display:grid;grid-template-columns:minmax(0,1fr) 390px;min-height:100vh}
+  .preview-shell{padding:28px;display:flex;flex-direction:column;gap:18px;min-width:0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-.02em}
+  .brand p{margin:4px 0 0;color:var(--muted);font-size:12px}
+  .top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  button,.select{
+    border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:8px 11px;
+    cursor:pointer;transition:.15s ease;box-shadow:0 1px 0 rgba(0,0,0,.02)
+  }
+  button:hover{border-color:#bdbdb5;background:#fbfbf8}
+  button.primary{background:#1f1f1d;color:white;border-color:#1f1f1d}
+  .stage-wrap{flex:1;min-height:460px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;grid-template-rows:1fr auto;gap:14px;box-shadow:0 8px 30px rgba(0,0,0,.035)}
+  .stage{
+    position:relative;display:grid;place-items:center;overflow:hidden;border-radius:14px;
+    background:var(--stage);min-height:390px;
+    background-image:linear-gradient(rgba(120,120,110,.05) 1px, transparent 1px),linear-gradient(90deg, rgba(120,120,110,.05) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .stage.clean-grid{background-image:none}
+  .loader-holder{width:280px;height:280px;display:grid;place-items:center;transform:scale(var(--previewZoom,1));transition:transform .15s ease}
+  svg{overflow:visible}
+  .statusbar{display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{background:#f5f5f1;border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:#5e5e57}
+  .actual-preview{display:flex;align-items:center;gap:10px;min-height:56px}
+  .actual-box{display:grid;place-items:center;width:68px;height:52px;border-radius:10px;border:1px solid var(--line);background:#fff;overflow:visible}
+  .panel{border-left:1px solid var(--line);background:var(--panel);height:100vh;overflow:auto}
+  .panel-inner{padding:22px 20px 40px}
+  .section{border-bottom:1px solid var(--line);padding:0 0 18px;margin:0 0 18px}
+  .section:last-child{border-bottom:0}
+  .section h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#6c6c65;margin:0 0 12px}
+  .row{display:grid;grid-template-columns:1fr auto;gap:9px 12px;align-items:center;margin:10px 0}
+  .row label{font-size:13px}
+  .value{font-variant-numeric:tabular-nums;color:#62625b;font-size:12px;min-width:76px;text-align:right}
+  .row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+  .inline{display:flex;gap:8px;align-items:center}
+  .inline > *{min-width:0}
+  input[type=color]{width:40px;height:34px;padding:2px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  input[type=text],input[type=number],select{
+    width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)
+  }
+  .segmented{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+  .segmented.three{grid-template-columns:repeat(3,1fr)}
+  .segmented button{padding:7px 8px;font-size:12px}
+  .segmented button.active{background:#1f1f1d;color:white;border-color:#1f1f1d}
+  .preset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .preset-grid button{font-size:11px;padding:7px 6px}
+  .curve-box{height:110px;border:1px solid var(--line);border-radius:10px;background:#fbfbf8;margin-top:10px;display:grid;place-items:center}
+  .curve-box svg{width:100%;height:100%}
+  .export{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+  .export button{font-size:12px}
+  details{border:1px solid var(--line);border-radius:11px;padding:10px 11px;margin-top:10px;background:#fcfcfa}
+  summary{cursor:pointer;font-size:12px;font-weight:650}
+  .small{font-size:11px;color:var(--muted);line-height:1.45}
+  .notice{margin-top:8px;padding:9px 10px;border-radius:9px;background:#f7f2e7;color:#665a3c;font-size:11px;line-height:1.4}
+  @media (max-width: 960px){
+    .app{grid-template-columns:1fr}
+    .panel{height:auto;border-left:0;border-top:1px solid var(--line)}
+    .stage-wrap{min-height:620px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="preview-shell">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Logo Bloom Loader — Motion Lab</h1>
+        <p>Four identical capsules unfold into a rosette and collapse back into one.</p>
+      </div>
+      <div class="top-actions">
+        <button id="restartBtn">Restart</button>
+        <button id="playBtn" class="primary">Pause</button>
+      </div>
+    </div>
+
+    <section class="stage-wrap">
+      <div class="stage" id="stage">
+        <div class="loader-holder" id="loaderHolder">
+          <svg id="loaderSvg" viewBox="-140 -140 280 280" width="280" height="280" aria-label="Animated logo loading indicator" role="img">
+            <g id="globalGroup">
+              <g class="capsule"><rect /></g>
+              <g class="capsule"><rect /></g>
+              <g class="capsule"><rect /></g>
+              <g class="capsule"><rect /></g>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="statusbar">
+        <div class="chips">
+          <span class="chip" id="phaseChip">Collapsed Hold</span>
+          <span class="chip" id="cycleChip">1.90 s cycle</span>
+          <span class="chip" id="easeChip">cubic-bezier(0.42, 0, 0.58, 1)</span>
+        </div>
+        <div class="actual-preview">
+          <span>Actual size</span>
+          <select id="actualSize" style="width:84px">
+            <option>16</option><option>24</option><option selected>32</option><option>48</option>
+            <option>64</option><option>96</option><option>128</option>
+          </select>
+          <div class="actual-box">
+            <svg id="actualSvg" viewBox="-140 -140 280 280" width="32" height="32" aria-hidden="true">
+              <g id="actualGlobalGroup">
+                <g class="actual-capsule"><rect /></g>
+                <g class="actual-capsule"><rect /></g>
+                <g class="actual-capsule"><rect /></g>
+                <g class="actual-capsule"><rect /></g>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="panel">
+    <div class="panel-inner">
+      <section class="section">
+        <h2>Presets</h2>
+        <div class="preset-grid">
+          <button data-preset="calm">Calm</button>
+          <button data-preset="balanced" class="active">Balanced</button>
+          <button data-preset="fast">Fast</button>
+          <button data-preset="snappy">Snappy</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Timing</h2>
+        <div class="row">
+          <label for="speed">Speed multiplier</label><span class="value" data-out="speed"></span>
+          <input id="speed" data-key="speed" type="range" min="0.25" max="3" step="0.05">
+        </div>
+        <div class="row">
+          <label for="collapsedHold">Collapsed hold</label><span class="value" data-out="collapsedHold"></span>
+          <input id="collapsedHold" data-key="collapsedHold" type="range" min="0" max="1500" step="10">
+        </div>
+        <div class="row">
+          <label for="bloomMs">Bloom</label><span class="value" data-out="bloomMs"></span>
+          <input id="bloomMs" data-key="bloomMs" type="range" min="100" max="2000" step="10">
+        </div>
+        <div class="row">
+          <label for="expandedHold">Expanded hold</label><span class="value" data-out="expandedHold"></span>
+          <input id="expandedHold" data-key="expandedHold" type="range" min="0" max="1500" step="10">
+        </div>
+        <div class="row">
+          <label for="collapseMs">Collapse</label><span class="value" data-out="collapseMs"></span>
+          <input id="collapseMs" data-key="collapseMs" type="range" min="100" max="2000" step="10">
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Geometry</h2>
+        <div class="row">
+          <label for="capsuleLength">Capsule length</label><span class="value" data-out="capsuleLength"></span>
+          <input id="capsuleLength" data-key="capsuleLength" type="range" min="50" max="220" step="1">
+        </div>
+        <div class="row">
+          <label for="capsuleHeight">Capsule height</label><span class="value" data-out="capsuleHeight"></span>
+          <input id="capsuleHeight" data-key="capsuleHeight" type="range" min="8" max="100" step="1">
+        </div>
+        <div class="row">
+          <label for="strokeWidth">Capsule thickness</label><span class="value" data-out="strokeWidth"></span>
+          <input id="strokeWidth" data-key="strokeWidth" type="range" min="0.5" max="16" step="0.25">
+        </div>
+        <div class="row">
+          <label for="scale">Loader scale</label><span class="value" data-out="scale"></span>
+          <input id="scale" data-key="scale" type="range" min="0.25" max="2.25" step="0.05">
+        </div>
+        <div class="row">
+          <label for="spread">Angular separation</label><span class="value" data-out="spread"></span>
+          <input id="spread" data-key="spread" type="range" min="15" max="90" step="1">
+        </div>
+        <div class="row">
+          <label for="baseAngle">Base rotation</label><span class="value" data-out="baseAngle"></span>
+          <input id="baseAngle" data-key="baseAngle" type="range" min="-180" max="180" step="1">
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Appearance</h2>
+        <div class="row">
+          <label>Stroke color</label>
+          <div class="inline">
+            <input id="strokeColorPicker" type="color">
+            <input id="strokeColorText" type="text" maxlength="7" style="width:92px">
+          </div>
+        </div>
+        <div class="row">
+          <label>Background</label>
+          <div class="inline">
+            <input id="bgColorPicker" type="color">
+            <input id="bgColorText" type="text" maxlength="7" style="width:92px">
+          </div>
+        </div>
+        <div class="row">
+          <label for="opacity">Stroke opacity</label><span class="value" data-out="opacity"></span>
+          <input id="opacity" data-key="opacity" type="range" min="0.1" max="1" step="0.01">
+        </div>
+        <div class="row">
+          <label for="previewZoom">Preview zoom</label><span class="value" data-out="previewZoom"></span>
+          <input id="previewZoom" data-key="previewZoom" type="range" min="0.5" max="2.5" step="0.05">
+        </div>
+        <div class="segmented">
+          <button id="gridBtn" class="active">Grid</button>
+          <button id="cleanBtn">Clean</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Motion</h2>
+        <div class="row">
+          <label>Direction</label>
+          <div class="segmented" style="width:190px">
+            <button data-direction="1" class="active">Clockwise</button>
+            <button data-direction="-1">Counter</button>
+          </div>
+        </div>
+        <div class="row">
+          <label for="staggerMs">Rotation stagger</label><span class="value" data-out="staggerMs"></span>
+          <input id="staggerMs" data-key="staggerMs" type="range" min="0" max="300" step="5">
+        </div>
+        <div class="row">
+          <label for="overshoot">Overshoot</label><span class="value" data-out="overshoot"></span>
+          <input id="overshoot" data-key="overshoot" type="range" min="0" max="20" step="0.5">
+        </div>
+
+        <details open>
+          <summary>Easing</summary>
+          <div style="margin-top:10px">
+            <select id="easePreset">
+              <option value="0.42,0,0.58,1">Smooth / standard</option>
+              <option value="0.25,0.1,0.25,1">Ease</option>
+              <option value="0.42,0,1,1">Ease in</option>
+              <option value="0,0,0.58,1">Ease out</option>
+              <option value="0.22,0.61,0.36,1">Soft</option>
+              <option value="0.33,1,0.68,1">Cinematic</option>
+              <option value="0.7,0,0.3,1">Snappy</option>
+            </select>
+          </div>
+          <div class="row"><label>P1 X</label><span class="value" data-out="x1"></span><input data-key="x1" type="range" min="0" max="1" step="0.01"></div>
+          <div class="row"><label>P1 Y</label><span class="value" data-out="y1"></span><input data-key="y1" type="range" min="-0.5" max="1.5" step="0.01"></div>
+          <div class="row"><label>P2 X</label><span class="value" data-out="x2"></span><input data-key="x2" type="range" min="0" max="1" step="0.01"></div>
+          <div class="row"><label>P2 Y</label><span class="value" data-out="y2"></span><input data-key="y2" type="range" min="-0.5" max="1.5" step="0.01"></div>
+          <div class="curve-box">
+            <svg id="curveSvg" viewBox="0 0 240 100" preserveAspectRatio="none">
+              <line x1="18" y1="82" x2="222" y2="18" stroke="#dddcd5" stroke-width="1"/>
+              <path id="curvePath" fill="none" stroke="currentColor" stroke-width="2"/>
+              <circle id="p1Dot" r="3.5" fill="currentColor"/>
+              <circle id="p2Dot" r="3.5" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="small" id="easeText" style="margin-top:8px"></div>
+        </details>
+      </section>
+
+      <section class="section">
+        <h2>State</h2>
+        <div class="segmented three">
+          <button id="collapsedBtn">Collapsed</button>
+          <button id="expandedBtn">Expanded</button>
+          <button id="resumeBtn">Resume</button>
+        </div>
+        <div class="notice" id="reduceMotionNotice" hidden>
+          Your system currently requests reduced motion. The lab still plays so you can tune it, but production usage should honor that preference.
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Export</h2>
+        <div class="export">
+          <button id="copyJson">Copy JSON</button>
+          <button id="copyMarkdown">Copy Markdown</button>
+          <button id="copyPrompt">Copy Compact Prompt</button>
+          <button id="resetBtn">Reset Defaults</button>
+        </div>
+        <p class="small" id="copyStatus" aria-live="polite"></p>
+      </section>
+    </div>
+  </aside>
+</div>
+
+<script>
+(() => {
+  const defaults = {
+    version: 1,
+    capsuleCount: 4,
+    capsuleLength: 132,
+    capsuleHeight: 38,
+    strokeWidth: 3,
+    scale: 1,
+    strokeColor: "#B99445",
+    backgroundColor: "#FFFFFF",
+    opacity: 1,
+    spread: 45,
+    baseAngle: 0,
+    direction: 1,
+    staggerMs: 0,
+    overshoot: 0,
+    collapsedHold: 220,
+    bloomMs: 480,
+    expandedHold: 300,
+    collapseMs: 480,
+    speed: 1,
+    x1: 0.42,
+    y1: 0,
+    x2: 0.58,
+    y2: 1,
+    previewZoom: 1
+  };
+
+  const presets = {
+    calm:      {collapsedHold:300,bloomMs:650,expandedHold:360,collapseMs:650,speed:1,x1:.42,y1:0,x2:.58,y2:1,staggerMs:0,overshoot:0},
+    balanced:  {collapsedHold:220,bloomMs:480,expandedHold:300,collapseMs:480,speed:1,x1:.42,y1:0,x2:.58,y2:1,staggerMs:0,overshoot:0},
+    fast:      {collapsedHold:100,bloomMs:300,expandedHold:180,collapseMs:300,speed:1,x1:.33,y1:1,x2:.68,y2:1,staggerMs:0,overshoot:0},
+    snappy:    {collapsedHold:90,bloomMs:260,expandedHold:180,collapseMs:280,speed:1,x1:.7,y1:0,x2:.3,y2:1,staggerMs:10,overshoot:2}
+  };
+
+  let state = structuredClone(defaults);
+  let playing = true;
+  let fixedState = null;
+  let animationStart = performance.now();
+  let pauseStarted = 0;
+  let pausedAccum = 0;
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const capsules = $$(".capsule");
+  const actualCapsules = $$(".actual-capsule");
+
+  function totalBase(){
+    return state.collapsedHold + state.bloomMs + state.expandedHold + state.collapseMs;
+  }
+  function totalEffective(){
+    return totalBase() / state.speed;
+  }
+
+  // Cubic-bezier evaluator adapted from the standard inversion approach.
+  function bezierAt(x, x1, y1, x2, y2){
+    const cx = 3*x1, bx = 3*(x2-x1)-cx, ax = 1-cx-bx;
+    const cy = 3*y1, by = 3*(y2-y1)-cy, ay = 1-cy-by;
+    const sampleX = t => ((ax*t+bx)*t+cx)*t;
+    const sampleY = t => ((ay*t+by)*t+cy)*t;
+    const sampleDx = t => (3*ax*t+2*bx)*t+cx;
+    let t = x;
+    for(let i=0;i<8;i++){
+      const dx = sampleX(t)-x;
+      const d = sampleDx(t);
+      if(Math.abs(dx)<1e-6 || Math.abs(d)<1e-6) break;
+      t -= dx/d;
+    }
+    let lo=0, hi=1;
+    t=Math.min(1,Math.max(0,t));
+    for(let i=0;i<12;i++){
+      const sx=sampleX(t);
+      if(Math.abs(sx-x)<1e-6) break;
+      if(sx<x) lo=t; else hi=t;
+      t=(lo+hi)/2;
+    }
+    return sampleY(t);
+  }
+
+  function ease(t){
+    return bezierAt(Math.min(1,Math.max(0,t)), state.x1,state.y1,state.x2,state.y2);
+  }
+
+  function staggeredProgress(baseProgress, index, phaseDuration){
+    if(state.staggerMs <= 0) return Math.min(1,Math.max(0,baseProgress));
+    const staggerFraction = Math.min(.85, state.staggerMs / Math.max(1,phaseDuration));
+    const delay = index * staggerFraction;
+    const span = Math.max(.05, 1 - staggerFraction * 3);
+    return Math.min(1,Math.max(0,(baseProgress-delay)/span));
+  }
+
+  function overshotProgress(t){
+    if(state.overshoot <= 0) return {main:ease(t), extra:0};
+    // Reach target slightly early, overshoot, then settle during the last 22%.
+    if(t < .78) return {main:ease(t/.78), extra:0};
+    const settle = (t-.78)/.22;
+    return {main:1, extra: Math.sin(settle*Math.PI) * state.overshoot};
+  }
+
+  function phaseAt(baseElapsed){
+    const a = state.collapsedHold;
+    const b = a + state.bloomMs;
+    const c = b + state.expandedHold;
+    const d = c + state.collapseMs;
+    if(baseElapsed < a) return {name:"Collapsed Hold", kind:"collapsed", t:0};
+    if(baseElapsed < b) return {name:"Blooming", kind:"bloom", t:(baseElapsed-a)/state.bloomMs};
+    if(baseElapsed < c) return {name:"Expanded Hold", kind:"expanded", t:1};
+    if(baseElapsed < d) return {name:"Collapsing", kind:"collapse", t:(baseElapsed-c)/state.collapseMs};
+    return {name:"Collapsed Hold", kind:"collapsed", t:0};
+  }
+
+  function anglesFor(phase){
+    const dir = state.direction;
+    return Array.from({length:4}, (_,i) => {
+      const target = i * state.spread * dir;
+      if(fixedState === "collapsed") return 0;
+      if(fixedState === "expanded") return target;
+      if(phase.kind === "collapsed") return 0;
+      if(phase.kind === "expanded") return target;
+      const phaseDuration = phase.kind === "bloom" ? state.bloomMs : state.collapseMs;
+      const local = staggeredProgress(phase.t, i, phaseDuration);
+      const p = overshotProgress(local);
+      const sign = target === 0 ? dir : Math.sign(target);
+      if(phase.kind === "bloom") return target * p.main + sign * p.extra;
+      return target * (1 - p.main) + sign * p.extra;
+    });
+  }
+
+  function applyGeometry(angleList){
+    const rx = state.capsuleHeight/2;
+    const x = -state.capsuleLength/2;
+    const y = -state.capsuleHeight/2;
+    const sets = [capsules, actualCapsules];
+    sets.forEach(groupSet => {
+      groupSet.forEach((g,i) => {
+        const rect = g.querySelector("rect");
+        rect.setAttribute("x",x);
+        rect.setAttribute("y",y);
+        rect.setAttribute("width",state.capsuleLength);
+        rect.setAttribute("height",state.capsuleHeight);
+        rect.setAttribute("rx",rx);
+        rect.setAttribute("ry",rx);
+        rect.setAttribute("fill","none");
+        rect.setAttribute("stroke",state.strokeColor);
+        rect.setAttribute("stroke-width",state.strokeWidth);
+        rect.setAttribute("stroke-linejoin","round");
+        rect.setAttribute("vector-effect","non-scaling-stroke");
+        rect.setAttribute("opacity",state.opacity);
+        g.setAttribute("transform",`rotate(${angleList[i]})`);
+      });
+    });
+    $("#globalGroup").setAttribute("transform",`rotate(${state.baseAngle}) scale(${state.scale})`);
+    $("#actualGlobalGroup").setAttribute("transform",`rotate(${state.baseAngle}) scale(${state.scale})`);
+    $("#stage").style.backgroundColor = state.backgroundColor;
+    $(".actual-box").style.backgroundColor = state.backgroundColor;
+    document.documentElement.style.setProperty("--accent",state.strokeColor);
+    document.documentElement.style.setProperty("--previewZoom",state.previewZoom);
+  }
+
+  function render(now){
+    let phase;
+    if(fixedState){
+      phase = {name:fixedState === "expanded" ? "Expanded (Fixed)" : "Collapsed (Fixed)",kind:fixedState,t:fixedState==="expanded"?1:0};
+    } else {
+      const elapsedReal = Math.max(0, now - animationStart - pausedAccum);
+      const baseElapsed = (elapsedReal * state.speed) % totalBase();
+      phase = phaseAt(baseElapsed);
+    }
+    applyGeometry(anglesFor(phase));
+    $("#phaseChip").textContent = phase.name;
+    if(playing) requestAnimationFrame(render);
+  }
+
+  function startAnimation(reset=true){
+    if(reset){
+      animationStart = performance.now();
+      pausedAccum = 0;
+    }
+    fixedState = null;
+    if(!playing){
+      playing = true;
+      $("#playBtn").textContent = "Pause";
+      $("#playBtn").classList.add("primary");
+      requestAnimationFrame(render);
+    }
+  }
+
+  function pause(){
+    if(!playing) return;
+    playing = false;
+    pauseStarted = performance.now();
+    $("#playBtn").textContent = "Play";
+    $("#playBtn").classList.remove("primary");
+  }
+
+  function resume(){
+    if(playing) return;
+    pausedAccum += performance.now()-pauseStarted;
+    playing = true;
+    $("#playBtn").textContent = "Pause";
+    $("#playBtn").classList.add("primary");
+    requestAnimationFrame(render);
+  }
+
+  function setFixed(which){
+    pause();
+    fixedState = which;
+    const phase = {name:which==="expanded"?"Expanded (Fixed)":"Collapsed (Fixed)",kind:which,t:which==="expanded"?1:0};
+    applyGeometry(anglesFor(phase));
+    $("#phaseChip").textContent = phase.name;
+  }
+
+  function formatValue(key,v){
+    if(["collapsedHold","bloomMs","expandedHold","collapseMs","staggerMs"].includes(key)) return `${Math.round(v)} ms`;
+    if(["spread","baseAngle","overshoot"].includes(key)) return `${Number(v).toFixed(key==="overshoot"?1:0)}°`;
+    if(["strokeWidth"].includes(key)) return `${Number(v).toFixed(2)} px`;
+    if(["capsuleLength","capsuleHeight"].includes(key)) return `${Math.round(v)} u`;
+    if(["scale","speed","previewZoom"].includes(key)) return `${Number(v).toFixed(2)}×`;
+    if(key==="opacity") return `${Math.round(v*100)}%`;
+    if(["x1","y1","x2","y2"].includes(key)) return Number(v).toFixed(2);
+    return String(v);
+  }
+
+  function syncUI(){
+    $$("[data-key]").forEach(el => {
+      const key=el.dataset.key;
+      el.value=state[key];
+      const out=$(`[data-out="${key}"]`);
+      if(out) out.textContent=formatValue(key,state[key]);
+    });
+    $("#strokeColorPicker").value=state.strokeColor;
+    $("#strokeColorText").value=state.strokeColor.toUpperCase();
+    $("#bgColorPicker").value=state.backgroundColor;
+    $("#bgColorText").value=state.backgroundColor.toUpperCase();
+    $$("[data-direction]").forEach(b=>b.classList.toggle("active",Number(b.dataset.direction)===state.direction));
+    const easing=`cubic-bezier(${state.x1.toFixed(2)}, ${state.y1.toFixed(2)}, ${state.x2.toFixed(2)}, ${state.y2.toFixed(2)})`;
+    $("#easeText").textContent=easing;
+    $("#easeChip").textContent=easing;
+    $("#cycleChip").textContent=`${(totalEffective()/1000).toFixed(2)} s cycle`;
+    drawCurve();
+    const phase = fixedState
+      ? {name:fixedState==="expanded"?"Expanded (Fixed)":"Collapsed (Fixed)",kind:fixedState,t:fixedState==="expanded"?1:0}
+      : {name:"Preview",kind:"collapsed",t:0};
+    if(fixedState) applyGeometry(anglesFor(phase));
+  }
+
+  function drawCurve(){
+    const mapX=t=>18+t*204, mapY=v=>82-v*64;
+    const p1x=mapX(state.x1), p1y=mapY(state.y1);
+    const p2x=mapX(state.x2), p2y=mapY(state.y2);
+    $("#curvePath").setAttribute("d",`M18 82 C ${p1x} ${p1y}, ${p2x} ${p2y}, 222 18`);
+    $("#p1Dot").setAttribute("cx",p1x); $("#p1Dot").setAttribute("cy",p1y);
+    $("#p2Dot").setAttribute("cx",p2x); $("#p2Dot").setAttribute("cy",p2y);
+  }
+
+  function configObject(){
+    return {
+      version: state.version,
+      geometry:{
+        capsuleCount:4,
+        capsuleLength:state.capsuleLength,
+        capsuleHeight:state.capsuleHeight,
+        strokeWidth:state.strokeWidth,
+        scale:state.scale
+      },
+      appearance:{
+        strokeColor:state.strokeColor.toUpperCase(),
+        strokeOpacity:state.opacity,
+        backgroundColor:state.backgroundColor.toUpperCase()
+      },
+      rotation:{
+        baseAngle:state.baseAngle,
+        angleSeparation:state.spread,
+        direction:state.direction===1?"clockwise":"counterclockwise",
+        overshootDegrees:state.overshoot,
+        staggerMs:state.staggerMs
+      },
+      timing:{
+        speedMultiplier:state.speed,
+        collapsedHoldMs:state.collapsedHold,
+        bloomMs:state.bloomMs,
+        expandedHoldMs:state.expandedHold,
+        collapseMs:state.collapseMs,
+        effectiveCycleMs:Math.round(totalEffective())
+      },
+      easing:{
+        css:`cubic-bezier(${state.x1.toFixed(2)}, ${state.y1.toFixed(2)}, ${state.x2.toFixed(2)}, ${state.y2.toFixed(2)})`,
+        points:[state.x1,state.y1,state.x2,state.y2]
+      }
+    };
+  }
+
+  function markdown(){
+    const c=configObject();
+    return `# Logo Bloom Loader Configuration
+
+## Geometry
+- Capsule count: ${c.geometry.capsuleCount}
+- Capsule length: ${c.geometry.capsuleLength}
+- Capsule height: ${c.geometry.capsuleHeight}
+- Stroke thickness: ${c.geometry.strokeWidth}
+- Loader scale: ${c.geometry.scale}
+
+## Appearance
+- Stroke color: ${c.appearance.strokeColor}
+- Stroke opacity: ${Math.round(c.appearance.strokeOpacity*100)}%
+- Background: ${c.appearance.backgroundColor}
+
+## Motion
+- Direction: ${c.rotation.direction}
+- Angular separation: ${c.rotation.angleSeparation}°
+- Base rotation: ${c.rotation.baseAngle}°
+- Stagger: ${c.rotation.staggerMs} ms
+- Overshoot: ${c.rotation.overshootDegrees}°
+- Speed multiplier: ${c.timing.speedMultiplier}×
+- Collapsed hold: ${c.timing.collapsedHoldMs} ms
+- Bloom: ${c.timing.bloomMs} ms
+- Expanded hold: ${c.timing.expandedHoldMs} ms
+- Collapse: ${c.timing.collapseMs} ms
+- Effective cycle: ${c.timing.effectiveCycleMs} ms
+
+## Easing
+- ${c.easing.css}
+`;
+  }
+
+  function compactPrompt(){
+    const c=configObject();
+    return `Logo bloom loader approved values: 4 capsules; length ${c.geometry.capsuleLength}; height ${c.geometry.capsuleHeight}; stroke ${c.geometry.strokeWidth}; color ${c.appearance.strokeColor}; opacity ${Math.round(c.appearance.strokeOpacity*100)}%; background ${c.appearance.backgroundColor}; separation ${c.rotation.angleSeparation}°; base rotation ${c.rotation.baseAngle}°; ${c.rotation.direction}; stagger ${c.rotation.staggerMs}ms; overshoot ${c.rotation.overshootDegrees}°; collapsed hold ${c.timing.collapsedHoldMs}ms; bloom ${c.timing.bloomMs}ms; expanded hold ${c.timing.expandedHoldMs}ms; collapse ${c.timing.collapseMs}ms; speed ${c.timing.speedMultiplier}x; easing ${c.easing.css}.`;
+  }
+
+  async function copy(text,label){
+    try{
+      await navigator.clipboard.writeText(text);
+      $("#copyStatus").textContent=`${label} copied.`;
+    }catch{
+      const ta=document.createElement("textarea");
+      ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();
+      $("#copyStatus").textContent=`${label} copied.`;
+    }
+    setTimeout(()=>$("#copyStatus").textContent="",1800);
+  }
+
+  $$("[data-key]").forEach(el=>{
+    el.addEventListener("input",()=>{
+      state[el.dataset.key]=Number(el.value);
+      syncUI();
+      if(!playing && fixedState) applyGeometry(anglesFor({kind:fixedState,t:fixedState==="expanded"?1:0}));
+    });
+  });
+
+  function wireColor(picker,text,key){
+    picker.addEventListener("input",()=>{state[key]=picker.value.toUpperCase();text.value=state[key];syncUI();});
+    text.addEventListener("change",()=>{
+      if(/^#[0-9a-fA-F]{6}$/.test(text.value)){
+        state[key]=text.value.toUpperCase();picker.value=state[key];syncUI();
+      }else text.value=state[key];
+    });
+  }
+  wireColor($("#strokeColorPicker"),$("#strokeColorText"),"strokeColor");
+  wireColor($("#bgColorPicker"),$("#bgColorText"),"backgroundColor");
+
+  $$("[data-direction]").forEach(b=>b.addEventListener("click",()=>{state.direction=Number(b.dataset.direction);syncUI();}));
+  $$("[data-preset]").forEach(b=>b.addEventListener("click",()=>{
+    Object.assign(state,presets[b.dataset.preset]);
+    $$("[data-preset]").forEach(x=>x.classList.toggle("active",x===b));
+    syncUI(); startAnimation(true);
+  }));
+
+  $("#easePreset").addEventListener("change",e=>{
+    const [x1,y1,x2,y2]=e.target.value.split(",").map(Number);
+    Object.assign(state,{x1,y1,x2,y2});syncUI();
+  });
+
+  $("#playBtn").addEventListener("click",()=>{
+    if(fixedState){fixedState=null;animationStart=performance.now();pausedAccum=0;resume();return;}
+    playing?pause():resume();
+  });
+  $("#restartBtn").addEventListener("click",()=>{fixedState=null;animationStart=performance.now();pausedAccum=0;if(!playing)resume();});
+  $("#resumeBtn").addEventListener("click",()=>{fixedState=null;animationStart=performance.now();pausedAccum=0;if(!playing)resume();});
+  $("#collapsedBtn").addEventListener("click",()=>setFixed("collapsed"));
+  $("#expandedBtn").addEventListener("click",()=>setFixed("expanded"));
+
+  $("#actualSize").addEventListener("change",e=>{
+    const s=Number(e.target.value);$("#actualSvg").setAttribute("width",s);$("#actualSvg").setAttribute("height",s);
+  });
+
+  $("#gridBtn").addEventListener("click",()=>{
+    $("#stage").classList.remove("clean-grid");$("#gridBtn").classList.add("active");$("#cleanBtn").classList.remove("active");
+  });
+  $("#cleanBtn").addEventListener("click",()=>{
+    $("#stage").classList.add("clean-grid");$("#cleanBtn").classList.add("active");$("#gridBtn").classList.remove("active");
+  });
+
+  $("#copyJson").addEventListener("click",()=>copy(JSON.stringify(configObject(),null,2),"JSON"));
+  $("#copyMarkdown").addEventListener("click",()=>copy(markdown(),"Markdown"));
+  $("#copyPrompt").addEventListener("click",()=>copy(compactPrompt(),"Compact prompt"));
+  $("#resetBtn").addEventListener("click",()=>{
+    state=structuredClone(defaults);syncUI();fixedState=null;animationStart=performance.now();pausedAccum=0;
+    if(!playing)resume();
+    $$("[data-preset]").forEach(x=>x.classList.toggle("active",x.dataset.preset==="balanced"));
+  });
+
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+    $("#reduceMotionNotice").hidden=false;
+  }
+
+  syncUI();
+  requestAnimationFrame(render);
+})();
+</script>
+</body>
+</html>

@@ -140,3 +140,6 @@ export function Tabs({
     </div>
   );
 }
+
+export { LogoLoader } from './logo-loader';
+export type { LogoLoaderProps } from './logo-loader';

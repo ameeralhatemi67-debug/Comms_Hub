@@ -142,6 +142,73 @@ When recording future implementation outcomes, follow this standardized template
 - **Next Action:** [The immediate next technical task]
 ```
 
+### 2026-09-20 — Checkpoint 0.2 Google Form Transformation & Wi-Fi LAN Tooling
+
+- **Milestone / Context:** Checkpoint 0.2 (Department Validation), Phase 0.2.2 readiness.
+- **Outcome Summary:** Created an automated Google Apps Script form generator, complete form architecture specification, visual mapping guide connecting validation tasks to screenshot artifacts, and local network Wi-Fi hosting commands.
+- **Technical Changes & Implementation:**
+  - `validation/google-form-generator.gs`: Turnkey Google Apps Script creating a 9-section Arabic Google Form with automatic role branching (`مدير الاتصال المؤسسي`, `مساعد مدير الاتصال`, `كاتب المحتوى`, `المصمم`, `المنتج الإعلامي`, `مسؤول النشر`, `عضو / مسؤول النظام`), task execution blocks, open architecture questions, and D1–D5 dimension scales converging to the final exit gate section.
+  - `validation/google-form-spec.md`: Authoritative specification document for all form fields, options, and logic.
+  - `validation/form-visual-guide.md`: Mapping guide linking each validation scenario to corresponding screenshots in `qa/artifacts/` and documenting prototype boundaries.
+  - `package.json`: Added `dev:lan` and `start:lan` scripts binding Next.js to `0.0.0.0:3000` for multi-device local network access.
+- **Verification & Evidence:**
+  - JavaScript syntax check on `google-form-generator.gs`: passed (exit code 0).
+  - TypeScript typecheck: `npm run typecheck` passed cleanly (0 errors).
+  - Domain tests: `npm test` passed 8 of 8 unit tests.
+  - Production build: `npm run build` compiled successfully in 654ms via Next.js Turbopack.
+  - Zero emoji verified across all added and modified files.
+- **Key Decisions & Deviations:** Used Google Apps Script programmatically to construct the complex multi-section Google Form since Google Forms does not support file-based JSON imports.
+- **Remaining Limitations:** Google Form must be generated once in the user's Google Drive by running the script; live human validation sessions with department staff remain required for exit gate sign-off.
+- **Next Action:** Facilitate Phase 0.2.2 department validation sessions and collect participant submissions.
+
+---
+
+### 2026-09-20 — Logo Loading Animation Motion Lab & 2-Stop Full 360 Continuous Forward Loop
+
+- **Milestone / Context:** Brand Logo Loading Animation Visual & Motion Calibration Workbench.
+- **Outcome Summary:** Built and calibrated the interactive, zero-dependency Logo Loading Animation Motion Lab in `loading/logo-loader-motion-lab.html` and documented it in `loading/README.md`. Mathematically verified and implemented the 2-stop continuous forward loop geometry ($90 \mid -90$ and $0 \mid 180$) with zero backward swing.
+- **Technical Changes & Implementation:**
+  - `loading/logo-loader-motion-lab.html`: Standalone SVG/CSS/JS motion sandbox featuring rAF animation engine, cubic-Bézier visualizer, 7 actual-size previews (16px to 128px), continuous whole-assembly rotation, and individual capsule trajectories (`A-B-A`, `A-B-C-B`, and `continuous-360`).
+  - Mathematical modeling of the 2-stop full 360 forward loop:
+    - Shape 2 ($90^\circ$): $90^\circ \to 0^\circ \to -90^\circ \to 180^\circ \to 90^\circ$.
+    - Shape 1 ($45^\circ$): $45^\circ \to 0^\circ \to -135^\circ \to 180^\circ \to 45^\circ$.
+    - Shape 3 ($135^\circ$): $135^\circ \to 0^\circ \to -45^\circ \to 180^\circ \to 135^\circ$.
+    - Shape 0 ($0^\circ$): Anchored horizontal baseline capsule.
+  - UI toggle configured: OFF = Reversing (`A-B-A`), ON = Full 360 Forward (`continuous-360`).
+  - Transport step buttons updated: `Step Collapsed (0|180)`, `Step Expanded (+90)`, and `Step Expanded (-90)`.
+- **Verification & Evidence:**
+  - `vm.Script` JavaScript syntax check: passed (exit code 0).
+  - Node simulation of exact angular trajectory across both Clockwise and Counterclockwise directions: confirmed 100% agreement with theoretical deltas.
+  - Microsoft Edge headless DOM dump: executed and verified without errors.
+  - `npm run typecheck`: passed cleanly (exit code 0).
+  - `npm test`: passed 8/8 tests.
+  - Zero emoji verified across all files.
+- **Key Decisions & Deviations:** Maintained Capsule 0 as the stationary horizontal baseline anchor so petals revolve around it, while providing whole-shape continuous assembly rotation on a separate dedicated control.
+- **Remaining Limitations:** Visual tuning of final parameters (timing, stroke, color, and curves) is in progress by user.
+- **Next Action:** User experiments with sliders, exports approved values, and reports back to finalize production SVG/CSS implementation.
+
+---
+
+### 2026-09-20 — Production LogoLoader Component Integration into Comms Hub
+
+- **Milestone / Context:** Brand Identity & Motion Design Integration across Comms Hub Prototype.
+- **Outcome Summary:** Integrated the user-approved branded loading animation (4-capsule continuous forward pass-through trajectory, 1.5s continuous assembly spin, and custom cubic-Bézier `(0.44, -0.03, 0.4, 1)`) into the Comms Hub Next.js application as a production-grade, hardware-accelerated pure CSS React component.
+- **Technical Changes & Implementation:**
+  - `src/components/logo-loader.tsx`: Created `<LogoLoader />` parameterized component supporting visual sizes (`xs` 16px, `sm` 24px, `md` 32px, `lg` 48px, `xl` 64px, `2xl` 80px, or numeric px), modes (`active` animated spinner vs `static` brand rosette), custom color (`#B99445`), and accessible ARIA attributes (`role="status"`). Includes `@media (prefers-reduced-motion: reduce)` fallback.
+  - `src/components/ui.tsx`: Re-exported `LogoLoader` and `LogoLoaderProps` from the core UI component barrel.
+  - `src/app/loading.tsx`: Replaced generic skeleton placeholder with centered `<LogoLoader size={72} />` and Arabic status text *«جارٍ تجهيز مساحة العمل…»* for all Next.js route transitions and Suspense boundaries.
+  - `src/components/shell.tsx`: Replaced placeholder Lucide icon `<ChartNoAxesCombined />` in the sidebar header (`aside.sidebar .brand .brandmark`) with the static brand rosette `<LogoLoader size={26} mode="static" color="#FFFFFF" />`.
+  - `src/components/operations.tsx`: Integrated `<LogoLoader size={22} />` next to *«جارٍ النشر التجريبي…»* and `<LogoLoader size={16} />` next to *«جارٍ التنفيذ…»* during publishing and retry simulations.
+- **Verification & Evidence:**
+  - `npm run typecheck`: Passed with 0 errors.
+  - `npm test`: Passed 8/8 domain and workflow unit tests.
+  - `npm run build`: Compiled production build successfully in 1074ms via Next.js Turbopack.
+  - Headless Microsoft Edge browser (`--headless --dump-dom`): Verified that `<LogoLoader />` renders valid SVG markup in the live application shell and sidebar brandmark.
+  - Zero emoji verified across all added and modified files.
+- **Key Decisions & Deviations:** Compiled animation into pure CSS `@keyframes` inside SVG/defs rather than a runtime JavaScript rAF loop, ensuring zero React re-render overhead, 60/120fps GPU compositing, and full compatibility with Next.js SSR.
+- **Remaining Limitations:** None for prototype scope; visual shell and simulation flows now reflect approved brand motion design.
+- **Next Action:** Continue Phase 0.2.2 department validation and user feedback.
+
 ---
 
 ^comms-hub-progress-boundary

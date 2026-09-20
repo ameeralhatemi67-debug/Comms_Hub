@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { noticesFor, roles, type Role } from '@/lib/domain';
 import { useHub } from '@/lib/store';
-import { Modal, Empty } from './ui';
+import { Modal, Empty, LogoLoader } from './ui';
 
 const nav = [
   ['/', 'الرئيسية', House],
@@ -84,7 +84,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <aside className="sidebar">
         <Link href="/" className="brand">
           <span className="brandmark">
-            <ChartNoAxesCombined />
+            <LogoLoader size={26} mode="static" color="#FFFFFF" ariaLabel="شعار مركز الاتصال" />
           </span>
           <span>
             <b>مركز الاتصال</b>

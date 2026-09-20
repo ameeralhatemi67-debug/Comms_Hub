@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { roles, ready, type Work } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { ReleaseHistory } from './release-history';
-import { Title, Panel, StatusChip, Empty, MediaPreview, Modal, Tabs } from './ui';
+import { Title, Panel, StatusChip, Empty, MediaPreview, Modal, Tabs, LogoLoader } from './ui';
 
 export function Approvals() {
   const { state, dispatch } = useHub();
@@ -131,7 +131,12 @@ export function Approvals() {
                           : w.results[c] === 'FAILED'
                             ? 'فشل تجريبي · أعد المحاولة'
                             : w.status === 'PUBLISHING'
-                              ? 'جارٍ التنفيذ…'
+                              ? (
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                    <LogoLoader size={16} />
+                                    جارٍ التنفيذ…
+                                  </span>
+                                )
                               : 'جاهز'}
                       </span>
                     </div>
@@ -152,7 +157,12 @@ export function Approvals() {
                         إعادة محاولة القنوات الفاشلة
                       </button>
                     )}
-                    {w.status === 'PUBLISHING' && <span role="status">جارٍ النشر التجريبي…</span>}
+                    {w.status === 'PUBLISHING' && (
+                      <span role="status" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                        <LogoLoader size={22} />
+                        جارٍ النشر التجريبي…
+                      </span>
+                    )}
                   </div>
                 )}
                 {!actor.publish && <p className="warning">الجدولة والتنفيذ متاحان لمسؤول النشر وإدارة الحسابات.</p>}

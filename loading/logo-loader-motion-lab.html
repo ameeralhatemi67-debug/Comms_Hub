@@ -1,0 +1,2424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logo Loading Animation Motion Lab</title>
+  <style>
+    /* Reset and Base Theme */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-app: #0c0e12;
+      --bg-panel: #141820;
+      --bg-surface: #1b212c;
+      --bg-input: #10141b;
+      --border-subtle: #232a38;
+      --border-focus: #485773;
+      --text-primary: #e6edf3;
+      --text-secondary: #9aa7b8;
+      --text-muted: #657386;
+      --accent-gold: #b99445;
+      --accent-gold-hover: #cfab5c;
+      --accent-active: #388bfd;
+      --accent-active-bg: rgba(56, 139, 253, 0.12);
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--bg-panel);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .header-branding {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-primary);
+    }
+
+    .header-badge {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--accent-gold);
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Layout Containers */
+    .motion-lab-grid {
+      display: grid;
+      grid-template-columns: minmax(460px, 1.15fr) minmax(380px, 0.85fr);
+      flex: 1;
+      height: calc(100vh - 57px);
+      overflow: hidden;
+    }
+
+    @media (max-width: 1024px) {
+      .motion-lab-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+      }
+    }
+
+    /* Left Stage Area */
+    .stage-column {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border-subtle);
+      background: var(--bg-app);
+      overflow: hidden;
+    }
+
+    .stage-toolbar {
+      padding: 10px 16px;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stage-tools-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tool-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stage-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #ffffff;
+      transition: background-color 0.2s ease;
+      min-height: 380px;
+      overflow: hidden;
+    }
+
+    .stage-viewport.theme-dark {
+      background: #111419;
+    }
+
+    .stage-viewport.theme-checker {
+      background-color: #ffffff;
+      background-image: 
+        linear-gradient(45deg, #eee 25%, transparent 25%), 
+        linear-gradient(-45deg, #eee 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #eee 75%), 
+        linear-gradient(-45deg, transparent 75%, #eee 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+
+    .loader-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
+      transition: transform 0.08s linear;
+      position: relative;
+    }
+
+    /* Center crosshair helper (subtle) */
+    .stage-center-marker {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .stage-center-marker::before, .stage-center-marker::after {
+      content: "";
+      position: absolute;
+      background: #388bfd;
+    }
+    .stage-center-marker::before {
+      top: 5px; left: 0; width: 12px; height: 2px;
+    }
+    .stage-center-marker::after {
+      top: 0; left: 5px; width: 2px; height: 12px;
+    }
+    .show-guides .stage-center-marker {
+      opacity: 0.6;
+    }
+
+    /* Transport & Playback Bar */
+    .playback-bar {
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border-subtle);
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .scrubber-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .scrubber-slider {
+      flex: 1;
+      height: 6px;
+      accent-color: var(--accent-gold);
+      cursor: pointer;
+    }
+
+    .scrubber-time {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .transport-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .transport-buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Multi-Size Preview Tray */
+    .multi-size-tray {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      padding: 10px 16px;
+    }
+
+    .tray-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .size-samples {
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .size-sample-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 8px 10px;
+      min-width: 52px;
+    }
+
+    .size-sample-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border-radius: 4px;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .size-sample-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Right Control Panel */
+    .controls-column {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-panel);
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .controls-content {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Control Sections */
+    .control-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: 0.02em;
+    }
+
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--accent-gold);
+    }
+
+    /* Form Fields */
+    .control-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 65px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control-label-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .control-slider {
+      width: 100%;
+      height: 5px;
+      accent-color: var(--accent-gold);
+      background: var(--bg-input);
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .control-number {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      text-align: right;
+      width: 100%;
+    }
+
+    .control-number:focus {
+      outline: none;
+      border-color: var(--border-focus);
+    }
+
+    /* Select & Toggles */
+    select.control-select {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 12px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    select.control-select:focus {
+      outline: none;
+      border-color: var(--border-focus);
+    }
+
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .color-swatch-input {
+      -webkit-appearance: none;
+      appearance: none;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      cursor: pointer;
+      background: none;
+      padding: 0;
+    }
+    .color-swatch-input::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    .color-swatch-input::-webkit-color-swatch {
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+    }
+
+    .color-hex-text {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .btn:hover {
+      background: var(--border-subtle);
+      color: #ffffff;
+    }
+
+    .btn.active {
+      background: var(--accent-active-bg);
+      border-color: var(--accent-active);
+      color: #ffffff;
+    }
+
+    .btn-gold {
+      background: var(--accent-gold);
+      color: #0c0e12;
+      border: 1px solid var(--accent-gold-hover);
+      font-weight: 600;
+    }
+
+    .btn-gold:hover {
+      background: var(--accent-gold-hover);
+      color: #000000;
+    }
+
+    .btn-sm {
+      font-size: 11px;
+      padding: 4px 8px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* Easing Curve Canvas */
+    .bezier-canvas-wrapper {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bezier-svg {
+      width: 100%;
+      height: 100px;
+      background: #090c10;
+      border-radius: 4px;
+    }
+
+    .bezier-formula {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-gold);
+      text-align: center;
+      word-break: break-all;
+    }
+
+    /* State Inspector Pill */
+    .state-inspector-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .phase-badge {
+      font-weight: 600;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+    }
+
+    /* Bottom Configuration Drawer / Export Area */
+    .config-drawer {
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-panel);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .config-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .config-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .config-pre {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #98c379;
+      max-height: 160px;
+      overflow-y: auto;
+      white-space: pre;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--accent-gold);
+      color: #0c0e12;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      z-index: 999;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Collapsible Details */
+    details.advanced-box {
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 10px;
+      background: var(--bg-panel);
+    }
+
+    details.advanced-box summary {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+      outline: none;
+    }
+
+    details.advanced-box[open] summary {
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header>
+    <div class="header-branding">
+      <span class="header-title">Logo Loading Animation Motion Lab</span>
+      <span class="header-badge">Prototype Lab</span>
+    </div>
+    <div class="header-actions">
+      <div class="state-inspector-pill">
+        <span>Status: <strong id="insp-status">PLAYING</strong></span>
+        <span>Phase: <span class="phase-badge" id="insp-phase">COLLAPSED HOLD</span></span>
+      </div>
+      <button class="btn btn-sm" id="btn-reset-defaults" title="Reset all controls to recommended default">Reset Defaults</button>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <div class="motion-lab-grid">
+
+    <!-- Left Stage Column -->
+    <div class="stage-column">
+      
+      <!-- Stage Toolbar -->
+      <div class="stage-toolbar">
+        <div class="stage-tools-group">
+          <span class="tool-label">Canvas:</span>
+          <div class="button-group">
+            <button class="btn btn-sm active" id="canvas-bg-white">White</button>
+            <button class="btn btn-sm" id="canvas-bg-dark">Dark</button>
+            <button class="btn btn-sm" id="canvas-bg-checker">Grid</button>
+          </div>
+        </div>
+
+        <div class="stage-tools-group">
+          <span class="tool-label">Zoom:</span>
+          <input type="range" id="stage-zoom-slider" min="0.5" max="3" step="0.1" value="1.5" style="width: 70px;">
+          <span class="tool-label" id="stage-zoom-val" style="min-width: 32px;">150%</span>
+        </div>
+
+        <div class="stage-tools-group">
+          <label style="font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; cursor: pointer;">
+            <input type="checkbox" id="toggle-center-guide"> Guides
+          </label>
+        </div>
+      </div>
+
+      <!-- Main Stage Viewport -->
+      <div class="stage-viewport" id="stage-viewport">
+        <div class="stage-center-marker"></div>
+        <div class="loader-container" id="main-loader-container">
+          <!-- Primary SVG Loader -->
+          <svg id="main-loader-svg" width="240" height="240" viewBox="-150 -150 300 300" style="overflow: visible;">
+            <g id="main-capsules-group">
+              <!-- Four overlapping rounded capsules -->
+              <g id="main-cap-0" class="capsule-g"><rect class="capsule-rect" fill="none" /></g>
+              <g id="main-cap-1" class="capsule-g"><rect class="capsule-rect" fill="none" /></g>
+              <g id="main-cap-2" class="capsule-g"><rect class="capsule-rect" fill="none" /></g>
+              <g id="main-cap-3" class="capsule-g"><rect class="capsule-rect" fill="none" /></g>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Playback Bar -->
+      <div class="playback-bar">
+        <div class="scrubber-row">
+          <input type="range" id="cycle-scrubber" class="scrubber-slider" min="0" max="1000" step="1" value="0">
+          <div class="scrubber-time">
+            <span id="scrub-time-cur">0.00s</span> / <span id="scrub-time-total">2.00s</span>
+          </div>
+        </div>
+        <div class="transport-controls">
+          <div class="transport-buttons">
+            <button class="btn btn-sm btn-gold" id="btn-play-pause">Pause</button>
+            <button class="btn btn-sm" id="btn-restart">Restart</button>
+            <button class="btn btn-sm" id="btn-step-collapsed" title="Stop: Collapsed single pill (0 or 180 deg)">Step Collapsed (0|180)</button>
+            <button class="btn btn-sm" id="btn-step-expanded" title="Stop: Expanded Rosette (+90 / +45 / +135 deg)">Step Expanded (+90)</button>
+            <button class="btn btn-sm" id="btn-step-expanded-neg" title="Stop: Expanded Rosette (-90 / -135 / -45 deg)">Step Expanded (-90)</button>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); font-family: var(--font-mono);">
+            Progress: <span id="insp-progress-pct" style="color: var(--text-primary); font-weight: 600;">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Multi-Size Preview Tray -->
+      <div class="multi-size-tray">
+        <div class="tray-title">
+          <span>Actual Size Previews (Real-world scale)</span>
+          <span style="font-size: 10px; font-weight: normal; color: var(--text-muted);">Synchronized live motion</span>
+        </div>
+        <div class="size-samples">
+          <div class="size-sample-item">
+            <div class="size-sample-box" style="width: 24px; height: 24px;">
+              <svg id="sample-16" width="16" height="16" viewBox="-150 -150 300 300">
+                <g class="sample-group"></g>
+              </svg>
+            </div>
+            <span class="size-sample-label">16px</span>
+          </div>
+
+          <div class="size-sample-item">
+            <div class="size-sample-box" style="width: 32px; height: 32px;">
+              <svg id="sample-24" width="24" height="24" viewBox="-150 -150 300 300">
+                <g class="sample-group"></g>
+              </svg>
+            </div>
+            <span class="size-sample-label">24px</span>
+          </div>
+
+          <div class="size-sample-item">
+            <div class="size-sample-box" style="width: 40px; height: 40px;">
+              <svg id="sample-32" width="32" height="32" viewBox="-150 -150 300 300">
+                <g class="sample-group"></g>
+              </svg>
+            </div>
+            <span class="size-sample-label">32px</span>
+          </div>
+
+          <div class="size-sample-item">
+            <div class="size-sample-box" style="width: 56px; height: 56px;">
+              <svg id="sample-48" width="48" height="48" viewBox="-150 -150 300 300">
+                <g class="sample-group"></g>
+              </svg>
+            </div>
+            <span class="size-sample-label">48px</span>
+          </div>
+
+          <div class="size-sample-item">
+            <div class="size-sample-box" style="width: 72px; height: 72px;">
+              <svg id="sample-64" width="64" height="64" viewBox="-150 -150 300 300">
+                <g class="sample-group"></g>
+              </svg>
+            </div>
+            <span class="size-sample-label">64px</span>
+          </div>
+
+          <div class="size-sample-item">
+            <div class="size-sample-box" style="width: 104px; height: 104px;">
+              <svg id="sample-96" width="96" height="96" viewBox="-150 -150 300 300">
+                <g class="sample-group"></g>
+              </svg>
+            </div>
+            <span class="size-sample-label">96px</span>
+          </div>
+
+          <div class="size-sample-item">
+            <div class="size-sample-box" style="width: 136px; height: 136px;">
+              <svg id="sample-128" width="128" height="128" viewBox="-150 -150 300 300">
+                <g class="sample-group"></g>
+              </svg>
+            </div>
+            <span class="size-sample-label">128px</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Control Column -->
+    <div class="controls-column">
+      <div class="controls-content">
+
+        <!-- Motion Presets Section -->
+        <div class="control-section">
+          <div class="section-header">
+            <span class="section-title">Motion Presets</span>
+            <span class="section-tag">QUICK PROFILES</span>
+          </div>
+          <div class="button-group">
+            <button class="btn btn-sm active" id="preset-balanced">Balanced</button>
+            <button class="btn btn-sm" id="preset-calm">Calm</button>
+            <button class="btn btn-sm" id="preset-fast">Fast</button>
+            <button class="btn btn-sm" id="preset-snappy">Snappy</button>
+          </div>
+        </div>
+
+        <!-- Animation Speed & Timing Section -->
+        <div class="control-section">
+          <div class="section-header">
+            <span class="section-title">Cycle & Phase Timing</span>
+            <span class="section-tag" id="cycle-ms-readout">2000 ms</span>
+          </div>
+
+          <!-- Total Cycle Duration -->
+          <div class="control-row">
+            <span class="control-label-text">Cycle Duration</span>
+            <input type="range" id="slider-cycle-duration" class="control-slider" min="0.5" max="8.0" step="0.05" value="2.0">
+            <input type="number" id="num-cycle-duration" class="control-number" min="0.5" max="8.0" step="0.05" value="2.00">
+          </div>
+
+          <details class="advanced-box" id="timing-mode-box" open>
+            <summary>Advanced Phase Timing</summary>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+              <div class="control-row">
+                <span class="control-label-text">Bloom Duration</span>
+                <input type="range" id="slider-bloom-ms" class="control-slider" min="100" max="3000" step="25" value="550">
+                <input type="number" id="num-bloom-ms" class="control-number" min="100" max="3000" step="25" value="550">
+              </div>
+
+              <div class="control-row">
+                <span class="control-label-text">Expanded Hold</span>
+                <input type="range" id="slider-expanded-hold-ms" class="control-slider" min="0" max="2500" step="25" value="350">
+                <input type="number" id="num-expanded-hold-ms" class="control-number" min="0" max="2500" step="25" value="350">
+              </div>
+
+              <div class="control-row">
+                <span class="control-label-text">Collapse Duration</span>
+                <input type="range" id="slider-collapse-ms" class="control-slider" min="100" max="3000" step="25" value="550">
+                <input type="number" id="num-collapse-ms" class="control-number" min="100" max="3000" step="25" value="550">
+              </div>
+
+              <div class="control-row">
+                <span class="control-label-text">Collapsed Hold</span>
+                <input type="range" id="slider-collapsed-hold-ms" class="control-slider" min="0" max="2500" step="25" value="550">
+                <input type="number" id="num-collapsed-hold-ms" class="control-number" min="0" max="2500" step="25" value="550">
+              </div>
+
+              <div style="font-size: 11px; color: var(--text-muted); font-style: italic;">
+                Phase proportions sum to the overall cycle duration.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Capsule Geometry Section -->
+        <div class="control-section">
+          <div class="section-header">
+            <span class="section-title">Capsule Geometry</span>
+            <span class="section-tag" id="aspect-ratio-tag">Ratio: 3.33:1</span>
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Capsule Length</span>
+            <input type="range" id="slider-cap-length" class="control-slider" min="40" max="220" step="1" value="120">
+            <input type="number" id="num-cap-length" class="control-number" min="40" max="220" step="1" value="120">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Capsule Height</span>
+            <input type="range" id="slider-cap-height" class="control-slider" min="12" max="72" step="1" value="36">
+            <input type="number" id="num-cap-height" class="control-number" min="12" max="72" step="1" value="36">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Stroke Thickness</span>
+            <input type="range" id="slider-stroke-width" class="control-slider" min="1" max="16" step="0.25" value="3">
+            <input type="number" id="num-stroke-width" class="control-number" min="1" max="16" step="0.25" value="3.00">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Loader Scale</span>
+            <input type="range" id="slider-loader-scale" class="control-slider" min="0.25" max="2.5" step="0.05" value="1">
+            <input type="number" id="num-loader-scale" class="control-number" min="0.25" max="2.5" step="0.05" value="1.00">
+          </div>
+
+          <details class="advanced-box">
+            <summary>Alignment Offsets</summary>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+              <div class="control-row">
+                <span class="control-label-text">Center X Offset</span>
+                <input type="range" id="slider-offset-x" class="control-slider" min="-50" max="50" step="1" value="0">
+                <input type="number" id="num-offset-x" class="control-number" min="-50" max="50" step="1" value="0">
+              </div>
+              <div class="control-row">
+                <span class="control-label-text">Center Y Offset</span>
+                <input type="range" id="slider-offset-y" class="control-slider" min="-50" max="50" step="1" value="0">
+                <input type="number" id="num-offset-y" class="control-number" min="-50" max="50" step="1" value="0">
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Color & Appearance Section -->
+        <div class="control-section">
+          <div class="section-header">
+            <span class="section-title">Color & Appearance</span>
+            <span class="section-tag">BRAND STYLING</span>
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Stroke Color</span>
+            <div class="color-row">
+              <input type="color" id="color-stroke-picker" class="color-swatch-input" value="#b99445">
+              <input type="text" id="color-stroke-hex" class="color-hex-text" value="#B99445">
+            </div>
+            <div></div>
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Stage Background</span>
+            <div class="color-row">
+              <input type="color" id="color-bg-picker" class="color-swatch-input" value="#ffffff">
+              <input type="text" id="color-bg-hex" class="color-hex-text" value="#FFFFFF">
+            </div>
+            <div></div>
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Stroke Opacity</span>
+            <input type="range" id="slider-stroke-opacity" class="control-slider" min="0.05" max="1" step="0.05" value="1">
+            <input type="number" id="num-stroke-opacity" class="control-number" min="5" max="100" step="5" value="100">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Overlap Strategy</span>
+            <select id="select-overlap-strategy" class="control-select">
+              <option value="standard">Natural Geometric Overlap</option>
+              <option value="compensated">Fade Duplicate Collapsed Strokes</option>
+            </select>
+            <div></div>
+          </div>
+        </div>
+
+        <!-- Rotation & Bloom Section -->
+        <div class="control-section">
+          <div class="section-header">
+            <span class="section-title">Rotation & Bloom</span>
+            <span class="section-tag" id="separation-tag">45 deg separation</span>
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Angular Separation</span>
+            <input type="range" id="slider-angular-sep" class="control-slider" min="15" max="90" step="1" value="45">
+            <input type="number" id="num-angular-sep" class="control-number" min="15" max="90" step="1" value="45">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Base Rotation</span>
+            <input type="range" id="slider-base-rot" class="control-slider" min="-180" max="180" step="1" value="0">
+            <input type="number" id="num-base-rot" class="control-number" min="-180" max="180" step="1" value="0">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Bloom Direction</span>
+            <select id="select-direction" class="control-select">
+              <option value="clockwise">Clockwise</option>
+              <option value="counterclockwise">Counterclockwise</option>
+            </select>
+            <div></div>
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Pass-Through Mode</span>
+            <div style="display: flex; gap: 6px; width: 100%;">
+              <button type="button" class="btn btn-sm active" id="btn-traj-aba" style="flex: 1;" title="Standard Reversing (A -> B -> A)">Reversing [OFF]</button>
+              <button type="button" class="btn btn-sm" id="btn-traj-abcb" style="flex: 1;" title="Full 360 Forward Continuous Loop (90 -> 0 -> -90 -> 180)">Full 360 Forward [ON]</button>
+            </div>
+            <div></div>
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Trajectory Path</span>
+            <select id="select-trajectory" class="control-select">
+              <option value="A-B-A">Standard Reversing (A -> B -> A) [OFF]</option>
+              <option value="continuous-360">Full 360 Forward (90 -> 0 -> -90 -> 180) [ON]</option>
+              <option value="A-B-C-B">Pass-Through Alternating Swing (A -> B -> C -> B)</option>
+            </select>
+            <div></div>
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Overshoot</span>
+            <input type="range" id="slider-overshoot" class="control-slider" min="0" max="20" step="0.5" value="0">
+            <input type="number" id="num-overshoot" class="control-number" min="0" max="20" step="0.5" value="0">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Capsule Stagger</span>
+            <input type="range" id="slider-stagger" class="control-slider" min="0" max="200" step="5" value="0">
+            <input type="number" id="num-stagger" class="control-number" min="0" max="200" step="5" value="0">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Stagger Order</span>
+            <select id="select-stagger-order" class="control-select">
+              <option value="forward">Forward (0 to 3)</option>
+              <option value="reverse">Reverse (3 to 0)</option>
+              <option value="center-out">Center-out (Inner first)</option>
+            </select>
+            <div></div>
+          </div>
+
+          <details class="advanced-box" id="continuous-rot-box" open>
+            <summary>Whole Shape Continuous Rotation</summary>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+              <div class="control-row">
+                <span class="control-label-text">Enable Rotation</span>
+                <label style="font-size: 12px; color: var(--text-primary); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                  <input type="checkbox" id="toggle-continuous-rot"> Rotate Whole Shape
+                </label>
+                <div></div>
+              </div>
+
+              <div class="control-row">
+                <span class="control-label-text">Rotation Speed</span>
+                <input type="range" id="slider-continuous-speed" class="control-slider" min="1.0" max="30.0" step="0.5" value="8.0">
+                <input type="number" id="num-continuous-speed" class="control-number" min="1.0" max="30.0" step="0.5" value="8.00">
+              </div>
+
+              <div class="control-row">
+                <span class="control-label-text">Rotation Direction</span>
+                <select id="select-continuous-dir" class="control-select">
+                  <option value="clockwise">Clockwise</option>
+                  <option value="counterclockwise">Counterclockwise</option>
+                </select>
+                <div></div>
+              </div>
+
+              <div style="font-size: 11px; color: var(--text-muted);" id="continuous-rot-readout">
+                8.0s per revolution (45 deg/s)
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Easing Editor Section -->
+        <div class="control-section">
+          <div class="section-header">
+            <span class="section-title">Easing Curve</span>
+            <span class="section-tag" id="easing-active-name">Ease In-Out</span>
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">Preset Curves</span>
+            <select id="select-easing-preset" class="control-select">
+              <option value="ease-in-out">Ease In-Out (0.42, 0.00, 0.58, 1.00)</option>
+              <option value="ease">Ease (0.25, 0.10, 0.25, 1.00)</option>
+              <option value="ease-in">Ease In (0.42, 0.00, 1.00, 1.00)</option>
+              <option value="ease-out">Ease Out (0.00, 0.00, 0.58, 1.00)</option>
+              <option value="soft">Soft (0.33, 0.00, 0.20, 1.00)</option>
+              <option value="snappy">Snappy (0.16, 1.00, 0.30, 1.00)</option>
+              <option value="cinematic">Smooth Cinematic (0.65, 0.00, 0.35, 1.00)</option>
+              <option value="linear">Linear (0.00, 0.00, 1.00, 1.00)</option>
+              <option value="custom">Custom Bézier</option>
+            </select>
+            <div></div>
+          </div>
+
+          <div class="bezier-canvas-wrapper">
+            <svg id="bezier-preview-svg" class="bezier-svg" viewBox="0 0 200 100">
+              <!-- Grid -->
+              <line x1="20" y1="10" x2="180" y2="10" stroke="#1f2633" stroke-dasharray="2 2" />
+              <line x1="20" y1="50" x2="180" y2="50" stroke="#1f2633" stroke-dasharray="2 2" />
+              <line x1="20" y1="90" x2="180" y2="90" stroke="#1f2633" stroke-dasharray="2 2" />
+              <line x1="20" y1="90" x2="180" y2="10" stroke="#252f40" stroke-width="1" />
+              <!-- Control handle lines -->
+              <line id="bz-line1" x1="20" y1="90" x2="20" y2="90" stroke="#388bfd" stroke-width="1.5" />
+              <line id="bz-line2" x1="180" y1="10" x2="180" y2="10" stroke="#e3b341" stroke-width="1.5" />
+              <!-- Curve Path -->
+              <path id="bz-curve-path" d="M 20 90 C 20 90, 180 10, 180 10" fill="none" stroke="#e6edf3" stroke-width="2.5" />
+              <!-- Handle Circles -->
+              <circle id="bz-pt1" cx="20" cy="90" r="4" fill="#388bfd" />
+              <circle id="bz-pt2" cx="180" cy="10" r="4" fill="#e3b341" />
+            </svg>
+            <span class="bezier-formula" id="bezier-css-formula">cubic-bezier(0.42, 0.00, 0.58, 1.00)</span>
+          </div>
+
+          <!-- Custom Cubic-Bezier Sliders -->
+          <div class="control-row">
+            <span class="control-label-text">P1 X</span>
+            <input type="range" id="slider-bz-x1" class="control-slider" min="0" max="1" step="0.01" value="0.42">
+            <input type="number" id="num-bz-x1" class="control-number" min="0" max="1" step="0.01" value="0.42">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">P1 Y</span>
+            <input type="range" id="slider-bz-y1" class="control-slider" min="-0.5" max="1.5" step="0.01" value="0.00">
+            <input type="number" id="num-bz-y1" class="control-number" min="-0.5" max="1.5" step="0.01" value="0.00">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">P2 X</span>
+            <input type="range" id="slider-bz-x2" class="control-slider" min="0" max="1" step="0.01" value="0.58">
+            <input type="number" id="num-bz-x2" class="control-number" min="0" max="1" step="0.01" value="0.58">
+          </div>
+
+          <div class="control-row">
+            <span class="control-label-text">P2 Y</span>
+            <input type="range" id="slider-bz-y2" class="control-slider" min="-0.5" max="1.5" step="0.01" value="1.00">
+            <input type="number" id="num-bz-y2" class="control-number" min="-0.5" max="1.5" step="0.01" value="1.00">
+          </div>
+
+          <details class="advanced-box">
+            <summary>Independent Collapse Easing</summary>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+              <label style="font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="toggle-independent-easing"> Enable separate Collapse easing curve
+              </label>
+              <div id="collapse-easing-controls" style="display: none; flex-direction: column; gap: 8px;">
+                <div class="control-row">
+                  <span class="control-label-text">Collapse P1 X</span>
+                  <input type="range" id="slider-col-x1" class="control-slider" min="0" max="1" step="0.01" value="0.42">
+                  <input type="number" id="num-col-x1" class="control-number" min="0" max="1" step="0.01" value="0.42">
+                </div>
+                <div class="control-row">
+                  <span class="control-label-text">Collapse P1 Y</span>
+                  <input type="range" id="slider-col-y1" class="control-slider" min="-0.5" max="1.5" step="0.01" value="0.00">
+                  <input type="number" id="num-col-y1" class="control-number" min="-0.5" max="1.5" step="0.01" value="0.00">
+                </div>
+                <div class="control-row">
+                  <span class="control-label-text">Collapse P2 X</span>
+                  <input type="range" id="slider-col-x2" class="control-slider" min="0" max="1" step="0.01" value="0.58">
+                  <input type="number" id="num-col-x2" class="control-number" min="0" max="1" step="0.01" value="0.58">
+                </div>
+                <div class="control-row">
+                  <span class="control-label-text">Collapse P2 Y</span>
+                  <input type="range" id="slider-col-y2" class="control-slider" min="-0.5" max="1.5" step="0.01" value="1.00">
+                  <input type="number" id="num-col-y2" class="control-number" min="-0.5" max="1.5" step="0.01" value="1.00">
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Accessibility / Reduced Motion Section -->
+        <div class="control-section">
+          <div class="section-header">
+            <span class="section-title">Reduced Motion</span>
+            <span class="section-tag" id="reduced-motion-tag">System: Standard</span>
+          </div>
+          <div class="control-row">
+            <span class="control-label-text">Motion Mode</span>
+            <select id="select-reduced-motion" class="control-select">
+              <option value="auto">Auto (Match OS Preference)</option>
+              <option value="standard">Standard Full Motion</option>
+              <option value="reduced">Reduced Motion Simulation</option>
+            </select>
+            <div></div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted);">
+            Reduced motion mode keeps the symmetrical rosette static and applies a gentle, restrained opacity breathing cycle.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Live Configuration and Export Panel -->
+      <div class="config-drawer">
+        <div class="config-header">
+          <span class="config-title">Live Configuration Specification</span>
+          <div class="button-group">
+            <button class="btn btn-sm btn-gold" id="btn-copy-json">Copy JSON</button>
+            <button class="btn btn-sm" id="btn-copy-markdown">Copy Markdown</button>
+            <button class="btn btn-sm" id="btn-copy-compact">Copy Compact Prompt</button>
+          </div>
+        </div>
+        <pre class="config-pre" id="config-json-display"></pre>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Configuration copied to clipboard</div>
+
+  <script>
+    /*
+      Logo Loading Animation Motion Lab
+      Pure vanilla JavaScript, standalone, zero dependencies.
+      All animation driven by requestAnimationFrame for absolute mathematical precision,
+      scrubbing, stepping, and multi-size synchronization.
+    */
+
+    // Canonical State Configuration
+    const state = {
+      version: 1,
+      geometry: {
+        capsuleCount: 4,
+        capsuleLength: 120,
+        capsuleHeight: 36,
+        strokeWidth: 3.0,
+        scale: 1.0,
+        offsetX: 0,
+        offsetY: 0
+      },
+      appearance: {
+        strokeColor: "#b99445",
+        strokeOpacity: 1.0,
+        stageBgColor: "#ffffff",
+        overlapStrategy: "standard" // "standard" or "compensated"
+      },
+      rotation: {
+        baseAngle: 0,
+        angleSeparation: 45,
+        direction: "clockwise", // "clockwise" or "counterclockwise"
+        overshoot: 0.0,
+        staggerMs: 0,
+        staggerOrder: "forward", // "forward", "reverse", "center-out"
+        trajectory: "A-B-A", // "A-B-A" (Standard Reversing), "A-B-C-B" (Pass-Through Alternating), "continuous-360" (Unidirectional Forward)
+        continuousRotation: {
+          enabled: false,
+          speedSeconds: 8.0,
+          direction: "clockwise"
+        }
+      },
+      timing: {
+        totalCycleMs: 2000,
+        bloomMs: 550,
+        expandedHoldMs: 350,
+        collapseMs: 550,
+        collapsedHoldMs: 550,
+        timingMode: "advanced" // "linked" or "advanced"
+      },
+      easing: {
+        preset: "ease-in-out",
+        bloom: [0.42, 0.00, 0.58, 1.00],
+        independentCollapse: false,
+        collapse: [0.42, 0.00, 0.58, 1.00]
+      },
+      playback: {
+        isPlaying: true,
+        currentTimeMs: 0,
+        reducedMotionMode: "auto" // "auto", "standard", "reduced"
+      },
+      ui: {
+        zoom: 1.5,
+        showGuides: false,
+        stageTheme: "white" // "white", "dark", "checker"
+      }
+    };
+
+    // Predefined Easing Presets
+    const EASING_PRESETS = {
+      "ease-in-out": [0.42, 0.00, 0.58, 1.00],
+      "ease": [0.25, 0.10, 0.25, 1.00],
+      "ease-in": [0.42, 0.00, 1.00, 1.00],
+      "ease-out": [0.00, 0.00, 0.58, 1.00],
+      "soft": [0.33, 0.00, 0.20, 1.00],
+      "snappy": [0.16, 1.00, 0.30, 1.00],
+      "cinematic": [0.65, 0.00, 0.35, 1.00],
+      "linear": [0.00, 0.00, 1.00, 1.00]
+    };
+
+    // Predefined Motion Lab Presets
+    const LAB_PRESETS = {
+      balanced: {
+        timing: { bloomMs: 550, expandedHoldMs: 350, collapseMs: 550, collapsedHoldMs: 550, totalCycleMs: 2000 },
+        geometry: { capsuleLength: 120, capsuleHeight: 36, strokeWidth: 3.0 },
+        rotation: { angleSeparation: 45, overshoot: 0.0, staggerMs: 0 },
+        easing: { preset: "ease-in-out", bloom: [0.42, 0.00, 0.58, 1.00] }
+      },
+      calm: {
+        timing: { bloomMs: 950, expandedHoldMs: 600, collapseMs: 950, collapsedHoldMs: 700, totalCycleMs: 3200 },
+        geometry: { capsuleLength: 124, capsuleHeight: 36, strokeWidth: 2.5 },
+        rotation: { angleSeparation: 45, overshoot: 0.0, staggerMs: 30 },
+        easing: { preset: "soft", bloom: [0.33, 0.00, 0.20, 1.00] }
+      },
+      fast: {
+        timing: { bloomMs: 350, expandedHoldMs: 200, collapseMs: 350, collapsedHoldMs: 300, totalCycleMs: 1200 },
+        geometry: { capsuleLength: 110, capsuleHeight: 34, strokeWidth: 3.5 },
+        rotation: { angleSeparation: 45, overshoot: 0.0, staggerMs: 0 },
+        easing: { preset: "snappy", bloom: [0.16, 1.00, 0.30, 1.00] }
+      },
+      snappy: {
+        timing: { bloomMs: 400, expandedHoldMs: 250, collapseMs: 400, collapsedHoldMs: 350, totalCycleMs: 1400 },
+        geometry: { capsuleLength: 120, capsuleHeight: 36, strokeWidth: 3.25 },
+        rotation: { angleSeparation: 45, overshoot: 3.5, staggerMs: 0 },
+        easing: { preset: "snappy", bloom: [0.16, 1.00, 0.30, 1.00] }
+      }
+    };
+
+    // Cubic Bézier Solver (Standard high-precision Newton-Raphson with bisection fallback)
+    function createBezierEvaluator(x1, y1, x2, y2) {
+      if (x1 === y1 && x2 === y2) {
+        return function(t) { return Math.max(0, Math.min(1, t)); };
+      }
+
+      function sampleX(t) {
+        return ((1 - 3 * x2 + 3 * x1) * t + (3 * x2 - 6 * x1)) * t * t + 3 * x1 * t;
+      }
+      function sampleY(t) {
+        return ((1 - 3 * y2 + 3 * y1) * t + (3 * y2 - 6 * y1)) * t * t + 3 * y1 * t;
+      }
+      function sampleDerivativeX(t) {
+        return (3 * (1 - 3 * x2 + 3 * x1) * t + 2 * (3 * x2 - 6 * x1)) * t + 3 * x1;
+      }
+
+      function solveX(x) {
+        if (x <= 0) return 0;
+        if (x >= 1) return 1;
+        let t = x;
+        // Newton-Raphson
+        for (let i = 0; i < 8; i++) {
+          const cx = sampleX(t) - x;
+          if (Math.abs(cx) < 1e-6) return t;
+          const dx = sampleDerivativeX(t);
+          if (Math.abs(dx) < 1e-6) break;
+          t -= cx / dx;
+          if (t < 0 || t > 1) break;
+        }
+        // Bisection fallback
+        let t0 = 0.0, t1 = 1.0;
+        t = x;
+        while (t0 < t1) {
+          const cx = sampleX(t);
+          if (Math.abs(cx - x) < 1e-6) return t;
+          if (x > cx) t0 = t;
+          else t1 = t;
+          t = (t1 + t0) * 0.5;
+          if (t1 - t0 < 1e-6) break;
+        }
+        return t;
+      }
+
+      return function(x) {
+        if (x <= 0) return 0;
+        if (x >= 1) return 1;
+        return sampleY(solveX(x));
+      };
+    }
+
+    let bloomBezierEvaluator = createBezierEvaluator(...state.easing.bloom);
+    let collapseBezierEvaluator = createBezierEvaluator(...state.easing.collapse);
+
+    function updateBezierEvaluators() {
+      bloomBezierEvaluator = createBezierEvaluator(...state.easing.bloom);
+      const colPts = state.easing.independentCollapse ? state.easing.collapse : state.easing.bloom;
+      collapseBezierEvaluator = createBezierEvaluator(...colPts);
+    }
+
+    // DOM Elements
+    const elements = {
+      mainSvg: document.getElementById("main-loader-svg"),
+      mainCapsulesGroup: document.getElementById("main-capsules-group"),
+      stageViewport: document.getElementById("stage-viewport"),
+      mainLoaderContainer: document.getElementById("main-loader-container"),
+      stageZoomSlider: document.getElementById("stage-zoom-slider"),
+      stageZoomVal: document.getElementById("stage-zoom-val"),
+      toggleCenterGuide: document.getElementById("toggle-center-guide"),
+      canvasBgWhite: document.getElementById("canvas-bg-white"),
+      canvasBgDark: document.getElementById("canvas-bg-dark"),
+      canvasBgChecker: document.getElementById("canvas-bg-checker"),
+      
+      // Playback
+      cycleScrubber: document.getElementById("cycle-scrubber"),
+      scrubTimeCur: document.getElementById("scrub-time-cur"),
+      scrubTimeTotal: document.getElementById("scrub-time-total"),
+      btnPlayPause: document.getElementById("btn-play-pause"),
+      btnRestart: document.getElementById("btn-restart"),
+      btnStepCollapsed: document.getElementById("btn-step-collapsed"),
+      btnStepExpanded: document.getElementById("btn-step-expanded"),
+      btnStepExpandedNeg: document.getElementById("btn-step-expanded-neg"),
+      inspStatus: document.getElementById("insp-status"),
+      inspPhase: document.getElementById("insp-phase"),
+      inspProgressPct: document.getElementById("insp-progress-pct"),
+      btnResetDefaults: document.getElementById("btn-reset-defaults"),
+
+      // Controls - Timing
+      cycleMsReadout: document.getElementById("cycle-ms-readout"),
+      sliderCycleDuration: document.getElementById("slider-cycle-duration"),
+      numCycleDuration: document.getElementById("num-cycle-duration"),
+      sliderBloomMs: document.getElementById("slider-bloom-ms"),
+      numBloomMs: document.getElementById("num-bloom-ms"),
+      sliderExpandedHoldMs: document.getElementById("slider-expanded-hold-ms"),
+      numExpandedHoldMs: document.getElementById("num-expanded-hold-ms"),
+      sliderCollapseMs: document.getElementById("slider-collapse-ms"),
+      numCollapseMs: document.getElementById("num-collapse-ms"),
+      sliderCollapsedHoldMs: document.getElementById("slider-collapsed-hold-ms"),
+      numCollapsedHoldMs: document.getElementById("num-collapsed-hold-ms"),
+
+      // Controls - Geometry
+      aspectRatioTag: document.getElementById("aspect-ratio-tag"),
+      sliderCapLength: document.getElementById("slider-cap-length"),
+      numCapLength: document.getElementById("num-cap-length"),
+      sliderCapHeight: document.getElementById("slider-cap-height"),
+      numCapHeight: document.getElementById("num-cap-height"),
+      sliderStrokeWidth: document.getElementById("slider-stroke-width"),
+      numStrokeWidth: document.getElementById("num-stroke-width"),
+      sliderLoaderScale: document.getElementById("slider-loader-scale"),
+      numLoaderScale: document.getElementById("num-loader-scale"),
+      sliderOffsetX: document.getElementById("slider-offset-x"),
+      numOffsetX: document.getElementById("num-offset-x"),
+      sliderOffsetY: document.getElementById("slider-offset-y"),
+      numOffsetY: document.getElementById("num-offset-y"),
+
+      // Controls - Appearance
+      colorStrokePicker: document.getElementById("color-stroke-picker"),
+      colorStrokeHex: document.getElementById("color-stroke-hex"),
+      colorBgPicker: document.getElementById("color-bg-picker"),
+      colorBgHex: document.getElementById("color-bg-hex"),
+      sliderStrokeOpacity: document.getElementById("slider-stroke-opacity"),
+      numStrokeOpacity: document.getElementById("num-stroke-opacity"),
+      selectOverlapStrategy: document.getElementById("select-overlap-strategy"),
+
+      // Controls - Rotation
+      separationTag: document.getElementById("separation-tag"),
+      sliderAngularSep: document.getElementById("slider-angular-sep"),
+      numAngularSep: document.getElementById("num-angular-sep"),
+      sliderBaseRot: document.getElementById("slider-base-rot"),
+      numBaseRot: document.getElementById("num-base-rot"),
+      selectDirection: document.getElementById("select-direction"),
+      btnTrajAba: document.getElementById("btn-traj-aba"),
+      btnTrajAbcb: document.getElementById("btn-traj-abcb"),
+      selectTrajectory: document.getElementById("select-trajectory"),
+      sliderOvershoot: document.getElementById("slider-overshoot"),
+      numOvershoot: document.getElementById("num-overshoot"),
+      sliderStagger: document.getElementById("slider-stagger"),
+      numStagger: document.getElementById("num-stagger"),
+      selectStaggerOrder: document.getElementById("select-stagger-order"),
+      toggleContinuousRot: document.getElementById("toggle-continuous-rot"),
+      sliderContinuousSpeed: document.getElementById("slider-continuous-speed"),
+      numContinuousSpeed: document.getElementById("num-continuous-speed"),
+      selectContinuousDir: document.getElementById("select-continuous-dir"),
+      continuousRotReadout: document.getElementById("continuous-rot-readout"),
+
+      // Controls - Easing
+      easingActiveName: document.getElementById("easing-active-name"),
+      selectEasingPreset: document.getElementById("select-easing-preset"),
+      bezierCssFormula: document.getElementById("bezier-css-formula"),
+      bzCurvePath: document.getElementById("bz-curve-path"),
+      bzLine1: document.getElementById("bz-line1"),
+      bzLine2: document.getElementById("bz-line2"),
+      bzPt1: document.getElementById("bz-pt1"),
+      bzPt2: document.getElementById("bz-pt2"),
+      sliderBzX1: document.getElementById("slider-bz-x1"),
+      numBzX1: document.getElementById("num-bz-x1"),
+      sliderBzY1: document.getElementById("slider-bz-y1"),
+      numBzY1: document.getElementById("num-bz-y1"),
+      sliderBzX2: document.getElementById("slider-bz-x2"),
+      numBzX2: document.getElementById("num-bz-x2"),
+      sliderBzY2: document.getElementById("slider-bz-y2"),
+      numBzY2: document.getElementById("num-bz-y2"),
+      toggleIndependentEasing: document.getElementById("toggle-independent-easing"),
+      collapseEasingControls: document.getElementById("collapse-easing-controls"),
+      sliderColX1: document.getElementById("slider-col-x1"),
+      numColX1: document.getElementById("num-col-x1"),
+      sliderColY1: document.getElementById("slider-col-y1"),
+      numColY1: document.getElementById("num-col-y1"),
+      sliderColX2: document.getElementById("slider-col-x2"),
+      numColX2: document.getElementById("num-col-x2"),
+      sliderColY2: document.getElementById("slider-col-y2"),
+      numColY2: document.getElementById("num-col-y2"),
+
+      // Accessibility
+      selectReducedMotion: document.getElementById("select-reduced-motion"),
+      reducedMotionTag: document.getElementById("reduced-motion-tag"),
+
+      // Configuration & Export
+      configJsonDisplay: document.getElementById("config-json-display"),
+      btnCopyJson: document.getElementById("btn-copy-json"),
+      btnCopyMarkdown: document.getElementById("btn-copy-markdown"),
+      btnCopyCompact: document.getElementById("btn-copy-compact"),
+      toast: document.getElementById("toast")
+    };
+
+    // Build miniature sample SVG structures
+    const sampleIds = [16, 24, 32, 48, 64, 96, 128];
+    sampleIds.forEach(size => {
+      const svg = document.getElementById("sample-" + size);
+      if (!svg) return;
+      const grp = svg.querySelector(".sample-group");
+      grp.innerHTML = "";
+      for (let i = 0; i < 4; i++) {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "sample-cap-" + i);
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("class", "capsule-rect");
+        rect.setAttribute("fill", "none");
+        g.appendChild(rect);
+        grp.appendChild(g);
+      }
+    });
+
+    // Update Geometry of All Capsule Elements
+    function updateCapsuleGeometry() {
+      const L = state.geometry.capsuleLength;
+      const H = state.geometry.capsuleHeight;
+      const W = state.geometry.strokeWidth;
+      const rad = H / 2; // Perfect semicircle pill ends
+
+      const allRects = document.querySelectorAll(".capsule-rect");
+      allRects.forEach(rect => {
+        rect.setAttribute("x", -L / 2);
+        rect.setAttribute("y", -H / 2);
+        rect.setAttribute("width", L);
+        rect.setAttribute("height", H);
+        rect.setAttribute("rx", rad);
+        rect.setAttribute("ry", rad);
+        rect.setAttribute("stroke", state.appearance.strokeColor);
+        rect.setAttribute("stroke-width", W);
+      });
+
+      // Update aspect ratio tag
+      const ratio = (L / H).toFixed(2);
+      elements.aspectRatioTag.textContent = `Ratio: ${ratio}:1`;
+
+      // Apply master scale & offsets to main loader container
+      const scale = state.geometry.scale * state.ui.zoom;
+      elements.mainLoaderContainer.style.transform = `translate(${state.geometry.offsetX}px, ${state.geometry.offsetY}px) scale(${scale})`;
+    }
+
+    // Bézier Canvas Drawing
+    function updateBezierCurveVisual() {
+      const [x1, y1, x2, y2] = state.easing.bloom;
+      const left = 20, right = 180, top = 10, bottom = 90;
+      const w = right - left;
+      const h = bottom - top;
+
+      // Coordinate mapping (Y is inverted in SVG)
+      const p1x = left + x1 * w;
+      const p1y = bottom - y1 * h;
+      const p2x = left + x2 * w;
+      const p2y = bottom - y2 * h;
+
+      const pathData = `M ${left} ${bottom} C ${p1x} ${p1y}, ${p2x} ${p2y}, ${right} ${top}`;
+      elements.bzCurvePath.setAttribute("d", pathData);
+
+      elements.bzLine1.setAttribute("x1", left);
+      elements.bzLine1.setAttribute("y1", bottom);
+      elements.bzLine1.setAttribute("x2", p1x);
+      elements.bzLine1.setAttribute("y2", p1y);
+
+      elements.bzLine2.setAttribute("x1", right);
+      elements.bzLine2.setAttribute("y1", top);
+      elements.bzLine2.setAttribute("x2", p2x);
+      elements.bzLine2.setAttribute("y2", p2y);
+
+      elements.bzPt1.setAttribute("cx", p1x);
+      elements.bzPt1.setAttribute("cy", p1y);
+      elements.bzPt2.setAttribute("cx", p2x);
+      elements.bzPt2.setAttribute("cy", p2y);
+
+      const cssStr = `cubic-bezier(${x1.toFixed(2)}, ${y1.toFixed(2)}, ${x2.toFixed(2)}, ${y2.toFixed(2)})`;
+      elements.bezierCssFormula.textContent = cssStr;
+    }
+
+    // Refresh Configuration JSON and Display
+    function refreshConfigDisplay() {
+      // Recompute total duration from phases
+      const phaseSum = 
+        state.timing.collapsedHoldMs + 
+        state.timing.bloomMs + 
+        state.timing.expandedHoldMs + 
+        state.timing.collapseMs;
+
+      const isPassThrough = state.rotation.trajectory === "A-B-C-B" || state.rotation.trajectory === "continuous-360";
+      state.timing.totalCycleMs = isPassThrough ? phaseSum * 2 : phaseSum;
+
+      elements.cycleMsReadout.textContent = `${state.timing.totalCycleMs} ms${isPassThrough ? " (2x half-cycles)" : ""}`;
+      elements.scrubTimeTotal.textContent = `${(state.timing.totalCycleMs / 1000).toFixed(2)}s`;
+
+      const exportObj = {
+        version: state.version,
+        geometry: {
+          capsuleCount: state.geometry.capsuleCount,
+          capsuleLength: state.geometry.capsuleLength,
+          capsuleHeight: state.geometry.capsuleHeight,
+          strokeWidth: state.geometry.strokeWidth,
+          scale: state.geometry.scale,
+          offsetX: state.geometry.offsetX,
+          offsetY: state.geometry.offsetY
+        },
+        appearance: {
+          strokeColor: state.appearance.strokeColor.toUpperCase(),
+          strokeOpacity: state.appearance.strokeOpacity,
+          stageBgColor: state.appearance.stageBgColor.toUpperCase(),
+          overlapStrategy: state.appearance.overlapStrategy
+        },
+        rotation: {
+          baseAngle: state.rotation.baseAngle,
+          angleSeparation: state.rotation.angleSeparation,
+          direction: state.rotation.direction,
+          trajectory: state.rotation.trajectory,
+          passThroughEnabled: state.rotation.trajectory === "A-B-C-B",
+          overshoot: state.rotation.overshoot,
+          staggerMs: state.rotation.staggerMs,
+          staggerOrder: state.rotation.staggerOrder,
+          continuousRotation: {
+            enabled: state.rotation.continuousRotation.enabled,
+            speedSeconds: state.rotation.continuousRotation.speedSeconds,
+            direction: state.rotation.continuousRotation.direction
+          }
+        },
+        timing: {
+          collapsedHoldMs: state.timing.collapsedHoldMs,
+          bloomMs: state.timing.bloomMs,
+          expandedHoldMs: state.timing.expandedHoldMs,
+          collapseMs: state.timing.collapseMs,
+          totalCycleMs: state.timing.totalCycleMs
+        },
+        easing: {
+          preset: state.easing.preset,
+          independentCollapse: state.easing.independentCollapse,
+          bloom: state.easing.bloom.map(v => Number(v.toFixed(2))),
+          collapse: (state.easing.independentCollapse ? state.easing.collapse : state.easing.bloom).map(v => Number(v.toFixed(2)))
+        }
+      };
+
+      elements.configJsonDisplay.textContent = JSON.stringify(exportObj, null, 2);
+      return exportObj;
+    }
+
+    // Motion Evaluation Math for given time t
+    function evaluateMotionAtTime(timeMs) {
+      const T_hold1 = state.timing.collapsedHoldMs;
+      const T_bloom = state.timing.bloomMs;
+      const T_hold2 = state.timing.expandedHoldMs;
+      const T_col = state.timing.collapseMs;
+      const T_half = T_hold1 + T_bloom + T_hold2 + T_col;
+
+      if (T_half <= 0) return { angles: [0,0,0,0], phase: "COLLAPSED HOLD", opacities: [1,1,1,1] };
+
+      const traj = state.rotation.trajectory || "A-B-A";
+      const isMultiHalf = (traj === "A-B-C-B" || traj === "continuous-360");
+      const T_total = isMultiHalf ? T_half * 2 : T_half;
+
+      // Normal cycle looping
+      const cycleT = ((timeMs % T_total) + T_total) % T_total;
+
+      let halfIndex = 0; // 0 for first half, 1 for second half
+      let localHalfT = cycleT;
+      if (isMultiHalf && cycleT >= T_half) {
+        halfIndex = 1;
+        localHalfT = cycleT - T_half;
+      }
+
+      let currentPhase = "COLLAPSED HOLD";
+      let phaseProgress = 0;
+      let mode = 0; // 0: collapsed hold, 1: blooming, 2: expanded hold, 3: collapsing
+
+      if (localHalfT < T_hold1) {
+        mode = 0;
+        phaseProgress = T_hold1 > 0 ? localHalfT / T_hold1 : 1;
+        currentPhase = isMultiHalf ? "COLLAPSED HOLD (MIDPOINT B)" : "COLLAPSED HOLD";
+      } else if (localHalfT < T_hold1 + T_bloom) {
+        mode = 1;
+        phaseProgress = (localHalfT - T_hold1) / T_bloom;
+        if (traj === "A-B-C-B") {
+          currentPhase = halfIndex === 0 ? "BLOOMING (+A)" : "BLOOMING (-C)";
+        } else if (traj === "continuous-360") {
+          currentPhase = halfIndex === 0 ? "BLOOMING (0 to +90)" : "BLOOMING (180 to -90)";
+        } else {
+          currentPhase = "BLOOMING";
+        }
+      } else if (localHalfT < T_hold1 + T_bloom + T_hold2) {
+        mode = 2;
+        phaseProgress = T_hold2 > 0 ? (localHalfT - (T_hold1 + T_bloom)) / T_hold2 : 1;
+        if (traj === "A-B-C-B") {
+          currentPhase = halfIndex === 0 ? "EXPANDED HOLD (+A)" : "EXPANDED HOLD (-C)";
+        } else if (traj === "continuous-360") {
+          currentPhase = halfIndex === 0 ? "EXPANDED HOLD (+90 / -135 / +135)" : "EXPANDED HOLD (-90 / +45 / -45)";
+        } else {
+          currentPhase = "EXPANDED HOLD";
+        }
+      } else {
+        mode = 3;
+        phaseProgress = (localHalfT - (T_hold1 + T_bloom + T_hold2)) / T_col;
+        if (traj === "A-B-C-B") {
+          currentPhase = halfIndex === 0 ? "COLLAPSING (+A to B)" : "COLLAPSING (-C to B)";
+        } else if (traj === "continuous-360") {
+          currentPhase = halfIndex === 0 ? "COLLAPSING FORWARD (to 180)" : "COLLAPSING FORWARD (to 360/0)";
+        } else {
+          currentPhase = "COLLAPSING";
+        }
+      }
+
+      // Check reduced motion
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const isReduced = (state.playback.reducedMotionMode === "reduced") || 
+                        (state.playback.reducedMotionMode === "auto" && prefersReduced);
+
+      if (isReduced) {
+        // Reduced motion: static rosette with gentle breathing opacity
+        const breath = 0.85 + 0.15 * Math.sin((cycleT / T_total) * Math.PI * 2);
+        const S = state.rotation.angleSeparation;
+        const dir = state.rotation.direction === "clockwise" ? 1 : -1;
+        const base = state.rotation.baseAngle;
+        return {
+          angles: [base, base + S * dir, base + 2 * S * dir, base + 3 * S * dir],
+          phase: "REDUCED MOTION (GENTLE)",
+          opacities: [breath, breath, breath, breath],
+          cycleT,
+          T_total
+        };
+      }
+
+      // Direction multiplier
+      const dirSign = state.rotation.direction === "clockwise" ? 1 : -1;
+      const S = state.rotation.angleSeparation;
+      const targetSeparations = [0, S, 2 * S, 3 * S];
+
+      // Stagger delays per capsule
+      const stagger = state.rotation.staggerMs;
+      const order = state.rotation.staggerOrder;
+      const delays = [0, 0, 0, 0];
+      for (let i = 0; i < 4; i++) {
+        let idx = i;
+        if (order === "reverse") idx = 3 - i;
+        else if (order === "center-out") idx = (i === 1 || i === 2) ? 0 : 1;
+        delays[i] = idx * stagger;
+      }
+
+      const angles = [0, 0, 0, 0];
+      const opacities = [1, 1, 1, 1];
+
+      for (let i = 0; i < 4; i++) {
+        let capAngle = 0;
+
+        if (traj === "A-B-C-B") {
+          // Pass-Through Alternating (+Target in half 0, -Target in half 1)
+          const sideSign = halfIndex === 0 ? 1 : -1;
+          const targetAngle = targetSeparations[i] * dirSign * sideSign;
+
+          if (mode === 0) {
+            capAngle = 0;
+          } else if (mode === 2) {
+            capAngle = targetAngle;
+          } else if (mode === 1) {
+            const activeWindow = Math.max(50, T_bloom - Math.max(...delays));
+            const localT = (localHalfT - T_hold1) - delays[i];
+            const rawNorm = Math.max(0, Math.min(1, localT / activeWindow));
+            const eased = bloomBezierEvaluator(rawNorm);
+
+            let overshootAngle = 0;
+            if (state.rotation.overshoot > 0 && i > 0) {
+              const peak = Math.sin(rawNorm * Math.PI) * (1 - rawNorm) * 2.0;
+              overshootAngle = state.rotation.overshoot * (targetSeparations[i] / (3 * S)) * peak * dirSign * sideSign;
+            }
+            capAngle = eased * targetAngle + overshootAngle;
+          } else if (mode === 3) {
+            const activeWindow = Math.max(50, T_col - Math.max(...delays));
+            const localT = (localHalfT - (T_hold1 + T_bloom + T_hold2)) - delays[i];
+            const rawNorm = Math.max(0, Math.min(1, localT / activeWindow));
+            const eased = collapseBezierEvaluator(rawNorm);
+            capAngle = (1 - eased) * targetAngle;
+          }
+          angles[i] = state.rotation.baseAngle + capAngle;
+
+        } else if (traj === "continuous-360") {
+          // Continuous 360 Forward:
+          // Half 0: 0 -> targetAngle -> 180
+          // Half 1: 180 -> 180 + targetAngle -> 360
+          const baseHalfAngle = halfIndex === 0 ? 0 : 180 * dirSign;
+          const targetAngle = targetSeparations[i] * dirSign;
+          const nextFoldAngle = (halfIndex === 0 ? 180 : 360) * dirSign;
+
+          if (i === 0) {
+            capAngle = 0;
+          } else if (mode === 0) {
+            capAngle = baseHalfAngle;
+          } else if (mode === 2) {
+            capAngle = baseHalfAngle + targetAngle;
+          } else if (mode === 1) {
+            const activeWindow = Math.max(50, T_bloom - Math.max(...delays));
+            const localT = (localHalfT - T_hold1) - delays[i];
+            const rawNorm = Math.max(0, Math.min(1, localT / activeWindow));
+            const eased = bloomBezierEvaluator(rawNorm);
+            let overshootAngle = 0;
+            if (state.rotation.overshoot > 0 && i > 0) {
+              const peak = Math.sin(rawNorm * Math.PI) * (1 - rawNorm) * 2.0;
+              overshootAngle = state.rotation.overshoot * (targetSeparations[i] / (3 * S)) * peak * dirSign;
+            }
+            capAngle = baseHalfAngle + eased * targetAngle + overshootAngle;
+          } else if (mode === 3) {
+            const activeWindow = Math.max(50, T_col - Math.max(...delays));
+            const localT = (localHalfT - (T_hold1 + T_bloom + T_hold2)) - delays[i];
+            const rawNorm = Math.max(0, Math.min(1, localT / activeWindow));
+            const eased = collapseBezierEvaluator(rawNorm);
+            capAngle = (baseHalfAngle + targetAngle) + eased * (nextFoldAngle - (baseHalfAngle + targetAngle));
+          }
+          angles[i] = state.rotation.baseAngle + capAngle;
+
+        } else {
+          // Standard A-B-A Reversing
+          const targetAngle = targetSeparations[i] * dirSign;
+          if (mode === 0) {
+            capAngle = 0;
+          } else if (mode === 2) {
+            capAngle = targetAngle;
+          } else if (mode === 1) {
+            const activeWindow = Math.max(50, T_bloom - Math.max(...delays));
+            const localT = (cycleT - T_hold1) - delays[i];
+            const rawNorm = Math.max(0, Math.min(1, localT / activeWindow));
+            const eased = bloomBezierEvaluator(rawNorm);
+            let overshootAngle = 0;
+            if (state.rotation.overshoot > 0 && i > 0) {
+              const peak = Math.sin(rawNorm * Math.PI) * (1 - rawNorm) * 2.0;
+              overshootAngle = state.rotation.overshoot * (targetSeparations[i] / (3 * S)) * peak * dirSign;
+            }
+            capAngle = eased * targetAngle + overshootAngle;
+          } else if (mode === 3) {
+            const activeWindow = Math.max(50, T_col - Math.max(...delays));
+            const localT = (cycleT - (T_hold1 + T_bloom + T_hold2)) - delays[i];
+            const rawNorm = Math.max(0, Math.min(1, localT / activeWindow));
+            const eased = collapseBezierEvaluator(rawNorm);
+            capAngle = (1 - eased) * targetAngle;
+          }
+          angles[i] = state.rotation.baseAngle + capAngle;
+        }
+
+        // Opacity & Overlap Strategy
+        let capOpacity = state.appearance.strokeOpacity;
+        if (state.appearance.overlapStrategy === "compensated") {
+          if (i > 0) {
+            const bloomDist = Math.abs(angles[i] - state.rotation.baseAngle) % 180;
+            const normDist = Math.min(bloomDist, 180 - bloomDist);
+            const clampedBloom = Math.max(0, Math.min(1, (normDist / (targetSeparations[i] || 45)) * 2.5));
+            capOpacity = capOpacity * clampedBloom;
+          }
+        }
+        opacities[i] = capOpacity;
+      }
+
+      return { angles, phase: currentPhase, opacities, cycleT, T_total };
+    }
+
+    // Apply Computed Transforms to DOM
+    function renderFrame(timeMs) {
+      const result = evaluateMotionAtTime(timeMs);
+
+      // Whole shape continuous assembly rotation
+      let continuousAngle = 0;
+      if (state.rotation.continuousRotation && state.rotation.continuousRotation.enabled) {
+        const speedSec = Math.max(0.1, state.rotation.continuousRotation.speedSeconds);
+        const dirMult = state.rotation.continuousRotation.direction === "counterclockwise" ? -1 : 1;
+        continuousAngle = ((timeMs / (speedSec * 1000)) * 360 * dirMult) % 360;
+      }
+      elements.mainCapsulesGroup.setAttribute("transform", `rotate(${continuousAngle.toFixed(2)})`);
+
+      // Main loader capsules
+      for (let i = 0; i < 4; i++) {
+        const g = document.getElementById(`main-cap-${i}`);
+        if (g) {
+          g.setAttribute("transform", `rotate(${result.angles[i].toFixed(2)})`);
+          g.style.opacity = result.opacities[i];
+        }
+      }
+
+      // Synchronized miniature samples
+      sampleIds.forEach(size => {
+        const svg = document.getElementById("sample-" + size);
+        if (!svg) return;
+        const sampleGrp = svg.querySelector(".sample-group");
+        if (sampleGrp) {
+          sampleGrp.setAttribute("transform", `rotate(${continuousAngle.toFixed(2)})`);
+        }
+        for (let i = 0; i < 4; i++) {
+          const g = svg.querySelector(`.sample-cap-${i}`);
+          if (g) {
+            g.setAttribute("transform", `rotate(${result.angles[i].toFixed(2)})`);
+            g.style.opacity = result.opacities[i];
+          }
+        }
+      });
+
+      // Update Inspector
+      elements.inspPhase.textContent = result.phase;
+      if (result.T_total > 0) {
+        const pct = ((result.cycleT / result.T_total) * 100).toFixed(0);
+        elements.inspProgressPct.textContent = `${pct}%`;
+        elements.scrubTimeCur.textContent = `${(result.cycleT / 1000).toFixed(2)}s`;
+        elements.cycleScrubber.value = Math.floor((result.cycleT / result.T_total) * 1000);
+      }
+    }
+
+    // Animation Loop
+    let lastTimestamp = performance.now();
+    function animationLoop(timestamp) {
+      const delta = timestamp - lastTimestamp;
+      lastTimestamp = timestamp;
+
+      if (state.playback.isPlaying) {
+        state.playback.currentTimeMs += delta;
+      }
+
+      renderFrame(state.playback.currentTimeMs);
+      requestAnimationFrame(animationLoop);
+    }
+    requestAnimationFrame(animationLoop);
+
+    // Synchronize UI Controls from State
+    function syncUiFromState() {
+      // Timing
+      elements.sliderCycleDuration.value = (state.timing.totalCycleMs / 1000).toFixed(2);
+      elements.numCycleDuration.value = (state.timing.totalCycleMs / 1000).toFixed(2);
+      elements.sliderBloomMs.value = state.timing.bloomMs;
+      elements.numBloomMs.value = state.timing.bloomMs;
+      elements.sliderExpandedHoldMs.value = state.timing.expandedHoldMs;
+      elements.numExpandedHoldMs.value = state.timing.expandedHoldMs;
+      elements.sliderCollapseMs.value = state.timing.collapseMs;
+      elements.numCollapseMs.value = state.timing.collapseMs;
+      elements.sliderCollapsedHoldMs.value = state.timing.collapsedHoldMs;
+      elements.numCollapsedHoldMs.value = state.timing.collapsedHoldMs;
+
+      // Geometry
+      elements.sliderCapLength.value = state.geometry.capsuleLength;
+      elements.numCapLength.value = state.geometry.capsuleLength;
+      elements.sliderCapHeight.value = state.geometry.capsuleHeight;
+      elements.numCapHeight.value = state.geometry.capsuleHeight;
+      elements.sliderStrokeWidth.value = state.geometry.strokeWidth;
+      elements.numStrokeWidth.value = state.geometry.strokeWidth.toFixed(2);
+      elements.sliderLoaderScale.value = state.geometry.scale;
+      elements.numLoaderScale.value = state.geometry.scale.toFixed(2);
+      elements.sliderOffsetX.value = state.geometry.offsetX;
+      elements.numOffsetX.value = state.geometry.offsetX;
+      elements.sliderOffsetY.value = state.geometry.offsetY;
+      elements.numOffsetY.value = state.geometry.offsetY;
+
+      // Appearance
+      elements.colorStrokePicker.value = state.appearance.strokeColor;
+      elements.colorStrokeHex.value = state.appearance.strokeColor.toUpperCase();
+      elements.colorBgPicker.value = state.appearance.stageBgColor;
+      elements.colorBgHex.value = state.appearance.stageBgColor.toUpperCase();
+      elements.sliderStrokeOpacity.value = state.appearance.strokeOpacity;
+      elements.numStrokeOpacity.value = Math.round(state.appearance.strokeOpacity * 100);
+      elements.selectOverlapStrategy.value = state.appearance.overlapStrategy;
+
+      // Rotation
+      elements.sliderAngularSep.value = state.rotation.angleSeparation;
+      elements.numAngularSep.value = state.rotation.angleSeparation;
+      elements.separationTag.textContent = `${state.rotation.angleSeparation} deg separation`;
+      elements.sliderBaseRot.value = state.rotation.baseAngle;
+      elements.numBaseRot.value = state.rotation.baseAngle;
+      elements.selectDirection.value = state.rotation.direction;
+      elements.selectTrajectory.value = state.rotation.trajectory;
+      elements.btnTrajAba.classList.toggle("active", state.rotation.trajectory === "A-B-A");
+      elements.btnTrajAbcb.classList.toggle("active", state.rotation.trajectory === "continuous-360" || state.rotation.trajectory === "A-B-C-B");
+      elements.sliderOvershoot.value = state.rotation.overshoot;
+      elements.numOvershoot.value = state.rotation.overshoot;
+      elements.sliderStagger.value = state.rotation.staggerMs;
+      elements.numStagger.value = state.rotation.staggerMs;
+      elements.selectStaggerOrder.value = state.rotation.staggerOrder;
+      elements.toggleContinuousRot.checked = state.rotation.continuousRotation.enabled;
+      elements.sliderContinuousSpeed.value = state.rotation.continuousRotation.speedSeconds;
+      elements.numContinuousSpeed.value = state.rotation.continuousRotation.speedSeconds.toFixed(2);
+      elements.selectContinuousDir.value = state.rotation.continuousRotation.direction;
+      const degPerSec = (360 / Math.max(0.1, state.rotation.continuousRotation.speedSeconds)).toFixed(0);
+      elements.continuousRotReadout.textContent = `${state.rotation.continuousRotation.speedSeconds.toFixed(1)}s per revolution (${degPerSec} deg/s) - ${state.rotation.continuousRotation.enabled ? "ACTIVE" : "OFF"}`;
+
+      // Easing
+      elements.selectEasingPreset.value = state.easing.preset;
+      elements.sliderBzX1.value = state.easing.bloom[0];
+      elements.numBzX1.value = state.easing.bloom[0].toFixed(2);
+      elements.sliderBzY1.value = state.easing.bloom[1];
+      elements.numBzY1.value = state.easing.bloom[1].toFixed(2);
+      elements.sliderBzX2.value = state.easing.bloom[2];
+      elements.numBzX2.value = state.easing.bloom[2].toFixed(2);
+      elements.sliderBzY2.value = state.easing.bloom[3];
+      elements.numBzY2.value = state.easing.bloom[3].toFixed(2);
+
+      elements.toggleIndependentEasing.checked = state.easing.independentCollapse;
+      elements.collapseEasingControls.style.display = state.easing.independentCollapse ? "flex" : "none";
+      elements.sliderColX1.value = state.easing.collapse[0];
+      elements.numColX1.value = state.easing.collapse[0].toFixed(2);
+      elements.sliderColY1.value = state.easing.collapse[1];
+      elements.numColY1.value = state.easing.collapse[1].toFixed(2);
+      elements.sliderColX2.value = state.easing.collapse[2];
+      elements.numColX2.value = state.easing.collapse[2].toFixed(2);
+      elements.sliderColY2.value = state.easing.collapse[3];
+      elements.numColY2.value = state.easing.collapse[3].toFixed(2);
+
+      updateBezierCurveVisual();
+      updateCapsuleGeometry();
+      updateBezierEvaluators();
+      refreshConfigDisplay();
+    }
+
+    // Bind Dual Slider & Number Input Pair
+    function bindSliderNumberPair(slider, num, onValChange) {
+      slider.addEventListener("input", e => {
+        const val = parseFloat(e.target.value);
+        num.value = slider.step.includes(".") ? val.toFixed(2) : val;
+        onValChange(val);
+      });
+      num.addEventListener("change", e => {
+        let val = parseFloat(e.target.value);
+        if (isNaN(val)) val = parseFloat(slider.value);
+        val = Math.max(parseFloat(slider.min), Math.min(parseFloat(slider.max), val));
+        slider.value = val;
+        num.value = slider.step.includes(".") ? val.toFixed(2) : val;
+        onValChange(val);
+      });
+    }
+
+    // Setup All Input Event Listeners
+    function setupEventListeners() {
+      // Cycle Duration
+      bindSliderNumberPair(elements.sliderCycleDuration, elements.numCycleDuration, val => {
+        const newTotal = Math.round(val * 1000);
+        const oldTotal = state.timing.totalCycleMs;
+        if (oldTotal > 0) {
+          const ratio = newTotal / oldTotal;
+          state.timing.bloomMs = Math.round(state.timing.bloomMs * ratio);
+          state.timing.expandedHoldMs = Math.round(state.timing.expandedHoldMs * ratio);
+          state.timing.collapseMs = Math.round(state.timing.collapseMs * ratio);
+          state.timing.collapsedHoldMs = Math.round(state.timing.collapsedHoldMs * ratio);
+        }
+        syncUiFromState();
+      });
+
+      // Phases
+      bindSliderNumberPair(elements.sliderBloomMs, elements.numBloomMs, val => {
+        state.timing.bloomMs = val;
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderExpandedHoldMs, elements.numExpandedHoldMs, val => {
+        state.timing.expandedHoldMs = val;
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderCollapseMs, elements.numCollapseMs, val => {
+        state.timing.collapseMs = val;
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderCollapsedHoldMs, elements.numCollapsedHoldMs, val => {
+        state.timing.collapsedHoldMs = val;
+        refreshConfigDisplay();
+      });
+
+      // Geometry
+      bindSliderNumberPair(elements.sliderCapLength, elements.numCapLength, val => {
+        state.geometry.capsuleLength = val;
+        updateCapsuleGeometry();
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderCapHeight, elements.numCapHeight, val => {
+        state.geometry.capsuleHeight = val;
+        updateCapsuleGeometry();
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderStrokeWidth, elements.numStrokeWidth, val => {
+        state.geometry.strokeWidth = val;
+        updateCapsuleGeometry();
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderLoaderScale, elements.numLoaderScale, val => {
+        state.geometry.scale = val;
+        updateCapsuleGeometry();
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderOffsetX, elements.numOffsetX, val => {
+        state.geometry.offsetX = val;
+        updateCapsuleGeometry();
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderOffsetY, elements.numOffsetY, val => {
+        state.geometry.offsetY = val;
+        updateCapsuleGeometry();
+        refreshConfigDisplay();
+      });
+
+      // Appearance
+      elements.colorStrokePicker.addEventListener("input", e => {
+        state.appearance.strokeColor = e.target.value;
+        elements.colorStrokeHex.value = e.target.value.toUpperCase();
+        updateCapsuleGeometry();
+        refreshConfigDisplay();
+      });
+      elements.colorStrokeHex.addEventListener("change", e => {
+        let hex = e.target.value.trim();
+        if (!hex.startsWith("#")) hex = "#" + hex;
+        if (/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+          state.appearance.strokeColor = hex;
+          elements.colorStrokePicker.value = hex;
+          updateCapsuleGeometry();
+          refreshConfigDisplay();
+        }
+      });
+
+      elements.colorBgPicker.addEventListener("input", e => {
+        state.appearance.stageBgColor = e.target.value;
+        elements.colorBgHex.value = e.target.value.toUpperCase();
+        elements.stageViewport.style.backgroundColor = e.target.value;
+        refreshConfigDisplay();
+      });
+      elements.colorBgHex.addEventListener("change", e => {
+        let hex = e.target.value.trim();
+        if (!hex.startsWith("#")) hex = "#" + hex;
+        if (/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+          state.appearance.stageBgColor = hex;
+          elements.colorBgPicker.value = hex;
+          elements.stageViewport.style.backgroundColor = hex;
+          refreshConfigDisplay();
+        }
+      });
+
+      bindSliderNumberPair(elements.sliderStrokeOpacity, elements.numStrokeOpacity, val => {
+        state.appearance.strokeOpacity = val;
+        refreshConfigDisplay();
+      });
+      elements.selectOverlapStrategy.addEventListener("change", e => {
+        state.appearance.overlapStrategy = e.target.value;
+        refreshConfigDisplay();
+      });
+
+      // Rotation & Bloom
+      bindSliderNumberPair(elements.sliderAngularSep, elements.numAngularSep, val => {
+        state.rotation.angleSeparation = val;
+        elements.separationTag.textContent = `${val} deg separation`;
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderBaseRot, elements.numBaseRot, val => {
+        state.rotation.baseAngle = val;
+        refreshConfigDisplay();
+      });
+      elements.selectDirection.addEventListener("change", e => {
+        state.rotation.direction = e.target.value;
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderOvershoot, elements.numOvershoot, val => {
+        state.rotation.overshoot = val;
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderStagger, elements.numStagger, val => {
+        state.rotation.staggerMs = val;
+        refreshConfigDisplay();
+      });
+      elements.selectStaggerOrder.addEventListener("change", e => {
+        state.rotation.staggerOrder = e.target.value;
+        refreshConfigDisplay();
+      });
+      elements.toggleContinuousRot.addEventListener("change", e => {
+        state.rotation.continuousRotation.enabled = e.target.checked;
+        const degPerSec = (360 / Math.max(0.1, state.rotation.continuousRotation.speedSeconds)).toFixed(0);
+        elements.continuousRotReadout.textContent = `${state.rotation.continuousRotation.speedSeconds.toFixed(1)}s per revolution (${degPerSec} deg/s) - ${state.rotation.continuousRotation.enabled ? "ACTIVE" : "OFF"}`;
+        refreshConfigDisplay();
+      });
+      bindSliderNumberPair(elements.sliderContinuousSpeed, elements.numContinuousSpeed, val => {
+        state.rotation.continuousRotation.speedSeconds = val;
+        const degPerSec = (360 / Math.max(0.1, val)).toFixed(0);
+        elements.continuousRotReadout.textContent = `${val.toFixed(1)}s per revolution (${degPerSec} deg/s) - ${state.rotation.continuousRotation.enabled ? "ACTIVE" : "OFF"}`;
+        refreshConfigDisplay();
+      });
+      elements.selectContinuousDir.addEventListener("change", e => {
+        state.rotation.continuousRotation.direction = e.target.value;
+        refreshConfigDisplay();
+      });
+      elements.selectTrajectory.addEventListener("change", e => {
+        state.rotation.trajectory = e.target.value;
+        syncUiFromState();
+      });
+      elements.btnTrajAba.addEventListener("click", () => {
+        state.rotation.trajectory = "A-B-A";
+        syncUiFromState();
+      });
+      elements.btnTrajAbcb.addEventListener("click", () => {
+        state.rotation.trajectory = "continuous-360";
+        syncUiFromState();
+      });
+
+      // Easing Presets & Custom Sliders
+      elements.selectEasingPreset.addEventListener("change", e => {
+        const val = e.target.value;
+        state.easing.preset = val;
+        if (EASING_PRESETS[val]) {
+          state.easing.bloom = [...EASING_PRESETS[val]];
+          if (!state.easing.independentCollapse) {
+            state.easing.collapse = [...EASING_PRESETS[val]];
+          }
+          elements.easingActiveName.textContent = e.target.options[e.target.selectedIndex].text.split(" (")[0];
+          syncUiFromState();
+        }
+      });
+
+      function onCustomBezierChange() {
+        state.easing.preset = "custom";
+        elements.selectEasingPreset.value = "custom";
+        elements.easingActiveName.textContent = "Custom Bézier";
+        state.easing.bloom = [
+          parseFloat(elements.sliderBzX1.value),
+          parseFloat(elements.sliderBzY1.value),
+          parseFloat(elements.sliderBzX2.value),
+          parseFloat(elements.sliderBzY2.value)
+        ];
+        if (!state.easing.independentCollapse) {
+          state.easing.collapse = [...state.easing.bloom];
+        }
+        updateBezierCurveVisual();
+        updateBezierEvaluators();
+        refreshConfigDisplay();
+      }
+
+      bindSliderNumberPair(elements.sliderBzX1, elements.numBzX1, onCustomBezierChange);
+      bindSliderNumberPair(elements.sliderBzY1, elements.numBzY1, onCustomBezierChange);
+      bindSliderNumberPair(elements.sliderBzX2, elements.numBzX2, onCustomBezierChange);
+      bindSliderNumberPair(elements.sliderBzY2, elements.numBzY2, onCustomBezierChange);
+
+      elements.toggleIndependentEasing.addEventListener("change", e => {
+        state.easing.independentCollapse = e.target.checked;
+        elements.collapseEasingControls.style.display = e.target.checked ? "flex" : "none";
+        updateBezierEvaluators();
+        refreshConfigDisplay();
+      });
+
+      function onCollapseBezierChange() {
+        state.easing.collapse = [
+          parseFloat(elements.sliderColX1.value),
+          parseFloat(elements.sliderColY1.value),
+          parseFloat(elements.sliderColX2.value),
+          parseFloat(elements.sliderColY2.value)
+        ];
+        updateBezierEvaluators();
+        refreshConfigDisplay();
+      }
+
+      bindSliderNumberPair(elements.sliderColX1, elements.numColX1, onCollapseBezierChange);
+      bindSliderNumberPair(elements.sliderColY1, elements.numColY1, onCollapseBezierChange);
+      bindSliderNumberPair(elements.sliderColX2, elements.numColX2, onCollapseBezierChange);
+      bindSliderNumberPair(elements.sliderColY2, elements.numColY2, onCollapseBezierChange);
+
+      // Reduced Motion
+      elements.selectReducedMotion.addEventListener("change", e => {
+        state.playback.reducedMotionMode = e.target.value;
+        const prefers = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        elements.reducedMotionTag.textContent = `Mode: ${e.target.value} (OS: ${prefers ? "reduced" : "standard"})`;
+        refreshConfigDisplay();
+      });
+
+      // Motion Lab Presets Buttons
+      const presetButtons = [
+        { id: "preset-balanced", key: "balanced" },
+        { id: "preset-calm", key: "calm" },
+        { id: "preset-fast", key: "fast" },
+        { id: "preset-snappy", key: "snappy" }
+      ];
+      presetButtons.forEach(({ id, key }) => {
+        document.getElementById(id).addEventListener("click", () => {
+          presetButtons.forEach(p => document.getElementById(p.id).classList.remove("active"));
+          document.getElementById(id).classList.add("active");
+          const p = LAB_PRESETS[key];
+          Object.assign(state.timing, p.timing);
+          Object.assign(state.geometry, p.geometry);
+          Object.assign(state.rotation, p.rotation);
+          Object.assign(state.easing, p.easing);
+          state.easing.collapse = [...p.easing.bloom];
+          syncUiFromState();
+        });
+      });
+
+      // Reset Defaults
+      elements.btnResetDefaults.addEventListener("click", () => {
+        document.getElementById("preset-balanced").click();
+        showToast("Reset to default configuration");
+      });
+
+      // Transport & Playback
+      elements.btnPlayPause.addEventListener("click", () => {
+        state.playback.isPlaying = !state.playback.isPlaying;
+        elements.btnPlayPause.textContent = state.playback.isPlaying ? "Pause" : "Play";
+        elements.btnPlayPause.classList.toggle("btn-gold", state.playback.isPlaying);
+        elements.inspStatus.textContent = state.playback.isPlaying ? "PLAYING" : "PAUSED";
+      });
+
+      elements.btnRestart.addEventListener("click", () => {
+        state.playback.currentTimeMs = 0;
+        state.playback.isPlaying = true;
+        elements.btnPlayPause.textContent = "Pause";
+        elements.btnPlayPause.classList.add("btn-gold");
+        elements.inspStatus.textContent = "PLAYING";
+      });
+
+      elements.btnStepCollapsed.addEventListener("click", () => {
+        state.playback.isPlaying = false;
+        elements.btnPlayPause.textContent = "Play";
+        elements.btnPlayPause.classList.remove("btn-gold");
+        elements.inspStatus.textContent = "PAUSED (COLLAPSED B)";
+        state.playback.currentTimeMs = state.timing.collapsedHoldMs / 2;
+        renderFrame(state.playback.currentTimeMs);
+      });
+
+      elements.btnStepExpanded.addEventListener("click", () => {
+        state.playback.isPlaying = false;
+        elements.btnPlayPause.textContent = "Play";
+        elements.btnPlayPause.classList.remove("btn-gold");
+        elements.inspStatus.textContent = "PAUSED (EXPANDED +A)";
+        state.playback.currentTimeMs = state.timing.collapsedHoldMs + state.timing.bloomMs + (state.timing.expandedHoldMs / 2);
+        renderFrame(state.playback.currentTimeMs);
+      });
+
+      elements.btnStepExpandedNeg.addEventListener("click", () => {
+        state.playback.isPlaying = false;
+        elements.btnPlayPause.textContent = "Play";
+        elements.btnPlayPause.classList.remove("btn-gold");
+        if (state.rotation.trajectory === "A-B-A") {
+          state.rotation.trajectory = "continuous-360";
+          syncUiFromState();
+        }
+        elements.inspStatus.textContent = "PAUSED (EXPANDED -90 / 2ND STOP)";
+        const phaseSum = state.timing.collapsedHoldMs + state.timing.bloomMs + state.timing.expandedHoldMs + state.timing.collapseMs;
+        state.playback.currentTimeMs = phaseSum + state.timing.collapsedHoldMs + state.timing.bloomMs + (state.timing.expandedHoldMs / 2);
+        renderFrame(state.playback.currentTimeMs);
+      });
+
+      // Scrubber
+      elements.cycleScrubber.addEventListener("input", e => {
+        const frac = parseFloat(e.target.value) / 1000;
+        state.playback.currentTimeMs = frac * state.timing.totalCycleMs;
+        renderFrame(state.playback.currentTimeMs);
+      });
+
+      // Stage Canvas Backgrounds
+      elements.canvasBgWhite.addEventListener("click", () => {
+        elements.canvasBgWhite.classList.add("active");
+        elements.canvasBgDark.classList.remove("active");
+        elements.canvasBgChecker.classList.remove("active");
+        elements.stageViewport.className = "stage-viewport";
+        elements.stageViewport.style.backgroundColor = state.appearance.stageBgColor;
+      });
+      elements.canvasBgDark.addEventListener("click", () => {
+        elements.canvasBgWhite.classList.remove("active");
+        elements.canvasBgDark.classList.add("active");
+        elements.canvasBgChecker.classList.remove("active");
+        elements.stageViewport.className = "stage-viewport theme-dark";
+        elements.stageViewport.style.backgroundColor = "";
+      });
+      elements.canvasBgChecker.addEventListener("click", () => {
+        elements.canvasBgWhite.classList.remove("active");
+        elements.canvasBgDark.classList.remove("active");
+        elements.canvasBgChecker.classList.add("active");
+        elements.stageViewport.className = "stage-viewport theme-checker";
+        elements.stageViewport.style.backgroundColor = "";
+      });
+
+      // Stage Zoom
+      elements.stageZoomSlider.addEventListener("input", e => {
+        state.ui.zoom = parseFloat(e.target.value);
+        elements.stageZoomVal.textContent = `${Math.round(state.ui.zoom * 100)}%`;
+        updateCapsuleGeometry();
+      });
+
+      // Toggle Center Guides
+      elements.toggleCenterGuide.addEventListener("change", e => {
+        elements.stageViewport.classList.toggle("show-guides", e.target.checked);
+      });
+
+      // Copy Buttons
+      elements.btnCopyJson.addEventListener("click", () => {
+        const config = refreshConfigDisplay();
+        navigator.clipboard.writeText(JSON.stringify(config, null, 2)).then(() => {
+          showToast("Configuration JSON copied to clipboard");
+        });
+      });
+
+      elements.btnCopyMarkdown.addEventListener("click", () => {
+        const c = refreshConfigDisplay();
+        const md = `# Logo Loader Configuration
+
+## Geometry
+- Capsule count: ${c.geometry.capsuleCount}
+- Capsule length: ${c.geometry.capsuleLength}
+- Capsule height: ${c.geometry.capsuleHeight}
+- Stroke thickness: ${c.geometry.strokeWidth}
+- Scale: ${c.geometry.scale}
+
+## Appearance
+- Stroke color: ${c.appearance.strokeColor}
+- Background: ${c.appearance.stageBgColor}
+- Opacity: ${Math.round(c.appearance.strokeOpacity * 100)}%
+- Overlap compensation: ${c.appearance.overlapStrategy}
+
+## Motion Timing
+- Total cycle: ${c.timing.totalCycleMs} ms
+- Bloom duration: ${c.timing.bloomMs} ms
+- Expanded hold: ${c.timing.expandedHoldMs} ms
+- Collapse duration: ${c.timing.collapseMs} ms
+- Collapsed hold: ${c.timing.collapsedHoldMs} ms
+
+## Rotation & Bloom
+- Angular separation: ${c.rotation.angleSeparation} deg
+- Base rotation: ${c.rotation.baseAngle} deg
+- Direction: ${c.rotation.direction}
+- Trajectory path: ${c.rotation.trajectory} (${c.rotation.trajectory === "continuous-360" ? "Full 360 Forward (90 -> 0 -> -90 -> 180)" : c.rotation.trajectory === "A-B-C-B" ? "Pass-Through Alternating swing (A -> B -> C -> B)" : "Standard Reversing (A -> B -> A)"})
+- Overshoot: ${c.rotation.overshoot} deg
+- Stagger: ${c.rotation.staggerMs} ms (${c.rotation.staggerOrder})
+- Whole shape continuous rotation: ${c.rotation.continuousRotation.enabled ? `Enabled (${c.rotation.continuousRotation.speedSeconds}s / rev, ${c.rotation.continuousRotation.direction})` : "Disabled"}
+
+## Easing Curves
+- Bloom: cubic-bezier(${c.easing.bloom.join(", ")})
+- Collapse: cubic-bezier(${c.easing.collapse.join(", ")})
+`;
+        navigator.clipboard.writeText(md).then(() => {
+          showToast("Configuration Markdown copied to clipboard");
+        });
+      });
+
+      elements.btnCopyCompact.addEventListener("click", () => {
+        const c = refreshConfigDisplay();
+        const rotStr = c.rotation.continuousRotation.enabled ? `, continuous rotation ${c.rotation.continuousRotation.speedSeconds}s/rev ${c.rotation.continuousRotation.direction}` : ", no continuous rotation";
+        const trajStr = `, trajectory ${c.rotation.trajectory}`;
+        const text = `Logo loader approved values: capsule length ${c.geometry.capsuleLength}, height ${c.geometry.capsuleHeight}, stroke ${c.geometry.strokeWidth}, color ${c.appearance.strokeColor}, ${c.rotation.angleSeparation} deg separation, ${c.timing.bloomMs}ms bloom, ${c.timing.expandedHoldMs}ms expanded hold, ${c.timing.collapseMs}ms collapse, ${c.timing.collapsedHoldMs}ms collapsed hold, bloom easing cubic-bezier(${c.easing.bloom.join(", ")}), collapse easing cubic-bezier(${c.easing.collapse.join(", ")}), stagger ${c.rotation.staggerMs}ms, overshoot ${c.rotation.overshoot} deg${trajStr}${rotStr}.`;
+        navigator.clipboard.writeText(text).then(() => {
+          showToast("Compact configuration prompt copied to clipboard");
+        });
+      });
+    }
+
+    // Toast Notification Display
+    let toastTimeout = null;
+    function showToast(msg) {
+      elements.toast.textContent = msg;
+      elements.toast.classList.add("show");
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        elements.toast.classList.remove("show");
+      }, 2500);
+    }
+
+    // Initial Boot
+    setupEventListeners();
+    syncUiFromState();
+  </script>
+</body>
+</html>
