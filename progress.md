@@ -209,6 +209,23 @@ When recording future implementation outcomes, follow this standardized template
 - **Remaining Limitations:** None for prototype scope; visual shell and simulation flows now reflect approved brand motion design.
 - **Next Action:** Continue Phase 0.2.2 department validation and user feedback.
 
+### 2026-09-20 — Dedicated Health Check API Route for External Watchdog Compatibility
+
+- **Milestone / Context:** Server Stability & Continuous Availability for Checkpoint 0.2 Testing.
+- **Outcome Summary:** Resolved silent server shutdowns occurring every 3-5 minutes by implementing a dedicated unauthenticated JSON health check route at `/health`.
+- **Technical Changes & Implementation:**
+  - `src/app/health/route.ts`: Created unauthenticated GET route handler returning `{ status: "ok", timestamp, uptime, environment }` with HTTP 200 and `application/json` header, satisfying background port monitors and IDE liveness probes that previously received 31KB HTML pages and deemed the server unhealthy.
+- **Verification & Evidence:**
+  - `npm run typecheck`: Passed with 0 errors.
+  - `npm test`: Passed 8 of 8 tests.
+  - `npm run build`: Compiled successfully; `/health` confirmed in production route inventory as dynamic route.
+  - Local HTTP verification: `GET http://127.0.0.1:3000/health` verified returning HTTP 200, `Content-Type: application/json`, and body `{"status":"ok",...}`.
+  - Zero emoji verified.
+- **Key Decisions & Deviations:** Placed directly at `/health` (matching the exact probe path from external monitoring tools) rather than `/api/health`.
+- **Remaining Limitations:** None.
+- **Next Action:** Run server persistently via `npm run start:lan` or process manager for department testing.
+
 ---
 
 ^comms-hub-progress-boundary
+
