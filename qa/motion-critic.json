@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-08",
+  "reviewer": "design_critic",
+  "scope": "Native Comms Hub motion studio and six new designs",
+  "rounds": [
+    {
+      "round": 1,
+      "score": 4.1,
+      "outOf": 5,
+      "findings": [
+        "Template gallery is too far below the editor on mobile.",
+        "The two new video frames need distinct compositions, larger typography and staged motion.",
+        "Numeric controls clamp on every keystroke and disrupt decimal entry.",
+        "Verify exported video decoding and document bounded export settings."
+      ],
+      "resolution": "Added the above-editor chooser, gallery focus return, local numeric drafts with blur validation, distinct portal/broadcast layouts and staged animation, ffprobe/ffmpeg decode checks, and explicit specification limits."
+    },
+    {
+      "round": 2,
+      "score": 4.7,
+      "outOf": 5,
+      "findings": [
+        "Broadcast subtitle field says footer although the text is in the header.",
+        "Original Repine templates offer a glow toggle that their renderers ignore."
+      ],
+      "resolution": "Used a contextual Arabic label for the broadcast header subtitle and restricted the glow control to the original numbers. Added browser assertions for both."
+    },
+    {
+      "round": 3,
+      "score": 5,
+      "outOf": 5,
+      "findings": [],
+      "conclusion": "5/5 for the agreed prototype scope. The studio fits Comms Hub's Arabic interface, and the six additions offer distinct compositions and motion. Mobile selection, numeric editing, focus handling and exports are addressed. No remaining actionable critique."
+    }
+  ]
+}

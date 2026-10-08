@@ -1,0 +1,599 @@
+{
+  "date": "2026-10-08",
+  "baseURL": "http://127.0.0.1:3000",
+  "checks": [
+    {
+      "name": "native shell navigation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "RTL shell",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "paused on initial load",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "numbers: template count",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "numbers: two additions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "count-up: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 119864,
+        "clear": 385100
+      }
+    },
+    {
+      "name": "odometer: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 131891,
+        "clear": 389964
+      }
+    },
+    {
+      "name": "ring: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 89785,
+        "clear": 420870
+      }
+    },
+    {
+      "name": "progress-bar: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 59542,
+        "clear": 475366
+      }
+    },
+    {
+      "name": "growth-bars: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 75086,
+        "clear": 448572
+      }
+    },
+    {
+      "name": "line-rise: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 74279,
+        "clear": 421925
+      }
+    },
+    {
+      "name": "arc-gauge: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 17959,
+        "clear": 544737
+      }
+    },
+    {
+      "name": "milestone-count: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 13382,
+        "clear": 549466
+      }
+    },
+    {
+      "name": "repine: template count",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "repine: two additions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-gold: no inactive glow control",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-gold: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 62875,
+        "clear": 482641
+      }
+    },
+    {
+      "name": "rp-teal: no inactive glow control",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-teal: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 85809,
+        "clear": 451424
+      }
+    },
+    {
+      "name": "rp-glass: no inactive glow control",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-glass: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 89506,
+        "clear": 432850
+      }
+    },
+    {
+      "name": "rp-slats: no inactive glow control",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-slats: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 64189,
+        "clear": 489898
+      }
+    },
+    {
+      "name": "rp-editorial: no inactive glow control",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-editorial: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 80519,
+        "clear": 482481
+      }
+    },
+    {
+      "name": "rp-orbit: no inactive glow control",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-orbit: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 73120,
+        "clear": 489807
+      }
+    },
+    {
+      "name": "frames: template count",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "frames: two additions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-lattice: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 1130279,
+        "clear": 579821
+      }
+    },
+    {
+      "name": "fr-lattice: ratio 4:5",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-lattice: ratio 1:1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-lattice: ratio 16:9",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-lattice: ratio 9:16",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-watercolor: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 1344916,
+        "clear": 432747
+      }
+    },
+    {
+      "name": "fr-watercolor: ratio 4:5",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-watercolor: ratio 1:1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-watercolor: ratio 16:9",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-watercolor: ratio 9:16",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-mihrab: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 1195420,
+        "clear": 578866
+      }
+    },
+    {
+      "name": "fr-mihrab: ratio 4:5",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-mihrab: ratio 1:1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-mihrab: ratio 16:9",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-mihrab: ratio 9:16",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-girih: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 1077914,
+        "clear": 692646
+      }
+    },
+    {
+      "name": "fr-girih: ratio 4:5",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-girih: ratio 1:1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-girih: ratio 16:9",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-girih: ratio 9:16",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-arch: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 1207594,
+        "clear": 570360
+      }
+    },
+    {
+      "name": "fr-arch: ratio 4:5",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-arch: ratio 1:1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-arch: ratio 16:9",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-arch: ratio 9:16",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-night: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 1394548,
+        "clear": 379211
+      }
+    },
+    {
+      "name": "fr-night: ratio 4:5",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-night: ratio 1:1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-night: ratio 16:9",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-night: ratio 9:16",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-portal: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 869466,
+        "clear": 908410
+      }
+    },
+    {
+      "name": "fr-portal: ratio 4:5",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-portal: ratio 1:1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-portal: ratio 16:9",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-portal: ratio 9:16",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "broadcast subtitle label matches header position",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-broadcast: visible artwork and alpha",
+      "pass": true,
+      "detail": {
+        "ink": 859670,
+        "clear": 918330
+      }
+    },
+    {
+      "name": "fr-broadcast: ratio 4:5",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-broadcast: ratio 1:1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-broadcast: ratio 16:9",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-broadcast: ratio 9:16",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "22 total templates exercised",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "per-template edits retained",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "play advances then pauses",
+      "pass": true,
+      "detail": 0.48
+    },
+    {
+      "name": "scrub updates time readout",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reset restores original value",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timing input allows clearing during editing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timing input accepts typed decimal",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timing input bounds on blur",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "png: real local export",
+      "pass": true,
+      "detail": {
+        "bytes": 5999,
+        "name": "arc-gauge.png"
+      }
+    },
+    {
+      "name": "zip: real local export",
+      "pass": true,
+      "detail": {
+        "bytes": 557139,
+        "name": "arc-gauge.zip"
+      }
+    },
+    {
+      "name": "mov: real local export",
+      "pass": true,
+      "detail": {
+        "bytes": 554192,
+        "name": "arc-gauge.mov"
+      }
+    },
+    {
+      "name": "mov: 32 frames decode at expected dimensions",
+      "pass": true,
+      "detail": {
+        "codec_name": "png",
+        "width": 640,
+        "height": 360,
+        "pix_fmt": "rgba",
+        "duration": "1.333333",
+        "nb_read_frames": "32"
+      }
+    },
+    {
+      "name": "MOV preserves alpha pixel format",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "mov: complete decode without errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "mp4: real local export",
+      "pass": true,
+      "detail": {
+        "bytes": 85804,
+        "name": "arc-gauge.mp4"
+      }
+    },
+    {
+      "name": "mp4: 32 frames decode at expected dimensions",
+      "pass": true,
+      "detail": {
+        "codec_name": "h264",
+        "width": 640,
+        "height": 360,
+        "pix_fmt": "yuv420p",
+        "duration": "1.333333",
+        "nb_read_frames": "32"
+      }
+    },
+    {
+      "name": "mp4: complete decode without errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "export cancels cleanly",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no overflow at 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "template chooser before editor at 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no overflow at 1280",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "template chooser before editor at 1280",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no overflow at 900",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "template chooser before editor at 900",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no overflow at 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "template chooser before editor at 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile quick chooser changes design",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "gallery choice returns keyboard focus to editor",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "chooser has keyboard route to gallery",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page or console errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": []
+}

@@ -22,6 +22,12 @@ import { Title, Panel, Empty, MediaPreview, StatusChip } from './ui';
 import { WorkList, WorkDetail, Composer, WorkRow } from './work';
 import { Approvals, Calendar } from './operations';
 import { Supporting } from './supporting';
+import dynamic from 'next/dynamic';
+
+const MotionStudio = dynamic(() => import('./motion-studio'), {
+  ssr: false,
+  loading: () => <div className="panel" role="status">جارٍ تحميل استوديو الحركة…</div>,
+});
 
 function Home() {
   const { state } = useHub();
@@ -364,6 +370,7 @@ export function HubPage({ route }: { route: string[] }) {
   if (page === 'approvals') return <Approvals key={state.role} />;
   if (page === 'calendar') return <Calendar />;
   if (page === 'media') return <Media key={id || 'all'} id={id} />;
+  if (page === 'motion') return <MotionStudio />;
   if (['mail', 'ideas', 'analytics', 'monitoring', 'admin', 'settings', 'account'].includes(page))
     return <Supporting page={page} />;
 

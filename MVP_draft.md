@@ -2304,3 +2304,17 @@ And:
 > **The prototype should look like the future Communication Hub, but it should not pretend that its integrations, security, publishing, automation, storage, or analytics are real yet.**
 
 This document defines the MVP shell only. It is not yet the Version 1 technical specification or implementation roadmap. ^core-mvp-boundary
+
+# 57. Motion studio addition, 2026-10-08
+
+User-requested extension to Version 0: add **استوديو الحركة** at `/motion`, next to the media library in the shared navigation. It uses Direction A's Arabic RTL shell, tokens and controls, with Direction B's larger preview treatment.
+
+- Preserve the source library's six number animations, four Repine lower-thirds and six video frames. Add two distinct designs per category, for 22 templates total. Mark the six additions as new.
+- Provide a template chooser above the editor and a visual gallery. Gallery selection returns keyboard focus to the editor. Keep edits per template while the page remains mounted.
+- Allow local text, color and timing changes, preview play/pause/scrubbing, reset and four frame proportions: 9:16, 4:5, 1:1 and 16:9. Previews start paused, respect reduced-motion preferences and release animation resources on unmount.
+- Download real local PNG snapshots, transparent PNG sequences in ZIP, transparent MOV with PNG codec, and keyed H.264 MP4 when the browser supports it. Show progress, cancellation and Arabic errors. Preview checkerboards are never exported.
+- Local export uses 360 or 720 pixels on the short side and 24 frames per second. The original 1080p/4K and frame-rate controls are deliberately reduced to bound browser memory. Export refuses more than 1,200 frames. These are browser exports, with no workers or server rendering.
+- Remove the source defaults' contact details. Label source templates containing the Hedayah logo; editable template content is distinct from Hub identity. Chart trajectories and waveform decoration are illustrative.
+- All edits are temporary and reset on refresh. Downloads do not attach to campaign work, upload to the media library or publish. File/video upload, persistent storage and access restrictions are deferred. The page is currently available to every prototype persona; no authentication or RBAC enforcement is implied.
+
+The immutable architecture records remain unchanged. This addition does not satisfy or bypass the department-validation gate.

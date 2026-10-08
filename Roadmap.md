@@ -168,6 +168,12 @@ When starting active implementation on the Communication Department Hub, follow 
 
 ## Version 0: UI Prototype
 
+### Requested scope addition, 2026-10-08: local motion studio
+
+Integrate the existing `motion_design` library into `/motion` using the established Arabic shell. Preserve 16 source designs and add two number designs, two Repine designs and two video frames. Include local editing, previews and browser-only downloads. This is independent of Phase 0.2.2 department validation and does not count as stakeholder acceptance.
+
+Access restrictions, persisted assets, video uploads and workflow attachment remain future work. The bounded export controls and prototype behavior are specified in `MVP_draft.md` section 57. Verification and critic-round results are recorded in `progress.md` and `qa/motion-studio.json`.
+
 ### Checkpoint 0.1: UI Prototype MVP 0.1
 
 **State:** Complete and verified (2026-09-19). **Authority:** [[MVP_draft]].
