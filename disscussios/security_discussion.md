@@ -13,14 +13,14 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Security Architecture Discussion
   - Threat Defense and Access Control
   - البنية الأمنية وإدارة التهديدات
 ---
 
-[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]] | [[disscussios/emergency_workflows|Emergency Workflows]] | [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]] | [[disscussios/emergency_workflows|Emergency Workflows]] | [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]]
 
 # Security Discussion — Communication Department Hub
 
@@ -1700,7 +1700,7 @@ This document preserves the security discussion only. It is not yet the final se
 ^security-discussion-boundary
 
 > [!important] Security Discussion Hub
-> Cross-reference with [[discussions_list#8. Security, Permissions, and Threat Model|Discussions List - Security]], [[MVP_draft#35. Security & Permission Boundaries|MVP Security Boundaries]], [[MVP_draft#3. Non-Goals|MVP Non-Goals]], and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+> Cross-reference with [[discussions_list#8. Security, Permissions, and Threat Model|Discussions List - Security]], [[MVP_draft#35. Security & Permission Boundaries|MVP Security Boundaries]], [[MVP_draft#3. Non-Goals|MVP Non-Goals]], and [[projects/ideas/Comms_Hub/Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
 
 ---
 

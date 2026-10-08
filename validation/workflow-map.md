@@ -1,6 +1,6 @@
 ---
 type: validation
-project: "[[Comms Hub|Communication Department Hub]]"
+project: "[[projects/ideas/Comms_Hub/Comms Hub|Communication Department Hub]]"
 tags:
   - comms-hub
   - document/validation
@@ -8,7 +8,7 @@ tags:
 created: 2026-09-19
 updated: 2026-09-19
 status: active
-phase: "0.2.1 Workflow Mapping"
+phase: 0.2.1 Workflow Mapping
 parent: "[[Roadmap|Product Roadmap]]"
 aliases:
   - Department Workflow Map

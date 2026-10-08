@@ -1,6 +1,6 @@
 ---
 type: validation
-project: "[[Comms Hub|Communication Department Hub]]"
+project: "[[projects/ideas/Comms_Hub/Comms Hub|Communication Department Hub]]"
 tags:
   - comms-hub
   - document/validation
@@ -9,7 +9,7 @@ tags:
 created: 2026-09-20
 updated: 2026-09-20
 status: active
-phase: "0.2.2 Guided Department Validation (input log)"
+phase: 0.2.2 Guided Department Validation (input log)
 parent: "[[Roadmap|Product Roadmap]]"
 aliases:
   - Owner Input Log

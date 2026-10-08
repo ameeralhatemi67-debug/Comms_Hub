@@ -13,14 +13,14 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Failure Handling and Background Jobs
   - Background Jobs and Reliability Architecture
   - إدارة الأخطاء والمهام الخلفية
 ---
 
-[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]]
 
 ---
 
@@ -1905,7 +1905,7 @@ This document preserves the reliability discussion only and is not yet the final
 ^failure-handling-jobs-boundary
 
 > [!important] Reliability & Background Operations Hub
-> Cross-reference with [[discussions_list#2. Background Jobs and Failure Handling|Discussions List - Background Jobs]], [[MVP_draft#38. Settings Page|MVP Settings Page]], and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+> Cross-reference with [[discussions_list#2. Background Jobs and Failure Handling|Discussions List - Background Jobs]], [[MVP_draft#38. Settings Page|MVP Settings Page]], and [[projects/ideas/Comms_Hub/Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
 
 ---
 

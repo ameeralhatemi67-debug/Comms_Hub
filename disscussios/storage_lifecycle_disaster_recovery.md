@@ -13,14 +13,14 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Storage Lifecycle and Disaster Recovery
   - Storage Architecture and Backup Design
   - دورة حياة التخزين والتعافي من الكوارث
 ---
 
-[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]] | [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]] | [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]]
 
 ---
 
@@ -2356,7 +2356,7 @@ So, yes: **completely possible, connectable, and potentially a very practical tr
 ^storage-lifecycle-boundary
 
 > [!important] Storage Architecture Hub
-> Cross-reference with [[discussions_list#5. Storage Lifecycle and Disaster Recovery|Discussions List - Storage Lifecycle]], [[MVP_draft#27. Media Library|MVP Media Library]], and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+> Cross-reference with [[discussions_list#5. Storage Lifecycle and Disaster Recovery|Discussions List - Storage Lifecycle]], [[MVP_draft#27. Media Library|MVP Media Library]], and [[projects/ideas/Comms_Hub/Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 type: roadmap
-project: "[[Comms Hub|Communication Department Hub]]"
+project: "[[projects/ideas/Comms_Hub/Comms Hub|Communication Department Hub]]"
 tags:
   - comms-hub
   - document/roadmap
@@ -10,8 +10,8 @@ created: 2026-08-18
 updated: 2026-09-19
 status: active
 active_version: "Version 0: UI Prototype"
-planning_horizon: "1–12 months"
-parent: "[[Comms Hub]]"
+planning_horizon: 1–12 months
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Communication Hub Roadmap
   - خريطة طريق مركز الاتصال المؤسسي
@@ -22,7 +22,7 @@ related:
   - "[[discussions_list|Master Discussions Index]]"
 ---
 
-[[Comms Hub|Comms Hub Overview]] | [[Status|Current Status]] | [[progress|Progress Log]] | [[MVP_draft|MVP Draft UI Shell]] | [[discussions_list|Master Discussions Index]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[Status|Current Status]] | [[progress|Progress Log]] | [[MVP_draft|MVP Draft UI Shell]] | [[discussions_list|Master Discussions Index]]
 
 ---
 

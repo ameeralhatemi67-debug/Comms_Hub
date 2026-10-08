@@ -13,14 +13,14 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Search and Metadata Architecture
   - Metadata and Taxonomy Design
   - البحث والبيانات الوصفية
 ---
 
-[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/notification_model|Notification Model]] | [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]] | [[disscussios/security_discussion|Security Architecture]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/notification_model|Notification Model]] | [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]] | [[disscussios/security_discussion|Security Architecture]]
 
 ---
 
@@ -2242,7 +2242,7 @@ Mobile results should be concise and filters should remain accessible.
 
 Permission filtering should happen as early as technically practical.
 
-The overarching architectural blueprint for all Hub subsystems is maintained in the [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+The overarching architectural blueprint for all Hub subsystems is maintained in the [[projects/ideas/Comms_Hub/Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
 
 ---
 

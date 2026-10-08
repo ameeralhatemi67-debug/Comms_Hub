@@ -12,7 +12,7 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Organizational Role Discussion
   - Roles and Permissions Architecture
@@ -20,7 +20,7 @@ aliases:
 ---
 
 
-[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/Second_discussion_draft|Second Discussion Draft]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/Second_discussion_draft|Second Discussion Draft]]
 
 ---
 

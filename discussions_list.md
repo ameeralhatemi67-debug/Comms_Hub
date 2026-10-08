@@ -10,7 +10,7 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Discussions List
   - Master Discussions Index
@@ -18,7 +18,7 @@ aliases:
 ---
 
 
-[[Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept]] | [[MVP_draft|MVP Draft UI Shell]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept]] | [[MVP_draft|MVP Draft UI Shell]]
 
 ---
 

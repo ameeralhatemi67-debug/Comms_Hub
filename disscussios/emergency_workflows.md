@@ -13,14 +13,14 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Emergency Workflows
   - Crisis Governance and Emergency Controls
   - مسارات العمل في حالات الطوارئ
 ---
 
-[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/security_discussion|Security Architecture]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]] | [[disscussios/approval_policy_design|Approval Policy Design]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/security_discussion|Security Architecture]] | [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]] | [[disscussios/approval_policy_design|Approval Policy Design]]
 
 ---
 
@@ -2190,7 +2190,7 @@ This document preserves the emergency-workflow discussion only. It is not yet th
 ^emergency-workflows-boundary
 
 > [!important] Emergency Workflows & Crisis Governance Navigation
-> Cross-reference with [[discussions_list#9. Emergency Workflows|Discussions List - Emergency Workflows]], [[MVP_draft#50. Emergency Mode|MVP Emergency Mode]], and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+> Cross-reference with [[discussions_list#9. Emergency Workflows|Discussions List - Emergency Workflows]], [[MVP_draft#50. Emergency Mode|MVP Emergency Mode]], and [[projects/ideas/Comms_Hub/Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
 
 ---
 

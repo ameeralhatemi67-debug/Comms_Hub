@@ -10,7 +10,7 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Original Idea
   - Project Genesis
@@ -18,7 +18,7 @@ aliases:
 ---
 
 
-[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP Draft UI Shell]] | [[discussions_list|Discussions Index]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP Draft UI Shell]] | [[discussions_list|Discussions Index]]
 
 ---
 
@@ -59,7 +59,7 @@ aliases:
 One website that can be the working hup for the communication department.
 
 > [!tip] Architectural Evolution
-> This concept expanded into the formal 6-system foundation in [[Comms Hub|Comms Hub Architecture]] (People, Work, Content, Assets, Channels, Operations) and the interactive UI prototype in [[MVP_draft|MVP UI Shell Draft]].
+> This concept expanded into the formal 6-system foundation in [[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Architecture]] (People, Work, Content, Assets, Channels, Operations) and the interactive UI prototype in [[MVP_draft|MVP UI Shell Draft]].
 
 
 \# Main issue:

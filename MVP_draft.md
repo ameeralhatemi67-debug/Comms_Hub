@@ -11,8 +11,8 @@ tags:
 created: 2026-09-18
 updated: 2026-09-18
 status: draft
-version: "0.1.0-ui-shell"
-parent: "[[Comms Hub]]"
+version: 0.1.0-ui-shell
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Comms Hub MVP
   - Comms Hub MVP UI Shell Draft
@@ -20,7 +20,7 @@ aliases:
 ---
 
 
-[[Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept]] | [[discussions_list|Discussions Index]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept]] | [[discussions_list|Discussions Index]]
 
 ---
 

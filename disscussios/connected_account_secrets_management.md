@@ -13,14 +13,14 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Connected-Account and Secrets Management
   - Secrets and Integrations Architecture
   - إدارة الحسابات المتصلة والأسرار
 ---
 
-[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]] | [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle and Disaster Recovery]] | [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]]
 
 ---
 
@@ -2174,7 +2174,7 @@ This document preserves the connected-account and secrets-management discussion 
 ^connected-accounts-secrets-boundary
 
 > [!important] Connected Accounts & Secrets Management Hub
-> Cross-reference with [[discussions_list#3. Connected Accounts and Secrets Management|Discussions List - Connected Accounts]], [[MVP_draft#38. Settings Page|MVP Settings Page]], and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+> Cross-reference with [[discussions_list#3. Connected Accounts and Secrets Management|Discussions List - Connected Accounts]], [[MVP_draft#38. Settings Page|MVP Settings Page]], and [[projects/ideas/Comms_Hub/Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 type: status
-project: "[[Comms Hub|Communication Department Hub]]"
+project: "[[projects/ideas/Comms_Hub/Comms Hub|Communication Department Hub]]"
 tags:
   - comms-hub
   - document/status
@@ -8,7 +8,7 @@ tags:
 created: 2026-08-18
 updated: 2026-09-19
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Communication Hub Current Status
   - حالة مركز الاتصال المؤسسي
@@ -20,7 +20,7 @@ related:
   - "[[validation/workflow-map|Department Workflow Map]]"
 ---
 
-[[Comms Hub|Comms Hub Overview]] | [[Roadmap|Product Roadmap]] | [[progress|Progress Log]] | [[MVP_draft|MVP Draft UI Shell]] | [[discussions_list|Master Discussions Index]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[Roadmap|Product Roadmap]] | [[progress|Progress Log]] | [[MVP_draft|MVP Draft UI Shell]] | [[discussions_list|Master Discussions Index]]
 
 ---
 

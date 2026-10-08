@@ -13,7 +13,7 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Second Discussion Draft
   - Comms Hub Working Draft 2
@@ -21,7 +21,7 @@ aliases:
 ---
 
 
-[[Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept Genesis]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/First_idea_darft|First Idea Draft]] | [[disscussios/organizational_role_discussion|Organizational Role Discussion]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept Genesis]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/First_idea_darft|First Idea Draft]] | [[disscussios/organizational_role_discussion|Organizational Role Discussion]]
 
 ---
 

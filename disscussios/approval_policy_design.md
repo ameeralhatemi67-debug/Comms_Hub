@@ -13,14 +13,14 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Approval Policy Design
   - Approval and Release Architecture
   - سياسات الاعتماد والموافقات
 ---
 
-[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/organizational_role_discussion|Organizational Role Discussion]] | [[disscussios/emergency_workflows|Emergency Workflows]] | [[disscussios/Second_discussion_draft|Second Discussion Draft]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/organizational_role_discussion|Organizational Role Discussion]] | [[disscussios/emergency_workflows|Emergency Workflows]] | [[disscussios/Second_discussion_draft|Second Discussion Draft]]
 
 ---
 
@@ -1685,7 +1685,7 @@ This is substantially safer and more auditable than simply saying:
 ^approval-policy-boundary
 
 > [!important] Policy Governance Hub
-> Cross-reference with [[discussions_list#4. Approval Policies and Dynamic Routing|Discussions List - Approval Policies]] and [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
+> Cross-reference with [[discussions_list#4. Approval Policies and Dynamic Routing|Discussions List - Approval Policies]] and [[projects/ideas/Comms_Hub/Comms Hub#Master Vault Document Map|Comms Hub Master Map]].
 
 # 54. Still Unresolved
 

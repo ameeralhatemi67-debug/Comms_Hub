@@ -12,14 +12,14 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - Notification Model
   - Attention and Notification Architecture
   - نموذج الإشعارات وإدارة الانتباه
 ---
 
-[[Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]] | [[disscussios/search_and_metadata|Search and Metadata]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/approval_policy_design|Approval Policy Design]] | [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]] | [[disscussios/search_and_metadata|Search and Metadata]]
 
 ---
 
@@ -2172,7 +2172,7 @@ Reading or deleting a notification must never delete the underlying responsibili
 ^notification-model-boundary
 
 > [!important] Attention Model Governance Anchor
-> Cross-reference with [[Comms Hub#Master Vault Document Map|Comms Hub Master Map]] and [[MVP_draft#40. Notification Center Drawer|MVP Notification Center Drawer]].
+> Cross-reference with [[projects/ideas/Comms_Hub/Comms Hub#Master Vault Document Map|Comms Hub Master Map]] and [[MVP_draft#40. Notification Center Drawer|MVP Notification Center Drawer]].
 
 ---
 

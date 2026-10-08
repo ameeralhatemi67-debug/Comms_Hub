@@ -11,7 +11,7 @@ tags:
 created: 2026-08-18
 updated: 2026-09-18
 status: active
-parent: "[[Comms Hub]]"
+parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
   - First Idea Draft
   - Comms Hub Working Draft 1
@@ -19,7 +19,7 @@ aliases:
 ---
 
 
-[[Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept Genesis]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/Second_discussion_draft|Second Discussion Draft]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[Original_Idea|Original Concept Genesis]] | [[MVP_draft|MVP UI Shell Draft]] | [[discussions_list|Master Discussions Index]] | [[disscussios/Second_discussion_draft|Second Discussion Draft]]
 
 ---
 
@@ -246,7 +246,7 @@ graph TD
 ```
 
 > [!note] Downstream Architectural Refinement
-> This six-system foundation was formalized in [[Comms Hub#The Six Foundational Subsystems|Comms Hub Master Architecture]] and operationalized in [[MVP_draft#7. Main Information Architecture|MVP Main Information Architecture]].
+> This six-system foundation was formalized in [[projects/ideas/Comms_Hub/Comms Hub#The Six Foundational Subsystems|Comms Hub Master Architecture]] and operationalized in [[MVP_draft#7. Main Information Architecture|MVP Main Information Architecture]].
 
 ---
 
