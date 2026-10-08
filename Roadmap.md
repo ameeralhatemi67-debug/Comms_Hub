@@ -170,9 +170,9 @@ When starting active implementation on the Communication Department Hub, follow 
 
 ### Requested scope addition, 2026-10-08: local motion studio
 
-Integrate the existing `motion_design` library into `/motion` using the established Arabic shell. Preserve 16 source designs and add two number designs, two Repine designs and two video frames. Include local editing, previews and browser-only downloads. This is independent of Phase 0.2.2 department validation and does not count as stakeholder acceptance.
+Integrate the existing `motion_design` library into `/motion` using the established Arabic shell. Preserve 16 source designs and add ten more (26 in total), with the controls of the source library restored (timing, motion intensity, frame ratios, window preview) and fast browser-only downloads at up to 4K and 60 frames per second. Revised the same day after first review. This is independent of Phase 0.2.2 department validation and does not count as stakeholder acceptance.
 
-Access restrictions, persisted assets, video uploads and workflow attachment remain future work. The bounded export controls and prototype behavior are specified in `MVP_draft.md` section 57. Verification and critic-round results are recorded in `progress.md` and `qa/motion-studio.json`.
+Access restrictions, persisted assets, video uploads and workflow attachment remain future work. The revised scope, export behavior and prototype limits are specified in `MVP_draft.md` section 57. Verification and critic-round results are recorded in `progress.md` and `qa/motion-studio.json`.
 
 ### Checkpoint 0.1: UI Prototype MVP 0.1
 

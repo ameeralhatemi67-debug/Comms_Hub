@@ -58,4 +58,4 @@ function muxVideo(o) {                                   // o: {kind:'mp4'|'mov'
 }
 
 
-export { makeZip, muxVideo };
+export { makeZip, muxVideo, crc32 };

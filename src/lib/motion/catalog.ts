@@ -1,152 +1,116 @@
-import { GRAPHICS, REPINE, FRAMES, drawLogo } from './renderers.js';
-import type { Graphic, Params, Category } from './types';
+import { GRAPHICS, REPINE, FRAMES } from './renderers.js';
+import { EXTRA_NUMBERS, EXTRA_REPINE, EXTRA_FRAMES } from './designs.js';
+import type { Graphic, Params, Category, TextField, ColorField, ToggleField, ColorKey, ToggleKey } from './types';
 
-const common = { value: 82, decimals: 0, label: 'نسبة إنجاز الحملة', prefix: '', suffix: '%',
-  title: 'أثر يمتد', subtitle: 'مركز الاتصال المؤسسي', reciter: 'رسالة اليوم',
+/* One shared set of defaults. Each design overrides what it needs. Contact details start empty and hidden:
+   the sample numbers inside the source designs belong to another organization. */
+const common = { value: 82, decimals: 0, label: 'أثر الحملة', prefix: '', suffix: '%',
+  title: 'أثر يمتد', subtitle: 'مركز الاتصال المؤسسي', kicker: '', reciter: 'رسالة اليوم',
   support: 'تواصل معنا', phone: '', handle: '', web: '', color: '#80c6a3', text: '#ffffff',
   main: '#17634b', accent: '#c9ac70', c1: '#183e33', c2: '#c9ac70', c3: '#f4f6f2', c4: '#ffffff',
   speed: 1, hold: 1.5, tIn: 2.6, tHold: 4, tOut: 1.2, mIn: 60, mOut: 50, mIdle: 60,
   ratio: '9:16', glow: true, showVerse: true, showLogo: true, showContact: false,
   showSocial: false, showWave: true, particles: true, bgIn: false } satisfies Params;
-const names = [
-  ['العد التصاعدي', 'رقم يتصاعد حتى القيمة النهائية مع نبضة ختامية.'],
-  ['العداد الدوار', 'خانات تدور وتتوقف بالتتابع على الرقم المطلوب.'],
-  ['حلقة الإنجاز', 'حلقة مضيئة تتقدم مع النسبة.'],
-  ['شريط التقدم', 'شريط يتحرك حتى يصل إلى النسبة المحددة.'],
-  ['أعمدة النمو', 'أعمدة توضيحية تتصاعد بالتتابع.'],
-  ['خط النمو', 'مسار توضيحي يرسم تقدّم النسبة.'],
-  ['الشريط الذهبي', 'ميدالية تدور ثم تفتح شريط العنوان.'],
-  ['البلاطة المتحولة', 'بلاطة تدور وتتمدد إلى شريط تعريفي.'],
-  ['تفتح الزهرة', 'شعار يتفتح ثم يكشف لوحة شفافة.'],
-  ['الشرائح الهندسية', 'شرائح تنفتح بالتتابع حول الميدالية.'],
-  ['قوس المشربية', 'زخرفة علوية ولوحة سفلية تحيطان بمساحة الفيديو.'],
-  ['الورق المائي', 'ورق محبب وحواف مرسومة بألوان مائية.'],
-  ['المحراب الذهبي', 'ستائر ذهبية وقوس مضيء يكشفان الفيديو.'],
-  ['النجمة الهندسية', 'شبكة نجمية وميداليات حول نافذة الفيديو.'],
-  ['القوس الرملي', 'قوس هادئ مع ألوان الرمل والمريمية.'],
-  ['فوانيس الليل', 'فوانيس متأرجحة وسماء ليلية حول الفيديو.'],
+
+type Meta = { name: string; blurb: string; badge?: 'new' | 'updated'; colors?: string[]; label?: string; reciter?: string };
+const meta: Record<string, Meta> = {
+  'count-up': { name: 'العد التصاعدي', label: 'مستفيد من الحملة', blurb: 'رقم كبير يتصاعد حتى القيمة النهائية، ثم يخرج نبضة حلقية عند الوصول.' },
+  'odometer': { name: 'العداد الدوار', label: 'إجمالي المشاهدات', blurb: 'خانات تدور مثل عداد ميكانيكي وتستقر على الرقم بالتتابع.' },
+  'ring': { name: 'حلقة الإنجاز', label: 'نسبة الإنجاز', blurb: 'حلقة مضيئة تمتلئ حتى النسبة المطلوبة مع علامات وقراءة في المنتصف.' },
+  'progress-bar': { name: 'شريط التقدم', label: 'اكتمال الحملة', blurb: 'شريط مخطط يمتلئ وتركب فقاعة النسبة على طرفه المتقدم.' },
+  'growth-bars': { name: 'أعمدة النمو', label: 'نمو التفاعل', blurb: 'سبعة أعمدة ترتفع بالتتابع ويستقر الأخير على نسبة النمو.' },
+  'line-rise': { name: 'خط النمو', label: 'نمو الجمهور', blurb: 'مخطط خطي يرسم نفسه صعوداً ويتبع الرقم الكبير رأس الخط.' },
+  'arc-gauge': { name: 'مقياس الأثر', badge: 'updated', label: 'نسبة الإنجاز',
+    blurb: 'قرص نصفي مدرّج: العلامات تضيء مع القوس، والمؤشر يتجاوز القيمة قليلاً ثم يستقر، والرقم يهبط في المنتصف بنبضة.' },
+  'milestone-count': { name: 'محطات الإنجاز', badge: 'updated', label: 'مستفيد من الحملة',
+    blurb: 'رقم كبير يتصاعد فوق مسار بخمس محطات، تضيء كل محطة بحلقة وعلامة صح عند مرور التعبئة بها.' },
+  'rp-gold': { name: 'الشريط الذهبي', blurb: 'كرة ذهبية تنبثق وتنقلب إلى ميدالية الشعار، ثم يتفتح شريط العنوان وشريط النص الفرعي.',
+    colors: ['لون الشريط الذهبي', 'لون الشعار'] },
+  'rp-teal': { name: 'البلاطة المتحولة', blurb: 'نقطة تكبر إلى بلاطة تدور، ثم تنكمش إلى خط وتمتد شريطاً بينما ترتفع لوحة الشعار.',
+    colors: ['لون الشريط', 'لون لوحة الشعار'] },
+  'rp-glass': { name: 'تفتح الزهرة', blurb: 'شعار يتفتح بتلة بتلة ويخرج خط ضوء تنفتح على امتداده لوحة زجاجية.',
+    colors: ['لون اللوحة الزجاجية', 'لون الإبراز الذهبي'] },
+  'rp-slats': { name: 'الشرائح الهندسية', blurb: 'ميدالية تنبثق ويمتد خط ذهبي، ثم تنقلب الشرائح العاجية في موجة تبتعد عن النقطة.',
+    colors: ['لون الشرائح', 'لون الإبراز الذهبي'] },
+  'rp-editorial': { name: 'الشريط التحريري', badge: 'updated', colors: ['لون الشريط', 'لون التزيين الذهبي'],
+    blurb: 'شريط مائل بأسلوب نشرات الأخبار: خط ذهبي يمتد وكتلة شعار تنبثق، ثم ينكشف العنوان وشريط النص الفرعي، ويتحول الخط إلى مؤشر تقدم.' },
+  'rp-orbit': { name: 'مدار الهوية', badge: 'updated', colors: ['لون الكبسولة', 'لون المدار الذهبي'],
+    blurb: 'ميدالية يدور حولها مداران ذهبيان، ثم يتمدد المدار إلى كبسولة تحمل العنوان وشارة ذهبية للنص الفرعي.' },
+  'rp-scroll': { name: 'المخطوطة', badge: 'new', colors: ['لون الرق', 'لون الحبر الذهبي'],
+    blurb: 'مخطوطة تنفتح من أسطوانتها، يُكتب عليها العنوان بالحبر ويُختم طرفها بختم الشعار.' },
+  'rp-crescent': { name: 'الهلال المضيء', badge: 'new', colors: ['لون اللافتة الليلية', 'لون الهلال'],
+    blurb: 'هلال يرسم نفسه وتشتعل نجمة في جوفه، وتنفتح منه لافتة ليلية بالعنوان. مناسب لرمضان والأعياد.' },
+  'fr-lattice': { name: 'القوس المشربي', blurb: 'زخرفة علوية مشبّكة تهبط من الأعلى ولوحة سفلية ممزقة الحواف ترتفع، والفيديو يملأ ما بينهما.',
+    colors: ['الزخرفة', 'اللوحة', 'الذهبي', 'النص'] },
+  'fr-watercolor': { name: 'الورق المائي', blurb: 'ورق محبب وإطار مرسوم بالفرشاة مع غرز وأغصان، ومصحف على حامله وبطاقة اسم مرسومة.',
+    colors: ['الورق', 'الإطار', 'لون التمييز', 'الحبر'] },
+  'fr-mihrab': { name: 'المحراب الذهبي', blurb: 'ستائر ذهبية تنفرج وقوس عاجي يرسم نفسه، فتنفتح نافذة المحراب وتطفو جزيئات ذهبية.',
+    colors: ['الخلفية', 'الذهبي', 'العاجي', 'الستائر'] },
+  'fr-girih': { name: 'النجمة الهندسية', blurb: 'شبكة نجمية ثمانية تنتشر على الكحلي، وتنفتح النافذة وتدور ميداليات ذهبية في زواياها.',
+    colors: ['الكحلي', 'الذهبي', 'العاجي'] },
+  'fr-arch': { name: 'القوس الرملي', blurb: 'تصميم هادئ وحديث: قوس ينبثق من الرمل وخط ذهبي يتتبعه وشمس طينية تنزلق خلفه.',
+    colors: ['الرمل', 'المريمية', 'الشمس', 'الخط الذهبي'] },
+  'fr-night': { name: 'فوانيس الليل', blurb: 'ليل مرصّع بالنجوم، فوانيس تهبط على سلاسلها وتتأرجح، ونافذة قبّة مضيئة فوق أفق المساجد.',
+    colors: ['سماء الليل', 'ذهب الفوانيس', 'النص', 'الأفق'] },
+  'fr-portal': { name: 'بوابة الأثر', badge: 'updated', colors: ['العمق', 'الذهبي', 'النص', 'التوهج'],
+    blurb: 'موجات أثر تنتشر من النافذة، وثلاثة إطارات ذهبية ترسم نفسها حولها، وأشعة ضوء تدور بهدوء خلفها.' },
+  'fr-broadcast': { name: 'إطار التغطية', badge: 'updated', reciter: 'فريق الاتصال', colors: ['الورق', 'الأخضر', 'الحبر', 'الذهبي'],
+    blurb: 'إطار تغطية نظيف: زوايا ترسم نفسها، وسم مباشر وعدّاد وقت، وشريط عنوان سفلي، وخط تقدم يتبع المقطع.' },
+  'fr-doors': { name: 'أبواب المشربية', badge: 'new', colors: ['الخشب', 'الذهبي', 'النص', 'النقش'],
+    blurb: 'جدار خشبي منقوش وبابان من المشربية ينفتحان على مهل ليكشفا نافذة الفيديو.' },
+  'fr-spectrum': { name: 'طيف التلاوة', badge: 'new', reciter: 'اسم القارئ', colors: ['المسرح', 'الذهبي', 'النص', 'توهج الصوت'],
+    blurb: 'مسرح داكن تتوهج نافذته مع الصوت، وطيف متناظر يرتفع تحتها، واسم القارئ في المقدمة.' },
+};
+
+const toggleLabels: Record<ToggleKey, string> = { showVerse: 'الآية', showLogo: 'الشعار', showContact: 'معلومات التواصل', showSocial: 'روابط التواصل',
+  showWave: 'الموجة الصوتية', particles: 'الجزيئات', bgIn: 'ظهور الخلفية تدريجياً', glow: 'التوهج' };
+
+const numberTexts = (): TextField[] => [
+  { key: 'label', label: 'وصف الرقم', max: 38, group: 'main' },
+  { key: 'prefix', label: 'قبل الرقم', max: 4, compact: true, placeholder: '+' },
+  { key: 'suffix', label: 'بعد الرقم', max: 4, compact: true, placeholder: '%' },
+];
+const repineTexts = (id: string): TextField[] => [
+  { key: 'title', label: 'العنوان', max: 60, group: 'main' },
+  { key: 'subtitle', label: 'النص الفرعي', max: 90, group: 'main' },
+  ...(id === 'rp-editorial' ? [{ key: 'kicker', label: 'الوسم فوق الشريط', max: 24, group: 'main' } as TextField] : []),
+];
+const frameTexts = (id: string): TextField[] => [
+  ...(id === 'fr-broadcast' ? [
+    { key: 'kicker', label: 'وسم البث', max: 20, group: 'main' } as TextField,
+    { key: 'title', label: 'العنوان', max: 48, group: 'main' } as TextField,
+    { key: 'subtitle', label: 'النص الفرعي', max: 60, group: 'main' } as TextField,
+  ] : []),
+  { key: 'reciter', label: id === 'fr-broadcast' ? 'الاسم على الشريط' : 'الاسم أو عنوان التغطية', max: 50, group: 'main', hint: 'اتركه فارغاً لإخفائه' },
+  { key: 'support', label: 'عبارة التواصل', max: 60, group: 'contact' },
+  { key: 'phone', label: 'رقم التواصل', max: 18, ltr: true, group: 'contact', placeholder: '05XXXXXXXX' },
+  { key: 'handle', label: 'اسم الحساب', max: 30, ltr: true, group: 'social', placeholder: 'account_name' },
+  { key: 'web', label: 'الموقع الإلكتروني', max: 40, ltr: true, group: 'social', placeholder: 'www.example.org' },
 ];
 
-const ease = (t: number) => 1 - Math.pow(1 - Math.max(0, Math.min(1, t)), 3);
-function text(ctx: CanvasRenderingContext2D, value: string, x: number, y: number, size: number, color: string, align: CanvasTextAlign = 'center', maxWidth?: number) {
-  ctx.font = `600 ${size}px "Segoe UI", Tahoma, sans-serif`;
-  ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.direction = 'rtl';
-  ctx.fillText(value, x, y, maxWidth);
-}
-function reveal(p: Params, t: number) {
-  return ease(t / p.tIn) * (1 - ease((t - p.tIn - p.tHold) / Math.max(.01, p.tOut)));
-}
-const total = (p: Params) => ({ total: p.tIn + p.tHold + p.tOut });
-function newNumber(kind: 'gauge' | 'milestones'): Graphic['draw'] {
-  return (ctx, p, t) => {
-    const visible = reveal(p, t), progress = ease(t / p.tIn), value = Math.round(p.value * progress);
-    ctx.globalAlpha = visible; ctx.lineCap = 'round';
-    if (kind === 'gauge') {
-      ctx.lineWidth = 25; ctx.strokeStyle = '#ffffff24';
-      ctx.beginPath(); ctx.arc(640, 410, 235, Math.PI, Math.PI * 2); ctx.stroke();
-      ctx.strokeStyle = p.color;
-      ctx.beginPath(); ctx.arc(640, 410, 235, Math.PI, Math.PI + Math.PI * progress * p.value / 100); ctx.stroke();
-      for (let i = 0; i <= 10; i++) {
-        const angle = Math.PI + i / 10 * Math.PI;
-        ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(640 + Math.cos(angle) * 263, 410 + Math.sin(angle) * 263);
-        ctx.lineTo(640 + Math.cos(angle) * 276, 410 + Math.sin(angle) * 276); ctx.stroke();
-      }
-      text(ctx, `${p.prefix}${value}${p.suffix}`, 640, 360, 108, p.text);
-      text(ctx, p.label, 640, 490, 32, p.text, 'center', 940);
-    } else {
-      text(ctx, `${p.prefix}${value}${p.suffix}`, 640, 285, 118, p.text);
-      text(ctx, p.label, 640, 385, 32, p.text, 'center', 940);
-      ctx.lineWidth = 4; ctx.strokeStyle = '#ffffff30'; ctx.beginPath(); ctx.moveTo(250, 480); ctx.lineTo(1030, 480); ctx.stroke();
-      ctx.strokeStyle = p.color; ctx.beginPath(); ctx.moveTo(250, 480); ctx.lineTo(250 + 780 * progress, 480); ctx.stroke();
-      for (let i = 0; i < 5; i++) {
-        const reached = progress >= i / 4;
-        ctx.fillStyle = reached ? p.color : '#40574e'; ctx.beginPath(); ctx.arc(250 + i * 195, 480, reached ? 12 : 7, 0, Math.PI * 2); ctx.fill();
-        text(ctx, `${Math.round(p.value * i / 4)}`, 250 + i * 195, 532, 23, p.text);
-      }
-    }
+function build(source: any, category: Category): Graphic {
+  const m = meta[source.id];
+  const colors: ColorField[] = category === 'numbers'
+    ? [{ key: 'color', label: 'لون الحركة' }, { key: 'text', label: 'لون الرقم' }]
+    : category === 'repine'
+      ? [{ key: 'main', label: m.colors![0] }, { key: 'accent', label: m.colors![1] }]
+      : (source.colors as [string, string][]).map(([key], i) => ({ key: key as ColorKey, label: m.colors![i] }));
+  const sourceToggles: ToggleKey[] = category === 'frames' ? (source.toggles as ToggleKey[]) : ['glow'];
+  const toggles: ToggleField[] = category === 'repine' ? [] : sourceToggles.map(key => ({ key, label: source.id === 'fr-spectrum' && key === 'showWave' ? 'الطيف الصوتي' : toggleLabels[key] }));
+  const defaults: Params = { ...common, ...source.defaults };
+  if (category === 'numbers') Object.assign(defaults, { label: m.label ?? common.label, decimals: 0 });
+  if (category === 'repine') Object.assign(defaults, { title: common.title, subtitle: common.subtitle, kicker: source.defaults.kicker ?? '' });
+  if (category === 'frames') Object.assign(defaults, { support: common.support, phone: '', handle: '', web: '', showContact: false, showSocial: false, reciter: m.reciter ?? common.reciter, kicker: source.defaults.kicker ?? '' });
+  return {
+    id: source.id, name: m.name, blurb: m.blurb, category, badge: m.badge, defaults, raw: source.raw, draw: source.draw, timing: source.timing, dims: source.dims, winBox: source.winBox,
+    value: source.value ? { ...source.value, label: 'القيمة' } : undefined,
+    texts: category === 'numbers' ? numberTexts() : category === 'repine' ? repineTexts(source.id) : frameTexts(source.id),
+    colors, toggles,
   };
 }
-function newRibbon(kind: 'editorial' | 'orbit'): Graphic['draw'] {
-  return (ctx, p, t) => {
-    const v = reveal(p, t); ctx.globalAlpha = v;
-    ctx.translate((1 - v) * 70, 0);
-    if (kind === 'editorial') {
-      ctx.fillStyle = p.main; ctx.fillRect(150, 485, 980 * v, 130);
-      ctx.fillStyle = p.accent; ctx.fillRect(1120, 475, 8, 150); ctx.fillRect(150, 615, 978, 3);
-      text(ctx, p.title, 1080, 531, 38, '#ffffff', 'right', 830);
-      text(ctx, p.subtitle, 1080, 580, 23, '#e0e9e3', 'right', 830);
-    } else {
-      ctx.fillStyle = p.main; ctx.beginPath(); ctx.roundRect(190, 481, 855 * v, 130, 65); ctx.fill();
-      ctx.strokeStyle = p.accent; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(1050, 546, 87, -.5 + t * .08, Math.PI * 1.65 + t * .08); ctx.stroke();
-      ctx.fillStyle = p.accent; ctx.beginPath(); ctx.arc(1050, 546, 67, 0, Math.PI * 2); ctx.fill();
-      drawLogo(ctx, 'emblem', p.main, 1050, 546, 106);
-      text(ctx, p.title, 935, 526, 35, '#ffffff', 'right', 690);
-      text(ctx, p.subtitle, 935, 572, 22, '#e0e9e3', 'right', 690);
-    }
-  };
-}
-const dimensions = (p: Params) => ({ '9:16': { w: 1080, h: 1920 }, '4:5': { w: 1080, h: 1350 }, '1:1': { w: 1080, h: 1080 }, '16:9': { w: 1920, h: 1080 } }[p.ratio] || { w: 1080, h: 1920 });
-function newFrame(kind: 'portal' | 'broadcast'): Graphic['draw'] {
-  return (ctx, p, t) => {
-    const { w, h } = dimensions(p), k = Math.min(w, h), v = reveal(p, t);
-    const isPortal = kind === 'portal';
-    const margin = k * (isPortal ? .065 : .045), top = h * (isPortal ? .16 : .23), bottom = h * (isPortal ? .76 : .80);
-    const exit = 1 - ease((t - p.tIn - p.tHold) / p.tOut);
-    const stage = (start: number, length = .4) => ease((t / p.tIn - start) / length) * exit;
-    ctx.globalAlpha = v; ctx.fillStyle = p.c1; ctx.fillRect(0, 0, w, h);
-    ctx.globalCompositeOperation = 'destination-out'; ctx.globalAlpha = 1;
-    ctx.beginPath(); ctx.roundRect(margin, top, w - margin * 2, bottom - top, isPortal ? k * .12 : 0); ctx.fill();
-    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = v;
-    ctx.strokeStyle = p.c2; ctx.lineWidth = k * .003;
-    if (isPortal) {
-      for (let i = 0; i < 3; i++) {
-        const offset = i * k * .014;
-        const perimeter = 2 * (w - 2 * margin + bottom - top + 4 * offset);
-        ctx.setLineDash([perimeter * stage(.08 + i * .12, .55), perimeter]);
-        ctx.globalAlpha = exit * (1 - i * .25); ctx.beginPath();
-        ctx.roundRect(margin - offset, top - offset, w - 2 * margin + offset * 2, bottom - top + 2 * offset, k * .12 + offset); ctx.stroke();
-      }
-      ctx.setLineDash([]);
-      ctx.globalAlpha = stage(.1);
-      text(ctx, p.title, w / 2, h * .075, k * .054, p.c3, 'center', w * .82);
-      const footer = stage(.5);
-      ctx.globalAlpha = footer;
-      text(ctx, p.reciter, w / 2, h * .855 + (1 - footer) * k * .025, k * .06, p.c3, 'center', w * .82);
-      ctx.fillStyle = p.c2; ctx.fillRect(w / 2 - k * .035, h * .903, k * .07 * footer, k * .003);
-      text(ctx, p.subtitle, w / 2, h * .945, k * .03, p.c3, 'center', w * .82);
-    } else {
-      const span = k * .09;
-      for (const [i, [x, y, dx, dy]] of [[margin, top, 1, 1], [w - margin, top, -1, 1], [margin, bottom, 1, -1], [w - margin, bottom, -1, -1]].entries()) {
-        const corner = stage(.12 + i * .12);
-        ctx.globalAlpha = corner; ctx.lineWidth = k * .01;
-        ctx.beginPath(); ctx.moveTo(x, y + dy * span * corner); ctx.lineTo(x, y); ctx.lineTo(x + dx * span * corner, y); ctx.stroke();
-      }
-      const header = stage(0, .5), footer = stage(.55);
-      ctx.globalAlpha = header; ctx.fillStyle = p.c2;
-      ctx.fillRect(w - margin - k * .018, h * .045, k * .018, h * .12 * header);
-      text(ctx, p.title, w - margin - k * .05, h * .085, k * .066, p.c3, 'right', w - 2 * margin - k * .1);
-      text(ctx, p.subtitle, w - margin - k * .05, h * .156, k * .032, p.c3, 'right', w - 2 * margin - k * .1);
-      ctx.globalAlpha = footer; ctx.fillStyle = p.c2;
-      ctx.fillRect(margin, h * .854, (w - 2 * margin) * footer, k * .003);
-      text(ctx, p.reciter, w - margin, h * .921, k * .052, p.c3, 'right', w - margin * 2);
-    }
-  };
-}
-const original = [...GRAPHICS, ...REPINE, ...FRAMES].map((g, i): Graphic => ({
-  ...g, name: names[i][0], blurb: names[i][1], category: i < 6 ? 'numbers' : i < 10 ? 'repine' : 'frames',
-  defaults: { ...common, ...g.defaults, label: 'أثر الحملة', title: 'أثر يمتد', subtitle: 'مركز الاتصال المؤسسي',
-    reciter: 'رسالة اليوم', support: 'تواصل معنا', phone: '', handle: '', web: '', showContact: false, showSocial: false },
-}));
-function addition(id: string, name: string, blurb: string, category: Category, draw: Graphic['draw'], defaults: Partial<Params> = {}): Graphic {
-  return { id, name, blurb, category, isNew: true, raw: true, draw, timing: total,
-    ...(category === 'frames' ? { dims: dimensions } : {}), defaults: { ...common, ...defaults } };
-}
-export const catalog: Graphic[] = [...original,
-  addition('arc-gauge', 'مقياس الأثر', 'قوس مدرّج يرسم النسبة ويثبت الرقم في مركزه.', 'numbers', newNumber('gauge')),
-  addition('milestone-count', 'محطات الإنجاز', 'عداد يصل بين خمس محطات حتى القيمة النهائية.', 'numbers', newNumber('milestones'), { value: 12500, suffix: '', label: 'مستفيد من الحملة' }),
-  addition('rp-editorial', 'الشريط التحريري', 'عنوان واضح ينكشف أفقياً على شريط مع خط جانبي.', 'repine', newRibbon('editorial')),
-  addition('rp-orbit', 'مدار الهوية', 'ميدالية يحيط بها مدار مفتوح متحرك مع شريط تعريفي.', 'repine', newRibbon('orbit')),
-  addition('fr-portal', 'بوابة الأثر', 'ثلاثة حدود متدرجة حول نافذة واسعة بزوايا منحنية.', 'frames', newFrame('portal')),
-  addition('fr-broadcast', 'إطار التغطية', 'زوايا محددة ونافذة مستقيمة لتغطيات المؤسسة.', 'frames', newFrame('broadcast'), { c1: '#edf2ed', c2: '#17634b', c3: '#203e35' }),
+
+export const catalog: Graphic[] = [
+  ...[...GRAPHICS, ...EXTRA_NUMBERS].map(g => build(g, 'numbers')),
+  ...[...REPINE, ...EXTRA_REPINE].map(g => build(g, 'repine')),
+  ...[...FRAMES.filter((g: any) => !['fr-portal', 'fr-broadcast'].includes(g.id)), ...EXTRA_FRAMES].map(g => build(g, 'frames')),
 ];

@@ -1239,11 +1239,12 @@ function icon(ctx, kind, cx, cy, r, chip, glyph) {
 
 /* support line + WhatsApp + phone, centred on cx. Returns the height used */
 function contact(ctx, P, cx, y, k, pal, p) {
-  if (p <= 0 || !P.showContact) return 0;
+  if (p <= 0 || !P.showContact || !(P.phone || P.support)) return 0;
   const a = EZ.out(p), fs = 72, r = 31, gap = 16;
   ctx.save(); ctx.globalAlpha *= a; ctx.translate(cx, y + (1 - a) * 22 * k); ctx.scale(k, k);
   let yy = 0;
   if (P.support) { txt(ctx, P.support, 0, 36, fitSize(ctx, P.support, 36, 600, 560), 600, pal.support, 'center'); yy = 58; }
+  if (!P.phone) { ctx.restore(); return yy ? (yy + 20) * k : 0; }
   ctx.font = `800 ${fs}px ${AR_FONT}`; ctx.direction = 'ltr'; if ('letterSpacing' in ctx) ctx.letterSpacing = '2px';
   const pw = ctx.measureText(P.phone).width, tot = 2 * r + gap + pw, x0 = -tot / 2, cy = yy + 46;
   icon(ctx, 'wa', x0 + r, cy, r);
@@ -2141,4 +2142,13 @@ export async function loadAssets() {
     image.src = src;
   })));
 }
+/* Shared drawing kit for the extra designs in designs.js (same helpers the source designs use). */
+export const kit = {
+  E, EZ, S, TAU, clamp, lerp, sm, frac, rnd, rgba, shade, mix: mix, onColor, hexToRgb,
+  rr, safeArc, shadow, noShadow, metalV, sparkle, txt, textW, fitSize, revealBox,
+  drawLogo, drawMask, bloomLogo, layer, blit, cut, grain, verse, verseH, lockup, lockupH, waveform, contact, socials,
+  bokeh, plaque, rowBlock, stackBlock, stdProgress, fstate, rstate, rtotal, ftotal, dimsOf, orient, RATIOS, nameText, icon, starLattice, notchRect,
+  numberRow, drawText, measure, glow, fmt, arrowUp, setFont,
+  get scale() { return gScale; },
+};
 export { GRAPHICS, REPINE, FRAMES, renderFrame, timingOf, drawLogo };

@@ -2305,16 +2305,30 @@ And:
 
 This document defines the MVP shell only. It is not yet the Version 1 technical specification or implementation roadmap. ^core-mvp-boundary
 
-# 57. Motion studio addition, 2026-10-08
+# 57. Motion studio addition, 2026-10-08 (revised after first review)
 
-User-requested extension to Version 0: add **استوديو الحركة** at `/motion`, next to the media library in the shared navigation. It uses Direction A's Arabic RTL shell, tokens and controls, with Direction B's larger preview treatment.
+User-requested extension to Version 0: add **استوديو الحركة** at `/motion`, next to the media library in the shared navigation. It uses Direction A's Arabic RTL shell, tokens and controls, with Direction B's larger preview treatment. The first integration was reviewed the same day and revised; this section describes the revised scope.
 
-- Preserve the source library's six number animations, four Repine lower-thirds and six video frames. Add two distinct designs per category, for 22 templates total. Mark the six additions as new.
-- Provide a template chooser above the editor and a visual gallery. Gallery selection returns keyboard focus to the editor. Keep edits per template while the page remains mounted.
-- Allow local text, color and timing changes, preview play/pause/scrubbing, reset and four frame proportions: 9:16, 4:5, 1:1 and 16:9. Previews start paused, respect reduced-motion preferences and release animation resources on unmount.
-- Download real local PNG snapshots, transparent PNG sequences in ZIP, transparent MOV with PNG codec, and keyed H.264 MP4 when the browser supports it. Show progress, cancellation and Arabic errors. Preview checkerboards are never exported.
-- Local export uses 360 or 720 pixels on the short side and 24 frames per second. The original 1080p/4K and frame-rate controls are deliberately reduced to bound browser memory. Export refuses more than 1,200 frames. These are browser exports, with no workers or server rendering.
-- Remove the source defaults' contact details. Label source templates containing the Hedayah logo; editable template content is distinct from Hub identity. Chart trajectories and waveform decoration are illustrative.
-- All edits are temporary and reset on refresh. Downloads do not attach to campaign work, upload to the media library or publish. File/video upload, persistent storage and access restrictions are deferred. The page is currently available to every prototype persona; no authentication or RBAC enforcement is implied.
+**Inventory.** Twenty-six templates: eight number animations, eight Repine lower-thirds and ten video frames. Sixteen come from `motion_design/numbers-library` and are preserved; ten are Hub additions. Four additions are new (المخطوطة, الهلال المضيء, أبواب المشربية, طيف التلاوة) and six replace the first integration's basic versions with full designs (مقياس الأثر, محطات الإنجاز, الشريط التحريري, مدار الهوية, بوابة الأثر, إطار التغطية). Badges: "جديد" and "مُحدَّث".
+
+**Layout.** Operate mode, one workbench: category tabs, a horizontal template rail with live thumbnails, then the preview stage beside a tabbed settings panel, then the download panel. The settings panel stays in view while the page scrolls. At 1000px and below the panel moves under the stage. The stage is dark with a checkerboard only where transparency is being shown.
+
+**Preview.**
+- Transport: play/pause, restart, loop, scrubber, readout. A strip under the scrubber shows the proportional lengths of entry, showcase and exit.
+- Numbers and Repine: backdrop choice (scene, transparent, dark, light). Frames: what shows in the window (sample footage, the user's own clip loaded locally for preview only, key green, transparent) and Reels safe zones at 9:16. The backdrop and clip are never part of an export.
+- Frames: ratio chooser (9:16, 4:5, 1:1, 16:9) with a glyph of the true shape, and the explicit output width and height at 1080p.
+- Starts playing on selection unless the user prefers reduced motion; then it starts paused with idle motion and particles off.
+
+**Settings (restored from the source library).**
+- Content: text per design, number value (slider and exact box), contact and social details revealed by their own switches.
+- Colors: per-design pickers with Arabic names; restore original colors.
+- Elements (frames): logo, verse, waveform, particles, background fade.
+- Timing: entry, showcase (up to 180 seconds by slider, 900 exact), exit (0 keeps the frame to the end), speed. Numbers: hold and speed.
+- Motion (Repine and frames): entry, exit and showcase motion intensity, 0 to 100 percent.
+- Edits are kept per design while the page is mounted and reset on refresh.
+
+**Download.** Four formats: MP4 on a key color (WebCodecs; real-time recording when the browser lacks it), transparent MOV (PNG codec), PNG sequence in ZIP, single PNG. Short side 720, 1080 or 4K; 24, 30 or 60 frames per second. PNG frames use a built-in encoder over `CompressionStream`, with four encodes in flight. The panel states output size, duration, frames and an approximate file size, warns about heavy files, refuses estimates above 1.6 GB, shows progress with time remaining, can be cancelled, and keeps a working save link after completion in case the automatic download is blocked. Nothing is uploaded.
+
+**Boundaries.** Contact defaults are empty and hidden: the source library's numbers belong to another organization. Templates containing the Hedayah logo and verses say so. Chart trajectories and waveform decoration are illustrative. Downloads do not attach to work, enter the media library or publish. Access restrictions, persisted settings, asset upload and storage are deferred; the page is open to every prototype persona and implies no authentication or RBAC.
 
 The immutable architecture records remain unchanged. This addition does not satisfy or bypass the department-validation gate.

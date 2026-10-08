@@ -1,193 +1,192 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState, type RefObject } from 'react';
-import { Download, Pause, Play, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Activity, ChevronLeft, ChevronRight, Layers, Palette, RotateCcw, Timer, Type, Upload } from 'lucide-react';
 import { Title, Tabs } from './ui';
 import { catalog } from '@/lib/motion/catalog';
-import { loadAssets, renderFrame, timingOf } from '@/lib/motion/renderers.js';
-import { exportDesign, type ExportFormat } from '@/lib/motion/export.js';
-import type { Category, Graphic, Params } from '@/lib/motion/types';
+import { loadAssets, timingOf } from '@/lib/motion/renderers.js';
+import { planExport } from '@/lib/motion/export.js';
+import type { Category, Graphic, Params, ToggleKey } from '@/lib/motion/types';
+import { ColorInput, Segmented, Slider, Switch, TextInput } from './motion-controls';
+import { Stage, paint, settledTime, type Backdrop, type WinMode } from './motion-stage';
+import { ExportPanel } from './motion-export';
 import './motion-studio.css';
 
-const groups = [{ id: 'numbers', label: 'الأرقام' }, { id: 'repine', label: 'تصاميم ريبين' }, { id: 'frames', label: 'إطارات الفيديو' }];
-const settledTime = (g: Graphic, p: Params) => g.category === 'numbers' && !g.isNew ? 3.4 : p.tIn + Math.min(.5, p.tHold / 2);
-function NumberField({ label, value, min, max, step, onChange }: { label: string; value: number; min: number; max: number; step: number; onChange: (value: number) => void }) {
-  const [draft, setDraft] = useState(String(value));
-  useEffect(() => setDraft(String(value)), [value]);
-  return <label>{label}<input type="number" min={min} max={max} step={step} value={draft}
-    onChange={event => {
-      setDraft(event.target.value);
-      const next = event.target.valueAsNumber;
-      if (Number.isFinite(next) && next >= min && next <= max) onChange(next);
-    }}
-    onBlur={() => {
-      const next = draft.trim() === '' ? value : Number(draft);
-      const valid = Number.isFinite(next) ? Math.max(min, Math.min(max, next)) : value;
-      setDraft(String(valid)); onChange(valid);
-    }} onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur(); }} /></label>;
+const groups: { id: Category; label: string }[] = [{ id: 'numbers', label: 'الأرقام' }, { id: 'repine', label: 'تصاميم ريبين' }, { id: 'frames', label: 'إطارات الفيديو' }];
+const intro: Record<Category, string> = {
+  numbers: 'أرقام وإحصاءات متحركة بخلفية شفافة، تُوضع فوق مقطعك.',
+  repine: 'شرائط عناوين سفلية تنبثق من الشعار وتنكمش إليه عند الخروج.',
+  frames: 'إطارات كاملة لإنستغرام بنافذة في المنتصف لمقطعك. نزّلها وضعها فوق الفيديو.',
+};
+const ratios = [{ value: '9:16', hint: 'ستوري وريلز' }, { value: '4:5', hint: 'منشور' }, { value: '1:1', hint: 'مربع' }, { value: '16:9', hint: 'أفقي' }];
+const backdrops: { value: Backdrop; label: string }[] = [{ value: 'scene', label: 'مشهد' }, { value: 'alpha', label: 'شفاف' }, { value: 'dark', label: 'داكن' }, { value: 'light', label: 'فاتح' }];
+const windows: { value: WinMode; label: string }[] = [{ value: 'sample', label: 'عينة' }, { value: 'video', label: 'مقطعي' }, { value: 'green', label: 'أخضر' }, { value: 'alpha', label: 'شفاف' }];
+type TabId = 'content' | 'colors' | 'elements' | 'timing' | 'motion';
+const tabMeta: Record<TabId, { label: string; icon: typeof Type }> = {
+  content: { label: 'المحتوى', icon: Type }, colors: { label: 'الألوان', icon: Palette }, elements: { label: 'العناصر', icon: Layers },
+  timing: { label: 'التوقيت', icon: Timer }, motion: { label: 'الحركة', icon: Activity },
+};
+const tabsFor = (c: Category): TabId[] => c === 'numbers' ? ['content', 'colors', 'timing'] : c === 'repine' ? ['content', 'colors', 'timing', 'motion'] : ['content', 'colors', 'elements', 'timing', 'motion'];
+
+/* Thumbnails paint one at a time so the stage itself is never kept waiting behind them. */
+const queue: (() => void)[] = []; let draining = false;
+function enqueue(job: () => void) {
+  queue.push(job);
+  if (draining) return;
+  draining = true;
+  const next = () => { const run = queue.shift(); if (!run) { draining = false; return; } try { run(); } catch { /* a failed thumbnail stays blank */ } setTimeout(next, 20); };
+  setTimeout(next, 60);
 }
-function paint(canvas: HTMLCanvasElement, g: Graphic, p: Params, time: number, thumbnail = false) {
-  const d = g.dims?.(p) || { w: 1280, h: 720 }, width = thumbnail ? 420 : 1000;
-  if (canvas.width !== width || canvas.height !== Math.round(width * d.h / d.w)) {
-    canvas.width = width; canvas.height = Math.round(width * d.h / d.w);
-  }
-  const ctx = canvas.getContext('2d');
-  if (ctx) renderFrame(g, p, time, ctx, width / d.w, null);
-}
-function Thumbnail({ graphic }: { graphic: Graphic }) {
-  const ref = useRef<HTMLCanvasElement>(null);
+
+function Tile({ graphic, selected, disabled, onPick }: { graphic: Graphic; selected: boolean; disabled: boolean; onPick: () => void }) {
+  const canvas = useRef<HTMLCanvasElement>(null), box = useRef<HTMLSpanElement>(null);
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    if (ref.current) paint(ref.current, graphic, graphic.defaults, settledTime(graphic, graphic.defaults), true);
+    const el = box.current, cv = canvas.current; if (!el || !cv) return;
+    let cancelled = false, queued = false;
+    const draw = () => { if (cancelled) return; paint(cv, graphic, graphic.defaults, settledTime(graphic, graphic.defaults), { area: graphic.category === 'frames' ? 72000 : 60000, backdrop: 'scene', win: 'sample', key: '#00ff00' }); setReady(true); };
+    const io = new IntersectionObserver(entries => { if (!queued && entries.some(e => e.isIntersecting)) { queued = true; io.disconnect(); enqueue(draw); } }, { rootMargin: '200px' });
+    io.observe(el); return () => { cancelled = true; io.disconnect(); };
   }, [graphic]);
-  return <canvas ref={ref} aria-hidden="true" />;
+  return <button type="button" className={`ms-tile ${selected ? 'on' : ''} ${graphic.category}`} aria-pressed={selected} disabled={disabled} onClick={onPick} data-template={graphic.id}>
+    <span className={`ms-thumb ${ready ? 'ready' : ''}`} ref={box}><canvas ref={canvas} aria-hidden="true" />{graphic.badge && <em className={graphic.badge}>{graphic.badge === 'new' ? 'جديد' : 'مُحدَّث'}</em>}</span>
+    <span className="ms-tile-name"><b>{graphic.name}</b></span>
+  </button>;
 }
-function Player({ g, p, time, busy }: { g: Graphic; p: Params; time: RefObject<number>; busy: boolean }) {
-  const canvas = useRef<HTMLCanvasElement>(null), scrub = useRef<HTMLInputElement>(null), counter = useRef<HTMLOutputElement>(null);
-  const [playing, setPlaying] = useState(false);
-  const duration = timingOf(g, p).total;
-  useEffect(() => {
-    const media = matchMedia('(prefers-reduced-motion: reduce)');
-    const stop = () => { if (media.matches) setPlaying(false); };
-    media.addEventListener('change', stop); return () => media.removeEventListener('change', stop);
-  }, []);
-  useEffect(() => { if (busy) setPlaying(false); }, [busy]);
-  useEffect(() => {
-    let frame = 0, previous = performance.now();
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const params = reduced ? { ...p, mIdle: 0, particles: false } : p;
-    const draw = () => {
-      time.current = Math.min(time.current, duration);
-      if (canvas.current) paint(canvas.current, g, params, time.current);
-      if (scrub.current) scrub.current.value = String(time.current);
-      if (counter.current) counter.current.textContent = `${(time.current / p.speed).toFixed(1)} / ${(duration / p.speed).toFixed(1)} ث`;
-    };
-    const tick = (now: number) => {
-      if (!document.hidden) time.current = Math.min(duration, time.current + Math.min(now - previous, 100) / 1000 * p.speed);
-      previous = now; draw();
-      if (time.current < duration) frame = requestAnimationFrame(tick); else setPlaying(false);
-    };
-    draw();
-    if (playing && !busy) frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [g, p, duration, playing, busy, time]);
-  return <div className="motion-player">
-    <div className={`motion-stage ${g.category === 'frames' ? 'portrait' : ''}`}>
-      <canvas ref={canvas} role="img" aria-label={`معاينة ${g.name}`} style={{ aspectRatio: `${g.dims?.(p).w || 1280} / ${g.dims?.(p).h || 720}` }} />
-    </div>
-    <div className="motion-transport">
-      <button disabled={busy} aria-label={playing ? 'إيقاف المعاينة' : 'تشغيل المعاينة'} onClick={() => {
-        if (time.current >= duration || !playing && time.current === settledTime(g, p)) time.current = 0;
-        setPlaying(!playing);
-      }}>{playing ? <Pause /> : <Play />}</button>
-      <input ref={scrub} aria-label="موضع المعاينة" type="range" min="0" max={duration} step="0.01" defaultValue={time.current} disabled={busy} onChange={e => {
-        setPlaying(false); time.current = Number(e.target.value);
-        if (canvas.current) paint(canvas.current, g, p, time.current);
-        if (counter.current) counter.current.textContent = `${(time.current / p.speed).toFixed(1)} / ${(duration / p.speed).toFixed(1)} ث`;
-      }} />
-      <output ref={counter} dir="ltr" />
-    </div>
+
+function Rail({ items, selected, busy, onPick }: { items: Graphic[]; selected: string; busy: boolean; onPick: (g: Graphic) => void }) {
+  const list = useRef<HTMLDivElement>(null);
+  const scroll = (dir: number) => list.current?.scrollBy({ left: dir * (list.current.clientWidth * .8), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  useEffect(() => { list.current?.querySelector<HTMLElement>('[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }, [selected]);
+  return <div className="ms-rail">
+    <button type="button" className="ms-rail-arrow" aria-label="القوالب السابقة" onClick={() => scroll(1)}><ChevronRight /></button>
+    <div className="ms-rail-list" ref={list} role="group" aria-label="قوالب التصميم">{items.map(g => <Tile key={g.id} graphic={g} selected={g.id === selected} disabled={busy} onPick={() => onPick(g)} />)}</div>
+    <button type="button" className="ms-rail-arrow" aria-label="القوالب التالية" onClick={() => scroll(-1)}><ChevronLeft /></button>
   </div>;
 }
 
 export default function MotionStudio() {
   const [assetsReady, setAssetsReady] = useState(false), [assetError, setAssetError] = useState('');
   const [category, setCategory] = useState<Category>('numbers');
-  const [selected, setSelected] = useState('count-up');
+  const [picked, setPicked] = useState<Record<Category, string>>({ numbers: 'count-up', repine: 'rp-gold', frames: 'fr-mihrab' });
   const [drafts, setDrafts] = useState<Record<string, Params>>({});
-  const [format, setFormat] = useState<ExportFormat>('mov'), [shortSide, setShortSide] = useState(720);
-  const [keyColor, setKeyColor] = useState('#ff00ff');
-  const [busy, setBusy] = useState(false), [progress, setProgress] = useState(0), [message, setMessage] = useState('');
-  const controller = useRef<AbortController | null>(null), time = useRef(3.4);
-  const editorTitle = useRef<HTMLHeadingElement>(null);
-  const g = catalog.find(item => item.id === selected)!;
-  const p = drafts[selected] || g.defaults;
-  const templates = catalog.filter(item => item.category === category);
-  const dimensions = g.dims?.(p) || { w: 1280, h: 720 };
-  const scale = shortSide / Math.min(dimensions.w, dimensions.h);
-  const init = () => {
-    setAssetError(''); loadAssets().then(() => setAssetsReady(true)).catch(() => setAssetError('تعذر تحميل عناصر التصميم.'));
+  const [tab, setTab] = useState<TabId>('content');
+  const [backdrop, setBackdrop] = useState<Backdrop>('scene'), [win, setWin] = useState<WinMode>('sample'), [safe, setSafe] = useState(false);
+  const [video, setVideo] = useState<HTMLVideoElement | null>(null), [videoName, setVideoName] = useState('');
+  const [keyColor, setKeyColor] = useState('#00ff00'), [busy, setBusy] = useState(false), [token, setToken] = useState(0);
+  const time = useRef(0), fileInput = useRef<HTMLInputElement>(null), restartTimer = useRef(0), videoUrl = useRef('');
+  const g = catalog.find(item => item.id === picked[category])!;
+  const p = drafts[g.id] || g.defaults;
+  const items = catalog.filter(item => item.category === category);
+  const tabs = tabsFor(category), activeTab = tabs.includes(tab) ? tab : 'content';
+  const frames = category === 'frames';
+
+  const init = () => { setAssetError(''); loadAssets().then(() => setAssetsReady(true)).catch(() => setAssetError('تعذر تحميل شعار هداية والآيات. تحقق من الاتصال ثم أعد المحاولة.')); };
+  useEffect(() => { init(); return () => { clearTimeout(restartTimer.current); if (videoUrl.current) URL.revokeObjectURL(videoUrl.current); }; }, []);
+
+  const restart = useCallback(() => { clearTimeout(restartTimer.current); setToken(t => t + 1); }, []);
+  const later = () => { clearTimeout(restartTimer.current); restartTimer.current = window.setTimeout(restart, 650); };
+  const update = <K extends keyof Params>(key: K, value: Params[K], replay: 'none' | 'soon' = 'none') => {
+    setDrafts(previous => ({ ...previous, [g.id]: { ...(previous[g.id] || g.defaults), [key]: value } }));
+    if (replay === 'soon') later();
   };
-  useEffect(() => { init(); return () => controller.current?.abort(); }, []);
-  const update = <K extends keyof Params>(key: K, value: Params[K]) => {
-    setDrafts(previous => ({ ...previous, [selected]: { ...p, [key]: value } })); setMessage('');
+  const choose = (graphic: Graphic) => { setPicked(previous => ({ ...previous, [graphic.category]: graphic.id })); time.current = 0; };
+  const changeCategory = (next: Category) => { setCategory(next); time.current = 0; };
+  const loadVideo = (file: File | undefined) => {
+    if (!file) return;
+    if (videoUrl.current) URL.revokeObjectURL(videoUrl.current);
+    videoUrl.current = URL.createObjectURL(file);
+    const v = document.createElement('video'); v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto'; v.src = videoUrl.current;
+    setVideo(v); setVideoName(file.name); setWin('video');
   };
-  const choose = (graphic: Graphic, focusEditor = false) => {
-    setSelected(graphic.id); time.current = settledTime(graphic, drafts[graphic.id] || graphic.defaults); setMessage('');
-    if (focusEditor) requestAnimationFrame(() => { editorTitle.current?.focus(); editorTitle.current?.scrollIntoView({ block: 'start' }); });
-  };
-  const field = (key: keyof Params, label: string, maxLength = 48) => <label>{label}<input value={String(p[key])} maxLength={maxLength} onChange={e => update(key, e.target.value)} /></label>;
-  const color = (key: keyof Params, label: string) => <label className="motion-color">{label}<input type="color" value={String(p[key])} onChange={e => update(key, e.target.value)} /></label>;
-  const numeric = (key: keyof Params, label: string, min: number, max: number, step = .1) => <NumberField key={`${g.id}-${key}`} label={label} min={min} max={max} step={step} value={Number(p[key])} onChange={value => update(key, value)} />;
-  async function exportCurrent() {
-    const abort = new AbortController(); controller.current = abort;
-    setBusy(true); setProgress(0); setMessage('');
-    try {
-      await exportDesign(g, p, { format, shortSide, keyColor, time: time.current }, abort.signal, setProgress);
-      setMessage('اكتمل إنشاء الملف وبدأ تنزيله على جهازك.');
-    } catch (error) {
-      setMessage(abort.signal.aborted ? 'أُلغي التصدير. يمكنك المحاولة من جديد.' : error instanceof Error && /[\u0600-\u06ff]/.test(error.message) ? error.message : 'تعذر التصدير. حاول بدقة أقل أو استخدم صيغة أخرى.');
-    } finally { setBusy(false); controller.current = null; }
-  }
-  return <div className="motion-studio">
-    <Title title="استوديو الحركة" sub="اختر قالباً، خصّص محتواه، ثم نزّل التصميم لاستخدامه في موادك.">
+  const reset = () => { setDrafts(previous => { const next = { ...previous }; delete next[g.id]; return next; }); restart(); };
+  const resetColors = () => setDrafts(previous => ({ ...previous, [g.id]: { ...(previous[g.id] || g.defaults), ...Object.fromEntries(g.colors.map(c => [c.key, g.defaults[c.key]])) } }));
+  const plan = assetsReady ? planExport(g, p, { shortSide: 1080, fps: 30 }) : null;
+  const total = timingOf(g, p).total / p.speed;
+
+  const content = <>
+    {g.value && <Slider label={g.value.label} value={p.value} min={g.value.min} max={g.value.max} step={g.value.step} box boxMax={g.value.boxMax} onChange={v => update('value', v, 'soon')} />}
+    {g.texts.filter(t => (t.group === 'main' || !t.group) && !t.compact).map(t => <TextInput key={t.key} label={t.label} value={String(p[t.key])} max={t.max} hint={t.hint} placeholder={t.placeholder} ltr={t.ltr} onChange={v => update(t.key, v, 'soon')} />)}
+    {category === 'numbers' && <div className="ms-pair">{g.texts.filter(t => t.compact).map(t => <TextInput key={t.key} label={t.label} value={String(p[t.key])} max={t.max} placeholder={t.placeholder} onChange={v => update(t.key, v, 'soon')} />)}</div>}
+    {frames && g.toggles.some(t => t.key === 'showContact') && <fieldset className="ms-group"><legend>معلومات التواصل</legend>
+      <Switch label="إظهار عبارة ورقم التواصل" checked={p.showContact} onChange={v => update('showContact', v, 'soon')} />
+      {p.showContact && g.texts.filter(t => t.group === 'contact').map(t => <TextInput key={t.key} label={t.label} value={String(p[t.key])} max={t.max} ltr={t.ltr} placeholder={t.placeholder} onChange={v => update(t.key, v, 'soon')} />)}
+    </fieldset>}
+    {frames && g.toggles.some(t => t.key === 'showSocial') && <fieldset className="ms-group"><legend>حسابات التواصل</legend>
+      <Switch label="إظهار الحسابات والموقع" checked={p.showSocial} onChange={v => update('showSocial', v, 'soon')} />
+      {p.showSocial && g.texts.filter(t => t.group === 'social').map(t => <TextInput key={t.key} label={t.label} value={String(p[t.key])} max={t.max} ltr={t.ltr} placeholder={t.placeholder} onChange={v => update(t.key, v, 'soon')} />)}
+    </fieldset>}
+  </>;
+  const colorsTab = <>
+    <div className="ms-colors">{g.colors.map(c => <ColorInput key={c.key} label={c.label} value={String(p[c.key])} onChange={v => update(c.key, v)} />)}</div>
+    {category === 'numbers' && <Switch label="التوهج حول الأرقام" checked={p.glow} onChange={v => update('glow', v)} hint="أوقفه إذا ظهر هالة خضراء عند إزالة اللون الأخضر" />}
+    <button type="button" className="ms-link" onClick={resetColors}><RotateCcw />استعادة الألوان الأصلية</button>
+  </>;
+  const elementsTab = <div className="ms-switches">{g.toggles.filter(t => t.key !== 'showContact' && t.key !== 'showSocial').map(t => <Switch key={t.key} label={t.label} checked={Boolean(p[t.key as ToggleKey])} onChange={v => update(t.key as ToggleKey, v)} />)}</div>;
+  const timingTab = <>
+    {category === 'numbers'
+      ? <Slider label="مدة الثبات في النهاية" value={p.hold} min={0} max={6} step={.25} unit="ث" decimals={2} box onChange={v => update('hold', v)} onCommit={restart} />
+      : <>
+        <Slider label="مدة الدخول" value={p.tIn} min={.6} max={8} step={.1} unit="ث" decimals={1} onChange={v => update('tIn', v)} onCommit={restart} />
+        <Slider label={frames ? 'مدة العرض (بطول مقطعك)' : 'مدة العرض'} value={p.tHold} min={0} max={frames ? 180 : 20} step={.5} unit="ث" decimals={1} box={frames} boxMax={frames ? 900 : undefined} onChange={v => update('tHold', v)} onCommit={restart}
+          hint={frames ? 'اجعلها بطول المقطع الذي ستضعه داخل النافذة.' : undefined} />
+        <Slider label="مدة الخروج" value={p.tOut} min={frames ? 0 : .6} max={6} step={.1} unit="ث" decimals={1} onChange={v => update('tOut', v)} onCommit={restart} hint={frames ? 'صفر يعني أن يبقى الإطار ظاهراً حتى نهاية الفيديو.' : undefined} />
+      </>}
+    <Slider label="سرعة التشغيل" value={p.speed} min={.25} max={category === 'numbers' ? 3 : 2} step={.05} format={v => `${v.toFixed(2)}×`} onChange={v => update('speed', v)} onCommit={restart} />
+    <p className="ms-total">المدة الكلية للملف: <bdi dir="ltr">{total.toFixed(1)}</bdi> ثانية</p>
+  </>;
+  const motionTab = <>
+    <p className="ms-tip">كلما زادت النسبة زادت المبالغة في الارتداد والتمايل. صفر يعطي حركة هادئة بلا ارتداد.</p>
+    <Slider label="حركة الدخول" value={p.mIn} min={0} max={100} step={1} unit="٪" onChange={v => update('mIn', v)} onCommit={restart} />
+    <Slider label="حركة الخروج" value={p.mOut} min={0} max={100} step={1} unit="٪" onChange={v => update('mOut', v)} onCommit={restart} />
+    <Slider label="حركة العرض (الهدوء الحي)" value={p.mIdle} min={0} max={100} step={1} unit="٪" onChange={v => update('mIdle', v)} hint="تمايل خفيف ولمعان أثناء بقاء التصميم على الشاشة." />
+  </>;
+  const panels: Record<TabId, React.ReactNode> = { content, colors: colorsTab, elements: elementsTab, timing: timingTab, motion: motionTab };
+
+  return <div className="ms">
+    <Title title="استوديو الحركة" sub={intro[category]}>
       <Link href="/media" className="button">مكتبة الوسائط</Link>
     </Title>
-    <div className="motion-note"><span className="chip">أداة محلية تجريبية</span><p>التعديلات مؤقتة حتى تحديث الصفحة. التنزيل محلي، ولا يُضاف الملف إلى مكتبة الوسائط أو يُنشر تلقائياً.</p></div>
-    <fieldset className="motion-categories" disabled={busy}>
-      <Tabs items={groups.map(group => ({ ...group, label: `${group.label} (${catalog.filter(g => g.category === group.id).length})` }))} value={category} onChange={value => {
-        setCategory(value as Category); choose(catalog.find(g => g.category === value)!);
-      }} />
-    </fieldset>
-    {assetError ? <div className="panel"><p role="alert">{assetError}</p><button onClick={init}>إعادة المحاولة</button></div> : !assetsReady ? <div className="motion-loading" role="status">جارٍ تجهيز القوالب…</div> : <>
-      <div className="motion-chooser"><label>القالب<select aria-label="اختيار قالب" disabled={busy} value={g.id} onChange={event => choose(catalog.find(item => item.id === event.target.value)!)}>{templates.map(item => <option key={item.id} value={item.id}>{item.name}{item.isNew ? ' · جديد' : ''}</option>)}</select></label><a className="button" href="#motion-gallery">استعراض القوالب</a></div>
-      <section className="motion-editor" aria-label="تخصيص التصميم">
-        <div className="motion-preview-column">
-          <div className="between motion-preview-heading"><div><span className="eyebrow">معاينة التصميم</span><h2 ref={editorTitle} tabIndex={-1}>{g.name}</h2></div>{g.isNew && <span className="chip success">جديد</span>}</div>
-          <Player key={g.id} g={g} p={p} time={time} busy={busy} />
-          <p className="motion-caption">{g.blurb} المربعات تمثل المساحة الشفافة ولا تظهر في الملف.</p>
-          {g.category === 'numbers' && ['growth-bars', 'line-rise'].includes(g.id) && <p className="motion-caption">مسار الرسم توضيحي، ولا يمثل بيانات فعلية.</p>}
-          {g.category !== 'numbers' && !['rp-editorial', 'fr-portal', 'fr-broadcast'].includes(g.id) && <p className="motion-caption">يتضمن القالب شعار هداية الأصلي. النصوص القابلة للتعديل تخص التصميم فقط.</p>}
-          <div className="motion-export">
-            <h3><Download /> تنزيل التصميم</h3>
-            <fieldset disabled={busy} className="motion-export-fields">
-              <label>صيغة الملف<select aria-label="صيغة الملف" value={format} onChange={e => setFormat(e.target.value as ExportFormat)}>
-                <option value="mov">فيديو شفاف (MOV)</option><option value="mp4">فيديو بخلفية مفتاحية (MP4)</option><option value="zip">تسلسل صور شفاف (ZIP)</option><option value="png">صورة الموضع الحالي (PNG)</option>
-              </select></label>
-              <label>دقة الضلع القصير<select aria-label="دقة الضلع القصير" value={shortSide} onChange={e => setShortSide(Number(e.target.value))}><option value="360">٣٦٠ بكسل</option><option value="720">٧٢٠ بكسل</option></select></label>
-              {format === 'mp4' && <label className="motion-color">لون الخلفية المفتاحية<input type="color" value={keyColor} onChange={e => setKeyColor(e.target.value)} /></label>}
-            </fieldset>
-            <p className="motion-caption">{Math.round(dimensions.w * scale / 2) * 2} × {Math.round(dimensions.h * scale / 2) * 2} بكسل · {format === 'png' ? 'صورة ثابتة' : `٢٤ إطاراً/ث · ${(timingOf(g, p).total / p.speed).toFixed(1)} ثانية`}</p>
-            <p className="motion-caption">{format === 'mp4' ? 'أزل اللون المفتاحي في برنامج المونتاج. اختر لوناً مختلفاً عن ألوان التصميم.' : format === 'mov' ? 'ملف شفاف بترميز PNG. قد يكون حجمه كبيراً؛ افتحه في برنامج المونتاج.' : format === 'zip' ? 'فك الضغط ثم استورد الصور كتسلسل في برنامج المونتاج.' : 'يحفظ موضع المعاينة الحالي بخلفية شفافة.'}</p>
-            <div className="actions"><button className="primary" disabled={busy} onClick={exportCurrent}><Download />{busy ? `جارٍ التصدير ${progress}٪` : 'تنزيل التصميم'}</button>{busy && <button onClick={() => controller.current?.abort()}>إلغاء التصدير</button>}</div>
-            {busy && <progress aria-label="تقدم التصدير" value={progress} max="100" />}
-            <p role="status" className="motion-feedback">{message}</p>
+    <Tabs items={groups.map(group => ({ id: group.id, label: `${group.label} (${catalog.filter(item => item.category === group.id).length})` }))} value={category} onChange={value => changeCategory(value as Category)} />
+    {assetError ? <div className="panel"><p role="alert">{assetError}</p><button onClick={init}>إعادة المحاولة</button></div>
+      : !assetsReady ? <div className="ms-loading" role="status"><span className="skeleton" />جارٍ تجهيز القوالب…</div> : <>
+        <Rail items={items} selected={g.id} busy={busy} onPick={choose} />
+        <section className="ms-workbench" aria-label="تخصيص التصميم">
+          <div className="ms-preview">
+            <div className="ms-preview-head">
+              <div><h2>{g.name}{g.badge && <em className={`ms-badge ${g.badge}`}>{g.badge === 'new' ? 'جديد' : 'مُحدَّث'}</em>}</h2><p>{g.blurb}</p></div>
+            </div>
+            {frames && <div className="ms-ratios">
+              <Segmented label="أبعاد الإطار" value={p.ratio} disabled={busy} onChange={v => { update('ratio', v); }} options={ratios.map(r => {
+                const [w, h] = r.value.split(':').map(Number), k = 18 / Math.max(w, h);
+                return { value: r.value, hint: r.hint, label: <><i className="ratio-glyph" style={{ width: w * k, height: h * k }} /><span><b dir="ltr">{r.value}</b><small>{r.hint}</small></span></> };
+              })} />
+              {plan && <p className="ms-size">الملف عند 1080p: عرض <bdi dir="ltr">{plan.w}</bdi> × ارتفاع <bdi dir="ltr">{plan.h}</bdi> بكسل</p>}
+            </div>}
+            <Stage g={g} p={p} backdrop={backdrop} win={win} video={video} safe={safe && p.ratio === '9:16'} keyColor={keyColor} token={token} busy={busy} time={time} />
+            <div className="ms-viewopts">
+              {frames ? <>
+                <Segmented label="ما يظهر داخل النافذة" size="sm" value={win} onChange={v => { if (v === 'video' && !video) fileInput.current?.click(); else setWin(v); }} options={windows} />
+                <div className="ms-viewrow">
+                  <button type="button" className="ms-chip-btn" onClick={() => fileInput.current?.click()}><Upload />{videoName ? 'تغيير مقطع المعاينة' : 'تحميل مقطع للمعاينة'}</button>
+                  {videoName && <bdi dir="ltr" className="ms-file" title={videoName}>{videoName}</bdi>}
+                  {p.ratio === '9:16' && <Switch label="مناطق واجهة ريلز" checked={safe} onChange={setSafe} hint="يظلل المناطق التي قد تغطيها أزرار إنستغرام" />}
+                </div>
+                <input ref={fileInput} type="file" accept="video/*" hidden onChange={e => { loadVideo(e.target.files?.[0]); e.target.value = ''; }} />
+              </> : <Segmented label="خلفية المعاينة" size="sm" value={backdrop} onChange={setBackdrop} options={backdrops} />}
+              <p className="ms-hint">{frames ? 'المقطع يظهر في المعاينة فقط ولا يدخل في الملف المنزَّل.' : backdrop === 'alpha' ? 'المربعات تعني شفافية، ولا تظهر في الملف.' : 'الخلفية للمعاينة فقط، والملف المنزَّل يبقى شفافاً.'}</p>
+            </div>
           </div>
-        </div>
-        <aside className="motion-settings">
-          <div className="between"><h3><SlidersHorizontal /> تخصيص القالب</h3><button aria-label="إعادة ضبط القالب" title="إعادة ضبط القالب" disabled={busy} onClick={() => { setDrafts(previous => ({ ...previous, [selected]: { ...g.defaults } })); time.current = settledTime(g, g.defaults); setMessage('أُعيد القالب إلى إعداداته الأصلية.'); }}><RotateCcw /></button></div>
-          <fieldset disabled={busy}>
-            {category === 'numbers' ? <>{field('label', 'وصف الرقم', 38)}{numeric('value', 'القيمة', 0, g.id === 'arc-gauge' ? 100 : g.value?.boxMax || 99999999, 1)}<div className="field-pair">{field('prefix', 'قبل الرقم', 4)}{field('suffix', 'بعد الرقم', 4)}</div><div className="field-pair">{color('color', 'لون الحركة')}{color('text', 'لون الرقم')}</div></> : category === 'repine' ? <>{field('title', 'العنوان', 38)}{field('subtitle', 'النص الفرعي', 65)}<div className="field-pair">{color('main', 'اللون الأساسي')}{color('accent', 'لون الزخرفة')}</div></> : <>
-              <label>أبعاد الإطار<select aria-label="أبعاد الإطار" value={p.ratio} onChange={e => update('ratio', e.target.value)}><option value="9:16">رأسي 9:16</option><option value="4:5">منشور 4:5</option><option value="1:1">مربع 1:1</option><option value="16:9">أفقي 16:9</option></select></label>
-              {g.isNew && field('title', 'العنوان العلوي', 38)}{field('reciter', 'الاسم أو عنوان التغطية', 38)}{g.isNew && field('subtitle', g.id === 'fr-broadcast' ? 'النص العلوي الفرعي' : 'النص السفلي', 50)}
-              <div className="field-pair">{color('c1', 'اللون الأساسي')}{color('c2', 'اللون الثانوي')}{color('c3', 'اللون الثالث')}{!g.isNew && g.colors?.some(item => Array.isArray(item) && item[0] === 'c4') && color('c4', 'اللون الرابع')}</div>
-              {!g.isNew && <details><summary>عناصر الإطار</summary>{(['showLogo', 'showVerse', 'showWave', 'particles', 'showContact', 'showSocial'] as const).map((key, index) => g.toggles?.includes(key) && <label className="check-row" key={key}><input type="checkbox" checked={p[key]} onChange={e => update(key, e.target.checked)} />{['الشعار', 'الآية', 'الموجة الصوتية الزخرفية', 'الجزيئات', 'معلومات التواصل', 'روابط التواصل'][index]}</label>)}{p.showContact && <>{field('support', 'عبارة التواصل')}{field('phone', 'رقم التواصل', 20)}</>}{p.showSocial && <>{field('handle', 'اسم الحساب', 25)}{field('web', 'الموقع الإلكتروني', 40)}</>}</details>}
-            </>}
-            <details className="motion-timing"><summary>التوقيت والحركة</summary>
-              {numeric('speed', 'سرعة الحركة', .5, 2, .25)}
-              {category === 'numbers' && !g.isNew ? numeric('hold', 'مدة الثبات بالثواني', .5, 10, .5) : <>{numeric('tIn', 'مدة الدخول بالثواني', .5, 5, .1)}{numeric('tHold', 'مدة الثبات بالثواني', .5, 12, .5)}{numeric('tOut', 'مدة الخروج بالثواني', .3, 3, .1)}</>}
-              {!g.isNew && category === 'numbers' && <label className="check-row"><input type="checkbox" checked={p.glow} onChange={e => update('glow', e.target.checked)} />التوهج</label>}
-            </details>
-          </fieldset>
-        </aside>
-      </section>
-      <section id="motion-gallery" tabIndex={-1} aria-label="قوالب الحركة" className="motion-library">
-        <div className="between"><h2>قوالب {groups.find(group => group.id === category)?.label}</h2><small>{templates.length} قوالب · تصميمان جديدان</small></div>
-        <div className="motion-grid">{templates.map(graphic => <button key={graphic.id} disabled={busy} className={`motion-card ${selected === graphic.id ? 'selected' : ''}`} aria-pressed={selected === graphic.id} onClick={() => choose(graphic, true)} data-template={graphic.id}>
-          <div className={`motion-thumb ${category === 'frames' ? 'frame-thumb' : ''}`}><Thumbnail graphic={graphic} /></div>
-          <span className="motion-card-text"><span className="between"><b>{graphic.name}</b>{graphic.isNew && <span className="chip success">جديد</span>}</span><small>{graphic.blurb}</small></span>
-        </button>)}</div>
-      </section>
-    </>}
+          <aside className="ms-settings" aria-label="إعدادات القالب"><div className="ms-settings-inner">
+            <div className="ms-tablist" role="tablist" aria-label="أقسام الإعدادات">
+              {tabs.map(id => { const I = tabMeta[id].icon; return <button key={id} role="tab" type="button" id={`ms-tab-${id}`} aria-selected={activeTab === id} aria-controls="ms-panel" className={activeTab === id ? 'on' : ''} onClick={() => setTab(id)}><I />{tabMeta[id].label}</button>; })}
+            </div>
+            <fieldset className="ms-panel" id="ms-panel" role="tabpanel" aria-labelledby={`ms-tab-${activeTab}`} disabled={busy}>{panels[activeTab]}</fieldset>
+            <button type="button" className="ms-reset" disabled={busy} onClick={reset}><RotateCcw />إعادة ضبط هذا التصميم</button>
+          </div></aside>
+        </section>
+        <ExportPanel g={g} p={p} time={time} keyColor={keyColor} onKeyColor={setKeyColor} onBusy={setBusy} />
+      </>}
   </div>;
 }

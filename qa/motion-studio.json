@@ -1,6 +1,12 @@
 {
   "date": "2026-10-08",
   "baseURL": "http://127.0.0.1:3000",
+  "exportSeconds": {
+    "mp4": 3.058,
+    "mov": 5.019,
+    "zip": 4.835,
+    "png": 0.287
+  },
   "checks": [
     {
       "name": "native shell navigation",
@@ -13,515 +19,1349 @@
       "detail": ""
     },
     {
-      "name": "paused on initial load",
+      "name": "numbers: template count 8",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "numbers: template count",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "numbers: two additions",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "count-up: visible artwork and alpha",
+      "name": "count-up: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 119864,
-        "clear": 385100
+        "colors": 170,
+        "lit": 5890,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "odometer: visible artwork and alpha",
+      "name": "count-up: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 131891,
-        "clear": 389964
+        "colors": 211,
+        "lit": 6083,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "ring: visible artwork and alpha",
+      "name": "odometer: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 89785,
-        "clear": 420870
+        "colors": 181,
+        "lit": 5270,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "progress-bar: visible artwork and alpha",
+      "name": "odometer: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 59542,
-        "clear": 475366
+        "colors": 186,
+        "lit": 5186,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "growth-bars: visible artwork and alpha",
+      "name": "ring: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 75086,
-        "clear": 448572
+        "colors": 153,
+        "lit": 5908,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "line-rise: visible artwork and alpha",
+      "name": "ring: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 74279,
-        "clear": 421925
+        "colors": 166,
+        "lit": 6111,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "arc-gauge: visible artwork and alpha",
+      "name": "progress-bar: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 17959,
-        "clear": 544737
+        "colors": 175,
+        "lit": 5918,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "milestone-count: visible artwork and alpha",
+      "name": "progress-bar: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 13382,
-        "clear": 549466
+        "colors": 200,
+        "lit": 5931,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "repine: template count",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "repine: two additions",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "rp-gold: no inactive glow control",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "rp-gold: visible artwork and alpha",
+      "name": "growth-bars: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 62875,
-        "clear": 482641
+        "colors": 172,
+        "lit": 5858,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "rp-teal: no inactive glow control",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "rp-teal: visible artwork and alpha",
+      "name": "growth-bars: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 85809,
-        "clear": 451424
+        "colors": 225,
+        "lit": 6067,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "rp-glass: no inactive glow control",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "rp-glass: visible artwork and alpha",
+      "name": "line-rise: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 89506,
-        "clear": 432850
+        "colors": 164,
+        "lit": 5858,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "rp-slats: no inactive glow control",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "rp-slats: visible artwork and alpha",
+      "name": "line-rise: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 64189,
-        "clear": 489898
+        "colors": 187,
+        "lit": 6003,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "rp-editorial: no inactive glow control",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "rp-editorial: visible artwork and alpha",
+      "name": "arc-gauge: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 80519,
-        "clear": 482481
+        "colors": 156,
+        "lit": 5876,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "rp-orbit: no inactive glow control",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "rp-orbit: visible artwork and alpha",
+      "name": "arc-gauge: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 73120,
-        "clear": 489807
+        "colors": 194,
+        "lit": 5889,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "frames: template count",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "frames: two additions",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-lattice: visible artwork and alpha",
+      "name": "milestone-count: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 1130279,
-        "clear": 579821
+        "colors": 164,
+        "lit": 5942,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "fr-lattice: ratio 4:5",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-lattice: ratio 1:1",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-lattice: ratio 16:9",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-lattice: ratio 9:16",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-watercolor: visible artwork and alpha",
+      "name": "milestone-count: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 1344916,
-        "clear": 432747
+        "colors": 197,
+        "lit": 5938,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "fr-watercolor: ratio 4:5",
+      "name": "numbers: badges on new or updated designs",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "fr-watercolor: ratio 1:1",
+      "name": "repine: template count 8",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "fr-watercolor: ratio 16:9",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-watercolor: ratio 9:16",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-mihrab: visible artwork and alpha",
+      "name": "rp-gold: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 1195420,
-        "clear": 578866
+        "colors": 155,
+        "lit": 5842,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "fr-mihrab: ratio 4:5",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-mihrab: ratio 1:1",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-mihrab: ratio 16:9",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-mihrab: ratio 9:16",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-girih: visible artwork and alpha",
+      "name": "rp-gold: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 1077914,
-        "clear": 692646
+        "colors": 217,
+        "lit": 6123,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "fr-girih: ratio 4:5",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-girih: ratio 1:1",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-girih: ratio 16:9",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-girih: ratio 9:16",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-arch: visible artwork and alpha",
+      "name": "rp-teal: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 1207594,
-        "clear": 570360
+        "colors": 159,
+        "lit": 5825,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "fr-arch: ratio 4:5",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-arch: ratio 1:1",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-arch: ratio 16:9",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-arch: ratio 9:16",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-night: visible artwork and alpha",
+      "name": "rp-teal: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 1394548,
-        "clear": 379211
+        "colors": 168,
+        "lit": 6185,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "fr-night: ratio 4:5",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-night: ratio 1:1",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-night: ratio 16:9",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-night: ratio 9:16",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-portal: visible artwork and alpha",
+      "name": "rp-glass: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "ink": 869466,
-        "clear": 908410
+        "colors": 149,
+        "lit": 5842,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "fr-portal: ratio 4:5",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-portal: ratio 1:1",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-portal: ratio 16:9",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-portal: ratio 9:16",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "broadcast subtitle label matches header position",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-broadcast: visible artwork and alpha",
+      "name": "rp-glass: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "ink": 859670,
-        "clear": 918330
+        "colors": 180,
+        "lit": 6114,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "fr-broadcast: ratio 4:5",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-broadcast: ratio 1:1",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-broadcast: ratio 16:9",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "fr-broadcast: ratio 9:16",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "22 total templates exercised",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "per-template edits retained",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "play advances then pauses",
-      "pass": true,
-      "detail": 0.48
-    },
-    {
-      "name": "scrub updates time readout",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "reset restores original value",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "timing input allows clearing during editing",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "timing input accepts typed decimal",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "timing input bounds on blur",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "png: real local export",
+      "name": "rp-slats: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "bytes": 5999,
-        "name": "arc-gauge.png"
+        "colors": 155,
+        "lit": 5819,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "zip: real local export",
+      "name": "rp-slats: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "bytes": 557139,
-        "name": "arc-gauge.zip"
+        "colors": 184,
+        "lit": 6114,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "mov: real local export",
+      "name": "rp-editorial: draws real artwork at 0.4s",
       "pass": true,
       "detail": {
-        "bytes": 554192,
-        "name": "arc-gauge.mov"
+        "colors": 171,
+        "lit": 5934,
+        "w": 1116,
+        "h": 628
       }
     },
     {
-      "name": "mov: 32 frames decode at expected dimensions",
+      "name": "rp-editorial: draws real artwork at 3.2s",
       "pass": true,
       "detail": {
-        "codec_name": "png",
+        "colors": 197,
+        "lit": 6178,
+        "w": 1116,
+        "h": 628
+      }
+    },
+    {
+      "name": "rp-orbit: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 173,
+        "lit": 5804,
+        "w": 1116,
+        "h": 628
+      }
+    },
+    {
+      "name": "rp-orbit: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 196,
+        "lit": 5957,
+        "w": 1116,
+        "h": 628
+      }
+    },
+    {
+      "name": "rp-scroll: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 166,
+        "lit": 5858,
+        "w": 1116,
+        "h": 628
+      }
+    },
+    {
+      "name": "rp-scroll: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 183,
+        "lit": 6133,
+        "w": 1116,
+        "h": 628
+      }
+    },
+    {
+      "name": "rp-crescent: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 146,
+        "lit": 5842,
+        "w": 1116,
+        "h": 628
+      }
+    },
+    {
+      "name": "rp-crescent: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 180,
+        "lit": 5992,
+        "w": 1116,
+        "h": 628
+      }
+    },
+    {
+      "name": "repine: badges on new or updated designs",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "frames: template count 10",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-lattice: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 129,
+        "lit": 4389,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-lattice: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 174,
+        "lit": 4824,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-watercolor: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 48,
+        "lit": 6188,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-watercolor: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 203,
+        "lit": 6188,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-mihrab: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 62,
+        "lit": 4418,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-mihrab: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 242,
+        "lit": 4210,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-girih: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 15,
+        "lit": 4709,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-girih: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 206,
+        "lit": 4705,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-arch: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 30,
+        "lit": 6173,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-arch: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 180,
+        "lit": 6188,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-night: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 28,
+        "lit": 2032,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-night: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 216,
+        "lit": 2971,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-portal: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 18,
+        "lit": 4106,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-portal: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 205,
+        "lit": 4245,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-broadcast: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 16,
+        "lit": 6188,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-broadcast: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 206,
+        "lit": 6185,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-doors: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 58,
+        "lit": 2852,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-doors: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 185,
+        "lit": 4359,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-spectrum: draws real artwork at 0.4s",
+      "pass": true,
+      "detail": {
+        "colors": 16,
+        "lit": 492,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "fr-spectrum: draws real artwork at 3.2s",
+      "pass": true,
+      "detail": {
+        "colors": 219,
+        "lit": 2844,
+        "w": 581,
+        "h": 1033
+      }
+    },
+    {
+      "name": "frames: badges on new or updated designs",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "26 designs exercised",
+      "pass": true,
+      "detail": 26
+    },
+    {
+      "name": "no empty template names",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-editorial named الشريط التحريري",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-orbit named مدار الهوية",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-scroll named المخطوطة",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-crescent named الهلال المضيء",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-portal named بوابة الأثر",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-broadcast named إطار التغطية",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-doors named أبواب المشربية",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-spectrum named طيف التلاوة",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fr-mihrab: preview 4:5 keeps its shape",
+      "pass": true,
+      "detail": [
+        693,
+        866
+      ]
+    },
+    {
+      "name": "fr-mihrab: stated size at 4:5",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1350 بكسل"
+    },
+    {
+      "name": "fr-mihrab: displayed shape at 4:5",
+      "pass": true,
+      "detail": {
+        "x": 538,
+        "y": 739.59375,
+        "width": 512,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-mihrab: preview 1:1 keeps its shape",
+      "pass": true,
+      "detail": [
+        775,
+        775
+      ]
+    },
+    {
+      "name": "fr-mihrab: stated size at 1:1",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-mihrab: displayed shape at 1:1",
+      "pass": true,
+      "detail": {
+        "x": 474,
+        "y": 739.59375,
         "width": 640,
-        "height": 360,
-        "pix_fmt": "rgba",
-        "duration": "1.333333",
-        "nb_read_frames": "32"
+        "height": 640
       }
     },
     {
-      "name": "MOV preserves alpha pixel format",
+      "name": "fr-mihrab: preview 16:9 keeps its shape",
       "pass": true,
-      "detail": ""
+      "detail": [
+        1033,
+        581
+      ]
     },
     {
-      "name": "mov: complete decode without errors",
+      "name": "fr-mihrab: stated size at 16:9",
       "pass": true,
-      "detail": ""
+      "detail": "الملف عند 1080p: عرض 1920 × ارتفاع 1080 بكسل"
     },
     {
-      "name": "mp4: real local export",
+      "name": "fr-mihrab: displayed shape at 16:9",
       "pass": true,
       "detail": {
-        "bytes": 85804,
-        "name": "arc-gauge.mp4"
+        "x": 447,
+        "y": 739.59375,
+        "width": 694,
+        "height": 390.375
       }
     },
     {
-      "name": "mp4: 32 frames decode at expected dimensions",
+      "name": "fr-mihrab: preview 9:16 keeps its shape",
+      "pass": true,
+      "detail": [
+        581,
+        1033
+      ]
+    },
+    {
+      "name": "fr-mihrab: stated size at 9:16",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1920 بكسل"
+    },
+    {
+      "name": "fr-mihrab: displayed shape at 9:16",
+      "pass": true,
+      "detail": {
+        "x": 614,
+        "y": 739.59375,
+        "width": 360,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-portal: preview 4:5 keeps its shape",
+      "pass": true,
+      "detail": [
+        693,
+        866
+      ]
+    },
+    {
+      "name": "fr-portal: stated size at 4:5",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1350 بكسل"
+    },
+    {
+      "name": "fr-portal: displayed shape at 4:5",
+      "pass": true,
+      "detail": {
+        "x": 538,
+        "y": 762.984375,
+        "width": 512,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-portal: preview 1:1 keeps its shape",
+      "pass": true,
+      "detail": [
+        775,
+        775
+      ]
+    },
+    {
+      "name": "fr-portal: stated size at 1:1",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-portal: displayed shape at 1:1",
+      "pass": true,
+      "detail": {
+        "x": 474,
+        "y": 762.984375,
+        "width": 640,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-portal: preview 16:9 keeps its shape",
+      "pass": true,
+      "detail": [
+        1033,
+        581
+      ]
+    },
+    {
+      "name": "fr-portal: stated size at 16:9",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1920 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-portal: displayed shape at 16:9",
+      "pass": true,
+      "detail": {
+        "x": 447,
+        "y": 762.984375,
+        "width": 694,
+        "height": 390.375
+      }
+    },
+    {
+      "name": "fr-portal: preview 9:16 keeps its shape",
+      "pass": true,
+      "detail": [
+        581,
+        1033
+      ]
+    },
+    {
+      "name": "fr-portal: stated size at 9:16",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1920 بكسل"
+    },
+    {
+      "name": "fr-portal: displayed shape at 9:16",
+      "pass": true,
+      "detail": {
+        "x": 614,
+        "y": 762.984375,
+        "width": 360,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-broadcast: preview 4:5 keeps its shape",
+      "pass": true,
+      "detail": [
+        693,
+        866
+      ]
+    },
+    {
+      "name": "fr-broadcast: stated size at 4:5",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1350 بكسل"
+    },
+    {
+      "name": "fr-broadcast: displayed shape at 4:5",
+      "pass": true,
+      "detail": {
+        "x": 538,
+        "y": 762.984375,
+        "width": 512,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-broadcast: preview 1:1 keeps its shape",
+      "pass": true,
+      "detail": [
+        775,
+        775
+      ]
+    },
+    {
+      "name": "fr-broadcast: stated size at 1:1",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-broadcast: displayed shape at 1:1",
+      "pass": true,
+      "detail": {
+        "x": 474,
+        "y": 762.984375,
+        "width": 640,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-broadcast: preview 16:9 keeps its shape",
+      "pass": true,
+      "detail": [
+        1033,
+        581
+      ]
+    },
+    {
+      "name": "fr-broadcast: stated size at 16:9",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1920 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-broadcast: displayed shape at 16:9",
+      "pass": true,
+      "detail": {
+        "x": 447,
+        "y": 762.984375,
+        "width": 694,
+        "height": 390.375
+      }
+    },
+    {
+      "name": "fr-broadcast: preview 9:16 keeps its shape",
+      "pass": true,
+      "detail": [
+        581,
+        1033
+      ]
+    },
+    {
+      "name": "fr-broadcast: stated size at 9:16",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1920 بكسل"
+    },
+    {
+      "name": "fr-broadcast: displayed shape at 9:16",
+      "pass": true,
+      "detail": {
+        "x": 614,
+        "y": 762.984375,
+        "width": 360,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-doors: preview 4:5 keeps its shape",
+      "pass": true,
+      "detail": [
+        693,
+        866
+      ]
+    },
+    {
+      "name": "fr-doors: stated size at 4:5",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1350 بكسل"
+    },
+    {
+      "name": "fr-doors: displayed shape at 4:5",
+      "pass": true,
+      "detail": {
+        "x": 538,
+        "y": 739.59375,
+        "width": 512,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-doors: preview 1:1 keeps its shape",
+      "pass": true,
+      "detail": [
+        775,
+        775
+      ]
+    },
+    {
+      "name": "fr-doors: stated size at 1:1",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-doors: displayed shape at 1:1",
+      "pass": true,
+      "detail": {
+        "x": 474,
+        "y": 739.59375,
+        "width": 640,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-doors: preview 16:9 keeps its shape",
+      "pass": true,
+      "detail": [
+        1033,
+        581
+      ]
+    },
+    {
+      "name": "fr-doors: stated size at 16:9",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1920 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-doors: displayed shape at 16:9",
+      "pass": true,
+      "detail": {
+        "x": 447,
+        "y": 739.59375,
+        "width": 694,
+        "height": 390.375
+      }
+    },
+    {
+      "name": "fr-doors: preview 9:16 keeps its shape",
+      "pass": true,
+      "detail": [
+        581,
+        1033
+      ]
+    },
+    {
+      "name": "fr-doors: stated size at 9:16",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1920 بكسل"
+    },
+    {
+      "name": "fr-doors: displayed shape at 9:16",
+      "pass": true,
+      "detail": {
+        "x": 614,
+        "y": 739.59375,
+        "width": 360,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-spectrum: preview 4:5 keeps its shape",
+      "pass": true,
+      "detail": [
+        693,
+        866
+      ]
+    },
+    {
+      "name": "fr-spectrum: stated size at 4:5",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1350 بكسل"
+    },
+    {
+      "name": "fr-spectrum: displayed shape at 4:5",
+      "pass": true,
+      "detail": {
+        "x": 538,
+        "y": 739.59375,
+        "width": 512,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-spectrum: preview 1:1 keeps its shape",
+      "pass": true,
+      "detail": [
+        775,
+        775
+      ]
+    },
+    {
+      "name": "fr-spectrum: stated size at 1:1",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-spectrum: displayed shape at 1:1",
+      "pass": true,
+      "detail": {
+        "x": 474,
+        "y": 739.59375,
+        "width": 640,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-spectrum: preview 16:9 keeps its shape",
+      "pass": true,
+      "detail": [
+        1033,
+        581
+      ]
+    },
+    {
+      "name": "fr-spectrum: stated size at 16:9",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1920 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-spectrum: displayed shape at 16:9",
+      "pass": true,
+      "detail": {
+        "x": 447,
+        "y": 739.59375,
+        "width": 694,
+        "height": 390.375
+      }
+    },
+    {
+      "name": "fr-spectrum: preview 9:16 keeps its shape",
+      "pass": true,
+      "detail": [
+        581,
+        1033
+      ]
+    },
+    {
+      "name": "fr-spectrum: stated size at 9:16",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1920 بكسل"
+    },
+    {
+      "name": "fr-spectrum: displayed shape at 9:16",
+      "pass": true,
+      "detail": {
+        "x": 614,
+        "y": 739.59375,
+        "width": 360,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-lattice: preview 4:5 keeps its shape",
+      "pass": true,
+      "detail": [
+        693,
+        866
+      ]
+    },
+    {
+      "name": "fr-lattice: stated size at 4:5",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1350 بكسل"
+    },
+    {
+      "name": "fr-lattice: displayed shape at 4:5",
+      "pass": true,
+      "detail": {
+        "x": 538,
+        "y": 762.984375,
+        "width": 512,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-lattice: preview 1:1 keeps its shape",
+      "pass": true,
+      "detail": [
+        775,
+        775
+      ]
+    },
+    {
+      "name": "fr-lattice: stated size at 1:1",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-lattice: displayed shape at 1:1",
+      "pass": true,
+      "detail": {
+        "x": 474,
+        "y": 762.984375,
+        "width": 640,
+        "height": 640
+      }
+    },
+    {
+      "name": "fr-lattice: preview 16:9 keeps its shape",
+      "pass": true,
+      "detail": [
+        1033,
+        581
+      ]
+    },
+    {
+      "name": "fr-lattice: stated size at 16:9",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1920 × ارتفاع 1080 بكسل"
+    },
+    {
+      "name": "fr-lattice: displayed shape at 16:9",
+      "pass": true,
+      "detail": {
+        "x": 447,
+        "y": 762.984375,
+        "width": 694,
+        "height": 390.375
+      }
+    },
+    {
+      "name": "fr-lattice: preview 9:16 keeps its shape",
+      "pass": true,
+      "detail": [
+        581,
+        1033
+      ]
+    },
+    {
+      "name": "fr-lattice: stated size at 9:16",
+      "pass": true,
+      "detail": "الملف عند 1080p: عرض 1080 × ارتفاع 1920 بكسل"
+    },
+    {
+      "name": "fr-lattice: displayed shape at 9:16",
+      "pass": true,
+      "detail": {
+        "x": 614,
+        "y": 762.984375,
+        "width": 360,
+        "height": 640
+      }
+    },
+    {
+      "name": "green window preview shows the key color",
+      "pass": true,
+      "detail": [
+        0,
+        255,
+        0,
+        255
+      ]
+    },
+    {
+      "name": "transparent window preview has real alpha",
+      "pass": true,
+      "detail": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "sample window preview is opaque footage",
+      "pass": true,
+      "detail": [
+        139,
+        116,
+        176,
+        255
+      ]
+    },
+    {
+      "name": "\"my video\" opens a file chooser",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reels safe zones toggle on",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "safe zones only offered for 9:16",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timing slider: مدة الدخول",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timing slider: مدة العرض (بطول مقطعك)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timing slider: مدة الخروج",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timing slider: سرعة التشغيل",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "motion slider: حركة الدخول",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "motion slider: حركة الخروج",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "motion slider: حركة العرض (الهدوء الحي)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "timing change updates total length",
+      "pass": true,
+      "detail": [
+        "15.8",
+        "33.8"
+      ]
+    },
+    {
+      "name": "phase strip reflects the change",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "number box tolerates clearing while editing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "number box accepts typed value",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "number box clamps to its bound",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "slider reachable and adjustable from the keyboard",
+      "pass": true,
+      "detail": "1.05×"
+    },
+    {
+      "name": "phone field hidden until contact is enabled",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone field appears and accepts input",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "edits are remembered per design",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reset restores the original text",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "four colour pickers for a four-colour frame",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "element switches present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "replay plays forward",
+      "pass": true,
+      "detail": "0.74"
+    },
+    {
+      "name": "pause holds the frame",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "scrub reads out time",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "loop toggle",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "value box applies",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "transparent backdrop leaves real alpha",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "format mp4 selected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "mp4: real download with the stated name",
+      "pass": true,
+      "detail": "fr-spectrum_720x1280_24fps_greenscreen.mp4"
+    },
+    {
+      "name": "mp4: decodes at 720x1280 with 38 frames",
       "pass": true,
       "detail": {
         "codec_name": "h264",
-        "width": 640,
-        "height": 360,
+        "width": 720,
+        "height": 1280,
         "pix_fmt": "yuv420p",
-        "duration": "1.333333",
-        "nb_read_frames": "32"
+        "nb_read_frames": "38"
       }
     },
     {
@@ -530,64 +1370,164 @@
       "detail": ""
     },
     {
-      "name": "export cancels cleanly",
+      "name": "result card keeps a working link",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "no overflow at 1440",
+      "name": "format mov selected",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "template chooser before editor at 1440",
+      "name": "mov: transparent video with alpha",
+      "pass": true,
+      "detail": {
+        "codec_name": "png",
+        "width": 720,
+        "height": 1280,
+        "pix_fmt": "rgba",
+        "nb_read_frames": "38"
+      }
+    },
+    {
+      "name": "mov: complete decode without errors",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "no overflow at 1280",
+      "name": "format zip selected",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "template chooser before editor at 1280",
+      "name": "zip: archive of PNG frames",
+      "pass": true,
+      "detail": "fr-spectrum_720x1280_24fps_png-sequence.zip"
+    },
+    {
+      "name": "zip: 38 PNG frames",
+      "pass": true,
+      "detail": 38
+    },
+    {
+      "name": "zip: first PNG decodes at 720x1280 with alpha",
+      "pass": true,
+      "detail": {
+        "width": 720,
+        "height": 1280,
+        "pix_fmt": "rgba"
+      }
+    },
+    {
+      "name": "format png selected",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "no overflow at 900",
+      "name": "png still: valid image",
+      "pass": true,
+      "detail": "fr-spectrum_720x1280_still.png"
+    },
+    {
+      "name": "exports are fast enough to use (mp4 under 60 s for a 1.6 s clip)",
+      "pass": true,
+      "detail": {
+        "mp4": 3.058,
+        "mov": 5.019,
+        "zip": 4.835,
+        "png": 0.287
+      }
+    },
+    {
+      "name": "export cancels cleanly and says so",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "template chooser before editor at 900",
+      "name": "controls are available again after cancel",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "no overflow at 390",
+      "name": "every control has an accessible name",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "stage is keyboard reachable",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "template chooser before editor at 390",
+      "name": "no horizontal overflow at 1440",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "mobile quick chooser changes design",
+      "name": "stage stays inside its card at 1440",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "gallery choice returns keyboard focus to editor",
+      "name": "no horizontal overflow at 1100",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "chooser has keyboard route to gallery",
+      "name": "stage stays inside its card at 1100",
       "pass": true,
       "detail": ""
+    },
+    {
+      "name": "no horizontal overflow at 900",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "stage stays inside its card at 900",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no horizontal overflow at 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "stage stays inside its card at 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ratio chooser fits a phone",
+      "pass": true,
+      "detail": {
+        "x": 225.4375,
+        "y": 750.28125,
+        "width": 133.5625,
+        "height": 58.890625
+      }
+    },
+    {
+      "name": "reduced motion: preview starts paused",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fallback notice shown when the browser lacks WebCodecs",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "real-time fallback still produces a decodable video",
+      "pass": true,
+      "detail": {
+        "name": "fr-broadcast_720x1280_30fps_greenscreen.mp4",
+        "codec_name": "h264",
+        "width": 720,
+        "height": 1280
+      }
     },
     {
       "name": "no page or console errors",

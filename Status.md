@@ -32,8 +32,8 @@ Design: Direction A throughout; B only for larger media previews. See DESIGN.md.
 
 ## Verified capability
 
-- Added `/motion`, the local Arabic motion studio: 16 integrated source templates plus six new designs, native navigation, editable controls, paused previews, scrubbing, reset and local PNG/ZIP/MOV/MP4 exports. See `MVP_draft.md` section 57 for the scope and export limits. Edits reset on refresh; access restrictions and asset attachment are deferred.
-- Motion studio evidence, 2026-10-08: 100/100 browser/export checks, including decoded MOV/MP4 files; existing browser regression 34/34; domain tests 8/8; production build and typecheck pass. Independent critic scores across three rounds: 4.1/5, 4.7/5, 5/5 for prototype scope. Evidence lives in `qa/motion-studio.json` and `qa/motion-critic.json`.
+- `/motion`, the local Arabic motion studio, revised after first review (2026-10-08): 26 templates (8 numbers, 8 Repine, 10 video frames), template rail with live thumbnails, stage with transport and phase strip, tabbed settings with every timing and motion slider restored, frame ratios with true shapes and stated output sizes, window preview (sample, own clip, key green, transparent) and Reels safe zones, and downloads (MP4, transparent MOV, PNG sequence ZIP, single PNG) up to 4K and 60 fps with progress, cancel and a persistent save link. See `MVP_draft.md` section 57. Edits reset on refresh; access restrictions and asset attachment are deferred.
+- Motion studio evidence, 2026-10-08 (second round): `node qa/motion-studio.cjs` passed all checks, including real downloads decoded with ffprobe and ffmpeg; existing regression 34/34; domain tests 8/8; typecheck and production build pass. Details in `progress.md` and `qa/motion-studio.json`.
 
 - Runnable Next.js/TypeScript/Tailwind local UI with a coherent Saudi National Day 2026 campaign, eight role experiences, and distinct approval/publishing/Admin authority.
 - Full browser journey passes: create, submit, request changes, edit, resubmit, approve exact revision, schedule, calendar, partial publication, retry and success.
