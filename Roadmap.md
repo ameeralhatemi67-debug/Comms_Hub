@@ -7,7 +7,7 @@ tags:
   - status/active
   - planning/foundation
 created: 2026-08-18
-updated: 2026-09-19
+updated: 2026-10-10
 status: active
 active_version: "Version 0: UI Prototype"
 planning_horizon: 1–12 months
@@ -20,9 +20,11 @@ related:
   - "[[progress|Progress Log]]"
   - "[[MVP_draft|MVP Draft UI Shell]]"
   - "[[discussions_list|Master Discussions Index]]"
+  - "[[Ideas_Backlog|Ideas Backlog]]"
+  - "[[validation/responses/R01-2026-10-10-director|Response R01]]"
 ---
 
-[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[Status|Current Status]] | [[progress|Progress Log]] | [[MVP_draft|MVP Draft UI Shell]] | [[discussions_list|Master Discussions Index]]
+[[projects/ideas/Comms_Hub/Comms Hub|Comms Hub Overview]] | [[Status|Current Status]] | [[progress|Progress Log]] | [[MVP_draft|MVP Draft UI Shell]] | [[discussions_list|Master Discussions Index]] | [[Ideas_Backlog|Ideas Backlog]]
 
 ---
 
@@ -69,6 +71,8 @@ flowchart LR
 
 The active scope is the UI Prototype MVP 0.1 in [[MVP_draft]]. Validate the prototype with department users before platform implementation. Future production work remains planned below; dates will be set after validation.
 
+Two additions as of 2026-10-10. Department validation has begun: the first response (R01, the Director) is recorded, and its findings drive a first round of corrections from 2026-10-11. A new visual identity, «الهوية الجديدة لمركز الاتصال», is planned as an **optional** Checkpoint 0.3 that starts only if the Director approves it; Direction A stays in force until then.
+
 ```mermaid
 flowchart LR
     Spec[Specification foundation] --> UI[UI Prototype MVP 0.1]
@@ -97,6 +101,8 @@ The vault maintains a strict separation of document concerns across four core op
 | `progress.md` | Dated outcomes, verified evidence, benchmark results, and limitations. | Whenever a meaningful change is completed and verified. |
 | `MVP_draft.md` | Authoritative UI shell layout, page specifications, and user flows. | When interface requirements or user interactions change. |
 | `validation/` | Checkpoint 0.2 workflow map, guided session scripts, and feedback rubric. | During Checkpoint 0.2; frozen at the 0.2.4 gate. |
+| `validation/responses/` | One capture sheet per validation response or session (`R01`, `R02`, ...), transcribed in the rubric's format. | When a response arrives. |
+| `Ideas_Backlog.md` | Extra ideas outside this roadmap: owner ideas, agent suggestions, Severity 4 preferences. Nothing there is planned. | When an idea is added, promoted or rejected. |
 
 ### Work Hierarchy & Breakdown Standards
 
@@ -168,6 +174,45 @@ When starting active implementation on the Communication Department Hub, follow 
 
 ## Version 0: UI Prototype
 
+### Work plan from 2026-10-11
+
+Written 2026-10-10 from response R01 (`validation/responses/R01-2026-10-10-director.md`)
+and the identity proposal (<https://claude.ai/artifact/51Rsuxkv8LeDK1JJEpq6nr>). Day
+targets are an order of work, not commitments; one bounded task at a time, each
+verified before the next.
+
+**Two tracks run side by side, kept apart.**
+
+1. **Validation track.** The remaining participants test a frozen copy of today's
+   prototype (task 0.2.2.6), so every participant sees the same starting state, as
+   `validation/owner-input.md` section 7 requires.
+2. **Correction track.** Round 1 corrections (Phase 0.2.3, tasks 0.2.3.5 to 0.2.3.10)
+   are built on `main`. Each one cites the finding that justifies it. Under the
+   rubric, a Severity 1 finding is corrected and re-checked with the participant who
+   raised it; a Severity 2 finding qualifies because it arose on a daily task.
+
+**Owner decisions needed first (2026-10-11).**
+
+| ID | Decision | Recommendation |
+|---|---|---|
+| D-01 | Approve, adjust or decline the new identity (Checkpoint 0.3) | Send the artifact link to the Director with the three questions on its last screen. No identity work, other than the colour clean-up in 0.3.1, starts before an answer |
+| D-02 | Do self-administered form responses count as sessions? The exit gate asks for a named facilitator; the form has none | Count them when the owner confirms the respondent and role, recording "facilitator: none, self-administered, reviewed by the owner" |
+| D-03 | Confirm the provisional severities in R01 and the Round 1 list below | Confirm as listed; hold the Severity 2 items not on a daily task until a second participant raises them |
+
+**Week of 11 to 15 October 2026.**
+
+| Day | Work | Tasks |
+|---|---|---|
+| Sun 11 | Owner sends D-01 to the Director. Start the overdue count. (Freeze, R01 anomaly and recruitment skipped 2026-10-10: Director's input only) | 0.2.3.5 |
+| Mon 12 | Finish the overdue count and filter. Stale-variant flag | 0.2.3.5, 0.2.3.7 |
+| Tue 13 | Team workload and stage view on Work and Home | 0.2.3.6 |
+| Wed 14 | Highlighted version difference. Early reconnect warning | 0.2.3.8, 0.2.3.9 |
+| Thu 15 | Timestamped video notes. Round 1 browser QA script and `progress.md` entry. Re-check session with P01 | 0.2.3.10, 0.2.3.11 |
+
+**Following week.** Transcribe each new response into `validation/responses/` as it
+arrives and merge it into the register (0.2.3.1). Write the design notes for the
+structural findings (0.2.3.12). If D-01 is approved, start Phase 0.3.2.
+
 ### Requested scope addition, 2026-10-08: local motion studio
 
 Integrate the existing `motion_design` library into `/motion` using the established Arabic shell. Preserve 16 source designs and add ten more (26 in total), with the controls of the source library restored (timing, motion intensity, frame ratios, window preview) and fast browser-only downloads at up to 4K and 60 frames per second. Revised the same day after first review. This is independent of Phase 0.2.2 department validation and does not count as stakeholder acceptance.
@@ -216,7 +261,7 @@ Access restrictions, persisted assets, video uploads and workflow attachment rem
 
 ### Checkpoint 0.2: Department Validation
 
-**State:** In progress. Phase 0.2.1 complete (2026-09-19); Phase 0.2.2 blocked on human department participants.
+**State:** In progress. Phase 0.2.1 complete (2026-09-19). Phase 0.2.2 closed 2026-10-10 on one response (R01, Director, desktop); the remaining participants are skipped by owner directive. Phase 0.2.3 Round 1 corrections start 2026-10-11 on R01's findings.
 **Outcome:** Validate the prototype against actual Communication Department work, record operational corrections, and authorize production architecture planning.
 
 **Exit Gate (measurable).** All six criteria must hold before Checkpoint 0.2 closes:
@@ -227,6 +272,12 @@ Access restrictions, persisted assets, video uploads and workflow attachment rem
 4. **Pass threshold.** At least 80 percent of attempted scenarios complete without a structural blocker, where a structural blocker is any finding scored Severity 1 in `validation/feedback-rubric.md` (the participant cannot complete the task, or the model contradicts how the department actually works).
 5. **Zero unresolved Severity 1 findings.** Every Severity 1 finding is either corrected in Phase 0.2.3 and re-checked with the participant who raised it, or explicitly deferred with a written, dated reason in `progress.md` and a recorded decision in `disscussios/` follow-up notes.
 6. **Recorded evidence.** Every session has a completed rubric sheet, a dated findings entry in `progress.md`, and a named facilitator and participant role. Sessions without a completed rubric do not count toward criteria 1 or 2.
+
+> [!note] Gate standing, 2026-10-10
+> After R01: criterion 1 at one of five role groups (Director); criterion 2 at one of six participants, one of two leadership. R01 answered every role section, but a participant counts for one role group only, so the other sections are findings, not coverage. Criterion 6 asks for a named facilitator, while the Google Form was built to be self-administered. Owner decision D-02 settles whether form responses count; the criteria themselves are unchanged until it does.
+
+> [!important] Gate standing, 2026-10-10 (after the directive)
+> The owner directed that the Director's input alone is enough and the other members are skipped (Phase 0.2.2). Criteria 1 and 2 (five role groups, six participants, two leadership) therefore cannot be met as written and are waived by that directive, not satisfied. Criteria 3 to 6 still apply to R01: zero unresolved Severity 1 findings (corrected and re-checked with the Director in 0.2.3.11, or deferred with a dated reason), and a recorded rubric for R01. This waiver is to be restated in `Status.md` when task 0.2.4.3 checks the gate.
 
 > [!important] Agent vs. Human Responsibilities in Checkpoint 0.2
 > - **Astra / Agent Responsibility:** Conduct pre-validation workflow mapping (0.2.1), analyze prototype interaction bottlenecks, prepare structured guided interview scripts, validation rubrics, and feedback collection instruments, and synthesize evidence-based corrections into the specification and freeze gate (0.2.3, 0.2.4).
@@ -263,35 +314,52 @@ Access restrictions, persisted assets, video uploads and workflow attachment rem
 
 #### Phase 0.2.2 — Guided Department Validation (Human Department Execution)
 
-**State:** Not started. Blocked: requires real department participants. An agent cannot execute, simulate or substitute for this phase.
+**State:** Closed 2026-10-10 by owner directive. The Director stated that his input alone is enough, so the other members are not being asked. R01 (the Director's response, all seven role sections) is the department's validation input. Every remaining task below is marked skipped (`[-]`) with that reason. The response sheet was re-checked on 2026-10-10: it still holds one response, R01.
 
-- [ ] **0.2.2.1 Director and Assistant Director strategic and review validation.**
+> [!note] Owner directive, 2026-10-10: Director's input only
+> The remaining participants are skipped, not pending. Consequences for the exit gate are recorded in "Gate standing, 2026-10-10 (after the directive)" above. If other members are asked later, reopen the skipped tasks rather than writing new ones.
+
+- [-] **0.2.2.1 Director and Assistant Director strategic and review validation.**
   *Definition of done:* Both leadership roles complete scripts S1 and S2 unaided, including approving an exact revision and rejecting a superseded one.
   *Evidence:* Two completed rubric sheets with named participants and dated findings in `progress.md`.
+  *Status:* Director done through the Google Form on 2026-10-10 (R01): S1 5 of 7 scenario passes, failing task 3 (the purpose of «العمل») and task 6. The Director also answered S2. Assistant Director part skipped 2026-10-10 by owner directive (Director's input only).
 
-- [ ] **0.2.2.2 Content Writer, Designer and Media Producer specialist validation.**
+- [-] **0.2.2.2 Content Writer, Designer and Media Producer specialist validation.** Skipped 2026-10-10 by owner directive (Director's input only). The Director's S3 to S5 answers in R01 stand in.
   *Definition of done:* At least one participant per specialism completes scripts S3, S4 and S5, including a revision round after a change request.
   *Evidence:* Three completed rubric sheets and the recorded terminology verdicts from section 7 of the workflow map.
 
-- [ ] **0.2.2.3 Publishing Officer release, scheduling and channel governance validation.**
+- [-] **0.2.2.3 Publishing Officer release, scheduling and channel governance validation.** Skipped 2026-10-10 by owner directive (Director's input only). The Director's S6 answers in R01 stand in.
   *Definition of done:* The publishing officer completes script S6, including scheduling, a partial failure, and a retry that does not republish a successful channel.
   *Evidence:* One completed rubric sheet plus the participant's verdict on the connected-account health surface.
 
-- [ ] **0.2.2.4 Department member and administrative feedback collection.**
+- [-] **0.2.2.4 Department member and administrative feedback collection.** Skipped 2026-10-10 by owner directive (Director's input only). The Director's S7 and Admin answers in R01 stand in.
   *Definition of done:* Script S7 completed by a department member, and the Admin surfaces reviewed by whoever actually administers systems for the department.
   *Evidence:* Completed rubric sheets, or a dated record that no such administrator exists yet, which is itself a finding.
 
-- [ ] **0.2.2.5 Mobile workflow review for on-call and remote scenarios.**
+- [-] **0.2.2.5 Mobile workflow review for on-call and remote scenarios.** Skipped 2026-10-10 by owner directive (Director's input only). R01 was on desktop, so no real-phone evidence exists; phone layouts rest on the 390 px browser checks.
   *Definition of done:* At least two participants, one of them leadership, complete their approval or release steps on a real phone.
   *Evidence:* Rubric sheets marked mobile, with the device and browser recorded.
 
+- [-] **0.2.2.6 Freeze the validation build.** Skipped 2026-10-10: with no further participants there is nothing to freeze for. Correction work proceeds on `main` directly.
+  *Definition of done:* The commit the remaining participants test is tagged (`validation-0.2`, today's `dd55cc3` unless Round 1 is approved for testing), served from its own working copy on the LAN port the form names, while correction work runs elsewhere. The form's instructions still match what that build shows.
+  *Evidence:* Tag name, the serving command and a `/health` check recorded in `progress.md`.
+
+- [-] **0.2.2.7 Resolve the R01 anomaly.** Skipped 2026-10-10 by owner directive. R01's S3 to S7 answers are taken as the Director's own and weighted as findings at face value.
+  *Definition of done:* P01 confirms whether they completed sections S3 to S7 themselves, and the form is tested once with a dummy role to confirm the branching sends each role to its own section only. R01 is annotated with the answer.
+  *Evidence:* Dated line in `validation/responses/R01-2026-10-10-director.md` section 9.
+
+- [-] **0.2.2.8 Recruit the remaining role groups.** Skipped 2026-10-10 by owner directive (Director's input only).
+  *Definition of done:* Named invitations sent for the Assistant Director, a content specialist, the Media Producer and the Publishing Officer, and a sixth participant, with at least two asked to use a phone (0.2.2.5).
+  *Evidence:* Invitation list with roles and dates in `progress.md`.
+
 #### Phase 0.2.3 — Prototype Corrections
 
-**State:** Not started. Depends on 0.2.2 findings.
+**State:** Round 1 starts 2026-10-11 on the findings of R01, while Phase 0.2.2 continues. Later rounds follow as responses arrive. Tasks 0.2.3.2 to 0.2.3.4 stay open until the last session; 0.2.3.5 to 0.2.3.12 are Round 1.
 
-- [ ] **0.2.3.1 Synthesize human validation findings into a single ranked register.**
+- [/] **0.2.3.1 Synthesize human validation findings into a single ranked register.**
   *Definition of done:* Every finding from every session appears once, deduplicated, severity-scored, and attributed to the session that raised it.
   *Evidence:* Consolidated findings register in `validation/feedback-rubric.md`, plus a dated summary entry in `progress.md`.
+  *Status:* R01 transcribed with 19 findings, 8 of them provisionally Severity 1. Register entry waits for decision D-03 on the severities.
 
 - [ ] **0.2.3.2 Apply evidence-based workflow and interface corrections only.**
   *Definition of done:* Each applied correction cites the finding that justifies it. Changes with no finding behind them are not made. Typecheck, tests, build and a browser check pass after each correction.
@@ -305,6 +373,43 @@ Access restrictions, persisted assets, video uploads and workflow attachment rem
   *Definition of done:* Every terminology item from section 7 of the workflow map has a recorded department verdict, and accepted corrections are applied across interface strings and `MVP_draft.md` consistently.
   *Evidence:* Terminology table with verdicts, and a passing browser check of the corrected strings.
 
+**Round 1 corrections, from R01.** Every task below follows the same rule: the commit
+message cites the finding; `npm run typecheck`, `npm test` and `npm run build` pass; a
+browser check is saved under `qa/` as a script and its JSON result; `MVP_draft.md` is
+amended where the interface changes; Arabic strings follow the established terms.
+
+- [ ] **0.2.3.5 Overdue count and filter.** Finding F-R01-02 (Severity 1), B4, E5.
+  *Definition of done:* The prototype states its scenario date on screen (it has no notion of "today": `dueSoon` in `src/lib/domain.ts` counts every item due on or before the campaign date, and all seed due dates are 22 or 23 September, so a tester on 10 October sees everything as late). Overdue and due-soon are measured against that scenario date, and the seed holds a realistic mix of on-time, due-soon and overdue items. Home for the Director and Assistant Director shows both counts, each a link to Work filtered to exactly those items; Work has an «متأخر» filter.
+  *Evidence:* Domain test for the overdue rule against the scenario date; browser check that each count equals its filtered list for both roles.
+
+- [ ] **0.2.3.6 Team workload and stage view.** Findings F-R01-01 and F-R01-17 (Severity 1), A25, B4, T6.
+  *Definition of done:* Seed work is assigned to named people within each role, and the Work page gains a team view: per person, their items, each item's status and stage, what is overdue, and what awaits review or approval. Home for leadership shows the load per person. The page states its purpose in one line, since P01 could not tell what «العمل» is for. The section name «العمل» is not changed until T6 has a verdict.
+  *Evidence:* Browser check for the Director and Assistant Director; screenshot at 1440 and 390 inspected.
+
+- [ ] **0.2.3.7 Stale channel variants.** Finding F-R01-05 (Severity 2, a writer's daily task), B5.
+  *Definition of done:* Editing the master text marks each channel variant written before the edit as needing review, shown on the variant and in the release the reviewer sees, cleared when the variant is edited or confirmed.
+  *Evidence:* Domain test; browser check of edit, flag, confirm.
+
+- [ ] **0.2.3.8 Highlighted version difference.** Finding F-R01-06 (Severity 2, a reviewer's and writer's daily task), B3.
+  *Definition of done:* Between any two submitted revisions, changed text is highlighted and changed fields (asset version, channels) are listed, on the review screen and the writer's history.
+  *Evidence:* Domain test of the text difference on Arabic text; browser check on revisions 1 and 2 of the seed item.
+
+- [ ] **0.2.3.9 Early reconnect warning.** Finding F-R01-07 (Severity 2, the publisher's daily task), B6, E4.
+  *Definition of done:* Scheduling onto a channel whose authorization expires before the publication time shows the warning at scheduling, and the Publishing Officer's home lists scheduled items at risk.
+  *Evidence:* Browser check scheduling onto the seeded LinkedIn account.
+
+- [ ] **0.2.3.10 Timestamped video review notes.** Finding F-R01-03 (Severity 1), B2, W4.
+  *Definition of done:* A reviewer can add a note with a time (mm:ss) to a video asset version; notes are listed in time order on the review screen and the producer's work page; a change request can carry them. Playback stays deferred, so the time is typed, not picked from a player, and the interface says so.
+  *Evidence:* Domain test; browser check of add, list, change request.
+
+- [ ] **0.2.3.11 Round 1 re-check with P01.**
+  *Definition of done:* P01 repeats S1 tasks 3 and 6 and S2 task 4 on the corrected build and confirms or rejects each Round 1 correction. Results recorded against the finding identifiers.
+  *Evidence:* Addendum in `validation/responses/R01-2026-10-10-director.md` and a dated `progress.md` entry. Exit gate criterion 5 requires this re-check before a Severity 1 finding closes.
+
+- [ ] **0.2.3.12 Design notes for the structural findings.** Findings F-R01-04, 09, 10, 11, 12, 13, 18 and 19.
+  *Definition of done:* One short note per topic under `validation/design-notes/`, each stating the department's answer, the conflict with the current model and specification, the options, and a recommended Version 2 checkpoint: component-scoped approval (F-R01-04, E6), close and archive with a reason (F-R01-09, E11), configurable stages per content type (F-R01-10, B7, O-009), delegation with automatic expiry (F-R01-11, E2), urgent path (F-R01-12, E3), work linked to several campaigns (F-R01-13, E8), stage deadlines (F-R01-18), edit attribution (F-R01-19, E9). Existing `disscussios/` documents and `discussions_list.md` are not edited.
+  *Evidence:* The notes, and a decision per note recorded in `progress.md`: build in the prototype now, defer to Version 2 with a dated reason, or ask the next participants.
+
 #### Phase 0.2.4 — Product Freeze Gate
 
 **State:** Not started. Depends on 0.2.3.
@@ -315,11 +420,50 @@ Access restrictions, persisted assets, video uploads and workflow attachment rem
 
 - [ ] **0.2.4.2 Record unresolved questions separately.**
   *Definition of done:* Every question the sessions raised but did not settle is captured as a new discussion note, not silently dropped.
-  *Evidence:* New follow-up notes referenced from `discussions_list.md`. Existing `disscussios/` documents are not edited.
+  *Evidence:* New follow-up notes under `validation/design-notes/`, alongside those of task 0.2.3.12. Existing `disscussios/` documents and `discussions_list.md` are not edited (`AGENTS.md`); corrected 2026-10-10, as this task previously pointed to `discussions_list.md`.
 
 - [ ] **0.2.4.3 Authorize production architecture planning.**
   *Definition of done:* All six Exit Gate criteria above are demonstrably met and recorded, and Checkpoint 1.1 is opened.
   *Evidence:* Exit gate checklist completed in `Status.md` with a pointer to the evidence for each criterion.
+
+---
+
+### Checkpoint 0.3: Visual Identity Option — «الهوية الجديدة لمركز الاتصال»
+
+**State:** Proposed, not approved. Waiting on owner decision D-01: the Director approves, adjusts or declines. Until then Direction A (`DESIGN.md`) remains the only design in force, and nothing below except task 0.3.1.1 may start.
+**Source:** the proposal artifact <https://claude.ai/artifact/51Rsuxkv8LeDK1JJEpq6nr> (read 2026-10-10).
+**Outcome:** The prototype carries the emerald-and-gold identity: Reem Kufi headings, IBM Plex Sans Arabic text, an Aref Ruqaa accent on one word per page, the mashrabiya lattice and four gradients, eleven status colour pairs, light and evening modes, and the motion rules of the proposal, without changing roles, statuses, Arabic terms, version-bound approval or the local-simulation boundary. The proposal itself lists these as unchanged.
+**Exit Gate:** Approval recorded; `DESIGN.md` rewritten to the new identity; all existing browser regressions (`qa/checkpoint-02-corrections.cjs`, `qa/motion-studio.cjs` and the Round 1 scripts) and domain tests pass; contrast of at least 4.5 to 1 computed for every text pair in both modes; reduced motion respected; zero emoji; no request leaves the local machine (fonts are served from the app, not Google Fonts).
+
+> [!important] How this stays an option
+> The new look is introduced behind one switch on the root element, so Direction A and the new identity can be compared on the same build and the change can be undone in one line. Validation participants keep testing the frozen build from task 0.2.2.6, so the identity never changes what a participant sees mid-validation. If the Director approves before Checkpoint 0.2 closes, the owner may authorize running this checkpoint alongside 0.2; record that exception in `progress.md`, because the Work Hierarchy rules allow one active checkpoint.
+
+#### Phase 0.3.1 — Colour clean-up (identity-neutral)
+
+- [ ] **0.3.1.1 Move hard-coded colours into tokens.**
+  *Definition of done:* `src/app/globals.css` defines six colour variables and hard-codes most other colours inline (status chips, panels, media art, calendar, toasts). Every colour becomes a named token, mapped first to today's Direction A values, so the rendered prototype does not change. Useful whether or not the identity is approved, and the only Checkpoint 0.3 task allowed before D-01.
+  *Evidence:* Screenshots of every Level A page at 1440 and 390 before and after, compared pixel by pixel with zero differences; regression scripts pass.
+
+#### Phase 0.3.2 — Foundation (after approval)
+
+- [ ] **0.3.2.1 Identity tokens and fonts.** The proposal's tokens for both modes, under the switch; Reem Kufi, IBM Plex Sans Arabic, Aref Ruqaa and IBM Plex Mono served locally (all four are under the SIL Open Font License; confirm each licence file is kept). *Evidence:* contrast table generated by script for both modes.
+- [ ] **0.3.2.2 Shell.** Emerald-depth sidebar with the lattice texture, top bar with role and notifications, the gold active marker. *Evidence:* screenshots of all eight role homes in both identities.
+- [ ] **0.3.2.3 Shared components.** Buttons, chips, fields, tabs, segmented control, switch, dialogs, toasts, empty and loading states, each with normal, hover, focus, disabled and loading states. *Evidence:* a QA component page showing every state, checked by a `qa/` script.
+
+#### Phase 0.3.3 — Decision screens (after approval)
+
+- [ ] **0.3.3.1 Home: «قراراتك الآن», campaign pulse and team load.** Re-skins the Round 1 overdue and workload views (0.2.3.5, 0.2.3.6); it does not rebuild them.
+- [ ] **0.3.3.2 Approvals with the version difference and the approval stamp.** Re-skins 0.2.3.8. The stamp is the one celebrated moment, and respects reduced motion.
+- [ ] **0.3.3.3 Three-tier notifications** (قرارك، انتباه، للعلم), per `disscussios/notification_model.md`.
+- [ ] **0.3.3.4 Command palette** (Ideas Backlog I-021), only if the Director wants it.
+
+#### Phase 0.3.4 — Time and phone (after approval)
+
+- [ ] **0.3.4.1 Calendar week view with channel lanes and drag to reschedule.** Drag only moves a requested time; the Publishing Officer still confirms (A12).
+- [ ] **0.3.4.2 Motion Studio from the work item** (I-023) and media library in the new identity.
+- [ ] **0.3.4.3 Phone approval sheet with 44 px targets, and evening mode** (I-022). Tested on a real phone as in task 0.2.2.5.
+
+**If declined.** Keep Direction A and the token clean-up from 0.3.1.1. Record the decision and reason in `progress.md`; the proposal's interface ideas stay in `Ideas_Backlog.md` (I-021 to I-023). **If adjusted.** Record the requested changes, revise the proposal artifact, and ask again before 0.3.2.
 
 ---
 
@@ -400,6 +544,7 @@ Phases:
 ### Checkpoint 2.1 — Work & Campaign Engine
 - **Scope:** Campaigns, Work Items, participants, priorities, deadlines, comments, revision tracking, and complete lifecycle states.
 - **Outcome:** Full operational tracking of all departmental content initiatives from concept to readiness.
+- **Validation input (R01, 2026-10-10, one participant, to be confirmed):** assignment to a named person by specialty and load; one work linked to several campaigns; a final deadline per work with optional stage deadlines; close or cancel with a reason and an archive; a source on each work so planned and unplanned work can be measured (Ideas Backlog I-010).
 
 ### Checkpoint 2.2 — Asset Management Core
 - **Scope:** Provider-agnostic core domain logic. Establishes the Asset, Version, Location abstraction (`AssetLocation`), metadata schemas, MIME validation, thumbnail extraction pipeline, and Work/Campaign bindings. Real external storage integrations (Google Drive, NAS, etc.) are strictly deferred to Checkpoint 3.2.
@@ -408,10 +553,12 @@ Phases:
 ### Checkpoint 2.3 — Approval & Release Engine
 - **Scope:** Version-bound release packages, multi-stage approval requests, formal decisions, delegation, and revision invalidation.
 - **Outcome:** Strict governance ensuring approved content cannot be modified without re-triggering the approval chain.
+- **Validation input (R01, to be confirmed):** the Director holds approval, and the path may later differ by content sensitivity and type; a design-only change needs a new approval of the design version, not of unchanged text; temporary delegation to a named person that expires by itself; an urgent path that is faster but still ends in the Director's approval; post-publication correction by edit or delete-and-republish, decided by the Director; edits by the Director attributed without taking the author's credit.
 
 ### Checkpoint 2.4 — Actions, Attention & Notifications
 - **Scope:** Three-tier attention model: Action Items (blocking), Attention Items (informational), and Notifications (activity feed).
 - **Outcome:** Role-tailored operational inbox preventing notification fatigue while ensuring critical approvals are never missed.
+- **Validation input (R01, to be confirmed):** alerts on delay, a named owner per stage, and organised intake of requests from other departments, named as the biggest current blocker.
 
 ### Checkpoint 2.5 — Search & Metadata
 - **Scope:** Permission-aware global search, tag taxonomy, faceted filtering, full-text indexing, and Arabic text normalization.

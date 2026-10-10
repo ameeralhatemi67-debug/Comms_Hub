@@ -6,7 +6,7 @@ tags:
   - document/progress
   - knowledge/dated
 created: 2026-08-18
-updated: 2026-09-18
+updated: 2026-10-10
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -257,3 +257,17 @@ When recording future implementation outcomes, follow this standardized template
 - **Not verified, said plainly:** downloads were tested in Edge and in the in-app browser, not in Safari or Firefox. Playing the exported MOV inside Premiere, After Effects, Resolve or Final Cut was not tested; the MOV is verified only by ffprobe/ffmpeg. The real-time fallback records at the preview's pace and its frame rate is approximate. 4K and 60 fps were not exercised end to end; large PNG-based exports hold all frames in memory.
 - **Caution:** `qa/import-motion-source.cjs` regenerates `renderers.js` from the source library and would discard the `kit` export and the contact guard added in this pass. Do not rerun it without re-applying them.
 - Next action: user review of `/motion`. The production server (`start-server.bat`) must be restarted to serve this build. Real department validation remains the prerequisite for Version 1.
+
+### 2026-10-10: First department response recorded, Roadmap replanned from 2026-10-11
+
+- **Milestone / Context:** Checkpoint 0.2, Phase 0.2.2 started; Phase 0.2.3 Round 1 planned; optional Checkpoint 0.3 (new identity) added. Documentation only: no source file changed.
+- **Inputs read:** the Google Form response sheet (`170JQB5I...`, fetched as CSV) and the CSV export the owner attached. A script compared all 177 columns: the two hold the same single response, differing only in timestamp format. The identity proposal artifact «الهوية الجديدة لمركز الاتصال» (<https://claude.ai/artifact/51Rsuxkv8LeDK1JJEpq6nr>), read in full: tokens for light and evening modes, four fonts, four gradients, eleven status colour pairs, motion rules, seven interface proposals and a three-stage plan. It states itself as a proposal awaiting approval.
+- **Response R01:** Director, more than three years in the department, desktop, self-administered. Transcribed into the rubric's capture-sheet format at `validation/responses/R01-2026-10-10-director.md`; name and email stay in the response sheet. Dimension scores D1 3, D2 4, D3 3, D4 3, D5 3. Own-role scripts S1 and S2: 10 of 13 tasks passed (76.9 percent). Whole submission: 39 of 45 (86.7 percent). Failed tasks: S1.3 and S1.6 (purpose of «العمل», team workflow), S2.4 (overdue count), S4.4 and S5.5 (upload, a recorded prototype limit, not scored), S5.4 (timestamped video note).
+- **Findings:** 19, with provisional severities assigned by the agent from the written answers because the session had no facilitator: 8 Severity 1, 7 Severity 2, 3 Severity 4, and the upload demand recorded but not scored. The participant also answered six of the seven open questions in the workflow map (all but Q5) and confirmed exceptions E1, E2, E3, E4, E6, E7, E8, E9 and E11 as real.
+- **Anomaly:** the form branches each role to one section (`validation/google-form-generator.gs` lines 82 to 99), yet R01 carries answers in all seven. The S3 to S7 answers are short and in a different register from S1 and S2, and S3 to S6 structural questions are blank. Not resolved; task 0.2.2.7 asks the participant. Those sections are treated as findings, not role coverage.
+- **Prototype defect found while planning:** `src/lib/domain.ts` has no scenario "today". `dueSoon` counts every active item due on or before the campaign date, and all seed due dates are 22 or 23 September 2026, so a tester in October sees all work as late; this is the "six items past their dates" the Director noticed. Folded into task 0.2.3.5.
+- **Roadmap:** added a work plan from Sunday 2026-10-11 with two tracks (frozen validation build for participants, Round 1 corrections on `main`), owner decisions D-01 to D-03, tasks 0.2.2.6 to 0.2.2.8 and 0.2.3.5 to 0.2.3.12, gate standing after R01, R01 input lines in Checkpoints 2.1, 2.3 and 2.4, and Checkpoint 0.3 for the identity, optional and approval-gated, with a colour clean-up task (`globals.css` has six colour variables and many inline colours) as the only work allowed before approval. Corrected task 0.2.4.2, which pointed new notes at `discussions_list.md`, an index `AGENTS.md` forbids editing; notes now go to `validation/design-notes/`.
+- **New files:** `validation/responses/R01-2026-10-10-director.md`; `Ideas_Backlog.md` with 23 parked ideas: video editing and photo editing from the owner, 15 agent suggestions, 3 Severity 4 preferences from R01, 3 identity-proposal ideas. Updated `README.md`, `Status.md`, `Roadmap.md`.
+- **Verification:** no code changed, so typecheck, tests and build were not rerun for this entry. Day-of-week for the plan checked by script (11 October 2026 is a Sunday). Zero emoji in the new and changed files, checked by script. `disscussios/` and `discussions_list.md` not edited.
+- **Remaining limitations:** one participant of six; severities provisional until D-03; the R01 anomaly is open; the identity is not approved.
+- **Next action:** task 0.2.2.6, freeze the validation build, then the rest of Sunday's list in `Status.md`.

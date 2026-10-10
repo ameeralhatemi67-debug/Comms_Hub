@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-08
+updated: 2026-10-10
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -26,9 +26,27 @@ related:
 
 # Communication Department Hub — Current Status
 
-Updated 2026-10-08. **CHECKPOINT 0.2 IN PROGRESS.** Checkpoint 0.1 is complete and accepted. Phase 0.2.1 (Workflow Mapping) is complete, including the pre-validation defect corrections in task 0.2.1.5. Phase 0.2.2 (Guided Department Validation) has not started and cannot start without real department participants.
+Updated 2026-10-10. **CHECKPOINT 0.2 IN PROGRESS.** Checkpoint 0.1 is complete and accepted. Phase 0.2.1 (Workflow Mapping) is complete. **Phase 0.2.2 (Guided Department Validation) is closed on the Director's response alone:** R01 arrived on 2026-10-10, and the same day the owner directed that the Director's input is enough, so the remaining participants and the frozen build are skipped (`[-]` in `Roadmap.md`; exit gate criteria 1 and 2 waived by that directive). Phase 0.2.3 Round 1 corrections start on 2026-10-11. The day-by-day plan is in `Roadmap.md` under "Work plan from 2026-10-11".
 
-Design: Direction A throughout; B only for larger media previews. See DESIGN.md.
+Design: Direction A throughout; B only for larger media previews. See DESIGN.md. A new identity, «الهوية الجديدة لمركز الاتصال», is **proposed and not approved**; it is planned as optional Checkpoint 0.3 and waits on the Director (decision D-01).
+
+## Validation so far (2026-10-10)
+
+- **Response R01, Director, desktop, self-administered Google Form.** Transcribed in `validation/responses/R01-2026-10-10-director.md`. The shared response sheet and the attached CSV hold the same single response.
+- **Scores:** workflow fidelity 3, authority 4, findability 3, terminology 3, trust in the record 3, out of 5.
+- **Own-role tasks (S1 and S2):** 10 of 13 passed. Failed: the purpose of «العمل» and the team's work (S1.3, S1.6), and counting overdue work (S2.4).
+- **Whole submission:** answers appear in all seven role sections although the form sends each role to one section. 39 of 45 tasks passed. Who completed sections S3 to S7 is unconfirmed (task 0.2.2.7), so those answers are findings, not role coverage.
+- **Findings:** 19 recorded, 8 provisionally Severity 1: team workload and stage view, overdue count, timestamped video notes, component-scoped approval, delegation, urgent path, work linked to several campaigns, assignment to a named person. Severities await owner confirmation (D-03).
+- **Prototype defect exposed:** the prototype has no scenario "today", and every seed due date is 22 or 23 September, so a tester in October sees all work as late. Corrected in task 0.2.3.5.
+- **Exit gate:** one of five role groups, one of six participants, one of two leadership. Whether self-administered form responses count as sessions is owner decision D-02.
+
+## Decisions waiting on the owner
+
+| ID | Decision |
+|---|---|
+| D-01 | Approve, adjust or decline the new identity (send the artifact link to the Director) |
+| D-02 | Count self-administered form responses as sessions, with "facilitator: none" recorded |
+| D-03 | Confirm R01's provisional severities and the Round 1 correction list |
 
 ## Verified capability
 
@@ -65,11 +83,20 @@ Design: Direction A throughout; B only for larger media previews. See DESIGN.md.
 - State/history reset on refresh. Content types share one composer. Calendar supports month/agenda only, without week/day or date-level creation. Settings and Admin are visual shells with no enforcement.
 - No real authentication/RBAC, database, OAuth, publishing, mail, AI, Drive/NAS, workers, external notification delivery or production secrets/services.
 - No delegation of review authority and no urgent or crisis path exist. Both are recorded as unsupported assumptions, not oversights.
-- This is not formal accessibility certification, production readiness or department sign-off. **Actual human validation has still not occurred.**
+- This is not formal accessibility certification, production readiness or department sign-off. **Human validation has begun with one participant of the six the exit gate requires.**
+- Extra ideas outside the Roadmap (video and photo editing, agent suggestions, Severity 4 preferences) are parked in `Ideas_Backlog.md`. None is planned work.
 - Phase 0.2.1 corrected only defects that contradict `MVP_draft.md` on their face. It deliberately did not resolve any of the seven open questions, add delegation or an urgent path, change any Arabic term, or restructure the composer. Those belong to Phase 0.2.3, after real findings exist.
 
 Evidence, reproduction instructions and precise accepted scope for Checkpoint 0.1: [qa/ACCEPTANCE.md](qa/ACCEPTANCE.md). Phase 0.2.1 correction evidence: [qa/checkpoint-02-corrections.json](qa/checkpoint-02-corrections.json).
 
 ## Next action
 
-Arrange real department participants and run Phase 0.2.2 using `validation/validation-scripts.md`. The Checkpoint 0.2 exit gate in `Roadmap.md` requires at least six distinct participants, two of them leadership, covering five role groups, with a completed rubric sheet per session. Nothing in Phase 0.2.2 can be executed, simulated or substituted by an agent. Version 1 remains gated on that validation.
+Sunday 2026-10-11, in this order:
+
+1. Freeze the validation build: tag today's commit and serve it from its own working copy for the remaining participants (task 0.2.2.6).
+2. Ask the Director who completed sections S3 to S7 of R01, and test the form's branching once with a dummy role (task 0.2.2.7).
+3. Send the form to the Assistant Director first, then a content specialist, the Media Producer, the Publishing Officer and a sixth participant, two of them on a phone (task 0.2.2.8).
+4. Owner: send the identity proposal to the Director (D-01), and answer D-02 and D-03.
+5. Start Round 1 with the scenario date and overdue count (task 0.2.3.5).
+
+Nothing in Phase 0.2.2 can be executed, simulated or substituted by an agent. Version 1 remains gated on the Checkpoint 0.2 exit gate.
