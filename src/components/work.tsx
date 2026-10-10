@@ -19,6 +19,7 @@ import {
   pickContent,
   stageOf,
   staleVariants,
+  isVideo,
   teamLoad,
   checklistSteps,
   type Content,
@@ -27,6 +28,7 @@ import {
 } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { ReleaseHistory } from './release-history';
+import { VideoNotes } from './video-notes';
 import { Title, Panel, StatusChip, Empty, MediaPreview, Tabs, VariantCopy } from './ui';
 
 export function WorkRow({ work: w }: { work: Work }) {
@@ -571,6 +573,7 @@ export function WorkDetail({ id }: { id: string }) {
           {tab === 'overview' && (
             <Panel title={`معاينة العمل · الإصدار ${w.revision}`}>
               <MediaPreview assetId={w.assetId} version={w.assetVersion} large />
+              {isVideo(w) && <VideoNotes work={w} version={w.assetVersion} />}
               <p className="body-copy">{w.body}</p>
               {w.channels.map((c) => (
                 <VariantCopy content={w} channel={c} key={c} />

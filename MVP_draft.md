@@ -2386,3 +2386,11 @@ Phase 0.2.3 corrections built on findings of response R01 (`validation/responses
 - **At scheduling:** as soon as a time is chosen, the scheduling dialog lists every selected channel whose authorization is expired or runs out before that time, with the reason: «تفويض X ينتهي … قبل موعد النشر. أعد ربط الحساب قبل الموعد.» The warning follows the chosen time. Scheduling is still allowed; the confirmation message says what is at risk and the notice is raised as «يحتاج انتباه».
 - **Publishing Officer's Home:** a panel «مواعيد معرضة للخطر» lists every scheduled item whose channels will not be authorized at its publication time, with the reason per channel. The publishing package on the approvals page shows the same warning.
 - Reconnecting remains a simulation; nothing contacts the channels.
+
+## 59.6 Timestamped video review notes (F-R01-03, task 0.2.3.10)
+
+- A video version under review has «ملاحظات زمنية على الفيديو»: notes bound to a time such as 01:30, listed in time order with the reviewer's name. Notes belong to the asset version they were written on.
+- Playback stays deferred, so the time is **typed** in the form minutes:seconds; the panel says so. An invalid time is refused with the expected format.
+- Reviewers and the person assigned to the work may add notes. Notes appear on the review screen and on the producer's work page.
+- «طلب تعديل» offers the notes on the version under review, all ticked; the reviewer may untick any. The chosen notes are appended to the change request, in time order, under «ملاحظات زمنية», and so reach the producer's comments and the release history.
+- Only video work takes these notes.

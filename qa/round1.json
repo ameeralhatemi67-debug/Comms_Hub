@@ -1,7 +1,7 @@
 {
-  "date": "2026-10-10T21:43:37.667Z",
+  "date": "2026-10-10T21:49:23.653Z",
   "baseURL": "http://127.0.0.1:3000",
-  "passed": 46,
+  "passed": 52,
   "failed": 0,
   "errors": [],
   "checks": [
@@ -274,6 +274,42 @@
       "name": "the newly scheduled item joins the at-risk list",
       "pass": true,
       "detail": "مواعيد معرضة للخطرتصميم الملصق2026-09-23 · 18:00 الرياضتفويض X ينتهي 2026-09-23 12:00، قبل موعد النشر. أعد ربط الحساب قبل الموعد.تفويض LinkedIn منتهٍ منذ 2026-09-20 09:00. سيفشل النشر على LinkedIn حتى إعادة الربط.إعداد منشور Instagram2026-09-23 · 18:00 الرياضتفويض X ينتهي 2026-09-23 12:00، قبل موعد النشر. أعد ربط الحساب قبل الموعد.تفويض LinkedIn منتهٍ منذ 2026-09-20 09:00. سيفشل النشر على LinkedIn حتى إعادة الربط."
+    },
+    {
+      "task": "0.2.3.10",
+      "name": "review screen says the time is typed because playback is deferred",
+      "pass": true,
+      "detail": "ملاحظات زمنية على الفيديو · v4تشغيل الفيديو غير متاح في هذا النموذج، لذلك يُكتب الوقت يدوياً بصيغة دقيقة:ثانية.00:45ارفع صوت المقابلة قليلاً، الموسيقى تغطي الكلام. · ريمالوقتالملاحظةإضافة ملاحظة"
+    },
+    {
+      "task": "0.2.3.10",
+      "name": "notes are listed in time order",
+      "pass": true,
+      "detail": "[\"00:10\",\"00:45\",\"01:30\"]"
+    },
+    {
+      "task": "0.2.3.10",
+      "name": "an invalid time is refused with the expected format",
+      "pass": true,
+      "detail": "اكتب الوقت بصيغة دقيقة:ثانية، مثل 01:30.×"
+    },
+    {
+      "task": "0.2.3.10",
+      "name": "a change request offers every note to carry",
+      "pass": true,
+      "detail": "3 notes offered"
+    },
+    {
+      "task": "0.2.3.10",
+      "name": "notes are listed on the producer's work page",
+      "pass": true,
+      "detail": "[\"00:10\",\"00:45\",\"01:30\"]"
+    },
+    {
+      "task": "0.2.3.10",
+      "name": "notes travel with the change request",
+      "pass": true,
+      "detail": "عدّل المونتاج\nملاحظات زمنية:\n00:10 · العنوان يظهر متأخراً\n01:30 · قصّ اللقطة قبل ظهور الشعار"
     },
     {
       "task": "all",

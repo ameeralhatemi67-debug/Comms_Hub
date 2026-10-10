@@ -425,6 +425,9 @@ export type PublicationRecord = {
   scheduled?: string;
 };
 
+/** A review note bound to a time in a video asset version (task 0.2.3.10, F-R01-03). */
+export type VideoNote = { id: string; at: string; seconds: number; text: string; by: string; assetVersion: number };
+
 export type Work = Content & {
   id: string;
   revision: number;
@@ -437,6 +440,7 @@ export type Work = Content & {
   comments: { by: string; text: string }[];
   activity: string[];
   checklist: boolean[];
+  videoNotes: VideoNote[];
 };
 
 export type Notice = {
@@ -463,7 +467,8 @@ export type Action =
   | { type: 'campaign'; title: string; date: string; description: string }
   | { type: 'edit'; id: string; content: Content }
   | { type: 'submit' | 'approve' | 'publish' | 'retry'; id: string }
-  | { type: 'changes' | 'reject' | 'comment'; id: string; text: string }
+  | { type: 'changes' | 'reject' | 'comment'; id: string; text: string; notes?: string[] }
+  | { type: 'video-note'; id: string; at: string; text: string }
   | { type: 'schedule'; id: string; date: string }
   | { type: 'result'; id: string; mode: 'success' | 'partial' | 'failure' }
   | { type: 'check'; id: string; index: number }
@@ -494,6 +499,7 @@ type SeedRow = {
   previous?: { body: string; assetVersion: number; note: string };
   scheduled?: string;
   comments?: { by: string; text: string }[];
+  videoNotes?: { at: string; text: string; by: string }[];
   /** Channel variants and the master text each was written against. */
   variants?: Partial<Record<Channel, { text: string; base: string }>>;
   activity: string[];
@@ -508,6 +514,7 @@ const seedRows: SeedRow[] = [
     type: 'فيديو',
     due: '2026-09-22',
     revision: 4,
+    videoNotes: [{ at: '00:45', text: 'ارفع صوت المقابلة قليلاً، الموسيقى تغطي الكلام.', by: 'ريم' }],
     activity: ['أرسل أحمد الإصدار 4 للمراجعة', 'رفع أحمد نسخة المونتاج الرابعة'],
   },
   {
@@ -657,6 +664,14 @@ export function initialState(): State {
       comments: row.comments ? row.comments.map((c) => ({ ...c })) : [],
       activity: [...row.activity],
       checklist: row.checklist ? [...row.checklist] : [true, true, false, false],
+      videoNotes: (row.videoNotes ?? []).map((n, k) => ({
+        id: `vn-${241 + i}-${k + 1}`,
+        at: n.at,
+        seconds: parseTime(n.at)!,
+        text: n.text,
+        by: n.by,
+        assetVersion: row.assetVersion ?? (row.assetId === 'reel' ? 4 : 1),
+      })),
       ...(row.scheduled ? { scheduled: row.scheduled } : {}),
     };
     if (['IN_REVIEW', 'APPROVED', 'SCHEDULED'].includes(w.status)) {
@@ -776,6 +791,29 @@ export function staleVariants(c: Content): Channel[] {
 }
 
 /** Reviewers may edit any work; anyone else only work assigned to the person they are. */
+// --- Timestamped video notes (task 0.2.3.10, F-R01-03) ---
+
+/** Seconds from a typed time such as 01:30 or 1:30, or null when it is not mm:ss. */
+export function parseTime(at: string): number | null {
+  const m = /^(\d{1,2}):([0-5]\d)$/.exec(at.trim());
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+}
+
+/** Is this work's media a video? Only videos take timestamped notes. */
+export function isVideo(c: Content) {
+  return assets.find((a) => a.id === c.assetId)?.kind === 'video';
+}
+
+/** Notes on one asset version, in time order. */
+export function notesFor(w: Work, assetVersion: number) {
+  return w.videoNotes.filter((n) => n.assetVersion === assetVersion).sort((a, b) => a.seconds - b.seconds);
+}
+
+/** The lines a change request carries for the chosen notes. */
+export function notesText(notes: VideoNote[]) {
+  return notes.map((n) => `${n.at} · ${n.text}`).join('\n');
+}
+
 // --- Version difference (task 0.2.3.8, F-R01-06) ---
 
 export type DiffPart = { kind: 'same' | 'add' | 'del'; text: string };
@@ -1322,6 +1360,7 @@ export function reducer(state: State, a: Action): State {
       comments: [],
       activity: [`أنشأ ${actor.user} العمل`],
       checklist: [false, false, false, false],
+      videoNotes: [],
     };
     if (a.submit) {
       w.release = { ...pickContent(w), revision: 1, submittedBy: state.role };
@@ -1361,6 +1400,8 @@ export function reducer(state: State, a: Action): State {
   };
   let message = '';
   let kind: Notice['kind'] = 'info';
+  // The review note grows by any timestamped video notes a change request carries.
+  let reviewNote: string | undefined;
 
   switch (a.type) {
     case 'edit': {
@@ -1428,14 +1469,34 @@ export function reducer(state: State, a: Action): State {
       kind = 'action';
       break;
     case 'changes':
-    case 'reject':
+    case 'reject': {
       if (!actor.review || w.status !== 'IN_REVIEW' || !a.text.trim())
         return fail('المراجعة تتطلب صلاحية وسبباً واضحاً.');
       w.status = a.type === 'changes' ? 'CHANGES_REQUESTED' : 'REJECTED';
-      w.comments.push({ by: actor.user, text: a.text });
+      // A change request can carry the timestamped video notes the reviewer chose.
+      const chosen = a.notes ?? [];
+      const carried = w.videoNotes.filter((n) => chosen.includes(n.id)).sort((x, y) => x.seconds - y.seconds);
+      reviewNote = carried.length ? `${a.text.trim()}\nملاحظات زمنية:\n${notesText(carried)}` : a.text;
+      w.comments.push({ by: actor.user, text: reviewNote });
       message = a.type === 'changes' ? 'طُلب تعديل المحتوى' : 'رُفض الإصدار';
       kind = 'action';
       break;
+    }
+    case 'video-note': {
+      if (!actor.review && !isMine(state.role, w)) return fail('الملاحظات الزمنية للمراجعين وصاحب العمل.');
+      if (!isVideo(w)) return fail('الملاحظات الزمنية متاحة للفيديو فقط.');
+      const seconds = parseTime(a.at);
+      if (seconds === null) return fail('اكتب الوقت بصيغة دقيقة:ثانية، مثل 01:30.');
+      if (!a.text.trim()) return fail('اكتب نص الملاحظة.');
+      const at = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+      w.videoNotes = [
+        ...w.videoNotes,
+        { id: `vn-${w.id}-${w.videoNotes.length + 1}`, at, seconds, text: a.text.trim(), by: actor.user, assetVersion: w.assetVersion },
+      ];
+      message = `أُضيفت ملاحظة عند ${at} على الإصدار v${w.assetVersion}`;
+      kind = 'mention';
+      break;
+    }
     case 'comment':
       if (!a.text.trim()) return state;
       w.comments.push({ by: actor.user, text: a.text });
@@ -1510,7 +1571,7 @@ export function reducer(state: State, a: Action): State {
         release: { ...w.release, ...pickContent(w.release) },
         decision,
         by: state.role,
-        ...('text' in a ? { note: a.text } : {}),
+        ...('text' in a ? { note: reviewNote ?? a.text } : {}),
       },
     ];
   }

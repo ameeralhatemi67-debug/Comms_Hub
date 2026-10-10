@@ -223,6 +223,55 @@ section('0.2.3.9', async (page, shot) => {
   check(T, 'the newly scheduled item joins the at-risk list', after.includes('تصميم الملصق'), after);
 });
 
+// --- 0.2.3.10 Timestamped video review notes (F-R01-03) ------------------------
+section('0.2.3.10', async (page, shot) => {
+  const T = '0.2.3.10';
+  await page.goto(baseURL + '/approvals', { waitUntil: 'networkidle' });
+  await asRole(page, 'director');
+  await page.locator('.queue-item', { hasText: 'إعداد الفيديو الرئيسي' }).click();
+  const box = page.locator('main .video-notes');
+  const said = await box.textContent();
+  check(T, 'review screen says the time is typed because playback is deferred', said.includes('يُكتب الوقت يدوياً'), said);
+  await box.getByLabel('وقت الملاحظة بصيغة دقيقة:ثانية').fill('01:30');
+  await box.getByLabel('الملاحظة', { exact: true }).fill('قصّ اللقطة قبل ظهور الشعار');
+  await box.getByRole('button', { name: 'إضافة ملاحظة', exact: true }).click();
+  await box.getByLabel('وقت الملاحظة بصيغة دقيقة:ثانية').fill('00:10');
+  await box.getByLabel('الملاحظة', { exact: true }).fill('العنوان يظهر متأخراً');
+  await box.getByRole('button', { name: 'إضافة ملاحظة', exact: true }).click();
+  const times = await box.locator('.note-list time').allTextContents();
+  check(T, 'notes are listed in time order', JSON.stringify(times) === '["00:10","00:45","01:30"]', JSON.stringify(times));
+  await box.getByLabel('وقت الملاحظة بصيغة دقيقة:ثانية').fill('90');
+  await box.getByLabel('الملاحظة', { exact: true }).fill('خطأ');
+  await box.getByRole('button', { name: 'إضافة ملاحظة', exact: true }).click();
+  const toast = await page.locator('.toast').textContent();
+  check(T, 'an invalid time is refused with the expected format', toast.includes('01:30') && (await box.locator('.note-list li').count()) === 3, toast);
+  await shot('review-notes-1440');
+
+  await page.getByRole('button', { name: 'طلب تعديل', exact: true }).click();
+  const dialog = page.locator('dialog[open]');
+  const boxes = dialog.locator('.carry-notes input[type=checkbox]');
+  check(T, 'a change request offers every note to carry', (await boxes.count()) === 3, `${await boxes.count()} notes offered`);
+  await boxes.nth(1).uncheck();
+  await dialog.getByLabel('الملاحظات', { exact: true }).fill('عدّل المونتاج');
+  await shot('change-request-notes', false);
+  await dialog.getByRole('button', { name: 'تأكيد', exact: true }).click();
+
+  // The producer's work page lists the notes, and the change request carries the chosen ones.
+  // State lives in memory, so the work page is reached by in-app navigation, not a reload.
+  await asRole(page, 'producer');
+  await page.getByRole('link', { name: 'العمل', exact: true }).first().click();
+  await page.waitForURL('**/work');
+  await page.locator('main a', { hasText: 'إعداد الفيديو الرئيسي' }).first().click();
+  await page.waitForURL('**/work/CH-241');
+  await page.locator('main .video-notes .note-list').waitFor();
+  const listed = await page.locator('main .video-notes .note-list time').allTextContents();
+  check(T, "notes are listed on the producer's work page", JSON.stringify(listed) === '["00:10","00:45","01:30"]', JSON.stringify(listed));
+  await page.getByRole('button', { name: 'التعليقات', exact: true }).click();
+  const comments = await page.locator('main .comment p').allTextContents();
+  check(T, 'notes travel with the change request', comments.some((c) => c.includes('عدّل المونتاج') && c.includes('ملاحظات زمنية')), comments.join(' | '));
+  await shot('producer-page');
+});
+
 (async () => {
   const { chromium } = dependency('playwright');
   fs.rmSync(out, { recursive: true, force: true });

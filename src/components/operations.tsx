@@ -2,7 +2,19 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { channelRisks, isMine, personById, previousRelease, riskText, roles, ready, type Work } from '@/lib/domain';
+import {
+  channelRisks,
+  isMine,
+  isVideo,
+  notesFor,
+  personById,
+  previousRelease,
+  riskText,
+  roles,
+  ready,
+  type Work,
+} from '@/lib/domain';
+import { VideoNotes } from './video-notes';
 import { useHub } from '@/lib/store';
 import { ReleaseHistory } from './release-history';
 import { Title, Panel, StatusChip, Empty, MediaPreview, Modal, Tabs, LogoLoader, VariantCopy, VersionDiff } from './ui';
@@ -15,6 +27,7 @@ export function Approvals() {
   const [id, setId] = useState(params.get('work') || '');
   const [dialog, setDialog] = useState('');
   const [reason, setReason] = useState('');
+  const [carry, setCarry] = useState<string[] | null>(null);
   const [date, setDate] = useState('2026-09-23T18:00');
   const [mode, setMode] = useState<'success' | 'partial' | 'failure'>('partial');
 
@@ -29,6 +42,7 @@ export function Approvals() {
   const close = () => {
     setDialog('');
     setReason('');
+    setCarry(null);
   };
 
   function publish(item: Work, retry = false) {
@@ -89,6 +103,7 @@ export function Approvals() {
               <VersionDiff before={previousRelease(w, w.release.revision)!} after={w.release} />
             )}
             <MediaPreview assetId={w.release?.assetId} version={w.release?.assetVersion} large />
+            {tab === 'review' && w.release && isVideo(w.release) && <VideoNotes work={w} version={w.release.assetVersion} />}
             <p className="body-copy">{w.release?.body}</p>
             {w.release && w.release.channels.map((c) => <VariantCopy content={w.release!} channel={c} key={c} />)}
             <div className="release-note">
@@ -204,7 +219,13 @@ export function Approvals() {
               else if (dialog === 'publish') {
                 publish(w);
                 return;
-              } else dispatch({ type: dialog === 'changes' ? 'changes' : 'reject', id: w.id, text: reason });
+              } else
+                dispatch({
+                  type: dialog === 'changes' ? 'changes' : 'reject',
+                  id: w.id,
+                  text: reason,
+                  notes: carry ?? (w.release ? notesFor(w, w.release.assetVersion).map((n) => n.id) : []),
+                });
               close();
             }}
           >
@@ -239,10 +260,32 @@ export function Approvals() {
                 </label>
               </>
             ) : (
-              <label>
-                الملاحظات
-                <textarea required value={reason} onChange={(e) => setReason(e.target.value)} />
-              </label>
+              <>
+                <label>
+                  الملاحظات
+                  <textarea required value={reason} onChange={(e) => setReason(e.target.value)} />
+                </label>
+                {w.release && notesFor(w, w.release.assetVersion).length > 0 && (
+                  <fieldset className="carry-notes">
+                    <legend>إرفاق الملاحظات الزمنية</legend>
+                    {notesFor(w, w.release.assetVersion).map((n) => {
+                      const chosen = carry ?? notesFor(w, w.release!.assetVersion).map((x) => x.id);
+                      return (
+                        <label className="check-row" key={n.id}>
+                          <input
+                            type="checkbox"
+                            checked={chosen.includes(n.id)}
+                            onChange={(e) =>
+                              setCarry(e.target.checked ? [...chosen, n.id] : chosen.filter((x) => x !== n.id))
+                            }
+                          />
+                          <span dir="ltr">{n.at}</span> {n.text}
+                        </label>
+                      );
+                    })}
+                  </fieldset>
+                )}
+              </>
             )}
             <button className="primary">{dialog === 'publish' ? 'تأكيد المحاكاة' : 'تأكيد'}</button>
           </form>

@@ -26,6 +26,8 @@ import {
   channelRisks,
   riskText,
   atRiskSchedules,
+  parseTime,
+  notesFor,
 } from '../src/lib/domain.ts';
 
 test('version-bound review, revision, scheduling, partial result and safe retry', () => {
@@ -393,4 +395,37 @@ test('scheduling warns when a channel authorization will not cover the publicati
   assert.equal(next.notices[0].kind, 'attention');
   next = reducer({ ...s, role: 'publisher' }, { type: 'schedule', id: 'CH-242', date: '2026-09-22T09:00' });
   assert(next.message.includes('LinkedIn'));
+});
+
+test('video review notes are bound to a typed time, kept in time order, and travel with a change request (F-R01-03)', () => {
+  assert.equal(parseTime('01:30'), 90);
+  assert.equal(parseTime('1:05'), 65);
+  assert.equal(parseTime('01:75'), null);
+  assert.equal(parseTime('ninety'), null);
+
+  let s = reducer(initialState(), { type: 'role', role: 'director' });
+  const reel = () => s.work.find((w) => w.id === 'CH-241');
+  s = reducer(s, { type: 'video-note', id: 'CH-241', at: '1:30', text: 'قصّ اللقطة قبل ظهور الشعار' });
+  s = reducer(s, { type: 'video-note', id: 'CH-241', at: '00:10', text: 'العنوان يظهر متأخراً' });
+  const notes = notesFor(reel(), 4);
+  assert.deepEqual(notes.map((n) => n.at), ['00:10', '00:45', '01:30']);
+  assert.equal(notes[2].by, 'محمد');
+
+  // Invalid time, a non-video work, or a role without standing are refused.
+  const before = reel().videoNotes.length;
+  s = reducer(s, { type: 'video-note', id: 'CH-241', at: '90', text: 'خطأ' });
+  assert.equal(reel().videoNotes.length, before);
+  assert(s.message.includes('01:30'));
+  s = reducer(s, { type: 'video-note', id: 'CH-242', at: '00:20', text: 'ليست فيديو' });
+  assert.equal(s.work.find((w) => w.id === 'CH-242').videoNotes.length, 0);
+  let pub = reducer({ ...s, role: 'publisher' }, { type: 'video-note', id: 'CH-241', at: '00:20', text: 'لا' });
+  assert.equal(pub.work.find((w) => w.id === 'CH-241').videoNotes.length, before);
+
+  // A change request carries the chosen notes, in time order, to the producer.
+  s = reducer(s, { type: 'changes', id: 'CH-241', text: 'عدّل المونتاج', notes: [notes[2].id, notes[0].id] });
+  const comment = reel().comments.at(-1).text;
+  assert(comment.startsWith('عدّل المونتاج'));
+  assert(comment.indexOf('00:10') < comment.indexOf('01:30'));
+  assert(!comment.includes('00:45'));
+  assert.equal(reel().history.at(-1).note, comment);
 });
