@@ -86,7 +86,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <aside className="sidebar">
         <Link href="/" className="brand">
           <span className="brandmark">
-            <LogoLoader size={26} mode="static" color="#FFFFFF" ariaLabel="شعار مركز الاتصال" />
+            <LogoLoader size={26} mode="static" color="currentColor" ariaLabel="شعار مركز الاتصال" />
           </span>
           <span>
             <b>مركز الاتصال</b>

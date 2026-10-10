@@ -1,0 +1,388 @@
+{
+  "task": "0.3.1.1",
+  "compared": "before vs after",
+  "date": "2026-10-10T20:30:06.304Z",
+  "screenshots": 63,
+  "identical": 63,
+  "failed": [],
+  "results": [
+    {
+      "file": "1440-director-account.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-director-admin.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-director-analytics.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-director-approvals.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1550"
+    },
+    {
+      "file": "1440-director-calendar.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1213"
+    },
+    {
+      "file": "1440-director-create.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1504"
+    },
+    {
+      "file": "1440-director-home.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1764"
+    },
+    {
+      "file": "1440-director-ideas.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1037"
+    },
+    {
+      "file": "1440-director-mail.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-director-media.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1347"
+    },
+    {
+      "file": "1440-director-media_poster.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x926"
+    },
+    {
+      "file": "1440-director-monitoring.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1300"
+    },
+    {
+      "file": "1440-director-settings.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-director-work.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1068"
+    },
+    {
+      "file": "1440-director-work_CH-241.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1238"
+    },
+    {
+      "file": "1440-overlay-notifications.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x900"
+    },
+    {
+      "file": "1440-publisher-account.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-publisher-admin.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-publisher-analytics.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-publisher-approvals.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1753"
+    },
+    {
+      "file": "1440-publisher-calendar.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1213"
+    },
+    {
+      "file": "1440-publisher-create.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-publisher-home.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x2148"
+    },
+    {
+      "file": "1440-publisher-ideas.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1083"
+    },
+    {
+      "file": "1440-publisher-mail.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-publisher-media.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1347"
+    },
+    {
+      "file": "1440-publisher-media_poster.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x926"
+    },
+    {
+      "file": "1440-publisher-monitoring.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1300"
+    },
+    {
+      "file": "1440-publisher-settings.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x906"
+    },
+    {
+      "file": "1440-publisher-work.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1068"
+    },
+    {
+      "file": "1440-publisher-work_CH-241.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "1440x1238"
+    },
+    {
+      "file": "390-director-account.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1095"
+    },
+    {
+      "file": "390-director-admin.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x900"
+    },
+    {
+      "file": "390-director-analytics.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x996"
+    },
+    {
+      "file": "390-director-approvals.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1978"
+    },
+    {
+      "file": "390-director-calendar.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1094"
+    },
+    {
+      "file": "390-director-create.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x2321"
+    },
+    {
+      "file": "390-director-home.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x2637"
+    },
+    {
+      "file": "390-director-ideas.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1097"
+    },
+    {
+      "file": "390-director-mail.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x900"
+    },
+    {
+      "file": "390-director-media.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1918"
+    },
+    {
+      "file": "390-director-media_poster.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1292"
+    },
+    {
+      "file": "390-director-monitoring.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1607"
+    },
+    {
+      "file": "390-director-settings.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x900"
+    },
+    {
+      "file": "390-director-work.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1398"
+    },
+    {
+      "file": "390-director-work_CH-241.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x2050"
+    },
+    {
+      "file": "390-overlay-menu.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x900"
+    },
+    {
+      "file": "390-overlay-notifications.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x900"
+    },
+    {
+      "file": "390-publisher-account.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1095"
+    },
+    {
+      "file": "390-publisher-admin.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x900"
+    },
+    {
+      "file": "390-publisher-analytics.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x996"
+    },
+    {
+      "file": "390-publisher-approvals.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x2244"
+    },
+    {
+      "file": "390-publisher-calendar.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1094"
+    },
+    {
+      "file": "390-publisher-create.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x900"
+    },
+    {
+      "file": "390-publisher-home.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x2964"
+    },
+    {
+      "file": "390-publisher-ideas.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1143"
+    },
+    {
+      "file": "390-publisher-mail.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x927"
+    },
+    {
+      "file": "390-publisher-media.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1918"
+    },
+    {
+      "file": "390-publisher-media_poster.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1292"
+    },
+    {
+      "file": "390-publisher-monitoring.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1607"
+    },
+    {
+      "file": "390-publisher-settings.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x900"
+    },
+    {
+      "file": "390-publisher-work.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x1356"
+    },
+    {
+      "file": "390-publisher-work_CH-241.png",
+      "pass": true,
+      "differentPixels": 0,
+      "size": "390x2035"
+    }
+  ]
+}
