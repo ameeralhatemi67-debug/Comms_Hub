@@ -919,6 +919,19 @@ export function daysBetween(from: string, to: string) {
   return Math.round((day(to) - day(from)) / 86400000);
 }
 
+/** The ISO date `days` after `date`. */
+export function addDays(date: string, days: number) {
+  const d = new Date(`${date.slice(0, 10)}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** The seven dates, Sunday first, of the week holding `date`. */
+export function weekOf(date: string) {
+  const start = addDays(date, -new Date(`${date.slice(0, 10)}T00:00:00Z`).getUTCDay());
+  return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+}
+
 /** Delivery is outstanding and its date has passed (task 0.2.3.5, F-R01-02). */
 export function isOverdue(w: Work, today = scenario.today) {
   return isOpen(w) && daysBetween(today, w.due) < 0;
@@ -967,6 +980,27 @@ export function atRiskSchedules(work: Work[]) {
     .filter((w) => w.status === 'SCHEDULED' && w.scheduled)
     .map((w) => ({ work: w, risks: channelRisks(w.channels, w.scheduled!) }))
     .filter((x) => x.risks.length > 0);
+}
+
+// --- Campaign pulse for the second design (task 0.3.3.1) ---
+
+export const pulseStations = ['المحتوى', 'التصميم', 'المراجعة', 'الجدولة', 'النشر'];
+
+/** Which station of the campaign a work stands at: 0 to 4, or 5 once published. */
+export function stationOf(w: Work): number {
+  if (w.status === 'PUBLISHED') return 5;
+  if (['SCHEDULED', 'PUBLISHING', 'PARTIAL', 'FAILED'].includes(w.status)) return 4;
+  if (w.status === 'APPROVED') return 3;
+  if (w.status === 'IN_REVIEW') return 2;
+  return ['designer', 'producer'].includes(w.owner) ? 1 : 0;
+}
+
+/** Work count per station, the earliest station still holding work, and overall progress. */
+export function campaignPulse(work: Work[]) {
+  const counts = pulseStations.map((_, i) => work.filter((w) => stationOf(w) === i).length);
+  const current = Math.max(0, counts.findIndex((n) => n > 0));
+  const progress = work.length ? work.reduce((sum, w) => sum + stationOf(w), 0) / (work.length * 5) : 0;
+  return { counts, current, progress };
 }
 
 // --- Stage and team view (task 0.2.3.6, F-R01-01) ---

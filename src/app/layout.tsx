@@ -10,6 +10,7 @@ import '@fontsource/ibm-plex-sans-arabic/600.css';
 import '@fontsource/ibm-plex-sans-arabic/700.css';
 import '@fontsource/reem-kufi/500.css';
 import '@fontsource/reem-kufi/600.css';
+import '@fontsource/aref-ruqaa/700.css';
 import './globals.css';
 import './identity.css';
 

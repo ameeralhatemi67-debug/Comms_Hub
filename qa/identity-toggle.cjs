@@ -34,9 +34,10 @@ const pairs = [
   ['body text on surface', '--ink', ['--surface']], ['body text on ground', '--ink', ['--bg']], ['body text on surface-2', '--ink', ['--surface-2']],
   ['muted on surface', '--muted', ['--surface']], ['muted on ground', '--muted', ['--bg']], ['muted on surface-2', '--muted', ['--surface-2']],
   ['secondary ink on surface', '--ink-2', ['--surface']],
-  ['link and active tab on surface', '--green', ['--surface']], ['link on ground', '--green', ['--bg']],
+  ['link and active tab on surface', '--green-text', ['--surface']], ['link on ground', '--green-text', ['--bg']],
   ['primary button', '--on-brand', ['--green']], ['primary button hover', '--on-brand', ['--green-hover']],
-  ['selected item text', '--ink', ['--selected-bg']], ['active tab text on soft', '--green', ['--soft']],
+  ['selected item text', '--ink', ['--selected-bg']], ['active tab text on soft', '--green-text', ['--soft']], ['link on surface-2', '--green-text', ['--surface-2']],
+  ['count badge', '--on-gold', ['--gold-hi']], ['decision tier chip', '--st-warn-fg', ['--st-warn-bg']],
   ['sidebar item', '--side-fg', depth], ['sidebar strong text', '--side-fg-strong', depth], ['sidebar small text', '--side-muted', depth],
   ['brand logo gold on brandmark (graphic, 3:1)', '--gold-hi', depth, 3],
   ['campaign text', '--on-brand', depth], ['campaign secondary', '--campaign-muted', depth], ['gold button text', '--on-gold', leafText],
@@ -204,16 +205,26 @@ async function contrastTable(page) {
     }
   }
 
-  // 10. Contrast of every text pair in the second design.
+  // 10. Contrast of every text pair in the second design, light and evening modes.
   await page.evaluate((k) => localStorage.setItem(k, 'emerald'), KEY);
   await page.reload({ waitUntil: 'networkidle' });
   const contrast = await contrastTable(page);
-  for (const row of contrast) check(`contrast ${row.label} ${row.ratio}:1`, row.pass, `${row.fg} (${row.fgValue}) on ${row.bg}`);
+  for (const row of contrast) check(`contrast light ${row.label} ${row.ratio}:1`, row.pass, `${row.fg} (${row.fgValue}) on ${row.bg}`);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.reload({ waitUntil: 'networkidle' });
+  const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  check('evening mode follows the device in the second design', bg === 'rgb(7, 19, 14)', bg);
+  const contrastDark = await contrastTable(page);
+  for (const row of contrastDark) check(`contrast evening ${row.label} ${row.ratio}:1`, row.pass, `${row.fg} (${row.fgValue}) on ${row.bg}`);
   await page.evaluate((k) => localStorage.removeItem(k), KEY);
+  await page.reload({ waitUntil: 'networkidle' });
+  const bgA = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  check('Direction A has no evening mode', bgA === 'rgb(244, 246, 242)', bgA);
+  await page.emulateMedia({ colorScheme: 'light' });
 
   await browser.close();
   const passed = checks.filter((c) => c.pass).length;
-  const report = { date: new Date().toISOString(), baseURL, passed, failed: checks.length - passed, errors, contrast, checks };
+  const report = { date: new Date().toISOString(), baseURL, passed, failed: checks.length - passed, errors, contrast, contrastDark, checks };
   fs.writeFileSync(path.join(__dirname, 'identity-toggle.json'), JSON.stringify(report, null, 2));
   console.log(`${passed} passed, ${checks.length - passed} failed`);
   for (const e of errors) console.log('FAIL', e);

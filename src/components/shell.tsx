@@ -25,6 +25,7 @@ import {
 import { noticesFor, roles, type Role } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { toggleIdentity } from '@/lib/identity';
+import { useIdentity } from '@/lib/use-identity';
 import { Modal, Empty, LogoLoader } from './ui';
 
 const nav = [
@@ -51,6 +52,17 @@ const noticeKindLabels = {
   mention: 'تعليق',
 };
 
+type Tier = 'decision' | 'attention' | 'info';
+const tierOf = (kind: string): Tier => (kind === 'action' ? 'decision' : kind === 'attention' ? 'attention' : 'info');
+const tierOrder: Tier[] = ['decision', 'attention', 'info'];
+const tierLabels: Record<Tier, string> = { decision: 'قرارك', attention: 'انتباه', info: 'للعلم' };
+const tiers: [string, string][] = [
+  ['all', 'الكل'],
+  ['decision', 'قرارك'],
+  ['attention', 'انتباه'],
+  ['info', 'للعلم'],
+];
+
 export function Shell({ children }: { children: ReactNode }) {
   const { state, dispatch } = useHub();
   const path = usePathname();
@@ -60,6 +72,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
   const actor = roles[state.role];
+  const second = useIdentity();
 
   const normalized = (s: string) =>
     s
@@ -75,7 +88,24 @@ export function Shell({ children }: { children: ReactNode }) {
 
   // Each role reads only the notices addressed to it (MVP_draft.md section 6).
   const notices = noticesFor(state.role, state.notices);
-  const shown = notices.filter((n) => category === 'all' || category === n.kind);
+  const shown = notices
+    .filter((n) => category === 'all' || category === (second ? tierOf(n.kind) : n.kind))
+    // In the second design decisions come first, then attention, then information.
+    .sort((a, b) => (second ? tierOrder.indexOf(tierOf(a.kind)) - tierOrder.indexOf(tierOf(b.kind)) : 0));
+
+  // A double-click on the logo switches between the current design and the second
+  // design (Roadmap Checkpoint 0.3). mousedown is cancelled on the second click so
+  // the double-click does not select text. The same logo sits in the phone top bar.
+  const designSwitch = {
+    onMouseDown: (e: React.MouseEvent) => {
+      if (e.detail > 1) e.preventDefault();
+    },
+    onDoubleClick: () =>
+      dispatch({
+        type: 'notify',
+        text: toggleIdentity() ? 'التصميم: الهوية الجديدة لمركز الاتصال' : 'التصميم: التصميم الحالي',
+      }),
+  };
 
   const visible = nav.filter((n) => (n[0] !== '/admin' || actor.admin) && (n[0] !== '/create' || actor.create));
 
@@ -85,22 +115,7 @@ export function Shell({ children }: { children: ReactNode }) {
         انتقل إلى المحتوى
       </a>
       <aside className="sidebar">
-        <Link
-          href="/"
-          className="brand"
-          // A double-click on the logo switches between the current design and the
-          // second design (Roadmap Checkpoint 0.3). mousedown is cancelled on the
-          // second click so the double-click does not select the brand text.
-          onMouseDown={(e) => {
-            if (e.detail > 1) e.preventDefault();
-          }}
-          onDoubleClick={() =>
-            dispatch({
-              type: 'notify',
-              text: toggleIdentity() ? 'التصميم: الهوية الجديدة لمركز الاتصال' : 'التصميم: التصميم الحالي',
-            })
-          }
-        >
+        <Link href="/" className="brand" {...designSwitch}>
           <span className="brandmark">
             <LogoLoader size={26} mode="static" color="currentColor" ariaLabel="شعار مركز الاتصال" />
           </span>
@@ -144,6 +159,11 @@ export function Shell({ children }: { children: ReactNode }) {
 
       <div className="workspace">
         <header className="topbar">
+          <Link href="/" className="mobile-brand" aria-label="مركز الاتصال، الرئيسية" {...designSwitch}>
+            <span className="brandmark">
+              <LogoLoader size={22} mode="static" color="currentColor" ariaLabel="شعار مركز الاتصال" />
+            </span>
+          </Link>
           <button
             aria-label="البحث الشامل"
             className="global-search"
@@ -251,18 +271,36 @@ export function Shell({ children }: { children: ReactNode }) {
             </>
           ) : (
             <>
-              <div className="tabs">
-                {[
-                  ['all', 'الكل'],
-                  ['action', 'إجراء'],
-                  ['attention', 'انتباه'],
-                  ['mention', 'إشارات'],
-                ].map(([id, label]) => (
-                  <button className={category === id ? 'active' : ''} key={id} onClick={() => setCategory(id)}>
-                    {label}
-                  </button>
-                ))}
-              </div>
+              {second ? (
+                // Three tiers in the second design (task 0.3.3.3, disscussios/notification_model.md):
+                // what needs a decision, what needs attention, and what is for information.
+                <div className="seg tiers" role="group" aria-label="درجة الإشعار">
+                  {tiers.map(([id, label]) => (
+                    <button
+                      type="button"
+                      key={id}
+                      aria-pressed={category === id}
+                      onClick={() => setCategory(id)}
+                      data-tier={id}
+                    >
+                      {label} <span className="count-badge">{notices.filter((n) => tierOf(n.kind) === id || id === 'all').length}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="tabs">
+                  {[
+                    ['all', 'الكل'],
+                    ['action', 'إجراء'],
+                    ['attention', 'انتباه'],
+                    ['mention', 'إشارات'],
+                  ].map(([id, label]) => (
+                    <button className={category === id ? 'active' : ''} key={id} onClick={() => setCategory(id)}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
               <p className="muted">
                 هذه إشعارات دور {actor.name} فقط. قراءة الإشعار لا تُنجز العمل أو تعتمده.
               </p>
@@ -276,7 +314,9 @@ export function Shell({ children }: { children: ReactNode }) {
                     setOverlay('');
                   }}
                 >
-                  <span className="chip">{noticeKindLabels[n.kind]}</span>
+                  <span className={`chip tier-${tierOf(n.kind)}`}>
+                    {second ? tierLabels[tierOf(n.kind)] : noticeKindLabels[n.kind]}
+                  </span>
                   <p>{n.title}</p>
                   {!n.read && <small>غير مقروء</small>}
                 </Link>

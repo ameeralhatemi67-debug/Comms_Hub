@@ -55,6 +55,7 @@ All six Round 1 corrections from the Director's findings are built and verified:
 
 ## Verified capability
 
+- **Second design screens (2026-10-11).** Behind the same logo toggle (also in the phone top bar): evening mode, decisions and campaign pulse on Home, approval stamp, phone approval sheet, notification tiers, calendar week with drag-to-request, motion from the work item, and the `/components` page. `qa/identity-screens.cjs` 48/48; contrast 51 pairs per mode, lowest 4.73. See `MVP_draft.md` section 60.
 - **Design toggle (2026-10-10).** Double-click on the sidebar logo switches between Direction A and the new identity; restored before first paint; fonts served by the app. Direction A is pixel-identical to before on 63 captures (`qa/colour-tokens.json`). `qa/identity-toggle.cjs` 134 of 134, including 48 contrast pairs and no request leaving the machine. Regressions 34/34, journey PASS, motion studio 205/205, domain tests 9/9, typecheck and build clean. Evening mode and the component QA page are not built.
 - **Colour tokens (task 0.3.1.1).** Every interface colour in `globals.css` is one of 73 named tokens.
 - `/motion`, the local Arabic motion studio, revised after first review (2026-10-08): 26 templates (8 numbers, 8 Repine, 10 video frames), template rail with live thumbnails, stage with transport and phase strip, tabbed settings with every timing and motion slider restored, frame ratios with true shapes and stated output sizes, window preview (sample, own clip, key green, transparent) and Reels safe zones, and downloads (MP4, transparent MOV, PNG sequence ZIP, single PNG) up to 4K and 60 fps with progress, cancel and a persistent save link. See `MVP_draft.md` section 57. Edits reset on refresh; access restrictions and asset attachment are deferred.
@@ -98,10 +99,10 @@ Evidence, reproduction instructions and precise accepted scope for Checkpoint 0.
 
 ## Next action
 
-Sunday 2026-10-11, in this order:
+Waiting on people; no agent task is open on the critical path.
 
-1. Owner: show the Director both designs on the live toggle (D-01), and answer D-03 (R01 severities); confirm D-02.
-2. Start Round 1 with the scenario date and overdue count (task 0.2.3.5), then 0.2.3.6 to 0.2.3.10 in the Roadmap's order.
-3. Re-check the Round 1 corrections with the Director (task 0.2.3.11).
+1. Director: run the re-check `validation/recheck-R01.md` on the current build. It covers the three failed tasks, each Round 1 correction, the open design questions, T6, D-01 (which design is the default, on the live logo toggle) and the command palette.
+2. Owner: decide the eight design-note recommendations (D-04) and confirm D-02.
+3. Agent, after the re-check: record the addendum, close or reopen each finding, and start Round 2 if any correction is rejected. If D-01 approves the new identity as default, rewrite `DESIGN.md` and flip the default.
 
 Phase 0.2.2 is closed on the Director's response by owner directive; tasks 0.2.2.2 to 0.2.2.8 are skipped, not pending. Version 1 remains gated on the Checkpoint 0.2 exit gate, with criteria 1 and 2 waived by that directive.

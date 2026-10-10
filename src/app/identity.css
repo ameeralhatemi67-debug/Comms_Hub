@@ -30,9 +30,10 @@
   --ease:cubic-bezier(.16,1,.3,1); --d1:120ms; --d2:220ms;
   --f-display:"Reem Kufi","Segoe UI",Tahoma,sans-serif;
   --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+  --f-accent:"Aref Ruqaa","Reem Kufi","Segoe UI",serif;
 
   /* Direction A names, re-mapped */
-  --green:var(--emerald); --green-hover:var(--emerald-hi); --ink:#10241d; --muted:#526b5e;
+  --green:var(--emerald); --green-hover:var(--emerald-hi); --green-text:var(--emerald); --ink:#10241d; --muted:#526b5e;
   --line:#d6e0d7; --bg:#eaefe8; --soft:var(--emerald-soft);
   --surface:#fbfcf9; --surface-2:#f2f6ef; --on-brand:#ffffff;
   --focus:#9a6a12; --accent:var(--gold-hi);
@@ -63,6 +64,43 @@
   --art-video-bg:#17445a; --art-video-band:rgba(217,173,79,.16); --art-video-ring-1:rgba(217,173,79,.08); --art-video-ring-2:rgba(217,173,79,.06);
   --art-raw-bg:#3b574b; --art-raw-band:#2c463b;
   --art-play-line:rgba(232,196,108,.6); --art-play-fg:#f6efd8;
+}
+
+/* Evening mode (tasks 0.3.2.1 and 0.3.4.3): the second design follows the device's
+   dark preference. Direction A has no evening mode. Values from the proposal's dark
+   palette; text pairs are checked to 4.5 to 1 by qa/identity-toggle.cjs. */
+@media (prefers-color-scheme:dark){
+  :root[data-identity="emerald"]{
+    color-scheme:dark;
+    --emerald:#17795a; --emerald-hi:#146a50; /* hover darkens: white text keeps 4.5:1 */ --emerald-deep:#0a3326; --emerald-night:#041a13; --emerald-soft:#133a2c;
+    --gold:#d9ad4f; --gold-hi:#e8c46c; --gold-text:#e6c36d; --gold-soft:#2c2614;
+    --ink-2:#b9cdc1; --line-strong:#2f5242; --lattice:rgba(255,255,255,.08);
+    --e1:0 1px 2px rgba(0,0,0,.4),0 6px 14px -8px rgba(0,0,0,.5);
+    --e2:0 2px 4px rgba(0,0,0,.4),0 18px 36px -16px rgba(0,0,0,.65);
+    --e3:0 4px 8px rgba(0,0,0,.4),0 32px 64px -24px rgba(0,0,0,.8);
+    --green-text:#4fcfa3; --ink:#e8f1ea; --muted:#8fa99b;
+    --line:#1f3a2e; --bg:#07130e; --surface:#0e1f18; --surface-2:#132a21;
+    --focus:#e6c36d;
+    --avatar-fg:#4fcfa3;
+    --row-line:#1a3328; --calendar-entry:#0f2f35; --skeleton:#16302a;
+    --danger:#f19a8d; --success:#6fd19b; --warning-bg:#34280d; --warning-fg:#efc066;
+    --chip-bg:#1a2d24; --chip-fg:#a9bfb2;
+    --st-review-bg:#2a2040; --st-review-fg:#c4aee8;
+    --st-success-bg:#10301f; --st-success-fg:#6fd19b;
+    --st-warn-bg:#34280d; --st-warn-fg:#efc066;
+    --st-danger-bg:#3a1814; --st-danger-fg:#f19a8d;
+    --st-schedule-bg:#0f2f35; --st-schedule-fg:#7fd0de;
+    --st-production-bg:#1b2a3d; --st-production-fg:#9db8da;
+    --st-publishing-bg:#0f3a2c; --st-publishing-fg:#7ae3bb;
+    --backdrop:rgba(0,0,0,.6);
+  }
+  /* The Motion Studio draws on light panels of its own, so it keeps the light
+     palette inside its frame in evening mode. */
+  :root[data-identity="emerald"] .ms{
+    color-scheme:light;color:#10241d;
+    --ink:#10241d; --muted:#526b5e; --line:#d6e0d7; --surface:#fbfcf9; --surface-2:#f2f6ef; --soft:#dcefe5;
+    --green-text:#14684f; --ink-2:#3b574b; --line-strong:#b6c8bb; --focus:#9a6a12;
+  }
 }
 
 /* ---------- Part 2: structure ---------- */
@@ -120,6 +158,31 @@
 [data-identity="emerald"] .toast{border-radius:14px}
 [data-identity="emerald"] .toast button{color:var(--gold-hi)}
 [data-identity="emerald"] .empty svg{color:var(--gold-text)}
+/* One calligraphic accent word per page, in gold (the proposal's Aref Ruqaa accent). */
+[data-identity="emerald"] .accent-word{font-family:var(--f-accent);font-weight:700;color:var(--gold-text);font-size:1.08em}
+
+/* Home: decisions, pulse (task 0.3.3.1) */
+[data-identity="emerald"] .count-badge{background:var(--gold-hi);color:var(--on-gold)}
+[data-identity="emerald"] .decisions{border-top:3px solid var(--gold)}
+[data-identity="emerald"] .alert-strip{border-radius:12px}
+[data-identity="emerald"] .stations::after{content:"";position:absolute;top:13px;inset-inline-start:10%;height:3px;border-radius:2px;width:calc(80% * var(--p,.5));background:var(--g-leaf)}
+[data-identity="emerald"] .stations li.done i{background:var(--g-leaf-text);color:var(--on-gold)}
+[data-identity="emerald"] .stations li.now i{background:#ffffff;color:var(--emerald);border-color:var(--gold-hi);box-shadow:0 0 0 6px rgba(232,196,108,.28)}
+/* Approvals: the stamp (task 0.3.3.2) */
+[data-identity="emerald"] .approval-stamp .seal{background:var(--g-leaf-text);color:var(--on-gold);box-shadow:0 14px 26px -10px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.5)}
+[data-identity="emerald"] .binding-note{padding:10px 12px;border-radius:10px;background:var(--surface-2);border:1px dashed var(--line-strong)}
+/* Phone approval sheet with 44 px targets (task 0.3.4.3) */
+@media (max-width:699px){
+  [data-identity="emerald"] .decision-actions{position:sticky;bottom:70px;z-index:20;margin-inline:-18px;padding:10px 16px 14px;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -12px 30px -12px rgba(0,0,0,.35)}
+  [data-identity="emerald"] .decision-actions::before{content:"";display:block;width:38px;height:4px;border-radius:2px;background:var(--line-strong);margin:0 auto 6px;flex-basis:100%;max-width:38px}
+  [data-identity="emerald"] .decision-actions button,[data-identity="emerald"] .decision-actions .button{min-height:44px;flex:1 1 0;white-space:nowrap}
+  [data-identity="emerald"] .decision-actions button.primary{flex-basis:100%}
+}
+
+/* Calendar week (task 0.3.4.1) */
+[data-identity="emerald"] .week-grid{border-radius:var(--r-lg);box-shadow:var(--e1)}
+[data-identity="emerald"] .week-head b{font-family:var(--f-display)}
+[data-identity="emerald"] .ev{border-radius:9px}
 
 /* Motion: short, eased, and only for people who have not asked for less. */
 @media (prefers-reduced-motion:no-preference){
@@ -128,3 +191,19 @@
   [data-identity="emerald"] .skeleton{background:linear-gradient(100deg,var(--surface-2) 30%,var(--line) 50%,var(--surface-2) 70%);background-size:220% 100%;animation:shimmer 1.4s linear infinite}
 }
 @keyframes shimmer{to{background-position:-220% 0}}
+@media (prefers-reduced-motion:no-preference){
+  [data-identity="emerald"] .approval-stamp .seal{animation:stampin 760ms var(--ease) both}
+  [data-identity="emerald"] .approval-stamp b{animation:rise 420ms var(--ease) 200ms both}
+  [data-identity="emerald"] .stations li.now i{animation:pulse2 2s ease-in-out infinite}
+}
+@keyframes stampin{from{transform:scale(1.7) rotate(-14deg);opacity:0}60%{transform:scale(.94) rotate(3deg);opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}}
+@keyframes pulse2{50%{box-shadow:0 0 0 10px rgba(232,196,108,.06)}}
+[data-identity="emerald"] .seg{border-radius:12px}
+[data-identity="emerald"] .seg button{border-radius:9px}
+[data-identity="emerald"] .seg button[aria-pressed=true]{box-shadow:var(--e1)}
+[data-identity="emerald"] .dialog-sample{border-radius:var(--r-xl)}
+[data-identity="emerald"] .dialog-sample h2{font-family:var(--f-display)}
+@media (prefers-reduced-motion:no-preference){
+  [data-identity="emerald"] .switch i,[data-identity="emerald"] .switch i::after{transition:background-color var(--d2),inset-inline-start var(--d2) var(--ease)}
+}

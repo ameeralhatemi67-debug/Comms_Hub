@@ -14,14 +14,28 @@ import {
   type Status,
 } from '@/lib/domain';
 
-export function Title({ title, sub, children }: { title: string; sub?: string; children?: ReactNode }) {
+export function Title({
+  title,
+  accent,
+  sub,
+  children,
+}: {
+  title: string;
+  /** One word set apart; the second design writes it in a calligraphic gold face. */
+  accent?: string;
+  sub?: string;
+  children?: ReactNode;
+}) {
   return (
     <header className="page-heading">
       <div>
         <span className="eyebrow">
           مركز الاتصال المؤسسي · <span className="scenario-date">اليوم في النموذج: {scenario.label}</span>
         </span>
-        <h1>{title}</h1>
+        <h1>
+          {title}
+          {accent && <em className="accent-word">{accent}</em>}
+        </h1>
         {sub && <p>{sub}</p>}
       </div>
       <div className="actions">{children}</div>

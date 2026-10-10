@@ -1,7 +1,7 @@
 {
-  "date": "2026-10-10T20:46:58.067Z",
+  "date": "2026-10-10T22:16:45.177Z",
   "baseURL": "http://127.0.0.1:3000",
-  "passed": 134,
+  "passed": 190,
   "failed": 0,
   "errors": [],
   "contrast": [
@@ -70,7 +70,7 @@
     },
     {
       "label": "link and active tab on surface",
-      "fg": "--green",
+      "fg": "--green-text",
       "fgValue": "#14684f",
       "bg": "--surface",
       "ratio": 6.53,
@@ -79,7 +79,7 @@
     },
     {
       "label": "link on ground",
-      "fg": "--green",
+      "fg": "--green-text",
       "fgValue": "#14684f",
       "bg": "--bg",
       "ratio": 5.77,
@@ -115,10 +115,37 @@
     },
     {
       "label": "active tab text on soft",
-      "fg": "--green",
+      "fg": "--green-text",
       "fgValue": "#14684f",
       "bg": "--soft",
       "ratio": 5.61,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "link on surface-2",
+      "fg": "--green-text",
+      "fgValue": "#14684f",
+      "bg": "--surface-2",
+      "ratio": 6.15,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "count badge",
+      "fg": "--on-gold",
+      "fgValue": "#10241d",
+      "bg": "--gold-hi",
+      "ratio": 7.77,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "decision tier chip",
+      "fg": "--st-warn-fg",
+      "fgValue": "#84580f",
+      "bg": "--st-warn-bg",
+      "ratio": 5.28,
       "min": 4.5,
       "pass": true
     },
@@ -438,6 +465,467 @@
       "pass": true
     }
   ],
+  "contrastDark": [
+    {
+      "label": "body text on surface",
+      "fg": "--ink",
+      "fgValue": "#e8f1ea",
+      "bg": "--surface",
+      "ratio": 14.82,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "body text on ground",
+      "fg": "--ink",
+      "fgValue": "#e8f1ea",
+      "bg": "--bg",
+      "ratio": 16.42,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "body text on surface-2",
+      "fg": "--ink",
+      "fgValue": "#e8f1ea",
+      "bg": "--surface-2",
+      "ratio": 13.18,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "muted on surface",
+      "fg": "--muted",
+      "fgValue": "#8fa99b",
+      "bg": "--surface",
+      "ratio": 6.77,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "muted on ground",
+      "fg": "--muted",
+      "fgValue": "#8fa99b",
+      "bg": "--bg",
+      "ratio": 7.5,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "muted on surface-2",
+      "fg": "--muted",
+      "fgValue": "#8fa99b",
+      "bg": "--surface-2",
+      "ratio": 6.02,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "secondary ink on surface",
+      "fg": "--ink-2",
+      "fgValue": "#b9cdc1",
+      "bg": "--surface",
+      "ratio": 10.23,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "link and active tab on surface",
+      "fg": "--green-text",
+      "fgValue": "#4fcfa3",
+      "bg": "--surface",
+      "ratio": 8.78,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "link on ground",
+      "fg": "--green-text",
+      "fgValue": "#4fcfa3",
+      "bg": "--bg",
+      "ratio": 9.73,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "primary button",
+      "fg": "--on-brand",
+      "fgValue": "#fff",
+      "bg": "--green",
+      "ratio": 5.36,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "primary button hover",
+      "fg": "--on-brand",
+      "fgValue": "#fff",
+      "bg": "--green-hover",
+      "ratio": 6.55,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "selected item text",
+      "fg": "--ink",
+      "fgValue": "#e8f1ea",
+      "bg": "--selected-bg",
+      "ratio": 10.9,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "active tab text on soft",
+      "fg": "--green-text",
+      "fgValue": "#4fcfa3",
+      "bg": "--soft",
+      "ratio": 6.46,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "link on surface-2",
+      "fg": "--green-text",
+      "fgValue": "#4fcfa3",
+      "bg": "--surface-2",
+      "ratio": 7.81,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "count badge",
+      "fg": "--on-gold",
+      "fgValue": "#10241d",
+      "bg": "--gold-hi",
+      "ratio": 9.71,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "decision tier chip",
+      "fg": "--st-warn-fg",
+      "fgValue": "#efc066",
+      "bg": "--st-warn-bg",
+      "ratio": 8.52,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "sidebar item",
+      "fg": "--side-fg",
+      "fgValue": "#c4dccf",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 5.18,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "sidebar strong text",
+      "fg": "--side-fg-strong",
+      "fgValue": "#fff",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 7.51,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "sidebar small text",
+      "fg": "--side-muted",
+      "fgValue": "#bad3c6",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 4.73,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "brand logo gold on brandmark (graphic, 3:1)",
+      "fg": "--gold-hi",
+      "fgValue": "#e8c46c",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 4.48,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "label": "campaign text",
+      "fg": "--on-brand",
+      "fgValue": "#fff",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 7.51,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "campaign secondary",
+      "fg": "--campaign-muted",
+      "fgValue": "#c3dccf",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 5.17,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "gold button text",
+      "fg": "--on-gold",
+      "fgValue": "#10241d",
+      "bg": "#f6e3a6 / #dcb257 / #c99a3c",
+      "ratio": 6.32,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "sidebar avatar",
+      "fg": "--on-gold",
+      "fgValue": "#10241d",
+      "bg": "#f6e3a6 / #dcb257 / #c99a3c",
+      "ratio": 6.32,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "prototype badge",
+      "fg": "--badge-fg",
+      "fgValue": "#e6c36d",
+      "bg": "--badge-bg",
+      "ratio": 8.89,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "avatar",
+      "fg": "--avatar-fg",
+      "fgValue": "#4fcfa3",
+      "bg": "--avatar-bg",
+      "ratio": 6.46,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "notes",
+      "fg": "--note-fg",
+      "fgValue": "#b9cdc1",
+      "bg": "--note-bg",
+      "ratio": 9.1,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "empty state",
+      "fg": "--empty-fg",
+      "fgValue": "#8fa99b",
+      "bg": "--surface",
+      "ratio": 6.77,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "danger text",
+      "fg": "--danger",
+      "fgValue": "#f19a8d",
+      "bg": "--surface",
+      "ratio": 7.94,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "success text",
+      "fg": "--success",
+      "fgValue": "#6fd19b",
+      "bg": "--surface",
+      "ratio": 9.18,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "warning",
+      "fg": "--warning-fg",
+      "fgValue": "#efc066",
+      "bg": "--warning-bg",
+      "ratio": 8.52,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip neutral",
+      "fg": "--chip-fg",
+      "fgValue": "#a9bfb2",
+      "bg": "--chip-bg",
+      "ratio": 7.46,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip review",
+      "fg": "--st-review-fg",
+      "fgValue": "#c4aee8",
+      "bg": "--st-review-bg",
+      "ratio": 7.66,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip success",
+      "fg": "--st-success-fg",
+      "fgValue": "#6fd19b",
+      "bg": "--st-success-bg",
+      "ratio": 7.69,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip warn",
+      "fg": "--st-warn-fg",
+      "fgValue": "#efc066",
+      "bg": "--st-warn-bg",
+      "ratio": 8.52,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip danger",
+      "fg": "--st-danger-fg",
+      "fgValue": "#f19a8d",
+      "bg": "--st-danger-bg",
+      "ratio": 7.38,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip scheduled",
+      "fg": "--st-schedule-fg",
+      "fgValue": "#7fd0de",
+      "bg": "--st-schedule-bg",
+      "ratio": 8.1,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip production",
+      "fg": "--st-production-fg",
+      "fgValue": "#9db8da",
+      "bg": "--st-production-bg",
+      "ratio": 7.13,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip publishing",
+      "fg": "--st-publishing-fg",
+      "fgValue": "#7ae3bb",
+      "bg": "--st-publishing-bg",
+      "ratio": 8.14,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip success (small)",
+      "fg": "--chip-success-fg",
+      "fgValue": "#6fd19b",
+      "bg": "--chip-success-bg",
+      "ratio": 7.69,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip danger (small)",
+      "fg": "--chip-danger-fg",
+      "fgValue": "#f19a8d",
+      "bg": "--chip-danger-bg",
+      "ratio": 7.38,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "calendar entry",
+      "fg": "--st-schedule-fg",
+      "fgValue": "#7fd0de",
+      "bg": "--calendar-entry",
+      "ratio": 8.1,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "toast text",
+      "fg": "--on-brand",
+      "fgValue": "#fff",
+      "bg": "--toast-bg",
+      "ratio": 18.07,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "toast action",
+      "fg": "--gold-hi",
+      "fgValue": "#e8c46c",
+      "bg": "--toast-bg",
+      "ratio": 10.79,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "media art headline",
+      "fg": "--art-fg",
+      "fgValue": "#f6efd8",
+      "bg": "--art-bg",
+      "ratio": 12.06,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "media art text",
+      "fg": "--art-text",
+      "fgValue": "#c3dccf",
+      "bg": "--art-bg",
+      "ratio": 9.55,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "media art kicker",
+      "fg": "--art-kicker",
+      "fgValue": "#e8c46c",
+      "bg": "--art-bg",
+      "ratio": 8.28,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "media art brand line",
+      "fg": "--art-brand",
+      "fgValue": "#b7d3c4",
+      "bg": "--art-bg",
+      "ratio": 8.67,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "media art footer",
+      "fg": "--art-base",
+      "fgValue": "#b7d3c4",
+      "bg": "--art-bg",
+      "ratio": 8.67,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "video art headline",
+      "fg": "--art-fg",
+      "fgValue": "#f6efd8",
+      "bg": "--art-video-bg",
+      "ratio": 9.08,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "raw art headline",
+      "fg": "--art-fg",
+      "fgValue": "#f6efd8",
+      "bg": "--art-raw-bg",
+      "ratio": 6.89,
+      "min": 4.5,
+      "pass": true
+    }
+  ],
   "checks": [
     {
       "name": "default design is Direction A",
@@ -482,7 +970,7 @@
     {
       "name": "both faces loaded from the app",
       "pass": true,
-      "detail": "IBM Plex Sans Arabic 400, IBM Plex Sans Arabic 400, IBM Plex Sans Arabic 500, IBM Plex Sans Arabic 500, IBM Plex Sans Arabic 600, IBM Plex Sans Arabic 600, IBM Plex Sans Arabic 700, Reem Kufi 500, Reem Kufi 600, Reem Kufi 600"
+      "detail": "IBM Plex Sans Arabic 400, IBM Plex Sans Arabic 400, IBM Plex Sans Arabic 500, IBM Plex Sans Arabic 500, IBM Plex Sans Arabic 600, IBM Plex Sans Arabic 600, IBM Plex Sans Arabic 700, IBM Plex Sans Arabic 700, Reem Kufi 500, Reem Kufi 600, Reem Kufi 600, Aref Ruqaa 700"
     },
     {
       "name": "reload keeps the second design",
@@ -870,244 +1358,524 @@
       "detail": "data-identity=emerald"
     },
     {
-      "name": "contrast body text on surface 15.78:1",
+      "name": "contrast light body text on surface 15.78:1",
       "pass": true,
       "detail": "--ink (#10241d) on --surface"
     },
     {
-      "name": "contrast body text on ground 13.94:1",
+      "name": "contrast light body text on ground 13.94:1",
       "pass": true,
       "detail": "--ink (#10241d) on --bg"
     },
     {
-      "name": "contrast body text on surface-2 14.86:1",
+      "name": "contrast light body text on surface-2 14.86:1",
       "pass": true,
       "detail": "--ink (#10241d) on --surface-2"
     },
     {
-      "name": "contrast muted on surface 5.63:1",
+      "name": "contrast light muted on surface 5.63:1",
       "pass": true,
       "detail": "--muted (#526b5e) on --surface"
     },
     {
-      "name": "contrast muted on ground 4.97:1",
+      "name": "contrast light muted on ground 4.97:1",
       "pass": true,
       "detail": "--muted (#526b5e) on --bg"
     },
     {
-      "name": "contrast muted on surface-2 5.3:1",
+      "name": "contrast light muted on surface-2 5.3:1",
       "pass": true,
       "detail": "--muted (#526b5e) on --surface-2"
     },
     {
-      "name": "contrast secondary ink on surface 7.69:1",
+      "name": "contrast light secondary ink on surface 7.69:1",
       "pass": true,
       "detail": "--ink-2 (#3b574b) on --surface"
     },
     {
-      "name": "contrast link and active tab on surface 6.53:1",
+      "name": "contrast light link and active tab on surface 6.53:1",
       "pass": true,
-      "detail": "--green (#14684f) on --surface"
+      "detail": "--green-text (#14684f) on --surface"
     },
     {
-      "name": "contrast link on ground 5.77:1",
+      "name": "contrast light link on ground 5.77:1",
       "pass": true,
-      "detail": "--green (#14684f) on --bg"
+      "detail": "--green-text (#14684f) on --bg"
     },
     {
-      "name": "contrast primary button 6.72:1",
+      "name": "contrast light primary button 6.72:1",
       "pass": true,
       "detail": "--on-brand (#fff) on --green"
     },
     {
-      "name": "contrast primary button hover 8.19:1",
+      "name": "contrast light primary button hover 8.19:1",
       "pass": true,
       "detail": "--on-brand (#fff) on --green-hover"
     },
     {
-      "name": "contrast selected item text 13.56:1",
+      "name": "contrast light selected item text 13.56:1",
       "pass": true,
       "detail": "--ink (#10241d) on --selected-bg"
     },
     {
-      "name": "contrast active tab text on soft 5.61:1",
+      "name": "contrast light active tab text on soft 5.61:1",
       "pass": true,
-      "detail": "--green (#14684f) on --soft"
+      "detail": "--green-text (#14684f) on --soft"
     },
     {
-      "name": "contrast sidebar item 5.18:1",
+      "name": "contrast light link on surface-2 6.15:1",
       "pass": true,
-      "detail": "--side-fg (#c4dccf) on #12604a / #0b3a2d / #06241b"
+      "detail": "--green-text (#14684f) on --surface-2"
     },
     {
-      "name": "contrast sidebar strong text 7.51:1",
+      "name": "contrast light count badge 7.77:1",
       "pass": true,
-      "detail": "--side-fg-strong (#fff) on #12604a / #0b3a2d / #06241b"
+      "detail": "--on-gold (#10241d) on --gold-hi"
     },
     {
-      "name": "contrast sidebar small text 4.73:1",
-      "pass": true,
-      "detail": "--side-muted (#bad3c6) on #12604a / #0b3a2d / #06241b"
-    },
-    {
-      "name": "contrast brand logo gold on brandmark (graphic, 3:1) 3.59:1",
-      "pass": true,
-      "detail": "--gold-hi (#d9ad4f) on #12604a / #0b3a2d / #06241b"
-    },
-    {
-      "name": "contrast campaign text 7.51:1",
-      "pass": true,
-      "detail": "--on-brand (#fff) on #12604a / #0b3a2d / #06241b"
-    },
-    {
-      "name": "contrast campaign secondary 5.17:1",
-      "pass": true,
-      "detail": "--campaign-muted (#c3dccf) on #12604a / #0b3a2d / #06241b"
-    },
-    {
-      "name": "contrast gold button text 6.32:1",
-      "pass": true,
-      "detail": "--on-gold (#10241d) on #f6e3a6 / #dcb257 / #c99a3c"
-    },
-    {
-      "name": "contrast sidebar avatar 6.32:1",
-      "pass": true,
-      "detail": "--on-gold (#10241d) on #f6e3a6 / #dcb257 / #c99a3c"
-    },
-    {
-      "name": "contrast prototype badge 5.14:1",
-      "pass": true,
-      "detail": "--badge-fg (#7d5a14) on --badge-bg"
-    },
-    {
-      "name": "contrast avatar 5.61:1",
-      "pass": true,
-      "detail": "--avatar-fg (#14684f) on --avatar-bg"
-    },
-    {
-      "name": "contrast notes 7.24:1",
-      "pass": true,
-      "detail": "--note-fg (#3b574b) on --note-bg"
-    },
-    {
-      "name": "contrast empty state 5.63:1",
-      "pass": true,
-      "detail": "--empty-fg (#526b5e) on --surface"
-    },
-    {
-      "name": "contrast danger text 6.41:1",
-      "pass": true,
-      "detail": "--danger (#a23a2e) on --surface"
-    },
-    {
-      "name": "contrast success text 6.28:1",
-      "pass": true,
-      "detail": "--success (#1f6b45) on --surface"
-    },
-    {
-      "name": "contrast warning 5.28:1",
-      "pass": true,
-      "detail": "--warning-fg (#84580f) on --warning-bg"
-    },
-    {
-      "name": "contrast chip neutral 5.5:1",
-      "pass": true,
-      "detail": "--chip-fg (#4d6358) on --chip-bg"
-    },
-    {
-      "name": "contrast chip review 5.6:1",
-      "pass": true,
-      "detail": "--st-review-fg (#6a4f8f) on --st-review-bg"
-    },
-    {
-      "name": "contrast chip success 5.52:1",
-      "pass": true,
-      "detail": "--st-success-fg (#1f6b45) on --st-success-bg"
-    },
-    {
-      "name": "contrast chip warn 5.28:1",
+      "name": "contrast light decision tier chip 5.28:1",
       "pass": true,
       "detail": "--st-warn-fg (#84580f) on --st-warn-bg"
     },
     {
-      "name": "contrast chip danger 5.45:1",
+      "name": "contrast light sidebar item 5.18:1",
+      "pass": true,
+      "detail": "--side-fg (#c4dccf) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast light sidebar strong text 7.51:1",
+      "pass": true,
+      "detail": "--side-fg-strong (#fff) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast light sidebar small text 4.73:1",
+      "pass": true,
+      "detail": "--side-muted (#bad3c6) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast light brand logo gold on brandmark (graphic, 3:1) 3.59:1",
+      "pass": true,
+      "detail": "--gold-hi (#d9ad4f) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast light campaign text 7.51:1",
+      "pass": true,
+      "detail": "--on-brand (#fff) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast light campaign secondary 5.17:1",
+      "pass": true,
+      "detail": "--campaign-muted (#c3dccf) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast light gold button text 6.32:1",
+      "pass": true,
+      "detail": "--on-gold (#10241d) on #f6e3a6 / #dcb257 / #c99a3c"
+    },
+    {
+      "name": "contrast light sidebar avatar 6.32:1",
+      "pass": true,
+      "detail": "--on-gold (#10241d) on #f6e3a6 / #dcb257 / #c99a3c"
+    },
+    {
+      "name": "contrast light prototype badge 5.14:1",
+      "pass": true,
+      "detail": "--badge-fg (#7d5a14) on --badge-bg"
+    },
+    {
+      "name": "contrast light avatar 5.61:1",
+      "pass": true,
+      "detail": "--avatar-fg (#14684f) on --avatar-bg"
+    },
+    {
+      "name": "contrast light notes 7.24:1",
+      "pass": true,
+      "detail": "--note-fg (#3b574b) on --note-bg"
+    },
+    {
+      "name": "contrast light empty state 5.63:1",
+      "pass": true,
+      "detail": "--empty-fg (#526b5e) on --surface"
+    },
+    {
+      "name": "contrast light danger text 6.41:1",
+      "pass": true,
+      "detail": "--danger (#a23a2e) on --surface"
+    },
+    {
+      "name": "contrast light success text 6.28:1",
+      "pass": true,
+      "detail": "--success (#1f6b45) on --surface"
+    },
+    {
+      "name": "contrast light warning 5.28:1",
+      "pass": true,
+      "detail": "--warning-fg (#84580f) on --warning-bg"
+    },
+    {
+      "name": "contrast light chip neutral 5.5:1",
+      "pass": true,
+      "detail": "--chip-fg (#4d6358) on --chip-bg"
+    },
+    {
+      "name": "contrast light chip review 5.6:1",
+      "pass": true,
+      "detail": "--st-review-fg (#6a4f8f) on --st-review-bg"
+    },
+    {
+      "name": "contrast light chip success 5.52:1",
+      "pass": true,
+      "detail": "--st-success-fg (#1f6b45) on --st-success-bg"
+    },
+    {
+      "name": "contrast light chip warn 5.28:1",
+      "pass": true,
+      "detail": "--st-warn-fg (#84580f) on --st-warn-bg"
+    },
+    {
+      "name": "contrast light chip danger 5.45:1",
       "pass": true,
       "detail": "--st-danger-fg (#a23a2e) on --st-danger-bg"
     },
     {
-      "name": "contrast chip scheduled 6.1:1",
+      "name": "contrast light chip scheduled 6.1:1",
       "pass": true,
       "detail": "--st-schedule-fg (#17606f) on --st-schedule-bg"
     },
     {
-      "name": "contrast chip production 6.2:1",
+      "name": "contrast light chip production 6.2:1",
       "pass": true,
       "detail": "--st-production-fg (#3f5876) on --st-production-bg"
     },
     {
-      "name": "contrast chip publishing 6.5:1",
+      "name": "contrast light chip publishing 6.5:1",
       "pass": true,
       "detail": "--st-publishing-fg (#0f5c46) on --st-publishing-bg"
     },
     {
-      "name": "contrast chip success (small) 5.52:1",
+      "name": "contrast light chip success (small) 5.52:1",
       "pass": true,
       "detail": "--chip-success-fg (#1f6b45) on --chip-success-bg"
     },
     {
-      "name": "contrast chip danger (small) 5.45:1",
+      "name": "contrast light chip danger (small) 5.45:1",
       "pass": true,
       "detail": "--chip-danger-fg (#a23a2e) on --chip-danger-bg"
     },
     {
-      "name": "contrast calendar entry 6.1:1",
+      "name": "contrast light calendar entry 6.1:1",
       "pass": true,
       "detail": "--st-schedule-fg (#17606f) on --calendar-entry"
     },
     {
-      "name": "contrast toast text 16.46:1",
+      "name": "contrast light toast text 16.46:1",
       "pass": true,
       "detail": "--on-brand (#fff) on --toast-bg"
     },
     {
-      "name": "contrast toast action 7.87:1",
+      "name": "contrast light toast action 7.87:1",
       "pass": true,
       "detail": "--gold-hi (#d9ad4f) on --toast-bg"
     },
     {
-      "name": "contrast media art headline 11.02:1",
+      "name": "contrast light media art headline 11.02:1",
       "pass": true,
       "detail": "--art-fg (#f6efd8) on --art-bg"
     },
     {
-      "name": "contrast media art text 8.72:1",
+      "name": "contrast light media art text 8.72:1",
       "pass": true,
       "detail": "--art-text (#c3dccf) on --art-bg"
     },
     {
-      "name": "contrast media art kicker 7.57:1",
+      "name": "contrast light media art kicker 7.57:1",
       "pass": true,
       "detail": "--art-kicker (#e8c46c) on --art-bg"
     },
     {
-      "name": "contrast media art brand line 7.92:1",
+      "name": "contrast light media art brand line 7.92:1",
       "pass": true,
       "detail": "--art-brand (#b7d3c4) on --art-bg"
     },
     {
-      "name": "contrast media art footer 7.92:1",
+      "name": "contrast light media art footer 7.92:1",
       "pass": true,
       "detail": "--art-base (#b7d3c4) on --art-bg"
     },
     {
-      "name": "contrast video art headline 9.08:1",
+      "name": "contrast light video art headline 9.08:1",
       "pass": true,
       "detail": "--art-fg (#f6efd8) on --art-video-bg"
     },
     {
-      "name": "contrast raw art headline 6.89:1",
+      "name": "contrast light raw art headline 6.89:1",
       "pass": true,
       "detail": "--art-fg (#f6efd8) on --art-raw-bg"
+    },
+    {
+      "name": "evening mode follows the device in the second design",
+      "pass": true,
+      "detail": "rgb(7, 19, 14)"
+    },
+    {
+      "name": "contrast evening body text on surface 14.82:1",
+      "pass": true,
+      "detail": "--ink (#e8f1ea) on --surface"
+    },
+    {
+      "name": "contrast evening body text on ground 16.42:1",
+      "pass": true,
+      "detail": "--ink (#e8f1ea) on --bg"
+    },
+    {
+      "name": "contrast evening body text on surface-2 13.18:1",
+      "pass": true,
+      "detail": "--ink (#e8f1ea) on --surface-2"
+    },
+    {
+      "name": "contrast evening muted on surface 6.77:1",
+      "pass": true,
+      "detail": "--muted (#8fa99b) on --surface"
+    },
+    {
+      "name": "contrast evening muted on ground 7.5:1",
+      "pass": true,
+      "detail": "--muted (#8fa99b) on --bg"
+    },
+    {
+      "name": "contrast evening muted on surface-2 6.02:1",
+      "pass": true,
+      "detail": "--muted (#8fa99b) on --surface-2"
+    },
+    {
+      "name": "contrast evening secondary ink on surface 10.23:1",
+      "pass": true,
+      "detail": "--ink-2 (#b9cdc1) on --surface"
+    },
+    {
+      "name": "contrast evening link and active tab on surface 8.78:1",
+      "pass": true,
+      "detail": "--green-text (#4fcfa3) on --surface"
+    },
+    {
+      "name": "contrast evening link on ground 9.73:1",
+      "pass": true,
+      "detail": "--green-text (#4fcfa3) on --bg"
+    },
+    {
+      "name": "contrast evening primary button 5.36:1",
+      "pass": true,
+      "detail": "--on-brand (#fff) on --green"
+    },
+    {
+      "name": "contrast evening primary button hover 6.55:1",
+      "pass": true,
+      "detail": "--on-brand (#fff) on --green-hover"
+    },
+    {
+      "name": "contrast evening selected item text 10.9:1",
+      "pass": true,
+      "detail": "--ink (#e8f1ea) on --selected-bg"
+    },
+    {
+      "name": "contrast evening active tab text on soft 6.46:1",
+      "pass": true,
+      "detail": "--green-text (#4fcfa3) on --soft"
+    },
+    {
+      "name": "contrast evening link on surface-2 7.81:1",
+      "pass": true,
+      "detail": "--green-text (#4fcfa3) on --surface-2"
+    },
+    {
+      "name": "contrast evening count badge 9.71:1",
+      "pass": true,
+      "detail": "--on-gold (#10241d) on --gold-hi"
+    },
+    {
+      "name": "contrast evening decision tier chip 8.52:1",
+      "pass": true,
+      "detail": "--st-warn-fg (#efc066) on --st-warn-bg"
+    },
+    {
+      "name": "contrast evening sidebar item 5.18:1",
+      "pass": true,
+      "detail": "--side-fg (#c4dccf) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast evening sidebar strong text 7.51:1",
+      "pass": true,
+      "detail": "--side-fg-strong (#fff) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast evening sidebar small text 4.73:1",
+      "pass": true,
+      "detail": "--side-muted (#bad3c6) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast evening brand logo gold on brandmark (graphic, 3:1) 4.48:1",
+      "pass": true,
+      "detail": "--gold-hi (#e8c46c) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast evening campaign text 7.51:1",
+      "pass": true,
+      "detail": "--on-brand (#fff) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast evening campaign secondary 5.17:1",
+      "pass": true,
+      "detail": "--campaign-muted (#c3dccf) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast evening gold button text 6.32:1",
+      "pass": true,
+      "detail": "--on-gold (#10241d) on #f6e3a6 / #dcb257 / #c99a3c"
+    },
+    {
+      "name": "contrast evening sidebar avatar 6.32:1",
+      "pass": true,
+      "detail": "--on-gold (#10241d) on #f6e3a6 / #dcb257 / #c99a3c"
+    },
+    {
+      "name": "contrast evening prototype badge 8.89:1",
+      "pass": true,
+      "detail": "--badge-fg (#e6c36d) on --badge-bg"
+    },
+    {
+      "name": "contrast evening avatar 6.46:1",
+      "pass": true,
+      "detail": "--avatar-fg (#4fcfa3) on --avatar-bg"
+    },
+    {
+      "name": "contrast evening notes 9.1:1",
+      "pass": true,
+      "detail": "--note-fg (#b9cdc1) on --note-bg"
+    },
+    {
+      "name": "contrast evening empty state 6.77:1",
+      "pass": true,
+      "detail": "--empty-fg (#8fa99b) on --surface"
+    },
+    {
+      "name": "contrast evening danger text 7.94:1",
+      "pass": true,
+      "detail": "--danger (#f19a8d) on --surface"
+    },
+    {
+      "name": "contrast evening success text 9.18:1",
+      "pass": true,
+      "detail": "--success (#6fd19b) on --surface"
+    },
+    {
+      "name": "contrast evening warning 8.52:1",
+      "pass": true,
+      "detail": "--warning-fg (#efc066) on --warning-bg"
+    },
+    {
+      "name": "contrast evening chip neutral 7.46:1",
+      "pass": true,
+      "detail": "--chip-fg (#a9bfb2) on --chip-bg"
+    },
+    {
+      "name": "contrast evening chip review 7.66:1",
+      "pass": true,
+      "detail": "--st-review-fg (#c4aee8) on --st-review-bg"
+    },
+    {
+      "name": "contrast evening chip success 7.69:1",
+      "pass": true,
+      "detail": "--st-success-fg (#6fd19b) on --st-success-bg"
+    },
+    {
+      "name": "contrast evening chip warn 8.52:1",
+      "pass": true,
+      "detail": "--st-warn-fg (#efc066) on --st-warn-bg"
+    },
+    {
+      "name": "contrast evening chip danger 7.38:1",
+      "pass": true,
+      "detail": "--st-danger-fg (#f19a8d) on --st-danger-bg"
+    },
+    {
+      "name": "contrast evening chip scheduled 8.1:1",
+      "pass": true,
+      "detail": "--st-schedule-fg (#7fd0de) on --st-schedule-bg"
+    },
+    {
+      "name": "contrast evening chip production 7.13:1",
+      "pass": true,
+      "detail": "--st-production-fg (#9db8da) on --st-production-bg"
+    },
+    {
+      "name": "contrast evening chip publishing 8.14:1",
+      "pass": true,
+      "detail": "--st-publishing-fg (#7ae3bb) on --st-publishing-bg"
+    },
+    {
+      "name": "contrast evening chip success (small) 7.69:1",
+      "pass": true,
+      "detail": "--chip-success-fg (#6fd19b) on --chip-success-bg"
+    },
+    {
+      "name": "contrast evening chip danger (small) 7.38:1",
+      "pass": true,
+      "detail": "--chip-danger-fg (#f19a8d) on --chip-danger-bg"
+    },
+    {
+      "name": "contrast evening calendar entry 8.1:1",
+      "pass": true,
+      "detail": "--st-schedule-fg (#7fd0de) on --calendar-entry"
+    },
+    {
+      "name": "contrast evening toast text 18.07:1",
+      "pass": true,
+      "detail": "--on-brand (#fff) on --toast-bg"
+    },
+    {
+      "name": "contrast evening toast action 10.79:1",
+      "pass": true,
+      "detail": "--gold-hi (#e8c46c) on --toast-bg"
+    },
+    {
+      "name": "contrast evening media art headline 12.06:1",
+      "pass": true,
+      "detail": "--art-fg (#f6efd8) on --art-bg"
+    },
+    {
+      "name": "contrast evening media art text 9.55:1",
+      "pass": true,
+      "detail": "--art-text (#c3dccf) on --art-bg"
+    },
+    {
+      "name": "contrast evening media art kicker 8.28:1",
+      "pass": true,
+      "detail": "--art-kicker (#e8c46c) on --art-bg"
+    },
+    {
+      "name": "contrast evening media art brand line 8.67:1",
+      "pass": true,
+      "detail": "--art-brand (#b7d3c4) on --art-bg"
+    },
+    {
+      "name": "contrast evening media art footer 8.67:1",
+      "pass": true,
+      "detail": "--art-base (#b7d3c4) on --art-bg"
+    },
+    {
+      "name": "contrast evening video art headline 9.08:1",
+      "pass": true,
+      "detail": "--art-fg (#f6efd8) on --art-video-bg"
+    },
+    {
+      "name": "contrast evening raw art headline 6.89:1",
+      "pass": true,
+      "detail": "--art-fg (#f6efd8) on --art-raw-bg"
+    },
+    {
+      "name": "Direction A has no evening mode",
+      "pass": true,
+      "detail": "rgb(244, 246, 242)"
     }
   ]
 }

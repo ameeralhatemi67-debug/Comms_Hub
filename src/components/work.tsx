@@ -29,6 +29,7 @@ import {
 import { useHub } from '@/lib/store';
 import { ReleaseHistory } from './release-history';
 import { VideoNotes } from './video-notes';
+import { useIdentity } from '@/lib/use-identity';
 import { Title, Panel, StatusChip, Empty, MediaPreview, Tabs, VariantCopy } from './ui';
 
 export function WorkRow({ work: w }: { work: Work }) {
@@ -529,8 +530,23 @@ export function Composer({ work }: { work?: Work }) {
 }
 
 
+/** Templates suggested per media kind when opening Motion Studio from a work (I-023). */
+const motionSuggestions: Record<string, [string, string][]> = {
+  poster: [
+    ['rp-editorial', 'الشريط التحريري'],
+    ['rp-scroll', 'المخطوطة'],
+    ['fr-broadcast', 'إطار التغطية'],
+  ],
+  video: [
+    ['fr-broadcast', 'إطار التغطية'],
+    ['rp-editorial', 'الشريط التحريري'],
+    ['rp-orbit', 'مدار الهوية'],
+  ],
+};
+
 export function WorkDetail({ id }: { id: string }) {
   const { state, dispatch } = useHub();
+  const second = useIdentity();
   const [tab, setTab] = useState('overview');
   const [comment, setComment] = useState('');
   const w = state.work.find((x) => x.id === id);
@@ -711,6 +727,22 @@ export function WorkDetail({ id }: { id: string }) {
                 إرسال الإصدار {w.revision} للمراجعة
               </button>
             )}
+          {second && motionSuggestions[asset.kind] && (
+            <Panel title="أنشئ حركة">
+              <p className="muted">قوالب مقترحة لهذا العمل. يُفتح الاستوديو بالقالب وعنوان العمل.</p>
+              <div className="motion-suggest">
+                {motionSuggestions[asset.kind].map(([template, name]) => (
+                  <Link
+                    key={template}
+                    className="button"
+                    href={`/motion?template=${template}&title=${encodeURIComponent(w.title)}&from=${w.id}`}
+                  >
+                    {name}
+                  </Link>
+                ))}
+              </div>
+            </Panel>
+          )}
           {w.comments.length > 0 && (
             <Panel title="آخر ملاحظة">
               <p>{w.comments.at(-1)?.text}</p>

@@ -4,6 +4,9 @@ import { useState } from 'react';
 import {
   assets,
   atRiskSchedules,
+  campaignPulse,
+  personById,
+  pulseStations,
   riskText,
   campaign,
   channelAccounts,
@@ -22,10 +25,12 @@ import {
   teamLoad,
 } from '@/lib/domain';
 import { useHub } from '@/lib/store';
+import { useIdentity } from '@/lib/use-identity';
 import { Title, Panel, Empty, MediaPreview, StatusChip } from './ui';
 import { WorkList, WorkDetail, Composer, WorkRow } from './work';
 import { Approvals, Calendar } from './operations';
 import { Supporting } from './supporting';
+import { ComponentGallery } from './gallery';
 import dynamic from 'next/dynamic';
 
 const MotionStudio = dynamic(() => import('./motion-studio'), {
@@ -34,7 +39,8 @@ const MotionStudio = dynamic(() => import('./motion-studio'), {
 });
 
 function Home() {
-  const { state } = useHub();
+  const { state, dispatch } = useHub();
+  const second = useIdentity();
   const actor = roles[state.role];
   const tiles = homeTiles(state);
 
@@ -66,7 +72,7 @@ function Home() {
 
   return (
     <>
-      <Title title={`صباح الخير، ${actor.user}`} sub={actor.priority}>
+      <Title title="صباح الخير، " accent={actor.user} sub={actor.priority}>
         {actor.create && (
           <Link href="/create" className="button primary">
             إنشاء عمل +
@@ -166,6 +172,12 @@ function Home() {
       ) : (
         <div className="columns wide-first">
           <div>
+            {/* Second design: what needs this person's attention, before anything else. */}
+            {second && (actor.publish || actor.review) && atRiskSchedules(state.work).length > 0 && (
+              <Link className="alert-strip" href="/approvals" role="status">
+                <b>تحتاج انتباهك:</b> {riskText(atRiskSchedules(state.work)[0].risks[0])}
+              </Link>
+            )}
             <section className="campaign">
               <span className="eyebrow">الحملة النشطة · سبتمبر 2026</span>
               <h2>{campaign.title}</h2>
@@ -184,6 +196,7 @@ function Home() {
                   <b>{campaign.pendingApprovals}</b>بانتظار الاعتماد
                 </span>
               </div>
+              {second && <CampaignPulse />}
               <div className="actions">
                 <span>{state.work.length} أعمال في النموذج</span>
                 <span>{campaign.date}</span>
@@ -193,13 +206,52 @@ function Home() {
               </div>
             </section>
 
-            <Panel title={focusTitle}>
-              {focus.length ? (
-                focus.map((w) => <WorkRow work={w} key={w.id} />)
-              ) : (
-                <Empty>لا يوجد عمل يتطلب هذا الدور حالياً.</Empty>
-              )}
-            </Panel>
+            {second ? (
+              <section className="panel decisions" aria-label="قراراتك الآن">
+                <h2>
+                  قراراتك الآن <span className="count-badge">{focus.length}</span>
+                </h2>
+                {focus.map((w) => (
+                  <div className="decision-row" key={w.id}>
+                    <span>
+                      <b>{w.title}</b>
+                      <small>
+                        الإصدار {w.revision} · {personById(w.assignee).name} · <StatusChip status={w.status} />
+                      </small>
+                    </span>
+                    <span className="actions">
+                      {actor.review && w.status === 'IN_REVIEW' ? (
+                        <>
+                          <button className="primary" onClick={() => dispatch({ type: 'approve', id: w.id })}>
+                            اعتماد الإصدار {w.revision}
+                          </button>
+                          <Link className="button" href={`/approvals?work=${w.id}`}>
+                            مراجعة
+                          </Link>
+                        </>
+                      ) : actor.publish ? (
+                        <Link className="button primary" href={`/approvals?work=${w.id}`}>
+                          جدولة
+                        </Link>
+                      ) : (
+                        <Link className="button" href={`/work/${w.id}`}>
+                          فتح
+                        </Link>
+                      )}
+                    </span>
+                  </div>
+                ))}
+                {!focus.length && <Empty>لا يوجد قرار ينتظرك الآن.</Empty>}
+              </section>
+            ) : (
+              <Panel title={focusTitle}>
+                {focus.length ? (
+                  focus.map((w) => <WorkRow work={w} key={w.id} />)
+                ) : (
+                  <Empty>لا يوجد عمل يتطلب هذا الدور حالياً.</Empty>
+                )}
+              </Panel>
+            )}
           </div>
 
           <aside>
@@ -289,6 +341,27 @@ function Home() {
         ))}
       </Panel>
     </>
+  );
+}
+
+/** The campaign's stations on one bar (second design, task 0.3.3.1). */
+function CampaignPulse() {
+  const { state } = useHub();
+  const { counts, current, progress } = campaignPulse(state.work);
+  return (
+    <div className="pulse" aria-label={`نبضة الحملة: المحطة الحالية ${pulseStations[current]}`}>
+      <ol className="stations" style={{ ['--p' as string]: progress }}>
+        {pulseStations.map((name, i) => (
+          <li key={name} className={i < current ? 'done' : i === current ? 'now' : ''}>
+            <i aria-hidden="true">{counts[i]}</i>
+            {name}
+          </li>
+        ))}
+      </ol>
+      <small>
+        المحطة الحالية: {pulseStations[current]} · {counts[current]} أعمال فيها · الإنجاز {Math.round(progress * 100)}%
+      </small>
+    </div>
   );
 }
 
@@ -438,6 +511,7 @@ export function HubPage({ route }: { route: string[] }) {
   if (page === 'calendar') return <Calendar />;
   if (page === 'media') return <Media key={id || 'all'} id={id} />;
   if (page === 'motion') return <MotionStudio />;
+  if (page === 'components') return <ComponentGallery />;
   if (['mail', 'ideas', 'analytics', 'monitoring', 'admin', 'settings', 'account'].includes(page))
     return <Supporting page={page} />;
 

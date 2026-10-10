@@ -2394,3 +2394,18 @@ Phase 0.2.3 corrections built on findings of response R01 (`validation/responses
 - Reviewers and the person assigned to the work may add notes. Notes appear on the review screen and on the producer's work page.
 - «طلب تعديل» offers the notes on the version under review, all ticked; the reviewer may untick any. The chosen notes are appended to the change request, in time order, under «ملاحظات زمنية», and so reach the producer's comments and the release history.
 - Only video work takes these notes.
+
+# 60. Second design: screens and evening mode, 2026-10-11
+
+Extends section 58. Everything here appears only while the second design is on; Direction A is unchanged by it. The switch is the logo: at the top of the sidebar on wider screens, and at the top of the bar on phones, where a double tap switches.
+
+- **Evening mode.** The second design follows the device's dark preference. Text pairs keep at least 4.5 to 1 in both modes. The Motion Studio keeps its own light panels.
+- **Accent word.** The name in the Home greeting is written in Aref Ruqaa, in gold: one accent word per page, as the proposal asks.
+- **Home.** «قراراتك الآن» lists what waits for this person with a count and direct actions: «اعتماد الإصدار N» (the exact version), «مراجعة», «جدولة» for the Publishing Officer, «فتح» for others. The campaign card gains the **campaign pulse**: five stations (المحتوى، التصميم، المراجعة، الجدولة، النشر), how many works stand at each, the current station and overall progress. Leadership and the Publishing Officer see an attention strip when a scheduled item's channel will not be authorized in time.
+- **Approvals.** Above the decision, a note binds it to the exact version: «الاعتماد مرتبط بالإصدار N تحديداً. أي تعديل بعده يُلغيه تلقائياً.» Approving shows the gold **approval stamp** for about two seconds; it does not animate when the user prefers reduced motion.
+- **Phone approval sheet.** On phones the decision buttons sit in a bottom sheet above the navigation bar, at least 44 px tall, approval on its own row.
+- **Notification tiers.** The notification centre groups by «قرارك», «انتباه», «للعلم», with counts, decisions first (`disscussios/notification_model.md`).
+- **Calendar week.** The calendar opens on the week of the scenario date, with a lane per channel (Instagram, X, LinkedIn) and one for internal delivery dates, and a load bar under each day. Dragging a scheduled item to another day, or choosing a new time in its dialog, records a **requested time** only. Requests are listed with the channel risks of the new time; only the Publishing Officer confirms («تأكيد النقل») or drops them. Month and agenda views remain.
+- **Motion from the work.** A poster or video work offers «أنشئ حركة» with three suggested templates; the studio opens on the template with the work's title in its title field and names the work it was opened from.
+- **Component page.** `/components`, outside the navigation, shows every shared component in each state, for whichever design is on.
+- Not built: the command palette (only if the Director wants it).

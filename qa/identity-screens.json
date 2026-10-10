@@ -1,0 +1,297 @@
+{
+  "date": "2026-10-10T22:15:26.610Z",
+  "baseURL": "http://127.0.0.1:3000",
+  "passed": 48,
+  "failed": 0,
+  "errors": [],
+  "checks": [
+    {
+      "task": "A",
+      "name": "Direction A Home has no decisions panel or pulse",
+      "pass": true,
+      "detail": "{\"decisions\":false,\"pulse\":false,\"accentFont\":\"\\\"Segoe UI\\\", Tahoma, Arial, sans-serif\",\"h1Font\":\"\\\"Segoe UI\\\", Tahoma, Arial, sans-serif\"}"
+    },
+    {
+      "task": "A",
+      "name": "Direction A writes the accent word in the heading face",
+      "pass": true,
+      "detail": "{\"decisions\":false,\"pulse\":false,\"accentFont\":\"\\\"Segoe UI\\\", Tahoma, Arial, sans-serif\",\"h1Font\":\"\\\"Segoe UI\\\", Tahoma, Arial, sans-serif\"}"
+    },
+    {
+      "task": "A",
+      "name": "Direction A calendar opens on the month",
+      "pass": true,
+      "detail": "month grid"
+    },
+    {
+      "task": "A",
+      "name": "Direction A notifications keep their tabs",
+      "pass": true,
+      "detail": "tabs"
+    },
+    {
+      "task": "0.3.3.1",
+      "name": "«قراراتك الآن» lists the decisions with a count",
+      "pass": true,
+      "detail": "2 rows, badge 2"
+    },
+    {
+      "task": "0.3.3.1",
+      "name": "campaign pulse shows five stations and one current",
+      "pass": true,
+      "detail": "3المحتوى | 4التصميم | 2المراجعة | 1الجدولة | 1النشر"
+    },
+    {
+      "task": "0.3.3.1",
+      "name": "Home warns about the scheduled item at risk",
+      "pass": true,
+      "detail": "alert"
+    },
+    {
+      "task": "0.3.3.1",
+      "name": "the accent word uses Aref Ruqaa",
+      "pass": true,
+      "detail": "\"Aref Ruqaa\", \"Reem Kufi\", \"Segoe UI\", serif"
+    },
+    {
+      "task": "0.3.3.1",
+      "name": "approving from Home removes the decision",
+      "pass": true,
+      "detail": "2 -> 1"
+    },
+    {
+      "task": "0.3.3.2",
+      "name": "binding note names the exact version (no-preference)",
+      "pass": true,
+      "detail": "إعداد الفيديو الرئيسي · الاعتماد مرتبط بالإصدار 4 تحديداً. أي تعديل بعده يُلغيه تلقائياً."
+    },
+    {
+      "task": "0.3.3.2",
+      "name": "the approval stamp appears (no-preference)",
+      "pass": true,
+      "detail": "اعتُمد الإصدار 4إعداد الفيديو الرئيسي"
+    },
+    {
+      "task": "0.3.3.2",
+      "name": "the stamp does animate",
+      "pass": true,
+      "detail": "stampin"
+    },
+    {
+      "task": "0.3.3.2",
+      "name": "the stamp clears by itself (no-preference)",
+      "pass": true,
+      "detail": "gone"
+    },
+    {
+      "task": "0.3.3.2",
+      "name": "binding note names the exact version (reduce)",
+      "pass": true,
+      "detail": "إعداد الفيديو الرئيسي · الاعتماد مرتبط بالإصدار 4 تحديداً. أي تعديل بعده يُلغيه تلقائياً."
+    },
+    {
+      "task": "0.3.3.2",
+      "name": "the approval stamp appears (reduce)",
+      "pass": true,
+      "detail": "اعتُمد الإصدار 4إعداد الفيديو الرئيسي"
+    },
+    {
+      "task": "0.3.3.2",
+      "name": "the stamp does not animate",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "task": "0.3.3.2",
+      "name": "the stamp clears by itself (reduce)",
+      "pass": true,
+      "detail": "gone"
+    },
+    {
+      "task": "0.3.3.3",
+      "name": "three tiers plus all",
+      "pass": true,
+      "detail": "الكل 2 | قرارك 1 | انتباه 0 | للعلم 1"
+    },
+    {
+      "task": "0.3.3.3",
+      "name": "decisions come first",
+      "pass": true,
+      "detail": "قرارك"
+    },
+    {
+      "task": "0.3.3.3",
+      "name": "a tier shows only its notices",
+      "pass": true,
+      "detail": "للعلم"
+    },
+    {
+      "task": "0.3.4.1",
+      "name": "the second design opens on the week with channel lanes",
+      "pass": true,
+      "detail": "7 days; Instagram,X,LinkedIn,التسليم الداخلي"
+    },
+    {
+      "task": "0.3.4.1",
+      "name": "dragging records a requested time, not a new schedule",
+      "pass": true,
+      "detail": "3 pending"
+    },
+    {
+      "task": "0.3.4.1",
+      "name": "the director sees the request waiting for the publishing officer",
+      "pass": true,
+      "detail": "إعداد منشور Instagramمن 2026-09-23 18:00 إلى 2026-09-24 18:00تفويض X ينتهي 2026-09-23 12:00، قبل موعد النشر. أعد ربط الحساب قبل الموعد.تفويض LinkedIn منتهٍ منذ 2026-09-20 09:00. سيفشل النشر على LinkedIn حتى إعادة الربط.بانتظار تأكيد مسؤول النشر"
+    },
+    {
+      "task": "0.3.4.1",
+      "name": "the publishing officer confirms and the item moves",
+      "pass": true,
+      "detail": "1 moved"
+    },
+    {
+      "task": "0.3.4.1",
+      "name": "a move can be requested from the dialog by keyboard",
+      "pass": true,
+      "detail": "dialog request"
+    },
+    {
+      "task": "0.3.4.2",
+      "name": "a poster work suggests three templates",
+      "pass": true,
+      "detail": "الشريط التحريري | المخطوطة | إطار التغطية"
+    },
+    {
+      "task": "0.3.4.2",
+      "name": "the studio opens on the template with the work title",
+      "pass": true,
+      "detail": "تصميم الملصق | مفتوح من العمل CH-242 بقالب مقترح. شرائط عناوين سفلية تنبثق من الشعار وتنكمش إليه عند الخروج."
+    },
+    {
+      "task": "0.3.2.3",
+      "name": "component page shows every component (Direction A)",
+      "pass": true,
+      "detail": "button-primary,button-default,button-light,button-danger,chips,fields,tabs,segmented,switch,overlays,empty-loading"
+    },
+    {
+      "task": "0.3.2.3",
+      "name": "buttons show normal, hover, focus, disabled and loading (A)",
+      "pass": true,
+      "detail": "5"
+    },
+    {
+      "task": "0.3.2.3",
+      "name": "the switch toggles",
+      "pass": true,
+      "detail": "off"
+    },
+    {
+      "task": "0.3.2.3",
+      "name": "component page shows every component (second design)",
+      "pass": true,
+      "detail": "button-primary,button-default,button-light,button-danger,chips,fields,tabs,segmented,switch,overlays,empty-loading"
+    },
+    {
+      "task": "0.3.2.3",
+      "name": "buttons show normal, hover, focus, disabled and loading (second)",
+      "pass": true,
+      "detail": "5"
+    },
+    {
+      "task": "0.3.2.3",
+      "name": "the switch toggles",
+      "pass": true,
+      "detail": "off"
+    },
+    {
+      "task": "0.3.4.3",
+      "name": "the decision buttons sit in a sticky sheet above the bottom bar",
+      "pass": true,
+      "detail": "{\"position\":\"sticky\",\"heights\":[44,44,44],\"lowest\":760,\"nav\":775}"
+    },
+    {
+      "task": "0.3.4.3",
+      "name": "every decision button is at least 44 px tall",
+      "pass": true,
+      "detail": "[44,44,44]"
+    },
+    {
+      "task": "0.3.4.3",
+      "name": "the logo is in the phone top bar",
+      "pass": true,
+      "detail": "visible"
+    },
+    {
+      "task": "0.3.4.3",
+      "name": "double-tapping the phone logo switches the design off",
+      "pass": true,
+      "detail": "off"
+    },
+    {
+      "task": "0.3.4.3",
+      "name": "and on again",
+      "pass": true,
+      "detail": "on"
+    },
+    {
+      "task": "0.3.4.3",
+      "name": "no sideways scrolling on the phone",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "task": "0.3.2.1",
+      "name": "evening / renders without sideways scrolling",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "task": "0.3.2.1",
+      "name": "evening /work renders without sideways scrolling",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "task": "0.3.2.1",
+      "name": "evening /approvals renders without sideways scrolling",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "task": "0.3.2.1",
+      "name": "evening /calendar renders without sideways scrolling",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "task": "0.3.2.1",
+      "name": "evening /components renders without sideways scrolling",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "task": "0.3.2.1",
+      "name": "evening /motion renders without sideways scrolling",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "task": "0.3.4.2",
+      "name": "the Motion Studio keeps dark text on its light panels in evening mode",
+      "pass": true,
+      "detail": "rgb(16, 36, 29)"
+    },
+    {
+      "task": "all",
+      "name": "no page or console errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "task": "all",
+      "name": "no request leaves the local server",
+      "pass": true,
+      "detail": "none"
+    }
+  ]
+}

@@ -66,11 +66,23 @@ function Rail({ items, selected, busy, onPick }: { items: Graphic[]; selected: s
   </div>;
 }
 
+/** Opened from a work item (task 0.3.4.2, I-023): ?template=<id>&title=<text>&from=<work id>. */
+function fromWork() {
+  const q = new URLSearchParams(window.location.search);
+  const g = catalog.find(item => item.id === q.get('template'));
+  return { g, title: q.get('title') || '', work: q.get('from') || '' };
+}
+
 export default function MotionStudio() {
+  const [start] = useState(fromWork);
   const [assetsReady, setAssetsReady] = useState(false), [assetError, setAssetError] = useState('');
-  const [category, setCategory] = useState<Category>('numbers');
-  const [picked, setPicked] = useState<Record<Category, string>>({ numbers: 'count-up', repine: 'rp-gold', frames: 'fr-mihrab' });
-  const [drafts, setDrafts] = useState<Record<string, Params>>({});
+  const [category, setCategory] = useState<Category>(start.g?.category || 'numbers');
+  const [picked, setPicked] = useState<Record<Category, string>>({ numbers: 'count-up', repine: 'rp-gold', frames: 'fr-mihrab', ...(start.g ? { [start.g.category]: start.g.id } : {}) });
+  // The work's title goes into the template's title field when it has one.
+  const [drafts, setDrafts] = useState<Record<string, Params>>(() =>
+    start.g && start.title && start.g.texts.some(t => t.key === 'title')
+      ? { [start.g.id]: { ...start.g.defaults, title: start.title.slice(0, start.g.texts.find(t => t.key === 'title')!.max) } as Params }
+      : {});
   const [tab, setTab] = useState<TabId>('content');
   const [backdrop, setBackdrop] = useState<Backdrop>('scene'), [win, setWin] = useState<WinMode>('sample'), [safe, setSafe] = useState(false);
   const [video, setVideo] = useState<HTMLVideoElement | null>(null), [videoName, setVideoName] = useState('');
@@ -145,7 +157,7 @@ export default function MotionStudio() {
   const panels: Record<TabId, React.ReactNode> = { content, colors: colorsTab, elements: elementsTab, timing: timingTab, motion: motionTab };
 
   return <div className="ms">
-    <Title title="استوديو الحركة" sub={intro[category]}>
+    <Title title="استوديو الحركة" sub={start.work ? `مفتوح من العمل ${start.work} بقالب مقترح. ${intro[category]}` : intro[category]}>
       <Link href="/media" className="button">مكتبة الوسائط</Link>
     </Title>
     <Tabs items={groups.map(group => ({ id: group.id, label: `${group.label} (${catalog.filter(item => item.category === group.id).length})` }))} value={category} onChange={value => changeCategory(value as Category)} />
