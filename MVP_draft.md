@@ -2332,3 +2332,13 @@ User-requested extension to Version 0: add **استوديو الحركة** at `/
 **Boundaries.** Contact defaults are empty and hidden: the source library's numbers belong to another organization. Templates containing the Hedayah logo and verses say so. Chart trajectories and waveform decoration are illustrative. Downloads do not attach to work, enter the media library or publish. Access restrictions, persisted settings, asset upload and storage are deferred; the page is open to every prototype persona and implies no authentication or RBAC.
 
 The immutable architecture records remain unchanged. This addition does not satisfy or bypass the department-validation gate.
+
+# 58. Second design behind a toggle, 2026-10-10
+
+Owner directive: the proposed identity «الهوية الجديدة لمركز الاتصال» (Roadmap Checkpoint 0.3) is available in the prototype as an option, not as a replacement. Direction A (`DESIGN.md`) remains the default.
+
+**Switch.** A double-click on the logo at the top of the sidebar switches between the current design and the second design. A status message confirms the result: «التصميم: الهوية الجديدة لمركز الاتصال» or «التصميم: التصميم الحالي». A single click on the logo still opens Home. The choice is remembered in that browser only and is restored before the page first paints. There is no visible control and no keyboard path; the switch is for comparing the two designs, not a user setting. On phone widths the sidebar, and so the logo, is hidden, so a phone shows whichever design that browser last chose.
+
+**What changes.** Colour tokens, type faces (Reem Kufi for headings, IBM Plex Sans Arabic for text, both served by the app), the emerald-depth sidebar with the lattice texture and a gold marker on the active item, rounder surfaces with soft elevation, pill status chips with a dot, a gold campaign action, and short motion that is off when the user asks for reduced motion.
+
+**What does not change.** Pages, layout, navigation, roles, statuses, Arabic terms, version-bound approval, and the local-simulation boundary. Evening mode, the Aref Ruqaa accent word and the decision screens of Checkpoint 0.3 are not built.

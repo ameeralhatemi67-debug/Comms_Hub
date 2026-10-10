@@ -220,3 +220,11 @@ test('every role gets its own home tiles and no two roles share the same set', (
 
   assert.equal(signatures.size, roleIds.length, 'each role must present a distinct tile set');
 });
+
+test('a design switch notice shows as a message and changes nothing else', () => {
+  const s = initialState();
+  const n = reducer(s, { type: 'notify', text: 'التصميم: الهوية الجديدة لمركز الاتصال' });
+  assert.equal(n.message, 'التصميم: الهوية الجديدة لمركز الاتصال');
+  assert.deepEqual({ ...n, message: s.message }, s);
+  assert.equal(reducer(n, { type: 'clear' }).message, '');
+});

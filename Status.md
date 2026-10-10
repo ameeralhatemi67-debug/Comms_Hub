@@ -28,7 +28,7 @@ related:
 
 Updated 2026-10-10. **CHECKPOINT 0.2 IN PROGRESS.** Checkpoint 0.1 is complete and accepted. Phase 0.2.1 (Workflow Mapping) is complete. **Phase 0.2.2 (Guided Department Validation) is closed on the Director's response alone:** R01 arrived on 2026-10-10, and the same day the owner directed that the Director's input is enough, so the remaining participants and the frozen build are skipped (`[-]` in `Roadmap.md`; exit gate criteria 1 and 2 waived by that directive). Phase 0.2.3 Round 1 corrections start on 2026-10-11. The day-by-day plan is in `Roadmap.md` under "Work plan from 2026-10-11".
 
-Design: Direction A throughout; B only for larger media previews. See DESIGN.md. A new identity, «الهوية الجديدة لمركز الاتصال», is **proposed and not approved**; it is planned as optional Checkpoint 0.3 and waits on the Director (decision D-01).
+Design: Direction A is the default; B only for larger media previews. See DESIGN.md. The new identity, «الهوية الجديدة لمركز الاتصال», is **built as an option, not approved as the default** (2026-10-10, owner directive): a double-click on the sidebar logo switches between the two designs, remembered per browser. See `MVP_draft.md` section 58. D-01 decides which design is the default.
 
 ## Validation so far (2026-10-10)
 
@@ -44,12 +44,14 @@ Design: Direction A throughout; B only for larger media previews. See DESIGN.md.
 
 | ID | Decision |
 |---|---|
-| D-01 | Approve, adjust or decline the new identity (send the artifact link to the Director) |
-| D-02 | Count self-administered form responses as sessions, with "facilitator: none" recorded |
+| D-01 | With the Director, on the live toggle: make the new identity the default, keep it as an option, adjust it, or remove it |
+| D-02 | Count self-administered form responses as sessions, with "facilitator: none" recorded. Effectively settled by the 2026-10-10 directive that the Director's response alone is enough; to be confirmed |
 | D-03 | Confirm R01's provisional severities and the Round 1 correction list |
 
 ## Verified capability
 
+- **Design toggle (2026-10-10).** Double-click on the sidebar logo switches between Direction A and the new identity; restored before first paint; fonts served by the app. Direction A is pixel-identical to before on 63 captures (`qa/colour-tokens.json`). `qa/identity-toggle.cjs` 134 of 134, including 48 contrast pairs and no request leaving the machine. Regressions 34/34, journey PASS, motion studio 205/205, domain tests 9/9, typecheck and build clean. Evening mode and the component QA page are not built.
+- **Colour tokens (task 0.3.1.1).** Every interface colour in `globals.css` is one of 73 named tokens.
 - `/motion`, the local Arabic motion studio, revised after first review (2026-10-08): 26 templates (8 numbers, 8 Repine, 10 video frames), template rail with live thumbnails, stage with transport and phase strip, tabbed settings with every timing and motion slider restored, frame ratios with true shapes and stated output sizes, window preview (sample, own clip, key green, transparent) and Reels safe zones, and downloads (MP4, transparent MOV, PNG sequence ZIP, single PNG) up to 4K and 60 fps with progress, cancel and a persistent save link. See `MVP_draft.md` section 57. Edits reset on refresh; access restrictions and asset attachment are deferred.
 - Motion studio evidence, 2026-10-08 (second round): `node qa/motion-studio.cjs` passed all checks, including real downloads decoded with ffprobe and ffmpeg; existing regression 34/34; domain tests 8/8; typecheck and production build pass. Details in `progress.md` and `qa/motion-studio.json`.
 
@@ -83,7 +85,7 @@ Design: Direction A throughout; B only for larger media previews. See DESIGN.md.
 - State/history reset on refresh. Content types share one composer. Calendar supports month/agenda only, without week/day or date-level creation. Settings and Admin are visual shells with no enforcement.
 - No real authentication/RBAC, database, OAuth, publishing, mail, AI, Drive/NAS, workers, external notification delivery or production secrets/services.
 - No delegation of review authority and no urgent or crisis path exist. Both are recorded as unsupported assumptions, not oversights.
-- This is not formal accessibility certification, production readiness or department sign-off. **Human validation has begun with one participant of the six the exit gate requires.**
+- This is not formal accessibility certification, production readiness or department sign-off. **Human validation rests on one participant, the Director, by owner directive; the exit gate's six-participant and five-role-group criteria are waived, not met.**
 - Extra ideas outside the Roadmap (video and photo editing, agent suggestions, Severity 4 preferences) are parked in `Ideas_Backlog.md`. None is planned work.
 - Phase 0.2.1 corrected only defects that contradict `MVP_draft.md` on their face. It deliberately did not resolve any of the seven open questions, add delegation or an urgent path, change any Arabic term, or restructure the composer. Those belong to Phase 0.2.3, after real findings exist.
 
@@ -93,10 +95,8 @@ Evidence, reproduction instructions and precise accepted scope for Checkpoint 0.
 
 Sunday 2026-10-11, in this order:
 
-1. Freeze the validation build: tag today's commit and serve it from its own working copy for the remaining participants (task 0.2.2.6).
-2. Ask the Director who completed sections S3 to S7 of R01, and test the form's branching once with a dummy role (task 0.2.2.7).
-3. Send the form to the Assistant Director first, then a content specialist, the Media Producer, the Publishing Officer and a sixth participant, two of them on a phone (task 0.2.2.8).
-4. Owner: send the identity proposal to the Director (D-01), and answer D-02 and D-03.
-5. Start Round 1 with the scenario date and overdue count (task 0.2.3.5).
+1. Owner: show the Director both designs on the live toggle (D-01), and answer D-03 (R01 severities); confirm D-02.
+2. Start Round 1 with the scenario date and overdue count (task 0.2.3.5), then 0.2.3.6 to 0.2.3.10 in the Roadmap's order.
+3. Re-check the Round 1 corrections with the Director (task 0.2.3.11).
 
-Nothing in Phase 0.2.2 can be executed, simulated or substituted by an agent. Version 1 remains gated on the Checkpoint 0.2 exit gate.
+Phase 0.2.2 is closed on the Director's response by owner directive; tasks 0.2.2.2 to 0.2.2.8 are skipped, not pending. Version 1 remains gated on the Checkpoint 0.2 exit gate, with criteria 1 and 2 waived by that directive.

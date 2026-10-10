@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { noticesFor, roles, type Role } from '@/lib/domain';
 import { useHub } from '@/lib/store';
+import { toggleIdentity } from '@/lib/identity';
 import { Modal, Empty, LogoLoader } from './ui';
 
 const nav = [
@@ -84,7 +85,22 @@ export function Shell({ children }: { children: ReactNode }) {
         انتقل إلى المحتوى
       </a>
       <aside className="sidebar">
-        <Link href="/" className="brand">
+        <Link
+          href="/"
+          className="brand"
+          // A double-click on the logo switches between the current design and the
+          // second design (Roadmap Checkpoint 0.3). mousedown is cancelled on the
+          // second click so the double-click does not select the brand text.
+          onMouseDown={(e) => {
+            if (e.detail > 1) e.preventDefault();
+          }}
+          onDoubleClick={() =>
+            dispatch({
+              type: 'notify',
+              text: toggleIdentity() ? 'التصميم: الهوية الجديدة لمركز الاتصال' : 'التصميم: التصميم الحالي',
+            })
+          }
+        >
           <span className="brandmark">
             <LogoLoader size={26} mode="static" color="currentColor" ariaLabel="شعار مركز الاتصال" />
           </span>

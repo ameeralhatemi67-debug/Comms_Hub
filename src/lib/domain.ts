@@ -390,6 +390,7 @@ export type Action =
   | { type: 'check'; id: string; index: number }
   | { type: 'read'; id: string }
   | { type: 'clear' }
+  | { type: 'notify'; text: string }
   | { type: 'reset' };
 
 const blankVariants = { Instagram: '', X: '', LinkedIn: '' };
@@ -895,6 +896,7 @@ export function reducer(state: State, a: Action): State {
   if (a.type === 'role') return { ...state, role: a.role, message: '' };
   if (a.type === 'reset') return initialState();
   if (a.type === 'clear') return { ...state, message: '' };
+  if (a.type === 'notify') return { ...state, message: a.text };
   if (a.type === 'read')
     return { ...state, notices: state.notices.map((n) => (n.id === a.id ? { ...n, read: true } : n)) };
 

@@ -1,0 +1,130 @@
+/* Second design: «الهوية الجديدة لمركز الاتصال» (Roadmap Checkpoint 0.3).
+   Source: the proposal artifact https://claude.ai/artifact/51Rsuxkv8LeDK1JJEpq6nr,
+   light mode. Applied only while <html data-identity="emerald">; a double-click on
+   the sidebar logo toggles it (src/lib/identity.ts). Direction A in globals.css
+   stays the default and is untouched by this file.
+
+   Part 1 re-maps the colour tokens of globals.css. Part 2 adds what tokens cannot
+   express: type faces, the emerald-depth sidebar with its lattice, the gold active
+   marker, rounder surfaces and soft elevation. Roles, statuses, Arabic terms and
+   layout are unchanged. Evening mode is task 0.3.4.3 and is not included. */
+
+/* ---------- Part 1: tokens ---------- */
+:root[data-identity="emerald"]{
+  /* Identity palette */
+  --emerald:#14684f; --emerald-hi:#0f5a43; --emerald-deep:#0b3a2d; --emerald-night:#06241b; --emerald-soft:#dcefe5;
+  --gold:#b8892b; --gold-hi:#d9ad4f; --gold-text:#7d5a14; --gold-soft:#f3e8c8; --on-gold:#10241d;
+  --ink-2:#3b574b; --line-strong:#b6c8bb;
+  --side-fg:#c4dccf; --side-fg-strong:#ffffff; --side-muted:#bad3c6;
+  --side-hover:rgba(255,255,255,.07); --side-active:rgba(255,255,255,.12); --side-rule:rgba(255,255,255,.14);
+  --lattice:rgba(255,255,255,.1);
+  --g-depth:linear-gradient(155deg,#12604a 0%,#0b3a2d 55%,#06241b 100%);
+  --g-leaf:linear-gradient(135deg,#f6e3a6 0%,#d9ad4f 42%,#a8761f 100%);
+  /* Gold behind text stops short of the darkest leaf tone, keeping 4.5:1 for --on-gold. */
+  --g-leaf-text:linear-gradient(135deg,#f6e3a6 0%,#dcb257 55%,#c99a3c 100%);
+  --lattice-img:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='72'%20height='72'%20viewBox='0%200%2072%2072'%3E%3Cg%20fill='none'%20stroke='black'%20stroke-width='1.2'%20stroke-linejoin='round'%3E%3Crect%20x='22'%20y='22'%20width='28'%20height='28'/%3E%3Crect%20x='22'%20y='22'%20width='28'%20height='28'%20transform='rotate%2845%2036%2036%29'/%3E%3Cpath%20d='M36%200V16.2M36%2055.8V72M0%2036H16.2M55.8%2036H72'/%3E%3C/g%3E%3C/svg%3E");
+  --e1:0 1px 2px rgba(16,36,29,.08),0 6px 14px -8px rgba(16,36,29,.16);
+  --e2:0 2px 4px rgba(16,36,29,.08),0 18px 36px -16px rgba(16,36,29,.28);
+  --e3:0 4px 8px rgba(6,36,27,.1),0 32px 64px -24px rgba(6,36,27,.4);
+  --r-md:10px; --r-lg:16px; --r-xl:24px;
+  --ease:cubic-bezier(.16,1,.3,1); --d1:120ms; --d2:220ms;
+  --f-display:"Reem Kufi","Segoe UI",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+
+  /* Direction A names, re-mapped */
+  --green:var(--emerald); --green-hover:var(--emerald-hi); --ink:#10241d; --muted:#526b5e;
+  --line:#d6e0d7; --bg:#eaefe8; --soft:var(--emerald-soft);
+  --surface:#fbfcf9; --surface-2:#f2f6ef; --on-brand:#ffffff;
+  --focus:#9a6a12; --accent:var(--gold-hi);
+  --nav-fg:var(--ink-2); --nav-hover:var(--surface-2); --selected-bg:var(--emerald-soft);
+  --avatar-bg:var(--emerald-soft); --avatar-fg:var(--emerald);
+  --badge-bg:var(--gold-soft); --badge-fg:var(--gold-text); --field-quiet:var(--surface-2);
+  --button-light-bg:var(--gold-soft);
+  --campaign-bg:var(--g-depth); --campaign-muted:#c3dccf;
+  --row-line:#e2e9e2; --row-hover:var(--surface-2);
+  --note-bg:var(--surface-2); --note-fg:var(--ink-2); --empty-fg:var(--muted);
+  --calendar-entry:#e0f0f2; --calendar-pad:var(--surface-2); --skeleton:#e4ebe4;
+  --danger:#a23a2e; --success:#1f6b45; --warning-bg:#f8eccb; --warning-fg:#84580f;
+  --chip-bg:#e8eee9; --chip-fg:#4d6358;
+  --st-review-bg:#eee8f6; --st-review-fg:#6a4f8f;
+  --st-success-bg:#e1f1e7; --st-success-fg:#1f6b45;
+  --st-warn-bg:#f8eccb; --st-warn-fg:#84580f;
+  --st-danger-bg:#f9e5e1; --st-danger-fg:#a23a2e;
+  --st-schedule-bg:#e0f0f2; --st-schedule-fg:#17606f;
+  --st-production-bg:#e6edf5; --st-production-fg:#3f5876;
+  --st-publishing-bg:#d5eee3; --st-publishing-fg:#0f5c46;
+  --chip-success-bg:var(--st-success-bg); --chip-success-fg:var(--st-success-fg);
+  --chip-danger-bg:var(--st-danger-bg); --chip-danger-fg:var(--st-danger-fg);
+  --toast-bg:var(--emerald-night); --backdrop:rgba(6,36,27,.55);
+  --shadow-toast:var(--e2); --shadow-dialog:var(--e3); --shadow-menu:var(--e3);
+  --art-bg:var(--emerald-deep); --art-fg:#f6efd8; --art-brand:#b7d3c4; --art-kicker:#e8c46c;
+  --art-text:#c3dccf; --art-base:#b7d3c4;
+  --art-line:rgba(217,173,79,.42); --art-ring-faint:rgba(217,173,79,.07); --art-ring:rgba(217,173,79,.3);
+  --art-video-bg:#17445a; --art-video-band:rgba(217,173,79,.16); --art-video-ring-1:rgba(217,173,79,.08); --art-video-ring-2:rgba(217,173,79,.06);
+  --art-raw-bg:#3b574b; --art-raw-band:#2c463b;
+  --art-play-line:rgba(232,196,108,.6); --art-play-fg:#f6efd8;
+}
+
+/* ---------- Part 2: structure ---------- */
+:root[data-identity="emerald"] body{font-family:var(--f-body)}
+[data-identity="emerald"] :is(h1,h2,.brand b,.stat strong,.campaign-stats b,.month-picker b){font-family:var(--f-display);font-weight:600}
+[data-identity="emerald"] h1{letter-spacing:0}
+[data-identity="emerald"] .stat strong{font-weight:500;font-variant-numeric:tabular-nums}
+
+/* Sidebar: emerald depth, mashrabiya lattice, gold active marker */
+[data-identity="emerald"] .sidebar{background:var(--g-depth);border-inline-end-color:transparent;color:var(--side-fg);isolation:isolate}
+[data-identity="emerald"] .sidebar::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:var(--lattice);-webkit-mask:var(--lattice-img) 0 0/64px;mask:var(--lattice-img) 0 0/64px;opacity:.55}
+[data-identity="emerald"] .brand b{color:var(--side-fg-strong)}
+[data-identity="emerald"] .brand small{color:var(--side-muted);letter-spacing:.14em}
+[data-identity="emerald"] .brandmark{background:var(--g-depth);color:var(--gold-hi);border-radius:12px 3px 12px 3px;box-shadow:var(--e1),inset 0 0 0 1px rgba(217,173,79,.45)}
+[data-identity="emerald"] .collapse-control{color:var(--side-fg)}
+[data-identity="emerald"] .collapse-control:hover{background:var(--side-hover);color:var(--side-fg-strong)}
+[data-identity="emerald"] .sidebar .nav-item{position:relative;color:var(--side-fg);border-radius:var(--r-md)}
+[data-identity="emerald"] .sidebar .nav-item:hover{background:var(--side-hover);color:var(--side-fg-strong)}
+[data-identity="emerald"] .sidebar .nav-item.active{background:var(--side-active);color:var(--side-fg-strong);font-weight:600}
+[data-identity="emerald"] .sidebar .nav-item.active::after{content:"";position:absolute;inset-inline-end:10px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--gold-hi);box-shadow:0 0 10px var(--gold-hi)}
+[data-identity="emerald"] .sidebar-foot{border-top-color:var(--side-rule);color:var(--side-fg-strong)}
+[data-identity="emerald"] .sidebar-foot small{color:var(--side-muted)}
+[data-identity="emerald"] .sidebar .avatar{background:var(--g-leaf-text);color:var(--on-gold);font-weight:700}
+
+/* Top bar */
+[data-identity="emerald"] .notification-button i{background:var(--gold-hi);box-shadow:0 0 0 2px var(--surface)}
+[data-identity="emerald"] .role-select select{border-radius:999px;padding-inline:12px}
+
+/* Surfaces */
+[data-identity="emerald"] :is(.panel,.stat,.media-card,.calendar-grid){border-radius:var(--r-lg);box-shadow:var(--e1)}
+[data-identity="emerald"] .stat:first-child{border-top-color:var(--gold)}
+[data-identity="emerald"] .campaign{position:relative;isolation:isolate;overflow:hidden;border-radius:var(--r-lg);box-shadow:var(--e2)}
+[data-identity="emerald"] .campaign::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:var(--lattice);-webkit-mask:var(--lattice-img) 0 0/76px;mask:var(--lattice-img) 0 0/76px;opacity:.8}
+[data-identity="emerald"] .campaign .button{background:var(--g-leaf-text);border-color:transparent;color:var(--on-gold);font-weight:600}
+[data-identity="emerald"] .media-preview{border-radius:var(--r-md)}
+[data-identity="emerald"] .media-card .media-preview{border-radius:0}
+[data-identity="emerald"] .release-note,[data-identity="emerald"] .warning{border-radius:var(--r-md)}
+
+/* Controls. :where() keeps these at the specificity of the globals.css rules they
+   follow, so the special buttons (tabs, queue, calendar) keep their own shapes. */
+:where([data-identity="emerald"]) :is(button,.button){border-radius:var(--r-md)}
+:where([data-identity="emerald"]) :is(input:not([type=checkbox]),select,textarea){border-radius:var(--r-md)}
+[data-identity="emerald"] .chip{gap:6px;padding-inline:10px;border-radius:999px;font-weight:500}
+[data-identity="emerald"] .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+[data-identity="emerald"] .status-IN_PRODUCTION{color:var(--st-production-fg);background:var(--st-production-bg)}
+[data-identity="emerald"] .status-PUBLISHING{color:var(--st-publishing-fg);background:var(--st-publishing-bg)}
+[data-identity="emerald"] .tabs button.active{font-weight:600}
+[data-identity="emerald"] .queue-item{border-radius:var(--r-md)}
+[data-identity="emerald"] .calendar-day button{border-radius:8px;color:var(--st-schedule-fg)}
+[data-identity="emerald"] .channels label{border-radius:999px}
+
+/* Overlays */
+[data-identity="emerald"] dialog{border-radius:var(--r-xl)}
+[data-identity="emerald"] dialog h2{font-family:var(--f-display)}
+[data-identity="emerald"] .toast{border-radius:14px}
+[data-identity="emerald"] .toast button{color:var(--gold-hi)}
+[data-identity="emerald"] .empty svg{color:var(--gold-text)}
+
+/* Motion: short, eased, and only for people who have not asked for less. */
+@media (prefers-reduced-motion:no-preference){
+  [data-identity="emerald"] :is(button,.button,.nav-item,.work-row,.queue-item){transition:background-color var(--d2),color var(--d2),box-shadow var(--d2),transform var(--d1) var(--ease)}
+  [data-identity="emerald"] :is(button,.button):active:not(:disabled){transform:scale(.97)}
+  [data-identity="emerald"] .skeleton{background:linear-gradient(100deg,var(--surface-2) 30%,var(--line) 50%,var(--surface-2) 70%);background-size:220% 100%;animation:shimmer 1.4s linear infinite}
+}
+@keyframes shimmer{to{background-position:-220% 0}}

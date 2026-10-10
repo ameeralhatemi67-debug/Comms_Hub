@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-08",
+  "date": "2026-10-10",
   "baseURL": "http://127.0.0.1:3000",
   "exportSeconds": {
-    "mp4": 3.058,
-    "mov": 5.019,
-    "zip": 4.835,
-    "png": 0.287
+    "mp4": 2.867,
+    "mov": 5.877,
+    "zip": 5.863,
+    "png": 0.362
   },
   "checks": [
     {
@@ -1316,7 +1316,7 @@
     {
       "name": "replay plays forward",
       "pass": true,
-      "detail": "0.74"
+      "detail": "0.72"
     },
     {
       "name": "pause holds the frame",
@@ -1433,10 +1433,10 @@
       "name": "exports are fast enough to use (mp4 under 60 s for a 1.6 s clip)",
       "pass": true,
       "detail": {
-        "mp4": 3.058,
-        "mov": 5.019,
-        "zip": 4.835,
-        "png": 0.287
+        "mp4": 2.867,
+        "mov": 5.877,
+        "zip": 5.863,
+        "png": 0.362
       }
     },
     {

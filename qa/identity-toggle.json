@@ -1,0 +1,1113 @@
+{
+  "date": "2026-10-10T20:46:58.067Z",
+  "baseURL": "http://127.0.0.1:3000",
+  "passed": 134,
+  "failed": 0,
+  "errors": [],
+  "contrast": [
+    {
+      "label": "body text on surface",
+      "fg": "--ink",
+      "fgValue": "#10241d",
+      "bg": "--surface",
+      "ratio": 15.78,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "body text on ground",
+      "fg": "--ink",
+      "fgValue": "#10241d",
+      "bg": "--bg",
+      "ratio": 13.94,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "body text on surface-2",
+      "fg": "--ink",
+      "fgValue": "#10241d",
+      "bg": "--surface-2",
+      "ratio": 14.86,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "muted on surface",
+      "fg": "--muted",
+      "fgValue": "#526b5e",
+      "bg": "--surface",
+      "ratio": 5.63,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "muted on ground",
+      "fg": "--muted",
+      "fgValue": "#526b5e",
+      "bg": "--bg",
+      "ratio": 4.97,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "muted on surface-2",
+      "fg": "--muted",
+      "fgValue": "#526b5e",
+      "bg": "--surface-2",
+      "ratio": 5.3,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "secondary ink on surface",
+      "fg": "--ink-2",
+      "fgValue": "#3b574b",
+      "bg": "--surface",
+      "ratio": 7.69,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "link and active tab on surface",
+      "fg": "--green",
+      "fgValue": "#14684f",
+      "bg": "--surface",
+      "ratio": 6.53,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "link on ground",
+      "fg": "--green",
+      "fgValue": "#14684f",
+      "bg": "--bg",
+      "ratio": 5.77,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "primary button",
+      "fg": "--on-brand",
+      "fgValue": "#fff",
+      "bg": "--green",
+      "ratio": 6.72,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "primary button hover",
+      "fg": "--on-brand",
+      "fgValue": "#fff",
+      "bg": "--green-hover",
+      "ratio": 8.19,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "selected item text",
+      "fg": "--ink",
+      "fgValue": "#10241d",
+      "bg": "--selected-bg",
+      "ratio": 13.56,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "active tab text on soft",
+      "fg": "--green",
+      "fgValue": "#14684f",
+      "bg": "--soft",
+      "ratio": 5.61,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "sidebar item",
+      "fg": "--side-fg",
+      "fgValue": "#c4dccf",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 5.18,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "sidebar strong text",
+      "fg": "--side-fg-strong",
+      "fgValue": "#fff",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 7.51,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "sidebar small text",
+      "fg": "--side-muted",
+      "fgValue": "#bad3c6",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 4.73,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "brand logo gold on brandmark (graphic, 3:1)",
+      "fg": "--gold-hi",
+      "fgValue": "#d9ad4f",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 3.59,
+      "min": 3,
+      "pass": true
+    },
+    {
+      "label": "campaign text",
+      "fg": "--on-brand",
+      "fgValue": "#fff",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 7.51,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "campaign secondary",
+      "fg": "--campaign-muted",
+      "fgValue": "#c3dccf",
+      "bg": "#12604a / #0b3a2d / #06241b",
+      "ratio": 5.17,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "gold button text",
+      "fg": "--on-gold",
+      "fgValue": "#10241d",
+      "bg": "#f6e3a6 / #dcb257 / #c99a3c",
+      "ratio": 6.32,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "sidebar avatar",
+      "fg": "--on-gold",
+      "fgValue": "#10241d",
+      "bg": "#f6e3a6 / #dcb257 / #c99a3c",
+      "ratio": 6.32,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "prototype badge",
+      "fg": "--badge-fg",
+      "fgValue": "#7d5a14",
+      "bg": "--badge-bg",
+      "ratio": 5.14,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "avatar",
+      "fg": "--avatar-fg",
+      "fgValue": "#14684f",
+      "bg": "--avatar-bg",
+      "ratio": 5.61,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "notes",
+      "fg": "--note-fg",
+      "fgValue": "#3b574b",
+      "bg": "--note-bg",
+      "ratio": 7.24,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "empty state",
+      "fg": "--empty-fg",
+      "fgValue": "#526b5e",
+      "bg": "--surface",
+      "ratio": 5.63,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "danger text",
+      "fg": "--danger",
+      "fgValue": "#a23a2e",
+      "bg": "--surface",
+      "ratio": 6.41,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "success text",
+      "fg": "--success",
+      "fgValue": "#1f6b45",
+      "bg": "--surface",
+      "ratio": 6.28,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "warning",
+      "fg": "--warning-fg",
+      "fgValue": "#84580f",
+      "bg": "--warning-bg",
+      "ratio": 5.28,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip neutral",
+      "fg": "--chip-fg",
+      "fgValue": "#4d6358",
+      "bg": "--chip-bg",
+      "ratio": 5.5,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip review",
+      "fg": "--st-review-fg",
+      "fgValue": "#6a4f8f",
+      "bg": "--st-review-bg",
+      "ratio": 5.6,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip success",
+      "fg": "--st-success-fg",
+      "fgValue": "#1f6b45",
+      "bg": "--st-success-bg",
+      "ratio": 5.52,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip warn",
+      "fg": "--st-warn-fg",
+      "fgValue": "#84580f",
+      "bg": "--st-warn-bg",
+      "ratio": 5.28,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip danger",
+      "fg": "--st-danger-fg",
+      "fgValue": "#a23a2e",
+      "bg": "--st-danger-bg",
+      "ratio": 5.45,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip scheduled",
+      "fg": "--st-schedule-fg",
+      "fgValue": "#17606f",
+      "bg": "--st-schedule-bg",
+      "ratio": 6.1,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip production",
+      "fg": "--st-production-fg",
+      "fgValue": "#3f5876",
+      "bg": "--st-production-bg",
+      "ratio": 6.2,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip publishing",
+      "fg": "--st-publishing-fg",
+      "fgValue": "#0f5c46",
+      "bg": "--st-publishing-bg",
+      "ratio": 6.5,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip success (small)",
+      "fg": "--chip-success-fg",
+      "fgValue": "#1f6b45",
+      "bg": "--chip-success-bg",
+      "ratio": 5.52,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "chip danger (small)",
+      "fg": "--chip-danger-fg",
+      "fgValue": "#a23a2e",
+      "bg": "--chip-danger-bg",
+      "ratio": 5.45,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "calendar entry",
+      "fg": "--st-schedule-fg",
+      "fgValue": "#17606f",
+      "bg": "--calendar-entry",
+      "ratio": 6.1,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "toast text",
+      "fg": "--on-brand",
+      "fgValue": "#fff",
+      "bg": "--toast-bg",
+      "ratio": 16.46,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "toast action",
+      "fg": "--gold-hi",
+      "fgValue": "#d9ad4f",
+      "bg": "--toast-bg",
+      "ratio": 7.87,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "media art headline",
+      "fg": "--art-fg",
+      "fgValue": "#f6efd8",
+      "bg": "--art-bg",
+      "ratio": 11.02,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "media art text",
+      "fg": "--art-text",
+      "fgValue": "#c3dccf",
+      "bg": "--art-bg",
+      "ratio": 8.72,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "media art kicker",
+      "fg": "--art-kicker",
+      "fgValue": "#e8c46c",
+      "bg": "--art-bg",
+      "ratio": 7.57,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "media art brand line",
+      "fg": "--art-brand",
+      "fgValue": "#b7d3c4",
+      "bg": "--art-bg",
+      "ratio": 7.92,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "media art footer",
+      "fg": "--art-base",
+      "fgValue": "#b7d3c4",
+      "bg": "--art-bg",
+      "ratio": 7.92,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "video art headline",
+      "fg": "--art-fg",
+      "fgValue": "#f6efd8",
+      "bg": "--art-video-bg",
+      "ratio": 9.08,
+      "min": 4.5,
+      "pass": true
+    },
+    {
+      "label": "raw art headline",
+      "fg": "--art-fg",
+      "fgValue": "#f6efd8",
+      "bg": "--art-raw-bg",
+      "ratio": 6.89,
+      "min": 4.5,
+      "pass": true
+    }
+  ],
+  "checks": [
+    {
+      "name": "default design is Direction A",
+      "pass": true,
+      "detail": "data-identity=null"
+    },
+    {
+      "name": "Direction A keeps Segoe UI",
+      "pass": true,
+      "detail": "\"Segoe UI\", Tahoma, Arial, sans-serif"
+    },
+    {
+      "name": "double-click switches to the second design",
+      "pass": true,
+      "detail": "data-identity=emerald"
+    },
+    {
+      "name": "choice is remembered in this browser",
+      "pass": true,
+      "detail": "stored=emerald"
+    },
+    {
+      "name": "switch is announced in a status message",
+      "pass": true,
+      "detail": "التصميم: الهوية الجديدة لمركز الاتصال×"
+    },
+    {
+      "name": "double-click does not select the brand text",
+      "pass": true,
+      "detail": "\"\""
+    },
+    {
+      "name": "body uses IBM Plex Sans Arabic",
+      "pass": true,
+      "detail": "\"IBM Plex Sans Arabic\", \"Segoe UI\", Tahoma, sans-serif"
+    },
+    {
+      "name": "headings use Reem Kufi",
+      "pass": true,
+      "detail": "\"Reem Kufi\", \"Segoe UI\", Tahoma, sans-serif"
+    },
+    {
+      "name": "both faces loaded from the app",
+      "pass": true,
+      "detail": "IBM Plex Sans Arabic 400, IBM Plex Sans Arabic 400, IBM Plex Sans Arabic 500, IBM Plex Sans Arabic 500, IBM Plex Sans Arabic 600, IBM Plex Sans Arabic 600, IBM Plex Sans Arabic 700, Reem Kufi 500, Reem Kufi 600, Reem Kufi 600"
+    },
+    {
+      "name": "reload keeps the second design",
+      "pass": true,
+      "detail": "data-identity=emerald"
+    },
+    {
+      "name": "no hydration or console errors after reload",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "restore script runs from <head> before the body",
+      "pass": true,
+      "detail": "inline script present in head"
+    },
+    {
+      "name": "no horizontal overflow 1440 /",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /work",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /work/CH-241",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /create",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /approvals",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /calendar",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /media",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /media/poster",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /mail",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /ideas",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /analytics",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /monitoring",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /settings",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /account",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /admin",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1440 /motion",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /work",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /work/CH-241",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /create",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /approvals",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /calendar",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /media",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /media/poster",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /mail",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /ideas",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /analytics",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /monitoring",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /settings",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /account",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /admin",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 1280 /motion",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /work",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /work/CH-241",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /create",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /approvals",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /calendar",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /media",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /media/poster",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /mail",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /ideas",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /analytics",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /monitoring",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /settings",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /account",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /admin",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 900 /motion",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /work",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /work/CH-241",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /create",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /approvals",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /calendar",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /media",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /media/poster",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /mail",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /ideas",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /analytics",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /monitoring",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /settings",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /account",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /admin",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no horizontal overflow 390 /motion",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no page errors in the second design",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "double-click on the collapsed logo switches back to Direction A",
+      "pass": true,
+      "detail": "data-identity=null"
+    },
+    {
+      "name": "switching back clears the remembered choice",
+      "pass": true,
+      "detail": "stored=null"
+    },
+    {
+      "name": "switching back is announced",
+      "pass": true,
+      "detail": "toast"
+    },
+    {
+      "name": "a single click on the logo still opens Home and does not switch",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "reload after switching back shows Direction A",
+      "pass": true,
+      "detail": "data-identity=null"
+    },
+    {
+      "name": "reduced motion turns transitions off",
+      "pass": true,
+      "detail": "0s"
+    },
+    {
+      "name": "no request leaves the local server",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "name": "design direction-a active for role homes",
+      "pass": true,
+      "detail": "data-identity=null"
+    },
+    {
+      "name": "design emerald active for role homes",
+      "pass": true,
+      "detail": "data-identity=emerald"
+    },
+    {
+      "name": "contrast body text on surface 15.78:1",
+      "pass": true,
+      "detail": "--ink (#10241d) on --surface"
+    },
+    {
+      "name": "contrast body text on ground 13.94:1",
+      "pass": true,
+      "detail": "--ink (#10241d) on --bg"
+    },
+    {
+      "name": "contrast body text on surface-2 14.86:1",
+      "pass": true,
+      "detail": "--ink (#10241d) on --surface-2"
+    },
+    {
+      "name": "contrast muted on surface 5.63:1",
+      "pass": true,
+      "detail": "--muted (#526b5e) on --surface"
+    },
+    {
+      "name": "contrast muted on ground 4.97:1",
+      "pass": true,
+      "detail": "--muted (#526b5e) on --bg"
+    },
+    {
+      "name": "contrast muted on surface-2 5.3:1",
+      "pass": true,
+      "detail": "--muted (#526b5e) on --surface-2"
+    },
+    {
+      "name": "contrast secondary ink on surface 7.69:1",
+      "pass": true,
+      "detail": "--ink-2 (#3b574b) on --surface"
+    },
+    {
+      "name": "contrast link and active tab on surface 6.53:1",
+      "pass": true,
+      "detail": "--green (#14684f) on --surface"
+    },
+    {
+      "name": "contrast link on ground 5.77:1",
+      "pass": true,
+      "detail": "--green (#14684f) on --bg"
+    },
+    {
+      "name": "contrast primary button 6.72:1",
+      "pass": true,
+      "detail": "--on-brand (#fff) on --green"
+    },
+    {
+      "name": "contrast primary button hover 8.19:1",
+      "pass": true,
+      "detail": "--on-brand (#fff) on --green-hover"
+    },
+    {
+      "name": "contrast selected item text 13.56:1",
+      "pass": true,
+      "detail": "--ink (#10241d) on --selected-bg"
+    },
+    {
+      "name": "contrast active tab text on soft 5.61:1",
+      "pass": true,
+      "detail": "--green (#14684f) on --soft"
+    },
+    {
+      "name": "contrast sidebar item 5.18:1",
+      "pass": true,
+      "detail": "--side-fg (#c4dccf) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast sidebar strong text 7.51:1",
+      "pass": true,
+      "detail": "--side-fg-strong (#fff) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast sidebar small text 4.73:1",
+      "pass": true,
+      "detail": "--side-muted (#bad3c6) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast brand logo gold on brandmark (graphic, 3:1) 3.59:1",
+      "pass": true,
+      "detail": "--gold-hi (#d9ad4f) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast campaign text 7.51:1",
+      "pass": true,
+      "detail": "--on-brand (#fff) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast campaign secondary 5.17:1",
+      "pass": true,
+      "detail": "--campaign-muted (#c3dccf) on #12604a / #0b3a2d / #06241b"
+    },
+    {
+      "name": "contrast gold button text 6.32:1",
+      "pass": true,
+      "detail": "--on-gold (#10241d) on #f6e3a6 / #dcb257 / #c99a3c"
+    },
+    {
+      "name": "contrast sidebar avatar 6.32:1",
+      "pass": true,
+      "detail": "--on-gold (#10241d) on #f6e3a6 / #dcb257 / #c99a3c"
+    },
+    {
+      "name": "contrast prototype badge 5.14:1",
+      "pass": true,
+      "detail": "--badge-fg (#7d5a14) on --badge-bg"
+    },
+    {
+      "name": "contrast avatar 5.61:1",
+      "pass": true,
+      "detail": "--avatar-fg (#14684f) on --avatar-bg"
+    },
+    {
+      "name": "contrast notes 7.24:1",
+      "pass": true,
+      "detail": "--note-fg (#3b574b) on --note-bg"
+    },
+    {
+      "name": "contrast empty state 5.63:1",
+      "pass": true,
+      "detail": "--empty-fg (#526b5e) on --surface"
+    },
+    {
+      "name": "contrast danger text 6.41:1",
+      "pass": true,
+      "detail": "--danger (#a23a2e) on --surface"
+    },
+    {
+      "name": "contrast success text 6.28:1",
+      "pass": true,
+      "detail": "--success (#1f6b45) on --surface"
+    },
+    {
+      "name": "contrast warning 5.28:1",
+      "pass": true,
+      "detail": "--warning-fg (#84580f) on --warning-bg"
+    },
+    {
+      "name": "contrast chip neutral 5.5:1",
+      "pass": true,
+      "detail": "--chip-fg (#4d6358) on --chip-bg"
+    },
+    {
+      "name": "contrast chip review 5.6:1",
+      "pass": true,
+      "detail": "--st-review-fg (#6a4f8f) on --st-review-bg"
+    },
+    {
+      "name": "contrast chip success 5.52:1",
+      "pass": true,
+      "detail": "--st-success-fg (#1f6b45) on --st-success-bg"
+    },
+    {
+      "name": "contrast chip warn 5.28:1",
+      "pass": true,
+      "detail": "--st-warn-fg (#84580f) on --st-warn-bg"
+    },
+    {
+      "name": "contrast chip danger 5.45:1",
+      "pass": true,
+      "detail": "--st-danger-fg (#a23a2e) on --st-danger-bg"
+    },
+    {
+      "name": "contrast chip scheduled 6.1:1",
+      "pass": true,
+      "detail": "--st-schedule-fg (#17606f) on --st-schedule-bg"
+    },
+    {
+      "name": "contrast chip production 6.2:1",
+      "pass": true,
+      "detail": "--st-production-fg (#3f5876) on --st-production-bg"
+    },
+    {
+      "name": "contrast chip publishing 6.5:1",
+      "pass": true,
+      "detail": "--st-publishing-fg (#0f5c46) on --st-publishing-bg"
+    },
+    {
+      "name": "contrast chip success (small) 5.52:1",
+      "pass": true,
+      "detail": "--chip-success-fg (#1f6b45) on --chip-success-bg"
+    },
+    {
+      "name": "contrast chip danger (small) 5.45:1",
+      "pass": true,
+      "detail": "--chip-danger-fg (#a23a2e) on --chip-danger-bg"
+    },
+    {
+      "name": "contrast calendar entry 6.1:1",
+      "pass": true,
+      "detail": "--st-schedule-fg (#17606f) on --calendar-entry"
+    },
+    {
+      "name": "contrast toast text 16.46:1",
+      "pass": true,
+      "detail": "--on-brand (#fff) on --toast-bg"
+    },
+    {
+      "name": "contrast toast action 7.87:1",
+      "pass": true,
+      "detail": "--gold-hi (#d9ad4f) on --toast-bg"
+    },
+    {
+      "name": "contrast media art headline 11.02:1",
+      "pass": true,
+      "detail": "--art-fg (#f6efd8) on --art-bg"
+    },
+    {
+      "name": "contrast media art text 8.72:1",
+      "pass": true,
+      "detail": "--art-text (#c3dccf) on --art-bg"
+    },
+    {
+      "name": "contrast media art kicker 7.57:1",
+      "pass": true,
+      "detail": "--art-kicker (#e8c46c) on --art-bg"
+    },
+    {
+      "name": "contrast media art brand line 7.92:1",
+      "pass": true,
+      "detail": "--art-brand (#b7d3c4) on --art-bg"
+    },
+    {
+      "name": "contrast media art footer 7.92:1",
+      "pass": true,
+      "detail": "--art-base (#b7d3c4) on --art-bg"
+    },
+    {
+      "name": "contrast video art headline 9.08:1",
+      "pass": true,
+      "detail": "--art-fg (#f6efd8) on --art-video-bg"
+    },
+    {
+      "name": "contrast raw art headline 6.89:1",
+      "pass": true,
+      "detail": "--art-fg (#f6efd8) on --art-raw-bg"
+    }
+  ]
+}
