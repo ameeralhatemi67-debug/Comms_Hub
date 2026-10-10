@@ -1,7 +1,7 @@
 {
-  "date": "2026-10-10T21:40:29.804Z",
+  "date": "2026-10-10T21:43:37.667Z",
   "baseURL": "http://127.0.0.1:3000",
-  "passed": 40,
+  "passed": 46,
   "failed": 0,
   "errors": [],
   "checks": [
@@ -238,6 +238,42 @@
       "name": "difference fits a phone",
       "pass": true,
       "detail": "ok"
+    },
+    {
+      "task": "0.2.3.9",
+      "name": "publisher home lists the scheduled item at risk",
+      "pass": true,
+      "detail": "مواعيد معرضة للخطرإعداد منشور Instagram2026-09-23 · 18:00 الرياضتفويض X ينتهي 2026-09-23 12:00، قبل موعد النشر. أعد ربط الحساب قبل الموعد.تفويض LinkedIn منتهٍ منذ 2026-09-20 09:00. سيفشل النشر على LinkedIn حتى إعادة الربط."
+    },
+    {
+      "task": "0.2.3.9",
+      "name": "scheduling onto the expired LinkedIn account warns at once",
+      "pass": true,
+      "detail": "تفويض X ينتهي 2026-09-23 12:00، قبل موعد النشر. أعد ربط الحساب قبل الموعد.تفويض LinkedIn منتهٍ منذ 2026-09-20 09:00. سيفشل النشر على LinkedIn حتى إعادة الربط.يمكن الجدولة الآن، لكن أعد الربط من صفحة الإدارة قبل الموعد. الربط محاكاة في هذا النموذج."
+    },
+    {
+      "task": "0.2.3.9",
+      "name": "scheduling after X runs out warns before the publication time",
+      "pass": true,
+      "detail": "تفويض X ينتهي 2026-09-23 12:00، قبل موعد النشر. أعد ربط الحساب قبل الموعد.تفويض LinkedIn منتهٍ منذ 2026-09-20 09:00. سيفشل النشر على LinkedIn حتى إعادة الربط.يمكن الجدولة الآن، لكن أعد الربط من صفحة الإدارة قبل الموعد. الربط محاكاة في هذا النموذج."
+    },
+    {
+      "task": "0.2.3.9",
+      "name": "the warning follows the chosen time (X is fine in the morning)",
+      "pass": true,
+      "detail": "تفويض LinkedIn منتهٍ منذ 2026-09-20 09:00. سيفشل النشر على LinkedIn حتى إعادة الربط.يمكن الجدولة الآن، لكن أعد الربط من صفحة الإدارة قبل الموعد. الربط محاكاة في هذا النموذج."
+    },
+    {
+      "task": "0.2.3.9",
+      "name": "scheduling still succeeds and says what is at risk",
+      "pass": true,
+      "detail": "تمت الجدولة بتوقيت الرياض. تنبيه: تفويض X وLinkedIn لا يغطي موعد النشر.×"
+    },
+    {
+      "task": "0.2.3.9",
+      "name": "the newly scheduled item joins the at-risk list",
+      "pass": true,
+      "detail": "مواعيد معرضة للخطرتصميم الملصق2026-09-23 · 18:00 الرياضتفويض X ينتهي 2026-09-23 12:00، قبل موعد النشر. أعد ربط الحساب قبل الموعد.تفويض LinkedIn منتهٍ منذ 2026-09-20 09:00. سيفشل النشر على LinkedIn حتى إعادة الربط.إعداد منشور Instagram2026-09-23 · 18:00 الرياضتفويض X ينتهي 2026-09-23 12:00، قبل موعد النشر. أعد ربط الحساب قبل الموعد.تفويض LinkedIn منتهٍ منذ 2026-09-20 09:00. سيفشل النشر على LinkedIn حتى إعادة الربط."
     },
     {
       "task": "all",

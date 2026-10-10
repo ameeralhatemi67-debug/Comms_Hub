@@ -23,6 +23,9 @@ import {
   diffWords,
   releaseChanges,
   previousRelease,
+  channelRisks,
+  riskText,
+  atRiskSchedules,
 } from '../src/lib/domain.ts';
 
 test('version-bound review, revision, scheduling, partial result and safe retry', () => {
@@ -368,4 +371,26 @@ test('the difference between two revisions highlights changed Arabic text and li
   assert.equal(fields[0].after, 'الملصق النهائي · v5');
   // A first revision has nothing to compare with.
   assert.equal(previousRelease(w, 1), undefined);
+});
+
+test('scheduling warns when a channel authorization will not cover the publication time (F-R01-07)', () => {
+  // X runs out at noon on the campaign day; LinkedIn has already expired.
+  const evening = channelRisks(['Instagram', 'X', 'LinkedIn'], '2026-09-23T18:00');
+  assert.deepEqual(evening.map((r) => [r.channel, r.expired]), [['X', false], ['LinkedIn', true]]);
+  const morning = channelRisks(['Instagram', 'X'], '2026-09-23T09:00');
+  assert.deepEqual(morning, []);
+  assert(riskText(evening[0]).includes('قبل موعد النشر'));
+  assert(riskText(evening[1]).includes('منتهٍ'));
+
+  // The seeded evening publication is at risk and listed for the publishing officer.
+  const s = initialState();
+  assert.deepEqual(atRiskSchedules(s.work).map((x) => x.work.id), ['CH-244']);
+
+  // Scheduling onto a risky channel is allowed but says so at once.
+  let next = reducer({ ...s, role: 'publisher' }, { type: 'schedule', id: 'CH-242', date: '2026-09-23T18:00' });
+  assert.equal(next.work.find((w) => w.id === 'CH-242').status, 'SCHEDULED');
+  assert(next.message.includes('تنبيه') && next.message.includes('X'));
+  assert.equal(next.notices[0].kind, 'attention');
+  next = reducer({ ...s, role: 'publisher' }, { type: 'schedule', id: 'CH-242', date: '2026-09-22T09:00' });
+  assert(next.message.includes('LinkedIn'));
 });

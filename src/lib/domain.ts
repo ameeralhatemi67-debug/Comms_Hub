@@ -253,6 +253,8 @@ export type Integration = {
   kind: 'channel' | 'storage' | 'mail';
   status: IntegrationStatus;
   detail: string;
+  /** Channel accounts: when the publishing authorization runs out, Riyadh time (task 0.2.3.9). */
+  authorizedUntil?: string;
 };
 
 export const integrationStatusLabels: Record<IntegrationStatus, string> = {
@@ -268,13 +270,16 @@ export const integrations: Integration[] = [
     kind: 'channel',
     status: 'CONNECTED',
     detail: '@organization · التفويض صالح حتى 2026-11-02',
+    authorizedUntil: '2026-11-02T00:00',
   },
   {
     id: 'x',
     name: 'X',
     kind: 'channel',
     status: 'CONNECTED',
-    detail: '@organization · التفويض صالح حتى 2026-10-18',
+    // Runs out on the campaign day, before the evening publication (finding F-R01-07).
+    detail: '@organization · التفويض صالح حتى 2026-09-23 12:00',
+    authorizedUntil: '2026-09-23T12:00',
   },
   {
     id: 'linkedin',
@@ -282,6 +287,7 @@ export const integrations: Integration[] = [
     kind: 'channel',
     status: 'REAUTH',
     detail: 'انتهت صلاحية التفويض · النشر معطل حتى إعادة الربط',
+    authorizedUntil: '2026-09-20T09:00',
   },
   {
     id: 'drive',
@@ -308,6 +314,30 @@ export const integrations: Integration[] = [
 
 /** Channel accounts only: what the publishing officer depends on before a release. */
 export const channelAccounts = integrations.filter((i) => i.kind === 'channel');
+
+export type ChannelRisk = { channel: Channel; until: string; expired: boolean };
+
+/**
+ * Channels whose authorization will not hold at the publication time (task 0.2.3.9,
+ * F-R01-07): already expired, or running out before `when`. Times are Riyadh time.
+ */
+export function channelRisks(list: Channel[], when: string): ChannelRisk[] {
+  return list.flatMap((channel) => {
+    const account = channelAccounts.find((a) => a.name === channel);
+    if (!account?.authorizedUntil) return [];
+    const expired = account.status !== 'CONNECTED';
+    const runsOut = account.authorizedUntil < when;
+    return expired || runsOut ? [{ channel, until: account.authorizedUntil, expired }] : [];
+  });
+}
+
+/** One Arabic line per risk, for the scheduling dialog and the publishing officer's home. */
+export function riskText(r: ChannelRisk) {
+  const until = r.until.replace('T', ' ');
+  return r.expired
+    ? `تفويض ${r.channel} منتهٍ منذ ${until}. سيفشل النشر على ${r.channel} حتى إعادة الربط.`
+    : `تفويض ${r.channel} ينتهي ${until}، قبل موعد النشر. أعد ربط الحساب قبل الموعد.`;
+}
 
 export function healthyChannels() {
   return channelAccounts.filter((i) => i.status === 'CONNECTED').length;
@@ -893,6 +923,14 @@ export function noticesFor(role: Role, notices: Notice[]) {
   return notices.filter((n) => n.for.includes(role));
 }
 
+/** Scheduled work whose channels will not be authorized at its publication time. */
+export function atRiskSchedules(work: Work[]) {
+  return work
+    .filter((w) => w.status === 'SCHEDULED' && w.scheduled)
+    .map((w) => ({ work: w, risks: channelRisks(w.channels, w.scheduled!) }))
+    .filter((x) => x.risks.length > 0);
+}
+
 // --- Stage and team view (task 0.2.3.6, F-R01-01) ---
 
 /** Production steps shown on the work page and used to name the stage. */
@@ -1415,7 +1453,13 @@ export function reducer(state: State, a: Action): State {
       if (!a.date || !Number.isFinite(Date.parse(`${a.date}+03:00`))) return fail('حدد موعداً صالحاً.');
       w.scheduled = a.date;
       w.status = 'SCHEDULED';
-      message = 'تمت الجدولة بتوقيت الرياض';
+      {
+        const risks = channelRisks(w.channels, a.date);
+        message = risks.length
+          ? `تمت الجدولة بتوقيت الرياض. تنبيه: تفويض ${risks.map((r) => r.channel).join(' و')} لا يغطي موعد النشر.`
+          : 'تمت الجدولة بتوقيت الرياض';
+        if (risks.length) kind = 'attention';
+      }
       break;
     case 'publish':
       if (!actor.publish || !ready(w) || !['APPROVED', 'SCHEDULED'].includes(w.status))

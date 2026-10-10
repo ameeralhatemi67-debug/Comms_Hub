@@ -2379,3 +2379,10 @@ Phase 0.2.3 corrections built on findings of response R01 (`validation/responses
 - The same comparison appears inside each later revision of the release history, so the writer sees what changed between their own versions. The first revision has nothing to compare with and shows none.
 - The comparison is by word, so it works for Arabic text. Punctuation stays attached to its word.
 - Seed example: «منشور شكر المتطوعين», revision 1 (changes requested) and revision 2 (in review), with new text and the poster moved from v4 to v5.
+
+## 59.5 Early reconnect warning (F-R01-07, task 0.2.3.9)
+
+- Each channel account carries the time its publishing authorization runs out (Riyadh time). In the seed, Instagram is valid until 2 November, X runs out at 12:00 on the campaign day, and LinkedIn has already expired.
+- **At scheduling:** as soon as a time is chosen, the scheduling dialog lists every selected channel whose authorization is expired or runs out before that time, with the reason: «تفويض X ينتهي … قبل موعد النشر. أعد ربط الحساب قبل الموعد.» The warning follows the chosen time. Scheduling is still allowed; the confirmation message says what is at risk and the notice is raised as «يحتاج انتباه».
+- **Publishing Officer's Home:** a panel «مواعيد معرضة للخطر» lists every scheduled item whose channels will not be authorized at its publication time, with the reason per channel. The publishing package on the approvals page shows the same warning.
+- Reconnecting remains a simulation; nothing contacts the channels.

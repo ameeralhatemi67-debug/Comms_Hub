@@ -191,6 +191,38 @@ section('0.2.3.8', async (page, shot) => {
   await shot('review-diff-390');
 });
 
+// --- 0.2.3.9 Early reconnect warning (F-R01-07) --------------------------------
+section('0.2.3.9', async (page, shot) => {
+  const T = '0.2.3.9';
+  await page.goto(baseURL + '/', { waitUntil: 'networkidle' });
+  await asRole(page, 'publisher');
+  const risky = page.locator('.panel', { has: page.locator('h2', { hasText: 'مواعيد معرضة للخطر' }) });
+  const riskText = await risky.textContent();
+  check(T, 'publisher home lists the scheduled item at risk', riskText.includes('إعداد منشور Instagram') && riskText.includes('X') && riskText.includes('LinkedIn'), riskText);
+  await shot('publisher-home-at-risk');
+
+  await page.getByRole('link', { name: 'الموافقات والنشر' }).first().click();
+  await page.waitForURL('**/approvals');
+  await page.locator('.queue-item', { hasText: 'تصميم الملصق' }).click();
+  await page.getByRole('button', { name: 'جدولة', exact: true }).click();
+  const dialog = page.locator('dialog[open]');
+  await dialog.locator('input[type="datetime-local"]').fill('2026-09-23T18:00');
+  const warn = await dialog.locator('.reauth-warning').textContent();
+  check(T, 'scheduling onto the expired LinkedIn account warns at once', warn.includes('LinkedIn') && warn.includes('منتهٍ'), warn);
+  check(T, 'scheduling after X runs out warns before the publication time', warn.includes('X') && warn.includes('قبل موعد النشر'), warn);
+  await shot('schedule-warning', false);
+  await dialog.locator('input[type="datetime-local"]').fill('2026-09-23T09:00');
+  const morning = await dialog.locator('.reauth-warning').textContent();
+  check(T, 'the warning follows the chosen time (X is fine in the morning)', !morning.includes('قبل موعد النشر') && morning.includes('LinkedIn'), morning);
+  await dialog.locator('input[type="datetime-local"]').fill('2026-09-23T18:00');
+  await dialog.getByRole('button', { name: 'تأكيد', exact: true }).click();
+  const toast = await page.locator('.toast').textContent();
+  check(T, 'scheduling still succeeds and says what is at risk', toast.includes('تمت الجدولة') && toast.includes('تنبيه'), toast);
+  await page.getByRole('link', { name: 'الرئيسية' }).first().click();
+  const after = await page.locator('.panel', { has: page.locator('h2', { hasText: 'مواعيد معرضة للخطر' }) }).textContent();
+  check(T, 'the newly scheduled item joins the at-risk list', after.includes('تصميم الملصق'), after);
+});
+
 (async () => {
   const { chromium } = dependency('playwright');
   fs.rmSync(out, { recursive: true, force: true });

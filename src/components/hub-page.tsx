@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import {
   assets,
+  atRiskSchedules,
+  riskText,
   campaign,
   channelAccounts,
   directory,
@@ -202,6 +204,26 @@ function Home() {
 
           <aside>
             {actor.review && <TeamLoadPanel />}
+
+            {actor.publish && (
+              <Panel title="مواعيد معرضة للخطر">
+                {atRiskSchedules(state.work).length ? (
+                  atRiskSchedules(state.work).map(({ work: w, risks }) => (
+                    <Link className="notice at-risk" href={`/approvals?work=${w.id}`} key={w.id}>
+                      <b>{w.title}</b>
+                      <small>{w.scheduled?.replace('T', ' · ')} الرياض</small>
+                      {risks.map((r) => (
+                        <p key={r.channel} className="danger">
+                          {riskText(r)}
+                        </p>
+                      ))}
+                    </Link>
+                  ))
+                ) : (
+                  <p className="muted">كل المواعيد المجدولة مغطاة بتفويض صالح.</p>
+                )}
+              </Panel>
+            )}
 
             {actor.publish && (
               <Panel title="صحة الحسابات المتصلة">

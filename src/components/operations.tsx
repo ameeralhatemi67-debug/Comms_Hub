@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { isMine, personById, previousRelease, roles, ready, type Work } from '@/lib/domain';
+import { channelRisks, isMine, personById, previousRelease, riskText, roles, ready, type Work } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { ReleaseHistory } from './release-history';
 import { Title, Panel, StatusChip, Empty, MediaPreview, Modal, Tabs, LogoLoader, VariantCopy, VersionDiff } from './ui';
@@ -119,6 +119,13 @@ export function Approvals() {
                   اعتمده {w.release?.approvedBy && roles[w.release.approvedBy].user} ·{' '}
                   {w.scheduled ? `${w.scheduled.replace('T', ' · ')} بتوقيت الرياض` : 'لم يُحدد موعد بعد'}
                 </p>
+                {w.scheduled && channelRisks(w.channels, w.scheduled).length > 0 && (
+                  <div className="warning reauth-warning">
+                    {channelRisks(w.channels, w.scheduled).map((r) => (
+                      <p key={r.channel}>{riskText(r)}</p>
+                    ))}
+                  </div>
+                )}
                 <div className="channel-results">
                   {w.channels.map((c) => (
                     <div key={c}>
@@ -202,10 +209,21 @@ export function Approvals() {
             }}
           >
             {dialog === 'schedule' ? (
-              <label>
-                الموعد بتوقيت الرياض
-                <input type="datetime-local" required value={date} onChange={(e) => setDate(e.target.value)} />
-              </label>
+              <>
+                <label>
+                  الموعد بتوقيت الرياض
+                  <input type="datetime-local" required value={date} onChange={(e) => setDate(e.target.value)} />
+                </label>
+                {/* Warned at scheduling, not at dispatch (task 0.2.3.9, F-R01-07). */}
+                {channelRisks(w.channels, date).length > 0 && (
+                  <div className="warning reauth-warning" role="alert">
+                    {channelRisks(w.channels, date).map((r) => (
+                      <p key={r.channel}>{riskText(r)}</p>
+                    ))}
+                    <small>يمكن الجدولة الآن، لكن أعد الربط من صفحة الإدارة قبل الموعد. الربط محاكاة في هذا النموذج.</small>
+                  </div>
+                )}
+              </>
             ) : dialog === 'publish' ? (
               <>
                 <p>

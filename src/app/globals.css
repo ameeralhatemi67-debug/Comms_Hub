@@ -111,3 +111,5 @@ a.stat-link strong{color:var(--ink)}
 .diff-fields div{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:baseline}
 .diff-fields dt,.diff-fields dd{margin:0}
 @media(max-width:699px){.diff-fields div{grid-template-columns:1fr;gap:2px}}
+.reauth-warning p{margin:0 0 6px;color:inherit}
+.at-risk p{font-size:12px}
