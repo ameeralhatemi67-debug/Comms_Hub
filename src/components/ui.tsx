@@ -1,13 +1,15 @@
 'use client';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Play, Image as ImageIcon } from 'lucide-react';
-import { assets, statusLabels, type Status } from '@/lib/domain';
+import { assets, scenario, statusLabels, type Status } from '@/lib/domain';
 
 export function Title({ title, sub, children }: { title: string; sub?: string; children?: ReactNode }) {
   return (
     <header className="page-heading">
       <div>
-        <span className="eyebrow">مركز الاتصال المؤسسي</span>
+        <span className="eyebrow">
+          مركز الاتصال المؤسسي · <span className="scenario-date">اليوم في النموذج: {scenario.label}</span>
+        </span>
         <h1>{title}</h1>
         {sub && <p>{sub}</p>}
       </div>

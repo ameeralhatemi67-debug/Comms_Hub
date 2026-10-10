@@ -170,7 +170,30 @@ and lists every session that raised it.
 
 | ID | Severity | Finding | Sessions | Related | Decision | Status |
 |---|---|---|---|---|---|---|
-| | | | | | correct / defer / no change | open / done |
+| F-R01-01 | 1 | «العمل» does not show the team's work: who does what, stage, overdue, awaiting review | R01 | A25, B4, T6 | correct, task 0.2.3.6 | open |
+| F-R01-02 | 1 | Overdue work cannot be counted; no overdue section on Home | R01 | B4, E5 | correct, task 0.2.3.5 | open |
+| F-R01-03 | 1 | No timestamped note for video review | R01 | B2, W4 | correct, task 0.2.3.10 | open |
+| F-R01-04 | 1 | Editing approved content returns the whole work to draft; a design-only change should need approval of the design only | R01 | A5, E6, Q1 | design note, task 0.2.3.12 | open |
+| F-R01-05 | 2 | Editing the master text leaves channel variants silently stale | R01 | B5 | correct, task 0.2.3.7 (daily writer task) | open |
+| F-R01-06 | 2 | The difference between versions is shown weakly | R01 | B3 | correct, task 0.2.3.8 (daily review task) | open |
+| F-R01-07 | 2 | Reconnect warning appears only at dispatch time | R01 | B6, E4 | correct, task 0.2.3.9 (daily publishing task) | open |
+| F-R01-08 | not scored | No upload for a new design or a final video | R01 | A17, O-010 | no change: deliberate prototype limit; demand recorded from two roles | done |
+| F-R01-09 | 2 | No close or archive, with a reason, for work rejected for good | R01 | E11, Q6 | design note, task 0.2.3.12 | open |
+| F-R01-10 | 2 | Four fixed production stages do not fit design work | R01 | B7, O-009 | design note, task 0.2.3.12 | open |
+| F-R01-11 | 1 | No temporary delegation of approval during leave | R01 | A19, E2, Q3 | design note, task 0.2.3.12 | open |
+| F-R01-12 | 1 | No urgent path | R01 | E3, Q4 | design note, task 0.2.3.12 | open |
+| F-R01-13 | 1 | One work belongs to one campaign only | R01 | E8, Q7 | design note, task 0.2.3.12 | open |
+| F-R01-14 | 4 | No undo of a mistaken approval before publication | R01 | approval_policy_design.md | no change in Checkpoint 0.2; Version 1 backlog (Ideas_Backlog.md) | done |
+| F-R01-15 | 4 | A change request does not visibly notify the responsible person | R01 | notification_model.md | no change in Checkpoint 0.2; Version 1 backlog | done |
+| F-R01-16 | 4 | A member lacks next steps, status, deadlines and notes in one place | R01 | O-005 | no change in Checkpoint 0.2; Version 1 backlog | done |
+| F-R01-17 | 1 | Work is assigned to a role, not to a named person | R01 | A25, F-R01-01 | correct, task 0.2.3.6 | open |
+| F-R01-18 | 2 | Only one final due date per work; no stage deadlines | R01 | B4 | design note, task 0.2.3.12 | open |
+| F-R01-19 | 2 | The Director's own text edits are not attributed | R01 | E9 | design note, task 0.2.3.12 | open |
+
+Severities confirmed by the owner on 2026-10-11 (decision D-03), as transcribed in
+`validation/responses/R01-2026-10-10-director.md` section 4. Round 1 is the list of
+`correct` decisions above. Severity 2 findings qualify because each arose on a daily
+task of the role concerned.
 
 **Rules for this table.**
 

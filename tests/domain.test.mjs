@@ -8,6 +8,12 @@ import {
   noticesFor,
   homeTiles,
   roleIds,
+  scenario,
+  isOverdue,
+  isOpen,
+  dueSoon,
+  dueNote,
+  matchesDue,
 } from '../src/lib/domain.ts';
 
 test('version-bound review, revision, scheduling, partial result and safe retry', () => {
@@ -227,4 +233,42 @@ test('a design switch notice shows as a message and changes nothing else', () =>
   assert.equal(n.message, 'التصميم: الهوية الجديدة لمركز الاتصال');
   assert.deepEqual({ ...n, message: s.message }, s);
   assert.equal(reducer(n, { type: 'clear' }).message, '');
+});
+
+test('overdue and due-soon are measured against the scenario date (F-R01-02)', () => {
+  const s = initialState();
+  assert.equal(scenario.today, '2026-09-21');
+  const overdue = s.work.filter((w) => isOverdue(w)).map((w) => w.id).sort();
+  const soon = s.work.filter((w) => dueSoon(w)).map((w) => w.id).sort();
+  assert.deepEqual(overdue, ['CH-243', 'CH-247', 'CH-248']);
+  assert.deepEqual(soon, ['CH-241', 'CH-245', 'CH-246']);
+  // The seed holds on-time work too, and nothing is both late and due soon.
+  assert(s.work.some((w) => isOpen(w) && !isOverdue(w) && !dueSoon(w)));
+  assert(!overdue.some((id) => soon.includes(id)));
+
+  // Approved, scheduled and published work is delivered: never overdue, whatever its date.
+  const approved = { ...s.work.find((w) => w.id === 'CH-242'), due: '2026-09-01' };
+  assert.equal(isOverdue(approved), false);
+  // The rule follows the date it is given, not the viewer's clock.
+  const late = s.work.find((w) => w.id === 'CH-241');
+  assert.equal(isOverdue(late, '2026-09-23'), true);
+  assert.equal(dueSoon(late, '2026-09-23'), false);
+
+  assert.equal(dueNote(s.work.find((w) => w.id === 'CH-243')), 'متأخر يومين');
+  assert.equal(dueNote(s.work.find((w) => w.id === 'CH-247')), 'متأخر 3 أيام');
+  assert.equal(dueNote(s.work.find((w) => w.id === 'CH-248')), 'متأخر يوماً واحداً');
+  assert.equal(dueNote(s.work.find((w) => w.id === 'CH-246')), 'يستحق اليوم');
+  assert.equal(dueNote(s.work.find((w) => w.id === 'CH-241')), 'يستحق غداً');
+
+  // Leadership homes show both counts, each linked to exactly that filter.
+  for (const role of ['director', 'assistant']) {
+    const tiles = homeTiles({ ...s, role });
+    const o = tiles.find((t) => t.key === 'overdue');
+    const d = tiles.find((t) => t.key === 'soon');
+    assert.equal(o.value, 3);
+    assert.equal(o.href, '/work?due=overdue');
+    assert.equal(d.value, 3);
+    assert.equal(d.href, '/work?due=soon');
+    assert.equal(s.work.filter((w) => matchesDue(w, 'overdue')).length, o.value);
+  }
 });

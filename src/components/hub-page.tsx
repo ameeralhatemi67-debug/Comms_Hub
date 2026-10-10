@@ -72,11 +72,19 @@ function Home() {
 
       <div className="stats">
         {tiles.map((tile) => (
-          <div className="stat" key={tile.key}>
-            <span>{tile.label}</span>
-            <strong>{tile.value}</strong>
-            <small>{tile.hint}</small>
-          </div>
+          tile.href ? (
+            <Link className="stat stat-link" href={tile.href} key={tile.key} data-tile={tile.key}>
+              <span>{tile.label}</span>
+              <strong>{tile.value}</strong>
+              <small>{tile.hint}</small>
+            </Link>
+          ) : (
+            <div className="stat" key={tile.key} data-tile={tile.key}>
+              <span>{tile.label}</span>
+              <strong>{tile.value}</strong>
+              <small>{tile.hint}</small>
+            </div>
+          )
         ))}
       </div>
 

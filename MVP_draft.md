@@ -2342,3 +2342,16 @@ Owner directive: the proposed identity «الهوية الجديدة لمركز 
 **What changes.** Colour tokens, type faces (Reem Kufi for headings, IBM Plex Sans Arabic for text, both served by the app), the emerald-depth sidebar with the lattice texture and a gold marker on the active item, rounder surfaces with soft elevation, pill status chips with a dot, a gold campaign action, and short motion that is off when the user asks for reduced motion.
 
 **What does not change.** Pages, layout, navigation, roles, statuses, Arabic terms, version-bound approval, and the local-simulation boundary. Evening mode, the Aref Ruqaa accent word and the decision screens of Checkpoint 0.3 are not built.
+
+# 59. Round 1 corrections from the Director's response, 2026-10-11
+
+Phase 0.2.3 corrections built on findings of response R01 (`validation/responses/R01-2026-10-10-director.md`), severities confirmed by the owner (D-03). Each subsection names its finding. They apply to both designs.
+
+## 59.1 Scenario date, overdue and due soon (F-R01-02, task 0.2.3.5)
+
+- The prototype has a fixed "today": **Monday 21 September 2026**, two days before the campaign. Every page header states it: «اليوم في النموذج: الاثنين 21 سبتمبر 2026». Dates are never read from the viewer's clock.
+- **Overdue (متأخر):** delivery is still outstanding (draft, in production, in review, changes requested or rejected) and the delivery date is before the scenario date. Approved, scheduled and published work is delivered and never counts as overdue.
+- **Due soon (قريب الموعد):** outstanding and due today or within two days.
+- The Director's and Assistant Director's Home show both counts. Each count is a link to Work filtered to exactly those items.
+- Work has a delivery filter (كل المواعيد، متأخر، قريب الموعد). Each row says how late or how close it is, for example «متأخر يومين» or «يستحق غداً».
+- The seed now holds nine work items in a realistic mix: three overdue, three due soon, three on time, plus the approved and scheduled ones.

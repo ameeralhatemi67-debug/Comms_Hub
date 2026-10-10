@@ -26,6 +26,17 @@ export const campaign: Campaign = {
   pendingApprovals: 2,
 };
 
+/**
+ * The prototype's fixed "today" (Roadmap task 0.2.3.5, finding F-R01-02). The seed
+ * tells the story of the days before the campaign date, so overdue and due-soon are
+ * measured against this date, never against the viewer's clock. It is stated on
+ * every page so a tester in another month is not misled.
+ */
+export const scenario = { today: '2026-09-21', label: 'الاثنين 21 سبتمبر 2026' };
+
+/** Days ahead of the scenario date that count as due soon. */
+export const soonDays = 2;
+
 export const roles = {
   director: {
     name: 'مدير الاتصال المؤسسي',
@@ -406,6 +417,11 @@ type SeedRow = {
   type: string;
   due: string;
   revision?: number;
+  assetVersion?: number;
+  body?: string;
+  channels?: Channel[];
+  /** A previous submitted revision that received a change request (for the version difference). */
+  previous?: { body: string; assetVersion: number; note: string };
   scheduled?: string;
   comments?: { by: string; text: string }[];
   activity: string[];
@@ -437,7 +453,7 @@ const seedRows: SeedRow[] = [
     status: 'CHANGES_REQUESTED',
     assetId: 'poster',
     type: 'منشور اجتماعي',
-    due: '2026-09-22',
+    due: '2026-09-19',
     comments: [{ by: 'محمد', text: 'يرجى اختصار النص وإبراز مشاركة الفريق.' }],
     activity: ['طلب محمد تعديل النص', 'أرسل خالد الصياغة الأولى للمراجعة'],
   },
@@ -467,8 +483,64 @@ const seedRows: SeedRow[] = [
     status: 'IN_PRODUCTION',
     assetId: 'footage',
     type: 'فيديو',
-    due: '2026-09-23',
+    due: '2026-09-21',
     activity: ['بدأ أحمد معالجة لقطات الطائرة'],
+  },
+  // Added for Round 1 (task 0.2.3.5): a realistic mix of overdue, due-soon and
+  // on-time work against the scenario date, across more of the team.
+  {
+    title: 'كتابة البيان الصحفي',
+    owner: 'writer',
+    status: 'DRAFT',
+    assetId: 'poster',
+    type: 'بيان صحفي',
+    due: '2026-09-18',
+    activity: ['بدأت كتابة مسودة البيان الصحفي'],
+  },
+  {
+    title: 'تصميم بطاقة LinkedIn',
+    owner: 'designer',
+    status: 'CHANGES_REQUESTED',
+    assetId: 'poster',
+    type: 'تصميم',
+    due: '2026-09-20',
+    comments: [{ by: 'ريم', text: 'وحّد ألوان البطاقة مع الملصق المعتمد.' }],
+    activity: ['طلبت ريم تعديل ألوان البطاقة', 'أُرسلت البطاقة للمراجعة'],
+  },
+  {
+    title: 'فيديو قصير للقصص',
+    owner: 'producer',
+    status: 'IN_PRODUCTION',
+    assetId: 'reel',
+    type: 'فيديو',
+    due: '2026-09-25',
+    activity: ['بدأ تقطيع مقاطع القصص من الفيديو الرئيسي'],
+  },
+  {
+    title: 'منشور شكر المتطوعين',
+    owner: 'writer',
+    status: 'IN_REVIEW',
+    assetId: 'poster',
+    type: 'منشور اجتماعي',
+    due: '2026-09-24',
+    revision: 2,
+    channels: ['Instagram', 'X'],
+    body: 'شكراً لكل المتطوعين والزملاء الذين شاركوا معنا في التحضير لليوم الوطني السعودي 96، عطاؤكم يصنع الفرق. #اليوم_الوطني_السعودي',
+    previous: {
+      body: 'شكراً لكل من شارك معنا في التحضير لليوم الوطني. #اليوم_الوطني_السعودي',
+      assetVersion: 4,
+      note: 'اذكر المتطوعين صراحة واستخدم الملصق المعتمد.',
+    },
+    activity: ['أرسل خالد الإصدار 2 للمراجعة', 'طلب محمد تعديل الإصدار 1'],
+  },
+  {
+    title: 'ألبوم صور التغطية',
+    owner: 'designer',
+    status: 'DRAFT',
+    assetId: 'footage',
+    type: 'تصميم',
+    due: '2026-09-26',
+    activity: ['أنشئ ألبوم صور التغطية'],
   },
 ];
 
@@ -480,11 +552,11 @@ export function initialState(): State {
       owner: row.owner,
       status: row.status,
       type: row.type,
-      body: baseCopy,
+      body: row.body ?? baseCopy,
       due: row.due,
-      channels: [...channels],
+      channels: row.channels ? [...row.channels] : [...channels],
       assetId: row.assetId,
-      assetVersion: row.assetId === 'reel' ? 4 : row.assetId === 'poster' ? 5 : 1,
+      assetVersion: row.assetVersion ?? (row.assetId === 'reel' ? 4 : row.assetId === 'poster' ? 5 : 1),
       variants: { ...blankVariants },
       campaignId: campaign.id,
       revision: row.revision ?? 1,
@@ -517,6 +589,22 @@ export function initialState(): State {
           by: w.release.approvedBy || w.owner,
         },
       ];
+    }
+    if (row.previous && w.release) {
+      // An earlier revision that went to review and came back with a change request.
+      const before: Release = {
+        ...pickContent(w),
+        body: row.previous.body,
+        assetVersion: row.previous.assetVersion,
+        revision: w.revision - 1,
+        submittedBy: w.owner,
+      };
+      w.history = [
+        { release: before, decision: 'SUBMITTED', by: w.owner },
+        { release: { ...before }, decision: 'CHANGES_REQUESTED', by: 'director', note: row.previous.note },
+        ...w.history,
+      ];
+      w.comments = [{ by: roles.director.user, text: row.previous.note }, ...w.comments];
     }
     return w;
   });
@@ -612,8 +700,49 @@ export function needsAttention(w: Work) {
   return ['FAILED', 'PARTIAL', 'CHANGES_REQUESTED', 'REJECTED'].includes(w.status);
 }
 
-export function dueSoon(w: Work) {
-  return isActive(w) && w.due <= campaign.date;
+/** Work whose delivery is still outstanding: not yet approved, scheduled or published. */
+const openStatuses: Status[] = ['DRAFT', 'IN_PRODUCTION', 'IN_REVIEW', 'CHANGES_REQUESTED', 'REJECTED'];
+
+export function isOpen(w: Work) {
+  return openStatuses.includes(w.status);
+}
+
+/** Whole days from one ISO date to another, positive when `to` is later. */
+export function daysBetween(from: string, to: string) {
+  const day = (d: string) => Date.parse(`${d.slice(0, 10)}T00:00:00Z`);
+  return Math.round((day(to) - day(from)) / 86400000);
+}
+
+/** Delivery is outstanding and its date has passed (task 0.2.3.5, F-R01-02). */
+export function isOverdue(w: Work, today = scenario.today) {
+  return isOpen(w) && daysBetween(today, w.due) < 0;
+}
+
+/** Delivery is outstanding and due today or within `soonDays` days. */
+export function dueSoon(w: Work, today = scenario.today) {
+  const d = daysBetween(today, w.due);
+  return isOpen(w) && d >= 0 && d <= soonDays;
+}
+
+/** Work list filter by delivery date: 'overdue', 'soon', or anything else for all. */
+export function matchesDue(w: Work, filter: string) {
+  return filter === 'overdue' ? isOverdue(w) : filter === 'soon' ? dueSoon(w) : true;
+}
+
+/** Short Arabic note on a work item's delivery date, or '' when nothing is pressing. */
+export function dueNote(w: Work, today = scenario.today) {
+  if (!isOpen(w)) return '';
+  const d = daysBetween(today, w.due);
+  if (d < 0) {
+    const late = -d;
+    if (late === 1) return 'متأخر يوماً واحداً';
+    if (late === 2) return 'متأخر يومين';
+    return late <= 10 ? `متأخر ${late} أيام` : `متأخر ${late} يوماً`;
+  }
+  if (d === 0) return 'يستحق اليوم';
+  if (d === 1) return 'يستحق غداً';
+  if (d === 2) return 'يستحق بعد يومين';
+  return '';
 }
 
 /** True once a release of this work item has actually been dispatched to channels. */
@@ -628,7 +757,7 @@ export function noticesFor(role: Role, notices: Notice[]) {
 
 // --- Role-specific home experience (MVP_draft.md section 6) ---
 
-export type Tile = { key: string; label: string; value: number | string; hint: string };
+export type Tile = { key: string; label: string; value: number | string; hint: string; href?: string };
 
 function countWork(work: Work[], predicate: (w: Work) => boolean) {
   return work.filter(predicate).length;
@@ -640,7 +769,22 @@ export function homeTiles(state: State): Tile[] {
   const own = (w: Work) => w.owner === role;
   const scheduledToday = (w: Work) => !!w.scheduled && w.scheduled.startsWith(campaign.date);
   const revisionRequested = (w: Work) => ['CHANGES_REQUESTED', 'REJECTED'].includes(w.status);
-  const until = `حتى ${campaign.date}`;
+  const until = 'اليوم وخلال يومين';
+  // Leadership counts, each a link to Work filtered to exactly those items (task 0.2.3.5).
+  const overdueTile: Tile = {
+    key: 'overdue',
+    label: 'متأخر',
+    value: countWork(work, (w) => isOverdue(w)),
+    hint: 'تجاوز موعد التسليم',
+    href: '/work?due=overdue',
+  };
+  const soonTile: Tile = {
+    key: 'soon',
+    label: 'قريب الموعد',
+    value: countWork(work, (w) => dueSoon(w)),
+    hint: until,
+    href: '/work?due=soon',
+  };
 
   switch (role) {
     case 'director':
@@ -651,7 +795,8 @@ export function homeTiles(state: State): Tile[] {
           value: countWork(work, (w) => w.status === 'IN_REVIEW'),
           hint: 'إصدارات مرسلة للمراجعة',
         },
-        { key: 'workload', label: 'حمل القسم', value: countWork(work, isActive), hint: 'أعمال قيد التنفيذ' },
+        overdueTile,
+        soonTile,
         {
           key: 'today',
           label: 'نشر اليوم',
@@ -687,7 +832,8 @@ export function homeTiles(state: State): Tile[] {
           value: new Set(work.filter(isActive).map((w) => w.owner)).size,
           hint: 'توزيع الحمل الحالي',
         },
-        { key: 'due', label: 'مواعيد قريبة', value: countWork(work, dueSoon), hint: until },
+        overdueTile,
+        soonTile,
       ];
     case 'writer':
       return [

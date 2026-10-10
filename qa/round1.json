@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-10T21:28:46.910Z",
+  "baseURL": "http://127.0.0.1:3000",
+  "passed": 14,
+  "failed": 0,
+  "errors": [],
+  "checks": [
+    {
+      "task": "0.2.3.5",
+      "name": "scenario date stated on Home",
+      "pass": true,
+      "detail": "مركز الاتصال المؤسسي · اليوم في النموذج: الاثنين 21 سبتمبر 2026"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "director home shows the overdue count",
+      "pass": true,
+      "detail": "متأخر = 3"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "director overdue count equals its filtered list",
+      "pass": true,
+      "detail": "tile 3, list 3, filter overdue"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "director every overdue row says how late it is",
+      "pass": true,
+      "detail": "متأخر يومين | متأخر 3 أيام | متأخر يوماً واحداً"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "director home shows the soon count",
+      "pass": true,
+      "detail": "قريب الموعد = 3"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "director soon count equals its filtered list",
+      "pass": true,
+      "detail": "tile 3, list 3, filter soon"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "assistant home shows the overdue count",
+      "pass": true,
+      "detail": "متأخر = 3"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "assistant overdue count equals its filtered list",
+      "pass": true,
+      "detail": "tile 3, list 3, filter overdue"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "assistant every overdue row says how late it is",
+      "pass": true,
+      "detail": "متأخر يومين | متأخر 3 أيام | متأخر يوماً واحداً"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "assistant home shows the soon count",
+      "pass": true,
+      "detail": "قريب الموعد = 3"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "assistant soon count equals its filtered list",
+      "pass": true,
+      "detail": "tile 3, list 3, filter soon"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "Work has an «متأخر» filter that narrows the list",
+      "pass": true,
+      "detail": "all 11, overdue 3"
+    },
+    {
+      "task": "0.2.3.5",
+      "name": "scenario date stated on Work",
+      "pass": true,
+      "detail": "مركز الاتصال المؤسسي · اليوم في النموذج: الاثنين 21 سبتمبر 2026"
+    },
+    {
+      "task": "all",
+      "name": "no page or console errors",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}

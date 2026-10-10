@@ -1,9 +1,12 @@
 'use client';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import {
   campaign,
+  dueNote,
+  isOverdue,
+  matchesDue,
   roles,
   assets,
   channels,
@@ -28,6 +31,12 @@ export function WorkRow({ work: w }: { work: Work }) {
         <b>{w.title}</b>
         <small>
           {w.id} · {owning.title}
+          {dueNote(w) && (
+            <>
+              {' · '}
+              <span className={isOverdue(w) ? 'due-note late' : 'due-note soon'}>{dueNote(w)}</span>
+            </>
+          )}
         </small>
       </span>
       <span className="owner">{roles[w.owner].user}</span>
@@ -39,8 +48,13 @@ export function WorkRow({ work: w }: { work: Work }) {
 
 export function WorkList() {
   const { state } = useHub();
+  const params = useSearchParams();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  // Home's overdue and due-soon counts open this page with ?due= (task 0.2.3.5).
+  const [due, setDue] = useState(params.get('due') || '');
+  const dueParam = params.get('due') || '';
+  useEffect(() => setDue(dueParam), [dueParam]);
   const [owner, setOwner] = useState('');
   const [mine, setMine] = useState(false);
   const [board, setBoard] = useState(false);
@@ -50,6 +64,7 @@ export function WorkList() {
       (!mine || w.owner === state.role) &&
       (!status || w.status === status) &&
       (!owner || w.owner === owner) &&
+      matchesDue(w, due) &&
       w.title.includes(search),
   );
 
@@ -84,6 +99,11 @@ export function WorkList() {
               {v}
             </option>
           ))}
+        </select>
+        <select aria-label="موعد التسليم" value={due} onChange={(e) => setDue(e.target.value)}>
+          <option value="">كل المواعيد</option>
+          <option value="overdue">متأخر</option>
+          <option value="soon">قريب الموعد</option>
         </select>
         <select aria-label="المسؤول" value={owner} onChange={(e) => setOwner(e.target.value)}>
           <option value="">كل المسؤولين</option>

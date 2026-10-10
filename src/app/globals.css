@@ -73,3 +73,12 @@
 .calendar-head,.calendar-pad{display:none}
 .month-picker{flex-wrap:wrap}
 }
+
+/* Round 1 (Phase 0.2.3). Colours come from the tokens above only. */
+.scenario-date{white-space:nowrap}
+a.stat-link{color:inherit;display:block;transition:border-color .15s}
+a.stat-link:hover{border-color:var(--green)}
+a.stat-link strong{color:var(--ink)}
+.due-note{font-weight:600}
+.due-note.late{color:var(--danger)}
+.due-note.soon{color:var(--warning-fg)}
