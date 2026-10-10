@@ -9,6 +9,7 @@ import {
   homeTiles,
   integrationStatusLabels,
   integrations,
+  isMine,
   needsAttention,
   noticesFor,
   ready,
@@ -16,6 +17,7 @@ import {
   securityEvents,
   storageUsage,
   systemHealth,
+  teamLoad,
 } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { Title, Panel, Empty, MediaPreview, StatusChip } from './ui';
@@ -36,7 +38,7 @@ function Home() {
 
   // What this role is asked to act on, per MVP_draft.md section 6.
   const focus = state.work.filter((w) =>
-    actor.review ? w.status === 'IN_REVIEW' : actor.publish ? ready(w) : w.owner === state.role,
+    actor.review ? w.status === 'IN_REVIEW' : actor.publish ? ready(w) : isMine(state.role, w),
   );
   const focusTitle = actor.review
     ? 'بانتظار موافقتك'
@@ -51,7 +53,7 @@ function Home() {
   const attention = state.work.filter((w) =>
     actor.publish
       ? ['FAILED', 'PARTIAL'].includes(w.status)
-      : needsAttention(w) && (actor.review || actor.admin || w.owner === state.role),
+      : needsAttention(w) && (actor.review || actor.admin || isMine(state.role, w)),
   );
   const scheduled = state.work.filter((w) => w.scheduled);
   const myNotices = noticesFor(state.role, state.notices).filter((n) => !n.read);
@@ -199,6 +201,8 @@ function Home() {
           </div>
 
           <aside>
+            {actor.review && <TeamLoadPanel />}
+
             {actor.publish && (
               <Panel title="صحة الحسابات المتصلة">
                 {channelAccounts.map((account) => (
@@ -263,6 +267,39 @@ function Home() {
         ))}
       </Panel>
     </>
+  );
+}
+
+/** Load per person for leadership (task 0.2.3.6, F-R01-01). */
+function TeamLoadPanel() {
+  const { state } = useHub();
+  const load = teamLoad(state.work);
+  const most = Math.max(1, ...load.map((x) => x.active));
+  return (
+    <Panel title="حمل الفريق">
+      <div className="team-load">
+        {load.map(({ person, active, overdue, awaitingReview }) => (
+          <div className="team-load-row" key={person.id}>
+            <span className="between">
+              <b>
+                {person.name} <small>{roles[person.role].name}</small>
+              </b>
+              <span>
+                {active} نشطة
+                {overdue > 0 && <span className="due-note late"> · {overdue} متأخر</span>}
+                {awaitingReview > 0 && <span> · {awaitingReview} للمراجعة</span>}
+              </span>
+            </span>
+            <span className="load-bar" aria-hidden="true">
+              <i style={{ width: `${(active / most) * 100}%` }} className={overdue ? 'late' : ''} />
+            </span>
+          </div>
+        ))}
+      </div>
+      <Link className="text-link" href="/work">
+        عرض الفريق في صفحة العمل ←
+      </Link>
+    </Panel>
   );
 }
 

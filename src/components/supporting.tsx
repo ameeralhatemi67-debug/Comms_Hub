@@ -14,11 +14,12 @@ import {
   noticesFor,
   permissionMatrix,
   roles,
+  personOf,
+  teamLoad,
   securityEvents,
   statusLabels,
   storageUsage,
   systemHealth,
-  type Role,
 } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { Empty, Modal, Panel, Tabs, Title } from './ui';
@@ -89,6 +90,7 @@ export function Supporting({ page }: { page: string }) {
         body,
         type: 'منشور اجتماعي',
         owner: state.role,
+        assignee: personOf(state.role)?.id ?? 'abdullah',
         due: campaign.date,
         channels: ['Instagram', 'X', 'LinkedIn'],
         assetId: 'poster',
@@ -209,13 +211,7 @@ export function Supporting({ page }: { page: string }) {
       (sum, w) => sum + Object.values(w.results).filter((x) => x === 'FAILED').length,
       0,
     );
-    const workload = Object.entries(roles)
-      .map(([id, r]) => ({
-        id: id as Role,
-        name: r.user,
-        count: state.work.filter((w) => w.owner === id).length,
-      }))
-      .filter((x) => x.count);
+    const workload = teamLoad(state.work).map((x) => ({ id: x.person.id, name: x.person.name, count: x.items.length }));
 
     return (
       <div dir="rtl">
@@ -263,9 +259,7 @@ export function Supporting({ page }: { page: string }) {
   }
 
   if (page === 'monitoring') {
-    const workload = Object.entries(roles)
-      .map(([id, r]) => ({ id, name: r.user, count: state.work.filter((w) => w.owner === id).length }))
-      .filter((x) => x.count);
+    const workload = teamLoad(state.work).map((x) => ({ id: x.person.id, name: x.person.name, count: x.items.length }));
     const unread = noticesFor(state.role, state.notices).filter((n) => !n.read);
 
     return (

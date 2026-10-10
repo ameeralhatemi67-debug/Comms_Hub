@@ -12,9 +12,15 @@ import {
   channels,
   statusLabels,
   canEdit,
+  isMine,
+  people,
+  personById,
+  personOf,
   pickContent,
+  stageOf,
+  teamLoad,
+  checklistSteps,
   type Content,
-  type Role,
   type Channel,
   type Work,
 } from '@/lib/domain';
@@ -39,7 +45,7 @@ export function WorkRow({ work: w }: { work: Work }) {
           )}
         </small>
       </span>
-      <span className="owner">{roles[w.owner].user}</span>
+      <span className="owner">{personById(w.assignee).name}</span>
       <StatusChip status={w.status} />
       <time>{w.due}</time>
     </Link>
@@ -56,21 +62,28 @@ export function WorkList() {
   const dueParam = params.get('due') || '';
   useEffect(() => setDue(dueParam), [dueParam]);
   const [owner, setOwner] = useState('');
-  const [mine, setMine] = useState(false);
+  const actor = roles[state.role];
+  // Leadership opens on the team view: who does what, at which stage (F-R01-01).
+  // A link from Home with a delivery filter opens the plain list instead.
+  const [view, setView] = useState(actor.review && !params.get('due') ? 'team' : 'all');
+  const mine = view === 'mine';
   const [board, setBoard] = useState(false);
 
   const filtered = state.work.filter(
     (w) =>
-      (!mine || w.owner === state.role) &&
+      (!mine || isMine(state.role, w)) &&
       (!status || w.status === status) &&
-      (!owner || w.owner === owner) &&
+      (!owner || w.assignee === owner) &&
       matchesDue(w, due) &&
       w.title.includes(search),
   );
 
   return (
     <>
-      <Title title="العمل" sub="كل ما نصنعه لليوم الوطني، في مكان واحد.">
+      <Title
+        title="العمل"
+        sub="قائمة عمل الفريق: من يعمل على ماذا، وفي أي مرحلة، وما المتأخر، وما ينتظر المراجعة أو الاعتماد."
+      >
         {roles[state.role].create && (
           <Link className="button primary" href="/create">
             مهمة جديدة +
@@ -78,12 +91,17 @@ export function WorkList() {
         )}
       </Title>
       <div className="tabs">
-        <button className={!mine ? 'active' : ''} onClick={() => setMine(false)}>
+        <button className={view === 'team' ? 'active' : ''} onClick={() => setView('team')}>
+          الفريق
+        </button>
+        <button className={view === 'all' ? 'active' : ''} onClick={() => setView('all')}>
           الكل
         </button>
-        <button className={mine ? 'active' : ''} onClick={() => setMine(true)}>
-          مهامي
-        </button>
+        {personOf(state.role) && (
+          <button className={mine ? 'active' : ''} onClick={() => setView('mine')}>
+            مهامي
+          </button>
+        )}
       </div>
       <div className="filters">
         <input
@@ -107,18 +125,22 @@ export function WorkList() {
         </select>
         <select aria-label="المسؤول" value={owner} onChange={(e) => setOwner(e.target.value)}>
           <option value="">كل المسؤولين</option>
-          {Object.entries(roles).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v.user}
+          {people.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
             </option>
           ))}
         </select>
-        <button onClick={() => setBoard(!board)}>{board ? 'عرض القائمة' : 'عرض اللوحة'}</button>
+        {view !== 'team' && (
+          <button onClick={() => setBoard(!board)}>{board ? 'عرض القائمة' : 'عرض اللوحة'}</button>
+        )}
       </div>
       {!filtered.length ? (
         <Panel>
           <Empty>غيّر البحث أو المرشحات، أو أنشئ عملاً جديداً.</Empty>
         </Panel>
+      ) : view === 'team' ? (
+        <TeamView work={filtered} />
       ) : board ? (
         <div className="board">
           {Object.entries(statusLabels)
@@ -147,6 +169,55 @@ export function WorkList() {
         </Panel>
       )}
     </>
+  );
+}
+
+/** Team view: per person, their work with status, stage and delivery (task 0.2.3.6). */
+function TeamView({ work }: { work: Work[] }) {
+  const load = teamLoad(work);
+  return (
+    <div className="team-grid">
+      {load.map(({ person, items, overdue, awaitingReview, soon }) => (
+        <section className="panel team-card" key={person.id} aria-label={`أعمال ${person.name}`}>
+          <header className="between">
+            <span>
+              <h2>{person.name}</h2>
+              <small>{roles[person.role].name}</small>
+            </span>
+            <span className="team-counts">
+              <span className="chip">{items.length} أعمال</span>
+              {overdue > 0 && <span className="chip status-FAILED">{overdue} متأخر</span>}
+              {soon > 0 && <span className="chip status-CHANGES_REQUESTED">{soon} قريب الموعد</span>}
+              {awaitingReview > 0 && <span className="chip status-IN_REVIEW">{awaitingReview} بانتظار المراجعة</span>}
+            </span>
+          </header>
+          {items.map((w) => (
+            <Link href={`/work/${w.id}`} className="team-item" key={w.id}>
+              <span className="team-item-main">
+                <b>{w.title}</b>
+                <small>
+                  {stageOf(w)}
+                  {dueNote(w) ? (
+                    <>
+                      {' · '}
+                      <span className={isOverdue(w) ? 'due-note late' : 'due-note soon'}>{dueNote(w)}</span>
+                    </>
+                  ) : (
+                    ` · التسليم ${w.due}`
+                  )}
+                </small>
+              </span>
+              <StatusChip status={w.status} />
+            </Link>
+          ))}
+        </section>
+      ))}
+      {!load.length && (
+        <Panel>
+          <Empty>لا يوجد عمل مطابق لهذه المرشحات.</Empty>
+        </Panel>
+      )}
+    </div>
   );
 }
 
@@ -227,6 +298,7 @@ export function Composer({ work }: { work?: Work }) {
           body: '',
           type: 'منشور اجتماعي',
           owner: actor.create ? state.role : 'writer',
+          assignee: personOf(actor.create ? state.role : 'writer')?.id ?? 'khalid',
           due: '2026-09-22',
           channels: ['Instagram', 'X'],
           assetId: 'poster',
@@ -306,12 +378,18 @@ export function Composer({ work }: { work?: Work }) {
             <div className="field-pair">
               <label>
                 المسؤول
-                <select value={data.owner} onChange={(e) => change('owner', e.target.value as Role)}>
-                  {Object.entries(roles)
-                    .filter(([, v]) => v.create)
-                    .map(([k, v]) => (
-                      <option key={k} value={k}>
-                        {v.user} · {v.name}
+                <select
+                  value={data.assignee}
+                  onChange={(e) => {
+                    const p = personById(e.target.value);
+                    setData({ ...data, assignee: p.id, owner: p.role });
+                  }}
+                >
+                  {people
+                    .filter((p) => roles[p.role].create)
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} · {roles[p.role].name}
                       </option>
                     ))}
                 </select>
@@ -425,7 +503,6 @@ export function Composer({ work }: { work?: Work }) {
   );
 }
 
-const checklistSteps = ['كتابة النص', 'التصوير / التصميم', 'الإعداد النهائي', 'التحقق قبل المراجعة'];
 
 export function WorkDetail({ id }: { id: string }) {
   const { state, dispatch } = useHub();
@@ -576,8 +653,10 @@ export function WorkDetail({ id }: { id: string }) {
             <dl>
               <dt>المسؤول</dt>
               <dd>
-                {roles[w.owner].user} · {roles[w.owner].name}
+                {personById(w.assignee).name} · {roles[w.owner].name}
               </dd>
+              <dt>المرحلة</dt>
+              <dd>{stageOf(w)}</dd>
               <dt>الحملة</dt>
               <dd>{owning.title}</dd>
               <dt>التسليم</dt>

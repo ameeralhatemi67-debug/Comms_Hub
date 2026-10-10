@@ -2354,4 +2354,14 @@ Phase 0.2.3 corrections built on findings of response R01 (`validation/responses
 - **Due soon (قريب الموعد):** outstanding and due today or within two days.
 - The Director's and Assistant Director's Home show both counts. Each count is a link to Work filtered to exactly those items.
 - Work has a delivery filter (كل المواعيد، متأخر، قريب الموعد). Each row says how late or how close it is, for example «متأخر يومين» or «يستحق غداً».
-- The seed now holds nine work items in a realistic mix: three overdue, three due soon, three on time, plus the approved and scheduled ones.
+- The seed now holds eleven work items in a realistic mix: three overdue, three due soon, three on time, plus the approved and scheduled ones.
+
+## 59.2 Named people, team view and load (F-R01-01, F-R01-17, task 0.2.3.6)
+
+- Work is assigned to a **named person**, not to a role. The department in the prototype: محمد (Director), ريم (Assistant Director), خالد and لمى (writers), سارة and فهد (designers), أحمد and ماجد (producers), نورة (Publishing Officer), عبدالله (member). The role still decides authority; "View As" simulates the first person of each role.
+- A specialist edits and submits only work assigned to them; leadership may edit any work. «مهامي» shows only the simulated person's work.
+- Work states its purpose under the title: «قائمة عمل الفريق: من يعمل على ماذا، وفي أي مرحلة، وما المتأخر، وما ينتظر المراجعة أو الاعتماد». The section name «العمل» is unchanged until terminology item T6 has a verdict.
+- Work has three tabs: «الفريق» (team view), «الكل» (list) and «مهامي». Leadership opens on «الفريق», unless arriving from a Home count, which opens the filtered list.
+- **Team view:** one card per person, with counts (works, overdue, due soon, awaiting review), then each item with its status, its **stage** and its delivery note. The stage says where the work stands: the next production step, «تعديل بعد المراجعة», «بانتظار المراجعة والاعتماد», «معتمد · بانتظار الجدولة», «مجدول للنشر», and so on.
+- **Home for the Director and Assistant Director** shows «حمل الفريق»: active work per person with overdue and awaiting-review counts and a bar, red when the person has late work.
+- The Composer's «المسؤول» chooses a person; the role follows from the person.

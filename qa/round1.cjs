@@ -59,12 +59,58 @@ section('0.2.3.5', async (page, shot) => {
   }
 
   await page.goto(baseURL + '/work', { waitUntil: 'networkidle' });
+  // Leadership opens on the team view (task 0.2.3.6); the plain list is «الكل».
+  await page.getByRole('button', { name: 'الكل', exact: true }).click();
   const all = await page.locator('main .work-row').count();
   await page.selectOption('select[aria-label="موعد التسليم"]', 'overdue');
   const late = await page.locator('main .work-row').count();
   check(T, 'Work has an «متأخر» filter that narrows the list', late > 0 && late < all, `all ${all}, overdue ${late}`);
   const workEyebrow = await page.locator('main .eyebrow').first().textContent();
   check(T, 'scenario date stated on Work', workEyebrow.includes('21 سبتمبر 2026'), workEyebrow);
+});
+
+// --- 0.2.3.6 Team workload and stage view (F-R01-01, F-R01-17) ----------------
+section('0.2.3.6', async (page, shot) => {
+  const T = '0.2.3.6';
+  for (const role of ['director', 'assistant']) {
+    await page.setViewportSize({ width: 1440, height: 950 });
+    await page.goto(baseURL + '/work', { waitUntil: 'networkidle' });
+    await asRole(page, role);
+    await page.getByRole('button', { name: 'الفريق', exact: true }).click();
+    const purpose = await page.locator('main .page-heading p').textContent();
+    check(T, `${role} Work states its purpose in one line`, purpose.includes('من يعمل على ماذا'), purpose);
+    const cards = page.locator('main .team-card');
+    const names = await cards.locator('h2').allTextContents();
+    check(T, `${role} team view lists people, not roles`, ['خالد', 'لمى', 'سارة', 'فهد', 'أحمد', 'ماجد'].every((n) => names.includes(n)), names.join(', '));
+    const items = await page.locator('main .team-item').count();
+    const total = await page.evaluate(() => document.querySelectorAll('main .team-item').length);
+    check(T, `${role} team view shows every work item once`, items === 11 && total === 11, `${items} items`);
+    const lama = cards.filter({ has: page.locator('h2', { hasText: 'لمى' }) });
+    const lamaText = await lama.textContent();
+    check(T, `${role} team view shows stage and lateness per item`, lamaText.includes('الإنتاج · كتابة النص') && lamaText.includes('متأخر 3 أيام') && lamaText.includes('1 متأخر'), lamaText);
+    const khalid = await cards.filter({ has: page.locator('h2', { hasText: 'خالد' }) }).textContent();
+    check(T, `${role} team view shows what awaits review`, khalid.includes('بانتظار المراجعة'), khalid);
+    if (role === 'director') await shot('team-view-1440');
+
+    await page.goto(baseURL + '/', { waitUntil: 'networkidle' });
+    await asRole(page, role);
+    const rows = await page.locator('.team-load-row').allTextContents();
+    check(T, `${role} home shows load per person`, rows.length >= 6 && rows.some((r) => r.includes('لمى') && r.includes('متأخر')), rows.join(' | '));
+    if (role === 'director') await shot('home-team-load-1440');
+  }
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto(baseURL + '/work', { waitUntil: 'networkidle' });
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
+  check(T, 'team view fits a phone without sideways scrolling', !overflow, overflow ? 'overflow' : 'ok');
+  await shot('team-view-390');
+
+  // Specialists see their own work only under «مهامي».
+  await page.setViewportSize({ width: 1440, height: 950 });
+  await page.goto(baseURL + '/work', { waitUntil: 'networkidle' });
+  await asRole(page, 'writer');
+  await page.getByRole('button', { name: 'مهامي', exact: true }).click();
+  const mine = await page.locator('main .work-row .owner').allTextContents();
+  check(T, 'writer «مهامي» shows Khalid only, not the other writer', mine.length > 0 && mine.every((n) => n === 'خالد'), mine.join(', '));
 });
 
 (async () => {

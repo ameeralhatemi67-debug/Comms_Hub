@@ -14,6 +14,11 @@ import {
   dueSoon,
   dueNote,
   matchesDue,
+  personById,
+  teamLoad,
+  stageOf,
+  isMine,
+  canEdit,
 } from '../src/lib/domain.ts';
 
 test('version-bound review, revision, scheduling, partial result and safe retry', () => {
@@ -271,4 +276,33 @@ test('overdue and due-soon are measured against the scenario date (F-R01-02)', (
     assert.equal(d.href, '/work?due=soon');
     assert.equal(s.work.filter((w) => matchesDue(w, 'overdue')).length, o.value);
   }
+});
+
+test('work is assigned to named people and leadership sees load per person (F-R01-01, F-R01-17)', () => {
+  const s = initialState();
+  // Every item names a person whose role matches the item's role.
+  for (const w of s.work) assert.equal(personById(w.assignee).role, w.owner, w.id);
+  // Two people share a specialism, so assignment is to a person, not a role.
+  const writers = new Set(s.work.filter((w) => w.owner === 'writer').map((w) => w.assignee));
+  assert.deepEqual([...writers].sort(), ['khalid', 'lama']);
+
+  const load = teamLoad(s.work);
+  const lama = load.find((x) => x.person.id === 'lama');
+  assert.equal(lama.overdue, 1);
+  assert.equal(load.reduce((n, x) => n + x.items.length, 0), s.work.length);
+  assert.equal(load.find((x) => x.person.id === 'khalid').awaitingReview, 1);
+
+  // Stage says where the work stands, beyond its status.
+  assert.equal(stageOf(s.work.find((w) => w.id === 'CH-247')), 'الإنتاج · كتابة النص');
+  assert.equal(stageOf(s.work.find((w) => w.id === 'CH-241')), 'بانتظار المراجعة والاعتماد');
+
+  // The writer simulates Khalid: Lama's work is not "mine" and not editable by him.
+  const lamas = s.work.find((w) => w.id === 'CH-247');
+  assert.equal(isMine('writer', lamas), false);
+  assert.equal(canEdit('writer', lamas), false);
+  assert.equal(canEdit('director', lamas), true);
+  let next = reducer({ ...s, role: 'writer' }, { type: 'submit', id: 'CH-247' });
+  assert.equal(next.work.find((w) => w.id === 'CH-247').status, 'DRAFT');
+  next = reducer({ ...s, role: 'writer' }, { type: 'submit', id: 'CH-243' });
+  assert.equal(next.work.find((w) => w.id === 'CH-243').status, 'IN_REVIEW');
 });

@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { roles, ready, type Work } from '@/lib/domain';
+import { isMine, personById, roles, ready, type Work } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { ReleaseHistory } from './release-history';
 import { Title, Panel, StatusChip, Empty, MediaPreview, Modal, Tabs, LogoLoader } from './ui';
@@ -22,7 +22,7 @@ export function Approvals() {
     tab === 'review'
       ? actor.review
         ? w.status === 'IN_REVIEW'
-        : w.owner === state.role && !!w.release
+        : isMine(state.role, w) && !!w.release
       : ready(w),
   );
   const w = list.find((x) => x.id === id) || list[0];
@@ -62,7 +62,7 @@ export function Approvals() {
               >
                 <b>{x.title}</b>
                 <small>
-                  الإصدار {x.revision} · {roles[x.owner].user}
+                  الإصدار {x.revision} · {personById(x.assignee).name}
                 </small>
                 <StatusChip status={x.status} />
               </button>

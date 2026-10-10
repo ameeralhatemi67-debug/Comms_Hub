@@ -114,6 +114,35 @@ export const roles = {
 
 export type Role = keyof typeof roles;
 
+/**
+ * Named people of the department (task 0.2.3.6, findings F-R01-01 and F-R01-17).
+ * Work is assigned to a person, not to a role; the role still decides authority.
+ * The first person of each role is the one "View As" simulates.
+ */
+export type Person = { id: string; name: string; role: Role };
+
+export const people: Person[] = [
+  { id: 'mohammed', name: 'محمد', role: 'director' },
+  { id: 'reem', name: 'ريم', role: 'assistant' },
+  { id: 'khalid', name: 'خالد', role: 'writer' },
+  { id: 'lama', name: 'لمى', role: 'writer' },
+  { id: 'sara', name: 'سارة', role: 'designer' },
+  { id: 'fahad', name: 'فهد', role: 'designer' },
+  { id: 'ahmed', name: 'أحمد', role: 'producer' },
+  { id: 'majed', name: 'ماجد', role: 'producer' },
+  { id: 'noura', name: 'نورة', role: 'publisher' },
+  { id: 'abdullah', name: 'عبدالله', role: 'member' },
+];
+
+/** The person a role simulates in "View As", if the role has one. */
+export function personOf(role: Role): Person | undefined {
+  return people.find((p) => p.role === role);
+}
+
+export function personById(id: string): Person {
+  return people.find((p) => p.id === id) ?? { id, name: id, role: 'member' };
+}
+
 export const roleIds = Object.keys(roles) as Role[];
 
 /** Roles holding content review authority. Admin authority is deliberately excluded. */
@@ -323,7 +352,10 @@ export type Content = {
   title: string;
   body: string;
   type: string;
+  /** Role of the assignee; decides who may edit and who is notified. */
   owner: Role;
+  /** The named person doing the work (task 0.2.3.6). */
+  assignee: string;
   due: string;
   channels: Channel[];
   assetId: string;
@@ -412,6 +444,8 @@ const baseCopy =
 type SeedRow = {
   title: string;
   owner: Role;
+  assignee?: string;
+  checklist?: boolean[];
   status: Status;
   assetId: string;
   type: string;
@@ -491,6 +525,8 @@ const seedRows: SeedRow[] = [
   {
     title: 'كتابة البيان الصحفي',
     owner: 'writer',
+    assignee: 'lama',
+    checklist: [false, false, false, false],
     status: 'DRAFT',
     assetId: 'poster',
     type: 'بيان صحفي',
@@ -500,6 +536,7 @@ const seedRows: SeedRow[] = [
   {
     title: 'تصميم بطاقة LinkedIn',
     owner: 'designer',
+    assignee: 'fahad',
     status: 'CHANGES_REQUESTED',
     assetId: 'poster',
     type: 'تصميم',
@@ -510,6 +547,8 @@ const seedRows: SeedRow[] = [
   {
     title: 'فيديو قصير للقصص',
     owner: 'producer',
+    assignee: 'majed',
+    checklist: [true, false, false, false],
     status: 'IN_PRODUCTION',
     assetId: 'reel',
     type: 'فيديو',
@@ -536,6 +575,8 @@ const seedRows: SeedRow[] = [
   {
     title: 'ألبوم صور التغطية',
     owner: 'designer',
+    assignee: 'fahad',
+    checklist: [false, false, false, false],
     status: 'DRAFT',
     assetId: 'footage',
     type: 'تصميم',
@@ -550,6 +591,7 @@ export function initialState(): State {
       id: `CH-${241 + i}`,
       title: row.title,
       owner: row.owner,
+      assignee: row.assignee ?? personOf(row.owner)!.id,
       status: row.status,
       type: row.type,
       body: row.body ?? baseCopy,
@@ -565,7 +607,7 @@ export function initialState(): State {
       results: {},
       comments: row.comments ? row.comments.map((c) => ({ ...c })) : [],
       activity: [...row.activity],
-      checklist: [true, true, false, false],
+      checklist: row.checklist ? [...row.checklist] : [true, true, false, false],
       ...(row.scheduled ? { scheduled: row.scheduled } : {}),
     };
     if (['IN_REVIEW', 'APPROVED', 'SCHEDULED'].includes(w.status)) {
@@ -665,6 +707,7 @@ export function pickContent(w: Content): Content {
     body: w.body,
     type: w.type,
     owner: w.owner,
+    assignee: w.assignee,
     due: w.due,
     channels: [...w.channels],
     assetId: w.assetId,
@@ -674,8 +717,14 @@ export function pickContent(w: Content): Content {
   };
 }
 
+/** Reviewers may edit any work; anyone else only work assigned to the person they are. */
 export function canEdit(role: Role, w: Work) {
-  return roles[role].create && (roles[role].review || role === w.owner);
+  return roles[role].create && (roles[role].review || w.assignee === personOf(role)?.id);
+}
+
+/** Is this work assigned to the person the role simulates? */
+export function isMine(role: Role, w: Work) {
+  return w.assignee === personOf(role)?.id;
 }
 
 export function ready(w: Work) {
@@ -755,6 +804,65 @@ export function noticesFor(role: Role, notices: Notice[]) {
   return notices.filter((n) => n.for.includes(role));
 }
 
+// --- Stage and team view (task 0.2.3.6, F-R01-01) ---
+
+/** Production steps shown on the work page and used to name the stage. */
+export const checklistSteps = ['كتابة النص', 'التصوير / التصميم', 'الإعداد النهائي', 'التحقق قبل المراجعة'];
+
+/** Where the work stands in the department's flow, and what it waits for. */
+export function stageOf(w: Work): string {
+  switch (w.status) {
+    case 'DRAFT':
+    case 'IN_PRODUCTION': {
+      const next = w.checklist.findIndex((done) => !done);
+      return next === -1 ? 'الإنتاج مكتمل · جاهز للإرسال' : `الإنتاج · ${checklistSteps[next]}`;
+    }
+    case 'CHANGES_REQUESTED':
+      return 'تعديل بعد المراجعة';
+    case 'REJECTED':
+      return 'مرفوض · بانتظار قرار';
+    case 'IN_REVIEW':
+      return 'بانتظار المراجعة والاعتماد';
+    case 'APPROVED':
+      return 'معتمد · بانتظار الجدولة';
+    case 'SCHEDULED':
+      return 'مجدول للنشر';
+    case 'PUBLISHING':
+      return 'جارٍ النشر';
+    case 'PUBLISHED':
+      return 'منشور';
+    default:
+      return 'إعادة محاولة النشر';
+  }
+}
+
+export type PersonLoad = {
+  person: Person;
+  items: Work[];
+  active: number;
+  overdue: number;
+  awaitingReview: number;
+  soon: number;
+};
+
+/** Per-person load for leadership: everyone with work assigned, busiest first. */
+export function teamLoad(work: Work[]): PersonLoad[] {
+  return people
+    .map((person) => {
+      const items = work.filter((w) => w.assignee === person.id);
+      return {
+        person,
+        items,
+        active: items.filter(isActive).length,
+        overdue: items.filter((w) => isOverdue(w)).length,
+        awaitingReview: items.filter((w) => w.status === 'IN_REVIEW').length,
+        soon: items.filter((w) => dueSoon(w)).length,
+      };
+    })
+    .filter((x) => x.items.length > 0)
+    .sort((a, b) => b.active - a.active || b.overdue - a.overdue);
+}
+
 // --- Role-specific home experience (MVP_draft.md section 6) ---
 
 export type Tile = { key: string; label: string; value: number | string; hint: string; href?: string };
@@ -766,7 +874,7 @@ function countWork(work: Work[], predicate: (w: Work) => boolean) {
 export function homeTiles(state: State): Tile[] {
   const work = state.work;
   const role = state.role;
-  const own = (w: Work) => w.owner === role;
+  const own = (w: Work) => isMine(role, w);
   const scheduledToday = (w: Work) => !!w.scheduled && w.scheduled.startsWith(campaign.date);
   const revisionRequested = (w: Work) => ['CHANGES_REQUESTED', 'REJECTED'].includes(w.status);
   const until = 'اليوم وخلال يومين';
@@ -823,13 +931,13 @@ export function homeTiles(state: State): Tile[] {
         {
           key: 'assignments',
           label: 'الإسنادات',
-          value: countWork(work, (w) => isActive(w) && w.owner !== role),
+          value: countWork(work, (w) => isActive(w) && !own(w)),
           hint: 'مسندة إلى المختصين',
         },
         {
           key: 'load',
           label: 'الأعضاء المشغولون',
-          value: new Set(work.filter(isActive).map((w) => w.owner)).size,
+          value: new Set(work.filter(isActive).map((w) => w.assignee)).size,
           hint: 'توزيع الحمل الحالي',
         },
         overdueTile,
