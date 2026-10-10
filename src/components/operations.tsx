@@ -2,10 +2,10 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { isMine, personById, roles, ready, type Work } from '@/lib/domain';
+import { isMine, personById, previousRelease, roles, ready, type Work } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { ReleaseHistory } from './release-history';
-import { Title, Panel, StatusChip, Empty, MediaPreview, Modal, Tabs, LogoLoader, VariantCopy } from './ui';
+import { Title, Panel, StatusChip, Empty, MediaPreview, Modal, Tabs, LogoLoader, VariantCopy, VersionDiff } from './ui';
 
 export function Approvals() {
   const { state, dispatch } = useHub();
@@ -85,6 +85,9 @@ export function Approvals() {
               </div>
               <StatusChip status={w.status} />
             </div>
+            {tab === 'review' && w.release && previousRelease(w, w.release.revision) && (
+              <VersionDiff before={previousRelease(w, w.release.revision)!} after={w.release} />
+            )}
             <MediaPreview assetId={w.release?.assetId} version={w.release?.assetVersion} large />
             <p className="body-copy">{w.release?.body}</p>
             {w.release && w.release.channels.map((c) => <VariantCopy content={w.release!} channel={c} key={c} />)}

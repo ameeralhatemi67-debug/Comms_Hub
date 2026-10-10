@@ -1,7 +1,7 @@
 {
-  "date": "2026-10-10T21:37:27.987Z",
+  "date": "2026-10-10T21:40:29.804Z",
   "baseURL": "http://127.0.0.1:3000",
-  "passed": 34,
+  "passed": 40,
   "failed": 0,
   "errors": [],
   "checks": [
@@ -202,6 +202,42 @@
       "name": "reviewer sees the flag on the release",
       "pass": true,
       "detail": "[\"X\"]"
+    },
+    {
+      "task": "0.2.3.8",
+      "name": "review screen compares revision 2 with revision 1",
+      "pass": true,
+      "detail": "ما الذي تغيّر منذ الإصدار 1"
+    },
+    {
+      "task": "0.2.3.8",
+      "name": "added words are highlighted",
+      "pass": true,
+      "detail": "المتطوعين | والزملاء | الذين شاركوا  | الوطني | السعودي 96، عطاؤكم يصنع الفرق. "
+    },
+    {
+      "task": "0.2.3.8",
+      "name": "removed words are struck through",
+      "pass": true,
+      "detail": "من | شارك | الوطني."
+    },
+    {
+      "task": "0.2.3.8",
+      "name": "changed fields are listed",
+      "pass": true,
+      "detail": "الوسيطالملصق النهائي · v4 ← الملصق النهائي · v5"
+    },
+    {
+      "task": "0.2.3.8",
+      "name": "writer's history shows the difference on later revisions only",
+      "pass": true,
+      "detail": "[[\"الإصدار 1 · أُرسل للمراجعة · خالد\",false],[\"الإصدار 1 · طُلب تعديل · محمد\",false],[\"الإصدار 2 · أُرسل للمراجعة · خالد\",true]]"
+    },
+    {
+      "task": "0.2.3.8",
+      "name": "difference fits a phone",
+      "pass": true,
+      "detail": "ok"
     },
     {
       "task": "all",

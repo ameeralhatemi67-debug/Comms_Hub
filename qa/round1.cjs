@@ -154,6 +154,43 @@ section('0.2.3.7', async (page, shot) => {
   await shot('flag-for-reviewer');
 });
 
+// --- 0.2.3.8 Highlighted version difference (F-R01-06) -------------------------
+section('0.2.3.8', async (page, shot) => {
+  const T = '0.2.3.8';
+  await page.goto(baseURL + '/approvals', { waitUntil: 'networkidle' });
+  await asRole(page, 'director');
+  await page.locator('.queue-item', { hasText: 'منشور شكر المتطوعين' }).click();
+  const diff = page.locator('main .review-layout > .panel > .version-diff');
+  check(T, 'review screen compares revision 2 with revision 1', (await diff.locator('h3').textContent()).includes('منذ الإصدار 1'), await diff.locator('h3').textContent());
+  const added = await diff.locator('.diff-text ins').allTextContents();
+  const removed = await diff.locator('.diff-text del').allTextContents();
+  check(T, 'added words are highlighted', added.join(' ').includes('المتطوعين'), added.join(' | '));
+  check(T, 'removed words are struck through', removed.join(' ').includes('شارك'), removed.join(' | '));
+  const fields = await diff.locator('.diff-fields').textContent();
+  check(T, 'changed fields are listed', fields.includes('الوسيط') && fields.includes('v4') && fields.includes('v5'), fields);
+  await shot('review-diff-1440');
+
+  // The writer's history shows the same difference on revision 2 and none on revision 1.
+  await page.goto(baseURL + '/work/CH-250', { waitUntil: 'networkidle' });
+  await asRole(page, 'writer');
+  await page.getByRole('button', { name: 'الموافقة', exact: true }).click();
+  const records = page.locator('main .release-history details');
+  const count = await records.count();
+  for (let i = 0; i < count; i++) await records.nth(i).locator('summary').click();
+  const withDiff = await records.evaluateAll((els) => els.map((e) => [e.querySelector('summary').textContent, !!e.querySelector('.version-diff')]));
+  check(T, "writer's history shows the difference on later revisions only",
+    withDiff.some(([s, d]) => s.includes('الإصدار 2') && d) && withDiff.filter(([s]) => s.includes('الإصدار 1')).every(([, d]) => !d),
+    JSON.stringify(withDiff));
+  await shot('history-diff-1440');
+
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto(baseURL + '/approvals', { waitUntil: 'networkidle' });
+  await page.locator('.queue-item', { hasText: 'منشور شكر المتطوعين' }).click();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
+  check(T, 'difference fits a phone', !overflow, overflow ? 'overflow' : 'ok');
+  await shot('review-diff-390');
+});
+
 (async () => {
   const { chromium } = dependency('playwright');
   fs.rmSync(out, { recursive: true, force: true });

@@ -20,6 +20,9 @@ import {
   isMine,
   canEdit,
   staleVariants,
+  diffWords,
+  releaseChanges,
+  previousRelease,
 } from '../src/lib/domain.ts';
 
 test('version-bound review, revision, scheduling, partial result and safe retry', () => {
@@ -340,4 +343,29 @@ test('a variant written before the master text changed is flagged until edited o
   assert.deepEqual(staleVariants(x()), []);
   // An empty variant falls back to the master text and is never stale.
   assert.deepEqual(staleVariants({ ...pickContent(x()), body: 'آخر', variants: { Instagram: '', X: '', LinkedIn: '' } }), []);
+});
+
+test('the difference between two revisions highlights changed Arabic text and lists changed fields (F-R01-06)', () => {
+  const before = 'شكراً لكل من شارك معنا في التحضير لليوم الوطني.';
+  const after = 'شكراً لكل المتطوعين والزملاء الذين شاركوا معنا في التحضير لليوم الوطني السعودي.';
+  const parts = diffWords(before, after);
+  const rebuild = (kinds) => parts.filter((p) => kinds.includes(p.kind)).map((p) => p.text).join('');
+  assert.equal(rebuild(['same', 'add']), after);
+  assert.equal(rebuild(['same', 'del']), before);
+  assert(parts.some((p) => p.kind === 'add' && p.text.includes('المتطوعين')));
+  assert(parts.some((p) => p.kind === 'del' && p.text.includes('شارك')));
+  assert(parts[0].kind === 'same' && parts[0].text.startsWith('شكراً لكل'));
+  assert.deepEqual(diffWords('نص', 'نص'), [{ kind: 'same', text: 'نص' }]);
+
+  // The seeded item has revisions 1 and 2: different text and a newer poster.
+  const w = initialState().work.find((x) => x.id === 'CH-250');
+  const prev = previousRelease(w, w.release.revision);
+  assert.equal(prev.revision, 1);
+  assert.equal(w.release.revision, 2);
+  const fields = releaseChanges(prev, w.release);
+  assert.deepEqual(fields.map((f) => f.label), ['الوسيط']);
+  assert.equal(fields[0].before, 'الملصق النهائي · v4');
+  assert.equal(fields[0].after, 'الملصق النهائي · v5');
+  // A first revision has nothing to compare with.
+  assert.equal(previousRelease(w, 1), undefined);
 });

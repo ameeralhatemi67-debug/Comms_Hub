@@ -2372,3 +2372,10 @@ Phase 0.2.3 corrections built on findings of response R01 (`validation/responses
 - The flag shows on the version in the work page, in the release the reviewer sees, and in the release history. In the composer the channel tab reads «X · تحتاج مراجعة» and the main-text tab lists the flagged versions.
 - The flag clears when the version is rewritten, or when the writer presses «تأكيد الصياغة» to confirm it is still right. Either change is saved as a new version, like any other edit.
 - An empty channel version uses the main text and is never flagged.
+
+## 59.4 Highlighted version difference (F-R01-06, task 0.2.3.8)
+
+- When a version under review has an earlier submitted version, the review screen opens with «ما الذي تغيّر منذ الإصدار N»: the main text with added words highlighted and underlined, removed words struck through, and a list of other changed fields (title, media and its version, channels, each channel version, delivery date, content type), each shown as old struck through, then new.
+- The same comparison appears inside each later revision of the release history, so the writer sees what changed between their own versions. The first revision has nothing to compare with and shows none.
+- The comparison is by word, so it works for Arabic text. Punctuation stays attached to its word.
+- Seed example: «منشور شكر المتطوعين», revision 1 (changes requested) and revision 2 (in review), with new text and the poster moved from v4 to v5.

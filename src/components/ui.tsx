@@ -1,7 +1,18 @@
 'use client';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Play, Image as ImageIcon } from 'lucide-react';
-import { assets, scenario, staleVariants, statusLabels, type Channel, type Content, type Status } from '@/lib/domain';
+import {
+  assets,
+  diffWords,
+  releaseChanges,
+  scenario,
+  staleVariants,
+  statusLabels,
+  type Channel,
+  type Content,
+  type Release,
+  type Status,
+} from '@/lib/domain';
 
 export function Title({ title, sub, children }: { title: string; sub?: string; children?: ReactNode }) {
   return (
@@ -48,6 +59,54 @@ export function VariantCopy({ content, channel }: { content: Content; channel: C
       {stale && <span className="chip status-CHANGES_REQUESTED stale-flag">تحتاج مراجعة: كُتبت قبل تعديل النص الأساسي</span>}
       <p>{content.variants[channel] || content.body}</p>
     </div>
+  );
+}
+
+/** What changed between two versions: highlighted text and changed fields (F-R01-06). */
+export function VersionDiff({ before, after }: { before: Release; after: Release }) {
+  const parts = diffWords(before.body, after.body);
+  const fields = releaseChanges(before, after);
+  const textChanged = parts.some((p) => p.kind !== 'same');
+  return (
+    <section className="version-diff" aria-label={`الفرق بين الإصدار ${before.revision} والإصدار ${after.revision}`}>
+      <h3>
+        ما الذي تغيّر منذ الإصدار {before.revision}
+      </h3>
+      {textChanged ? (
+        <>
+          <p className="diff-text">
+            {parts.map((p, i) =>
+              p.kind === 'add' ? (
+                <ins key={i}>{p.text}</ins>
+              ) : p.kind === 'del' ? (
+                <del key={i}>{p.text}</del>
+              ) : (
+                <span key={i}>{p.text}</span>
+              ),
+            )}
+          </p>
+          <small className="diff-legend">
+            <ins>المضاف مظلل</ins> · <del>المحذوف مشطوب</del>
+          </small>
+        </>
+      ) : (
+        <p className="muted">لم يتغير النص الأساسي.</p>
+      )}
+      {fields.length > 0 ? (
+        <dl className="diff-fields">
+          {fields.map((f) => (
+            <div key={f.label}>
+              <dt>{f.label}</dt>
+              <dd>
+                <del>{f.before}</del> ← <ins>{f.after}</ins>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : (
+        <p className="muted">لم تتغير الحقول الأخرى.</p>
+      )}
+    </section>
   );
 }
 

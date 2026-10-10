@@ -1,5 +1,5 @@
-import { roles, type Work } from '@/lib/domain';
-import { MediaPreview, VariantCopy } from './ui';
+import { previousRelease, roles, type Work } from '@/lib/domain';
+import { MediaPreview, VariantCopy, VersionDiff } from './ui';
 
 const decisions = {
   SUBMITTED: 'أُرسل للمراجعة',
@@ -20,6 +20,9 @@ export function ReleaseHistory({ work }: { work: Work }) {
               الإصدار {record.release.revision} · {decisions[record.decision]} · {roles[record.by].user}
             </summary>
             <div className="history-content">
+              {previousRelease(work, record.release.revision) && (
+                <VersionDiff before={previousRelease(work, record.release.revision)!} after={record.release} />
+              )}
               <h3>{record.release.title}</h3>
               <p className="body-copy">{record.release.body}</p>
               <MediaPreview assetId={record.release.assetId} version={record.release.assetVersion} />

@@ -746,6 +746,67 @@ export function staleVariants(c: Content): Channel[] {
 }
 
 /** Reviewers may edit any work; anyone else only work assigned to the person they are. */
+// --- Version difference (task 0.2.3.8, F-R01-06) ---
+
+export type DiffPart = { kind: 'same' | 'add' | 'del'; text: string };
+
+/**
+ * Word-level difference between two texts. Words are split on whitespace, which
+ * suits Arabic as well as Latin script; the whitespace is kept so joining the
+ * 'same' and 'add' parts gives back the new text exactly.
+ */
+export function diffWords(before: string, after: string): DiffPart[] {
+  const a = before.split(/(\s+)/).filter(Boolean);
+  const b = after.split(/(\s+)/).filter(Boolean);
+  // Longest common subsequence table, filled from the end.
+  const lcs = Array.from({ length: a.length + 1 }, () => new Array<number>(b.length + 1).fill(0));
+  for (let i = a.length - 1; i >= 0; i--)
+    for (let j = b.length - 1; j >= 0; j--)
+      lcs[i][j] = a[i] === b[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+  const parts: DiffPart[] = [];
+  const push = (kind: DiffPart['kind'], text: string) => {
+    const last = parts.at(-1);
+    if (last && last.kind === kind) last.text += text;
+    else parts.push({ kind, text });
+  };
+  let i = 0;
+  let j = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) {
+      push('same', a[i]);
+      i++;
+      j++;
+    } else if (lcs[i + 1][j] >= lcs[i][j + 1]) push('del', a[i++]);
+    else push('add', b[j++]);
+  }
+  while (i < a.length) push('del', a[i++]);
+  while (j < b.length) push('add', b[j++]);
+  return parts;
+}
+
+export type FieldChange = { label: string; before: string; after: string };
+
+/** Fields other than the main text that changed between two versions. */
+export function releaseChanges(before: Content, after: Content): FieldChange[] {
+  const assetName = (c: Content) => `${assets.find((x) => x.id === c.assetId)?.title ?? c.assetId} · v${c.assetVersion}`;
+  const changes: FieldChange[] = [];
+  const add = (label: string, x: string, y: string) => {
+    if (x !== y) changes.push({ label, before: x || 'فارغ', after: y || 'فارغ' });
+  };
+  add('العنوان', before.title, after.title);
+  add('الوسيط', assetName(before), assetName(after));
+  add('القنوات', before.channels.join('، '), after.channels.join('، '));
+  for (const c of channels) add(`صياغة ${c}`, before.variants[c] ?? '', after.variants[c] ?? '');
+  add('التسليم', before.due, after.due);
+  add('نوع المحتوى', before.type, after.type);
+  return changes;
+}
+
+/** The latest earlier revision sent to review, to compare a release against. */
+export function previousRelease(w: Work, revision: number): Release | undefined {
+  return w.history.filter((h) => h.release.revision < revision).at(-1)?.release;
+}
+
 export function canEdit(role: Role, w: Work) {
   return roles[role].create && (roles[role].review || w.assignee === personOf(role)?.id);
 }
