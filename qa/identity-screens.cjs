@@ -139,7 +139,18 @@ const asRole = async (page, role) => {
     const waiting = await page.locator('.move-request').textContent();
     check(T, 'the director sees the request waiting for the publishing officer', waiting.includes('بانتظار تأكيد مسؤول النشر') && waiting.includes('2026-09-24 18:00'), waiting);
     await shot(page, 'calendar-week-request');
+    // The request is kept in the shared store: it survives leaving the calendar.
+    await page.getByRole('link', { name: 'الرئيسية' }).first().click();
+    await page.waitForURL(baseURL + '/');
+    await page.getByRole('link', { name: 'التقويم' }).first().click();
+    await page.waitForURL('**/calendar');
+    const kept = await page.locator('.week-cell[data-day="2026-09-24"] .ev.pending').count();
+    check(T, 'the request survives navigating away and back', kept >= 1 && (await page.locator('.move-request').count()) === 1, `${kept} pending after return`);
     await asRole(page, 'publisher');
+    await page.getByRole('button', { name: 'الإشعارات', exact: true }).click();
+    const told = await page.locator('dialog .notice p').allTextContents();
+    check(T, 'the publishing officer is notified of the request', told.some((t) => t.includes('طُلب نقل')), told.join(' | '));
+    await page.keyboard.press('Escape');
     await page.getByRole('button', { name: 'تأكيد النقل', exact: true }).click();
     const moved = await page.locator('.week-cell[data-lane="Instagram"][data-day="2026-09-24"] .ev:not(.pending)', { hasText: 'إعداد منشور Instagram' }).count();
     check(T, 'the publishing officer confirms and the item moves', moved === 1 && (await page.locator('.move-request').count()) === 0, `${moved} moved`);
@@ -190,16 +201,23 @@ const asRole = async (page, role) => {
     const { ctx, page } = await open({ viewport: { width: 390, height: 844 } });
     const T = '0.3.4.3';
     await page.goto(baseURL + '/approvals', { waitUntil: 'networkidle' });
-    // Sticky positioning holds once the reviewer scrolls into the release.
-    await page.mouse.wheel(0, 400);
-    await page.waitForTimeout(300);
+    // The sheet sits above the bottom bar from first load, without scrolling.
     const sheet = await page.locator('.decision-actions').evaluate((e) => ({
       position: getComputedStyle(e).position,
       heights: [...e.querySelectorAll('button')].map((b) => b.getBoundingClientRect().height),
       lowest: Math.max(...[...e.querySelectorAll('button')].map((b) => b.getBoundingClientRect().bottom)),
       nav: document.querySelector('.mobile-nav').getBoundingClientRect().top,
     }));
-    check(T, 'the decision buttons sit in a sticky sheet above the bottom bar', sheet.position === 'sticky' && sheet.lowest <= sheet.nav, JSON.stringify(sheet));
+    check(T, 'the decision sheet sits above the bottom bar on first load', sheet.position === 'fixed' && sheet.lowest <= sheet.nav, JSON.stringify(sheet));
+    // The end of the page stays reachable above the sheet.
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(200);
+    const reach = await page.evaluate(() => ({
+      link: document.querySelector('main .text-link').getBoundingClientRect().bottom,
+      sheet: document.querySelector('.decision-actions').getBoundingClientRect().top,
+    }));
+    check(T, 'the sheet never hides the end of the page', reach.link <= reach.sheet, JSON.stringify(reach));
+    await page.evaluate(() => window.scrollTo(0, 0));
     check(T, 'every decision button is at least 44 px tall', sheet.heights.length >= 3 && sheet.heights.every((h) => h >= 44), JSON.stringify(sheet.heights));
     await shot(page, 'phone-approval-sheet', false);
     const brand = page.locator('.mobile-brand');

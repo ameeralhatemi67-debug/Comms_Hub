@@ -482,11 +482,11 @@ amended where the interface changes; Arabic strings follow the established terms
 #### Phase 0.3.4 — Time and phone (after approval)
 
 - [x] **0.3.4.1 Calendar week view with channel lanes and drag to reschedule.** Drag only moves a requested time; the Publishing Officer still confirms (A12).
-  *Status:* Done 2026-10-11. Week of the scenario date with lanes for Instagram, X, LinkedIn and internal delivery, a load bar per day, drag or a dialog (keyboard) to request a time, a requests panel with the channel risks of the new time, and «تأكيد النقل» for the Publishing Officer only.
+  *Status:* Done 2026-10-11. Week of the scenario date with lanes for Instagram, X, LinkedIn and internal delivery, a load bar per day, drag or a dialog (keyboard) to request a time, a requests panel with the channel risks of the new time, and «تأكيد النقل» for the Publishing Officer only. Since 2026-10-11 (later) requests live in the shared store, survive navigation and notify the Publishing Officer.
 - [x] **0.3.4.2 Motion Studio from the work item** (I-023) and media library in the new identity.
   *Status:* Done 2026-10-11. Poster and video work offer three suggested templates; the studio opens on the template with the work's title and says which work opened it. The media library follows the tokens. The studio keeps its own light panels in evening mode.
 - [/] **0.3.4.3 Phone approval sheet with 44 px targets, and evening mode** (I-022). Tested on a real phone as in task 0.2.2.5.
-  *Status:* Built 2026-10-11: on phones the decision buttons sit in a sticky bottom sheet above the navigation bar, each at least 44 px tall; the logo sits in the phone top bar and a double tap switches designs; evening mode as in 0.3.2.1. Checked at 390 px in Edge's phone emulation only; the real-phone test of the task is not done, since task 0.2.2.5 was skipped.
+  *Status:* Built 2026-10-11: on phones the decision buttons sit in a bottom sheet fixed above the navigation bar from first load, each at least 44 px tall; the logo sits in the phone top bar and a double tap switches designs; evening mode as in 0.3.2.1. Checked at 390 px in Edge's phone emulation only; the real-phone test of the task is not done, since task 0.2.2.5 was skipped.
 
 **If declined.** Keep Direction A and the token clean-up from 0.3.1.1. Record the decision and reason in `progress.md`; the proposal's interface ideas stay in `Ideas_Backlog.md` (I-021 to I-023). **If adjusted.** Record the requested changes, revise the proposal artifact, and ask again before 0.3.2.
 

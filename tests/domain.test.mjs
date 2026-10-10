@@ -429,3 +429,39 @@ test('video review notes are bound to a typed time, kept in time order, and trav
   assert(!comment.includes('00:45'));
   assert.equal(reel().history.at(-1).note, comment);
 });
+
+test('a calendar move is only a request until the publishing officer confirms it (task 0.3.4.1, A12)', () => {
+  let s = initialState();
+  const item = () => s.work.find((w) => w.id === 'CH-244');
+  const before = item().scheduled;
+
+  // A writer cannot request; the director can, and the schedule does not change.
+  s = reducer({ ...s, role: 'writer' }, { type: 'move-request', id: 'CH-244', date: '2026-09-24T18:00' });
+  assert.equal(s.moveRequests.length, 0);
+  s = reducer({ ...s, role: 'director' }, { type: 'move-request', id: 'CH-244', date: '2026-09-24T18:00' });
+  assert.deepEqual(s.moveRequests, [{ workId: 'CH-244', date: '2026-09-24T18:00', by: 'director' }]);
+  assert.equal(item().scheduled, before);
+  assert(s.notices[0].for.includes('publisher'));
+  assert.equal(s.notices[0].kind, 'action');
+
+  // Unscheduled work cannot be moved, and the same time is not a move.
+  s = reducer(s, { type: 'move-request', id: 'CH-242', date: '2026-09-24T18:00' });
+  s = reducer(s, { type: 'move-request', id: 'CH-244', date: before });
+  assert.equal(s.moveRequests.length, 1);
+
+  // A new request for the same work replaces the old one.
+  s = reducer(s, { type: 'move-request', id: 'CH-244', date: '2026-09-25T10:00' });
+  assert.deepEqual(s.moveRequests.map((r) => r.date), ['2026-09-25T10:00']);
+
+  // The publishing officer confirms by scheduling, which clears the request.
+  s = reducer({ ...s, role: 'publisher' }, { type: 'schedule', id: 'CH-244', date: '2026-09-25T10:00' });
+  assert.equal(item().scheduled, '2026-09-25T10:00');
+  assert.equal(s.moveRequests.length, 0);
+
+  // Only the publishing officer or the requester cancels.
+  s = reducer({ ...s, role: 'director' }, { type: 'move-request', id: 'CH-244', date: '2026-09-26T10:00' });
+  s = reducer({ ...s, role: 'assistant' }, { type: 'move-cancel', id: 'CH-244' });
+  assert.equal(s.moveRequests.length, 1);
+  s = reducer({ ...s, role: 'publisher' }, { type: 'move-cancel', id: 'CH-244' });
+  assert.equal(s.moveRequests.length, 0);
+});

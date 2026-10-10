@@ -1,7 +1,7 @@
 {
-  "date": "2026-10-10T22:15:26.610Z",
+  "date": "2026-10-10T22:35:19.065Z",
   "baseURL": "http://127.0.0.1:3000",
-  "passed": 48,
+  "passed": 51,
   "failed": 0,
   "errors": [],
   "checks": [
@@ -145,6 +145,18 @@
     },
     {
       "task": "0.3.4.1",
+      "name": "the request survives navigating away and back",
+      "pass": true,
+      "detail": "3 pending after return"
+    },
+    {
+      "task": "0.3.4.1",
+      "name": "the publishing officer is notified of the request",
+      "pass": true,
+      "detail": "إعداد منشور Instagram: طُلب نقل «إعداد منشور Instagram» إلى 2026-09-24 18:00 · بانتظار تأكيد مسؤول النشر | إصدار معتمد بانتظار الجدولة: تصميم الملصق | تفويض LinkedIn منتهٍ · إعادة الربط مطلوبة قبل النشر"
+    },
+    {
+      "task": "0.3.4.1",
       "name": "the publishing officer confirms and the item moves",
       "pass": true,
       "detail": "1 moved"
@@ -205,9 +217,15 @@
     },
     {
       "task": "0.3.4.3",
-      "name": "the decision buttons sit in a sticky sheet above the bottom bar",
+      "name": "the decision sheet sits above the bottom bar on first load",
       "pass": true,
-      "detail": "{\"position\":\"sticky\",\"heights\":[44,44,44],\"lowest\":760,\"nav\":775}"
+      "detail": "{\"position\":\"fixed\",\"heights\":[44,44,44],\"lowest\":761,\"nav\":775}"
+    },
+    {
+      "task": "0.3.4.3",
+      "name": "the sheet never hides the end of the page",
+      "pass": true,
+      "detail": "{\"link\":425.828125,\"sheet\":560.21875}"
     },
     {
       "task": "0.3.4.3",

@@ -173,7 +173,12 @@
 [data-identity="emerald"] .binding-note{padding:10px 12px;border-radius:10px;background:var(--surface-2);border:1px dashed var(--line-strong)}
 /* Phone approval sheet with 44 px targets (task 0.3.4.3) */
 @media (max-width:699px){
-  [data-identity="emerald"] .decision-actions{position:sticky;bottom:70px;z-index:20;margin-inline:-18px;padding:10px 16px 14px;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -12px 30px -12px rgba(0,0,0,.35)}
+  /* Fixed above the bottom navigation bar (69 px) from the first moment, not only
+     after scrolling; only when it holds decision buttons. The page gains matching
+     space at the bottom so the sheet never hides the end of the content. */
+  [data-identity="emerald"] .decision-actions:has(button){position:fixed;inset-inline:0;bottom:69px;z-index:20;margin:0;padding:10px 16px 14px;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -12px 30px -12px rgba(0,0,0,.35)}
+  [data-identity="emerald"] .decision-actions .binding-note{font-size:12px;padding:8px 10px}
+  [data-identity="emerald"] main:has(.decision-actions button){padding-bottom:260px}
   [data-identity="emerald"] .decision-actions::before{content:"";display:block;width:38px;height:4px;border-radius:2px;background:var(--line-strong);margin:0 auto 6px;flex-basis:100%;max-width:38px}
   [data-identity="emerald"] .decision-actions button,[data-identity="emerald"] .decision-actions .button{min-height:44px;flex:1 1 0;white-space:nowrap}
   [data-identity="emerald"] .decision-actions button.primary{flex-basis:100%}

@@ -453,9 +453,16 @@ export type Notice = {
   for: Role[];
 };
 
+/**
+ * A requested new publication time for scheduled work (task 0.3.4.1). Only the
+ * publishing officer turns it into a schedule (assumption A12).
+ */
+export type MoveRequest = { workId: string; date: string; by: Role };
+
 export type State = {
   role: Role;
   work: Work[];
+  moveRequests: MoveRequest[];
   campaigns: Campaign[];
   notices: Notice[];
   message: string;
@@ -469,6 +476,8 @@ export type Action =
   | { type: 'submit' | 'approve' | 'publish' | 'retry'; id: string }
   | { type: 'changes' | 'reject' | 'comment'; id: string; text: string; notes?: string[] }
   | { type: 'video-note'; id: string; at: string; text: string }
+  | { type: 'move-request'; id: string; date: string }
+  | { type: 'move-cancel'; id: string }
   | { type: 'schedule'; id: string; date: string }
   | { type: 'result'; id: string; mode: 'success' | 'partial' | 'failure' }
   | { type: 'check'; id: string; index: number }
@@ -719,6 +728,7 @@ export function initialState(): State {
     role: 'director',
     message: '',
     work,
+    moveRequests: [],
     campaigns: [{ ...campaign }],
     notices: [
       {
@@ -1332,6 +1342,8 @@ function audienceFor(type: Action['type'], w: Work, actor: Role): Role[] {
       list = [owner, ...reviewerRoles];
       break;
     case 'schedule':
+    case 'move-request':
+    case 'move-cancel':
       list = ['publisher', ...reviewerRoles];
       break;
     case 'publish':
@@ -1436,6 +1448,7 @@ export function reducer(state: State, a: Action): State {
   let kind: Notice['kind'] = 'info';
   // The review note grows by any timestamped video notes a change request carries.
   let reviewNote: string | undefined;
+  let moveRequests = state.moveRequests;
 
   switch (a.type) {
     case 'edit': {
@@ -1516,6 +1529,23 @@ export function reducer(state: State, a: Action): State {
       kind = 'action';
       break;
     }
+    case 'move-request': {
+      if (!actor.review && !actor.publish) return fail('طلب نقل الموعد لقيادة القسم ومسؤول النشر.');
+      if (w.status !== 'SCHEDULED' || !w.scheduled) return fail('يُطلب النقل لعمل مجدول فقط.');
+      if (!Number.isFinite(Date.parse(`${a.date}+03:00`)) || a.date === w.scheduled) return fail('اختر موعداً جديداً صالحاً.');
+      moveRequests = [...moveRequests.filter((r) => r.workId !== w.id), { workId: w.id, date: a.date, by: state.role }];
+      message = `طُلب نقل «${w.title}» إلى ${a.date.replace('T', ' ')} · بانتظار تأكيد مسؤول النشر`;
+      kind = 'action';
+      break;
+    }
+    case 'move-cancel': {
+      const request = moveRequests.find((r) => r.workId === w.id);
+      if (!request) return fail('لا يوجد طلب نقل لهذا العمل.');
+      if (!actor.publish && request.by !== state.role) return fail('يلغي الطلب مسؤول النشر أو من طلبه.');
+      moveRequests = moveRequests.filter((r) => r.workId !== w.id);
+      message = `أُلغي طلب نقل موعد «${w.title}»`;
+      break;
+    }
     case 'video-note': {
       if (!actor.review && !isMine(state.role, w)) return fail('الملاحظات الزمنية للمراجعين وصاحب العمل.');
       if (!isVideo(w)) return fail('الملاحظات الزمنية متاحة للفيديو فقط.');
@@ -1548,6 +1578,7 @@ export function reducer(state: State, a: Action): State {
       if (!a.date || !Number.isFinite(Date.parse(`${a.date}+03:00`))) return fail('حدد موعداً صالحاً.');
       w.scheduled = a.date;
       w.status = 'SCHEDULED';
+      moveRequests = moveRequests.filter((r) => r.workId !== w.id);
       {
         const risks = channelRisks(w.channels, a.date);
         message = risks.length
@@ -1615,6 +1646,7 @@ export function reducer(state: State, a: Action): State {
   return {
     ...state,
     work: state.work.map((x) => (x.id === w.id ? w : x)),
+    moveRequests,
     message,
     notices:
       a.type === 'check'

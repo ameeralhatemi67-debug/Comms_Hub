@@ -718,7 +718,7 @@ Example:
 [ ابحث في مركز الاتصال... ]
 
                          [+ إنشاء]
-                         [🔔 3]
+                         [الإشعارات 3]
                          [محمد ▼]
 ```
 
@@ -2403,9 +2403,9 @@ Extends section 58. Everything here appears only while the second design is on; 
 - **Accent word.** The name in the Home greeting is written in Aref Ruqaa, in gold: one accent word per page, as the proposal asks.
 - **Home.** «قراراتك الآن» lists what waits for this person with a count and direct actions: «اعتماد الإصدار N» (the exact version), «مراجعة», «جدولة» for the Publishing Officer, «فتح» for others. The campaign card gains the **campaign pulse**: five stations (المحتوى، التصميم، المراجعة، الجدولة، النشر), how many works stand at each, the current station and overall progress. Leadership and the Publishing Officer see an attention strip when a scheduled item's channel will not be authorized in time.
 - **Approvals.** Above the decision, a note binds it to the exact version: «الاعتماد مرتبط بالإصدار N تحديداً. أي تعديل بعده يُلغيه تلقائياً.» Approving shows the gold **approval stamp** for about two seconds; it does not animate when the user prefers reduced motion.
-- **Phone approval sheet.** On phones the decision buttons sit in a bottom sheet above the navigation bar, at least 44 px tall, approval on its own row.
+- **Phone approval sheet.** On phones the decision buttons sit in a bottom sheet fixed above the navigation bar from the first moment, at least 44 px tall, approval on its own row. The page keeps space at its end so the sheet never hides content.
 - **Notification tiers.** The notification centre groups by «قرارك», «انتباه», «للعلم», with counts, decisions first (`disscussios/notification_model.md`).
-- **Calendar week.** The calendar opens on the week of the scenario date, with a lane per channel (Instagram, X, LinkedIn) and one for internal delivery dates, and a load bar under each day. Dragging a scheduled item to another day, or choosing a new time in its dialog, records a **requested time** only. Requests are listed with the channel risks of the new time; only the Publishing Officer confirms («تأكيد النقل») or drops them. Month and agenda views remain.
+- **Calendar week.** The calendar opens on the week of the scenario date, with a lane per channel (Instagram, X, LinkedIn) and one for internal delivery dates, and a load bar under each day. Dragging a scheduled item to another day, or choosing a new time in its dialog, records a **requested time** only. Requests are listed with the channel risks of the new time and notify the Publishing Officer, who alone confirms («تأكيد النقل»); the Publishing Officer or the requester may cancel. Requests are kept while moving around the app (they reset with the page, like all prototype state). Month and agenda views remain.
 - **Motion from the work.** A poster or video work offers «أنشئ حركة» with three suggested templates; the studio opens on the template with the work's title in its title field and names the work it was opened from.
 - **Component page.** `/components`, outside the navigation, shows every shared component in each state, for whichever design is on.
 - Not built: the command palette (only if the Director wants it).

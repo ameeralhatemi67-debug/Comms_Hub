@@ -480,23 +480,16 @@ export function Calendar() {
   const view = chosenView || (second ? 'week' : 'month');
   const [weekStart, setWeekStart] = useState(weekOf(scenario.today)[0]);
   // Requested publication times. Dragging only requests a move; the publishing
-  // officer confirms it (task 0.3.4.1, assumption A12).
-  const [requests, setRequests] = useState<Record<string, string>>({});
+  // officer confirms it (task 0.3.4.1, assumption A12). Requests live in the shared
+  // store, so they survive navigating away from the calendar.
+  const requests = Object.fromEntries(state.moveRequests.map((r) => [r.workId, r.date]));
   const [moveTo, setMoveTo] = useState('');
   const canRequest = actor.review || actor.publish;
   const requestMove = (w: Work, when: string) => {
     if (!w.scheduled || when === w.scheduled) return;
-    setRequests({ ...requests, [w.id]: when });
-    dispatch({
-      type: 'notify',
-      text: `طُلب نقل «${w.title}» إلى ${when.replace('T', ' ')} · بانتظار تأكيد مسؤول النشر`,
-    });
+    dispatch({ type: 'move-request', id: w.id, date: when });
   };
-  const dropRequest = (id: string) => {
-    const next = { ...requests };
-    delete next[id];
-    setRequests(next);
-  };
+  const dropRequest = (id: string) => dispatch({ type: 'move-cancel', id });
   const [filter, setFilter] = useState('all');
   const [month, setMonth] = useState('2026-09');
 
@@ -646,10 +639,8 @@ export function Calendar() {
                   <span className="actions">
                     <button
                       className="primary"
-                      onClick={() => {
-                        dispatch({ type: 'schedule', id, date: when });
-                        dropRequest(id);
-                      }}
+                      // Scheduling clears the request in the reducer.
+                      onClick={() => dispatch({ type: 'schedule', id, date: when })}
                     >
                       تأكيد النقل
                     </button>
