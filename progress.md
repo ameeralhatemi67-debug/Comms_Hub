@@ -283,3 +283,32 @@ When recording future implementation outcomes, follow this standardized template
 - **Verification, all run on the final production build.** `npm run typecheck` clean. `npm run build` clean. `npm test` 9 of 9 (new: the design notice changes only the message). `node qa/identity-toggle.cjs` 134 of 134: default is Direction A; double-click switches, is announced, does not select text; reload keeps it with no console or hydration errors; both faces load from the app; no request leaves the local server; no horizontal overflow on 16 routes at 1440, 1280, 900 and 390; collapsed-sidebar double-click switches back and clears the stored choice; a single click still opens Home; reduced motion removes transitions; 48 contrast pairs pass. Screenshots of every route at 1440 and 390, the notifications dialog, and all eight role homes in both designs were inspected. Regressions: `qa/checkpoint-02-corrections.cjs` 34 of 34, `qa/verify.cjs` journey PASS with 60 views and no overflow, `qa/motion-studio.cjs` 205 of 205.
 - **Not done, said plainly.** Evening mode (0.3.4.3) and its contrast table; the QA component page of 0.3.2.3; the Aref Ruqaa accent word and IBM Plex Mono (not installed until used). The switch has no keyboard path and cannot be reached on phone widths, where the sidebar is hidden. The built-in browser pane would not draw while the app window was hidden, so all visual checks used Playwright screenshots in Edge.
 - **Next action:** owner decision D-01 with the Director, now on the live toggle instead of the artifact; then Round 1 corrections from task 0.2.3.5.
+
+## 2026-10-10 — Logged by Compass
+
+- 937e22b feat(identity): second design behind a double-click on the sidebar logo
+
+### 2026-10-11: Round 1 corrections from the Director's response (Phase 0.2.3)
+
+- **Owner decision D-03, 2026-10-11:** R01's severities confirmed as transcribed (8 Severity 1, 7 Severity 2, 3 Severity 4, 1 not scored). The consolidated register in `validation/feedback-rubric.md` section 5 now holds all 19 findings with a decision and status each (task 0.2.3.1).
+- **Six corrections, one commit each, each citing its findings:**
+  - `0a0c5e5` task 0.2.3.5 (F-R01-02): fixed scenario date, Monday 21 September 2026, stated in every page header; overdue and due-soon measured against it; seed of 11 items with 3 overdue, 3 due soon, 3 on time; Director and Assistant Director Home counts linked to the filtered list; «متأخر» filter on Work.
+  - `1418f68` task 0.2.3.6 (F-R01-01, F-R01-17): work assigned to ten named people, two per specialism; team view on Work (default for leadership) with status, stage and lateness per item; «حمل الفريق» on leadership Home; purpose line under «العمل». A specialist now edits only their own work.
+  - `792eae0` task 0.2.3.7 (F-R01-05): channel versions written before a change to the main text are flagged on the work page, the reviewer's release and the history; cleared by rewriting or «تأكيد الصياغة».
+  - `e0863d9` task 0.2.3.8 (F-R01-06): word-level difference between submitted revisions, suited to Arabic, with changed fields listed, on the review screen and in the writer's history.
+  - `65b740d` task 0.2.3.9 (F-R01-07): channel authorization end times; the scheduling dialog warns for the chosen time; «مواعيد معرضة للخطر» on the Publishing Officer's Home.
+  - `93b321a` task 0.2.3.10 (F-R01-03): typed mm:ss video notes in time order, carried by a change request; the interface says playback is deferred.
+- **Verification, final production build:** `npm run typecheck` clean; `npm run build` clean; `npm test` 15 of 15 (six new tests, one per correction); `node qa/round1.cjs` 52 of 52 (new script, one section per task, both leadership roles where the task names them, 390 px checks for the team view and the difference); `qa/checkpoint-02-corrections.cjs` 34 of 34 and `qa/verify.cjs` journey PASS with 60 views after every correction. Screenshots of each correction inspected.
+- **Task 0.2.3.12, design notes and recommended decisions** (`validation/design-notes/`). Each Severity 1 deferral below is recorded with its reason, as exit gate criterion 5 requires; the owner confirms or overrules.
+  - F-R01-04 approval scoped to what changed (Severity 1): recommended defer to Checkpoint 2.3. Reason: it changes the approval engine; `approval_policy_design.md` sections 4 to 6 already anticipate it after the conservative first-version rule.
+  - F-R01-09 close and archive (Severity 2): recommended defer to Checkpoint 2.1; the Arabic action word needs a verdict first.
+  - F-R01-10 stages per content type (Severity 2): recommended defer to Checkpoint 2.1, templates kept by leadership.
+  - F-R01-11 delegation (Severity 1): recommended defer to Checkpoints 1.2 and 2.3. Reason: needs real authority checks the prototype does not have; `organizational_role_discussion.md` section 5 already specifies the acting assignment.
+  - F-R01-12 urgent path (Severity 1): recommended defer to Checkpoints 2.3 and 2.4. Reason: reminders and escalation need the notification engine; `emergency_workflows.md` section 1 already matches the Director's answer. A visual urgent mark in the prototype is offered as an owner option.
+  - F-R01-13 several campaigns (Severity 1): recommended defer to Checkpoint 2.1. Reason: changes the core data model; pair it with a source field to measure planned against unplanned work.
+  - F-R01-18 stage deadlines (Severity 2): recommended defer to Checkpoint 2.1, on the stage templates.
+  - F-R01-19 edit attribution (Severity 2): recommended defer to Checkpoints 1.4 and 2.3; the activity log already names the editor. Showing it on each version in the prototype is offered as an owner option.
+- **Task 0.2.3.11:** re-check script `validation/recheck-R01.md` prepared; waits on the Director.
+- **Tasks 0.2.3.3 and 0.2.3.4:** nothing removed (R01 named no unused interaction); no terminology verdicts exist yet (T6 asked in the re-check).
+- **Not done, said plainly:** no participant has seen the corrections yet, so no Severity 1 finding is closed. The scenario date is fixed; nothing in the prototype advances time.
+- **Next action:** the Director's re-check (0.2.3.11) and the owner's decisions on the eight design notes.

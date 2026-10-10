@@ -209,6 +209,8 @@ verified before the next.
 | Wed 14 | Highlighted version difference. Early reconnect warning | 0.2.3.8, 0.2.3.9 |
 | Thu 15 | Timestamped video notes. Round 1 browser QA script and `progress.md` entry. Re-check session with P01 | 0.2.3.10, 0.2.3.11 |
 
+All of Round 1 (0.2.3.5 to 0.2.3.10) and the design notes were completed on Sunday 11 October, ahead of this plan. What remains needs people: the re-check with the Director and the owner's decisions on the design notes and D-01.
+
 **Following week.** Transcribe each new response into `validation/responses/` as it
 arrives and merge it into the register (0.2.3.1). Write the design notes for the
 structural findings (0.2.3.12). If D-01 is approved, start Phase 0.3.2.
@@ -354,61 +356,72 @@ Access restrictions, persisted assets, video uploads and workflow attachment rem
 
 #### Phase 0.2.3 — Prototype Corrections
 
-**State:** Round 1 starts 2026-10-11 on the findings of R01, while Phase 0.2.2 continues. Later rounds follow as responses arrive. Tasks 0.2.3.2 to 0.2.3.4 stay open until the last session; 0.2.3.5 to 0.2.3.12 are Round 1.
+**State:** Round 1 built 2026-10-11 (tasks 0.2.3.5 to 0.2.3.10, one commit each). Severities confirmed by the owner (D-03, 2026-10-11). Design notes written (0.2.3.12) and the re-check script prepared (0.2.3.11); both now wait on people: the owner for the design decisions, the Director for the re-check. With Phase 0.2.2 closed on the Director's input, the re-check is the last session, so tasks 0.2.3.2 to 0.2.3.4 close with it.
 
-- [/] **0.2.3.1 Synthesize human validation findings into a single ranked register.**
+- [x] **0.2.3.1 Synthesize human validation findings into a single ranked register.**
   *Definition of done:* Every finding from every session appears once, deduplicated, severity-scored, and attributed to the session that raised it.
   *Evidence:* Consolidated findings register in `validation/feedback-rubric.md`, plus a dated summary entry in `progress.md`.
-  *Status:* R01 transcribed with 19 findings, 8 of them provisionally Severity 1. Register entry waits for decision D-03 on the severities.
+  *Status:* Done 2026-10-11. All 19 findings of R01 in the register with the severities the owner confirmed (D-03): 8 Severity 1, 7 Severity 2, 3 Severity 4, 1 not scored. Each has a decision (correct, design note, or no change) and a status.
 
-- [ ] **0.2.3.2 Apply evidence-based workflow and interface corrections only.**
+- [/] **0.2.3.2 Apply evidence-based workflow and interface corrections only.**
   *Definition of done:* Each applied correction cites the finding that justifies it. Changes with no finding behind them are not made. Typecheck, tests, build and a browser check pass after each correction.
   *Evidence:* Commits referencing finding identifiers, and passing `qa/` runs recorded in `progress.md`.
+  *Status:* Round 1 applied: six commits, each citing its findings, each verified by typecheck, tests, build and `qa/round1.cjs`. Open until the re-check (0.2.3.11) shows whether a Round 2 is needed.
 
-- [ ] **0.2.3.3 Remove or simplify interactions the department did not need.**
+- [/] **0.2.3.3 Remove or simplify interactions the department did not need.**
   *Definition of done:* Each removal names the sessions in which the interaction went unused or caused confusion.
   *Evidence:* Dated entry in `progress.md` listing what was removed and on what observation.
+  *Status:* Nothing removed. R01 named no interaction as unused or confusing apart from the purpose of «العمل», which was corrected rather than removed (0.2.3.6). The tile «حمل القسم» on the Director's Home was replaced by the overdue and due-soon counts and the per-person load panel. Closes with the re-check.
 
-- [ ] **0.2.3.4 Correct role-specific experiences and Arabic terminology.**
+- [/] **0.2.3.4 Correct role-specific experiences and Arabic terminology.**
   *Definition of done:* Every terminology item from section 7 of the workflow map has a recorded department verdict, and accepted corrections are applied across interface strings and `MVP_draft.md` consistently.
   *Evidence:* Terminology table with verdicts, and a passing browser check of the corrected strings.
+  *Status:* No verdicts yet: R01 left T3, T5, T6 and T7 blank, and no Arabic term may change on agent judgement. T6 («العمل») is asked in the re-check script, Part C.
 
 **Round 1 corrections, from R01.** Every task below follows the same rule: the commit
 message cites the finding; `npm run typecheck`, `npm test` and `npm run build` pass; a
 browser check is saved under `qa/` as a script and its JSON result; `MVP_draft.md` is
 amended where the interface changes; Arabic strings follow the established terms.
 
-- [ ] **0.2.3.5 Overdue count and filter.** Finding F-R01-02 (Severity 1), B4, E5.
+- [x] **0.2.3.5 Overdue count and filter.** Finding F-R01-02 (Severity 1), B4, E5.
   *Definition of done:* The prototype states its scenario date on screen (it has no notion of "today": `dueSoon` in `src/lib/domain.ts` counts every item due on or before the campaign date, and all seed due dates are 22 or 23 September, so a tester on 10 October sees everything as late). Overdue and due-soon are measured against that scenario date, and the seed holds a realistic mix of on-time, due-soon and overdue items. Home for the Director and Assistant Director shows both counts, each a link to Work filtered to exactly those items; Work has an «متأخر» filter.
   *Evidence:* Domain test for the overdue rule against the scenario date; browser check that each count equals its filtered list for both roles.
+  *Status:* Done 2026-10-11, commit `0a0c5e5`. Scenario date Monday 21 September 2026 on every page; 3 overdue, 3 due soon, 3 on time in the seed. Tests 10/10; `qa/round1.cjs` 14/14 at the time, both leadership roles.
 
-- [ ] **0.2.3.6 Team workload and stage view.** Findings F-R01-01 and F-R01-17 (Severity 1), A25, B4, T6.
+- [x] **0.2.3.6 Team workload and stage view.** Findings F-R01-01 and F-R01-17 (Severity 1), A25, B4, T6.
   *Definition of done:* Seed work is assigned to named people within each role, and the Work page gains a team view: per person, their items, each item's status and stage, what is overdue, and what awaits review or approval. Home for leadership shows the load per person. The page states its purpose in one line, since P01 could not tell what «العمل» is for. The section name «العمل» is not changed until T6 has a verdict.
   *Evidence:* Browser check for the Director and Assistant Director; screenshot at 1440 and 390 inspected.
+  *Status:* Done 2026-10-11, commit `1418f68`. Ten named people, two per specialism; team view per person with status, stage and lateness; load per person on leadership Home; purpose line on Work. Screenshots at 1440 and 390 inspected.
 
-- [ ] **0.2.3.7 Stale channel variants.** Finding F-R01-05 (Severity 2, a writer's daily task), B5.
+- [x] **0.2.3.7 Stale channel variants.** Finding F-R01-05 (Severity 2, a writer's daily task), B5.
   *Definition of done:* Editing the master text marks each channel variant written before the edit as needing review, shown on the variant and in the release the reviewer sees, cleared when the variant is edited or confirmed.
   *Evidence:* Domain test; browser check of edit, flag, confirm.
+  *Status:* Done 2026-10-11, commit `792eae0`. Flag on the variant, the reviewer's release and the history; cleared by rewriting or «تأكيد الصياغة».
 
-- [ ] **0.2.3.8 Highlighted version difference.** Finding F-R01-06 (Severity 2, a reviewer's and writer's daily task), B3.
+- [x] **0.2.3.8 Highlighted version difference.** Finding F-R01-06 (Severity 2, a reviewer's and writer's daily task), B3.
   *Definition of done:* Between any two submitted revisions, changed text is highlighted and changed fields (asset version, channels) are listed, on the review screen and the writer's history.
   *Evidence:* Domain test of the text difference on Arabic text; browser check on revisions 1 and 2 of the seed item.
+  *Status:* Done 2026-10-11, commit `e0863d9`. Word-level difference on the review screen and in each later revision of the history; seed item «منشور شكر المتطوعين» revisions 1 and 2.
 
-- [ ] **0.2.3.9 Early reconnect warning.** Finding F-R01-07 (Severity 2, the publisher's daily task), B6, E4.
+- [x] **0.2.3.9 Early reconnect warning.** Finding F-R01-07 (Severity 2, the publisher's daily task), B6, E4.
   *Definition of done:* Scheduling onto a channel whose authorization expires before the publication time shows the warning at scheduling, and the Publishing Officer's home lists scheduled items at risk.
   *Evidence:* Browser check scheduling onto the seeded LinkedIn account.
+  *Status:* Done 2026-10-11, commit `65b740d`. Accounts carry an authorization end time; X runs out at noon on the campaign day, LinkedIn is expired. Warning live in the scheduling dialog; «مواعيد معرضة للخطر» on the Publishing Officer's Home.
 
-- [ ] **0.2.3.10 Timestamped video review notes.** Finding F-R01-03 (Severity 1), B2, W4.
+- [x] **0.2.3.10 Timestamped video review notes.** Finding F-R01-03 (Severity 1), B2, W4.
   *Definition of done:* A reviewer can add a note with a time (mm:ss) to a video asset version; notes are listed in time order on the review screen and the producer's work page; a change request can carry them. Playback stays deferred, so the time is typed, not picked from a player, and the interface says so.
   *Evidence:* Domain test; browser check of add, list, change request.
+  *Status:* Done 2026-10-11, commit `93b321a`. Typed mm:ss notes in time order on the review screen and the producer's work page; a change request carries the chosen notes.
 
-- [ ] **0.2.3.11 Round 1 re-check with P01.**
+- [/] **0.2.3.11 Round 1 re-check with P01.**
   *Definition of done:* P01 repeats S1 tasks 3 and 6 and S2 task 4 on the corrected build and confirms or rejects each Round 1 correction. Results recorded against the finding identifiers.
   *Evidence:* Addendum in `validation/responses/R01-2026-10-10-director.md` and a dated `progress.md` entry. Exit gate criterion 5 requires this re-check before a Severity 1 finding closes.
+  *Status:* Script ready, `validation/recheck-R01.md` (2026-10-11): the three failed tasks, one question per correction, and the open questions of the design notes, T6 and D-01. Waits on the Director; the agent cannot run it.
 
-- [ ] **0.2.3.12 Design notes for the structural findings.** Findings F-R01-04, 09, 10, 11, 12, 13, 18 and 19.
+- [/] **0.2.3.12 Design notes for the structural findings.** Findings F-R01-04, 09, 10, 11, 12, 13, 18 and 19.
   *Definition of done:* One short note per topic under `validation/design-notes/`, each stating the department's answer, the conflict with the current model and specification, the options, and a recommended Version 2 checkpoint: component-scoped approval (F-R01-04, E6), close and archive with a reason (F-R01-09, E11), configurable stages per content type (F-R01-10, B7, O-009), delegation with automatic expiry (F-R01-11, E2), urgent path (F-R01-12, E3), work linked to several campaigns (F-R01-13, E8), stage deadlines (F-R01-18), edit attribution (F-R01-19, E9). Existing `disscussios/` documents and `discussions_list.md` are not edited.
   *Evidence:* The notes, and a decision per note recorded in `progress.md`: build in the prototype now, defer to Version 2 with a dated reason, or ask the next participants.
+  *Status:* Eight notes and an index written 2026-10-11 under `validation/design-notes/`. Each recommends deferral (Checkpoints 1.2, 1.4, 2.1, 2.3 or 2.4) with a reason; two offer an optional small prototype addition (urgent mark, editor name) if the owner wants them shown at the re-check. The recommendations are recorded in `progress.md`; the owner's decision closes the task.
 
 #### Phase 0.2.4 — Product Freeze Gate
 

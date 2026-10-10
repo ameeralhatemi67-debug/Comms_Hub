@@ -40,13 +40,18 @@ Design: Direction A is the default; B only for larger media previews. See DESIGN
 - **Prototype defect exposed:** the prototype has no scenario "today", and every seed due date is 22 or 23 September, so a tester in October sees all work as late. Corrected in task 0.2.3.5.
 - **Exit gate:** one of five role groups, one of six participants, one of two leadership. Whether self-administered form responses count as sessions is owner decision D-02.
 
+## Round 1 corrections (2026-10-11)
+
+All six Round 1 corrections from the Director's findings are built and verified: overdue and due-soon against a fixed scenario date (21 September 2026), named assignees with a team view and load per person, stale channel version flags, highlighted version difference, early reconnect warning, and timestamped video notes. `npm test` 15/15, `qa/round1.cjs` 52/52, regressions pass. See `MVP_draft.md` section 59. Eight design notes for the structural findings are in `validation/design-notes/`, each recommending a Version 1 or 2 checkpoint. The re-check script for the Director is `validation/recheck-R01.md`.
+
 ## Decisions waiting on the owner
 
 | ID | Decision |
 |---|---|
 | D-01 | With the Director, on the live toggle: make the new identity the default, keep it as an option, adjust it, or remove it |
 | D-02 | Count self-administered form responses as sessions, with "facilitator: none" recorded. Effectively settled by the 2026-10-10 directive that the Director's response alone is enough; to be confirmed |
-| D-03 | Confirm R01's provisional severities and the Round 1 correction list |
+| D-03 | Done 2026-10-11: severities confirmed as transcribed |
+| D-04 | Confirm or overrule the eight design-note recommendations (`validation/design-notes/README.md`), including whether to show an urgent mark and the editor's name in the prototype |
 
 ## Verified capability
 
