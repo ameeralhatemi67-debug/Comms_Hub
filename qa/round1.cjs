@@ -113,6 +113,47 @@ section('0.2.3.6', async (page, shot) => {
   check(T, 'writer «مهامي» shows Khalid only, not the other writer', mine.length > 0 && mine.every((n) => n === 'خالد'), mine.join(', '));
 });
 
+// --- 0.2.3.7 Stale channel variants (F-R01-05) --------------------------------
+section('0.2.3.7', async (page, shot) => {
+  const T = '0.2.3.7';
+  // Flags on the content shown, not on the snapshots in the release history below it.
+  const flagged = async () =>
+    page.$$eval('main .variant-copy.stale b', (els) => els.filter((e) => !e.closest('.release-history')).map((e) => e.textContent));
+  await page.goto(baseURL + '/work/CH-243', { waitUntil: 'networkidle' });
+  await asRole(page, 'writer');
+  check(T, 'seeded X variant is flagged on the work page', JSON.stringify(await flagged()) === '["X"]', JSON.stringify(await flagged()));
+  await shot('flag-on-work-page');
+
+  await page.getByRole('link', { name: 'تحرير', exact: true }).click();
+  await page.locator('main textarea').first().waitFor();
+  const masterWarning = await page.locator('main .warning[role=status]').first().textContent();
+  check(T, 'composer warns on the master tab', masterWarning.includes('X'), masterWarning);
+  await page.getByRole('button', { name: 'X · تحتاج مراجعة', exact: true }).click();
+  await page.getByRole('button', { name: 'تأكيد الصياغة', exact: true }).click();
+  const tabAfter = await page.locator('main .tabs button').allTextContents();
+  check(T, 'confirming clears the flag in the composer', tabAfter.includes('X') && !tabAfter.some((t) => t.includes('تحتاج مراجعة')), tabAfter.join(', '));
+  await page.getByRole('button', { name: 'حفظ إصدار جديد', exact: true }).click();
+  await page.waitForURL('**/work/CH-243');
+  check(T, 'confirmed variant is no longer flagged', (await flagged()).length === 0, JSON.stringify(await flagged()));
+
+  // Edit the master text: the variant written before it is flagged again.
+  await page.getByRole('link', { name: 'تحرير', exact: true }).click();
+  await page.locator('main textarea').first().fill('نص أساسي معدّل للتحقق من الصياغات');
+  const tabs = await page.locator('main .tabs button').allTextContents();
+  check(T, 'editing the master text flags the variant at once', tabs.includes('X · تحتاج مراجعة'), tabs.join(', '));
+  await shot('composer-flag');
+  await page.getByRole('button', { name: 'حفظ إصدار جديد', exact: true }).click();
+  await page.waitForURL('**/work/CH-243');
+  await page.getByRole('button', { name: /إرسال الإصدار \d+ للمراجعة/ }).click();
+
+  await page.getByRole('link', { name: 'الموافقات والنشر' }).first().click();
+  await page.waitForURL('**/approvals');
+  await asRole(page, 'director');
+  await page.locator('.queue-item', { hasText: 'كتابة محتوى X' }).click();
+  check(T, 'reviewer sees the flag on the release', JSON.stringify(await flagged()) === '["X"]', JSON.stringify(await flagged()));
+  await shot('flag-for-reviewer');
+});
+
 (async () => {
   const { chromium } = dependency('playwright');
   fs.rmSync(out, { recursive: true, force: true });

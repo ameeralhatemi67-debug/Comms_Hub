@@ -19,6 +19,7 @@ import {
   stageOf,
   isMine,
   canEdit,
+  staleVariants,
 } from '../src/lib/domain.ts';
 
 test('version-bound review, revision, scheduling, partial result and safe retry', () => {
@@ -305,4 +306,38 @@ test('work is assigned to named people and leadership sees load per person (F-R0
   assert.equal(next.work.find((w) => w.id === 'CH-247').status, 'DRAFT');
   next = reducer({ ...s, role: 'writer' }, { type: 'submit', id: 'CH-243' });
   assert.equal(next.work.find((w) => w.id === 'CH-243').status, 'IN_REVIEW');
+});
+
+test('a variant written before the master text changed is flagged until edited or confirmed (F-R01-05)', () => {
+  let s = reducer(initialState(), { type: 'role', role: 'writer' });
+  const x = () => s.work.find((w) => w.id === 'CH-243');
+  // The seed's X variant was written for an earlier master text.
+  assert.deepEqual(staleVariants(x()), ['X']);
+
+  // Confirming records the current master text as its base; the flag clears.
+  let content = pickContent(x());
+  content = { ...content, variantBase: { ...content.variantBase, X: content.body } };
+  s = reducer(s, { type: 'edit', id: 'CH-243', content });
+  assert.deepEqual(staleVariants(x()), []);
+
+  // Editing the master text again flags every variant written before it.
+  s = reducer(s, { type: 'edit', id: 'CH-243', content: { ...pickContent(x()), body: 'نص أساسي جديد' } });
+  assert.deepEqual(staleVariants(x()), ['X']);
+  // The submitted release carries the flag to the reviewer.
+  s = reducer(s, { type: 'submit', id: 'CH-243' });
+  assert.deepEqual(staleVariants(x().release), ['X']);
+
+  // Rewriting the variant against the new text clears it.
+  const fresh = pickContent(x());
+  s = reducer(s, { type: 'role', role: 'director' });
+  s = reducer(s, { type: 'changes', id: 'CH-243', text: 'حدّث صياغة X' });
+  s = reducer(s, { type: 'role', role: 'writer' });
+  s = reducer(s, {
+    type: 'edit',
+    id: 'CH-243',
+    content: { ...fresh, variants: { ...fresh.variants, X: 'صياغة X جديدة' }, variantBase: { ...fresh.variantBase, X: fresh.body } },
+  });
+  assert.deepEqual(staleVariants(x()), []);
+  // An empty variant falls back to the master text and is never stale.
+  assert.deepEqual(staleVariants({ ...pickContent(x()), body: 'آخر', variants: { Instagram: '', X: '', LinkedIn: '' } }), []);
 });

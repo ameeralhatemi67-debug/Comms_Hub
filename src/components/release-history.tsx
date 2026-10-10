@@ -1,5 +1,5 @@
 import { roles, type Work } from '@/lib/domain';
-import { MediaPreview } from './ui';
+import { MediaPreview, VariantCopy } from './ui';
 
 const decisions = {
   SUBMITTED: 'أُرسل للمراجعة',
@@ -27,10 +27,7 @@ export function ReleaseHistory({ work }: { work: Work }) {
                 الوسيط: {record.release.assetId} · v{record.release.assetVersion}
               </p>
               {record.release.channels.map((c) => (
-                <div className="variant-copy" key={c}>
-                  <b>{c}</b>
-                  <p>{record.release.variants[c] || record.release.body}</p>
-                </div>
+                <VariantCopy content={record.release} channel={c} key={c} />
               ))}
               {record.note && <p className="warning">ملاحظة المراجع: {record.note}</p>}
             </div>

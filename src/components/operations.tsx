@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { isMine, personById, roles, ready, type Work } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { ReleaseHistory } from './release-history';
-import { Title, Panel, StatusChip, Empty, MediaPreview, Modal, Tabs, LogoLoader } from './ui';
+import { Title, Panel, StatusChip, Empty, MediaPreview, Modal, Tabs, LogoLoader, VariantCopy } from './ui';
 
 export function Approvals() {
   const { state, dispatch } = useHub();
@@ -87,12 +87,7 @@ export function Approvals() {
             </div>
             <MediaPreview assetId={w.release?.assetId} version={w.release?.assetVersion} large />
             <p className="body-copy">{w.release?.body}</p>
-            {w.release?.channels.map((c) => (
-              <div key={c} className="variant-copy">
-                <b>{c}</b>
-                <p>{w.release?.variants[c] || w.release?.body}</p>
-              </div>
-            ))}
+            {w.release && w.release.channels.map((c) => <VariantCopy content={w.release!} channel={c} key={c} />)}
             <div className="release-note">
               الاعتماد مرتبط بهذا النص، وهذه الوسائط بإصداراتها، والقنوات المحددة. الجدولة هنا إجراء تنفيذي لاحق في
               نموذج UX.

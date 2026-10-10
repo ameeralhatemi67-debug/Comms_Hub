@@ -2365,3 +2365,10 @@ Phase 0.2.3 corrections built on findings of response R01 (`validation/responses
 - **Team view:** one card per person, with counts (works, overdue, due soon, awaiting review), then each item with its status, its **stage** and its delivery note. The stage says where the work stands: the next production step, «تعديل بعد المراجعة», «بانتظار المراجعة والاعتماد», «معتمد · بانتظار الجدولة», «مجدول للنشر», and so on.
 - **Home for the Director and Assistant Director** shows «حمل الفريق»: active work per person with overdue and awaiting-review counts and a bar, red when the person has late work.
 - The Composer's «المسؤول» chooses a person; the role follows from the person.
+
+## 59.3 Stale channel versions (F-R01-05, task 0.2.3.7)
+
+- Each channel version (Instagram, X, LinkedIn) remembers the main text it was written against. When the main text changes afterwards, that version is flagged «تحتاج مراجعة: كُتبت قبل تعديل النص الأساسي».
+- The flag shows on the version in the work page, in the release the reviewer sees, and in the release history. In the composer the channel tab reads «X · تحتاج مراجعة» and the main-text tab lists the flagged versions.
+- The flag clears when the version is rewritten, or when the writer presses «تأكيد الصياغة» to confirm it is still right. Either change is saved as a new version, like any other edit.
+- An empty channel version uses the main text and is never flagged.

@@ -361,6 +361,12 @@ export type Content = {
   assetId: string;
   assetVersion: number;
   variants: Record<Channel, string>;
+  /**
+   * The master text each channel variant was last written or confirmed against
+   * (task 0.2.3.7, F-R01-05). A variant whose base differs from the current master
+   * text was written before the master changed and needs review.
+   */
+  variantBase?: Partial<Record<Channel, string>>;
   campaignId: string;
 };
 
@@ -458,6 +464,8 @@ type SeedRow = {
   previous?: { body: string; assetVersion: number; note: string };
   scheduled?: string;
   comments?: { by: string; text: string }[];
+  /** Channel variants and the master text each was written against. */
+  variants?: Partial<Record<Channel, { text: string; base: string }>>;
   activity: string[];
 };
 
@@ -489,6 +497,13 @@ const seedRows: SeedRow[] = [
     type: 'منشور اجتماعي',
     due: '2026-09-19',
     comments: [{ by: 'محمد', text: 'يرجى اختصار النص وإبراز مشاركة الفريق.' }],
+    // Written for the first draft of the master text, which has since been edited (task 0.2.3.7).
+    variants: {
+      X: {
+        text: 'في يومنا الوطني نحتفي بوطن يجمعنا. #اليوم_الوطني_السعودي',
+        base: 'في يومنا الوطني، نحتفي بوطن يجمعنا. #اليوم_الوطني_السعودي',
+      },
+    },
     activity: ['طلب محمد تعديل النص', 'أرسل خالد الصياغة الأولى للمراجعة'],
   },
   {
@@ -599,7 +614,11 @@ export function initialState(): State {
       channels: row.channels ? [...row.channels] : [...channels],
       assetId: row.assetId,
       assetVersion: row.assetVersion ?? (row.assetId === 'reel' ? 4 : row.assetId === 'poster' ? 5 : 1),
-      variants: { ...blankVariants },
+      variants: {
+        ...blankVariants,
+        ...Object.fromEntries(Object.entries(row.variants ?? {}).map(([c, v]) => [c, v!.text])),
+      },
+      variantBase: Object.fromEntries(Object.entries(row.variants ?? {}).map(([c, v]) => [c, v!.base])),
       campaignId: campaign.id,
       revision: row.revision ?? 1,
       history: [],
@@ -713,8 +732,17 @@ export function pickContent(w: Content): Content {
     assetId: w.assetId,
     assetVersion: w.assetVersion,
     variants: { ...w.variants },
+    variantBase: { ...(w.variantBase ?? {}) },
     campaignId: w.campaignId,
   };
+}
+
+/** Channel variants written before the latest change to the master text (F-R01-05). */
+export function staleVariants(c: Content): Channel[] {
+  return c.channels.filter((ch) => {
+    const base = c.variantBase?.[ch];
+    return !!c.variants[ch]?.trim() && base !== undefined && base !== c.body;
+  });
 }
 
 /** Reviewers may edit any work; anyone else only work assigned to the person they are. */

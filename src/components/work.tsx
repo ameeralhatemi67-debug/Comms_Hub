@@ -18,6 +18,7 @@ import {
   personOf,
   pickContent,
   stageOf,
+  staleVariants,
   teamLoad,
   checklistSteps,
   type Content,
@@ -26,7 +27,7 @@ import {
 } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { ReleaseHistory } from './release-history';
-import { Title, Panel, StatusChip, Empty, MediaPreview, Tabs } from './ui';
+import { Title, Panel, StatusChip, Empty, MediaPreview, Tabs, VariantCopy } from './ui';
 
 export function WorkRow({ work: w }: { work: Work }) {
   const { state } = useHub();
@@ -308,6 +309,12 @@ export function Composer({ work }: { work?: Work }) {
         },
   );
   const [variant, setVariant] = useState('master');
+  const stale = staleVariants(data);
+  // Writing a variant records the master text it was written against; confirming
+  // records it without changing the variant (task 0.2.3.7, F-R01-05).
+  const setVariantText = (c: Channel, text: string) =>
+    setData({ ...data, variants: { ...data.variants, [c]: text }, variantBase: { ...data.variantBase, [c]: data.body } });
+  const confirmVariant = (c: Channel) => setData({ ...data, variantBase: { ...data.variantBase, [c]: data.body } });
   const [error, setError] = useState('');
   const asset = assets.find((a) => a.id === data.assetId)!;
 
@@ -402,8 +409,24 @@ export function Composer({ work }: { work?: Work }) {
             <Tabs
               value={variant}
               onChange={setVariant}
-              items={[{ id: 'master', label: 'النص الأساسي' }, ...channels.map((c) => ({ id: c, label: c }))]}
+              items={[
+                { id: 'master', label: 'النص الأساسي' },
+                ...channels.map((c) => ({ id: c, label: stale.includes(c) ? `${c} · تحتاج مراجعة` : c })),
+              ]}
             />
+            {variant === 'master' && stale.length > 0 && (
+              <p className="warning" role="status">
+                تغيّر النص الأساسي بعد كتابة صياغة {stale.join(' و')}. راجع كل صياغة ثم عدّلها أو أكّدها.
+              </p>
+            )}
+            {variant !== 'master' && stale.includes(variant as Channel) && (
+              <div className="warning stale-warning" role="status">
+                <span>كُتبت صياغة {variant} قبل آخر تعديل على النص الأساسي. عدّلها، أو أكّد أنها ما زالت صحيحة.</span>
+                <button type="button" onClick={() => confirmVariant(variant as Channel)}>
+                  تأكيد الصياغة
+                </button>
+              </div>
+            )}
             <label>
               {variant === 'master' ? 'المحتوى الأساسي' : `صياغة ${variant}`}
               <textarea
@@ -414,7 +437,7 @@ export function Composer({ work }: { work?: Work }) {
                 onChange={(e) =>
                   variant === 'master'
                     ? change('body', e.target.value)
-                    : change('variants', { ...data.variants, [variant]: e.target.value })
+                    : setVariantText(variant as Channel, e.target.value)
                 }
                 placeholder={variant === 'master' ? 'اكتب رسالة الحملة…' : 'اتركه فارغاً لاستخدام النص الأساسي'}
               />
@@ -550,10 +573,7 @@ export function WorkDetail({ id }: { id: string }) {
               <MediaPreview assetId={w.assetId} version={w.assetVersion} large />
               <p className="body-copy">{w.body}</p>
               {w.channels.map((c) => (
-                <div className="variant-copy" key={c}>
-                  <b>{c}</b>
-                  <p>{w.variants[c] || w.body}</p>
-                </div>
+                <VariantCopy content={w} channel={c} key={c} />
               ))}
             </Panel>
           )}

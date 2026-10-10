@@ -99,3 +99,5 @@ a.stat-link strong{color:var(--ink)}
 .load-bar i{display:block;height:100%;border-radius:inherit;background:var(--green)}
 .load-bar i.late{background:var(--danger)}
 @media(max-width:699px){.team-grid{grid-template-columns:1fr}.team-counts{justify-content:flex-start}.team-card header{flex-wrap:wrap}}
+.variant-copy .stale-flag{margin-inline-start:8px;vertical-align:middle}
+.stale-warning{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}

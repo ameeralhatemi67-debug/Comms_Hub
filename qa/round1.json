@@ -1,7 +1,7 @@
 {
-  "date": "2026-10-10T21:33:41.562Z",
+  "date": "2026-10-10T21:37:27.987Z",
   "baseURL": "http://127.0.0.1:3000",
-  "passed": 28,
+  "passed": 34,
   "failed": 0,
   "errors": [],
   "checks": [
@@ -166,6 +166,42 @@
       "name": "writer «مهامي» shows Khalid only, not the other writer",
       "pass": true,
       "detail": "خالد, خالد"
+    },
+    {
+      "task": "0.2.3.7",
+      "name": "seeded X variant is flagged on the work page",
+      "pass": true,
+      "detail": "[\"X\"]"
+    },
+    {
+      "task": "0.2.3.7",
+      "name": "composer warns on the master tab",
+      "pass": true,
+      "detail": "تغيّر النص الأساسي بعد كتابة صياغة X. راجع كل صياغة ثم عدّلها أو أكّدها."
+    },
+    {
+      "task": "0.2.3.7",
+      "name": "confirming clears the flag in the composer",
+      "pass": true,
+      "detail": "النص الأساسي, Instagram, X, LinkedIn"
+    },
+    {
+      "task": "0.2.3.7",
+      "name": "confirmed variant is no longer flagged",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "task": "0.2.3.7",
+      "name": "editing the master text flags the variant at once",
+      "pass": true,
+      "detail": "النص الأساسي, Instagram, X · تحتاج مراجعة, LinkedIn"
+    },
+    {
+      "task": "0.2.3.7",
+      "name": "reviewer sees the flag on the release",
+      "pass": true,
+      "detail": "[\"X\"]"
     },
     {
       "task": "all",

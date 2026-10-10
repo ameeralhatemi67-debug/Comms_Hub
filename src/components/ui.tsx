@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Play, Image as ImageIcon } from 'lucide-react';
-import { assets, scenario, statusLabels, type Status } from '@/lib/domain';
+import { assets, scenario, staleVariants, statusLabels, type Channel, type Content, type Status } from '@/lib/domain';
 
 export function Title({ title, sub, children }: { title: string; sub?: string; children?: ReactNode }) {
   return (
@@ -37,6 +37,18 @@ export function Panel({
 
 export function StatusChip({ status }: { status: Status }) {
   return <span className={`chip status-${status}`}>{statusLabels[status]}</span>;
+}
+
+/** One channel's text, flagged when written before the latest master text (F-R01-05). */
+export function VariantCopy({ content, channel }: { content: Content; channel: Channel }) {
+  const stale = staleVariants(content).includes(channel);
+  return (
+    <div className={`variant-copy ${stale ? 'stale' : ''}`}>
+      <b>{channel}</b>
+      {stale && <span className="chip status-CHANGES_REQUESTED stale-flag">تحتاج مراجعة: كُتبت قبل تعديل النص الأساسي</span>}
+      <p>{content.variants[channel] || content.body}</p>
+    </div>
+  );
 }
 
 export function Empty({ children }: { children: ReactNode }) {
