@@ -609,7 +609,7 @@ Phases:
 - **Outcome:** Secure external platform connection management without exposing raw secrets to client code.
 
 ### Checkpoint 3.2 — Production Storage Adapter
-*Partly pulled forward 2026-10-11 by owner directive:* a Google Drive adapter (personal Gmail account, OAuth, `drive.file` scope, resumable uploads straight from the browser) is built in `src/lib/drive/`; the Workspace Shared Drive, service account, `AssetLocation` versioning, 3-2-1 backup and NAS remain here.
+*Partly pulled forward 2026-10-11 by owner directive:* a Google Drive adapter (personal Gmail account, OAuth, `drive.file` scope, resumable uploads straight from the browser) is built in `src/lib/drive/`, with folders, versions and the asset record, permissions and activity log in the database; the Workspace Shared Drive, service account, `AssetLocation` versioning, 3-2-1 backup and NAS remain here.
 - **Scope:** Implement the `AssetLocation` / Storage Adapter interface with the selected first production storage provider (evaluating Google Shared Drive as the primary institutional candidate, without locking into an unearned S3/hybrid decision prematurely).
 - **Outcome:** Seamless large-file asset preservation adhering to the 3-2-1 backup lifecycle specification with the chosen initial storage provider.
 

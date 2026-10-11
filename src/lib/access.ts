@@ -17,6 +17,8 @@ export const grantablePages = [
   { id: 'approvals', label: 'الموافقات والنشر' },
   { id: 'calendar', label: 'التقويم' },
   { id: 'media', label: 'مكتبة الوسائط' },
+  { id: 'tasks', label: 'المهام' },
+  { id: 'activity', label: 'سجل النشاط' },
   { id: 'motion', label: 'استوديو الحركة' },
   { id: 'mail', label: 'البريد' },
   { id: 'ideas', label: 'الأفكار' },

@@ -18,6 +18,7 @@ import '@fontsource/aref-ruqaa/700.css';
 import './globals.css';
 import './identity.css';
 import './auth.css';
+import './media.css';
 
 export const metadata: Metadata = {
   title: 'مركز الاتصال المؤسسي',

@@ -89,7 +89,14 @@ in each browser. No real publishing, mail delivery, AI or background workers.
 Files are the second exception, by owner directive of 2026-10-11: uploads go
 to Google Drive (the connected Gmail account, `drive.file` scope, folder
 «Comms Hub») and are listed in the `media_files` table; the Drive client
-secret and refresh token are server-only environment variables. Where a page would need one of these, render the shell and
+secret and refresh token are server-only environment variables.
+
+The media section (folders, permissions, pipeline stages, tasks, activity log,
+review links) is real too, with its rules in Postgres
+(`supabase/migrations/*media*`): who may see, edit, create, manage, approve or
+publish is decided by row level security and triggers, not by the interface.
+Administrators act as any role there (testing phase). Publishing itself stays a
+simulation. Where a page would need one of these, render the shell and
 say plainly in the interface that it is a simulation.
 
 One deliberate exception, by owner directive of 2026-10-11 (recorded in

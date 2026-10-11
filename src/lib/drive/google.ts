@@ -114,7 +114,17 @@ export function createDrive(deps: Partial<Deps> = {}) {
     rootFolder,
 
     /** Starts a resumable upload and returns the session address the browser sends chunks to. */
-    async startUpload(meta: { name: string; mimeType: string; size: number; origin: string; uploadedBy: string }) {
+    async startUpload(meta: {
+      name: string;
+      mimeType: string;
+      size: number;
+      origin: string;
+      uploadedBy: string;
+      /** The Drive folder to create the file in. Defaults to the Hub's root folder. */
+      parentId?: string;
+      /** Stored on the file so a later "complete" can prove which asset it was for. */
+      assetId?: string;
+    }) {
       const res = await http(`${UPLOAD}/files?uploadType=resumable&fields=${encodeURIComponent('id,name,mimeType,size')}`, {
         method: 'POST',
         headers: {
@@ -128,14 +138,41 @@ export function createDrive(deps: Partial<Deps> = {}) {
         body: JSON.stringify({
           name: meta.name,
           mimeType: meta.mimeType,
-          parents: [await rootFolder()],
-          appProperties: { commsHub: '1', uploadedBy: meta.uploadedBy },
+          parents: [meta.parentId ?? (await rootFolder())],
+          appProperties: {
+            commsHub: '1',
+            uploadedBy: meta.uploadedBy,
+            ...(meta.assetId ? { assetId: meta.assetId } : {}),
+          },
         }),
       });
       if (!res.ok) throw new DriveError(res.status, `DRIVE_${res.status}`);
       const location = res.headers.get('location');
       if (!location) throw new DriveError(502, 'NO_UPLOAD_SESSION');
       return location;
+    },
+
+    /** A folder in the account's Drive. Defaults to inside the Hub's root folder. */
+    async createFolder(name: string, parentId?: string) {
+      const parent = parentId ?? (await rootFolder());
+      const created = await api<{ id: string }>('/files?fields=id', {
+        method: 'POST',
+        json: { name, mimeType: FOLDER_MIME, parents: [parent], appProperties: { commsHub: '1' } },
+      });
+      return created.id;
+    },
+
+    /** Renames a file or folder in Drive. */
+    async rename(id: string, name: string) {
+      await api(`/files/${encodeURIComponent(id)}?fields=id`, { method: 'PATCH', json: { name } });
+    },
+
+    /** Moves a file or folder between Drive folders. */
+    async move(id: string, fromParent: string, toParent: string) {
+      await api(
+        `/files/${encodeURIComponent(id)}?addParents=${encodeURIComponent(toParent)}&removeParents=${encodeURIComponent(fromParent)}&fields=id`,
+        { method: 'PATCH', json: {} },
+      );
     },
 
     fileInfo(id: string) {

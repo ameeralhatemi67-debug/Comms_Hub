@@ -31,7 +31,11 @@ import { Approvals, Calendar } from './operations';
 import { Supporting } from './supporting';
 import { ComponentGallery } from './gallery';
 import { AccountsPage } from './accounts';
-import { DriveFiles } from './drive-files';
+import { MediaProvider } from './media/provider';
+import { MediaLibrary } from './media/library';
+import { AssetPage } from './media/asset-page';
+import { TasksPage } from './media/tasks-page';
+import { ActivityPage } from './media/activity-page';
 import dynamic from 'next/dynamic';
 
 const MotionStudio = dynamic(() => import('./motion-studio'), {
@@ -393,11 +397,9 @@ function TeamLoadPanel() {
   );
 }
 
+/** The illustrative assets that work items still point to (poster, reel, footage). */
 function Media({ id }: { id?: string }) {
   const { state } = useHub();
-  const [search, setSearch] = useState('');
-  const [kind, setKind] = useState('all');
-  const [list, setList] = useState(false);
   const [version, setVersion] = useState<number | null>(null);
   const asset = assets.find((a) => a.id === id);
 
@@ -446,48 +448,7 @@ function Media({ id }: { id?: string }) {
       </>
     );
 
-  const filtered = assets.filter(
-    (a) => (kind === 'all' || a.kind === kind) && (a.title + ' ' + a.filename).includes(search),
-  );
-
-  return (
-    <>
-      <Title title="مكتبة الوسائط" sub="أصول الحملة وإصداراتها، مرتبطة بالعمل والمراجعة." />
-      <DriveFiles />
-      <h2 className="drive-samples">نماذج الأصول التوضيحية</h2>
-      <div className="filters">
-        <input
-          aria-label="البحث في الوسائط"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="ابحث عن وسيط…"
-        />
-        <select aria-label="نوع الوسائط" value={kind} onChange={(e) => setKind(e.target.value)}>
-          <option value="all">كل الوسائط</option>
-          <option value="poster">تصاميم</option>
-          <option value="video">فيديو</option>
-          <option value="raw">مواد أصلية</option>
-        </select>
-        <button onClick={() => setList(!list)}>{list ? 'عرض الشبكة' : 'عرض القائمة'}</button>
-      </div>
-      <div className={list ? 'asset-list' : 'media-grid'}>
-        {filtered.map((a) => (
-          <Link className="media-card" href={`/media/${a.id}`} key={a.id}>
-            <MediaPreview assetId={a.id} version={a.versions.at(-1)} />
-            <div>
-              <h2>{a.title}</h2>
-              <p>{campaign.title}</p>
-              <small>
-                {a.filename} · v{a.versions.at(-1)}
-              </small>
-              <span className="chip">{a.approved ? 'معتمد v' + a.approved : 'غير معتمد'}</span>
-            </div>
-          </Link>
-        ))}
-      </div>
-      {!filtered.length && <Empty>لا توجد وسائط مطابقة.</Empty>}
-    </>
-  );
+  return <Empty>الوسيط غير موجود.</Empty>;
 }
 
 export function HubPage({ route }: { route: string[] }) {
@@ -506,7 +467,22 @@ export function HubPage({ route }: { route: string[] }) {
   if (page === 'create') return <Composer key={'new-' + state.role} />;
   if (page === 'approvals') return <Approvals key={state.role} />;
   if (page === 'calendar') return <Calendar />;
-  if (page === 'media') return <Media key={id || 'all'} id={id} />;
+  if (page === 'media') {
+    if (id && assets.some((a) => a.id === id)) return <Media key={id} id={id} />;
+    return <MediaProvider>{id ? <AssetPage key={id} id={id} /> : <MediaLibrary />}</MediaProvider>;
+  }
+  if (page === 'tasks')
+    return (
+      <MediaProvider>
+        <TasksPage />
+      </MediaProvider>
+    );
+  if (page === 'activity')
+    return (
+      <MediaProvider>
+        <ActivityPage />
+      </MediaProvider>
+    );
   if (page === 'motion') return <MotionStudio />;
   if (page === 'components') return <ComponentGallery />;
   if (page === 'accounts') return <AccountsPage />;
