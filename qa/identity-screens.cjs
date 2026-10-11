@@ -34,9 +34,11 @@ const asRole = async (page, role) => {
   const pageErrors = [];
   const external = [];
   const origin = new URL(baseURL).origin;
-  const open = async (opts = {}, second = true) => {
+  const open = async ({ evening, ...opts } = {}, second = true) => {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 950 }, ...opts });
     if (second) await ctx.addInitScript((k) => localStorage.setItem(k, 'emerald'), KEY);
+    // Evening mode is chosen, not inferred from the device (src/lib/identity.ts).
+    if (evening) await ctx.addInitScript(() => localStorage.setItem('comms-hub-theme', 'dark'));
     const page = await ctx.newPage();
     page.on('pageerror', (e) => pageErrors.push(String(e)));
     page.on('console', (m) => { if (m.type() === 'error') pageErrors.push(m.text()); });
@@ -235,7 +237,7 @@ const asRole = async (page, role) => {
 
   // --- Evening mode screenshots and overflow on the new screens ------------------------
   {
-    const { ctx, page } = await open({ colorScheme: 'dark' });
+    const { ctx, page } = await open({ evening: true });
     for (const route of ['/', '/work', '/approvals', '/calendar', '/components', '/motion']) {
       await page.goto(baseURL + route, { waitUntil: 'networkidle' });
       await page.waitForTimeout(route === '/motion' ? 1500 : 200);

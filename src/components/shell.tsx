@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import {
   House,
@@ -17,6 +17,8 @@ import {
   Settings,
   User,
   Shield,
+  UserCog,
+  LogOut,
   Bell,
   Search,
   PanelRightClose,
@@ -24,6 +26,9 @@ import {
 } from 'lucide-react';
 import { noticesFor, roles, type Role } from '@/lib/domain';
 import { useHub } from '@/lib/store';
+import { useAccount } from '@/lib/account-context';
+import { canOpen, canSwitchRole } from '@/lib/access';
+import { supabase } from '@/lib/supabase/client';
 import { toggleIdentity } from '@/lib/identity';
 import { useIdentity } from '@/lib/use-identity';
 import { Modal, Empty, LogoLoader } from './ui';
@@ -41,6 +46,7 @@ const nav = [
   ['/analytics', 'التحليلات', ChartNoAxesCombined],
   ['/monitoring', 'المراقبة', Users],
   ['/admin', 'الإدارة', Shield],
+  ['/accounts', 'الحسابات', UserCog],
   ['/settings', 'الإعدادات', Settings],
   ['/account', 'الحساب', User],
 ] as const;
@@ -65,6 +71,8 @@ const tiers: [string, string][] = [
 
 export function Shell({ children }: { children: ReactNode }) {
   const { state, dispatch } = useHub();
+  const account = useAccount();
+  const router = useRouter();
   const path = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobile, setMobile] = useState(false);
@@ -107,7 +115,21 @@ export function Shell({ children }: { children: ReactNode }) {
       }),
   };
 
-  const visible = nav.filter((n) => (n[0] !== '/admin' || actor.admin) && (n[0] !== '/create' || actor.create));
+  // What the sidebar offers: pages this account was granted (access.ts), and, as
+  // before, only what the role being viewed can use. Administrators see every page.
+  const adminPage = (href: string) => href === '/admin' || href === '/accounts';
+  const visible = nav.filter(
+    ([href]) =>
+      canOpen(account, href.slice(1)) &&
+      (!adminPage(href) || actor.admin) &&
+      (href !== '/create' || actor.create),
+  );
+  const allowed = (href: string) => visible.some((n) => n[0] === href);
+
+  const signOut = async () => {
+    await supabase().auth.signOut();
+    router.refresh();
+  };
 
   return (
     <div className={`app-shell ${collapsed ? 'collapsed' : ''}`}>
@@ -149,11 +171,14 @@ export function Shell({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="sidebar-foot">
-          <span className="avatar">{actor.user[0]}</span>
+          <span className="avatar">{account.name[0]}</span>
           <span>
-            <b>{actor.user}</b>
-            <small>{actor.name}</small>
+            <b>{account.name}</b>
+            <small>{state.role === account.role ? actor.name : `عرض بصفة ${actor.name}`}</small>
           </span>
+          <button className="sign-out" onClick={signOut} aria-label="تسجيل الخروج" title="تسجيل الخروج">
+            <LogOut />
+          </button>
         </div>
       </aside>
 
@@ -177,20 +202,26 @@ export function Shell({ children }: { children: ReactNode }) {
           </button>
           <div className="top-actions">
             <span className="prototype">نموذج محلي · 0.1</span>
-            <label className="role-select">
-              عرض بصفة
-              <select
-                aria-label="عرض بصفة"
-                value={state.role}
-                onChange={(e) => dispatch({ type: 'role', role: e.target.value as Role })}
-              >
-                {Object.entries(roles).map(([id, r]) => (
-                  <option key={id} value={id}>
-                    {r.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {canSwitchRole(account) ? (
+              <label className="role-select">
+                عرض بصفة
+                <select
+                  aria-label="عرض بصفة"
+                  value={state.role}
+                  onChange={(e) => dispatch({ type: 'role', role: e.target.value as Role })}
+                >
+                  {Object.entries(roles).map(([id, r]) => (
+                    <option key={id} value={id}>
+                      {r.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : (
+              <span className="role-fixed" title="دورك في النظام">
+                {actor.name}
+              </span>
+            )}
             <button aria-label="الإشعارات" onClick={() => setOverlay('notifications')} className="notification-button">
               <Bell />
               {notices.some((n) => !n.read) && <i />}
@@ -208,20 +239,24 @@ export function Shell({ children }: { children: ReactNode }) {
           <House />
           الرئيسية
         </Link>
-        <Link href="/work">
-          <BriefcaseBusiness />
-          العمل
-        </Link>
-        {actor.create && (
+        {allowed('/work') && (
+          <Link href="/work">
+            <BriefcaseBusiness />
+            العمل
+          </Link>
+        )}
+        {allowed('/create') && (
           <Link href="/create">
             <Plus />
             إنشاء
           </Link>
         )}
-        <Link href="/calendar">
-          <CalendarDays />
-          التقويم
-        </Link>
+        {allowed('/calendar') && (
+          <Link href="/calendar">
+            <CalendarDays />
+            التقويم
+          </Link>
+        )}
         <button onClick={() => setMobile(!mobile)} aria-expanded={mobile}>
           <Menu />
           المزيد
@@ -238,6 +273,10 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
+          <button className="secondary" onClick={signOut}>
+            <LogOut />
+            تسجيل الخروج
+          </button>
         </Modal>
       )}
 

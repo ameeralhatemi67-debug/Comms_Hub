@@ -1,0 +1,348 @@
+{
+  "version": 1,
+  "northStar": null,
+  "ideas": [
+    {
+      "id": "imv2jhh4p0",
+      "text": "Cache Keeper mod: reserve = measured cost per ping x pings needed until reset, with the user's tier table as the minimum.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2jhh4p1",
+      "text": "Two-threshold safe stop: wrap-up line with a Status.md handoff note, then a hard floor that holds new prompts and edits.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2jhh4p2",
+      "text": "Status line, band above the prompt, /cache on/off/status/reserve commands, a ping log pane, dry run and a toast on reset.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2lpen60",
+      "text": "A Cache Keeper side pane with a usage timeline, reset countdown and full ping log.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2lpen61",
+      "text": "Warnings when the weekly (7-day) window, not the 5h window, is the real limit.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2lpen62",
+      "text": "A 'keep hot until' option for a set time instead of only an idle-hours cap.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2noet90",
+      "text": "Video and photo editing tools inside the hub, prototyped as local browser tools like Motion Studio.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2noet91",
+      "text": "Request form for other departments to fix late-information intake, the Director's named biggest blocker.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2noet92",
+      "text": "Consent and media-rights register with face blurring and metadata removal for beneficiary photos.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2tx2k00",
+      "text": "Toggle between Direction A and new identity by double-clicking the sidebar logo, persisted per browser.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2tx2k01",
+      "text": "Serve new identity fonts locally behind a single root-element switch after 0.3.1.1 token clean-up.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2vaqck0",
+      "text": "Evening (dark) mode for the new identity, with its own contrast table (task 0.3.4.3).",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2vaqck1",
+      "text": "A QA component page showing every component state in both designs (task 0.3.2.3).",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2vaqck2",
+      "text": "Aref Ruqaa accent word per page and IBM Plex Mono, installed once a screen uses them.",
+      "at": "2026-10-10",
+      "source": "auto"
+    },
+    {
+      "id": "imv2w9yb30",
+      "text": "Add a phone and keyboard path for switching designs, since the logo double-click is desktop-only.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv2yksxj0",
+      "text": "Show an «عاجل» mark in the prototype if the owner wants the Director to see it at the re-check.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv2yksxj1",
+      "text": "Show the editor's name on each version («حرره محمد») in the prototype.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv2yksxj2",
+      "text": "Command palette (Ctrl K) for the new design, only if the Director wants it.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv2yuns70",
+      "text": "Persist calendar move requests in the shared store so navigation does not drop them.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv2yuns71",
+      "text": "Make the phone approval sheet sit above the bottom bar before the user scrolls.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv2z7d5k0",
+      "text": "Keep prototype data in the browser across refresh, with a «إعادة ضبط السيناريو» reset button.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv2z7d5k1",
+      "text": "Single npm run qa command running all browser suites and tests together.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv2z7d5k2",
+      "text": "Draft the Version 1 Checkpoint 1.1 plan (Vercel and Supabase setup) for approval once the gate closes.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3enn8i0",
+      "text": "Add a change-password screen for signed-in users; today only the forgot-password email flow exists.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3enn8i1",
+      "text": "Move work items and approvals into Supabase so permissions are enforced on shared data.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3enn8i2",
+      "text": "Run the older QA scripts with a signed-in session once the owner has set passwords.",
+      "at": "2026-10-11",
+      "source": "auto"
+    }
+  ],
+  "findings": [
+    {
+      "id": "fmv2jhh4p0",
+      "text": "percentUsed has one-decimal resolution and only updates on responses, so measuring cost per ping may be noisy or stale.",
+      "severity": "medium",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2jhh4p1",
+      "text": "With a 5-minute cache, keeping it hot for hours likely costs more than rebuilding it. The mod needs a break-even check.",
+      "severity": "medium",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2jhh4p2",
+      "text": "The 5h limit is account-wide. Several sessions running the mod would each claim the full reserve unless they share one record.",
+      "severity": "medium",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2lpen60",
+      "text": "Unverified: whether $.model.fork reads refresh the main thread's 1-hour cache entry. If not, pings waste usage and the cache still expires.",
+      "severity": "medium",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2lpen61",
+      "text": "The cost calibration counts other sessions' and subagents' usage, which can inflate the learned rate and over-reserve.",
+      "severity": "low",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2lpen62",
+      "text": "In the desktop app, a held prompt may not be put back into the input box, so the user may have to retype it.",
+      "severity": "low",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2noet90",
+      "text": "Prototype has no scenario 'today'; dueSoon counts every item due by 23 Sep, so October testers see all work as late.",
+      "severity": "medium",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2noet91",
+      "text": "R01 contains answers in all seven role sections despite single-section branching; authorship of S3-S7 is unconfirmed.",
+      "severity": "medium",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2noet92",
+      "text": "globals.css hard-codes most colours outside six variables, blocking a clean identity switch until tokenised.",
+      "severity": "low",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2tx2k00",
+      "text": "Phase 0.2.2 skip directive not yet logged in progress.md, which the project rules require for dated decisions.",
+      "severity": "low",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2tx2k01",
+      "text": "Checkpoint 0.3 note still refers to participants testing frozen build 0.2.2.6, now skipped; text is stale.",
+      "severity": "low",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2vaqck0",
+      "text": "The design toggle cannot be reached on phone widths or by keyboard, because the logo sits in the sidebar, which is hidden under 700px.",
+      "severity": "low",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2vaqck1",
+      "text": "The .claude/ folder, including the new launch.json, is left untracked and uncommitted.",
+      "severity": "low",
+      "at": "2026-10-10",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2yksxj0",
+      "text": "The phone approval sheet only sticks above the bottom bar after scrolling; on first load it partly sits under the navigation bar.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2yksxj1",
+      "text": "A pre-existing emoji in MVP_draft.md breaks the project's zero-emoji rule; it is still not removed.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2yksxj2",
+      "text": "Requested calendar moves live in the page's local state and are lost when the user navigates away.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2yuns70",
+      "text": "Production alias comms-hub-three.vercel.app is public without authentication; prototype content is visible to anyone with the link.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2z7d5k0",
+      "text": "Prototype state resets on page refresh, so the Director loses test progress if he reloads on Vercel.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2z7d5k1",
+      "text": "ISO dates inside Arabic sentences display reversed (23-09-2026) due to missing direction isolation.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv2z7d5k2",
+      "text": "Design switch has no keyboard path; double-click or double-tap only.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3enn8i0",
+      "text": "Work data is per-browser mock state, so reducer role rules protect interface behaviour only, not shared data; real approval/publish enforcement needs the database.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3enn8i1",
+      "text": "A reviewer who submitted a work can approve it; nothing prevents self-approval and the spec does not forbid it.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3enn8i2",
+      "text": "email_status and request_access are callable anonymously, letting anyone test whether an email is an approved account (enumeration).",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    }
+  ]
+}

@@ -517,7 +517,7 @@ Phases:
 **Outcome:** Real authenticated users operate under the confirmed institutional organizational model.
 
 Phases:
-- **1.2.1 Authentication & Session Management:** Supabase Auth integration, session tokens, and refresh flows.
+- **1.2.1 Authentication & Session Management:** Supabase Auth integration, session tokens, and refresh flows. *Partly pulled forward 2026-10-11 by owner directive:* email and password sign-in, an approved-accounts list, access requests and page permissions already run on Supabase (`comms-hub`); account lifecycle states, audit capture of sign-ins and the production deployment settings remain here.
 - **1.2.2 User Profile & Lifecycle:** Account states (active, suspended, offboarded) and profile metadata.
 - **1.2.3 Organizational Positions & Hierarchy:** Department positions, reporting lines, and organizational units.
 - **1.2.4 Role Permissions & Capabilities:** Fine-grained permission assignments mapping to the eight confirmed roles.

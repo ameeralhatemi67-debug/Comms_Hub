@@ -1,0 +1,50 @@
+/* Sign-in screen. Colours come from the tokens in globals.css only, so it follows
+   the current design and, in the second design, the light or evening theme. */
+.auth-screen{max-width:none;min-height:100vh;margin:0;padding:24px 16px;display:grid;place-items:center;background:var(--campaign-bg)}
+.auth-card{width:min(440px,100%);display:grid;gap:16px;padding:28px;border-radius:16px;background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow-dialog)}
+.auth-brand{display:flex;align-items:center;gap:12px}
+.auth-brand b{display:block;font-size:20px;line-height:1.3;font-family:var(--f-display,inherit)}
+.auth-brand small{display:block;font-size:10px;letter-spacing:.14em;color:var(--muted)}
+.auth-mark{display:grid;place-items:center;width:40px;height:46px;border-radius:12px 3px 12px 3px;background:var(--green);color:var(--on-brand)}
+.auth-card h1{font-size:22px;font-family:var(--f-display,inherit)}
+.auth-card .muted{margin:0}
+.auth-tabs{display:flex;width:100%}
+.auth-tabs button{flex:1;gap:6px;padding-inline:8px;font-size:12.5px;white-space:nowrap}
+.auth-tabs svg{width:15px;height:15px}
+.auth-form{display:grid;gap:14px}
+.auth-form label{margin:0;display:grid;gap:0}
+.auth-form label small{margin-top:6px}
+.auth-form button{width:100%}
+.auth-link{border:0;background:transparent;color:var(--green-text);min-height:32px;padding:0;text-decoration:underline;text-underline-offset:3px}
+.auth-link:hover{background:transparent}
+.auth-note{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.8}
+.auth-note.error{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.auth-note.ok{background:var(--st-success-bg);color:var(--st-success-fg)}
+.auth-note svg{margin-top:4px}
+.auth-out{width:100%}
+.auth-foot{font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;margin:0}
+[data-identity="emerald"] .auth-screen{background:var(--g-depth)}
+[data-identity="emerald"] .auth-card{border-radius:var(--r-xl)}
+[data-identity="emerald"] .auth-mark{background:var(--g-depth);color:var(--gold-hi);box-shadow:var(--e1),inset 0 0 0 1px rgba(217,173,79,.45)}
+
+/* Shell additions that belong to signing in: the sign-out button and the fixed role chip. */
+.sign-out{margin-inline-start:auto;min-height:32px;padding:5px;border:0;background:transparent;color:inherit}
+.sign-out:hover{background:var(--nav-hover)}
+[data-identity="emerald"] .sign-out:hover{background:var(--side-hover)}
+.collapsed .sign-out{display:none}
+.role-fixed{font-size:12px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+@media(max-width:699px){.role-fixed{display:none}}
+
+/* Accounts page (الحسابات) */
+.acct-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) 120px auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--row-line)}
+.acct-row:last-of-type{border-bottom:0}
+.acct-row .actions button{min-height:34px;padding:4px 10px;font-size:12px}
+.acct-founder{color:var(--gold-text,var(--muted))}
+.acct-request{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--row-line)}
+.acct-request:last-child{border-bottom:0}
+.acct-form{display:grid;gap:4px}
+.page-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 12px;margin-top:8px}
+button.danger{color:var(--danger)}
+button.primary.danger{background:var(--danger);border-color:var(--danger);color:var(--on-brand)}
+@media(max-width:1099px){.acct-row{grid-template-columns:minmax(0,1fr) auto}.acct-row>:nth-child(3),.acct-row>:nth-child(4){display:none}}
+@media(max-width:699px){.acct-request{flex-direction:column}.acct-row .actions{grid-column:1/-1}}

@@ -66,41 +66,44 @@
   --art-play-line:rgba(232,196,108,.6); --art-play-fg:#f6efd8;
 }
 
-/* Evening mode (tasks 0.3.2.1 and 0.3.4.3): the second design follows the device's
-   dark preference. Direction A has no evening mode. Values from the proposal's dark
-   palette; text pairs are checked to 4.5 to 1 by qa/identity-toggle.cjs. */
-@media (prefers-color-scheme:dark){
-  :root[data-identity="emerald"]{
-    color-scheme:dark;
-    --emerald:#17795a; --emerald-hi:#146a50; /* hover darkens: white text keeps 4.5:1 */ --emerald-deep:#0a3326; --emerald-night:#041a13; --emerald-soft:#133a2c;
-    --gold:#d9ad4f; --gold-hi:#e8c46c; --gold-text:#e6c36d; --gold-soft:#2c2614;
-    --ink-2:#b9cdc1; --line-strong:#2f5242; --lattice:rgba(255,255,255,.08);
-    --e1:0 1px 2px rgba(0,0,0,.4),0 6px 14px -8px rgba(0,0,0,.5);
-    --e2:0 2px 4px rgba(0,0,0,.4),0 18px 36px -16px rgba(0,0,0,.65);
-    --e3:0 4px 8px rgba(0,0,0,.4),0 32px 64px -24px rgba(0,0,0,.8);
-    --green-text:#4fcfa3; --ink:#e8f1ea; --muted:#8fa99b;
-    --line:#1f3a2e; --bg:#07130e; --surface:#0e1f18; --surface-2:#132a21;
-    --focus:#e6c36d;
-    --avatar-fg:#4fcfa3;
-    --row-line:#1a3328; --calendar-entry:#0f2f35; --skeleton:#16302a;
-    --danger:#f19a8d; --success:#6fd19b; --warning-bg:#34280d; --warning-fg:#efc066;
-    --chip-bg:#1a2d24; --chip-fg:#a9bfb2;
-    --st-review-bg:#2a2040; --st-review-fg:#c4aee8;
-    --st-success-bg:#10301f; --st-success-fg:#6fd19b;
-    --st-warn-bg:#34280d; --st-warn-fg:#efc066;
-    --st-danger-bg:#3a1814; --st-danger-fg:#f19a8d;
-    --st-schedule-bg:#0f2f35; --st-schedule-fg:#7fd0de;
-    --st-production-bg:#1b2a3d; --st-production-fg:#9db8da;
-    --st-publishing-bg:#0f3a2c; --st-publishing-fg:#7ae3bb;
-    --backdrop:rgba(0,0,0,.6);
-  }
-  /* The Motion Studio draws on light panels of its own, so it keeps the light
-     palette inside its frame in evening mode. */
-  :root[data-identity="emerald"] .ms{
-    color-scheme:light;color:#10241d;
-    --ink:#10241d; --muted:#526b5e; --line:#d6e0d7; --surface:#fbfcf9; --surface-2:#f2f6ef; --soft:#dcefe5;
-    --green-text:#14684f; --ink-2:#3b574b; --line-strong:#b6c8bb; --focus:#9a6a12;
-  }
+/* Light is the default and sets the colour scheme explicitly, so the device's own
+   preference never darkens the page on its own. */
+:root[data-identity="emerald"]{color-scheme:light}
+
+/* Evening mode (tasks 0.3.2.1 and 0.3.4.3): applies only while <html data-theme="dark">,
+   which a person turns on in Settings, Appearance (src/lib/identity.ts). Direction A has
+   no evening mode. Values from the proposal's dark palette; text pairs are checked to
+   4.5 to 1 by qa/identity-toggle.cjs. */
+:root[data-identity="emerald"][data-theme="dark"]{
+  color-scheme:dark;
+  --emerald:#17795a; --emerald-hi:#146a50; /* hover darkens: white text keeps 4.5:1 */ --emerald-deep:#0a3326; --emerald-night:#041a13; --emerald-soft:#133a2c;
+  --gold:#d9ad4f; --gold-hi:#e8c46c; --gold-text:#e6c36d; --gold-soft:#2c2614;
+  --ink-2:#b9cdc1; --line-strong:#2f5242; --lattice:rgba(255,255,255,.08);
+  --e1:0 1px 2px rgba(0,0,0,.4),0 6px 14px -8px rgba(0,0,0,.5);
+  --e2:0 2px 4px rgba(0,0,0,.4),0 18px 36px -16px rgba(0,0,0,.65);
+  --e3:0 4px 8px rgba(0,0,0,.4),0 32px 64px -24px rgba(0,0,0,.8);
+  --green-text:#4fcfa3; --ink:#e8f1ea; --muted:#8fa99b;
+  --line:#1f3a2e; --bg:#07130e; --surface:#0e1f18; --surface-2:#132a21;
+  --focus:#e6c36d;
+  --avatar-fg:#4fcfa3;
+  --row-line:#1a3328; --calendar-entry:#0f2f35; --skeleton:#16302a;
+  --danger:#f19a8d; --success:#6fd19b; --warning-bg:#34280d; --warning-fg:#efc066;
+  --chip-bg:#1a2d24; --chip-fg:#a9bfb2;
+  --st-review-bg:#2a2040; --st-review-fg:#c4aee8;
+  --st-success-bg:#10301f; --st-success-fg:#6fd19b;
+  --st-warn-bg:#34280d; --st-warn-fg:#efc066;
+  --st-danger-bg:#3a1814; --st-danger-fg:#f19a8d;
+  --st-schedule-bg:#0f2f35; --st-schedule-fg:#7fd0de;
+  --st-production-bg:#1b2a3d; --st-production-fg:#9db8da;
+  --st-publishing-bg:#0f3a2c; --st-publishing-fg:#7ae3bb;
+  --backdrop:rgba(0,0,0,.6);
+}
+/* The Motion Studio draws on light panels of its own, so it keeps the light
+   palette inside its frame in evening mode. */
+:root[data-identity="emerald"][data-theme="dark"] .ms{
+  color-scheme:light;color:#10241d;
+  --ink:#10241d; --muted:#526b5e; --line:#d6e0d7; --surface:#fbfcf9; --surface-2:#f2f6ef; --soft:#dcefe5;
+  --green-text:#14684f; --ink-2:#3b574b; --line-strong:#b6c8bb; --focus:#9a6a12;
 }
 
 /* ---------- Part 2: structure ---------- */

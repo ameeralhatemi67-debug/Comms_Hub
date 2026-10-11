@@ -84,11 +84,19 @@ explicitly requested.
 
 ## Prototype boundary (Version 0)
 
-Local mock state only. No database, authentication, RBAC enforcement, OAuth,
-real publishing, mail, AI, external storage, background workers or production
-secrets. Admin and Settings are visual shells. When a page would need one of
-these, render the shell and say plainly in the interface that it is a
-simulation.
+Work data (items, approvals, publications, notices) is local mock state, held
+in each browser. No real publishing, mail delivery, AI, external storage or
+background workers. Where a page would need one of these, render the shell and
+say plainly in the interface that it is a simulation.
+
+One deliberate exception, by owner directive of 2026-10-11 (recorded in
+`progress.md`): **accounts are real.** Sign-in with email and password,
+approved accounts, access requests, roles and page permissions live in the
+Supabase project `comms-hub` (`supabase/migrations/`), enforced by row level
+security. The role switch («عرض بصفة») belongs to administrators only. Rules for
+who may open what are in `src/lib/access.ts` and are tested. Never add a
+sign-in bypass, stub session or hard-coded credential, not even for tests. A
+service_role key never goes in this repository.
 
 ## Writing markdown from a shell
 

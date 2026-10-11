@@ -5,10 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { BarChart3, Bell, Check, ShieldAlert, SlidersHorizontal, UserRound } from 'lucide-react';
 import {
-  accountStateLabels,
   campaign,
   channelAccounts,
-  directory,
   integrationStatusLabels,
   integrations,
   noticesFor,
@@ -22,6 +20,10 @@ import {
   systemHealth,
 } from '@/lib/domain';
 import { useHub } from '@/lib/store';
+import { useAccount } from '@/lib/account-context';
+import { supabase } from '@/lib/supabase/client';
+import { setTheme, toggleIdentity } from '@/lib/identity';
+import { useIdentity, useTheme } from '@/lib/use-identity';
 import { Empty, Modal, Panel, Tabs, Title } from './ui';
 
 const pageNames: Record<string, string> = {
@@ -64,15 +66,13 @@ const settingsSections = [
   { id: 'storage', label: 'التخزين' },
 ];
 
-const sessions = [
-  { id: 'a', device: 'Windows · Edge', place: 'الرياض', at: 'الجلسة الحالية' },
-  { id: 'b', device: 'iPhone · Safari', place: 'الرياض', at: 'أمس 19:40' },
-];
-
 export function Supporting({ page }: { page: string }) {
   const { state, dispatch } = useHub();
   const router = useRouter();
   const actor = roles[state.role];
+  const second = useIdentity();
+  const theme = useTheme();
+  const account = useAccount();
   const [idea, setIdea] = useState('');
   const [mailRead, setMailRead] = useState(false);
   const [compact, setCompact] = useState(true);
@@ -322,38 +322,20 @@ export function Supporting({ page }: { page: string }) {
           <>
             <Tabs items={adminSections} value={adminTab} onChange={setAdminTab} />
             <p className="muted">
-              جميع أقسام الإدارة واجهات عرض فقط في النموذج. لا يوجد تطبيق فعلي للصلاحيات، ولا أسرار، ولا اتصال
-              خارجي.
+              الحسابات وطلبات الوصول والصلاحيات حقيقية وتُدار من صفحة الحسابات. بقية أقسام الإدارة واجهات عرض
+              فقط في النموذج: لا أسرار ولا اتصال خارجي.
             </p>
 
             {adminTab === 'users' && (
               <Panel title="المستخدمون">
-                <div className="table-head">
-                  <span>المستخدم</span>
-                  <span>الدور</span>
-                  <span>الحالة</span>
-                  <span>آخر ظهور</span>
-                </div>
-                {directory.map((entry) => (
-                  <div className="work-row" key={entry.role}>
-                    <span className="work-name">
-                      <b>{entry.user}</b>
-                      <small>{entry.email}</small>
-                    </span>
-                    <span className="owner">{entry.roleName}</span>
-                    <span className={`chip ${entry.state === 'ACTIVE' ? 'success' : ''}`}>
-                      {accountStateLabels[entry.state]}
-                    </span>
-                    <time>{entry.lastSeen}</time>
-                  </div>
-                ))}
+                <p>
+                  الدخول بالبريد وكلمة المرور، ولا يدخل إلا بريد أضافه مسؤول النظام أو قبل طلبه. من الحسابات
+                  تُضاف الحسابات وتُحذف، وتُمنح الأدوار والصفحات.
+                </p>
                 <div className="actions">
-                  <button className="primary" disabled>
-                    دعوة مستخدم
-                  </button>
-                  <button className="secondary" disabled>
-                    تصدير القائمة
-                  </button>
+                  <Link className="button primary" href="/accounts">
+                    فتح الحسابات
+                  </Link>
                 </div>
               </Panel>
             )}
@@ -522,7 +504,10 @@ export function Supporting({ page }: { page: string }) {
           <SlidersHorizontal />
         </Title>
         <Tabs items={settingsSections} value={settingsTab} onChange={setSettingsTab} />
-        <p className="muted">إعدادات مرئية فقط. لا تُحفظ خارج هذه الجلسة ولا تغيّر سلوك النظام.</p>
+        <p className="muted">
+          التصميم والوضع يُحفظان في هذا المتصفح. بقية الإعدادات مرئية فقط، لا تُحفظ خارج هذه الجلسة ولا تغيّر سلوك
+          النظام.
+        </p>
 
         {settingsTab === 'organization' && (
           <Panel title="المؤسسة">
@@ -543,6 +528,40 @@ export function Supporting({ page }: { page: string }) {
 
         {settingsTab === 'appearance' && (
           <Panel title="المظهر">
+            <div className="notice">
+              <b>التصميم</b>
+              <small>الهوية الجديدة لمركز الاتصال أو التصميم الحالي</small>
+              <div className="seg" role="group" aria-label="التصميم">
+                <button type="button" aria-pressed={!second} onClick={() => second && toggleIdentity()}>
+                  التصميم الحالي
+                </button>
+                <button type="button" aria-pressed={second} onClick={() => !second && toggleIdentity()}>
+                  الهوية الجديدة
+                </button>
+              </div>
+            </div>
+            <div className="notice">
+              <b>الوضع</b>
+              <small>
+                {second
+                  ? 'الوضع الفاتح هو الافتراضي. الوضع الداكن اختيار شخصي يُحفظ في هذا المتصفح.'
+                  : 'الوضع الداكن متاح في الهوية الجديدة فقط. فعّلها من الخيار أعلاه.'}
+              </small>
+              <div className="seg" role="group" aria-label="الوضع">
+                <button type="button" aria-pressed={theme === 'light'} onClick={() => setTheme('light')}>
+                  فاتح
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={theme === 'dark'}
+                  disabled={!second}
+                  title={!second ? 'متاح في الهوية الجديدة فقط' : ''}
+                  onClick={() => setTheme('dark')}
+                >
+                  داكن
+                </button>
+              </div>
+            </div>
             <label className="between notice">
               <span>
                 <b>عرض مختصر</b>
@@ -659,15 +678,23 @@ export function Supporting({ page }: { page: string }) {
         <div className="columns">
           <Panel title="الملف الشخصي">
             <div className="notice">
-              <b>{actor.user}</b>
-              <p>{actor.name}</p>
-              <small>البريد: {directory.find((d) => d.role === state.role)?.email}</small>
+              <b>{account.name}</b>
+              <p>{roles[account.role].name}</p>
+              <small>
+                البريد: <bdi dir="ltr">{account.email}</bdi>
+              </small>
             </div>
             <div className="table">
               <div className="between">
-                <span>الدور الحالي</span>
-                <b>{actor.name}</b>
+                <span>دورك في النظام</span>
+                <b>{roles[account.role].name}</b>
               </div>
+              {state.role !== account.role && (
+                <div className="between">
+                  <span>العرض الحالي بصفة</span>
+                  <b>{actor.name}</b>
+                </div>
+              )}
               <div className="between">
                 <span>اللغة</span>
                 <b>العربية</b>
@@ -685,18 +712,38 @@ export function Supporting({ page }: { page: string }) {
               </button>
             </div>
           </Panel>
-          <Panel title="الجلسات النشطة">
-            <div className="stack">
-              {sessions.map((session) => (
-                <div className="notice" key={session.id}>
-                  <b>{session.device}</b>
-                  <small>
-                    {session.place} · {session.at}
-                  </small>
-                </div>
-              ))}
+          <Panel title="الجلسة">
+            <div className="notice">
+              <b>مسجّل الدخول</b>
+              <small>
+                <bdi dir="ltr">{account.email}</bdi>
+              </small>
             </div>
-            <p className="muted">جلسات تجريبية. لا يوجد تسجيل دخول حقيقي في النموذج.</p>
+            <div className="actions">
+              <button
+                className="primary"
+                onClick={async () => {
+                  await supabase().auth.signOut();
+                  router.refresh();
+                }}
+              >
+                تسجيل الخروج
+              </button>
+              <button
+                className="secondary"
+                onClick={async () => {
+                  await supabase().auth.signOut({ scope: 'global' });
+                  router.refresh();
+                }}
+              >
+                الخروج من كل الأجهزة
+              </button>
+            </div>
+            <p className="muted">
+              {account.role === 'admin'
+                ? 'أنت مسؤول نظام: تفتح كل الصفحات، وتبدّل الدور من أعلى الصفحة لتختبر كل دور.'
+                : 'دورك وصفحاتك يحددها مسؤول النظام. لا يمكنك تبديل الدور.'}
+            </p>
           </Panel>
         </div>
         {confirmReset && (

@@ -210,10 +210,16 @@ async function contrastTable(page) {
   await page.reload({ waitUntil: 'networkidle' });
   const contrast = await contrastTable(page);
   for (const row of contrast) check(`contrast light ${row.label} ${row.ratio}:1`, row.pass, `${row.fg} (${row.fgValue}) on ${row.bg}`);
+  // Light is the default: a dark device preference alone must not darken the page.
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.reload({ waitUntil: 'networkidle' });
+  const bgDeviceOnly = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  check('a dark device preference alone keeps the second design light', bgDeviceOnly === 'rgb(234, 239, 232)', bgDeviceOnly);
+  // Evening mode is a choice (Settings, Appearance) stored in localStorage.
+  await page.evaluate(() => localStorage.setItem('comms-hub-theme', 'dark'));
+  await page.reload({ waitUntil: 'networkidle' });
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  check('evening mode follows the device in the second design', bg === 'rgb(7, 19, 14)', bg);
+  check('evening mode applies when chosen in the second design', bg === 'rgb(7, 19, 14)', bg);
   const contrastDark = await contrastTable(page);
   for (const row of contrastDark) check(`contrast evening ${row.label} ${row.ratio}:1`, row.pass, `${row.fg} (${row.fgValue}) on ${row.bg}`);
   await page.evaluate((k) => localStorage.removeItem(k), KEY);
@@ -221,6 +227,7 @@ async function contrastTable(page) {
   const bgA = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   check('Direction A has no evening mode', bgA === 'rgb(244, 246, 242)', bgA);
   await page.emulateMedia({ colorScheme: 'light' });
+  await page.evaluate(() => localStorage.removeItem('comms-hub-theme'));
 
   await browser.close();
   const passed = checks.filter((c) => c.pass).length;

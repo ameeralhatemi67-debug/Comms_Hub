@@ -10,7 +10,6 @@ import {
   riskText,
   campaign,
   channelAccounts,
-  directory,
   homeTiles,
   integrationStatusLabels,
   integrations,
@@ -31,6 +30,7 @@ import { WorkList, WorkDetail, Composer, WorkRow } from './work';
 import { Approvals, Calendar } from './operations';
 import { Supporting } from './supporting';
 import { ComponentGallery } from './gallery';
+import { AccountsPage } from './accounts';
 import dynamic from 'next/dynamic';
 
 const MotionStudio = dynamic(() => import('./motion-studio'), {
@@ -111,7 +111,8 @@ function Home() {
                 ))}
               </div>
               <p className="muted">
-                إعدادات المستخدمين والتكاملات محاكاة فقط. لا يملك Admin صلاحية اعتماد المحتوى أو نشره.
+                التكاملات محاكاة فقط. الحسابات والصلاحيات حقيقية. لا يملك Admin صلاحية اعتماد المحتوى أو نشره، لكنه
+                يبدّل الدور من أعلى الصفحة ليختبر كل دور.
               </p>
               <Link href="/admin" className="button primary">
                 فتح الإدارة
@@ -131,17 +132,10 @@ function Home() {
             </Panel>
           </div>
           <aside>
-            <Panel title="المستخدمون">
-              <div className="table">
-                {directory.slice(0, 5).map((entry) => (
-                  <div className="between" key={entry.role}>
-                    <span>{entry.user}</span>
-                    <b>{entry.roleName}</b>
-                  </div>
-                ))}
-              </div>
-              <Link className="text-link" href="/admin">
-                كل المستخدمين ←
+            <Panel title="الحسابات">
+              <p>إضافة الحسابات وحذفها، ومنح الأدوار والصفحات، والبتّ في طلبات الوصول.</p>
+              <Link className="button primary" href="/accounts">
+                فتح الحسابات
               </Link>
             </Panel>
             <Panel title="التخزين">
@@ -512,6 +506,7 @@ export function HubPage({ route }: { route: string[] }) {
   if (page === 'media') return <Media key={id || 'all'} id={id} />;
   if (page === 'motion') return <MotionStudio />;
   if (page === 'components') return <ComponentGallery />;
+  if (page === 'accounts') return <AccountsPage />;
   if (['mail', 'ideas', 'analytics', 'monitoring', 'admin', 'settings', 'account'].includes(page))
     return <Supporting page={page} />;
 

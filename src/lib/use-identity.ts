@@ -2,11 +2,14 @@
 // Client-side reading of the design switch. Kept apart from identity.ts so the
 // server layout can import the switch's constants without a client hook.
 import { useSyncExternalStore } from 'react';
-import { IDENTITY_NEW } from './identity';
+import { IDENTITY_NEW, type Theme } from './identity';
 
 function subscribe(onChange: () => void) {
   const observer = new MutationObserver(onChange);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-identity'] });
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-identity', 'data-theme'],
+  });
   return () => observer.disconnect();
 }
 
@@ -21,5 +24,14 @@ export function useIdentity(): boolean {
     subscribe,
     () => document.documentElement.getAttribute('data-identity') === IDENTITY_NEW,
     () => false,
+  );
+}
+
+/** The current theme. The server renders light; the client corrects it before paint. */
+export function useTheme(): Theme {
+  return useSyncExternalStore(
+    subscribe,
+    () => (document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'),
+    () => 'light',
   );
 }

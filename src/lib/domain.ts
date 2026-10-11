@@ -460,7 +460,12 @@ export type Notice = {
 export type MoveRequest = { workId: string; date: string; by: Role };
 
 export type State = {
+  /** The role the product is being used as. For an administrator this is the "View As" role. */
   role: Role;
+  /** The signed-in person's own role: where "View As" returns to on reset. */
+  baseRole: Role;
+  /** True when the person may not switch roles. Only administrators can; see src/lib/access.ts. */
+  roleLocked: boolean;
   work: Work[];
   moveRequests: MoveRequest[];
   campaigns: Campaign[];
@@ -646,7 +651,11 @@ const seedRows: SeedRow[] = [
   },
 ];
 
-export function initialState(): State {
+/**
+ * @param role the role the session starts as (the signed-in person's own role)
+ * @param roleLocked true for everyone but an administrator
+ */
+export function initialState(role: Role = 'director', roleLocked = false): State {
   const work: Work[] = seedRows.map((row, i) => {
     const w: Work = {
       id: `CH-${241 + i}`,
@@ -725,7 +734,9 @@ export function initialState(): State {
   });
 
   return {
-    role: 'director',
+    role,
+    baseRole: role,
+    roleLocked,
     message: '',
     work,
     moveRequests: [],
@@ -1358,8 +1369,12 @@ function audienceFor(type: Action['type'], w: Work, actor: Role): Role[] {
 }
 
 export function reducer(state: State, a: Action): State {
-  if (a.type === 'role') return { ...state, role: a.role, message: '' };
-  if (a.type === 'reset') return initialState();
+  if (a.type === 'role') {
+    // The control is hidden for non-administrators; this is the rule behind it.
+    if (state.roleLocked) return { ...state, message: 'تبديل الدور متاح لمسؤول النظام فقط.' };
+    return { ...state, role: a.role, message: '' };
+  }
+  if (a.type === 'reset') return initialState(state.baseRole, state.roleLocked);
   if (a.type === 'clear') return { ...state, message: '' };
   if (a.type === 'notify') return { ...state, message: a.text };
   if (a.type === 'read')
