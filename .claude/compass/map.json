@@ -361,6 +361,54 @@
       "text": "Later: AI thread summary, extraction of requests and dates, and suggested replies in the mail context panel.",
       "at": "2026-10-11",
       "source": "auto"
+    },
+    {
+      "id": "imv3pyi1z0",
+      "text": "Store mail drafts in the database instead of localStorage so they follow the user across devices.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3pyi1z1",
+      "text": "Add a Vercel cron for mail sync so scheduled outside mail goes out without someone having the page open.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3pyi1z2",
+      "text": "AI thread summary and suggested reply after Version 0.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3s4xym0",
+      "text": "Optional 'send as me' from each person's own Gmail, alongside the department mailbox",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3y53ma1",
+      "text": "Update the mail artifact to match the build (four external statuses, browser-kept drafts).",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3zgkbq0",
+      "text": "Build the messaging tab into the site with Postgres tables and RLS like mail.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3zgkbq1",
+      "text": "Store chat images and files in Google Drive instead of the browser.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3zgkbq2",
+      "text": "Real voice notes via browser microphone and Drive storage.",
+      "at": "2026-10-11",
+      "source": "auto"
     }
   ],
   "findings": [
@@ -784,6 +832,46 @@
       "id": "fmv3nahsf2",
       "text": "Direct database inserts into media_files skip the Drive checks in the complete route; an admin can also make another admin through a direct table update.",
       "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3pyi1z0",
+      "text": "Approved or scheduled assets can still have their caption changed by view-level roles without returning to review.",
+      "severity": "high",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3pyi1z1",
+      "text": "Installed Next.js 16.3.5 has critical npm audit advisories (RCE in next/og, SSRF); a fix exists in 16.4.0.",
+      "severity": "high",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3pyi1z2",
+      "text": "An admin can promote another account to protected admin by direct table update, bypassing add_account's rule.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3y53ma0",
+      "text": "Without MAIL_SITE_URL, outgoing date-confirmation and review links point to the request origin, possibly localhost, unreachable by outside parties.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3zgkbq0",
+      "text": "Mail approval card counts as waiting while stage is review even if another channel later approves; only patched in the artifact, not the site code.",
+      "severity": "low",
       "at": "2026-10-11",
       "status": "open",
       "source": "auto"

@@ -398,3 +398,7 @@ When recording future implementation outcomes, follow this standardized template
 - **Not done and not verified, said plainly.** (1) No signed-in mail screen was seen in a browser by me (no sign-in bypass may exist); the page is covered by typecheck, build, unit tests and the database run only. (2) No real Gmail connection was made: `GMAIL_ADDRESS` and `GMAIL_APP_PASSWORD` are not set, so reading, sending, threading by headers and inbound attachments are untested against Gmail. (3) Attachments from the computer need Google Drive connected, which is not set locally.
 - **Owner steps.** (1) On the department Gmail account: turn on 2-Step Verification, then create an app password (Google Account, Security, App passwords). (2) Set `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD` and `MAIL_SERVER_KEY` in `.env.local` and in Vercel; the server key is already in the local `.env.local` and its hash is in the database, so copy that same value to Vercel. Optionally set `MAIL_SITE_URL` to the public address. (3) Grant the «البريد» page to the accounts that should use it. (4) Sign in, open البريد as an administrator and send one internal and one outside message, then reply to the outside one from another mailbox.
 - **Next action:** the owner's steps above, then a signed-in walk-through of the mail page across the roles.
+
+## 2026-10-11 — Logged by Compass
+
+- 4bc0666 feat(mail): internal mail, the shared Gmail mailbox and action cards
