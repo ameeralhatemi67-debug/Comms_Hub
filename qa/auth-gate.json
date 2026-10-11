@@ -1,0 +1,164 @@
+{
+  "date": "2026-10-11T17:04:13.722Z",
+  "baseURL": "http://127.0.0.1:3100",
+  "passed": 31,
+  "failed": 0,
+  "errors": [],
+  "checks": [
+    {
+      "name": "signed out / shows the sign-in screen",
+      "pass": true,
+      "detail": "{\"heading\":\"تسجيل الدخول\",\"shell\":false}"
+    },
+    {
+      "name": "signed out / leaks no product text",
+      "pass": true,
+      "detail": "no work titles, ids or role names"
+    },
+    {
+      "name": "signed out /work shows the sign-in screen",
+      "pass": true,
+      "detail": "{\"heading\":\"تسجيل الدخول\",\"shell\":false}"
+    },
+    {
+      "name": "signed out /work leaks no product text",
+      "pass": true,
+      "detail": "no work titles, ids or role names"
+    },
+    {
+      "name": "signed out /work/CH-241 shows the sign-in screen",
+      "pass": true,
+      "detail": "{\"heading\":\"تسجيل الدخول\",\"shell\":false}"
+    },
+    {
+      "name": "signed out /work/CH-241 leaks no product text",
+      "pass": true,
+      "detail": "no work titles, ids or role names"
+    },
+    {
+      "name": "signed out /create shows the sign-in screen",
+      "pass": true,
+      "detail": "{\"heading\":\"تسجيل الدخول\",\"shell\":false}"
+    },
+    {
+      "name": "signed out /create leaks no product text",
+      "pass": true,
+      "detail": "no work titles, ids or role names"
+    },
+    {
+      "name": "signed out /approvals shows the sign-in screen",
+      "pass": true,
+      "detail": "{\"heading\":\"تسجيل الدخول\",\"shell\":false}"
+    },
+    {
+      "name": "signed out /approvals leaks no product text",
+      "pass": true,
+      "detail": "no work titles, ids or role names"
+    },
+    {
+      "name": "signed out /settings shows the sign-in screen",
+      "pass": true,
+      "detail": "{\"heading\":\"تسجيل الدخول\",\"shell\":false}"
+    },
+    {
+      "name": "signed out /settings leaks no product text",
+      "pass": true,
+      "detail": "no work titles, ids or role names"
+    },
+    {
+      "name": "signed out /account shows the sign-in screen",
+      "pass": true,
+      "detail": "{\"heading\":\"تسجيل الدخول\",\"shell\":false}"
+    },
+    {
+      "name": "signed out /account leaks no product text",
+      "pass": true,
+      "detail": "no work titles, ids or role names"
+    },
+    {
+      "name": "signed out /admin shows the sign-in screen",
+      "pass": true,
+      "detail": "{\"heading\":\"تسجيل الدخول\",\"shell\":false}"
+    },
+    {
+      "name": "signed out /admin leaks no product text",
+      "pass": true,
+      "detail": "no work titles, ids or role names"
+    },
+    {
+      "name": "signed out /accounts shows the sign-in screen",
+      "pass": true,
+      "detail": "{\"heading\":\"تسجيل الدخول\",\"shell\":false}"
+    },
+    {
+      "name": "signed out /accounts leaks no product text",
+      "pass": true,
+      "detail": "no work titles, ids or role names"
+    },
+    {
+      "name": "the test device prefers dark",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "light is the default on a dark device",
+      "pass": true,
+      "detail": "{\"theme\":\"light\",\"identity\":\"emerald\",\"scheme\":\"light\",\"card\":\"rgb(251, 252, 249)\",\"shell\":false,\"heading\":\"تسجيل الدخول\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبريد الإلكتروني\\nكلمة المرور\\nدخول\\nنسيت كلمة المرور\\n\\nالحسابات والصلاحيات حقيقية. بيانات العمل نفسها ما تزال نموذجاً محلياً بلا نشر فعلي.\",\"overflow\":false}"
+    },
+    {
+      "name": "dark applies when chosen, on a light device",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\",\"identity\":\"emerald\",\"scheme\":\"dark\",\"card\":\"rgb(14, 31, 24)\",\"shell\":false,\"heading\":\"تسجيل الدخول\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبريد الإلكتروني\\nكلمة المرور\\nدخول\\nنسيت كلمة المرور\\n\\nالحسابات والصلاحيات حقيقية. بيانات العمل نفسها ما تزال نموذجاً محلياً بلا نشر فعلي.\",\"overflow\":false}"
+    },
+    {
+      "name": "Direction A has no evening mode even if dark was stored",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\",\"identity\":null,\"scheme\":\"normal\",\"card\":\"rgb(255, 255, 255)\",\"shell\":false,\"heading\":\"تسجيل الدخول\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبريد الإلكتروني\\nكلمة المرور\\nدخول\\nنسيت كلمة المرور\\n\\nالحسابات والصلاحيات حقيقية. بيانات العمل نفسها ما تزال نموذجاً محلياً بلا نشر فعلي.\",\"overflow\":false}"
+    },
+    {
+      "name": "tab أول دخول",
+      "pass": true,
+      "detail": "أول دخول"
+    },
+    {
+      "name": "tab طلب وصول",
+      "pass": true,
+      "detail": "طلب وصول"
+    },
+    {
+      "name": "tab تسجيل الدخول",
+      "pass": true,
+      "detail": "تسجيل الدخول"
+    },
+    {
+      "name": "forgot password view",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "390 px no sideways scroll (A)",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "390 px no sideways scroll (emerald)",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "390 px no sideways scroll (emerald, dark)",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no page or console errors",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "name": "no request leaves the local server on load",
+      "pass": true,
+      "detail": "none"
+    }
+  ]
+}

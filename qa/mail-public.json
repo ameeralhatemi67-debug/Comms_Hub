@@ -1,6 +1,6 @@
 {
-  "run": "2026-10-11T11:03:52.085Z",
-  "baseURL": "http://127.0.0.1:3000",
+  "run": "2026-10-11T17:04:14.533Z",
+  "baseURL": "http://127.0.0.1:3100",
   "checks": [
     {
       "name": "unknown token answers 404",
@@ -18,39 +18,9 @@
       "detail": ""
     },
     {
-      "name": "date page opens",
-      "pass": true,
-      "detail": "موعد نشر «إعلان اختبار»الموعد المقترح: الخميس 15 أكتوبر · 19:00تأكيد الموعدأو اق"
-    },
-    {
-      "name": "date shown in Riyadh time",
-      "pass": true,
-      "detail": "موعد نشر «إعلان اختبار»الموعد المقترح: الخميس 15 أكتوبر · 19:00تأكيد الموعدأو اقترحوا موعداً آخرإرسال الموعد المقترحيُسجَّل رد واحد فقط. الرابط صالح 72 ساعة من إرسال الرسالة."
-    },
-    {
-      "name": "opening the page does not answer",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "no sideways scroll at 1280px",
-      "pass": true,
-      "detail": "0"
-    },
-    {
-      "name": "no sideways scroll at 390px",
-      "pass": true,
-      "detail": "0"
-    },
-    {
-      "name": "pressing confirm records the answer",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "a second visit shows it was answered",
-      "pass": true,
-      "detail": ""
+      "name": "real token flow",
+      "pass": false,
+      "detail": "MAIL_TEST_TOKEN not set; skipped"
     },
     {
       "name": "/mail without sign-in shows the sign-in gate, not mail",
@@ -79,5 +49,5 @@
     }
   ],
   "errors": [],
-  "pass": true
+  "pass": false
 }
