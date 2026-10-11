@@ -75,7 +75,6 @@ export function Supporting({ page }: { page: string }) {
   const theme = useTheme();
   const account = useAccount();
   const [idea, setIdea] = useState('');
-  const [mailRead, setMailRead] = useState(false);
   const [compact, setCompact] = useState(true);
   const [alerts, setAlerts] = useState(true);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -102,55 +101,6 @@ export function Supporting({ page }: { page: string }) {
     });
     router.push('/work');
   };
-
-  if (page === 'mail')
-    return (
-      <div dir="rtl">
-        <Title title="البريد" sub="رسائل العمل المختارة من صندوق الحملة">
-          <span className="chip">{mailRead ? 'تمت القراءة' : 'رسالة واحدة تحتاج متابعة'}</span>
-        </Title>
-        <div className="columns">
-          <Panel title="طلب اليوم الوطني">
-            <div className={`notice ${mailRead ? 'read' : ''}`}>
-              <b>من: فريق الفعاليات</b>
-              <p>نحتاج منشوراً يعلن برنامج اليوم الوطني في مقر الشركة قبل نهاية اليوم.</p>
-              <small className="muted">اليوم · إلى الاتصال المؤسسي · أولوية عالية</small>
-            </div>
-            <div className="actions">
-              <button
-                className="primary"
-                disabled={!actor.create}
-                title={!actor.create ? 'هذا الدور لا ينشئ الأعمال' : ''}
-                onClick={() =>
-                  createWork(
-                    'إعلان برنامج اليوم الوطني',
-                    'إعلان برنامج اليوم الوطني في مقر الشركة، مع توضيح الوقت والموقع ودعوة الزملاء للمشاركة.',
-                    true,
-                  )
-                }
-              >
-                إنشاء عمل وإرساله للمراجعة
-              </button>
-              <button className="secondary" onClick={() => setMailRead(true)} disabled={mailRead}>
-                {mailRead ? 'تمت القراءة' : 'تمييز كمقروء'}
-              </button>
-            </div>
-            {!actor.create && <p className="muted">هذا الدور لا يملك صلاحية إنشاء الأعمال.</p>}
-          </Panel>
-          <Panel title="سياق الحملة">
-            <p>{campaign.description}</p>
-            <div className="field">
-              <b>{state.work.length}</b>
-              <span> أعمال قائمة</span>
-            </div>
-            <div className="field">
-              <b>{campaign.date}</b>
-              <span> موعد الحملة</span>
-            </div>
-          </Panel>
-        </div>
-      </div>
-    );
 
   if (page === 'ideas')
     return (

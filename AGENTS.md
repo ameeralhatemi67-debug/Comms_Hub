@@ -99,6 +99,17 @@ Administrators act as any role there (testing phase). Publishing itself stays a
 simulation. Where a page would need one of these, render the shell and
 say plainly in the interface that it is a simulation.
 
+Mail is the third exception, by owner directive of 2026-10-11: the mail page is
+real. Internal mail, its action cards and the shared outside mailbox live in
+Postgres (`supabase/migrations/*mail*`), every write goes through a database
+function, and who sees what is row level security. Outside mail goes through
+one Gmail account over IMAP and SMTP with an app password; `GMAIL_ADDRESS`,
+`GMAIL_APP_PASSWORD` and `MAIL_SERVER_KEY` are server-only environment
+variables, and the database stores only the sha256 of the server key. There is
+still no background worker: the mailbox syncs when someone has the mail page
+open. Internal mail stays private from administrators; they act as any role
+only for the shared mailbox and approvals.
+
 One deliberate exception, by owner directive of 2026-10-11 (recorded in
 `progress.md`): **accounts are real.** Sign-in with email and password,
 approved accounts, access requests, roles and page permissions live in the

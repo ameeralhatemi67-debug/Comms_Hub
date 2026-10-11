@@ -36,6 +36,7 @@ import { MediaLibrary } from './media/library';
 import { AssetPage } from './media/asset-page';
 import { TasksPage } from './media/tasks-page';
 import { ActivityPage } from './media/activity-page';
+import { MailPage } from './mail/mail-page';
 import dynamic from 'next/dynamic';
 
 const MotionStudio = dynamic(() => import('./motion-studio'), {
@@ -483,10 +484,11 @@ export function HubPage({ route }: { route: string[] }) {
         <ActivityPage />
       </MediaProvider>
     );
+  if (page === 'mail') return <MailPage />;
   if (page === 'motion') return <MotionStudio />;
   if (page === 'components') return <ComponentGallery />;
   if (page === 'accounts') return <AccountsPage />;
-  if (['mail', 'ideas', 'analytics', 'monitoring', 'admin', 'settings', 'account'].includes(page))
+  if (['ideas', 'analytics', 'monitoring', 'admin', 'settings', 'account'].includes(page))
     return <Supporting page={page} />;
 
   return (
