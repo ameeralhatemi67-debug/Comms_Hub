@@ -380,3 +380,7 @@ When recording future implementation outcomes, follow this standardized template
 - **Not done and not verified, said plainly.** (1) No signed-in screen was seen in a browser by me: every screen of this section is covered by typecheck, build and unit tests only. The first real sign-in is the test, including the Drive card height fix. (2) No real Google call was made for folder create, rename, move, new version, trash or review-link streaming; they follow the documented API and the earlier scripted adapter tests only. (3) Publishing remains a simulation (no message leaves the system); the interface says so. (4) The older illustrative assets (poster, reel, footage) remain only for the work items that point to them. (5) `qa/*.cjs` scripts need a signed-in session and were not re-run. (6) The channel integration data (Instagram, X, LinkedIn) is still the mock list from `domain.ts`.
 - **Owner steps.** Sign in as an administrator and walk the library: create a folder, upload, rename, move, change access and lock, then switch «عرض بصفة» to the publisher and the writer to see their actions. Grant «المهام» and «سجل النشاط» to the other accounts in the accounts page; grant folder levels from «الوصول والقفل».
 - **Next action:** the owner's walk-through and a list of what to fix; then the signed-in browser run of the older QA scripts.
+
+## 2026-10-11 — Logged by Compass
+
+- 55211de feat(media): folders, permissions, pipeline, asset page, tasks, activity log and review links

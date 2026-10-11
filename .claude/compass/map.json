@@ -271,6 +271,96 @@
       "text": "Move to a custom domain so Google authorised-domain and verification steps are simpler and the logo can be added later.",
       "at": "2026-10-11",
       "source": "auto"
+    },
+    {
+      "id": "imv3j7k520",
+      "text": "Create Hub folders from campaigns and work items, and rename or move them in Drive from the website.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3j7k521",
+      "text": "Per-folder access rules by person or role (view, edit, manage, hidden), enforced in the database.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3j7k522",
+      "text": "Lock approved asset versions, and show real Drive storage figures in Admin Storage.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3jmjtq0",
+      "text": "Auto-create a Drive folder per campaign and per work item, and attach uploads to the work item",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3jmjtq1",
+      "text": "Time-limited review links for outside reviewers, with open tracking in the activity feed",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3jmjtq2",
+      "text": "Thumbnails and real Drive storage figures in Admin, plus a per-folder audit trail",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3kcdvz0",
+      "text": "Implement real folders, rename, move and per-folder access rules on Drive and Supabase, with a logged action trail.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3kcdvz1",
+      "text": "Add a pipeline-stage field, tasks table and quick-action permissions per role to the real database.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3kcdvz2",
+      "text": "Time-limited review links for people without accounts.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3lch480",
+      "text": "Share-link signed-open logging and per-link access counts in the activity log.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3lch481",
+      "text": "Move channel integrations (Instagram, X, LinkedIn) from mock data to real account state.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3lch482",
+      "text": "Signed-in browser QA script covering library, asset page, tasks and activity log.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3nahsf0",
+      "text": "Write a Codex brief in the repo: mail tables and row level security, Gmail app-password sync and send, review fixes, and a qa/ checklist.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3nahsf1",
+      "text": "Restore the «تم الرد» external status if the owner wants five statuses.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3nahsf2",
+      "text": "Later: AI thread summary, extraction of requests and dates, and suggested replies in the mail context panel.",
+      "at": "2026-10-11",
+      "source": "auto"
     }
   ],
   "findings": [
@@ -582,6 +672,118 @@
       "id": "fmv3icu892",
       "text": "Privacy and terms pages are static files in public/ that were never fetched locally or on Vercel; their public reachability is unconfirmed.",
       "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3ikrxj0",
+      "text": "Google still flags the OAuth app as requiring verification: the homepage domain is unverified and a logo may be present. Publishing worked, but the banner and branding issue persist.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3ikrxj2",
+      "text": "Static privacy.html and terms.html in public/ were never fetched locally or on the deployed site, so their reachability without sign-in is unconfirmed.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3j7k520",
+      "text": "Google still flags the OAuth app as requiring verification; the homepage domain is unverified, though Drive upload already works end to end.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3j7k521",
+      "text": "The hardcoded mock assets and the new Drive files are separate worlds; nothing links uploads to work items or approvals yet.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3j7k522",
+      "text": "Everything is stored in one personal Gmail account on the free 15 GB tier shared with Gmail; capacity and 2-step verification are unconfirmed.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3jmjtq0",
+      "text": "The real media page still uses hardcoded mock assets, separate from the new Drive files. The mock redesign depends on replacing them with real folders and records.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3jmjtq1",
+      "text": "The proposed review-link feature (signed, expiring, no-login links) has no backend design yet. It is shown in the mock but is only a placeholder.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3jmjtq2",
+      "text": "The mock's access model is not tested against the database row level security that would enforce it. Real enforcement of per-folder access is unbuilt.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3kcdvz0",
+      "text": "The real media page still uses hardcoded mock assets, separate from the real Drive files, so pipeline stages and tasks have no backing data.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3lch480",
+      "text": "Media UI and Drive card height fix untested in a real signed-in browser; defects likely surface on first run.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3lch481",
+      "text": "Server-side upload/rename/move/delete route ordering (DB first, then Drive revert) has no automated test; failures could leave Drive and database out of step.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3nahsf0",
+      "text": "Copy can change on an approved or scheduled asset without returning it to review, so text nobody approved can be published.",
+      "severity": "high",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3nahsf1",
+      "text": "The person assigned a task can change its due date, priority and kind without anything being logged.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3nahsf2",
+      "text": "Direct database inserts into media_files skip the Drive checks in the complete route; an admin can also make another admin through a direct table update.",
+      "severity": "medium",
       "at": "2026-10-11",
       "status": "open",
       "source": "auto"
