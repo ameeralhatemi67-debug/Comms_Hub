@@ -55,6 +55,9 @@ All six Round 1 corrections from the Director's findings are built and verified:
 
 ## Verified capability
 
+- **Messaging tab and profiles (2026-10-12).** «المراسلة» beside «البريد» at `/mail/chat`: direct chats, groups tied to a campaign or work item, announcement channels, replies, forwarding, reactions, stars, pins, edits, deletes, pictures, files and recorded voice notes, polls, tasks, approval cards, urgent messages with acknowledgement, slash commands, moving a conversation to formal mail, live through Realtime. The account page gains «مظهرك في البريد والمراسلة» (picture, name, headline, colour, presence, signature). `npm test` 87/87, database rule run 22/22. Not yet seen signed in by an agent.
+- **Mail is live (2026-10-12).** Pushed and deployed to `comms-hub-three.vercel.app` with the Gmail variables set; the public date page and the sign-in guard answer in production.
+
 - **Mail page (2026-10-11).** Real internal mail, the shared Gmail mailbox (IMAP and SMTP with an app password), approval of outside mail, and approval, date, task and progress cards that act through the media rules. Rules in Postgres; `npm test` 74/74, database rule run 25/25, `qa/mail-public.cjs` 15/15. Not yet seen signed in, and Gmail is not connected yet: owner steps in `progress.md`.
 - **Second design screens (2026-10-11).** Behind the same logo toggle (also in the phone top bar): evening mode, decisions and campaign pulse on Home, approval stamp, phone approval sheet, notification tiers, calendar week with drag-to-request, motion from the work item, and the `/components` page. `qa/identity-screens.cjs` 48/48; contrast 51 pairs per mode, lowest 4.73. See `MVP_draft.md` section 60.
 - **Design toggle (2026-10-10).** Double-click on the sidebar logo switches between Direction A and the new identity; restored before first paint; fonts served by the app. Direction A is pixel-identical to before on 63 captures (`qa/colour-tokens.json`). `qa/identity-toggle.cjs` 134 of 134, including 48 contrast pairs and no request leaving the machine. Regressions 34/34, journey PASS, motion studio 205/205, domain tests 9/9, typecheck and build clean. Evening mode and the component QA page are not built.
@@ -100,7 +103,7 @@ Evidence, reproduction instructions and precise accepted scope for Checkpoint 0.
 
 ## Next action
 
-Waiting on people; no agent task is open on the critical path.
+Owner: sign in to the live site and walk the mail page and the messaging tab (send internal and outside mail, reply from outside, open «المراسلة», start a chat and a group, record a voice note, set a profile picture on the account page). Then the earlier items below.
 
 1. Director: run the re-check `validation/recheck-R01.md` on the current build. It covers the three failed tasks, each Round 1 correction, the open design questions, T6, D-01 (which design is the default, on the live logo toggle) and the command palette.
 2. Owner: decide the eight design-note recommendations (D-04) and confirm D-02.

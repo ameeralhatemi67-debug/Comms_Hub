@@ -29,8 +29,10 @@ import {
   Lock,
   Mail,
   MailOpen,
+  Mic,
   Pause,
   Paperclip,
+  Play,
   Pencil,
   Plus,
   RefreshCw,
@@ -49,6 +51,7 @@ import {
   X,
 } from 'lucide-react';
 import { GROUPS, type GroupId } from '@/lib/mail/rules';
+import { usePeopleOptional } from '../people';
 
 const icons = {
   alarm: AlarmClock,
@@ -80,6 +83,8 @@ const icons = {
   mail: Mail,
   unread: MailOpen,
   pause: Pause,
+  play: Play,
+  voice: Mic,
   clip: Paperclip,
   pencil: Pencil,
   plus: Plus,
@@ -108,8 +113,18 @@ export function I({ n, className }: { n: IconName; className?: string }) {
   return <C className={`i ${mirrored.has(n) ? 'flip' : ''} ${className ?? ''}`} aria-hidden="true" />;
 }
 
-export function Av({ label, tone = '', small = false }: { label: string; tone?: '' | 'ext' | 'grp'; small?: boolean }) {
-  return <span className={`ml-av ${tone} ${small ? 'sm' : ''}`}>{label.trim().charAt(0) || '·'}</span>;
+export function Av({ label, tone = '', small = false, email }: { label: string; tone?: '' | 'ext' | 'grp'; small?: boolean; email?: string | null }) {
+  const pic = usePeopleOptional()?.personOf(email ?? '')?.profile?.avatar;
+  return (
+    <span className={`ml-av ${tone} ${small ? 'sm' : ''}`}>
+      {pic ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={pic} alt="" />
+      ) : (
+        label.trim().charAt(0) || '·'
+      )}
+    </span>
+  );
 }
 
 export function Bdi({ children }: { children: React.ReactNode }) {

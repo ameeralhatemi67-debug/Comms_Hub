@@ -18,6 +18,7 @@ import {
 } from '@/lib/mail/rules';
 import { CHANNEL_AR, I, fileSize, localInput, tokenName, tokenTone, Av } from './parts';
 import { useMail, type FileLite, type Outgoing } from './provider';
+import { usePeopleOptional } from '../people';
 
 export type CardDraft =
   | { type: 'task'; what: string; assignee: string; due: string; priority: 'normal' | 'urgent' }
@@ -107,7 +108,8 @@ export function Composer({
   const newThread = !d.thread || d.mode === 'forward';
   const gated = needsApproval({ role: m.role, me: m.me, external, newThread, assignee: view?.thread.assignee ?? null });
   const me = m.personOf(m.me);
-  const signature = `${me?.display_name ?? ''}\n${roles[m.role]?.name ?? ''}، إدارة الاتصال المؤسسي`;
+  const ownSignature = usePeopleOptional()?.me?.profile?.signature;
+  const signature = ownSignature || `${me?.display_name ?? ''}\n${roles[m.role]?.name ?? ''}، إدارة الاتصال المؤسسي`;
 
   // People, groups and outside contacts already known to the Hub.
   const contacts = useMemo(() => {

@@ -20,6 +20,7 @@ import './identity.css';
 import './auth.css';
 import './media.css';
 import './mail.css';
+import './chat.css';
 
 export const metadata: Metadata = {
   title: 'مركز الاتصال المؤسسي',

@@ -108,7 +108,7 @@ export function ThreadView({
           return (
             <article key={x.id} className={`ml-msg ${collapsed ? 'collapsed' : ''} ${['outbox', 'queued', 'failed'].includes(x.state) ? 'pending' : ''}`}>
               <button type="button" className="ml-msg-h" aria-expanded={!collapsed} onClick={() => setOpen({ ...open, [x.id]: collapsed })}>
-                <Av label={fromName(x)} tone={x.author ? '' : 'ext'} />
+                <Av label={fromName(x)} tone={x.author ? '' : 'ext'} email={x.author} />
                 <span className="who">
                   <b>{fromName(x)}</b>
                   {!x.author && x.from_email && (
@@ -582,7 +582,7 @@ function CardView({ x, card, contact }: { x: MessageRow; card: Card; contact: st
           <b className="ml-what">{card.what}</b>
           <div className="ml-meta">
             <span>
-              <Av label={m.nameOf(card.assignee)} small /> {m.nameOf(card.assignee)}
+              <Av label={m.nameOf(card.assignee)} small email={card.assignee} /> {m.nameOf(card.assignee)}
             </span>
             <span className={late ? 'late' : ''}>
               <I n="clock" /> التسليم {fullWhen(card.due)}
@@ -882,7 +882,7 @@ function Context({ view, onBack }: { view: View; onBack: () => void }) {
         <div className="ml-ppl">
           {[...people].map((p) => (
             <div key={p}>
-              <Av label={m.nameOf(p)} small />
+              <Av label={m.nameOf(p)} small email={p} />
               <span>
                 {m.nameOf(p)}
                 <small>{roles[m.personOf(p)?.role ?? 'member']?.name}</small>

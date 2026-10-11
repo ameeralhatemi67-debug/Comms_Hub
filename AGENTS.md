@@ -110,6 +110,17 @@ still no background worker: the mailbox syncs when someone has the mail page
 open. Internal mail stays private from administrators; they act as any role
 only for the shared mailbox and approvals.
 
+Messaging (the «المراسلة» tab of the mail page, `/mail/chat`) and personal
+profiles are real too, by owner directive of 2026-10-12: rooms, messages,
+reactions, votes and acknowledgements live in Postgres
+(`supabase/migrations/*chat*`), every write is a database function, a room is
+visible to its members only (administrators included), and changes arrive live
+through Supabase Realtime. Pictures, voice notes and files sent in messaging go
+to Google Drive like mail attachments. A profile picture is a small square
+image resized in the browser and stored in the `profiles` table; a person may
+change their own display name, picture, headline, name colour, presence and
+mail signature, and nothing else about their account.
+
 One deliberate exception, by owner directive of 2026-10-11 (recorded in
 `progress.md`): **accounts are real.** Sign-in with email and password,
 approved accounts, access requests, roles and page permissions live in the

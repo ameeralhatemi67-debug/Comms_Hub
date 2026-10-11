@@ -2,6 +2,7 @@
 // البريد: internal mail between the department's accounts, the shared outside mailbox
 // (Gmail), and action cards bound to real records. Specification: MVP_draft.md
 // section 31, extended by the owner's brief of 2026-10-11 (progress.md).
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { campaign, roles } from '@/lib/domain';
@@ -31,6 +32,10 @@ import { Composer, blankDraft, cardTitle, type Draft } from './composer';
 import { Av, I, localInput, tokenName, type IconName } from './parts';
 import { MailProvider, useMail, type Outgoing } from './provider';
 import { ThreadView } from './thread';
+import { ChatProvider, useChat } from '../chat/provider';
+import { ChatTab, type MailPrefill } from '../chat/chat-tab';
+import { PeopleProvider, usePeopleOptional } from '../people';
+import { unreadCount } from '@/lib/chat/rules';
 
 const FOLDER_ICONS: Record<string, IconName> = {
   inbox: 'inbox', action: 'flag', mine: 'user', waiting: 'clock', starred: 'star', snoozed: 'alarm', sent: 'send',
@@ -41,11 +46,55 @@ const LABEL_SET = ['طلبات تغطية', 'شركاء', 'صحافة', 'الي�
 
 const memory = { folder: 'inbox' as FolderId };
 
-export function MailPage() {
+/** A draft waiting for the mail tab, when a chat message is moved to formal mail. */
+let queuedDraft: MailPrefill | null = null;
+
+export function MailPage({ tab = 'mail' }: { tab?: 'mail' | 'chat' }) {
   return (
-    <MailProvider>
-      <Mail />
-    </MailProvider>
+    <PeopleProvider>
+      <MailProvider>
+        <ChatProvider>{tab === 'chat' ? <ChatView /> : <Mail />}</ChatProvider>
+      </MailProvider>
+    </PeopleProvider>
+  );
+}
+
+/** البريد and المراسلة, each with its unread count. */
+function MailTabs({ active }: { active: 'mail' | 'chat' }) {
+  const m = useMail();
+  const c = useChat();
+  const mailUnread = m.views.filter((v) => inFolder(v, 'inbox', { me: m.me, role: m.role, now: m.now }) && isUnread(v, m.me, m.now)).length;
+  const chatUnread = c.rooms.reduce((n, r) => (c.myMember(r.id)?.muted ? n : n + unreadCount(c.messagesOf(r.id), c.myMember(r.id), c.me)), 0);
+  return (
+    <nav className="ml-tabs" aria-label="البريد والمراسلة">
+      <Link href="/mail" aria-current={active === 'mail' ? 'page' : undefined}>
+        <I n="mail" />
+        البريد
+        {mailUnread > 0 && <span className="n">{mailUnread}</span>}
+      </Link>
+      <Link href="/mail/chat" aria-current={active === 'chat' ? 'page' : undefined}>
+        <I n="reply" />
+        المراسلة
+        {chatUnread > 0 && <span className="n">{chatUnread}</span>}
+      </Link>
+    </nav>
+  );
+}
+
+function ChatView() {
+  const router = useRouter();
+  return (
+    <div className="mx ml" dir="rtl">
+      <Title title="" accent="المراسلة" sub="حديث الفريق اليومي، مع معاينات العمل والبطاقات. ما يحتاج سجلاً رسمياً أو جهة خارجية يذهب إلى البريد.">
+        <MailTabs active="chat" />
+      </Title>
+      <ChatTab
+        onToMail={(p) => {
+          queuedDraft = p;
+          router.push('/mail');
+        }}
+      />
+    </div>
   );
 }
 
@@ -64,6 +113,15 @@ function Mail() {
   const [dialog, setDialog] = useState<null | 'settings' | 'keys' | 'work'>(null);
   const [menu, setMenu] = useState<null | { kind: 'snooze' | 'label'; x: number; y: number }>(null);
   const [drafts, setDrafts] = useDrafts(m.me);
+  const people = usePeopleOptional();
+
+  // A chat message moved here becomes a draft addressed to the chat's members.
+  useEffect(() => {
+    if (!queuedDraft) return;
+    const p = queuedDraft;
+    queuedDraft = null;
+    setDraft(blankDraft({ to: p.to, subject: p.subject, body: p.body, refs: p.refs }));
+  }, []);
   const search = useRef<HTMLInputElement>(null);
 
   const setFolder = (f: FolderId) => {
@@ -152,7 +210,7 @@ function Mail() {
       to: d.to,
       cc: d.cc,
       bcc: d.bcc,
-      body: `${d.body.trim()}\n\n${me?.display_name ?? ''}\n${roles[m.role]?.name ?? ''}، إدارة الاتصال المؤسسي`,
+      body: `${d.body.trim()}\n\n${people?.me?.profile?.signature || `${me?.display_name ?? ''}\n${roles[m.role]?.name ?? ''}، إدارة الاتصال المؤسسي`}`,
       refs: d.refs,
       files: d.files.map((f) => f.id),
       card: null,
@@ -218,6 +276,7 @@ function Mail() {
   return (
     <div className="mx ml" dir="rtl">
       <Title title="" accent="البريد" sub="رسائل الفريق الداخلية وصندوق القسم المشترك، مع بطاقات الاعتماد والمواعيد والمهام.">
+        <MailTabs active="mail" />
         <span className={`ml-pill ${m.settings.paused ? 'off' : m.mailbox === 'connected' ? '' : 'idle'}`}>
           <i />
           {m.settings.paused
@@ -607,6 +666,7 @@ function Row({
   const mins = replyMinutes(t, m.now);
   const lastCard = [...ms].reverse().find((x) => x.card)?.card;
   const avatar = t.kind === 'external' ? t.contact_name || t.contact_email || '·' : senders.find((s) => s !== 'أنا') ?? 'أنا';
+  const avatarEmail = t.kind === 'external' ? null : ([...ms].reverse().find((x) => x.author && x.author !== m.me)?.author ?? null);
   return (
     <div className={`ml-row ${unread ? 'unread' : ''} ${on ? 'on' : ''}`} role="button" tabIndex={0} aria-label={t.subject} onClick={onOpen} onKeyDown={(e) => e.key === 'Enter' && onOpen()}>
       <span className="pick" onClick={(e) => e.stopPropagation()}>
@@ -615,7 +675,7 @@ function Row({
           <I n="star" />
         </button>
       </span>
-      <Av label={avatar} tone={t.kind === 'external' ? 'ext' : ''} />
+      <Av label={avatar} tone={t.kind === 'external' ? 'ext' : ''} email={avatarEmail} />
       <span className="main">
         <span className="top">
           <span className="from">

@@ -25,6 +25,7 @@ import { supabase } from '@/lib/supabase/client';
 import { setTheme, toggleIdentity } from '@/lib/identity';
 import { useIdentity, useTheme } from '@/lib/use-identity';
 import { Empty, Modal, Panel, Tabs, Title } from './ui';
+import { ProfileEditor } from './profile-editor';
 import { DriveIntegration } from './drive-files';
 
 const pageNames: Record<string, string> = {
@@ -633,6 +634,9 @@ export function Supporting({ page }: { page: string }) {
         <Title title="الحساب" sub="بيانات المستخدم والدور الحالي">
           <UserRound />
         </Title>
+        <Panel title="مظهرك في البريد والمراسلة">
+          <ProfileEditor />
+        </Panel>
         <div className="columns">
           <Panel title="الملف الشخصي">
             <div className="notice">

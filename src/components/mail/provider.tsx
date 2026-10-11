@@ -7,9 +7,8 @@ import type { Role } from '@/lib/domain';
 import { useAccount } from '@/lib/account-context';
 import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
-import { sendToDrive } from '@/lib/media/upload';
+import { uploadAttachment } from '@/lib/mail/upload';
 import {
-  MAIL_ATTACH_BYTES,
   mailErrorText,
   type MemberRow,
   type MessageRow,
@@ -293,23 +292,7 @@ export function MailProvider({ children }: { children: ReactNode }) {
       call,
       sync,
       async upload(file, onProgress) {
-        if (file.size > MAIL_ATTACH_BYTES) throw new Error('مرفقات البريد حتى 25 MB. للملفات الأكبر أضفها إلى مكتبة الوسائط وأرسلها مرجعاً.');
-        const session = await fetch('/api/mail/upload-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size }),
-        });
-        if (!session.ok) throw new Error(((await session.json().catch(() => null)) as { error?: string } | null)?.error ?? 'تعذّر بدء الرفع.');
-        const { sessionUrl } = (await session.json()) as { sessionUrl: string };
-        const fileId = await sendToDrive(sessionUrl, file, onProgress);
-        const done = await fetch('/api/mail/upload-complete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fileId }),
-        });
-        if (!done.ok) throw new Error(((await done.json().catch(() => null)) as { error?: string } | null)?.error ?? 'تعذّر تسجيل المرفق.');
-        const j = (await done.json()) as { id: string; name: string; size: number; mime: string };
-        const f = { id: j.id, name: j.name, size_bytes: j.size, mime_type: j.mime };
+        const f = await uploadAttachment(file, onProgress);
         setFiles((all) => [...all.filter((x) => x.id !== f.id), f]);
         return f;
       },

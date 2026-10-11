@@ -484,7 +484,7 @@ export function HubPage({ route }: { route: string[] }) {
         <ActivityPage />
       </MediaProvider>
     );
-  if (page === 'mail') return <MailPage />;
+  if (page === 'mail') return <MailPage key={id === 'chat' ? 'chat' : 'mail'} tab={id === 'chat' ? 'chat' : 'mail'} />;
   if (page === 'motion') return <MotionStudio />;
   if (page === 'components') return <ComponentGallery />;
   if (page === 'accounts') return <AccountsPage />;
