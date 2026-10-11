@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["start"],
       "port": 3000
+    },
+    {
+      "name": "comms-hub-start-3100",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "start", "--hostname", "127.0.0.1", "--port", "3100"],
+      "port": 3100
     }
   ]
 }
