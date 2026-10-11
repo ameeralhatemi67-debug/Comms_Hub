@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-11
+updated: 2026-10-12
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -52,7 +52,7 @@ All six Round 1 corrections from the Director's findings are built and verified:
 | D-02 | Count self-administered form responses as sessions, with "facilitator: none" recorded. Effectively settled by the 2026-10-10 directive that the Director's response alone is enough; to be confirmed |
 | D-03 | Done 2026-10-11: severities confirmed as transcribed |
 | D-04 | Confirm or overrule the eight design-note recommendations (`validation/design-notes/README.md`), including whether to show an urgent mark and the editor's name in the prototype. Partly settled 2026-10-12: urgent mark, close with reason, several campaigns, stage deadlines, stage templates, editor shown on a version and per-part approval are accepted for the real work pages (see `progress.md`) |
-| D-05 | Review artifact «دورة العمل» pass 3, «التقويم» (https://claude.ai/artifact/1tREdJRSuLpY9yignsf8q9), and its seven calendar rules. Pass 1 and pass 2 rules accepted 2026-10-12. After this, implementation starts with «العمل» and «إنشاء» |
+| D-05 | Review version 4 of the artifact, «النموذج المرجعي للمركز» (https://claude.ai/artifact/1tREdJRSuLpY9yignsf8q9): the eleven additions and the merge of the media and mail artifacts. Pass 1, 2 and 3 rules accepted 2026-10-12. After this, implementation starts with «العمل» and «إنشاء» |
 
 ## Verified capability
 
