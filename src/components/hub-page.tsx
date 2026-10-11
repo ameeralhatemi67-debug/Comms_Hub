@@ -31,6 +31,7 @@ import { Approvals, Calendar } from './operations';
 import { Supporting } from './supporting';
 import { ComponentGallery } from './gallery';
 import { AccountsPage } from './accounts';
+import { DriveFiles } from './drive-files';
 import dynamic from 'next/dynamic';
 
 const MotionStudio = dynamic(() => import('./motion-studio'), {
@@ -427,7 +428,7 @@ function Media({ id }: { id?: string }) {
             <p>
               {asset.filename} · أُنشئ بواسطة {asset.creator}
             </p>
-            <small>نسخة مرئية تجريبية. الملفات الثنائية والتخزين غير متصلين.</small>
+            <small>نسخة مرئية تجريبية. الملفات الحقيقية تُرفع من مكتبة الوسائط إلى Google Drive.</small>
           </Panel>
           <Panel title="مستخدم في">
             {state.work
@@ -452,6 +453,8 @@ function Media({ id }: { id?: string }) {
   return (
     <>
       <Title title="مكتبة الوسائط" sub="أصول الحملة وإصداراتها، مرتبطة بالعمل والمراجعة." />
+      <DriveFiles />
+      <h2 className="drive-samples">نماذج الأصول التوضيحية</h2>
       <div className="filters">
         <input
           aria-label="البحث في الوسائط"

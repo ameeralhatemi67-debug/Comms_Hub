@@ -25,6 +25,7 @@ import { supabase } from '@/lib/supabase/client';
 import { setTheme, toggleIdentity } from '@/lib/identity';
 import { useIdentity, useTheme } from '@/lib/use-identity';
 import { Empty, Modal, Panel, Tabs, Title } from './ui';
+import { DriveIntegration } from './drive-files';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
@@ -368,7 +369,10 @@ export function Supporting({ page }: { page: string }) {
             {adminTab === 'integrations' && (
               <Panel title="التكاملات">
                 <div className="stack">
-                  {integrations.map((item) => (
+                  {integrations.map((item) =>
+                    item.id === 'drive' ? (
+                      <DriveIntegration key={item.id} />
+                    ) : (
                     <div className="notice" key={item.id}>
                       <span className="between">
                         <b>{item.name}</b>
@@ -383,9 +387,13 @@ export function Supporting({ page }: { page: string }) {
                         </button>
                       </div>
                     </div>
-                  ))}
+                    ),
+                  )}
                 </div>
-                <p className="muted">تدفق الربط ومعالجة الرموز مؤجلان إلى مرحلة التكاملات الحقيقية.</p>
+                <p className="muted">
+                  Google Drive حقيقي. بقية التكاملات واجهات عرض، وتدفق ربطها ومعالجة رموزها مؤجلان إلى مرحلة
+                  التكاملات الحقيقية.
+                </p>
               </Panel>
             )}
 

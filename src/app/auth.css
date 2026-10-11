@@ -48,3 +48,20 @@ button.danger{color:var(--danger)}
 button.primary.danger{background:var(--danger);border-color:var(--danger);color:var(--on-brand)}
 @media(max-width:1099px){.acct-row{grid-template-columns:minmax(0,1fr) auto}.acct-row>:nth-child(3),.acct-row>:nth-child(4){display:none}}
 @media(max-width:699px){.acct-request{flex-direction:column}.acct-row .actions{grid-column:1/-1}}
+
+/* Google Drive files on the Media page */
+.drive-bar{align-items:flex-start;margin-bottom:14px}
+.drive-bar .muted{margin:0}
+.drive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:14px}
+.drive-card{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;min-width:0}
+.drive-thumb{aspect-ratio:16/10;background:var(--surface-2);display:grid;place-items:center;overflow:hidden}
+.drive-thumb img,.drive-thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.drive-icon{display:grid;gap:8px;justify-items:center;color:var(--muted)}
+.drive-icon svg{width:36px;height:36px}
+.drive-icon audio{width:90%}
+.drive-meta{display:grid;gap:6px;padding:12px}
+.drive-meta b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drive-meta .actions .button,.drive-meta .actions button{min-height:34px;padding:4px 10px;font-size:12px}
+.drive-samples{margin:28px 0 14px;font-size:16px;color:var(--muted)}
+progress{width:100%;accent-color:var(--green)}
+[data-identity="emerald"] .drive-card{border-radius:var(--r-lg)}

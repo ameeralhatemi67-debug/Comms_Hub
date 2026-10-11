@@ -85,8 +85,11 @@ explicitly requested.
 ## Prototype boundary (Version 0)
 
 Work data (items, approvals, publications, notices) is local mock state, held
-in each browser. No real publishing, mail delivery, AI, external storage or
-background workers. Where a page would need one of these, render the shell and
+in each browser. No real publishing, mail delivery, AI or background workers.
+Files are the second exception, by owner directive of 2026-10-11: uploads go
+to Google Drive (the connected Gmail account, `drive.file` scope, folder
+«Comms Hub») and are listed in the `media_files` table; the Drive client
+secret and refresh token are server-only environment variables. Where a page would need one of these, render the shell and
 say plainly in the interface that it is a simulation.
 
 One deliberate exception, by owner directive of 2026-10-11 (recorded in

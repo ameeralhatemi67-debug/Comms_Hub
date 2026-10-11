@@ -157,6 +157,120 @@
       "text": "Run the older QA scripts with a signed-in session once the owner has set passwords.",
       "at": "2026-10-11",
       "source": "auto"
+    },
+    {
+      "id": "imv3fzmmh1",
+      "text": "Start admin accounts as the director role instead of Admin, if the owner prefers.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3fzmmh2",
+      "text": "Block a reviewer from approving a work they submitted themselves.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3gg4vx0",
+      "text": "Offer to mark the owner's email confirmed from the database so first sign-in does not depend on email delivery.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3gn4431",
+      "text": "Configure custom SMTP in Supabase to avoid the built-in mail rate limit.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3gvqdj0",
+      "text": "Connect a Google Shared Drive or SharePoint library through a service account, with browser-direct resumable uploads.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3gvqdj1",
+      "text": "Keep thumbnails and previews in Supabase Storage so the media grid stays fast.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3hgo7y0",
+      "text": "Add per-campaign subfolders and attach uploaded files to work items and approvals in place of the mock assets.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3hgo7y1",
+      "text": "Add an in-app password change screen and an audit log of sign-ins and uploads.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3hgo7y2",
+      "text": "Move to Google Workspace with a Shared Drive and service account behind the same adapter.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3hrfqz0",
+      "text": "Move to a Google Workspace Shared Drive with a service account when the organisation upgrades.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3hrfqz1",
+      "text": "Store small preview thumbnails in Supabase Storage so the media grid loads fast.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3hrfqz2",
+      "text": "Add a password-change screen inside the app.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3hz1ll0",
+      "text": "Use the new brand logo PNGs as favicon and app icon in the Hub itself",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3hz1ll1",
+      "text": "Add the logo to the Google consent screen once brand verification is acceptable",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3i5a250",
+      "text": "Use the 512px rosette logo as favicon and app icon once the owner approves it.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3i5a251",
+      "text": "Add a visible warning in the Hub when the Drive refresh token is near expiry or revoked.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3i93l40",
+      "text": "Submit the app for Google verification later so the logo shows on the consent screen.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3i93l41",
+      "text": "Use the brand SVG as the site favicon and app icon from public/brand.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv3icu890",
+      "text": "Move to a custom domain so Google authorised-domain and verification steps are simpler and the logo can be added later.",
+      "at": "2026-10-11",
+      "source": "auto"
     }
   ],
   "findings": [
@@ -339,6 +453,134 @@
     {
       "id": "fmv3enn8i2",
       "text": "email_status and request_access are callable anonymously, letting anyone test whether an email is an approved account (enumeration).",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3fzmmh1",
+      "text": "Legacy qa/*.cjs browser scripts now hit the sign-in gate and cannot run without a signed-in session; qa/auth-gate.cjs has no recorded result.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3gg4vx0",
+      "text": "Supabase Site URL is still http://localhost:3000 with no Redirect URLs, so every confirmation and reset link lands on an unreachable page and masks success or failure.",
+      "severity": "high",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3gg4vx1",
+      "text": "Resending a confirmation email invalidates the earlier link, which is easy to trip over. The UI now warns about it, but the edit is uncommitted and undeployed.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3gn4430",
+      "text": "Supabase Site URL still http://localhost:3000 with empty Redirect URLs, so confirmation and password-reset links land on an unreachable page.",
+      "severity": "high",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3gn4431",
+      "text": "Supabase built-in mailer rate limit blocked resend; each resend also invalidates earlier links, which is easy to trip over during onboarding.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3hgo7y0",
+      "text": "Supabase leaked-password protection is off, and the admin's weak password was shared in chat; the new-password minimum is only 10 characters.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3hgo7y1",
+      "text": "Video playback streams through a serverless function, so long single requests are bounded by the host's function duration limit.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3hgo7y2",
+      "text": "Resume after a dropped connection may restart from byte 0 if the browser cannot read Drive's cross-origin Range header; slower, not incorrect.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3hrfqz0",
+      "text": "Drive upload, resume, CORS and range playback were only tested with a scripted fetch; the first real upload may expose failures.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3hrfqz1",
+      "text": "Supabase leaked-password protection is still off, and a weak admin password was shared in chat and not yet changed.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3i5a250",
+      "text": "Google Drive OAuth consent screen cannot be published yet; Drive connection, upload and playback remain unconnected and untested against real Google.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3i5a251",
+      "text": "Logo files and Drive code in public/brand and src/lib/drive are uncommitted in the working tree; production deploy is blocked for the agent.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3i93l40",
+      "text": "Google OAuth consent screen is still in Testing; Drive refresh tokens expire after 7 days until the app is published.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3i93l42",
+      "text": "A logo upload forces Google verification before the OAuth app can be published, blocking the Drive connection.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3icu891",
+      "text": "Supabase leaked-password protection is off and a weak admin password was shared in chat; there is no in-app password change screen.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv3icu892",
+      "text": "Privacy and terms pages are static files in public/ that were never fetched locally or on Vercel; their public reachability is unconfirmed.",
       "severity": "low",
       "at": "2026-10-11",
       "status": "open",

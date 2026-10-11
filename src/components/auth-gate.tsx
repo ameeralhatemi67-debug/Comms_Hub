@@ -135,7 +135,7 @@ export function AuthGate({
         return router.refresh();
       }
       setNeedsConfirm(true);
-      ok('أُرسل رابط التأكيد إلى بريدك. افتحه ثم عد إلى هذه الصفحة وسجّل الدخول بكلمة المرور التي اخترتها.');
+      ok('أُرسل رابط التأكيد إلى بريدك. افتح أحدث رسالة فقط، فكل رسالة جديدة تُبطل التي قبلها. ثم عد إلى هذه الصفحة وسجّل الدخول بكلمة المرور التي اخترتها.');
     });
   };
 
@@ -147,7 +147,7 @@ export function AuthGate({
         options: { emailRedirectTo: `${window.location.origin}/` },
       });
       if (error) return fail(arabicError(error.message));
-      ok('أُعيد إرسال رابط التأكيد.');
+      ok('أُعيد إرسال رابط التأكيد. افتح هذه الرسالة الأحدث فقط، فالرابط في الرسائل السابقة لم يعد يعمل.');
     });
 
   const requestAccess = (e: FormEvent) => {

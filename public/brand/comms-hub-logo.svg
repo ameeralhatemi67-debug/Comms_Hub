@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="مركز الاتصال">
+  <defs>
+    <linearGradient id="depth" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(25 .5 .5)">
+      <stop offset="0" stop-color="#12604a"/>
+      <stop offset=".55" stop-color="#0b3a2d"/>
+      <stop offset="1" stop-color="#06241b"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6e3a6"/>
+      <stop offset=".5" stop-color="#e8c46c"/>
+      <stop offset="1" stop-color="#d9ad4f"/>
+    </linearGradient>
+  </defs>
+  <!-- Brand tile: the corners alternate large and small, as the sidebar mark does. -->
+  <path d="M96 0H488a24 24 0 0 1 24 24V416a96 96 0 0 1-96 96H24a24 24 0 0 1-24-24V96A96 96 0 0 1 96 0Z" fill="url(#depth)"/>
+  <!-- The rosette: four capsules turned 0, 45, 90 and 135 degrees. -->
+  <g transform="translate(256 256) scale(2.6)" fill="none" stroke="url(#leaf)" stroke-width="3.2">
+    <rect x="-60" y="-18" width="120" height="36" rx="18"/>
+    <rect x="-60" y="-18" width="120" height="36" rx="18" transform="rotate(45)"/>
+    <rect x="-60" y="-18" width="120" height="36" rx="18" transform="rotate(90)"/>
+    <rect x="-60" y="-18" width="120" height="36" rx="18" transform="rotate(135)"/>
+  </g>
+</svg>
