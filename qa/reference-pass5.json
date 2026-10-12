@@ -1,0 +1,243 @@
+{
+  "checked": "2026-10-12T07:57:59.570Z",
+  "pass": 47,
+  "fail": 0,
+  "results": [
+    {
+      "name": "first visit guide opens on «العمل»",
+      "pass": true,
+      "detail": "إرشاد «العمل» · 1 من 4"
+    },
+    {
+      "name": "spotlight is shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide has 3 or 4 steps and closes",
+      "pass": true,
+      "detail": "steps 4"
+    },
+    {
+      "name": "seen guide does not return after reload",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "hover on help button says what the page is for",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "one click turns guide mode on",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "first click explains instead of acting",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "second click on the same element acts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "explanation of a tab",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape leaves guide mode",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "double click opens the page guide inside the page",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "page guide has all sections",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sidebar and top bar stay",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "replay leaves the guide and starts the page guide at step 1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "first click in a section shows its tip",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan editor opened in guide mode",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "explanation window does not cover the opened editor",
+      "pass": true,
+      "detail": "{\"p\":true,\"m\":true,\"area\":0,\"pop\":68414.0625}"
+    },
+    {
+      "name": "approve button is marked as hold",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "quick click does not approve",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "fill grows while pressing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "long press approves",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "message offers undo",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "top bar undo has a count",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "undo restores the review",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "work closed by long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Ctrl+Z reopens it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "close action still offered after undo",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "arrow moves a stage up",
+      "pass": true,
+      "detail": "الاتجاهات الأولية / التصميم النهائي / اختيار الاتجاه / النص التعريفي"
+    },
+    {
+      "name": "a reorder is reported",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dragging stage 5 above stage 2 moves it",
+      "pass": true,
+      "detail": "الاتجاهات الأولية / القوالب والمقاسات / التصميم النهائي / اختيار الاتجاه / النص التعريفي / الموافقة النهائية"
+    },
+    {
+      "name": "free editor shows tools, library and templates",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library adds a stage",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dates computed back from the due date",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "live timeline is shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan saves or names the problem",
+      "pass": true,
+      "detail": "saved"
+    },
+    {
+      "name": "saved plan shows the new stage on the work page",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "finished approval point waits",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Director sees «اعتماد المرحلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "after approval the next stage is ready",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "YouTube section with an account",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "YouTube says video only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a post on YouTube without a video is refused",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar has a YouTube lane",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page errors across 11 pages and 5 people",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "all 96 scenario buttons run without errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no sideways scroll at phone width (page guide)",
+      "pass": true,
+      "detail": "overflow 0"
+    },
+    {
+      "name": "no page errors at the end",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "errors": []
+}
