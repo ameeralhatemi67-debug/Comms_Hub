@@ -601,6 +601,42 @@
       "text": "Commit a pinned copy of the artifact HTML under reference/ so build sessions search a fixed version.",
       "at": "2026-10-12",
       "source": "auto"
+    },
+    {
+      "id": "imv518gmz0",
+      "text": "Approval rights for other users, with delegation while away, as a later permissions feature.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv518gmz1",
+      "text": "Realtime publication for the notifications table, for the Step 4 drawer.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv52gb6u0",
+      "text": "Add per-button guide-mode explanations (reference ACT_HELP) for library, mail and messaging buttons.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv52gb6u1",
+      "text": "Best-effort Drive rollback when a multi-file move fails partway.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv52nlbt0",
+      "text": "Offer the portrait flyer at A4 print resolution, or with the gold pattern on the right only.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv5a5b1z0",
+      "text": "Rebuild the Instagram post from the original design file or separate photos for a sharp result.",
+      "at": "2026-10-12",
+      "source": "auto"
     }
   ],
   "findings": [
@@ -1272,6 +1308,38 @@
       "id": "fmv4zaynd1",
       "text": "Seeding sample works CH-233 to CH-253 into the production database would show sample works to real users once Step 3 ships.",
       "severity": "medium",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv518gmz0",
+      "text": "Mail «تحويل إلى عمل» numbers works in the browser (mail-page.tsx:586); fix is planned for Step 3.",
+      "severity": "medium",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv518gmz1",
+      "text": "Library dbErrorText table could still show generic text for some new guard paths; only SELF_APPROVAL was added.",
+      "severity": "low",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv52gb6u0",
+      "text": "Bulk move route: if Drive fails midway, earlier version moves aren't rolled back in Drive while the database reverts.",
+      "severity": "medium",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv52gb6u1",
+      "text": "Explanation window can sit over the next element a person wants to click in guide mode; they must close it first.",
+      "severity": "low",
       "at": "2026-10-12",
       "status": "open",
       "source": "auto"
