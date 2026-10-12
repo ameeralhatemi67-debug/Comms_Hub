@@ -409,6 +409,198 @@
       "text": "Real voice notes via browser microphone and Drive storage.",
       "at": "2026-10-11",
       "source": "auto"
+    },
+    {
+      "id": "imv40s5wi0",
+      "text": "Optional per-person 'send as me' from their own Gmail address, later.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv40sm7f0",
+      "text": "Store chat and mail drafts in the database instead of the browser.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv40sm7f1",
+      "text": "Add a background worker or Vercel cron so the Gmail mailbox syncs without the mail page open.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv40sm7f2",
+      "text": "Fix remaining review findings 1, 4, 5 (caption after approval, admin promotion, partial Drive moves).",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv41ti260",
+      "text": "Keep admin-only sidebar links visible for real administrators regardless of the role being viewed.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv42alhw0",
+      "text": "Make «العمل» and «إنشاء» real shared data before Approvals and Calendar",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv42alhw1",
+      "text": "Run «العمل» through brainstorm, artifact, then build, like mail",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv42alhw2",
+      "text": "Keep «الحسابات» visible for real admins regardless of «عرض بصفة»",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv42qhej0",
+      "text": "One artifact covering العمل+إنشاء, الموافقات والنشر and التقويم on shared mock data, reviewed in three passes.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv42qhej1",
+      "text": "Design the work database schema with approvals and schedules included from the start, so later pages need no rework.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv42qhej2",
+      "text": "Show real links from the work item page to mail threads, chat groups and media assets in the artifact.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv43hgxt0",
+      "text": "Keep artifact source files in the repo (e.g. design-review/) so later passes and builds don't depend on artifact reads.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv43hgxt1",
+      "text": "Ask the Director for the real design and video stage templates instead of the agent-proposed ones.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv44868o0",
+      "text": "Ask the Director at the re-check whether a channel copy change should reopen only that channel.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv44868o2",
+      "text": "Move the artifact headless checks into qa/ so they can be re-run.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv4581x40",
+      "text": "Save the artifact source and check scripts under design-review/ so the implementation can reuse them.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv46e0eg0",
+      "text": "Pass 4: projects with steps that each have a person, start/end dates and dependencies, with handoff notifications.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv46e0eg1",
+      "text": "One «الطلبات» inbox: new work, extension with one-click approval and automatic shifting, publish-date moves, approvals, delegation.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv46e0eg2",
+      "text": "«الحسابات المرتبطة» page: many accounts per platform; work picks exact accounts; least-loaded auto-assignment with manual override.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv4al5nz0",
+      "text": "Merge media library and mail/messaging artifacts into «دورة العمل» as modules sharing one data set.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv4al5nz1",
+      "text": "Add pass 4 items 1–11: linked accounts, projects with dependent steps, requests inbox, extensions, auto-assign, publish-mode toggle.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv4al5nz2",
+      "text": "Unify work steps and media tasks into one dependency-aware tasks model for the implementation reference.",
+      "at": "2026-10-11",
+      "source": "auto"
+    },
+    {
+      "id": "imv4e1zuf0",
+      "text": "Move check4 and the v4 copies of check2 and check3 into qa/ with their JSON results",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv4e1zuf1",
+      "text": "Make the phone top bar search less cramped at 390 px",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv4yc94g0",
+      "text": "Offer a right-side-only pattern variant matching the original asymmetric layout.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv4yc94g1",
+      "text": "Export an A4 print-resolution version of the portrait flyer.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv4yran00",
+      "text": "Store guide progress (seen pages and sections) on the profiles table so it follows the account.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv4yran01",
+      "text": "Record each undo as a new activity-log event in the site instead of silently restoring data.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv4yran02",
+      "text": "Move the earlier artifact check scripts into qa/ with updated expectations for version 5.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv4z2rk40",
+      "text": "Store guide progress in profiles.guide_seen instead of browser storage.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv4z2rk41",
+      "text": "Server undo tokens: undo_action(token) only if record untouched since.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv4zaynd0",
+      "text": "Commit a pinned copy of the artifact HTML under reference/ so build sessions search a fixed version.",
+      "at": "2026-10-12",
+      "source": "auto"
     }
   ],
   "findings": [
@@ -873,6 +1065,214 @@
       "text": "Mail approval card counts as waiting while stage is review even if another channel later approves; only patched in the artifact, not the site code.",
       "severity": "low",
       "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv40s5wi0",
+      "text": "Pictures, files and voice notes need Google Drive, which is configured only in production, so local uploads fail.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv40s5wi1",
+      "text": "Drafts in mail are kept only in browser localStorage, so they are lost across devices or cleared storage.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv40s5wi2",
+      "text": "Next.js 16.3.5 has critical npm audit advisories (RCE in next/og, SSRF); still not upgraded before this deploy.",
+      "severity": "high",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv40sm7f0",
+      "text": "Typing indicator uses public Realtime broadcast channels named by room id; not protected by row level security.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv40sm7f1",
+      "text": "Profile pictures stored as data URLs in profiles; people list loads every picture for every page view, could grow heavy.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv40sm7f2",
+      "text": "Next.js 16.3.5 critical npm audit advisories still unresolved; production now runs this version.",
+      "severity": "high",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv41ti260",
+      "text": "Sidebar hides «الحسابات» and «الإدارة» from real administrators whenever «عرض بصفة» is set to a non-admin role, so the page looks removed.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv42qhej0",
+      "text": "Mail «تحويل إلى عمل» numbers new work as local max+1 (mail-page.tsx:586), so two people can create the same CH number in a shared thread.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv42qhej1",
+      "text": "Work items live only in in-memory reducer state; they reset on reload and are invisible to colleagues opening shared links.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv42qhej2",
+      "text": "Media asset stages and work statuses are two diverging vocabularies; it is undecided whether approving an asset approves its work item.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv43hgxt2",
+      "text": "Media asset stages and work statuses are diverging vocabularies; unresolved whether approval is per asset or whole work.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv44868o0",
+      "text": "Mail «تحويل إلى عمل» numbers new work as local max+1 (mail-page.tsx:586); duplicates possible until the server issues numbers.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv44868o1",
+      "text": "Old local next start on port 3000 still runs Next 16.3.5 in memory; serves stale code until restarted.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv46e0eg0",
+      "text": "Media library has its own «اعتماد» action while pass 2 approves parts from the work item; two approval places would conflict.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv46e0eg1",
+      "text": "Platform accounts exist only as a static Admin-only mock with one account per platform; no real management exists.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv46e0eg2",
+      "text": "Native date fields show mm/dd/yyyy in the Arabic interface; dates should display in Arabic.",
+      "severity": "low",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv4al5nz0",
+      "text": "Mail artifact CSS shares 111 class names with the work artifact, some with different meanings (.note, .sim, .later, .meta, .row); merging needs scoping or renaming.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv4al5nz1",
+      "text": "Media library's «طلب عنوان ووصف» form id «cf» collides with the «إنشاء» form id «cf»; submit handling would misfire when merged.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv4al5nz2",
+      "text": "Media artifact schedules and publishes each asset directly, conflicting with the work-level publishing model; must be reconciled in the merge.",
+      "severity": "medium",
+      "at": "2026-10-11",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv4e1zuf0",
+      "text": "Module toasts from tours stay visible after switching pages, so a stale message can show on the next screen.",
+      "severity": "low",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv4e1zuf1",
+      "text": "The library and mail keep separate state that the host does not reset; an open mail compose is saved as a draft on leaving.",
+      "severity": "low",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv4yran00",
+      "text": "Escape to close a host dialog only works when keyboard focus is inside the app frame.",
+      "severity": "low",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv4yran01",
+      "text": "Undo is refused after any mail, messaging or async upload change, so the undo history often becomes unusable after mixed activity.",
+      "severity": "low",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv4z2rk40",
+      "text": "Mail «تحويل إلى عمل» numbers works client-side (mail-page.tsx:586); duplicates possible across users.",
+      "severity": "medium",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv4zaynd0",
+      "text": "Urgent approval conflict: pass 2 says the Director alone; Reference_Build_Plan.md Step 1 says the Director or a delegate.",
+      "severity": "medium",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv4zaynd1",
+      "text": "Seeding sample works CH-233 to CH-253 into the production database would show sample works to real users once Step 3 ships.",
+      "severity": "medium",
+      "at": "2026-10-12",
       "status": "open",
       "source": "auto"
     }
