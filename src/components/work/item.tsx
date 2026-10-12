@@ -86,6 +86,7 @@ import {
 import { useWork, useWorkDetail, type WorkDetail } from './data';
 import { Av, Empty, Hint, Ic, LibraryPicker, Modal, PrioChip, RestrictedChip, StatusChip, TYPE_ICON, Wid } from './parts';
 import { PlanEditor, type EditRow } from './plan';
+import { PublishNowDialog, ScheduleDialog, isMailWork, publishOp } from './publish';
 
 type Dialog =
   | { t: 'assign' }
@@ -95,11 +96,13 @@ type Dialog =
   | { t: 'details' }
   | { t: 'lib' }
   | { t: 'plan' }
-  | { t: 'ext'; stage: StageRow };
+  | { t: 'ext'; stage: StageRow }
+  | { t: 'schedule' }
+  | { t: 'pubnow' };
 
 const ACTION_ICON: Record<string, LucideIcon> = {
   reopen: LockOpen, assign: Users, details: Settings, start: Play, submit: Send, plan: ChartGantt, review: Eye, edittext: Pencil,
-  lib: ImageIcon, publish: Upload, chat: MessagesSquare, restrict: Shield, close: Lock, stepdone: Check, wait: Clock,
+  lib: ImageIcon, schedule: Clock, pubnow: Upload, confirmpub: Upload, declinepub: X, unsched: X, retry: Upload, chat: MessagesSquare, restrict: Shield, close: Lock, stepdone: Check, wait: Clock,
 };
 const LOG_ICON: Record<string, LucideIcon> = {
   create: Plus, request: Send, start: Play, stage_start: Play, stage_done: Check, gate: ShieldCheck, gate_wait: ShieldCheck, plan: ChartGantt,
@@ -165,6 +168,7 @@ export function WorkItemPage({ id }: { id: string }) {
     decideBlock: d.decideBlock,
     hasChat: d.chats.length > 0,
     nameOf: w.nameOf,
+    mail: isMailWork(d.w, w.accounts),
   });
   const owners = actionOwners(x, w.me, w.role, w.nameOf);
   const Type = TYPE_ICON[x.type];
@@ -193,6 +197,19 @@ export function WorkItemPage({ id }: { id: string }) {
       }
       case 'edittext':
         return setDlg({ t: 'text', target: 'main' });
+      case 'review':
+        return router.push(`/approvals/${x.id}`);
+      case 'schedule':
+      case 'pubnow':
+        return setDlg({ t: id0 });
+      case 'confirmpub':
+        return void publishOp(act, x, 'confirm');
+      case 'declinepub':
+        return void publishOp(act, x, 'decline');
+      case 'unsched':
+        return void publishOp(act, x, 'unschedule');
+      case 'retry':
+        return void publishOp(act, x, 'retry');
       case 'assign':
       case 'close':
       case 'submit':
@@ -316,7 +333,14 @@ export function WorkItemPage({ id }: { id: string }) {
             <div className="wk-qlist">
               {acts.length ? (
                 acts.map((a) => (
-                  <button key={a.id} type="button" className={`wk-qbtn ${a.next ? 'next' : ''}`} disabled={a.disabled || busy} onClick={() => void run(a)}>
+                  <button
+                    key={a.id}
+                    type="button"
+                    className={`wk-qbtn ${a.next ? 'next' : ''}`}
+                    disabled={a.disabled || busy}
+                    data-hold={a.id === 'confirmpub' ? HOLD.publishNow : undefined}
+                    onClick={() => void run(a)}
+                  >
                     <span className="q-i">
                       <Ic i={ACTION_ICON[a.id.split(':')[0]] ?? Check} />
                     </span>
@@ -439,6 +463,15 @@ export function WorkItemPage({ id }: { id: string }) {
       {dlg?.t === 'text' && <TextDialog d={d} target={dlg.target} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'details' && <DetailsDialog d={d} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'ext' && <ExtensionDialog d={d} stage={dlg.stage} onClose={() => setDlg(null)} act={act} />}
+      {dlg?.t === 'schedule' && (
+        <ScheduleDialog
+          w={x}
+          approvedParts={d.parts.filter((p) => d.approvals.some((a) => a.part === p.key && a.ver === p.ver)).map((p) => p.label)}
+          onClose={() => setDlg(null)}
+          act={act}
+        />
+      )}
+      {dlg?.t === 'pubnow' && <PublishNowDialog w={x} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'lib' && (
         <LibraryPicker
           have={d.assets.map((a) => a.asset_id)}
@@ -895,7 +928,14 @@ function ApprovalPanel({ d }: { d: WorkDetail }) {
           })}
         </div>
       )}
-      {x.status === 'IN_REVIEW' && isLead(w.role) && <Hint i={Eye}>القرار على الأجزاء من شاشة المراجعة في «الموافقات والنشر»، وهي قيد البناء.</Hint>}
+      {x.status === 'IN_REVIEW' && isLead(w.role) && (
+        <div>
+          <Link className={`wk-btn sm ${d.decideBlock ? '' : 'primary'}`} href={`/approvals/${x.id}`}>
+            <Ic i={Eye} />
+            افتح شاشة المراجعة
+          </Link>
+        </div>
+      )}
       {d.cycles.length > 0 && (
         <details>
           <summary className="wk-lk">دورات المراجعة ({d.cycles.length})</summary>
@@ -965,6 +1005,14 @@ function PublishPanel({ d }: { d: WorkDetail }) {
           );
         })}
       </div>
+      {(x.sched_at || x.proposed_at) && (
+        <div>
+          <Link className="wk-btn sm" href={`/calendar?date=${riyadhStamp((x.sched_at ?? x.proposed_at)!).slice(0, 10)}`}>
+            <Ic i={Clock} />
+            عرض في التقويم
+          </Link>
+        </div>
+      )}
       <p className="wk-col-hint">{mail ? 'الإرسال في هذه المرحلة محاكاة.' : 'النشر في هذه المرحلة محاكاة: لا يصل شيء إلى المنصات.'}</p>
     </section>
   );

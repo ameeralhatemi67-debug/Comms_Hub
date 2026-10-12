@@ -41,6 +41,15 @@ test('a page grant cannot give create to a role that lacks it', () => {
   assert.equal(canOpen(publisher, 'approvals'), true);
 });
 
+test('«الحسابات المرتبطة» goes with «الموافقات والنشر», for the roles that manage or publish on the accounts', () => {
+  for (const role of ['director', 'assistant', 'publisher']) {
+    assert.equal(canOpen({ role, pages: ['approvals'] }, 'channels'), true, role);
+    assert.equal(canOpen({ role, pages: ['work'] }, 'channels'), false, `${role} without approvals`);
+  }
+  for (const role of ['writer', 'designer', 'producer', 'member']) assert.equal(canOpen({ role, pages: ['approvals'] }, 'channels'), false, role);
+  assert.equal(canOpen({ role: 'admin', pages: [] }, 'channels'), true);
+});
+
 test('only an administrator may switch roles', () => {
   assert.equal(canSwitchRole({ role: 'admin' }), true);
   for (const r of roleIds.filter((x) => x !== 'admin')) assert.equal(canSwitchRole({ role: r }), false, r);

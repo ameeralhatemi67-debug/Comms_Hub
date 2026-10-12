@@ -136,10 +136,11 @@ account succeeds only if its simulated authorisation covers the moment, and the
 page says so. Approval is the director's and the assistant's (urgent work
 included) and never publishes; nobody approves what they sent or uploaded.
 There is no sample data in the database: the reference's sample works stay in
-the artifact. «العمل», the work page and «إنشاء» (`src/components/work/`, Step 3)
-read and write the database; every write is a database function called through
-`useWork().call`. Until Steps 4 and 5 replace them, «الموافقات والنشر» and «التقويم»
-(`operations.tsx`) and Home still show the old browser mock.
+the artifact. «العمل», the work page, «إنشاء» (Step 3), «الموافقات والنشر», the
+review screen, «الحسابات المرتبطة» at `/channels` and the notifications drawer (Step 4)
+read and write the database (`src/components/work/`, `src/components/notices.tsx`);
+every write is a database function called through `useWork().call`. Until Step 5
+replaces them, «التقويم» (`operations.tsx`) and Home still show the old browser mock.
 
 The shared interaction kit (Step 2) is real as well: undo steps of library edits and
 each person's help progress live in Postgres

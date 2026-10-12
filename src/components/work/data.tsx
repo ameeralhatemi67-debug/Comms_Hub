@@ -180,7 +180,7 @@ export function useWorkList() {
 // ---------------------------------------------------------------------------
 export type TextVersion = { n: number; body: string; note: string | null; author: string; created_at: string };
 export type Variant = { platform: string; n: number; body: string; base: number; author: string; created_at: string };
-export type PartRow = { key: string; label: string; ver: string; kind: string };
+export type PartRow = { key: string; label: string; ver: string; kind: string; snap?: string | null };
 export type Cycle = { n: number; sent_by: string; sent_at: string; note: string | null };
 export type Decision = { id: number; cycle: number; op: string; labels: string[]; decided_by: string; decided_at: string; note: string | null };
 export type Comment = { id: string; author: string; body: string; created_at: string };
@@ -195,7 +195,7 @@ export type WorkDetail = {
   stages: StageRow[];
   texts: TextVersion[];
   variants: Variant[];
-  approvals: { part: string; ver: string; approved_by: string }[];
+  approvals: { part: string; ver: string; approved_by: string; approved_at: string; snap: string | null }[];
   flags: { part: string; ver: string; note: string | null }[];
   cycles: Cycle[];
   decisions: Decision[];
@@ -224,7 +224,7 @@ export function useWorkDetail(id: string) {
       db.from('work_stages').select('*').eq('work_id', id).order('pos'),
       db.from('work_texts').select('n,body,note,author,created_at').eq('work_id', id).order('n'),
       db.from('work_variants').select('platform,n,body,base,author,created_at').eq('work_id', id).order('n'),
-      db.from('work_approvals').select('part,ver,approved_by').eq('work_id', id),
+      db.from('work_approvals').select('part,ver,approved_by,approved_at,snap').eq('work_id', id),
       db.from('work_flags').select('part,ver,note').eq('work_id', id),
       db.from('work_cycles').select('n,sent_by,sent_at,note').eq('work_id', id).order('n'),
       db.from('work_decisions').select('id,cycle,op,labels,decided_by,decided_at,note').eq('work_id', id).order('decided_at'),
@@ -280,4 +280,35 @@ export async function libraryFiles(q: string): Promise<LibraryFile[]> {
   if (q.trim()) query = query.ilike('name', `%${q.trim()}%`);
   const { data } = await query;
   return (data ?? []) as LibraryFile[];
+}
+
+/** Every review cycle and decision this person can see (row level security), newest decisions first. */
+export function useDecisions() {
+  const [cycles, setCycles] = useState<(Cycle & { work_id: string })[]>([]);
+  const [decisions, setDecisions] = useState<(Decision & { work_id: string; parts: string[] })[]>([]);
+  const reload = useCallback(async () => {
+    const db = supabase();
+    const [c, d] = await Promise.all([
+      db.from('work_cycles').select('work_id,n,sent_by,sent_at,note'),
+      db.from('work_decisions').select('id,work_id,cycle,op,parts,labels,decided_by,decided_at,note').order('decided_at', { ascending: false }).limit(300),
+    ]);
+    setCycles((c.data ?? []) as (Cycle & { work_id: string })[]);
+    setDecisions((d.data ?? []) as (Decision & { work_id: string; parts: string[] })[]);
+  }, []);
+  useEffect(() => {
+    void reload();
+  }, [reload]);
+  return { cycles, decisions, reload };
+}
+
+/** The library's notes on these files, oldest first; a timecode marks a moment of a video. */
+export type FileNote = { id: string; asset_id: string; author: string; body: string; timecode: string | null; created_at: string };
+export async function fileNotes(ids: string[]): Promise<FileNote[]> {
+  if (!ids.length) return [];
+  const { data } = await supabase().from('media_notes').select('id,asset_id,author,body,timecode,created_at').in('asset_id', ids).order('created_at');
+  return (data ?? []) as FileNote[];
+}
+export async function addFileNote(assetId: string, author: string, body: string, timecode: string): Promise<string | null> {
+  const { error } = await supabase().from('media_notes').insert({ asset_id: assetId, author, body, timecode: timecode || null });
+  return error ? 'تعذّر حفظ الملاحظة. الوقت بصيغة دقيقة:ثانية، مثل 00:32.' : null;
 }

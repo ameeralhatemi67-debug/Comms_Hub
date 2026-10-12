@@ -33,7 +33,10 @@ import { WorkProvider } from './work/data';
 import { WorkListPage } from './work/list';
 import { WorkItemPage } from './work/item';
 import { CreatePage } from './work/create';
-import { Approvals, Calendar } from './operations';
+import { Calendar } from './operations';
+import { ApprovalsPage } from './work/approvals';
+import { ReviewPage } from './work/review';
+import { ChannelsPage } from './work/channels';
 import { Supporting } from './supporting';
 import { ComponentGallery } from './gallery';
 import { AccountsPage } from './accounts';
@@ -497,7 +500,14 @@ export function HubPage({ route }: { route: string[] }) {
         <CreatePage />
       </WorkProvider>
     );
-  if (page === 'approvals') return <Approvals key={state.role} />;
+  if (page === 'approvals')
+    return <WorkProvider key={state.role}>{id ? <ReviewPage key={id} id={decodeURIComponent(id)} /> : <ApprovalsPage />}</WorkProvider>;
+  if (page === 'channels')
+    return (
+      <WorkProvider key={state.role}>
+        <ChannelsPage />
+      </WorkProvider>
+    );
   if (page === 'calendar') return <Calendar />;
   if (page === 'media') {
     if (id && assets.some((a) => a.id === id)) return <Media key={id} id={id} />;

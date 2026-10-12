@@ -18,6 +18,9 @@ export function pageKeyOf(path: string): string | null {
   if (p === '/work') return 'work';
   if (/^\/work\/[^/]+$/.test(p)) return 'item';
   if (p === '/create') return 'create';
+  if (p === '/approvals') return 'approvals';
+  if (/^\/approvals\/[^/]+$/.test(p)) return 'review';
+  if (p === '/channels') return 'channels';
   return null;
 }
 
@@ -32,6 +35,9 @@ export const PAGE_HREF: Record<string, string> = {
   work: '/work',
   item: '/work',
   create: '/create',
+  approvals: '/approvals',
+  review: '/approvals',
+  channels: '/channels',
 };
 
 export const ROLE_GROUP: Record<RoleGroup, string> = {
@@ -59,7 +65,10 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   mail: ['src/components/mail/mail-page.tsx', 'src/components/mail/thread.tsx', 'src/components/mail/parts.tsx'],
   chat: ['src/components/chat/chat-tab.tsx', 'src/components/mail/mail-page.tsx'],
   work: ['src/components/work/list.tsx', 'src/components/work/parts.tsx'],
-  item: ['src/components/work/item.tsx', 'src/components/work/plan.tsx', 'src/components/work/parts.tsx'],
+  item: ['src/components/work/item.tsx', 'src/components/work/plan.tsx', 'src/components/work/publish.tsx', 'src/components/work/parts.tsx'],
   create: ['src/components/work/create.tsx', 'src/components/work/plan.tsx', 'src/components/work/parts.tsx'],
+  approvals: ['src/components/work/approvals.tsx', 'src/components/work/publish.tsx', 'src/components/work/parts.tsx'],
+  review: ['src/components/work/review.tsx', 'src/components/work/parts.tsx'],
+  channels: ['src/components/work/channels.tsx', 'src/components/work/parts.tsx'],
 };
 export const SHARED_SOURCES = ['src/components/ui.tsx', 'src/components/shell.tsx', 'src/components/kit.tsx'];

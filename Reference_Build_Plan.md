@@ -145,7 +145,16 @@ and board pages.
 
 ---
 
-## Step 4. «الموافقات والنشر», the review screen and «الحسابات المرتبطة»
+## Step 4. «الموافقات والنشر», the review screen and «الحسابات المرتبطة» (done 2026-10-12)
+
+Built as planned, with these differences, recorded in `progress.md`: the review of the
+approval rules found one gap, fixed in `20261012180000_approval_uploader.sql` (a file
+version could be approved from a work's review by the person who uploaded it); the rules
+are checked by `supabase/tests/approval_rules.sql`, 71 of 71; «الحسابات المرتبطة» lives at
+`/channels`, because `/accounts` is the people and permissions page; the mail and
+messaging cards already approve through the library's guard and its trigger into every
+work, so they were not changed; the calendar's «محاكاة حلول الموعد» is not built, because
+the database has no such operation and what is due is run when a work page opens.
 
 **Goal:** the decision and publishing half of the cycle.
 
@@ -194,5 +203,5 @@ row level security.
 ## Opening instruction for the next session
 
 > Read `Reference_Build_Plan.md`, `AGENTS.md`, the last three entries of `progress.md`, and
-> the reference in `reference/comms-hub-reference-v5.html` («الموافقات والنشر», the
-> review screen, «الحسابات المرتبطة» and the notifications drawer). Start Step 4.
+> the reference in `reference/comms-hub-reference-v5.html` («التقويم», «المشاريع» and the
+> project page, «الطلبات»). Start Step 5.

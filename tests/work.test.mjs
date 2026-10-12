@@ -361,7 +361,7 @@ test('the work page offers each role only what the database would let it do', ()
   assert.deepEqual(ids({ w: W({ closed_at: 'x' }), me: 'dir@x.sa', role: 'assistant' }), ['reopen']);
   assert.deepEqual(ids({ w: W({ closed_at: 'x' }), me: 'w@x.sa', role: 'writer' }), []);
   // The publisher sees publishing as coming from «الموافقات والنشر».
-  assert.ok(ids({ w: W({ status: 'APPROVED' }), me: 'p@x.sa', role: 'publisher' }).includes('publish'));
+  assert.deepEqual(ids({ w: W({ status: 'APPROVED' }), me: 'p@x.sa', role: 'publisher' }), ['schedule', 'pubnow']);
   // A text after approval re-opens review; the hint says so.
   const after = workActions({ ...base, hasText: true, w: W({ status: 'APPROVED', type: 'press' }), me: 'w@x.sa', role: 'writer' });
   assert.match(after.find((a) => a.id === 'edittext').hint, /الحزمة كاملة/);
@@ -408,7 +408,80 @@ test('every database function the work pages call exists in a migration and is g
   }
 });
 
+// ---------------------------------------------------------------------------
+// Step 4: «الموافقات والنشر», the review screen, «الحسابات المرتبطة», notifications
+// ---------------------------------------------------------------------------
+import { diffWords, partLine, accountState, atRisk, accountName, noticeHref } from '../src/lib/work/rules.ts';
+
+test('review: the word difference keeps, adds and removes words in order', () => {
+  const d = diffWords('أ ب ج', 'أ د ج');
+  assert.deepEqual(d, [['s', 'أ'], ['d', 'ب'], ['a', 'د'], ['s', 'ج']]);
+  assert.deepEqual(diffWords('', 'نص جديد'), [['a', 'نص'], ['a', 'جديد']]);
+  assert.deepEqual(diffWords('نفس النص', 'نفس  النص'), [['s', 'نفس'], ['s', 'النص']], 'spacing is not a change');
+  // Kept words read in the new order, so the new text is always recoverable from the result.
+  const r = diffWords('a b c d e', 'a x c e f');
+  assert.equal(r.filter(([t]) => t !== 'd').map(([, w]) => w).join(' '), 'a x c e f');
+  assert.equal(r.filter(([t]) => t !== 'a').map(([, w]) => w).join(' '), 'a b c d e');
+});
+
+test('review: the line under a part says approved, changed since, or sent back', () => {
+  const p = { key: 'text', ver: 't3' };
+  const nm = (e) => (e === 'dir@x.sa' ? 'محمد' : e);
+  assert.match(partLine(p, [{ part: 'text', ver: 't3', approved_by: 'dir@x.sa', approved_at: '2026-10-11T08:00:00Z' }], [], nm), /^معتمد · محمد 11 أكتوبر$/);
+  assert.match(partLine(p, [{ part: 'text', ver: 't2', approved_by: 'dir@x.sa', approved_at: '2026-10-11T08:00:00Z' }], [], nm), /^تغيّر بعد اعتماده/);
+  assert.equal(partLine(p, [], [{ part: 'text', ver: 't3' }], nm), 'طُلب تعديله ولم يتغيّر بعد');
+  assert.equal(partLine(p, [], [{ part: 'text', ver: 't2' }], nm), 'عُدّل بعد طلب التعديل');
+  assert.equal(partLine(p, [], [], nm), 'لم يُعتمد بعد');
+});
+
+test('accounts: their state now, and the scheduled works their authorisation will not cover', () => {
+  const now = '2026-10-12T09:00:00Z';
+  const acc = (over) => ({ id: 'a', platform: 'x', label: 'الرسمي', handle: '@x', purpose: null, authorized_until: '2026-12-01T00:00:00Z', publishers: [], mode: 'auto', active: true, fixed: false, ...over });
+  assert.deepEqual(accountState(acc({ active: false }), now), ['موقوف', '']);
+  assert.equal(accountState(acc({ authorized_until: '2026-10-12T08:00:00Z' }), now)[1], 'danger');
+  assert.equal(accountState(acc({ authorized_until: '2026-10-14T00:00:00Z' }), now)[1], 'warn');
+  assert.equal(accountState(acc({}), now)[1], 'approved');
+  assert.equal(accountState(acc({ platform: 'mail', authorized_until: null }), now)[0], 'متصل');
+  const w = { status: 'SCHEDULED', sched_at: '2026-10-20T09:00:00Z', channels: ['a', 'b', 'm'] };
+  const list = [acc({ id: 'a', authorized_until: '2026-10-15T00:00:00Z' }), acc({ id: 'b' }), acc({ id: 'm', platform: 'mail', authorized_until: null })];
+  assert.deepEqual(atRisk(w, list).map((a) => a.id), ['a']);
+  assert.deepEqual(atRisk({ ...w, status: 'APPROVED' }, list), [], 'only scheduled work is at risk');
+  assert.deepEqual(atRisk(w, [acc({ id: 'b', active: false })]).map((a) => a.id), ['b'], 'a stopped account fails');
+  assert.equal(accountName(list[0]), 'X · الرسمي');
+  assert.equal(accountName(list[2]), 'البريد');
+  assert.equal(accountName(undefined), 'حساب محذوف');
+});
+
+test('notifications open where the work is', () => {
+  assert.equal(noticeHref({ page: 'item', id: 'CH-4' }), '/work/CH-4');
+  assert.equal(noticeHref({ page: 'review', id: 'CH-4' }), '/approvals/CH-4');
+  assert.equal(noticeHref({ page: 'approvals', tab: 'publish' }), '/approvals?tab=publish');
+  assert.equal(noticeHref({ page: 'accounts' }), '/channels');
+  assert.equal(noticeHref({ page: 'requests' }), '/work?tab=requests');
+  assert.equal(noticeHref(null), '/work');
+  // Every page the database writes into a notification has a place to go.
+  const pages = new Set([...migrations.matchAll(/'page',\s*'([a-z]+)'/g)].map((m) => m[1]));
+  for (const p of pages) assert.ok(['item', 'review', 'approvals', 'requests', 'accounts', 'tasks', 'calendar', 'project'].includes(p), `known page ${p}`);
+});
+
+test('the work page: the leader opens the review, the publisher schedules, confirms or retries', () => {
+  const base = { stages: [], hasText: true, pending: 2, total: 4, decideBlock: '', hasChat: true, nameOf };
+  const rev = workActions({ ...base, w: W({ status: 'IN_REVIEW' }), me: 'dir@x.sa', role: 'director' }).find((a) => a.id === 'review');
+  assert.deepEqual([rev.label, rev.next, rev.disabled], ['مراجعة واعتماد', true, false]);
+  const blocked = workActions({ ...base, decideBlock: 'أرسلتَ هذا العمل للمراجعة بنفسك، فلا تعتمده.', w: W({ status: 'IN_REVIEW' }), me: 'dir@x.sa', role: 'director' }).find((a) => a.id === 'review');
+  assert.deepEqual([blocked.label, blocked.next], ['عرض المراجعة', false]);
+  const pub = (over, mail = false) => workActions({ ...base, mail, w: W(over), me: 'p@x.sa', role: 'publisher' }).map((a) => a.id);
+  assert.deepEqual(pub({ status: 'SCHEDULED' }), ['schedule', 'unsched']);
+  assert.deepEqual(pub({ status: 'SCHEDULED', confirm_pending: true }), ['confirmpub', 'declinepub']);
+  assert.deepEqual(pub({ status: 'PARTIAL' }), ['retry']);
+  assert.deepEqual(pub({ status: 'PUBLISHED' }), []);
+  assert.equal(workActions({ ...base, mail: true, w: W({ status: 'APPROVED', type: 'press' }), me: 'p@x.sa', role: 'publisher' }).find((a) => a.id === 'pubnow').label, 'إرسال الآن من البريد');
+  // Nobody else gets publishing actions.
+  for (const role of ['director', 'assistant', 'writer', 'member'])
+    assert.ok(!workActions({ ...base, w: W({ status: 'APPROVED' }), me: 'dir@x.sa', role }).some((a) => ['schedule', 'pubnow', 'retry'].includes(a.id)), role);
+});
+
 test('the work pages, their styles and the drag engine have no emoji', () => {
-  const files = [...readdirSync('src/components/work').map((f) => `src/components/work/${f}`), 'src/app/work.css', 'src/lib/work/drag.ts', 'tests/work.test.mjs'];
+  const files = [...readdirSync('src/components/work').map((f) => `src/components/work/${f}`), 'src/app/work.css', 'src/lib/work/drag.ts', 'src/components/notices.tsx', 'tests/work.test.mjs', 'supabase/tests/approval_rules.sql', 'supabase/migrations/20261012180000_approval_uploader.sql'];
   for (const f of files) assert.doesNotMatch(readFileSync(f, 'utf8'), /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, f);
 });

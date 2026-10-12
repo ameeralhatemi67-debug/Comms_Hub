@@ -1,5 +1,6 @@
 // Browser check of «العمل», the work page, «إنشاء» and the plan editor (Reference_Build_Plan.md,
-// Step 3), without signing in.
+// Step 3), and of «الموافقات والنشر», the review screen, «الحسابات المرتبطة» and the
+// notifications drawer (Step 4), without signing in.
 // The pages are behind sign-in and no bypass is allowed, so this compiles the pages' own
 // components (src/components/work, src/lib/work: the code the site runs) with the database
 // layer (./data) replaced by fixture data, renders them with React, and checks the result in
@@ -25,6 +26,7 @@ const check = (name, pass, detail = '') => result.checks.push({ name, pass: Bool
 fs.rmSync(build, { recursive: true, force: true });
 const sources = [
   'components/work/list.tsx', 'components/work/item.tsx', 'components/work/create.tsx', 'components/work/plan.tsx', 'components/work/parts.tsx',
+  'components/work/approvals.tsx', 'components/work/review.tsx', 'components/work/channels.tsx', 'components/work/publish.tsx', 'components/notices.tsx',
   'lib/work/rules.ts', 'lib/work/drag.ts', 'lib/media/rules.ts', 'lib/domain.ts', 'lib/kit/hold-reasons.ts',
 ];
 for (const m of sources) {
@@ -41,7 +43,7 @@ for (const m of sources) {
     .replace(/from '\.\/data'/g, `from '${up}mocks/data.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
-    .replace(/from '(\.\/(?:plan|parts|list|item|create))'/g, "from '$1.js'");
+    .replace(/from '(\.\/(?:plan|parts|list|item|create|publish|approvals|review|channels))'/g, "from '$1.js'");
   const dest = path.join(build, m.replace(/\.tsx?$/, '.js'));
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, js);
@@ -51,6 +53,7 @@ fs.writeFileSync(path.join(build, 'package.json'), '{"type":"module"}');
 fs.writeFileSync(path.join(build, 'mocks', 'link.js'), `import { createElement } from 'react';
 export default function Link({ href, children, ...rest }) { return createElement('a', { href, ...rest }, children); }`);
 fs.writeFileSync(path.join(build, 'mocks', 'navigation.js'), `export const useRouter = () => ({ push() {}, replace() {}, refresh() {} });
+export const usePathname = () => '/approvals';
 export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search || '');`);
 fs.writeFileSync(path.join(build, 'mocks', 'supabase.js'), `const chain = new Proxy(function () {}, { get: () => chain, apply: () => chain });
 export const supabase = () => chain;`);
@@ -58,6 +61,9 @@ fs.writeFileSync(path.join(build, 'mocks', 'data.js'), `export const useWork = (
 export const useWorkList = () => ({ items: globalThis.__WK.items, status: 'ready', reload: async () => {} });
 export const useWorkDetail = () => ({ detail: globalThis.__WK.detail, status: globalThis.__WK.detail ? 'ready' : 'missing', reload: async () => {} });
 export const libraryFiles = async () => [];
+export const useDecisions = () => ({ ...globalThis.__WK.dec, reload: async () => {} });
+export const fileNotes = async () => [];
+export const addFileNote = async () => null;
 export const WorkProvider = ({ children }) => children;`);
 for (const f of ['globals.css', 'identity.css', 'work.css']) fs.copyFileSync(path.join(root, 'src/app', f), path.join(out, f));
 
@@ -106,7 +112,28 @@ const works = [
     stages: [S('CH-5', 0, { name: 'الفكرة', who: 'sara@x.sa', done_at: '2026-10-08T08:00:00Z', done_by: 'sara@x.sa', due_on: '2026-10-08' })], projects: ['p1'], flags: 1 },
   { w: W({ id: 'CH-6', title: 'إعلان أُلغي', type: 'announce', status: 'DRAFT', closed_at: '2026-10-11T09:00:00Z', closed_by: 'dir@x.sa', close_reason: 'أُلغي الحدث' }),
     stages: [S('CH-6', 0, { name: 'كتابة النص' })], projects: [], flags: 0 },
+  { w: W({ id: 'CH-7', title: 'منشور الملتقى المجدول', status: 'SCHEDULED', channels: ['a-ig', 'a-x'], sched_at: '2026-10-14T15:00:00Z', proposed_at: '2026-10-14T15:00:00Z', pub_mode: 'ask' }),
+    stages: [], projects: ['p2'], flags: 0 },
+  { w: W({ id: 'CH-8', title: 'منشور نُشر جزئياً', status: 'PARTIAL', channels: ['a-ig', 'a-x'], pub_at: '2026-10-11T09:00:00Z',
+    results: { 'a-ig': { ok: true, at: '2026-10-11T09:00:00Z', why: null }, 'a-x': { ok: false, at: '2026-10-11T09:00:00Z', why: 'التفويض منتهٍ' } } }),
+    stages: [], projects: [], flags: 0 },
+  { w: W({ id: 'CH-9', title: 'فيديو منشور', type: 'video', status: 'PUBLISHED', channels: ['a-yt'], pub_at: '2026-10-10T09:00:00Z',
+    results: { 'a-yt': { ok: true, at: '2026-10-10T09:00:00Z', why: null } } }),
+    stages: [], projects: [], flags: 0 },
+  { w: W({ id: 'CH-10', title: 'بيان الشراكة للمراجعة', type: 'press', status: 'IN_REVIEW', review_cycle: 1, channels: ['a-mail'], assignee: 'lama@x.sa' }),
+    stages: [], projects: [], flags: 0 },
 ];
+const dec = {
+  cycles: [
+    { work_id: 'CH-2', n: 1, sent_by: 'ahmed@x.sa', sent_at: '2026-10-11T10:00:00Z', note: 'جاهز' },
+    { work_id: 'CH-10', n: 1, sent_by: 'dir@x.sa', sent_at: '2026-10-11T11:00:00Z', note: null },
+    { work_id: 'CH-4', n: 1, sent_by: 'khalid@x.sa', sent_at: '2026-10-10T10:00:00Z', note: null },
+  ],
+  decisions: [
+    { id: 2, work_id: 'CH-4', cycle: 1, op: 'approve', parts: ['text', 'dest'], labels: ['الحزمة كاملة'], decided_by: 'dir@x.sa', decided_at: '2026-10-11T08:00:00Z', note: null },
+    { id: 1, work_id: 'CH-5', cycle: 1, op: 'changes', parts: ['a:f1'], labels: ['ملصق الشتاء'], decided_by: 'asst@x.sa', decided_at: '2026-10-10T08:00:00Z', note: 'كبّر الشعار' },
+  ],
+};
 const detailOf = (i, over = {}) => {
   const x = works[i];
   return {
@@ -123,6 +150,20 @@ const detailOf = (i, over = {}) => {
     ...over,
   };
 };
+const reviewDetail = (i, over = {}) => detailOf(i, {
+  cycles: [{ n: 1, sent_by: 'ahmed@x.sa', sent_at: '2026-10-11T10:00:00Z', note: 'جاهز للمراجعة' }],
+  approvals: [{ part: 'text', ver: 't1', approved_by: 'dir@x.sa', approved_at: '2026-10-09T08:00:00Z', snap: 'شكراً لفريقنا على العمل' }],
+  assets: [{ asset_id: 'f9', file: { id: 'f9', name: 'فيديو الملتقى', kind: 'video', current_version: 2, approved_version: 1, stage: 'review' } }],
+  parts: [
+    { key: 'text', label: 'نص الفيديو', ver: 't2', kind: 'text', snap: 'شكراً لكل فريقنا على الجهد' },
+    { key: 'v:instagram', label: 'نسخة إنستغرام', ver: 'c1', kind: 'copy', snap: 'نسخة إنستغرام' },
+    { key: 'a:f9', label: 'فيديو الملتقى', ver: 'v2', kind: 'asset', snap: null },
+    { key: 'dest', label: 'المنصات والحسابات', ver: 'd', kind: 'dest', snap: null },
+    { key: 'date', label: 'موعد النشر', ver: 's:2026-10-14T15:00', kind: 'date', snap: null },
+  ],
+  pending: [{ key: 'text' }, { key: 'v:instagram' }, { key: 'a:f9' }, { key: 'date' }],
+  ...over,
+});
 const ctx = (email, role) => ({
   status: 'ready', me: email, role, isAdmin: false, today: TODAY, people, load, projects, accounts, templates,
   nameOf: (e) => (e ? (people.find((p) => p.email === e)?.display_name ?? e.split('@')[0]) : ''),
@@ -138,10 +179,15 @@ async function renderAll() {
   const item = await import(url('components/work/item.js'));
   const create = await import(url('components/work/create.js'));
   const plan = await import(url('components/work/plan.js'));
+  const appr = await import(url('components/work/approvals.js'));
+  const review = await import(url('components/work/review.js'));
+  const chan = await import(url('components/work/channels.js'));
+  const publish = await import(url('components/work/publish.js'));
+  const notices = await import(url('components/notices.js'));
   const h = React.createElement;
   const pages = {};
   const render = (name, as, role, el, extra = {}) => {
-    globalThis.__WK = { ctx: ctx(as, role), items: works, detail: null, search: '', ...extra };
+    globalThis.__WK = { ctx: ctx(as, role), items: works, detail: null, search: '', dec, ...extra };
     try {
       pages[name] = renderToStaticMarkup(el).replace(/<dialog /g, '<dialog open ');
       check(`${name}: renders`, true);
@@ -172,8 +218,33 @@ async function renderAll() {
   const wk = (el) => h('div', { className: 'wk' }, el);
   render('plan-simple', 'dir@x.sa', 'director', wk(h(plan.PlanEditor, { title: 'منشور اليوم الوطني', type: 'post', due: '2026-10-16', initial: rows, onSave: async () => null, onClose: () => {} })));
   render('plan-free', 'dir@x.sa', 'director', wk(h(plan.PlanEditor, { title: 'منشور اليوم الوطني', type: 'post', due: '2026-10-16', initial: rows, advanced: true, onSave: async () => null, onClose: () => {} })));
+  // Step 4
+  render('approvals-director', 'dir@x.sa', 'director', h(appr.ApprovalsPage));
+  render('approvals-writer', 'khalid@x.sa', 'writer', h(appr.ApprovalsPage));
+  render('approvals-publish', 'noura@x.sa', 'publisher', h(appr.ApprovalsPage));
+  render('approvals-publish-lead', 'dir@x.sa', 'director', h(appr.ApprovalsPage), { search: 'tab=publish' });
+  const ch2 = { ...works[1].w, proposed_at: '2026-10-14T15:00:00Z', channels: ['a-ig', 'a-x'] };
+  render('review-director', 'dir@x.sa', 'director', h(review.ReviewPage, { id: 'CH-2' }), { detail: reviewDetail(1, { w: ch2 }) });
+  render('review-writer', 'khalid@x.sa', 'writer', h(review.ReviewPage, { id: 'CH-2' }), { detail: reviewDetail(1, { w: ch2 }) });
+  render('review-self', 'ahmed@x.sa', 'director', h(review.ReviewPage, { id: 'CH-2' }), {
+    detail: reviewDetail(1, { w: ch2, decideBlock: 'لا تعتمد ما أرسلته أو رفعته بنفسك.' }),
+  });
+  render('review-package', 'asst@x.sa', 'assistant', h(review.ReviewPage, { id: 'CH-10' }), {
+    detail: reviewDetail(9, { w: works[9].w, parts: [{ key: 'text', label: 'نص البيان', ver: 't2', kind: 'text', snap: 'نص البيان' }, { key: 'dest', label: 'جهة الإرسال', ver: 'd', kind: 'dest', snap: null }], pending: [{ key: 'text' }, { key: 'dest' }], assets: [] }),
+  });
+  render('channels-director', 'dir@x.sa', 'director', h(chan.ChannelsPage));
+  render('channels-publisher', 'noura@x.sa', 'publisher', h(chan.ChannelsPage));
+  render('channels-writer', 'khalid@x.sa', 'writer', h(chan.ChannelsPage));
+  render('item-publisher', 'noura@x.sa', 'publisher', h(item.WorkItemPage, { id: 'CH-4' }), { detail: detailOf(3) });
+  const nlist = [
+    { id: 'n1', tier: 'decide', body: 'أعاد أحمد «فيديو قصص الملتقى» للمراجعة.', go: { page: 'review', id: 'CH-2' }, created_at: '2026-10-11T09:00:00Z', read_at: null },
+    { id: 'n2', tier: 'attention', body: 'طلبت ريم تعديل «ملصق الشتاء».', go: { page: 'item', id: 'CH-5' }, created_at: '2026-10-11T08:00:00Z', read_at: null },
+    { id: 'n3', tier: 'info', body: 'صار دورك: «المرئيات».', go: { page: 'item', id: 'CH-1' }, created_at: '2026-10-10T08:00:00Z', read_at: '2026-10-10T09:00:00Z' },
+  ];
+  render('notices', 'dir@x.sa', 'director', h(notices.NoticeDrawer, { notices: { list: nlist, unread: 2, read: async () => {}, reload: async () => {} }, onClose: () => {} }));
+
   const d0 = detailOf(0);
-  globalThis.__WK = { ctx: ctx('khalid@x.sa', 'writer'), items: works, detail: d0, search: '' };
+  globalThis.__WK = { ctx: ctx('khalid@x.sa', 'writer'), items: works, detail: d0, search: '', dec };
   const dialogs = [
     ['submit', h(item.SubmitDialog, { d: d0, onClose() {}, act: async () => true })],
     ['close', h(item.CloseDialog, { d: d0, onClose() {}, act: async () => true })],
@@ -183,6 +254,16 @@ async function renderAll() {
     ['extension', h(item.ExtensionDialog, { d: d0, stage: d0.stages[1], onClose() {}, act: async () => true })],
   ];
   for (const [n, el] of dialogs) render(`dialog-${n}`, 'dir@x.sa', 'director', wk(el), { detail: d0 });
+  const rd = reviewDetail(1, { w: ch2 });
+  const pubDialogs = [
+    ['schedule', 'noura@x.sa', 'publisher', h(publish.ScheduleDialog, { w: works[6].w, approvedParts: ['النص الأساسي الإصدار 2'], onClose() {}, act: async () => true })],
+    ['pubnow', 'noura@x.sa', 'publisher', h(publish.PublishNowDialog, { w: { ...works[7].w, status: 'APPROVED' }, onClose() {}, act: async () => true })],
+    ['changes', 'dir@x.sa', 'director', h(review.ChangesDialog, { d: rd, pend: rd.parts.slice(0, 3), first: 'text', notes: [{ id: 'vn1', asset_id: 'f9', author: 'dir@x.sa', body: 'قدّم الشعار', timecode: '00:32', created_at: '2026-10-11T08:00:00Z' }], onClose() {}, act: async () => true })],
+    ['reject', 'dir@x.sa', 'director', h(review.RejectDialog, { d: rd, onClose() {}, act: async () => true })],
+    ['account-add', 'dir@x.sa', 'director', h(chan.AccountDialog, { a: null, use: [], onClose() {}, act: async () => true })],
+    ['account-busy', 'dir@x.sa', 'director', h(chan.DeleteDialog, { a: accounts[1], use: [works[6]], onClose() {}, act: async () => true })],
+  ];
+  for (const [n, as, role, el] of pubDialogs) render(`dialog-${n}`, as, role, wk(el));
   return pages;
 }
 
@@ -218,7 +299,7 @@ window.__ready = true;
       'list-empty': ['لا أعمال بعد', 'CH-1'],
       'item-writer': ['إنهاء مرحلة «نسخ المنصات»', 'إرسال للمراجعة', 'نقطة اعتماد', 'الإصدار 2', 'عدّله', 'ملف في مجلد لا تصل إليه', 'طلب منشور شكر', 'سجل العمل', 'طلب تمديد'],
       'item-designer': ['إنهاء مرحلة «المرئيات»', 'الإنتاج والإرسال للمراجعة: خالد'],
-      'item-director-review': ['مراجعة واعتماد', 'قيد البناء', 'دورات المراجعة'],
+      'item-director-review': ['مراجعة واعتماد', 'افتح شاشة المراجعة', 'دورات المراجعة'],
       'item-closed': ['أغلقه', 'أُلغي الحدث'],
       'item-missing': ['العمل غير موجود'],
       'create-types': ['منشور اجتماعي', 'تغطية حدث', 'مشروع', 'تحويل إلى عمل'],
@@ -234,6 +315,25 @@ window.__ready = true;
       'dialog-details': ['مواعيد المراحل', 'الأولوية'],
       'dialog-assign': ['ريم', 'نشطة'],
       'dialog-extension': ['الموعد الجديد', 'السبب'],
+      'approvals-director': ['الموافقات والنشر', 'بانتظار قراري', 'فيديو قصص الملتقى', 'أرسلها أحمد', 'مراجعة', 'في المراجعة ولا تقرر فيها', 'بيان الشراكة للمراجعة'],
+      'approvals-writer': ['بانتظار القرار', 'أرسلتها أنا'],
+      'approvals-publish': ['النشر في هذه المرحلة محاكاة', 'جاهز للنشر', 'مجدول', 'نشر جزئي أو فشل', 'منشور', 'مواعيد معرضة للخطر', 'جدولة', 'إعادة المحاولة للفاشلة', 'تغيير الموعد', 'بتأكيد قبل النشر', 'اعتمده محمد', 'إعادة الربط'],
+      'approvals-publish-lead': ['الجدولة والنشر لمسؤول النشر', 'إدارة الحسابات المرتبطة'],
+      'review-director': ['أنت تراجع', 'الدورة 1', 'جاهز للمراجعة', 'ما تغيّر منذ الإصدار المعتمد', 'تغيّر بعد اعتماده', 'اعتماد هذا الجزء', 'طلب تعديل عليه', 'فيديو الملتقى', 'v2', 'موعد النشر', 'المنصات والحسابات', 'اعتماد الأجزاء المعلّقة (4)', 'رفض العمل', 'لا يُنشر تلقائياً', 'معتمد ولم يتغيّر'],
+      'review-writer': ['عرض للمراجعة', 'القرار لمدير الاتصال ومساعده'],
+      'review-self': ['لا تعتمد ما أرسلته أو رفعته بنفسك'],
+      'review-package': ['الحزمة كاملة', 'اعتماد الحزمة كاملة', 'يُعتمد حزمة كاملة'],
+      'channels-director': ['الحسابات المرتبطة', 'إضافة حساب', 'يوتيوب', 'يقبل الفيديو فقط', 'صندوق القسم', 'تعديل', 'إيقاف', 'حذف', 'التفويض منتهٍ'],
+      'channels-publisher': ['إعادة الربط', 'لك إعادة ربط الحسابات'],
+      'channels-writer': ['الحسابات المرتبطة لمن يديرها وينشر عليها'],
+      'item-publisher': ['جدولة الإرسال', 'إرسال الآن من البريد'],
+      'notices': ['الإشعارات', 'يحتاج قرارك', 'يحتاج انتباهك', 'للعلم', 'تعليم الكل كمقروء', 'لا تُنجز العمل'],
+      'dialog-schedule': ['تغيير الموعد', 'الموعد المعتمد', 'التفويض ينتهي قبل الموعد', 'اسألني قبل النشر'],
+      'dialog-pubnow': ['محاكاة', 'التفويض منتهٍ: سيفشل', 'نشر الآن'],
+      'dialog-changes': ['على أي جزء؟', 'ملاحظات زمنية تُرفق بالطلب', '00:32'],
+      'dialog-reject': ['السبب', 'أغلق العمل أيضاً', 'تأكيد الرفض'],
+      'dialog-account-add': ['المنصة', 'إضافة وربط الحساب', '60 يوماً'],
+      'dialog-account-busy': ['لا يُحذف', 'CH-7'],
     };
     const absent = {
       'list-writer': ['الطلبات', 'كل الأشخاص'],
@@ -241,13 +341,20 @@ window.__ready = true;
       'item-designer': ['إغلاق العمل', 'تقييد الرؤية'],
       'item-writer': ['اعتماد المرحلة'],
       'create-member': ['خطة المراحل', 'المشاركون'],
+      'approvals-writer': ['في المراجعة ولا تقرر فيها'],
+      'approvals-publish-lead': ['إعادة المحاولة للفاشلة', 'انشر الآن'],
+      'review-writer': ['اعتماد هذا الجزء', 'رفض العمل'],
+      'review-self': ['اعتماد هذا الجزء', 'رفض العمل'],
+      'review-package': ['اعتماد هذا الجزء'],
+      'channels-publisher': ['إضافة حساب', 'إيقاف'],
+      'channels-writer': ['إعادة الربط'],
     };
     const looks = [['a', ''], ['emerald', 'data-identity="emerald"'], ['evening', 'data-identity="emerald" data-theme="dark"']];
     for (const name of Object.keys(pages)) {
       for (const [look, attrs] of looks) {
         for (const [vw, vh] of [[1280, 900], [390, 844]]) {
-          if (look !== 'a' && vw === 390 && !['list-all', 'item-writer', 'create-post', 'plan-free'].includes(name)) continue;
-          if (look !== 'a' && vw === 1280 && !['list-director', 'item-writer', 'create-post', 'plan-free'].includes(name)) continue;
+          if (look !== 'a' && vw === 390 && !['list-all', 'item-writer', 'create-post', 'plan-free', 'approvals-publish', 'review-director'].includes(name)) continue;
+          if (look !== 'a' && vw === 1280 && !['list-director', 'item-writer', 'create-post', 'plan-free', 'approvals-publish', 'review-director', 'channels-director', 'notices'].includes(name)) continue;
           const html = page(pages[name], attrs);
           const file = `${name}.${look}.html`;
           fs.writeFileSync(path.join(out, file), html);
@@ -268,7 +375,7 @@ window.__ready = true;
             const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(text);
             check(`${name}: no emoji`, !emoji);
           }
-          if (['list-director', 'list-all', 'item-writer', 'create-post', 'plan-free', 'dialog-submit'].includes(name) && (look === 'a' || vw === 1280))
+          if (['list-director', 'list-all', 'item-writer', 'create-post', 'plan-free', 'dialog-submit', 'approvals-director', 'approvals-publish', 'review-director', 'channels-director', 'notices', 'dialog-schedule'].includes(name) && (look === 'a' || vw === 1280))
             await p.screenshot({ path: path.join(out, `${name}.${look}.${vw}.png`), fullPage: true });
           await context.close();
         }

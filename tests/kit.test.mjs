@@ -15,7 +15,7 @@ const classesOf = (sel) => [...sel.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m
 
 test('every help page has its purpose, a short first-visit guide, its parts, every role, rules, links and questions', () => {
   const groups = ['lead', 'maker', 'publisher', 'member'];
-  assert.deepEqual(Object.keys(PAGES).sort(), ['activity', 'asset', 'chat', 'create', 'item', 'library', 'mail', 'tasks', 'work']);
+  assert.deepEqual(Object.keys(PAGES).sort(), ['activity', 'approvals', 'asset', 'channels', 'chat', 'create', 'item', 'library', 'mail', 'review', 'tasks', 'work']);
   for (const [key, h] of Object.entries(PAGES)) {
     assert.ok(h.name && h.tip && h.purpose, key);
     assert.ok(h.onb.length >= 3 && h.onb.length <= 4, `${key}: three or four steps`);
@@ -56,7 +56,10 @@ test('routes map to their help page', () => {
   assert.equal(pageKeyOf('/work'), 'work');
   assert.equal(pageKeyOf('/work/CH-12'), 'item');
   assert.equal(pageKeyOf('/create'), 'create');
-  assert.equal(pageKeyOf('/approvals'), null);
+  assert.equal(pageKeyOf('/approvals'), 'approvals');
+  assert.equal(pageKeyOf('/approvals/CH-12'), 'review');
+  assert.equal(pageKeyOf('/channels'), 'channels');
+  assert.equal(pageKeyOf('/calendar'), null);
   assert.equal(roleGroup('admin'), 'lead');
   assert.equal(roleGroup('producer'), 'maker');
   assert.equal(roleGroup('publisher'), 'publisher');
@@ -72,8 +75,13 @@ test('hold to confirm: the reference\'s reasons, each used by a button, about a 
   assert.equal(HOLD.chatApprove, why('mail:ch-appr:approve'));
   assert.equal(HOLD.chatDelete, why('mail:ch-del'));
   assert.equal(HOLD.closeWork, why('doclose'));
+  assert.equal(HOLD.approveAll, why('approveall'));
+  assert.equal(HOLD.rejectWork, why('doreject'));
+  assert.equal(HOLD.publishNow, why('dopubnow'));
+  assert.equal(HOLD.publishNow, why('q:confirmpub'));
+  assert.equal(HOLD.accountDelete, why('accdeldo'));
   assert.equal(HOLD_MS, Number(reference.match(/var HOLD_MS = (\d+);/)[1]));
-  const comps = ['src/components/media/dialogs.tsx', 'src/components/media/library.tsx', 'src/components/media/asset-page.tsx', 'src/components/mail/thread.tsx', 'src/components/chat/chat-tab.tsx', 'src/components/work/item.tsx'].map(read).join('\n');
+  const comps = ['src/components/media/dialogs.tsx', 'src/components/media/library.tsx', 'src/components/media/asset-page.tsx', 'src/components/mail/thread.tsx', 'src/components/chat/chat-tab.tsx', 'src/components/work/item.tsx', 'src/components/work/review.tsx', 'src/components/work/publish.tsx', 'src/components/work/channels.tsx'].map(read).join('\n');
   for (const k of Object.keys(HOLD)) assert.match(comps, new RegExp(`data-hold=\\{HOLD\\.${k}\\}`), k);
 });
 

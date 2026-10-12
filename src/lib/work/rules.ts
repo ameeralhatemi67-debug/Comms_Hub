@@ -624,11 +624,15 @@ export function attentionCounts(list: { w: ListWork; stages: DatedStage[] }[], t
 // The work page: what this person may do now (the database decides each one)
 // ---------------------------------------------------------------------------
 export type ActionId =
-  | 'reopen' | 'assign' | 'details' | 'start' | 'submit' | 'plan' | 'review' | 'edittext' | 'lib' | 'publish'
+  | 'reopen' | 'assign' | 'details' | 'start' | 'submit' | 'plan' | 'review' | 'edittext' | 'lib'
+  | 'schedule' | 'pubnow' | 'confirmpub' | 'declinepub' | 'unsched' | 'retry'
   | 'chat' | 'restrict' | 'close' | `stepdone:${number}` | `wait:${number}`;
 export type WorkAction = { id: ActionId; label: string; hint: string; next: boolean; disabled: boolean };
 export type ActionInput = {
-  w: Pick<WorkRow, 'status' | 'closed_at' | 'assignee' | 'created_by' | 'people' | 'type' | 'restricted' | 'channels' | 'priority' | 'review_cycle'>;
+  w: Pick<WorkRow, 'status' | 'closed_at' | 'assignee' | 'created_by' | 'people' | 'type' | 'restricted' | 'channels' | 'priority' | 'review_cycle'>
+    & Partial<Pick<WorkRow, 'proposed_at' | 'sched_at' | 'confirm_pending'>>;
+  /** The work goes out by the shared mailbox rather than a platform. */
+  mail?: boolean;
   stages: (StageLike & Pick<StageRow, 'name' | 'who'>)[];
   me: string;
   role: Role;
@@ -677,7 +681,7 @@ export function workActions(x: ActionInput): WorkAction[] {
     }
     if ((lead || w.assignee === me) && OUTSTANDING.includes(w.status)) add('plan', 'خطة المراحل', 'من يعمل على ماذا ومتى، وما ينتظر ماذا');
     if (w.status === 'IN_REVIEW' && lead)
-      add('review', 'مراجعة واعتماد', x.decideBlock || `ينتظر قرارك: ${x.pending} من ${x.total} أجزاء. القرار من شاشة المراجعة في «الموافقات والنشر»، وهي قيد البناء.`, false, true);
+      add('review', x.decideBlock ? 'عرض المراجعة' : 'مراجعة واعتماد', x.decideBlock || `ينتظر قرارك: ${x.pending} من ${x.total} أجزاء`, !x.decideBlock);
     if (boss && textEditable(w)) {
       const after = ['APPROVED', 'SCHEDULED'].includes(w.status);
       add('edittext', `${x.hasText ? 'تعديل' : 'كتابة'} ${textLabels[w.type]}`,
@@ -687,9 +691,21 @@ export function workActions(x: ActionInput): WorkAction[] {
     }
     if (part && ['DRAFT', 'IN_PRODUCTION', 'CHANGES_REQUESTED', 'REJECTED'].includes(w.status))
       add('lib', 'إضافة وسائط من المكتبة', 'تبقى الوسائط في مجلدها بصلاحياته');
-    if (canPublish(r) && ['APPROVED', 'SCHEDULED', 'PARTIAL', 'FAILED'].includes(w.status))
-      add('publish', w.status === 'APPROVED' ? 'جدولة النشر' : w.status === 'SCHEDULED' ? 'تغيير الموعد' : 'إعادة المحاولة',
-        'من «الموافقات والنشر»، وهي قيد البناء. النشر محاكاة.', false, true);
+    if (canPublish(r)) {
+      const noun = x.mail ? 'الإرسال' : 'النشر';
+      if (w.status === 'APPROVED') {
+        add('schedule', `جدولة ${noun}`, w.proposed_at ? `الموعد المعتمد ${riyadhStamp(w.proposed_at)}` : 'اختر الموعد', true);
+        add('pubnow', x.mail ? 'إرسال الآن من البريد' : 'نشر الآن', 'محاكاة: إلى الحسابات المعتمدة');
+      } else if (w.status === 'SCHEDULED' && w.confirm_pending) {
+        add('confirmpub', 'انشر الآن', `حلّ الموعد ${w.sched_at ? riyadhStamp(w.sched_at) : ''}، وهذا العمل لا يُنشر بلا تأكيد`, true);
+        add('declinepub', 'لا تنشر', 'يعود «جاهز للنشر» بلا موعد');
+      } else if (w.status === 'SCHEDULED') {
+        add('schedule', 'تغيير الموعد', 'موعد غير المعتمد يعيد «موعد النشر» وحده إلى المراجعة');
+        add('unsched', 'إلغاء الجدولة', 'يعود إلى «جاهز للنشر»');
+      } else if (w.status === 'PARTIAL' || w.status === 'FAILED') {
+        add('retry', 'إعادة المحاولة', 'للحسابات التي فشلت فقط', true);
+      }
+    }
     if (lead) add('assign', 'إسناد إلى شخص آخر', `المسؤول الحالي: ${nameOf(w.assignee)}`);
   }
   if (lead) add('details', 'تعديل التفاصيل والمواعيد', 'المشاريع والأولوية ومواعيد المراحل');
@@ -747,6 +763,92 @@ export function planPayload(P: PlanRow[]) {
     id: s.id ?? null, n: s.n.trim(), role: s.role, who: s.who || null, start: s.start || null, due: s.due || null,
     after: s.after, days: stepDays(s), gate: s.gate, note: s.note.trim(),
   }));
+}
+
+// ---------------------------------------------------------------------------
+// «الموافقات والنشر»: the word difference, the state of a part, accounts, notifications
+// ---------------------------------------------------------------------------
+/** Word by word: kept, added and removed, as the review screen shows a changed text. */
+export function diffWords(a: string, b: string): ['s' | 'a' | 'd', string][] {
+  const x = a.split(/\s+/).filter(Boolean);
+  const y = b.split(/\s+/).filter(Boolean);
+  const n = x.length;
+  const m = y.length;
+  const L: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = x[i] === y[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const out: ['s' | 'a' | 'd', string][] = [];
+  let i = 0;
+  let j = 0;
+  while (i < n && j < m) {
+    if (x[i] === y[j]) {
+      out.push(['s', x[i]]);
+      i++;
+      j++;
+    } else if (L[i + 1][j] >= L[i][j + 1]) out.push(['d', x[i++]]);
+    else out.push(['a', y[j++]]);
+  }
+  while (i < n) out.push(['d', x[i++]]);
+  while (j < m) out.push(['a', y[j++]]);
+  return out;
+}
+
+type ApprovalRow = { part: string; ver: string; approved_by: string; approved_at?: string };
+type FlagRow = { part: string; ver: string };
+/** The line under a part: approved by whom, changed since, or sent back and not yet changed. */
+export function partLine(p: Pick<Part, 'key' | 'ver'>, approvals: ApprovalRow[], flags: FlagRow[], nameOf: (e: string) => string): string {
+  const a = approvals.find((x) => x.part === p.key);
+  const f = flags.find((x) => x.part === p.key);
+  if (a && a.ver === p.ver) return `معتمد · ${nameOf(a.approved_by)}${a.approved_at ? ` ${sdate(riyadhStamp(a.approved_at))}` : ''}`;
+  if (f && f.ver === p.ver) return 'طُلب تعديله ولم يتغيّر بعد';
+  if (f) return 'عُدّل بعد طلب التعديل';
+  if (a) return `تغيّر بعد اعتماده${a.approved_at ? ` ${sdate(riyadhStamp(a.approved_at))}` : ''}`;
+  return 'لم يُعتمد بعد';
+}
+
+/** How an account stands now: stopped, expired, running out within six days, or connected. */
+export function accountState(a: Pick<AccountRow, 'active' | 'authorized_until'>, nowIso: string): [string, '' | 'danger' | 'warn' | 'approved'] {
+  if (!a.active) return ['موقوف', ''];
+  if (!a.authorized_until) return ['متصل', 'approved'];
+  if (Date.parse(a.authorized_until) <= Date.parse(nowIso)) return ['التفويض منتهٍ', 'danger'];
+  if (Date.parse(a.authorized_until) - Date.parse(nowIso) < 6 * 864e5) return [`ينتهي ${riyadhStamp(a.authorized_until)}`, 'warn'];
+  return [`متصل حتى ${sdate(riyadhStamp(a.authorized_until))}`, 'approved'];
+}
+/** The accounts of a scheduled work whose authorisation will not cover its time. */
+export function atRisk(w: Pick<WorkRow, 'status' | 'sched_at' | 'channels'>, accounts: AccountRow[]): AccountRow[] {
+  if (w.status !== 'SCHEDULED' || !w.sched_at) return [];
+  const at = w.sched_at;
+  return accounts.filter((a) => w.channels.includes(a.id) && a.platform !== 'mail' && !(a.active && (!a.authorized_until || Date.parse(a.authorized_until) > Date.parse(at))));
+}
+export const accountName = (a: Pick<AccountRow, 'platform' | 'label'> | undefined) =>
+  !a ? 'حساب محذوف' : a.platform === 'mail' ? 'البريد' : `${platformLabels[a.platform]} · ${a.label}`;
+
+/** Where a notification leads, from the `go` the database wrote with it. */
+export function noticeHref(go: { page?: string; id?: string; tab?: string } | null | undefined): string {
+  const g = go ?? {};
+  switch (g.page) {
+    case 'item':
+      return g.id ? `/work/${g.id}` : '/work';
+    case 'review':
+      return g.id ? `/approvals/${g.id}` : '/approvals';
+    case 'approvals':
+      return g.tab === 'publish' ? '/approvals?tab=publish' : '/approvals';
+    case 'requests':
+      return '/work?tab=requests';
+    case 'accounts':
+      return '/channels';
+    case 'tasks':
+      return '/tasks';
+    case 'calendar':
+      return '/calendar';
+    case 'asset':
+      return g.id ? `/media/${g.id}` : '/media';
+    case 'mail':
+      return g.id ? `/mail?thread=${g.id}` : '/mail';
+    case 'chat':
+      return g.id ? `/mail/chat?room=${g.id}` : '/mail/chat';
+    default:
+      return '/work';
+  }
 }
 
 // ---------------------------------------------------------------------------

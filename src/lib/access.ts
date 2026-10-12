@@ -34,6 +34,9 @@ const grantable = new Set<string>(grantablePages.map((p) => p.id));
 /** Open to every signed-in person. */
 const alwaysOpen = new Set(['', 'account']);
 
+/** The roles that open «الحسابات المرتبطة» (/channels), with the «الموافقات والنشر» page. */
+export const linkedAccountRoles: Role[] = ['director', 'assistant', 'publisher'];
+
 /** Open to administrators only. Anything not listed anywhere is treated the same way. */
 export const adminOnlyPages = ['admin', 'accounts'] as const;
 
@@ -69,6 +72,9 @@ export const isAdmin = (account: Pick<Account, 'role'>) => account.role === 'adm
 export function canOpen(account: Pick<Account, 'role' | 'pages'>, page: string): boolean {
   if (isAdmin(account)) return true;
   if (alwaysOpen.has(page)) return true;
+  // «الحسابات المرتبطة» goes with «الموافقات والنشر», for the roles that manage the
+  // accounts (director, assistant) or publish on them (publisher).
+  if (page === 'channels') return linkedAccountRoles.includes(account.role) && account.pages.includes('approvals');
   if (!grantable.has(page)) return false;
   // Creating is also a role ability; a page grant cannot give it to a role that lacks it.
   if (page === 'create' && !roles[account.role].create) return false;
