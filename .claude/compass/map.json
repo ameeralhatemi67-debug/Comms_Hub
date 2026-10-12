@@ -637,6 +637,24 @@
       "text": "Rebuild the Instagram post from the original design file or separate photos for a sharp result.",
       "at": "2026-10-12",
       "source": "auto"
+    },
+    {
+      "id": "imv5okpz50",
+      "text": "Add undo for work-page edits (text, plan, details) like the library's undo tokens.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv5okpz51",
+      "text": "Store video duration, design sizes and mail recipients as real fields instead of in the brief.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv5okpz52",
+      "text": "Add realtime updates to work pages instead of reloading on focus.",
+      "at": "2026-10-12",
+      "source": "auto"
     }
   ],
   "findings": [
@@ -1339,6 +1357,30 @@
     {
       "id": "fmv52gb6u1",
       "text": "Explanation window can sit over the next element a person wants to click in guide mode; they must close it first.",
+      "severity": "low",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv5okpz50",
+      "text": "Home still links sample work numbers (CH-241 etc.) to /work/<id>, which now show 'العمل غير موجود'.",
+      "severity": "low",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv5okpz51",
+      "text": "Creating a work from an external mail thread fails for a maker who is not the thread's assignee (mail_link_work refuses).",
+      "severity": "medium",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv5okpz52",
+      "text": "Linking an existing work from mail updates the thread only; the work's log records nothing.",
       "severity": "low",
       "at": "2026-10-12",
       "status": "open",
