@@ -10,6 +10,8 @@ import {
   riskText,
   campaign,
   channelAccounts,
+  dueNote,
+  isOverdue,
   homeTiles,
   integrationStatusLabels,
   integrations,
@@ -26,7 +28,11 @@ import {
 import { useHub } from '@/lib/store';
 import { useIdentity } from '@/lib/use-identity';
 import { Title, Panel, Empty, MediaPreview, StatusChip } from './ui';
-import { WorkList, WorkDetail, Composer, WorkRow } from './work';
+import type { Work } from '@/lib/domain';
+import { WorkProvider } from './work/data';
+import { WorkListPage } from './work/list';
+import { WorkItemPage } from './work/item';
+import { CreatePage } from './work/create';
 import { Approvals, Calendar } from './operations';
 import { Supporting } from './supporting';
 import { ComponentGallery } from './gallery';
@@ -344,6 +350,31 @@ function Home() {
   );
 }
 
+/** A sample work on Home. Home still shows the browser sample; the work pages are real. */
+function WorkRow({ work: w }: { work: Work }) {
+  const { state } = useHub();
+  const owning = state.campaigns.find((c) => c.id === w.campaignId) || campaign;
+  return (
+    <Link href={`/work/${w.id}`} className="work-row">
+      <span className="work-name">
+        <b>{w.title}</b>
+        <small>
+          {w.id} · {owning.title}
+          {dueNote(w) && (
+            <>
+              {' · '}
+              <span className={isOverdue(w) ? 'due-note late' : 'due-note soon'}>{dueNote(w)}</span>
+            </>
+          )}
+        </small>
+      </span>
+      <span className="owner">{personById(w.assignee).name}</span>
+      <StatusChip status={w.status} />
+      <time>{w.due}</time>
+    </Link>
+  );
+}
+
 /** The campaign's stations on one bar (second design, task 0.3.3.1). */
 function CampaignPulse() {
   const { state } = useHub();
@@ -454,18 +485,18 @@ function Media({ id }: { id?: string }) {
 
 export function HubPage({ route }: { route: string[] }) {
   const { state } = useHub();
-  const [page, id, action] = route;
+  const [page, id] = route;
 
   if (!page) return <Home />;
-  if (page === 'work') {
-    if (!id) return <WorkList />;
-    if (action === 'edit') {
-      const w = state.work.find((x) => x.id === id);
-      return w ? <Composer key={w.id} work={w} /> : <Empty>العمل غير موجود.</Empty>;
-    }
-    return <WorkDetail key={id} id={id} />;
-  }
-  if (page === 'create') return <Composer key={'new-' + state.role} />;
+  // The work pages read and write the database (supabase/migrations/*work_cycle*).
+  if (page === 'work')
+    return <WorkProvider key={state.role}>{id ? <WorkItemPage key={id} id={decodeURIComponent(id)} /> : <WorkListPage />}</WorkProvider>;
+  if (page === 'create')
+    return (
+      <WorkProvider key={state.role}>
+        <CreatePage />
+      </WorkProvider>
+    );
   if (page === 'approvals') return <Approvals key={state.role} />;
   if (page === 'calendar') return <Calendar />;
   if (page === 'media') {

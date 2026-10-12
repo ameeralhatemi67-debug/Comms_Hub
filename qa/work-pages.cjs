@@ -1,0 +1,336 @@
+// Browser check of «العمل», the work page, «إنشاء» and the plan editor (Reference_Build_Plan.md,
+// Step 3), without signing in.
+// The pages are behind sign-in and no bypass is allowed, so this compiles the pages' own
+// components (src/components/work, src/lib/work: the code the site runs) with the database
+// layer (./data) replaced by fixture data, renders them with React, and checks the result in
+// headless Edge: no page errors, the expected content, no sideways scroll at phone width, in
+// Direction A, the new identity and its evening mode. The drag engine is then driven for
+// real on the rendered plan rows: a mouse drag down, a mouse drag up, and a touch drag.
+// What this cannot check: clicks that call the database. Those are in the owner walkthrough.
+// Usage: node qa/work-pages.cjs   (writes qa/work-pages.json, screenshots in qa/artifacts/work/)
+const fs = require('node:fs');
+const path = require('node:path');
+const http = require('node:http');
+const ts = require('typescript');
+const { dependency, launchOptions } = require('./runtime.cjs');
+const { chromium } = dependency('playwright');
+
+const root = path.resolve(__dirname, '..');
+const out = path.join(__dirname, 'artifacts', 'work');
+const build = path.join(out, 'build');
+const result = { run: new Date().toISOString(), checks: [], errors: [] };
+const check = (name, pass, detail = '') => result.checks.push({ name, pass: Boolean(pass), detail: String(detail) });
+
+// ---------- compile the real modules, with the database layer swapped for fixtures ----------
+fs.rmSync(build, { recursive: true, force: true });
+const sources = [
+  'components/work/list.tsx', 'components/work/item.tsx', 'components/work/create.tsx', 'components/work/plan.tsx', 'components/work/parts.tsx',
+  'lib/work/rules.ts', 'lib/work/drag.ts', 'lib/media/rules.ts', 'lib/domain.ts', 'lib/kit/hold-reasons.ts',
+];
+for (const m of sources) {
+  const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
+  const depth = m.split('/').length - 1;
+  const up = '../'.repeat(depth);
+  let js = ts.transpileModule(src, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, verbatimModuleSyntax: false },
+  }).outputText;
+  js = js
+    .replace(/from '@\/lib\/supabase\/client'/g, `from '${up}mocks/supabase.js'`)
+    .replace(/from 'next\/link'/g, `from '${up}mocks/link.js'`)
+    .replace(/from 'next\/navigation'/g, `from '${up}mocks/navigation.js'`)
+    .replace(/from '\.\/data'/g, `from '${up}mocks/data.js'`)
+    .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
+    .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
+    .replace(/from '(\.\/(?:plan|parts|list|item|create))'/g, "from '$1.js'");
+  const dest = path.join(build, m.replace(/\.tsx?$/, '.js'));
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.writeFileSync(dest, js);
+}
+fs.mkdirSync(path.join(build, 'mocks'), { recursive: true });
+fs.writeFileSync(path.join(build, 'package.json'), '{"type":"module"}');
+fs.writeFileSync(path.join(build, 'mocks', 'link.js'), `import { createElement } from 'react';
+export default function Link({ href, children, ...rest }) { return createElement('a', { href, ...rest }, children); }`);
+fs.writeFileSync(path.join(build, 'mocks', 'navigation.js'), `export const useRouter = () => ({ push() {}, replace() {}, refresh() {} });
+export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search || '');`);
+fs.writeFileSync(path.join(build, 'mocks', 'supabase.js'), `const chain = new Proxy(function () {}, { get: () => chain, apply: () => chain });
+export const supabase = () => chain;`);
+fs.writeFileSync(path.join(build, 'mocks', 'data.js'), `export const useWork = () => globalThis.__WK.ctx;
+export const useWorkList = () => ({ items: globalThis.__WK.items, status: 'ready', reload: async () => {} });
+export const useWorkDetail = () => ({ detail: globalThis.__WK.detail, status: globalThis.__WK.detail ? 'ready' : 'missing', reload: async () => {} });
+export const libraryFiles = async () => [];
+export const WorkProvider = ({ children }) => children;`);
+for (const f of ['globals.css', 'identity.css', 'work.css']) fs.copyFileSync(path.join(root, 'src/app', f), path.join(out, f));
+
+// ---------- fixture: a department on 12 October 2026 ----------
+const TODAY = '2026-10-12';
+const people = [
+  ['dir@x.sa', 'محمد', 'director'], ['asst@x.sa', 'ريم', 'assistant'], ['khalid@x.sa', 'خالد', 'writer'], ['lama@x.sa', 'لمى', 'writer'],
+  ['sara@x.sa', 'سارة', 'designer'], ['ahmed@x.sa', 'أحمد', 'producer'], ['noura@x.sa', 'نورة', 'publisher'], ['abd@x.sa', 'عبدالله', 'member'],
+].map(([email, display_name, role]) => ({ email, display_name, role }));
+const load = people.map((p, i) => ({ ...p, active_works: i % 3, late_works: i === 2 ? 1 : 0, open_stages: i % 4, late_stages: 0, open_tasks: i % 2, late_tasks: 0 }));
+const projects = [
+  { id: 'p1', name: 'اليوم الوطني 2026', type: 'campaign', start_on: '2026-09-28', end_on: '2026-10-16', owner: 'asst@x.sa', description: null },
+  { id: 'p2', name: 'ملتقى الشركاء 2026', type: 'event', start_on: '2026-10-04', end_on: '2026-10-18', owner: 'asst@x.sa', description: null },
+];
+const accounts = [
+  { id: 'a-ig', platform: 'instagram', label: 'الرسمي', handle: '@company.sa', purpose: null, authorized_until: '2026-11-02T00:00:00Z', publishers: ['noura@x.sa'], mode: 'auto', active: true, fixed: false },
+  { id: 'a-x', platform: 'x', label: 'الرسمي', handle: '@company_sa', purpose: null, authorized_until: '2026-10-12T09:00:00Z', publishers: ['noura@x.sa'], mode: 'auto', active: true, fixed: false },
+  { id: 'a-li', platform: 'linkedin', label: 'صفحة الشركة', handle: 'Company SA', purpose: null, authorized_until: '2026-12-01T00:00:00Z', publishers: ['noura@x.sa'], mode: 'auto', active: true, fixed: false },
+  { id: 'a-yt', platform: 'youtube', label: 'الرسمي', handle: '@CompanySA', purpose: null, authorized_until: '2026-12-15T00:00:00Z', publishers: ['noura@x.sa'], mode: 'ask', active: true, fixed: false },
+  { id: 'a-mail', platform: 'mail', label: 'صندوق القسم', handle: null, purpose: null, authorized_until: null, publishers: [], mode: 'ask', active: true, fixed: true },
+];
+const templates = [{ id: 't1', name: 'فيديو قصير بمراجعة قانونية', type: 'video', rows: [{ n: 'النص', role: 'writer', days: 1, after: [], gate: true, note: '' }, { n: 'التصوير', role: 'producer', days: 2, after: [0], gate: false, note: '' }], created_by: 'dir@x.sa' }];
+const W = (over) => ({
+  no: 1, type: 'post', status: 'IN_PRODUCTION', priority: 'normal', restricted: false, source: 'plan', requester: null, brief: null,
+  created_by: 'asst@x.sa', assignee: 'khalid@x.sa', people: [], due: '2026-10-16', event_at: null, place: null, channels: [],
+  proposed_at: null, sched_at: null, pub_at: null, pub_mode: null, pending_sched: false, confirm_pending: false, move_from: null, move_by: null,
+  review_cycle: null, results: {}, closed_at: null, closed_by: null, close_reason: null, created_at: '2026-10-10T06:00:00Z', updated_at: '2026-10-11T06:00:00Z', ...over,
+});
+const S = (work, pos, over) => ({
+  id: `${work}-s${pos}`, work_id: work, pos, name: 'مرحلة', role: '', who: null, start_on: null, due_on: null, after_pos: pos ? [pos - 1] : [], days: 1,
+  note: null, gate: false, gate_by: null, gate_at: null, started_at: null, done_at: null, done_by: null, ...over,
+});
+const works = [
+  { w: W({ id: 'CH-1', title: 'منشور اليوم الوطني: شكراً لفريقنا', priority: 'urgent', channels: ['a-ig', 'a-x', 'a-li'], people: ['sara@x.sa'], brief: 'منشور شكر للفريق بمناسبة اليوم الوطني.' }),
+    stages: [S('CH-1', 0, { name: 'كتابة النص', role: 'writer', who: 'khalid@x.sa', start_on: '2026-10-09', due_on: '2026-10-10', done_at: '2026-10-10T08:00:00Z', done_by: 'khalid@x.sa' }),
+      S('CH-1', 1, { name: 'نسخ المنصات', role: 'writer', who: 'khalid@x.sa', start_on: '2026-10-11', due_on: '2026-10-11', started_at: '2026-10-11T07:00:00Z' }),
+      S('CH-1', 2, { name: 'المرئيات', role: 'designer', who: 'sara@x.sa', start_on: '2026-10-11', due_on: '2026-10-13', after_pos: [0], gate: true, note: 'بهوية الحملة' }),
+      S('CH-1', 3, { name: 'التدقيق', role: 'assistant', who: 'asst@x.sa', start_on: '2026-10-14', due_on: '2026-10-15', after_pos: [1, 2] })], projects: ['p1'], flags: 0 },
+  { w: W({ id: 'CH-2', title: 'فيديو قصص الملتقى', type: 'video', status: 'IN_REVIEW', assignee: 'ahmed@x.sa', review_cycle: 1, due: '2026-10-18', channels: ['a-yt', 'a-ig'] }),
+    stages: [S('CH-2', 0, { name: 'النص', who: 'khalid@x.sa', done_at: '2026-10-09T08:00:00Z', done_by: 'khalid@x.sa', due_on: '2026-10-09' }), S('CH-2', 1, { name: 'التصوير', who: 'ahmed@x.sa', done_at: '2026-10-11T08:00:00Z', done_by: 'ahmed@x.sa', due_on: '2026-10-11' })], projects: ['p2'], flags: 0, pending: 3 },
+  { w: W({ id: 'CH-3', title: 'طلب تغطية يوم التطوع', type: 'event', status: 'DRAFT', assignee: null, created_by: 'abd@x.sa', source: 'member', due: '2026-10-20' }),
+    stages: [S('CH-3', 0, { name: 'التخطيط' }), S('CH-3', 1, { name: 'التصوير يوم الحدث' })], projects: [], flags: 0 },
+  { w: W({ id: 'CH-4', title: 'بيان الشراكة الجديدة', type: 'press', status: 'APPROVED', assignee: 'lama@x.sa', due: '2026-10-11', channels: ['a-mail'], restricted: true }),
+    stages: [S('CH-4', 0, { name: 'كتابة البيان', who: 'lama@x.sa', done_at: '2026-10-10T08:00:00Z', done_by: 'lama@x.sa' })], projects: [], flags: 0 },
+  { w: W({ id: 'CH-5', title: 'تصميم ملصق الشتاء', type: 'design', status: 'CHANGES_REQUESTED', assignee: 'sara@x.sa', due: '2026-10-10' }),
+    stages: [S('CH-5', 0, { name: 'الفكرة', who: 'sara@x.sa', done_at: '2026-10-08T08:00:00Z', done_by: 'sara@x.sa', due_on: '2026-10-08' })], projects: ['p1'], flags: 1 },
+  { w: W({ id: 'CH-6', title: 'إعلان أُلغي', type: 'announce', status: 'DRAFT', closed_at: '2026-10-11T09:00:00Z', closed_by: 'dir@x.sa', close_reason: 'أُلغي الحدث' }),
+    stages: [S('CH-6', 0, { name: 'كتابة النص' })], projects: [], flags: 0 },
+];
+const detailOf = (i, over = {}) => {
+  const x = works[i];
+  return {
+    w: x.w, stages: x.stages,
+    texts: [{ n: 1, body: 'نص أول', note: 'الصياغة الأولى', author: 'khalid@x.sa', created_at: '2026-10-10T07:00:00Z' }, { n: 2, body: 'شكراً لكل من صنع هذا اليوم معنا.\nفخورون بكم.', note: null, author: 'asst@x.sa', created_at: '2026-10-11T07:00:00Z' }],
+    variants: [{ platform: 'x', n: 1, body: 'شكراً لفريقنا #اليوم_الوطني', base: 1, author: 'khalid@x.sa', created_at: '2026-10-10T09:00:00Z' }],
+    approvals: [{ part: 'dest', ver: 'x', approved_by: 'dir@x.sa' }], flags: [], cycles: [], decisions: [],
+    comments: [{ id: 'c1', author: 'asst@x.sa', body: 'الصورة الثانية أفضل للإنستغرام.', created_at: '2026-10-11T08:00:00Z' }],
+    log: [{ id: 1, at: '2026-10-09T06:00:00Z', actor: 'asst@x.sa', type: 'create', text: 'إنشاء العمل وإسناده إلى خالد' }, { id: 2, at: '2026-10-10T08:00:00Z', actor: 'khalid@x.sa', type: 'stage_done', text: 'إنهاء مرحلة «كتابة النص»' }],
+    projects: x.projects,
+    assets: [{ asset_id: 'f1', file: { id: 'f1', name: 'ملصق اليوم الوطني', kind: 'image', current_version: 3, approved_version: null, stage: 'production' } }, { asset_id: 'f2', file: null }],
+    parts: [{ key: 'text', label: 'النص الأساسي', ver: 't2', kind: 'text' }, { key: 'v:x', label: 'نسخة X', ver: 'c1', kind: 'copy' }, { key: 'a:f1', label: 'ملصق اليوم الوطني', ver: 'v3', kind: 'asset' }, { key: 'dest', label: 'المنصات والحسابات', ver: 'd', kind: 'dest' }],
+    pending: [], decideBlock: '', mail: [{ id: 'm1', subject: 'طلب منشور شكر', kind: 'external', req_no: 7 }], chats: [], extensions: [],
+    ...over,
+  };
+};
+const ctx = (email, role) => ({
+  status: 'ready', me: email, role, isAdmin: false, today: TODAY, people, load, projects, accounts, templates,
+  nameOf: (e) => (e ? (people.find((p) => p.email === e)?.display_name ?? e.split('@')[0]) : ''),
+  personOf: (e) => people.find((p) => p.email === e), reloadBase: async () => {}, call: async () => ({ ok: true, data: null }), say: () => {},
+});
+
+// ---------- render each scenario with React ----------
+async function renderAll() {
+  const React = await import('react');
+  const { renderToStaticMarkup } = await import('react-dom/server');
+  const url = (f) => 'file:///' + path.join(build, f).replace(/\\/g, '/');
+  const list = await import(url('components/work/list.js'));
+  const item = await import(url('components/work/item.js'));
+  const create = await import(url('components/work/create.js'));
+  const plan = await import(url('components/work/plan.js'));
+  const h = React.createElement;
+  const pages = {};
+  const render = (name, as, role, el, extra = {}) => {
+    globalThis.__WK = { ctx: ctx(as, role), items: works, detail: null, search: '', ...extra };
+    try {
+      pages[name] = renderToStaticMarkup(el).replace(/<dialog /g, '<dialog open ');
+      check(`${name}: renders`, true);
+    } catch (e) {
+      check(`${name}: renders`, false, e.stack);
+      pages[name] = '';
+    }
+  };
+  render('list-director', 'dir@x.sa', 'director', h(list.WorkListPage));
+  render('list-all', 'dir@x.sa', 'director', h(list.WorkListPage), { search: 'tab=all' });
+  render('list-writer', 'khalid@x.sa', 'writer', h(list.WorkListPage));
+  render('list-member', 'abd@x.sa', 'member', h(list.WorkListPage), { search: 'tab=mine' });
+  render('list-empty', 'dir@x.sa', 'director', h(list.WorkListPage), { items: [], search: 'tab=all' });
+  render('item-writer', 'khalid@x.sa', 'writer', h(item.WorkItemPage, { id: 'CH-1' }), { detail: detailOf(0) });
+  render('item-designer', 'sara@x.sa', 'designer', h(item.WorkItemPage, { id: 'CH-1' }), { detail: detailOf(0) });
+  render('item-director-review', 'dir@x.sa', 'director', h(item.WorkItemPage, { id: 'CH-2' }), {
+    detail: detailOf(1, { cycles: [{ n: 1, sent_by: 'ahmed@x.sa', sent_at: '2026-10-11T10:00:00Z', note: 'جاهز' }], pending: [{ key: 'text', label: 'نص الفيديو', ver: 't2', kind: 'text' }] }),
+  });
+  render('item-closed', 'khalid@x.sa', 'writer', h(item.WorkItemPage, { id: 'CH-6' }), { detail: detailOf(5) });
+  render('item-missing', 'khalid@x.sa', 'writer', h(item.WorkItemPage, { id: 'CH-99' }));
+  render('create-types', 'dir@x.sa', 'director', h(create.CreatePage));
+  render('create-post', 'dir@x.sa', 'director', h(create.CreatePage), { search: 'type=post' });
+  render('create-writer-video', 'khalid@x.sa', 'writer', h(create.CreatePage), { search: 'type=video' });
+  render('create-member', 'abd@x.sa', 'member', h(create.CreatePage), { search: 'type=event' });
+  render('create-publisher', 'noura@x.sa', 'publisher', h(create.CreatePage));
+  const rows = works[0].stages.map((s) => ({ id: s.id, n: s.name, role: s.role, who: s.who ?? '', start: s.start_on ?? '', due: s.due_on ?? '', after: s.after_pos, days: 1, gate: s.gate, note: s.note ?? '', done: !!s.done_at }));
+  // The editor and the dialogs open inside a work page, so they render inside its .wk frame.
+  const wk = (el) => h('div', { className: 'wk' }, el);
+  render('plan-simple', 'dir@x.sa', 'director', wk(h(plan.PlanEditor, { title: 'منشور اليوم الوطني', type: 'post', due: '2026-10-16', initial: rows, onSave: async () => null, onClose: () => {} })));
+  render('plan-free', 'dir@x.sa', 'director', wk(h(plan.PlanEditor, { title: 'منشور اليوم الوطني', type: 'post', due: '2026-10-16', initial: rows, advanced: true, onSave: async () => null, onClose: () => {} })));
+  const d0 = detailOf(0);
+  globalThis.__WK = { ctx: ctx('khalid@x.sa', 'writer'), items: works, detail: d0, search: '' };
+  const dialogs = [
+    ['submit', h(item.SubmitDialog, { d: d0, onClose() {}, act: async () => true })],
+    ['close', h(item.CloseDialog, { d: d0, onClose() {}, act: async () => true })],
+    ['text', h(item.TextDialog, { d: d0, target: 'x', onClose() {}, act: async () => true })],
+    ['details', h(item.DetailsDialog, { d: d0, onClose() {}, act: async () => true })],
+    ['assign', h(item.AssignDialog, { d: d0, onClose() {}, act: async () => true })],
+    ['extension', h(item.ExtensionDialog, { d: d0, stage: d0.stages[1], onClose() {}, act: async () => true })],
+  ];
+  for (const [n, el] of dialogs) render(`dialog-${n}`, 'dir@x.sa', 'director', wk(el), { detail: d0 });
+  return pages;
+}
+
+const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${attrs}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,"><link rel="stylesheet" href="globals.css"><link rel="stylesheet" href="identity.css"><link rel="stylesheet" href="work.css">
+<style>body{font-family:"Segoe UI",Tahoma,sans-serif}main{max-width:1400px}</style></head><body><main id="main">${body}</main></body></html>`;
+
+(async () => {
+  const pages = await renderAll();
+  for (const [name, html] of Object.entries(pages)) fs.writeFileSync(path.join(out, `${name}.html`), page(html));
+  fs.writeFileSync(path.join(out, 'drag.html'), page(pages['plan-simple'], 'data-identity="emerald"').replace('</body>', `<script type="module">
+import { installRowDrag } from './build/lib/work/drag.js';
+window.__moves = [];
+installRowDrag(document.querySelector('[data-plist]'), { onMove: (f, t) => window.__moves.push([f, t]) });
+window.__ready = true;
+</script></body>`));
+
+  const server = http.createServer((req, res) => {
+    const f = path.join(out, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html');
+    if (!f.startsWith(out) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+    res.writeHead(200, { 'Content-Type': f.endsWith('.js') ? 'text/javascript' : f.endsWith('.css') ? 'text/css' : 'text/html; charset=utf-8' });
+    fs.createReadStream(f).pipe(res);
+  });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const base = `http://127.0.0.1:${server.address().port}/`;
+  const browser = await chromium.launch(launchOptions);
+  try {
+    const expect = {
+      'list-director': ['يحتاج انتباهك', 'الفريق', 'خالد', 'طلب بانتظار الإسناد'],
+      'list-all': ['منشور اليوم الوطني: شكراً لفريقنا', 'CH-1', 'نسخ المنصات (خالد) · المرئيات (سارة) · متأخرة', 'بانتظار اعتماد 3 أجزاء', 'لوحة الحالات', 'مقيّد'],
+      'list-writer': ['مهامي', 'إنشاء عمل'],
+      'list-member': ['طلباتي', 'طلب تغطية يوم التطوع', 'طلب جديد'],
+      'list-empty': ['لا أعمال بعد', 'CH-1'],
+      'item-writer': ['إنهاء مرحلة «نسخ المنصات»', 'إرسال للمراجعة', 'نقطة اعتماد', 'الإصدار 2', 'عدّله', 'ملف في مجلد لا تصل إليه', 'طلب منشور شكر', 'سجل العمل', 'طلب تمديد'],
+      'item-designer': ['إنهاء مرحلة «المرئيات»', 'الإنتاج والإرسال للمراجعة: خالد'],
+      'item-director-review': ['مراجعة واعتماد', 'قيد البناء', 'دورات المراجعة'],
+      'item-closed': ['أغلقه', 'أُلغي الحدث'],
+      'item-missing': ['العمل غير موجود'],
+      'create-types': ['منشور اجتماعي', 'تغطية حدث', 'مشروع', 'تحويل إلى عمل'],
+      'create-post': ['خطة المراحل', 'كتابة النص', 'تلقائي', 'بلا مسؤول الآن (يبقى طلباً)', 'إرسال الطلب', 'إنستغرام · الرسمي', 'حمل الفريق الآن'],
+      'create-writer-video': ['أنا المسؤول', 'اتركه للقادة', 'المدة التقريبية', 'حفظ مسودة', 'إنشاء وبدء الإنتاج', 'يوتيوب · الرسمي'],
+      'create-member': ['طلب جديد', 'إرسال الطلب', 'يوم الحدث ووقته'],
+      'create-publisher': ['إنشاء العمل غير متاح لدورك'],
+      'plan-simple': ['المحرر البسيط', 'المعاينة الزمنية', 'حفظ الخطة'],
+      'plan-free': ['اجعلها متتابعة', 'رجوعاً من التسليم', 'تدقيق لغوي', 'حفظ الخطة قالباً', 'فيديو قصير بمراجعة قانونية', 'نقطة اعتماد'],
+      'dialog-submit': ['ما سيُراجع', 'يوتيوب', 'موعد النشر المقترح'],
+      'dialog-close': ['السبب', 'إغلاق العمل'],
+      'dialog-text': ['نسخة X', 'الحد المقترح 240 حرفاً'],
+      'dialog-details': ['مواعيد المراحل', 'الأولوية'],
+      'dialog-assign': ['ريم', 'نشطة'],
+      'dialog-extension': ['الموعد الجديد', 'السبب'],
+    };
+    const absent = {
+      'list-writer': ['الطلبات', 'كل الأشخاص'],
+      'list-member': ['كل الأشخاص', 'لوحة الفريق'],
+      'item-designer': ['إغلاق العمل', 'تقييد الرؤية'],
+      'item-writer': ['اعتماد المرحلة'],
+      'create-member': ['خطة المراحل', 'المشاركون'],
+    };
+    const looks = [['a', ''], ['emerald', 'data-identity="emerald"'], ['evening', 'data-identity="emerald" data-theme="dark"']];
+    for (const name of Object.keys(pages)) {
+      for (const [look, attrs] of looks) {
+        for (const [vw, vh] of [[1280, 900], [390, 844]]) {
+          if (look !== 'a' && vw === 390 && !['list-all', 'item-writer', 'create-post', 'plan-free'].includes(name)) continue;
+          if (look !== 'a' && vw === 1280 && !['list-director', 'item-writer', 'create-post', 'plan-free'].includes(name)) continue;
+          const html = page(pages[name], attrs);
+          const file = `${name}.${look}.html`;
+          fs.writeFileSync(path.join(out, file), html);
+          const context = await browser.newContext({ viewport: { width: vw, height: vh } });
+          const p = await context.newPage();
+          const errs = [];
+          p.on('pageerror', (e) => errs.push(e.message));
+          p.on('console', (m) => m.type() === 'error' && !/favicon|Failed to load resource/.test(m.text()) && errs.push(m.text()));
+          await p.goto(base + file);
+          const tag = `${name} · ${look} · ${vw}`;
+          check(`${tag}: no page errors`, !errs.length, errs.join(' | '));
+          const sw = await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+          check(`${tag}: no sideways scroll`, sw <= 1, `overflow ${sw}px`);
+          if (look === 'a' && vw === 1280) {
+            const text = await p.evaluate(() => document.body.innerText);
+            for (const t of expect[name] ?? []) check(`${name}: shows «${t}»`, text.includes(t));
+            for (const t of absent[name] ?? []) check(`${name}: does not show «${t}»`, !text.includes(t));
+            const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(text);
+            check(`${name}: no emoji`, !emoji);
+          }
+          if (['list-director', 'list-all', 'item-writer', 'create-post', 'plan-free', 'dialog-submit'].includes(name) && (look === 'a' || vw === 1280))
+            await p.screenshot({ path: path.join(out, `${name}.${look}.${vw}.png`), fullPage: true });
+          await context.close();
+        }
+      }
+    }
+
+    // ---------- the drag engine on the rendered plan rows ----------
+    const ctxD = await browser.newContext({ viewport: { width: 1280, height: 1100 }, hasTouch: true });
+    const pd = await ctxD.newPage();
+    const derr = [];
+    pd.on('pageerror', (e) => derr.push(e.message));
+    await pd.goto(base + 'drag.html');
+    await pd.waitForFunction(() => window.__ready === true);
+    const grips = await pd.$$('[data-plist] [data-pdrag]');
+    const rowsBox = await pd.$$eval('[data-plist] > [data-prow]', (rs) => rs.map((r) => { const b = r.getBoundingClientRect(); return { top: b.top, bottom: b.bottom, mid: b.top + b.height / 2 }; }));
+    check('drag: the finished stage has no grip', grips.length === rowsBox.length - 1, `${grips.length} grips for ${rowsBox.length} rows`);
+    const gripOf = async (i) => pd.$eval(`[data-plist] > [data-prow="${i}"] [data-pdrag]`, (g) => { const b = g.getBoundingClientRect(); return { x: b.left + b.width / 2, y: b.top + b.height / 2 }; });
+    // Mouse: «نسخ المنصات» (row 1) below «التدقيق» (row 3).
+    let g = await gripOf(1);
+    await pd.mouse.move(g.x, g.y);
+    await pd.mouse.down();
+    await pd.mouse.move(g.x, rowsBox[3].mid + 6, { steps: 8 });
+    const mid = await pd.evaluate(() => ({
+      dragging: !!document.querySelector('[data-prow="1"].dragging'),
+      mark: !!document.querySelector('[data-prow="3"].drop-after'),
+    }));
+    check('drag: while dragging, the row fades and the target shows where it lands', mid.dragging && mid.mark, JSON.stringify(mid));
+    await pd.mouse.up();
+    check('drag: a mouse drag down moves the stage to the end', JSON.stringify(await pd.evaluate(() => window.__moves)) === '[[1,3]]', JSON.stringify(await pd.evaluate(() => window.__moves)));
+    check('drag: the marks are cleared on release', await pd.evaluate(() => !document.querySelector('.drop-before,.drop-after,.dragging')));
+    // Mouse: «التدقيق» (row 3) above «المرئيات» (row 2).
+    g = await gripOf(3);
+    await pd.mouse.move(g.x, g.y);
+    await pd.mouse.down();
+    await pd.mouse.move(g.x, rowsBox[2].top + 3, { steps: 6 });
+    await pd.mouse.up();
+    check('drag: a mouse drag up moves the stage above the row it is dropped on', JSON.stringify(await pd.evaluate(() => window.__moves[1])) === '[3,2]', JSON.stringify(await pd.evaluate(() => window.__moves)));
+    // Touch: «المرئيات» (row 2) to the top, by finger.
+    g = await gripOf(2);
+    const cdp = await ctxD.newCDPSession(pd);
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: g.x, y: g.y }] });
+    for (let k = 1; k <= 8; k++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: g.x, y: g.y + ((rowsBox[0].top + 4 - g.y) * k) / 8 }] });
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await pd.waitForTimeout(100);
+    check('drag: a touch drag moves the stage too (the grip does not scroll the page)', JSON.stringify(await pd.evaluate(() => window.__moves[2])) === '[2,0]', JSON.stringify(await pd.evaluate(() => window.__moves)));
+    // A quick tap on a grip moves nothing.
+    g = await gripOf(1);
+    await pd.mouse.click(g.x, g.y);
+    check('drag: a click on the grip alone moves nothing', (await pd.evaluate(() => window.__moves.length)) === 3);
+    check('drag: no page errors', !derr.length, derr.join(' | '));
+    await ctxD.close();
+  } catch (e) {
+    result.errors.push(e.stack);
+  } finally {
+    await browser.close();
+    server.close();
+  }
+  const failed = result.checks.filter((c) => !c.pass);
+  result.summary = { total: result.checks.length, passed: result.checks.length - failed.length, failed: failed.length };
+  fs.writeFileSync(path.join(__dirname, 'work-pages.json'), JSON.stringify(result, null, 2));
+  console.log(`${result.summary.passed} of ${result.summary.total} passed`);
+  for (const f of failed) console.log('FAIL', f.name, f.detail.slice(0, 300));
+  for (const e of result.errors) console.log('ERROR', e);
+  process.exit(failed.length || result.errors.length ? 1 : 0);
+})();

@@ -1,0 +1,1331 @@
+{
+  "run": "2026-10-12T20:01:00.458Z",
+  "checks": [
+    {
+      "name": "list-director: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-member: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-empty: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-designer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-director-review: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-closed: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-missing: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-types: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-writer-video: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-member: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-publisher: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-simple: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-submit: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-close: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-text: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-details: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-assign: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-extension: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-director · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-director · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-director: shows «يحتاج انتباهك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-director: shows «الفريق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-director: shows «خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-director: shows «طلب بانتظار الإسناد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-director: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-director · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-director · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-director · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-director · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-director · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-director · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-all · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-all: shows «منشور اليوم الوطني: شكراً لفريقنا»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all: shows «CH-1»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all: shows «نسخ المنصات (خالد) · المرئيات (سارة) · متأخرة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all: shows «بانتظار اعتماد 3 أجزاء»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all: shows «لوحة الحالات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all: shows «مقيّد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-all · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-all · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-all · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-writer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-writer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-writer: shows «مهامي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-writer: shows «إنشاء عمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-writer: does not show «الطلبات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-writer: does not show «كل الأشخاص»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-writer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-writer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-writer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-member · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-member · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-member: shows «طلباتي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-member: shows «طلب تغطية يوم التطوع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-member: shows «طلب جديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-member: does not show «كل الأشخاص»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-member: does not show «لوحة الفريق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-member: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-member · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-member · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-empty · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-empty · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-empty: shows «لا أعمال بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-empty: shows «CH-1»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-empty: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-empty · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-empty · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-writer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-writer: shows «إنهاء مرحلة «نسخ المنصات»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: shows «إرسال للمراجعة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: shows «نقطة اعتماد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: shows «الإصدار 2»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: shows «عدّله»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: shows «ملف في مجلد لا تصل إليه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: shows «طلب منشور شكر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: shows «سجل العمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: shows «طلب تمديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: does not show «اعتماد المرحلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-writer · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-writer · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-writer · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-writer · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-writer · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-designer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-designer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-designer: shows «إنهاء مرحلة «المرئيات»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-designer: shows «الإنتاج والإرسال للمراجعة: خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-designer: does not show «إغلاق العمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-designer: does not show «تقييد الرؤية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-designer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-designer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-designer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-director-review · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-director-review · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-director-review: shows «مراجعة واعتماد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-director-review: shows «قيد البناء»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-director-review: shows «دورات المراجعة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-director-review: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-director-review · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-director-review · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-closed · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-closed · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-closed: shows «أغلقه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-closed: shows «أُلغي الحدث»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-closed: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-closed · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-closed · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-missing · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-missing · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-missing: shows «العمل غير موجود»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-missing: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-missing · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-missing · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-types · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-types · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-types: shows «منشور اجتماعي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-types: shows «تغطية حدث»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-types: shows «مشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-types: shows «تحويل إلى عمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-types: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-types · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-types · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-post · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-post: shows «خطة المراحل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post: shows «كتابة النص»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post: shows «تلقائي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post: shows «بلا مسؤول الآن (يبقى طلباً)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post: shows «إرسال الطلب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post: shows «إنستغرام · الرسمي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post: shows «حمل الفريق الآن»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-post · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-post · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-post · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-post · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-post · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-writer-video · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-writer-video · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-writer-video: shows «أنا المسؤول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-writer-video: shows «اتركه للقادة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-writer-video: shows «المدة التقريبية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-writer-video: shows «حفظ مسودة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-writer-video: shows «إنشاء وبدء الإنتاج»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-writer-video: shows «يوتيوب · الرسمي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-writer-video: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-writer-video · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-writer-video · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-member · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-member · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-member: shows «طلب جديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-member: shows «إرسال الطلب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-member: shows «يوم الحدث ووقته»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-member: does not show «خطة المراحل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-member: does not show «المشاركون»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-member: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-member · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-member · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-publisher · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-publisher · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-publisher: shows «إنشاء العمل غير متاح لدورك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-publisher: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-publisher · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-publisher · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "plan-simple · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-simple · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "plan-simple: shows «المحرر البسيط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-simple: shows «المعاينة الزمنية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-simple: shows «حفظ الخطة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-simple: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-simple · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-simple · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "plan-free · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "plan-free: shows «اجعلها متتابعة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free: shows «رجوعاً من التسليم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free: shows «تدقيق لغوي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free: shows «حفظ الخطة قالباً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free: shows «فيديو قصير بمراجعة قانونية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free: shows «نقطة اعتماد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "plan-free · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "plan-free · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "plan-free · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "plan-free · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plan-free · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-submit · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-submit · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-submit: shows «ما سيُراجع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-submit: shows «يوتيوب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-submit: shows «موعد النشر المقترح»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-submit: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-submit · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-submit · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-close · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-close · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-close: shows «السبب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-close: shows «إغلاق العمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-close: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-close · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-close · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-text · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-text · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-text: shows «نسخة X»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-text: shows «الحد المقترح 240 حرفاً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-text: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-text · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-text · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-details · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-details · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-details: shows «مواعيد المراحل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-details: shows «الأولوية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-details: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-details · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-details · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-assign · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-assign · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-assign: shows «ريم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-assign: shows «نشطة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-assign: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-assign · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-assign · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-extension · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-extension · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-extension: shows «الموعد الجديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-extension: shows «السبب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-extension: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-extension · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-extension · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drag: the finished stage has no grip",
+      "pass": true,
+      "detail": "3 grips for 4 rows"
+    },
+    {
+      "name": "drag: while dragging, the row fades and the target shows where it lands",
+      "pass": true,
+      "detail": "{\"dragging\":true,\"mark\":true}"
+    },
+    {
+      "name": "drag: a mouse drag down moves the stage to the end",
+      "pass": true,
+      "detail": "[[1,3]]"
+    },
+    {
+      "name": "drag: the marks are cleared on release",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drag: a mouse drag up moves the stage above the row it is dropped on",
+      "pass": true,
+      "detail": "[[1,3],[3,2]]"
+    },
+    {
+      "name": "drag: a touch drag moves the stage too (the grip does not scroll the page)",
+      "pass": true,
+      "detail": "[[1,3],[3,2],[2,0]]"
+    },
+    {
+      "name": "drag: a click on the grip alone moves nothing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drag: no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "total": 264,
+    "passed": 264,
+    "failed": 0
+  }
+}

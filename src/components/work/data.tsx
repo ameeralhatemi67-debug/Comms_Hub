@@ -1,0 +1,283 @@
+'use client';
+// What the work pages share: who is signed in and the role they act as, the people and
+// their load, projects, accounts and plan templates, and the one way to write: a
+// database function (supabase/migrations/*work_cycle*). The database decides every rule;
+// this layer loads, calls and words the answer (src/lib/work/rules.ts).
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { Role } from '@/lib/domain';
+import { useAccount } from '@/lib/account-context';
+import { useHub } from '@/lib/store';
+import { supabase } from '@/lib/supabase/client';
+import {
+  riyadhToday,
+  workErrorText,
+  type AccountRow,
+  type StageRow,
+  type TemplateRow,
+  type WorkRow,
+  type WorkType,
+} from '@/lib/work/rules';
+
+export type Person = { email: string; display_name: string; role: Role };
+export type Load = {
+  email: string;
+  display_name: string;
+  role: Role;
+  active_works: number;
+  late_works: number;
+  open_stages: number;
+  late_stages: number;
+  open_tasks: number;
+  late_tasks: number;
+};
+export type Project = { id: string; name: string; type: string; start_on: string; end_on: string; owner: string; description: string | null };
+export type Template = { id: string; name: string; type: WorkType; rows: TemplateRow[]; created_by: string };
+export type ListItem = { w: WorkRow; stages: StageRow[]; projects: string[]; flags: number; pending?: number };
+export type Result<T = unknown> = { ok: true; data: T } | { ok: false; error: string };
+
+type Ctx = {
+  status: 'loading' | 'ready' | 'error';
+  me: string;
+  /** The role the interface behaves as: the viewed role for an administrator, who acts as any role. */
+  role: Role;
+  isAdmin: boolean;
+  today: string;
+  people: Person[];
+  nameOf: (email: string | null | undefined) => string;
+  personOf: (email: string | null | undefined) => Person | undefined;
+  load: Load[];
+  projects: Project[];
+  accounts: AccountRow[];
+  templates: Template[];
+  reloadBase: () => Promise<void>;
+  /** Calls a database function; on refusal returns the reason in Arabic. */
+  call: <T = unknown>(fn: string, args: Record<string, unknown>) => Promise<Result<T>>;
+  say: (text: string) => void;
+};
+
+const WorkContext = createContext<Ctx | null>(null);
+export function useWork(): Ctx {
+  const v = useContext(WorkContext);
+  if (!v) throw Error('Work provider missing');
+  return v;
+}
+
+export function WorkProvider({ children }: { children: ReactNode }) {
+  const account = useAccount();
+  const { state, dispatch } = useHub();
+  const isAdmin = account.role === 'admin';
+  const role: Role = isAdmin ? state.role : account.role;
+  const [status, setStatus] = useState<Ctx['status']>('loading');
+  const [people, setPeople] = useState<Person[]>([]);
+  const [load, setLoad] = useState<Load[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [accounts, setAccounts] = useState<AccountRow[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const ran = useRef(false);
+
+  const reloadBase = useCallback(async () => {
+    const db = supabase();
+    // No background worker: whoever has a work page open runs what has come due (simulation).
+    if (!ran.current) {
+      ran.current = true;
+      await db.rpc('work_due_run');
+    }
+    const [p, l, j, a, t] = await Promise.all([
+      db.rpc('media_people'),
+      db.rpc('work_people_load'),
+      db.from('projects').select('id,name,type,start_on,end_on,owner,description').order('start_on', { ascending: false }),
+      db.from('platform_accounts').select('id,platform,label,handle,purpose,authorized_until,publishers,mode,active,fixed').order('created_at'),
+      db.from('plan_templates').select('id,name,type,rows,created_by').order('created_at', { ascending: false }),
+    ]);
+    if (p.error || l.error || j.error || a.error || t.error) return setStatus('error');
+    setPeople(p.data as Person[]);
+    setLoad(l.data as Load[]);
+    setProjects(j.data as Project[]);
+    setAccounts(a.data as AccountRow[]);
+    setTemplates(t.data as Template[]);
+    setStatus('ready');
+  }, []);
+  useEffect(() => {
+    void reloadBase();
+  }, [reloadBase]);
+
+  const say = useCallback((text: string) => dispatch({ type: 'notify', text }), [dispatch]);
+  const personOf = useCallback((email: string | null | undefined) => people.find((x) => x.email === email), [people]);
+  const nameOf = useCallback(
+    (email: string | null | undefined) => (email ? (personOf(email)?.display_name ?? email.split('@')[0]) : ''),
+    [personOf],
+  );
+  const call = useCallback(async <T,>(fn: string, args: Record<string, unknown>): Promise<Result<T>> => {
+    const { data, error } = await supabase().rpc(fn, args);
+    if (error) return { ok: false, error: workErrorText(error.message) };
+    return { ok: true, data: data as T };
+  }, []);
+
+  const value = useMemo<Ctx>(
+    () => ({
+      status,
+      me: account.email,
+      role,
+      isAdmin,
+      today: riyadhToday(),
+      people,
+      nameOf,
+      personOf,
+      load,
+      projects,
+      accounts,
+      templates,
+      reloadBase,
+      call,
+      say,
+    }),
+    [status, account.email, role, isAdmin, people, nameOf, personOf, load, projects, accounts, templates, reloadBase, call, say],
+  );
+  return <WorkContext.Provider value={value}>{children}</WorkContext.Provider>;
+}
+
+/** Every work this person can see (row level security decides), with its stages, projects and review counts. */
+export function useWorkList() {
+  const [items, setItems] = useState<ListItem[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const reload = useCallback(async () => {
+    const db = supabase();
+    const [w, s, p, f] = await Promise.all([
+      db.from('works').select('*').order('due'),
+      db.from('work_stages').select('*').order('pos'),
+      db.from('work_projects').select('work_id,project_id'),
+      db.from('work_flags').select('work_id,part'),
+    ]);
+    if (w.error || s.error || p.error || f.error) return setStatus('error');
+    const works = w.data as WorkRow[];
+    const stages = s.data as StageRow[];
+    const inReview = works.filter((x) => x.status === 'IN_REVIEW');
+    const pending = await Promise.all(inReview.map((x) => db.rpc('work_pending', { p_work: x.id })));
+    const pend: Record<string, number> = {};
+    inReview.forEach((x, i) => (pend[x.id] = ((pending[i].data as unknown[]) ?? []).length));
+    setItems(
+      works.map((x) => ({
+        w: x,
+        stages: stages.filter((st) => st.work_id === x.id),
+        projects: (p.data as { work_id: string; project_id: string }[]).filter((r) => r.work_id === x.id).map((r) => r.project_id),
+        flags: (f.data as { work_id: string }[]).filter((r) => r.work_id === x.id).length,
+        pending: pend[x.id],
+      })),
+    );
+    setStatus('ready');
+  }, []);
+  useEffect(() => {
+    void reload();
+    const again = () => document.visibilityState === 'visible' && void reload();
+    document.addEventListener('visibilitychange', again);
+    return () => document.removeEventListener('visibilitychange', again);
+  }, [reload]);
+  return { items, status, reload };
+}
+
+// ---------------------------------------------------------------------------
+// One work, in full
+// ---------------------------------------------------------------------------
+export type TextVersion = { n: number; body: string; note: string | null; author: string; created_at: string };
+export type Variant = { platform: string; n: number; body: string; base: number; author: string; created_at: string };
+export type PartRow = { key: string; label: string; ver: string; kind: string };
+export type Cycle = { n: number; sent_by: string; sent_at: string; note: string | null };
+export type Decision = { id: number; cycle: number; op: string; labels: string[]; decided_by: string; decided_at: string; note: string | null };
+export type Comment = { id: string; author: string; body: string; created_at: string };
+export type LogRow = { id: number; at: string; actor: string; type: string; text: string };
+export type WorkAsset = { asset_id: string; file: { id: string; name: string; kind: string; current_version: number; approved_version: number | null; stage: string } | null };
+export type MailLink = { id: string; subject: string; kind: string; req_no: number | null };
+export type ChatLink = { id: string; name: string | null };
+export type Extension = { id: string; stage_id: string | null; status: string; to_at: string; requested_by: string };
+
+export type WorkDetail = {
+  w: WorkRow;
+  stages: StageRow[];
+  texts: TextVersion[];
+  variants: Variant[];
+  approvals: { part: string; ver: string; approved_by: string }[];
+  flags: { part: string; ver: string; note: string | null }[];
+  cycles: Cycle[];
+  decisions: Decision[];
+  comments: Comment[];
+  log: LogRow[];
+  projects: string[];
+  assets: WorkAsset[];
+  parts: PartRow[];
+  pending: PartRow[];
+  decideBlock: string;
+  mail: MailLink[];
+  chats: ChatLink[];
+  extensions: Extension[];
+};
+
+export function useWorkDetail(id: string) {
+  const [detail, setDetail] = useState<WorkDetail | null>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
+  const reload = useCallback(async () => {
+    const db = supabase();
+    const w = await db.from('works').select('*').eq('id', id).maybeSingle();
+    if (w.error) return setStatus('error');
+    // Not found and not visible read the same: a restricted work does not exist for those outside it.
+    if (!w.data) return setStatus('missing');
+    const [st, tx, va, ap, fl, cy, de, co, lg, pj, as, parts, pend, blk, ml, ch] = await Promise.all([
+      db.from('work_stages').select('*').eq('work_id', id).order('pos'),
+      db.from('work_texts').select('n,body,note,author,created_at').eq('work_id', id).order('n'),
+      db.from('work_variants').select('platform,n,body,base,author,created_at').eq('work_id', id).order('n'),
+      db.from('work_approvals').select('part,ver,approved_by').eq('work_id', id),
+      db.from('work_flags').select('part,ver,note').eq('work_id', id),
+      db.from('work_cycles').select('n,sent_by,sent_at,note').eq('work_id', id).order('n'),
+      db.from('work_decisions').select('id,cycle,op,labels,decided_by,decided_at,note').eq('work_id', id).order('decided_at'),
+      db.from('work_comments').select('id,author,body,created_at').eq('work_id', id).order('created_at'),
+      db.from('work_log').select('id,at,actor,type,text').eq('work_id', id).order('at'),
+      db.from('work_projects').select('project_id').eq('work_id', id),
+      db.from('work_assets').select('asset_id, file:media_files(id,name,kind,current_version,approved_version,stage)').eq('work_id', id).order('added_at'),
+      db.rpc('work_parts', { p_work: id }),
+      db.rpc('work_pending', { p_work: id }),
+      db.rpc('work_decide_block', { p_work: id }),
+      db.from('mail_threads').select('id,subject,kind,req_no').contains('links', [{ type: 'work', id }]),
+      db.from('chat_rooms').select('id,name').eq('link->>id', id),
+    ]);
+    const stages = (st.data ?? []) as StageRow[];
+    const ex = stages.length
+      ? await db.from('work_requests').select('id,stage_id,status,to_at,requested_by').in('stage_id', stages.map((s) => s.id)).eq('status', 'pending')
+      : { data: [] };
+    setDetail({
+      w: w.data as WorkRow,
+      stages,
+      texts: (tx.data ?? []) as TextVersion[],
+      variants: (va.data ?? []) as Variant[],
+      approvals: (ap.data ?? []) as WorkDetail['approvals'],
+      flags: (fl.data ?? []) as WorkDetail['flags'],
+      cycles: (cy.data ?? []) as Cycle[],
+      decisions: (de.data ?? []) as Decision[],
+      comments: (co.data ?? []) as Comment[],
+      log: (lg.data ?? []) as LogRow[],
+      projects: ((pj.data ?? []) as { project_id: string }[]).map((r) => r.project_id),
+      assets: (as.data ?? []) as unknown as WorkAsset[],
+      parts: (parts.data ?? []) as PartRow[],
+      pending: (pend.data ?? []) as PartRow[],
+      decideBlock: blk.data ? workErrorText(blk.data as string) : '',
+      mail: (ml.data ?? []) as MailLink[],
+      chats: (ch.data ?? []) as ChatLink[],
+      extensions: (ex.data ?? []) as Extension[],
+    });
+    setStatus('ready');
+  }, [id]);
+  useEffect(() => {
+    void reload();
+    const again = () => document.visibilityState === 'visible' && void reload();
+    document.addEventListener('visibilitychange', again);
+    return () => document.removeEventListener('visibilitychange', again);
+  }, [reload]);
+  return { detail, status, reload };
+}
+
+/** Files this person can reach in the library, newest first, for the pickers. */
+export type LibraryFile = { id: string; name: string; kind: string; current_version: number; stage: string };
+export async function libraryFiles(q: string): Promise<LibraryFile[]> {
+  let query = supabase().from('media_files').select('id,name,kind,current_version,stage').order('created_at', { ascending: false }).limit(60);
+  if (q.trim()) query = query.ilike('name', `%${q.trim()}%`);
+  const { data } = await query;
+  return (data ?? []) as LibraryFile[];
+}

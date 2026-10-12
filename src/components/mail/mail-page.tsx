@@ -5,7 +5,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { campaign, roles } from '@/lib/domain';
+import { roles } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { Title } from '../ui';
 import {
@@ -107,7 +107,8 @@ function Mail() {
   const [folder, setFolderState] = useState<FolderId>(memory.folder);
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<'all' | 'unread' | 'internal' | 'external' | 'cards'>('all');
-  const [openId, setOpenId] = useState<string | null>(null);
+  // A work page links its mail as /mail?thread=<id>.
+  const [openId, setOpenId] = useState<string | null>(() => (typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('thread')));
   const [sel, setSel] = useState<string[]>([]);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [dialog, setDialog] = useState<null | 'settings' | 'keys' | 'work'>(null);
@@ -582,29 +583,11 @@ function Mail() {
           view={open}
           onClose={() => setDialog(null)}
           canCreate={roles[state.role].create}
-          onCreate={async (title, body, assignee) => {
-            const id = `CH-${Math.max(...state.work.map((w) => Number(w.id.slice(3)))) + 1}`;
-            dispatch({
-              type: 'create',
-              submit: false,
-              content: {
-                title,
-                body,
-                type: 'طلب خارجي',
-                owner: state.role,
-                assignee: 'abdullah',
-                due: campaign.date,
-                channels: ['Instagram', 'X', 'LinkedIn'],
-                assetId: 'poster',
-                assetVersion: 5,
-                variants: { Instagram: body, X: body, LinkedIn: body },
-                campaignId: campaign.id,
-              },
-            });
-            const r = await m.call('mail_link_work', { p_thread: open.thread.id, p_work: id, p_title: title, p_assignee: assignee || null }, `أُنشئ العمل ${id} وارتبط بالمحادثة.`);
-            if (!r.ok) m.say(r.error);
+          onCreate={() => router.push(`/create?mail=${open.thread.id}`)}
+          onLink={async (id, title, assignee) => {
+            const r = await m.call('mail_link_work', { p_thread: open.thread.id, p_work: id, p_title: title, p_assignee: assignee || null }, `رُبطت المحادثة بالعمل ${id}.`);
+            if (!r.ok) return m.say(r.error);
             setDialog(null);
-            return id;
           }}
           onOpenWork={(id) => router.push(`/work/${id}`)}
         />
@@ -830,32 +813,66 @@ function WorkDialog({
   view,
   onClose,
   onCreate,
+  onLink,
   onOpenWork,
   canCreate,
 }: {
   view: View;
   onClose: () => void;
-  onCreate: (title: string, body: string, assignee: string) => Promise<string>;
+  onCreate: () => void;
+  onLink: (id: string, title: string, assignee: string) => Promise<void>;
   onOpenWork: (id: string) => void;
   canCreate: boolean;
 }) {
   const m = useMail();
-  const first = mails(view)[0];
-  const [title, setTitle] = useState(view.thread.subject.replace(/^طلب /, ''));
-  const [body, setBody] = useState(first.body.split('\n').filter(Boolean).slice(0, 4).join('\n'));
+  const [works, setWorks] = useState<{ id: string; title: string }[] | null>(null);
+  const [pick, setPick] = useState('');
   const [who, setWho] = useState(view.thread.assignee ?? '');
   const [busy, setBusy] = useState(false);
+  const linked = (view.thread.links ?? []).filter((l: { type: string }) => l.type === 'work') as { id: string; title: string }[];
+  useEffect(() => {
+    void (async () => {
+      const { supabase } = await import('@/lib/supabase/client');
+      const { data } = await supabase().from('works').select('id,title').is('closed_at', null).order('created_at', { ascending: false }).limit(80);
+      setWorks((data ?? []) as { id: string; title: string }[]);
+    })();
+  }, []);
   return (
     <Dlg title="تحويل إلى عمل" onClose={onClose}>
-      <p className="ml-mtext">يُنشأ عمل جديد في صفحة العمل، ويرتبط بهذه المحادثة، ويحصل الطلب الخارجي على رقم. الأعمال ما زالت محلية في كل متصفح في هذه المرحلة.</p>
-      {!canCreate && <p className="ml-err">دورك الحالي لا ينشئ الأعمال.</p>}
-      <label className="ml-l" htmlFor="ml-w-title">
-        عنوان العمل
-        <input id="ml-w-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={140} />
-      </label>
-      <label className="ml-l" htmlFor="ml-w-body">
-        الوصف
-        <textarea id="ml-w-body" value={body} onChange={(e) => setBody(e.target.value)} />
+      <p className="ml-mtext">
+        يُفتح «إنشاء» بعنوان الرسالة ومرسلها وأول سطورها، فتختار النوع وتكمل. عند الحفظ يصدر المركز رقم العمل، ويرتبط العمل بهذه المحادثة، ويحصل الطلب الخارجي على رقم.
+      </p>
+      {linked.length > 0 && (
+        <p className="ml-mtext">
+          مرتبطة الآن بـ:{' '}
+          {linked.map((l, i) => (
+            <button key={l.id} type="button" className="ml-btn sm quiet" onClick={() => onOpenWork(l.id)}>
+              {i ? '، ' : ''}
+              {l.id} {l.title}
+            </button>
+          ))}
+        </p>
+      )}
+      {!canCreate && <p className="ml-err">دورك الحالي لا ينشئ الأعمال. يمكنك ربط المحادثة بعمل قائم.</p>}
+      <div className="ml-row-end">
+        <button type="button" className="ml-btn" onClick={onClose}>
+          إلغاء
+        </button>
+        <button type="button" className="ml-btn primary" disabled={!canCreate} onClick={onCreate}>
+          <I n="work" />
+          إنشاء عمل من الرسالة
+        </button>
+      </div>
+      <label className="ml-l" htmlFor="ml-w-link">
+        أو اربطها بعمل قائم
+        <select id="ml-w-link" value={pick} onChange={(e) => setPick(e.target.value)}>
+          <option value="">{works === null ? 'جارٍ التحميل…' : works.length ? 'اختر عملاً' : 'لا أعمال مفتوحة تراها'}</option>
+          {(works ?? []).map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.id} · {w.title}
+            </option>
+          ))}
+        </select>
       </label>
       {view.thread.kind === 'external' && !view.thread.assignee && (
         <label className="ml-l" htmlFor="ml-w-who">
@@ -873,22 +890,18 @@ function WorkDialog({
         </label>
       )}
       <div className="ml-row-end">
-        <button type="button" className="ml-btn" onClick={onClose}>
-          إلغاء
-        </button>
         <button
           type="button"
-          className="ml-btn primary"
-          disabled={busy || !canCreate || !title.trim() || !body.trim()}
+          className="ml-btn"
+          disabled={busy || !pick}
           onClick={async () => {
             setBusy(true);
-            const id = await onCreate(title.trim(), body.trim(), who);
+            await onLink(pick, works?.find((w) => w.id === pick)?.title ?? '', who);
             setBusy(false);
-            onOpenWork(id);
           }}
         >
-          <I n="work" />
-          إنشاء العمل
+          <I n="link" />
+          ربط بالعمل
         </button>
       </div>
     </Dlg>

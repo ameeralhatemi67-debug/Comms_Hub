@@ -484,6 +484,272 @@ export function taskImpact(tasks: Pick<TaskRow, 'id' | 'what' | 'assignee' | 'du
 }
 
 // ---------------------------------------------------------------------------
+// Dates as the pages show them: «الأحد 11 أكتوبر», in Riyadh
+// ---------------------------------------------------------------------------
+const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const MONTH_NAMES = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+export const sdate = (d: string) => `${+d.slice(8, 10)} ${MONTH_NAMES[+d.slice(5, 7) - 1]}`;
+export const fdate = (d: string) => `${DAY_NAMES[new Date(dayNum(d) * 864e5).getUTCDay()]} ${sdate(d)}`;
+/** A moment as 'YYYY-MM-DD HH:MM' in Riyadh. */
+export const riyadhStamp = (iso: string) => new Date(Date.parse(iso) + 3 * 3600e3).toISOString().slice(0, 16).replace('T', ' ');
+/** A Riyadh 'YYYY-MM-DDTHH:MM' (a datetime-local value) as an instant. */
+export const riyadhInstant = (local: string) => new Date(`${local.length === 16 ? `${local}:00` : local}+03:00`).toISOString();
+export function lateN(n: number): string {
+  return n === 1 ? 'مرحلة متأخرة' : n === 2 ? 'مرحلتان متأخرتان' : `${n} مراحل متأخرة`;
+}
+
+// ---------------------------------------------------------------------------
+// «العمل»: what is late, what each row says, tabs and order
+// ---------------------------------------------------------------------------
+type ListWork = Pick<WorkRow, 'status' | 'closed_at' | 'assignee' | 'due' | 'priority'>;
+export const isOverdue = (w: ListWork, today: string) => isOutstanding(w) && !isRequest(w) && dayDiff(w.due, today) < 0;
+export const isSoon = (w: ListWork, today: string) => {
+  const d = dayDiff(w.due, today);
+  return isOutstanding(w) && !isRequest(w) && d >= 0 && d <= 2;
+};
+type DatedStage = Pick<StageRow, 'done_at' | 'due_on'>;
+export const stageLate = (s: DatedStage, today: string) => !s.done_at && !!s.due_on && dayDiff(s.due_on, today) < 0;
+export const lateStages = <S extends DatedStage>(w: ListWork, stages: S[], today: string) =>
+  isOutstanding(w) ? stages.filter((s) => stageLate(s, today)) : [];
+/** Stages someone can work on now: started, or ready to start. */
+export function openSteps(stages: StageLike[]): number[] {
+  return stages.map((_, i) => i).filter((i) => ['active', 'ready'].includes(stageState(stages, i)));
+}
+export function curStage(stages: StageLike[]): number {
+  const o = openSteps(stages);
+  if (o.length) return o[0];
+  return stages.findIndex((s) => !s.done_at);
+}
+
+/** Where a work stands, in one line: the open stages and who is on them, or what it waits for. */
+export function stageLine(
+  w: Pick<WorkRow, 'status' | 'closed_at' | 'assignee' | 'type' | 'sched_at' | 'pub_at' | 'proposed_at' | 'confirm_pending' | 'due' | 'priority'>,
+  stages: (StageLike & DatedStage & Pick<StageRow, 'name' | 'who'>)[],
+  today: string,
+  nameOf: (email: string) => string,
+  counts: { pending?: number; flags?: number } = {},
+): { text: string; tone: '' | 'late' } {
+  if (w.closed_at) return { text: 'مغلق', tone: '' };
+  if (!w.assignee) return { text: 'بانتظار الإسناد', tone: '' };
+  const late = lateStages(w, stages, today);
+  const n = (k: number) => (k === 1 ? 'جزء واحد' : k === 2 ? 'جزأين' : `${k} أجزاء`);
+  switch (w.status) {
+    case 'DRAFT':
+      return { text: `لم يبدأ الإنتاج${late.length ? ` · ${lateN(late.length)}` : ''}`, tone: late.length ? 'late' : '' };
+    case 'IN_PRODUCTION': {
+      const o = openSteps(stages);
+      if (!o.length) return { text: 'المراحل مكتملة · جاهز للإرسال', tone: '' };
+      const anyLate = o.some((i) => stageLate(stages[i], today));
+      return {
+        text: o.map((i) => stages[i].name + (stages[i].who ? ` (${nameOf(stages[i].who!)})` : '')).join(' · ') + (anyLate ? ' · متأخرة' : ''),
+        tone: anyLate ? 'late' : '',
+      };
+    }
+    case 'IN_REVIEW':
+      return {
+        text: isWhole(w.type) ? 'بانتظار اعتماد الحزمة كاملة' : counts.pending ? `بانتظار اعتماد ${n(counts.pending)}` : 'بانتظار القرار',
+        tone: '',
+      };
+    case 'CHANGES_REQUESTED':
+      return { text: `تعديل بعد المراجعة${counts.flags ? ` · ${n(counts.flags)}` : ''}`, tone: '' };
+    case 'REJECTED':
+      return { text: 'رُفض في المراجعة', tone: '' };
+    case 'APPROVED':
+      return { text: `معتمد · بانتظار الجدولة${w.proposed_at ? ` (${sdate(riyadhStamp(w.proposed_at))})` : ''}`, tone: '' };
+    case 'SCHEDULED': {
+      const at = w.sched_at ? riyadhStamp(w.sched_at) : '';
+      return { text: `مجدول للنشر ${at ? `${sdate(at)} ${at.slice(11)}` : ''}${w.confirm_pending ? ' · بانتظار التأكيد' : ''}`, tone: w.confirm_pending ? 'late' : '' };
+    }
+    case 'PUBLISHING':
+      return { text: 'جارٍ النشر', tone: '' };
+    case 'PUBLISHED':
+      return { text: `نُشر ${w.pub_at ? sdate(riyadhStamp(w.pub_at)) : ''}`.trim(), tone: '' };
+    case 'PARTIAL':
+      return { text: 'نُشر على بعض المنصات', tone: 'late' };
+    case 'FAILED':
+      return { text: 'فشل النشر', tone: 'late' };
+  }
+  return { text: '', tone: '' };
+}
+
+export type WorkTab = 'team' | 'all' | 'mine' | 'requests' | 'closed';
+export function tabsFor(r: Role): [WorkTab, string][] {
+  const t: [WorkTab, string][] = [];
+  if (isLead(r)) t.push(['team', 'الفريق']);
+  t.push(['all', 'الكل']);
+  t.push(['mine', r === 'member' ? 'طلباتي' : 'مهامي']);
+  if (isLead(r)) t.push(['requests', 'الطلبات']);
+  t.push(['closed', 'المغلقة']);
+  return t;
+}
+export function inTab(
+  w: Pick<WorkRow, 'closed_at' | 'assignee' | 'created_by' | 'people'>,
+  stages: Pick<StageRow, 'who'>[],
+  tab: WorkTab,
+  me: string,
+  r: Role,
+): boolean {
+  if (tab === 'closed') return !!w.closed_at;
+  if (w.closed_at) return false;
+  if (tab === 'mine') return r === 'member' ? w.created_by === me : involved(w, stages, me);
+  if (tab === 'requests') return isRequest(w);
+  return true;
+}
+/** Open work first (urgent, then by due date), then requests, then delivered, then closed (newest first). */
+export function workOrder(a: ListWork & Pick<WorkRow, 'closed_at'>, b: ListWork & Pick<WorkRow, 'closed_at'>): number {
+  const k = (w: typeof a) => (w.closed_at ? 3 : isOutstanding(w) ? (isRequest(w) ? 1 : 0) : 2);
+  const ka = k(a), kb = k(b);
+  if (ka !== kb) return ka - kb;
+  if (ka === 0) {
+    const ua = a.priority === 'urgent' ? 0 : 1, ub = b.priority === 'urgent' ? 0 : 1;
+    if (ua !== ub) return ua - ub;
+  }
+  if (ka === 3) return (a.closed_at ?? '') < (b.closed_at ?? '') ? 1 : -1;
+  return a.due < b.due ? -1 : a.due > b.due ? 1 : 0;
+}
+/** The attention counts on «العمل», over open work. */
+export function attentionCounts(list: { w: ListWork; stages: DatedStage[] }[], today: string) {
+  const open = list.filter((x) => !x.w.closed_at);
+  return {
+    late: open.filter((x) => isOverdue(x.w, today)).length,
+    soon: open.filter((x) => isSoon(x.w, today)).length,
+    stages: open.filter((x) => lateStages(x.w, x.stages, today).length).length,
+    review: open.filter((x) => x.w.status === 'IN_REVIEW').length,
+    urgent: open.filter((x) => x.w.priority === 'urgent' && isOutstanding(x.w)).length,
+    requests: open.filter((x) => isRequest(x.w)).length,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// The work page: what this person may do now (the database decides each one)
+// ---------------------------------------------------------------------------
+export type ActionId =
+  | 'reopen' | 'assign' | 'details' | 'start' | 'submit' | 'plan' | 'review' | 'edittext' | 'lib' | 'publish'
+  | 'chat' | 'restrict' | 'close' | `stepdone:${number}` | `wait:${number}`;
+export type WorkAction = { id: ActionId; label: string; hint: string; next: boolean; disabled: boolean };
+export type ActionInput = {
+  w: Pick<WorkRow, 'status' | 'closed_at' | 'assignee' | 'created_by' | 'people' | 'type' | 'restricted' | 'channels' | 'priority' | 'review_cycle'>;
+  stages: (StageLike & Pick<StageRow, 'name' | 'who'>)[];
+  me: string;
+  role: Role;
+  hasText: boolean;
+  pending: number;
+  total: number;
+  decideBlock: string;
+  hasChat: boolean;
+  nameOf: (email: string) => string;
+};
+export function workActions(x: ActionInput): WorkAction[] {
+  const { w, stages, me, role: r, nameOf } = x;
+  const out: WorkAction[] = [];
+  const add = (id: ActionId, label: string, hint: string, next = false, disabled = false) => out.push({ id, label, hint, next, disabled });
+  const lead = isLead(r);
+  const part = lead || involved(w, stages, me);
+  if (w.closed_at) {
+    if (lead) add('reopen', 'إعادة فتح العمل', 'يعود إلى القوائم النشطة بحالته الأخيرة', true);
+    return out;
+  }
+  if (!w.assignee) {
+    if (lead) add('assign', 'إسناد الطلب', 'اختر المسؤول، فيصله إشعار ويبدأ العمل', true);
+    if (w.created_by === me && !lead) add('details', 'تعديل الطلب', 'العنوان والموعد والوصف قبل الإسناد');
+  } else {
+    const boss = lead || w.assignee === me;
+    if (w.status === 'DRAFT' && boss) add('start', 'بدء الإنتاج', 'ينتقل العمل إلى «قيد الإنتاج»', true);
+    if (['CHANGES_REQUESTED', 'REJECTED'].includes(w.status) && boss)
+      add('start', 'بدء التعديل', 'يعود العمل إلى «قيد الإنتاج» لتعديل ما طُلب');
+    if (w.status === 'CHANGES_REQUESTED' && boss)
+      add('submit', 'إعادة الإرسال للمراجعة', isWhole(w.type) ? 'تُراجع الحزمة كاملة مرة أخرى' : 'يُراجع ما تغيّر فقط، والمعتمد يبقى معتمداً', true);
+    if (['IN_PRODUCTION', 'DRAFT'].includes(w.status) && part) {
+      openSteps(stages)
+        .filter((i) => stages[i].who === me || boss)
+        .slice(0, 3)
+        .forEach((i) => {
+          const s = stages[i];
+          add(`stepdone:${i}`, `إنهاء مرحلة «${s.name}»`, `${s.who && s.who !== me ? `مسندة إلى ${nameOf(s.who)}. ` : ''}يصل إشعار لمن بعدها`, s.who === me);
+        });
+      stages.forEach((s, i) => {
+        if (s.who === me && stageState(stages, i) === 'waiting')
+          add(`wait:${i}`, `«${s.name}» تنتظر`, `تبدأ بعد ${waitsFor(stages, i).map((j) => `«${stages[j].name}»${stages[j].who ? ` (${nameOf(stages[j].who!)})` : ''}`).join(' و')}`, false, true);
+      });
+      const left = stages.filter((s) => !s.done_at).length;
+      if (w.status === 'IN_PRODUCTION' && boss)
+        add('submit', 'إرسال للمراجعة', `إلى مدير الاتصال ومساعده${left ? `، وتبقى ${left} مراحل` : ''}`, !left);
+    }
+    if ((lead || w.assignee === me) && OUTSTANDING.includes(w.status)) add('plan', 'خطة المراحل', 'من يعمل على ماذا ومتى، وما ينتظر ماذا');
+    if (w.status === 'IN_REVIEW' && lead)
+      add('review', 'مراجعة واعتماد', x.decideBlock || `ينتظر قرارك: ${x.pending} من ${x.total} أجزاء. القرار من شاشة المراجعة في «الموافقات والنشر»، وهي قيد البناء.`, false, true);
+    if (boss && textEditable(w)) {
+      const after = ['APPROVED', 'SCHEDULED'].includes(w.status);
+      add('edittext', `${x.hasText ? 'تعديل' : 'كتابة'} ${textLabels[w.type]}`,
+        !x.hasText ? 'يصبح جزءاً يُراجع ويُعتمد'
+          : after ? (isWhole(w.type) ? 'معتمد: التعديل يعيد الحزمة كاملة إلى المراجعة' : 'معتمد: التعديل يعيده وحده إلى المراجعة')
+            : 'يُحفظ إصداراً جديداً باسم من عدّله');
+    }
+    if (part && ['DRAFT', 'IN_PRODUCTION', 'CHANGES_REQUESTED', 'REJECTED'].includes(w.status))
+      add('lib', 'إضافة وسائط من المكتبة', 'تبقى الوسائط في مجلدها بصلاحياته');
+    if (canPublish(r) && ['APPROVED', 'SCHEDULED', 'PARTIAL', 'FAILED'].includes(w.status))
+      add('publish', w.status === 'APPROVED' ? 'جدولة النشر' : w.status === 'SCHEDULED' ? 'تغيير الموعد' : 'إعادة المحاولة',
+        'من «الموافقات والنشر»، وهي قيد البناء. النشر محاكاة.', false, true);
+    if (lead) add('assign', 'إسناد إلى شخص آخر', `المسؤول الحالي: ${nameOf(w.assignee)}`);
+  }
+  if (lead) add('details', 'تعديل التفاصيل والمواعيد', 'المشاريع والأولوية ومواعيد المراحل');
+  if (!x.hasChat && part) add('chat', 'فتح محادثة للعمل', 'مجموعة مراسلة تضم المسؤول والمشاركين');
+  if (lead) add('restrict', w.restricted ? 'إلغاء التقييد' : 'تقييد الرؤية', w.restricted ? 'يراه كل القسم' : 'لا يراه إلا المعنيون والقادة');
+  if (lead) add('close', 'إغلاق العمل', 'مع سبب مكتوب، ويبقى في «المغلقة»');
+  return out;
+}
+/** Under the actions: who holds what this person does not. */
+export function actionOwners(w: Pick<WorkRow, 'closed_at' | 'assignee'>, me: string, r: Role, nameOf: (e: string) => string): string {
+  if (w.closed_at) return isLead(r) ? '' : 'إعادة الفتح لمدير الاتصال ومساعده.';
+  if (isLead(r)) return '';
+  const t: string[] = [];
+  if (w.assignee && w.assignee !== me) t.push(`الإنتاج والإرسال للمراجعة: ${nameOf(w.assignee)}`);
+  t.push('الإسناد والإغلاق والتقييد: مدير الاتصال ومساعده');
+  return `${t.join(' · ')}.`;
+}
+
+// ---------------------------------------------------------------------------
+// The free plan editor's tools
+// ---------------------------------------------------------------------------
+/** Each stage waits for the one before it. Finished stages keep their waits. */
+export const planChain = (P: PlanRow[]): PlanRow[] => P.map((s, i) => (s.done ? s : { ...s, after: i ? [i - 1] : [] }));
+/** Every stage starts on its own. */
+export const planParallel = (P: PlanRow[]): PlanRow[] => P.map((s) => (s.done ? s : { ...s, after: [] }));
+/** A copy right after the stage: the same person, dates and waits, as a new stage. */
+export function planCopy(P: PlanRow[], i: number): PlanRow[] {
+  const s = P[i];
+  const out = planInsert(P, i + 1, { ...s, id: undefined, n: `${s.n} (نسخة)`, days: stepDays(s), done: false });
+  out[i + 1] = { ...out[i + 1], after: [...s.after] };
+  return out;
+}
+export type TemplateRow = { n: string; role: StageRole; days: number; after: number[]; gate: boolean; note: string };
+export function typeTemplate(t: WorkType): TemplateRow[] {
+  return TYPE_PLANS[t].map(([n, role, days, after]) => ({ n, role, days, after: [...after], gate: false, note: '' }));
+}
+export function rowsFromTemplate(rows: TemplateRow[]): PlanRow[] {
+  return rows.map((r) => ({ n: r.n, role: r.role, who: '', start: '', due: '', after: [...r.after], days: r.days, gate: !!r.gate, note: r.note ?? '' }));
+}
+/** Apply a template: finished stages stay first, and the template's stages follow them. */
+export function planWithTemplate(P: PlanRow[], rows: TemplateRow[]): PlanRow[] {
+  const done = P.filter((s) => s.done).map((s) => ({ ...s, after: [] as number[] }));
+  const base = done.length;
+  return [
+    ...done,
+    ...rowsFromTemplate(rows).map((r) => ({ ...r, after: r.after.length ? r.after.map((j) => j + base) : base ? [base - 1] : [] })),
+  ];
+}
+export function templateFromPlan(P: PlanRow[]): TemplateRow[] {
+  return P.map((s) => ({ n: s.n.trim(), role: s.role, days: stepDays(s), after: [...s.after], gate: s.gate, note: s.note.trim() }));
+}
+/** A plan as the database functions take it. */
+export function planPayload(P: PlanRow[]) {
+  return P.map((s) => ({
+    id: s.id ?? null, n: s.n.trim(), role: s.role, who: s.who || null, start: s.start || null, due: s.due || null,
+    after: s.after, days: stepDays(s), gate: s.gate, note: s.note.trim(),
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // Errors from the database, in Arabic
 // ---------------------------------------------------------------------------
 const ERRORS: Record<string, string> = {

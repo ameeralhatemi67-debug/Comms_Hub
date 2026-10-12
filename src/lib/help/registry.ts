@@ -15,10 +15,13 @@ export function pageKeyOf(path: string): string | null {
   if (p === '/activity') return 'activity';
   if (p === '/mail') return 'mail';
   if (p === '/mail/chat') return 'chat';
+  if (p === '/work') return 'work';
+  if (/^\/work\/[^/]+$/.test(p)) return 'item';
+  if (p === '/create') return 'create';
   return null;
 }
 
-/** Where a linked page opens. The file page needs a file, so it opens the library. */
+/** Where a linked page opens. The file page needs a file, so it opens the library; a work page opens «العمل». */
 export const PAGE_HREF: Record<string, string> = {
   library: '/media',
   asset: '/media',
@@ -26,6 +29,9 @@ export const PAGE_HREF: Record<string, string> = {
   activity: '/activity',
   mail: '/mail',
   chat: '/mail/chat',
+  work: '/work',
+  item: '/work',
+  create: '/create',
 };
 
 export const ROLE_GROUP: Record<RoleGroup, string> = {
@@ -52,5 +58,8 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   activity: ['src/components/media/activity-page.tsx'],
   mail: ['src/components/mail/mail-page.tsx', 'src/components/mail/thread.tsx', 'src/components/mail/parts.tsx'],
   chat: ['src/components/chat/chat-tab.tsx', 'src/components/mail/mail-page.tsx'],
+  work: ['src/components/work/list.tsx', 'src/components/work/parts.tsx'],
+  item: ['src/components/work/item.tsx', 'src/components/work/plan.tsx', 'src/components/work/parts.tsx'],
+  create: ['src/components/work/create.tsx', 'src/components/work/plan.tsx', 'src/components/work/parts.tsx'],
 };
 export const SHARED_SOURCES = ['src/components/ui.tsx', 'src/components/shell.tsx', 'src/components/kit.tsx'];

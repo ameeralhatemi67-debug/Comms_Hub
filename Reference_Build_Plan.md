@@ -112,7 +112,14 @@ content.
 
 ---
 
-## Step 3. «العمل», the work page and «إنشاء»
+## Step 3. «العمل», the work page and «إنشاء» (done 2026-10-12)
+
+Built as planned, with these differences, recorded in `progress.md`: no database change
+was needed; the review decision itself and the publishing actions wait for Step 4 (the
+work page shows the review state of each part and says where the decision is made);
+edits on the work pages are recorded in the work log but are not undoable from «تراجع»;
+the project card creates a project without its works plan (Step 5). Pages in
+`src/components/work/`; browser check `qa/work-pages.cjs` 264 of 264.
 
 **Goal:** replace the mock work pages with the reference's, on real data.
 
@@ -187,5 +194,5 @@ row level security.
 ## Opening instruction for the next session
 
 > Read `Reference_Build_Plan.md`, `AGENTS.md`, the last three entries of `progress.md`, and
-> the reference in `reference/comms-hub-reference-v5.html` («العمل», the work page,
-> «إنشاء» and the plan editor). Start Step 3.
+> the reference in `reference/comms-hub-reference-v5.html` («الموافقات والنشر», the
+> review screen, «الحسابات المرتبطة» and the notifications drawer). Start Step 4.

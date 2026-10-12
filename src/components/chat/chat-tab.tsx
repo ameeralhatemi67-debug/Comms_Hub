@@ -57,7 +57,8 @@ const REACT_ICON: Record<string, IconName> = { check: 'check', eye: 'eye', heart
 export function ChatTab({ onToMail }: { onToMail: (p: MailPrefill) => void }) {
   const c = useChat();
   const people = usePeople();
-  const [openId, setOpenId] = useState<string | null>(null);
+  // A work page links its group as /mail/chat?room=<id>.
+  const [openId, setOpenId] = useState<string | null>(() => (typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('room')));
   const [filter, setFilter] = useState<'all' | 'unread' | 'groups' | 'starred'>('all');
   const [q, setQ] = useState('');
   const [info, setInfo] = useState(false);
