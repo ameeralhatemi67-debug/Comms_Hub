@@ -251,6 +251,7 @@ export function riyadhStamp(iso: string | Date): string {
 export function dbErrorText(message: string): string {
   const m = message || '';
   const table: [string, string][] = [
+    ['SELF_APPROVAL', 'لا تعتمد إصداراً رفعته بنفسك. يقرر فيه غيرك من القيادة.'],
     ['STAGE_DENIED', 'هذا الانتقال غير متاح لدورك أو لحالة الأصل الحالية.'],
     ['NAME_LOCKED', 'لا يمكن تغيير الاسم: لا تملك صلاحية التحرير، أو الإصدار معتمد ومقفل، أو المجلد مقفل.'],
     ['EDIT_LOCKED', 'لا يمكن التعديل: لا تملك صلاحية التحرير، أو الإصدار معتمد ومقفل، أو المجلد مقفل.'],

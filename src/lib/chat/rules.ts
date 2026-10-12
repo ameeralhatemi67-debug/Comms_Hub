@@ -186,6 +186,7 @@ const CHAT_ERRORS: Record<string, string> = {
   CARD_CLOSED: 'حُسم هذا الطلب من قبل.',
   INVALID_NAME: 'اكتب اسماً بين حرف و80 حرفاً.',
   STAGE_DENIED: 'لا يسمح دورك أو صلاحيتك على المجلد بهذه الخطوة.',
+  SELF_APPROVAL: 'لا تعتمد إصداراً رفعته بنفسك. يقرر فيه غيرك من القيادة.',
   FORBIDDEN: 'لا يسمح دورك بهذا الإجراء.',
 };
 export function chatErrorText(message: string | null | undefined) {

@@ -30,6 +30,13 @@ Updated 2026-10-10. **CHECKPOINT 0.2 IN PROGRESS.** Checkpoint 0.1 is complete a
 
 Design: Direction A is the default; B only for larger media previews. See DESIGN.md. The new identity, «الهوية الجديدة لمركز الاتصال», is **built as an option, not approved as the default** (2026-10-10, owner directive): a double-click on the sidebar logo switches between the two designs, remembered per browser. See `MVP_draft.md` section 58. D-01 decides which design is the default.
 
+## Building the reference into the site (from 2026-10-12)
+
+The plan is `Reference_Build_Plan.md`, five steps; the reference is kept in `reference/comms-hub-reference-v5.html`.
+
+- **Step 1, the work cycle in the database: done 2026-10-12.** Works, stages with approval points, versioned text and copies, approval per part bound to versions, projects, events, reminders, requests, notifications, connected accounts with YouTube and plan templates are in the Supabase project `comms-hub`, every rule in the database. Database rule run 135 of 135, `npm test` 104 of 104, typecheck and build clean. Nothing visible yet: the work pages still show the browser mock.
+- **Next action: Step 2**, the shared interaction kit (hold to confirm, undo by server tokens, the help system with progress on `profiles`), proven on the library, mail and messaging.
+
 ## Validation so far (2026-10-10)
 
 - **Response R01, Director, desktop, self-administered Google Form.** Transcribed in `validation/responses/R01-2026-10-10-director.md`. The shared response sheet and the attached CSV hold the same single response.
@@ -52,7 +59,7 @@ All six Round 1 corrections from the Director's findings are built and verified:
 | D-02 | Count self-administered form responses as sessions, with "facilitator: none" recorded. Effectively settled by the 2026-10-10 directive that the Director's response alone is enough; to be confirmed |
 | D-03 | Done 2026-10-11: severities confirmed as transcribed |
 | D-04 | Confirm or overrule the eight design-note recommendations (`validation/design-notes/README.md`), including whether to show an urgent mark and the editor's name in the prototype. Partly settled 2026-10-12: urgent mark, close with reason, several campaigns, stage deadlines, stage templates, editor shown on a version and per-part approval are accepted for the real work pages (see `progress.md`) |
-| D-05 | Review version 5 of the artifact, «النموذج المرجعي للمركز» (https://claude.ai/artifact/1tREdJRSuLpY9yignsf8q9): hold to confirm, undo, YouTube, the free plan editor with approval points and templates, and the three-level help system (first-visit guide, help button and guide mode, page guide). Version 4 additions and pass 1 to 3 rules accepted 2026-10-12. After this, implementation starts with «العمل» and «إنشاء» |
+| D-05 | Done 2026-10-12: version 5 of «النموذج المرجعي للمركز» and its rules accepted with no notes. Urgent work is approved by the director and the assistant; giving the right to approve to others comes later. No sample data in the database. See `progress.md` |
 
 ## Verified capability
 

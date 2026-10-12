@@ -1,0 +1,60 @@
+{
+  "run": "2026-10-12",
+  "what": "Database rule run for the work cycle (Reference_Build_Plan.md, Step 1)",
+  "script": "supabase/tests/work_rules.sql",
+  "how": "One transaction against the Supabase project comms-hub, rolled back at the end. Throwaway accounts (@t.test) for director, assistant, writer, designer, producer, publisher, member and an administrator; each check runs as one of them through row level security. The work number counter is saved before and restored after, since sequences do not roll back.",
+  "migrations": [
+    "supabase/migrations/20261012120000_work_cycle.sql",
+    "supabase/migrations/20261012130000_work_cycle_fixes.sql",
+    "supabase/migrations/20261012140000_work_cycle_indexes.sql"
+  ],
+  "runs": [
+    {
+      "attempt": 1,
+      "checks": 101,
+      "passed": 89,
+      "failed": [
+        "10c, 18b, 18c, 33c, 65b: the check read another person's notifications, which row level security hides (test defect; fixed by reading as the recipient)",
+        "55, 55b, 56, 57, 57b: work_sync_asset raised 'column reference \"ver\" is ambiguous' (migration defect; fixed in 20261012130000_work_cycle_fixes.sql together with the same defect in media_follow_works and work_variant_confirm)"
+      ]
+    },
+    {
+      "attempt": 2,
+      "checks": 135,
+      "passed": 135,
+      "failed": [],
+      "added": "the platform copy and its confirmation, no editing while a decision is pending, and a coverage section that runs every remaining function at least once (projects, assignment, details and stage dates, restriction, close and reopen, comments, start, plan save with insert and reorder, refusal to drop a finished stage, load counts, events, task extension, notifications read, plan templates, stopping and deleting accounts, reminders, request withdrawal)"
+    }
+  ],
+  "rules_checked": [
+    "only the director, the assistant and the administrator add accounts; a handle is not linked twice",
+    "the publisher does not create work; a writer assigns work only to himself; a member sends a request without an assignee and without people or dates on its stages",
+    "YouTube is refused without a video, accepted with a video file from the library",
+    "a stage waits only for stages above it",
+    "the work number is issued by the server (CH-n)",
+    "a restricted work is hidden from a member and from a designer not on it, seen by the writer on one of its stages, the assistant and the administrator",
+    "a waiting stage cannot be finished; finishing a stage tells the next person «صار دورك» and the one still waiting «للعلم»",
+    "an approval point holds the next stage until the director approves it; a writer cannot approve it",
+    "an extension request: the requester and a writer cannot decide it, the director approves it and the stage after it moves by one day",
+    "approval per part: text approved alone, accounts sent back with a required note, the approved text stays approved, the resubmission asks only for what is not approved",
+    "urgent work approved by the assistant (owner decision of 2026-10-12)",
+    "nobody approves what they sent (assistant on her own announcement), nor the one who re-opened review by renaming a handle",
+    "an edit after approval re-opens the changed part alone; a platform copy older than the text is flagged and confirmed without re-opening anything",
+    "a whole package goes back to review entirely when a handle is renamed",
+    "approval never publishes: the director can neither publish nor schedule; only the publisher, on accounts he publishes on",
+    "an account in use by approved, scheduled or in-review work cannot be deleted; a free one can be stopped",
+    "scheduling at another time sends only «موعد النشر» back for approval; withdrawing the move restores the old time",
+    "an ask-first publication waits for the publisher when its time comes; confirming publishes (simulation)",
+    "an expired account fails and gives a partial publication; after reconnecting, the retry sends the failed account alone",
+    "a file submitted with a work shows «قيد المراجعة» in the library; its uploader cannot approve it there; the director's library approval is recorded on the work at that version",
+    "a folder access request approved by the director gives the member view access",
+    "a writer cannot save a plan template or give the designer a task; he makes his own task; a task that waited for another tells its owner «صار دورك» when that one is done",
+    "a reminder is seen by its owner only, not the administrator; a member sees only his own notifications",
+    "nobody writes a work table directly or deletes the work log"
+  ],
+  "after": "no test rows left (0 works, 0 test accounts, 0 notifications, 0 tasks), the work counter back at 1 so the first real work is CH-1",
+  "advisors": {
+    "security": "no new kind of finding: the new definer functions are the only write path, by design, as for mail and messaging; no internal helper is callable through the API",
+    "performance": "seven foreign keys of the new tables had no covering index; added in 20261012140000_work_cycle_indexes.sql"
+  }
+}

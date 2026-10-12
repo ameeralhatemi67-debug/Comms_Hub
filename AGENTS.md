@@ -84,8 +84,9 @@ explicitly requested.
 
 ## Prototype boundary (Version 0)
 
-Work data (items, approvals, publications, notices) is local mock state, held
-in each browser. No real publishing, mail delivery, AI or background workers.
+Publishing to platforms is a simulation, and there is no AI or background
+worker. Work data was local mock state, held in each browser; by owner
+directive of 2026-10-12 it is moving to Postgres (see the work cycle below).
 Files are the second exception, by owner directive of 2026-10-11: uploads go
 to Google Drive (the connected Gmail account, `drive.file` scope, folder
 «Comms Hub») and are listed in the `media_files` table; the Drive client
@@ -120,6 +121,23 @@ to Google Drive like mail attachments. A profile picture is a small square
 image resized in the browser and stored in the `profiles` table; a person may
 change their own display name, picture, headline, name colour, presence and
 mail signature, and nothing else about their account.
+
+The work cycle is real too, by owner directive of 2026-10-12: works, stages
+with approval points, versioned text and platform copies, approvals bound to
+the exact version of each part, review cycles, comments, the work log,
+projects, calendar events, private reminders, requests (extension, folder
+access), notifications in three tiers, connected platform accounts (YouTube
+included) and plan templates live in Postgres
+(`supabase/migrations/*work_cycle*`), every write is a database function, and
+who sees what is row level security. The reference for every rule is
+«النموذج المرجعي للمركز», version 5, kept in `reference/comms-hub-reference-v5.html`;
+the build follows `Reference_Build_Plan.md`. Publishing stays a simulation: an
+account succeeds only if its simulated authorisation covers the moment, and the
+page says so. Approval is the director's and the assistant's (urgent work
+included) and never publishes; nobody approves what they sent or uploaded.
+There is no sample data in the database: the reference's sample works stay in
+the artifact. Until Steps 3 to 5 of the plan replace them, the work pages
+(`src/components/work.tsx`, `operations.tsx`) still show the old browser mock.
 
 One deliberate exception, by owner directive of 2026-10-11 (recorded in
 `progress.md`): **accounts are real.** Sign-in with email and password,

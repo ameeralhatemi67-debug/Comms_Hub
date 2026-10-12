@@ -17,7 +17,13 @@ and leaves the site working. Do them in order: each step builds on the one befor
 - **Known debt the build fixes:** mail «تحويل إلى عمل» numbers works in the browser
   (`src/components/mail/mail-page.tsx:586`); the reference moves numbering to the server.
 
-## Before Step 1: one owner decision
+## Before Step 1: one owner decision (given 2026-10-12)
+
+Given on 2026-10-12, with three more decisions recorded in `progress.md`: the version 5
+rules are accepted as listed; urgent work is approved by the director and the assistant
+(the right to approve for other people, and delegation while away, come later); no
+sample data goes into the database. The reference is kept in
+`reference/comms-hub-reference-v5.html`.
 
 `AGENTS.md` says work data is local mock state. Building this means the work cycle
 becomes real, as the library and mail did. Needed: a dated owner directive that **work items, stages, approvals,
@@ -27,7 +33,12 @@ stays a simulation**. Record it in `progress.md`, then update the prototype boun
 
 ---
 
-## Step 1. The work cycle in the database
+## Step 1. The work cycle in the database (done 2026-10-12)
+
+Built as planned, except `delegations` (waits for the approval-rights work) and the
+seed (owner decision). Migrations `20261012120000_work_cycle.sql`, `..130000_work_cycle_fixes.sql`,
+`..140000_work_cycle_indexes.sql`; rules in `src/lib/work/rules.ts`; database rule run
+`supabase/tests/work_rules.sql` 135 of 135 (`qa/work-rules.json`). Details in `progress.md`.
 
 **Goal:** the data and the rules behind every work page, with no visible change yet.
 
@@ -168,6 +179,6 @@ row level security.
 
 ## Opening instruction for the next session
 
-> Read `Reference_Build_Plan.md`, `AGENTS.md` and the artifact's decision lists. I give
-> the directive that the work cycle moves to Postgres and publishing stays a
-> simulation. Start Step 1.
+> Read `Reference_Build_Plan.md`, `AGENTS.md`, the last two entries of `progress.md`, and
+> the reference in `reference/comms-hub-reference-v5.html` (hold to confirm, undo and the
+> help system). Start Step 2.
