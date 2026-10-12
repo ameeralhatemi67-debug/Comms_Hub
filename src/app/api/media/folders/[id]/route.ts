@@ -28,7 +28,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     try {
       await getDrive().rename(before.drive_folder_id, name);
     } catch {
-      await supabase.from('media_folders').update({ name: before.name }).eq('id', id);
+      await supabase.rpc('undo_cancel_last');
       return fail(502, 'تعذّر تحديث Google Drive، لم يُحفظ التغيير.');
     }
   }

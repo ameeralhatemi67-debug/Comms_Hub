@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNod
 import { campaign, statusLabels } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
+import { HOLD } from '@/lib/kit/hold-reasons';
 import {
   COMMANDS,
   PRESENCE_AR,
@@ -902,7 +903,7 @@ function AssetCard({ id }: { id: string }) {
           فتح في المكتبة
         </Link>
         {a.stage === 'review' && canUrgent(c.role) && (
-          <button type="button" className="ml-btn sm primary" onClick={() => void approve()}>
+          <button type="button" className="ml-btn sm primary" data-hold={HOLD.chatApprove} onClick={() => void approve()}>
             <I n="check" />
             اعتماد الإصدار {a.current_version}
           </button>
@@ -1053,7 +1054,7 @@ function ApprovalCard({ m }: { m: ChatMessage }) {
         (canUrgent(c.role) ? (
           note === null ? (
             <div className="acts">
-              <button type="button" className="ml-btn sm primary" onClick={() => void act('approve', null)}>
+              <button type="button" className="ml-btn sm primary" data-hold={HOLD.chatApprove} onClick={() => void act('approve', null)}>
                 <I n="check" />
                 اعتماد الإصدار {d.version}
               </button>
@@ -1546,7 +1547,7 @@ function MessageMenu({
         </button>
       )}
       {(mine || isAdmin) && m.kind !== 'sys' && (
-        <button type="button" role="menuitem" className="danger" onClick={run(() => void c.rpc('chat_delete', { p_msg: m.id }, 'حُذفت الرسالة للجميع.'))}>
+        <button type="button" role="menuitem" className="danger" data-hold={HOLD.chatDelete} onClick={run(() => void c.rpc('chat_delete', { p_msg: m.id }, 'حُذفت الرسالة للجميع.'))}>
           <I n="trash" />
           حذف للجميع
         </button>

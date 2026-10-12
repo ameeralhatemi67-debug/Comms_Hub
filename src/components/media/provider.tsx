@@ -17,6 +17,7 @@ import {
   type TaskKind,
 } from '@/lib/media/rules';
 import { uploadNewAsset, uploadNewVersion } from '@/lib/media/upload';
+import { useKitMaybe } from '../kit';
 
 export type FolderRow = {
   id: string;
@@ -133,6 +134,8 @@ export function MediaProvider({ children }: { children: ReactNode }) {
   const [people, setPeople] = useState<PersonRow[]>([]);
   const [transfers, setTransfers] = useState<Transfer[]>([]);
 
+  const kit = useKitMaybe();
+  const track = kit?.track;
   const isAdmin = account.role === 'admin';
   const role: Role = isAdmin ? state.role : account.role;
 
@@ -155,6 +158,9 @@ export function MediaProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void load();
   }, [load]);
+  // An undo from the top bar or the result message changes what this page shows.
+  const onUndo = kit?.onUndo;
+  useEffect(() => onUndo?.(() => void load()), [onUndo, load]);
 
   const say = useCallback((text: string) => dispatch({ type: 'notify', text }), [dispatch]);
 
@@ -173,12 +179,13 @@ export function MediaProvider({ children }: { children: ReactNode }) {
     async (res: Response, fallback: string): Promise<Result> => {
       if (res.ok) {
         await load();
+        void track?.();
         return { ok: true };
       }
       const j = (await res.json().catch(() => null)) as { error?: string } | null;
       return { ok: false, error: j?.error ?? fallback };
     },
-    [load],
+    [load, track],
   );
   const json = (method: string, body: unknown): RequestInit => ({
     method,
@@ -191,6 +198,7 @@ export function MediaProvider({ children }: { children: ReactNode }) {
     const done = async (error: { message: string } | null): Promise<Result> => {
       if (error) return fail(error.message);
       await load();
+      void track?.();
       return { ok: true };
     };
     return {
@@ -241,16 +249,8 @@ export function MediaProvider({ children }: { children: ReactNode }) {
         return after(await fetch(`/api/media/${id}`, json('PATCH', { name })), 'تعذّرت إعادة التسمية.');
       },
       async moveAssets(ids, folderId) {
-        for (const id of ids) {
-          const res = await fetch(`/api/media/${id}`, json('PATCH', { folderId }));
-          if (!res.ok) {
-            await load();
-            const j = (await res.json().catch(() => null)) as { error?: string } | null;
-            return { ok: false, error: j?.error ?? 'تعذّر النقل.' };
-          }
-        }
-        await load();
-        return { ok: true };
+        // One request, so moving several files is one action to undo.
+        return after(await fetch('/api/media/move', json('POST', { ids, folderId })), 'تعذّر النقل.');
       },
       async trashAsset(id) {
         return after(await fetch(`/api/media/${id}`, { method: 'DELETE' }), 'تعذّر الحذف.');
@@ -322,7 +322,7 @@ export function MediaProvider({ children }: { children: ReactNode }) {
       },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, role, isAdmin, people, nameOf, folders, assets, tasks, folderOf, levelOf, lockedIn, canEdit, canCreate, canManage, transfers, load, say, account.email, after]);
+  }, [status, role, isAdmin, people, nameOf, folders, assets, tasks, folderOf, levelOf, lockedIn, canEdit, canCreate, canManage, transfers, load, say, account.email, after, track]);
 
   return <MediaContext.Provider value={value}>{children}</MediaContext.Provider>;
 }

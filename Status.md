@@ -35,7 +35,8 @@ Design: Direction A is the default; B only for larger media previews. See DESIGN
 The plan is `Reference_Build_Plan.md`, five steps; the reference is kept in `reference/comms-hub-reference-v5.html`.
 
 - **Step 1, the work cycle in the database: done 2026-10-12.** Works, stages with approval points, versioned text and copies, approval per part bound to versions, projects, events, reminders, requests, notifications, connected accounts with YouTube and plan templates are in the Supabase project `comms-hub`, every rule in the database. Database rule run 135 of 135, `npm test` 104 of 104, typecheck and build clean. Nothing visible yet: the work pages still show the browser mock.
-- **Next action: Step 2**, the shared interaction kit (hold to confirm, undo by server tokens, the help system with progress on `profiles`), proven on the library, mail and messaging.
+- **Step 2, the shared interaction kit: done 2026-10-12.** Hold to confirm on the library, mail and messaging; undo of library edits, decided in the database and followed by Google Drive; the help system (first-visit guides, section tips, the help button with guide mode, the page guide) with progress per person in the database, written for the library pages, mail and messaging. `npm test` 112 of 112, kit rule run 56 of 56, browser check of the kit 40 of 40. Not yet seen signed in: the owner walkthrough is in `progress.md`.
+- **Next action: Step 3**, «العمل», the work page and «إنشاء» on the work-cycle database, with the plan editor.
 
 ## Validation so far (2026-10-10)
 

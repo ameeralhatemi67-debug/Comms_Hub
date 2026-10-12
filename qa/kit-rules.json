@@ -1,0 +1,26 @@
+{
+  "run": "2026-10-12",
+  "what": "Database rule run for the interaction kit (Reference_Build_Plan.md, Step 2): guide progress and undo of library edits",
+  "script": "supabase/tests/kit_rules.sql",
+  "how": "One transaction against the Supabase project comms-hub, rolled back at the end. Throwaway accounts (@t.test) for director, assistant and writer act through row level security. In the site each action is its own request and so its own transaction id; the script gives each action's steps their own id (pg_temp.cut) to stand for that.",
+  "migration": "supabase/migrations/20261012160000_interaction_kit.sql",
+  "runs": [{ "attempt": 1, "checks": 56, "passed": 56, "failed": [] }],
+  "rules_checked": [
+    "guide progress: seen, a section tip, a malformed key refused, replaying a page forgets the page and its tips, guides off; nobody else reads it",
+    "an upload is not undoable; a rename is, labelled in Arabic; another person neither sees nor undoes it",
+    "the undo puts the old name back, the activity log records an undo, the undo is not itself undoable, and it works once",
+    "refused when someone else changed the file since (the tags stay)",
+    "a stage move on the board is undone back past the forward-only pipeline; a decision (approval) is not undoable, nor the move into review it settled",
+    "a move between folders is labelled with the folder; the undo checks the rights again (view only in the folder: refused; the right back: allowed)",
+    "a folder lock and its undo; a folder access grant and its undo",
+    "an action older than an hour is gone; a system write (the work sync) is not a step",
+    "an approved file keeps its name",
+    "a rename that Drive refuses is cancelled by the server without an undo in the log",
+    "an undo that Drive refuses to follow is taken forward again and offered again",
+    "nobody writes the steps directly"
+  ],
+  "after": "no steps, no guide progress, no test files or accounts left",
+  "advisors": {
+    "security": "no new kind of finding: guide_update, undo_list, undo_action, undo_cancel_last and undo_reapply are the intended callable functions; undo_apply, undo_capture and undo_row_hash are not callable"
+  }
+}

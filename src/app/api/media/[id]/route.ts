@@ -47,11 +47,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
     return Response.json({ ok: true });
   } catch {
-    // Drive refused: put the record back so the Hub and Drive agree.
-    await supabase
-      .from('media_files')
-      .update({ name: before.name, folder_id: before.folder_id })
-      .eq('id', id);
+    // Drive refused: the database puts the change back (and forgets it, so it is not
+    // offered as an undo), so the Hub and Drive agree.
+    await supabase.rpc('undo_cancel_last');
     return fail(502, 'تعذّر تحديث Google Drive، لم يُحفظ التغيير.');
   }
 }

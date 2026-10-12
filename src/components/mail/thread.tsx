@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { roles } from '@/lib/domain';
+import { HOLD } from '@/lib/kit/hold-reasons';
 import {
   cardWaits,
   extStatusLabels,
@@ -285,7 +286,7 @@ function Hold({ x, onEdit }: { x: MessageRow; onEdit: (d: Partial<Draft>) => voi
       </p>
       {canDecide && note === null && (
         <div className="row">
-          <button type="button" className="ml-btn sm primary" onClick={() => void m.call('mail_hold_act', { p_message: x.id, p_op: 'approve', p_note: null }, 'اعتُمدت الرسالة.').then(() => m.sync(true))}>
+          <button type="button" className="ml-btn sm primary" data-hold={HOLD.holdSend} onClick={() => void m.call('mail_hold_act', { p_message: x.id, p_op: 'approve', p_note: null }, 'اعتُمدت الرسالة.').then(() => m.sync(true))}>
             <I n="check" />
             اعتماد وإرسال
           </button>
@@ -457,7 +458,7 @@ function CardView({ x, card, contact }: { x: MessageRow; card: Card; contact: st
               ) : (
                 <>
                   <div className="ml-act-f">
-                    <button type="button" className="ml-btn sm primary" onClick={() => void act('approve', null, `اعتُمد الإصدار ${card.version}.`)}>
+                    <button type="button" className="ml-btn sm primary" data-hold={HOLD.mailCardApprove} onClick={() => void act('approve', null, `اعتُمد الإصدار ${card.version}.`)}>
                       <I n="check" />
                       اعتماد الإصدار {card.version}
                     </button>

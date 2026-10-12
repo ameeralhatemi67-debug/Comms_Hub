@@ -74,7 +74,14 @@ under `qa/`; Supabase security advisors show no new findings.
 
 ---
 
-## Step 2. The shared interaction kit, proven on pages that already exist
+## Step 2. The shared interaction kit, proven on pages that already exist (done 2026-10-12)
+
+Built as planned, with these differences, recorded in `progress.md`: guide progress is a
+table of its own (`guide_progress`, owner only) rather than a `profiles` column; undo is
+recorded by the database for the library's edits (decisions, scheduling, publishing,
+uploads and deletions are not undoable) and stays undoable for an hour; the browser check
+runs the kit's own modules in a test page (`qa/kit-browser.cjs`). Migration
+`20261012160000_interaction_kit.sql`; rules run `supabase/tests/kit_rules.sql` 56 of 56.
 
 **Goal:** hold to confirm, undo, and the three-level help system as site-wide parts,
 used first on the library, mail and messaging.
@@ -179,6 +186,6 @@ row level security.
 
 ## Opening instruction for the next session
 
-> Read `Reference_Build_Plan.md`, `AGENTS.md`, the last two entries of `progress.md`, and
-> the reference in `reference/comms-hub-reference-v5.html` (hold to confirm, undo and the
-> help system). Start Step 2.
+> Read `Reference_Build_Plan.md`, `AGENTS.md`, the last three entries of `progress.md`, and
+> the reference in `reference/comms-hub-reference-v5.html` («العمل», the work page,
+> «إنشاء» and the plan editor). Start Step 3.

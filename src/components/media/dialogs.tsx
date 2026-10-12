@@ -16,6 +16,7 @@ import {
   type TaskKind,
 } from '@/lib/media/rules';
 import { Modal } from '../ui';
+import { HOLD } from '@/lib/kit/hold-reasons';
 import { Icon, Ts } from './parts';
 import { useMedia, type AssetRow } from './provider';
 
@@ -748,6 +749,7 @@ function Approve({ asset, onClose }: AP) {
           <button
             className="primary"
             disabled={busy}
+            data-hold={HOLD.approveLock}
             onClick={async () => {
               setBusy(true);
               const r = await m.patchAsset(asset.id, { stage: 'ready' });

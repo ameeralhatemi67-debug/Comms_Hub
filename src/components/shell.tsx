@@ -34,6 +34,7 @@ import { supabase } from '@/lib/supabase/client';
 import { toggleIdentity } from '@/lib/identity';
 import { useIdentity } from '@/lib/use-identity';
 import { Modal, Empty, LogoLoader } from './ui';
+import { HelpButton, ToastUndo, UndoButton, useKit } from './kit';
 
 const nav = [
   ['/', 'الرئيسية', House],
@@ -85,6 +86,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [category, setCategory] = useState('all');
   const actor = roles[state.role];
   const second = useIdentity();
+  const kit = useKit();
 
   const normalized = (s: string) =>
     s
@@ -226,13 +228,19 @@ export function Shell({ children }: { children: ReactNode }) {
                 {actor.name}
               </span>
             )}
+            <UndoButton />
+            <HelpButton />
             <button aria-label="الإشعارات" onClick={() => setOverlay('notifications')} className="notification-button">
               <Bell />
               {notices.some((n) => !n.read) && <i />}
             </button>
           </div>
         </header>
-        <main id="main">{children}</main>
+        <main id="main">
+          {/* The page guide opens here, in place of the page (src/lib/kit/guide.ts). */}
+          <div id="guide-view" hidden />
+          {children}
+        </main>
         <footer className="app-footer">
           نموذج تجربة المستخدم · بيانات تجريبية · جميع إجراءات النشر محاكاة محلية
         </footer>
@@ -284,10 +292,17 @@ export function Shell({ children }: { children: ReactNode }) {
         </Modal>
       )}
 
-      {state.message && (
+      {(state.message || kit.offer) && (
         <div className="toast" role="status">
-          <span>{state.message}</span>
-          <button aria-label="إغلاق الرسالة" onClick={() => dispatch({ type: 'clear' })}>
+          <span>{state.message || `تم: ${kit.offer?.label}`}</span>
+          <ToastUndo />
+          <button
+            aria-label="إغلاق الرسالة"
+            onClick={() => {
+              dispatch({ type: 'clear' });
+              kit.dropOffer();
+            }}
+          >
             ×
           </button>
         </div>

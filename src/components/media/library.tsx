@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Fragment, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { stageLabels, pipeline, stagePosition, formatBytes, canCreateAt, type Stage, LEVELS, levelLabels, LEVEL_NAMES } from '@/lib/media/rules';
+import { HOLD } from '@/lib/kit/hold-reasons';
 import { Title } from '../ui';
 import { useDriveStatus } from '../drive-files';
 import { MediaDialogs, type Dialog } from './dialogs';
@@ -650,7 +651,7 @@ export function MediaLibrary() {
                 <Icon name="move" />
                 نقل
               </button>
-              <button onClick={() => void trash(selected)}>
+              <button data-hold={HOLD.trashSelected} onClick={() => void trash(selected)}>
                 <Icon name="trash" />
                 حذف
               </button>

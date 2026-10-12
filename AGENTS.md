@@ -139,6 +139,13 @@ There is no sample data in the database: the reference's sample works stay in
 the artifact. Until Steps 3 to 5 of the plan replace them, the work pages
 (`src/components/work.tsx`, `operations.tsx`) still show the old browser mock.
 
+The shared interaction kit (Step 2) is real as well: undo steps of library edits and
+each person's help progress live in Postgres
+(`supabase/migrations/*interaction_kit*`). A button asks for a long press by carrying a
+`data-hold` reason (`src/lib/kit/hold-reasons.ts`); a page gets its guide from
+`src/lib/help/pages.ts`, whose selectors must exist in the page's components (tested).
+New user-facing help text is Arabic, like every other string.
+
 One deliberate exception, by owner directive of 2026-10-11 (recorded in
 `progress.md`): **accounts are real.** Sign-in with email and password,
 approved accounts, access requests, roles and page permissions live in the

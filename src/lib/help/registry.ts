@@ -1,0 +1,56 @@
+// Which help page a route is, who a role counts as in the page guide, and where a page
+// lives. The content is in ./pages.ts.
+import type { Role } from '../domain.ts';
+import { PAGES, SHELL_PARTS } from './pages.ts';
+import type { HelpPage, RoleGroup } from './types.ts';
+
+export { PAGES, SHELL_PARTS };
+
+/** The page a path belongs to, or null where no guide is written yet. */
+export function pageKeyOf(path: string): string | null {
+  const p = path.replace(/\/+$/, '') || '/';
+  if (p === '/media') return 'library';
+  if (/^\/media\/[^/]+$/.test(p)) return 'asset';
+  if (p === '/tasks') return 'tasks';
+  if (p === '/activity') return 'activity';
+  if (p === '/mail') return 'mail';
+  if (p === '/mail/chat') return 'chat';
+  return null;
+}
+
+/** Where a linked page opens. The file page needs a file, so it opens the library. */
+export const PAGE_HREF: Record<string, string> = {
+  library: '/media',
+  asset: '/media',
+  tasks: '/tasks',
+  activity: '/activity',
+  mail: '/mail',
+  chat: '/mail/chat',
+};
+
+export const ROLE_GROUP: Record<RoleGroup, string> = {
+  lead: 'مدير الاتصال المؤسسي ومساعده والمسؤول عن النظام',
+  maker: 'كاتب المحتوى والمصمم والمنتج الإعلامي',
+  publisher: 'مسؤول النشر وإدارة الحسابات',
+  member: 'العضو',
+};
+
+export function roleGroup(r: Role): RoleGroup {
+  if (r === 'admin' || r === 'director' || r === 'assistant') return 'lead';
+  if (r === 'publisher') return 'publisher';
+  if (r === 'member') return 'member';
+  return 'maker';
+}
+
+export const helpFor = (key: string | null): HelpPage | null => (key && PAGES[key]) || null;
+
+/** The components each page is drawn by: tests/kit.test.mjs checks the selectors against them. */
+export const PAGE_SOURCES: Record<string, string[]> = {
+  library: ['src/components/media/library.tsx', 'src/components/media/parts.tsx'],
+  asset: ['src/components/media/asset-page.tsx', 'src/components/media/parts.tsx'],
+  tasks: ['src/components/media/tasks-page.tsx'],
+  activity: ['src/components/media/activity-page.tsx'],
+  mail: ['src/components/mail/mail-page.tsx', 'src/components/mail/thread.tsx', 'src/components/mail/parts.tsx'],
+  chat: ['src/components/chat/chat-tab.tsx', 'src/components/mail/mail-page.tsx'],
+};
+export const SHARED_SOURCES = ['src/components/ui.tsx', 'src/components/shell.tsx', 'src/components/kit.tsx'];

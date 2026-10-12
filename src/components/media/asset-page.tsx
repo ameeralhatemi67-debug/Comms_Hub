@@ -30,6 +30,7 @@ import { MediaDialogs, type Dialog } from './dialogs';
 import { useAssetActions } from './actions';
 import { Avatar, Icon, KIND_AR, StageChip, Thumb, Ts } from './parts';
 import { useMedia } from './provider';
+import { HOLD } from '@/lib/kit/hold-reasons';
 
 type VersionRow = { id: string; version: number; uploaded_by: string; note: string | null; created_at: string; size_bytes: number };
 type NoteRow = { id: string; author: string; body: string; timecode: string | null; created_at: string };
@@ -290,7 +291,7 @@ export function AssetPage({ id }: { id: string }) {
               <Icon name="move" />
               نقل
             </button>
-            <button disabled={!m.canManage(asset.folder_id) || locked} onClick={() => void remove()}>
+            <button disabled={!m.canManage(asset.folder_id) || locked} data-hold={HOLD.trashOne} onClick={() => void remove()}>
               <Icon name="trash" />
               حذف
             </button>

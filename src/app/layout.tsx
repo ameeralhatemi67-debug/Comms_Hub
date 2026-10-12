@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Store } from '@/lib/store';
 import { Shell } from '@/components/shell';
+import { KitProvider } from '@/components/kit';
 import { AuthGate } from '@/components/auth-gate';
 import { AccountProvider } from '@/lib/account-context';
 import { canSwitchRole } from '@/lib/access';
@@ -21,6 +22,7 @@ import './auth.css';
 import './media.css';
 import './mail.css';
 import './chat.css';
+import './kit.css';
 
 export const metadata: Metadata = {
   title: 'مركز الاتصال المؤسسي',
@@ -45,7 +47,9 @@ export default async function Layout({ children }: { children: React.ReactNode }
         {session.status === 'ready' ? (
           <AccountProvider account={session.account}>
             <Store role={session.account.role} roleLocked={!canSwitchRole(session.account)}>
-              <Shell>{children}</Shell>
+              <KitProvider>
+                <Shell>{children}</Shell>
+              </KitProvider>
             </Store>
           </AccountProvider>
         ) : (

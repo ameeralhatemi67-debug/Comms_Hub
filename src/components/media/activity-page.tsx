@@ -28,6 +28,7 @@ const typeIcon: Record<string, string> = {
   access: 'shield',
   lock: 'lock',
   folder: 'folder',
+  undo: 'history',
   note: 'note',
   download: 'download',
   link: 'link',

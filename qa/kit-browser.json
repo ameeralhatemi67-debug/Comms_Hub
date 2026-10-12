@@ -1,0 +1,207 @@
+{
+  "run": "2026-10-12T09:41:36.973Z",
+  "checks": [
+    {
+      "name": "first-visit guide starts by itself",
+      "pass": true,
+      "detail": "إرشاد «مكتبة الوسائط» · 1 من 3مكتبة الوسائطالملفات ومراحلها "
+    },
+    {
+      "name": "the step points at its part (spotlight)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "step 2 is the folders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "step 3 is the upload area",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the guide closes after the last step",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it does not return after a reload",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "section tip on the first click into the folders",
+      "pass": true,
+      "detail": "نصيحة · أول مرة هنا · «مكتبة الوسائط»شجرة المجلداتالباهت يحو"
+    },
+    {
+      "name": "the tip does not come back",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "hovering the help button says what the page is for",
+      "pass": true,
+      "detail": "«مكتبة الوسائط»ملفات الحملات في مجلداتها ومراحلها،"
+    },
+    {
+      "name": "one click turns guide mode on",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "in guide mode the first click explains, by the part it sits in",
+      "pass": true,
+      "detail": "وضع الإرشاد · «مكتبة الوسائط»الملفات«فتح الملف 1» جزء من هذا القسم.مرّ على بطاقة"
+    },
+    {
+      "name": "and does not act",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the explanation does not cover the element",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the second click on the same element acts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a hold button explains its long press in guide mode",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes the explanation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape again leaves guide mode",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a double click opens the page guide in place of the page",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the guide has purpose, roles, parts, rules, links and questions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the reader's role is marked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "parts not on screen say so",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«أرني» goes back to the page and points at the part",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«إعادة الإرشاد لهذه الصفحة» starts the guide again from step 1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a quick click does not act and says why",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the button fills while pressed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a press of about a second acts, once",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "letting go early does not act",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Enter held from the keyboard acts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a quick Enter does not",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "other buttons are untouched by the hold",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a long press works inside a modal dialog",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "in guide mode the first click on «اعتماد ملف» explains it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the second click opens the dialog",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a click inside the dialog explains instead of closing it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the explanation lives inside the dialog, so it can be clicked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and does not cover the dialog",
+      "pass": true,
+      "detail": "{\"pop\":{\"l\":961,\"t\":615,\"r\":1270,\"b\":852.65625},\"dlg\":{\"l\":329,\"t\":364.5,\"r\":951,\"b\":495.5}}"
+    },
+    {
+      "name": "«جرّبه» from the explanation acts inside the dialog",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "at 390 px the guide window fits the screen",
+      "pass": true,
+      "detail": "{\"l\":10,\"t\":157.4375,\"r\":380,\"b\":359.703125}"
+    },
+    {
+      "name": "no sideways scroll at 390 px",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "errors": [],
+  "summary": "40 of 40"
+}

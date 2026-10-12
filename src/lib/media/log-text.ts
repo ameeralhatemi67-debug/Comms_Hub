@@ -90,6 +90,8 @@ export function describe(e: LogRow, nameOf: (email: string) => string): Describe
       return { text: `نزّل ${who} «${name}»` };
     case 'link':
       return { text: `أنشأ ${who} رابط مراجعة لـ «${name}»` };
+    case 'undo':
+      return { text: `تراجع ${who} عن: ${str(d.label)}` };
     default:
       return { text: `${who}: ${e.type}` };
   }
@@ -118,4 +120,5 @@ export const logTypeLabels: Record<string, string> = {
   note: 'ملاحظة',
   download: 'تنزيل',
   link: 'رابط مراجعة',
+  undo: 'تراجع',
 };
