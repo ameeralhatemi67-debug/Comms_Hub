@@ -1,0 +1,103 @@
+/* «الحسابات», the person's card, the grant dialog, the role matrix, the log and «صلاحياتي»
+   (Permissions_Plan.md 5 and 9). Only the colour tokens of globals.css and identity.css. */
+.pm .sr,.pm-search .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pm button.sm,.pm-dialog button.sm,.pm-mine button.sm{min-height:32px;padding:3px 11px;font-size:12.5px}
+.pm .secondary,.pm-dialog .secondary{background:var(--surface)}
+.pm-tabs .tabs{margin-bottom:18px}
+.pm-split{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+.pm-split.with-card{grid-template-columns:minmax(0,1fr) minmax(320px,440px)}
+.pm-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.pm-search{flex:1;margin:0}.pm-search input{margin:0}
+.pm-bulk{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);margin-bottom:12px}
+.pm-list{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.pm-row{display:grid;grid-template-columns:auto minmax(0,1.6fr) auto minmax(0,1.4fr) auto auto;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--row-line)}
+.pm-row:last-child{border-bottom:0}.pm-row:hover{background:var(--row-hover)}.pm-row.on{background:var(--selected-bg)}
+.pm-who{border:0;background:transparent;padding:0;min-height:0;text-align:start;display:block;min-width:0}
+.pm-who b,.pm-who small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm-who small{font-size:11px}
+.pm-marks{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pm-mark{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:5px;background:var(--chip-bg);color:var(--chip-fg)}
+.pm-mark svg{width:13px;height:13px}
+.pm-mark.timed{background:var(--st-schedule-bg);color:var(--st-schedule-fg)}
+.pm-mark.once{background:var(--st-review-bg);color:var(--st-review-fg)}
+.pm-mark.removed{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.pm-seen{white-space:nowrap}
+.pm-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+.pm-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.pm-head .face{width:44px;height:44px;font-size:18px}
+.pm-head .work-name small{font-size:11px;margin-top:2px}
+.pm-x{border:0;background:transparent;min-height:32px;padding:4px}
+.pm-why{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:var(--warning-bg);color:var(--warning-fg);font-size:13px}
+.pm-why svg{width:16px;height:16px;margin-top:3px}
+.pm-actions{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px}
+.pm-presets{display:inline-flex;gap:6px;align-items:center}.pm-presets select{margin:0;min-width:150px}
+.pm-group{margin-top:14px}
+.pm-group h3{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.pm-perm{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--row-line);font-size:13px}
+.pm-perm>:nth-child(3){grid-column:1 / -1;justify-self:start}
+.pm-perm.off>span:first-child{color:var(--muted)}
+.pm-src{font-size:11px;padding:2px 8px;border-radius:5px;background:var(--chip-bg);color:var(--chip-fg);white-space:nowrap;display:inline-flex;gap:4px;align-items:center}
+.pm-src svg{width:12px;height:12px}
+.pm-src.role,.pm-src.page{background:var(--chip-success-bg);color:var(--chip-success-fg)}
+.pm-src.added{background:var(--st-success-bg);color:var(--st-success-fg)}
+.pm-src.timed{background:var(--st-schedule-bg);color:var(--st-schedule-fg)}
+.pm-src.once{background:var(--st-review-bg);color:var(--st-review-fg)}
+.pm-src.removed{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.pm-src.fixed,.pm-src.rank,.pm-src.none{background:transparent;color:var(--muted);border:1px solid var(--line)}
+span.pm-locked{display:inline-flex;gap:6px;align-items:flex-start;font-size:11.5px;color:var(--muted)}
+span.pm-locked svg{width:13px;height:13px;margin-top:3px}
+.pm-more{margin-top:6px}.pm-more>summary{cursor:pointer;font-size:12.5px;color:var(--green-text);padding:6px 0}
+.pm-folders .text-link{margin-top:10px;font-size:12px}
+.pm-dialog{display:grid;gap:4px}
+.pm-dialog label{margin-bottom:12px}
+.pm-caplist{display:grid;gap:4px;max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px}
+.pm-caplist button{justify-content:space-between;text-align:start;min-height:36px;padding:6px 10px;border:0}
+.pm-caplist button.on{background:var(--selected-bg);color:var(--green-text);font-weight:600}
+.pm-caplist small{font-size:11px}
+.pm-modes,.pm-durs{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;width:max-content;max-width:100%;margin:10px 0}
+.pm-modes button,.pm-durs button{border:0;border-radius:0;min-height:38px;border-inline-start:1px solid var(--line)}
+.pm-modes button:first-child,.pm-durs button:first-child{border-inline-start:0}
+.pm-modes button.on,.pm-durs button.on{background:var(--green);color:var(--on-brand)}
+.pm-preview{padding:12px 14px;border-radius:8px;background:var(--note-bg);color:var(--ink);font-size:13.5px;margin:8px 0}
+.pm-item{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:center;margin-bottom:8px}
+.pm-item select{margin:0}
+.pm-roles>p{margin-bottom:14px}
+.pm-matrix-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.pm-matrix{border-collapse:collapse;width:100%;min-width:860px;font-size:12.5px}
+.pm-matrix th,.pm-matrix td{padding:8px 10px;border-bottom:1px solid var(--row-line);text-align:center}
+.pm-matrix th[scope=row]{text-align:start;font-weight:500;min-width:200px}
+.pm-matrix thead th{font-size:11.5px;font-weight:600;color:var(--muted);vertical-align:bottom}
+.pm-matrix thead small{display:block;font-weight:400}
+.pm-matrix .pm-grp th{text-align:start;background:var(--surface-2);color:var(--muted);font-size:12px}
+.pm-matrix .pm-locked th small{display:flex;gap:4px;font-size:11px;color:var(--muted);font-weight:400}
+.pm-switch{width:42px;min-height:24px;height:24px;padding:2px;border-radius:12px;background:var(--chip-bg);border:1px solid var(--line);justify-content:flex-start}
+.pm-switch i{display:block;width:18px;height:18px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px #0003;transition:transform .15s}
+.pm-switch.on{background:var(--green);border-color:var(--green)}
+.pm-switch.on i{transform:translateX(-18px)}
+[dir=ltr] .pm-switch.on i{transform:translateX(18px)}
+.pm-fixed{font-size:11px;color:var(--muted)}.pm-fixed.on{color:var(--green-text);font-weight:600}
+.pm-log{list-style:none;padding:0;margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.pm-log li{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:10px;align-items:baseline;padding:10px 14px;border-bottom:1px solid var(--row-line);font-size:13px}
+.pm-log li:last-child{border-bottom:0}
+.pm-filters select{width:auto;min-width:160px;flex:1}
+.pm-logtab>p{margin-top:12px}
+.pm-presetline{display:flex;gap:6px;align-items:center;margin-top:14px}
+.pm-presetline svg{width:15px;height:15px}
+.pm-mine .pm-group:first-child{margin-top:0}
+.pm-soon{padding:10px 12px;border-radius:8px;background:var(--st-schedule-bg);color:var(--st-schedule-fg);font-size:13px;margin-bottom:10px}
+.pm-mine>p.muted{margin-top:12px}
+@media(max-width:899px){
+  .pm-split.with-card{grid-template-columns:minmax(0,1fr)}
+  .pm-card{position:static;max-height:none}
+}
+@media(max-width:699px){
+  .pm-row{grid-template-columns:auto minmax(0,1fr) auto;gap:8px}
+  .pm-row .pm-marks{grid-column:2 / -1}
+  .pm-row .pm-seen{display:none}
+  .pm-row .pm-rolechip{grid-column:2}
+  .pm-row .pm-open{grid-row:1;grid-column:3}
+  .pm-item{grid-template-columns:1fr 1fr}
+  .pm-log li{grid-template-columns:1fr}
+  .pm-modes,.pm-durs{width:100%}
+  .pm-modes button,.pm-durs button{flex:1}
+}

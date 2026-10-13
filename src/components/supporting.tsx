@@ -26,6 +26,7 @@ import { setTheme, toggleIdentity } from '@/lib/identity';
 import { useIdentity, useTheme } from '@/lib/use-identity';
 import { Empty, Modal, Panel, Tabs, Title } from './ui';
 import { ProfileEditor } from './profile-editor';
+import { MyPermissions } from './my-permissions';
 import { DriveIntegration } from './drive-files';
 
 const pageNames: Record<string, string> = {
@@ -637,6 +638,9 @@ export function Supporting({ page }: { page: string }) {
         <Panel title="مظهرك في البريد والمراسلة">
           <ProfileEditor />
         </Panel>
+        <Panel title="صلاحياتي" className="pm-minepanel">
+          <MyPermissions />
+        </Panel>
         <div className="columns">
           <Panel title="الملف الشخصي">
             <div className="notice">
@@ -704,7 +708,7 @@ export function Supporting({ page }: { page: string }) {
             <p className="muted">
               {account.role === 'admin'
                 ? 'أنت مسؤول نظام: تفتح كل الصفحات، وتبدّل الدور من أعلى الصفحة لتختبر كل دور.'
-                : 'دورك وصفحاتك يحددها مسؤول النظام. لا يمكنك تبديل الدور.'}
+                : 'دورك وصفحاتك وصلاحياتك يحددها من يدير رتبتك في «الحسابات». لا يمكنك تبديل الدور.'}
             </p>
           </Panel>
         </div>

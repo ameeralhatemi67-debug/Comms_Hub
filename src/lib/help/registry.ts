@@ -25,6 +25,8 @@ export function pageKeyOf(path: string): string | null {
   if (p === '/projects') return 'projects';
   if (/^\/projects\/[^/]+$/.test(p)) return 'project';
   if (p === '/requests') return 'requests';
+  if (p === '/accounts') return 'accounts';
+  if (p === '/account') return 'account';
   return null;
 }
 
@@ -46,6 +48,8 @@ export const PAGE_HREF: Record<string, string> = {
   projects: '/projects',
   project: '/projects',
   requests: '/requests',
+  accounts: '/accounts',
+  account: '/account',
 };
 
 export const ROLE_GROUP: Record<RoleGroup, string> = {
@@ -82,5 +86,7 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   projects: ['src/components/work/projects.tsx', 'src/components/work/parts.tsx'],
   project: ['src/components/work/projects.tsx', 'src/components/work/list.tsx', 'src/components/work/day-dialogs.tsx', 'src/components/work/parts.tsx'],
   requests: ['src/components/work/requests.tsx', 'src/components/work/day-dialogs.tsx', 'src/components/work/parts.tsx'],
+  accounts: ['src/components/accounts/page.tsx', 'src/components/accounts/members.tsx', 'src/components/accounts/card.tsx', 'src/components/accounts/roles.tsx', 'src/components/accounts/log.tsx'],
+  account: ['src/components/supporting.tsx', 'src/components/profile-editor.tsx', 'src/components/my-permissions.tsx'],
 };
 export const SHARED_SOURCES = ['src/components/ui.tsx', 'src/components/shell.tsx', 'src/components/kit.tsx'];

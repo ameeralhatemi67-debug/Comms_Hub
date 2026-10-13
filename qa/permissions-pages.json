@@ -1,0 +1,1366 @@
+{
+  "run": "2026-10-13T09:10:42.053Z",
+  "checks": [
+    {
+      "name": "accounts-members: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card-above: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-assistant: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-requests: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-once: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add-assistant: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-remove: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-preset: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add-assistant: offers rank 1 roles only (D-11)",
+      "pass": true,
+      "detail": "member,writer,designer,producer,publisher"
+    },
+    {
+      "name": "dialog-member-add: a director offers the assistant and rank 1, never director or Admin",
+      "pass": true,
+      "detail": "member,assistant,writer,designer,producer,publisher"
+    },
+    {
+      "name": "accounts-roles-assistant: without «تعديل صلاحيات الأدوار» every switch is disabled with its reason",
+      "pass": true,
+      "detail": "88 switches"
+    },
+    {
+      "name": "accounts-roles: the director edits roles below his rank only (Admin, director columns locked)",
+      "pass": true,
+      "detail": "59 locked of 88"
+    },
+    {
+      "name": "accounts-card: the two large effects need a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-remove: removing needs a long press with the plan's reason",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: what the person does not hold is folded away, each with its reason or «منح»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick: the capability search box is there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-members: shows «الحسابات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «الأعضاء (8)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «الأدوار»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «الطلبات (1)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «السجل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «إضافة عضو»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «حزمة جديدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «أمير»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «مؤسس»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «مدير الاتصال المؤسسي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «1 مؤقتة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «1 لمرة واحدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «1 مسحوبة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «لم يسجل الدخول بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «البطاقة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «تغطية النشر لأسبوع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: does not show «urgency.2»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: does not show «permissions.grant»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-members · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-members · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-members · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-members · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-card · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-card: shows «بطاقة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «منح»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «حزمة جاهزة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «تطبيق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «الاسم والصفحات والدور»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «إنهاء كل الإضافات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «إزالة العضو»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «الصفحات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «المراسلة والبريد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «الحسابات والصلاحيات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «مقفلة بقواعد المركز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «من صفحات الحساب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «إغلاق الصفحة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «مؤقتة حتى 2026-10-14 12:00»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «تمديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «إنهاء الآن»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «مرة واحدة · 1 استخدام باقٍ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «لمحادثة واحدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «مسحوبة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «إعادة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «لا يملكها (»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «الاعتماد لمدير الاتصال ومساعده»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «مجلدات المكتبة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «العقود»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «عرض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «مستويات المجلدات تُدار من المكتبة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: does not show «whatsapp.push»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: does not show «urgency.3»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-card · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-card · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-card · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-card · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-card-above · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card-above · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-card-above: shows «في رتبتك أو فوقها، فلا تدير صلاحياته»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card-above: does not show «إنهاء كل الإضافات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card-above: does not show «إزالة العضو»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card-above: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card-above · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card-above · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-roles · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-roles: shows «ما يملكه كل دور»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «الصلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «مدير الاتصال المؤسسي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «مساعد مدير الاتصال المؤسسي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «كاتب المحتوى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «مسؤول النشر وإدارة الحسابات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «رسائل «مهم» (المستوى 2)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «إرسال رسالة إلى واتساب زميل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «مقفلة بقواعد المركز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «يملكها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «لا يعتمد أحد ما أرسله أو رفعه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-roles · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-roles · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-roles · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-roles · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-roles-assistant · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-assistant · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-roles-assistant: shows «ما يملكه كل دور»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-assistant: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-assistant · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-assistant · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-requests · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-requests · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-requests: shows «طلبات الوصول إلى المركز (1)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-requests: shows «لمى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-requests: shows «منضمة إلى فريق التصميم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-requests: shows «قبول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-requests: shows «رفض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-requests: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-requests · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-requests · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-log · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-log: shows «كل الأشخاص»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: shows «كل الصلاحيات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: shows «كل الأحداث»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: shows «محمد منح خالد «رسائل «مهم» (المستوى 2)» حتى 2026-10-14 12:00.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: shows «محمد سحب «إنشاء قناة إعلانات في المراسلة» من خالد.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: shows «النظام فعّل «فتح صفحة «الحسابات»» لدور «مدير الاتصال المؤسسي» (1 شخص).»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: shows «محمد غيّر دور سارة من «المنتج الإعلامي» إلى «المصمم».»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: shows «استخدم خالد «إرسال رسالة إلى واتساب زميل» مرة، وبقي 0.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: shows «السجل يُكتب ولا يُعدَّل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-writer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-writer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-writer: shows «لمن يملك «فتح صفحة الحسابات»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-writer: shows «صلاحياتك أنت في صفحة «الحساب»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-writer: does not show «إضافة عضو»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-writer: does not show «الأعضاء (»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-writer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-writer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-writer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-grant · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-grant: shows «منح خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «رسائل «مهم» (المستوى 2)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «دائمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «مؤقتة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «مرة واحدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «ساعة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «يوم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «أسبوع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «تاريخ محدد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «السبب (اختياري)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «سيملك خالد «رسائل «مهم» (المستوى 2)» حتى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: shows «ثم تنتهي وحدها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-grant · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-grant · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-grant · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-grant · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-grant-pick · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-grant-pick: shows «منح 2 أشخاص»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick: shows «الصلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick: shows «لا تملكها أنت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick: shows «مقفل بقواعد المركز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick: shows «اختر صلاحية.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick: does not show «اعتماد جزء من عمل أو رفضه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick: does not show «النشر والجدولة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-pick · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-grant-once · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-once · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-grant-once: shows «عدد المرات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-once: shows «لمحادثة واحدة (اختياري)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-once: shows «فريق الحملة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-once: shows «بلا نهاية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-once: shows «سيستطيع خالد «إرسال رسالة إلى واتساب زميل» في «فريق الحملة» مرة واحدة، ثم تنتهي.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-once: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-once · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-grant-once · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-member-add · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-member-add: shows «إضافة عضو»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: shows «الاسم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: shows «البريد الإلكتروني»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: shows «الدور»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: shows «الصفحات المفتوحة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: shows «لا تمنح دوراً في رتبتك أو فوقها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: does not show «>Admin<»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-member-add-assistant · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add-assistant · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-member-add-assistant: shows «والمساعد يمنح أدوار الفريق فقط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add-assistant: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add-assistant · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add-assistant · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-remove · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-remove · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-remove: shows «إزالة عبدالله»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-remove: shows «تبقى كما هي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-remove: shows «حسابات المؤسسين لا تُزال»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-remove: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-remove · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-remove · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-preset · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-preset · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-preset: shows «حزمة جديدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-preset: shows «بند آخر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-preset: shows «حفظ الحزمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-preset: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-preset · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-preset · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "my-permissions · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "my-permissions: shows «صلاحياتي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions: shows «لديك صلاحية مؤقتة أو لمرة واحدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions: shows «الصفحات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions: shows «من صفحات الحساب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions: shows «مؤقتة حتى 2026-10-14 12:00»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions: shows «يمنح الصلاحيات ويسحبها من يدير رتبتك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions: does not show «urgency.2»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "my-permissions · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "my-permissions · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "my-permissions · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "my-permissions · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "my-permissions · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "total": 271,
+    "passed": 271,
+    "failed": 0
+  }
+}

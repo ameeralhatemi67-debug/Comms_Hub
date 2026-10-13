@@ -15,8 +15,9 @@ const classesOf = (sel) => [...sel.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m
 
 test('every help page has its purpose, a short first-visit guide, its parts, every role, rules, links and questions', () => {
   const groups = ['lead', 'maker', 'publisher', 'member'];
-  // All sixteen pages of the reference have their guide (Step 5 of Reference_Build_Plan.md).
-  assert.deepEqual(Object.keys(PAGES).sort(), ['activity', 'approvals', 'asset', 'calendar', 'channels', 'chat', 'create', 'item', 'library', 'mail', 'project', 'projects', 'requests', 'review', 'tasks', 'work']);
+  // All sixteen pages of the reference have their guide (Step 5 of Reference_Build_Plan.md),
+  // and «الحسابات» and «الحساب» theirs (Permissions_Plan.md, Step P2).
+  assert.deepEqual(Object.keys(PAGES).sort(), ['account', 'accounts', 'activity', 'approvals', 'asset', 'calendar', 'channels', 'chat', 'create', 'item', 'library', 'mail', 'project', 'projects', 'requests', 'review', 'tasks', 'work']);
   for (const [key, h] of Object.entries(PAGES)) {
     assert.ok(h.name && h.tip && h.purpose, key);
     assert.ok(h.onb.length >= 3 && h.onb.length <= 4, `${key}: three or four steps`);
@@ -64,6 +65,10 @@ test('routes map to their help page', () => {
   assert.equal(pageKeyOf('/projects'), 'projects');
   assert.equal(pageKeyOf('/projects/5f0e2d7e-2c55-4c4c-9b9e-6f7b0d1a2c3d'), 'project');
   assert.equal(pageKeyOf('/requests'), 'requests');
+  assert.equal(pageKeyOf('/accounts'), 'accounts');
+  assert.equal(pageKeyOf('/account'), 'account');
+  assert.equal(PAGE_HREF.accounts, '/accounts');
+  assert.equal(PAGE_HREF.account, '/account');
   assert.equal(pageKeyOf('/admin'), null);
   assert.equal(roleGroup('admin'), 'lead');
   assert.equal(roleGroup('producer'), 'maker');
@@ -85,8 +90,14 @@ test('hold to confirm: the reference\'s reasons, each used by a button, about a 
   assert.equal(HOLD.publishNow, why('dopubnow'));
   assert.equal(HOLD.publishNow, why('q:confirmpub'));
   assert.equal(HOLD.accountDelete, why('accdeldo'));
+  // Permissions_Plan.md 10, «New hold buttons», word for word.
+  assert.equal(HOLD.removeMember, 'إزالة العضو تفصله عن المركز وتبقي أعماله لدى من يُسند إليه.');
+  assert.equal(HOLD.endAllGrants, 'تنتهي كل الصلاحيات المضافة لهذا الشخص الآن.');
+  assert.equal(HOLD.roleDefaultOff, 'التغيير يمسّ كل من يحمل هذا الدور.');
+  assert.equal(HOLD.roleDown, 'ينقص هذا التغيير ما يستطيع الشخص فعله فوراً.');
   assert.equal(HOLD_MS, Number(reference.match(/var HOLD_MS = (\d+);/)[1]));
-  const comps = ['src/components/media/dialogs.tsx', 'src/components/media/library.tsx', 'src/components/media/asset-page.tsx', 'src/components/mail/thread.tsx', 'src/components/chat/chat-tab.tsx', 'src/components/work/item.tsx', 'src/components/work/review.tsx', 'src/components/work/publish.tsx', 'src/components/work/channels.tsx'].map(read).join('\n');
+  const comps = ['src/components/media/dialogs.tsx', 'src/components/media/library.tsx', 'src/components/media/asset-page.tsx', 'src/components/mail/thread.tsx', 'src/components/chat/chat-tab.tsx', 'src/components/work/item.tsx', 'src/components/work/review.tsx', 'src/components/work/publish.tsx', 'src/components/work/channels.tsx',
+    'src/components/accounts/members.tsx', 'src/components/accounts/card.tsx', 'src/components/accounts/roles.tsx'].map(read).join('\n');
   for (const k of Object.keys(HOLD)) assert.match(comps, new RegExp(`data-hold=\\{HOLD\\.${k}\\}`), k);
 });
 

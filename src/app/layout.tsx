@@ -3,6 +3,7 @@ import { Store } from '@/lib/store';
 import { Shell } from '@/components/shell';
 import { KitProvider } from '@/components/kit';
 import { AuthGate } from '@/components/auth-gate';
+import { CapsProvider } from '@/components/caps';
 import { AccountProvider } from '@/lib/account-context';
 import { canSwitchRole } from '@/lib/access';
 import { getSession } from '@/lib/supabase/session';
@@ -24,6 +25,7 @@ import './mail.css';
 import './chat.css';
 import './kit.css';
 import './work.css';
+import './permissions.css';
 
 export const metadata: Metadata = {
   title: 'مركز الاتصال المؤسسي',
@@ -47,11 +49,13 @@ export default async function Layout({ children }: { children: React.ReactNode }
       <body>
         {session.status === 'ready' ? (
           <AccountProvider account={session.account}>
-            <Store role={session.account.role} roleLocked={!canSwitchRole(session.account)}>
-              <KitProvider>
-                <Shell>{children}</Shell>
-              </KitProvider>
-            </Store>
+            <CapsProvider>
+              <Store role={session.account.role} roleLocked={!canSwitchRole(session.account)}>
+                <KitProvider>
+                  <Shell>{children}</Shell>
+                </KitProvider>
+              </Store>
+            </CapsProvider>
           </AccountProvider>
         ) : (
           <AuthGate

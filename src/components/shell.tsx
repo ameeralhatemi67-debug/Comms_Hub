@@ -38,6 +38,7 @@ import { toggleIdentity } from '@/lib/identity';
 import { Modal, Empty, LogoLoader } from './ui';
 import { HelpButton, ToastUndo, UndoButton, useKit } from './kit';
 import { NoticeDrawer, useNotices } from './notices';
+import { useCaps } from './caps';
 
 const nav = [
   ['/', 'الرئيسية', House],
@@ -103,11 +104,14 @@ export function Shell({ children }: { children: ReactNode }) {
 
   // What the sidebar offers: pages this account was granted (access.ts), and, as
   // before, only what the role being viewed can use. Administrators see every page.
-  const adminPage = (href: string) => href === '/admin' || href === '/accounts';
+  // «الحسابات» follows «فتح صفحة الحسابات» (Permissions_Plan.md 5), read live from the
+  // database; an administrator viewing as another role sees it as that role's leaders do.
+  const caps = useCaps();
+  const accountsOpen = account.role === 'admin' ? actor.admin || state.role === 'director' || state.role === 'assistant' : caps.has('accounts.view');
   const visible = nav.filter(
     ([href]) =>
-      canOpen(account, href.slice(1)) &&
-      (!adminPage(href) || actor.admin) &&
+      (href === '/accounts' ? accountsOpen : canOpen(account, href.slice(1))) &&
+      (href !== '/admin' || actor.admin) &&
       (href !== '/create' || actor.create),
   );
   const allowed = (href: string) => visible.some((n) => n[0] === href);

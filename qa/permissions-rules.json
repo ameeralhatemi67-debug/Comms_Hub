@@ -6,9 +6,37 @@
   "migration_check": "applied to comms-hub as version 20261013084017 'permissions'; md5 of the stored statement f8be7db018708d8bf3a7d601bdf68e0b equals the md5 of the file",
   "how": "One transaction against the Supabase project comms-hub, rolled back at the end. Eleven throwaway accounts (@t.test), two of each leading rank and one of each other role, act through row level security.",
   "runs": [
-    { "attempt": 1, "part": 1, "checks": 122, "passed": 121, "failed": ["77: the check read the designer's notice while signed in as the assistant; notices are private to their recipient. The check was wrong, not the rule: it now reads as the designer."] },
-    { "attempt": 2, "part": 1, "checks": 122, "passed": 122, "failed": [] },
-    { "attempt": 1, "part": 2, "checks": 5, "passed": 5, "failed": [] }
+    {
+      "attempt": 1,
+      "part": 1,
+      "checks": 122,
+      "passed": 121,
+      "failed": [
+        "77: the check read the designer's notice while signed in as the assistant; notices are private to their recipient. The check was wrong, not the rule: it now reads as the designer."
+      ]
+    },
+    {
+      "attempt": 2,
+      "part": 1,
+      "checks": 122,
+      "passed": 122,
+      "failed": []
+    },
+    {
+      "attempt": 1,
+      "part": 2,
+      "checks": 5,
+      "passed": 5,
+      "failed": []
+    },
+    {
+      "attempt": 1,
+      "part": "1 and 3 (after Step P2)",
+      "checks": 137,
+      "passed": 137,
+      "failed": [],
+      "note": "Parts 1 and 2 pin the templates as Step P1 installed them; part 3 restores the widening of section 5 and checks it, and presets."
+    }
   ],
   "rules_checked": [
     "installation changes nobody's behaviour: for each of the eight roles, every capability that replaces an existing check (urgency 3, outside mail without approval, announcement channels, the seven account capabilities, the thirteen pages, the WhatsApp push) answers exactly as the rule it replaces; the only grantable capability without a predecessor is the new level 2",
@@ -25,7 +53,8 @@
     "members: adding needs «إضافة الأعضاء» and only pages the adder holds; removing needs «إزالة عضو»; a founder is never removed; removing a page needs no holding",
     "who reads what: rank 1 reads only their own grants and log and cannot open another card; the assistant reads rank 1 grants and not the director's; the director's card of a writer names each source (page, timed, role, fixed)",
     "the log is append-only: no policy lets anyone delete it, and an update is refused even for the table owner",
-    "messaging after the move: the director still sends «عاجل», the writer still cannot (URGENT_ROLE), even holding «مهم»"
+    "messaging after the move: the director still sends «عاجل», the writer still cannot (URGENT_ROLE), even holding «مهم»",
+    "Step P2 (part 3): the director and the assistant read the members list from their role templates; a producer still reads only their own; an assistant changes no role and adds nobody until granted (D-3) but gives rank 1 what she holds; a director changes a role from the template alone; presets: saved, refused if they hold a fixed rule, applied as two grants named after the preset, refused as a whole for someone above (nothing given), not visible to a writer, not deletable by an assistant; the widening is eight role-template events in the log"
   ],
   "one_time_under_overlap": {
     "tried": "two sessions on 2026-10-13 with a committed throwaway member holding one «إنشاء قناة إعلانات»: A created a channel and held its transaction 4 to 5 seconds; B tried the same. B was refused (CHANNEL_ROLE) both times.",
@@ -41,5 +70,10 @@
   "advisors": {
     "security": "the same four kinds of finding as before (RLS enabled without policy on two server tables, five anon-callable functions, signed-in security definer functions, leaked-password protection off); the sixteen new or changed signed-in functions are intended; perm_eval, use_capability, perm_require, perm_note, perm_log, perm_pages_ok, perm_role_ok are not callable",
     "performance": "two new INFO findings: the capability foreign keys of member_capabilities and role_capabilities have no covering index (added in the Step P2 migration)"
+  },
+  "migration_p2": "supabase/migrations/20261013160000_permissions_accounts.sql, applied as 20261013085314 'permissions_accounts'; md5 72bcdaabac29ce7eefd846d9238837ac equals the file",
+  "advisors_p2": {
+    "security": "no new kind of finding; preset_save, preset_delete and preset_apply are the intended new callable functions",
+    "performance": "the two unindexed capability foreign keys are indexed (findings gone); the two new indexes are listed as unused, as every new index is at first (INFO)"
   }
 }

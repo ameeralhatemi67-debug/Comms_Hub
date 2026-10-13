@@ -293,3 +293,108 @@ export function permError(message: string): string {
   if (m.includes('violates check constraint')) return 'تحقق من البريد والاسم، ثم أعد المحاولة.';
   return 'تعذّر تنفيذ الإجراء. حاول مجدداً.';
 }
+
+// ---------------------------------------------------------------------------
+// The permission log, in words
+// ---------------------------------------------------------------------------
+export type PermEvent = {
+  id: number;
+  at: string;
+  actor: string | null;
+  subject: string | null;
+  role: string | null;
+  capability: string | null;
+  kind: string;
+  data: Record<string, unknown>;
+};
+
+export const EVENT_KINDS: Record<string, string> = {
+  grant: 'منح',
+  revoke: 'إنهاء',
+  override: 'سحب أو إعادة',
+  extend: 'تمديد',
+  use: 'استخدام',
+  expired: 'انتهاء',
+  role_default: 'صلاحيات دور',
+  role_assign: 'تغيير دور',
+  member_add: 'إضافة عضو',
+  member_remove: 'إزالة عضو',
+  account_edit: 'تعديل حساب',
+  request: 'طلب',
+  decide: 'قرار طلب',
+  withdraw: 'سحب طلب',
+};
+
+const ROLE_AR: Record<string, string> = {
+  director: 'مدير الاتصال المؤسسي',
+  assistant: 'مساعد مدير الاتصال المؤسسي',
+  writer: 'كاتب المحتوى',
+  designer: 'المصمم',
+  producer: 'المنتج الإعلامي',
+  publisher: 'مسؤول النشر وإدارة الحسابات',
+  member: 'عضو',
+  admin: 'Admin',
+};
+export const roleAr = (r: string | null | undefined) => (r && ROLE_AR[r]) || '';
+
+const howLong = (d: Record<string, unknown>) => {
+  if (d.mode === 'timed' && typeof d.until === 'string') return ` حتى ${stamp(d.until)}`;
+  if (d.mode === 'once') return Number(d.uses ?? 1) === 1 ? ' لمرة واحدة' : ` لـ${d.uses} مرات`;
+  if (d.mode === 'standing') return ' دائمة';
+  return '';
+};
+
+/** One line of the permission log, in Arabic, without a raw key. */
+export function eventText(e: PermEvent, nameOf: (email: string) => string): string {
+  const who = e.actor ? nameOf(e.actor) : 'النظام';
+  const whom = e.subject ? nameOf(e.subject) : '';
+  const cap = e.capability ? `«${capLabel(e.capability)}»` : '';
+  const d = e.data ?? {};
+  switch (e.kind) {
+    case 'grant':
+      return `${who} منح ${whom} ${cap}${howLong(d)}${d.request ? ' بطلب منه' : ''}.`;
+    case 'revoke':
+      return d.all ? `${who} أنهى كل الصلاحيات المضافة لـ${whom}.` : `${who} أنهى ${cap} لـ${whom}.`;
+    case 'override':
+      return d.effect === 'deny' ? `${who} سحب ${cap} من ${whom}.` : `${who} أعاد ${cap} لـ${whom} إلى ما يقرره دوره.`;
+    case 'extend':
+      return `${who} غيّر نهاية ${cap} لـ${whom} إلى ${typeof d.to === 'string' ? stamp(d.to) : ''}.`;
+    case 'use':
+      return `استخدم ${whom} ${cap} مرة، وبقي ${d.left ?? 0}.`;
+    case 'expired':
+      return d.used_up ? `استُنفدت ${cap} لـ${whom}.` : `انتهت ${cap} لـ${whom}.`;
+    case 'role_default':
+      return `${who} ${d.allowed ? 'فعّل' : 'أوقف'} ${cap} لدور «${roleAr(e.role)}»${typeof d.people === 'number' ? ` (${d.people} ${d.people === 1 ? 'شخص' : 'أشخاص'})` : ''}.`;
+    case 'role_assign':
+      return `${who} غيّر دور ${whom} من «${roleAr(String(d.from ?? ''))}» إلى «${roleAr(String(d.to ?? e.role ?? ''))}».`;
+    case 'member_add':
+      return `${who} أضاف ${whom} بدور «${roleAr(e.role)}».`;
+    case 'member_remove':
+      return `${who} أزال ${whom}${typeof d.name === 'string' ? ` (${d.name})` : ''}.`;
+    case 'account_edit':
+      return `${who} عدّل حساب ${whom}${Array.isArray(d.added) && d.added.length ? `: فتح ${d.added.length} ${d.added.length === 1 ? 'صفحة' : 'صفحات'}` : ''}${Array.isArray(d.removed) && d.removed.length ? `، وأغلق ${d.removed.length}` : ''}.`;
+    case 'request':
+      return `طلب ${who} ${cap}${howLong(d)}.`;
+    case 'decide':
+      return `${who} ${d.approve ? 'وافق على' : 'رفض'} طلب ${whom} ${cap}${d.approve ? howLong(d) : ''}.`;
+    case 'withdraw':
+      return `سحب ${who} طلبه ${cap}.`;
+    default:
+      return `${who}: ${EVENT_KINDS[e.kind] ?? 'حدث'} ${cap}`.trim();
+  }
+}
+
+/** The small markers on a member's row: temporary, one-time and removed. */
+export function markers(grants: Pick<Grant, 'mode' | 'effect'>[]): { timed: number; once: number; removed: number } {
+  return {
+    timed: grants.filter((g) => g.mode === 'timed').length,
+    once: grants.filter((g) => g.mode === 'once').length,
+    removed: grants.filter((g) => g.mode === 'standing' && g.effect === 'deny').length,
+  };
+}
+
+/** The next moment one of these grants ends, for the shell to read again then (no timer job). */
+export function nextEnd(grants: Pick<Grant, 'until'>[], nowMs: number): number | null {
+  const ends = grants.map((g) => (g.until ? Date.parse(g.until) : NaN)).filter((t) => t > nowMs);
+  return ends.length ? Math.min(...ends) : null;
+}

@@ -26,6 +26,15 @@ export const HOLD = {
   publishNow: 'النشر يصل إلى المنصات ولا يُتراجع عنه.',
   /** «الحسابات المرتبطة»: delete an account. */
   accountDelete: 'حذف الحساب يفصله عن المركز ويحذف مفاتيحه.',
+  // Permissions (Permissions_Plan.md 10, «New hold buttons»).
+  /** «الحسابات»: remove a member. */
+  removeMember: 'إزالة العضو تفصله عن المركز وتبقي أعماله لدى من يُسند إليه.',
+  /** «الحسابات»: end every grant a person was given. */
+  endAllGrants: 'تنتهي كل الصلاحيات المضافة لهذا الشخص الآن.',
+  /** «الحسابات», roles: switch a capability off for a whole role. */
+  roleDefaultOff: 'التغيير يمسّ كل من يحمل هذا الدور.',
+  /** «الحسابات»: change a person's role to a lower one. */
+  roleDown: 'ينقص هذا التغيير ما يستطيع الشخص فعله فوراً.',
 } as const;
 
 export const HOLD_MS = 900;

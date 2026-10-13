@@ -45,6 +45,11 @@ create function pg_temp.before(cap text) returns boolean language sql as $$
     when cap = 'whatsapp.push' then false
   end $$;
 grant execute on function pg_temp.before(text) to authenticated;
+-- Parts 1 and 2 check the templates as Step P1 installed them (equal to the rules before).
+-- Step P2 then switched on the account capabilities of section 4.2 for the director and the
+-- assistant; part 3 below puts them back and checks that widening.
+update public.role_capabilities set allowed = false
+ where role in ('director','assistant') and capability in ('accounts.view','permissions.grant','roles.assign','members.invite','members.remove','roles.templates.edit');
 
 set local role authenticated;
 
@@ -263,6 +268,37 @@ select pg_temp.who('00000000-0000-0000-0000-0000000000d1');
 select pg_temp.t('92 the director sends «عاجل»', $q$ insert into v values ('room', public.chat_create_room('group','فريق',null,array['wri@t.test'],null)::text); select public.chat_send(pg_temp.g('room')::uuid,'text','اجتماع',null,null,true,false) $q$, 'ok');
 select pg_temp.who('00000000-0000-0000-0000-0000000000c1');
 select pg_temp.t('93 the writer cannot, even with «مهم» from the role', $q$ select public.chat_send(pg_temp.g('room')::uuid,'text','x',null,null,true,false) $q$, 'ERR URGENT_ROLE');
+reset role;
+
+-- Part 3, Step P2: the accounts page opens to the director and the assistant (section 5) --
+update public.role_capabilities set allowed = true
+ where (role, capability) in (('director','accounts.view'),('director','permissions.grant'),('director','roles.assign'),('director','members.invite'),
+   ('director','members.remove'),('director','roles.templates.edit'),('assistant','accounts.view'),('assistant','permissions.grant'));
+set local role authenticated;
+select pg_temp.who('00000000-0000-0000-0000-0000000000d2');
+select pg_temp.c('100 a director reads the members list', (select count(*) from public.accounts where email like '%@t.test')::text, '11');
+select pg_temp.who('00000000-0000-0000-0000-0000000000b2');
+select pg_temp.c('101 so does an assistant', (select count(*) from public.accounts where email like '%@t.test')::text, '11');
+select pg_temp.who('00000000-0000-0000-0000-0000000000c3');
+select pg_temp.c('102 a producer still reads only their own', (select count(*) from public.accounts where email like '%@t.test')::text, '1');
+select pg_temp.who('00000000-0000-0000-0000-0000000000b2');
+select pg_temp.t('103 an assistant changes no role until granted (D-3)', $q$ select public.assign_role('pro@t.test','writer') $q$, 'ERR FORBIDDEN');
+select pg_temp.t('104 but gives rank 1 what she holds', $q$ select public.grant_capability('pro@t.test','urgency.2','timed',now()+interval '1 day',null,null,null) $q$, 'ok');
+select pg_temp.t('105 and adds nobody until granted', $q$ select public.add_account('new3@t.test','جديد','member',array['work']) $q$, 'ERR FORBIDDEN');
+select pg_temp.who('00000000-0000-0000-0000-0000000000d2');
+select pg_temp.t('106 a director changes a role from the template alone', $q$ select public.assign_role('pro@t.test','writer') $q$, 'ok');
+select pg_temp.t('107 saves a preset', $q$ insert into v values ('p1', public.preset_save(null,'تغطية النشر لأسبوع','[{"k":"mail.outside.send","mode":"timed","hours":168},{"k":"urgency.2","mode":"timed","hours":168}]','حين يغيب مسؤول النشر')::text) $q$, 'ok');
+select pg_temp.t('108 a preset cannot hold a fixed rule', $q$ select public.preset_save(null,'اعتماد','[{"k":"work.approve","mode":"once","uses":1}]') $q$, 'ERR CAP_FIXED');
+select pg_temp.c('109 applies it: two grants', public.preset_apply('pro@t.test', pg_temp.g('p1')::uuid, null)::text, '2');
+select pg_temp.t('110 not to someone above him; nothing is given', $q$ select public.preset_apply('dir@t.test', pg_temp.g('p1')::uuid, null) $q$, 'ERR NOT_MANAGEABLE');
+select pg_temp.who('00000000-0000-0000-0000-0000000000c3');
+select pg_temp.c('111 the producer, now a writer, holds outside mail for a week, named after the preset', (select (e->>'src') from (select public.my_capabilities()->'caps' cs) x, jsonb_array_elements(x.cs) e where e->>'k' = 'mail.outside.send')
+  || ' ' || (select count(*) from public.member_capabilities where email = 'pro@t.test' and reason = '«تغطية النشر لأسبوع»'), 'timed 2');
+select pg_temp.c('112 a writer does not see presets', (select count(*) from public.permission_presets)::text, '0');
+select pg_temp.who('00000000-0000-0000-0000-0000000000b2');
+select pg_temp.t('113 an assistant does not delete the director''s preset', $q$ select public.preset_delete(pg_temp.g('p1')::uuid) $q$, 'ERR FORBIDDEN');
+select pg_temp.who('00000000-0000-0000-0000-0000000000d1');
+select pg_temp.c('114 the widening is in the log', (select count(*) from public.permission_events where kind = 'role_default' and actor is null and role in ('director','assistant'))::text, '8');
 reset role;
 
 select * from (

@@ -144,3 +144,25 @@ test('every notice the permission functions write leads somewhere', () => {
   assert.equal(noticeHref({ page: 'members', tab: 'requests' }), '/accounts?tab=requests');
   assert.equal(noticeHref({ page: 'members', id: 'a@b.sa' }), '/accounts?person=a%40b.sa');
 });
+
+test('the permission log is worded in Arabic, for every kind the database writes', async () => {
+  const { eventText, EVENT_KINDS, markers, nextEnd } = await import('../src/lib/permissions.ts');
+  const name = (e) => ({ 'd@x': 'محمد', 'w@x': 'خالد' })[e] ?? e;
+  const E = (kind, over = {}) => ({ id: 1, at: '2026-10-13T09:00:00Z', actor: 'd@x', subject: 'w@x', role: null, capability: 'urgency.2', kind, data: {}, ...over });
+  assert.equal(eventText(E('grant', { data: { mode: 'timed', until: '2026-10-14T09:00:00Z' } }), name), 'محمد منح خالد «رسائل «مهم» (المستوى 2)» حتى 2026-10-14 12:00.');
+  assert.equal(eventText(E('grant', { data: { mode: 'once', uses: 1 } }), name), 'محمد منح خالد «رسائل «مهم» (المستوى 2)» لمرة واحدة.');
+  assert.equal(eventText(E('override', { data: { effect: 'deny' } }), name), 'محمد سحب «رسائل «مهم» (المستوى 2)» من خالد.');
+  assert.equal(eventText(E('role_default', { actor: null, subject: null, role: 'director', capability: 'accounts.view', data: { allowed: true, people: 1 } }), name), 'النظام فعّل «فتح صفحة «الحسابات»» لدور «مدير الاتصال المؤسسي» (1 شخص).');
+  assert.equal(eventText(E('role_assign', { capability: null, role: 'producer', data: { from: 'designer', to: 'producer' } }), name), 'محمد غيّر دور خالد من «المصمم» إلى «المنتج الإعلامي».');
+  assert.equal(eventText(E('expired', { actor: null }), name), 'انتهت «رسائل «مهم» (المستوى 2)» لـخالد.');
+  // Every kind the migrations allow has a label and words without a raw key.
+  const kinds = sql.match(/kind text not null check \(kind in \(([^)]+)\)/)[1].match(/'([a-z_]+)'/g).map((k) => k.slice(1, -1));
+  for (const k of kinds) {
+    assert.ok(EVENT_KINDS[k], k);
+    assert.doesNotMatch(eventText(E(k, { data: { mode: 'standing', allowed: true } }), name), /[a-z]+\.[a-z]+|_/, k);
+  }
+  assert.deepEqual(markers([{ mode: 'timed', effect: 'allow' }, { mode: 'once', effect: 'allow' }, { mode: 'standing', effect: 'deny' }, { mode: 'standing', effect: 'allow' }]), { timed: 1, once: 1, removed: 1 });
+  const now = Date.parse('2026-10-13T09:00:00Z');
+  assert.equal(nextEnd([{ until: '2026-10-13T08:00:00Z' }, { until: '2026-10-13T10:00:00Z' }, { until: null }, { until: '2026-10-13T12:00:00Z' }], now), Date.parse('2026-10-13T10:00:00Z'));
+  assert.equal(nextEnd([{ until: null }], now), null);
+});
