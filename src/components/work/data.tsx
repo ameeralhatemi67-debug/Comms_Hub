@@ -17,6 +17,7 @@ import {
   type WorkRow,
   type WorkType,
 } from '@/lib/work/rules';
+import type { EventItem, HeldMail, ReminderItem, RequestRow, TaskItem } from '@/lib/work/planning';
 
 export type Person = { email: string; display_name: string; role: Role };
 export type Load = {
@@ -32,7 +33,7 @@ export type Load = {
 };
 export type Project = { id: string; name: string; type: string; start_on: string; end_on: string; owner: string; description: string | null };
 export type Template = { id: string; name: string; type: WorkType; rows: TemplateRow[]; created_by: string };
-export type ListItem = { w: WorkRow; stages: StageRow[]; projects: string[]; flags: number; pending?: number };
+export type ListItem = { w: WorkRow; stages: StageRow[]; projects: string[]; flags: number; pending?: number; pendingKeys?: string[] };
 export type Result<T = unknown> = { ok: true; data: T } | { ok: false; error: string };
 
 type Ctx = {
@@ -152,16 +153,17 @@ export function useWorkList() {
     const works = w.data as WorkRow[];
     const stages = s.data as StageRow[];
     const inReview = works.filter((x) => x.status === 'IN_REVIEW');
-    const pending = await Promise.all(inReview.map((x) => db.rpc('work_pending', { p_work: x.id })));
-    const pend: Record<string, number> = {};
-    inReview.forEach((x, i) => (pend[x.id] = ((pending[i].data as unknown[]) ?? []).length));
+    const pending = await Promise.all(inReview.map((x) => db.rpc('work_view_pending', { p_work: x.id })));
+    const pend: Record<string, string[]> = {};
+    inReview.forEach((x, i) => (pend[x.id] = ((pending[i].data as { key: string }[]) ?? []).map((p) => p.key)));
     setItems(
       works.map((x) => ({
         w: x,
         stages: stages.filter((st) => st.work_id === x.id),
         projects: (p.data as { work_id: string; project_id: string }[]).filter((r) => r.work_id === x.id).map((r) => r.project_id),
         flags: (f.data as { work_id: string }[]).filter((r) => r.work_id === x.id).length,
-        pending: pend[x.id],
+        pending: pend[x.id]?.length,
+        pendingKeys: pend[x.id],
       })),
     );
     setStatus('ready');
@@ -232,8 +234,8 @@ export function useWorkDetail(id: string) {
       db.from('work_log').select('id,at,actor,type,text').eq('work_id', id).order('at'),
       db.from('work_projects').select('project_id').eq('work_id', id),
       db.from('work_assets').select('asset_id, file:media_files(id,name,kind,current_version,approved_version,stage)').eq('work_id', id).order('added_at'),
-      db.rpc('work_parts', { p_work: id }),
-      db.rpc('work_pending', { p_work: id }),
+      db.rpc('work_view_parts', { p_work: id }),
+      db.rpc('work_view_pending', { p_work: id }),
       db.rpc('work_decide_block', { p_work: id }),
       db.from('mail_threads').select('id,subject,kind,req_no').contains('links', [{ type: 'work', id }]),
       db.from('chat_rooms').select('id,name').eq('link->>id', id),
@@ -311,4 +313,69 @@ export async function fileNotes(ids: string[]): Promise<FileNote[]> {
 export async function addFileNote(assetId: string, author: string, body: string, timecode: string): Promise<string | null> {
   const { error } = await supabase().from('media_notes').insert({ asset_id: assetId, author, body, timecode: timecode || null });
   return error ? 'تعذّر حفظ الملاحظة. الوقت بصيغة دقيقة:ثانية، مثل 00:32.' : null;
+}
+
+// ---------------------------------------------------------------------------
+// The planning pages: tasks, events and private reminders, and «الطلبات»
+// ---------------------------------------------------------------------------
+export type { TaskItem, EventItem, ReminderItem, RequestRow, HeldMail } from '@/lib/work/planning';
+
+/** Tasks this person can read (row level security), the department's events, and their own reminders. */
+export function usePlanData() {
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [reminders, setReminders] = useState<ReminderItem[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const reload = useCallback(async () => {
+    const db = supabase();
+    const [t, e, r] = await Promise.all([
+      db.from('media_tasks').select('id,what,kind,assignee,assigned_by,due,start_on,after_ids,status,note,project_id,work_id,group_key,priority').order('due').limit(1000),
+      db.from('events').select('id,title,start_at,end_at,place,project_id,created_by').order('start_at').limit(1000),
+      db.from('reminders').select('id,at,body').order('at').limit(500),
+    ]);
+    if (t.error || e.error || r.error) return setStatus('error');
+    setTasks(t.data as TaskItem[]);
+    setEvents(e.data as EventItem[]);
+    setReminders(r.data as ReminderItem[]);
+    setStatus('ready');
+  }, []);
+  useEffect(() => {
+    void reload();
+    const again = () => document.visibilityState === 'visible' && void reload();
+    document.addEventListener('visibilitychange', again);
+    return () => document.removeEventListener('visibilitychange', again);
+  }, [reload]);
+  return { tasks, events, reminders, status, reload };
+}
+
+/** The requests this person may see (work_request_list), outside mail held for approval, and folders they cannot open. */
+export function useRequestData() {
+  const [requests, setRequests] = useState<RequestRow[]>([]);
+  const [held, setHeld] = useState<HeldMail[]>([]);
+  const [locked, setLocked] = useState<{ id: string; name: string }[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const reload = useCallback(async () => {
+    const db = supabase();
+    const [q, m, f] = await Promise.all([
+      db.rpc('work_request_list'),
+      db.from('mail_messages').select('id,thread_id,author,created_at').eq('state', 'held').order('created_at', { ascending: false }).limit(100),
+      db.rpc('media_tree'),
+    ]);
+    if (q.error) return setStatus('error');
+    const msgs = (m.data ?? []) as { id: string; thread_id: string; author: string | null; created_at: string }[];
+    const ids = [...new Set(msgs.map((x) => x.thread_id))];
+    const th = ids.length ? await db.from('mail_threads').select('id,subject').in('id', ids) : { data: [] };
+    const subj = new Map(((th.data ?? []) as { id: string; subject: string }[]).map((x) => [x.id, x.subject]));
+    setRequests(q.data as RequestRow[]);
+    setHeld(msgs.map((x) => ({ ...x, author: x.author ?? '', subject: subj.get(x.thread_id) ?? 'رسالة خارجية' })));
+    setLocked(((f.data ?? []) as { id: string; name: string; ghost: boolean }[]).filter((x) => x.ghost).map((x) => ({ id: x.id, name: x.name })));
+    setStatus('ready');
+  }, []);
+  useEffect(() => {
+    void reload();
+    const again = () => document.visibilityState === 'visible' && void reload();
+    document.addEventListener('visibilitychange', again);
+    return () => document.removeEventListener('visibilitychange', again);
+  }, [reload]);
+  return { requests, held, locked, status, reload };
 }

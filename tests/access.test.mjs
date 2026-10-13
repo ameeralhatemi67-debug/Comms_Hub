@@ -50,6 +50,27 @@ test('«الحسابات المرتبطة» goes with «الموافقات وا�
   assert.equal(canOpen({ role: 'admin', pages: [] }, 'channels'), true);
 });
 
+test('«المشاريع» goes with «العمل» or «التقويم», and «الطلبات» with «العمل», the library or tasks, so existing accounts need no change', () => {
+  for (const role of ['director', 'assistant', 'writer', 'designer', 'producer', 'publisher', 'member']) {
+    assert.equal(canOpen({ role, pages: ['work'] }, 'projects'), true, `${role} projects with work`);
+    assert.equal(canOpen({ role, pages: ['calendar'] }, 'projects'), true, `${role} projects with calendar`);
+    assert.equal(canOpen({ role, pages: ['media'] }, 'projects'), false, `${role} projects with media only`);
+    assert.equal(canOpen({ role, pages: ['work'] }, 'requests'), true, `${role} requests with work`);
+    assert.equal(canOpen({ role, pages: ['media'] }, 'requests'), true, `${role} requests with media`);
+    assert.equal(canOpen({ role, pages: ['tasks'] }, 'requests'), true, `${role} requests with tasks`);
+    assert.equal(canOpen({ role, pages: ['mail', 'calendar'] }, 'requests'), false, `${role} requests without work, media or tasks`);
+  }
+  // They are not separate grants, so the accounts page cannot hand them out or take them away.
+  assert.deepEqual(sanitizePages(['projects', 'requests', 'work']), ['work']);
+  for (const role of ['writer', 'publisher', 'member']) {
+    const pages = defaultPages(role);
+    assert.equal(canOpen({ role, pages }, 'projects'), true, role);
+    assert.equal(canOpen({ role, pages }, 'requests'), true, role);
+  }
+  assert.equal(canOpen({ role: 'admin', pages: [] }, 'projects'), true);
+  assert.equal(canOpen({ role: 'admin', pages: [] }, 'requests'), true);
+});
+
 test('only an administrator may switch roles', () => {
   assert.equal(canSwitchRole({ role: 'admin' }), true);
   for (const r of roleIds.filter((x) => x !== 'admin')) assert.equal(canSwitchRole({ role: r }), false, r);

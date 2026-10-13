@@ -139,8 +139,13 @@ There is no sample data in the database: the reference's sample works stay in
 the artifact. «العمل», the work page, «إنشاء» (Step 3), «الموافقات والنشر», the
 review screen, «الحسابات المرتبطة» at `/channels` and the notifications drawer (Step 4)
 read and write the database (`src/components/work/`, `src/components/notices.tsx`);
-every write is a database function called through `useWork().call`. Until Step 5
-replaces them, «التقويم» (`operations.tsx`) and Home still show the old browser mock.
+every write is a database function called through `useWork().call`. Step 5 put «التقويم»
+(`/calendar`), «المشاريع» and the project page (`/projects`), «الطلبات» (`/requests`) and Home on
+the database too (`src/components/work/calendar.tsx`, `projects.tsx`, `requests.tsx`,
+`day-dialogs.tsx`, `src/components/home.tsx`; rules in `src/lib/work/planning.ts`). The pages
+read a work's parts through `work_view_parts` and `work_view_pending`; `work_parts`,
+`work_pending` and `work_stage_state` are internal and not callable from outside. Delegation
+while away is not built (owner decision of 2026-10-12).
 
 The shared interaction kit (Step 2) is real as well: undo steps of library edits and
 each person's help progress live in Postgres

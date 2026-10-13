@@ -221,6 +221,17 @@ Integrate the existing `motion_design` library into `/motion` using the establis
 
 Access restrictions, persisted assets, video uploads and workflow attachment remain future work. The revised scope, export behavior and prototype limits are specified in `MVP_draft.md` section 57. Verification and critic-round results are recorded in `progress.md` and `qa/motion-studio.json`.
 
+### Requested scope addition, 2026-10-12: «النموذج المرجعي للمركز» built into the site
+
+By owner directive of 2026-10-12 (recorded in `progress.md`) the work cycle moves to Postgres and version 5 of the reference (`reference/comms-hub-reference-v5.html`) is built into the site in five steps, planned in `Reference_Build_Plan.md`. Publishing stays a simulation. This is independent of the department validation and does not count as stakeholder acceptance.
+
+- [x] **Step 1, the work cycle in the database** (2026-10-12, `bed3fda`). Rule run 135 of 135.
+- [x] **Step 2, the shared interaction kit** (2026-10-12, `8d7289d`). Hold to confirm, undo of library edits, the help system. Rule run 56 of 56, browser check 40 of 40.
+- [x] **Step 3, «العمل», the work page and «إنشاء»** (2026-10-12, `1bd27a7`). Browser check 264 of 264.
+- [x] **Step 4, «الموافقات والنشر», the review screen, «الحسابات المرتبطة», notifications** (2026-10-12, `7814620`). Rule run 71 of 71, browser check 495 of 495.
+- [/] **Step 5, «التقويم», «المشاريع», «الطلبات», then acceptance** (2026-10-13). Built and checked: rule run 113 of 113 with Steps 1 and 4 re-run, `npm test` 141 of 141, browser check 1010 of 1010, all sixteen pages with their guide, `MVP_draft.md` section 61. The review of the rules and row level security across Steps 1 to 5 closed the gaps it found (`20261013120000_work_cycle_planning.sql`). Delegation while away is deferred by owner decision (it waits for the approval-rights work).
+  *Exit gate:* standard checks pass (met); a push to deploy on the owner's request (pending: all five steps are local commits); the owner's signed-in walkthrough of the whole cycle, with findings recorded in `progress.md` (pending).
+
 ### Checkpoint 0.1: UI Prototype MVP 0.1
 
 **State:** Complete and verified (2026-09-19). **Authority:** [[MVP_draft]].

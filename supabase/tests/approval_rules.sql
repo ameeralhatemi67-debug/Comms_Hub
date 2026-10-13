@@ -19,6 +19,9 @@ insert into auth.users (id, email, email_confirmed_at) values
 -- The writer views the unfiled folder, so a file there can go into her work.
 insert into public.media_grants (folder_id, subject_type, subject, level) values ('00000000-0000-0000-0000-0000000000a1','role','writer',1);
 
+-- Since 20261013120000_work_cycle_planning.sql the pages read parts through work_view_parts and
+-- work_view_pending, and a stage's state is internal: this run reads it as the database.
+create function pg_temp.st(id uuid) returns text language sql security definer set search_path = '' as $$ select public.work_stage_state(id) $$;
 create function pg_temp.who(id text) returns void language sql as $$ select set_config('request.jwt.claims', json_build_object('sub',id,'role','authenticated')::text, true) $$;
 create function pg_temp.t(k text, sqltext text, e text) returns void language plpgsql as $$
 begin
@@ -27,8 +30,8 @@ begin
 end $$;
 create function pg_temp.c(k text, val text, e text) returns void language sql as $$ insert into r(k,v,expect) values (k,val,e) $$;
 create function pg_temp.g(k text) returns text language sql as $$ select val from v where k = $1 $$;
-create function pg_temp.pend(w text) returns text language sql as $$ select coalesce(string_agg(key, ',' order by key), '-') from public.work_pending(w) $$;
-grant execute on function pg_temp.t(text,text,text), pg_temp.c(text,text,text), pg_temp.g(text), pg_temp.pend(text) to authenticated;
+create function pg_temp.pend(w text) returns text language sql as $$ select coalesce(string_agg(key, ',' order by key), '-') from public.work_view_pending(w) $$;
+grant execute on function pg_temp.t(text,text,text), pg_temp.c(text,text,text), pg_temp.g(text), pg_temp.pend(text), pg_temp.st(uuid) to authenticated;
 set local role authenticated;
 
 -- Accounts the works publish on (the publisher «pub» publishes on both; «pub2» on neither).
@@ -132,7 +135,7 @@ select pg_temp.t('04f director finishes the approval point', $q$ select public.w
 select pg_temp.t('04g he cannot approve it', $q$ select public.work_stage_act((select id from public.work_stages where work_id = pg_temp.g('G') and pos = 0), 'gate') $q$, 'ERR SELF_APPROVAL');
 select pg_temp.who('00000000-0000-0000-0000-00000000a001');
 select pg_temp.t('04h the assistant approves it', $q$ select public.work_stage_act((select id from public.work_stages where work_id = pg_temp.g('G') and pos = 0), 'gate') $q$, 'ok');
-select pg_temp.c('04i what followed is ready', (select public.work_stage_state(id) from public.work_stages where work_id = pg_temp.g('G') and pos = 1), 'ready');
+select pg_temp.c('04i what followed is ready', (select pg_temp.st(id) from public.work_stages where work_id = pg_temp.g('G') and pos = 1), 'ready');
 select pg_temp.t('04j assistant uploads a video', $q$ with x as (insert into public.media_files (drive_file_id, name, mime_type, size_bytes, kind, folder_id)
   values ('t-ar-drive-1', 'فيديو القواعد.mp4', 'video/mp4', 1000, 'video', '00000000-0000-0000-0000-0000000000a1') returning id)
   insert into v select 'F', id::text from x $q$, 'ok');

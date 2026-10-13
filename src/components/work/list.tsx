@@ -235,7 +235,7 @@ export function WorkListPage() {
       ) : view === 'board' ? (
         <Board list={list} open={open} />
       ) : (
-        <Table list={list} open={open} projectName={projectName} />
+        <WorkTable list={list} open={open} projectName={projectName} />
       )}
     </div>
   );
@@ -264,7 +264,8 @@ function EmptyTab({ tab, total }: { tab: WorkTab; total: number }) {
   );
 }
 
-function Table({ list, open, projectName }: { list: ListItem[]; open: (id: string) => void; projectName: (id: string) => string }) {
+/** The works as a table; also the project page's «الأعمال». */
+export function WorkTable({ list, open, projectName }: { list: ListItem[]; open: (id: string) => void; projectName: (id: string) => string }) {
   const w = useWork();
   return (
     <div className="wk-table" role="table" aria-label="الأعمال">

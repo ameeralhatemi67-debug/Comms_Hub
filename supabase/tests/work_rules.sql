@@ -23,6 +23,9 @@ values ('00000000-0000-0000-0000-0000000000f9', null, 'مجلد مقيّد لل�
 insert into public.media_grants (folder_id, subject_type, subject, level) values
  ('00000000-0000-0000-0000-0000000000a1','role','writer',1);
 
+-- Since 20261013120000_work_cycle_planning.sql the pages read parts through work_view_parts and
+-- work_view_pending, and a stage's state is internal: this run reads it as the database.
+create function pg_temp.st(id uuid) returns text language sql security definer set search_path = '' as $$ select public.work_stage_state(id) $$;
 create function pg_temp.who(id text) returns void language sql as $$ select set_config('request.jwt.claims', json_build_object('sub',id,'role','authenticated')::text, true) $$;
 create function pg_temp.t(k text, sqltext text, e text) returns void language plpgsql as $$
 begin
@@ -31,7 +34,7 @@ begin
 end $$;
 create function pg_temp.c(k text, val text, e text) returns void language sql as $$ insert into r(k,v,expect) values (k,val,e) $$;
 create function pg_temp.g(k text) returns text language sql as $$ select val from v where k = $1 $$;
-grant execute on function pg_temp.t(text,text,text), pg_temp.c(text,text,text), pg_temp.g(text) to authenticated;
+grant execute on function pg_temp.t(text,text,text), pg_temp.c(text,text,text), pg_temp.g(text), pg_temp.st(uuid) to authenticated;
 
 set local role authenticated;
 
@@ -102,11 +105,11 @@ select pg_temp.who('00000000-0000-0000-0000-00000000b001');
 select pg_temp.t('18d writer writes the Instagram copy', $q$ select public.work_text_save(pg_temp.g('A'), 'instagram', 'نسخة إنستغرام', null) $q$, 'ok');
 select pg_temp.t('18e a copy for a platform not chosen is refused', $q$ select public.work_text_save(pg_temp.g('A'), 'x', 'نسخة X', null) $q$, 'ERR PLATFORM_NOT_CHOSEN');
 select pg_temp.t('19 writer finishes the approval point of R', $q$ select public.work_stage_act((select id from public.work_stages where work_id = pg_temp.g('R') and pos = 0), 'finish') $q$, 'ok');
-select pg_temp.c('19b the next stage waits for approval', (select public.work_stage_state(id) from public.work_stages where work_id = pg_temp.g('R') and pos = 1), 'waiting');
+select pg_temp.c('19b the next stage waits for approval', (select pg_temp.st(id) from public.work_stages where work_id = pg_temp.g('R') and pos = 1), 'waiting');
 select pg_temp.t('20 writer cannot approve the point', $q$ select public.work_stage_act((select id from public.work_stages where work_id = pg_temp.g('R') and pos = 0), 'gate') $q$, 'ERR FORBIDDEN_DECIDE');
 select pg_temp.who('00000000-0000-0000-0000-00000000d001');
 select pg_temp.t('21 director approves the point', $q$ select public.work_stage_act((select id from public.work_stages where work_id = pg_temp.g('R') and pos = 0), 'gate') $q$, 'ok');
-select pg_temp.c('21b the next stage is ready', (select public.work_stage_state(id) from public.work_stages where work_id = pg_temp.g('R') and pos = 1), 'ready');
+select pg_temp.c('21b the next stage is ready', (select pg_temp.st(id) from public.work_stages where work_id = pg_temp.g('R') and pos = 1), 'ready');
 
 -- Extension request moves what follows --------------------------------------
 select pg_temp.who('00000000-0000-0000-0000-00000000f001');
@@ -123,7 +126,7 @@ select pg_temp.c('25b the edit now ends a day later', (select (due_on - public.w
 -- Review: per part, no self approval, urgent ---------------------------------
 select pg_temp.who('00000000-0000-0000-0000-00000000b001');
 select pg_temp.t('26 writer submits A', $q$ select public.work_submit(pg_temp.g('A'), 'جاهز', array[pg_temp.g('ig')::uuid], now()) $q$, 'ok');
-select pg_temp.c('26b parts waiting', (select string_agg(key, ',' order by key) from public.work_pending(pg_temp.g('A'))), 'date,dest,text,v:instagram');
+select pg_temp.c('26b parts waiting', (select string_agg(key, ',' order by key) from public.work_view_pending(pg_temp.g('A'))), 'date,dest,text,v:instagram');
 select pg_temp.t('26c no editing while a decision is pending', $q$ select public.work_text_save(pg_temp.g('A'), 'main', 'تعديل أثناء المراجعة', null) $q$, 'ERR STATUS_DENIED');
 select pg_temp.t('27 writer cannot decide', $q$ select public.work_decide(pg_temp.g('A'), 'approve', array['text'], null, false) $q$, 'ERR FORBIDDEN_DECIDE');
 select pg_temp.who('00000000-0000-0000-0000-00000000d001');
@@ -135,7 +138,7 @@ select pg_temp.c('30b status and the text stays approved', (select status from p
 select pg_temp.t('31 director marks A urgent', $q$ select public.work_update(pg_temp.g('A'), '{"priority":"urgent"}') $q$, 'ok');
 select pg_temp.who('00000000-0000-0000-0000-00000000b001');
 select pg_temp.t('32 writer resubmits', $q$ select public.work_submit(pg_temp.g('A'), null, array[pg_temp.g('ig')::uuid], now()) $q$, 'ok');
-select pg_temp.c('32b only what was not approved is waiting', (select string_agg(key, ',' order by key) from public.work_pending(pg_temp.g('A'))), 'date,dest,v:instagram');
+select pg_temp.c('32b only what was not approved is waiting', (select string_agg(key, ',' order by key) from public.work_view_pending(pg_temp.g('A'))), 'date,dest,v:instagram');
 select pg_temp.who('00000000-0000-0000-0000-00000000a001');
 select pg_temp.t('33 assistant approves the rest of an urgent work', $q$ select public.work_decide(pg_temp.g('A'), 'approve', array['dest','date','v:instagram'], null, false) $q$, 'ok');
 select pg_temp.c('33b ready to publish, not published', (select status || ' ' || coalesce(pub_at::text, 'none') from public.works where id = pg_temp.g('A')), 'APPROVED none');
@@ -146,11 +149,11 @@ select pg_temp.c('33c publisher told', (select count(*) from public.notification
 select pg_temp.who('00000000-0000-0000-0000-00000000b001');
 select pg_temp.t('34 writer edits the approved text', $q$ select public.work_text_save(pg_temp.g('A'), 'main', 'النص الثاني', 'تعديل') $q$, 'ok');
 select pg_temp.c('34b back in review for the text alone', (select status from public.works where id = pg_temp.g('A')) || ' ' ||
-  (select string_agg(key, ',') from public.work_pending(pg_temp.g('A'))), 'IN_REVIEW text');
+  (select string_agg(key, ',') from public.work_view_pending(pg_temp.g('A'))), 'IN_REVIEW text');
 select pg_temp.c('34c the Instagram copy is now older than the text', (select base::text from public.work_variants where work_id = pg_temp.g('A') and platform = 'instagram'), '1');
 select pg_temp.t('34d writer confirms the copy still fits', $q$ select public.work_variant_confirm(pg_temp.g('A'), 'instagram') $q$, 'ok');
 select pg_temp.c('34e confirmed against version 2, nothing re-opened', (select base::text from public.work_variants where work_id = pg_temp.g('A') and platform = 'instagram') || ' ' ||
-  (select string_agg(key, ',') from public.work_pending(pg_temp.g('A'))), '2 text');
+  (select string_agg(key, ',') from public.work_view_pending(pg_temp.g('A'))), '2 text');
 select pg_temp.who('00000000-0000-0000-0000-00000000d001');
 select pg_temp.t('35 director approves the new text', $q$ select public.work_decide(pg_temp.g('A'), 'approve', array['text'], null, false) $q$, 'ok');
 
@@ -163,7 +166,7 @@ select pg_temp.t('39 publisher schedules at the approved time, ask first', $q$ s
 select pg_temp.c('39b scheduled', (select status from public.works where id = pg_temp.g('A')), 'SCHEDULED');
 select pg_temp.t('40 another time sends only the date back', $q$ select public.work_schedule(pg_temp.g('A'), now() + interval '1 day', 'ask') $q$, 'ok');
 select pg_temp.c('40b in review for the date alone', (select status from public.works where id = pg_temp.g('A')) || ' ' ||
-  (select string_agg(key, ',') from public.work_pending(pg_temp.g('A'))), 'IN_REVIEW date');
+  (select string_agg(key, ',') from public.work_view_pending(pg_temp.g('A'))), 'IN_REVIEW date');
 select pg_temp.t('41 publisher withdraws the move', $q$ select public.work_cancel_move(pg_temp.g('A')) $q$, 'ok');
 select pg_temp.c('41b back on the old time', (select status || ' ' || (sched_at = now())::text from public.works where id = pg_temp.g('A')), 'SCHEDULED true');
 select pg_temp.t('42 the time comes', $q$ insert into v select 'due', public.work_due_run()::text $q$, 'ok');
@@ -182,7 +185,7 @@ select pg_temp.who('00000000-0000-0000-0000-00000000d001');
 select pg_temp.t('47 director approves the whole package', $q$ select public.work_decide(pg_temp.g('C'), 'approve', null, null, false) $q$, 'ok');
 select pg_temp.t('48 renaming the X handle', $q$ select public.account_save(pg_temp.g('x')::uuid, '{"label":"الرسمي","handle":"@t_x2","publishers":["pub@t.test"]}') $q$, 'ok');
 select pg_temp.c('48b whole package back in review', (select status from public.works where id = pg_temp.g('C')) || ' ' ||
-  (select count(*) from public.work_pending(pg_temp.g('C'))) || '/' || (select count(*) from public.work_parts(pg_temp.g('C'))), 'IN_REVIEW 2/2');
+  (select count(*) from public.work_view_pending(pg_temp.g('C'))) || '/' || (select count(*) from public.work_view_parts(pg_temp.g('C'))), 'IN_REVIEW 2/2');
 select pg_temp.who('00000000-0000-0000-0000-00000000a001');
 select pg_temp.t('49 the one who renamed it cannot approve; the assistant does', $q$ select public.work_decide(pg_temp.g('C'), 'approve', null, null, false) $q$, 'ok');
 reset role;

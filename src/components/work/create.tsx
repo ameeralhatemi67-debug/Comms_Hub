@@ -32,8 +32,9 @@ import {
 import { useWork, type LibraryFile } from './data';
 import { Av, Empty, Hint, Ic, LibraryPicker, Modal, TYPE_HINT, TYPE_ICON } from './parts';
 import { PlanEditor, PlanRows, keyed, staffOf, type EditRow } from './plan';
+import { ProjectDialog } from './projects';
 
-type FromMail = { id: string; subject: string; from: string; body: string; req: number | null; external: boolean };
+type FromMail = { id: string; subject: string; from: string; body: string; req: number | null; external: boolean; assignee: string | null };
 type Draft = {
   type: WorkType | null;
   title: string;
@@ -81,12 +82,25 @@ export function CreatePage() {
   };
   const params = useSearchParams();
   const preType = params.get('type');
+  // From the calendar (?due=) and the project page (?project=): the due date and the project.
+  const dueParam = params.get('due') ?? '';
+  const preDue = /^\d{4}-\d{2}-\d{2}$/.test(dueParam) && dueParam >= w.today ? dueParam : '';
+  const preProject = params.get('project') ?? '';
   const [d, setD] = useState<Draft>(() => {
     const type = preType && preType in TYPE_PLANS ? (preType as WorkType) : null;
-    return { ...blank(), type, plan: type && !member ? fresh(type, '') : null };
+    return {
+      ...blank(),
+      type,
+      due: preDue,
+      projects: preProject && w.projects.some((p) => p.id === preProject) ? [preProject] : [],
+      extra1: type === 'event' && preDue ? `${preDue}T09:00` : '',
+      plan: type && !member ? fresh(type, preDue) : null,
+    };
   });
   const [mail, setMail] = useState<FromMail | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
+  // Outside mail is turned into a work by its assignee or the leaders (mail_link_work); say so before saving.
+  const mailBlocked = !!mail && mail.external && !['director', 'assistant', 'publisher', 'admin'].includes(w.role) && mail.assignee !== w.me;
   const [dlg, setDlg] = useState<'' | 'lib' | 'plan' | 'project'>('');
   const [busy, setBusy] = useState(false);
   const set = (patch: Partial<Draft>) => setD((x) => ({ ...x, ...patch }));
@@ -98,14 +112,14 @@ export function CreatePage() {
     void (async () => {
       const db = supabase();
       const [t, m] = await Promise.all([
-        db.from('mail_threads').select('id,subject,kind,req_no').eq('id', id).maybeSingle(),
+        db.from('mail_threads').select('id,subject,kind,req_no,assignee').eq('id', id).maybeSingle(),
         db.from('mail_messages').select('from_name,from_email,author,body').eq('thread_id', id).eq('kind', 'mail').order('created_at').limit(1),
       ]);
       if (!t.data) return;
       const first = (m.data ?? [])[0] as { from_name: string | null; from_email: string | null; author: string | null; body: string } | undefined;
       const from = first?.from_name || first?.from_email || (first?.author ? w.nameOf(first.author) : '');
       const body = (first?.body ?? '').split('\n').filter(Boolean).slice(0, 6).join('\n');
-      setMail({ id, subject: t.data.subject, from, body, req: t.data.req_no, external: t.data.kind === 'external' });
+      setMail({ id, subject: t.data.subject, from, body, req: t.data.req_no, external: t.data.kind === 'external', assignee: t.data.assignee });
       setD((x) => ({
         ...x,
         title: x.title || t.data!.subject.replace(/^طلب /, ''),
@@ -174,7 +188,7 @@ export function CreatePage() {
               </span>
               <b>مشروع</b>
               <span>حملة أو فعالية أو مبادرة تمتد أسابيع، تُربط بها الأعمال.</span>
-              <small>الحملة نوع من المشاريع. خطة الأعمال للمشروع تأتي مع صفحة «المشاريع».</small>
+              <small>الحملة نوع من المشاريع. مع خطة أعمال اختيارية تُسند وتُحسب مواعيدها.</small>
             </button>
           )}
         </div>
@@ -191,12 +205,21 @@ export function CreatePage() {
         ) : (
           <Hint i={Mail}>طلب وصل بالبريد؟ افتح الرسالة واضغط «تحويل إلى عمل»، فتُفتح هذه الصفحة بالبيانات والرابط إلى الرسالة.</Hint>
         )}
-        {dlg === 'project' && <ProjectDialog onClose={() => setDlg('')} />}
+        {dlg === 'project' && (
+          <ProjectDialog
+            onClose={() => setDlg('')}
+            onSaved={async (id, n) => {
+              setDlg('');
+              router.push(`/projects/${id}${n ? '?tab=people' : ''}`);
+            }}
+          />
+        )}
       </div>
     );
 
   const type = d.type;
   const pub = PUBLISHABLE_TYPES.includes(type);
+  const mailBlockText = `هذه رسالة خارجية ${mail?.assignee ? `مسندة إلى ${w.nameOf(mail.assignee)}` : 'لم تُسند بعد'}: تحويلها إلى عمل مربوط بها لمسؤولها أو لمدير الاتصال ومساعده. احفظ العمل بلا ربط بالرسالة، أو اطلب الإسناد من البريد.`;
   const isReq = member || !d.assignee;
   const usable = w.accounts.filter((a) => a.active && a.platform !== 'mail');
   const staff = staffOf(w.people);
@@ -210,6 +233,7 @@ export function CreatePage() {
     if (pub && !member && !youtubeOk(type, usable.filter((a) => d.channels.includes(a.id)).map((a) => a.platform), d.assets.map((a) => a.kind)))
       errs.push('يوتيوب يقبل الفيديو فقط: أضف فيديو من المكتبة أو أزل حساب يوتيوب.');
     if (type === 'event' && d.extra1 && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(d.extra1)) errs.push('اختر يوم الحدث ووقته.');
+    if (mailBlocked) errs.push(mailBlockText);
     const plan = !member && d.plan ? d.plan.rows : null;
     if (plan && !isReq) planIssues(plan, d.due || undefined).errs.forEach((e) => errs.push(e.text));
     setErrors(errs);
@@ -309,6 +333,14 @@ export function CreatePage() {
                 {mail.body && <p>{mail.body}</p>}
               </div>
             </div>
+          )}
+          {mailBlocked && (
+            <Hint warn>
+              {mailBlockText}{' '}
+              <button type="button" className="wk-lk" onClick={() => setMail(null)}>
+                إنشاء بلا ربط بالرسالة
+              </button>
+            </Hint>
           )}
 
           <section className="wk-fs" data-gd="basics">
@@ -673,80 +705,5 @@ export function CreatePage() {
         />
       )}
     </div>
-  );
-}
-
-/** A new project: a campaign, an event, an initiative. Leaders only; the works plan comes with «المشاريع». */
-function ProjectDialog({ onClose }: { onClose: () => void }) {
-  const w = useWork();
-  const [name, setName] = useState('');
-  const [type, setType] = useState('campaign');
-  const [start, setStart] = useState(w.today);
-  const [end, setEnd] = useState('');
-  const [owner, setOwner] = useState(w.me);
-  const [desc, setDesc] = useState('');
-  const [err, setErr] = useState('');
-  const staff = staffOf(w.people).filter((p) => ['director', 'assistant'].includes(p.role) || p.email === owner);
-  const save = async () => {
-    const r = await w.call('project_save', { p_id: null, p: { name, type, start, end, owner, description: desc } });
-    if (!r.ok) return setErr(r.error);
-    await w.reloadBase();
-    w.say(`أُنشئ المشروع «${name.trim()}». اربط به الأعمال من «إنشاء» أو من تفاصيل العمل.`);
-    onClose();
-  };
-  return (
-    <Modal title="مشروع جديد" onClose={onClose}>
-      <Hint i={Flag}>المشروع يجمع أعمالاً على مدى أسابيع. «الحملة» نوع من المشاريع. صفحة «المشاريع» بخطتها الزمنية تأتي لاحقاً.</Hint>
-      <label className="l">
-        الاسم
-        <input className="wk-inp" value={name} maxLength={120} onChange={(e) => setName(e.target.value)} />
-      </label>
-      <div className="wk-two">
-        <label className="l">
-          النوع
-          <select className="wk-inp" value={type} onChange={(e) => setType(e.target.value)}>
-            {Object.entries(projectTypeLabels).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="l">
-          المسؤول
-          <select className="wk-inp" value={owner} onChange={(e) => setOwner(e.target.value)}>
-            {staff.map((p) => (
-              <option key={p.email} value={p.email}>
-                {p.display_name} · {roles[p.role].name}
-              </option>
-            ))}
-            {!staff.some((p) => p.email === owner) && <option value={owner}>{w.nameOf(owner)}</option>}
-          </select>
-        </label>
-      </div>
-      <div className="wk-two">
-        <label className="l">
-          البداية
-          <input className="wk-inp" type="date" value={start} onChange={(e) => setStart(e.target.value)} />
-        </label>
-        <label className="l">
-          النهاية
-          <input className="wk-inp" type="date" min={start} value={end} onChange={(e) => setEnd(e.target.value)} />
-        </label>
-      </div>
-      <label className="l">
-        الوصف <small>اختياري</small>
-        <textarea className="wk-inp" value={desc} maxLength={2000} onChange={(e) => setDesc(e.target.value)} />
-      </label>
-      {err && <p className="wk-err">{err}</p>}
-      <div className="wk-row-acts">
-        <button type="button" className="wk-btn quiet" onClick={onClose}>
-          تراجع
-        </button>
-        <button type="button" className="wk-btn primary" disabled={!name.trim() || !end} onClick={() => void save()}>
-          إنشاء المشروع
-        </button>
-      </div>
-    </Modal>
   );
 }

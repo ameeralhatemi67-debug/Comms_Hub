@@ -21,11 +21,12 @@ function notMine(w: WorkRow, accounts: AccountRow[], me: string, admin: boolean)
   return channelsOf(w, accounts).filter((a) => a.platform !== 'mail' && !a.publishers.includes(me));
 }
 
-export function ScheduleDialog({ w, approvedParts, onClose, act }: { w: WorkRow; approvedParts: string[]; onClose: () => void; act: Act }) {
+/** at: a Riyadh 'YYYY-MM-DDTHH:MM' to start from, when scheduling from a day of the calendar. */
+export function ScheduleDialog({ w, approvedParts, at: from, onClose, act }: { w: WorkRow; approvedParts: string[]; at?: string; onClose: () => void; act: Act }) {
   const x = useWork();
   const chs = channelsOf(w, x.accounts);
   const start = w.sched_at ?? w.proposed_at;
-  const [when, setWhen] = useState(start ? riyadhStamp(start).replace(' ', 'T') : '');
+  const [when, setWhen] = useState(from ?? (start ? riyadhStamp(start).replace(' ', 'T') : ''));
   const [mode, setMode] = useState<'auto' | 'ask'>(w.pub_mode ?? (chs.some((a) => a.mode === 'ask') ? 'ask' : 'auto'));
   const [err, setErr] = useState('');
   const at = when ? riyadhInstant(when) : '';

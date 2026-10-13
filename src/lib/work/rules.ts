@@ -162,7 +162,7 @@ export const STAGE_LIBRARY: [string, StageRole, number][] = [
 export const KIND_ROLE: Record<string, StageRole> = { copy: 'writer', design: 'designer', edit: 'producer', review: 'assistant', publish: 'publisher' };
 /** The role that usually leads a work of this type, for a project's works plan. */
 export const MAIN_ROLE: Record<WorkType, StageRole> = {
-  post: 'writer', video: 'producer', design: 'designer', announce: 'writer', email: 'writer', press: 'writer', event: 'assistant',
+  post: 'writer', video: 'producer', design: 'designer', announce: 'writer', email: 'writer', press: 'writer', event: 'producer',
 };
 
 // ---------------------------------------------------------------------------
@@ -833,7 +833,11 @@ export function noticeHref(go: { page?: string; id?: string; tab?: string } | nu
     case 'approvals':
       return g.tab === 'publish' ? '/approvals?tab=publish' : '/approvals';
     case 'requests':
-      return '/work?tab=requests';
+      return '/requests';
+    case 'project':
+      return g.id ? `/projects/${g.id}` : '/projects';
+    case 'projects':
+      return '/projects';
     case 'accounts':
       return '/channels';
     case 'tasks':
@@ -885,6 +889,7 @@ const ERRORS: Record<string, string> = {
   STAGE_STATE: 'المرحلة بدأت أو انتهت من قبل.',
   GATE_NOT_PENDING: 'لا تنتظر هذه المرحلة اعتماداً.',
   STAGE_AFTER_DUE: 'موعد مرحلة بعد التسليم النهائي.',
+  STAGE_BEFORE_WAIT: 'لا يكون موعد المرحلة قبل نهاية مرحلة مفتوحة تنتظرها.',
   PRIORITY_INVALID: 'أولوية غير معروفة.',
   REASON_REQUIRED: 'اكتب السبب.',
   NOTE_REQUIRED: 'اكتب ما يجب تعديله.',
@@ -921,8 +926,9 @@ export const WORK_RPC = [
   'work_create', 'work_update', 'work_assign', 'work_set_restricted', 'work_close', 'work_reopen', 'work_start',
   'work_stage_act', 'work_save_plan', 'work_text_save', 'work_variant_confirm', 'work_asset_link', 'work_comment',
   'work_submit', 'work_decide', 'work_request_move', 'work_cancel_move', 'work_schedule', 'work_publish', 'work_due_run',
-  'work_parts', 'work_pending', 'work_stage_state', 'work_decide_block', 'work_step_impact', 'work_task_impact',
+  'work_view_parts', 'work_view_pending', 'work_decide_block', 'work_step_impact', 'work_task_impact',
   'work_people_load', 'request_extension', 'request_folder_access', 'request_decide', 'request_withdraw',
   'account_save', 'account_set_active', 'account_delete', 'account_reconnect', 'project_save', 'event_save', 'event_delete',
   'reminder_add', 'reminder_delete', 'plan_template_save', 'plan_template_delete', 'task_create', 'notifications_read',
+  'project_create', 'work_request_list',
 ] as const;

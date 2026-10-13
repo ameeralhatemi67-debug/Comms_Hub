@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-12T20:32:52.170Z",
+  "run": "2026-10-13T06:29:33.877Z",
   "checks": [
     {
       "name": "list-director: renders",
@@ -208,6 +208,226 @@
     },
     {
       "name": "dialog-account-busy: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-month: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-day: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-member: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-project: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-director: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-self: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pubok-publisher: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-stage-designer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-due-director: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-task: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-rem: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-empty: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-people: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-works: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-tasks: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-missing: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-done: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-deleg: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-publisher: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-publisher: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-member: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-move: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-stage: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-delivery: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-event: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-reminder: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-extension: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-publisher: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-member-past: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-new: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-edit: renders",
       "pass": true,
       "detail": ""
     },
@@ -2437,6 +2657,2321 @@
       "detail": "overflow 0px"
     },
     {
+      "name": "calendar-week · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-week: shows «التقويم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «11 أكتوبر إلى 17 أكتوبر 2026»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «مراحل ومهام ممتدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «إنستغرام · الرسمي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «X · الرسمي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «التفويض منتهٍ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «التسليم والمهام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «حمل الفريق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «منشور الملتقى المجدول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «ملتقى الشركاء»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «اليوم الوطني 2026»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «التفويض لا يغطي الموعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «النشر في هذه المرحلة محاكاة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «اسحب موعد نشر إلى يوم آخر لطلب نقله، واسحب التسليم أو المرحلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «سارة · المرئيات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: shows «أحمد · تغطية يومية للمعرض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-week · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-week · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-week · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-week · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-week · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-month · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-month · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-month: shows «أكتوبر 2026»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-month: shows «الأحد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-month: shows «السبت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-month: shows «منشور الملتقى المجدول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-month: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-month · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-month · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-month · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-month · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-month · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-month · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-day · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-day · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-day: shows «الأربعاء 14 أكتوبر 2026»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-day: shows «منشور الملتقى المجدول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-day: shows «قريب من «منشور معتمد قريب»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-day: shows «معتمد · لم يُجدول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-day: shows «إضافة في هذا اليوم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-day: shows «ملتقى الشركاء»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-day: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-day · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-day · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-agenda · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-agenda: shows «من 12 أكتوبر لمدة أسبوعين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda: shows «اليوم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda: shows «افتح أي موعد لترى تفاصيله»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda: shows «طوال اليوم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda: does not show «واسحب التسليم أو المرحلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-agenda · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-agenda · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-agenda · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-member · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-member · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-member: shows «التقويم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-member: shows «إضافة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-member: does not show «اسحب موعد نشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-member: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-member · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-member · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-project · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-project · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "calendar-project: shows «اليوم الوطني 2026»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-project: shows «فرز الصور»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-project: does not show «تغطية يومية للمعرض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-project: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-project · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar-project · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-pub-writer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-pub-writer: shows «مجدول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer: shows «طلب نقل الموعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer: shows «التفويض لا يغطي الموعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer: shows «فتح العمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer: shows «بتوقيت الرياض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer: does not show «جدولة في الموعد المعتمد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer: does not show «تغيير موعد التسليم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pub-writer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-move-director · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-director · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-move-director: shows «موعد مطلوب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-director: shows «اعتماد الموعد الجديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-director: shows «سحب طلب النقل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-director: shows «طلب خالد نقل الموعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-director: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-director · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-director · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-move-director · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-director · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-move-director · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-director · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-move-self · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-self · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-move-self: shows «أرسلتَ هذا العمل للمراجعة بنفسك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-self: shows «سحب طلب النقل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-self: does not show «اعتماد الموعد الجديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-self: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-self · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-move-self · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-pubok-publisher · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pubok-publisher · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-pubok-publisher: shows «معتمد · لم يُجدول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pubok-publisher: shows «جدولة في الموعد المعتمد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pubok-publisher: shows «طلب نقل الموعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pubok-publisher: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pubok-publisher · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-pubok-publisher · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-stage-designer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-stage-designer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-stage-designer: shows «المرئيات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-stage-designer: shows «طلب تمديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-stage-designer: does not show «تغيير موعد المرحلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-stage-designer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-stage-designer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-stage-designer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-due-director · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-due-director · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-due-director: shows «تغيير موعد التسليم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-due-director: shows «تسليم خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-due-director: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-due-director · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-due-director · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-task · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-task · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-task: shows «طلب تمديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-task: shows «صفحة المهام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-task: shows «من ريم إلى خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-task: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-task · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-task · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-rem · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-rem · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-rem: shows «تذكير خاص بك، لا يراه غيرك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-rem: shows «حذف التذكير»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-rem: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-rem · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-rem · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "projects-director · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "projects-director: shows «المشاريع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director: shows «مشروع جديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director: shows «اليوم الوطني 2026»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director: shows «ملتقى الشركاء 2026»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director: shows «فتح المشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director: shows «من المراحل والمهام منجزة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director: shows «جارٍ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "projects-director · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "projects-director · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-director · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "projects-writer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-writer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "projects-writer: shows «المشاريع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-writer: shows «فتح المشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-writer: does not show «مشروع جديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-writer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-writer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-writer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "projects-empty · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-empty · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "projects-empty: shows «لا مشاريع بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-empty: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-empty · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "projects-empty · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-timeline · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-timeline: shows «العودة إلى المشاريع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «الجدول الزمني»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «من يعمل على ماذا»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «فيديو قصص الملتقى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «مهام المشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «تغطية يومية للمعرض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «الأحداث»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «ملتقى الشركاء»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «عمل في المشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «تعديل المشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «في التقويم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: shows «تنتظر غيرها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-timeline · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-timeline · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-timeline · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-timeline · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-timeline · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-people · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-people · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-people: shows «مسؤول المشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-people: shows «ريم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-people: shows «ثم إلى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-people: shows «بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-people: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-people · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-people · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-works · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-works · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-works: shows «منشور اليوم الوطني: شكراً لفريقنا»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-works: shows «تصميم ملصق الشتاء»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-works: shows «المهام التي تظهر لك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-works: does not show «تعديل المشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-works: does not show «حدث»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-works: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-works · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-works · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-tasks · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-tasks · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-tasks: shows «كتابة التعليقات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-tasks: shows «طلب تمديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-tasks: shows «تنتظر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-tasks: shows «مهمة في المشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-tasks: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-tasks · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-tasks · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-missing · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-missing · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-missing: shows «المشروع غير موجود»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-missing: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-missing · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-missing · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-director · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-director: shows «الطلبات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «بانتظار قراري»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «طلب تمديد «المرئيات»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «منح «عرض فقط»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «اعتماد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «رفض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «طلب عمل: «طلب تغطية يوم التطوع»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «إسناد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «نقل موعد «منشور نقل موعده»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «اعتماد الموعد الجديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «بريد خارجي: «رد على طلب الشراكة»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «افتح في البريد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: shows «طلب جديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-director · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-director · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-director · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-director · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-director · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-writer-sent · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-writer-sent: shows «طلباتي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent: shows «طلب تمديد مهمة «كتابة التعليقات»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent: shows «سحب الطلب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent: shows «نقل موعد «منشور نقل موعده»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent: shows «أرسلته أنت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent: does not show «منح «عرض فقط»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent: does not show «إسناد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-writer-sent · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-done · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-done · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-done: shows «المنتهية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-done: shows «اعتُمد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-done: shows «ومُدّ التسليم النهائي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-done: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-done · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-done · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-deleg · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-deleg · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-deleg: shows «تفويض الاعتماد أثناء الغياب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-deleg: shows «يأتي لاحقاً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-deleg: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-deleg · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-deleg · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-publisher · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-publisher · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-publisher: shows «تأكيد نشر «منشور الملتقى المجدول»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-publisher: shows «التأكيد في «النشر»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-publisher: does not show «منح «عرض فقط»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-publisher: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-publisher · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-publisher · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-director · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-director: shows «صباح الخير، محمد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director: shows «بانتظار المراجعة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director: shows «طلبات بلا مسؤول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director: shows «حمل الفريق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director: shows «الأيام السبعة القادمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director: shows «فيديو قصص الملتقى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director: does not show «الحملة النشطة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director: does not show «أعمال في النموذج»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-director · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-director · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-director · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-director · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-director · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-writer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-writer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-writer: shows «أعمالي النشطة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-writer: shows «مراحلي الجاهزة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-writer: shows «أولويات عملك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-writer: does not show «حمل الفريق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-writer: does not show «الحملة النشطة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-writer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-writer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-writer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-publisher · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-publisher · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-publisher: shows «جاهز للنشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-publisher: shows «بانتظار تأكيدك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-publisher: shows «جاهزيتك للنشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-publisher: shows «تحتاج انتباهك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-publisher: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-publisher · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-publisher · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-member · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-member · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-member: shows «طلباتي المفتوحة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-member: shows «طلب جديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-member: does not show «حمل الفريق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-member: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-member · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-member · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-move · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-move · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-move: shows «طلب نقل موعد النشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-move: shows «الموعد الجديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-move: shows «التفويض لا يغطي الموعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-move: shows «خلال ساعتين من الموعد الجديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-move: shows «إرسال طلب النقل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-move: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-move · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-move · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-due-stage · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-stage · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-due-stage: shows «موعد مرحلة «التدقيق»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-stage: shows «تنتظر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-stage: shows «موعد داخلي لا يحتاج اعتماداً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-stage: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-stage · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-stage · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-due-delivery · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-delivery · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-due-delivery: shows «موعد التسليم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-delivery: shows «بعد التسليم الجديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-delivery: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-delivery · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-due-delivery · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-task · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-task: shows «مهمة جديدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task: shows «أيام متصلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task: shows «أيام محددة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task: shows «إلى من»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task: shows «تبدأ بعد إنجاز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task: shows «إسناد المهمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-task-writer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-writer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-task-writer: shows «المهمة لك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-writer: does not show «إلى من»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-writer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-writer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-writer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-event · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-event · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-event: shows «حدث جديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-event: shows «يمكن أن يمتد أياماً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-event: shows «إضافة الحدث»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-event: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-event · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-event · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-reminder · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-reminder · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-reminder: shows «تذكير لي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-reminder: shows «لا يراه غيرك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-reminder: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-reminder · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-reminder · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-task-extension · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-extension · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-task-extension: shows «طلب تمديد مهمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-extension: shows «كتابة التعليقات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-extension: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-extension · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-task-extension · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-add-director · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-add-director: shows «إضافة في الأربعاء 14 أكتوبر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director: shows «عمل يُسلَّم في هذا اليوم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director: shows «تغطية حدث في هذا اليوم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director: shows «مهمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director: shows «اجتماع أو معرض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director: shows «تذكير لي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director: does not show «جدولة عمل جاهز للنشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-director · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-add-publisher · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-publisher · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-add-publisher: shows «جدولة عمل جاهز للنشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-publisher: shows «1 أعمال معتمدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-publisher: does not show «عمل يُسلَّم في هذا اليوم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-publisher: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-publisher · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-publisher · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-add-member-past · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-member-past · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-add-member-past: shows «طلب يُسلَّم في هذا اليوم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-member-past: shows «يوم مضى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-member-past: does not show «اجتماع أو معرض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-member-past: does not show «جدولة عمل جاهز للنشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-member-past: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-member-past · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-add-member-past · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-project-new · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-new · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-project-new: shows «مشروع جديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-new: shows «خطة الأعمال»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-new: shows «عمل في الخطة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-new: shows «إنشاء المشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-new: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-new · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-new · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-project-edit · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-edit · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-project-edit: shows «تعديل المشروع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-edit: shows «حفظ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-edit: does not show «خطة الأعمال»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-edit: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-edit · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-project-edit · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
       "name": "drag: the finished stage has no grip",
       "pass": true,
       "detail": "3 grips for 4 rows"
@@ -2475,12 +5010,52 @@
       "name": "drag: no page errors",
       "pass": true,
       "detail": ""
+    },
+    {
+      "name": "calendar drag: a leader can drag publishing and delivery entries, not every entry",
+      "pass": true,
+      "detail": "9 of 33"
+    },
+    {
+      "name": "calendar drag: while dragging, the entry fades and the target day is marked",
+      "pass": true,
+      "detail": "{\"dragging\":true,\"over\":true}"
+    },
+    {
+      "name": "calendar drag: a mouse drag drops the publishing entry on the new day",
+      "pass": true,
+      "detail": "[[\"pub|CH-7|a-ig|||\",\"2026-10-15\"]]"
+    },
+    {
+      "name": "calendar drag: the drag does not also open the entry",
+      "pass": true,
+      "detail": "clicks 0"
+    },
+    {
+      "name": "calendar drag: the marks are cleared on release",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "calendar drag: a click without moving opens the entry and moves nothing",
+      "pass": true,
+      "detail": "{\"drops\":1,\"clicks\":1}"
+    },
+    {
+      "name": "calendar drag: a touch drag drops it too",
+      "pass": true,
+      "detail": "[[\"pub|CH-7|a-ig|||\",\"2026-10-15\"],[\"pub|CH-7|a-ig|||\",\"2026-10-15\"]]"
+    },
+    {
+      "name": "calendar drag: no page errors",
+      "pass": true,
+      "detail": ""
     }
   ],
   "errors": [],
   "summary": {
-    "total": 495,
-    "passed": 495,
+    "total": 1010,
+    "passed": 1010,
     "failed": 0
   }
 }

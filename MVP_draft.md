@@ -2409,3 +2409,44 @@ Extends section 58. Everything here appears only while the second design is on; 
 - **Motion from the work.** A poster or video work offers «أنشئ حركة» with three suggested templates; the studio opens on the template with the work's title in its title field and names the work it was opened from.
 - **Component page.** `/components`, outside the navigation, shows every shared component in each state, for whichever design is on.
 - Not built: the command palette (only if the Director wants it).
+
+# 61. «التقويم», «المشاريع» and «الطلبات» on the work-cycle database, 2026-10-13
+
+Step 5 of `Reference_Build_Plan.md`, after «النموذج المرجعي للمركز» version 5 (`reference/comms-hub-reference-v5.html`). These pages read and write the database (`supabase/migrations/*work_cycle*`); every write is a database function, and who sees what is row level security. Publishing stays a simulation, and the calendar says so. This section replaces the calendar of section 60 (a browser mock with a request list that reset with the page), which is removed.
+
+## 61.1 «التقويم» (`/calendar`)
+
+- **Views.** Day, week (Sunday to Saturday, Riyadh time), month, and a two-week list. On a phone the page opens on the list. Previous, today, next; the heading names the range. `?date=`, `?view=` and `?project=` open it on a day, a view or a project.
+- **What shows.** Filters for publishing, deliveries, stages, tasks, events, projects and «تذكيراتي», «عملي فقط», and a project. Publishing appears on each account's lane: «مجدول», «معتمد · لم يُجدول», «مقترح · لم يُعتمد بعد», a requested move as «موعد مطلوب» with the held time «معلّق حتى القرار», and «نُشر» with each account's result. The shared mailbox has its own lane, then events, then deliveries, stages, tasks and reminders. A key under the calendar names every colour.
+- **Across days.** Project bands across the week (each opens its project) and month stripes; open stages with a start and an end, and tasks with a start, as bars with the person's name (dashed while waiting, red when late). The team's load under each day counts deliveries, stages and tasks, red when one is late.
+- **Warnings that do not block.** An account whose authorisation will not cover the time; two works on one account within two hours; a day with seven or more entries («يوم مزدحم»). The lane of an expired or nearly expired account says so under its name.
+- **The entry panel.** Opens from any entry: the day and time, the work and its status, each account and whether its authorisation covers the time, and only this role's actions. Escape closes it.
+- **Moving.** A publish date is moved by a request («طلب نقل الموعد»), by the leaders, the work's owner or the publisher; only «موعد النشر» goes back to review and the current time is held until the decision. The new date is approved from the panel or «الطلبات» when it is the only part waiting, by a leader who did not ask for it; the asker, a leader or the publisher may withdraw it. Leaders move deliveries and stage dates directly; a stage never ends before an open stage it waits for ends, nor after the delivery, and the delivery never before an open stage ends. Dragging an entry to another day does the same (by mouse or finger); a press that does not move opens the panel.
+- **«إضافة» from a day.** A work due that day (or a request, for a member) and an event coverage, both opening «إنشاء» with the date; scheduling an approved work on that day (publisher); a task (one day, days in a row, or chosen days each with its person; leaders and the producer give tasks to others, with the least busy person in the kind's role suggested); an event (leaders); a private reminder. A past day cannot take a new delivery.
+- **Tasks** are managed in «المهام»; the panel offers an extension request to the task's person. Everyone but the leaders sees only the tasks given to them or by them.
+
+## 61.2 «المشاريع» (`/projects`)
+
+- A card per project: type, «جارٍ» or «قادم» or «منتهٍ», dates and length, owner, description, progress (done stages and tasks over all), works and how many are late, the next date, and the people on it.
+- **«مشروع جديد»** (the director and the assistant): name, type, dates, owner, description, and an optional **works plan**: per work a title, a type and a due date. Each planned work gets its stages from its type, given to the least busy person in each role (counting what the plan itself has given out) and dated back from its due date; its owner is the least busy in the type's main role. A post goes on the active accounts that are not YouTube. The preview under each row shows who and when. The project and all its works are created in one step (`project_create`): if any work is refused, nothing is created. The «مشروع» card in «إنشاء» opens the same dialog.
+
+## 61.3 The project page (`/projects/<id>`)
+
+- Header with type, dates, state, owner, counts and progress; «عمل في المشروع» (opens «إنشاء» linked to it, due its end), «مهمة», and for leaders «حدث» and «تعديل المشروع»; «في التقويم» opens its week filtered to it.
+- **الجدول الزمني:** a row per open work (with its delivery and publish marks) and its stages as bars by state, then the project's tasks and events, today as a gold line. **من يعمل على ماذا:** each person's stages and tasks in order, what each waits for and whom it hands over to. **الأعمال:** the works list. **المهام:** the project's tasks, with an extension request for one's own. `?tab=` opens a view.
+
+## 61.4 «الطلبات» (`/requests`)
+
+- Tabs «بانتظار قراري» (with a count), «طلباتي», «المنتهية», «التفويض». `?tab=` opens one.
+- **Kinds.** Extension of a stage or a task, with what moves after it computed by the database before the decision and, when the plan would pass the delivery, «مدّ التسليم النهائي أيضاً»; folder access («منح «عرض فقط»»); publish-date moves; work requests without an owner («إسناد»); outside mail held for approval and ask-first publish confirmations, as links to «البريد» and «النشر» where they are decided.
+- **Who decides.** Not the sender. A stage extension: the leaders and the work's owner. A task extension: the leaders and the person who gave the task. Folder access: the leaders and whoever manages the folder. The sender withdraws a pending request. A decline takes an optional reason; the sender is told either way.
+- **«طلب جديد»:** extension of one of my open stages or tasks, access to a restricted folder that shows in my library, or a new work.
+- **Delegation while away** is not built (owner decision of 2026-10-12: it waits for the work on giving the right to approve to other people). Its tab says so.
+
+## 61.5 Home
+
+Home now reads the database: tiles per role (leaders: waiting for review, late, late stages, requests without an owner; publisher: ready, scheduled, waiting for confirmation, partial or failed; makers: active work, ready stages, late, open tasks; member: open requests, waiting for an owner, tasks), each opening the page it counts; the works that need this person; the next seven days from the calendar; the team's load for the leaders; and an attention strip when a scheduled account's authorisation will not cover its time. The sample campaign and its sample work numbers are gone from Home.
+
+## 61.6 Navigation and access
+
+«المشاريع» and «الطلبات» are in the sidebar after «التقويم». They are not separate grants: «المشاريع» opens with «العمل» or «التقويم», and «الطلبات» with «العمل», «مكتبة الوسائط» or «المهام», so existing accounts need no change (`src/lib/access.ts`, tested). Notices about requests open «الطلبات», and about a project its page. Every one of the sixteen pages of the reference now has its guide.

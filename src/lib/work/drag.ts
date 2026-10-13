@@ -112,3 +112,105 @@ export function installRowDrag(list: HTMLElement, opts: RowDragOptions): () => v
     document.removeEventListener('pointercancel', cancel);
   };
 }
+
+// ---------------------------------------------------------------------------
+// The calendar: drag an entry to another day. An entry carries data-cdrag="<key>" and a day
+// cell data-drop="<YYYY-MM-DD>". A press that moves less than DRAG_SLOP pixels stays a click,
+// so the entry still opens its panel; a drag shows the target day (dropok) and calls onDrop.
+// The page decides what a drop means (a request to move a publish date, or a new delivery
+// or stage date for a leader), as in «النموذج المرجعي للمركز».
+// ---------------------------------------------------------------------------
+export const DRAG_SLOP = 6;
+export const movedEnough = (dx: number, dy: number) => Math.hypot(dx, dy) >= DRAG_SLOP;
+
+export type CellDragOptions = { onDrop: (key: string, date: string) => void };
+
+export function installCellDrag(root: HTMLElement, opts: CellDragOptions): () => void {
+  let key = '';
+  let pid = -1;
+  let x0 = 0;
+  let y0 = 0;
+  let chip: HTMLElement | null = null;
+  let dragging = false;
+  let over: HTMLElement | null = null;
+  const mark = (cell: HTMLElement | null) => {
+    if (over === cell) return;
+    over?.classList.remove('dropok');
+    over = cell;
+    over?.classList.add('dropok');
+  };
+  const reset = () => {
+    chip?.classList.remove('dragging');
+    mark(null);
+    key = '';
+    pid = -1;
+    chip = null;
+    dragging = false;
+  };
+  const cellAt = (x: number, y: number) => {
+    const el = document.elementFromPoint(x, y) as HTMLElement | null;
+    const cell = el?.closest<HTMLElement>('[data-drop]') ?? null;
+    return cell && root.contains(cell) ? cell : null;
+  };
+  // A drag ends with a click on the entry under the pointer; that click must not open its panel.
+  const swallow = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    document.removeEventListener('click', swallow, true);
+  };
+
+  const down = (e: PointerEvent) => {
+    const c = (e.target as HTMLElement | null)?.closest<HTMLElement>('[data-cdrag]');
+    if (!c || !root.contains(c) || e.button > 0) return;
+    key = c.dataset.cdrag ?? '';
+    pid = e.pointerId;
+    x0 = e.clientX;
+    y0 = e.clientY;
+    chip = c;
+  };
+  const move = (e: PointerEvent) => {
+    if (!key || e.pointerId !== pid) return;
+    if (!dragging) {
+      if (!movedEnough(e.clientX - x0, e.clientY - y0)) return;
+      dragging = true;
+      chip?.classList.add('dragging');
+      try {
+        chip?.setPointerCapture(e.pointerId);
+      } catch {
+        // A synthetic pointer cannot be captured; moves still reach the document.
+      }
+    }
+    e.preventDefault();
+    mark(cellAt(e.clientX, e.clientY));
+  };
+  const up = (e: PointerEvent) => {
+    if (!key || e.pointerId !== pid) return;
+    const was = dragging;
+    const k = key;
+    const cell = was ? cellAt(e.clientX, e.clientY) : null;
+    try {
+      chip?.releasePointerCapture(e.pointerId);
+    } catch {
+      // Already released.
+    }
+    reset();
+    if (!was) return;
+    document.addEventListener('click', swallow, true);
+    setTimeout(() => document.removeEventListener('click', swallow, true), 0);
+    const date = cell?.dataset.drop;
+    if (date) opts.onDrop(k, date);
+  };
+  const cancel = (e: PointerEvent) => {
+    if (e.pointerId === pid) reset();
+  };
+  root.addEventListener('pointerdown', down);
+  document.addEventListener('pointermove', move, { passive: false });
+  document.addEventListener('pointerup', up);
+  document.addEventListener('pointercancel', cancel);
+  return () => {
+    root.removeEventListener('pointerdown', down);
+    document.removeEventListener('pointermove', move);
+    document.removeEventListener('pointerup', up);
+    document.removeEventListener('pointercancel', cancel);
+  };
+}

@@ -457,7 +457,9 @@ test('notifications open where the work is', () => {
   assert.equal(noticeHref({ page: 'review', id: 'CH-4' }), '/approvals/CH-4');
   assert.equal(noticeHref({ page: 'approvals', tab: 'publish' }), '/approvals?tab=publish');
   assert.equal(noticeHref({ page: 'accounts' }), '/channels');
-  assert.equal(noticeHref({ page: 'requests' }), '/work?tab=requests');
+  assert.equal(noticeHref({ page: 'requests' }), '/requests');
+  assert.equal(noticeHref({ page: 'project', id: 'p-1' }), '/projects/p-1');
+  assert.equal(noticeHref({ page: 'calendar' }), '/calendar');
   assert.equal(noticeHref(null), '/work');
   // Every page the database writes into a notification has a place to go.
   const pages = new Set([...migrations.matchAll(/'page',\s*'([a-z]+)'/g)].map((m) => m[1]));

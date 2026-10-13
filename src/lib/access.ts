@@ -37,6 +37,10 @@ const alwaysOpen = new Set(['', 'account']);
 /** The roles that open «الحسابات المرتبطة» (/channels), with the «الموافقات والنشر» page. */
 export const linkedAccountRoles: Role[] = ['director', 'assistant', 'publisher'];
 
+/** The grants that open «المشاريع» (/projects) and «الطلبات» (/requests). */
+export const projectPageGrants = ['work', 'calendar'] as const;
+export const requestPageGrants = ['work', 'media', 'tasks'] as const;
+
 /** Open to administrators only. Anything not listed anywhere is treated the same way. */
 export const adminOnlyPages = ['admin', 'accounts'] as const;
 
@@ -75,6 +79,11 @@ export function canOpen(account: Pick<Account, 'role' | 'pages'>, page: string):
   // «الحسابات المرتبطة» goes with «الموافقات والنشر», for the roles that manage the
   // accounts (director, assistant) or publish on them (publisher).
   if (page === 'channels') return linkedAccountRoles.includes(account.role) && account.pages.includes('approvals');
+  // «المشاريع» and «الطلبات» (Step 5) are not granted on their own, so existing accounts need no
+  // change: projects go with «العمل» or «التقويم», whose works and dates they gather; requests go
+  // with «العمل», «مكتبة الوسائط» or «المهام», where extensions and folder access are asked for.
+  if (page === 'projects') return projectPageGrants.some((p) => account.pages.includes(p));
+  if (page === 'requests') return requestPageGrants.some((p) => account.pages.includes(p));
   if (!grantable.has(page)) return false;
   // Creating is also a role ability; a page grant cannot give it to a role that lacks it.
   if (page === 'create' && !roles[account.role].create) return false;

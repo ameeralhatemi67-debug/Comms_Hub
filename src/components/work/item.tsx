@@ -1060,7 +1060,7 @@ function Comments({ d, act }: { d: WorkDetail; act: Act }) {
 // ---------------------------------------------------------------------------
 // Dialogs
 // ---------------------------------------------------------------------------
-export function AssignDialog({ d, onClose, act }: { d: WorkDetail; onClose: () => void; act: Act }) {
+export function AssignDialog({ d, onClose, act }: { d: Pick<WorkDetail, 'w'>; onClose: () => void; act: Act }) {
   const w = useWork();
   const x = d.w;
   return (
@@ -1379,7 +1379,7 @@ export function DetailsDialog({ d, onClose, act }: { d: WorkDetail; onClose: () 
 }
 
 type Impact = { shifts: { stage: string; name: string; who: string | null; from: [string | null, string | null]; to: [string | null, string | null] }[]; max_end: string; over_due: boolean; over_pub: boolean; pub_day: string | null };
-export function ExtensionDialog({ d, stage, onClose, act }: { d: WorkDetail; stage: StageRow; onClose: () => void; act: Act }) {
+export function ExtensionDialog({ d, stage, onClose, act }: { d: Pick<WorkDetail, 'w'>; stage: StageRow; onClose: () => void; act: Act }) {
   const w = useWork();
   const cur = stage.due_on ?? d.w.due;
   const [to, setTo] = useState(dayAdd(cur, 2));

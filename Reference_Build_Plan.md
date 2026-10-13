@@ -176,7 +176,16 @@ as a test or a database rule run.
 
 ---
 
-## Step 5. «التقويم», «المشاريع», «الطلبات», then acceptance
+## Step 5. «التقويم», «المشاريع», «الطلبات», then acceptance (built 2026-10-13)
+
+Built as planned, with these differences, recorded in `progress.md`: delegation while away is
+not built (owner decision of 2026-10-12); the review of the rules found gaps, closed in
+`20261013120000_work_cycle_planning.sql` (the main one: any signed-in account could read a
+restricted work's text through `work_parts`), and the same migration adds `project_create` (a
+project and its works plan in one step) and `work_request_list` («الطلبات»); Home moved to the
+database too; «المشاريع» and «الطلبات» open with existing grants rather than new ones. Rule run
+`supabase/tests/planning_rules.sql` 113 of 113; browser check `qa/work-pages.cjs` 1010 of 1010.
+Open: the push and the owner's signed-in walkthrough.
 
 **Goal:** the planning pages, and the build closed out.
 
@@ -202,6 +211,6 @@ row level security.
 
 ## Opening instruction for the next session
 
-> Read `Reference_Build_Plan.md`, `AGENTS.md`, the last three entries of `progress.md`, and
-> the reference in `reference/comms-hub-reference-v5.html` («التقويم», «المشاريع» and the
-> project page, «الطلبات»). Start Step 5.
+> Read `Reference_Build_Plan.md`, `AGENTS.md` and the last entry of `progress.md`. All five
+> steps are built as local commits. Push only on the owner's request; then record the owner's
+> signed-in walkthrough findings in `progress.md` and correct what they show.

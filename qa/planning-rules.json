@@ -1,0 +1,31 @@
+{
+  "run": "2026-10-13",
+  "what": "Database rule run for «التقويم», «المشاريع» and «الطلبات», and the review of the rules and row level security across Steps 1 to 5 (Reference_Build_Plan.md, Step 5)",
+  "script": "supabase/tests/planning_rules.sql",
+  "how": "One transaction against the Supabase project comms-hub (hrghmioxvgkjpnydrxrk), run with the MCP execute_sql tool and rolled back at the end. Throwaway accounts (@t.test) for director, assistant, two writers, designer, producer, publisher and member; each check runs as one of them through row level security, and three checks read notifications as the database. The work number counter is saved before and restored after. Dates are written as offsets from today (D+n).",
+  "migrations": ["supabase/migrations/20261013120000_work_cycle_planning.sql"],
+  "runs": [
+    { "attempt": 1, "checks": 113, "passed": 113, "failed": [] }
+  ],
+  "regression": [
+    { "script": "supabase/tests/work_rules.sql", "checks": 135, "passed": 135, "note": "Step 1's run, re-run after the migration. Its direct reads of work_pending, work_parts and work_stage_state now go through work_view_pending, work_view_parts and a temporary function that reads the stage state as the database, since the three are no longer callable from outside." },
+    { "script": "supabase/tests/approval_rules.sql", "checks": 71, "passed": 71, "note": "Step 4's run, re-run after the migration, with the same change." }
+  ],
+  "rules_checked": [
+    "review finding: a member reads no part of a restricted work (work_view_parts and work_view_pending return nothing), cannot call work_parts, work_pending or work_stage_state at all, and the decision block says FORBIDDEN rather than the work's review state; the writer on the work reads its text",
+    "a publish date is a request: a member and an uninvolved writer cannot ask; a past time is refused; the work's owner asks and only «موعد النشر» waits, the old time held; the owner cannot approve it; someone else cannot withdraw it; the owner withdraws it and the approved time stands again",
+    "a scheduled work: the director asks to move it and may not approve his own request; the assistant approves and the work is scheduled at the new time",
+    "review finding: the publisher cannot move the date of a restricted work he cannot see",
+    "leaders move dates directly: a writer cannot; the delivery never before an open stage ends; review finding: a stage never before the end of an open stage it waits for (STAGE_BEFORE_WAIT); never after the delivery; a move within bounds changes the date and is logged; once the earlier stage is finished it no longer holds the date back",
+    "extensions: only the stage's person asks, with a reason; before the decision the impact shows both following stages moving past the delivery; the requester and an uninvolved designer cannot decide; the designer and a member do not see the request; the director and the work's owner see it and may decide",
+    "the owner approves with the delivery extended: the stages and the delivery move; the moved stages' people are told and the requester learns the decision",
+    "a request can be withdrawn only by its sender, and a withdrawn request cannot be decided; a declined request moves nothing; approving without extending the delivery moves the stages only",
+    "review finding: what moves after a task is readable only by its assignee, the person who assigned it and the leaders; the task extension moves the waiting task by its overlap; the writer cannot decide or see the designer's request; the director who gave the task approves",
+    "review finding: a task waits only for tasks the caller can read; a writer cannot give a task to someone else",
+    "folder access: asked once; the requester sees it with the folder's name and does not decide it; another writer does not see it; the assistant grants view access",
+    "a new project with its works plan in one step: a writer cannot; the director creates a project with two works, both linked, each with its owner and its stages' people; the owner and each work's owner are told; a plan with a work due in the past creates nothing (no project left behind); a planned post without an account is refused; a writer cannot edit a project",
+    "events and reminders: a member cannot add an event; an event that ends before it starts is refused; another writer cannot delete it; a reminder is invisible to and cannot be deleted by the director",
+    "known item fixed: linking a conversation to a work that does not exist, or to a restricted work the caller cannot see, is refused; linking an existing work writes it in the work's log, and linking it again adds nothing; a work created from the conversation is logged once"
+  ],
+  "after": "No test accounts, works, projects or requests left; the work counter back at 1. The stored migration statements have the same md5 as the file (7a0ac0cd16cc6b83d9d0fcf02bdf6b46). Security advisor: four kinds of finding, all present before this step; the four new functions are on the signed-in security definer list by design, and work_parts, work_pending and work_stage_state are off it."
+}

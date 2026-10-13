@@ -15,7 +15,8 @@ const classesOf = (sel) => [...sel.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m
 
 test('every help page has its purpose, a short first-visit guide, its parts, every role, rules, links and questions', () => {
   const groups = ['lead', 'maker', 'publisher', 'member'];
-  assert.deepEqual(Object.keys(PAGES).sort(), ['activity', 'approvals', 'asset', 'channels', 'chat', 'create', 'item', 'library', 'mail', 'review', 'tasks', 'work']);
+  // All sixteen pages of the reference have their guide (Step 5 of Reference_Build_Plan.md).
+  assert.deepEqual(Object.keys(PAGES).sort(), ['activity', 'approvals', 'asset', 'calendar', 'channels', 'chat', 'create', 'item', 'library', 'mail', 'project', 'projects', 'requests', 'review', 'tasks', 'work']);
   for (const [key, h] of Object.entries(PAGES)) {
     assert.ok(h.name && h.tip && h.purpose, key);
     assert.ok(h.onb.length >= 3 && h.onb.length <= 4, `${key}: three or four steps`);
@@ -59,7 +60,11 @@ test('routes map to their help page', () => {
   assert.equal(pageKeyOf('/approvals'), 'approvals');
   assert.equal(pageKeyOf('/approvals/CH-12'), 'review');
   assert.equal(pageKeyOf('/channels'), 'channels');
-  assert.equal(pageKeyOf('/calendar'), null);
+  assert.equal(pageKeyOf('/calendar'), 'calendar');
+  assert.equal(pageKeyOf('/projects'), 'projects');
+  assert.equal(pageKeyOf('/projects/5f0e2d7e-2c55-4c4c-9b9e-6f7b0d1a2c3d'), 'project');
+  assert.equal(pageKeyOf('/requests'), 'requests');
+  assert.equal(pageKeyOf('/admin'), null);
   assert.equal(roleGroup('admin'), 'lead');
   assert.equal(roleGroup('producer'), 'maker');
   assert.equal(roleGroup('publisher'), 'publisher');
