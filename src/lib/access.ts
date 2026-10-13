@@ -44,6 +44,12 @@ export const requestPageGrants = ['work', 'media', 'tasks'] as const;
 /** Open to administrators only. Anything not listed anywhere is treated the same way. */
 export const adminOnlyPages = ['admin', 'accounts'] as const;
 
+/**
+ * «الحسابات» opens with the capability «فتح صفحة الحسابات» (Permissions_Plan.md 5), which
+ * the database resolves (has_capability). Installed for administrators only, as before.
+ */
+export const ACCOUNTS_CAP = 'accounts.view';
+
 export type Account = {
   email: string;
   name: string;
@@ -51,6 +57,11 @@ export type Account = {
   pages: string[];
   /** A founding administrator: cannot be removed or demoted from the app. */
   protected: boolean;
+  /**
+   * The capabilities this person holds now (my_capabilities() in the database), pages
+   * excluded: those are in `pages`, which also carries temporary page grants.
+   */
+  caps?: string[];
 };
 
 /** Roles an administrator may give to another person. 'admin' is never among them. */
@@ -73,9 +84,10 @@ export const isAdmin = (account: Pick<Account, 'role'>) => account.role === 'adm
  * May this person open the page whose first path segment is `page`
  * ('' for Home, 'work' for /work and /work/CH-241, and so on)?
  */
-export function canOpen(account: Pick<Account, 'role' | 'pages'>, page: string): boolean {
+export function canOpen(account: Pick<Account, 'role' | 'pages' | 'caps'>, page: string): boolean {
   if (isAdmin(account)) return true;
   if (alwaysOpen.has(page)) return true;
+  if (page === 'accounts') return !!account.caps?.includes(ACCOUNTS_CAP);
   // «الحسابات المرتبطة» goes with «الموافقات والنشر», for the roles that manage the
   // accounts (director, assistant) or publish on them (publisher).
   if (page === 'channels') return linkedAccountRoles.includes(account.role) && account.pages.includes('approvals');

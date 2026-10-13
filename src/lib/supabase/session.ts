@@ -35,14 +35,23 @@ export const getSession = cache(async (): Promise<Session> => {
 
   if (!row || !roleIds.includes(row.role as Role)) return { status: 'no-account', email };
 
+  // What the person holds now, resolved by the database: standing pages plus temporary
+  // page grants, and every other capability (Permissions_Plan.md 4). Time is checked
+  // when this is read, so a temporary page closes on the first request after it ends.
+  const { data: mine } = await supabase.rpc('my_capabilities');
+  const evals = ((mine as { caps?: { k: string; ok: boolean }[] } | null)?.caps ?? []).filter((c) => c.ok);
+  const caps = evals.filter((c) => !c.k.startsWith('page.')).map((c) => c.k);
+  const pages = sanitizePages([...(row.pages ?? []), ...evals.filter((c) => c.k.startsWith('page.')).map((c) => c.k.slice(5))]);
+
   return {
     status: 'ready',
     account: {
       email: row.email,
       name: row.display_name,
       role: row.role as Role,
-      pages: sanitizePages(row.pages),
+      pages,
       protected: row.protected,
+      caps,
     },
   };
 });

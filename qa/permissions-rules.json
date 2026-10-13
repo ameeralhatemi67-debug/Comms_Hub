@@ -1,0 +1,45 @@
+{
+  "run": "2026-10-13",
+  "what": "Database rule run for the permission engine (Permissions_Plan.md, Step P1)",
+  "script": "supabase/tests/permissions_rules.sql",
+  "migration": "supabase/migrations/20261013150000_permissions.sql",
+  "migration_check": "applied to comms-hub as version 20261013084017 'permissions'; md5 of the stored statement f8be7db018708d8bf3a7d601bdf68e0b equals the md5 of the file",
+  "how": "One transaction against the Supabase project comms-hub, rolled back at the end. Eleven throwaway accounts (@t.test), two of each leading rank and one of each other role, act through row level security.",
+  "runs": [
+    { "attempt": 1, "part": 1, "checks": 122, "passed": 121, "failed": ["77: the check read the designer's notice while signed in as the assistant; notices are private to their recipient. The check was wrong, not the rule: it now reads as the designer."] },
+    { "attempt": 2, "part": 1, "checks": 122, "passed": 122, "failed": [] },
+    { "attempt": 1, "part": 2, "checks": 5, "passed": 5, "failed": [] }
+  ],
+  "rules_checked": [
+    "installation changes nobody's behaviour: for each of the eight roles, every capability that replaces an existing check (urgency 3, outside mail without approval, announcement channels, the seven account capabilities, the thirteen pages, the WhatsApp push) answers exactly as the rule it replaces; the only grantable capability without a predecessor is the new level 2",
+    "accounts are read with «فتح صفحة الحسابات» (administrators only at installation) and written through functions only; a direct update changes nothing, even for an administrator",
+    "hierarchy: an administrator manages everyone but themselves (another administrator included); a director manages the assistant and rank 1, not another director or an administrator; an assistant manages rank 1 only; nobody manages themselves; a writer manages nobody",
+    "no escalation: nobody gives what they do not hold (the push, a page); «منح الصلاحيات» has no meaning at rank 1 and is refused there",
+    "fixed rules cannot be granted, switched on for a role, or overridden: «عاجل», approving a work part, publishing; fixed rules answer from the role only",
+    "expiry is checked at the moment of use; the ending is written to the log once, dated when it ended, the next time the person loads a page",
+    "one-time grants: used once by the action that needs them (a channel), refused the second time, not used by an action that does not need them (a group, internal mail), logged with what is left; a one-time grant bound to a room fits that room only; nobody can call use_capability directly",
+    "outside mail: a writer's is held as before; a one-time «بريد خارجي دون انتظار الاعتماد» lets exactly one through",
+    "deny beats the role; a later layer (a temporary grant) beats the deny; ending the grant restores the deny; clearing the override restores the role",
+    "role templates (D-1): need «تعديل صلاحيات الأدوار»; the Admin template is locked; not one's own rank or above; not what one does not hold; returns and logs how many people hold the role",
+    "roles (D-3, D-11): need «تغيير دور عضو»; a founder's role never changes; never Admin; never a role at or above one's own; the assistant gives rank 1 roles only; the person is told in Arabic with the role's Arabic name",
+    "members: adding needs «إضافة الأعضاء» and only pages the adder holds; removing needs «إزالة عضو»; a founder is never removed; removing a page needs no holding",
+    "who reads what: rank 1 reads only their own grants and log and cannot open another card; the assistant reads rank 1 grants and not the director's; the director's card of a writer names each source (page, timed, role, fixed)",
+    "the log is append-only: no policy lets anyone delete it, and an update is refused even for the table owner",
+    "messaging after the move: the director still sends «عاجل», the writer still cannot (URGENT_ROLE), even holding «مهم»"
+  ],
+  "one_time_under_overlap": {
+    "tried": "two sessions on 2026-10-13 with a committed throwaway member holding one «إنشاء قناة إعلانات»: A created a channel and held its transaction 4 to 5 seconds; B tried the same. B was refused (CHANNEL_ROLE) both times.",
+    "limit": "The database tool sends calls one after another: in the timed round, B started at 08:45:54.80, after A had committed at 08:45:53.06, and waited 0.005 s. So the two calls did not truly overlap, and a lock wait was not observed.",
+    "shown_instead": "part 2 of the script: a reading taken before the use (as a second session would have it), applied after the first call used the grant, updates nothing; the grant ends at zero uses with one use in the log. The guard is the conditional update (uses_left > 0) that Postgres re-checks after a row-lock wait under READ COMMITTED.",
+    "cleanup": "the throwaway accounts, their sign-ins, channels and events were removed; afterwards 0 test accounts, 0 grants, 0 events, 0 rooms, 0 sign-ins, 0 notices"
+  },
+  "existing_rule_runs_after_the_migration": {
+    "chat_rules.sql": "22 of 22, identical to the run made just before the migration",
+    "mail_rules.sql": "25 of 25, identical to the run made just before; the request number moved 184 to 185 because a sequence advances even in a rolled-back run",
+    "kit, work, approval, planning": "not re-run in Step P1: none of them calls a function this migration changed (chat_send, chat_create_room, mail_send, add_account, approve_request, reject_request) or reads accounts or access_requests directly (checked by search). They are re-run after Step P3, which changes functions they call."
+  },
+  "advisors": {
+    "security": "the same four kinds of finding as before (RLS enabled without policy on two server tables, five anon-callable functions, signed-in security definer functions, leaked-password protection off); the sixteen new or changed signed-in functions are intended; perm_eval, use_capability, perm_require, perm_note, perm_log, perm_pages_ok, perm_role_ok are not callable",
+    "performance": "two new INFO findings: the capability foreign keys of member_capabilities and role_capabilities have no covering index (added in the Step P2 migration)"
+  }
+}

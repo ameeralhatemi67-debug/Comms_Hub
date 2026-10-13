@@ -1,0 +1,146 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import {
+  CAPABILITIES,
+  installedDefault,
+  resolve,
+  manageBlock,
+  assignableBy,
+  rankOf,
+  sourceLine,
+  grantPreview,
+  permError,
+  capLabel,
+} from '../src/lib/permissions.ts';
+import { canOpen } from '../src/lib/access.ts';
+import { roleIds } from '../src/lib/domain.ts';
+import { noticeHref } from '../src/lib/work/rules.ts';
+
+const sql = readFileSync('supabase/migrations/20261013150000_permissions.sql', 'utf8');
+
+/** The catalog rows of the migration's insert, parsed. */
+function seeded() {
+  const block = sql.slice(sql.indexOf('insert into public.capabilities'), sql.indexOf('-- Role templates equal'));
+  const rows = [];
+  const re = /\('([a-z0-9.]+)',\s*'(\w+)',\s*'([^']+)',\s*(true|false),\s*'(\w+)',\s*(\d),\s*'\{([a-z,]*)\}',\s*(null|'[^']*'),\s*(\d+)\)/g;
+  for (const m of block.matchAll(re))
+    rows.push({ key: m[1], grp: m[2], label: m[3], grantable: m[4] === 'true', scope: m[5], minRank: Number(m[6]), fixedRoles: m[7] ? m[7].split(',') : [], why: m[8] === 'null' ? undefined : m[8].slice(1, -1), sort: Number(m[9]) });
+  return rows;
+}
+
+test('the catalog in TypeScript is the catalog the database seeds', () => {
+  const db = seeded();
+  assert.equal(db.length, CAPABILITIES.length, 'same number of capabilities');
+  for (const c of CAPABILITIES) {
+    const d = db.find((x) => x.key === c.key);
+    assert.ok(d, c.key);
+    assert.deepEqual({ ...d }, { key: c.key, grp: c.grp, label: c.label, grantable: c.grantable, scope: c.scope, minRank: c.minRank, fixedRoles: c.fixedRoles, why: c.why, sort: c.sort }, c.key);
+  }
+});
+
+test('approval and publishing are fixed by the reference and explain why (D-9)', () => {
+  for (const k of ['work.approve', 'work.publish', 'media.approve', 'approve.own', 'urgency.3']) {
+    const c = CAPABILITIES.find((x) => x.key === k);
+    assert.equal(c.grantable, false, k);
+    assert.ok(c.why && /[؀-ۿ]/.test(c.why), `${k} has its reason in Arabic`);
+  }
+  assert.deepEqual(CAPABILITIES.find((x) => x.key === 'urgency.3').fixedRoles, ['admin', 'director', 'assistant'], 'D-4');
+  assert.deepEqual(CAPABILITIES.find((x) => x.key === 'approve.own').fixedRoles, [], 'nobody approves what they sent');
+});
+
+test('installed role templates equal the rules before the engine', () => {
+  const grantable = CAPABILITIES.filter((c) => c.grantable && c.scope !== 'page').map((c) => c.key);
+  for (const k of grantable) assert.equal(installedDefault('admin', k), k !== 'whatsapp.push', `admin ${k}`);
+  for (const role of ['director', 'assistant'])
+    assert.deepEqual(grantable.filter((k) => installedDefault(role, k)), ['urgency.2', 'mail.outside.send', 'room.create'], role);
+  for (const role of ['writer', 'designer', 'producer', 'publisher', 'member'])
+    assert.deepEqual(grantable.filter((k) => installedDefault(role, k)), [], role);
+  // The same cases appear in the migration's seed.
+  assert.match(sql, /when c\.key = 'whatsapp\.push' then false/);
+  assert.match(sql, /when c\.key in \('urgency\.2','mail\.outside\.send','room\.create'\) then r in \('director','assistant'\)/);
+});
+
+const NOW = Date.parse('2026-10-13T09:00:00Z');
+const later = (h) => new Date(NOW + h * 3600e3).toISOString();
+const person = (role, grants = [], pages = ['work']) => ({ role, pages, templates: installedDefault, grants });
+
+test('layers: the role, then a standing override, then temporary, then one-time; fixed rules last', () => {
+  assert.deepEqual(resolve(person('director'), 'urgency.2', NOW), { ok: true, src: 'role', until: null, uses: null, id: null });
+  const deny = { id: 'd', k: 'urgency.2', mode: 'standing', effect: 'deny', until: null, uses: null, scope: null };
+  assert.equal(resolve(person('director', [deny]), 'urgency.2', NOW).src, 'removed', 'a deny beats the role');
+  const timed = { id: 't', k: 'urgency.2', mode: 'timed', effect: 'allow', until: later(2), uses: null, scope: null };
+  assert.deepEqual(resolve(person('director', [deny, timed]), 'urgency.2', NOW), { ok: true, src: 'timed', until: later(2), uses: null, id: 't' }, 'a later layer beats the deny');
+  assert.equal(resolve(person('writer', [{ ...timed, until: later(-1) }]), 'urgency.2', NOW).ok, false, 'an ended grant is checked at use');
+  const once = { id: 'o', k: 'whatsapp.push', mode: 'once', effect: 'allow', until: null, uses: 1, scope: { room: 'r1' } };
+  assert.equal(resolve(person('member', [once]), 'whatsapp.push', NOW, { room: 'r1' }).src, 'once');
+  assert.equal(resolve(person('member', [once]), 'whatsapp.push', NOW, { room: 'r2' }).ok, false, 'another room');
+  assert.equal(resolve(person('member', [once]), 'whatsapp.push', NOW).ok, false, 'no target');
+  assert.equal(resolve(person('member', [{ ...once, uses: 0 }]), 'whatsapp.push', NOW, { room: 'r1' }).ok, false, 'used up');
+  assert.equal(resolve(person('writer', [{ id: 'x', k: 'permissions.grant', mode: 'standing', effect: 'allow', until: null, uses: null, scope: null }]), 'permissions.grant', NOW).src, 'rank', 'rank takes away');
+  assert.equal(resolve(person('publisher', [], ['create']), 'page.create', NOW).ok, false, '«إنشاء» needs a creating role');
+  assert.equal(resolve(person('writer', [], ['work']), 'page.work', NOW).src, 'page');
+  assert.equal(resolve(person('admin'), 'page.analytics', NOW).ok, true);
+  assert.equal(resolve(person('writer'), 'work.approve', NOW).src, 'fixed');
+  assert.equal(resolve(person('assistant'), 'work.approve', NOW).ok, true);
+});
+
+test('who manages whom (Permissions_Plan.md 4.2)', () => {
+  const me = (role, caps = ['permissions.grant']) => ({ email: `${role}@x`, role, caps });
+  const them = (role, email = `${role}2@x`) => ({ email, role });
+  assert.equal(manageBlock(me('admin'), them('admin')), null, 'an administrator manages another administrator');
+  assert.equal(manageBlock(me('admin'), { email: 'admin@x', role: 'admin' }), 'SELF_EDIT');
+  assert.equal(manageBlock(me('director'), them('assistant')), null);
+  assert.equal(manageBlock(me('director'), them('director')), 'NOT_MANAGEABLE');
+  assert.equal(manageBlock(me('director'), them('admin')), 'NOT_MANAGEABLE');
+  assert.equal(manageBlock(me('assistant'), them('writer')), null);
+  assert.equal(manageBlock(me('assistant'), them('assistant')), 'NOT_MANAGEABLE');
+  assert.equal(manageBlock(me('assistant'), them('director')), 'NOT_MANAGEABLE');
+  assert.equal(manageBlock(me('director', []), them('writer')), 'FORBIDDEN');
+  assert.deepEqual(assignableBy('admin', roleIds), roleIds.filter((r) => r !== 'admin'));
+  assert.deepEqual(assignableBy('director', roleIds), ['assistant', 'writer', 'designer', 'producer', 'publisher', 'member']);
+  assert.deepEqual(assignableBy('assistant', roleIds), ['writer', 'designer', 'producer', 'publisher', 'member'], 'D-11');
+  assert.equal(rankOf('admin'), 4);
+  assert.equal(rankOf('member'), 1);
+});
+
+test('«الحسابات» opens with the capability, installed for administrators only', () => {
+  assert.equal(canOpen({ role: 'director', pages: [] }, 'accounts'), false);
+  assert.equal(canOpen({ role: 'director', pages: [], caps: ['accounts.view'] }, 'accounts'), true);
+  assert.equal(canOpen({ role: 'writer', pages: [], caps: ['urgency.2'] }, 'accounts'), false);
+  assert.equal(canOpen({ role: 'admin', pages: [] }, 'accounts'), true);
+});
+
+test('the person\'s card words each source; the preview says what and until when', () => {
+  assert.equal(sourceLine({ src: 'role', until: null, uses: null }), 'من الدور');
+  assert.equal(sourceLine({ src: 'timed', until: '2026-10-14T09:00:00Z', uses: null }), 'مؤقتة حتى 2026-10-14 12:00');
+  assert.equal(sourceLine({ src: 'once', until: null, uses: 1 }), 'مرة واحدة · 1 استخدام باقٍ');
+  assert.equal(grantPreview('خالد', 'urgency.2', 'timed', '2026-10-14T09:00:00Z', 1, null), 'سيملك خالد «رسائل «مهم» (المستوى 2)» حتى 2026-10-14 12:00، ثم تنتهي وحدها.');
+  assert.equal(grantPreview('خالد', 'whatsapp.push', 'once', null, 1, 'فريق الحملة'), 'سيستطيع خالد «إرسال رسالة إلى واتساب زميل» في «فريق الحملة» مرة واحدة، ثم تنتهي.');
+  assert.equal(capLabel('nope'), 'صلاحية');
+});
+
+test('every refusal is worded in Arabic, never as a raw key', () => {
+  for (const code of ['SELF_EDIT', 'NOT_MANAGEABLE', 'NOT_HELD', 'CAP_FIXED', 'CAP_RANK', 'ROLE_ABOVE', 'ADMIN_NOT_ASSIGNABLE', 'PROTECTED_ACCOUNT', 'BAD_UNTIL', 'ONCE_NOT_FOR_PAGES', 'FORBIDDEN']) {
+    const text = permError(`ERROR: ${code}`);
+    assert.match(text, /[؀-ۿ]/, code);
+    assert.doesNotMatch(text, /[A-Z_]{4,}/, code);
+  }
+  // Every code the migration raises has its wording.
+  const raised = new Set([...sql.matchAll(/raise exception '([A-Z_]+)'/g)].map((m) => m[1]));
+  for (const code of raised) if (code !== 'APPEND_ONLY') assert.notEqual(permError(code), 'تعذّر تنفيذ الإجراء. حاول مجدداً.', code);
+});
+
+test('the permission files carry no emoji', () => {
+  for (const f of ['src/lib/permissions.ts', 'supabase/migrations/20261013150000_permissions.sql', 'supabase/tests/permissions_rules.sql'])
+    assert.doesNotMatch(readFileSync(f, 'utf8'), /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, f);
+});
+
+test('every notice the permission functions write leads somewhere', () => {
+  const gos = new Set([...sql.matchAll(/jsonb_build_object\('page', '([a-z]+)'/g)].map((m) => m[1]));
+  assert.ok(gos.size > 0);
+  for (const page of gos) assert.notEqual(noticeHref({ page }), '/work', page);
+  assert.equal(noticeHref({ page: 'profile' }), '/account');
+  assert.equal(noticeHref({ page: 'members', tab: 'requests' }), '/accounts?tab=requests');
+  assert.equal(noticeHref({ page: 'members', id: 'a@b.sa' }), '/accounts?person=a%40b.sa');
+});

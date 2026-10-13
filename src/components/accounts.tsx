@@ -5,7 +5,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { roles, type Role } from '@/lib/domain';
-import { assignableRoles, defaultPages, grantablePages, sanitizePages, isAdmin } from '@/lib/access';
+import { assignableRoles, canOpen, defaultPages, grantablePages, sanitizePages } from '@/lib/access';
+import { permError } from '@/lib/permissions';
 import { useAccount } from '@/lib/account-context';
 import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
@@ -57,14 +58,7 @@ function when(iso: string | null) {
 }
 
 function problem(error: { message: string; code?: string }) {
-  const m = error.message;
-  if (m.includes('PROTECTED_ACCOUNT')) return 'حساب مؤسس: لا يُحذف ولا يتغير دوره من التطبيق.';
-  if (m.includes('ADMIN_NOT_ASSIGNABLE')) return 'دور Admin لا يُمنح من التطبيق.';
-  if (m.includes('FORBIDDEN')) return 'هذا الإجراء لمسؤول النظام فقط.';
-  if (m.includes('REQUEST_NOT_PENDING')) return 'سبق البتّ في هذا الطلب.';
-  if (error.code === '23505' || m.includes('duplicate key')) return 'هذا البريد مُضاف بالفعل.';
-  if (m.includes('violates check constraint')) return 'تحقق من البريد والاسم، ثم أعد المحاولة.';
-  return 'تعذّر تنفيذ الإجراء. حاول مجدداً.';
+  return permError(error.code === '23505' ? `${error.message} duplicate key` : error.message);
 }
 
 export function AccountsPage() {
@@ -98,7 +92,7 @@ export function AccountsPage() {
     void load();
   }, [load]);
 
-  if (!isAdmin(me))
+  if (!canOpen(me, 'accounts'))
     return (
       <Panel>
         <Empty>هذه الصفحة متاحة لمسؤول النظام فقط.</Empty>
@@ -145,14 +139,20 @@ export function AccountsPage() {
         p_pages: pages,
       }));
     } else {
-      ({ error } = await supabase()
-        .from('accounts')
-        .update(
-          draft.protectedAccount
-            ? { display_name: draft.name.trim() }
-            : { display_name: draft.name.trim(), role: draft.role, pages },
-        )
-        .eq('email', draft.email));
+      // Every write is a database function (supabase/migrations/*permissions*): a new role
+      // through assign_role, the name and pages through account_update.
+      const before = rows?.find((r) => r.email === draft.email);
+      if (!draft.protectedAccount && before && before.role !== draft.role) {
+        ({ error } = await supabase().rpc('assign_role', { p_email: draft.email, p_role: draft.role, p_pages: pages }));
+        if (!error)
+          ({ error } = await supabase().rpc('account_update', { p_email: draft.email, p_name: draft.name.trim(), p_pages: null }));
+      } else {
+        ({ error } = await supabase().rpc('account_update', {
+          p_email: draft.email,
+          p_name: draft.name.trim(),
+          p_pages: draft.protectedAccount ? null : pages,
+        }));
+      }
     }
     setBusy(false);
     if (error) return say(problem(error));
@@ -168,7 +168,7 @@ export function AccountsPage() {
   const remove = async () => {
     if (!removing) return;
     setBusy(true);
-    const { error } = await supabase().from('accounts').delete().eq('email', removing.email);
+    const { error } = await supabase().rpc('account_remove', { p_email: removing.email });
     setBusy(false);
     if (error) return say(problem(error));
     say('أُزيل الحساب وأُلغيت جلساته.');
