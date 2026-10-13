@@ -667,6 +667,24 @@
       "text": "Add a way to simulate a scheduled time arriving, since the database has no such operation.",
       "at": "2026-10-12",
       "source": "auto"
+    },
+    {
+      "id": "imv6b4mz00",
+      "text": "Complete tasks directly from the calendar entry panel instead of linking to «المهام».",
+      "at": "2026-10-13",
+      "source": "auto"
+    },
+    {
+      "id": "imv6b4mz01",
+      "text": "Build delegation of approval while away once the approval-rights work is decided.",
+      "at": "2026-10-13",
+      "source": "auto"
+    },
+    {
+      "id": "imv6b4mz02",
+      "text": "Let a planned post choose its accounts in the project dialog instead of defaulting to all active non-YouTube accounts.",
+      "at": "2026-10-13",
+      "source": "auto"
     }
   ],
   "findings": [
@@ -1411,6 +1429,30 @@
       "text": "Home still shows sample data and links sample work numbers to /work/<id>, which now shows «العمل غير موجود».",
       "severity": "low",
       "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv6b4mz00",
+      "text": "work_stage_state was revoked rather than gated by visibility; internal callers still compute stage state without checking who can see the work.",
+      "severity": "low",
+      "at": "2026-10-13",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv6b4mz01",
+      "text": "event_save with a project that does not exist raises a raw foreign-key error instead of an Arabic PROJECT_INVALID message.",
+      "severity": "low",
+      "at": "2026-10-13",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv6b4mz02",
+      "text": "Writers, designers and producers see only tasks given to or by them, so project progress and team load undercount for them.",
+      "severity": "medium",
+      "at": "2026-10-13",
       "status": "open",
       "source": "auto"
     }
