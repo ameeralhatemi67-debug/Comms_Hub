@@ -41,6 +41,17 @@ The plan is `Reference_Build_Plan.md`, five steps; the reference is kept in `ref
 - **Step 5, «التقويم», «المشاريع» and «الطلبات», then acceptance: built 2026-10-13, local commit, not pushed.** The calendar on the database (day, week, month, list; a lane per account; project bands; stages and tasks across days; team load; events and private reminders; warnings that do not block; publish-date moves as requests and direct delivery and stage moves for leaders, by drag with mouse or finger); «المشاريع» and the project page (timeline, who works on what, works, tasks; a new project with a works plan created in one step); «الطلبات» (extensions with what moves first, folder access, date moves, work requests to assign, held mail and ask-first confirmations as links); Home on real counts; help for all sixteen pages. The review of the rules across Steps 1 to 5 found and closed gaps, the main one that any signed-in account could read a restricted work's text through `work_parts`. Rule run 113 of 113, Step 1 and Step 4 runs re-run 135 of 135 and 71 of 71, `npm test` 141 of 141, browser check 1010 of 1010, typecheck and build clean. Delegation while away waits for the approval-rights work (owner decision). Not yet seen signed in: the owner walkthrough of the whole cycle is in `progress.md`.
 - **Next action:** owner asks for the push; then the signed-in walkthrough of the whole cycle (create, hand over, approve, schedule, publish simulation, undo, help) and the findings recorded.
 
+## Permissions, urgency and WhatsApp (from 2026-10-13)
+
+The plan is `Permissions_Plan.md` (accepted, D-1 to D-13). Local commits, not pushed.
+
+- **P1, the permission engine: done.** Role templates, standing, temporary and one-time grants and an append-only log in the database; existing checks moved onto it with nobody's behaviour changed. Rule run 122 of 122 plus 5 of 5.
+- **P2, «الحسابات»: done.** Four tabs, the person's card with every permission's source, the grant dialog, presets, the role matrix; the director and assistant open it. Rule run 137 of 137, browser check 271 of 271.
+- **P3, asking and the connections: done.** Requests from a locked control, messaging, mail and «الطلبات»; Home, notices, the activity log, timed folder access. Request run 49 of 49; the six earlier runs unchanged; browser checks 414 of 414 and 1010 of 1010; `npm test` 153 of 153.
+- **P4, urgency 0 to 3: database part applied, interface not yet.** Safe state: the interface still sends and reads the old urgent flag, which the database keeps in step; chat run 22 of 22.
+- **P5a and P5b (WhatsApp): not started.** Nothing of the signed-in screens has been seen by an agent; owner walkthroughs are in `progress.md`.
+- **Next action:** a new session runs `Permissions_Continue_Prompt.md` (finish P4, then P5a, P5b).
+
 ## Validation so far (2026-10-10)
 
 - **Response R01, Director, desktop, self-administered Google Form.** Transcribed in `validation/responses/R01-2026-10-10-director.md`. The shared response sheet and the attached CSV hold the same single response.
