@@ -19,12 +19,17 @@ import {
 import { CHANNEL_AR, I, fileSize, localInput, tokenName, tokenTone, Av } from './parts';
 import { useMail, type FileLite, type Outgoing } from './provider';
 import { usePeopleOptional } from '../people';
+import { useAccount } from '@/lib/account-context';
+import { useCaps } from '../caps';
+import { askFor } from '@/lib/kit/need';
+import { REQUEST_HOURS, askable, capLabel, capability, howAr } from '@/lib/permissions';
 
 export type CardDraft =
   | { type: 'task'; what: string; assignee: string; due: string; priority: 'normal' | 'urgent' }
   | { type: 'approval'; asset_id: string }
   | { type: 'date'; asset_id: string; proposed: string; channels: string[]; askee: string }
-  | { type: 'progress'; asset_id: string; to: 'production' | 'review' };
+  | { type: 'progress'; asset_id: string; to: 'production' | 'review' }
+  | { type: 'permission'; k: string; mode: 'standing' | 'timed' | 'once'; hours: number | null; uses: number | null; reason: string };
 
 export type Draft = {
   key: string;
@@ -86,7 +91,7 @@ export function Composer({
 }) {
   const m = useMail();
   const [d, setD] = useState<Draft>(initial);
-  const [panel, setPanel] = useState<null | 'lib' | 'task' | 'approval' | 'date' | 'progress' | 'later'>(null);
+  const [panel, setPanel] = useState<null | 'lib' | 'task' | 'approval' | 'date' | 'progress' | 'permission' | 'later'>(null);
   const [typing, setTyping] = useState<{ field: Field; q: string }>({ field: 'to', q: '' });
   const [mention, setMention] = useState('');
   const [uploads, setUploads] = useState<Upload[]>([]);
@@ -106,7 +111,8 @@ export function Composer({
   const replyOnExternal = Boolean(view && view.thread.kind === 'external' && d.mode !== 'forward');
   const external = replyOnExternal || [...d.to, ...d.cc, ...d.bcc].some(isExternalToken);
   const newThread = !d.thread || d.mode === 'forward';
-  const gated = needsApproval({ role: m.role, me: m.me, external, newThread, assignee: view?.thread.assignee ?? null });
+  const caps = useCaps();
+  const gated = needsApproval({ role: m.role, me: m.me, external, newThread, assignee: view?.thread.assignee ?? null, canOutside: caps.ready ? caps.has('mail.outside.send') : undefined });
   const me = m.personOf(m.me);
   const ownSignature = usePeopleOptional()?.me?.profile?.signature;
   const signature = ownSignature || `${me?.display_name ?? ''}\n${roles[m.role]?.name ?? ''}، إدارة الاتصال المؤسسي`;
@@ -244,6 +250,8 @@ export function Composer({
     const card = d.card;
     const payload: Record<string, unknown> | null = !card
       ? null
+      : card.type === 'permission'
+        ? { type: 'permission', k: card.k, mode: card.mode, hours: card.hours, uses: card.uses, reason: card.reason }
       : card.type === 'task'
         ? { type: 'task', what: card.what, assignee: card.assignee, due: new Date(card.due).toISOString(), priority: card.priority }
         : card.type === 'date'
@@ -482,6 +490,17 @@ export function Composer({
             <I n="chart" />
             تحديث تقدّم
           </button>
+          <button
+            type="button"
+            className="ml-btn ml-askperm"
+            aria-pressed={panel === 'permission'}
+            disabled={external}
+            title={external ? 'طلب الصلاحية داخلي فقط' : ''}
+            onClick={() => setPanel(panel === 'permission' ? null : 'permission')}
+          >
+            <I n="lock" />
+            طلب صلاحية
+          </button>
           <select
             className="ml-sel"
             aria-label="قالب رد"
@@ -546,7 +565,10 @@ export function Composer({
             <I n="shield" />
             <span>
               {newThread ? 'رسالة خارجية جديدة' : 'رد على محادثة ليست مُسندة إليك'}، فتذهب أولاً إلى مدير الاتصال أو مساعده للاعتماد، ثم تخرج
-              من صندوق القسم.
+              من صندوق القسم. الإرسال دون انتظار لمن يملك «بريد خارجي دون انتظار الاعتماد».{' '}
+              <button type="button" className="ml-link ml-askout" onClick={() => askFor('mail.outside.send')}>
+                اطلب هذه الصلاحية
+              </button>
             </span>
           </p>
         )}
@@ -597,13 +619,14 @@ export function Composer({
 }
 
 export function cardTitle(c: { type: string }) {
-  return ({ task: 'مهمة', approval: 'طلب اعتماد', date: 'تأكيد موعد', progress: 'تحديث تقدّم' } as Record<string, string>)[c.type] ?? '';
+  return ({ task: 'مهمة', approval: 'طلب اعتماد', date: 'تأكيد موعد', progress: 'تحديث تقدّم', permission: 'طلب صلاحية' } as Record<string, string>)[c.type] ?? '';
 }
 
 function cardSummary(c: CardDraft, nameOf: (e: string) => string, assetName: (id: string) => string) {
   if (c.type === 'task') return `${c.what} · ${nameOf(c.assignee)} · التسليم ${fullWhen(new Date(c.due).toISOString())}${c.priority === 'urgent' ? ' · عاجلة' : ''}`;
   if (c.type === 'approval') return assetName(c.asset_id);
   if (c.type === 'date') return `${assetName(c.asset_id)} · ${fullWhen(new Date(c.proposed).toISOString())} · ${c.channels.map((x) => CHANNEL_AR[x]).join('، ')}`;
+  if (c.type === 'permission') return `«${capLabel(c.k)}»${howAr(c.mode, c.hours, c.uses)}: ${c.reason}`;
   return `${assetName(c.asset_id)} ← ${stageAr(c.to)}`;
 }
 
@@ -617,7 +640,7 @@ function Panel({
   onCard,
   onLater,
 }: {
-  kind: 'lib' | 'task' | 'approval' | 'date' | 'progress' | 'later';
+  kind: 'lib' | 'task' | 'approval' | 'date' | 'progress' | 'permission' | 'later';
   external: boolean;
   recipients: string[];
   refs: string[];
@@ -803,6 +826,7 @@ function Panel({
         </div>
       </div>
     );
+  if (kind === 'permission') return <PermissionPanel onCard={onCard} />;
   if (kind === 'progress')
     return (
       <div className="ml-sub">
@@ -850,6 +874,70 @@ function Panel({
       <div className="ml-row-end">
         <button type="button" className="ml-btn sm primary" onClick={() => onLater(later)}>
           اعتماد الموعد
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** A permission request card (Permissions_Plan.md 6, door 3): the same request as everywhere. */
+function PermissionPanel({ onCard }: { onCard: (c: CardDraft) => void }) {
+  const account = useAccount();
+  const caps = useCaps();
+  const options = askable(account.role, caps.evals);
+  const [k, setK] = useState('');
+  const [mode, setMode] = useState<'standing' | 'timed' | 'once'>('timed');
+  const [hours, setHours] = useState(24);
+  const [reason, setReason] = useState('');
+  return (
+    <div className="ml-sub">
+      <h4>طلب صلاحية مع الرسالة</h4>
+      <label className="ml-l" htmlFor="ml-pr-k">
+        الصلاحية
+        <select id="ml-pr-k" value={k} onChange={(e) => setK(e.target.value)}>
+          <option value="">اختر ما تحتاجه</option>
+          {options.map((o) => (
+            <option key={o.key} value={o.key}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="ml-two">
+        <label className="ml-l" htmlFor="ml-pr-mode">
+          لكم من الوقت
+          <select id="ml-pr-mode" value={mode} onChange={(e) => setMode(e.target.value as 'standing' | 'timed' | 'once')}>
+            <option value="timed">مؤقتة</option>
+            <option value="once" disabled={capability(k)?.scope === 'page'}>مرة واحدة</option>
+            <option value="standing">دائمة</option>
+          </select>
+        </label>
+        {mode === 'timed' && (
+          <label className="ml-l" htmlFor="ml-pr-h">
+            المدة
+            <select id="ml-pr-h" value={hours} onChange={(e) => setHours(Number(e.target.value))}>
+              {REQUEST_HOURS.map((d) => (
+                <option key={d.h} value={d.h}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
+      <label className="ml-l" htmlFor="ml-pr-why">
+        لماذا تحتاجها
+        <input id="ml-pr-why" maxLength={300} value={reason} onChange={(e) => setReason(e.target.value)} />
+      </label>
+      <p className="ml-mtext">يصل الطلب إلى من يقرر فيه، ويظهر بطاقةً في الرسالة وفي «الطلبات». يقرر المستلم إن كان يدير رتبتك ويملك الصلاحية، وقد يعطي مدة غير التي طلبتها.</p>
+      <div className="ml-row-end">
+        <button
+          type="button"
+          className="ml-btn sm primary"
+          disabled={!k || !reason.trim()}
+          onClick={() => onCard({ type: 'permission', k, mode, hours: mode === 'timed' ? hours : null, uses: mode === 'once' ? 1 : null, reason: reason.trim() })}
+        >
+          إضافة الطلب
         </button>
       </div>
     </div>

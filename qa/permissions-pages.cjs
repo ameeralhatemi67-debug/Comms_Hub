@@ -27,6 +27,8 @@ const sources = [
   'components/accounts/page.tsx', 'components/accounts/members.tsx', 'components/accounts/card.tsx', 'components/accounts/roles.tsx',
   'components/accounts/log.tsx', 'components/my-permissions.tsx', 'components/ui.tsx', 'components/logo-loader.tsx',
   'lib/domain.ts', 'lib/permissions.ts', 'lib/access.ts', 'lib/kit/hold-reasons.ts',
+  // Step P3
+  'components/perm-requests.tsx', 'components/home-perms.tsx', 'lib/kit/need.ts', 'lib/kit/layer.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -37,6 +39,8 @@ for (const m of sources) {
   }).outputText;
   js = js
     .replace(/from '@\/lib\/supabase\/client'/g, `from '${up}mocks/supabase.js'`)
+    .replace(/from '@\/lib\/store'/g, `from '${up}mocks/store.js'`)
+    .replace(/from '@\/lib\/account-context'/g, `from '${up}mocks/account.js'`)
     .replace(/from 'next\/link'/g, `from '${up}mocks/link.js'`)
     .replace(/from 'next\/navigation'/g, `from '${up}mocks/navigation.js'`)
     .replace(/from '\.\/data'/g, `from '${up}mocks/data.js'`)
@@ -44,6 +48,8 @@ for (const m of sources) {
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
     .replace(/from '(\.\.?\/[^'.]+)'/g, "from '$1.js'");
+  // Home's line reads the requests through its own hook: fixtures here.
+  if (m === 'components/home-perms.tsx') js = js.replace(/from '\.\/perm-requests\.js'/, `from '${up}mocks/permreq.js'`);
   const dest = path.join(build, m.replace(/\.tsx?$/, '.js'));
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, js);
@@ -62,6 +68,9 @@ export const AccountsProvider = ({ children }) => children;
 export const usePersonCard = (email) => ({ card: globalThis.__PM.cards[email] ?? null, error: globalThis.__PM.cards[email] ? '' : 'لا تملك صلاحية هذا الإجراء.' });
 export const useRooms = () => globalThis.__PM.rooms;`);
 fs.writeFileSync(path.join(build, 'mocks', 'caps.js'), `export const useCaps = () => globalThis.__PM.caps;`);
+fs.writeFileSync(path.join(build, 'mocks', 'store.js'), `export const useHub = () => ({ state: { role: globalThis.__PM.ctx.me.role, message: '' }, dispatch() {} });`);
+fs.writeFileSync(path.join(build, 'mocks', 'account.js'), `export const useAccount = () => globalThis.__PM.ctx.me;`);
+fs.writeFileSync(path.join(build, 'mocks', 'permreq.js'), `export const usePermRequests = () => ({ list: globalThis.__PM.perm ?? [], status: 'ready', reload: async () => {} });`);
 for (const f of ['globals.css', 'identity.css', 'work.css', 'chat.css', 'permissions.css']) fs.copyFileSync(path.join(root, 'src/app', f), path.join(out, f));
 
 // ---------- fixture: a department on 13 October 2026 ----------
@@ -120,6 +129,10 @@ const ctx = (email, role, evals) => ({
   nameOf: (e) => members.find((m) => m.email === e)?.display_name ?? (e ? e.split('@')[0] : ''), reload: async () => {}, call: async () => ({ ok: true, data: null }), say: () => {},
 });
 
+const PQ = (over) => ({ id: 'q1', requester: 'khalid@x.sa', requester_name: 'خالد', requester_role: 'writer', capability: 'urgency.2', label: 'رسائل «مهم» (المستوى 2)', mode: 'timed', hours: 168, uses: null, scope: null,
+  reason: 'تغطية حملة الأسبوع', source: 'chat', source_ref: null, status: 'pending', created_at: '2026-10-13T08:00:00Z', decided_by: null, decided_at: null, decision_note: null, can_decide: true, ...over });
+const permList = [PQ({}), PQ({ id: 'q2', requester: 'asst@x.sa', requester_name: 'ريم', requester_role: 'assistant', capability: 'whatsapp.push', label: 'إرسال رسالة إلى واتساب زميل', mode: 'once', hours: null, uses: 1, can_decide: false, source: 'button' })];
+
 // ---------- render each scenario with React ----------
 async function renderAll() {
   const React = await import('react');
@@ -129,6 +142,8 @@ async function renderAll() {
   const card = await import(url('components/accounts/card.js'));
   const mem = await import(url('components/accounts/members.js'));
   const mine = await import(url('components/my-permissions.js'));
+  const preq = await import(url('components/perm-requests.js'));
+  const hperm = await import(url('components/home-perms.js'));
   const h = React.createElement;
   const pages = {};
   const render = (name, as, role, evals, el, extra = {}) => {
@@ -158,6 +173,21 @@ async function renderAll() {
   render('dialog-remove', 'dir@x.sa', 'director', directorCaps, wk(h(mem.RemoveDialog, { emails: ['abd@x.sa'], onClose() {}, onDone() {} })));
   render('dialog-preset', 'dir@x.sa', 'director', directorCaps, wk(h(card.PresetDialog, { onClose() {} })));
   render('my-permissions', 'khalid@x.sa', 'writer', writerCaps, h('section', { className: 'panel' }, h('h2', null, 'صلاحياتي'), h(mine.MyPermissions)));
+  // Step P3: asking for a permission, and its decision.
+  const cards = (as, list) => h('div', { className: 'pq-list' }, ...list.map((q) => h(preq.PermRequestCard, { key: q.id, q, me: as, onDecide() {} })));
+  render('requests-perm-granter', 'dir@x.sa', 'director', directorCaps, cards('dir@x.sa', permList));
+  render('requests-perm-requester', 'khalid@x.sa', 'writer', writerCaps, cards('khalid@x.sa', [PQ({ can_decide: false }), PQ({ id: 'q3', status: 'declined', can_decide: false, decided_at: '2026-10-13T09:00:00Z', decision_note: 'ليس هذا الأسبوع' })]));
+  render('dialog-decide-approve', 'dir@x.sa', 'director', directorCaps, wk(h(preq.DecideDialog, { q: permList[0], approve: true, onClose() {} })));
+  render('dialog-decide-decline', 'dir@x.sa', 'director', directorCaps, wk(h(preq.DecideDialog, { q: permList[0], approve: false, onClose() {} })));
+  render('dialog-ask-button', 'khalid@x.sa', 'writer', writerCaps, wk(h(preq.RequestPermissionDialog, { cap: 'room.create', source: 'button', onClose() {} })));
+  render('dialog-ask-page', 'khalid@x.sa', 'writer', writerCaps, wk(h(preq.RequestPermissionDialog, { source: 'page', onClose() {} })));
+  render('dialog-ask-chat', 'khalid@x.sa', 'writer', writerCaps, wk(h(preq.RequestPermissionDialog, { cap: 'urgency.2', source: 'chat', onClose() {} })));
+  render('dialog-ask-fixed', 'khalid@x.sa', 'writer', writerCaps, wk(h(preq.RequestPermissionDialog, { cap: 'urgency.3', source: 'button', onClose() {} })));
+  const soon = new Date(Date.now() + 5 * 3600e3).toISOString();
+  render('home-perms', 'dir@x.sa', 'director', directorCaps, h('div', { className: 'wk' }, h(hperm.HomePermissions)), {
+    perm: permList,
+    caps: { ...capsOf(directorCaps), grants: [G({ id: 'h1', email: 'dir@x.sa', until: soon }), G({ id: 'h2', email: 'dir@x.sa', k: 'whatsapp.push', mode: 'once', until: null, uses: 1 })] },
+  });
   return pages;
 }
 
@@ -195,7 +225,17 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'dialog-member-add-assistant': ['والمساعد يمنح أدوار الفريق فقط'],
       'dialog-remove': ['إزالة عبدالله', 'تبقى كما هي', 'حسابات المؤسسين لا تُزال'],
       'dialog-preset': ['حزمة جديدة', 'بند آخر', 'حفظ الحزمة'],
-      'my-permissions': ['صلاحياتي', 'لديك صلاحية مؤقتة أو لمرة واحدة', 'الصفحات', 'من صفحات الحساب', 'مؤقتة حتى 2026-10-14 12:00', 'يمنح الصلاحيات ويسحبها من يدير رتبتك'],
+      'requests-perm-granter': ['طلب خالد «رسائل «مهم» (المستوى 2)» لمدة 1 أسبوع', '«تغطية حملة الأسبوع»', 'كاتب المحتوى', 'من المراسلة', 'بانتظار القرار', 'موافقة', 'رفض',
+        'طلب ريم «إرسال رسالة إلى واتساب زميل» لمرة واحدة', 'من زر مقفل', 'يقرر فيه من يملك'],
+      'requests-perm-requester': ['طلبتَ «رسائل «مهم» (المستوى 2)» لمدة 1 أسبوع', 'سحب الطلب', 'لم تُمنح', '«ليس هذا الأسبوع»'],
+      'dialog-decide-approve': ['موافقة على طلب خالد', 'دائمة', 'مؤقتة', 'مرة واحدة', 'ساعة', 'يوم', 'أسبوع', 'شهر', 'سيملك خالد', 'ملاحظة (اختياري)', 'موافقة ومنح'],
+      'dialog-decide-decline': ['رفض طلب خالد', 'سبب الرفض', 'رفض الطلب'],
+      'dialog-ask-button': ['طلب صلاحية', 'إنشاء قناة إعلانات في المراسلة', 'لماذا تحتاجها', 'إرسال الطلب', 'القرار لمن يدير رتبتك'],
+      'dialog-ask-page': ['اختر ما تحتاجه', 'رسائل «مهم» (المستوى 2)'],
+      'dialog-ask-chat': ['إلى', 'إرسال البطاقة'],
+      'dialog-ask-fixed': ['مقفلة بقواعد المركز ولا تُطلب', 'حتى يبقى العاجل نادراً'],
+      'home-perms': ['طلب صلاحية من خالد ينتظر قرارك', '«رسائل «مهم» (المستوى 2)»', 'تنتهي صلاحيتك «رسائل «مهم» (المستوى 2)» في', 'لديك «إرسال رسالة إلى واتساب زميل» لمرة واحدة لم تُستخدم بعد'],
+      'my-permissions': ['اطلب صلاحية', 'صلاحياتي', 'لديك صلاحية مؤقتة أو لمرة واحدة', 'الصفحات', 'من صفحات الحساب', 'مؤقتة حتى 2026-10-14 12:00', 'يمنح الصلاحيات ويسحبها من يدير رتبتك'],
     };
     const absent = {
       'accounts-members': ['undefined', 'urgency.2', 'permissions.grant'],
@@ -205,6 +245,9 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'dialog-grant-pick': ['اعتماد جزء من عمل أو رفضه', 'النشر والجدولة'],
       'dialog-member-add': ['>Admin<'],
       'my-permissions': ['urgency.2', 'undefined'],
+      'requests-perm-requester': ['موافقة'],
+      'dialog-ask-page': ['منح الصلاحيات وسحبها', 'اعتماد جزء من عمل أو رفضه', 'رسائل «عاجل»'],
+      'dialog-ask-fixed': ['إرسال الطلب'],
     };
     // roles the assistant must not be offered when adding a member
     const assistantOptions = (pages['dialog-member-add-assistant'].match(/<option value="([a-z]+)"(?![^>]*disabled)/g) ?? []).map((x) => x.split('"')[1]);
@@ -222,7 +265,7 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     check('dialog-grant-pick: the capability search box is there', pages['dialog-grant-pick'].includes('placeholder="ابحث في الصلاحيات"'));
 
     const looks = [['a', ''], ['emerald', 'data-identity="emerald"'], ['evening', 'data-identity="emerald" data-theme="dark"']];
-    const wide = ['accounts-members', 'accounts-card', 'accounts-roles', 'dialog-grant', 'my-permissions'];
+    const wide = ['accounts-members', 'accounts-card', 'accounts-roles', 'dialog-grant', 'my-permissions', 'requests-perm-granter', 'dialog-decide-approve', 'dialog-ask-button', 'home-perms'];
     for (const name of Object.keys(pages)) {
       for (const [look, attrs] of looks) {
         for (const [vw, vh] of [[1280, 900], [390, 844]]) {
@@ -251,6 +294,41 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
         }
       }
     }
+    // ---------- the locked-control helper, live (src/lib/kit/need.ts) ----------
+    fs.writeFileSync(path.join(out, 'need.html'), page(`<div class="pm"><button id="lock" class="primary" data-need="room.create" data-why="قنوات الإعلانات لمدير الاتصال ومساعده افتراضياً." aria-disabled="true" onclick="window.__clicked=true">قناة جديدة</button>
+<button id="fixed" class="secondary" data-need="urgency.3" data-why="المستوى الأعلى لمدير الاتصال ومساعده." aria-disabled="true" onclick="window.__clicked=true">عاجل</button>
+<button id="free" class="secondary" onclick="window.__free=true">عادي</button></div>`).replace('</body>', `<script type="module">
+import { installNeed, NEED_EVENT } from './build/lib/kit/need.js';
+window.__asked = [];
+window.addEventListener(NEED_EVENT, (e) => window.__asked.push(e.detail.cap));
+installNeed({ guideOn: () => false });
+window.__ready = true;
+</script></body>`));
+    const ctxN = await browser.newContext({ viewport: { width: 1000, height: 700 } });
+    const pn = await ctxN.newPage();
+    const nerr = [];
+    pn.on('pageerror', (e) => nerr.push(e.message));
+    await pn.goto(base + 'need.html');
+    await pn.waitForFunction(() => window.__ready === true);
+    await pn.click('#lock', { force: true });
+    const tip1 = await pn.evaluate(() => ({ text: document.querySelector('.gd-need')?.textContent ?? '', ask: !!document.querySelector('[data-need-ask="room.create"]'), clicked: !!window.__clicked }));
+    check('locked control: a click explains why, in the control\'s own words', tip1.text.includes('قنوات الإعلانات لمدير الاتصال ومساعده افتراضياً.') && tip1.text.includes('غير متاح لك الآن'), tip1.text);
+    check('locked control: it offers «اطلب هذه الصلاحية»', tip1.ask);
+    check('locked control: the control itself does not act', !tip1.clicked);
+    await pn.click('[data-need-ask="room.create"]');
+    const asked = await pn.evaluate(() => ({ asked: window.__asked, tip: !!document.querySelector('.gd-need') }));
+    check('locked control: «اطلب هذه الصلاحية» opens the request for that capability, and the tip closes', JSON.stringify(asked.asked) === '["room.create"]' && !asked.tip, JSON.stringify(asked));
+    await pn.click('#fixed', { force: true });
+    const tip2 = await pn.evaluate(() => ({ text: document.querySelector('.gd-need')?.textContent ?? '', ask: !!document.querySelector('[data-need-ask]') }));
+    check('locked control: a rule fixed by the reference explains itself and offers nothing', tip2.text.includes('المستوى الأعلى') && !tip2.ask, tip2.text);
+    await pn.click('#free');
+    const free = await pn.evaluate(() => ({ free: !!window.__free, tip: !!document.querySelector('.gd-need') }));
+    check('locked control: an ordinary button acts, and the tip goes away', free.free && !free.tip, JSON.stringify(free));
+    await pn.focus('#lock');
+    await pn.keyboard.press('Enter');
+    check('locked control: Enter on it explains too', await pn.evaluate(() => !!document.querySelector('.gd-need') && !window.__clicked));
+    check('locked control: no page errors', !nerr.length, nerr.join(' | '));
+    await ctxN.close();
   } catch (e) {
     result.errors.push(e.stack);
   } finally {

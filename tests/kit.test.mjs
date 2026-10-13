@@ -17,7 +17,8 @@ test('every help page has its purpose, a short first-visit guide, its parts, eve
   const groups = ['lead', 'maker', 'publisher', 'member'];
   // All sixteen pages of the reference have their guide (Step 5 of Reference_Build_Plan.md),
   // and «الحسابات» and «الحساب» theirs (Permissions_Plan.md, Step P2).
-  assert.deepEqual(Object.keys(PAGES).sort(), ['account', 'accounts', 'activity', 'approvals', 'asset', 'calendar', 'channels', 'chat', 'create', 'item', 'library', 'mail', 'project', 'projects', 'requests', 'review', 'tasks', 'work']);
+  // Home's since Step P3 (the plan's list of tips).
+  assert.deepEqual(Object.keys(PAGES).sort(), ['account', 'accounts', 'activity', 'approvals', 'asset', 'calendar', 'channels', 'chat', 'create', 'home', 'item', 'library', 'mail', 'project', 'projects', 'requests', 'review', 'tasks', 'work']);
   for (const [key, h] of Object.entries(PAGES)) {
     assert.ok(h.name && h.tip && h.purpose, key);
     assert.ok(h.onb.length >= 3 && h.onb.length <= 4, `${key}: three or four steps`);
@@ -65,6 +66,7 @@ test('routes map to their help page', () => {
   assert.equal(pageKeyOf('/projects'), 'projects');
   assert.equal(pageKeyOf('/projects/5f0e2d7e-2c55-4c4c-9b9e-6f7b0d1a2c3d'), 'project');
   assert.equal(pageKeyOf('/requests'), 'requests');
+  assert.equal(pageKeyOf('/'), 'home');
   assert.equal(pageKeyOf('/accounts'), 'accounts');
   assert.equal(pageKeyOf('/account'), 'account');
   assert.equal(PAGE_HREF.accounts, '/accounts');

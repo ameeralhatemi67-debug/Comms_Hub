@@ -28,6 +28,8 @@ import { pipeline, stagePosition } from '@/lib/media/rules';
 import { cardTitle, type Draft } from './composer';
 import { Av, Bdi, CHANNEL_AR, I, fileSize, localInput, tokenName } from './parts';
 import { useMail } from './provider';
+import { DecideDialog, usePermRequests } from '../perm-requests';
+import { REQUEST_STATUS, howAr } from '@/lib/permissions';
 
 const STAGE_TONE: Record<string, string> = {
   draft: '', production: 'info', review: 'review', changes: 'warn', rejected: 'danger', ready: 'success', scheduled: 'schedule', published: 'done',
@@ -574,6 +576,8 @@ function CardView({ x, card, contact }: { x: MessageRow; card: Card; contact: st
     );
   }
 
+  if (card.type === 'permission') return <PermissionMailCard card={card} />;
+
   if (card.type === 'task') {
     const late = card.state === 'open' && Date.parse(card.due) < m.now;
     return (
@@ -919,5 +923,48 @@ function Context({ view, onBack }: { view: View; onBack: () => void }) {
       )}
       <p className="ml-later">لاحقاً، بعد النسخة 0: تلخيص المحادثة واستخراج الطلبات والمواعيد واقتراح رد. لا ذكاء اصطناعي في هذه المرحلة.</p>
     </aside>
+  );
+}
+
+/** A permission request that came by mail: decided here by whoever may decide it. */
+function PermissionMailCard({ card }: { card: Extract<Card, { type: 'permission' }> }) {
+  const m = useMail();
+  const reqs = usePermRequests();
+  const [deciding, setDeciding] = useState<boolean | null>(null);
+  const q = reqs.list.find((x) => x.id === card.request_id);
+  const state = q?.status ?? card.state;
+  return (
+    <div className={`ml-act ${state === 'pending' && q?.can_decide ? 'wait' : ''}`}>
+      <div className="ml-act-h">
+        <span className="ai">
+          <I n="lock" />
+        </span>
+        طلب صلاحية
+        <span className={`mx-chip ${state === 'approved' ? 'done' : state === 'pending' ? 'info' : 'danger'}`}>{REQUEST_STATUS[state]}</span>
+      </div>
+      <div className="ml-act-b">
+        <b className="ml-what">
+          «{card.label}»{howAr(card.mode, card.hours, card.uses)}
+        </b>
+        <div className="ml-meta">
+          <span>طلبها {m.nameOf(card.by)}</span>
+          <span>«{card.reason}»</span>
+          {card.dby && state !== 'pending' && <span>قرّر {m.nameOf(card.dby)}</span>}
+        </div>
+        {state === 'pending' && q?.can_decide && (
+          <div className="ml-act-f">
+            <button type="button" className="ml-btn sm primary" onClick={() => setDeciding(true)}>
+              <I n="check" />
+              موافقة
+            </button>
+            <button type="button" className="ml-btn sm" onClick={() => setDeciding(false)}>
+              رفض
+            </button>
+          </div>
+        )}
+        {state === 'pending' && !q?.can_decide && card.by !== m.me && <small className="ml-who">يقرر فيه من يملك «{card.label}» ويدير رتبة صاحبه.</small>}
+        {q && deciding !== null && <DecideDialog q={q} approve={deciding} onClose={() => setDeciding(null)} onDone={() => void reqs.reload()} />}
+      </div>
+    </div>
   );
 }

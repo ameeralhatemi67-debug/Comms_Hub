@@ -107,7 +107,8 @@ type Ctx = {
   createFolder: (name: string, parentId: string | null, restricted: boolean) => Promise<Result & { id?: string }>;
   renameFolder: (id: string, name: string) => Promise<Result>;
   patchFolder: (id: string, patch: { locked?: boolean; lock_reason?: string | null; restricted?: boolean }) => Promise<Result>;
-  setGrant: (folderId: string, type: 'role' | 'person', subject: string, level: Level | null) => Promise<Result>;
+  /** A folder level; for a person, optionally until a moment (media_grants.expires_at, Permissions_Plan.md 4.3). */
+  setGrant: (folderId: string, type: 'role' | 'person', subject: string, level: Level | null, until?: string | null) => Promise<Result>;
   assignTask: (t: { assetId: string | null; what: string; kind: TaskKind; assignee: string; due: string; priority: 'normal' | 'urgent'; note: string }) => Promise<Result>;
   completeTask: (id: string) => Promise<Result>;
   addNote: (assetId: string, body: string, timecode: string) => Promise<Result>;
@@ -273,7 +274,7 @@ export function MediaProvider({ children }: { children: ReactNode }) {
         const { error } = await db().from('media_folders').update(patch).eq('id', id);
         return done(error);
       },
-      async setGrant(folderId, type, subject, level) {
+      async setGrant(folderId, type, subject, level, until) {
         if (level === null) {
           const del = await db().from('media_grants').delete().eq('folder_id', folderId).eq('subject_type', type).eq('subject', subject);
           return done(del.error);
@@ -281,14 +282,14 @@ export function MediaProvider({ children }: { children: ReactNode }) {
         // The uniqueness is an expression index, so update in place and insert when nothing matched.
         const upd = await db()
           .from('media_grants')
-          .update({ level: LEVELS[level] })
+          .update(until === undefined ? { level: LEVELS[level] } : { level: LEVELS[level], expires_at: until })
           .eq('folder_id', folderId)
           .eq('subject_type', type)
           .eq('subject', subject)
           .select('id');
         if (upd.error) return done(upd.error);
         if (!upd.data?.length) {
-          const ins = await db().from('media_grants').insert({ folder_id: folderId, subject_type: type, subject, level: LEVELS[level] });
+          const ins = await db().from('media_grants').insert({ folder_id: folderId, subject_type: type, subject, level: LEVELS[level], expires_at: until ?? null });
           return done(ins.error);
         }
         await load();

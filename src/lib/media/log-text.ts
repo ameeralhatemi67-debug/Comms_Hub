@@ -121,4 +121,5 @@ export const logTypeLabels: Record<string, string> = {
   download: 'تنزيل',
   link: 'رابط مراجعة',
   undo: 'تراجع',
+  permission: 'الصلاحيات',
 };

@@ -9,6 +9,8 @@ import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
 import { installGuide, type GuideApi } from '@/lib/kit/guide';
 import { installHold } from '@/lib/kit/hold';
+import { installNeed, NEED_EVENT, type NeedDetail } from '@/lib/kit/need';
+import { RequestPermissionDialog } from './perm-requests';
 import { undoKeyApplies, undoTip, type UndoItem } from '@/lib/kit/undo';
 import { pageKeyOf, roleGroup } from '@/lib/help/registry';
 
@@ -151,9 +153,11 @@ export function KitProvider({ children }: { children: ReactNode }) {
       say,
     });
     const stopHold = installHold({ guideOn: g.isOn, passing: g.passing });
+    const stopNeed = installNeed({ guideOn: g.isOn });
     guide.current = g;
     return () => {
       stopHold();
+      stopNeed();
       g.destroy();
       guide.current = null;
     };
@@ -163,6 +167,14 @@ export function KitProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     guide.current?.refresh();
   }, [path]);
+
+  // A locked control asked for its permission (src/lib/kit/need.ts): the request dialog.
+  const [asking, setAsking] = useState<string | null>(null);
+  useEffect(() => {
+    const onNeed = (e: Event) => setAsking((e as CustomEvent<NeedDetail>).detail.cap);
+    window.addEventListener(NEED_EVENT, onNeed);
+    return () => window.removeEventListener(NEED_EVENT, onNeed);
+  }, []);
 
   const value = useMemo<Kit>(
     () => ({
@@ -178,7 +190,12 @@ export function KitProvider({ children }: { children: ReactNode }) {
     }),
     [items, undo, track, offer],
   );
-  return <KitContext.Provider value={value}>{children}</KitContext.Provider>;
+  return (
+    <KitContext.Provider value={value}>
+      {children}
+      {asking && <RequestPermissionDialog cap={asking} source="button" onClose={() => setAsking(null)} />}
+    </KitContext.Provider>
+  );
 }
 
 /** The question mark in the top bar: hover, click for guide mode, double click for the page guide. The guide engine handles it. */

@@ -127,7 +127,11 @@ function NewFolder({ parentId, onClose }: { parentId: string | null; onClose: ()
   );
 }
 
-type GrantRow = { id: string; subject_type: 'role' | 'person'; subject: string; level: number };
+type GrantRow = { id: string; subject_type: 'role' | 'person'; subject: string; level: number; expires_at: string | null };
+
+// A person's folder level can last until a moment (Permissions_Plan.md 4.3): the library stays
+// the one place for folders, and the end is checked by the database when the folder is opened.
+const UNTIL_CHOICES: [string, string, number | null][] = [['', 'دائماً', null], ['day', 'ليوم', 864e5], ['week', 'لأسبوع', 7 * 864e5], ['month', 'لشهر', 30 * 864e5]];
 
 function Access({ folderId, onClose }: { folderId: string; onClose: () => void }) {
   const m = useMedia();
@@ -136,9 +140,10 @@ function Access({ folderId, onClose }: { folderId: string; onClose: () => void }
   const [error, setError] = useState('');
   const [reason, setReason] = useState(folder?.lock_reason ?? '');
   const [addWho, setAddWho] = useState('');
+  const [addUntil, setAddUntil] = useState('');
 
   const refresh = async () => {
-    const { data } = await supabase().from('media_grants').select('id, subject_type, subject, level').eq('folder_id', folderId);
+    const { data } = await supabase().from('media_grants').select('id, subject_type, subject, level, expires_at').eq('folder_id', folderId);
     setGrants((data as GrantRow[]) ?? []);
   };
   useEffect(() => {
@@ -149,7 +154,8 @@ function Access({ folderId, onClose }: { folderId: string; onClose: () => void }
   if (!folder) return null;
   const roleIds = (Object.keys(roles) as Role[]).filter((r) => r !== 'admin');
   const levelOfRow = (type: string, subject: string) => grants?.find((g) => g.subject_type === type && g.subject === subject)?.level;
-  const persons = (grants ?? []).filter((g) => g.subject_type === 'person');
+  const now = Date.now();
+  const persons = (grants ?? []).filter((g) => g.subject_type === 'person' && (!g.expires_at || Date.parse(g.expires_at) > now));
   const addable = m.people.filter((p) => p.role !== 'admin' && !persons.some((g) => g.subject === p.email));
 
   const set = async (type: 'role' | 'person', subject: string, value: string) => {
@@ -224,7 +230,7 @@ function Access({ folderId, onClose }: { folderId: string; onClose: () => void }
             <div className="r" key={g.id}>
               <span>
                 {m.nameOf(g.subject)}
-                <small>صلاحية خاصة بالشخص</small>
+                <small className="mx-until">{g.expires_at ? `حتى ${g.expires_at.slice(0, 16).replace('T', ' ')}` : 'صلاحية خاصة بالشخص'}</small>
               </span>
               <select aria-label={m.nameOf(g.subject)} value={LEVEL_NAMES[g.level]} onChange={(e) => void set('person', g.subject, e.target.value)}>
                 {options(g.level, 'إزالة')}
@@ -243,7 +249,27 @@ function Access({ folderId, onClose }: { folderId: string; onClose: () => void }
                 </option>
               ))}
             </select>
-            <button type="button" className="secondary" disabled={!addWho} onClick={() => void set('person', addWho, 'view').then(() => setAddWho(''))}>
+            <select aria-label="المدة" value={addUntil} onChange={(e) => setAddUntil(e.target.value)}>
+              {UNTIL_CHOICES.map(([k, label]) => (
+                <option key={k} value={k}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="secondary"
+              disabled={!addWho}
+              onClick={async () => {
+                const ms = UNTIL_CHOICES.find((x) => x[0] === addUntil)?.[2] ?? null;
+                const r = await m.setGrant(folderId, 'person', addWho, 'view', ms ? new Date(Date.now() + ms).toISOString() : null);
+                if (!r.ok) setError(r.error);
+                else setError('');
+                await refresh();
+                setAddWho('');
+                setAddUntil('');
+              }}
+            >
               <Icon name="plus" />
               إضافة شخص
             </button>

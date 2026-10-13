@@ -24,7 +24,7 @@ export type MemberRow = {
   muted: boolean;
   pinned: boolean;
 };
-export type ChatKind = 'text' | 'voice' | 'image' | 'file' | 'asset' | 'work' | 'poll' | 'task' | 'approval' | 'sys';
+export type ChatKind = 'text' | 'voice' | 'image' | 'file' | 'asset' | 'work' | 'poll' | 'task' | 'approval' | 'sys' | 'permission';
 export type ChatMessage = {
   id: string;
   room_id: string;
@@ -98,7 +98,7 @@ export function composerPopup(before: string, isDm: boolean): { kind: 'cmd' | 'm
   return men ? { kind: 'men', q: men[1] } : null;
 }
 
-export const COMMANDS: { word: string; hint: string; id: 'task' | 'poll' | 'approval' | 'asset' | 'work' | 'urgent' | 'mail' }[] = [
+export const COMMANDS: { word: string; hint: string; id: 'task' | 'poll' | 'approval' | 'asset' | 'work' | 'urgent' | 'mail' | 'perm' }[] = [
   { word: 'مهمة', hint: 'أسند مهمة لعضو بموعد تسليم', id: 'task' },
   { word: 'تصويت', hint: 'اسأل الفريق واجمع الأصوات', id: 'poll' },
   { word: 'اعتماد', hint: 'اطلب اعتماد أصل قيد المراجعة', id: 'approval' },
@@ -106,6 +106,7 @@ export const COMMANDS: { word: string; hint: string; id: 'task' | 'poll' | 'appr
   { word: 'عمل', hint: 'شارك عملاً بحالته', id: 'work' },
   { word: 'عاجل', hint: 'رسالة عاجلة تطلب إقراراً', id: 'urgent' },
   { word: 'بريد', hint: 'انقل النقاش إلى البريد الرسمي', id: 'mail' },
+  { word: 'صلاحية', hint: 'اطلب صلاحية ممن يقرر فيها لك', id: 'perm' },
 ];
 
 export function snippet(m: ChatMessage, assetName: (id: string) => string = () => ''): string {
@@ -163,6 +164,8 @@ export function chatSysText(d: Record<string, unknown> | null, nameOf: (e: strin
       return `تذكير ${who('to')} بالمهمة «${d.what}»`;
     case 'to_mail':
       return 'نقل النقاش إلى البريد الرسمي';
+    case 'perm':
+      return d.approve ? `مُنحت ${who('who')} صلاحية «${d.label ?? ''}»${d.how ?? ''}` : `لم تُمنح ${who('who')} صلاحية «${d.label ?? ''}»`;
     default:
       return '';
   }

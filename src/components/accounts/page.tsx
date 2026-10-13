@@ -13,6 +13,8 @@ import { AccessRequests, MemberDialog, MembersTab } from './members';
 import { GrantDialog, PersonCard, PresetDialog } from './card';
 import { RolesTab } from './roles';
 import { LogTab } from './log';
+import { PermRequestList, usePermRequests } from '../perm-requests';
+import { needProps } from '@/lib/kit/need';
 
 export function AccountsPage() {
   return (
@@ -39,7 +41,8 @@ function Accounts() {
       </Panel>
     );
 
-  const waiting = a.requests.length;
+  const perm = usePermRequests();
+  const waiting = a.requests.length + perm.list.filter((q) => q.can_decide).length;
   const tabs = [
     { id: 'members', label: `الأعضاء (${a.members.length})` },
     { id: 'roles', label: 'الأدوار' },
@@ -59,8 +62,7 @@ function Accounts() {
         <button
           type="button"
           className="primary pm-add"
-          disabled={!a.can('members.invite')}
-          title={a.can('members.invite') ? '' : 'الإضافة لمن يملك «إضافة الأعضاء وقبول طلبات الوصول».'}
+          {...(a.can('members.invite') ? {} : needProps('members.invite', 'الإضافة لمن يملك «إضافة الأعضاء وقبول طلبات الوصول»: المدير ومسؤول النظام افتراضياً.'))}
           onClick={() => setAdding(true)}
         >
           <Plus />
@@ -91,6 +93,9 @@ function Accounts() {
       {tab === 'roles' && <RolesTab />}
       {tab === 'requests' && (
         <div className="pm-reqs">
+          <Panel title="طلبات الصلاحيات">
+            <PermRequestList empty="لا طلبات صلاحيات تراها." />
+          </Panel>
           <Panel title={`طلبات الوصول إلى المركز${a.requests.length ? ` (${a.requests.length})` : ''}`}>
             <AccessRequests onApprove={setApproving} />
           </Panel>

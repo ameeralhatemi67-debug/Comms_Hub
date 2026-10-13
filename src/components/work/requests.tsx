@@ -9,7 +9,8 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { BriefcaseBusiness, Check, Clock, Inbox, Lock, Mail, Plus, Send, Upload, Users, X } from 'lucide-react';
+import { BriefcaseBusiness, Check, Clock, Inbox, KeyRound, Lock, Mail, Plus, Send, Upload, Users, X } from 'lucide-react';
+import { PermRequestList, RequestPermissionDialog, usePermRequests } from '../perm-requests';
 import { canCreateWork, fdate, isLead, riyadhStamp, sdate, type StageRow } from '@/lib/work/rules';
 import {
   INBOX_TABS,
@@ -49,7 +50,9 @@ export function RequestsPage() {
   const plan = usePlanData();
   const rq = useRequestData();
   const tab0 = useSearchParams().get('tab');
-  const [tab, setTab] = useState<InboxTab>(INBOX_TABS.some((t) => t[0] === tab0) ? (tab0 as InboxTab) : 'mine');
+  const [tab, setTab] = useState<InboxTab | 'perm'>(tab0 === 'perm' ? 'perm' : INBOX_TABS.some((t) => t[0] === tab0) ? (tab0 as InboxTab) : 'mine');
+  const perm = usePermRequests();
+  const [asking, setAsking] = useState(false);
   const [dlg, setDlg] = useState<Dialog | null>(null);
   const act: Act = async (fn, args, ok) => {
     const r = await w.call(fn, args);
@@ -62,8 +65,11 @@ export function RequestsPage() {
     return true;
   };
   const all = inboxItems({ requests: rq.requests, works: list.items, held: rq.held, me: w.me, role: w.role });
-  const count = (t: InboxTab) => (t === 'mine' ? all.filter((x) => inTabInbox(x, 'mine')).length : t === 'sent' ? all.filter((x) => x.sent && x.status === 'pending').length : 0);
-  const pick = all.filter((x) => inTabInbox(x, tab));
+  const count = (t: InboxTab | 'perm') =>
+    t === 'perm' ? perm.list.filter((q) => q.can_decide).length : t === 'mine' ? all.filter((x) => inTabInbox(x, 'mine')).length : t === 'sent' ? all.filter((x) => x.sent && x.status === 'pending').length : 0;
+  // The permission requests tab sits before «التفويض» (Permissions_Plan.md 6).
+  const tabs: [InboxTab | 'perm', string][] = [...INBOX_TABS.slice(0, 3), ['perm', 'الصلاحيات'], ...INBOX_TABS.slice(3)];
+  const pick = tab === 'perm' ? [] : all.filter((x) => inTabInbox(x, tab));
   const loading = [list.status, plan.status, rq.status, w.status].includes('loading');
   const failed = [list.status, rq.status, w.status].includes('error');
   return (
@@ -74,6 +80,10 @@ export function RequestsPage() {
           <p>كل ما ينتظر قراراً في مكان واحد: التمديد، والوصول إلى المجلدات، ونقل مواعيد النشر، وطلبات العمل، والبريد الخارجي المحتجز، وتأكيد النشر. طلب التمديد يعرض قبل القرار ما يتحرك بعده.</p>
         </div>
         <div className="wk-acts">
+          <button type="button" className="wk-btn" onClick={() => setAsking(true)}>
+            <Ic i={KeyRound} />
+            طلب صلاحية
+          </button>
           <button type="button" className="wk-btn gold" onClick={() => setDlg({ t: 'new' })}>
             <Ic i={Plus} />
             طلب جديد
@@ -82,7 +92,7 @@ export function RequestsPage() {
       </div>
       <div className="wk-tabs-row">
         <div className="wk-seg" role="group" aria-label="الطلبات" data-gd="rqtabs">
-          {INBOX_TABS.map(([k, label]) => (
+          {tabs.map(([k, label]) => (
             <button type="button" key={k} aria-pressed={tab === k} onClick={() => setTab(k)}>
               {label}
               {count(k) > 0 && <span className="n">{count(k)}</span>}
@@ -90,7 +100,13 @@ export function RequestsPage() {
           ))}
         </div>
       </div>
-      {tab === 'deleg' ? (
+      {tab === 'perm' ? (
+        <section className="wk-pn" data-gd="permreqs">
+          <h3>طلبات الصلاحيات</h3>
+          <p className="wk-col-hint">ما طلبته أنت، وما ينتظر قرارك ممن تدير رتبتهم. الموافقة تمنح ما طُلب أو ما تختاره بدلاً منه، والرفض بسبب يصل صاحبه.</p>
+          <PermRequestList empty="لا طلبات صلاحيات." />
+        </section>
+      ) : tab === 'deleg' ? (
         <section className="wk-pn" data-gd="deleg">
           <h3>
             تفويض الاعتماد أثناء الغياب <small>يأتي لاحقاً</small>
@@ -119,6 +135,7 @@ export function RequestsPage() {
         </div>
       )}
 
+      {asking && <RequestPermissionDialog source="page" onClose={() => setAsking(false)} />}
       {dlg?.t === 'new' && <NewRequestDialog onClose={() => setDlg(null)} items={list.items} tasks={plan.tasks} locked={rq.locked} pending={rq.requests} open={setDlg} />}
       {dlg?.t === 'no' && <DeclineDialog q={dlg.q} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'assign' && list.items.find((i) => i.w.id === dlg.id) && <AssignDialog d={{ w: list.items.find((i) => i.w.id === dlg.id)!.w }} onClose={() => setDlg(null)} act={act} />}

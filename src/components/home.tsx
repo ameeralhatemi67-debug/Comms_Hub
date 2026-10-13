@@ -28,6 +28,7 @@ import { CAL_KIND, calEntries, entryTitle,
   whenText,
 } from '@/lib/work/planning';
 import { usePlanData, useWork, useWorkList, type ListItem } from './work/data';
+import { HomePermissions } from './home-perms';
 import { Av, Empty, Ic, StatusChip, Wid } from './work/parts';
 
 type Tile = { key: string; label: string; value: number; hint: string; href: string; hot?: boolean };
@@ -145,6 +146,8 @@ export function HomePage() {
               </span>
             </Link>
           )}
+
+          <HomePermissions />
 
           <div className="wk-home">
             <section className="wk-pn">

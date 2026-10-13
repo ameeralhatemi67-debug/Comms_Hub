@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { describe, logTypeLabels, type LogRow } from '@/lib/media/log-text';
+import { eventText, type PermEvent } from '@/lib/permissions';
 import { logAllRoles, riyadhStamp } from '@/lib/media/rules';
 import { Title } from '../ui';
 import { Avatar, Icon, StageChip, Ts } from './parts';
@@ -33,7 +34,13 @@ const typeIcon: Record<string, string> = {
   download: 'download',
   link: 'link',
   stage: 'board',
+  permission: 'shield',
 };
+
+/** Permission events (Permissions_Plan.md 9, «Activity log») as rows of this log, a type of their own. */
+const PERM_TYPE = 'permission';
+const permRows = (events: PermEvent[]): LogRow[] =>
+  events.map((e) => ({ id: -e.id, at: e.at, actor_email: e.actor ?? 'system', type: PERM_TYPE, asset_id: null, folder_id: null, task_id: null, data: { event: e } }));
 
 export function ActivityPage() {
   const m = useMedia();
@@ -45,18 +52,24 @@ export function ActivityPage() {
 
   useEffect(() => {
     let live = true;
-    void supabase()
-      .from('activity_log')
-      .select('*')
-      .order('at', { ascending: false })
-      .limit(500)
-      .then(({ data }) => live && setRows((data as LogRow[]) ?? []));
+    // The permission log has its own row level security: each reader sees what concerns them.
+    void Promise.all([
+      supabase().from('activity_log').select('*').order('at', { ascending: false }).limit(500),
+      supabase().from('permission_events').select('id, at, actor, subject, role, capability, kind, data').order('at', { ascending: false }).limit(200),
+    ]).then(([a, p]) => {
+      if (!live) return;
+      const merged = [...((a.data as LogRow[]) ?? []), ...permRows((p.data as PermEvent[]) ?? [])].sort((x, y) => y.at.localeCompare(x.at));
+      setRows(merged);
+    });
     return () => {
       live = false;
     };
   }, [m.assets, m.tasks, m.folders]);
 
-  const described = useMemo(() => (rows ?? []).map((r) => ({ r, d: describe(r, m.nameOf) })), [rows, m.nameOf]);
+  const described = useMemo(
+    () => (rows ?? []).map((r) => ({ r, d: r.type === PERM_TYPE ? { text: eventText(r.data.event as PermEvent, m.nameOf) } : describe(r, m.nameOf) })),
+    [rows, m.nameOf],
+  );
   const shown = described.filter(({ r, d }) => {
     if (who !== 'all' && r.actor_email !== who) return false;
     if (type !== 'all' && r.type !== type) return false;

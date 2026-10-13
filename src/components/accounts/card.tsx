@@ -15,6 +15,7 @@ import {
   capLabel,
   capability,
   grantPreview,
+  howAr,
   rankOf,
   roleAr,
   sourceLine,
@@ -156,13 +157,31 @@ export function PersonCard({ email, onClose, onGrant }: { email: string; onClose
               </section>
             );
           })}
+          {(card.requests ?? []).length > 0 && (
+            <section className="pm-group pm-pending">
+              <h3>طلبات ينتظر قرارها</h3>
+              {card.requests!.map((q) => (
+                <div className="pm-perm" key={q.id}>
+                  <span>
+                    {capLabel(q.k)}
+                    {howAr(q.mode, q.hours, q.uses)}
+                  </span>
+                  <span className="pm-src once">«{q.reason}»</span>
+                </div>
+              ))}
+              <small className="muted">تُقرّر من تبويب «الطلبات».</small>
+            </section>
+          )}
           <section className="pm-group pm-folders">
             <h3>مجلدات المكتبة</h3>
             {card.folders.length ? (
               card.folders.map((f) => (
                 <div className="pm-perm" key={`${f.folder}`}>
                   <span>{f.name ?? 'أعلى المكتبة'}</span>
-                  <span className="pm-src page">{LEVEL_AR[f.level] ?? ''}</span>
+                  <span className="pm-src page">
+                    {LEVEL_AR[f.level] ?? ''}
+                    {f.until ? ` · حتى ${stamp(f.until)}` : ''}
+                  </span>
                 </div>
               ))
             ) : (

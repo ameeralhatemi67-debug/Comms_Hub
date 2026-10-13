@@ -48,7 +48,9 @@ test('slash commands at the start, mentions only in groups', () => {
   assert.deepEqual(composerPopup('مرحبا @ر', false), { kind: 'men', q: 'ر' });
   assert.equal(composerPopup('مرحبا @ر', true), null);
   assert.equal(composerPopup('نص عادي', false), null);
-  assert.equal(COMMANDS.length, 7);
+  // Seven since the messaging tab; «صلاحية» (ask for a permission) added by Permissions_Plan.md, Step P3.
+  assert.equal(COMMANDS.length, 8);
+  assert.ok(COMMANDS.some((c) => c.word === 'صلاحية' && c.id === 'perm'));
 });
 
 test('edits are the author\'s, text only, within fifteen minutes', () => {

@@ -283,9 +283,16 @@ export function permError(message: string): string {
     ['PROTECTED_ACCOUNT', 'حساب مؤسس: لا يُحذف ولا يتغير دوره من التطبيق.'],
     ['UNKNOWN_ACCOUNT', 'هذا الحساب لم يعد موجوداً.'],
     ['UNKNOWN_CAP', 'صلاحية غير معروفة.'],
+    ['CARD_NOT_SCHEDULABLE', 'لا تُجدول رسالة فيها طلب.'],
     ['UNKNOWN_ROLE', 'دور غير معروف.'],
     ['REQUEST_NOT_PENDING', 'سبق البتّ في هذا الطلب.'],
     ['INVALID_NAME', 'الاسم من حرف إلى 80 حرفاً.'],
+    ['ALREADY_HELD', 'تملك هذه الصلاحية بالفعل.'],
+    ['ALREADY_PENDING', 'طلبت هذه الصلاحية من قبل وطلبك ينتظر القرار.'],
+    ['REASON_REQUIRED', 'اكتب سبب الطلب.'],
+    ['NOTE_REQUIRED', 'اكتب سبب الرفض.'],
+    ['NOT_A_GRANTER', 'هذا الشخص لا يقرر في هذه الصلاحية لك. اختر المدير أو المساعد.'],
+    ['BAD_SOURCE', 'تعذّر إرسال الطلب من هنا.'],
     ['FORBIDDEN', 'لا تملك صلاحية هذا الإجراء.'],
   ];
   for (const [code, text] of table) if (m.includes(code)) return text;
@@ -397,4 +404,48 @@ export function markers(grants: Pick<Grant, 'mode' | 'effect'>[]): { timed: numb
 export function nextEnd(grants: Pick<Grant, 'until'>[], nowMs: number): number | null {
   const ends = grants.map((g) => (g.until ? Date.parse(g.until) : NaN)).filter((t) => t > nowMs);
   return ends.length ? Math.min(...ends) : null;
+}
+
+// ---------------------------------------------------------------------------
+// Requests (Permissions_Plan.md 6)
+// ---------------------------------------------------------------------------
+/** How long a request asks for, as the database words it (perm_how). */
+export function howAr(mode: Mode, hours: number | null | undefined, uses: number | null | undefined): string {
+  if (mode === 'standing') return ' دائمة';
+  if (mode === 'once') return (uses ?? 1) === 1 ? ' لمرة واحدة' : ` لـ${uses} مرات`;
+  const h = hours ?? 0;
+  if (h % 168 === 0) return ` لمدة ${h / 168} أسبوع`;
+  if (h % 24 === 0) return ` لمدة ${h / 24} يوم`;
+  return ` لمدة ${h} ساعة`;
+}
+
+export const REQUEST_HOURS: { h: number; label: string }[] = [
+  { h: 1, label: 'ساعة' },
+  { h: 24, label: 'يوم' },
+  { h: 168, label: 'أسبوع' },
+  { h: 720, label: 'شهر' },
+];
+
+export const SOURCE_DOOR: Record<string, string> = {
+  button: 'من زر مقفل',
+  chat: 'من المراسلة',
+  mail: 'من البريد',
+  page: 'من صفحة الطلبات',
+};
+
+export const REQUEST_STATUS: Record<string, string> = {
+  pending: 'بانتظار القرار',
+  approved: 'مُنحت',
+  declined: 'لم تُمنح',
+  withdrawn: 'سُحب',
+};
+
+/** What a person may ask for: grantable, fitting their role, not already theirs by role or for good. */
+export function askable(role: Role, evals: Pick<CapEval, 'k' | 'ok' | 'src'>[]): Capability[] {
+  return CAPABILITIES.filter((c) => {
+    if (!c.grantable || rankOf(role) < c.minRank) return false;
+    if (c.key === 'page.create' && !['director', 'assistant', 'writer', 'designer', 'producer'].includes(role)) return false;
+    const e = evals.find((x) => x.k === c.key);
+    return !(e?.ok && ['role', 'added', 'page'].includes(e.src));
+  });
 }

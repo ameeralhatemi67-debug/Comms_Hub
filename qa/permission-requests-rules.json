@@ -1,0 +1,39 @@
+{
+  "run": "2026-10-13",
+  "what": "Database rule run for asking for a permission and its connections (Permissions_Plan.md, Step P3)",
+  "script": "supabase/tests/permission_requests_rules.sql",
+  "migration": "supabase/migrations/20261013170000_permissions_requests.sql",
+  "migration_check": "applied to comms-hub as 'permissions_requests'; md5 of the stored statement f9b778194d1ad0d9f69c44e50132efa7 equals the md5 of the file",
+  "how": "One transaction against the Supabase project comms-hub, rolled back at the end. Seven throwaway accounts (@t.test) act through row level security.",
+  "runs": [
+    { "attempt": 1, "checks": 49, "passed": 47, "failed": [
+      "09 and 10: the checks of who was told counted every recipient; the three real administrators are correctly told of requests too, and the database orders the names with its own collation. The checks now look at the throwaway accounts; the rule was right."
+    ] },
+    { "attempt": 2, "checks": 49, "passed": 49, "failed": [] }
+  ],
+  "rules_checked": [
+    "asking: one pending request per person per capability and target; fixed rules (urgency 3, approving) cannot be asked for; nor what does not fit the role; a request says why; a page is not asked for once; nobody asks for what they hold by role",
+    "who is told: everyone who may decide (a rank above the requester, «منح الصلاحيات», holding what is asked; an administrator always), tier «قرارك», leading to the requests tab; an assistant's request reaches the director and the administrators, not another assistant",
+    "who sees and decides: a designer sees no one else's requests; another assistant sees the writer's, not the assistant's; nobody decides their own; the director decides both",
+    "withdraw: the requester withdraws; a withdrawn request is not decided",
+    "decline: needs a reason; the requester is told why",
+    "approve: asked for good, given for a week (the granter changes the mode and length); the grant appears at once with its source; the request is approved with its grant id; the person was told",
+    "the granter must hold what is asked: an assistant without the push cannot decide a push request (can_decide false, NOT_HELD if she tries); an administrator gives it once instead",
+    "door 2, messaging: a card only to someone who may decide (NOT_A_GRANTER); the card sits in the conversation with that person, pending; deciding from it updates the card and writes a line in the conversation; nobody posts a request card with chat_send",
+    "door 3, mail: a request card in internal mail creates the request (its source is the message), the card carries the request; not in outside mail (CARD_INTERNAL_ONLY); declining from the card updates it",
+    "the log: six requests, five decisions, one withdrawal",
+    "folder access for a time (media_grants.expires_at): an end in the past is refused; given for a day the writer sees the folder; after its end the level is gone; the person's card lists no ended folder"
+  ],
+  "existing_rule_runs_after_the_migration": {
+    "kit_rules.sql": "56 of 56 (undo of folder grants, media_level, unchanged)",
+    "work_rules.sql": "135 of 135 (folder access request and decision, unchanged)",
+    "approval_rules.sql": "71 of 71",
+    "planning_rules.sql": "113 of 113 (folder access requests, unchanged)",
+    "mail_rules.sql": "25 of 25 (mail_send changed again; the request number moved to 186 because the sequence advances in rolled-back runs)",
+    "chat_rules.sql": "not re-run in this step: only the kind constraint of chat_messages changed (a kind added); it is re-run after Step P4, which changes chat_send"
+  },
+  "advisors": {
+    "security": "no new kind of finding; the new callable functions are perm_requests, request_capability, decide_permission_request, withdraw_permission_request, chat_request_permission, perm_granters, request_decide_folder; perm_may_decide, perm_how and perm_request_cards are not callable",
+    "performance": "no new finding"
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-13T09:10:42.053Z",
+  "run": "2026-10-13T09:40:51.364Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -78,6 +78,51 @@
     },
     {
       "name": "my-permissions: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-requester: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-decline: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-page: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-chat: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-fixed: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms: renders",
       "pass": true,
       "detail": ""
     },
@@ -1262,6 +1307,11 @@
       "detail": "overflow 0px"
     },
     {
+      "name": "my-permissions: shows «اطلب صلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "my-permissions: shows «صلاحياتي»",
       "pass": true,
       "detail": ""
@@ -1355,12 +1405,677 @@
       "name": "my-permissions · evening · 390: no sideways scroll",
       "pass": true,
       "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-perm-granter · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-perm-granter: shows «طلب خالد «رسائل «مهم» (المستوى 2)» لمدة 1 أسبوع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: shows ««تغطية حملة الأسبوع»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: shows «كاتب المحتوى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: shows «من المراسلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: shows «بانتظار القرار»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: shows «موافقة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: shows «رفض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: shows «طلب ريم «إرسال رسالة إلى واتساب زميل» لمرة واحدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: shows «من زر مقفل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: shows «يقرر فيه من يملك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-perm-granter · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-perm-granter · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-perm-granter · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-perm-granter · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-granter · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-perm-requester · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-requester · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "requests-perm-requester: shows «طلبتَ «رسائل «مهم» (المستوى 2)» لمدة 1 أسبوع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-requester: shows «سحب الطلب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-requester: shows «لم تُمنح»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-requester: shows ««ليس هذا الأسبوع»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-requester: does not show «موافقة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-requester: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-requester · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "requests-perm-requester · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-decide-approve · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-decide-approve: shows «موافقة على طلب خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: shows «دائمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: shows «مؤقتة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: shows «مرة واحدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: shows «ساعة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: shows «يوم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: shows «أسبوع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: shows «شهر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: shows «سيملك خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: shows «ملاحظة (اختياري)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: shows «موافقة ومنح»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-decide-approve · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-decide-approve · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-decide-approve · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-decide-approve · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-approve · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-decide-decline · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-decline · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-decide-decline: shows «رفض طلب خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-decline: shows «سبب الرفض»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-decline: shows «رفض الطلب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-decline: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-decline · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-decide-decline · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-button · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-button: shows «طلب صلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button: shows «إنشاء قناة إعلانات في المراسلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button: shows «لماذا تحتاجها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button: shows «إرسال الطلب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button: shows «القرار لمن يدير رتبتك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-button · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-button · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-button · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-button · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-button · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-page · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-page · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-page: shows «اختر ما تحتاجه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-page: shows «رسائل «مهم» (المستوى 2)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-page: does not show «منح الصلاحيات وسحبها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-page: does not show «اعتماد جزء من عمل أو رفضه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-page: does not show «رسائل «عاجل»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-page: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-page · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-page · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-chat · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-chat · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-chat: shows «إلى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-chat: shows «إرسال البطاقة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-chat: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-chat · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-chat · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-fixed · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-fixed · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-ask-fixed: shows «مقفلة بقواعد المركز ولا تُطلب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-fixed: shows «حتى يبقى العاجل نادراً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-fixed: does not show «إرسال الطلب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-fixed: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-fixed · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-ask-fixed · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-perms · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-perms: shows «طلب صلاحية من خالد ينتظر قرارك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms: shows ««رسائل «مهم» (المستوى 2)»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms: shows «تنتهي صلاحيتك «رسائل «مهم» (المستوى 2)» في»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms: shows «لديك «إرسال رسالة إلى واتساب زميل» لمرة واحدة لم تُستخدم بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-perms · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-perms · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-perms · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-perms · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-perms · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "locked control: a click explains why, in the control's own words",
+      "pass": true,
+      "detail": "غير متاح لك الآنقنوات الإعلانات لمدير الاتصال ومساعده افتراضياً.اطلب هذه الصلاحية«إنشاء قناة إعلانات في المراسلة»: يقرر فيها من يدير رتبتك."
+    },
+    {
+      "name": "locked control: it offers «اطلب هذه الصلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "locked control: the control itself does not act",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "locked control: «اطلب هذه الصلاحية» opens the request for that capability, and the tip closes",
+      "pass": true,
+      "detail": "{\"asked\":[\"room.create\"],\"tip\":false}"
+    },
+    {
+      "name": "locked control: a rule fixed by the reference explains itself and offers nothing",
+      "pass": true,
+      "detail": "غير متاح لك الآنالمستوى الأعلى لمدير الاتصال ومساعده.المستوى الأعلى لمدير الاتصال ومساعده ومسؤول النظام فقط، حتى يبقى العاجل نادراً."
+    },
+    {
+      "name": "locked control: an ordinary button acts, and the tip goes away",
+      "pass": true,
+      "detail": "{\"free\":true,\"tip\":false}"
+    },
+    {
+      "name": "locked control: Enter on it explains too",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "locked control: no page errors",
+      "pass": true,
+      "detail": ""
     }
   ],
   "errors": [],
   "summary": {
-    "total": 271,
-    "passed": 271,
+    "total": 414,
+    "passed": 414,
     "failed": 0
   }
 }

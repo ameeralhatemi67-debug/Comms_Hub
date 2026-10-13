@@ -2,7 +2,9 @@
 // «صلاحياتي» on the account page (Permissions_Plan.md 9, «Account profile»): what the
 // signed-in person may do now, where each permission comes from and when it ends. Read only:
 // permissions are given in «الحسابات» by the people who manage them.
-import { Lock } from 'lucide-react';
+import { useState } from 'react';
+import { KeyRound, Lock } from 'lucide-react';
+import { RequestPermissionDialog } from './perm-requests';
 import { CAPABILITIES, GROUP_AR, sourceLine, type CapGroup } from '@/lib/permissions';
 import { useCaps } from './caps';
 
@@ -10,6 +12,7 @@ const GROUPS: CapGroup[] = ['pages', 'messaging', 'accounts', 'fixed'];
 
 export function MyPermissions() {
   const caps = useCaps();
+  const [asking, setAsking] = useState(false);
   if (!caps.ready) return <p className="muted">جارٍ تحميل صلاحياتك…</p>;
   const held = caps.evals.filter((e) => e.ok);
   const timed = held.filter((e) => e.src === 'timed' || e.src === 'once');
@@ -44,6 +47,13 @@ export function MyPermissions() {
           </section>
         );
       })}
+      <div className="actions pm-askrow">
+        <button type="button" className="secondary pm-ask" onClick={() => setAsking(true)}>
+          <KeyRound />
+          اطلب صلاحية
+        </button>
+      </div>
+      {asking && <RequestPermissionDialog source="page" onClose={() => setAsking(false)} />}
       <p className="muted">
         «من الدور» يأتي مع دورك، و«أُضيفت» أُعطيت لك وحدك، و«مؤقتة» تنتهي في موعدها، و«مرة واحدة» تنتهي بعد استخدامها. يمنح الصلاحيات ويسحبها من يدير
         رتبتك في «الحسابات»، ويصلك إشعار بكل تغيير.

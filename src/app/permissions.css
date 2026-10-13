@@ -101,3 +101,29 @@ span.pm-locked svg{width:13px;height:13px;margin-top:3px}
   .pm-modes,.pm-durs{width:100%}
   .pm-modes button,.pm-durs button{flex:1}
 }
+
+/* Requests (Permissions_Plan.md 6): cards, the decision and the asking dialogs, Home's line. */
+.pq-list{display:grid;gap:10px}
+.pq-card{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface)}
+.pq-card.pending{border-inline-start:3px solid var(--accent)}
+.pq-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pq-h svg{width:16px;height:16px;color:var(--green-text)}
+.pq-h b{flex:1;min-width:0}
+.pq-st{font-size:11px;padding:2px 8px;border-radius:5px;background:var(--chip-bg);color:var(--chip-fg)}
+.pq-st.pending{background:var(--st-warn-bg);color:var(--st-warn-fg)}
+.pq-st.approved{background:var(--st-success-bg);color:var(--st-success-fg)}
+.pq-st.declined{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.pq-why{margin:6px 0;color:var(--ink);font-size:13px}
+.pq-acts{margin-top:8px}
+.pq-ask textarea{min-height:70px}
+.pm-askrow{margin-top:12px}
+.hp-perms{display:grid;gap:8px;margin:0 0 14px}
+.hp-perms .wk-hint{display:flex;gap:8px;align-items:center}
+.hp-perms svg{width:16px;height:16px;flex-shrink:0}
+.cx-perm .ti{font-weight:600}
+.cx-chlock{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mx-until{color:var(--st-schedule-fg)}
+.gdl .gd-need{max-width:320px}
+.gdl .gd-need .gb{margin-top:8px}
+.gdl .gd-need small{display:block;margin-top:6px}
+[aria-disabled=true][data-need]{opacity:.55;cursor:help}

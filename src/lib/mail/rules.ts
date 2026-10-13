@@ -29,7 +29,8 @@ export type Card =
   | { type: 'approval'; asset_id: string; name: string; version: number; by: string; state: 'pending' | 'approved' | 'changes' | 'rejected' | 'superseded'; dby?: string; dat?: string; note?: string | null; now?: number }
   | { type: 'date'; asset_id: string; name: string; proposed: string; was?: string | null; channels: string[]; askee: string; by: string; state: 'pending' | 'confirmed' | 'counter'; final?: string; counter?: string; dby?: string; cby?: string; dat?: string }
   | { type: 'task'; task_id: string; what: string; assignee: string; due: string; priority: 'normal' | 'urgent'; by: string; state: 'open' | 'done'; progress: number; asset_id?: string | null; dat?: string | null }
-  | { type: 'progress'; asset_id: string; name: string; from: string; to: string; version: number; by: string };
+  | { type: 'progress'; asset_id: string; name: string; from: string; to: string; version: number; by: string }
+  | { type: 'permission'; request_id: string; k: string; label: string; mode: 'standing' | 'timed' | 'once'; hours: number | null; uses: number | null; reason: string; by: string; state: 'pending' | 'approved' | 'declined' | 'withdrawn'; dby?: string; dat?: string };
 
 export type SysData = { e: string; [k: string]: unknown };
 
@@ -86,8 +87,13 @@ export const isApprover = (role: Role) => actsAs(role, APPROVER_ROLES);
  * Outside mail from someone other than the director or the assistant waits for one
  * of them, unless it is a reply on a thread assigned to its author.
  */
-export function needsApproval(p: { role: Role; me: string; external: boolean; newThread: boolean; assignee: string | null }) {
-  return p.external && !isApprover(p.role) && (p.newThread || p.assignee !== p.me);
+/**
+ * Outside mail waits for approval unless the sender holds «بريد خارجي دون انتظار الاعتماد»
+ * (mail.outside.send, the director's and the assistant's by default; the database decides).
+ * `canOutside` is that capability as the shell read it; without it the role default applies.
+ */
+export function needsApproval(p: { role: Role; me: string; external: boolean; newThread: boolean; assignee: string | null; canOutside?: boolean }) {
+  return p.external && !(p.canOutside ?? isApprover(p.role)) && (p.newThread || p.assignee !== p.me);
 }
 
 /** Mail attachments follow Gmail's limit inside the Hub too, so any message can go out. */

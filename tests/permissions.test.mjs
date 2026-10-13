@@ -166,3 +166,39 @@ test('the permission log is worded in Arabic, for every kind the database writes
   assert.equal(nextEnd([{ until: '2026-10-13T08:00:00Z' }, { until: '2026-10-13T10:00:00Z' }, { until: null }, { until: '2026-10-13T12:00:00Z' }], now), Date.parse('2026-10-13T10:00:00Z'));
   assert.equal(nextEnd([{ until: null }], now), null);
 });
+
+test('requests: how long, what may be asked for, the locked-control helper, the notice route', async () => {
+  const { howAr, askable, REQUEST_STATUS, SOURCE_DOOR } = await import('../src/lib/permissions.ts');
+  const { needProps, askableCap } = await import('../src/lib/kit/need.ts');
+  const req = readFileSync('supabase/migrations/20261013170000_permissions_requests.sql', 'utf8');
+  // The interface words a request's length as the database does (perm_how).
+  assert.equal(howAr('timed', 168, null), ' لمدة 1 أسبوع');
+  assert.equal(howAr('timed', 24, null), ' لمدة 1 يوم');
+  assert.equal(howAr('timed', 36, null), ' لمدة 36 ساعة');
+  assert.equal(howAr('once', null, 1), ' لمرة واحدة');
+  assert.equal(howAr('once', null, 3), ' لـ3 مرات');
+  assert.equal(howAr('standing', null, null), ' دائمة');
+  for (const phrase of [' لمدة ', ' أسبوع', ' يوم', ' ساعة', ' لمرة واحدة', ' مرات', ' دائمة']) assert.ok(req.includes(phrase), phrase);
+  // A writer may ask for «مهم» but not for what does not fit the role, nor for a fixed rule.
+  const evals = [{ k: 'page.work', ok: true, src: 'page' }, { k: 'urgency.2', ok: false, src: 'none' }];
+  const w = askable('writer', evals).map((c) => c.key);
+  assert.ok(w.includes('urgency.2') && w.includes('whatsapp.push') && w.includes('page.calendar'));
+  assert.ok(!w.includes('page.work'), 'already held');
+  assert.ok(!w.includes('permissions.grant') && !w.includes('urgency.3') && !w.includes('work.approve'));
+  assert.ok(!askable('publisher', []).some((c) => c.key === 'page.create'), '«إنشاء» only for creating roles');
+  assert.deepEqual(needProps('room.create', 'سبب'), { 'data-need': 'room.create', 'data-why': 'سبب', 'aria-disabled': true });
+  assert.equal(askableCap('urgency.2'), true);
+  assert.equal(askableCap('urgency.3'), false);
+  assert.equal(askableCap('work.approve'), false);
+  assert.equal(noticeHref({ page: 'requests', tab: 'perm' }), '/requests?tab=perm');
+  assert.equal(noticeHref({ page: 'requests' }), '/requests');
+  for (const s of ['pending', 'approved', 'declined', 'withdrawn']) assert.ok(REQUEST_STATUS[s], s);
+  for (const s of req.match(/source in \(([^)]+)\)/)[1].match(/'([a-z]+)'/g).map((x) => x.slice(1, -1))) assert.ok(SOURCE_DOOR[s], s);
+  // Every code the request functions raise is worded.
+  for (const code of new Set([...req.matchAll(/raise exception '([A-Z_]+)'/g)].map((m) => m[1])))
+    assert.notEqual(permError(code), 'تعذّر تنفيذ الإجراء. حاول مجدداً.', code);
+  // The guide answers a locked control, and the kit installs the helper.
+  const guide = readFileSync('src/lib/kit/guide.ts', 'utf8');
+  assert.match(guide, /لماذا لا تستطيع/);
+  assert.match(readFileSync('src/components/kit.tsx', 'utf8'), /installNeed\(/);
+});

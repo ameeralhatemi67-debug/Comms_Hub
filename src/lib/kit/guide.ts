@@ -6,6 +6,7 @@
 import { PAGES, PAGE_HREF, ROLE_GROUP, SHELL_PARTS } from '../help/registry.ts';
 import type { HelpPage, HelpPart, RoleGroup } from '../help/types.ts';
 import { holdTip } from './hold.ts';
+import { askFor, askableCap, isLocked, needWhy } from './need.ts';
 import { esc, layer, layerEl, layerRemove, reducedMotion } from './layer.ts';
 import { place, overlap, type Box } from './place.ts';
 
@@ -233,8 +234,23 @@ export function installGuide(host: GuideHost): GuideApi {
     return null;
   }
   function explainHtml(x: Explain) {
-    const dis = (x.el as HTMLButtonElement).disabled;
+    const lockedEl = x.el.closest('[data-need]');
+    const locked = isLocked(lockedEl);
+    const dis = (x.el as HTMLButtonElement).disabled || locked;
     const links = (x.g ?? []).filter((p) => PAGE_HREF[p]);
+    // A locked control gets a fourth kind of answer: why you cannot, and what to do.
+    if (locked && lockedEl) {
+      const cap = lockedEl.getAttribute('data-need') ?? '';
+      return (
+        `<div class="gd-k"><span>وضع الإرشاد · «${esc(pageName(host.page()))}»</span><button class="gb q" data-gda="xclose" aria-label="إغلاق الشرح">${X}</button></div>` +
+        `<p class="gd-t">${esc(x.t)}</p><p class="gd-w off">لماذا لا تستطيع: ${esc(needWhy(lockedEl))}</p>` +
+        (askableCap(cap)
+          ? '<p>ما تفعله: اطلب الصلاحية ممن يدير رتبتك. يصله طلبك ويقرر المدة، ويصلك إشعار بالقرار.</p>'
+          : '<p>هذه مقفلة بقواعد المركز ولا تُطلب.</p>') +
+        `<div class="gd-a">${askableCap(cap) ? `<button class="gb pri" data-gda="need" data-cap="${esc(cap)}">اطلب هذه الصلاحية</button>` : ''}` +
+        `${H() ? '<button class="gb" data-gda="doc">في دليل الصفحة</button>' : ''}<span class="sp"></span><button class="gb q" data-gda="exit">إنهاء</button></div>`
+      );
+    }
     return (
       `<div class="gd-k"><span>وضع الإرشاد · «${esc(pageName(host.page()))}»</span><button class="gb q" data-gda="xclose" aria-label="إغلاق الشرح">${X}</button></div>` +
       `<p class="gd-t">${esc(x.t)}</p>` +
@@ -517,6 +533,11 @@ export function installGuide(host: GuideHost): GuideApi {
       else (x.el as HTMLElement).click();
       setTimeout(schedule, 40);
       return;
+    }
+    if (a === 'need') {
+      setOn(false);
+      hidePop();
+      return askFor(b.dataset.cap ?? '');
     }
     if (a === 'doc') return openHelp();
     if (a === 'go') {

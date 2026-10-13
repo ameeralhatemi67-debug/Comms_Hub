@@ -158,7 +158,8 @@ export type PersonCardData = {
   last_seen: string | null;
   caps: import('@/lib/permissions').CapEval[];
   grants: Grant[];
-  folders: { folder: string | null; name: string | null; level: number }[];
+  folders: { folder: string | null; name: string | null; level: number; until?: string | null }[];
+  requests?: { id: string; k: string; mode: Mode; hours: number | null; uses: number | null; reason: string; at: string }[];
 };
 
 /** A person's card (perm_card): read again whenever the page's data changes. */

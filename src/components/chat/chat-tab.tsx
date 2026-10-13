@@ -13,7 +13,6 @@ import {
   PRESENCE_AR,
   REACTIONS,
   canAssign,
-  canChannel,
   canEdit,
   canUrgent,
   chatSysText,
@@ -37,6 +36,10 @@ import { Thumb } from '../media/parts';
 import { Face, presenceOf, presenceText, roleTitle, usePeople } from '../people';
 import { I, fileSize, localInput, type IconName } from '../mail/parts';
 import { useChat, type AssetLite } from './provider';
+import { useCaps } from '../caps';
+import { DecideDialog, RequestPermissionDialog, usePermRequests } from '../perm-requests';
+import { needProps } from '@/lib/kit/need';
+import { REQUEST_STATUS, howAr, type Mode } from '@/lib/permissions';
 
 export type MailPrefill = { to: string[]; subject: string; body: string; refs: string[] };
 
@@ -46,6 +49,7 @@ type DialogState =
   | { kind: 'fwd'; msg: ChatMessage }
   | { kind: 'poll' }
   | { kind: 'task'; what?: string }
+  | { kind: 'perm' }
   | { kind: 'asset' }
   | { kind: 'approval' }
   | { kind: 'work' }
@@ -190,6 +194,7 @@ export function ChatTab({ onToMail }: { onToMail: (p: MailPrefill) => void }) {
       {room && dialog?.kind === 'task' && <TaskDialog room={room} what={dialog.what} onClose={() => setDialog(null)} />}
       {room && (dialog?.kind === 'asset' || dialog?.kind === 'approval') && <AssetDialog room={room} approval={dialog.kind === 'approval'} onClose={() => setDialog(null)} />}
       {room && dialog?.kind === 'work' && <WorkDialog room={room} onClose={() => setDialog(null)} />}
+      {dialog?.kind === 'perm' && <RequestPermissionDialog source="chat" onClose={() => setDialog(null)} />}
       {dialog?.kind === 'img' && (
         <Dlg title={dialog.msg.body || 'صورة'} onClose={() => setDialog(null)} wide>
           <div className="cx-lightbox">
@@ -526,6 +531,7 @@ function Conversation({
             if (id === 'work') return onDialog({ kind: 'work' });
             if (id === 'urgent') return canUrgent(c.role) && room.type !== 'dm' ? setUrgent(true) : c.say('الرسائل العاجلة لمدير الاتصال ومساعده في المجموعات.');
             if (id === 'mail') return void toMail(null);
+            if (id === 'perm') return onDialog({ kind: 'perm' });
           }}
         />
       ) : (
@@ -785,6 +791,7 @@ function Content({ room, m, onImg }: { room: RoomRow; m: ChatMessage; onImg: (m:
   if (m.kind === 'work') return <WorkCard id={String(d.id)} title={String(d.title ?? '')} />;
   if (m.kind === 'poll') return <PollCard room={room} m={m} />;
   if (m.kind === 'task') return <TaskCard m={m} />;
+  if (m.kind === 'permission') return <PermissionCard m={m} />;
   if (m.kind === 'approval') return <ApprovalCard m={m} />;
   return null;
 }
@@ -981,6 +988,46 @@ function PollCard({ room, m }: { room: RoomRow; m: ChatMessage }) {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/** A permission request asked in this conversation (Permissions_Plan.md 6, door 2). */
+function PermissionCard({ m }: { m: ChatMessage }) {
+  const c = useChat();
+  const people = usePeople();
+  const reqs = usePermRequests();
+  const [deciding, setDeciding] = useState<boolean | null>(null);
+  const d = (m.data ?? {}) as { request_id?: string; k?: string; label?: string; mode?: Mode; hours?: number | null; uses?: number | null; reason?: string; state?: string; dby?: string };
+  const q = reqs.list.find((x) => x.id === d.request_id);
+  const state = (q?.status ?? d.state ?? 'pending') as keyof typeof REQUEST_STATUS;
+  return (
+    <div className="ccard cx-perm">
+      <div className="hd">
+        <I n="lock" />
+        طلب صلاحية
+        <span className={`mx-chip ${state === 'approved' ? 'done' : state === 'pending' ? 'info' : 'danger'}`}>{REQUEST_STATUS[state]}</span>
+      </div>
+      <div className="ti">
+        «{d.label}»{d.mode ? howAr(d.mode, d.hours, d.uses) : ''}
+      </div>
+      <div className="sub">
+        طلبها {people.nameOf(m.author)}: «{d.reason}»
+        {d.dby && state !== 'pending' ? ` · قرّر ${people.nameOf(d.dby)}` : ''}
+      </div>
+      {state === 'pending' && q?.can_decide && (
+        <div className="acts">
+          <button type="button" className="ml-btn sm primary" onClick={() => setDeciding(true)}>
+            <I n="check" />
+            موافقة
+          </button>
+          <button type="button" className="ml-btn sm" onClick={() => setDeciding(false)}>
+            رفض
+          </button>
+        </div>
+      )}
+      {state === 'pending' && m.author === c.me && <div className="sub">ينتظر القرار. تسحبه من «الطلبات».</div>}
+      {q && deciding !== null && <DecideDialog q={q} approve={deciding} onClose={() => setDeciding(null)} onDone={() => void reqs.reload()} />}
     </div>
   );
 }
@@ -1438,6 +1485,10 @@ function Composer({
             <I n="check" />
             طلب اعتماد
           </button>
+          <button type="button" role="menuitem" className="cx-askperm" onClick={() => (setAttach(null), onCommand('perm'))}>
+            <I n="lock" />
+            اطلب صلاحية
+          </button>
           {canUrgent(c.role) && room.type !== 'dm' && (
             <button type="button" role="menuitem" onClick={() => (setAttach(null), onCommand('urgent'))}>
               <I n="alert" />
@@ -1756,6 +1807,7 @@ function NewChat({ onClose, onOpen }: { onClose: () => void; onOpen: (id: string
   const [channel, setChannel] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const caps = useCaps();
   const others = people.people.filter((p) => p.email !== c.me);
 
   const dm = async (email: string) => {
@@ -1837,11 +1889,18 @@ function NewChat({ onClose, onOpen }: { onClose: () => void; onOpen: (id: string
               ))}
             </select>
           </label>
-          {canChannel(c.role) && (
+          {caps.has('room.create') ? (
             <label className="ml-check">
               <input type="checkbox" checked={channel} onChange={(e) => setChannel(e.target.checked)} />
               قناة إعلانات: الكتابة للمشرفين فقط
             </label>
+          ) : (
+            <p className="ml-mtext cx-chlock">
+              قنوات الإعلانات لمن يملك «إنشاء قناة إعلانات في المراسلة».{' '}
+              <button type="button" className="ml-btn sm quiet" {...needProps('room.create', 'قنوات الإعلانات لمن يملك «إنشاء قناة إعلانات في المراسلة»: مدير الاتصال ومساعده افتراضياً.')}>
+                اطلب هذه الصلاحية
+              </button>
+            </p>
           )}
           {error && <p className="ml-err">{error}</p>}
           <div className="ml-row-end">

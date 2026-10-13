@@ -45,6 +45,8 @@ for (const m of sources) {
     .replace(/from 'next\/navigation'/g, `from '${up}mocks/navigation.js'`)
     .replace(/from '\.\/data'/g, `from '${up}mocks/data.js'`)
     .replace(/from '\.\/work\/data'/g, `from '${up}mocks/data.js'`)
+    .replace(/from '\.\/home-perms'/g, `from '${up}mocks/home-perms.js'`)
+    .replace(/from '\.\.\/perm-requests'/g, `from '${up}mocks/perm-requests.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
     .replace(/from '(\.\/(?:work\/)?(?:plan|parts|list|item|create|publish|approvals|review|channels|calendar|projects|requests|day-dialogs))'/g, "from '$1.js'");
@@ -59,6 +61,12 @@ export default function Link({ href, children, ...rest }) { return createElement
 fs.writeFileSync(path.join(build, 'mocks', 'navigation.js'), `export const useRouter = () => ({ push() {}, replace() {}, refresh() {} });
 export const usePathname = () => '/approvals';
 export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search || '');`);
+// Home's permissions part has its own check (qa/permissions-pages.cjs).
+fs.writeFileSync(path.join(build, 'mocks', 'home-perms.js'), 'export const HomePermissions = () => null;');
+// The permissions tab of «الطلبات» has its own check (qa/permissions-pages.cjs).
+fs.writeFileSync(path.join(build, 'mocks', 'perm-requests.js'), `export const usePermRequests = () => ({ list: [], status: 'ready', reload: async () => {} });
+export const PermRequestList = () => null;
+export const RequestPermissionDialog = () => null;`);
 fs.writeFileSync(path.join(build, 'mocks', 'supabase.js'), `const chain = new Proxy(function () {}, { get: () => chain, apply: () => chain });
 export const supabase = () => chain;`);
 fs.writeFileSync(path.join(build, 'mocks', 'data.js'), `export const useWork = () => globalThis.__WK.ctx;

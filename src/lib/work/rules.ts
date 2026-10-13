@@ -833,7 +833,7 @@ export function noticeHref(go: { page?: string; id?: string; tab?: string } | nu
     case 'approvals':
       return g.tab === 'publish' ? '/approvals?tab=publish' : '/approvals';
     case 'requests':
-      return '/requests';
+      return g.tab ? `/requests?tab=${g.tab}` : '/requests';
     case 'project':
       return g.id ? `/projects/${g.id}` : '/projects';
     case 'projects':
