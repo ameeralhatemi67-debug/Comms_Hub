@@ -655,6 +655,18 @@
       "text": "Add realtime updates to work pages instead of reloading on focus.",
       "at": "2026-10-12",
       "source": "auto"
+    },
+    {
+      "id": "imv5pq63u0",
+      "text": "Show timed-note marks on the review screen's video timeline, as the reference does.",
+      "at": "2026-10-12",
+      "source": "auto"
+    },
+    {
+      "id": "imv5pq63u1",
+      "text": "Add a way to simulate a scheduled time arriving, since the database has no such operation.",
+      "at": "2026-10-12",
+      "source": "auto"
     }
   ],
   "findings": [
@@ -1381,6 +1393,22 @@
     {
       "id": "fmv5okpz52",
       "text": "Linking an existing work from mail updates the thread only; the work's log records nothing.",
+      "severity": "low",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv5pq63u0",
+      "text": "Extension requests created on the work page cannot be decided until Step 5 builds «الطلبات»; notices link to /work?tab=requests.",
+      "severity": "medium",
+      "at": "2026-10-12",
+      "status": "open",
+      "source": "auto"
+    },
+    {
+      "id": "fmv5pq63u1",
+      "text": "Home still shows sample data and links sample work numbers to /work/<id>, which now shows «العمل غير موجود».",
       "severity": "low",
       "at": "2026-10-12",
       "status": "open",
