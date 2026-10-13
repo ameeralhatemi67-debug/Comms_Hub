@@ -76,6 +76,7 @@ needs production infrastructure (storage, workers, integrations) from Version 2 
 | I-021 | Command palette, Ctrl K, with Arabic-normalised search | Identity proposal | S | Checkpoint 0.3.3 if approved, else here | Parked |
 | I-022 | Dark mode | Identity proposal | S | Checkpoint 0.3.4 if approved, else here | Parked |
 | I-023 | Open Motion Studio from a work item with suggested templates | Identity proposal | S | Checkpoint 0.3.4 if approved, else here | Parked |
+| I-024 | Timed retries for outside deliveries (WhatsApp, later others) by a cron or edge function | Owner, 2026-10-13 | S | Only if the "no background worker" boundary is lifted | Parked |
 
 ## 3. Owner ideas
 
@@ -235,6 +236,8 @@ difference (F-R01-06), decisions on the home screen and team load (F-R01-01,
 F-R01-02) and the phone approval sheet (Roadmap task 0.2.2.5) are already Roadmap
 work.
 
+- **I-024 Timed retries for outside deliveries.** A cron or edge function that retries failed WhatsApp sends and picks up queued ones without a page being open. Owner, 2026-10-13: saved as an idea, not for now; `Permissions_Plan.md` D-7 keeps the "no background worker" boundary and uses a retry button and dispatch-on-page-open instead.
+
 ## 7. Already routed elsewhere
 
 Not repeated here; see the owner input log.
@@ -248,3 +251,4 @@ Not repeated here; see the owner input log.
 | Date | Change |
 |---|---|
 | 2026-10-10 | File created. I-001 and I-002 from the owner; I-003 to I-017 agent suggestions; I-018 to I-020 from response R01; I-021 to I-023 from the identity proposal |
+| 2026-10-13 | I-024 added from the owner: timed retries for outside deliveries |
