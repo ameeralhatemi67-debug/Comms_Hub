@@ -588,3 +588,10 @@ When recording future implementation outcomes, follow this standardized template
 ## 2026-10-13 — Logged by Compass
 
 - c6eb969 feat: Step 5, calendar, projects and requests on the database, with a rules review
+
+### 2026-10-13: owner directive before the permissions build
+
+- **Owner direction:** build `Permissions_Plan.md` (accepted 2026-10-13, decisions D-1 to D-13) in one run, its six steps in order, each with its own local commit and entry here.
+- **Directive: permissions are real.** Role templates, standing, temporary and one-time grants, permission requests and the permission log move to Postgres in the Supabase project `comms-hub`, decided by database functions and row level security. Approval and publishing stay fixed by the reference (D-9): no grant can unlock them.
+- **Directive: WhatsApp is a real outside channel,** one way (D-6), full content (D-5), only to numbers a member verified on the site, only for urgent or pushed messages, through a pull bridge on the owner's computer adapted from the Hedayah bridge (D-8). No cron or edge function in the site (D-7, idea I-024). Server-only variables: `WHATSAPP_SERVER_KEY` (its sha256 alone in the database) and `WHATSAPP_LINK_SECRET` (signs the link in each message).
+- **Recorded in `AGENTS.md`,** «Prototype boundary», after the accounts exception. Baseline commit 41a9470 holds the plan, the build prompt, idea I-024 and the Compass log as they were.

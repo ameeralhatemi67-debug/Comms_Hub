@@ -163,6 +163,26 @@ who may open what are in `src/lib/access.ts` and are tested. Never add a
 sign-in bypass, stub session or hard-coded credential, not even for tests. A
 service_role key never goes in this repository.
 
+Permissions are real too, by owner directive of 2026-10-13 (`Permissions_Plan.md`,
+recorded in `progress.md`): role templates, standing, temporary and one-time grants,
+permission requests and their log live in Postgres (`supabase/migrations/*permissions*`),
+every write is a database function, and who may give what to whom is decided there
+(`has_capability`, `use_capability`), never by the interface. The catalog is
+`src/lib/permissions.ts`, tested against the seeded `capabilities` table. Approval and
+publishing stay fixed by the reference: no grant can make a person approve or publish.
+Time is checked at the moment of use; there is no sweep job.
+
+WhatsApp is a real outside channel, by the same directive: one way (the system sends,
+nothing is read back), only to numbers a member proved on the site, and only for urgent
+or pushed messages. Routing is decided inside the database from room membership; the
+outbox holds ids, never message text. The sender is a pull bridge in `bridge/whatsapp/`
+on a computer the owner keeps on: it polls the site, so the site still has no cron, edge
+function or background worker (idea I-024 holds timed retries). `WHATSAPP_SERVER_KEY`
+is a server-only environment variable whose sha256 alone is in the database, as with
+`MAIL_SERVER_KEY`; `WHATSAPP_LINK_SECRET` signs the links in the messages. No phone
+number, token or QR payload goes into this repository, its fixtures or its logs. Only
+an administrator sees a member's number.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted
