@@ -10,8 +10,10 @@ import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
 import {
   riyadhToday,
+  setPlatformRegistry,
   workErrorText,
   type AccountRow,
+  type PlatformInfo,
   type StageRow,
   type TemplateRow,
   type WorkRow,
@@ -49,6 +51,8 @@ type Ctx = {
   load: Load[];
   projects: Project[];
   accounts: AccountRow[];
+  /** The platform registry, in order; also handed to the shared words and rules (setPlatformRegistry). */
+  platforms: PlatformInfo[];
   templates: Template[];
   reloadBase: () => Promise<void>;
   /** Calls a database function; on refusal returns the reason in Arabic. */
@@ -73,6 +77,7 @@ export function WorkProvider({ children }: { children: ReactNode }) {
   const [load, setLoad] = useState<Load[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [accounts, setAccounts] = useState<AccountRow[]>([]);
+  const [platforms, setPlatforms] = useState<PlatformInfo[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const ran = useRef(false);
 
@@ -83,14 +88,17 @@ export function WorkProvider({ children }: { children: ReactNode }) {
       ran.current = true;
       await db.rpc('work_due_run');
     }
-    const [p, l, j, a, t] = await Promise.all([
+    const [p, l, j, a, t, pl] = await Promise.all([
       db.rpc('media_people'),
       db.rpc('work_people_load'),
       db.from('projects').select('id,name,type,start_on,end_on,owner,description').order('start_on', { ascending: false }),
       db.from('platform_accounts').select('id,platform,label,handle,purpose,authorized_until,publishers,mode,active,fixed').order('created_at'),
       db.from('plan_templates').select('id,name,type,rows,created_by').order('created_at', { ascending: false }),
+      db.from('platforms').select('key,label_ar,kind,sort,accepts,publish_mode,scheduling,requires_review,token_life_days,enabled,builtin,docs_url,readiness,readiness_note,readiness_at,readiness_by').order('sort'),
     ]);
-    if (p.error || l.error || j.error || a.error || t.error) return setStatus('error');
+    if (p.error || l.error || j.error || a.error || t.error || pl.error) return setStatus('error');
+    setPlatformRegistry(pl.data as PlatformInfo[]);
+    setPlatforms(pl.data as PlatformInfo[]);
     setPeople(p.data as Person[]);
     setLoad(l.data as Load[]);
     setProjects(j.data as Project[]);
@@ -127,12 +135,13 @@ export function WorkProvider({ children }: { children: ReactNode }) {
       load,
       projects,
       accounts,
+      platforms,
       templates,
       reloadBase,
       call,
       say,
     }),
-    [status, account.email, role, isAdmin, people, nameOf, personOf, load, projects, accounts, templates, reloadBase, call, say],
+    [status, account.email, role, isAdmin, people, nameOf, personOf, load, projects, accounts, platforms, templates, reloadBase, call, say],
   );
   return <WorkContext.Provider value={value}>{children}</WorkContext.Provider>;
 }

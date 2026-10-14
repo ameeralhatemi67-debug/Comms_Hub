@@ -1,0 +1,65 @@
+{
+  "script": "qa/platform-gate.cjs",
+  "ran": "2026-10-14",
+  "base": "http://localhost:3100",
+  "total": 11,
+  "passed": 11,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "the registry is not readable without a sign-in",
+      "pass": true,
+      "detail": "200 []"
+    },
+    {
+      "name": "nor its log",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "platform_save cannot be called without a sign-in",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "platform_set_enabled cannot be called without a sign-in",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "platform_set_readiness cannot be called without a sign-in",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "platform_delete cannot be called without a sign-in",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "platform_impact cannot be called without a sign-in",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "platform_log cannot be called without a sign-in",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "the internal video-only rule is not callable either",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "the platforms tab is not shown to a visitor",
+      "pass": true,
+      "detail": "تسجيل الدخول"
+    },
+    {
+      "name": "and no registry text leaks into the sign-in screen",
+      "pass": true,
+      "detail": "مركز الاتصال\nCOMMUNICATION HUB\nتسجيل الدخول\nأول دخول\nطلب وصو"
+    }
+  ]
+}

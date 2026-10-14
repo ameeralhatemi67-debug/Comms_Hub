@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-14T20:19:53.819Z",
+  "run": "2026-10-14T20:45:08.074Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -242,6 +242,16 @@
       "detail": ""
     },
     {
+      "name": "settings-platforms: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-viewer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "urgency-badges: renders",
       "pass": true,
       "detail": ""
@@ -293,6 +303,41 @@
     },
     {
       "name": "library-storage-state: a missing copy is marked for the colour rule",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: an administrator has working controls, none locked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: a viewer sees every control locked for «platforms.manage»",
+      "pass": true,
+      "detail": "27"
+    },
+    {
+      "name": "settings-platforms: the built-in platforms cannot be deleted, the added one can",
+      "pass": true,
+      "detail": "2"
+    },
+    {
+      "name": "settings-platforms: the info card is there (closed), says it was not read from the official documents, and links the platform own page",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: the platform with an account is not offered a working delete",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: the mail channel has no readiness tracker or switch",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: the added platform is stopped and its toggle says «تفعيل»",
       "pass": true,
       "detail": ""
     },
@@ -4007,6 +4052,236 @@
       "detail": "overflow 0px"
     },
     {
+      "name": "settings-platforms · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms: shows «النشر على كل المنصات محاكاة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «إضافة منصة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «إنستغرام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «يوتيوب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «فيسبوك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «البريد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «منصة اجتماعية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «قناة بريد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «النشر الآن»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «محاكاة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «المسار المخطط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «نشر تلقائي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «نشر مساعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «الفيديو فقط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «نصاً وصورة وفيديو»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «التجهيز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «لم يبدأ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «قيد التجهيز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «قُدّم للمراجعة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «يعمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «حفظ التجهيز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «قناة القسم جاهزة، وشاشة الموافقة قيد الإعداد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «ما تقدمه وما تطلبه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «تيك توك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «مفعّلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «موقوفة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «قائمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «سجل المنصة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «لا تُوقف منصة عليها حسابات فعّالة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: shows «لا تُحذف منصة عليها حسابات أو نسخ نصوص»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: does not show «NaN»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: does not show «null»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms-viewer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-viewer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms-viewer: shows «إنستغرام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-viewer: shows «فيسبوك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-viewer: shows «حفظ التجهيز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-viewer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-viewer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-viewer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
       "name": "urgency-badges · a · 1280: no page errors",
       "pass": true,
       "detail": ""
@@ -4154,8 +4429,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 830,
-    "passed": 830,
+    "total": 885,
+    "passed": 885,
     "failed": 0
   }
 }

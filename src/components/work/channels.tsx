@@ -10,12 +10,12 @@ import { useMemo, useState } from 'react';
 import { Film, Lock, Mail, Pencil, Plus, RefreshCw, Send, Trash2, TriangleAlert, Users } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import { HOLD } from '@/lib/kit/hold-reasons';
-import { accountName, accountState, isLead, canPublish, platformLabels, statusLabels, type AccountRow, type Platform } from '@/lib/work/rules';
+import { accountName, accountState, isLead, canPublish, platformLabels, statusLabels, VIDEO_ONLY, type AccountRow, type Platform } from '@/lib/work/rules';
+import { MODE_AR, READINESS_AR } from '@/lib/platforms/info';
 import { useWork, useWorkList, type ListItem } from './data';
 import { Empty, Hint, Ic, Modal } from './parts';
 import { staffOf } from './plan';
 
-const PLATFORMS: Platform[] = ['instagram', 'x', 'linkedin', 'youtube', 'mail'];
 const LOCKING = ['APPROVED', 'SCHEDULED', 'IN_REVIEW'];
 
 export function ChannelsPage() {
@@ -25,6 +25,12 @@ export function ChannelsPage() {
   const pub = canPublish(w.role);
   const [dlg, setDlg] = useState<{ t: 'edit'; a: AccountRow | null } | { t: 'delete'; a: AccountRow } | null>(null);
   const nowIso = useMemo(() => new Date().toISOString(), []);
+  // Every platform of the registry that is on or has accounts: social ones in registry order, the shared mailbox last.
+  const sections = useMemo(() => {
+    const has = new Set(w.accounts.map((a) => a.platform));
+    const live = w.platforms.filter((p) => p.enabled || has.has(p.key));
+    return [...live.filter((p) => p.kind === 'social').sort((a, b) => a.sort - b.sort), ...live.filter((p) => p.kind === 'mail')];
+  }, [w.platforms, w.accounts]);
   const useOf = (id: string) => items.filter((x) => !x.w.closed_at && x.w.channels.includes(id) && !['PUBLISHED', 'PARTIAL', 'FAILED', 'PUBLISHING'].includes(x.w.status));
   const act = async (fn: string, args: Record<string, unknown>, ok: string) => {
     const r = await w.call(fn, args);
@@ -62,7 +68,7 @@ export function ChannelsPage() {
       </div>
       <p className="wk-simnote">
         <Ic i={TriangleAlert} />
-        <span>الربط في هذه المرحلة محاكاة: لا يتصل شيء بإنستغرام أو X أو لينكدإن أو يوتيوب. في التنفيذ يُربط كل حساب بتسجيل دخول المنصة الرسمي، وتُحفظ مفاتيحه في الخادم وحده.</span>
+        <span>الربط في هذه المرحلة محاكاة: لا يتصل شيء بأي منصة. في التنفيذ يُربط كل حساب بتسجيل دخول المنصة الرسمي، وتُحفظ مفاتيحه في الخادم وحده. المنصات وحالة تجهيز كل منها في «الإعدادات» ثم «المنصات».</span>
       </p>
       {!mgr && <Hint i={Users}>إضافة الحسابات وتعديلها وحذفها لمدير الاتصال ومساعده والمسؤول عن النظام. لك إعادة ربط الحسابات.</Hint>}
       {w.status === 'loading' ? (
@@ -70,13 +76,20 @@ export function ChannelsPage() {
           جارٍ التحميل…
         </div>
       ) : (
-        PLATFORMS.map((pl) => {
+        sections.map((info) => {
+          const pl = info.key;
           const list = w.accounts.filter((a) => a.platform === pl);
           return (
             <section className="wk-psec" data-gd={`plat-${pl}`} key={pl}>
               <h3>
-                <Ic i={pl === 'mail' ? Mail : pl === 'youtube' ? Film : Send} />
+                <Ic i={pl === 'mail' ? Mail : VIDEO_ONLY.includes(pl) ? Film : Send} />
                 {platformLabels[pl]} <span className="n">{list.length}</span>
+                {info.kind === 'social' && (
+                  <small className="wk-plat-meta">
+                    النشر محاكاة · المسار المخطط: {MODE_AR[info.publish_mode]} · التجهيز: {READINESS_AR[info.readiness]}
+                    {!info.enabled ? ' · موقوفة لإضافة حسابات جديدة' : ''}
+                  </small>
+                )}
               </h3>
               {list.length ? (
                 <div className="wk-accgrid">
@@ -92,9 +105,12 @@ export function ChannelsPage() {
                         {a.handle && <span className="handle">{a.handle}</span>}
                         {a.platform === 'mail' && <span className="handle">صندوق القسم المشترك</span>}
                         {a.purpose && <small>{a.purpose}</small>}
-                        {a.platform === 'youtube' && (
+                        {VIDEO_ONLY.includes(a.platform) && (
                           <p className="ytn">
-                            <Ic i={Film} /> يقبل الفيديو فقط: الطويل وShorts. لكل منشور عنوان ووصف وصورة مصغّرة وخصوصية (عام، غير مدرج، خاص).
+                            <Ic i={Film} />{' '}
+                            {a.platform === 'youtube'
+                              ? 'يقبل الفيديو فقط: الطويل وShorts. لكل منشور عنوان ووصف وصورة مصغّرة وخصوصية (عام، غير مدرج، خاص).'
+                              : 'يقبل الفيديو فقط: لا يُرسل إليه عمل بلا فيديو.'}
                           </p>
                         )}
                         <dl className="wk-kv">
@@ -155,7 +171,8 @@ type Act = (fn: string, args: Record<string, unknown>, ok: string) => Promise<bo
 export function AccountDialog({ a, use, onClose, act }: { a: AccountRow | null; use: ListItem[]; onClose: () => void; act: Act }) {
   const w = useWork();
   const edit = !!a;
-  const [platform, setPlatform] = useState<Platform>(a?.platform ?? 'instagram');
+  const offered = w.platforms.filter((p) => p.kind === 'social' && p.enabled).sort((x, y) => x.sort - y.sort);
+  const [platform, setPlatform] = useState<Platform>(a?.platform ?? offered[0]?.key ?? 'instagram');
   const [label, setLabel] = useState(a?.label ?? '');
   const [handle, setHandle] = useState(a?.handle ?? '');
   const [purpose, setPurpose] = useState(a?.purpose ?? '');
@@ -169,9 +186,9 @@ export function AccountDialog({ a, use, onClose, act }: { a: AccountRow | null; 
         <label className="l">
           المنصة
           <select className="wk-inp" value={platform} onChange={(e) => setPlatform(e.target.value as Platform)}>
-            {(['instagram', 'x', 'linkedin', 'youtube'] as Platform[]).map((p) => (
-              <option key={p} value={p}>
-                {platformLabels[p]}
+            {offered.map((p) => (
+              <option key={p.key} value={p.key}>
+                {p.label_ar}
               </option>
             ))}
           </select>

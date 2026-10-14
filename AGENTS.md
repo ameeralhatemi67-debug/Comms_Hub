@@ -192,6 +192,13 @@ is a server-only environment variable whose sha256 alone is in the database, as 
 number, token or QR payload goes into this repository, its fixtures or its logs. Only
 an administrator sees a member's number.
 
+The platform list is a registry in Postgres (`supabase/migrations/*platform_registry*`), not a
+constraint: labels, the order of copies and the video-only rule are read from it, a new platform
+is a row added from «الإعدادات» «المنصات» by someone holding `platforms.manage`, and the shared
+words and rules take it from `src/lib/work/rules.ts` (`setPlatformRegistry`). Publishing is
+still a simulation for every platform until an adapter exists; the tracker of readiness is
+information, not a connection.
+
 Integrations, storage providers and backups are real, by owner directive of 2026-10-14
 (`Settings_Integrations_Plan.md`, decisions E-1 to E-7, recorded in `progress.md`). Every
 connection (storage provider, platform app, messaging) is a row of one integrations core

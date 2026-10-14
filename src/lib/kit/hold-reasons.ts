@@ -40,6 +40,8 @@ export const HOLD = {
   // Settings and integrations (Settings_Integrations_Plan.md 10).
   /** «الإعدادات»: switch an integration off. */
   intDisable: 'إيقاف المزوّد يوقف الرفع إليه والقراءة منه حتى يُشغّل من جديد.',
+  /** «الإعدادات»، المنصات: delete a platform nothing has used. */
+  platformDelete: 'تُحذف المنصة من القائمة ويبقى في السجل أنها كانت.',
 } as const;
 
 export const HOLD_MS = 900;

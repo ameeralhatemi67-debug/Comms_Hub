@@ -13,7 +13,8 @@ export type WorkStatus =
   | 'DRAFT' | 'IN_PRODUCTION' | 'IN_REVIEW' | 'CHANGES_REQUESTED' | 'REJECTED'
   | 'APPROVED' | 'SCHEDULED' | 'PUBLISHING' | 'PUBLISHED' | 'PARTIAL' | 'FAILED';
 export type Priority = 'normal' | 'high' | 'urgent';
-export type Platform = 'instagram' | 'x' | 'linkedin' | 'youtube' | 'mail';
+/** A platform key from the registry (`platforms` in the database): instagram, x, linkedin, youtube, mail, and any added since. */
+export type Platform = string;
 export type StageRole = '' | 'writer' | 'designer' | 'producer' | 'assistant' | 'director' | 'publisher';
 export type StageState = 'done' | 'active' | 'ready' | 'waiting';
 export type Tier = 'decide' | 'attention' | 'info';
@@ -117,9 +118,65 @@ export const sourceLabels: Record<string, string> = {
   plan: 'خطة المشروع', dept: 'طلب من إدارة أخرى', directive: 'توجيه من الإدارة', occasion: 'مناسبة', coverage: 'تغطية',
   external: 'طلب خارجي من البريد', member: 'طلب من عضو',
 };
-export const platformLabels: Record<Platform, string> = {
-  instagram: 'إنستغرام', x: 'X', linkedin: 'لينكدإن', youtube: 'يوتيوب', mail: 'البريد',
+// ---------------------------------------------------------------------------
+// The platform registry (supabase/migrations/*platform_registry*). The pages load the table
+// once and hand it to setPlatformRegistry; until then, and for a key the table does not hold,
+// the five built-in rows below answer, so the pure rules and their tests need no database.
+// ---------------------------------------------------------------------------
+export type PublishMode = 'auto' | 'assisted' | 'manual';
+export type Readiness = 'not_started' | 'preparing' | 'submitted' | 'approved' | 'live';
+export type PlatformInfo = {
+  key: Platform;
+  label_ar: string;
+  kind: 'social' | 'mail';
+  sort: number;
+  accepts: { video_only?: boolean } & Record<string, unknown>;
+  publish_mode: PublishMode;
+  scheduling: boolean;
+  requires_review: boolean;
+  token_life_days: number | null;
+  enabled: boolean;
+  builtin: boolean;
+  docs_url: string | null;
+  readiness: Readiness;
+  readiness_note: string | null;
+  readiness_at: string | null;
+  readiness_by: string | null;
 };
+const seed = (key: string, label_ar: string, kind: 'social' | 'mail', sort: number, video_only: boolean, requires_review: boolean): PlatformInfo => ({
+  key, label_ar, kind, sort, accepts: { video_only }, publish_mode: 'auto', scheduling: true, requires_review, token_life_days: kind === 'mail' ? null : 60,
+  enabled: true, builtin: true, docs_url: null, readiness: kind === 'mail' ? 'live' : 'not_started', readiness_note: null, readiness_at: null, readiness_by: null,
+});
+/** Equal to the rows the migration seeds; tests/platforms.test.mjs keeps them so. */
+export const BUILTIN_PLATFORMS: PlatformInfo[] = [
+  seed('instagram', 'إنستغرام', 'social', 1, false, true),
+  seed('x', 'X', 'social', 2, false, false),
+  seed('linkedin', 'لينكدإن', 'social', 3, false, true),
+  seed('youtube', 'يوتيوب', 'social', 4, true, true),
+  seed('mail', 'البريد', 'mail', 0, false, false),
+];
+let registry = new Map<string, PlatformInfo>(BUILTIN_PLATFORMS.map((p) => [p.key, p]));
+const labelOf = (key: string) => registry.get(key)?.label_ar ?? key;
+/** Label by key: `platformLabels[a.platform]`. Always current; an unknown key shows as itself. */
+export const platformLabels: Record<Platform, string> = new Proxy({} as Record<Platform, string>, {
+  get: (_t, key) => (typeof key === 'string' ? labelOf(key) : undefined),
+});
+/** Platforms that take video only. Edited in place when the registry loads, so importers keep the same array. */
+export const VIDEO_ONLY: Platform[] = ['youtube'];
+/** The social platforms in registry order: the order platform copies are listed and approved. */
+export const PLATFORM_ORDER: Platform[] = ['instagram', 'x', 'linkedin', 'youtube'];
+export function setPlatformRegistry(rows: PlatformInfo[]): void {
+  const next = new Map<string, PlatformInfo>(BUILTIN_PLATFORMS.map((p) => [p.key, p]));
+  for (const r of rows) next.set(r.key, r);
+  registry = next;
+  const all = [...registry.values()];
+  VIDEO_ONLY.length = 0;
+  VIDEO_ONLY.push(...all.filter((p) => p.kind === 'social' && p.accepts.video_only === true).map((p) => p.key));
+  PLATFORM_ORDER.length = 0;
+  PLATFORM_ORDER.push(...all.filter((p) => p.kind === 'social').sort((a, b) => a.sort - b.sort || a.key.localeCompare(b.key)).map((p) => p.key));
+}
+export const platformInfo = (key: string): PlatformInfo | undefined => registry.get(key);
+export const platformList = (): PlatformInfo[] => [...registry.values()];
 export const stageStateLabels: Record<StageState, string> = {
   done: 'منتهية', active: 'جارية', ready: 'جاهزة للبدء', waiting: 'تنتظر',
 };
@@ -135,9 +192,6 @@ export const BOARD: WorkStatus[] = ['DRAFT', 'IN_PRODUCTION', 'IN_REVIEW', 'CHAN
 /** Press release, mail and announcement are approved as one package. */
 export const WHOLE_TYPES: WorkType[] = ['press', 'email', 'announce'];
 export const PUBLISHABLE_TYPES: WorkType[] = ['post', 'video', 'design', 'announce', 'event'];
-/** YouTube carries video only. */
-export const VIDEO_ONLY: Platform[] = ['youtube'];
-export const PLATFORM_ORDER: Platform[] = ['instagram', 'x', 'linkedin', 'youtube'];
 
 // ---------------------------------------------------------------------------
 // Plans: [name, role, days, waits for]. Stages without a shared wait run side by side.
@@ -407,7 +461,16 @@ export function decideBlock(w: Pick<WorkRow, 'status' | 'review_cycle' | 'closed
   return '';
 }
 
-/** YouTube carries video only: the video type, or a video file among the work's files. */
+/** What is said when a video-only platform is chosen for a work without a video. */
+export function videoOnlyMessage(platforms: Platform[]): string {
+  const names = [...new Set(platforms.filter((p) => VIDEO_ONLY.includes(p)))].map((p) => labelOf(p));
+  if (!names.length) return 'أحد الحسابات المختارة يقبل الفيديو فقط.';
+  return names.length === 1
+    ? `${names[0]} يقبل الفيديو فقط: أضف فيديو من المكتبة أو أزل حساب ${names[0]}.`
+    : `${names.join('، ')} تقبل الفيديو فقط: أضف فيديو من المكتبة أو أزل هذه الحسابات.`;
+}
+
+/** A video-only platform (YouTube, or any the registry marks so): the video type, or a video file among the work's files. */
 export function youtubeOk(type: WorkType, platforms: Platform[], assetKinds: string[]): boolean {
   return type === 'video' || !platforms.some((p) => VIDEO_ONLY.includes(p)) || assetKinds.includes('video');
 }
@@ -881,7 +944,15 @@ const ERRORS: Record<string, string> = {
   PROJECT_INVALID: 'المشروع غير موجود.',
   ACCOUNT_INVALID: 'أحد الحسابات موقوف أو غير موجود.',
   CHANNEL_REQUIRED: 'اختر حساباً واحداً على الأقل.',
-  YOUTUBE_VIDEO_ONLY: 'يوتيوب يقبل الفيديو فقط. أضف فيديو من المكتبة أو أزل حساب يوتيوب.',
+  YOUTUBE_VIDEO_ONLY: 'أحد الحسابات المختارة (مثل يوتيوب) يقبل الفيديو فقط. أضف فيديو من المكتبة أو أزل ذلك الحساب.',
+  PLATFORM_IN_USE: 'عليها حسابات أو نسخ نصوص، فلا تُوقف ولا تُحذف قبل أن تخلو.',
+  PLATFORM_BUILTIN: 'منصة أساسية في المركز: لا تُحذف ولا يتغير اسمها.',
+  PLATFORM_KEY_INVALID: 'المعرّف حروف إنجليزية صغيرة وأرقام وشرطة سفلية، ويبدأ بحرف.',
+  UNKNOWN_PLATFORM: 'المنصة غير موجودة.',
+  MODE_INVALID: 'اختر مساراً من الثلاثة.',
+  URL_INVALID: 'الرابط يبدأ بـ https وطوله حتى 300 حرف.',
+  LIFE_INVALID: 'مدة التفويض من يوم إلى 3650 يوماً.',
+  READINESS_INVALID: 'حالة غير معروفة.',
   PLAN_INVALID: 'الخطة تحتاج مرحلة واحدة على الأقل.',
   PLAN_NAME: 'اكتب اسماً لكل مرحلة.',
   PLAN_ORDER: 'المرحلة تنتظر مراحل قبلها فقط.',
@@ -912,7 +983,7 @@ const ERRORS: Record<string, string> = {
   HANDLE_REQUIRED: 'اكتب اسم الحساب على المنصة.',
   HANDLE_TAKEN: 'هذا الحساب مرتبط من قبل.',
   PUBLISHER_REQUIRED: 'اختر شخصاً واحداً على الأقل ينشر عليه.',
-  PLATFORM_INVALID: 'اختر المنصة.',
+  PLATFORM_INVALID: 'اختر منصة مفعّلة. تفعيل المنصات لمسؤول النظام من «الإعدادات».',
   ACCOUNT_IN_USE: 'عليه عمل معتمد أو مجدول أو قيد المراجعة. انقل هذه الأعمال أو أوقف الحساب بدل حذفه.',
   NAME_REQUIRED: 'اكتب الاسم.',
   DATES_INVALID: 'اختر بداية ونهاية صحيحتين.',

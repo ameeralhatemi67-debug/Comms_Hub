@@ -30,6 +30,7 @@ import { WhatsAppSystemPanel } from './whatsapp/system-panel';
 import { GeneralTab } from './settings/general';
 import { AuditTab } from './settings/audit';
 import { StorageTab } from './settings/storage';
+import { PlatformsTab } from './settings/platforms';
 import { DriveIntegration } from './drive-files';
 
 const pageNames: Record<string, string> = {
@@ -81,11 +82,12 @@ const settingsSections = [
   { id: 'approvals', label: 'افتراضات الاعتماد' },
   { id: 'ai', label: 'الذكاء والأتمتة' },
   { id: 'storage', label: 'التخزين' },
+  { id: 'platforms', label: 'المنصات' },
   { id: 'whatsapp', label: 'واتساب النظام' },
   { id: 'audit', label: 'السجل' },
 ];
 /** The settings tabs that are real (in the database); the others are visual in the prototype. */
-const REAL_SETTINGS = ['general', 'storage', 'whatsapp', 'audit'];
+const REAL_SETTINGS = ['general', 'storage', 'platforms', 'whatsapp', 'audit'];
 
 export function Supporting({ page }: { page: string }) {
   const { state, dispatch } = useHub();
@@ -444,6 +446,11 @@ export function Supporting({ page }: { page: string }) {
         {settingsTab === 'storage' && (
           <Panel title="التخزين" className="st-panel">
             <StorageTab />
+          </Panel>
+        )}
+        {settingsTab === 'platforms' && (
+          <Panel title="المنصات" className="st-panel">
+            <PlatformsTab />
           </Panel>
         )}
         {settingsTab === 'audit' && (

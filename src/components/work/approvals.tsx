@@ -413,7 +413,7 @@ function PublishTab({ items, dec, act }: { items: ListItem[]; dec: Dec; act: Act
     <>
       <p className="wk-simnote">
         <Ic i={TriangleAlert} />
-        <span>النشر في هذه المرحلة محاكاة: لا يصل شيء إلى إنستغرام أو X أو لينكدإن أو يوتيوب، ولا تُرسل رسالة. التفويض ونتائج الحسابات تتصرف كما ستتصرف فعلاً.</span>
+        <span>النشر في هذه المرحلة محاكاة: لا يصل شيء إلى أي منصة، ولا تُرسل رسالة. التفويض ونتائج الحسابات تتصرف كما ستتصرف فعلاً.</span>
       </p>
       {live.length ? (
         <div className="wk-accts">

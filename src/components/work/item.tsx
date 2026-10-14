@@ -76,6 +76,8 @@ import {
   waitsFor,
   workActions,
   youtubeOk,
+  videoOnlyMessage,
+  VIDEO_ONLY,
   type AccountRow,
   type ActionId,
   type Platform,
@@ -1157,7 +1159,7 @@ export function SubmitDialog({ d, onClose, act }: { d: WorkDetail; onClose: () =
   const kinds = d.assets.map((a) => a.file?.kind ?? '');
   const send = () => {
     if (pub && !chs.length) return setErr('اختر حساباً واحداً على الأقل.');
-    if (pub && !youtubeOk(x.type, usable.filter((a) => chs.includes(a.id)).map((a) => a.platform), kinds)) return setErr('يوتيوب يقبل الفيديو فقط. أضف فيديو من المكتبة أو أزل حساب يوتيوب.');
+    if (pub && !youtubeOk(x.type, usable.filter((a) => chs.includes(a.id)).map((a) => a.platform), kinds)) return setErr(videoOnlyMessage(usable.filter((a) => chs.includes(a.id)).map((a) => a.platform)));
     if (!pend.length) return setErr('لا شيء جديداً للمراجعة: كل الأجزاء معتمدة.');
     void act('work_submit', { p_work: x.id, p_note: note, p_channels: pub ? chs : null, p_proposed: pub && when ? riyadhInstant(when) : null }, 'أُرسل العمل للمراجعة، ووصل إشعار إلى مدير الاتصال ومساعده.').then((ok) => ok && onClose());
   };
@@ -1175,7 +1177,7 @@ export function SubmitDialog({ d, onClose, act }: { d: WorkDetail; onClose: () =
                   <label key={a.id}>
                     <input type="checkbox" checked={chs.includes(a.id)} onChange={(e) => setChs(e.target.checked ? [...chs, a.id] : chs.filter((c) => c !== a.id))} />
                     {platformLabels[a.platform]} · {a.label} <small className="ltr">{a.handle}</small>
-                    {a.platform === 'youtube' && <small> فيديو فقط</small>}
+                    {VIDEO_ONLY.includes(a.platform) && <small> فيديو فقط</small>}
                   </label>
                 ))}
               </div>

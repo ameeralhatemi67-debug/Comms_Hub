@@ -1,0 +1,32 @@
+{
+  "script": "supabase/tests/platform_rules.sql",
+  "ran": "2026-10-14",
+  "target": "Supabase project comms-hub (one transaction, rolled back)",
+  "migrations": [
+    "20261014150000_platform_registry.sql, applied the same day (statements as in the file, without its comment lines)",
+    "20261014150100_platform_registry_url_fix.sql, applied right after the first rule run found the defect it fixes"
+  ],
+  "result": { "total": 54, "passed": 54, "failed": 0 },
+  "attempts": [
+    "Run 1 (30 of 53 listed): the seed insert failed first (the key pattern required two characters and the platform 'x' has one), which was a defect in the migration; fixed before it was applied, the transaction having rolled back.",
+    "Run 2 stopped on the migration: a second apply, with the key pattern relaxed to one to thirty characters.",
+    "Run 3 against the applied migration: 51 of 54, and the cause of the failures was a defect: the documentation-link pattern used a repetition count of 300 and Postgres allows 255, so every link was refused. Found by checks 15 and 16, fixed by 20261014150100 (open-ended pattern plus a separate length check, and check 15b added).",
+    "Run 4: 51 of 54 again. Three checks read platform_events directly as the administrator; the table has no policy by design (read through platform_log), so they returned zero. The checks were changed to read through platform_log, and the final report made null-safe (a null result had been hidden from the failure list). No database behaviour changed.",
+    "Run 5: 54 of 54."
+  ],
+  "unchangedRuns": {
+    "note": "Re-run against the migrated database in the same session, each in one rolled-back transaction.",
+    "work_rules.sql": "135 of 135",
+    "approval_rules.sql": "71 of 71",
+    "planning_rules.sql": "113 of 113"
+  },
+  "afterRollback": {
+    "platforms": 5,
+    "platformEvents": 0,
+    "accounts": 3,
+    "worksCreatedByTests": 0,
+    "workNumberSequence": 1,
+    "serverKeyMd5Unchanged": true
+  },
+  "advisors": "Security advisors read after the migration: anon-callable security-definer functions 12 (unchanged: none of the platform functions is callable by a visitor), RLS-without-policy tables 8 (platform_events added, read through platform_log), leaked-password protection still off. Performance: nothing new above INFO (platform_accounts_platform_idx not used yet, storage_roles integration_id has no covering index)."
+}

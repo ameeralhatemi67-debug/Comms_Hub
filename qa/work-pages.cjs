@@ -31,6 +31,8 @@ const sources = [
   'components/work/approvals.tsx', 'components/work/review.tsx', 'components/work/channels.tsx', 'components/work/publish.tsx', 'components/notices.tsx',
   'components/work/calendar.tsx', 'components/work/projects.tsx', 'components/work/requests.tsx', 'components/work/day-dialogs.tsx', 'components/home.tsx',
   'lib/work/rules.ts', 'lib/work/planning.ts', 'lib/work/drag.ts', 'lib/media/rules.ts', 'lib/domain.ts', 'lib/kit/hold-reasons.ts',
+  // Settings Step S5: the registry's words, used by the channels page
+  'lib/platforms/info.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -212,6 +214,8 @@ const reviewDetail = (i, over = {}) => detailOf(i, {
 });
 const ctx = (email, role) => ({
   status: 'ready', me: email, role, isAdmin: false, today: TODAY, people, load, projects, accounts, templates,
+  platforms: ['instagram', 'x', 'linkedin', 'youtube', 'mail'].map((key, i) => ({ key, label_ar: { instagram: 'إنستغرام', x: 'X', linkedin: 'لينكدإن', youtube: 'يوتيوب', mail: 'البريد' }[key], kind: key === 'mail' ? 'mail' : 'social', sort: key === 'mail' ? 0 : i + 1,
+    accepts: { video_only: key === 'youtube' }, publish_mode: 'auto', scheduling: true, requires_review: false, token_life_days: 60, enabled: true, builtin: true, docs_url: null, readiness: 'not_started', readiness_note: null, readiness_at: null, readiness_by: null })),
   nameOf: (e) => (e ? (people.find((p) => p.email === e)?.display_name ?? e.split('@')[0]) : ''),
   personOf: (e) => people.find((p) => p.email === e), reloadBase: async () => {}, call: async () => ({ ok: true, data: null }), say: () => {},
 });

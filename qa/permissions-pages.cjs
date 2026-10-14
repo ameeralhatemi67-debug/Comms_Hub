@@ -40,6 +40,8 @@ const sources = [
   'components/settings/storage.tsx', 'components/media/storage-state.tsx',
   // Entry flow: the state of a person's entry, the invitation and the log words
   'lib/entry.ts', 'components/accounts/entry-help.tsx',
+  // Settings Step S5: «المنصات»
+  'components/settings/platforms.tsx', 'lib/platforms/info.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -290,6 +292,19 @@ async function renderAll() {
   ];
   render('library-storage-state', 'dir@x.sa', 'director', directorCaps, h('dl', { className: 'mx-kv' }, h('dt', null, 'التخزين'), h('dd', { className: 'mx-storage-line' }, h(sst.StorageState, { assetId: 'a1', initial: copies }))), wx);
   render('library-storage-empty', 'dir@x.sa', 'director', directorCaps, h('dl', { className: 'mx-kv' }, h('dt', null, 'التخزين'), h('dd', { className: 'mx-storage-line' }, h(sst.StorageState, { assetId: 'a1', initial: [] }))), wx);
+  // Settings Step S5.
+  const stp = await import(url('components/settings/platforms.js'));
+  const pinfo = (key, label_ar, kind, sort, over = {}) => ({ key, label_ar, kind, sort, accepts: { video_only: key === 'youtube' }, publish_mode: 'auto', scheduling: true, requires_review: key !== 'x' && kind === 'social',
+    token_life_days: 60, enabled: true, builtin: true, docs_url: null, readiness: 'not_started', readiness_note: null, readiness_at: null, readiness_by: null, ...over });
+  const plist = [pinfo('instagram', 'إنستغرام', 'social', 1), pinfo('x', 'X', 'social', 2), pinfo('linkedin', 'لينكدإن', 'social', 3),
+    pinfo('youtube', 'يوتيوب', 'social', 4, { readiness: 'preparing', readiness_note: 'قناة القسم جاهزة، وشاشة الموافقة قيد الإعداد', readiness_at: NOW, readiness_by: 'amir@x.sa' }),
+    pinfo('facebook', 'فيسبوك', 'social', 5, { enabled: false, builtin: false, publish_mode: 'assisted', readiness: 'submitted', readiness_note: 'قُدّم التطبيق للمراجعة', readiness_at: NOW, docs_url: 'https://developers.facebook.com/docs/pages-api/' }),
+    pinfo('tiktok', 'تيك توك', 'social', 6, { builtin: false, publish_mode: 'assisted', accepts: { video_only: true } }),
+    pinfo('mail', 'البريد', 'mail', 0, { readiness: 'live', token_life_days: null })];
+  const pimpact = { instagram: { accounts: 2, active_accounts: 2, open_works: 3, copies: 4 }, x: { accounts: 1, active_accounts: 0, open_works: 0, copies: 1 }, linkedin: { accounts: 0, active_accounts: 0, open_works: 0, copies: 0 },
+    youtube: { accounts: 1, active_accounts: 1, open_works: 1, copies: 1 }, facebook: { accounts: 0, active_accounts: 0, open_works: 0, copies: 0 }, tiktok: { accounts: 1, active_accounts: 0, open_works: 0, copies: 2 }, mail: { accounts: 1, active_accounts: 1, open_works: 0, copies: 0 } };
+  render('settings-platforms', 'amir@x.sa', 'admin', adminSet, pnl(h(stp.PlatformsTab, { initial: { list: plist, impact: pimpact } })), wx);
+  render('settings-platforms-viewer', 'dir@x.sa', 'director', capsWith(directorCaps, ['settings.view']), pnl(h(stp.PlatformsTab, { initial: { list: plist, impact: pimpact } })), wx);
   render('urgency-badges', 'khalid@x.sa', 'writer', writerCaps, h('div', { className: 'ml' }, ...[0, 1, 2, 3].map((l) => h('div', { key: l, className: 'cx-badge-row' }, `الدرجة ${l}: `, h(urg.UrgencyBadge, { level: l })))));
   return pages;
 }
@@ -358,6 +373,10 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'settings-general-locked': ['صحة النظام وإعداداته العامة لمن يملك', 'اطلب هذه الصلاحية'],
       'settings-audit': ['كل الأحداث', 'اعتُمد السر الجديد بعد فحصه · Google Drive', 'استعمل الخادم السر · Google Drive لـ «drive access»', 'تغيّرت الإعدادات العامة: شُغّل شريط الصيانة، حد الرفع 100 ميغابايت', 'أمير', 'الخادم', 'ولا يحمل قيمة سرّ أبداً'],
       'settings-audit-locked': ['السجل لمن يملك', 'اطلب هذه الصلاحية'],
+      'settings-platforms': ['النشر على كل المنصات محاكاة', 'إضافة منصة', 'إنستغرام', 'يوتيوب', 'فيسبوك', 'البريد', 'منصة اجتماعية', 'قناة بريد', 'النشر الآن', 'محاكاة', 'المسار المخطط', 'نشر تلقائي', 'نشر مساعد',
+        'الفيديو فقط', 'نصاً وصورة وفيديو', 'التجهيز', 'لم يبدأ', 'قيد التجهيز', 'قُدّم للمراجعة', 'يعمل', 'حفظ التجهيز', 'قناة القسم جاهزة، وشاشة الموافقة قيد الإعداد', 'ما تقدمه وما تطلبه',
+        'تيك توك', 'مفعّلة', 'موقوفة', 'قائمة', 'سجل المنصة', 'لا تُوقف منصة عليها حسابات فعّالة', 'لا تُحذف منصة عليها حسابات أو نسخ نصوص'],
+      'settings-platforms-viewer': ['إنستغرام', 'فيسبوك', 'حفظ التجهيز'],
       'settings-storage': ['مزودو التخزين', 'Google Drive', 'متصل', 'hub@example.com', 'نسخ محفوظة هنا', '5 · 1.50 غيغابايت', 'منها إصدارات مكتبة الوسائط', 'آخر تحقق', 'لم تُفحص بعد', 'تحقق من عينة',
         'ما يخدمه كل مزود', 'مكتبة الوسائط', 'مرفقات البريد', 'ملفات المراسلة', 'النسخ الاحتياطي', 'لا مزود بعد', 'غير متاح بعد', 'OneDrive', 'تخزين Supabase', 'S3', 'جهاز تخزين شبكي', 'الوكيل', 'لم يُبنيا بعد'],
       'settings-storage-bad': ['مفقودة أو تحتاج انتباهاً', '3 ملفات بلا موضع مسجّل', 'لم يُتحقق من شيء بعد'],
@@ -389,6 +408,7 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'settings-general': ['undefined', 'GOOGLE_', 'MAIL_SERVER_KEY', 'secret_id', 'نقل الرمز إلى خزنة الأسرار'],
       'settings-general-locked': ['ما يتصل به المركز'],
       'settings-audit': ['undefined', 'replaced'],
+      'settings-platforms': ['undefined', 'NaN', 'null'],
       'settings-storage': ['undefined', 'مفقودة أو تحتاج انتباهاً', 'بلا موضع مسجّل', 'ربط OneDrive', 'drv-', 'ref'],
       'settings-storage-locked': ['مزودو التخزين', 'Google Drive'],
       'library-storage-state': ['drv-', 'undefined'],
@@ -408,6 +428,14 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     check('settings-storage: nothing in «غير متاح بعد» is a button', !/<button[^>]*>[^<]*(OneDrive|NAS|S3)/.test(pages['settings-storage']));
     check('settings-storage-bad: the missing copies are flagged and counted', />1 · 2</.test(pages['settings-storage-bad'].replace(/<!-- -->/g, '')) || /1 · 2/.test(pages['settings-storage-bad'].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')));
     check('library-storage-state: a missing copy is marked for the colour rule', /data-state="missing"/.test(pages['library-storage-state']));
+    // Settings Step S5: reading is open, writing needs «platforms.manage».
+    check('settings-platforms: an administrator has working controls, none locked', !/data-need="platforms.manage"/.test(pages['settings-platforms']));
+    check('settings-platforms: a viewer sees every control locked for «platforms.manage»', (pages['settings-platforms-viewer'].match(/data-need="platforms.manage"/g) ?? []).length >= 8, (pages['settings-platforms-viewer'].match(/data-need="platforms.manage"/g) ?? []).length);
+    check('settings-platforms: the built-in platforms cannot be deleted, the added one can', (pages['settings-platforms'].match(/st-delete/g) ?? []).length === 2, (pages['settings-platforms'].match(/st-delete/g) ?? []).length);
+    check('settings-platforms: the info card is there (closed), says it was not read from the official documents, and links the platform own page', /لم تُراجع هذه المعلومات من وثائق المنصة الرسمية بعد/.test(pages['settings-platforms']) && /href="https:\/\/developers\.facebook\.com\/docs\/pages-api\/"/.test(pages['settings-platforms']) && /rel="noopener noreferrer"/.test(pages['settings-platforms']));
+    check('settings-platforms: the platform with an account is not offered a working delete', !/data-platform="instagram"[\s\S]*?st-delete[\s\S]*?data-platform="x"/.test(pages['settings-platforms']));
+    check('settings-platforms: the mail channel has no readiness tracker or switch', !/data-platform="mail"[\s\S]*?st-ready[\s\S]*?<\/article>/.test(pages['settings-platforms'].replace(/<article class="st-plat[^>]*data-platform="(?!mail)[\s\S]*?<\/article>/g, '')));
+    check('settings-platforms: the added platform is stopped and its toggle says «تفعيل»', /data-platform="facebook"[\s\S]*?تفعيل/.test(pages['settings-platforms']));
     // Step P5a: the push is a locked control until granted (D-13); nobody's number appears in messaging.
     check('wa-push-locked: the request is a locked control for «whatsapp.push»', /data-need="whatsapp.push"[^>]*aria-disabled="true"|aria-disabled="true"[^>]*data-need="whatsapp.push"/.test(pages['wa-push-locked']));
     check('wa-push-locked: no member can be sent to', !/class="ml-btn sm primary"/.test(pages['wa-push-locked']));

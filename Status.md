@@ -38,7 +38,14 @@ Verification: typecheck and production build passed; all 153 existing tests pass
 Steps 1 and 2 of the order in `Readiness_Audit.md` are built and verified except for the signed-in screens. An administrator can now send a real invitation, see how far each person got, resend the confirmation, send a reset link; access requests notify the leaders (in the site and by email) and tell a refused applicant; the sign-in screen has an expired-link state and stops revealing which addresses have accounts; «الأفكار» hands the text to the real «إنشاء»; the mock pages say «لم يُبنَ بعد». Database rule run 30 of 30, `npm test` 185 of 185, signed-out browser check 14 of 14.
 
 - **Waiting on the owner:** the one-time Supabase Auth SMTP change and address settings in `Entry_Flow_Setup.md`, then the signed-in walkthrough in the same file.
-- **Next action:** step 4 of the audit order, the platform registry with add, edit, delete, info tab and readiness tracker (S5).
+- **Next action:** step 5 of the audit order, the per-platform post preview with the platforms' limits, shown through to the send step (the registry now holds what a platform accepts).
+
+## Platform registry, 2026-10-14 (Step S5)
+
+The list of platforms is one table the whole work cycle reads: the labels, the order of copies and the video-only rule are data, a new platform is a row (added from «الإعدادات» «المنصات», switched off until switched on), and each platform carries the owner's readiness tracker for what it asks outside the site, with a note and a log. Publishing is still a simulation for every platform and the pages say so. The existing work, approval and planning rule runs are unchanged (135, 71, 113). Database rule run 54 of 54, `npm test` 206 of 206, fixture browser checks 885 and 1010, signed-out check 11 of 11.
+
+- **Waiting on the owner:** the signed-in walkthrough (the tab, adding facebook, switching it on, an account on it), and the outside paperwork the tracker follows: a verified Meta Business account decides whether Facebook and Instagram can publish for real (E-7).
+- **Next action:** step 5 of the audit order, the per-platform post preview with limits.
 
 ## Storage locations, 2026-10-14 (Step S2)
 

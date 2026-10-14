@@ -19,6 +19,7 @@ import {
   planIssues,
   planPayload,
   platformLabels,
+  VIDEO_ONLY,
   priorityLabels,
   projectTypeLabels,
   riyadhInstant,
@@ -26,6 +27,7 @@ import {
   textLabels,
   typeLabels,
   youtubeOk,
+  videoOnlyMessage,
   type Priority,
   type WorkType,
 } from '@/lib/work/rules';
@@ -246,7 +248,7 @@ export function CreatePage() {
     else if (d.due < w.today) errs.push('موعد التسليم قبل اليوم. اختر تاريخاً من اليوم فصاعداً.');
     if (type === 'post' && !member && !d.channels.length) errs.push('اختر حساباً واحداً على الأقل.');
     if (pub && !member && !youtubeOk(type, usable.filter((a) => d.channels.includes(a.id)).map((a) => a.platform), d.assets.map((a) => a.kind)))
-      errs.push('يوتيوب يقبل الفيديو فقط: أضف فيديو من المكتبة أو أزل حساب يوتيوب.');
+      errs.push(videoOnlyMessage(usable.filter((a) => d.channels.includes(a.id)).map((a) => a.platform)));
     if (type === 'event' && d.extra1 && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(d.extra1)) errs.push('اختر يوم الحدث ووقته.');
     if (mailBlocked) errs.push(mailBlockText);
     const plan = !member && d.plan ? d.plan.rows : null;
@@ -303,7 +305,7 @@ export function CreatePage() {
             <label key={a.id}>
               <input type="checkbox" checked={d.channels.includes(a.id)} onChange={(e) => set({ channels: e.target.checked ? [...d.channels, a.id] : d.channels.filter((c) => c !== a.id) })} />
               {platformLabels[a.platform]} · {a.label}
-              {a.platform === 'youtube' && <small> فيديو فقط</small>}
+              {VIDEO_ONLY.includes(a.platform) && <small> فيديو فقط</small>}
             </label>
           ))}
         </div>
