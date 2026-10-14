@@ -1,0 +1,17 @@
+{
+  "script": "supabase/tests/entry_rules.sql",
+  "ran": "2026-10-14",
+  "target": "Supabase project comms-hub (one transaction, rolled back)",
+  "migration": "20261014130000_entry_flow.sql, applied the same day",
+  "result": { "total": 30, "passed": 30, "failed": 0 },
+  "firstRun": "27 of 30: three checks listed everyone in the table and so also matched the three real founding administrators; the checks were narrowed to the test addresses and the whole script re-run, 30 of 30. No database behaviour changed between the runs.",
+  "afterRollback": {
+    "serverKeyMd5Unchanged": true,
+    "accounts": 3,
+    "accessRequests": 1,
+    "notifications": 0,
+    "inviteAndHelpEvents": 0,
+    "testAuthUsers": 0
+  },
+  "note": "Checks 20 and 21 (what a visitor can read of access_requests) were dropped before the first run because the earlier steps already cover table access; numbering is kept."
+}

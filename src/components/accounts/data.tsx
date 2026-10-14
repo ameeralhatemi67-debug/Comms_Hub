@@ -11,6 +11,7 @@ import { useAccount } from '@/lib/account-context';
 import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
 import { permError, type Grant, type Mode, type PermEvent } from '@/lib/permissions';
+import { isEntryState, type EntryState } from '@/lib/entry';
 import { useCaps } from '../caps';
 
 export type Member = {
@@ -22,6 +23,8 @@ export type Member = {
   added_by: string | null;
   created_at: string;
   last_seen_at: string | null;
+  invited_at: string | null;
+  invite_count: number;
 };
 export type AccessRequest = { id: string; email: string; full_name: string; note: string | null; created_at: string };
 export type GrantRow = Grant & { email: string };
@@ -36,6 +39,8 @@ type Ctx = {
   /** What the signed-in person holds now (my_capabilities), pages excluded. */
   can: (cap: string) => boolean;
   members: Member[];
+  /** How far each person got into the site (entry_states); missing for those one may not see. */
+  entry: Record<string, EntryState>;
   requests: AccessRequest[];
   grants: GrantRow[];
   defaults: RoleDefault[];
@@ -64,6 +69,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
   const { dispatch } = useHub();
   const [status, setStatus] = useState<Ctx['status']>('loading');
   const [members, setMembers] = useState<Member[]>([]);
+  const [entry, setEntry] = useState<Record<string, EntryState>>({});
   const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [grants, setGrants] = useState<GrantRow[]>([]);
   const [defaults, setDefaults] = useState<RoleDefault[]>([]);
@@ -72,8 +78,8 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
 
   const reload = useCallback(async () => {
     const db = supabase();
-    const [a, r, g, d, e, p] = await Promise.all([
-      db.from('accounts').select('email, display_name, role, pages, protected, added_by, created_at, last_seen_at').order('created_at', { ascending: true }),
+    const [a, r, g, d, e, p, en] = await Promise.all([
+      db.from('accounts').select('email, display_name, role, pages, protected, added_by, created_at, last_seen_at, invited_at, invite_count').order('created_at', { ascending: true }),
       db.from('access_requests').select('id, email, full_name, note, created_at').eq('status', 'pending').order('created_at', { ascending: true }),
       db
         .from('member_capabilities')
@@ -83,6 +89,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
       db.from('role_capabilities').select('role, capability, allowed'),
       db.from('permission_events').select('id, at, actor, subject, role, capability, kind, data').order('at', { ascending: false }).limit(300),
       db.from('permission_presets').select('id, name, items, note, created_by').order('name'),
+      db.rpc('entry_states'),
     ]);
     if (a.error || g.error || d.error) return setStatus('error');
     const now = Date.now();
@@ -100,6 +107,9 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
     setDefaults((d.data ?? []) as RoleDefault[]);
     setEvents((e.data ?? []) as PermEvent[]);
     setPresets((p.data ?? []) as Preset[]);
+    const states: Record<string, EntryState> = {};
+    for (const x of (en.data ?? []) as { email: string; state: string }[]) if (isEntryState(x.state)) states[x.email] = x.state;
+    setEntry(states);
     setStatus('ready');
   }, []);
 
@@ -134,6 +144,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
       me,
       can: (cap) => caps.has(cap),
       members,
+      entry,
       requests,
       grants,
       defaults,
@@ -144,7 +155,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
       call,
       say,
     };
-  }, [status, me, caps, members, requests, grants, defaults, events, presets, reload, call, say]);
+  }, [status, me, caps, members, entry, requests, grants, defaults, events, presets, reload, call, say]);
 
   return <AccountsContext.Provider value={value}>{children}</AccountsContext.Provider>;
 }

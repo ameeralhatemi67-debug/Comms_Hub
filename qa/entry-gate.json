@@ -1,0 +1,80 @@
+{
+  "script": "qa/entry-gate.cjs",
+  "ran": "2026-10-14",
+  "base": "http://localhost:3100",
+  "total": 14,
+  "passed": 14,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "an expired link shows its own screen",
+      "pass": true,
+      "detail": "انتهت صلاحية الرابط"
+    },
+    {
+      "name": "it offers a new reset link and a new confirmation link",
+      "pass": true,
+      "detail": "[\"أرسل رابط تعيين كلمة مرور جديد\",\"أرسل رابط التأكيد من جديد\",\"العودة إلى تسجيل الدخول\"]"
+    },
+    {
+      "name": "the address is cleaned of the error",
+      "pass": true,
+      "detail": "http://localhost:3100/"
+    },
+    {
+      "name": "the sign-in tabs are hidden on that screen",
+      "pass": true,
+      "detail": "tabs"
+    },
+    {
+      "name": "and it returns to sign-in",
+      "pass": true,
+      "detail": "back"
+    },
+    {
+      "name": "390 px expired screen has no sideways scroll",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "a plain visit shows sign-in",
+      "pass": true,
+      "detail": "h1"
+    },
+    {
+      "name": "the first-time screen no longer needs an approval lookup",
+      "pass": true,
+      "detail": "no email_status call on load"
+    },
+    {
+      "name": "and it still explains itself",
+      "pass": true,
+      "detail": "أول دخول\n\nإن أضافك مسؤول النظام، اكتب بريدك المعتمد واختر كلمة مرورك. سيصلك رابط"
+    },
+    {
+      "name": "invite without a session is refused",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "invite from another origin is refused",
+      "pass": true,
+      "detail": "403"
+    },
+    {
+      "name": "request with a bad address is refused",
+      "pass": true,
+      "detail": "400"
+    },
+    {
+      "name": "request with no name is refused",
+      "pass": true,
+      "detail": "400"
+    },
+    {
+      "name": "request from another origin is refused",
+      "pass": true,
+      "detail": "403"
+    }
+  ]
+}

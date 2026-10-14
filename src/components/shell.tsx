@@ -64,6 +64,9 @@ const nav = [
   ['/account', 'الحساب', User],
 ] as const;
 
+/** Pages still on sample data in the browser, not the database. Marked in the menu. */
+const SAMPLE_PAGES = ['/analytics', '/monitoring', '/admin'];
+
 export function Shell({ children }: { children: ReactNode }) {
   const { state, dispatch } = useHub();
   const account = useAccount();
@@ -158,6 +161,7 @@ export function Shell({ children }: { children: ReactNode }) {
             >
               <Icon />
               <span>{label}</span>
+              {SAMPLE_PAGES.includes(href) && <small className="nav-sample">تجريبي</small>}
             </Link>
           ))}
         </nav>
@@ -272,6 +276,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <Link className="nav-item" href={href} key={href} onClick={() => setMobile(false)}>
                 <Icon />
                 <span>{label}</span>
+                {SAMPLE_PAGES.includes(href) && <small className="nav-sample">تجريبي</small>}
               </Link>
             ))}
           </nav>

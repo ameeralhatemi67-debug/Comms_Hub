@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-11T17:04:13.722Z",
-  "baseURL": "http://127.0.0.1:3100",
+  "date": "2026-10-14T19:50:03.039Z",
+  "baseURL": "http://localhost:3100",
   "passed": 31,
   "failed": 0,
   "errors": [],
@@ -103,17 +103,17 @@
     {
       "name": "light is the default on a dark device",
       "pass": true,
-      "detail": "{\"theme\":\"light\",\"identity\":\"emerald\",\"scheme\":\"light\",\"card\":\"rgb(251, 252, 249)\",\"shell\":false,\"heading\":\"تسجيل الدخول\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبريد الإلكتروني\\nكلمة المرور\\nدخول\\nنسيت كلمة المرور\\n\\nالحسابات والصلاحيات حقيقية. بيانات العمل نفسها ما تزال نموذجاً محلياً بلا نشر فعلي.\",\"overflow\":false}"
+      "detail": "{\"theme\":\"light\",\"identity\":\"emerald\",\"scheme\":\"light\",\"card\":\"rgb(251, 252, 249)\",\"shell\":false,\"heading\":\"تسجيل الدخول\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبريد الإلكتروني\\nكلمة المرور\\nدخول\\nنسيت كلمة المرور\\n\\nالحسابات والصلاحيات وبيانات العمل حقيقية. النشر على المنصات ما يزال محاكاة.\",\"overflow\":false}"
     },
     {
       "name": "dark applies when chosen, on a light device",
       "pass": true,
-      "detail": "{\"theme\":\"dark\",\"identity\":\"emerald\",\"scheme\":\"dark\",\"card\":\"rgb(14, 31, 24)\",\"shell\":false,\"heading\":\"تسجيل الدخول\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبريد الإلكتروني\\nكلمة المرور\\nدخول\\nنسيت كلمة المرور\\n\\nالحسابات والصلاحيات حقيقية. بيانات العمل نفسها ما تزال نموذجاً محلياً بلا نشر فعلي.\",\"overflow\":false}"
+      "detail": "{\"theme\":\"dark\",\"identity\":\"emerald\",\"scheme\":\"dark\",\"card\":\"rgb(14, 31, 24)\",\"shell\":false,\"heading\":\"تسجيل الدخول\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبريد الإلكتروني\\nكلمة المرور\\nدخول\\nنسيت كلمة المرور\\n\\nالحسابات والصلاحيات وبيانات العمل حقيقية. النشر على المنصات ما يزال محاكاة.\",\"overflow\":false}"
     },
     {
       "name": "Direction A has no evening mode even if dark was stored",
       "pass": true,
-      "detail": "{\"theme\":\"dark\",\"identity\":null,\"scheme\":\"normal\",\"card\":\"rgb(255, 255, 255)\",\"shell\":false,\"heading\":\"تسجيل الدخول\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبريد الإلكتروني\\nكلمة المرور\\nدخول\\nنسيت كلمة المرور\\n\\nالحسابات والصلاحيات حقيقية. بيانات العمل نفسها ما تزال نموذجاً محلياً بلا نشر فعلي.\",\"overflow\":false}"
+      "detail": "{\"theme\":\"dark\",\"identity\":null,\"scheme\":\"normal\",\"card\":\"rgb(255, 255, 255)\",\"shell\":false,\"heading\":\"تسجيل الدخول\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبريد الإلكتروني\\nكلمة المرور\\nدخول\\nنسيت كلمة المرور\\n\\nالحسابات والصلاحيات وبيانات العمل حقيقية. النشر على المنصات ما يزال محاكاة.\",\"overflow\":false}"
     },
     {
       "name": "tab أول دخول",

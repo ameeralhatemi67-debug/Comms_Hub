@@ -303,6 +303,9 @@ export function permError(message: string): string {
     ['NOTE_REQUIRED', 'اكتب سبب الرفض.'],
     ['NOT_A_GRANTER', 'هذا الشخص لا يقرر في هذه الصلاحية لك. اختر المدير أو المساعد.'],
     ['BAD_SOURCE', 'تعذّر إرسال الطلب من هنا.'],
+    ['INVITE_TOO_SOON', 'أُرسلت دعوة لهذا الشخص قبل أقل من دقيقة. انتظر قليلاً.'],
+    ['ALREADY_ACTIVE', 'هذا الشخص دخل المركز بالفعل، فلا حاجة إلى دعوة.'],
+    ['BAD_KIND', 'نوع غير معروف.'],
     ['FORBIDDEN', 'لا تملك صلاحية هذا الإجراء.'],
   ];
   for (const [code, text] of table) if (m.includes(code)) return text;
@@ -340,6 +343,8 @@ export const EVENT_KINDS: Record<string, string> = {
   request: 'طلب',
   decide: 'قرار طلب',
   withdraw: 'سحب طلب',
+  invite: 'دعوة',
+  entry_help: 'مساعدة في الدخول',
 };
 
 const ROLE_AR: Record<string, string> = {
@@ -396,6 +401,10 @@ export function eventText(e: PermEvent, nameOf: (email: string) => string): stri
       return `${who} ${d.approve ? 'وافق على' : 'رفض'} طلب ${whom} ${cap}${d.approve ? howLong(d) : ''}.`;
     case 'withdraw':
       return `سحب ${who} طلبه ${cap}.`;
+    case 'invite':
+      return `${who} أرسل دعوة إلى ${whom}${Number(d.count ?? 1) > 1 ? ` (المرة ${d.count})` : ''}.`;
+    case 'entry_help':
+      return d.what === 'reset' ? `${who} أرسل إلى ${whom} رابطاً لتعيين كلمة مرور جديدة.` : `${who} أعاد إرسال رابط التأكيد إلى ${whom}.`;
     default:
       return `${who}: ${EVENT_KINDS[e.kind] ?? 'حدث'} ${cap}`.trim();
   }

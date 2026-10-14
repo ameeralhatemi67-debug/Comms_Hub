@@ -193,3 +193,27 @@ export async function sendOutgoing(
   });
   return info.messageId;
 }
+
+/**
+ * One notice from the department mailbox: the invitation, a request for the leaders, a
+ * refusal. Plain text and HTML, no attachments, no thread. Bcc keeps recipients apart.
+ */
+export async function sendNotice(
+  env: MailEnv,
+  m: { to: string[]; bcc?: string[]; subject: string; text: string; html: string },
+): Promise<void> {
+  const transport = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: { user: env.address!, pass: env.password! },
+  });
+  await transport.sendMail({
+    from: { name: 'مركز الاتصال', address: env.address! },
+    to: m.to.length ? m.to : undefined,
+    bcc: m.bcc?.length ? m.bcc : undefined,
+    subject: m.subject,
+    text: m.text,
+    html: m.html,
+  });
+}

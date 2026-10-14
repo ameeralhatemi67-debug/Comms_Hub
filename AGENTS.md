@@ -163,6 +163,15 @@ who may open what are in `src/lib/access.ts` and are tested. Never add a
 sign-in bypass, stub session or hard-coded credential, not even for tests. A
 service_role key never goes in this repository.
 
+The entry flow is part of the same accounts: «دعوة» sends one email from the site's Gmail
+mailbox (`/api/entry/invite`, rules in `supabase/migrations/*entry_flow*`: the database allows
+it only to a person who may manage the invitee and spaces invitations a minute apart); the
+administrator sees how far each person got (`entry_states`); an access request tells the
+leaders in the site and by email and tells a refused applicant by email; the sign-in screen
+gives the same answer whether or not an address has an account. Supabase Auth's own sender is
+pointed at the same Gmail account from the dashboard (`Entry_Flow_Setup.md`); no service_role
+key is involved anywhere.
+
 Permissions are real too, by owner directive of 2026-10-13 (`Permissions_Plan.md`,
 recorded in `progress.md`): role templates, standing, temporary and one-time grants,
 permission requests and their log live in Postgres (`supabase/migrations/*permissions*`),

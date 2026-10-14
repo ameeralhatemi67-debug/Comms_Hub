@@ -5,9 +5,10 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogIn, KeyRound, UserPlus, LogOut, MailCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
+import { linkProblem } from '@/lib/entry';
 import { LogoLoader } from './ui';
 
-type View = 'signin' | 'first' | 'request' | 'forgot' | 'recovery';
+type View = 'signin' | 'first' | 'request' | 'forgot' | 'recovery' | 'expired';
 type Note = { kind: 'error' | 'ok'; text: string } | null;
 
 const MIN_PASSWORD = 10;
@@ -57,6 +58,17 @@ export function AuthGate({
       }
     });
     return () => data.subscription.unsubscribe();
+  }, [mode]);
+
+  // A mailed link that was already used, or older than the newest one, comes back with the
+  // reason in the address. Say so plainly and offer a new one, instead of the empty sign-in.
+  useEffect(() => {
+    if (mode === 'unconfigured') return;
+    const problem = linkProblem(window.location.hash, window.location.search);
+    if (!problem) return;
+    window.history.replaceState(null, '', window.location.pathname);
+    setView('expired');
+    setNote(null);
   }, [mode]);
 
   if (mode === 'unconfigured')
@@ -114,28 +126,24 @@ export function AuthGate({
       const address = email.trim().toLowerCase();
       if (password.length < MIN_PASSWORD) return fail(`كلمة المرور ${MIN_PASSWORD} أحرف على الأقل.`);
       if (password !== confirm) return fail('كلمتا المرور غير متطابقتين.');
-      const status = await supabase().rpc('email_status', { p_email: address });
-      if (status.error) throw status.error;
-      if (status.data !== 'approved') {
-        setView('request');
-        return fail('هذا البريد غير مُدرج ضمن الحسابات المعتمدة. يمكنك طلب الوصول من هنا.');
-      }
+      // The answer is the same for an address that is not approved, one that already has a
+      // password and one that is new, so this screen cannot be used to test who has an account.
       const { data, error } = await supabase().auth.signUp({
         email: address,
         password,
         options: { emailRedirectTo: `${window.location.origin}/` },
       });
-      if (error) return fail(arabicError(error.message));
-      // The address already has a sign-in: Supabase answers with an empty identity list.
-      if (data.user && data.user.identities?.length === 0)
-        return fail('لهذا البريد كلمة مرور بالفعل. سجّل الدخول، أو استخدم «نسيت كلمة المرور».');
-      if (data.session) {
+      if (!error && data.session) {
         // Email confirmation is switched off on the project: signed in at once.
         await supabase().rpc('touch_account');
         return router.refresh();
       }
+      if (error && !error.message.toLowerCase().includes('database error')) return fail(arabicError(error.message));
       setNeedsConfirm(true);
-      ok('أُرسل رابط التأكيد إلى بريدك. افتح أحدث رسالة فقط، فكل رسالة جديدة تُبطل التي قبلها. ثم عد إلى هذه الصفحة وسجّل الدخول بكلمة المرور التي اخترتها.');
+      ok(
+        'إن كان بريدك معتمداً فقد أُرسل إليه رابط التأكيد: افتح أحدث رسالة فقط، ثم سجّل الدخول بكلمة المرور التي اخترتها. ' +
+          'إن لم تصلك رسالة فتفقد البريد غير الهام، أو سجّل الدخول إن سبق أن عيّنت كلمة المرور، أو اطلب الوصول من تبويب «طلب وصول» إن لم يكن بريدك مُدرجاً.',
+      );
     });
   };
 
@@ -153,22 +161,19 @@ export function AuthGate({
   const requestAccess = (e: FormEvent) => {
     e.preventDefault();
     void run(async () => {
-      const { data, error } = await supabase().rpc('request_access', {
-        p_email: email.trim().toLowerCase(),
-        p_name: name,
-        p_note: reason,
+      const res = await fetch('/api/entry/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), name, note: reason }),
       });
-      if (error) {
-        if (error.message.includes('INVALID_EMAIL')) return fail('اكتب بريداً إلكترونياً صحيحاً.');
-        if (error.message.includes('INVALID_NAME')) return fail('اكتب اسمك.');
-        throw error;
-      }
-      if (data === 'has_account') {
-        setView('first');
-        return ok('هذا البريد معتمد بالفعل. عيّن كلمة مرورك من هنا، أو سجّل الدخول إن سبق أن عيّنتها.');
-      }
-      if (data === 'already_pending') return ok('طلبك قيد المراجعة بالفعل. سيراه مسؤول النظام في صفحة الحسابات.');
-      ok('وصل طلبك إلى مسؤولي النظام. عند الموافقة عيّن كلمة مرورك من تبويب «أول دخول».');
+      const out = (await res.json().catch(() => ({}))) as { result?: string; error?: string };
+      if (!res.ok) return fail(out.error ?? 'تعذّر إرسال الطلب. حاول مجدداً بعد قليل.');
+      if (out.result === 'cooldown')
+        return fail('رُفض طلب سابق لهذا البريد قبل أقل من يوم. تواصل مع مسؤول النظام مباشرة.');
+      if (out.result === 'busy') return fail('وصلت طلبات كثيرة في هذه الساعة. حاول بعد ساعة.');
+      ok(
+        'وصل طلبك إلى مسؤولي النظام، وسيصلك قرارهم على بريدك. إن كان بريدك معتمداً بالفعل فعيّن كلمة مرورك من تبويب «أول دخول».',
+      );
       setName('');
       setReason('');
     });
@@ -232,7 +237,7 @@ export function AuthGate({
           </div>
         )}
 
-        {view !== 'recovery' && view !== 'forgot' && (
+        {view !== 'recovery' && view !== 'forgot' && view !== 'expired' && (
           <div className="seg auth-tabs" role="group" aria-label="نوع الدخول">
             {tabs.map(([id, label, icon]) => (
               <button type="button" key={id} aria-pressed={view === id} onClick={() => go(id)}>
@@ -341,6 +346,28 @@ export function AuthGate({
             </label>
             <button className="primary" disabled={busy}>
               {busy ? 'جارٍ الإرسال…' : 'إرسال الرابط'}
+            </button>
+            <button type="button" className="auth-link" onClick={() => go('signin')}>
+              العودة إلى تسجيل الدخول
+            </button>
+          </form>
+        )}
+
+        {view === 'expired' && (
+          <form onSubmit={forgot} className="auth-form">
+            <h1>انتهت صلاحية الرابط</h1>
+            <p className="muted">
+              الرابط في الرسالة يعمل مرة واحدة ويسقط بعد قليل، ويُبطله كل رابط أحدث منه. افتح أحدث رسالة وصلتك فقط، أو اطلب رابطاً جديداً من هنا.
+            </p>
+            <label>
+              البريد الإلكتروني
+              <input type="email" required autoComplete="username" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </label>
+            <button className="primary" disabled={busy}>
+              {busy ? 'جارٍ الإرسال…' : 'أرسل رابط تعيين كلمة مرور جديد'}
+            </button>
+            <button type="button" className="secondary" onClick={resend} disabled={busy || !email}>
+              أرسل رابط التأكيد من جديد
             </button>
             <button type="button" className="auth-link" onClick={() => go('signin')}>
               العودة إلى تسجيل الدخول

@@ -9,6 +9,7 @@ import { roles, type Role } from '@/lib/domain';
 import { defaultPages, grantablePages, sanitizePages } from '@/lib/access';
 import { assignableBy, manageBlock, markers, rankOf, roleAr } from '@/lib/permissions';
 import { HOLD } from '@/lib/kit/hold-reasons';
+import { ENTRY_STATE_AR, sendInvite } from '@/lib/entry';
 import { Modal } from '../ui';
 import { useAccounts, type AccessRequest, type Member } from './data';
 
@@ -96,6 +97,11 @@ export function MembersTab({ selected, onOpen, onGrant }: { selected: string | n
               <span className="pm-rolechip">
                 <span className="chip">{roleAr(m.role)}</span>
                 {m.protected && <small className="acct-founder"> مؤسس</small>}
+                {a.entry[m.email] && a.entry[m.email] !== 'active' && (
+                  <small className="pm-entrymark" data-state={a.entry[m.email]}>
+                    {ENTRY_STATE_AR[a.entry[m.email]]}
+                  </small>
+                )}
               </span>
               <span className="pm-marks">
                 {mk.timed > 0 && (
@@ -151,6 +157,7 @@ export function MemberDialog({
   const [pages, setPages] = useState<string[]>(member ? sanitizePages(member.pages) : defaultPages('member'));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [invite, setInvite] = useState(true);
   const myRoles = assignableBy(a.me.role, roleIds);
   const holds = (p: string) => a.me.role === 'admin' || a.me.pages.includes(p);
   const canRole = mode !== 'edit' || (a.can('roles.assign') && !member?.protected && !manageWhy(a.me, a.can, member!, 'roles.assign'));
@@ -169,7 +176,13 @@ export function MemberDialog({
     } else r = await a.call('account_update', { p_email: member!.email, p_name: name.trim(), p_pages: member!.protected ? null : p });
     setBusy(false);
     if (!r.ok) return setError(r.error);
-    a.say(mode === 'edit' ? 'حُفظ الحساب. يسري عند أول تحميل جديد لصفحته.' : 'أُضيف الحساب. يعيّن صاحبه كلمة مروره من تبويب «أول دخول».');
+    // A new person gets the invitation at once, unless the leader unticks it; the card can send it later.
+    let said = mode === 'edit' ? 'حُفظ الحساب. يسري عند أول تحميل جديد لصفحته.' : 'أُضيف الحساب. يعيّن صاحبه كلمة مروره من تبويب «أول دخول».';
+    if (mode !== 'edit' && invite) {
+      const err = await sendInvite(email.trim().toLowerCase());
+      said = err ? `أُضيف الحساب، لكن تعذّر إرسال الدعوة: ${err} أرسلها من بطاقته.` : 'أُضيف الحساب وأُرسلت الدعوة إلى بريده.';
+    }
+    a.say(said);
     await a.reload();
     if (mode !== 'edit') onAdded?.(email.trim().toLowerCase());
     else onClose();
@@ -237,6 +250,12 @@ export function MemberDialog({
               <p className="muted">الرئيسية والحساب مفتوحتان دائماً. صفحة لمدة محددة تُمنح من بطاقة العضو.</p>
             </fieldset>
           </>
+        )}
+        {mode !== 'edit' && (
+          <label className="check-row">
+            <input type="checkbox" checked={invite} onChange={(e) => setInvite(e.target.checked)} />
+            أرسل دعوة إلى بريده الآن
+          </label>
         )}
         {error && (
           <p className="warning" role="alert">
@@ -395,7 +414,13 @@ export function AccessRequests({ onApprove }: { onApprove: (r: AccessRequest) =>
               onClick={async () => {
                 const r = await a.call('reject_request', { p_id: req.id });
                 if (!r.ok) return a.say(r.error);
-                a.say('رُفض الطلب.');
+                // Tell the applicant by email; the database allows this once, just after the refusal.
+                const told = await fetch('/api/entry/invite', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email: req.email, kind: 'rejected' }),
+                }).then((x) => x.ok && x.json().then((j: { sent?: boolean }) => !!j.sent)).catch(() => false);
+                a.say(told ? 'رُفض الطلب وأُبلغ صاحبه بالبريد.' : 'رُفض الطلب. تعذّر إبلاغ صاحبه بالبريد.');
                 await a.reload();
               }}
             >

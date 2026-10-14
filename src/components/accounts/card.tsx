@@ -29,6 +29,7 @@ import { HOLD } from '@/lib/kit/hold-reasons';
 import { Modal } from '../ui';
 import { useAccounts, usePersonCard, useRooms, type Member, type PersonCardData } from './data';
 import { MemberDialog, RemoveDialog, manageWhy, when } from './members';
+import { EntryHelp } from './entry-help';
 
 type Card = PersonCardData;
 
@@ -100,6 +101,8 @@ export function PersonCard({ email, onClose, onGrant }: { email: string; onClose
           <Lock /> {why}
         </p>
       )}
+
+      {!why && <EntryHelp member={member} />}
 
       {!why && (
         <div className="pm-actions">

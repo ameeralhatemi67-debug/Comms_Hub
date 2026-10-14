@@ -15,6 +15,7 @@ import { ApprovalsPage } from './work/approvals';
 import { ReviewPage } from './work/review';
 import { ChannelsPage } from './work/channels';
 import { Supporting } from './supporting';
+import { IdeasPage } from './ideas';
 import { ComponentGallery } from './gallery';
 import { AccountsPage } from './accounts';
 import { MediaProvider } from './media/provider';
@@ -87,7 +88,8 @@ export function HubPage({ route }: { route: string[] }) {
   if (page === 'motion') return <MotionStudio />;
   if (page === 'components') return <ComponentGallery />;
   if (page === 'accounts') return <AccountsPage />;
-  if (['ideas', 'analytics', 'monitoring', 'admin', 'settings', 'account'].includes(page))
+  if (page === 'ideas') return <IdeasPage />;
+  if (['analytics', 'monitoring', 'admin', 'settings', 'account'].includes(page))
     return <Supporting page={page} />;
 
   return (

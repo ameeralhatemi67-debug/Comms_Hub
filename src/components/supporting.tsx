@@ -2,17 +2,15 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { BarChart3, Bell, Check, ShieldAlert, SlidersHorizontal, UserRound } from 'lucide-react';
 import {
-  campaign,
   channelAccounts,
   integrationStatusLabels,
   integrations,
   noticesFor,
   permissionMatrix,
   roles,
-  personOf,
   teamLoad,
   securityEvents,
   statusLabels,
@@ -48,6 +46,16 @@ function pageTitle(page: string) {
 }
 
 const yesNo = (value: boolean) => (value ? 'متاح' : 'غير متاح');
+
+/** Said plainly at the top of every part that still runs on sample data. */
+function SampleNotice({ children }: { children: ReactNode }) {
+  return (
+    <div className="sample-notice" role="note">
+      <b>لم يُبنَ بعد</b>
+      <span>{children}</span>
+    </div>
+  );
+}
 
 /** Admin sections, MVP_draft.md section 35. Visual shells only, no enforcement. */
 const adminSections = [
@@ -85,7 +93,6 @@ export function Supporting({ page }: { page: string }) {
   const second = useIdentity();
   const theme = useTheme();
   const account = useAccount();
-  const [idea, setIdea] = useState('');
   const [compact, setCompact] = useState(true);
   const [alerts, setAlerts] = useState(true);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -95,76 +102,6 @@ export function Supporting({ page }: { page: string }) {
     const t = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('tab');
     return t && settingsSections.some((s) => s.id === t) ? t : 'general';
   });
-
-  const createWork = (title: string, body: string, submit = false) => {
-    dispatch({
-      type: 'create',
-      submit,
-      content: {
-        title,
-        body,
-        type: 'منشور اجتماعي',
-        owner: state.role,
-        assignee: personOf(state.role)?.id ?? 'abdullah',
-        due: campaign.date,
-        channels: ['Instagram', 'X', 'LinkedIn'],
-        assetId: 'poster',
-        assetVersion: 5,
-        variants: { Instagram: body, X: body, LinkedIn: body },
-        campaignId: campaign.id,
-      },
-    });
-    router.push('/work');
-  };
-
-  if (page === 'ideas')
-    return (
-      <div dir="rtl">
-        <Title title="الأفكار" sub="حوّل الملاحظات السريعة إلى أعمال قابلة للتنفيذ">
-          <span className="chip">مسودة محلية</span>
-        </Title>
-        <Panel title="فكرة جديدة">
-          <label className="field">
-            اكتب الفكرة
-            <textarea
-              value={idea}
-              onChange={(e) => setIdea(e.target.value)}
-              placeholder="مثال: سلسلة قصيرة عن قصص الزملاء في خدمة الوطن"
-              rows={5}
-            />
-          </label>
-          <div className="actions">
-            <button
-              className="primary"
-              disabled={!idea.trim() || !actor.create}
-              title={!actor.create ? 'هذا الدور لا ينشئ الأعمال' : ''}
-              onClick={() => {
-                createWork(idea.trim().slice(0, 70), idea.trim());
-                setIdea('');
-              }}
-            >
-              تحويل الفكرة إلى عمل
-            </button>
-            <button className="secondary" onClick={() => setIdea('')}>
-              مسح
-            </button>
-          </div>
-          {!actor.create && <p className="muted">هذا الدور لا يملك صلاحية إنشاء الأعمال.</p>}
-        </Panel>
-        <Panel title="أفكار مرتبطة بالحملة">
-          <div className="stack">
-            {['قصة زميل ساهم في خدمة المجتمع', 'خريطة إنجازات الفريق خلال العام', 'رسالة شكر للمتطوعين'].map(
-              (item) => (
-                <button className="notice" key={item} onClick={() => setIdea(item)}>
-                  <b>{item}</b>
-                  <small>اضغط لاستخدامها كمسودة</small>
-                </button>
-              ),
-            )}
-          </div>
-        </Panel>
-      </div>
-    );
 
   if (page === 'analytics') {
     const done = state.work.filter((w) => ['APPROVED', 'SCHEDULED', 'PUBLISHED'].includes(w.status)).length;
@@ -182,8 +119,11 @@ export function Supporting({ page }: { page: string }) {
     return (
       <div dir="rtl">
         <Title title="التحليلات" sub="قراءة سريعة لحالة العمل في الحملة">
-          <span className="chip">بيانات محلية محاكاة</span>
+          <span className="chip">تجريبية، لم تُبنَ بعد</span>
         </Title>
+        <SampleNotice>
+          هذه الأرقام تُحسب من أعمال تجريبية محفوظة في هذا المتصفح، لا من أعمالك في «العمل». لن تطابق ما تراه هناك، ولا تعتمد عليها.
+        </SampleNotice>
         <div className="stats">
           <div className="stat">
             <BarChart3 />
@@ -231,8 +171,11 @@ export function Supporting({ page }: { page: string }) {
     return (
       <div dir="rtl">
         <Title title="المراقبة" sub="آخر التغييرات والتنبيهات التي تحتاج انتباهاً">
-          <span className="chip">تحديث مباشر محلي</span>
+          <span className="chip">تجريبية، لم تُبنَ بعد</span>
         </Title>
+        <SampleNotice>
+          التنبيهات والأعمال هنا من بيانات تجريبية في هذا المتصفح، وليست إشعاراتك الحقيقية. إشعاراتك في الجرس أعلى الصفحة، وأعمالك في «العمل».
+        </SampleNotice>
         <div className="columns">
           <Panel title="التنبيهات الموجهة لدورك">
             <div className="stack">
@@ -287,10 +230,15 @@ export function Supporting({ page }: { page: string }) {
         ) : (
           <>
             <Tabs items={adminSections} value={adminTab} onChange={setAdminTab} />
-            <p className="muted">
-              الحسابات وطلبات الوصول والصلاحيات حقيقية وتُدار من صفحة الحسابات. بقية أقسام الإدارة واجهات عرض
-              فقط في النموذج: لا أسرار ولا اتصال خارجي.
-            </p>
+            {adminTab === 'users' ? (
+              <p className="muted">الحسابات وطلبات الوصول والصلاحيات حقيقية وتُدار من صفحة «الحسابات».</p>
+            ) : adminTab === 'integrations' ? (
+              <SampleNotice>Google Drive وحده حقيقي في هذا القسم. بقية البطاقات عرض فقط، وتُدار التكاملات الحقيقية من «الإعدادات».</SampleNotice>
+            ) : adminTab === 'permissions' ? (
+              <SampleNotice>الجدول عرض لما يحدده الدور فقط. الصلاحيات الحقيقية وتعديلها في «الحسابات»، وصلاحياتك أنت في «الحساب».</SampleNotice>
+            ) : (
+              <SampleNotice>هذا القسم عرض تجريبي: أرقامه وأحداثه ليست من النظام الحقيقي، ولا يغيّر شيئاً.</SampleNotice>
+            )}
 
             {adminTab === 'users' && (
               <Panel title="المستخدمون">
@@ -480,10 +428,13 @@ export function Supporting({ page }: { page: string }) {
         {REAL_SETTINGS.includes(settingsTab) ? (
           <p className="muted">هذا القسم حقيقي: بياناته في قاعدة البيانات، ويقرر فيه من يملك صلاحيته.</p>
         ) : (
-          <p className="muted">
-            التصميم والوضع يُحفظان في هذا المتصفح. بقية الإعدادات مرئية فقط، لا تُحفظ خارج هذه الجلسة ولا تغيّر سلوك
-            النظام.
-          </p>
+          <SampleNotice>
+            {settingsTab === 'appearance'
+              ? 'التصميم والوضع يُحفظان في هذا المتصفح وحده وهما حقيقيان. «العرض المختصر» والمعاينة تحتها لا تفعل شيئاً بعد.'
+              : settingsTab === 'storage'
+                ? 'الأرقام هنا توضيحية. التخزين الحقيقي اليوم هو Google Drive، وتبويب التخزين الحقيقي قيد البناء.'
+                : 'هذا التبويب عرض فقط: لا يُحفظ شيء منه ولا يغيّر سلوك النظام.'}
+          </SampleNotice>
         )}
 
         {settingsTab === 'general' && (
@@ -656,7 +607,7 @@ export function Supporting({ page }: { page: string }) {
             <p>
               <b>{storageUsage.percent}%</b> مستخدم من {storageUsage.totalGb} غيغابايت
             </p>
-            <p className="muted">لا يوجد رفع أو تخزين حقيقي في النموذج. الوسائط رسوم توضيحية محلية.</p>
+            <p className="muted">الملفات تُخزَّن في Google Drive (من تبويب «عام وصحة النظام»). هذا الرقم لا يقيسها.</p>
           </Panel>
         )}
       </div>
@@ -710,7 +661,7 @@ export function Supporting({ page }: { page: string }) {
             </div>
             <div className="actions">
               <button className="secondary" onClick={() => setConfirmReset(true)}>
-                إعادة النموذج إلى حالته الأولى
+                إعادة البيانات التجريبية في هذا المتصفح
               </button>
             </div>
           </Panel>
@@ -750,7 +701,7 @@ export function Supporting({ page }: { page: string }) {
         </div>
         {confirmReset && (
           <Modal title="إعادة النموذج" onClose={() => setConfirmReset(false)}>
-            <p>سيُعاد العمل والتنبيهات إلى البيانات التجريبية الأولى.</p>
+            <p>يعيد هذا بيانات العرض التجريبية في هذا المتصفح فقط (صفحات «التحليلات» و«المراقبة»). لا يمسّ أعمالك ولا بريدك ولا حسابك.</p>
             <div className="actions">
               <button
                 className="primary"

@@ -105,6 +105,21 @@ export function CreatePage() {
   const [busy, setBusy] = useState(false);
   const set = (patch: Partial<Draft>) => setD((x) => ({ ...x, ...patch }));
 
+  // From «الأفكار»: the text written there arrives through the session, not the address.
+  useEffect(() => {
+    if (params.get('idea') !== '1') return;
+    try {
+      const raw = window.sessionStorage.getItem('comms-hub:idea');
+      window.sessionStorage.removeItem('comms-hub:idea');
+      const idea = raw ? (JSON.parse(raw) as { title?: string; brief?: string }) : null;
+      if (idea) setD((x) => ({ ...x, title: x.title || String(idea.title ?? '').slice(0, 140), brief: x.brief || String(idea.brief ?? '').slice(0, 4000) }));
+    } catch {
+      // Storage unavailable: the page opens blank, which is still correct.
+    }
+    // Once, on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // From mail: the conversation's subject, sender and first lines.
   useEffect(() => {
     const id = params.get('mail');
