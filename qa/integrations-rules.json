@@ -1,0 +1,14 @@
+{
+  "script": "supabase/tests/integrations_rules.sql",
+  "ran": "2026-10-14",
+  "target": "Supabase project comms-hub (one transaction, rolled back)",
+  "result": { "total": 57, "passed": 57, "failed": 0 },
+  "afterRollback": {
+    "serverKeyMd5Unchanged": true,
+    "vaultSecrets": 0,
+    "integrationEvents": 0,
+    "testAccounts": 0,
+    "maintenanceBanner": false
+  },
+  "note": "Check 15 expects 'permission denied for function int_secret_commit' (the corrected expectation recorded in progress.md for Step S1). Advisors read the same day are summarised in Readiness_Audit.md."
+}
