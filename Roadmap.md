@@ -232,6 +232,18 @@ By owner directive of 2026-10-12 (recorded in `progress.md`) the work cycle move
 - [/] **Step 5, «التقويم», «المشاريع», «الطلبات», then acceptance** (2026-10-13). Built and checked: rule run 113 of 113 with Steps 1 and 4 re-run, `npm test` 141 of 141, browser check 1010 of 1010, all sixteen pages with their guide, `MVP_draft.md` section 61. The review of the rules and row level security across Steps 1 to 5 closed the gaps it found (`20261013120000_work_cycle_planning.sql`). Delegation while away is deferred by owner decision (it waits for the approval-rights work).
   *Exit gate:* standard checks pass (met); a push to deploy on the owner's request (pending: all five steps are local commits); the owner's signed-in walkthrough of the whole cycle, with findings recorded in `progress.md` (pending).
 
+### Requested scope addition, 2026-10-13: permissions, urgency 0 to 3 and WhatsApp
+
+By owner directive of 2026-10-13 (recorded in `progress.md` and `AGENTS.md`) permissions are real and WhatsApp is a real one-way outside channel, built in six steps planned in `Permissions_Plan.md` (decisions D-1 to D-13). Approval and publishing stay fixed by the reference; no grant unlocks them. No cron, edge function or worker in the site: the WhatsApp sender is a pull bridge on the owner's computer (idea I-024 holds timed retries).
+
+- [x] **P1, the permission engine** (2026-10-13, `469d447`). Rule run 122 of 122 and 5 of 5.
+- [x] **P2, «الحسابات»** (2026-10-13, `85746ff`). Rule run 137 of 137, browser check 271 of 271.
+- [x] **P3, asking for a permission and the connections** (2026-10-13, `25d66c2`). Request run 49 of 49, browser checks 414 of 414 and 1010 of 1010.
+- [x] **P4, urgency 0 to 3** (2026-10-14, `2895583` and `f27f0e0`). Urgency run 41 of 41, chat run 22 of 22, browser check 483 of 483; the old `urgent` column removed.
+- [x] **P5a, WhatsApp without the real sender** (2026-10-14, `187f4aa`). WhatsApp run 98 of 98 with the four-room routing case, route check 25 of 25, browser check 625 of 625, `npm test` 168 of 168.
+- [/] **P5b, the pull bridge** (2026-10-14, `1f22f48`). Built in `bridge/whatsapp/`; offline tests 14 of 14 with the pinned library. The first QR link of the system number and a real message need the owner's phone and were not performed.
+  *Exit gate:* standard checks pass (met); the owner links the system number and runs the WhatsApp walkthrough of the P5b entry in `progress.md` (pending); the owner's signed-in walkthroughs of P2 to P5a (pending); a push to deploy on the owner's request (pending: all steps are local commits).
+
 ### Checkpoint 0.1: UI Prototype MVP 0.1
 
 **State:** Complete and verified (2026-09-19). **Authority:** [[MVP_draft]].
@@ -531,7 +543,7 @@ Phases:
 - **1.2.1 Authentication & Session Management:** Supabase Auth integration, session tokens, and refresh flows. *Partly pulled forward 2026-10-11 by owner directive:* email and password sign-in, an approved-accounts list, access requests and page permissions already run on Supabase (`comms-hub`); account lifecycle states, audit capture of sign-ins and the production deployment settings remain here.
 - **1.2.2 User Profile & Lifecycle:** Account states (active, suspended, offboarded) and profile metadata.
 - **1.2.3 Organizational Positions & Hierarchy:** Department positions, reporting lines, and organizational units.
-- **1.2.4 Role Permissions & Capabilities:** Fine-grained permission assignments mapping to the eight confirmed roles.
+- **1.2.4 Role Permissions & Capabilities:** Fine-grained permission assignments mapping to the eight confirmed roles. *Partly pulled forward 2026-10-13 by owner directive* (`Permissions_Plan.md`): role templates, standing, temporary and one-time grants, requests and their log run in the database; delegation of approval authority remains here.
 - **1.2.5 Resource-Level Access Control:** Scoped access to campaigns, work items, and internal documents.
 - **1.2.6 Delegation Foundations:** Temporary and delegated authority mechanisms for review and approvals.
 - **1.2.7 Server-Side & RLS Enforcement:** Row-Level Security policies ensuring no client can bypass authorization rules.
