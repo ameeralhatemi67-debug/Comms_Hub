@@ -10,6 +10,7 @@
 // never the rest of the account's Drive.
 
 import { vaultReachable, vaultSecret } from '../integrations/vault.ts';
+import { StorageError } from '../storage/provider.ts';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const API = 'https://www.googleapis.com/drive/v3';
@@ -42,13 +43,8 @@ export const oauthConfigured = (env: DriveEnv = readDriveEnv()) => Boolean(env.c
  */
 export const driveConfigured = (env: DriveEnv = readDriveEnv()) => oauthConfigured(env) && (Boolean(env.refreshToken) || vaultReachable());
 
-export class DriveError extends Error {
-  status: number;
-  constructor(status: number, message: string) {
-    super(message);
-    this.status = status;
-  }
-}
+/** A Drive failure. It is a StorageError, so code that serves any provider can catch the base class. */
+export class DriveError extends StorageError {}
 
 export type DriveFile = {
   id: string;
@@ -208,6 +204,21 @@ export function createDrive(deps: Partial<Deps> = {}) {
     /** Moves the file to the Drive trash (recoverable for 30 days from Drive itself). */
     async trash(id: string) {
       await api(`/files/${encodeURIComponent(id)}?fields=id`, { method: 'PATCH', json: { trashed: true } });
+    },
+
+    /** Drive's own MD5 of a binary file's bytes, or null (folders and Google Docs have none). */
+    async checksum(id: string) {
+      const f = await api<{ md5Checksum?: string }>(`/files/${encodeURIComponent(id)}?fields=md5Checksum`);
+      return f.md5Checksum ?? null;
+    },
+
+    /** What the account has used and its limit (null when the account does not say). */
+    async quota() {
+      const about = await api<{ storageQuota?: { limit?: string; usage?: string } }>(`/about?fields=${encodeURIComponent('storageQuota(limit,usage)')}`);
+      const used = Number(about.storageQuota?.usage ?? NaN);
+      if (!Number.isFinite(used)) return null;
+      const limit = Number(about.storageQuota?.limit ?? NaN);
+      return { used, total: Number.isFinite(limit) ? limit : null };
     },
 
     /** The Google account the refresh token belongs to. */

@@ -1,7 +1,7 @@
 // Brings Google Drive into step with rows the database has just changed back (an undo):
 // a file's name, a file's folder (every version moves), a folder's name.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Drive } from '@/lib/drive/google';
+import type { StorageProvider } from '@/lib/storage/provider';
 import { driveParentOf } from '@/lib/drive/parents';
 
 export type RestoredRow = {
@@ -16,7 +16,7 @@ export const touchesDrive = (r: RestoredRow) =>
   (r.tbl === 'media_files' && !!r.before && ('name' in r.before || 'folder_id' in r.before)) ||
   (r.tbl === 'media_folders' && !!r.before && 'name' in r.before);
 
-export async function syncDrive(supabase: SupabaseClient, drive: Drive, rows: RestoredRow[]): Promise<void> {
+export async function syncDrive(supabase: SupabaseClient, drive: StorageProvider, rows: RestoredRow[]): Promise<void> {
   for (const r of rows.filter(touchesDrive)) {
     const before = r.before ?? {};
     const after = r.after ?? {};

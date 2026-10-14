@@ -1,4 +1,4 @@
-import { getDrive } from '@/lib/drive/google';
+import { storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { cleanName } from '@/lib/drive/media';
 import { driveParentOf, isUuid } from '@/lib/drive/parents';
@@ -36,7 +36,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (error) return fail(403, dbErrorText(error.message));
 
   try {
-    const drive = getDrive();
+    const drive = storageFor('library');
     const { data: versions } = await supabase.from('media_versions').select('drive_file_id').eq('asset_id', id);
     const files = (versions ?? []).map((v) => v.drive_file_id as string);
     if (patch.name) await drive.rename(before.drive_file_id, patch.name);
@@ -68,7 +68,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
   const { data: versions } = await supabase.from('media_versions').select('drive_file_id').eq('asset_id', id);
   try {
-    const drive = getDrive();
+    const drive = storageFor('library');
     for (const v of versions ?? []) await drive.trash(v.drive_file_id as string);
   } catch {
     return fail(502, 'تعذّر نقل الملف إلى سلة Google Drive.');

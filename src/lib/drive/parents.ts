@@ -1,11 +1,11 @@
 // Which Drive folder a Hub folder lives in. A null Drive id is the Hub's root folder
 // (the "unfiled" folder keeps files uploaded before folders existed).
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Drive } from './google';
+import type { StorageProvider } from '../storage/provider';
 
 export async function driveParentOf(
   supabase: SupabaseClient,
-  drive: Drive,
+  drive: StorageProvider,
   folderId: string | null,
 ): Promise<string> {
   if (!folderId) return drive.rootFolder();

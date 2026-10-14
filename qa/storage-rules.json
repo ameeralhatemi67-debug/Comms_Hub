@@ -1,0 +1,24 @@
+{
+  "script": "supabase/tests/storage_rules.sql",
+  "ran": "2026-10-14",
+  "target": "Supabase project comms-hub (one transaction, rolled back)",
+  "migration": "20261014140000_storage_locations.sql, applied the same day (statements as in the file, without its comment lines)",
+  "result": { "total": 31, "passed": 31, "failed": 0 },
+  "attempts": [
+    "Run 1 stopped at check 9: an insert of a test asset by the database owner is refused by media_files_guard (no acting person); the test now inserts as the administrator, as the product does.",
+    "Run 2 stopped at mail_register_file: not callable by anon; the test now inserts the attachment row directly.",
+    "Run 3 stopped at check 9: a writer has no library access by default, so the writer cannot read the state of an asset; check 9 now expects FORBIDDEN for the writer and new checks 14b to 14d use the director (level 4 at the top, none in a restricted folder).",
+    "Run 4: 31 of 31."
+  ],
+  "afterRollback": {
+    "serverKeyMd5Unchanged": true,
+    "fileLocations": 5,
+    "mediaVersions": 5,
+    "testFolders": 0,
+    "storageVerifiedEvents": 0,
+    "accounts": 3,
+    "testAuthUsers": 0
+  },
+  "backfill": "5 media_versions and 0 mail_files existed; 5 file_locations rows were made by the migration, all at Google Drive, state ok, never verified.",
+  "advisors": "Security advisors read after the migration: leaked-password protection still off; anon-callable security-definer functions 12 (11 before, plus entry_notice_targets and storage_verify_mark, minus email_status), all key-gated or by design; RLS-without-policy tables 7 (file_locations and storage_roles added, read only through functions). No new error."
+}

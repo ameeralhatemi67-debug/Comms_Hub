@@ -82,6 +82,7 @@ export const EVENT_AR: Record<string, string> = {
   disabled: 'أُوقف',
   deleted: 'حُذف',
   settings: 'تغيّرت الإعدادات العامة',
+  storage_verified: 'فُحصت ملفات التخزين',
 };
 
 /** One line per event, never a value. */
@@ -90,6 +91,8 @@ export function eventLine(e: IntEvent): string {
   const d = e.data ?? {};
   if (e.kind === 'health') return `${head}: ${STATE_AR[d.from as IntState] ?? ''} إلى ${STATE_AR[d.to as IntState] ?? ''}${d.error ? ` (${errorAr(String(d.error))})` : ''}`;
   if (e.kind === 'secret_used') return `${head} لـ «${d.purpose ?? ''}»`;
+  if (e.kind === 'storage_verified')
+    return `${head}: فُحص ${Number(d.checked ?? 0)}، سليم ${Number(d.ok ?? 0)}، مفقود ${Number(d.missing ?? 0)}، يحتاج انتباهاً ${Number(d.failed ?? 0)}`;
   if (e.kind === 'settings') {
     const parts = [
       d.maintenance_on === true && 'شُغّل شريط الصيانة',
@@ -122,4 +125,77 @@ export function intError(message: string | null | undefined): string {
   if (code) return INT_ERRORS[code];
   if (m.includes('upload_max_mb')) return 'حد الرفع بين 1 و5120 ميغابايت.';
   return 'تعذّر تنفيذ الطلب. أعد المحاولة.';
+}
+
+// ---------------------------------------------------------------------------
+// Storage (Settings_Integrations_Plan.md 6, migration 20261014140000_storage_locations.sql)
+// ---------------------------------------------------------------------------
+export type StorageRoleId = 'library' | 'mail' | 'chat' | 'backup';
+export type CopyState = 'ok' | 'pending' | 'failed' | 'missing' | 'retired';
+export type StorageProviderRow = {
+  id: string;
+  type: string;
+  label: string;
+  state: IntState;
+  last_check_at: string | null;
+  last_ok_at: string | null;
+  last_error: string | null;
+  account: string | null;
+  files: number;
+  bytes: number;
+  library_files: number;
+  mail_files: number;
+  ok: number;
+  pending: number;
+  failed: number;
+  missing: number;
+  unverified: number;
+  last_verified_at: string | null;
+};
+export type StorageOverview = {
+  providers: StorageProviderRow[];
+  roles: { role: StorageRoleId; integration_id: string | null; label: string | null }[];
+  unrecorded: number;
+  can_manage: boolean;
+};
+/** One stored copy of a library version, as the library page shows it (never a reference). */
+export type AssetCopy = {
+  version: number;
+  provider: string;
+  type: string;
+  role: 'primary' | 'replica' | 'backup';
+  state: CopyState;
+  size_bytes: number | null;
+  verified_at: string | null;
+};
+/** What the verification route answers. */
+export type VerifyResult = { checked: number; ok: number; missing: number; failed: number; unverified: number };
+
+export const STORAGE_ROLE_AR: Record<StorageRoleId, string> = {
+  library: 'مكتبة الوسائط',
+  mail: 'مرفقات البريد',
+  chat: 'ملفات المراسلة',
+  backup: 'النسخ الاحتياطي',
+};
+export const COPY_STATE_AR: Record<CopyState, string> = {
+  ok: 'سليم',
+  pending: 'قيد النسخ',
+  failed: 'يحتاج انتباهاً',
+  missing: 'مفقود',
+  retired: 'أُحيل للتقاعد',
+};
+export const COPY_STATE_TONE: Record<CopyState, string> = { ok: 'success', pending: '', failed: 'warn', missing: 'danger', retired: '' };
+export const COPY_ROLE_AR: Record<AssetCopy['role'], string> = { primary: 'الأصل', replica: 'نسخة', backup: 'نسخة احتياطية' };
+
+/** Providers the plan names that cannot be connected yet, with the honest reason. */
+export const COMING_PROVIDERS: { id: string; label: string; why: string }[] = [
+  { id: 'onedrive', label: 'OneDrive', why: 'مرحلة لاحقة بعد محرك النقل: يحتاج تطبيق Microsoft يعتمده المالك.' },
+  { id: 'supabase_storage', label: 'تخزين Supabase', why: 'مع محرك النقل: أول مزود ثانٍ، فبه يصير النقل ممكناً.' },
+  { id: 's3', label: 'تخزين متوافق مع S3 (B2 أو R2 أو MinIO)', why: 'هدف نسخ احتياطي رخيص خارج Google: يأتي مع مرحلة النسخ الاحتياطي.' },
+  { id: 'nas', label: 'جهاز تخزين شبكي (NAS)', why: 'لا يصل إليه الموقع مباشرة: ينتظر جهاز الوكيل الذي يبقى مشغّلاً، وهو غير موجود بعد.' },
+];
+
+/** When a check was made, in words, or that none was. */
+export function checkedAr(iso: string | null | undefined): string {
+  return iso ? `تُحقق منه ${new Date(iso).toLocaleString('ar-SA-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' })}` : 'لم يُتحقق منه بعد';
 }

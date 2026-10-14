@@ -1,4 +1,4 @@
-import { DriveError, getDrive } from '@/lib/drive/google';
+import { StorageError, storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { mediaKind } from '@/lib/drive/media';
 import { readMailEnv } from '@/lib/mail/gmail';
@@ -18,8 +18,8 @@ export async function POST(request: Request) {
   if (!body || typeof body.fileId !== 'string' || !/^[\w-]{10,100}$/.test(body.fileId)) return fail(400, 'معرّف الملف غير صالح.');
 
   try {
-    const drive = getDrive();
-    const info = await drive.fileInfo(body.fileId);
+    const drive = storageFor('mail');
+    const info = await drive.info(body.fileId);
     const size = Number(info.size ?? 0);
     if (
       info.trashed ||
@@ -42,6 +42,6 @@ export async function POST(request: Request) {
     if (error || !data) return fail(500, 'تعذّر تسجيل المرفق.');
     return Response.json({ id: data, name: info.name, size, mime: info.mimeType }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (e) {
-    return fail(e instanceof DriveError && e.status === 404 ? 404 : 502, 'تعذّر التحقق من الملف في Google Drive.');
+    return fail(e instanceof StorageError && e.status === 404 ? 404 : 502, 'تعذّر التحقق من الملف في Google Drive.');
   }
 }

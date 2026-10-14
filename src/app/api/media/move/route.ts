@@ -1,4 +1,4 @@
-import { getDrive } from '@/lib/drive/google';
+import { storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { driveParentOf, isUuid } from '@/lib/drive/parents';
 import { dbErrorText } from '@/lib/media/rules';
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   if (error) return fail(403, dbErrorText(error.message));
 
   try {
-    const drive = getDrive();
+    const drive = storageFor('library');
     const to = await driveParentOf(supabase, drive, folderId);
     for (const r of moving) {
       const from = await driveParentOf(supabase, drive, r.folder_id as string);

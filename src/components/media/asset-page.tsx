@@ -30,6 +30,7 @@ import { MediaDialogs, type Dialog } from './dialogs';
 import { useAssetActions } from './actions';
 import { Avatar, Icon, KIND_AR, StageChip, Thumb, Ts } from './parts';
 import { useMedia } from './provider';
+import { StorageState } from './storage-state';
 import { HOLD } from '@/lib/kit/hold-reasons';
 
 type VersionRow = { id: string; version: number; uploaded_by: string; note: string | null; created_at: string; size_bytes: number };
@@ -589,6 +590,10 @@ export function AssetPage({ id }: { id: string }) {
               <dd>{folder?.name}</dd>
               <dt>صلاحيتك</dt>
               <dd>{levelLabels[LEVEL_NAMES[Math.min(level, LEVELS.manage)]]}</dd>
+              <dt>التخزين</dt>
+              <dd className="mx-storage-line">
+                <StorageState assetId={asset.id} refreshKey={versions.length} />
+              </dd>
               <dt>معرّف Drive</dt>
               <dd dir="ltr">{asset.drive_file_id}</dd>
             </dl>

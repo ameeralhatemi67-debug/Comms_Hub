@@ -1,4 +1,4 @@
-import { getDrive } from '@/lib/drive/google';
+import { storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { cleanName } from '@/lib/drive/media';
 import { driveParentOf, isUuid } from '@/lib/drive/parents';
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   if (error) return fail(403, dbErrorText(error.message));
 
   try {
-    const drive = getDrive();
+    const drive = storageFor('library');
     const driveId = await drive.createFolder(name, await driveParentOf(supabase, drive, parentId));
     const { error: upErr } = await supabase.from('media_folders').update({ drive_folder_id: driveId }).eq('id', row.id);
     if (upErr) throw new Error('link');

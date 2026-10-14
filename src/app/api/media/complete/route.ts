@@ -1,4 +1,4 @@
-import { DriveError, getDrive } from '@/lib/drive/google';
+import { StorageError, storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { MAX_UPLOAD_BYTES, mediaKind } from '@/lib/drive/media';
 import { driveParentOf, isUuid } from '@/lib/drive/parents';
@@ -23,8 +23,8 @@ export async function POST(request: Request) {
 
   try {
     const supabase = await serverClient();
-    const drive = getDrive();
-    const info = await drive.fileInfo(body.fileId);
+    const drive = storageFor('library');
+    const info = await drive.info(body.fileId);
     const size = Number(info.size ?? 0);
     const kind = mediaKind(info.mimeType);
     const parent = await driveParentOf(supabase, drive, body.folderId);
@@ -59,6 +59,6 @@ export async function POST(request: Request) {
     }
     return Response.json({ id: data.id }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (e) {
-    return fail(e instanceof DriveError && e.status === 404 ? 404 : 502, 'تعذّر التحقق من الملف في Google Drive.');
+    return fail(e instanceof StorageError && e.status === 404 ? 404 : 502, 'تعذّر التحقق من الملف في Google Drive.');
   }
 }

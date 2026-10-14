@@ -3,14 +3,14 @@
 // there is no background worker in Version 0. The database hands out one turn at a
 // time, so two open pages never send the same message twice.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { driveConfigured, getDrive } from '../drive/google';
+import { storageConfigured, storageFor } from '../storage';
 import { fetchSince, mailboxConfigured, readMailEnv, sendOutgoing, type Outgoing } from './gmail';
 
 /** Gmail refuses messages over 25 MB; larger approved files go as review links instead. */
 const ATTACH_LIMIT = 25 * 1024 * 1024;
 
 async function driveBytes(id: string): Promise<Buffer> {
-  const res = await getDrive().open(id);
+  const res = await storageFor('mail').open(id);
   if (!res.ok) throw new Error(`DRIVE_${res.status}`);
   return Buffer.from(await res.arrayBuffer());
 }
@@ -51,7 +51,7 @@ export async function runSync(supabase: SupabaseClient, site: string, force: boo
       try {
         const attachments: { filename: string; content: Buffer; contentType: string }[] = [];
         const needsDrive = item.files.length > 0 || item.refs.some((r) => !r.link);
-        if (needsDrive && !driveConfigured()) throw new Error('DRIVE_NOT_CONFIGURED');
+        if (needsDrive && !storageConfigured('mail')) throw new Error('DRIVE_NOT_CONFIGURED');
         for (const r of item.refs.filter((x) => !x.link && x.size <= ATTACH_LIMIT))
           attachments.push({ filename: r.name, content: await driveBytes(r.drive), contentType: r.mime });
         for (const f of item.files) attachments.push({ filename: f.name, content: await driveBytes(f.drive), contentType: f.mime });

@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-14T11:37:14.521Z",
+  "run": "2026-10-14T20:19:53.819Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -212,6 +212,36 @@
       "detail": ""
     },
     {
+      "name": "settings-storage: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-bad: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-viewer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-locked: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-empty: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "urgency-badges: renders",
       "pass": true,
       "detail": ""
@@ -233,6 +263,36 @@
     },
     {
       "name": "settings-general-locked: the request is for «settings.view»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: the check is a button for a manager",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-viewer: a viewer sees a locked control for «storage.manage», not a working button",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-locked: the request is for «storage.manage»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: nothing in «غير متاح بعد» is a button",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-bad: the missing copies are flagged and counted",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: a missing copy is marked for the colour rule",
       "pass": true,
       "detail": ""
     },
@@ -417,6 +477,11 @@
       "detail": ""
     },
     {
+      "name": "accounts-members: shows «لم يعيّن كلمة مرور بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "accounts-members: does not show «undefined»",
       "pass": true,
       "detail": ""
@@ -498,6 +563,21 @@
     },
     {
       "name": "accounts-card: shows «بطاقة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «لم يعيّن كلمة مرور بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «إرسال دعوة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «يفتح الموقع ويختار «أول دخول»»",
       "pass": true,
       "detail": ""
     },
@@ -642,6 +722,16 @@
       "detail": ""
     },
     {
+      "name": "accounts-card: does not show «إرسال رابط كلمة مرور جديدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: does not show «إعادة إرسال رابط التأكيد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "accounts-card: no emoji",
       "pass": true,
       "detail": ""
@@ -718,6 +808,11 @@
     },
     {
       "name": "accounts-card-above: does not show «إزالة العضو»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card-above: does not show «إرسال دعوة»",
       "pass": true,
       "detail": ""
     },
@@ -3522,6 +3617,396 @@
       "detail": "overflow 0px"
     },
     {
+      "name": "settings-storage · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage: shows «مزودو التخزين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «Google Drive»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «متصل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «hub@example.com»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «نسخ محفوظة هنا»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «5 · 1.50 غيغابايت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «منها إصدارات مكتبة الوسائط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «آخر تحقق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «لم تُفحص بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «تحقق من عينة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «ما يخدمه كل مزود»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «مكتبة الوسائط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «مرفقات البريد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «ملفات المراسلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «النسخ الاحتياطي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «لا مزود بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «غير متاح بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «OneDrive»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «تخزين Supabase»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «S3»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «جهاز تخزين شبكي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «الوكيل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «لم يُبنيا بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: does not show «مفقودة أو تحتاج انتباهاً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: does not show «بلا موضع مسجّل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: does not show «ربط OneDrive»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: does not show «drv-»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: does not show «ref»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-bad · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-bad · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-bad: shows «مفقودة أو تحتاج انتباهاً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-bad: shows «3 ملفات بلا موضع مسجّل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-bad: shows «لم يُتحقق من شيء بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-bad: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-bad · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-bad · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-viewer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-viewer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-viewer: shows «مزودو التخزين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-viewer: shows «تحقق من عينة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-viewer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-viewer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-viewer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-locked · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-locked · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-locked: shows «أين تُحفظ الملفات لمن يملك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-locked: shows «اطلب هذه الصلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-locked: does not show «مزودو التخزين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-locked: does not show «Google Drive»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-locked: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-locked · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-locked · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "library-storage-state · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "library-storage-state: shows «الإصدار 2»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: shows «Google Drive»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: shows «سليم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: shows «تُحقق منه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: shows «الإصدار 1»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: shows «مفقود»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: shows «لم يُتحقق منه بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: does not show «drv-»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-state · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "library-storage-empty · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-empty · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "library-storage-empty: shows «لا موضع مسجّل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-empty: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-empty · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library-storage-empty · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
       "name": "urgency-badges · a · 1280: no page errors",
       "pass": true,
       "detail": ""
@@ -3669,8 +4154,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 733,
-    "passed": 733,
+    "total": 830,
+    "passed": 830,
     "failed": 0
   }
 }

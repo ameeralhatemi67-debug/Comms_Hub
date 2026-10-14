@@ -69,3 +69,14 @@ export async function storeChecked(
   if (commit.error) return { ok: false, error: 'VAULT_REFUSED' };
   return { ok: true, tail };
 }
+
+/**
+ * Records what the provider said about stored copies. The server key, not a session, decides
+ * (storage_verify_mark), so a signed-in person cannot write a copy's state by hand. Returns
+ * how many rows were marked, or null when the database could not be asked.
+ */
+export async function markVerified(actor: string, results: { id: string; state: 'ok' | 'missing' | 'failed' }[]): Promise<number | null> {
+  if (!vaultReachable()) return null;
+  const { data, error } = await db().rpc('storage_verify_mark', { p_key: serverKey(), p_actor: actor, p_results: results });
+  return error || typeof data !== 'number' ? null : data;
+}

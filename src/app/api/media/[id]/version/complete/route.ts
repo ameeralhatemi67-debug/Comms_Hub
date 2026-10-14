@@ -1,4 +1,4 @@
-import { DriveError, getDrive } from '@/lib/drive/google';
+import { StorageError, storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { MAX_UPLOAD_BYTES, mediaKind } from '@/lib/drive/media';
 import { driveParentOf, isUuid } from '@/lib/drive/parents';
@@ -20,11 +20,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   try {
     const supabase = await serverClient();
-    const drive = getDrive();
+    const drive = storageFor('library');
     const { data: asset } = await supabase.from('media_files').select('folder_id, current_version').eq('id', id).maybeSingle();
     if (!asset) return fail(404, 'غير موجود.');
 
-    const info = await drive.fileInfo(body.fileId);
+    const info = await drive.info(body.fileId);
     const size = Number(info.size ?? 0);
     const parent = await driveParentOf(supabase, drive, asset.folder_id);
     if (
@@ -49,6 +49,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (error) return fail(403, dbErrorText(error.message));
     return Response.json({ ok: true, version: asset.current_version + 1 });
   } catch (e) {
-    return fail(e instanceof DriveError && e.status === 404 ? 404 : 502, 'تعذّر التحقق من الملف في Google Drive.');
+    return fail(e instanceof StorageError && e.status === 404 ? 404 : 502, 'تعذّر التحقق من الملف في Google Drive.');
   }
 }

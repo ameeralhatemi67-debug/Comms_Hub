@@ -29,6 +29,7 @@ import { WhatsAppSettings } from './whatsapp/member';
 import { WhatsAppSystemPanel } from './whatsapp/system-panel';
 import { GeneralTab } from './settings/general';
 import { AuditTab } from './settings/audit';
+import { StorageTab } from './settings/storage';
 import { DriveIntegration } from './drive-files';
 
 const pageNames: Record<string, string> = {
@@ -84,7 +85,7 @@ const settingsSections = [
   { id: 'audit', label: 'السجل' },
 ];
 /** The settings tabs that are real (in the database); the others are visual in the prototype. */
-const REAL_SETTINGS = ['general', 'whatsapp', 'audit'];
+const REAL_SETTINGS = ['general', 'storage', 'whatsapp', 'audit'];
 
 export function Supporting({ page }: { page: string }) {
   const { state, dispatch } = useHub();
@@ -431,15 +432,18 @@ export function Supporting({ page }: { page: string }) {
           <SampleNotice>
             {settingsTab === 'appearance'
               ? 'التصميم والوضع يُحفظان في هذا المتصفح وحده وهما حقيقيان. «العرض المختصر» والمعاينة تحتها لا تفعل شيئاً بعد.'
-              : settingsTab === 'storage'
-                ? 'الأرقام هنا توضيحية. التخزين الحقيقي اليوم هو Google Drive، وتبويب التخزين الحقيقي قيد البناء.'
-                : 'هذا التبويب عرض فقط: لا يُحفظ شيء منه ولا يغيّر سلوك النظام.'}
+              : 'هذا التبويب عرض فقط: لا يُحفظ شيء منه ولا يغيّر سلوك النظام.'}
           </SampleNotice>
         )}
 
         {settingsTab === 'general' && (
           <Panel title="عام وصحة النظام" className="st-panel">
             <GeneralTab />
+          </Panel>
+        )}
+        {settingsTab === 'storage' && (
+          <Panel title="التخزين" className="st-panel">
+            <StorageTab />
           </Panel>
         )}
         {settingsTab === 'audit' && (
@@ -602,14 +606,6 @@ export function Supporting({ page }: { page: string }) {
           </Panel>
         )}
 
-        {settingsTab === 'storage' && (
-          <Panel title="التخزين">
-            <p>
-              <b>{storageUsage.percent}%</b> مستخدم من {storageUsage.totalGb} غيغابايت
-            </p>
-            <p className="muted">الملفات تُخزَّن في Google Drive (من تبويب «عام وصحة النظام»). هذا الرقم لا يقيسها.</p>
-          </Panel>
-        )}
       </div>
     );
 

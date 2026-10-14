@@ -1,4 +1,4 @@
-import { getDrive } from '@/lib/drive/google';
+import { storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { serverClient } from '@/lib/supabase/server';
 import { syncDrive, touchesDrive, type RestoredRow } from '@/lib/media/drive-sync';
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
   if (result.rows.some(touchesDrive)) {
     try {
-      await syncDrive(supabase, getDrive(), result.rows);
+      await syncDrive(supabase, storageFor('library'), result.rows);
     } catch {
       await supabase.rpc('undo_reapply', { p_tx: tx });
       return fail(502, 'تعذّر تحديث Google Drive، فلم يُتراجع عن الإجراء. أعد المحاولة.');

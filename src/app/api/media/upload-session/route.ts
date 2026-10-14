@@ -1,4 +1,4 @@
-import { DriveError, driveConfigured, getDrive } from '@/lib/drive/google';
+import { StorageError, storageConfigured, storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { MAX_UPLOAD_BYTES, cleanName, mediaKind } from '@/lib/drive/media';
 import { driveParentOf, isUuid } from '@/lib/drive/parents';
@@ -11,7 +11,7 @@ import { overLimitText, uploadLimit } from '@/lib/integrations/limits';
 export async function POST(request: Request) {
   const g = await guard(request, { mutating: true, page: 'media' });
   if (!g.ok) return g.response;
-  if (!driveConfigured()) return fail(503, 'لم يُربط Google Drive بعد.');
+  if (!storageConfigured('library')) return fail(503, 'لم يُربط Google Drive بعد.');
 
   const body = (await request.json().catch(() => null)) as
     | { name?: unknown; mimeType?: unknown; size?: unknown; folderId?: unknown }
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   if (allowed !== true) return fail(403, 'الرفع إلى هذا المجلد يحتاج صلاحية «إنشاء»، وألا يكون مقفلاً.');
 
   try {
-    const drive = getDrive();
+    const drive = storageFor('library');
     const sessionUrl = await drive.startUpload({
       name: cleanName(body.name),
       mimeType: body.mimeType,
@@ -41,6 +41,6 @@ export async function POST(request: Request) {
     });
     return Response.json({ sessionUrl }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (e) {
-    return fail(e instanceof DriveError && e.status === 503 ? 503 : 502, 'تعذّر بدء الرفع إلى Google Drive.');
+    return fail(e instanceof StorageError && e.status === 503 ? 503 : 502, 'تعذّر بدء الرفع إلى Google Drive.');
   }
 }

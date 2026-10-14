@@ -1,4 +1,4 @@
-import { DriveError, driveConfigured, getDrive } from '@/lib/drive/google';
+import { StorageError, storageConfigured, storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { cleanName, mediaKind } from '@/lib/drive/media';
 import { MAIL_ATTACH_BYTES } from '@/lib/mail/rules';
@@ -8,7 +8,7 @@ import { MAIL_ATTACH_BYTES } from '@/lib/mail/rules';
 export async function POST(request: Request) {
   const g = await guard(request, { mutating: true, page: 'mail' });
   if (!g.ok) return g.response;
-  if (!driveConfigured()) return fail(503, 'لم يُربط Google Drive بعد، فلا تُرفق ملفات من الجهاز.');
+  if (!storageConfigured('mail')) return fail(503, 'لم يُربط Google Drive بعد، فلا تُرفق ملفات من الجهاز.');
 
   const body = (await request.json().catch(() => null)) as { name?: unknown; mimeType?: unknown; size?: unknown } | null;
   if (!body || typeof body.name !== 'string' || typeof body.mimeType !== 'string' || typeof body.size !== 'number')
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   if (!mediaKind(body.mimeType)) return fail(415, 'نوع الملف غير مدعوم.');
 
   try {
-    const sessionUrl = await getDrive().startUpload({
+    const sessionUrl = await storageFor('mail').startUpload({
       name: cleanName(body.name),
       mimeType: body.mimeType,
       size: body.size,
@@ -28,6 +28,6 @@ export async function POST(request: Request) {
     });
     return Response.json({ sessionUrl }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (e) {
-    return fail(e instanceof DriveError && e.status === 503 ? 503 : 502, 'تعذّر بدء الرفع إلى Google Drive.');
+    return fail(e instanceof StorageError && e.status === 503 ? 503 : 502, 'تعذّر بدء الرفع إلى Google Drive.');
   }
 }

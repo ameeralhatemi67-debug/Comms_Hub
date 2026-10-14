@@ -36,6 +36,10 @@ const sources = [
   'components/whatsapp/member.tsx', 'components/whatsapp/system-panel.tsx', 'components/chat/whatsapp.tsx', 'lib/whatsapp/rules.ts',
   // Settings Step S1: «عام وصحة النظام» and «السجل»
   'components/settings/general.tsx', 'components/settings/audit.tsx', 'lib/integrations/rules.ts',
+  // Settings Step S2: «التخزين» and the storage line of a library file
+  'components/settings/storage.tsx', 'components/media/storage-state.tsx',
+  // Entry flow: the state of a person's entry, the invitation and the log words
+  'lib/entry.ts', 'components/accounts/entry-help.tsx',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -141,6 +145,7 @@ const assistantCaps = KEYS.map((k) => (k.startsWith('page.') ? capEval(k, ['page
 const ctx = (email, role, evals) => ({
   status: 'ready', me: { email, name: members.find((m) => m.email === email)?.display_name ?? '', role, pages: ['work', 'mail', 'media', 'calendar'], protected: false, caps: evals.filter((e) => e.ok && !e.k.startsWith('page.')).map((e) => e.k) },
   can: (k) => !!evals.find((e) => e.k === k)?.ok, members, requests, grants, defaults, events, presets,
+  entry: { 'khalid@x.sa': 'not_started' },
   nameOf: (e) => members.find((m) => m.email === e)?.display_name ?? (e ? e.split('@')[0] : ''), reload: async () => {}, call: async () => ({ ok: true, data: null }), say: () => {},
 });
 
@@ -269,6 +274,22 @@ async function renderAll() {
   ];
   render('settings-audit', 'amir@x.sa', 'admin', adminSet, pnl(h(sta.AuditTab, { initial: ievents })), wx);
   render('settings-audit-locked', 'khalid@x.sa', 'writer', writerCaps, pnl(h(sta.AuditTab, {})), wx);
+  // Settings Step S2.
+  const sts = await import(url('components/settings/storage.js'));
+  const sst = await import(url('components/media/storage-state.js'));
+  const prov = (over) => ({ id: 'i1', type: 'google_drive', label: 'Google Drive', state: 'connected', last_check_at: NOW, last_ok_at: NOW, last_error: null, account: 'hub@example.com',
+    files: 5, bytes: 1610612736, library_files: 5, mail_files: 0, ok: 4, pending: 0, failed: 0, missing: 0, unverified: 1, last_verified_at: NOW, ...over });
+  const roles4 = [{ role: 'library', integration_id: 'i1', label: 'Google Drive' }, { role: 'mail', integration_id: 'i1', label: 'Google Drive' }, { role: 'chat', integration_id: 'i1', label: 'Google Drive' }, { role: 'backup', integration_id: null, label: null }];
+  render('settings-storage', 'amir@x.sa', 'admin', adminSet, pnl(h(sts.StorageTab, { initial: { providers: [prov({})], roles: roles4, unrecorded: 0, can_manage: true } })), wx);
+  render('settings-storage-bad', 'amir@x.sa', 'admin', adminSet, pnl(h(sts.StorageTab, { initial: { providers: [prov({ missing: 1, failed: 2, ok: 2, last_verified_at: null })], roles: roles4, unrecorded: 3, can_manage: true } })), wx);
+  render('settings-storage-viewer', 'dir@x.sa', 'director', capsWith(directorCaps, ['settings.view']), pnl(h(sts.StorageTab, { initial: { providers: [prov({})], roles: roles4, unrecorded: 0, can_manage: false } })), wx);
+  render('settings-storage-locked', 'khalid@x.sa', 'writer', writerCaps, pnl(h(sts.StorageTab, {})), wx);
+  const copies = [
+    { version: 2, provider: 'Google Drive', type: 'google_drive', role: 'primary', state: 'ok', size_bytes: 1500, verified_at: NOW },
+    { version: 1, provider: 'Google Drive', type: 'google_drive', role: 'primary', state: 'missing', size_bytes: 1000, verified_at: null },
+  ];
+  render('library-storage-state', 'dir@x.sa', 'director', directorCaps, h('dl', { className: 'mx-kv' }, h('dt', null, 'التخزين'), h('dd', { className: 'mx-storage-line' }, h(sst.StorageState, { assetId: 'a1', initial: copies }))), wx);
+  render('library-storage-empty', 'dir@x.sa', 'director', directorCaps, h('dl', { className: 'mx-kv' }, h('dt', null, 'التخزين'), h('dd', { className: 'mx-storage-line' }, h(sst.StorageState, { assetId: 'a1', initial: [] }))), wx);
   render('urgency-badges', 'khalid@x.sa', 'writer', writerCaps, h('div', { className: 'ml' }, ...[0, 1, 2, 3].map((l) => h('div', { key: l, className: 'cx-badge-row' }, `الدرجة ${l}: `, h(urg.UrgencyBadge, { level: l })))));
   return pages;
 }
@@ -290,8 +311,8 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
   const browser = await chromium.launch(launchOptions);
   try {
     const expect = {
-      'accounts-members': ['الحسابات', 'الأعضاء (8)', 'الأدوار', 'الطلبات (1)', 'السجل', 'إضافة عضو', 'حزمة جديدة', 'أمير', 'مؤسس', 'مدير الاتصال المؤسسي', '1 مؤقتة', '1 لمرة واحدة', '1 مسحوبة', 'لم يسجل الدخول بعد', 'البطاقة', 'تغطية النشر لأسبوع'],
-      'accounts-card': ['بطاقة', 'منح', 'حزمة جاهزة', 'تطبيق', 'الاسم والصفحات والدور', 'إنهاء كل الإضافات', 'إزالة العضو', 'الصفحات', 'المراسلة والبريد', 'الحسابات والصلاحيات', 'مقفلة بقواعد المركز',
+      'accounts-members': ['الحسابات', 'الأعضاء (8)', 'الأدوار', 'الطلبات (1)', 'السجل', 'إضافة عضو', 'حزمة جديدة', 'أمير', 'مؤسس', 'مدير الاتصال المؤسسي', '1 مؤقتة', '1 لمرة واحدة', '1 مسحوبة', 'لم يسجل الدخول بعد', 'البطاقة', 'تغطية النشر لأسبوع', 'لم يعيّن كلمة مرور بعد'],
+      'accounts-card': ['بطاقة', 'لم يعيّن كلمة مرور بعد', 'إرسال دعوة', 'يفتح الموقع ويختار «أول دخول»', 'منح', 'حزمة جاهزة', 'تطبيق', 'الاسم والصفحات والدور', 'إنهاء كل الإضافات', 'إزالة العضو', 'الصفحات', 'المراسلة والبريد', 'الحسابات والصلاحيات', 'مقفلة بقواعد المركز',
         'من صفحات الحساب', 'إغلاق الصفحة', 'مؤقتة حتى 2026-10-14 12:00', 'تمديد', 'إنهاء الآن', 'مرة واحدة · 1 استخدام باقٍ', 'لمحادثة واحدة', 'مسحوبة', 'إعادة', 'لا يملكها (', 'الاعتماد لمدير الاتصال ومساعده', 'مجلدات المكتبة', 'العقود', 'عرض', 'مستويات المجلدات تُدار من المكتبة'],
       'accounts-card-above': ['في رتبتك أو فوقها، فلا تدير صلاحياته'],
       'accounts-roles': ['ما يملكه كل دور', 'الصلاحية', 'مدير الاتصال المؤسسي', 'مساعد مدير الاتصال المؤسسي', 'كاتب المحتوى', 'مسؤول النشر وإدارة الحسابات', 'رسائل «مهم» (المستوى 2)', 'إرسال رسالة إلى واتساب زميل', 'مقفلة بقواعد المركز', 'يملكها', 'لا يعتمد أحد ما أرسله أو رفعه'],
@@ -337,14 +358,21 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'settings-general-locked': ['صحة النظام وإعداداته العامة لمن يملك', 'اطلب هذه الصلاحية'],
       'settings-audit': ['كل الأحداث', 'اعتُمد السر الجديد بعد فحصه · Google Drive', 'استعمل الخادم السر · Google Drive لـ «drive access»', 'تغيّرت الإعدادات العامة: شُغّل شريط الصيانة، حد الرفع 100 ميغابايت', 'أمير', 'الخادم', 'ولا يحمل قيمة سرّ أبداً'],
       'settings-audit-locked': ['السجل لمن يملك', 'اطلب هذه الصلاحية'],
+      'settings-storage': ['مزودو التخزين', 'Google Drive', 'متصل', 'hub@example.com', 'نسخ محفوظة هنا', '5 · 1.50 غيغابايت', 'منها إصدارات مكتبة الوسائط', 'آخر تحقق', 'لم تُفحص بعد', 'تحقق من عينة',
+        'ما يخدمه كل مزود', 'مكتبة الوسائط', 'مرفقات البريد', 'ملفات المراسلة', 'النسخ الاحتياطي', 'لا مزود بعد', 'غير متاح بعد', 'OneDrive', 'تخزين Supabase', 'S3', 'جهاز تخزين شبكي', 'الوكيل', 'لم يُبنيا بعد'],
+      'settings-storage-bad': ['مفقودة أو تحتاج انتباهاً', '3 ملفات بلا موضع مسجّل', 'لم يُتحقق من شيء بعد'],
+      'settings-storage-viewer': ['مزودو التخزين', 'تحقق من عينة'],
+      'settings-storage-locked': ['أين تُحفظ الملفات لمن يملك', 'اطلب هذه الصلاحية'],
+      'library-storage-state': ['الإصدار 2', 'Google Drive', 'سليم', 'تُحقق منه', 'الإصدار 1', 'مفقود', 'لم يُتحقق منه بعد'],
+      'library-storage-empty': ['لا موضع مسجّل'],
       // The mark and the word are flex items, so the page's text puts a line between them.
       'urgency-badges': ['!\nللانتباه', '!!\nمهم', '!!!\nعاجل'],
       'my-permissions': ['اطلب صلاحية', 'صلاحياتي', 'لديك صلاحية مؤقتة أو لمرة واحدة', 'الصفحات', 'من صفحات الحساب', 'مؤقتة حتى 2026-10-14 12:00', 'يمنح الصلاحيات ويسحبها من يدير رتبتك'],
     };
     const absent = {
       'accounts-members': ['undefined', 'urgency.2', 'permissions.grant'],
-      'accounts-card': ['undefined', 'whatsapp.push', 'urgency.3'],
-      'accounts-card-above': ['إنهاء كل الإضافات', 'إزالة العضو'],
+      'accounts-card': ['undefined', 'whatsapp.push', 'urgency.3', 'إرسال رابط كلمة مرور جديدة', 'إعادة إرسال رابط التأكيد'],
+      'accounts-card-above': ['إنهاء كل الإضافات', 'إزالة العضو', 'إرسال دعوة'],
       'accounts-writer': ['إضافة عضو', 'الأعضاء ('],
       'dialog-grant-pick': ['اعتماد جزء من عمل أو رفضه', 'النشر والجدولة'],
       'dialog-member-add': ['>Admin<'],
@@ -361,6 +389,9 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'settings-general': ['undefined', 'GOOGLE_', 'MAIL_SERVER_KEY', 'secret_id', 'نقل الرمز إلى خزنة الأسرار'],
       'settings-general-locked': ['ما يتصل به المركز'],
       'settings-audit': ['undefined', 'replaced'],
+      'settings-storage': ['undefined', 'مفقودة أو تحتاج انتباهاً', 'بلا موضع مسجّل', 'ربط OneDrive', 'drv-', 'ref'],
+      'settings-storage-locked': ['مزودو التخزين', 'Google Drive'],
+      'library-storage-state': ['drv-', 'undefined'],
       'urgency-picker-granted': ['رسائل «مهم» لمن يملك صلاحيتها'],
       'urgency-picker-director': ['رسائل «مهم» لمن يملك صلاحيتها', 'حتى يبقى العاجل نادراً'],
       'urgency-badges': ['بلا درجة'],
@@ -370,6 +401,13 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     check('settings-general: disabling a provider is a long press', /data-hold="إيقاف المزوّد يوقف الرفع إليه والقراءة منه حتى يُشغّل من جديد."/.test(pages['settings-general']));
     check('settings-general-viewer: the settings inputs are read only', (pages['settings-general-viewer'].match(/id="st-(maint-text|upload)"[^>]*disabled/g) ?? []).length === 2);
     check('settings-general-locked: the request is for «settings.view»', /data-need="settings.view"/.test(pages['settings-general-locked']));
+    // Settings Step S2: checking is a right; reading is not.
+    check('settings-storage: the check is a button for a manager', /class="primary st-verify"/.test(pages['settings-storage']) && !/data-need="storage.manage"/.test(pages['settings-storage']));
+    check('settings-storage-viewer: a viewer sees a locked control for «storage.manage», not a working button', /data-need="storage.manage"/.test(pages['settings-storage-viewer']));
+    check('settings-storage-locked: the request is for «storage.manage»', /data-need="storage.manage"/.test(pages['settings-storage-locked']));
+    check('settings-storage: nothing in «غير متاح بعد» is a button', !/<button[^>]*>[^<]*(OneDrive|NAS|S3)/.test(pages['settings-storage']));
+    check('settings-storage-bad: the missing copies are flagged and counted', />1 · 2</.test(pages['settings-storage-bad'].replace(/<!-- -->/g, '')) || /1 · 2/.test(pages['settings-storage-bad'].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')));
+    check('library-storage-state: a missing copy is marked for the colour rule', /data-state="missing"/.test(pages['library-storage-state']));
     // Step P5a: the push is a locked control until granted (D-13); nobody's number appears in messaging.
     check('wa-push-locked: the request is a locked control for «whatsapp.push»', /data-need="whatsapp.push"[^>]*aria-disabled="true"|aria-disabled="true"[^>]*data-need="whatsapp.push"/.test(pages['wa-push-locked']));
     check('wa-push-locked: no member can be sent to', !/class="ml-btn sm primary"/.test(pages['wa-push-locked']));

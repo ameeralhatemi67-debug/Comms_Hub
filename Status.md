@@ -38,7 +38,14 @@ Verification: typecheck and production build passed; all 153 existing tests pass
 Steps 1 and 2 of the order in `Readiness_Audit.md` are built and verified except for the signed-in screens. An administrator can now send a real invitation, see how far each person got, resend the confirmation, send a reset link; access requests notify the leaders (in the site and by email) and tell a refused applicant; the sign-in screen has an expired-link state and stops revealing which addresses have accounts; «الأفكار» hands the text to the real «إنشاء»; the mock pages say «لم يُبنَ بعد». Database rule run 30 of 30, `npm test` 185 of 185, signed-out browser check 14 of 14.
 
 - **Waiting on the owner:** the one-time Supabase Auth SMTP change and address settings in `Entry_Flow_Setup.md`, then the signed-in walkthrough in the same file.
-- **Next action:** step 3 of the audit order, the real storage tab with file locations and the provider interface (S2), with no change to how files behave.
+- **Next action:** step 4 of the audit order, the platform registry with add, edit, delete, info tab and readiness tracker (S5).
+
+## Storage locations, 2026-10-14 (Step S2)
+
+Where each stored file lives is now recorded (`file_locations`, backfilled and kept true by trigger), every route that serves or changes a file asks a role for its provider through one interface (Google Drive behind it), «الإعدادات» «التخزين» shows providers, roles and the state of their copies with «تحقق من عينة», and a library file's page says where each version is kept and when it was last checked. Files behave exactly as before. Database rule run 31 of 31, `npm test` 196 of 196, fixture browser check 830 of 830, signed-out check 10 of 10.
+
+- **Waiting on the owner:** the signed-in walkthrough, including the first «تحقق من عينة», which also shows whether the five library files are still in Drive.
+- **Next action:** step 4 above. The move engine and a second provider (S3) follow the registry in the audit order.
 
 Updated 2026-10-10. **CHECKPOINT 0.2 IN PROGRESS.** Checkpoint 0.1 is complete and accepted. Phase 0.2.1 (Workflow Mapping) is complete. **Phase 0.2.2 (Guided Department Validation) is closed on the Director's response alone:** R01 arrived on 2026-10-10, and the same day the owner directed that the Director's input is enough, so the remaining participants and the frozen build are skipped (`[-]` in `Roadmap.md`; exit gate criteria 1 and 2 waived by that directive). Phase 0.2.3 Round 1 corrections start on 2026-10-11. The day-by-day plan is in `Roadmap.md` under "Work plan from 2026-10-11".
 

@@ -1,0 +1,60 @@
+{
+  "script": "qa/storage-gate.cjs",
+  "ran": "2026-10-14",
+  "base": "http://localhost:3100",
+  "total": 10,
+  "passed": 10,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "the check route refuses a visitor",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "and a request from another site",
+      "pass": true,
+      "detail": "403"
+    },
+    {
+      "name": "a library file is refused to a visitor, not a server error",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "a mail attachment is refused to a visitor, not a server error",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "a messaging file is refused to a visitor, not a server error",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "a review link with no such token is a plain refusal, not a server error",
+      "pass": true,
+      "detail": "404"
+    },
+    {
+      "name": "starting an upload as a visitor is refused",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "moving files as a visitor is refused",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "the storage tab is not shown to a visitor",
+      "pass": true,
+      "detail": "تسجيل الدخول"
+    },
+    {
+      "name": "and no storage text leaks into the sign-in screen",
+      "pass": true,
+      "detail": "مركز الاتصال\nCOMMUNICATION HUB\nتسجيل الدخول\nأول دخول\nطلب وصو"
+    }
+  ]
+}

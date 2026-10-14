@@ -1,4 +1,4 @@
-import { getDrive } from '@/lib/drive/google';
+import { storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { isUuid } from '@/lib/drive/parents';
 import { serverClient } from '@/lib/supabase/server';
@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const row = Array.isArray(data) ? (data[0] as { drive_file_id: string; name: string; mime_type: string } | undefined) : undefined;
   if (!row) return fail(404, 'غير موجود.');
 
-  const upstream = await getDrive().open(row.drive_file_id, request.headers.get('range'));
+  const upstream = await storageFor('chat').open(row.drive_file_id, request.headers.get('range'));
   if (!upstream.ok && upstream.status !== 206) return fail(upstream.status === 404 ? 404 : 502, 'تعذّر قراءة الملف.');
   const inline = /^(image\/(png|jpeg|webp|gif)|audio\/)/.test(row.mime_type);
   const headers = new Headers({

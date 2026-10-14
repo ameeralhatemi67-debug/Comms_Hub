@@ -1,4 +1,4 @@
-import { getDrive } from '@/lib/drive/google';
+import { storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { cleanName } from '@/lib/drive/media';
 import { isUuid } from '@/lib/drive/parents';
@@ -26,7 +26,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   if (before.drive_folder_id) {
     try {
-      await getDrive().rename(before.drive_folder_id, name);
+      await storageFor('library').rename(before.drive_folder_id, name);
     } catch {
       await supabase.rpc('undo_cancel_last');
       return fail(502, 'تعذّر تحديث Google Drive، لم يُحفظ التغيير.');
