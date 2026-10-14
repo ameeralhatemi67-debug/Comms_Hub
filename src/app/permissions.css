@@ -143,3 +143,26 @@ span.pm-locked svg{width:13px;height:13px;margin-top:3px}
 .wa-sys-form{display:grid;gap:12px}
 .wa-sys-state{display:grid;gap:4px}
 .wa-sys-fails ul{margin:6px 0;padding-inline-start:18px;display:grid;gap:4px}
+
+/* Settings and integrations (Settings_Integrations_Plan.md 5): «عام» and «السجل», the maintenance banner. */
+.maint-banner{margin:0 0 14px;padding:10px 14px;border-radius:10px;border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);background:color-mix(in srgb,var(--danger) 8%,var(--surface));color:var(--ink)}
+.maint-banner b{color:var(--danger);margin-inline-end:6px}
+.st-general,.st-audit{display:grid;gap:18px;max-width:900px}
+.st-block{display:grid;gap:10px}
+.st-block h3{margin:0;font-size:15px}
+.st-int{display:grid;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.st-int.success{border-inline-start:3px solid var(--green)}
+.st-int.warn,.st-int.danger{border-inline-start:3px solid var(--danger)}
+.st-int header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.st-int small{color:var(--muted)}
+.st-int .actions,.st-site .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.st-yesno{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px}
+.st-yesno li{display:flex;justify-content:space-between;gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px}
+.st-yesno li.no b{color:var(--danger)}
+.st-yesno li.yes b{color:var(--green-text)}
+.st-site{max-width:560px}
+.st-site label{display:grid;gap:4px}
+.st-events{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.st-events li{display:grid;gap:2px;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.st-events small{color:var(--muted)}
+.st-audit label{display:grid;gap:4px;max-width:320px}

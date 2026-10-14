@@ -71,7 +71,9 @@ select pg_temp.who('00000000-0000-0000-0000-0000000000c4');
 select pg_temp.c('07 publisher: as before, and «إنشاء» stays closed though listed', (select count(*) from public.capabilities c where pg_temp.before(c.key) is not null and public.has_capability(c.key) <> pg_temp.before(c.key))::text || ' ' || public.has_capability('page.create'), '0 false');
 select pg_temp.who('00000000-0000-0000-0000-0000000000c5');
 select pg_temp.c('08 member: as before', (select count(*) from public.capabilities c where pg_temp.before(c.key) is not null and public.has_capability(c.key) <> pg_temp.before(c.key))::text, '0');
-select pg_temp.c('09 the comparison covers every grantable capability but the new level 2', (select count(*) from public.capabilities c where c.grantable and pg_temp.before(c.key) is null)::text, '1');
+-- Since Step S1 of Settings_Integrations_Plan.md (2026-10-14) eight settings capabilities exist that had no
+-- earlier rule to keep (grp 'settings'); they are new, the administrator's only, and counted apart.
+select pg_temp.c('09 the comparison covers every grantable capability but the new level 2 (and the eight settings ones, new since S1)', (select count(*) from public.capabilities c where c.grantable and c.grp <> 'settings' and pg_temp.before(c.key) is null)::text || ' ' || (select count(*) from public.capabilities where grp = 'settings')::text, '1 8');
 select pg_temp.c('10 «مهم» is the leaders'' by default, nobody else''s', (select string_agg(role, ',' order by role) from public.role_capabilities where capability = 'urgency.2' and allowed), 'admin,assistant,director');
 select pg_temp.c('11 the WhatsApp push is nobody''s until granted (D-13)', (select count(*) from public.role_capabilities where capability = 'whatsapp.push' and allowed)::text, '0');
 select pg_temp.c('12 my_capabilities lists every capability', (select jsonb_array_length(public.my_capabilities()->'caps'))::text, (select count(*) from public.capabilities)::text);
@@ -172,7 +174,7 @@ select pg_temp.t('56 one outside mail without waiting', $q$ select public.grant_
 select pg_temp.who('00000000-0000-0000-0000-0000000000c1');
 select pg_temp.c('56b an internal message does not use it', (public.mail_send(null,'داخلي',array['p:dir@t.test'],null,null,'نص',null,null,null,null,null,false)->>'state')
   || ' ' || public.has_capability('mail.outside.send')::text, 'sent true');
-select pg_temp.c('56c the outside one goes', (public.mail_send(null,'موضوع',array['e:x@example.com'],null,null,'نص',null,null,null,null,null,false)->>'state') in ('outbox','queued'), 'true');
+select pg_temp.c('56c the outside one goes', ((public.mail_send(null,'موضوع',array['e:x@example.com'],null,null,'نص',null,null,null,null,null,false)->>'state') in ('outbox','queued'))::text, 'true');
 select pg_temp.c('56d the next is held again', public.mail_send(null,'موضوع',array['e:x@example.com'],null,null,'نص',null,null,null,null,null,false)->>'state', 'held');
 
 -- Deny beats the role; a later layer beats the deny ---------------------------

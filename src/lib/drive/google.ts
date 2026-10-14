@@ -1,10 +1,15 @@
 // Google Drive, as the one Google account the owner connected. Server only: it holds
-// the client secret and the refresh token, which must never reach a browser.
+// the client secret and the refresh token, which must never reach a browser. Since Step S1
+// of Settings_Integrations_Plan.md the refresh token is read from Supabase Vault first
+// (../integrations/vault.ts); GOOGLE_DRIVE_REFRESH_TOKEN stays as a fallback until the
+// owner confirms the vault holds it.
 //
 // A personal Gmail account has no Shared Drives and a service account cannot own
 // files there, so the Hub acts as the account itself through OAuth 2.0 offline
 // access. The scope is drive.file: the Hub can only see and change files it created,
 // never the rest of the account's Drive.
+
+import { vaultReachable, vaultSecret } from '../integrations/vault.ts';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const API = 'https://www.googleapis.com/drive/v3';
@@ -31,8 +36,11 @@ export const readDriveEnv = (): DriveEnv => ({
 /** The OAuth client is set up (enough to run the connect flow). */
 export const oauthConfigured = (env: DriveEnv = readDriveEnv()) => Boolean(env.clientId && env.clientSecret);
 
-/** The Hub holds a refresh token and can talk to Drive. */
-export const driveConfigured = (env: DriveEnv = readDriveEnv()) => oauthConfigured(env) && Boolean(env.refreshToken);
+/**
+ * The Hub may hold a refresh token: in its environment, or in the vault when the vault can be
+ * asked. Whether the vault really holds one is known only by asking (the status route does).
+ */
+export const driveConfigured = (env: DriveEnv = readDriveEnv()) => oauthConfigured(env) && (Boolean(env.refreshToken) || vaultReachable());
 
 export class DriveError extends Error {
   status: number;
@@ -52,25 +60,34 @@ export type DriveFile = {
   appProperties?: Record<string, string>;
 };
 
-type Deps = { env: DriveEnv; fetch: typeof fetch; now: () => number };
+type Deps = {
+  env: DriveEnv;
+  fetch: typeof fetch;
+  now: () => number;
+  /** Where the refresh token comes from; defaults to the environment. */
+  tokenSource: () => Promise<string | null | undefined>;
+};
 
 export function createDrive(deps: Partial<Deps> = {}) {
   const env = deps.env ?? readDriveEnv();
   const http = deps.fetch ?? fetch;
   const now = deps.now ?? Date.now;
+  const source = deps.tokenSource ?? (async () => env.refreshToken);
   let token: { value: string; expires: number } | null = null;
   let folder: string | null = env.folderId ?? null;
 
   async function accessToken(): Promise<string> {
     if (token && token.expires - 60_000 > now()) return token.value;
-    if (!driveConfigured(env)) throw new DriveError(503, 'DRIVE_NOT_CONFIGURED');
+    if (!oauthConfigured(env)) throw new DriveError(503, 'DRIVE_NOT_CONFIGURED');
+    const refreshToken = await source();
+    if (!refreshToken) throw new DriveError(503, 'DRIVE_NOT_CONFIGURED');
     const res = await http(TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         client_id: env.clientId!,
         client_secret: env.clientSecret!,
-        refresh_token: env.refreshToken!,
+        refresh_token: refreshToken,
         grant_type: 'refresh_token',
       }),
     });
@@ -203,10 +220,28 @@ export function createDrive(deps: Partial<Deps> = {}) {
 
 export type Drive = ReturnType<typeof createDrive>;
 
+// The refresh token, vault first, kept in this process's memory for a few minutes so a burst
+// of requests asks the vault once.
+let cached: { value: string | null; source: 'vault' | 'env' | 'none'; at: number } | null = null;
+const CACHE_MS = 5 * 60_000;
+export async function driveRefreshToken(): Promise<{ value: string | null; source: 'vault' | 'env' | 'none' }> {
+  if (cached && Date.now() - cached.at < CACHE_MS) return cached;
+  const fromVault = await vaultSecret('google_drive', 'drive access');
+  const env = readDriveEnv().refreshToken ?? null;
+  cached = fromVault ? { value: fromVault, source: 'vault', at: Date.now() } : { value: env, source: env ? 'env' : 'none', at: Date.now() };
+  return cached;
+}
+
 let shared: Drive | undefined;
 /** One instance per server process, built on first use so the build never reads secrets. */
 export function getDrive(): Drive {
-  return (shared ??= createDrive());
+  return (shared ??= createDrive({ tokenSource: async () => (await driveRefreshToken()).value }));
+}
+
+/** After a new token is stored: forget the cached token and the access token made from it. */
+export function resetDrive() {
+  cached = null;
+  shared = undefined;
 }
 
 /** The address Google sends the person back to after they approve the connection. */

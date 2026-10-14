@@ -29,6 +29,8 @@ import { ProfileEditor } from './profile-editor';
 import { MyPermissions } from './my-permissions';
 import { WhatsAppSettings } from './whatsapp/member';
 import { WhatsAppSystemPanel } from './whatsapp/system-panel';
+import { GeneralTab } from './settings/general';
+import { AuditTab } from './settings/audit';
 import { DriveIntegration } from './drive-files';
 
 const pageNames: Record<string, string> = {
@@ -61,6 +63,7 @@ const adminSections = [
 
 /** Settings sections, MVP_draft.md section 38. Visual configuration only. */
 const settingsSections = [
+  { id: 'general', label: 'عام وصحة النظام' },
   { id: 'organization', label: 'المؤسسة' },
   { id: 'appearance', label: 'المظهر' },
   { id: 'language', label: 'اللغة' },
@@ -70,7 +73,10 @@ const settingsSections = [
   { id: 'ai', label: 'الذكاء والأتمتة' },
   { id: 'storage', label: 'التخزين' },
   { id: 'whatsapp', label: 'واتساب النظام' },
+  { id: 'audit', label: 'السجل' },
 ];
+/** The settings tabs that are real (in the database); the others are visual in the prototype. */
+const REAL_SETTINGS = ['general', 'whatsapp', 'audit'];
 
 export function Supporting({ page }: { page: string }) {
   const { state, dispatch } = useHub();
@@ -84,7 +90,11 @@ export function Supporting({ page }: { page: string }) {
   const [alerts, setAlerts] = useState(true);
   const [confirmReset, setConfirmReset] = useState(false);
   const [adminTab, setAdminTab] = useState('users');
-  const [settingsTab, setSettingsTab] = useState('organization');
+  // «/settings?tab=general» opens a tab directly (the Drive connection returns there).
+  const [settingsTab, setSettingsTab] = useState(() => {
+    const t = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('tab');
+    return t && settingsSections.some((s) => s.id === t) ? t : 'general';
+  });
 
   const createWork = (title: string, body: string, submit = false) => {
     dispatch({
@@ -467,8 +477,8 @@ export function Supporting({ page }: { page: string }) {
           <SlidersHorizontal />
         </Title>
         <Tabs items={settingsSections} value={settingsTab} onChange={setSettingsTab} />
-        {settingsTab === 'whatsapp' ? (
-          <p className="muted">واتساب النظام حقيقي: إعداداته في قاعدة البيانات ويقرر فيها من يملك صلاحيتها.</p>
+        {REAL_SETTINGS.includes(settingsTab) ? (
+          <p className="muted">هذا القسم حقيقي: بياناته في قاعدة البيانات، ويقرر فيه من يملك صلاحيته.</p>
         ) : (
           <p className="muted">
             التصميم والوضع يُحفظان في هذا المتصفح. بقية الإعدادات مرئية فقط، لا تُحفظ خارج هذه الجلسة ولا تغيّر سلوك
@@ -476,6 +486,16 @@ export function Supporting({ page }: { page: string }) {
           </p>
         )}
 
+        {settingsTab === 'general' && (
+          <Panel title="عام وصحة النظام" className="st-panel">
+            <GeneralTab />
+          </Panel>
+        )}
+        {settingsTab === 'audit' && (
+          <Panel title="سجل التكاملات والإعدادات" className="st-panel">
+            <AuditTab />
+          </Panel>
+        )}
         {settingsTab === 'whatsapp' && (
           <Panel title="واتساب النظام" className="wa-syspanel">
             <WhatsAppSystemPanel />

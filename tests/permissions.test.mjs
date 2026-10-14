@@ -18,10 +18,13 @@ import { roleIds } from '../src/lib/domain.ts';
 import { noticeHref } from '../src/lib/work/rules.ts';
 
 const sql = readFileSync('supabase/migrations/20261013150000_permissions.sql', 'utf8');
+// Settings and integrations add theirs (Settings_Integrations_Plan.md, Step S1).
+const intSql = readFileSync('supabase/migrations/20261014120000_integrations.sql', 'utf8');
 
 /** The catalog rows of the migration's insert, parsed. */
 function seeded() {
-  const block = sql.slice(sql.indexOf('insert into public.capabilities'), sql.indexOf('-- Role templates equal'));
+  const block = sql.slice(sql.indexOf('insert into public.capabilities'), sql.indexOf('-- Role templates equal'))
+    + intSql.slice(intSql.indexOf('insert into public.capabilities'), intSql.indexOf('insert into public.role_capabilities'));
   const rows = [];
   const re = /\('([a-z0-9.]+)',\s*'(\w+)',\s*'([^']+)',\s*(true|false),\s*'(\w+)',\s*(\d),\s*'\{([a-z,]*)\}',\s*(null|'[^']*'),\s*(\d+)\)/g;
   for (const m of block.matchAll(re))

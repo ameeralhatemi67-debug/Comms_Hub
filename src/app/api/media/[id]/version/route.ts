@@ -3,6 +3,7 @@ import { guard, fail } from '@/lib/drive/guard';
 import { MAX_UPLOAD_BYTES, cleanName, mediaKind } from '@/lib/drive/media';
 import { driveParentOf, isUuid } from '@/lib/drive/parents';
 import { serverClient } from '@/lib/supabase/server';
+import { overLimitText, uploadLimit } from '@/lib/integrations/limits';
 
 // Step 1 of a new version: the same resumable upload as a new file, in the asset's own
 // Drive folder. Earlier versions stay in Drive untouched.
@@ -21,6 +22,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!mediaKind(body.mimeType)) return fail(415, 'نوع الملف غير مدعوم.');
 
   const supabase = await serverClient();
+  // The limit the administrator set in «الإعدادات» (Step S1), under the 5 GB ceiling.
+  const limit = await uploadLimit(supabase);
+  if (body.size > limit) return fail(413, overLimitText(limit));
   const { data: asset } = await supabase.from('media_files').select('folder_id, stage').eq('id', id).maybeSingle();
   if (!asset) return fail(404, 'غير موجود.');
   if (asset.stage === 'published') return fail(409, 'الأصل المنشور لا يقبل إصداراً جديداً.');

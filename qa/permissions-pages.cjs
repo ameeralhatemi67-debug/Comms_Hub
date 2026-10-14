@@ -34,6 +34,8 @@ const sources = [
   'components/chat/urgency.tsx', 'lib/chat/rules.ts',
   // Step P5a: WhatsApp (the member's section, the system panel, the push list and delivery line)
   'components/whatsapp/member.tsx', 'components/whatsapp/system-panel.tsx', 'components/chat/whatsapp.tsx', 'lib/whatsapp/rules.ts',
+  // Settings Step S1: «عام وصحة النظام» and «السجل»
+  'components/settings/general.tsx', 'components/settings/audit.tsx', 'lib/integrations/rules.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -244,6 +246,29 @@ async function renderAll() {
   render('wa-push-granted', 'dir@x.sa', 'director', directorCaps.map((c) => (c.k === 'whatsapp.push' ? capEval(c.k, true, 'added') : c)), dlg(h(wac.WaPushList, { room, msg, onDone() {} })), { ...wx, chat: chat('dir@x.sa') });
   render('wa-push-locked', 'dir@x.sa', 'director', directorCaps, dlg(h(wac.WaPushList, { room, msg, onDone() {} })), { ...wx, chat: chat('dir@x.sa') });
   render('wa-delivery', 'dir@x.sa', 'director', directorCaps, h('div', { className: 'ml' }, h(wac.WaDelivery, { m: msg })), { ...wx, chat: chat('dir@x.sa', false) });
+  // Settings Step S1.
+  const stg = await import(url('components/settings/general.js'));
+  const sta = await import(url('components/settings/audit.js'));
+  const drive = (over) => ({ id: 'i1', kind: 'storage', type: 'google_drive', label: 'Google Drive', state: 'connected', config: { account: 'hub@example.com' }, has_secret: true, secret_tail: '••••a1b2', secret_set_at: NOW, pending: false,
+    last_check_at: NOW, last_ok_at: NOW, last_error: null, created_at: NOW, disabled_at: null, ...over });
+  const present = { NEXT_PUBLIC_SUPABASE_URL: true, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: true, MAIL_SERVER_KEY: true, GOOGLE_CLIENT_ID: true, GOOGLE_CLIENT_SECRET: true, GOOGLE_DRIVE_REFRESH_TOKEN: true, GMAIL_ADDRESS: true, GMAIL_APP_PASSWORD: true, MAIL_SITE_URL: false, WHATSAPP_SERVER_KEY: false, WHATSAPP_LINK_SECRET: false };
+  const overview = { library_files: 5, library_bytes: 1610612736, mail_files: 0, mail_bytes: 0, integrations: { connected: 1 }, whatsapp: { enabled: false, heartbeat_at: null }, events_day: 3 };
+  const siteSet = { maintenance_on: false, maintenance_text: '', upload_max_mb: 5120 };
+  // The fixture's KEYS predate the settings capabilities: add what is missing.
+  const capsWith = (base, keys) => [...base.filter((c) => !keys.includes(c.k)), ...keys.map((k) => capEval(k, true, 'role'))];
+  const allSettings = ['settings.view', 'settings.manage', 'storage.manage', 'storage.migrate', 'backups.run', 'backups.restore', 'platforms.manage', 'integrations.secrets'];
+  const adminSet = capsWith(KEYS.map((k) => capEval(k, false, 'none')), allSettings);
+  render('settings-general', 'amir@x.sa', 'admin', adminSet, pnl(h(stg.GeneralTab, { initial: { list: [drive({})], overview, config: { present, vault: true, driveToken: 'vault' }, settings: siteSet } })), wx);
+  render('settings-general-env', 'amir@x.sa', 'admin', adminSet, pnl(h(stg.GeneralTab, { initial: { list: [drive({ state: 'needs_reconnect', has_secret: false, secret_tail: null, last_error: 'TOKEN_REFUSED', config: {} })], overview, config: { present, vault: true, driveToken: 'env' }, settings: { ...siteSet, maintenance_on: true, maintenance_text: 'صيانة الليلة', upload_max_mb: 100 } } })), wx);
+  render('settings-general-viewer', 'dir@x.sa', 'director', capsWith(directorCaps, ['settings.view']), pnl(h(stg.GeneralTab, { initial: { list: [drive({})], overview, config: { present, vault: true, driveToken: 'env' }, settings: siteSet } })), wx);
+  render('settings-general-locked', 'khalid@x.sa', 'writer', writerCaps, pnl(h(stg.GeneralTab, {})), wx);
+  const ievents = [
+    { id: 3, at: NOW, kind: 'secret_committed', actor: 'amir@x.sa', actor_name: 'أمير', integration: 'Google Drive', data: { replaced: false } },
+    { id: 2, at: NOW, kind: 'secret_used', actor: null, actor_name: null, integration: 'Google Drive', data: { purpose: 'drive access', pending: false } },
+    { id: 1, at: NOW, kind: 'settings', actor: 'amir@x.sa', actor_name: 'أمير', integration: null, data: { maintenance_on: true, upload_max_mb: 100 } },
+  ];
+  render('settings-audit', 'amir@x.sa', 'admin', adminSet, pnl(h(sta.AuditTab, { initial: ievents })), wx);
+  render('settings-audit-locked', 'khalid@x.sa', 'writer', writerCaps, pnl(h(sta.AuditTab, {})), wx);
   render('urgency-badges', 'khalid@x.sa', 'writer', writerCaps, h('div', { className: 'ml' }, ...[0, 1, 2, 3].map((l) => h('div', { key: l, className: 'cx-badge-row' }, `الدرجة ${l}: `, h(urg.UrgencyBadge, { level: l })))));
   return pages;
 }
@@ -304,6 +329,14 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'wa-push-granted': ['تصل الرسالة كاملة', 'لا يظهر رقم أحد هنا', 'خالد', 'واتساب مرتبط', 'إرسال', 'سارة', 'لا يستقبل هذا الزميل رسائل واتساب منك الآن.', 'عبدالله', 'واتساب غير مرتبط', 'تعذّرت من قبل.'],
       'wa-push-locked': ['مقفلة حتى تُمنح', 'اطلب هذه الصلاحية'],
       'wa-delivery': ['واتساب: أُرسلت إلى 1 · لم تُسلَّم بعد 1 · تعذّرت 1', 'واتساب النظام متوقف، وتصل حين يعود', 'إعادة المحاولة'],
+      'settings-general': ['ما يتصل به المركز', 'Google Drive', 'تخزين', 'متصل', 'hub@example.com', 'الرمز الدائم: في خزنة الأسرار', '••••a1b2', 'فحص الآن', 'ربط حساب آخر', 'إيقاف',
+        'إعدادات الخادم', 'موجودة أو غير موجودة فقط', 'مفتاح الخادم (يفتح خزنة الأسرار والبريد)', 'موجود', 'غير موجود', 'خزنة الأسرار', 'يصل إليها الخادم',
+        'إصدارات ملفات المكتبة', '5 · 1.50 غيغابايت', 'آخر نسخة احتياطية', 'لا توجد نسخة بعد', 'شريط صيانة أعلى كل الصفحات', 'أقصى حجم لملف في المكتبة بالميغابايت', 'حفظ', 'واتساب النظام', 'لم يتصل الجسر بعد'],
+      'settings-general-env': ['يحتاج ربطاً من جديد', 'في متغيرات الخادم فقط (احتياطي)', 'رفضت Google الرمز. اربط الحساب من جديد.', 'نقل الرمز إلى خزنة الأسرار', 'ربط Google Drive'],
+      'settings-general-viewer': ['للقراءة: تعديلها لمن يملك «تعديل الإعدادات العامة للنظام».', 'نقل الرمز إلى خزنة الأسرار'],
+      'settings-general-locked': ['صحة النظام وإعداداته العامة لمن يملك', 'اطلب هذه الصلاحية'],
+      'settings-audit': ['كل الأحداث', 'اعتُمد السر الجديد بعد فحصه · Google Drive', 'استعمل الخادم السر · Google Drive لـ «drive access»', 'تغيّرت الإعدادات العامة: شُغّل شريط الصيانة، حد الرفع 100 ميغابايت', 'أمير', 'الخادم', 'ولا يحمل قيمة سرّ أبداً'],
+      'settings-audit-locked': ['السجل لمن يملك', 'اطلب هذه الصلاحية'],
       // The mark and the word are flex items, so the page's text puts a line between them.
       'urgency-badges': ['!\nللانتباه', '!!\nمهم', '!!!\nعاجل'],
       'my-permissions': ['اطلب صلاحية', 'صلاحياتي', 'لديك صلاحية مؤقتة أو لمرة واحدة', 'الصفحات', 'من صفحات الحساب', 'مؤقتة حتى 2026-10-14 12:00', 'يمنح الصلاحيات ويسحبها من يدير رتبتك'],
@@ -325,10 +358,18 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'wa-push-granted': ['+999', 'undefined', 'whatsapp.push'],
       'wa-system-locked': ['تشغيل واتساب النظام', 'undefined'],
       'wa-system': ['undefined', 'WHATSAPP'],
+      'settings-general': ['undefined', 'GOOGLE_', 'MAIL_SERVER_KEY', 'secret_id', 'نقل الرمز إلى خزنة الأسرار'],
+      'settings-general-locked': ['ما يتصل به المركز'],
+      'settings-audit': ['undefined', 'replaced'],
       'urgency-picker-granted': ['رسائل «مهم» لمن يملك صلاحيتها'],
       'urgency-picker-director': ['رسائل «مهم» لمن يملك صلاحيتها', 'حتى يبقى العاجل نادراً'],
       'urgency-badges': ['بلا درجة'],
     };
+    // Settings Step S1: who may do what on «عام».
+    check('settings-general-viewer: a viewer cannot save or move the token (locked control for «integrations.secrets»)', !/>حفظ</.test(pages['settings-general-viewer']) && /data-need="integrations.secrets"/.test(pages['settings-general-viewer']));
+    check('settings-general: disabling a provider is a long press', /data-hold="إيقاف المزوّد يوقف الرفع إليه والقراءة منه حتى يُشغّل من جديد."/.test(pages['settings-general']));
+    check('settings-general-viewer: the settings inputs are read only', (pages['settings-general-viewer'].match(/id="st-(maint-text|upload)"[^>]*disabled/g) ?? []).length === 2);
+    check('settings-general-locked: the request is for «settings.view»', /data-need="settings.view"/.test(pages['settings-general-locked']));
     // Step P5a: the push is a locked control until granted (D-13); nobody's number appears in messaging.
     check('wa-push-locked: the request is a locked control for «whatsapp.push»', /data-need="whatsapp.push"[^>]*aria-disabled="true"|aria-disabled="true"[^>]*data-need="whatsapp.push"/.test(pages['wa-push-locked']));
     check('wa-push-locked: no member can be sent to', !/class="ml-btn sm primary"/.test(pages['wa-push-locked']));
@@ -361,7 +402,7 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     check('dialog-grant-pick: the capability search box is there', pages['dialog-grant-pick'].includes('placeholder="ابحث في الصلاحيات"'));
 
     const looks = [['a', ''], ['emerald', 'data-identity="emerald"'], ['evening', 'data-identity="emerald" data-theme="dark"']];
-    const wide = ['wa-member-linked', 'wa-system', 'wa-push-granted', 'urgency-picker-writer', 'urgency-badges', 'accounts-members', 'accounts-card', 'accounts-roles', 'dialog-grant', 'my-permissions', 'requests-perm-granter', 'dialog-decide-approve', 'dialog-ask-button', 'home-perms'];
+    const wide = ['settings-general', 'settings-audit', 'wa-member-linked', 'wa-system', 'wa-push-granted', 'urgency-picker-writer', 'urgency-badges', 'accounts-members', 'accounts-card', 'accounts-roles', 'dialog-grant', 'my-permissions', 'requests-perm-granter', 'dialog-decide-approve', 'dialog-ask-button', 'home-perms'];
     for (const name of Object.keys(pages)) {
       for (const [look, attrs] of looks) {
         for (const [vw, vh] of [[1280, 900], [390, 844]]) {

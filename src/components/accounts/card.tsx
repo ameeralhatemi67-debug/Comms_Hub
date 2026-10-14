@@ -33,7 +33,7 @@ import { MemberDialog, RemoveDialog, manageWhy, when } from './members';
 type Card = PersonCardData;
 
 const LEVEL_AR = ['لا وصول', 'عرض', 'تحرير', 'إنشاء', 'إدارة'];
-const GROUPS: CapGroup[] = ['pages', 'messaging', 'accounts', 'fixed'];
+const GROUPS: CapGroup[] = ['pages', 'messaging', 'accounts', 'settings', 'fixed'];
 
 export function PersonCard({ email, onClose, onGrant }: { email: string; onClose: () => void; onGrant: (emails: string[], cap?: string) => void }) {
   const a = useAccounts();

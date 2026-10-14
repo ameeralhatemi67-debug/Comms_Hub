@@ -39,6 +39,7 @@ import { Modal, Empty, LogoLoader } from './ui';
 import { HelpButton, ToastUndo, UndoButton, useKit } from './kit';
 import { NoticeDrawer, useNotices } from './notices';
 import { useCaps } from './caps';
+import { MaintenanceBanner } from './settings/maintenance-banner';
 
 const nav = [
   ['/', 'الرئيسية', House],
@@ -225,6 +226,7 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main id="main">
+          <MaintenanceBanner />
           {/* The page guide opens here, in place of the page (src/lib/kit/guide.ts). */}
           <div id="guide-view" hidden />
           {children}

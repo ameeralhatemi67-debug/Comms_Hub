@@ -58,7 +58,7 @@ export function RolesTab() {
             </tr>
           </thead>
           <tbody>
-            {(['messaging', 'accounts'] as const).map((grp) => [
+            {(['messaging', 'accounts', 'settings'] as const).map((grp) => [
               <tr key={grp} className="pm-grp">
                 <th colSpan={ORDER.length + 1}>{GROUP_AR[grp]}</th>
               </tr>,

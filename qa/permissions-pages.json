@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-14T09:46:19.699Z",
+  "run": "2026-10-14T11:37:14.521Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -182,7 +182,57 @@
       "detail": ""
     },
     {
+      "name": "settings-general: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-env: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-viewer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-locked: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit-locked: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "urgency-badges: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-viewer: a viewer cannot save or move the token (locked control for «integrations.secrets»)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: disabling a provider is a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-viewer: the settings inputs are read only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-locked: the request is for «settings.view»",
       "pass": true,
       "detail": ""
     },
@@ -249,12 +299,12 @@
     {
       "name": "accounts-roles-assistant: without «تعديل صلاحيات الأدوار» every switch is disabled with its reason",
       "pass": true,
-      "detail": "88 switches"
+      "detail": "152 switches"
     },
     {
       "name": "accounts-roles: the director edits roles below his rank only (Admin, director columns locked)",
       "pass": true,
-      "detail": "59 locked of 88"
+      "detail": "123 locked of 152"
     },
     {
       "name": "accounts-card: the two large effects need a long press",
@@ -2982,6 +3032,496 @@
       "detail": "overflow 0px"
     },
     {
+      "name": "settings-general · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general: shows «ما يتصل به المركز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «Google Drive»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «تخزين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «متصل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «hub@example.com»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «الرمز الدائم: في خزنة الأسرار»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «••••a1b2»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «فحص الآن»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «ربط حساب آخر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «إيقاف»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «إعدادات الخادم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «موجودة أو غير موجودة فقط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «مفتاح الخادم (يفتح خزنة الأسرار والبريد)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «موجود»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «غير موجود»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «خزنة الأسرار»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «يصل إليها الخادم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «إصدارات ملفات المكتبة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «5 · 1.50 غيغابايت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «آخر نسخة احتياطية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «لا توجد نسخة بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «شريط صيانة أعلى كل الصفحات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «أقصى حجم لملف في المكتبة بالميغابايت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «حفظ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «واتساب النظام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: shows «لم يتصل الجسر بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: does not show «GOOGLE_»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: does not show «MAIL_SERVER_KEY»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: does not show «secret_id»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: does not show «نقل الرمز إلى خزنة الأسرار»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general-env · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-env · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general-env: shows «يحتاج ربطاً من جديد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-env: shows «في متغيرات الخادم فقط (احتياطي)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-env: shows «رفضت Google الرمز. اربط الحساب من جديد.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-env: shows «نقل الرمز إلى خزنة الأسرار»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-env: shows «ربط Google Drive»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-env: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-env · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-env · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general-viewer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-viewer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general-viewer: shows «للقراءة: تعديلها لمن يملك «تعديل الإعدادات العامة للنظام».»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-viewer: shows «نقل الرمز إلى خزنة الأسرار»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-viewer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-viewer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-viewer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general-locked · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-locked · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-general-locked: shows «صحة النظام وإعداداته العامة لمن يملك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-locked: shows «اطلب هذه الصلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-locked: does not show «ما يتصل به المركز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-locked: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-locked · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-general-locked · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-audit · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-audit: shows «كل الأحداث»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit: shows «اعتُمد السر الجديد بعد فحصه · Google Drive»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit: shows «استعمل الخادم السر · Google Drive لـ «drive access»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit: shows «تغيّرت الإعدادات العامة: شُغّل شريط الصيانة، حد الرفع 100 ميغابايت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit: shows «أمير»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit: shows «الخادم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit: shows «ولا يحمل قيمة سرّ أبداً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit: does not show «replaced»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-audit · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-audit · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-audit · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-audit · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-audit-locked · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit-locked · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-audit-locked: shows «السجل لمن يملك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit-locked: shows «اطلب هذه الصلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit-locked: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit-locked · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-audit-locked · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
       "name": "urgency-badges · a · 1280: no page errors",
       "pass": true,
       "detail": ""
@@ -3129,8 +3669,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 625,
-    "passed": 625,
+    "total": 733,
+    "passed": 733,
     "failed": 0
   }
 }

@@ -3,6 +3,7 @@ import { guard, fail } from '@/lib/drive/guard';
 import { MAX_UPLOAD_BYTES, cleanName, mediaKind } from '@/lib/drive/media';
 import { driveParentOf, isUuid } from '@/lib/drive/parents';
 import { serverClient } from '@/lib/supabase/server';
+import { overLimitText, uploadLimit } from '@/lib/integrations/limits';
 
 // Step 1 of an upload: validate, check the person may add to this folder, then open a
 // resumable session with Drive. The browser then sends the file itself, in chunks,
@@ -22,6 +23,9 @@ export async function POST(request: Request) {
   if (!mediaKind(body.mimeType)) return fail(415, 'نوع الملف غير مدعوم.');
 
   const supabase = await serverClient();
+  // The limit the administrator set in «الإعدادات» (Step S1), under the 5 GB ceiling.
+  const limit = await uploadLimit(supabase);
+  if (body.size > limit) return fail(413, overLimitText(limit));
   const { data: allowed } = await supabase.rpc('media_can_create', { p_folder: body.folderId });
   if (allowed !== true) return fail(403, 'الرفع إلى هذا المجلد يحتاج صلاحية «إنشاء»، وألا يكون مقفلاً.');
 

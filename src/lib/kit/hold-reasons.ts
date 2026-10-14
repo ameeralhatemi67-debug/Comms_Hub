@@ -37,6 +37,9 @@ export const HOLD = {
   roleDown: 'ينقص هذا التغيير ما يستطيع الشخص فعله فوراً.',
   /** «الحسابات»: an administrator unlinks a member's WhatsApp number. */
   waUnlink: 'يقطع ربط رقم هذا العضو ولا يُعاد إلا بتحقق جديد.',
+  // Settings and integrations (Settings_Integrations_Plan.md 10).
+  /** «الإعدادات»: switch an integration off. */
+  intDisable: 'إيقاف المزوّد يوقف الرفع إليه والقراءة منه حتى يُشغّل من جديد.',
 } as const;
 
 export const HOLD_MS = 900;

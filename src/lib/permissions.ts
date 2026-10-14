@@ -6,7 +6,7 @@
 // resolution equal to perm_eval.
 import type { Role } from './domain.ts';
 
-export type CapGroup = 'pages' | 'messaging' | 'accounts' | 'fixed';
+export type CapGroup = 'pages' | 'messaging' | 'accounts' | 'settings' | 'fixed';
 export type ScopeKind = 'none' | 'page' | 'room' | 'work' | 'folder';
 export type Capability = {
   key: string;
@@ -63,6 +63,15 @@ export const CAPABILITIES: Capability[] = [
   { key: 'members.remove', grp: 'accounts', label: 'إزالة عضو', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 44 },
   { key: 'roles.templates.edit', grp: 'accounts', label: 'تعديل صلاحيات الأدوار', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 45 },
   { key: 'whatsapp.system.manage', grp: 'accounts', label: 'إدارة رقم واتساب النظام', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 46 },
+  // Settings and integrations (Settings_Integrations_Plan.md 4.3), the administrator's by default.
+  { key: 'settings.view', grp: 'settings', label: 'عرض صحة النظام وسجل الإعدادات', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 50 },
+  { key: 'settings.manage', grp: 'settings', label: 'تعديل الإعدادات العامة للنظام', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 51 },
+  { key: 'storage.manage', grp: 'settings', label: 'إدارة مزودي التخزين', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 52 },
+  { key: 'storage.migrate', grp: 'settings', label: 'نقل الملفات بين مزودي التخزين', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 53 },
+  { key: 'backups.run', grp: 'settings', label: 'تشغيل النسخ الاحتياطي', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 54 },
+  { key: 'backups.restore', grp: 'settings', label: 'استعادة ملفات من نسخة احتياطية', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 55 },
+  { key: 'platforms.manage', grp: 'settings', label: 'إدارة المنصات وتطبيقاتها', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 56 },
+  { key: 'integrations.secrets', grp: 'settings', label: 'إدخال أسرار التكاملات وتجديدها', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 57 },
   {
     key: 'work.approve', grp: 'fixed', label: 'اعتماد جزء من عمل أو رفضه', grantable: false, scope: 'none', minRank: 2,
     fixedRoles: ['admin', 'director', 'assistant'],
@@ -97,6 +106,7 @@ export const GROUP_AR: Record<CapGroup, string> = {
   pages: 'الصفحات',
   messaging: 'المراسلة والبريد',
   accounts: 'الحسابات والصلاحيات',
+  settings: 'الإعدادات والتكاملات',
   fixed: 'مقفلة بقواعد المركز',
 };
 
