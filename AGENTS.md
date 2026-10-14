@@ -183,6 +183,21 @@ is a server-only environment variable whose sha256 alone is in the database, as 
 number, token or QR payload goes into this repository, its fixtures or its logs. Only
 an administrator sees a member's number.
 
+Integrations, storage providers and backups are real, by owner directive of 2026-10-14
+(`Settings_Integrations_Plan.md`, decisions E-1 to E-7, recorded in `progress.md`). Every
+connection (storage provider, platform app, messaging) is a row of one integrations core
+(`supabase/migrations/*integrations*`) with its state and an append-only event log.
+Secrets of anything connected through the interface live in **Supabase Vault**: entered
+once, never read back by any endpoint, never logged; only security-definer functions read
+them, and only when the site's server proves itself with `MAIL_SERVER_KEY` (one server, one
+key). The Google Drive refresh token moves there; `GOOGLE_DRIVE_REFRESH_TOKEN` stays only as
+a fallback until the owner confirms. Where each stored file lives is recorded in
+`file_locations` (`*storage*`); a move copies, verifies, switches and keeps the source until
+an administrator retires it. Capabilities `settings.view`, `settings.manage`,
+`storage.manage`, `storage.migrate`, `backups.run`, `backups.restore`, `platforms.manage`
+and `integrations.secrets` are the administrator's by default. Nothing is scheduled in the
+site: what needs a timer waits for the owner's agent computer (E-1), and the NAS likewise.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted

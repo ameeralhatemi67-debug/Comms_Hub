@@ -675,3 +675,11 @@ When recording future implementation outcomes, follow this standardized template
 - **Owner direction:** push it.
 - Pushed `main` (12 commits, `41a9470` to `d954ed1`, P1 to P5b and the film records) to GitHub; Vercel production deployment `dpl_GQcrPTpwL3m7jpeah7zBGBSaSjBr` built in about 60 seconds and is READY on `https://comms-hub-three.vercel.app`.
 - Checked live, signed out: `POST /api/whatsapp/dispatch` answers 503 «not configured» (the WhatsApp variables are not set in Vercel yet, as expected), `/w/not-a-token` answers 404 with the Arabic refusal page, Home answers 200. The database migrations were already applied in each step. The signed-in screens and WhatsApp delivery still wait for the owner's walkthroughs.
+
+### 2026-10-14: owner directive before the settings and integrations build (Step S0)
+
+- **Owner direction:** "start with S0 to S2" of `Settings_Integrations_Plan.md` (plan of 2026-10-13, decisions E-1 to E-7), after the permissions build landed.
+- **Directive recorded:** integrations, storage providers and backups are real; secrets of anything connected through the interface live in Supabase Vault (E-2), never read back, never logged; the Google Drive refresh token moves there with the environment variable kept as a fallback until the owner confirms; where each stored file lives is recorded per location; nothing scheduled runs in the site (E-1). Written into `AGENTS.md`, «Prototype boundary».
+- **Decision taken, within the plan:** the site's server proves itself to the vault functions with the existing `MAIL_SERVER_KEY` (already in Vercel, its sha256 already in the database), so no new secret is needed; the plan says the server key stays an environment variable.
+- **Checked before building:** Supabase Vault 0.3.1 is installed in `comms-hub` and its functions and views are not granted to `anon` or `authenticated`; `log_statement` is `ddl`, so a function call carrying a secret is not written to the database log; 5 library file versions and 0 mail files exist to record locations for.
+- **Baseline:** commit a621d73 holds the plan as written.
