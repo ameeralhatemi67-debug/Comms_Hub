@@ -42,6 +42,7 @@ import { Face, presenceOf, presenceText, roleTitle, usePeople } from '../people'
 import { I, fileSize, localInput, type IconName } from '../mail/parts';
 import { useChat, type AssetLite } from './provider';
 import { UrgencyBadge, UrgencyOptions } from './urgency';
+import { WaDelivery, WaPushList } from './whatsapp';
 import { useCaps } from '../caps';
 import { DecideDialog, RequestPermissionDialog, usePermRequests } from '../perm-requests';
 import { needProps } from '@/lib/kit/need';
@@ -59,7 +60,8 @@ type DialogState =
   | { kind: 'asset' }
   | { kind: 'approval' }
   | { kind: 'work' }
-  | { kind: 'img'; msg: ChatMessage };
+  | { kind: 'img'; msg: ChatMessage }
+  | { kind: 'wa'; msg: ChatMessage };
 
 const STAGE_TONE: Record<string, string> = { draft: '', production: 'info', review: 'review', changes: 'warn', rejected: 'danger', ready: 'success', scheduled: 'schedule', published: 'done' };
 const REACT_ICON: Record<string, IconName> = { check: 'check', eye: 'eye', heart: 'star', flag: 'flag', clock: 'clock' };
@@ -201,6 +203,11 @@ export function ChatTab({ onToMail }: { onToMail: (p: MailPrefill) => void }) {
       {room && (dialog?.kind === 'asset' || dialog?.kind === 'approval') && <AssetDialog room={room} approval={dialog.kind === 'approval'} onClose={() => setDialog(null)} />}
       {room && dialog?.kind === 'work' && <WorkDialog room={room} onClose={() => setDialog(null)} />}
       {dialog?.kind === 'perm' && <RequestPermissionDialog source="chat" onClose={() => setDialog(null)} />}
+      {room && dialog?.kind === 'wa' && (
+        <Dlg title="إرسال إلى واتساب" onClose={() => setDialog(null)}>
+          <WaPushList room={room} msg={dialog.msg} onDone={() => setDialog(null)} />
+        </Dlg>
+      )}
       {dialog?.kind === 'img' && (
         <Dlg title={dialog.msg.body || 'صورة'} onClose={() => setDialog(null)} wide>
           <div className="cx-lightbox">
@@ -395,6 +402,14 @@ function Conversation({
     el.classList.add('flash');
     setTimeout(() => el.classList.remove('flash'), 1500);
   };
+  // A WhatsApp link (/w/<token>) opens the room at its message: ?room=<id>&msg=<id>.
+  const target = useRef<string | null>(typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('msg'));
+  useEffect(() => {
+    const id = target.current;
+    if (!id || !msgs.some((m) => m.id === id)) return;
+    target.current = null;
+    requestAnimationFrame(() => jump(id));
+  }, [msgs.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toMail = async (m: ChatMessage | null) => {
     const to = members.filter((x) => x.email !== c.me).map((x) => `p:${x.email}`);
@@ -556,6 +571,7 @@ function Conversation({
           onReply={() => (setReply(menu.msg), setEdit(null))}
           onEdit={() => (setEdit(menu.msg), setReply(null))}
           onForward={() => onDialog({ kind: 'fwd', msg: menu.msg })}
+          onWa={() => onDialog({ kind: 'wa', msg: menu.msg })}
           onTask={() => onDialog({ kind: 'task', what: menu.msg.body })}
           onMail={() => void toMail(menu.msg)}
         />
@@ -696,6 +712,7 @@ function Bubble({
               <Content room={room} m={m} onImg={onImg} />
               {m.body && m.kind !== 'poll' && <Text text={m.body} find={find} />}
               {(m.urgency === 1 || m.urgency === 2) && <UrgencyBadge level={m.urgency} />}
+              <WaDelivery m={m} />
               {m.urgency === 3 && (
                 <div className="ack">
                   <I n="alert" />
@@ -1530,6 +1547,7 @@ function MessageMenu({
   onReply,
   onEdit,
   onForward,
+  onWa,
   onTask,
   onMail,
 }: {
@@ -1542,6 +1560,7 @@ function MessageMenu({
   onReply: () => void;
   onEdit: () => void;
   onForward: () => void;
+  onWa: () => void;
   onTask: () => void;
   onMail: () => void;
 }) {
@@ -1611,6 +1630,12 @@ function MessageMenu({
         <I n="mail" />
         تحويل إلى بريد رسمي
       </button>
+      {mine && m.kind !== 'sys' && (
+        <button type="button" role="menuitem" className="cx-wamenu" onClick={run(onWa)}>
+          <I n="send" />
+          إرسال إلى واتساب
+        </button>
+      )}
       {canEdit(m, c.me, Date.now()) && (
         <button type="button" role="menuitem" onClick={run(onEdit)}>
           <I n="pencil" />

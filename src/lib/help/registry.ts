@@ -28,6 +28,7 @@ export function pageKeyOf(path: string): string | null {
   if (p === '/') return 'home';
   if (p === '/accounts') return 'accounts';
   if (p === '/account') return 'account';
+  if (p === '/settings') return 'settings';
   return null;
 }
 
@@ -51,6 +52,7 @@ export const PAGE_HREF: Record<string, string> = {
   requests: '/requests',
   accounts: '/accounts',
   account: '/account',
+  settings: '/settings',
   home: '/',
 };
 
@@ -77,7 +79,7 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   tasks: ['src/components/media/tasks-page.tsx'],
   activity: ['src/components/media/activity-page.tsx'],
   mail: ['src/components/mail/mail-page.tsx', 'src/components/mail/thread.tsx', 'src/components/mail/parts.tsx', 'src/components/mail/composer.tsx'],
-  chat: ['src/components/chat/chat-tab.tsx', 'src/components/chat/urgency.tsx', 'src/components/mail/mail-page.tsx'],
+  chat: ['src/components/chat/chat-tab.tsx', 'src/components/chat/urgency.tsx', 'src/components/chat/whatsapp.tsx', 'src/components/mail/mail-page.tsx'],
   work: ['src/components/work/list.tsx', 'src/components/work/parts.tsx'],
   item: ['src/components/work/item.tsx', 'src/components/work/plan.tsx', 'src/components/work/publish.tsx', 'src/components/work/parts.tsx'],
   create: ['src/components/work/create.tsx', 'src/components/work/plan.tsx', 'src/components/work/parts.tsx'],
@@ -89,7 +91,8 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   project: ['src/components/work/projects.tsx', 'src/components/work/list.tsx', 'src/components/work/day-dialogs.tsx', 'src/components/work/parts.tsx'],
   requests: ['src/components/work/requests.tsx', 'src/components/work/day-dialogs.tsx', 'src/components/work/parts.tsx', 'src/components/perm-requests.tsx'],
   accounts: ['src/components/accounts/page.tsx', 'src/components/accounts/members.tsx', 'src/components/accounts/card.tsx', 'src/components/accounts/roles.tsx', 'src/components/accounts/log.tsx', 'src/components/perm-requests.tsx'],
-  account: ['src/components/supporting.tsx', 'src/components/profile-editor.tsx', 'src/components/my-permissions.tsx'],
+  account: ['src/components/supporting.tsx', 'src/components/profile-editor.tsx', 'src/components/my-permissions.tsx', 'src/components/whatsapp/member.tsx'],
+  settings: ['src/components/supporting.tsx', 'src/components/whatsapp/system-panel.tsx'],
   home: ['src/components/home.tsx', 'src/components/home-perms.tsx', 'src/components/work/parts.tsx'],
 };
 export const SHARED_SOURCES = ['src/components/ui.tsx', 'src/components/shell.tsx', 'src/components/kit.tsx'];

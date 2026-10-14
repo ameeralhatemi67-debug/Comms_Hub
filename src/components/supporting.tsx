@@ -27,6 +27,8 @@ import { useIdentity, useTheme } from '@/lib/use-identity';
 import { Empty, Modal, Panel, Tabs, Title } from './ui';
 import { ProfileEditor } from './profile-editor';
 import { MyPermissions } from './my-permissions';
+import { WhatsAppSettings } from './whatsapp/member';
+import { WhatsAppSystemPanel } from './whatsapp/system-panel';
 import { DriveIntegration } from './drive-files';
 
 const pageNames: Record<string, string> = {
@@ -67,6 +69,7 @@ const settingsSections = [
   { id: 'approvals', label: 'افتراضات الاعتماد' },
   { id: 'ai', label: 'الذكاء والأتمتة' },
   { id: 'storage', label: 'التخزين' },
+  { id: 'whatsapp', label: 'واتساب النظام' },
 ];
 
 export function Supporting({ page }: { page: string }) {
@@ -464,10 +467,20 @@ export function Supporting({ page }: { page: string }) {
           <SlidersHorizontal />
         </Title>
         <Tabs items={settingsSections} value={settingsTab} onChange={setSettingsTab} />
-        <p className="muted">
-          التصميم والوضع يُحفظان في هذا المتصفح. بقية الإعدادات مرئية فقط، لا تُحفظ خارج هذه الجلسة ولا تغيّر سلوك
-          النظام.
-        </p>
+        {settingsTab === 'whatsapp' ? (
+          <p className="muted">واتساب النظام حقيقي: إعداداته في قاعدة البيانات ويقرر فيها من يملك صلاحيتها.</p>
+        ) : (
+          <p className="muted">
+            التصميم والوضع يُحفظان في هذا المتصفح. بقية الإعدادات مرئية فقط، لا تُحفظ خارج هذه الجلسة ولا تغيّر سلوك
+            النظام.
+          </p>
+        )}
+
+        {settingsTab === 'whatsapp' && (
+          <Panel title="واتساب النظام" className="wa-syspanel">
+            <WhatsAppSystemPanel />
+          </Panel>
+        )}
 
         {settingsTab === 'organization' && (
           <Panel title="المؤسسة">
@@ -640,6 +653,9 @@ export function Supporting({ page }: { page: string }) {
         </Panel>
         <Panel title="صلاحياتي" className="pm-minepanel">
           <MyPermissions />
+        </Panel>
+        <Panel title="واتساب" className="wa-panel">
+          <WhatsAppSettings />
         </Panel>
         <div className="columns">
           <Panel title="الملف الشخصي">

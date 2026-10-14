@@ -35,6 +35,8 @@ export const HOLD = {
   roleDefaultOff: 'التغيير يمسّ كل من يحمل هذا الدور.',
   /** «الحسابات»: change a person's role to a lower one. */
   roleDown: 'ينقص هذا التغيير ما يستطيع الشخص فعله فوراً.',
+  /** «الحسابات»: an administrator unlinks a member's WhatsApp number. */
+  waUnlink: 'يقطع ربط رقم هذا العضو ولا يُعاد إلا بتحقق جديد.',
 } as const;
 
 export const HOLD_MS = 900;

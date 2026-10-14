@@ -10,6 +10,10 @@ import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
 import { uploadAttachment, type UploadedFile } from '@/lib/mail/upload';
 import { chatErrorText, type ChatMessage, type MemberRow, type RoomRow, type Urgency } from '@/lib/chat/rules';
+import type { OutboxRow } from '@/lib/whatsapp/rules';
+
+/** Who may receive a push from this reader: linked or not, never the number (D-12). */
+export type WaPerson = { email: string; linked: boolean; push: boolean };
 
 export type AssetLite = { id: string; name: string; kind: string; stage: string; current_version: number; approved_version: number | null; size_bytes: number };
 type Result = { ok: true; id?: string } | { ok: false; error: string };
@@ -26,6 +30,11 @@ type Ctx = {
   reactionsOf: (msg: string) => { email: string; kind: string }[];
   votesOf: (msg: string) => { email: string; option: number }[];
   acksOf: (msg: string) => string[];
+  /** WhatsApp rows of a message this person sent (urgent by level, or pushed). */
+  waOf: (msg: string) => OutboxRow[];
+  waPeople: WaPerson[];
+  /** The system number is switched on. */
+  waOn: boolean;
   starred: Set<string>;
   assets: AssetLite[];
   typing: Record<string, string[]>;
@@ -58,6 +67,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [reactions, setReactions] = useState<{ message_id: string; email: string; kind: string }[]>([]);
   const [votes, setVotes] = useState<{ message_id: string; email: string; option: number }[]>([]);
   const [acks, setAcks] = useState<{ message_id: string; email: string }[]>([]);
+  const [wa, setWa] = useState<{ rows: OutboxRow[]; people: WaPerson[]; on: boolean }>({ rows: [], people: [], on: false });
   const [stars, setStars] = useState<Set<string>>(new Set());
   const [assets, setAssets] = useState<AssetLite[]>([]);
   const [typing, setTyping] = useState<Record<string, string[]>>({});
@@ -75,10 +85,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (r.error) return setStatus('error');
     const ids = (r.data as RoomRow[]).map((x) => x.id);
     const none = Promise.resolve({ data: [], error: null });
-    const [mem, msg, a] = await Promise.all([
+    const [mem, msg, a, wo, wp, ws] = await Promise.all([
       ids.length ? db.from('chat_members').select('*').in('room_id', ids) : none,
       ids.length ? db.from('chat_messages').select('*').in('room_id', ids).order('created_at', { ascending: true }).limit(5000) : none,
       db.from('media_files').select('id, name, kind, stage, current_version, approved_version, size_bytes'),
+      db.from('whatsapp_outbox').select('id, kind, message_id, room_id, recipient, sender, state, error, created_at, sent_at').eq('sender', account.email).order('created_at', { ascending: false }).limit(1000),
+      db.rpc('wa_people'),
+      db.from('system_whatsapp').select('enabled').eq('id', 1).maybeSingle(),
     ]);
     if (mem.error || msg.error) return setStatus('error');
     const mids = (msg.data as ChatMessage[]).map((x) => x.id);
@@ -98,9 +111,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setAcks((ac.data ?? []) as typeof acks);
     setStars(new Set(((st.data ?? []) as { message_id: string }[]).map((x) => x.message_id)));
     setAssets((a.data ?? []) as AssetLite[]);
+    // WhatsApp is optional here: a failure leaves the page working without it.
+    setWa({
+      rows: (wo.data ?? []) as OutboxRow[],
+      people: ((wp.data ?? []) as WaPerson[]).map((x) => ({ email: x.email, linked: !!x.linked, push: !!x.push })),
+      on: !!(ws.data as { enabled?: boolean } | null)?.enabled,
+    });
     setNow(Date.now());
     setStatus('ready');
-  }, []);
+  }, [account.email]);
 
   const soon = useCallback(() => {
     if (reloadTimer.current) clearTimeout(reloadTimer.current);
@@ -117,7 +136,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     void load();
     const db = supabase();
     const ch = db.channel('chat-live');
-    for (const table of ['chat_messages', 'chat_members', 'chat_reactions', 'chat_votes', 'chat_acks', 'chat_rooms'])
+    for (const table of ['chat_messages', 'chat_members', 'chat_reactions', 'chat_votes', 'chat_acks', 'chat_rooms', 'whatsapp_outbox'])
       ch.on('postgres_changes', { event: '*', schema: 'public', table }, soon);
     ch.subscribe();
     const poll = setInterval(() => void load(), 30_000);
@@ -166,6 +185,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       reactionsOf: (msg) => reactions.filter((r) => r.message_id === msg),
       votesOf: (msg) => votes.filter((v) => v.message_id === msg),
       acksOf: (msg) => acks.filter((a) => a.message_id === msg).map((a) => a.email),
+      waOf: (msg) => wa.rows.filter((r) => r.message_id === msg),
+      waPeople: wa.people,
+      waOn: wa.on,
       starred: stars,
       assets,
       typing,
@@ -210,7 +232,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       },
       upload: uploadAttachment,
     };
-  }, [status, account.email, role, rooms, members, messages, pending, reactions, votes, acks, stars, assets, typing, now, load, say, open]);
+  }, [status, account.email, role, rooms, members, messages, pending, reactions, votes, acks, wa, stars, assets, typing, now, load, say, open]);
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 }

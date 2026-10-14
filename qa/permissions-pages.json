@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-14T09:13:07.066Z",
+  "run": "2026-10-14T09:46:19.699Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -142,7 +142,72 @@
       "detail": ""
     },
     {
+      "name": "wa-member-off: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system-locked: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-locked: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-delivery: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "urgency-badges: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-locked: the request is a locked control for «whatsapp.push»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-locked: no member can be sent to",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: only the one who accepts a push and has none yet gets «إرسال»",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "wa-member-pending: the pending number is masked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off: nothing but the switch while it is off",
       "pass": true,
       "detail": ""
     },
@@ -2272,6 +2337,651 @@
       "detail": "overflow 0px"
     },
     {
+      "name": "wa-member-off · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-member-off: shows «واتساب النظام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off: shows «متصل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off: shows «استلام رسائل واتساب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off: shows «في حالتين فقط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off: shows «لا يقرأ المركز الردود»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off: shows «إيقاف هذا الخيار يحذف رقمك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off: does not show «رقمك المتحقق منه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off: does not show «الرمز المرسل إلى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-off · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-member-pending · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-member-pending: shows «رقم واتساب بالصيغة الدولية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: shows «يرى رقمك أنت ومسؤول النظام فقط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: shows «إرسال الرمز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: shows «الرمز المرسل إلى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: shows «بقي 4 من المحاولات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: shows «تحقق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: shows «أرسل لي من درجة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: shows ««عاجل» فقط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: shows «الرسائل التي يدفعها إليّ زميل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: does not show «+99900000001»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-pending · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-member-linked · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-member-linked: shows «رقمك المتحقق منه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked: shows «+99900000001»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked: shows «تغيير الرقم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked: shows «غير متصل منذ 30 دقيقة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked: shows «ينتظر ولا يضيع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked: shows «محمد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked: shows «إلغاء الكتم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked: shows «كتم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-member-linked · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-member-linked · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-member-linked · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-member-linked · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-member-linked · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-system · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-system: shows «تشغيل واتساب النظام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «آخر ما قاله الجسر: جاهز»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «غير متصل منذ 3 ساعة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «مسح رمز QR»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «الاسم الذي تُوقَّع به الرسائل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «حد الرسائل المدفوعة لكل مرسل في اليوم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «أقصى طول للرسالة بالأحرف»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «رسالة تجربة إلى رقمي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «أعضاء ربطوا أرقامهم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «17»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «آخر ما تعذّر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «مدفوعة منك إلى سارة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: shows «لا تظهر هنا نصوص الرسائل ولا الأرقام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: does not show «WHATSAPP»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-system · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-system · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-system · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-system · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-system-locked · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system-locked · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-system-locked: shows «إدارة رقم واتساب النظام لمن يملك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system-locked: shows «اطلب هذه الصلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system-locked: does not show «تشغيل واتساب النظام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system-locked: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system-locked: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system-locked · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-system-locked · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-push-granted · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-push-granted: shows «تصل الرسالة كاملة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: shows «لا يظهر رقم أحد هنا»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: shows «خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: shows «واتساب مرتبط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: shows «إرسال»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: shows «سارة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: shows «لا يستقبل هذا الزميل رسائل واتساب منك الآن.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: shows «عبدالله»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: shows «واتساب غير مرتبط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: shows «تعذّرت من قبل.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: does not show «+999»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: does not show «whatsapp.push»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-push-granted · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-push-granted · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-push-granted · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-push-granted · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-granted · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-push-locked · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-locked · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-push-locked: shows «مقفلة حتى تُمنح»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-locked: shows «اطلب هذه الصلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-locked: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-locked · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-push-locked · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-delivery · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-delivery · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "wa-delivery: shows «واتساب: أُرسلت إلى 1 · لم تُسلَّم بعد 1 · تعذّرت 1»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-delivery: shows «واتساب النظام متوقف، وتصل حين يعود»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-delivery: shows «إعادة المحاولة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-delivery: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-delivery · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "wa-delivery · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
       "name": "urgency-badges · a · 1280: no page errors",
       "pass": true,
       "detail": ""
@@ -2419,8 +3129,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 483,
-    "passed": 483,
+    "total": 625,
+    "passed": 625,
     "failed": 0
   }
 }

@@ -127,3 +127,19 @@ span.pm-locked svg{width:13px;height:13px;margin-top:3px}
 .gdl .gd-need .gb{margin-top:8px}
 .gdl .gd-need small{display:block;margin-top:6px}
 [aria-disabled=true][data-need]{opacity:.55;cursor:help}
+
+/* WhatsApp (Permissions_Plan.md 8): the person's card line, the member's section, the system panel. */
+.pm-wa{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pm-wa .pm-wa-unlink{min-height:26px;padding:0 10px;font-size:12px}
+.wa-member,.wa-system{display:grid;gap:14px;max-width:720px}
+.wa-member label,.wa-system label{display:grid;gap:4px}
+.wa-member input[type="text"],.wa-member input:not([type]),.wa-member select,.wa-system input:not([type="checkbox"]){max-width:340px}
+.wa-member .actions,.wa-system .actions{display:flex;flex-wrap:wrap;gap:8px}
+.wa-number.between,.wa-mutes li.between{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.wa-mutes{display:grid;gap:8px}
+.wa-mutes ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.wa-code{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.wa-code input{letter-spacing:4px;max-width:160px}
+.wa-sys-form{display:grid;gap:12px}
+.wa-sys-state{display:grid;gap:4px}
+.wa-sys-fails ul{margin:6px 0;padding-inline-start:18px;display:grid;gap:4px}

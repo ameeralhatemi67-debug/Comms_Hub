@@ -1,0 +1,36 @@
+{
+  "run": "2026-10-14",
+  "what": "Database rule run for WhatsApp without the real sender (Permissions_Plan.md 8, Step P5a), including the four-room routing case of plan 8.6",
+  "script": "supabase/tests/whatsapp_rules.sql",
+  "migrations": {
+    "supabase/migrations/20261014100000_whatsapp.sql": "applied to comms-hub as 'whatsapp'; md5 of the stored statement 8918516e8f10ef173de8ac64c8570a1d equals the md5 of the file",
+    "supabase/migrations/20261014110000_whatsapp_dispatch_settings.sql": "applied as 'whatsapp_dispatch_settings'; file md5 7b11e58856fea41023f05bc3ba6892dd"
+  },
+  "how": "One transaction against the Supabase project comms-hub, rolled back at the end. Eight throwaway accounts (@t.test) act through row level security; the bridge's calls are made as anon. The server key is a throwaway whose hash exists only inside the transaction. Numbers use +999, a country code assigned to no country. Afterwards: 0 throwaway accounts, 0 key rows, 0 outbox rows, 0 links, the system switch off.",
+  "runs": [
+    { "attempt": 1, "checks": 98, "passed": 98, "failed": [] }
+  ],
+  "four_room_case": {
+    "rooms": "R1 director, writer, designer, member; R2 director, designer, producer (muted R2), publisher (muted the director on WhatsApp); R3 assistant, writer, producer; R4 director, assistant, publisher, writer",
+    "links": "writer and publisher from level 3; designer, producer and assistant from level 2; member asked for a code but never verified; director not linked",
+    "messages": "a1 R1 level 3, a2 R3 level 2, a3 R2 level 2, a8 R1 level 0, a4 R4 level 3, a5 R2 level 3, a6 R1 level 1, a7 R4 level 2, interleaved with pushes",
+    "urgent_rows": "a1>des,a1>wri,a2>pro,a3>des,a4>asst,a4>wri,a5>des,a5>pro (exactly)",
+    "push_rows": "a2>pro,a7>wri,a8>wri (exactly)",
+    "invariants": "for every outbox row: its room equals its message's room (0 violations), its recipient is a member of that room (0), has a verified link of that version (0), met its case: level, muted room, muted sender (0); no urgent row for a6, a7, a8; the outbox has no text or number column"
+  },
+  "rules_checked": [
+    "the system switch: off by default; nothing is sent while off; the director does not manage it, the administrator does (whatsapp.system.manage); a test send needs the manager's own verified number",
+    "the handshake: a code needs the server key; a number not in international form is refused; the pending code is unreadable even by its owner; a wrong code is counted (no raise, so the count survives); the right code verifies, version 1; after ten minutes it is refused; after five wrong tries even the right one is refused; three codes an hour; one account per number; an older waiting code is not sent",
+    "who sees a number (D-12): the owner and the administrator; a designer sees no link row and «linked» without the number",
+    "the push (plan 8.4): author only; members of the room only; not to a member without a verified link, nor to one who muted the sender (both read the same, revealing nothing); off until granted (D-13); a one-time grant bound to a room is used once; once per message and recipient; the daily cap holds",
+    "the outbox's own constraints: a recipient outside the room cannot be inserted (foreign key to chat_members); a message cannot be paired with another room (foreign key to chat_messages(id, room_id)); a recipient without a verified link of that version cannot be inserted (trigger, before the keys); one row per message, recipient and reason; nobody writes it directly (row level security); nobody calls the routing (not granted); a member sees only rows sent to or by them",
+    "dispatch with the server key, as anon: a claim and a heartbeat need the key; anon cannot reach a member's functions; a changed number (version 2) and a deleted message never go out (they fail at claim, with the reason); claimed rows are sending and a second claim finds nothing; each claimed message goes to the recipient's verified number; the code goes to the number being proved with its nonce, never the code; the text, sender, level and room are read at dispatch",
+    "reports: sent and failed; a finished row cannot be changed; the sender is told when a push did not arrive; only the sender retries",
+    "switched off: a claim returns nothing, the retried row stays queued, the claim still counts as a heartbeat; a level-3 message while off makes no row",
+    "an administrator unlinks (the director cannot): the link and its rows are gone and the member is told; a member turning WhatsApp off deletes the number"
+  ],
+  "existing_rule_runs_after_the_migration": {
+    "chat_rules.sql": "22 of 22, every value as its header states (chat_send now ends with the routing call)",
+    "urgency_rules.sql": "41 of 41"
+  }
+}

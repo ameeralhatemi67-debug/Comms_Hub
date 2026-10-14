@@ -3,7 +3,7 @@
 // grouped, each labelled with where it comes from, with the one control that fits it. The
 // grant dialog (5.2, «منح») gives a permission for good, for a time, or once, and says in
 // words what the person will be able to do and until when before it is saved.
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { CalendarClock, KeyRound, Lock, Package, RotateCcw, Trash2, Undo2, X } from 'lucide-react';
 import type { Role } from '@/lib/domain';
@@ -44,6 +44,7 @@ export function PersonCard({ email, onClose, onGrant }: { email: string; onClose
   const [extend, setExtend] = useState<Grant | null>(null);
   const [preset, setPreset] = useState('');
   const why = member ? manageWhy(a.me, a.can, member) : null;
+  const wa = useWhatsAppOf(email);
 
   if (!member) return null;
   const act = async (fn: string, args: Record<string, unknown>, ok: string) => {
@@ -67,6 +68,27 @@ export function PersonCard({ email, onClose, onGrant }: { email: string; onClose
             {roleAr(member.role)}
             {member.protected ? ' · مؤسس' : ''} · آخر دخول <bdi dir="ltr">{when(member.last_seen_at)}</bdi>
           </small>
+          {wa.row && (
+            <small className="pm-wa">
+              واتساب: {wa.row.linked ? 'مرتبط' : 'غير مرتبط'}
+              {wa.row.phone && (
+                <>
+                  {' · '}
+                  <bdi dir="ltr">{wa.row.phone}</bdi>
+                </>
+              )}
+              {wa.row.linked && a.me.role === 'admin' && a.me.email !== email && (
+                <button
+                  type="button"
+                  className="secondary danger pm-wa-unlink"
+                  data-hold={HOLD.waUnlink}
+                  onClick={() => void a.call('wa_admin_unlink', { p_email: email }).then((r) => (r.ok ? (a.say('قُطع ربط الرقم، وأُبلغ العضو.'), wa.reload()) : a.say(r.error)))}
+                >
+                  قطع ربط الرقم
+                </button>
+              )}
+            </small>
+          )}
         </span>
         <button type="button" className="pm-x" aria-label="إغلاق البطاقة" onClick={onClose}>
           <X />
@@ -593,3 +615,20 @@ export function PresetDialog({ onClose }: { onClose: () => void }) {
 }
 
 export const memberLabel = (m: Member) => `${m.display_name} · ${roleAr(m.role)}`;
+
+/** Linked or not for everyone; the number only when the reader is an administrator (D-12). */
+function useWhatsAppOf(email: string) {
+  const a = useAccounts();
+  const [row, setRow] = useState<{ email: string; linked: boolean; phone: string | null } | null>(null);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    let live = true;
+    void a.call<{ email: string; linked: boolean; phone: string | null }[]>('wa_people', {}).then((r) => {
+      if (live && r.ok) setRow((r.data ?? []).find((x) => x.email === email) ?? null);
+    });
+    return () => {
+      live = false;
+    };
+  }, [email, tick]); // eslint-disable-line react-hooks/exhaustive-deps
+  return { row, reload: () => setTick((t) => t + 1) };
+}

@@ -17,8 +17,8 @@ test('every help page has its purpose, a short first-visit guide, its parts, eve
   const groups = ['lead', 'maker', 'publisher', 'member'];
   // All sixteen pages of the reference have their guide (Step 5 of Reference_Build_Plan.md),
   // and «الحسابات» and «الحساب» theirs (Permissions_Plan.md, Step P2).
-  // Home's since Step P3 (the plan's list of tips).
-  assert.deepEqual(Object.keys(PAGES).sort(), ['account', 'accounts', 'activity', 'approvals', 'asset', 'calendar', 'channels', 'chat', 'create', 'home', 'item', 'library', 'mail', 'project', 'projects', 'requests', 'review', 'tasks', 'work']);
+  // Home's since Step P3 (the plan's list of tips); «الإعدادات» since Step P5a, for «واتساب النظام».
+  assert.deepEqual(Object.keys(PAGES).sort(), ['account', 'accounts', 'activity', 'approvals', 'asset', 'calendar', 'channels', 'chat', 'create', 'home', 'item', 'library', 'mail', 'project', 'projects', 'requests', 'review', 'settings', 'tasks', 'work']);
   for (const [key, h] of Object.entries(PAGES)) {
     assert.ok(h.name && h.tip && h.purpose, key);
     assert.ok(h.onb.length >= 3 && h.onb.length <= 4, `${key}: three or four steps`);

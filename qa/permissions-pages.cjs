@@ -32,12 +32,18 @@ const sources = [
   'components/perm-requests.tsx', 'components/home-perms.tsx', 'lib/kit/need.ts', 'lib/kit/layer.ts',
   // Step P4: the urgency picker and the level marks of messaging
   'components/chat/urgency.tsx', 'lib/chat/rules.ts',
+  // Step P5a: WhatsApp (the member's section, the system panel, the push list and delivery line)
+  'components/whatsapp/member.tsx', 'components/whatsapp/system-panel.tsx', 'components/chat/whatsapp.tsx', 'lib/whatsapp/rules.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
   const depth = m.split('/').length - 1;
   const up = '../'.repeat(depth);
-  let js = ts.transpileModule(src, {
+  // Messaging and people data are fixtures here (Step P5a).
+  const src2 = src
+    .replace(/from '\.\.\/people'/g, `from '${up}mocks/people.js'`)
+    .replace(/from '\.\/provider'/g, m === 'components/chat/whatsapp.tsx' ? `from '${up}mocks/chatprov.js'` : `from './provider'`);
+  let js = ts.transpileModule(src2, {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, verbatimModuleSyntax: false },
   }).outputText;
   js = js
@@ -73,6 +79,10 @@ export const useRooms = () => globalThis.__PM.rooms;`);
 fs.writeFileSync(path.join(build, 'mocks', 'caps.js'), `export const useCaps = () => globalThis.__PM.caps;`);
 fs.writeFileSync(path.join(build, 'mocks', 'store.js'), `export const useHub = () => ({ state: { role: globalThis.__PM.ctx.me.role, message: '' }, dispatch() {} });`);
 fs.writeFileSync(path.join(build, 'mocks', 'account.js'), `export const useAccount = () => globalThis.__PM.ctx.me;`);
+fs.writeFileSync(path.join(build, 'mocks', 'people.js'), `const P = () => globalThis.__PM.people;
+export const PeopleProvider = ({ children }) => children;
+export const usePeople = () => ({ people: P(), me: P().find((p) => p.email === globalThis.__PM.ctx.me.email), personOf: (e) => P().find((p) => p.email === e), nameOf: (e) => P().find((p) => p.email === e)?.display_name ?? e, reload: async () => {}, update: async () => ({ ok: true }) });`);
+fs.writeFileSync(path.join(build, 'mocks', 'chatprov.js'), `export const useChat = () => globalThis.__PM.chat;`);
 fs.writeFileSync(path.join(build, 'mocks', 'permreq.js'), `export const usePermRequests = () => ({ list: globalThis.__PM.perm ?? [], status: 'ready', reload: async () => {} });`);
 for (const f of ['globals.css', 'identity.css', 'work.css', 'chat.css', 'permissions.css']) fs.copyFileSync(path.join(root, 'src/app', f), path.join(out, f));
 
@@ -198,6 +208,42 @@ async function renderAll() {
   render('urgency-picker-writer', 'khalid@x.sa', 'writer', plainCaps, picker(0));
   render('urgency-picker-granted', 'khalid@x.sa', 'writer', writerCaps, picker(2));
   render('urgency-picker-director', 'dir@x.sa', 'director', directorCaps, picker(3));
+  // Step P5a: WhatsApp.
+  const wam = await import(url('components/whatsapp/member.js'));
+  const was = await import(url('components/whatsapp/system-panel.js'));
+  const wac = await import(url('components/chat/whatsapp.js'));
+  const peopleList = members.map((m) => ({ email: m.email, display_name: m.display_name, role: m.role, profile: null }));
+  const sys = (over) => ({ enabled: true, online: true, heartbeat_at: new Date().toISOString(), name: 'مركز الاتصال المؤسسي', ...over });
+  const waMe = (over) => ({ on: true, phone: null, verified_at: null, from_level: 3, pushed: true, pending: null, mutes: [], system: sys(), ...over });
+  const pnl = (el) => h('section', { className: 'panel' }, h('h2', null, 'واتساب'), el);
+  const wx = { people: peopleList };
+  render('wa-member-off', 'khalid@x.sa', 'writer', writerCaps, pnl(h(wam.WhatsAppSettings, { initial: waMe({ on: false }) })), wx);
+  render('wa-member-pending', 'khalid@x.sa', 'writer', writerCaps, pnl(h(wam.WhatsAppSettings, { initial: waMe({ pending: { phone: '+99900000001', expires_at: new Date(Date.now() + 6e5).toISOString(), left: 4 } }) })), wx);
+  render('wa-member-linked', 'khalid@x.sa', 'writer', writerCaps, pnl(h(wam.WhatsAppSettings, { initial: waMe({ phone: '+99900000001', verified_at: NOW, from_level: 2, mutes: ['dir@x.sa'], system: sys({ online: false, heartbeat_at: new Date(Date.now() - 30 * 60e3).toISOString() }) }) })), wx);
+  const adminCaps = KEYS.map((k) => capEval(k, !['whatsapp.push', 'approve.own', 'account.protected'].includes(k), k.startsWith('page.') ? 'page' : 'role'));
+  const view = { enabled: true, display_name: 'مركز الاتصال المؤسسي', about: null, daily_cap: 10, max_chars: 1000, heartbeat_at: new Date(Date.now() - 3 * 3600e3).toISOString(), bridge_note: 'جاهز', online: false, linked: 4, queued: 2, sent_day: 17, failed_day: 1,
+    failures: [{ kind: 'push', error: 'تغيّر الرقم أو أُلغي الربط.', at: NOW, who: 'سارة' }] };
+  render('wa-system', 'amir@x.sa', 'admin', adminCaps, pnl(h(was.WhatsAppSystemPanel, { initial: view })), wx);
+  render('wa-system-locked', 'dir@x.sa', 'director', directorCaps, pnl(h(was.WhatsAppSystemPanel, {})), wx);
+  const room = { id: 'r1', type: 'group', name: 'فريق الحملة' };
+  const msg = { id: 'm1', room_id: 'r1', author: 'dir@x.sa', kind: 'text', body: 'الاجتماع الآن', urgency: 3, created_at: NOW, deleted: false };
+  const chat = (me, on = true) => ({
+    me, waOn: on, say() {}, reload: async () => {},
+    membersOf: () => ['dir@x.sa', 'khalid@x.sa', 'sara@x.sa', 'abd@x.sa', 'noura@x.sa'].map((email) => ({ room_id: 'r1', email })),
+    waOf: () => [
+      { id: 'o1', kind: 'urgent', message_id: 'm1', recipient: 'khalid@x.sa', state: 'sent', error: null },
+      { id: 'o2', kind: 'urgent', message_id: 'm1', recipient: 'sara@x.sa', state: 'queued', error: null },
+      { id: 'o3', kind: 'push', message_id: 'm1', recipient: 'noura@x.sa', state: 'failed', error: 'تعذّر الإرسال.' },
+    ],
+    waPeople: [
+      { email: 'khalid@x.sa', linked: true, push: true }, { email: 'sara@x.sa', linked: true, push: false },
+      { email: 'abd@x.sa', linked: false, push: false }, { email: 'noura@x.sa', linked: true, push: true },
+    ],
+  });
+  const dlg = (el) => h('div', { className: 'ml cx-d' }, el);
+  render('wa-push-granted', 'dir@x.sa', 'director', directorCaps.map((c) => (c.k === 'whatsapp.push' ? capEval(c.k, true, 'added') : c)), dlg(h(wac.WaPushList, { room, msg, onDone() {} })), { ...wx, chat: chat('dir@x.sa') });
+  render('wa-push-locked', 'dir@x.sa', 'director', directorCaps, dlg(h(wac.WaPushList, { room, msg, onDone() {} })), { ...wx, chat: chat('dir@x.sa') });
+  render('wa-delivery', 'dir@x.sa', 'director', directorCaps, h('div', { className: 'ml' }, h(wac.WaDelivery, { m: msg })), { ...wx, chat: chat('dir@x.sa', false) });
   render('urgency-badges', 'khalid@x.sa', 'writer', writerCaps, h('div', { className: 'ml' }, ...[0, 1, 2, 3].map((l) => h('div', { key: l, className: 'cx-badge-row' }, `الدرجة ${l}: `, h(urg.UrgencyBadge, { level: l })))));
   return pages;
 }
@@ -249,6 +295,15 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'urgency-picker-writer': ['بلا درجة', 'رسالة عادية بلا تنبيه.', 'للانتباه', 'ينبّه أعضاء المحادثة في «انتباه»، إلا من كتمها.', 'مهم', 'رسائل «مهم» لمن يملك صلاحيتها', 'عاجل', 'حتى يبقى العاجل نادراً'],
       'urgency-picker-granted': ['ينبّه أعضاء المحادثة بعلامة «مهم»، إلا من كتمها.', 'حتى يبقى العاجل نادراً'],
       'urgency-picker-director': ['يصل الجميع ولو كتموا المحادثة، ويطلب من كل عضو الإقرار بالاستلام.'],
+      'wa-member-off': ['واتساب النظام', 'متصل', 'استلام رسائل واتساب', 'في حالتين فقط', 'لا يقرأ المركز الردود', 'إيقاف هذا الخيار يحذف رقمك'],
+      'wa-member-pending': ['رقم واتساب بالصيغة الدولية', 'يرى رقمك أنت ومسؤول النظام فقط', 'إرسال الرمز', 'الرمز المرسل إلى', 'بقي 4 من المحاولات', 'تحقق', 'أرسل لي من درجة', '«عاجل» فقط', 'الرسائل التي يدفعها إليّ زميل'],
+      'wa-member-linked': ['رقمك المتحقق منه', '+99900000001', 'تغيير الرقم', 'غير متصل منذ 30 دقيقة', 'ينتظر ولا يضيع', 'محمد', 'إلغاء الكتم', 'كتم'],
+      'wa-system': ['تشغيل واتساب النظام', 'آخر ما قاله الجسر: جاهز', 'غير متصل منذ 3 ساعة', 'مسح رمز QR', 'الاسم الذي تُوقَّع به الرسائل', 'حد الرسائل المدفوعة لكل مرسل في اليوم', 'أقصى طول للرسالة بالأحرف', 'رسالة تجربة إلى رقمي',
+        'أعضاء ربطوا أرقامهم', '17', 'آخر ما تعذّر', 'مدفوعة منك إلى سارة', 'لا تظهر هنا نصوص الرسائل ولا الأرقام'],
+      'wa-system-locked': ['إدارة رقم واتساب النظام لمن يملك', 'اطلب هذه الصلاحية'],
+      'wa-push-granted': ['تصل الرسالة كاملة', 'لا يظهر رقم أحد هنا', 'خالد', 'واتساب مرتبط', 'إرسال', 'سارة', 'لا يستقبل هذا الزميل رسائل واتساب منك الآن.', 'عبدالله', 'واتساب غير مرتبط', 'تعذّرت من قبل.'],
+      'wa-push-locked': ['مقفلة حتى تُمنح', 'اطلب هذه الصلاحية'],
+      'wa-delivery': ['واتساب: أُرسلت إلى 1 · لم تُسلَّم بعد 1 · تعذّرت 1', 'واتساب النظام متوقف، وتصل حين يعود', 'إعادة المحاولة'],
       // The mark and the word are flex items, so the page's text puts a line between them.
       'urgency-badges': ['!\nللانتباه', '!!\nمهم', '!!!\nعاجل'],
       'my-permissions': ['اطلب صلاحية', 'صلاحياتي', 'لديك صلاحية مؤقتة أو لمرة واحدة', 'الصفحات', 'من صفحات الحساب', 'مؤقتة حتى 2026-10-14 12:00', 'يمنح الصلاحيات ويسحبها من يدير رتبتك'],
@@ -265,10 +320,21 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'dialog-ask-page': ['منح الصلاحيات وسحبها', 'اعتماد جزء من عمل أو رفضه', 'رسائل «عاجل»'],
       'dialog-ask-fixed': ['إرسال الطلب'],
       'urgency-picker-writer': ['urgency.', 'undefined'],
+      'wa-member-off': ['رقمك المتحقق منه', 'الرمز المرسل إلى', 'undefined'],
+      'wa-member-pending': ['+99900000001', 'undefined'],
+      'wa-push-granted': ['+999', 'undefined', 'whatsapp.push'],
+      'wa-system-locked': ['تشغيل واتساب النظام', 'undefined'],
+      'wa-system': ['undefined', 'WHATSAPP'],
       'urgency-picker-granted': ['رسائل «مهم» لمن يملك صلاحيتها'],
       'urgency-picker-director': ['رسائل «مهم» لمن يملك صلاحيتها', 'حتى يبقى العاجل نادراً'],
       'urgency-badges': ['بلا درجة'],
     };
+    // Step P5a: the push is a locked control until granted (D-13); nobody's number appears in messaging.
+    check('wa-push-locked: the request is a locked control for «whatsapp.push»', /data-need="whatsapp.push"[^>]*aria-disabled="true"|aria-disabled="true"[^>]*data-need="whatsapp.push"/.test(pages['wa-push-locked']));
+    check('wa-push-locked: no member can be sent to', !/class="ml-btn sm primary"/.test(pages['wa-push-locked']));
+    check('wa-push-granted: only the one who accepts a push and has none yet gets «إرسال»', (pages['wa-push-granted'].match(/class="ml-btn sm primary"/g) ?? []).length === 1, (pages['wa-push-granted'].match(/class="ml-btn sm primary"/g) ?? []).length);
+    check('wa-member-pending: the pending number is masked', pages['wa-member-pending'].includes('+999•••••001'));
+    check('wa-member-off: nothing but the switch while it is off', !/wa-level|wa-pushed|wa-mutes/.test(pages['wa-member-off']));
     // Step P4: which steps are locked, and how (data-need on a locked control, never `disabled`).
     const lockOf = (html) => [0, 1, 2, 3].map((l) => {
       const tag = (html.match(new RegExp(`<button[^>]*data-level="${l}"[^>]*>`)) ?? [''])[0];
@@ -295,7 +361,7 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     check('dialog-grant-pick: the capability search box is there', pages['dialog-grant-pick'].includes('placeholder="ابحث في الصلاحيات"'));
 
     const looks = [['a', ''], ['emerald', 'data-identity="emerald"'], ['evening', 'data-identity="emerald" data-theme="dark"']];
-    const wide = ['urgency-picker-writer', 'urgency-badges', 'accounts-members', 'accounts-card', 'accounts-roles', 'dialog-grant', 'my-permissions', 'requests-perm-granter', 'dialog-decide-approve', 'dialog-ask-button', 'home-perms'];
+    const wide = ['wa-member-linked', 'wa-system', 'wa-push-granted', 'urgency-picker-writer', 'urgency-badges', 'accounts-members', 'accounts-card', 'accounts-roles', 'dialog-grant', 'my-permissions', 'requests-perm-granter', 'dialog-decide-approve', 'dialog-ask-button', 'home-perms'];
     for (const name of Object.keys(pages)) {
       for (const [look, attrs] of looks) {
         for (const [vw, vh] of [[1280, 900], [390, 844]]) {
