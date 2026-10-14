@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-13
+updated: 2026-10-14
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -25,6 +25,13 @@ related:
 ---
 
 # Communication Department Hub — Current Status
+
+## Film deliverable completed 2026-10-14
+
+The owner requested a Comms Hub version of the supplied Arabic motion-video reference. The standalone package is in `videos/comms-hub-launch/`: a 38.4-second portrait film, a separately composed landscape film, and a 15-second portrait teaser, all at 60 fps, with original synthesized music, Arabic captions, poster frames, editable artwork, a local preview, and render scripts. It uses the existing forest-green and gold brand and preserves the established Arabic terms. Illustrative scenes explain work, version-bound approval, the media library, mail and messaging, planning, and permissions; no live publishing or AI capability is claimed.
+
+Verification: typecheck and production build passed; all 153 existing tests passed. Film browser and media verification passed 128 checks, including deterministic seeking, both layouts, transitions, play/pause, fonts, audio, mobile overflow, reduced-motion initial state, and full decode of all three exports. Video is Rec.709 limited-range H.264 with 48 kHz stereo AAC. Two encoded-frame color comparisons passed. Re-run `node qa/comms-hub-film.cjs`; full evidence is beside the film under `qa/`. The application interface and the paused Permissions P4 work were not changed. Next action for this deliverable: review the film and copy; the application next actions below still apply.
+
 
 Updated 2026-10-10. **CHECKPOINT 0.2 IN PROGRESS.** Checkpoint 0.1 is complete and accepted. Phase 0.2.1 (Workflow Mapping) is complete. **Phase 0.2.2 (Guided Department Validation) is closed on the Director's response alone:** R01 arrived on 2026-10-10, and the same day the owner directed that the Director's input is enough, so the remaining participants and the frozen build are skipped (`[-]` in `Roadmap.md`; exit gate criteria 1 and 2 waived by that directive). Phase 0.2.3 Round 1 corrections start on 2026-10-11. The day-by-day plan is in `Roadmap.md` under "Work plan from 2026-10-11".
 

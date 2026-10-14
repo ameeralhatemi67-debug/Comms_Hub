@@ -1,0 +1,584 @@
+{
+  "checkedAt": "2026-10-14T08:21:15.195Z",
+  "passed": true,
+  "total": 128,
+  "checks": [
+    {
+      "name": "Arabic fonts loaded",
+      "passed": true,
+      "detail": {
+        "regular": true,
+        "semibold": true
+      }
+    },
+    {
+      "name": "portrait deterministic random seeking",
+      "passed": true
+    },
+    {
+      "name": "portrait scene من التشتّت إلى السياق",
+      "passed": true,
+      "detail": {
+        "sha256": "54fd3f7071a4af2790cb59c97c9159d5090b5475f995b412ef7616959a747d34"
+      }
+    },
+    {
+      "name": "portrait scene مركز الاتصال المؤسسي",
+      "passed": true,
+      "detail": {
+        "sha256": "7150e45097cd9db8be398f10688c53693624ec99f7c287c500a26ad838a3a280"
+      }
+    },
+    {
+      "name": "portrait scene العمل",
+      "passed": true,
+      "detail": {
+        "sha256": "8e1bf6b6cbd73bf88b32e38c8b5d8ab140a6217cffbcfca19f29ee871d9f0d2f"
+      }
+    },
+    {
+      "name": "portrait scene الموافقات والنشر",
+      "passed": true,
+      "detail": {
+        "sha256": "2b9e26238acdeea594de5a04349ce61b9245e8127461150b7d0ba6c416debb77"
+      }
+    },
+    {
+      "name": "portrait scene مكتبة الوسائط",
+      "passed": true,
+      "detail": {
+        "sha256": "6465e256d4c3809b08c1b526a48c10afbfc91c7e68e50c60b51a8f149c2d15f8"
+      }
+    },
+    {
+      "name": "portrait scene البريد والمراسلة",
+      "passed": true,
+      "detail": {
+        "sha256": "8a097b7a8c189542186efdcc6f08c2db4de15507a6e32cf68e10e91fd7d27cb7"
+      }
+    },
+    {
+      "name": "portrait scene المشاريع والتقويم",
+      "passed": true,
+      "detail": {
+        "sha256": "13297e3a3604ce588e511fbedea616eb2b8060445a1a5ee18dcb2b41c6746312"
+      }
+    },
+    {
+      "name": "portrait scene الأدوار والصلاحيات",
+      "passed": true,
+      "detail": {
+        "sha256": "14d27aca5f6eecbcc55cec68d356b3b5e0179693a20f13d1d584968d258ff41f"
+      }
+    },
+    {
+      "name": "portrait scene كل اتصال في مكانه",
+      "passed": true,
+      "detail": {
+        "sha256": "01e44daf1c888f47fd0bf757eb25f6d1538a8e8ecf0608787d79029141965ac1"
+      }
+    },
+    {
+      "name": "portrait scene فريق واحد، سياق واحد",
+      "passed": true,
+      "detail": {
+        "sha256": "4d405a8e7793e706c131897de0712beabc770db4bd3f65ae8ecd2edb02ec684d"
+      }
+    },
+    {
+      "name": "portrait transition 3.583",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 3.600",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 3.820",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 4.050",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 7.183",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 7.200",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 7.420",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 7.650",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 10.783",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 10.800",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 11.020",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 11.250",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 14.383",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 14.400",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 14.620",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 14.850",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 17.983",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 18.000",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 18.220",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 18.450",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 21.583",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 21.600",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 21.820",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 22.050",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 25.183",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 25.200",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 25.420",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 25.650",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 28.783",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 28.800",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 29.020",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 29.250",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 32.383",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 32.400",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 32.620",
+      "passed": true
+    },
+    {
+      "name": "portrait transition 32.850",
+      "passed": true
+    },
+    {
+      "name": "landscape deterministic random seeking",
+      "passed": true
+    },
+    {
+      "name": "landscape scene من التشتّت إلى السياق",
+      "passed": true,
+      "detail": {
+        "sha256": "20628e8e8363863c86465f44863ead7eef19ddbb7a0496d636042d74586afe76"
+      }
+    },
+    {
+      "name": "landscape scene مركز الاتصال المؤسسي",
+      "passed": true,
+      "detail": {
+        "sha256": "e4001c96b6a5ec8ed3a297c21844a6e0b603ebcfe5e29a6a83466516c422f800"
+      }
+    },
+    {
+      "name": "landscape scene العمل",
+      "passed": true,
+      "detail": {
+        "sha256": "9f8a4b0ab854e1d3d85ed26874034ad148cffab8540a36ebdf1169adc6fd1b79"
+      }
+    },
+    {
+      "name": "landscape scene الموافقات والنشر",
+      "passed": true,
+      "detail": {
+        "sha256": "20e6c1c8b3edb02edb23633d025560b4aa57f790973ad50c6dd9687d501f207c"
+      }
+    },
+    {
+      "name": "landscape scene مكتبة الوسائط",
+      "passed": true,
+      "detail": {
+        "sha256": "61977b27e35996e40bedf0ee429a019cfd091d09c52e7cd39e9a6dd6c4f4441b"
+      }
+    },
+    {
+      "name": "landscape scene البريد والمراسلة",
+      "passed": true,
+      "detail": {
+        "sha256": "84d89f89d73b358e845bd3c596a3d656f3e13392d8479a20fbfac331b5017bed"
+      }
+    },
+    {
+      "name": "landscape scene المشاريع والتقويم",
+      "passed": true,
+      "detail": {
+        "sha256": "0f9e75284a023493715b2cdf3d3409b336ceee33b194efc7b2b9ce44240ebabe"
+      }
+    },
+    {
+      "name": "landscape scene الأدوار والصلاحيات",
+      "passed": true,
+      "detail": {
+        "sha256": "4623fdb9b70c2b6a82d74cc0dc23dfd4bc16a1fe444903aae011a1fd62b342fe"
+      }
+    },
+    {
+      "name": "landscape scene كل اتصال في مكانه",
+      "passed": true,
+      "detail": {
+        "sha256": "7b29ad6248ceb836eb4b2ed64406586704bd151509ea287296422b547757e8fc"
+      }
+    },
+    {
+      "name": "landscape scene فريق واحد، سياق واحد",
+      "passed": true,
+      "detail": {
+        "sha256": "fefc37b72448a7544df510f4b93b12173d7b638d2a8d81d58fb7f77be12a2d70"
+      }
+    },
+    {
+      "name": "landscape transition 3.583",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 3.600",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 3.820",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 4.050",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 7.183",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 7.200",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 7.420",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 7.650",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 10.783",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 10.800",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 11.020",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 11.250",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 14.383",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 14.400",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 14.620",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 14.850",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 17.983",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 18.000",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 18.220",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 18.450",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 21.583",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 21.600",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 21.820",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 22.050",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 25.183",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 25.200",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 25.420",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 25.650",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 28.783",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 28.800",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 29.020",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 29.250",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 32.383",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 32.400",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 32.620",
+      "passed": true
+    },
+    {
+      "name": "landscape transition 32.850",
+      "passed": true
+    },
+    {
+      "name": "Play advances time",
+      "passed": true
+    },
+    {
+      "name": "Pause holds time",
+      "passed": true
+    },
+    {
+      "name": "Seek changes scene",
+      "passed": true
+    },
+    {
+      "name": "Sound toggle unmutes",
+      "passed": true
+    },
+    {
+      "name": "Audio loads",
+      "passed": true
+    },
+    {
+      "name": "Landscape selector changes dimensions",
+      "passed": true
+    },
+    {
+      "name": "Mobile has no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "Reduced motion stays still until Play",
+      "passed": true
+    },
+    {
+      "name": "No browser errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "portrait dimensions",
+      "passed": true
+    },
+    {
+      "name": "portrait 60 fps",
+      "passed": true
+    },
+    {
+      "name": "portrait frame count",
+      "passed": true
+    },
+    {
+      "name": "portrait duration",
+      "passed": true
+    },
+    {
+      "name": "portrait stereo audio",
+      "passed": true
+    },
+    {
+      "name": "portrait 48 kHz audio",
+      "passed": true
+    },
+    {
+      "name": "portrait Rec.709 limited range",
+      "passed": true
+    },
+    {
+      "name": "portrait full decode",
+      "passed": true
+    },
+    {
+      "name": "landscape dimensions",
+      "passed": true
+    },
+    {
+      "name": "landscape 60 fps",
+      "passed": true
+    },
+    {
+      "name": "landscape frame count",
+      "passed": true
+    },
+    {
+      "name": "landscape duration",
+      "passed": true
+    },
+    {
+      "name": "landscape stereo audio",
+      "passed": true
+    },
+    {
+      "name": "landscape 48 kHz audio",
+      "passed": true
+    },
+    {
+      "name": "landscape Rec.709 limited range",
+      "passed": true
+    },
+    {
+      "name": "landscape full decode",
+      "passed": true
+    },
+    {
+      "name": "teaser dimensions",
+      "passed": true
+    },
+    {
+      "name": "teaser 60 fps",
+      "passed": true
+    },
+    {
+      "name": "teaser frame count",
+      "passed": true
+    },
+    {
+      "name": "teaser duration",
+      "passed": true
+    },
+    {
+      "name": "teaser stereo audio",
+      "passed": true
+    },
+    {
+      "name": "teaser 48 kHz audio",
+      "passed": true
+    },
+    {
+      "name": "teaser Rec.709 limited range",
+      "passed": true
+    },
+    {
+      "name": "teaser full decode",
+      "passed": true
+    }
+  ]
+}
