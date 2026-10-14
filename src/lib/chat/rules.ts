@@ -33,7 +33,8 @@ export type ChatMessage = {
   body: string;
   reply_to: string | null;
   forwarded: boolean;
-  urgent: boolean;
+  /** 0 none, 1 «للانتباه», 2 «مهم», 3 «عاجل» (Permissions_Plan.md 7). */
+  urgency: Urgency;
   data: Record<string, unknown> | null;
   deleted: boolean;
   edited_at: string | null;
@@ -61,11 +62,46 @@ export const REACTIONS: [string, string][] = [
 export const PRESENCE_AR: Record<Presence, string> = { online: 'متاح', busy: 'في اجتماع', shoot: 'في تصوير', dnd: 'لا تزعج' };
 export const NAME_COLORS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6'] as const;
 
-/** Urgent messages and announcement channels belong to the director and the assistant. */
+/** The approval cards in messaging belong to the director and the assistant (and the administrator). */
 export const canUrgent = (role: Role) => role === 'admin' || role === 'director' || role === 'assistant';
 export const canChannel = canUrgent;
 /** Same rule as assigning on the Tasks page. */
 export const canAssign = (role: Role) => role === 'admin' || role === 'director' || role === 'assistant' || role === 'producer';
+
+/**
+ * Urgency of a message, 0 to 3 (Permissions_Plan.md 7, D-4, D-10). Level 1 is anyone's;
+ * level 2 needs «رسائل «مهم»» (urgency.2, grantable, possibly once); level 3 is fixed to the
+ * administrator, the director and the assistant (urgency.3) and asks each member to
+ * acknowledge. The database (chat_send) decides; this only words and predicts it.
+ */
+export type Urgency = 0 | 1 | 2 | 3;
+export const URGENCY_AR: Record<Urgency, string> = { 0: 'بلا درجة', 1: 'للانتباه', 2: 'مهم', 3: 'عاجل' };
+export const URGENCY_HINT: Record<Urgency, string> = {
+  0: 'رسالة عادية بلا تنبيه.',
+  1: 'ينبّه أعضاء المحادثة في «انتباه»، إلا من كتمها.',
+  2: 'ينبّه أعضاء المحادثة بعلامة «مهم»، إلا من كتمها.',
+  3: 'يصل الجميع ولو كتموا المحادثة، ويطلب من كل عضو الإقرار بالاستلام.',
+};
+export const URGENCY_WHY: Record<2 | 3, string> = {
+  2: 'رسائل «مهم» لمن يملك صلاحيتها: مدير الاتصال ومساعده افتراضياً، ويمنحها لغيرهم من يدير رتبتهم.',
+  3: 'المستوى «عاجل» لمدير الاتصال ومساعده ومسؤول النظام فقط، حتى يبقى العاجل نادراً.',
+};
+export type UrgencyStep = { level: Urgency; label: string; hint: string; ok: boolean; cap: string | null; why: string };
+
+/** The four steps of the composer's picker for this person, from what they hold now. */
+export function urgencySteps(has: (cap: string) => boolean): UrgencyStep[] {
+  return ([0, 1, 2, 3] as Urgency[]).map((level) => {
+    const cap = level === 2 ? 'urgency.2' : level === 3 ? 'urgency.3' : null;
+    const ok = !cap || has(cap);
+    return { level, label: URGENCY_AR[level], hint: URGENCY_HINT[level], ok, cap, why: ok || level < 2 ? '' : URGENCY_WHY[level as 2 | 3] };
+  });
+}
+
+/** A task card's priority in the urgency vocabulary: «عاجلة» shows as level 3 in messaging. */
+export const cardUrgency = (priority: unknown): Urgency => (priority === 'urgent' ? 3 : 0);
+
+/** Notice tier of a level, as chat_send writes it. */
+export const urgencyTier = (u: Urgency) => (u === 3 ? 'decide' : u > 0 ? 'attention' : null);
 
 /** Edits are allowed for a quarter of an hour, as the database enforces. */
 export const EDIT_MINUTES = 15;
@@ -175,6 +211,8 @@ const CHAT_ERRORS: Record<string, string> = {
   CHANNEL_POST: 'الكتابة في هذه القناة لمشرفيها.',
   CHANNEL_ROLE: 'قنوات الإعلانات لمدير الاتصال ومساعده.',
   URGENT_ROLE: 'الرسائل العاجلة لمدير الاتصال ومساعده.',
+  URGENCY_2: 'رسائل «مهم» لمن يملك صلاحيتها. اطلبها ممن يدير رتبتك.',
+  BAD_URGENCY: 'درجة الأهمية من صفر إلى ثلاثة.',
   TASK_ROLE: 'إسناد المهام لمدير الاتصال ومساعده والمنتج الإعلامي.',
   TASK_ASSIGNEE: 'مسؤول المهمة يجب أن يكون عضواً في المحادثة.',
   NOT_IN_REVIEW: 'طلب الاعتماد لأصل «قيد المراجعة» فقط.',

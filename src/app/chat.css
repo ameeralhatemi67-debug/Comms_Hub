@@ -283,3 +283,27 @@
 .pf-prev pre{margin:0;font:inherit;font-size:12.5px;color:var(--muted);white-space:pre-wrap;border-top:1px dashed var(--line);padding-top:8px}
 .pf-foot{display:flex;gap:10px;align-items:center;justify-content:flex-end}
 @media (max-width:860px){.pf-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* Urgency 0 to 3 (Permissions_Plan.md 7): 1 «للانتباه», 2 «مهم», 3 «عاجل» (the existing red treatment). */
+.cx-m.lvl1 .bub{border-inline-start:3px solid var(--green)}
+.cx-m.lvl2 .bub{border-color:var(--m-gold);box-shadow:0 0 0 2px color-mix(in srgb,var(--m-gold) 22%,transparent)}
+.cx-lvl{display:inline-flex;align-items:center;gap:5px;margin-top:4px;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:600;border:1px solid var(--line);color:var(--green-text);background:var(--surface)}
+.cx-lvl.l2{color:var(--m-goldtext);border-color:var(--m-gold);background:var(--m-goldsoft)}
+.cx-lvl.l3{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 45%,transparent)}
+.cx-lvl-dot{font-weight:800;letter-spacing:-1px;min-width:1ch}
+.cx-lvl-dot.l1{color:var(--green-text)}
+.cx-lvl-dot.l2{color:var(--m-goldtext)}
+.cx-lvl-dot.l3{color:var(--danger)}
+.ml .rbtn.lvl{background:transparent;color:var(--m-ink2)}
+.ml .rbtn.lvl:hover{background:var(--surface-2)}
+.ml .rbtn.lvl.on.l1{color:var(--green-text);background:var(--soft)}
+.ml .rbtn.lvl.on.l2{color:var(--m-goldtext);background:var(--m-goldsoft)}
+.ml .rbtn.lvl.on.l3{color:var(--danger);background:color-mix(in srgb,var(--danger) 12%,transparent)}
+.cx-lvls{display:flex;flex-direction:column;min-width:240px}
+.cx-lvls .cx-lvl-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start}
+.cx-lvls .cx-lvl-opt b{display:inline-flex;gap:6px;align-items:center}
+.cx-lvls .cx-lvl-opt small{color:var(--muted);font-size:11.5px;font-weight:400;line-height:1.5;white-space:normal}
+.cx-lvls .cx-lvl-opt[aria-checked="true"]{background:var(--soft)}
+.cx-lvls .cx-lvl-opt[aria-disabled="true"]{opacity:.72}
+.cx-bar.lvl1{border-inline-start-color:var(--green);color:var(--green-text)}
+.cx-bar.lvl2{border-inline-start-color:var(--m-gold);color:var(--m-goldtext)}

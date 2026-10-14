@@ -1,6 +1,7 @@
 // Browser check of the permissions screens (Permissions_Plan.md): «الحسابات» with its four
 // tabs, the person's card, the grant dialog, presets, the role matrix and the log (Step P2),
-// and «صلاحياتي» on the account page; later steps add their screens here.
+// and «صلاحياتي» on the account page; Step P3 the requests; Step P4 the urgency picker and
+// level marks of messaging (src/components/chat/urgency.tsx); later steps add their screens here.
 // The pages are behind sign-in and no bypass is allowed, so, as qa/work-pages.cjs does, this
 // compiles the pages' own components with the data layer (./data, ../caps) replaced by
 // fixtures, renders them with React, and checks the result in headless Edge: no page errors,
@@ -29,6 +30,8 @@ const sources = [
   'lib/domain.ts', 'lib/permissions.ts', 'lib/access.ts', 'lib/kit/hold-reasons.ts',
   // Step P3
   'components/perm-requests.tsx', 'components/home-perms.tsx', 'lib/kit/need.ts', 'lib/kit/layer.ts',
+  // Step P4: the urgency picker and the level marks of messaging
+  'components/chat/urgency.tsx', 'lib/chat/rules.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -144,6 +147,7 @@ async function renderAll() {
   const mine = await import(url('components/my-permissions.js'));
   const preq = await import(url('components/perm-requests.js'));
   const hperm = await import(url('components/home-perms.js'));
+  const urg = await import(url('components/chat/urgency.js'));
   const h = React.createElement;
   const pages = {};
   const render = (name, as, role, evals, el, extra = {}) => {
@@ -188,6 +192,13 @@ async function renderAll() {
     perm: permList,
     caps: { ...capsOf(directorCaps), grants: [G({ id: 'h1', email: 'dir@x.sa', until: soon }), G({ id: 'h2', email: 'dir@x.sa', k: 'whatsapp.push', mode: 'once', until: null, uses: 1 })] },
   });
+  // Step P4: the four steps for a writer without «مهم», with it given, and for the director.
+  const plainCaps = writerCaps.map((c) => (c.k === 'urgency.2' ? capEval(c.k, false, 'none') : c));
+  const picker = (v) => h('div', { className: 'ml' }, h('div', { className: 'mx-menu-static cx-menu' }, h(urg.UrgencyOptions, { value: v, onPick() {} })));
+  render('urgency-picker-writer', 'khalid@x.sa', 'writer', plainCaps, picker(0));
+  render('urgency-picker-granted', 'khalid@x.sa', 'writer', writerCaps, picker(2));
+  render('urgency-picker-director', 'dir@x.sa', 'director', directorCaps, picker(3));
+  render('urgency-badges', 'khalid@x.sa', 'writer', writerCaps, h('div', { className: 'ml' }, ...[0, 1, 2, 3].map((l) => h('div', { key: l, className: 'cx-badge-row' }, `الدرجة ${l}: `, h(urg.UrgencyBadge, { level: l })))));
   return pages;
 }
 
@@ -235,6 +246,11 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'dialog-ask-chat': ['إلى', 'إرسال البطاقة'],
       'dialog-ask-fixed': ['مقفلة بقواعد المركز ولا تُطلب', 'حتى يبقى العاجل نادراً'],
       'home-perms': ['طلب صلاحية من خالد ينتظر قرارك', '«رسائل «مهم» (المستوى 2)»', 'تنتهي صلاحيتك «رسائل «مهم» (المستوى 2)» في', 'لديك «إرسال رسالة إلى واتساب زميل» لمرة واحدة لم تُستخدم بعد'],
+      'urgency-picker-writer': ['بلا درجة', 'رسالة عادية بلا تنبيه.', 'للانتباه', 'ينبّه أعضاء المحادثة في «انتباه»، إلا من كتمها.', 'مهم', 'رسائل «مهم» لمن يملك صلاحيتها', 'عاجل', 'حتى يبقى العاجل نادراً'],
+      'urgency-picker-granted': ['ينبّه أعضاء المحادثة بعلامة «مهم»، إلا من كتمها.', 'حتى يبقى العاجل نادراً'],
+      'urgency-picker-director': ['يصل الجميع ولو كتموا المحادثة، ويطلب من كل عضو الإقرار بالاستلام.'],
+      // The mark and the word are flex items, so the page's text puts a line between them.
+      'urgency-badges': ['!\nللانتباه', '!!\nمهم', '!!!\nعاجل'],
       'my-permissions': ['اطلب صلاحية', 'صلاحياتي', 'لديك صلاحية مؤقتة أو لمرة واحدة', 'الصفحات', 'من صفحات الحساب', 'مؤقتة حتى 2026-10-14 12:00', 'يمنح الصلاحيات ويسحبها من يدير رتبتك'],
     };
     const absent = {
@@ -248,7 +264,21 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'requests-perm-requester': ['موافقة'],
       'dialog-ask-page': ['منح الصلاحيات وسحبها', 'اعتماد جزء من عمل أو رفضه', 'رسائل «عاجل»'],
       'dialog-ask-fixed': ['إرسال الطلب'],
+      'urgency-picker-writer': ['urgency.', 'undefined'],
+      'urgency-picker-granted': ['رسائل «مهم» لمن يملك صلاحيتها'],
+      'urgency-picker-director': ['رسائل «مهم» لمن يملك صلاحيتها', 'حتى يبقى العاجل نادراً'],
+      'urgency-badges': ['بلا درجة'],
     };
+    // Step P4: which steps are locked, and how (data-need on a locked control, never `disabled`).
+    const lockOf = (html) => [0, 1, 2, 3].map((l) => {
+      const tag = (html.match(new RegExp(`<button[^>]*data-level="${l}"[^>]*>`)) ?? [''])[0];
+      return /aria-disabled="true"/.test(tag) ? (tag.match(/data-need="([^"]+)"/) ?? ['', '?'])[1] : /disabled/.test(tag) ? 'disabled' : 'open';
+    }).join(',');
+    check('urgency-picker-writer: levels 0 and 1 open, 2 and 3 locked controls with their capability', lockOf(pages['urgency-picker-writer']) === 'open,open,urgency.2,urgency.3', lockOf(pages['urgency-picker-writer']));
+    check('urgency-picker-granted: given «مهم», only level 3 stays locked', lockOf(pages['urgency-picker-granted']) === 'open,open,open,urgency.3', lockOf(pages['urgency-picker-granted']));
+    check('urgency-picker-director: the director uses all four', lockOf(pages['urgency-picker-director']) === 'open,open,open,open', lockOf(pages['urgency-picker-director']));
+    check('urgency-picker-granted: the chosen step is marked', /aria-checked="true"[^>]*data-level="2"|data-level="2"[^>]*aria-checked="true"/.test(pages['urgency-picker-granted'].replace(/class="[^"]*"/g, '')));
+    check('urgency-badges: level 0 draws no mark', (pages['urgency-badges'].match(/class="cx-lvl l/g) ?? []).length === 3);
     // roles the assistant must not be offered when adding a member
     const assistantOptions = (pages['dialog-member-add-assistant'].match(/<option value="([a-z]+)"(?![^>]*disabled)/g) ?? []).map((x) => x.split('"')[1]);
     check('dialog-member-add-assistant: offers rank 1 roles only (D-11)', assistantOptions.length > 0 && !assistantOptions.some((r) => ['director', 'assistant', 'admin'].includes(r)), assistantOptions.join(','));
@@ -265,7 +295,7 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     check('dialog-grant-pick: the capability search box is there', pages['dialog-grant-pick'].includes('placeholder="ابحث في الصلاحيات"'));
 
     const looks = [['a', ''], ['emerald', 'data-identity="emerald"'], ['evening', 'data-identity="emerald" data-theme="dark"']];
-    const wide = ['accounts-members', 'accounts-card', 'accounts-roles', 'dialog-grant', 'my-permissions', 'requests-perm-granter', 'dialog-decide-approve', 'dialog-ask-button', 'home-perms'];
+    const wide = ['urgency-picker-writer', 'urgency-badges', 'accounts-members', 'accounts-card', 'accounts-roles', 'dialog-grant', 'my-permissions', 'requests-perm-granter', 'dialog-decide-approve', 'dialog-ask-button', 'home-perms'];
     for (const name of Object.keys(pages)) {
       for (const [look, attrs] of looks) {
         for (const [vw, vh] of [[1280, 900], [390, 844]]) {
@@ -329,6 +359,31 @@ window.__ready = true;
     check('locked control: Enter on it explains too', await pn.evaluate(() => !!document.querySelector('.gd-need') && !window.__clicked));
     check('locked control: no page errors', !nerr.length, nerr.join(' | '));
     await ctxN.close();
+    // ---------- Step P4: the picker's locked steps, live ----------
+    fs.writeFileSync(path.join(out, 'urgency-need.html'), page(pages['urgency-picker-writer']).replace('</body>', `<script type="module">
+import { installNeed, NEED_EVENT } from './build/lib/kit/need.js';
+window.__asked = [];
+window.addEventListener(NEED_EVENT, (e) => window.__asked.push(e.detail.cap));
+installNeed({ guideOn: () => false });
+window.__ready = true;
+</script></body>`));
+    const ctxU = await browser.newContext({ viewport: { width: 1000, height: 700 } });
+    const pu = await ctxU.newPage();
+    const uerr = [];
+    pu.on('pageerror', (e) => uerr.push(e.message));
+    await pu.goto(base + 'urgency-need.html');
+    await pu.waitForFunction(() => window.__ready === true);
+    await pu.click('[data-level="2"]', { force: true });
+    const u2 = await pu.evaluate(() => ({ text: document.querySelector('.gd-need')?.textContent ?? '', ask: !!document.querySelector('[data-need-ask="urgency.2"]') }));
+    check('urgency picker: «مهم» without the permission explains why and offers the request', u2.text.includes('رسائل «مهم» لمن يملك صلاحيتها') && u2.ask, u2.text);
+    await pu.click('[data-need-ask="urgency.2"]');
+    check('urgency picker: the request opens for «مهم»', JSON.stringify(await pu.evaluate(() => window.__asked)) === '["urgency.2"]');
+    await pu.click('[data-level="3"]', { force: true });
+    const u3 = await pu.evaluate(() => ({ text: document.querySelector('.gd-need')?.textContent ?? '', ask: !!document.querySelector('[data-need-ask]') }));
+    check('urgency picker: «عاجل» is fixed: explained, nothing offered', u3.text.includes('حتى يبقى العاجل نادراً') && !u3.ask, u3.text);
+    check('urgency picker: no page errors', !uerr.length, uerr.join(' | '));
+    await pu.screenshot({ path: path.join(out, 'urgency-need.png') });
+    await ctxU.close();
   } catch (e) {
     result.errors.push(e.stack);
   } finally {

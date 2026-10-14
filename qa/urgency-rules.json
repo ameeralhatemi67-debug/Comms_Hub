@@ -1,0 +1,30 @@
+{
+  "run": "2026-10-14",
+  "what": "Database rule run for urgency 0 to 3 on messages (Permissions_Plan.md 7, Step P4)",
+  "script": "supabase/tests/urgency_rules.sql",
+  "migrations": {
+    "supabase/migrations/20261013190000_urgency.sql": "applied 2026-10-13 as 'urgency'; stored md5 6f58fb7e4af8703670f20044fc5b826c",
+    "supabase/migrations/20261014090000_urgency_drop_urgent.sql": "applied 2026-10-14 as 'urgency_drop_urgent'; md5 of the stored statement d86621dadbbed7e6e70f35eaf0384d2a equals the md5 of the file"
+  },
+  "how": "One transaction against the Supabase project comms-hub, rolled back at the end. Five throwaway accounts (@t.test) act through row level security in one group; the member mutes it. 0 throwaway accounts left afterwards.",
+  "runs": [
+    { "attempt": 1, "when": "before the column `urgent` was dropped", "checks": 41, "passed": 41, "failed": [] },
+    { "attempt": 2, "when": "after the drop; checks 04 and 21b read `urgency` only", "checks": 41, "passed": 41, "failed": [] }
+  ],
+  "rules_checked": [
+    "level 1 is anyone's (a writer, a member); it tells the other members as «انتباه», not the author and not a member who muted the conversation; worded «للانتباه» من <name> في «<room>»: <text>.",
+    "level 2 without «رسائل «مهم»» is refused (URGENCY_2) and nothing is stored; the assistant sends it by role template; it tells as «انتباه» worded «مهم», muted member skipped",
+    "a one-time level-2 grant is used by the send, once: the second is refused, the grant has 0 uses left and one use is logged",
+    "a level-2 card refused for another reason (a poll with one option) uses nothing: the one-time grant keeps its use",
+    "a temporary grant works within its time and is refused at use after its end (no sweep)",
+    "a standing removal beats the role template (the director stops «مهم» for the assistant)",
+    "level 3 is fixed: a writer is refused (URGENT_ROLE), through the boolean form too; it cannot be granted (CAP_FIXED); the director sends it; the author counts as acknowledged; every other member is told as «قرارك», the muted member too, asked to acknowledge",
+    "the boolean form of chat_send still means level 3",
+    "acknowledgement only at level 3 (FORBIDDEN on levels 1 and 2)",
+    "level 0 tells nobody; a level above 3 or below 0 is refused (BAD_URGENCY)"
+  ],
+  "existing_rule_runs_after_the_drop": {
+    "chat_rules.sql": "22 of 22, every value as its header states (7 director urgent ok, 8 writer acks ok, 9 writer urgent in dm ERR URGENT_ROLE)"
+  },
+  "column_check_before_the_drop": "no view, policy, index or trigger depends on chat_messages.urgent; the Realtime publication carries the whole table (no column list); the only function naming the column was chat_send; the interface reads `urgency` (src/lib/chat/rules.ts, src/components/chat/)"
+}

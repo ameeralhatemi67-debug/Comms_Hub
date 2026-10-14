@@ -77,7 +77,7 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   tasks: ['src/components/media/tasks-page.tsx'],
   activity: ['src/components/media/activity-page.tsx'],
   mail: ['src/components/mail/mail-page.tsx', 'src/components/mail/thread.tsx', 'src/components/mail/parts.tsx', 'src/components/mail/composer.tsx'],
-  chat: ['src/components/chat/chat-tab.tsx', 'src/components/mail/mail-page.tsx'],
+  chat: ['src/components/chat/chat-tab.tsx', 'src/components/chat/urgency.tsx', 'src/components/mail/mail-page.tsx'],
   work: ['src/components/work/list.tsx', 'src/components/work/parts.tsx'],
   item: ['src/components/work/item.tsx', 'src/components/work/plan.tsx', 'src/components/work/publish.tsx', 'src/components/work/parts.tsx'],
   create: ['src/components/work/create.tsx', 'src/components/work/plan.tsx', 'src/components/work/parts.tsx'],

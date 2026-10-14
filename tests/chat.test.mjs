@@ -18,11 +18,16 @@ import {
   waveform,
   REACTIONS,
   COMMANDS,
+  URGENCY_AR,
+  urgencySteps,
+  cardUrgency,
+  urgencyTier,
 } from '../src/lib/chat/rules.ts';
+import { capability } from '../src/lib/permissions.ts';
 
 const msg = (over = {}) => ({
   id: `m${Math.random()}`, room_id: 'r', author: 'b@x.sa', kind: 'text', body: 'نص', reply_to: null, forwarded: false,
-  urgent: false, data: null, deleted: false, edited_at: null, created_at: '2026-10-12T08:00:00Z', ...over,
+  urgency: 0, data: null, deleted: false, edited_at: null, created_at: '2026-10-12T08:00:00Z', ...over,
 });
 const member = (over = {}) => ({ room_id: 'r', email: 'a@x.sa', admin: false, joined_at: '', last_read_at: '2026-10-12T07:00:00Z', muted: false, pinned: false, ...over });
 
@@ -113,7 +118,7 @@ test('reactions are words with icons, never emoji, and match the database', () =
   const sql = readFileSync('supabase/migrations/20261012000000_chat_profiles.sql', 'utf8');
   assert.match(sql, /kind in \('check','eye','heart','flag','clock'\)/);
   assert.deepEqual(REACTIONS.map((r) => r[0]), ['check', 'eye', 'heart', 'flag', 'clock']);
-  for (const f of ['src/components/chat/chat-tab.tsx', 'src/components/profile-editor.tsx', 'src/components/people.tsx', 'src/lib/chat/rules.ts'])
+  for (const f of ['src/components/chat/chat-tab.tsx', 'src/components/chat/urgency.tsx', 'src/components/profile-editor.tsx', 'src/components/people.tsx', 'src/lib/chat/rules.ts'])
     assert.doesNotMatch(readFileSync(f, 'utf8'), /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, f);
 });
 
@@ -125,4 +130,33 @@ test('every chat function the page calls exists in the migration', () => {
   for (const fn of used)
     if (!['chat_messages', 'chat_members', 'chat_reactions', 'chat_votes', 'chat_acks', 'chat_rooms', 'chat_stars', 'chat-live'].includes(fn))
       assert.match(sql, new RegExp(`create function public\\.${fn}\\(`), fn);
+});
+
+test('urgency: four steps named as the owner accepted (D-10), locked by what the person holds', () => {
+  assert.deepEqual([1, 2, 3].map((l) => URGENCY_AR[l]), ['للانتباه', 'مهم', 'عاجل']);
+  const none = urgencySteps(() => false);
+  assert.deepEqual(none.map((s) => s.ok), [true, true, false, false]);
+  assert.deepEqual(none.map((s) => s.cap), [null, null, 'urgency.2', 'urgency.3']);
+  assert.ok(none[2].why && none[3].why && !none[0].why && !none[1].why);
+  // Level 2 may be asked for; level 3 is fixed by the reference and offers nothing.
+  assert.equal(capability('urgency.2').grantable, true);
+  assert.equal(capability('urgency.3').grantable, false);
+  const two = urgencySteps((k) => k === 'urgency.2');
+  assert.deepEqual(two.map((s) => s.ok), [true, true, true, false]);
+  const lead = urgencySteps((k) => k === 'urgency.2' || k === 'urgency.3');
+  assert.ok(lead.every((s) => s.ok && !s.why));
+});
+
+test('urgency: notice tiers and a task card priority as chat_send and the mail cards word them', () => {
+  assert.deepEqual([0, 1, 2, 3].map(urgencyTier), [null, 'attention', 'attention', 'decide']);
+  assert.equal(cardUrgency('urgent'), 3);
+  assert.equal(cardUrgency('normal'), 0);
+  assert.equal(cardUrgency(undefined), 0);
+  assert.equal(chatErrorText('URGENCY_2'), 'رسائل «مهم» لمن يملك صلاحيتها. اطلبها ممن يدير رتبتك.');
+  assert.equal(chatErrorText('URGENT_ROLE'), 'الرسائل العاجلة لمدير الاتصال ومساعده.');
+  const sql = readFileSync('supabase/migrations/20261013190000_urgency.sql', 'utf8');
+  assert.match(sql, /when 1 then 'للانتباه' when 2 then 'مهم' when 3 then 'عاجل'/);
+  assert.match(sql, /v_u = 3 and not public\.has_capability\('urgency\.3'\)/);
+  assert.match(sql, /v_u = 2 and not public\.use_capability\('urgency\.2'\)/);
+  assert.match(sql, /case when v_u = 3 then 'decide' else 'attention' end/);
 });

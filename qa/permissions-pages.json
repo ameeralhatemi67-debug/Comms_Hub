@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-13T09:40:51.364Z",
+  "run": "2026-10-14T09:13:07.066Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -123,6 +123,51 @@
     },
     {
       "name": "home-perms: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-granted: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-director: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: levels 0 and 1 open, 2 and 3 locked controls with their capability",
+      "pass": true,
+      "detail": "open,open,urgency.2,urgency.3"
+    },
+    {
+      "name": "urgency-picker-granted: given «مهم», only level 3 stays locked",
+      "pass": true,
+      "detail": "open,open,open,urgency.3"
+    },
+    {
+      "name": "urgency-picker-director: the director uses all four",
+      "pass": true,
+      "detail": "open,open,open,open"
+    },
+    {
+      "name": "urgency-picker-granted: the chosen step is marked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges: level 0 draws no mark",
       "pass": true,
       "detail": ""
     },
@@ -2032,6 +2077,286 @@
       "detail": "overflow 0px"
     },
     {
+      "name": "urgency-picker-writer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-picker-writer: shows «بلا درجة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: shows «رسالة عادية بلا تنبيه.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: shows «للانتباه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: shows «ينبّه أعضاء المحادثة في «انتباه»، إلا من كتمها.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: shows «مهم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: shows «رسائل «مهم» لمن يملك صلاحيتها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: shows «عاجل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: shows «حتى يبقى العاجل نادراً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: does not show «urgency.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-picker-writer · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-picker-writer · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-picker-writer · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-picker-writer · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-writer · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-picker-granted · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-granted · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-picker-granted: shows «ينبّه أعضاء المحادثة بعلامة «مهم»، إلا من كتمها.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-granted: shows «حتى يبقى العاجل نادراً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-granted: does not show «رسائل «مهم» لمن يملك صلاحيتها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-granted: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-granted · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-granted · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-picker-director · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-director · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-picker-director: shows «يصل الجميع ولو كتموا المحادثة، ويطلب من كل عضو الإقرار بالاستلام.»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-director: does not show «رسائل «مهم» لمن يملك صلاحيتها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-director: does not show «حتى يبقى العاجل نادراً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-director: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-director · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-picker-director · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-badges · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-badges: shows «!\nللانتباه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges: shows «!!\nمهم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges: shows «!!!\nعاجل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges: does not show «بلا درجة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-badges · emerald · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges · emerald · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-badges · emerald · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges · emerald · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-badges · evening · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges · evening · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "urgency-badges · evening · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency-badges · evening · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
       "name": "locked control: a click explains why, in the control's own words",
       "pass": true,
       "detail": "غير متاح لك الآنقنوات الإعلانات لمدير الاتصال ومساعده افتراضياً.اطلب هذه الصلاحية«إنشاء قناة إعلانات في المراسلة»: يقرر فيها من يدير رتبتك."
@@ -2070,12 +2395,32 @@
       "name": "locked control: no page errors",
       "pass": true,
       "detail": ""
+    },
+    {
+      "name": "urgency picker: «مهم» without the permission explains why and offers the request",
+      "pass": true,
+      "detail": "غير متاح لك الآنرسائل «مهم» لمن يملك صلاحيتها: مدير الاتصال ومساعده افتراضياً، ويمنحها لغيرهم من يدير رتبتهم.اطلب هذه الصلاحية«رسائل «مهم» (المستوى 2)»: يقرر فيها من يدير رتبتك."
+    },
+    {
+      "name": "urgency picker: the request opens for «مهم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "urgency picker: «عاجل» is fixed: explained, nothing offered",
+      "pass": true,
+      "detail": "غير متاح لك الآنالمستوى «عاجل» لمدير الاتصال ومساعده ومسؤول النظام فقط، حتى يبقى العاجل نادراً.المستوى الأعلى لمدير الاتصال ومساعده ومسؤول النظام فقط، حتى يبقى العاجل نادراً."
+    },
+    {
+      "name": "urgency picker: no page errors",
+      "pass": true,
+      "detail": ""
     }
   ],
   "errors": [],
   "summary": {
-    "total": 414,
-    "passed": 414,
+    "total": 483,
+    "passed": 483,
     "failed": 0
   }
 }

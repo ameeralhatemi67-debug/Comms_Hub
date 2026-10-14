@@ -9,11 +9,11 @@ import { useAccount } from '@/lib/account-context';
 import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
 import { uploadAttachment, type UploadedFile } from '@/lib/mail/upload';
-import { chatErrorText, type ChatMessage, type MemberRow, type RoomRow } from '@/lib/chat/rules';
+import { chatErrorText, type ChatMessage, type MemberRow, type RoomRow, type Urgency } from '@/lib/chat/rules';
 
 export type AssetLite = { id: string; name: string; kind: string; stage: string; current_version: number; approved_version: number | null; size_bytes: number };
 type Result = { ok: true; id?: string } | { ok: false; error: string };
-export type SendOpts = { reply?: string | null; urgent?: boolean; forward?: boolean };
+export type SendOpts = { reply?: string | null; urgency?: Urgency; forward?: boolean };
 
 type Ctx = {
   status: 'loading' | 'ready' | 'error';
@@ -185,14 +185,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           kind === 'text'
             ? {
                 id: `tmp-${Date.now()}`, room_id: room, author: account.email, kind, body, reply_to: opts.reply ?? null,
-                forwarded: !!opts.forward, urgent: !!opts.urgent, data: null, deleted: false, edited_at: null,
+                forwarded: !!opts.forward, urgency: opts.urgency ?? 0, data: null, deleted: false, edited_at: null,
                 created_at: new Date().toISOString(),
               }
             : null;
         if (tmp) setPending((p) => [...p, tmp]);
         const { data: id, error } = await supabase().rpc('chat_send', {
           p_room: room, p_kind: kind, p_body: body, p_reply: opts.reply ?? null, p_data: data,
-          p_urgent: !!opts.urgent, p_forward: !!opts.forward,
+          p_urgency: opts.urgency ?? 0, p_forward: !!opts.forward,
         });
         if (error) {
           if (tmp) setPending((p) => p.filter((x) => x.id !== tmp.id));

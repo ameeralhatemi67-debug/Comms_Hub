@@ -15,6 +15,7 @@ import {
   canAssign,
   canEdit,
   canUrgent,
+  cardUrgency,
   chatSysText,
   composerPopup,
   dayLabel,
@@ -26,9 +27,13 @@ import {
   snippet,
   unreadCount,
   waveform,
+  URGENCY_AR,
+  URGENCY_HINT,
+  URGENCY_WHY,
   type ChatMessage,
   type Presence,
   type RoomRow,
+  type Urgency,
 } from '@/lib/chat/rules';
 import { stageAr } from '@/lib/mail/rules';
 import { pipeline, stagePosition, type Stage } from '@/lib/media/rules';
@@ -36,6 +41,7 @@ import { Thumb } from '../media/parts';
 import { Face, presenceOf, presenceText, roleTitle, usePeople } from '../people';
 import { I, fileSize, localInput, type IconName } from '../mail/parts';
 import { useChat, type AssetLite } from './provider';
+import { UrgencyBadge, UrgencyOptions } from './urgency';
 import { useCaps } from '../caps';
 import { DecideDialog, RequestPermissionDialog, usePermRequests } from '../perm-requests';
 import { needProps } from '@/lib/kit/need';
@@ -361,7 +367,8 @@ function Conversation({
   const [find, setFind] = useState<string | null>(null);
   const [reply, setReply] = useState<ChatMessage | null>(null);
   const [edit, setEdit] = useState<ChatMessage | null>(null);
-  const [urgent, setUrgent] = useState(false);
+  const [urgency, setUrgency] = useState<Urgency>(0);
+  const caps = useCaps();
   const [menu, setMenu] = useState<{ msg: ChatMessage; x: number; y: number } | null>(null);
   const [roomMenu, setRoomMenu] = useState<{ x: number; y: number } | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
@@ -515,10 +522,10 @@ function Conversation({
           room={room}
           reply={reply}
           edit={edit}
-          urgent={urgent}
+          urgency={urgency}
+          onUrgency={setUrgency}
           onClearReply={() => setReply(null)}
           onClearEdit={() => setEdit(null)}
-          onClearUrgent={() => setUrgent(false)}
           onEditLast={() => {
             const mine = [...msgs].reverse().find((m) => canEdit(m, c.me, Date.now()));
             if (mine) setEdit(mine);
@@ -529,7 +536,7 @@ function Conversation({
             if (id === 'approval') return onDialog({ kind: 'approval' });
             if (id === 'asset') return onDialog({ kind: 'asset' });
             if (id === 'work') return onDialog({ kind: 'work' });
-            if (id === 'urgent') return canUrgent(c.role) && room.type !== 'dm' ? setUrgent(true) : c.say('الرسائل العاجلة لمدير الاتصال ومساعده في المجموعات.');
+            if (id === 'urgent') return caps.has('urgency.3') ? setUrgency(3) : c.say(URGENCY_WHY[3]);
             if (id === 'mail') return void toMail(null);
             if (id === 'perm') return onDialog({ kind: 'perm' });
           }}
@@ -656,7 +663,7 @@ function Bubble({
   const read = readers(m, members);
   return (
     <>
-      <div id={`cm-${m.id}`} className={`cx-m ${mine ? 'mine' : ''} ${first ? 'first' : ''} ${last ? 'last' : ''} ${m.urgent ? 'urgent' : ''}`}>
+      <div id={`cm-${m.id}`} className={`cx-m ${mine ? 'mine' : ''} ${first ? 'first' : ''} ${last ? 'last' : ''} ${m.urgency === 3 ? 'urgent' : m.urgency ? `lvl${m.urgency}` : ''}`}>
         {grp && !mine && (last ? <Face email={m.author} label={author?.display_name ?? ''} size="sm" /> : <span className="face-sp" />)}
         <div className="bub">
           {!m.id.startsWith('tmp-') && (
@@ -688,7 +695,8 @@ function Bubble({
               )}
               <Content room={room} m={m} onImg={onImg} />
               {m.body && m.kind !== 'poll' && <Text text={m.body} find={find} />}
-              {m.urgent && (
+              {(m.urgency === 1 || m.urgency === 2) && <UrgencyBadge level={m.urgency} />}
+              {m.urgency === 3 && (
                 <div className="ack">
                   <I n="alert" />
                   <span>
@@ -1047,8 +1055,8 @@ function TaskCard({ m }: { m: ChatMessage }) {
       <div className="ti">{d.what}</div>
       <div className="sub">
         {people.nameOf(d.assignee ?? '')} · التسليم {d.due ? `${dayLabel(d.due, c.now)} ${hhmm(d.due)}` : ''} · أسندها {people.nameOf(m.author)}
-        {d.priority === 'urgent' ? ' · عاجلة' : ''}
       </div>
+      <UrgencyBadge level={cardUrgency(d.priority)} />
       {d.state === 'open' && d.assignee === c.me && (
         <div className="acts">
           <button type="button" className="ml-btn sm primary" onClick={() => void c.rpc('chat_card', { p_msg: m.id, p_op: 'done', p_value: null }, 'أُنجزت المهمة.')}>
@@ -1147,20 +1155,20 @@ function Composer({
   room,
   reply,
   edit,
-  urgent,
+  urgency,
+  onUrgency,
   onClearReply,
   onClearEdit,
-  onClearUrgent,
   onEditLast,
   onCommand,
 }: {
   room: RoomRow;
   reply: ChatMessage | null;
   edit: ChatMessage | null;
-  urgent: boolean;
+  urgency: Urgency;
+  onUrgency: (u: Urgency) => void;
   onClearReply: () => void;
   onClearEdit: () => void;
-  onClearUrgent: () => void;
   onEditLast: () => void;
   onCommand: (id: (typeof COMMANDS)[number]['id']) => void;
 }) {
@@ -1169,6 +1177,7 @@ function Composer({
   const [text, setText] = useState('');
   const [popup, setPopup] = useState<{ kind: 'cmd' | 'men'; q: string } | null>(null);
   const [attach, setAttach] = useState<{ x: number; y: number } | null>(null);
+  const [picker, setPicker] = useState<{ x: number; y: number } | null>(null);
   const [uploads, setUploads] = useState<{ key: string; name: string; progress: number; error?: string }[]>([]);
   const [rec, setRec] = useState<null | { t: number; levels: number[] }>(null);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -1204,13 +1213,14 @@ function Composer({
     }
     setText('');
     setPopup(null);
-    const r = await c.send(room.id, 'text', t, null, { reply: reply?.id, urgent });
+    const r = await c.send(room.id, 'text', t, null, { reply: reply?.id, urgency });
     if (!r.ok) {
       c.say(r.error);
       setText(t);
+      return;
     }
     onClearReply();
-    onClearUrgent();
+    onUrgency(0);
   };
 
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -1366,13 +1376,13 @@ function Composer({
           </button>
         </div>
       )}
-      {urgent && (
-        <div className="cx-bar urg">
-          <I n="alert" />
+      {urgency > 0 && (
+        <div className={`cx-bar ${urgency === 3 ? 'urg' : `lvl lvl${urgency}`}`}>
+          <I n={urgency === 3 ? 'alert' : 'flag'} />
           <span>
-            <b>عاجل</b> · يطلب إقراراً بالاستلام من كل عضو
+            <b>{URGENCY_AR[urgency]}</b> · {URGENCY_HINT[urgency]}
           </span>
-          <button type="button" className="ml-btn icon quiet" aria-label="إلغاء" onClick={onClearUrgent}>
+          <button type="button" className="ml-btn icon quiet" aria-label="إلغاء درجة الأهمية" onClick={() => onUrgency(0)}>
             <I n="x" />
           </button>
         </div>
@@ -1410,6 +1420,16 @@ function Composer({
         <div className="cx-row2">
           <button type="button" className="rbtn att" aria-label="إرفاق وبطاقات" title="إرفاق وبطاقات" onClick={(e) => setAttach({ x: e.clientX, y: e.clientY })}>
             <I n="plus" />
+          </button>
+          <button
+            type="button"
+            className={`rbtn lvl cx-urgency ${urgency ? `on l${urgency}` : ''}`}
+            aria-label={`درجة الأهمية: ${URGENCY_AR[urgency]}`}
+            title="درجة الأهمية"
+            aria-haspopup="menu"
+            onClick={(e) => setPicker({ x: e.clientX, y: e.clientY })}
+          >
+            <I n="flag" />
           </button>
           <textarea
             ref={input}
@@ -1489,12 +1509,11 @@ function Composer({
             <I n="lock" />
             اطلب صلاحية
           </button>
-          {canUrgent(c.role) && room.type !== 'dm' && (
-            <button type="button" role="menuitem" onClick={() => (setAttach(null), onCommand('urgent'))}>
-              <I n="alert" />
-              رسالة عاجلة بإقرار
-            </button>
-          )}
+        </Pop>
+      )}
+      {picker && (
+        <Pop x={picker.x} y={picker.y} onClose={() => setPicker(null)}>
+          <UrgencyOptions value={urgency} onPick={(u) => (onUrgency(u), setPicker(null))} />
         </Pop>
       )}
     </div>
