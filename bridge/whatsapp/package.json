@@ -1,0 +1,14 @@
+{
+  "name": "comms-hub-whatsapp-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One-way WhatsApp sender for the Comms Hub: polls the site, sends what the database routed, reports. Adapted from the Hedayah bridge.",
+  "scripts": {
+    "start": "node bridge.cjs",
+    "test": "node --test policy.test.cjs transport.test.cjs loop.test.cjs compat.test.cjs"
+  },
+  "dependencies": {
+    "whatsapp-web.js": "1.34.7",
+    "qrcode": "1.5.4"
+  }
+}

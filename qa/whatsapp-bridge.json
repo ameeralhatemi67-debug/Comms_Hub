@@ -1,0 +1,19 @@
+{
+  "run": "2026-10-14",
+  "what": "Offline tests of the pull bridge (Permissions_Plan.md 8.1, Step P5b) against a fake site",
+  "folder": "bridge/whatsapp",
+  "command": "cd bridge/whatsapp && npm test   (node --test policy.test.cjs transport.test.cjs loop.test.cjs compat.test.cjs)",
+  "runs": [
+    { "attempt": 1, "how": "without whatsapp-web.js installed in this folder", "tests": 14, "passed": 13, "failed": 0, "skipped": 1, "skipped_why": "the compatibility check needs the pinned library" },
+    { "attempt": 2, "how": "COMMS_WA_LIB pointed at the owner's existing install of the same pinned whatsapp-web.js 1.34.7 (D:/Agents/main/projects/hida/bridge/node_modules), loaded read only; nothing there was changed", "tests": 14, "passed": 14, "failed": 0, "skipped": 0 },
+    { "attempt": 3, "how": "both again after removing an unused line from one test", "tests": 14, "passed": "13 and 14", "failed": 0 }
+  ],
+  "covered": {
+    "policy": "numbers in international form only; a claimed batch split into what may go and what is refused (bad number, group or broadcast address, unknown kind, empty or too long text, duplicate id); the guarded sender refuses a destination that is not the claimed number of that row, and sends each row once",
+    "transport": "one door, POST /api/whatsapp/dispatch, key as a bearer token; refusals carry a status, never the key, a number or a text; errors named by kind; Arabic reasons for the site",
+    "polling (a real HTTP fake site on 127.0.0.1)": "claim, send each row to its own claimed number, report, queue empties, the heartbeat carries the state; not linked: it says so and claims nothing; refused rows reported failed with their reason and not sent; a lost session fails one row and the rest go, logs carry ids and reasons only; the site down: reports kept and sent next tick, the wait doubles; a wrong key claims nothing",
+    "one way": "the bridge registers exactly the link events (qr, authenticated, ready, auth_failure, disconnected) and no message, call or receipt handler; an incoming message changes nothing and sends nothing; the QR is drawn in the terminal; only a claimed row sends",
+    "compatibility": "the transform refuses code it does not recognise; on the pinned library it normalises new message keys"
+  },
+  "not_performed": "No real WhatsApp session was opened: the first QR link of the system number and a real message to a phone need the owner's phone. The packages were not installed in bridge/whatsapp (run-bridge.bat installs them from the pinned lockfile on first run, without downloading a browser)."
+}

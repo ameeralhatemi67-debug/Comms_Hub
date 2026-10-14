@@ -1,0 +1,7 @@
+# The linked WhatsApp session, the browser cache, the secrets and the installed packages
+# stay on the owner's computer.
+node_modules/
+.session/
+.wwebjs_auth/
+.wwebjs_cache/
+.env
