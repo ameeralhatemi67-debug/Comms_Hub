@@ -130,7 +130,7 @@ const events = [
 const presets = [{ id: 'p1', name: 'تغطية النشر لأسبوع', items: [{ k: 'mail.outside.send', mode: 'timed', hours: 168 }], note: null, created_by: 'dir@x.sa' }];
 const requests = [{ id: 'ar1', email: 'new@x.sa', full_name: 'لمى', note: 'منضمة إلى فريق التصميم', created_at: '2026-10-12T10:00:00Z' }];
 const capEval = (k, ok, src, over = {}) => ({ k, ok, src, until: null, uses: null, id: null, ...over });
-const KEYS = ['page.work', 'page.create', 'page.approvals', 'page.calendar', 'page.media', 'page.tasks', 'page.activity', 'page.motion', 'page.mail', 'page.ideas', 'page.analytics', 'page.monitoring', 'page.settings',
+const KEYS = ['page.work', 'page.create', 'page.approvals', 'page.calendar', 'page.media', 'page.tasks', 'page.activity', 'page.motion', 'page.mail', 'page.ideas', 'page.analytics', 'page.settings',
   'urgency.2', 'urgency.3', 'whatsapp.push', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant', 'roles.assign', 'members.invite', 'members.remove', 'roles.templates.edit', 'whatsapp.system.manage',
   'work.approve', 'work.publish', 'media.approve', 'approve.own', 'role.switch', 'account.protected'];
 const writerCaps = KEYS.map((k) => {

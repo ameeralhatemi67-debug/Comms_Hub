@@ -303,29 +303,3 @@ export function DriveFiles() {
     </Panel>
   );
 }
-
-/** One row of Admin, التكاملات, showing the real state of Google Drive. */
-export function DriveIntegration() {
-  const drive = useDriveStatus();
-  const ok = drive.state === 'connected';
-  return (
-    <div className="notice">
-      <span className="between">
-        <b>Google Drive</b>
-        <span className={`chip ${ok ? 'success' : 'danger'}`}>{ok ? 'متصل' : drive.state === 'loading' ? '…' : 'غير متصل'}</span>
-      </span>
-      <small>{ok ? `الحساب: ${drive.account ?? 'مرتبط'}` : stateText[drive.state]}</small>
-      <div className="actions">
-        {drive.canConnect ? (
-          <a className="button secondary" href="/api/drive/connect">
-            {ok ? 'إعادة الربط' : 'ربط'}
-          </a>
-        ) : (
-          <button className="secondary" disabled>
-            {ok ? 'إعادة الربط' : 'ربط'}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}

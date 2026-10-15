@@ -139,12 +139,26 @@ publishing simulation, with each number saying where it comes from. Real publish
 need real publishing; until then the page says so or stays hidden. Owner decides at this
 step which metrics matter (the reference artifact lists candidates).
 
-### Step B6: rename sweep and documents
+### Step B6: rename sweep and documents - BUILT 2026-10-15
+
+Built (`progress.md`, last entry of 2026-10-15). Not done on purpose: the sample constants
+`systemHealth`, `storageUsage` and `securityEvents` in `src/lib/domain.ts` stay, because the legacy
+mock store's `homeTiles` (covered by `tests/domain.test.mjs`) and one sample notice still read them;
+retiring the whole mock store is its own step (B8 below).
 
 `Roadmap.md`, `Status.md`, `MVP_draft.md` (sections of the shell, navigation, page specs),
 `Readiness_Audit.md` cross-references and the in-site help text use the new names.
 
-### Step B7: help refresh for the changed pages
+### Step B7: help refresh for the changed pages - BUILT 2026-10-15
+
+Built in the same entry.
+
+### Step B8 (new, optional): retire the legacy mock store
+
+`src/lib/domain.ts` still carries the prototype's sample state (works, notices, directory, the
+admin tiles) behind `useHub`, read now only by «التحليلات», the reset button on «الحساب», the
+global search and tests. When B5 decides what «التحليلات» reads, delete the store and the tests
+that cover it in one step.
 
 Guides and what-is-new notes (`v` and `news` per page) for «سجل النشاط», «الحساب»,
 «الحسابات», «الإعدادات» and «حسابات المنصات». This is what remains of step 8 of the audit.

@@ -1,6 +1,6 @@
 {
   "script": "qa/access-matrix.mjs",
-  "run": "2026-10-15T08:28:22.905Z",
+  "run": "2026-10-15T08:34:33.205Z",
   "roles": [
     {
       "role": "admin",
@@ -16,7 +16,6 @@
         "mail",
         "ideas",
         "analytics",
-        "monitoring",
         "settings"
       ],
       "caps": [
@@ -97,8 +96,7 @@
         "motion",
         "mail",
         "ideas",
-        "analytics",
-        "monitoring"
+        "analytics"
       ],
       "caps": [
         "urgency.2",
@@ -158,8 +156,7 @@
         "motion",
         "mail",
         "ideas",
-        "analytics",
-        "monitoring"
+        "analytics"
       ],
       "caps": [
         "urgency.2",
@@ -219,8 +216,7 @@
         "motion",
         "mail",
         "ideas",
-        "analytics",
-        "monitoring"
+        "analytics"
       ],
       "caps": [],
       "menu": [
@@ -271,8 +267,7 @@
         "motion",
         "mail",
         "ideas",
-        "analytics",
-        "monitoring"
+        "analytics"
       ],
       "caps": [],
       "menu": [
@@ -323,8 +318,7 @@
         "motion",
         "mail",
         "ideas",
-        "analytics",
-        "monitoring"
+        "analytics"
       ],
       "caps": [],
       "menu": [
@@ -374,8 +368,7 @@
         "motion",
         "mail",
         "ideas",
-        "analytics",
-        "monitoring"
+        "analytics"
       ],
       "caps": [
         "work.publish"
@@ -428,8 +421,7 @@
         "motion",
         "mail",
         "ideas",
-        "analytics",
-        "monitoring"
+        "analytics"
       ],
       "caps": [],
       "menu": [

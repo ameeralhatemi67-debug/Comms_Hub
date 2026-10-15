@@ -79,12 +79,12 @@ aliases:
   - [[#31. Mail Page|31. Mail Page]]
   - [[#32. Ideas Page|32. Ideas Page]]
   - [[#33. Analytics Page|33. Analytics Page]]
-  - [[#34. Monitoring Page|34. Monitoring Page]]
-  - [[#35. Admin Page|35. Admin Page]]
+  - [[#34. Monitoring Page|34. Monitoring Page]] (since 2026-10-15 the team panel of «سجل النشاط»)
+  - [[#35. Admin Page|35. Admin Page]] (dissolved 2026-10-15 into «الحسابات» and «الإعدادات»)
   - [[#36. Users Page|36. Users Page]]
   - [[#37. Integrations Page|37. Integrations Page]]
-  - [[#38. Settings Page|38. Settings Page]]
-  - [[#39. Account Page|39. Account Page]]
+  - [[#38. Settings Page|38. Settings Page]] (since 2026-10-15 the system's page only: six tabs)
+  - [[#39. Account Page|39. Account Page]] (since 2026-10-15 opened from the name badge; carries the appearance choices)
 - **Part VI: Cross-Cutting Interactions & Mobile**
   - [[#40. Notification Center|40. Notification Center]]
   - [[#41. Global Search|41. Global Search]]

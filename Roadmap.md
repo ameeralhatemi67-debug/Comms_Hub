@@ -228,7 +228,7 @@ By owner directive of 2026-10-12 (recorded in `progress.md`) the work cycle move
 - [x] **Step 1, the work cycle in the database** (2026-10-12, `bed3fda`). Rule run 135 of 135.
 - [x] **Step 2, the shared interaction kit** (2026-10-12, `8d7289d`). Hold to confirm, undo of library edits, the help system. Rule run 56 of 56, browser check 40 of 40.
 - [x] **Step 3, «العمل», the work page and «إنشاء»** (2026-10-12, `1bd27a7`). Browser check 264 of 264.
-- [x] **Step 4, «الموافقات والنشر», the review screen, «الحسابات المرتبطة», notifications** (2026-10-12, `7814620`). Rule run 71 of 71, browser check 495 of 495.
+- [x] **Step 4, «الموافقات والنشر», the review screen, «الحسابات المرتبطة» (called «حسابات المنصات» since 2026-10-15), notifications** (2026-10-12, `7814620`). Rule run 71 of 71, browser check 495 of 495.
 - [/] **Step 5, «التقويم», «المشاريع», «الطلبات», then acceptance** (2026-10-13). Built and checked: rule run 113 of 113 with Steps 1 and 4 re-run, `npm test` 141 of 141, browser check 1010 of 1010, all sixteen pages with their guide, `MVP_draft.md` section 61. The review of the rules and row level security across Steps 1 to 5 closed the gaps it found (`20261013120000_work_cycle_planning.sql`). Delegation while away is deferred by owner decision (it waits for the approval-rights work).
   *Exit gate:* standard checks pass (met); a push to deploy on the owner's request (pending: all five steps are local commits); the owner's signed-in walkthrough of the whole cycle, with findings recorded in `progress.md` (pending).
 

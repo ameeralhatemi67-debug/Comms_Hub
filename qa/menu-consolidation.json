@@ -1,6 +1,6 @@
 {
   "script": "qa/menu-consolidation.cjs",
-  "run": "2026-10-15T08:28:23.703Z",
+  "run": "2026-10-15T08:34:20.330Z",
   "checks": [
     {
       "name": "the menu has 16 entries",

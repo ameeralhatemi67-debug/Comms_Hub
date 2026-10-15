@@ -15,7 +15,7 @@ const { dependency, baseURL, launchOptions } = require('./runtime.cjs');
 
 const out = path.join(__dirname, 'artifacts', 'identity');
 const routes = ['/', '/work', '/work/CH-241', '/create', '/approvals', '/calendar', '/media', '/media/poster',
-  '/mail', '/ideas', '/analytics', '/monitoring', '/settings', '/account', '/admin', '/motion'];
+  '/mail', '/ideas', '/analytics', '/settings', '/account', '/motion'];
 const KEY = 'comms-hub-identity';
 const checks = [];
 const errors = [];

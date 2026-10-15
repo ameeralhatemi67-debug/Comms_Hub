@@ -16,7 +16,7 @@ const { dependency, baseURL, launchOptions } = require('./runtime.cjs');
 
 const root = path.join(__dirname, 'artifacts', 'colour-tokens');
 const routes = ['/', '/work', '/work/CH-241', '/create', '/approvals', '/calendar', '/media', '/media/poster',
-  '/mail', '/ideas', '/analytics', '/monitoring', '/settings', '/account', '/admin'];
+  '/mail', '/ideas', '/analytics', '/settings', '/account'];
 const roles = ['director', 'publisher'];
 const widths = [1440, 390];
 

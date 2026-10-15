@@ -15,6 +15,9 @@ const { dependency, launchOptions } = require('./runtime.cjs');
 const { chromium, devices } = dependency('playwright');
 
 const root = path.resolve(__dirname, '..');
+// The version of the settings guide, read from the registry, so a bump of the page's `v` does not stale this check.
+const pagesSrc = fs.readFileSync(path.join(root, 'src/lib/help/pages.ts'), 'utf8');
+const SV = Number(pagesSrc.slice(pagesSrc.search(/\n  settings: \{\r?\n/)).match(/\n    v: (\d+)/)[1]);
 const out = path.join(__dirname, 'artifacts', 'help-tours');
 const result = { script: 'qa/help-tours.cjs', run: new Date().toISOString(), checks: [] };
 const check = (name, pass, detail = '') => result.checks.push({ name, pass: Boolean(pass), detail: String(detail) });
@@ -66,8 +69,8 @@ const scenes = {
   member: make({ page: 'approvals', role: 'member', seen: {} }, APPROVALS),
   partial: make({ page: 'approvals', role: 'maker', seen: {} }, '<div class="wk-head"><h1>الموافقات والنشر</h1></div>'),
   nothing: make({ page: 'approvals', role: 'maker', seen: {} }, '<p>جارٍ التحميل</p>'),
-  news: make({ page: 'settings', role: 'lead', seen: { settings: true } }, '<div class="page-heading"><h1>الإعدادات</h1></div><section class="st-moves">نقل</section><button class="su-hint">!</button>'),
-  newsSeen: make({ page: 'settings', role: 'lead', seen: { settings: true, 'settings:v2': true } }, '<div class="page-heading"><h1>الإعدادات</h1></div><section class="st-moves">نقل</section>'),
+  news: make({ page: 'settings', role: 'lead', seen: { settings: true } }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div><button class="su-hint">!</button>'),
+  newsSeen: make({ page: 'settings', role: 'lead', seen: { settings: true, [`settings:v${SV}`]: true } }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div>'),
   first: make({ page: 'settings', role: 'lead', seen: {} }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div><section class="st-health">صحة</section>'),
   touch: make({ page: 'approvals', role: 'lead', seen: { approvals: true } }, APPROVALS),
 };
@@ -163,13 +166,12 @@ const scenes = {
     // 6. What is new, once.
     ({ ctx, page } = await open(scenes.news));
     t = await pop(page);
-    check('news: someone who saw the guide before gets «جديد في» with only the added steps', t && /جديد في «الإعدادات»/.test(t) && /1 من 2/.test(t) && /أضفنا إلى هذه الصفحة/.test(t), t?.replace(/\s+/g, ' ').slice(0, 200));
+    check('news: someone who saw the guide before gets «جديد في» with only the added steps', t && /جديد في «الإعدادات»/.test(t) && /1 من 1/.test(t) && /أضفنا إلى هذه الصفحة/.test(t), t?.replace(/\s+/g, ' ').slice(0, 200));
     check('news: no role line on a news card', t && !/بصفتك/.test(t));
-    await nextStep(page);
     await page.locator('.gd-pop [data-gda="tnext"]').click();
     await page.waitForTimeout(150);
     const nm = await page.evaluate(() => window.__marks);
-    check('news: seeing it marks the versioned key, so it is not shown again', nm.includes('settings:v2'), nm.join(','));
+    check('news: seeing it marks the versioned key, so it is not shown again', nm.includes(`settings:v${SV}`), nm.join(','));
     await ctx.close();
 
     ({ ctx, page } = await open(scenes.newsSeen));
@@ -187,7 +189,7 @@ const scenes = {
       await page.waitForTimeout(150);
     }
     const fm = await page.evaluate(() => window.__marks);
-    check('first visit: finishing marks the page and its current version', fm.includes('settings') && fm.includes('settings:v2'), fm.join(','));
+    check('first visit: finishing marks the page and its current version', fm.includes('settings') && fm.includes(`settings:v${SV}`), fm.join(','));
     await ctx.close();
 
     // 8. Touch: words, the page guide as a button, finger-sized buttons, windows inside the screen.

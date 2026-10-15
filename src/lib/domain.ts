@@ -257,12 +257,6 @@ export type Integration = {
   authorizedUntil?: string;
 };
 
-export const integrationStatusLabels: Record<IntegrationStatus, string> = {
-  CONNECTED: 'متصل',
-  REAUTH: 'يحتاج إعادة ربط',
-  NOT_CONFIGURED: 'غير مهيأ',
-};
-
 export const integrations: Integration[] = [
   {
     id: 'instagram',
@@ -366,15 +360,6 @@ export const securityEvents = [
   { id: 's2', at: 'أمس 21:10', actor: 'النظام', text: 'فشل تحديث تفويض LinkedIn' },
   { id: 's3', at: 'أمس 16:02', actor: 'مسؤول النظام', text: 'تعديل صلاحيات دور عضو' },
 ];
-
-export const permissionMatrix = roleIds.map((id) => ({
-  id,
-  name: roles[id].name,
-  create: roles[id].create,
-  review: roles[id].review,
-  publish: roles[id].publish,
-  admin: roles[id].admin,
-}));
 
 // --- Work items, releases and publication records ---
 

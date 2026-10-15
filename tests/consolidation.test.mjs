@@ -4,7 +4,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { canOpen } from '../src/lib/access.ts';
+import { canOpen, defaultPages, grantablePages, sanitizePages } from '../src/lib/access.ts';
+import { CAPABILITIES } from '../src/lib/permissions.ts';
 import { teamSummary } from '../src/lib/media/team.ts';
 
 const read = (p) => readFileSync(p, 'utf8');
@@ -33,7 +34,9 @@ test('«الحسابات المرتبطة» is «حسابات المنصات» e
       return statSync(p).isDirectory() ? walk(p) : /\.(ts|tsx|css)$/.test(p) ? [p] : [];
     });
   const left = walk('src').filter((p) => read(p).includes('الحسابات المرتبطة'));
-  assert.deepEqual(left, []);
+  // The one place that names the old name: the what-is-new note of the page itself, so people who knew it find it.
+  assert.deepEqual(left.map((p) => p.replace(/\\/g, '/')), ['src/lib/help/pages.ts']);
+  assert.equal(read('src/lib/help/pages.ts').split('الحسابات المرتبطة').length - 1, 1);
   assert.match(navBlock, /href: '\/channels', label: 'حسابات المنصات'/);
 });
 
@@ -53,11 +56,15 @@ test('/monitoring sends a visitor to «سجل النشاط» and its page and gu
   assert.doesNotMatch(read('src/lib/help/registry.ts'), /monitoring/);
 });
 
-test('the old «المراقبة» grant still opens «سجل النشاط», so nobody loses a page', () => {
-  const writer = { role: 'writer', pages: ['monitoring'], caps: [] };
-  assert.equal(canOpen(writer, 'activity'), true);
-  assert.equal(canOpen({ role: 'writer', pages: ['work'], caps: [] }, 'activity'), false);
-  assert.equal(canOpen({ role: 'writer', pages: ['activity'], caps: [] }, 'activity'), true);
+test('the «المراقبة» grant is folded away: not grantable, not a default, not in the catalogue, dropped when read', () => {
+  assert.equal(grantablePages.some((p) => p.id === 'monitoring'), false);
+  assert.equal(defaultPages('director').includes('monitoring'), false);
+  assert.deepEqual(sanitizePages(['work', 'monitoring', 'activity']), ['work', 'activity']);
+  assert.equal(canOpen({ role: 'writer', pages: ['monitoring'], caps: [] }, 'activity'), false, 'a stale entry opens nothing by itself');
+  assert.equal(CAPABILITIES.some((c) => c.key === 'page.monitoring'), false);
+  const sql = read('supabase/migrations/20261015170000_fold_monitoring.sql');
+  assert.match(sql, /delete from public\.capabilities where key = 'page\.monitoring'/);
+  assert.match(sql, /array_append\(array_remove\(pages, 'monitoring'\), 'activity'\)/);
 });
 
 test('the team panel counts what the rows say: last action, the week, open and late tasks', () => {

@@ -26,10 +26,13 @@ function seeded() {
   const block = sql.slice(sql.indexOf('insert into public.capabilities'), sql.indexOf('-- Role templates equal'))
     + intSql.slice(intSql.indexOf('insert into public.capabilities'), intSql.indexOf('insert into public.role_capabilities'));
   const rows = [];
+  // A later migration removes a page from the catalogue (Action_Plan.md B6, «المراقبة» folded into «سجل النشاط»).
+  const foldSql = readFileSync('supabase/migrations/20261015170000_fold_monitoring.sql', 'utf8');
+  const removed = [...foldSql.matchAll(/delete from public\.capabilities where key = '([a-z0-9.]+)'/g)].map((m) => m[1]);
   const re = /\('([a-z0-9.]+)',\s*'(\w+)',\s*'([^']+)',\s*(true|false),\s*'(\w+)',\s*(\d),\s*'\{([a-z,]*)\}',\s*(null|'[^']*'),\s*(\d+)\)/g;
   for (const m of block.matchAll(re))
     rows.push({ key: m[1], grp: m[2], label: m[3], grantable: m[4] === 'true', scope: m[5], minRank: Number(m[6]), fixedRoles: m[7] ? m[7].split(',') : [], why: m[8] === 'null' ? undefined : m[8].slice(1, -1), sort: Number(m[9]) });
-  return rows;
+  return rows.filter((r) => !removed.includes(r.key));
 }
 
 test('the catalog in TypeScript is the catalog the database seeds', () => {

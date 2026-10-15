@@ -42,9 +42,9 @@ by rule), so "works" below means "built and tested", not "walked by a person".
 
 ## 3. What was missed from the list
 
-1. **Four settings tabs are still mock**: organisation, appearance defaults, publishing
+1. **(2026-10-15: removed or moved, `Action_Plan.md` B3.) Four settings tabs are still mock**: organisation, appearance defaults, publishing
    defaults, approval defaults, AI. They are labelled "visual", but testers will click them.
-2. **«الأفكار», «التحليلات», «المراقبة» and «الإدارة» are still mock** (browser store, sample
+2. **«الأفكار», «التحليلات», «المراقبة» and «الإدارة» are still mock** (2026-10-15: «الإدارة» dissolved and «المراقبة» merged into «سجل النشاط», see `Action_Plan.md` Part B; «التحليلات» is out of the menu until it reads real data) (browser store, sample
    campaign). «الأفكار» creates a *mock* work and then sends the person to «العمل», which
    reads the database, so the idea never appears. This is a broken path, not just a stub.
 3. **Delegation while away** is not built (owner decision of 2026-10-12). A director on

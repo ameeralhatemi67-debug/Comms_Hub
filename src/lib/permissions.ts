@@ -45,7 +45,6 @@ export const CAPABILITIES: Capability[] = [
   page('mail', 'البريد', 18),
   page('ideas', 'الأفكار', 19),
   page('analytics', 'التحليلات', 20),
-  page('monitoring', 'المراقبة', 21),
   page('settings', 'الإعدادات', 22),
   { key: 'urgency.2', grp: 'messaging', label: 'رسائل «مهم» (المستوى 2)', grantable: true, scope: 'none', minRank: 1, fixedRoles: [], sort: 30 },
   {

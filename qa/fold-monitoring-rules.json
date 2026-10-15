@@ -1,0 +1,20 @@
+{
+  "run": "2026-10-15",
+  "what": "Database check for step B6 (the page grant «المراقبة» folded away)",
+  "migration": "supabase/migrations/20261015170000_fold_monitoring.sql, applied to comms-hub as 'fold_monitoring'",
+  "before": "no account, person grant, request or role template referred to page.monitoring (counted before the migration); two functions carried the page list (perm_pages_ok, account_update), each exactly once",
+  "after": {
+    "catalogue rows named page.monitoring": 0,
+    "catalogue rows in total": 38,
+    "functions whose source names monitoring": 0,
+    "page-list functions carrying the list without it": 2,
+    "accounts whose pages contain monitoring": 0
+  },
+  "function_checks_one_rolled_back_transaction": [
+    { "k": "account_update with activity and settings pages", "v": "ok", "expect": "ok", "pass": true },
+    { "k": "a stale monitoring entry is dropped, not stored", "v": "ok", "expect": "ok", "pass": true },
+    { "k": "the stored list has no monitoring and keeps work", "v": "work", "expect": "work", "pass": true }
+  ],
+  "passed": 3,
+  "total": 3
+}

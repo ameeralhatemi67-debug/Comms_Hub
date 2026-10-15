@@ -1,6 +1,6 @@
 {
   "script": "qa/help-tours.cjs",
-  "run": "2026-10-15T06:18:24.953Z",
+  "run": "2026-10-15T08:38:16.047Z",
   "checks": [
     {
       "name": "lead: the first card says what the page means for the lead group",
@@ -60,7 +60,7 @@
     {
       "name": "news: someone who saw the guide before gets «جديد في» with only the added steps",
       "pass": true,
-      "detail": "جديد في «الإعدادات» · 1 من 2 نقل الملفات بين المزودين جديد: مزود تخزين ثانٍ ونقل الملفات إليه وإليك بتحقق ببصمة المحتوى. تبويب «التخزين». أضفنا إلى هذه الصفحة ما يلي منذ زيارتك السابقة. الإرشاد الكامل"
+      "detail": "جديد في «الإعدادات» · 1 من 1 الإعدادات صارت للنظام فقط جديد: المظهر انتقل إلى صفحة «الحساب» لأنه لك وحدك، وأُزيلت الأقسام التي لم تكن تحفظ شيئاً (المؤسسة واللغة والإشعارات وافتراضات النشر والاعتماد وا"
     },
     {
       "name": "news: no role line on a news card",
@@ -70,7 +70,7 @@
     {
       "name": "news: seeing it marks the versioned key, so it is not shown again",
       "pass": true,
-      "detail": "settings,settings:v2"
+      "detail": "settings,settings:v4"
     },
     {
       "name": "news already seen: nothing is shown",
@@ -80,12 +80,12 @@
     {
       "name": "first visit: the ordinary tour",
       "pass": true,
-      "detail": "إرشاد «الإعدادات» · 1 من 3 الإعدادات «عام وصحة النظام» أولاً، ثم أقسام العرض، و«واتساب النظام» و«الس"
+      "detail": "إرشاد «الإعدادات» · 1 من 3 الإعدادات إعدادات النظام كلها حقيقية: «عام وصحة النظام» أولاً، ثم التخزين"
     },
     {
       "name": "first visit: finishing marks the page and its current version",
       "pass": true,
-      "detail": "settings,settings:v2"
+      "detail": "settings,settings:v4"
     },
     {
       "name": "touch: guide mode speaks of touching, not clicking",
