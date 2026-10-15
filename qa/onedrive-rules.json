@@ -1,0 +1,10 @@
+{
+  "run": "2026-10-15",
+  "what": "Database rule run for step B10: OneDrive as a storage provider (account entry, replacement, limit of three, server rotation of the refresh token in Vault, the Microsoft app entry and server read, removal, no secret leaked)",
+  "script": "supabase/tests/onedrive_rules.sql",
+  "migrations": ["supabase/migrations/20261015210000_onedrive.sql (applied as onedrive)"],
+  "how": "One transaction against the Supabase project comms-hub, aborted at the end by a raised exception that carried the result out (nothing committed). Four throwaway accounts (@t.test); the server key is replaced by a throwaway inside the transaction only.",
+  "total": 27,
+  "passed": 27,
+  "failed": []
+}

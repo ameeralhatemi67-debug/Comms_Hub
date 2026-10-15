@@ -38,7 +38,7 @@ step below ends with evidence in `progress.md`, per `AGENTS.md`.
 | 4 | Platform registry with add, edit, delete, info tab, readiness tracker (S5) | Built, pushed | Signed-in walkthrough; outside paperwork per platform |
 | 5 | Per-platform post preview with limits through the send step | Built, pushed | Known gap: the database does not enforce limits, only the interface |
 | 6 | Real OAuth and health checks: Facebook, Instagram, TikTok; Snapchat manual | Built, pushed | Tested against a fake platform only; owner creates the Meta and TikTok apps (`Platform_Connections_Setup.md`) |
-| 7 | Move engine with a second provider (S3), then OneDrive (S8) | **S3 built and pushed; S4 backups built and committed locally; OneDrive (S8) not built** | S8; a first real move to a real second provider (`Storage_Provider_Setup.md`) |
+| 7 | Move engine with a second provider (S3), then OneDrive (S8) | **S3 and S4 built and pushed; OneDrive (S8) built 2026-10-15 (B10), untried against a real Microsoft account** | S8; a first real move to a real second provider (`Storage_Provider_Setup.md`) |
 | 8 | Help upgrade: role-aware tours, empty-state tours, touch, missing pages | **Built and pushed** (`d20edb1`); the owner's list said "not done", `Status.md` and `progress.md` say done | Owes a refresh for every page Part B changes (step B7) |
 | 9 | NAS and scheduled backups when the agent computer arrives | Not started, gated on hardware (E-1) | Everything; see Part D |
 
@@ -184,7 +184,7 @@ Guides and what-is-new notes (`v` and `news` per page) for «سجل النشاط
 
 | Step | What | Gate |
 |---|---|---|
-| C1 | OneDrive as a storage provider (S8) on the move engine | A real Microsoft app registration by the owner |
+| C1 | OneDrive as a storage provider (S8) on the move engine | **Built (B10).** Owner enters the Microsoft app and connects an account; a first real move closes it |
 | C2 | A first real move and a first real backup to a real second provider | Owner creates the bucket and key pair (`Storage_Provider_Setup.md`) |
 | C3 | First real connection of a Meta and a TikTok account, then the signed-in walkthrough of steps 1 to 8 | Owner creates the apps, enters ids in «المنصات» |
 | C4 | Database enforcement of platform limits at the send step (known gap of step 5) | None; small |

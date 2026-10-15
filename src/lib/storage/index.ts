@@ -6,9 +6,10 @@
 // New uploads still go to the role's provider, Google Drive: changing a role's provider is not
 // offered, and the plan's step 6.3 moves existing files only.
 import { driveConfigured, getDrive, resolveDriveEnv } from '../drive/google.ts';
-import { storageServing, vaultSecretById, type ServedCopy } from '../integrations/vault.ts';
+import { integrationCreds, rotateOneDriveToken, storageServing, vaultSecretById, type ServedCopy } from '../integrations/vault.ts';
 import { driveStorage } from './drive.ts';
 import { StorageError, type StorageProvider, type StorageRole } from './provider.ts';
+import { onedriveStorage } from './onedrive.ts';
 import { parseCredentials, s3ConfigFrom, s3Storage } from './s3.ts';
 
 export { StorageError } from './provider.ts';
@@ -43,6 +44,23 @@ export async function providerFor(p: { id: string; type: string; config: Record<
     const creds = parseCredentials(await vaultSecretById(p.id, 'storage access'));
     if (!creds) throw new StorageError(503, 'NO_SECRET');
     const provider = s3Storage(s3ConfigFrom(p.config), creds);
+    built.set(key, { at: Date.now(), provider });
+    return provider;
+  }
+  if (p.type === 'onedrive') {
+    const key = `${p.id}:${JSON.stringify(p.config)}`;
+    const hit = built.get(key);
+    if (hit && Date.now() - hit.at < TTL) return hit.provider;
+    const provider = onedriveStorage({
+      auth: async () => {
+        // The Microsoft app entered in the site, and this account's refresh token, read when a new access token is needed.
+        const app = await integrationCreds('microsoft_app', 'onedrive access');
+        const refresh = await vaultSecretById(p.id, 'onedrive access');
+        const clientId = typeof app?.config.app_id === 'string' ? app.config.app_id : '';
+        return app && clientId && refresh ? { clientId, secret: app.secret, refresh } : null;
+      },
+      rotate: (token) => rotateOneDriveToken(p.id, token),
+    });
     built.set(key, { at: Date.now(), provider });
     return provider;
   }

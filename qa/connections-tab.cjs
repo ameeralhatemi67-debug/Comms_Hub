@@ -26,7 +26,7 @@ new Function('module', 'exports', js)(mod, mod.exports);
 const { GUIDES, resolveGuide } = mod.exports;
 
 const ORIGIN = 'https://comms-hub.example.org';
-const KEYS = ['meta', 'tiktok', 'google', 'linkedin', 'x', 'connect_google', 'connect_linkedin', 'connect_x', 'mail', 'drive', 'whatsapp'];
+const KEYS = ['meta', 'tiktok', 'google', 'linkedin', 'x', 'connect_google', 'connect_linkedin', 'connect_x', 'mail', 'drive', 'whatsapp', 'microsoft', 'onedrive'];
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const guideHtml = (key) => {
   const g = resolveGuide(GUIDES[key], ORIGIN, key.replace(/^connect_/, ''));
@@ -107,7 +107,7 @@ const pages = {
       copies: [...document.querySelectorAll('.su-copy')].map((c) => ({ dir: c.getAttribute('dir'), w: c.getBoundingClientRect().width, inside: c.getBoundingClientRect().right <= window.innerWidth + 1 })),
     }));
     await p.screenshot({ path: path.join(out, `guides-${width}.png`), fullPage: false });
-    check(`${width}: eleven guides drawn, no sideways overflow`, g.guides === 11 && !g.overflow, JSON.stringify({ guides: g.guides, overflow: g.overflow }));
+    check(`${width}: thirteen guides drawn, no sideways overflow`, g.guides === KEYS.length && !g.overflow, JSON.stringify({ guides: g.guides, overflow: g.overflow }));
     check(`${width}: every link is https, opens in a new page and is visible`, g.anchors.length > 15 && g.anchors.every((a) => a.href.startsWith('https://') && a.target === '_blank' && /noopener/.test(a.rel) && a.w > 0), g.anchors.length);
     check(`${width}: copy lines are left-to-right and inside the screen`, g.copies.every((c) => c.dir === 'ltr' && c.w > 0 && c.inside), g.copies.length);
 

@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       const done = await Promise.all(
         part.map(async (r) => {
           // Each copy is asked of its own provider. A type this build has no provider for is not ours to judge.
-          if (r.type !== 'google_drive' && r.type !== 's3_compatible') return null;
+          if (r.type !== 'google_drive' && r.type !== 's3_compatible' && r.type !== 'onedrive') return null;
           const c = await (await providerFor({ id: r.integration_id, type: r.type, config: r.config })).check(r.ref, r.size_bytes);
           return { id: r.id, state: c.state };
         }),

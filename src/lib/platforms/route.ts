@@ -3,7 +3,7 @@ import { fail, guard } from '../drive/guard.ts';
 import { serverClient } from '../supabase/server.ts';
 import type { Provider } from './oauth.ts';
 
-export const isProvider = (v: unknown): v is Provider => typeof v === 'string' && (['meta', 'tiktok', 'google', 'linkedin', 'x'] as string[]).includes(v);
+export const isProvider = (v: unknown): v is Provider => typeof v === 'string' && (['meta', 'tiktok', 'google', 'linkedin', 'x', 'microsoft'] as string[]).includes(v);
 export const isUuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 
 /**

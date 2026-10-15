@@ -117,10 +117,10 @@ test('the log line for a check says the counts and never a reference', () => {
 
 test('what is not built is listed as not available, with a reason, and nothing offers to connect it (S3 and Supabase Storage came with Step S3)', () => {
   const ids = COMING_PROVIDERS.map((c) => c.id).sort();
-  assert.deepEqual(ids, ['nas', 'onedrive']);
+  assert.deepEqual(ids, ['nas']); // OneDrive was built in Action_Plan.md B10
   for (const c of COMING_PROVIDERS) assert.ok(c.why.length > 10, c.id);
   const tab = readFileSync('src/components/settings/storage.tsx', 'utf8');
-  assert.doesNotMatch(tab, /ربط OneDrive|ربط NAS/);
+  assert.doesNotMatch(tab, /ربط NAS/);
 });
 
 test('no file location carries a policy: it is read only through functions', () => {

@@ -22,13 +22,14 @@ const TIKTOK_API = 'https://open.tiktokapis.com/v2';
 /** user.info.basic reads the profile (health); video.publish posts directly; video.upload sends a draft. */
 export const TIKTOK_SCOPES = ['user.info.basic', 'video.publish', 'video.upload'] as const;
 
-export type Provider = 'meta' | 'tiktok' | 'google' | 'linkedin' | 'x';
+export type Provider = 'meta' | 'tiktok' | 'google' | 'linkedin' | 'x' | 'microsoft';
 export const APP_TYPE: Record<Provider, string> = {
   meta: 'meta_app',
   tiktok: 'tiktok_app',
   google: 'google_app',
   linkedin: 'linkedin_app',
   x: 'x_app',
+  microsoft: 'microsoft_app',
 };
 export const OFFER_TYPE: Record<Provider, string> = {
   meta: 'meta_user',
@@ -36,6 +37,7 @@ export const OFFER_TYPE: Record<Provider, string> = {
   google: 'google_user_offer',
   linkedin: 'linkedin_user_offer',
   x: 'x_user_offer',
+  microsoft: 'microsoft_user_offer',
 };
 /** The account type each registry platform connects as. */
 export const ACCOUNT_TYPE: Record<string, { provider: Provider; type: string }> = {

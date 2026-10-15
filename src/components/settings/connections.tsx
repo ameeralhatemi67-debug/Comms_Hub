@@ -3,8 +3,9 @@
 // entered by the Director in the site instead of in the server's environment: the shared mailbox
 // (Gmail, an app password), the Google app (client id and secret, shared by Google Drive and
 // YouTube) and the Drive connection itself. Each value is checked with its own service before it
-// is kept, goes to the vault, and is never shown again. Each block has the circled "!" with the
-// steps and the links.
+// is kept, goes to the vault, and is never shown again. OneDrive joins here (Action_Plan.md B10): the
+// Microsoft app, then the accounts connected through Microsoft's own sign-in. Each block has the
+// circled "!" with the steps and the links.
 import { useCallback, useEffect, useState } from 'react';
 import { needProps } from '@/lib/kit/need';
 import { supabase } from '@/lib/supabase/client';
@@ -45,6 +46,8 @@ export function ConnectionsTab({ initial }: { initial?: { rows: Integration[]; p
 
   const mail = rows.find((r) => r.type === 'gmail_account');
   const google = rows.find((r) => r.type === 'google_app');
+  const microsoft = rows.find((r) => r.type === 'microsoft_app');
+  const onedrives = rows.filter((r) => r.type === 'onedrive');
   const lock = (why: string) => needProps('integrations.secrets', why);
 
   return (
@@ -55,6 +58,8 @@ export function ConnectionsTab({ initial }: { initial?: { rows: Integration[]; p
       <MailBlock row={mail} envPresent={Boolean(present.GMAIL_ADDRESS && present.GMAIL_APP_PASSWORD)} canEdit={canMail} onSaved={load} lock={lock} />
       <AppBlock provider="google" app={google} canSecrets={canGoogle} onSaved={load} lock={lock} />
       <DriveBlock drive={drive} googleReady={Boolean(google?.has_secret) || Boolean(present.GOOGLE_CLIENT_ID && present.GOOGLE_CLIENT_SECRET)} canConnect={canDrive || Boolean(drive.canConnect)} />
+      <AppBlock provider="microsoft" app={microsoft} canSecrets={canGoogle} onSaved={load} lock={lock} />
+      <OneDriveBlock accounts={onedrives} appReady={Boolean(microsoft?.has_secret)} canConnect={canDrive} onChecked={load} />
     </div>
   );
 }
@@ -160,6 +165,80 @@ function DriveBlock({ drive, googleReady, canConnect }: { drive: DriveState; goo
           </button>
         )}
       </div>
+    </section>
+  );
+}
+
+const ONEDRIVE_NOTE: Record<string, string> = {
+  APP_NOT_CONFIGURED: 'لم يُدخل معرّف تطبيق Microsoft وسره بعد: أدخلهما في بطاقة «تطبيق Microsoft».',
+  CODE_REFUSED: 'لم يكتمل الربط: رفضت Microsoft الدخول أو انتهت مهلته. ابدأ من جديد.',
+  REFRESH_MISSING: 'لم تُعطِ Microsoft رمزاً دائماً. أزل وصول التطبيق من حسابك على Microsoft ثم أعد الربط.',
+  ACCOUNT_UNKNOWN: 'تعذّر معرفة صاحب الحساب. أعد المحاولة.',
+  PROVIDER_LIMIT: 'بلغت الحد من حسابات OneDrive (3). أزل حساباً لا يحفظ ملفات.',
+  FORBIDDEN: 'لا تملك صلاحية ربط مزودي التخزين.',
+  SAVE_FAILED: 'تعذّر حفظ الحساب. أعد المحاولة.',
+};
+
+function OneDriveBlock({ accounts, appReady, canConnect, onChecked }: { accounts: Integration[]; appReady: boolean; canConnect: boolean; onChecked: () => Promise<void> }) {
+  const [busy, setBusy] = useState('');
+  const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
+  // The connection returns here with the result in the address.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get('onedrive') === 'connected') setNote({ ok: true, text: 'رُبط حساب OneDrive. افحص اتصاله، ثم انقل إليه ملفات من «التخزين».' });
+    else if (q.get('onedrive_error')) setNote({ ok: false, text: ONEDRIVE_NOTE[q.get('onedrive_error')!] ?? 'لم يكتمل ربط OneDrive.' });
+  }, []);
+  const check = async (id: string) => {
+    setBusy(id);
+    try {
+      const r = await fetch('/api/storage/provider', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'check', id }) });
+      const b = (await r.json()) as { ok?: boolean; error?: string };
+      setNote(b.ok ? { ok: true, text: 'اتصال OneDrive سليم.' } : { ok: false, text: b.error ?? 'تعذّر الفحص.' });
+      await onChecked();
+    } catch {
+      setNote({ ok: false, text: 'تعذّر الوصول إلى الخادم.' });
+    } finally {
+      setBusy('');
+    }
+  };
+  return (
+    <section className="st-app st-onedrive" aria-label="OneDrive" data-app="onedrive">
+      <div className="between">
+        <b>
+          OneDrive <SetupGuide guide="onedrive" label="خطوات ربط OneDrive" />
+        </b>
+        <span className={`mx-chip ${accounts.some((a) => a.state === 'connected') ? 'success' : ''}`}>{accounts.length ? `${accounts.length} حساب` : 'لم يُربط بعد'}</span>
+      </div>
+      <small className="muted">
+        مزود تخزين ثانٍ: تُنقل إليه ملفات المكتبة والبريد أو تُحفظ نسخاً احتياطية، وتُخدَّم منه بالروابط نفسها. الرفع الجديد يبقى إلى Google Drive. لم يُجرَّب مع حساب Microsoft حقيقي بعد.
+      </small>
+      {accounts.map((a) => (
+        <div className="between st-onedrive-row" key={a.id}>
+          <span>
+            <bdi dir="ltr">{String(a.config?.account ?? a.label)}</bdi> · <small className="muted">{STATE_AR[a.state]}</small>
+            {a.last_ok_at ? <small className="muted"> · آخر نجاح {when(a.last_ok_at)}</small> : null}
+          </span>
+          <button type="button" className="secondary st-onedrive-check" disabled={busy === a.id} onClick={() => void check(a.id)}>
+            {busy === a.id ? 'جارٍ الفحص…' : 'فحص الاتصال'}
+          </button>
+        </div>
+      ))}
+      <div className="actions">
+        {canConnect && appReady ? (
+          <a className="button secondary st-onedrive-connect" href="/api/onedrive/connect">
+            {accounts.length ? 'ربط حساب آخر أو إعادة ربط' : 'ربط OneDrive'}
+          </a>
+        ) : (
+          <button type="button" className="secondary" disabled title={appReady ? 'لا تملك «إدارة مزودي التخزين».' : 'أدخل تطبيق Microsoft أولاً.'}>
+            ربط OneDrive
+          </button>
+        )}
+      </div>
+      {note && (
+        <p className={note.ok ? 'ml-hint' : 'ml-err'} role="status">
+          {note.text}
+        </p>
+      )}
     </section>
   );
 }

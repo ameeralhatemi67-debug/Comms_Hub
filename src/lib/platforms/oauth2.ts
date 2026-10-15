@@ -64,7 +64,7 @@ async function postForm(f: Fetch, url: string, form: Record<string, string>, hea
  * of the code; that difference is the check. Only an explicit refusal of the client is a refusal:
  * anything else is taken as the pair being known to the platform.
  */
-async function appCheck(f: Fetch, url: string, form: Record<string, string>, headers: Record<string, string> = {}): Promise<{ ok: true } | { ok: false; error: string }> {
+export async function appCheck(f: Fetch, url: string, form: Record<string, string>, headers: Record<string, string> = {}): Promise<{ ok: true } | { ok: false; error: string }> {
   const r = await postForm(f, url, form, headers);
   const err = String(r.body.error ?? '');
   if (r.status === 401 || err === 'invalid_client' || err === 'unauthorized_client') return { ok: false, error: 'APP_REFUSED' };

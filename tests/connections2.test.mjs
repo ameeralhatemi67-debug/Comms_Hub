@@ -52,7 +52,8 @@ const SECRET = 'client-secret-0123456789';
 
 // ---- the map ---------------------------------------------------------------------------------------
 test('five providers, and every registry platform that connects names its account type', () => {
-  assert.deepEqual([...CONN_PROVIDERS], ['meta', 'tiktok', 'google', 'linkedin', 'x']);
+  // Microsoft is an app like the others, but it has no platform account: OneDrive is a storage provider.
+  assert.deepEqual([...CONN_PROVIDERS], ['meta', 'tiktok', 'google', 'linkedin', 'x', 'microsoft']);
   assert.deepEqual(Object.keys(ACCOUNT_TYPE).sort(), ['facebook', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube']);
   assert.equal(providerOf('youtube'), 'google');
   assert.equal(providerOf('linkedin'), 'linkedin');
@@ -64,12 +65,13 @@ test('five providers, and every registry platform that connects names its accoun
     assert.match(OFFER_TYPE[p], /_user_offer$|^meta_user$/, p);
   }
   for (const [platform, a] of Object.entries(ACCOUNT_TYPE)) assert.equal(PROVIDER_OF_TYPE[a.type], a.provider, platform);
+  assert.equal(Object.values(ACCOUNT_TYPE).some((a) => a.provider === 'microsoft'), false, 'Microsoft has an app but no platform account');
 });
 
 test('the migration lists exactly the types the code uses', () => {
-  const sql = readFileSync('supabase/migrations/20261015190000_connections_generalised.sql', 'utf8');
+  const sql = readFileSync('supabase/migrations/20261015190000_connections_generalised.sql', 'utf8') + readFileSync('supabase/migrations/20261015210000_onedrive.sql', 'utf8');
   for (const t of [...Object.values(APP_TYPE), ...Object.values(OFFER_TYPE), ...Object.values(ACCOUNT_TYPE).map((a) => a.type)]) {
-    if (['meta_app', 'tiktok_app', 'meta_user', 'tiktok_user_offer', 'meta_page', 'meta_instagram', 'tiktok_user'].includes(t)) continue;
+    if (['meta_app', 'tiktok_app', 'meta_user', 'tiktok_user_offer', 'meta_page', 'meta_instagram', 'tiktok_user', 'microsoft_user_offer'].includes(t)) continue;
     assert.ok(sql.includes(`''${t}''`), t);
   }
 });

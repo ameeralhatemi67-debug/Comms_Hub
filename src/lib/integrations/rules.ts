@@ -223,7 +223,6 @@ export const COPY_ROLE_AR: Record<AssetCopy['role'], string> = { primary: 'ال�
 
 /** Providers the plan names that cannot be connected yet, with the honest reason. */
 export const COMING_PROVIDERS: { id: string; label: string; why: string }[] = [
-  { id: 'onedrive', label: 'OneDrive', why: 'الخطوة التالية بعد محرك النقل: يحتاج تطبيق Microsoft يعتمده المالك.' },
   { id: 'nas', label: 'جهاز تخزين شبكي (NAS)', why: 'لا يصل إليه الموقع مباشرة: ينتظر جهاز الوكيل الذي يبقى مشغّلاً، وهو غير موجود بعد.' },
 ];
 
@@ -239,6 +238,7 @@ export type S3Flavor = 'supabase' | 'b2' | 'r2' | 'minio' | 'aws' | 'other';
 export const PROVIDER_TYPE_AR: Record<string, string> = {
   google_drive: 'Google Drive',
   s3_compatible: 'تخزين متوافق مع S3',
+  onedrive: 'Microsoft OneDrive',
 };
 export const FLAVORS: { id: S3Flavor; label: string; endpoint: string; region: string; note: string }[] = [
   {

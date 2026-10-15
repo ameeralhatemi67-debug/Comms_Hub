@@ -724,7 +724,7 @@ test('the words: scope, progress, time, and nothing offers what is not built', (
   const r = { move: { state: 'running' }, bytes: { planned: 1000, done: 400, partial: 100 } };
   assert.equal(moveProgress(r), 0.5);
   assert.equal(moveProgress({ move: { state: 'completed' }, bytes: { planned: 0, done: 0, partial: 0 } }), 1);
-  assert.deepEqual(COMING_PROVIDERS.map((c) => c.id).sort(), ['nas', 'onedrive']);
+  assert.deepEqual(COMING_PROVIDERS.map((c) => c.id).sort(), ['nas'], 'OneDrive joined with Action_Plan.md B10');
   const text = [...Object.values(MOVE_STATE_AR), ...Object.values(MOVE_ITEM_AR), ...Object.values(SKIP_REASON_AR), ...Object.values(FAIL_REASON_AR)].join(' ');
   assert.doesNotMatch(text, /\p{Extended_Pictographic}/u);
 });

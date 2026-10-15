@@ -23,6 +23,7 @@ const PROVIDER_AR: Record<ConnProvider, string> = {
   google: 'Google (قنوات يوتيوب)',
   linkedin: PROVIDER_NAME.linkedin,
   x: PROVIDER_NAME.x,
+  microsoft: PROVIDER_NAME.microsoft,
 };
 /** What to check when a sign-in offers nothing to connect, per provider. */
 const EMPTY_AR: Record<ConnProvider, string> = {
@@ -31,6 +32,7 @@ const EMPTY_AR: Record<ConnProvider, string> = {
   google: 'لا قناة يوتيوب لهذا الحساب. أنشئ قناة على يوتيوب بهذا الحساب أولاً ثم أعد الربط.',
   linkedin: 'لا ملف يمكن ربطه بهذا الدخول.',
   x: 'لا حساب يمكن ربطه بهذا الدخول.',
+  microsoft: 'لا شيء يُربط من هنا: يُربط OneDrive من «الإعدادات» ثم «الاتصالات».',
 };
 
 export function ConnectChooser({ provider, offer, onClose, onDone }: { provider: ConnProvider; offer: string; onClose: () => void; onDone: () => void }) {

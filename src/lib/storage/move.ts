@@ -170,7 +170,9 @@ export async function runBatch(deps: BatchDeps, moveId: string): Promise<BatchRe
           out.failed++;
           return;
         }
-        destProven = isMd5(remote) ? remote === whole : /^[0-9a-f]{32}-\d+$/.test(remote);
+        // An md5, an S3 composite etag, or OneDrive's quickXorHash: each was compared at copy time with
+        // what the sink computed from the very bytes it sent.
+        destProven = isMd5(remote) ? remote === whole : /^[0-9a-f]{32}-\d+$/.test(remote) || /^qxh:[A-Za-z0-9+/]{27}=$/.test(remote);
       }
       const level = sourceProven && destProven ? 'checksum' : 'size';
       await rpc('storage_move_verified', { p_item: item.id, p_ok: true, p_level: level, p_error: null });

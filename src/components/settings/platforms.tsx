@@ -579,6 +579,12 @@ const PROVIDER_COPY: Record<ConnProvider, { name: string; idLabel: string; secre
     secretLabel: 'سر العميل (Primary Client Secret)',
     where: 'من LinkedIn Developers، تطبيقك، تبويب «Auth».',
   },
+  microsoft: {
+    name: 'تطبيق Microsoft (OneDrive)',
+    idLabel: 'معرّف التطبيق (Application / client ID)',
+    secretLabel: 'قيمة السر (Client secret Value)',
+    where: 'من Microsoft Entra، «App registrations»، تطبيقك: «Overview» للمعرّف و«Certificates & secrets» للسر. انسخ «Value» لا «Secret ID».',
+  },
   x: {
     name: 'تطبيق X',
     idLabel: 'معرّف العميل (OAuth 2.0 Client ID)',

@@ -2,6 +2,8 @@ import { fail, guard } from '@/lib/drive/guard';
 import { serverKeyOrNull, vaultReachable } from '@/lib/integrations/vault';
 import { metaAppCheck, tiktokAppCheck, TIKTOK_SCOPES, connErrorAr, PlatformCallError } from '@/lib/platforms/oauth';
 import { googleAppCheck, linkedinAppCheck, xAppCheck } from '@/lib/platforms/oauth2';
+import { microsoftAppCheck } from '@/lib/storage/onedrive';
+import { forgetCreds } from '@/lib/integrations/vault';
 import { isProvider, json } from '@/lib/platforms/route';
 import { APP_TYPE } from '@/lib/platforms/oauth';
 import { serverClient } from '@/lib/supabase/server';
@@ -17,6 +19,7 @@ const LABEL: Record<string, string> = {
   google: 'تطبيق Google (يوتيوب وDrive)',
   linkedin: 'تطبيق LinkedIn',
   x: 'تطبيق X',
+  microsoft: 'تطبيق Microsoft (OneDrive)',
 };
 
 export async function POST(request: Request) {
@@ -51,7 +54,9 @@ export async function POST(request: Request) {
             ? await googleAppCheck(fetch, appId, secret)
             : provider === 'linkedin'
               ? await linkedinAppCheck(fetch, appId, secret)
-              : await xAppCheck(fetch, appId, secret);
+              : provider === 'x'
+                ? await xAppCheck(fetch, appId, secret)
+                : await microsoftAppCheck(fetch, appId, secret);
     if (!checked.ok) return fail(400, connErrorAr(checked.error));
   } catch (e) {
     return fail(502, connErrorAr(e instanceof PlatformCallError ? e.code : 'UNREACHABLE'));
@@ -65,5 +70,7 @@ export async function POST(request: Request) {
     p_secret: secret,
   });
   if (error) return fail(error.message.includes('FORBIDDEN') ? 403 : 400, 'تعذّر حفظ السر.');
+  if (provider === 'microsoft') forgetCreds('microsoft_app');
+  if (provider === 'google') forgetCreds('google_app');
   return json({ ok: true, tail: String(data ?? '') });
 }

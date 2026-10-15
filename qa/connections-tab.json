@@ -1,6 +1,6 @@
 {
   "script": "qa/connections-tab.cjs",
-  "run": "2026-10-15T09:38:07.050Z",
+  "run": "2026-10-15T10:05:13.192Z",
   "checks": [
     {
       "name": "guide meta exists",
@@ -54,6 +54,16 @@
     },
     {
       "name": "guide whatsapp exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide microsoft exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide onedrive exists",
       "pass": true,
       "detail": ""
     },
@@ -113,6 +123,16 @@
       "detail": "9 steps"
     },
     {
+      "name": "guide microsoft: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "8 steps"
+    },
+    {
+      "name": "guide onedrive: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "6 steps"
+    },
+    {
       "name": "the app guides carry the return address to copy, resolved to this site",
       "pass": true,
       "detail": ""
@@ -125,7 +145,7 @@
     {
       "name": "there are links to follow in the steps",
       "pass": true,
-      "detail": "14"
+      "detail": "15"
     },
     {
       "name": "no unresolved placeholder in any guide",
@@ -138,19 +158,19 @@
       "detail": ""
     },
     {
-      "name": "1280: eleven guides drawn, no sideways overflow",
+      "name": "1280: thirteen guides drawn, no sideways overflow",
       "pass": true,
-      "detail": "{\"guides\":11,\"overflow\":false}"
+      "detail": "{\"guides\":13,\"overflow\":false}"
     },
     {
       "name": "1280: every link is https, opens in a new page and is visible",
       "pass": true,
-      "detail": "22"
+      "detail": "25"
     },
     {
       "name": "1280: copy lines are left-to-right and inside the screen",
       "pass": true,
-      "detail": "8"
+      "detail": "9"
     },
     {
       "name": "1280: the connections tab has mail, Google app and Drive, each with its guide",
@@ -168,19 +188,19 @@
       "detail": ""
     },
     {
-      "name": "390: eleven guides drawn, no sideways overflow",
+      "name": "390: thirteen guides drawn, no sideways overflow",
       "pass": true,
-      "detail": "{\"guides\":11,\"overflow\":false}"
+      "detail": "{\"guides\":13,\"overflow\":false}"
     },
     {
       "name": "390: every link is https, opens in a new page and is visible",
       "pass": true,
-      "detail": "22"
+      "detail": "25"
     },
     {
       "name": "390: copy lines are left-to-right and inside the screen",
       "pass": true,
-      "detail": "8"
+      "detail": "9"
     },
     {
       "name": "390: the connections tab has mail, Google app and Drive, each with its guide",
@@ -198,6 +218,6 @@
       "detail": ""
     }
   ],
-  "passed": 39,
-  "total": 39
+  "passed": 43,
+  "total": 43
 }

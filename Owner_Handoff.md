@@ -20,7 +20,7 @@ you type secrets into the site's own screens.
 | 2b | In the site, as the Director, «الإعدادات» ثم «الاتصالات» (section 1.0) | Mail, the Google app (YouTube and Drive), Drive, then «المنصات» for LinkedIn, X, Meta, TikTok, then «واتساب النظام» | each has a circled "!" with the steps and the links |
 | 3 | Second storage provider and a first small move (1.3) | The backup system and the move engine have never met a real provider | 30 minutes |
 | 4 | Meta and TikTok apps (1.2) | The long pole: App Review takes weeks, so start early even if publishing is far | an afternoon, then waiting |
-| 5 | OneDrive app registration (1.4) | Only if you want OneDrive | 15 minutes |
+| 5 | OneDrive: enter the Microsoft app, connect the account (1.4) | Only if you want OneDrive | 15 minutes |
 | 6 | Agent computer and NAS (section 3) | When the hardware exists | n/a |
 
 ---
@@ -76,25 +76,28 @@ from the fake the engine was tested against.
 
 ### 1.4 OneDrive
 
-Not built, on purpose, and here is why so the decision is yours:
+**Built on 2026-10-15 (Action_Plan.md B10), and not yet tried against a real Microsoft account.**
+The engine hashes what it sends with quickXorHash (the only hash Microsoft guarantees for both
+personal and work accounts), compares it with the one OneDrive reports, and calls a file proven
+only when they match. Upload sessions use ranges of 320 KiB multiples; the refresh token is
+replaced in the vault each time Microsoft rotates it. It was driven against a fake that answers as
+Microsoft's documentation says; the first real move is the real test.
 
-- The engine verifies a copy by checksum and the library's approved versions move **only** by
-  checksum. OneDrive does not give an MD5: a personal account gives SHA-1 and quickXorHash, a
-  work or school account gives quickXorHash only. So it needs a resumable SHA-1 and a resumable
-  quickXorHash next to the existing MD5 (`src/lib/storage/md5.ts`), and Microsoft Graph's upload
-  sessions (ranges in multiples of 320 KiB, a redirect on download) have behaviour no fake can
-  prove. Building it without an account to try would produce code that looks finished and is not.
-- What exists is the shape it will take: the provider interface, the vault, the move engine and
-  the settings screens all accept a new provider type.
-
-**What you do:** in the Azure portal create an app registration («Microsoft Entra ID»), choose the
-account types you need (personal accounts if the department uses a personal OneDrive), add the
-redirect address `https://comms-hub-three.vercel.app/api/onedrive/callback` (the agent will
-build that route), add the delegated permissions `Files.ReadWrite` and `offline_access`, and create
-a client secret. Tell the agent **which account type** it is (personal or work), since the hashes
-differ. Keep the secret for the site's own screen.
-**Agent then:** builds the provider, its connect and callback routes, the two hashes, a test
-service that behaves as the documentation says, and then, with your account, a first small move.
+**What you do (the Director, from the site):**
+1. «الإعدادات» ثم «الاتصالات»: open the «!» next to «تطبيق Microsoft». It walks the Entra app
+   registration (account types, the return address to copy
+   `{site}/api/onedrive/callback`, the delegated permissions `Files.ReadWrite`, `offline_access`
+   and `User.Read`, a client secret). Enter the application (client) id and the secret value.
+2. In the OneDrive block press «ربط OneDrive» and sign in with the department's Microsoft
+   account; allow the permissions. The files go in a folder «Comms Hub» that the site makes.
+3. Press «فحص الاتصال». Then, in «التخزين», plan a small move to it (a few files first).
+**Closes when:** the check shows the account and the quota, and the move report shows the files
+«تحقق» at the checksum level.
+**Agent then:** records the numbers, and fixes what a real OneDrive does differently from the fake.
+Limits to know: the secret you create expires (up to 24 months; the site shows the tail only and
+the connection fails with a plain message when it does); the folder is kept by behaviour, since
+`Files.ReadWrite` is not folder-scoped; library and mail uploads still go to Google Drive: OneDrive
+is a second home for moves and backups.
 
 ---
 

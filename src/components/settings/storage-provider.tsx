@@ -164,7 +164,7 @@ export function ProviderControls({
     setBusy(true);
     const { data } = await post({ action: 'check', id: p.id });
     setBusy(false);
-    onDone(data.ok ? 'اتصال المزود سليم: كُتب ملف تجريبي وقُرئ وحُذف.' : data.error ?? intError(''), Boolean(data.ok));
+    onDone(data.ok ? (p.type === 'onedrive' ? 'اتصال OneDrive سليم: عُرف الحساب والمساحة.' : 'اتصال المزود سليم: كُتب ملف تجريبي وقُرئ وحُذف.') : data.error ?? intError(''), Boolean(data.ok));
   };
   const toggle = async (on: boolean) => {
     setBusy(true);
@@ -184,7 +184,12 @@ export function ProviderControls({
       <button type="button" className="secondary st-provider-check" disabled={busy || p.state === 'disabled'} {...(canManage ? { onClick: () => void check() } : lock('فحص الاتصال لمن يملك «إدارة مزودي التخزين».'))}>
         فحص الاتصال
       </button>
-      <button type="button" className="secondary st-provider-edit" disabled={busy} {...(canManage ? { onClick: onEdit } : lock('تعديل المزود لمن يملك «إدارة مزودي التخزين».'))}>
+      {p.type === 'onedrive' ? (
+        <a className="button secondary st-provider-reconnect" href="/api/onedrive/connect">
+          إعادة ربط
+        </a>
+      ) : null}
+      <button type="button" className="secondary st-provider-edit" hidden={p.type === 'onedrive'} disabled={busy} {...(canManage ? { onClick: onEdit } : lock('تعديل المزود لمن يملك «إدارة مزودي التخزين».'))}>
         تعديل
       </button>
       {p.state === 'disabled' ? (

@@ -2,7 +2,8 @@ import { fail } from '@/lib/drive/guard';
 import { capGuard } from '@/lib/integrations/guard';
 import { moveError } from '@/lib/integrations/rules';
 import { recordHealthById, storeChecked, vaultReachable, vaultSecretById } from '@/lib/integrations/vault';
-import { forgetProvider } from '@/lib/storage';
+import { forgetProvider, providerFor } from '@/lib/storage';
+import { onedriveProbe } from '@/lib/storage/onedrive';
 import { joinCredentials, parseCredentials, s3ConfigFrom, s3Probe } from '@/lib/storage/s3';
 
 // An S3-compatible provider (Settings_Integrations_Plan.md 6.1): its settings, its key pair,
@@ -86,6 +87,16 @@ export async function POST(request: Request) {
 
   if (body.action === 'check') {
     if (!isUuid(body.id)) return fail(400, 'طلب غير صالح.');
+    // A OneDrive account is asked who it is and how much room it has (its refresh token and the
+    // Microsoft app are read from the vault by the provider).
+    const overview = await g.db.rpc('storage_overview');
+    const row = ((overview.data as { providers?: { id: string; type: string; config: Record<string, unknown> }[] } | null)?.providers ?? []).find((p) => p.id === body.id);
+    if (row?.type === 'onedrive') {
+      forgetProvider(row.id);
+      const probe = await onedriveProbe(await providerFor(row));
+      await recordHealthById(row.id, probe.ok, probe.ok ? null : probe.error, probe.ok && probe.account ? { account: probe.account } : undefined);
+      return Response.json(probe.ok ? { ok: true } : { ok: false, error: moveError(probe.error) }, { headers: noStore });
+    }
     const settings = await settingsOf(body.id);
     if (!settings) return fail(404, 'المزود غير موجود.');
     const creds = parseCredentials(await vaultSecretById(body.id, 'connection check'));

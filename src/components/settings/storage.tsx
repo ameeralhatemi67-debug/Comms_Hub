@@ -181,7 +181,7 @@ export function StorageTab({
                 {busy ? 'جارٍ الفحص…' : 'تحقق من عينة'}
               </button>
             </div>
-            {p.type === 's3_compatible' && (
+            {(p.type === 's3_compatible' || p.type === 'onedrive') && (
               <ProviderControls p={p} canManage={data.can_manage} onEdit={() => setForm({ id: p.id })} onDone={done} />
             )}
             <small className="muted">

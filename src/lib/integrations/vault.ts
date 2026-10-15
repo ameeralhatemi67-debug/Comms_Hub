@@ -29,6 +29,17 @@ export async function vaultSecret(type: string, purpose: string, pending = false
   return data;
 }
 
+/** Keeps the refresh token Microsoft handed back (server key only; share links have no session). Never throws. */
+export async function rotateOneDriveToken(id: string, secret: string): Promise<void> {
+  if (!vaultReachable()) return;
+  await db()
+    .rpc('onedrive_token_rotate', { p_key: serverKey(), p_id: id, p_secret: secret })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
+}
+
 export type StoredCreds = { id: string; config: Record<string, unknown>; secret: string };
 const credsCache = new Map<string, { at: number; value: StoredCreds | null }>();
 const CREDS_TTL = 60_000;
@@ -39,7 +50,7 @@ const CREDS_TTL = 60_000;
  * session, because share links and the mail sync have none; each read is logged with its purpose.
  * Kept in this process for a minute so a burst of requests asks once.
  */
-export async function integrationCreds(type: 'google_app' | 'gmail_account' | 'whatsapp_bridge', purpose: string): Promise<StoredCreds | null> {
+export async function integrationCreds(type: 'google_app' | 'gmail_account' | 'whatsapp_bridge' | 'microsoft_app', purpose: string): Promise<StoredCreds | null> {
   if (!vaultReachable()) return null;
   const hit = credsCache.get(type);
   if (hit && Date.now() - hit.at < CREDS_TTL) return hit.value;
@@ -51,7 +62,7 @@ export async function integrationCreds(type: 'google_app' | 'gmail_account' | 'w
 }
 
 /** Forget what was read (after a new value was entered). */
-export function forgetCreds(type?: 'google_app' | 'gmail_account' | 'whatsapp_bridge') {
+export function forgetCreds(type?: 'google_app' | 'gmail_account' | 'whatsapp_bridge' | 'microsoft_app') {
   if (type) credsCache.delete(type);
   else credsCache.clear();
 }
