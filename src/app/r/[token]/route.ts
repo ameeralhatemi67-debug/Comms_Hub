@@ -1,4 +1,4 @@
-import { storageFor } from '@/lib/storage';
+import { openStored } from '@/lib/storage';
 import { serverClient } from '@/lib/supabase/server';
 
 // A review link: the file behind a valid, unexpired, unrevoked token, for someone
@@ -18,7 +18,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   const row = Array.isArray(data) ? data[0] : null;
   if (!row) return notFound();
 
-  const upstream = await storageFor('library').open(row.drive_file_id, request.headers.get('range'));
+  const upstream = await openStored('library', row.drive_file_id, request.headers.get('range'));
   if (!upstream.ok && upstream.status !== 206) return notFound();
 
   const headers = new Headers({

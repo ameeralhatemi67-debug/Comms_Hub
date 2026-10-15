@@ -60,6 +60,7 @@ import {
   partsOf,
   pendingParts,
   planPayload,
+  platformInfo,
   platformLabels,
   priorityLabels,
   riyadhInstant,
@@ -89,6 +90,9 @@ import { useWork, useWorkDetail, type WorkDetail } from './data';
 import { Av, Empty, Hint, Ic, LibraryPicker, Modal, PrioChip, RestrictedChip, StatusChip, TYPE_ICON, Wid } from './parts';
 import { PlanEditor, type EditRow } from './plan';
 import { PublishNowDialog, ScheduleDialog, isMailWork, publishOp } from './publish';
+import { CheckList, CopyStrip, PreviewOfWork } from './post-preview';
+import { checkCopy, limitsOf } from '@/lib/platforms/limits';
+import { mediaCounts } from '@/lib/platforms/copies';
 
 type Dialog =
   | { t: 'assign' }
@@ -756,6 +760,7 @@ function TextPanel({ d, onEdit, act }: { d: WorkDetail; onEdit: (t: 'main' | Pla
                 <span>نسخ تحتاج مراجعة بعد تعديل النص الأساسي: {stale.map((p) => platformLabels[p]).join('، ')}</span>
               </div>
             )}
+            {plats.length > 0 && <CopyStrip src={{ type: x.type, texts: d.texts, variants: d.variants, assets: d.assets }} platforms={plats} onOpen={(p) => setTab(p as Platform)} />}
             {d.texts.length > 1 && (
               <details>
                 <summary className="wk-lk">الإصدارات السابقة ({d.texts.length - 1})</summary>
@@ -817,6 +822,11 @@ function TextPanel({ d, onEdit, act }: { d: WorkDetail; onEdit: (t: 'main' | Pla
               </button>
             )}
           </div>
+          <PreviewOfWork
+            platform={t}
+            src={{ type: x.type, texts: d.texts, variants: d.variants, assets: d.assets }}
+            account={w.accounts.find((a) => x.channels.includes(a.id) && a.platform === t)}
+          />
         </>
       )}
     </section>
@@ -1263,9 +1273,15 @@ export function TextDialog({ d, target, onClose, act }: { d: WorkDetail; target:
       )}
       <label className="l">
         {label}
-        {target === 'x' && <small>الحد المقترح 240 حرفاً · {body.length}</small>}
+        {isV && <small>{[...body].length} حرفاً</small>}
         <textarea className="wk-inp" rows={7} value={body} maxLength={isV ? 4000 : 8000} onChange={(e) => setBody(e.target.value)} />
       </label>
+      {isV && (() => {
+        // The platform's own limits, from the registry, counted as the person writes.
+        const lim = limitsOf(platformInfo(target)?.accepts);
+        const m = mediaCounts(d.assets);
+        return <CheckList check={checkCopy(lim, { text: body, images: m.images, videos: m.videos, typeVideo: x.type === 'video' })} limits={lim} />;
+      })()}
       {!isV && (
         <label className="l">
           ما الذي تغيّر؟ <small>اختياري، يظهر في الإصدارات</small>

@@ -6,13 +6,17 @@
 // simulation: no platform is contacted, and an authorisation runs 60 days. Approval binds to
 // the account and its handle, so renaming a handle re-opens «المنصات والحسابات» (account_save),
 // and an account in use by approved, scheduled or in-review work cannot be stopped or deleted.
-import { useMemo, useState } from 'react';
-import { Film, Lock, Mail, Pencil, Plus, RefreshCw, Send, Trash2, TriangleAlert, Users } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { SetupGuide } from '../setup-guide';
+import { Film, Link2, Lock, Mail, Pencil, Plus, RefreshCw, Send, Trash2, TriangleAlert, Unplug, Users } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { accountName, accountState, isLead, canPublish, platformLabels, statusLabels, VIDEO_ONLY, type AccountRow, type Platform } from '@/lib/work/rules';
-import { MODE_AR, READINESS_AR } from '@/lib/platforms/info';
+import { MODE_AR, READINESS_AR, connErrorAr } from '@/lib/platforms/info';
+import { providerOf } from '@/lib/platforms/provider';
 import { useWork, useWorkList, type ListItem } from './data';
+import { ConnectChooser, RECONNECT_KEY, connLine } from './connect';
 import { Empty, Hint, Ic, Modal } from './parts';
 import { staffOf } from './plan';
 
@@ -24,7 +28,69 @@ export function ChannelsPage() {
   const mgr = isLead(w.role);
   const pub = canPublish(w.role);
   const [dlg, setDlg] = useState<{ t: 'edit'; a: AccountRow | null } | { t: 'delete'; a: AccountRow } | null>(null);
+  const [choose, setChoose] = useState<{ provider: 'meta' | 'tiktok'; offer: string } | null>(null);
+  const [connNote, setConnNote] = useState<{ ok: boolean; text: string } | null>(null);
+  const [checking, setChecking] = useState(false);
+  const router = useRouter();
+  const params = useSearchParams();
+  const checked = useRef(false);
   const nowIso = useMemo(() => new Date().toISOString(), []);
+
+  // Back from the platform's sign-in: open the chooser, or say why it did not complete.
+  useEffect(() => {
+    const provider = params.get('connect');
+    const offer = params.get('offer');
+    const error = params.get('connect_error');
+    if (provider && offer && (provider === 'meta' || provider === 'tiktok')) {
+      setChoose({ provider, offer });
+      router.replace('/channels');
+    } else if (error) {
+      setConnNote({ ok: false, text: connErrorAr(error) || 'لم يكتمل الربط.' });
+      router.replace('/channels');
+    }
+  }, [params, router]);
+
+  // No background worker: whoever opens this page asks the platforms about the accounts that were
+  // not asked in the last half hour. The answer is recorded by the server and read back.
+  useEffect(() => {
+    if (checked.current || w.status !== 'ready' || !(mgr || pub)) return;
+    if (!w.accounts.some((a) => a.conn_kind === 'oauth')) return;
+    checked.current = true;
+    void fetch('/api/platforms/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+      .then((r) => r.json() as Promise<{ checked?: number }>)
+      .then((b) => (b.checked ? w.reloadBase() : undefined))
+      .catch(() => undefined);
+  }, [w, mgr, pub]);
+
+  const checkNow = async (a: AccountRow) => {
+    setChecking(true);
+    try {
+      const r = await fetch('/api/platforms/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ account: a.id }) });
+      const b = (await r.json()) as { results?: { state: string | null; error: string | null }[]; error?: string };
+      const one = b.results?.[0];
+      setConnNote(one?.state === 'connected' ? { ok: true, text: `${accountName(a)}: الاتصال سليم.` } : { ok: false, text: `${accountName(a)}: ${connErrorAr(one?.error) || b.error || 'تعذّر الفحص.'}` });
+      await w.reloadBase();
+    } catch {
+      setConnNote({ ok: false, text: 'تعذّر الوصول إلى الخادم.' });
+    } finally {
+      setChecking(false);
+    }
+  };
+  const startConnect = (provider: 'meta' | 'tiktok', a?: AccountRow) => {
+    try {
+      if (a?.external_id) sessionStorage.setItem(RECONNECT_KEY, JSON.stringify({ account: a.id, external_id: a.external_id }));
+      else sessionStorage.removeItem(RECONNECT_KEY);
+    } catch {
+      // Without session storage a reconnect still links by handle.
+    }
+    window.location.href = `/api/platforms/connect/${provider}`;
+  };
+  const disconnect = async (a: AccountRow) => {
+    const r = await fetch('/api/platforms/disconnect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ account: a.id }) });
+    if (!r.ok) return w.say('تعذّر فصل الحساب.');
+    w.say(`فُصل ${accountName(a)}: دُمّر رمزه وانتهى تفويضه. أعد الربط ليعود.`);
+    await Promise.all([w.reloadBase(), reload()]);
+  };
   // Every platform of the registry that is on or has accounts: social ones in registry order, the shared mailbox last.
   const sections = useMemo(() => {
     const has = new Set(w.accounts.map((a) => a.platform));
@@ -68,8 +134,15 @@ export function ChannelsPage() {
       </div>
       <p className="wk-simnote">
         <Ic i={TriangleAlert} />
-        <span>الربط في هذه المرحلة محاكاة: لا يتصل شيء بأي منصة. في التنفيذ يُربط كل حساب بتسجيل دخول المنصة الرسمي، وتُحفظ مفاتيحه في الخادم وحده. المنصات وحالة تجهيز كل منها في «الإعدادات» ثم «المنصات».</span>
+        <span>
+          حساب «ربط حقيقي» مربوط بتسجيل دخول المنصة الرسمي، ويُفحص اتصاله فعلاً وتُحفظ مفاتيحه في خزنة الخادم وحده. حساب «ربط محاكى» لا يتصل بشيء. النشر نفسه ما زال محاكاة في الحالتين. المنصات وحالة تجهيز كل منها في «الإعدادات» ثم «المنصات».
+        </span>
       </p>
+      {connNote && (
+        <p className={connNote.ok ? 'wk-simnote' : 'wk-err'} role="status">
+          {connNote.text}
+        </p>
+      )}
       {!mgr && <Hint i={Users}>إضافة الحسابات وتعديلها وحذفها لمدير الاتصال ومساعده والمسؤول عن النظام. لك إعادة ربط الحسابات.</Hint>}
       {w.status === 'loading' ? (
         <div className="wk-loading" role="status">
@@ -90,7 +163,24 @@ export function ChannelsPage() {
                     {!info.enabled ? ' · موقوفة لإضافة حسابات جديدة' : ''}
                   </small>
                 )}
+                {info.kind === 'social' && (providerOf(pl) || info.publish_mode === 'manual') && (
+                  <SetupGuide
+                    guide={providerOf(pl) ? `connect_${providerOf(pl)}` : 'manual'}
+                    label={providerOf(pl) ? 'كيف تربط حسابك' : 'كيف يُنشر على هذه المنصة'}
+                  />
+                )}
+                {mgr && info.enabled && providerOf(pl) && (
+                  <button type="button" className="wk-btn sm" onClick={() => startConnect(providerOf(pl)!)}>
+                    <Ic i={Link2} />
+                    ربط عبر {providerOf(pl) === 'meta' ? 'Meta' : 'TikTok'}
+                  </button>
+                )}
               </h3>
+              {info.kind === 'social' && info.publish_mode === 'manual' && (
+                <Hint>
+                  مسار يدوي: لا ربط تلقائي بهذه المنصة. يُنشر من تطبيقها بحزمة جاهزة (النص والملفات) تظهر في نافذة النشر، ثم يؤكد مسؤول النشر أنه نُشر.
+                </Hint>
+              )}
               {list.length ? (
                 <div className="wk-accgrid">
                   {list.map((a) => {
@@ -104,6 +194,15 @@ export function ChannelsPage() {
                         </div>
                         {a.handle && <span className="handle">{a.handle}</span>}
                         {a.platform === 'mail' && <span className="handle">صندوق القسم المشترك</span>}
+                        {a.platform !== 'mail' && (() => {
+                          const c = connLine(a);
+                          return (
+                            <small className={`wk-conn ${c.tone}`} data-conn={c.real ? 'oauth' : 'simulated'}>
+                              {c.text}
+                              {c.real && a.external_name ? ` · ${a.external_name}` : ''}
+                            </small>
+                          );
+                        })()}
                         {a.purpose && <small>{a.purpose}</small>}
                         {VIDEO_ONLY.includes(a.platform) && (
                           <p className="ytn">
@@ -122,10 +221,28 @@ export function ChannelsPage() {
                           <dd>{use.length ? `${use.length} أعمال: ${use.slice(0, 3).map((x) => x.w.id).join('، ')}${use.length > 3 ? '…' : ''}` : 'لا أعمال حالية'}</dd>
                         </dl>
                         <div className="acts">
-                          {(mgr || pub) && a.platform !== 'mail' && (
+                          {(mgr || pub) && a.platform !== 'mail' && a.conn_kind !== 'oauth' && (
                             <button type="button" className="wk-btn sm" onClick={() => void act('account_reconnect', { p_id: a.id }, `أُعيد ربط ${accountName(a)} 60 يوماً (محاكاة).`)}>
                               <Ic i={RefreshCw} />
                               إعادة الربط
+                            </button>
+                          )}
+                          {(mgr || pub) && a.conn_kind === 'oauth' && (
+                            <button type="button" className="wk-btn sm" disabled={checking} onClick={() => void checkNow(a)}>
+                              <Ic i={RefreshCw} />
+                              فحص الاتصال
+                            </button>
+                          )}
+                          {mgr && a.conn_kind === 'oauth' && providerOf(a.platform) && (
+                            <button type="button" className="wk-btn sm" onClick={() => startConnect(providerOf(a.platform)!, a)}>
+                              <Ic i={Link2} />
+                              إعادة الربط عبر المنصة
+                            </button>
+                          )}
+                          {mgr && a.conn_kind === 'oauth' && a.conn_state !== 'needs_reconnect' && (
+                            <button type="button" className="wk-btn sm quiet" data-hold={HOLD.accountDisconnect} onClick={() => void disconnect(a)}>
+                              <Ic i={Unplug} />
+                              فصل
                             </button>
                           )}
                           {mgr && (
@@ -160,6 +277,17 @@ export function ChannelsPage() {
             </section>
           );
         })
+      )}
+      {choose && (
+        <ConnectChooser
+          provider={choose.provider}
+          offer={choose.offer}
+          onClose={() => setChoose(null)}
+          onDone={() => {
+            setChoose(null);
+            void Promise.all([w.reloadBase(), reload()]);
+          }}
+        />
       )}
       {dlg?.t === 'edit' && <AccountDialog a={dlg.a} use={dlg.a ? useOf(dlg.a.id).filter((x) => LOCKING.includes(x.w.status)) : []} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'delete' && <DeleteDialog a={dlg.a} use={useOf(dlg.a.id)} onClose={() => setDlg(null)} act={act} />}

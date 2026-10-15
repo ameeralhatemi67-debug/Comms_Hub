@@ -199,6 +199,15 @@ words and rules take it from `src/lib/work/rules.ts` (`setPlatformRegistry`). Pu
 still a simulation for every platform until an adapter exists; the tracker of readiness is
 information, not a connection.
 
+Platform accounts of Facebook, Instagram and TikTok can be connected for real, by owner
+directive of 2026-10-15 (`Platform_Connections_Setup.md`, recorded in `progress.md`): the
+platform's own sign-in, the token in Vault, the authorisation equal to the token's real expiry,
+a health check recorded in the account's row. Publishing is still a simulation. A platform
+copy is checked against its platform's limits (data in `platforms.accepts`, with a stated source
+and date) by `src/lib/platforms/limits.ts`; the interface stops the send step on a broken limit,
+and the database enforces only `video_only`. Never put a token, an app secret or a
+platform's response body in a log, a URL, an event or a notification.
+
 Integrations, storage providers and backups are real, by owner directive of 2026-10-14
 (`Settings_Integrations_Plan.md`, decisions E-1 to E-7, recorded in `progress.md`). Every
 connection (storage provider, platform app, messaging) is a row of one integrations core
@@ -209,7 +218,13 @@ them, and only when the site's server proves itself with `MAIL_SERVER_KEY` (one 
 key). The Google Drive refresh token moves there; `GOOGLE_DRIVE_REFRESH_TOKEN` stays only as
 a fallback until the owner confirms. Where each stored file lives is recorded in
 `file_locations` (`*storage*`); a move copies, verifies, switches and keeps the source until
-an administrator retires it. Capabilities `settings.view`, `settings.manage`,
+an administrator retires it, by owner directive of 2026-10-15 (Step S3, `*storage_move*`): a
+second provider (S3-compatible, key pair in Vault as one secret) and the move engine are real,
+state in `storage_moves` and `storage_move_items`, driven by the settings page while it is
+open, every record needing the right «نقل الملفات بين مزودي التخزين» and the server key; an
+approved version moves only by checksum; the library, mail and messaging routes serve through
+the file's own reference with `storage_serving` (`src/lib/storage/index.ts`, `openStored`).
+Retiring a source sends it to its provider's recoverable trash and is a separate long press. Capabilities `settings.view`, `settings.manage`,
 `storage.manage`, `storage.migrate`, `backups.run`, `backups.restore`, `platforms.manage`
 and `integrations.secrets` are the administrator's by default. Nothing is scheduled in the
 site: what needs a timer waits for the owner's agent computer (E-1), and the NAS likewise.

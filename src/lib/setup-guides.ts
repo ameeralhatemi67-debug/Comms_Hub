@@ -1,0 +1,182 @@
+// The "how do I set this up" steps of every outside connection, kept in the site so a person can
+// follow them from the screen that needs them (the circled "!" beside a platform or a storage
+// provider). Pure data, Arabic, no network. The facts come from each platform's own developer
+// documentation as read on 2026-10-15 and change often; each guide says so, and the exact scopes
+// and the API version live in one place in code (src/lib/platforms/oauth.ts).
+//
+// `{redirect}` in a step is replaced with the address of this site plus the platform's return path
+// when the guide is drawn; `{origin}` with the site's address.
+
+export type GuideStep = { t: string; b?: string; /** A value to copy exactly (an address), shown on its own line. */ copy?: string };
+export type Guide = {
+  title: string;
+  /** Who this is for and what it ends with. */
+  intro: string;
+  steps: GuideStep[];
+  /** What to expect, or what is not yet true (publishing is a simulation until an adapter exists). */
+  notes?: string[];
+  /** A link to the platform's own page, and its name. */
+  link?: { href: string; label: string };
+};
+
+const DEV_FACTS = 'المعلومات هنا من وثائق المنصة الرسمية كما قُرئت في 2026-10-15، وتتغير. راجع صفحة المنصة نفسها عند التسجيل.';
+const SIMULATION = 'النشر نفسه ما زال محاكاة في كل الحالات. هذه الخطوات تجهّز الربط والفحص فقط.';
+
+export const GUIDES: Record<string, Guide> = {
+  meta: {
+    title: 'تجهيز تطبيق Meta (فيسبوك وإنستغرام)',
+    intro: 'لمسؤول النظام. تُجرى مرة واحدة، وتنتهي بإدخال معرّف التطبيق وسره في الحقلين أسفل هذه البطاقة.',
+    steps: [
+      { t: 'أنشئ التطبيق', b: 'في Meta for Developers: «إنشاء تطبيق»، النوع Business، داخل حافظة أعمال القسم. إن لم يكن للقسم حساب أعمال موثّق في Meta فاكتب ذلك في ملاحظة «التجهيز»: هو ما يحدد مدة الانتظار.' },
+      { t: 'أضف «Facebook Login»', b: 'من «Add products»، نمط الويب.' },
+      { t: 'سجّل عنوان العودة', b: 'في إعدادات Facebook Login، الحقل «Valid OAuth Redirect URIs»: الصق هذا العنوان تماماً.', copy: '{redirect}' },
+      { t: 'أضف من سيربطون الحسابات', b: 'ما دام التطبيق في وضع التطوير يعمل فقط لمن له دور على التطبيق (مسؤول أو مطوّر أو مختبر). أضفهم من «App roles». للجميع لاحقاً يلزم «App Review» والتحقق من النشاط التجاري، وهو ما يستغرق أسابيع.' },
+      { t: 'جهّز الصفحات والحسابات', b: 'صفحة فيسبوك: يجب أن يكون من يربطها ممن يديرونها. حساب إنستغرام: مهني ومربوط بصفحة فيسبوك، وإلا لا يظهر في القائمة.' },
+      { t: 'انسخ المعرّف والسر', b: 'من «App settings» ثم «Basic»: App ID و App Secret. الصقهما في الحقلين أسفل البطاقة فقط، ولا ترسلهما إلى أحد.' },
+      { t: 'احفظ وفعّل', b: 'اضغط «فحص وحفظ»: يسأل الموقع Meta أولاً إن كان الزوج صحيحاً، ولا يحفظ شيئاً إن لم يكن. ثم فعّل المنصة من بطاقتها، وأخبر الناشرين أن يربطوا حساباتهم من «الحسابات المرتبطة».' },
+    ],
+    notes: [SIMULATION, DEV_FACTS, 'الصلاحيات المطلوبة: pages_show_list وpages_read_engagement وpages_manage_posts وinstagram_basic وinstagram_content_publish.'],
+    link: { href: 'https://developers.facebook.com/apps/', label: 'Meta for Developers' },
+  },
+  tiktok: {
+    title: 'تجهيز تطبيق TikTok',
+    intro: 'لمسؤول النظام. تُجرى مرة واحدة، وتنتهي بإدخال مفتاح العميل وسره في الحقلين أسفل هذه البطاقة.',
+    steps: [
+      { t: 'أنشئ التطبيق', b: 'في TikTok for Developers: «Manage apps» ثم «Connect an app».' },
+      { t: 'أضف المنتجين', b: '«Login Kit» و«Content Posting API» (Direct Post).' },
+      { t: 'سجّل عنوان العودة', b: 'في Login Kit، الحقل «Redirect URI»: الصق هذا العنوان تماماً.', copy: '{redirect}' },
+      { t: 'حدّد الصلاحيات', b: 'user.info.basic (يحتاجها فحص الاتصال) وvideo.publish وvideo.upload. اكتب في حقل «الصلاحيات المطلوبة» ما أضفته إلى التطبيق فقط: صلاحية لم تُمنح تجعل TikTok يرفض الدخول.' },
+      { t: 'انسخ المفتاح والسر', b: 'Client key و Client secret من «App details». الصقهما أسفل البطاقة فقط.' },
+      { t: 'احفظ وفعّل', b: 'اضغط «فحص وحفظ» ثم فعّل المنصة، وليربط الناشرون حساباتهم من «الحسابات المرتبطة».' },
+    ],
+    notes: [
+      'قبل أن يجتاز التطبيق «التدقيق» عند TikTok، كل ما يُنشر عبره مقيّد بالمشاهدة الخاصة وللحسابات الخاصة: هذه قاعدة TikTok لا قاعدة الموقع.',
+      'مدة رمز الدخول 24 ساعة ويُجدَّد تلقائياً بالفحص الذي يجري حين تُفتح صفحة الحسابات.',
+      SIMULATION,
+      DEV_FACTS,
+    ],
+    link: { href: 'https://developers.tiktok.com/', label: 'TikTok for Developers' },
+  },
+  connect_meta: {
+    title: 'ربط حسابك عبر Meta',
+    intro: 'لمن ينشر على الصفحات. تنتهي بحساب «ربط حقيقي» يُفحص اتصاله فعلاً.',
+    steps: [
+      { t: 'اضغط «ربط عبر Meta»', b: 'ستنتقل إلى صفحة تسجيل الدخول في فيسبوك. هناك تسجّل أنت بحسابك، ولا يطلب الموقع كلمة مرورك أبداً.' },
+      { t: 'اسمح بالصلاحيات', b: 'اختر الصفحات وحسابات إنستغرام التي تريد ربطها ووافق. إن لم تظهر صفحة فتأكد أنك تديرها، وأن حساب إنستغرام مهني ومربوط بها.' },
+      { t: 'عُد إلى الموقع واختر', b: 'تظهر قائمة بأسماء الصفحات والحسابات: اختر ما يُربط، وحدّد من ينشر على كل حساب.' },
+      { t: 'تأكد من الحالة', b: 'يظهر الحساب بعلامة «ربط حقيقي» وتاريخ انتهاء التفويض. «فحص الاتصال» يسأل المنصة فوراً.' },
+    ],
+    notes: [
+      'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فالتطبيق لم يُجهَّز بعد: يجهّزه مسؤول النظام من «الإعدادات» ثم «المنصات» (علامة «!» بجانب بطاقة Meta).',
+      'إن قال Meta إن التطبيق في وضع التطوير فاطلب من المسؤول أن يضيفك مختبراً على التطبيق.',
+      SIMULATION,
+    ],
+  },
+  connect_tiktok: {
+    title: 'ربط حسابك عبر TikTok',
+    intro: 'لمن ينشر على TikTok. تنتهي بحساب «ربط حقيقي» يُفحص اتصاله فعلاً.',
+    steps: [
+      { t: 'اضغط «ربط عبر TikTok»', b: 'تنتقل إلى TikTok لتسجّل الدخول بحسابك وتوافق على الصلاحيات.' },
+      { t: 'عُد إلى الموقع', b: 'يظهر حسابك باسمه، فحدّد من ينشر عليه.' },
+      { t: 'تأكد من الحالة', b: '«ربط حقيقي» وتاريخ التفويض. يُجدَّد الرمز تلقائياً حين تُفتح هذه الصفحة.' },
+    ],
+    notes: ['إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز مسؤول النظام التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
+  },
+  manual: {
+    title: 'النشر اليدوي على هذه المنصة',
+    intro: 'لا يوجد مسار رسمي معروف للنشر الآلي على هذه المنصة، فالمسار اليدوي هو المسار المكتمل لها وليس حلاً مؤقتاً.',
+    steps: [
+      { t: 'بعد الاعتماد', b: 'تفتح نافذة النشر أو الجدولة فتجد «حزمة النشر»: النص تماماً كما اعتُمد، والملفات.' },
+      { t: 'انسخ وارفع', b: 'انسخ النص والصقه في تطبيق المنصة، وحمّل الملفات من الروابط في الحزمة.' },
+      { t: 'أكّد النشر', b: 'عُد إلى الموقع وأكّد أنه نُشر، فيُسجَّل في سجل العمل باسمك.' },
+    ],
+    notes: ['لا يُنشر شيء قبل الاعتماد، والاعتماد مربوط بالإصدار نفسه الذي في الحزمة.'],
+  },
+  move: {
+    title: 'نقل الملفات بين مزودي التخزين',
+    intro: 'لمن يملك «نقل الملفات بين مزودي التخزين». ابدأ بمجلد صغير.',
+    steps: [
+      { t: 'جهّز مزوداً ثانياً', b: 'أضف مزود تخزين بالزر أعلاه (علامة «!» فيه تشرح كل نوع) وافحص اتصاله حتى يصير «متصل».' },
+      { t: 'اختر ما يُنقل', b: 'المصدر والهدف، ثم المكتبة كلها أو مجلداً أو مرفقات البريد، والنمط: «نقل» يجعل الجديد هو الأصل، و«نسخ فقط» يُبقي الأصل مكانه.' },
+      { t: 'احسب الخطة', b: 'لا ينسخ شيئاً. اقرأ التقرير: عدد الملفات وحجمها ومساحة الهدف وما لا يمكن نقله وسببه.' },
+      { t: 'ابدأ وأبقِ الصفحة مفتوحة', b: 'يُنسخ ملف واحد في كل مرة ويُتحقق منه ببصمة محتواه قبل أن يُحوَّل. لا عامل في الخلفية: إن أغلقت الصفحة توقّف، وتستأنف من حيث وقفت.' },
+      { t: 'افتح ملفاً منقولاً', b: 'من المكتبة، فإنه يُخدَّم من الموضع الجديد بالرابط نفسه.' },
+      { t: 'أحل المصدر للتقاعد بعد مدة الاحتفاظ', b: 'بضغط مطوّل، وتذهب نسخ المصدر إلى سلة مزودها الأول ولا يُحذف شيء نهائياً.' },
+    ],
+    notes: ['الملفات المرفوعة بعد النقل تذهب إلى Google Drive كما كانت، وتُنقل بخطة جديدة.'],
+  },
+  storage_supabase: {
+    title: 'إضافة تخزين Supabase',
+    intro: 'مفاتيح S3 تتجاوز قواعد الصفوف، فاستعمل حاوية يكتب فيها المركز وحده.',
+    steps: [
+      { t: 'أنشئ حاوية خاصة', b: 'في لوحة مشروع Supabase: Storage ثم «New bucket» بلا وصول عام. حجم الملف الأقصى تحدده خطة المشروع.' },
+      { t: 'خذ عنوان S3 والمنطقة', b: 'Storage ثم «S3 connection»: انسخ الـ endpoint (يشبه https://<معرّف المشروع>.storage.supabase.co/storage/v1/s3) ومنطقة المشروع مثل eu-central-1.' },
+      { t: 'أنشئ مفتاح وصول', b: 'من الصفحة نفسها: «New access key». انسخ المعرّف والسر الآن، فلا يُعرض السر بعد ذلك.' },
+      { t: 'املأ النموذج', b: 'اختر «تخزين Supabase»، الاسم والعنوان والحاوية والمنطقة، ثم المفتاح والسر، ثم «حفظ وفحص الاتصال».' },
+    ],
+    notes: ['يكتب الموقع ملفاً صغيراً ويقرأه ويحذفه للفحص قبل أن يقبل المفتاح.', DEV_FACTS],
+    link: { href: 'https://supabase.com/docs/guides/storage/s3', label: 'وثائق S3 في Supabase' },
+  },
+  storage_b2: {
+    title: 'إضافة Backblaze B2',
+    intro: 'استعمل مفتاح تطبيق محصوراً بالحاوية، لا المفتاح الرئيسي للحساب.',
+    steps: [
+      { t: 'أنشئ حاوية خاصة', b: 'في Backblaze: Buckets ثم «Create a Bucket»، خاصة. دوّن «Endpoint» الذي يظهر لها.' },
+      { t: 'أنشئ مفتاح تطبيق', b: 'App Keys ثم «Add a New Application Key»، محصوراً بهذه الحاوية، بصلاحية قراءة وكتابة.' },
+      { t: 'انسخ المعرّف والمفتاح', b: 'keyID و applicationKey: يُعرض المفتاح مرة واحدة.' },
+      { t: 'املأ النموذج', b: 'العنوان على صورة https://s3.<المنطقة>.backblazeb2.com، والمنطقة مثل us-west-004، ثم «حفظ وفحص الاتصال».' },
+    ],
+    notes: [DEV_FACTS],
+    link: { href: 'https://www.backblaze.com/docs/cloud-storage-s3-compatible-api', label: 'وثائق واجهة S3 في Backblaze' },
+  },
+  storage_r2: {
+    title: 'إضافة Cloudflare R2',
+    intro: 'استعمل رمز API محصوراً بالحاوية.',
+    steps: [
+      { t: 'أنشئ حاوية', b: 'في Cloudflare: R2 ثم «Create bucket».' },
+      { t: 'أنشئ رمز API', b: 'R2 ثم «Manage API tokens»: صلاحية «Object Read & Write» محصورة بهذه الحاوية.' },
+      { t: 'انسخ البيانات', b: 'Access Key ID و Secret Access Key (يُعرض السر مرة واحدة) ومعرّف الحساب.' },
+      { t: 'املأ النموذج', b: 'العنوان https://<معرّف الحساب>.r2.cloudflarestorage.com والمنطقة auto، ثم «حفظ وفحص الاتصال».' },
+    ],
+    notes: [DEV_FACTS],
+    link: { href: 'https://developers.cloudflare.com/r2/api/s3/', label: 'وثائق واجهة S3 في R2' },
+  },
+  storage_aws: {
+    title: 'إضافة Amazon S3',
+    intro: 'استعمل مستخدم IAM مخصصاً بصلاحيات هذه الحاوية فقط.',
+    steps: [
+      { t: 'أنشئ حاوية خاصة', b: 'في S3: «Create bucket» مع حجب الوصول العام. دوّن المنطقة.' },
+      { t: 'أنشئ مستخدم IAM', b: 'بصلاحيات s3:GetObject وs3:PutObject وs3:DeleteObject وs3:ListBucket وs3:AbortMultipartUpload على هذه الحاوية، ثم مفتاح وصول له.' },
+      { t: 'املأ النموذج', b: 'العنوان https://s3.<المنطقة>.amazonaws.com والمنطقة نفسها، والمفتاح والسر، ثم «حفظ وفحص الاتصال».' },
+    ],
+    notes: [DEV_FACTS],
+    link: { href: 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html', label: 'وثائق Amazon S3' },
+  },
+  storage_minio: {
+    title: 'إضافة MinIO',
+    intro: 'يجب أن يكون الخادم متاحاً من الإنترنت بعنوان https وشهادة صالحة: لا تُقبل العناوين الخاصة ولا أرقام IP.',
+    steps: [
+      { t: 'أنشئ حاوية ومستخدماً', b: 'بصلاحيات القراءة والكتابة والحذف على الحاوية فقط، ثم مفتاح وصول.' },
+      { t: 'املأ النموذج', b: 'العنوان https://<عنوان الخادم>، والمنطقة كما أعددتها (الافتراضي us-east-1)، ثم «حفظ وفحص الاتصال».' },
+    ],
+    notes: [DEV_FACTS],
+  },
+  storage_other: {
+    title: 'إضافة مزود متوافق مع S3',
+    intro: 'أي خدمة تدعم واجهة S3 بنمط المسار.',
+    steps: [
+      { t: 'احصل من المزود على', b: 'عنوان واجهة S3، واسم حاوية خاصة، ومنطقتها، ومفتاح وصول بصلاحيات القراءة والكتابة والحذف على الحاوية.' },
+      { t: 'املأ النموذج', b: 'العنوان يبدأ بـ https:// ولا يكون رقم IP ولا اسماً محلياً. ثم «حفظ وفحص الاتصال».' },
+    ],
+    notes: [DEV_FACTS],
+  },
+};
+
+/** Which guide a storage provider kind uses. */
+export const storageGuideKey = (flavor: string) => (`storage_${flavor}` in GUIDES ? `storage_${flavor}` : 'storage_other');
+
+/** The steps with the site's own addresses filled in. */
+export function resolveGuide(g: Guide, origin: string, provider?: string): Guide {
+  const fill = (s: string) => s.replace(/\{redirect\}/g, `${origin}/api/platforms/callback/${provider ?? ''}`).replace(/\{origin\}/g, origin);
+  return { ...g, steps: g.steps.map((s) => ({ ...s, copy: s.copy ? fill(s.copy) : undefined })) };
+}

@@ -1,4 +1,4 @@
-import { storageFor } from '@/lib/storage';
+import { copiesAt, storageFor } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { driveParentOf, isUuid } from '@/lib/drive/parents';
 import { dbErrorText } from '@/lib/media/rules';
@@ -30,7 +30,8 @@ export async function POST(request: Request) {
       const from = await driveParentOf(supabase, drive, r.folder_id as string);
       if (from === to) continue;
       const { data: versions } = await supabase.from('media_versions').select('drive_file_id').eq('asset_id', r.id);
-      for (const v of versions ?? []) await drive.move(v.drive_file_id as string, from, to);
+      for (const v of versions ?? [])
+        for (const f of await copiesAt('google_drive', v.drive_file_id as string)) await drive.move(f, from, to);
     }
     return Response.json({ ok: true, moved: moving.length });
   } catch {

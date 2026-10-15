@@ -1,7 +1,7 @@
 import { fail } from '@/lib/drive/guard';
 import { capGuard } from '@/lib/integrations/guard';
 import { markVerified } from '@/lib/integrations/vault';
-import { StorageError, storageFor, type CopyCheck } from '@/lib/storage';
+import { StorageError, providerFor, type CopyCheck } from '@/lib/storage';
 
 // «تحقق من عينة» in Settings, storage tab: asks the provider about the next copies that were
 // checked longest ago (or never), and records what it said. The database decides who may start
@@ -11,7 +11,7 @@ import { StorageError, storageFor, type CopyCheck } from '@/lib/storage';
 const BATCH = 20;
 const PARALLEL = 5;
 
-type Row = { id: string; ref: string; type: string; size_bytes: number | null };
+type Row = { id: string; ref: string; type: string; size_bytes: number | null; integration_id: string; config: Record<string, unknown> };
 
 export async function POST(request: Request) {
   const g = await capGuard(request, 'storage.manage', true);
@@ -28,9 +28,9 @@ export async function POST(request: Request) {
       const part = rows.slice(i, i + PARALLEL);
       const done = await Promise.all(
         part.map(async (r) => {
-          // Only Drive exists today. A row of another type is not ours to judge.
-          if (r.type !== 'google_drive') return null;
-          const c = await storageFor('library').check(r.ref, r.size_bytes);
+          // Each copy is asked of its own provider. A type this build has no provider for is not ours to judge.
+          if (r.type !== 'google_drive' && r.type !== 's3_compatible') return null;
+          const c = await (await providerFor({ id: r.integration_id, type: r.type, config: r.config })).check(r.ref, r.size_bytes);
           return { id: r.id, state: c.state };
         }),
       );

@@ -724,3 +724,56 @@ dialog.nt-drawer::backdrop{background:var(--backdrop)}
   .wk .wk-pplan .pprow{grid-template-columns:minmax(0,1fr) 34px}
   .wk .wk-drawer{width:100%}
 }
+
+/* Post preview per platform (src/components/work/post-preview.tsx): the copy as the platform lays it
+   out, counted against the registry's limits. Tokens only. */
+.wk .wk-pv{margin:0;display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:var(--w-rl);background:var(--surface)}
+.wk .wk-pv header{display:flex;gap:10px;align-items:center}
+.wk .wk-pv header > span:nth-child(2){display:grid;line-height:1.5;min-width:0;flex:1}
+.wk .wk-pv header small{color:var(--muted);font-size:12px}
+.wk .wk-pv .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--avatar-bg);color:var(--avatar-fg);font-weight:600}
+.wk .wk-pv .wk-pv-media{display:flex;gap:14px;align-items:center;justify-content:center;min-height:120px;border-radius:var(--w-r);background:var(--surface-2);border:1px dashed var(--w-line2);color:var(--w-ink2);font-size:13px;flex-wrap:wrap;padding:10px}
+.wk .wk-pv.square .wk-pv-media{aspect-ratio:1/1;min-height:0;max-height:260px}
+.wk .wk-pv.video .wk-pv-media{aspect-ratio:16/9;min-height:0;max-height:220px}
+.wk .wk-pv .wk-pv-media.none{min-height:44px;color:var(--muted)}
+.wk .wk-pv-media span{display:inline-flex;gap:6px;align-items:center}
+.wk .wk-pv .body p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.9}
+.wk .wk-pv .body .title{font-weight:600}
+.wk .wk-pv .body .desc{color:var(--w-ink2);margin-top:4px}
+.wk .wk-pv .body .more{color:var(--muted)}
+.wk .wk-pv .body .quiet{color:var(--muted)}
+.wk .wk-pv figcaption{display:grid;gap:2px;font-size:12px;color:var(--w-ink2)}
+.wk .wk-pv figcaption small{color:var(--muted)}
+.wk .wk-pv-checks{display:grid;gap:8px}
+.wk .wk-pv-counters{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.wk .wk-pv-counters li{display:flex;gap:6px;align-items:baseline;padding:2px 10px;border-radius:999px;font-size:12.5px;background:var(--w-neutral-bg);color:var(--w-neutral-fg)}
+.wk .wk-pv-counters li.near{background:var(--st-warn-bg);color:var(--st-warn-fg)}
+.wk .wk-pv-counters li.over{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.wk .wk-pv-counters small{opacity:.8}
+.wk .wk-pv-issues{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.wk .wk-pv-issues li{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;padding:6px 10px;border-radius:var(--w-r);background:var(--surface-2);color:var(--w-ink2)}
+.wk .wk-pv-issues li.error{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.wk .wk-pv-issues li.warn{background:var(--st-warn-bg);color:var(--st-warn-fg)}
+.wk .wk-pv-issues svg.wk-i{width:15px;height:15px;margin-top:3px}
+.wk .wk-pv-ok{margin:0;display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--st-success-fg)}
+.wk .wk-pv-ok svg.wk-i{width:15px;height:15px}
+.wk .wk-pv-src{color:var(--muted);font-size:11.5px;line-height:1.7}
+.wk .wk-pv-send{display:grid;gap:8px}
+.wk .wk-pv-send details{border:1px solid var(--line);border-radius:var(--w-r);padding:8px 10px}
+.wk .wk-pv-send summary{display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%}
+.wk .wk-pv-send summary small{color:var(--muted);flex-basis:100%}
+.wk .wk-pv-send details > .wk-pv{margin-top:8px}
+.wk .wk-pv-strip{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.wk .wk-pv-strip button,.wk .wk-pv-strip li > div{display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%;text-align:start;padding:6px 10px;border:1px solid var(--line);border-radius:var(--w-r);background:var(--surface);font:inherit;color:inherit}
+.wk .wk-pv-strip button{cursor:pointer}
+.wk .wk-pv-strip small{color:var(--muted)}
+
+/* Connection line of an account on «الحسابات المرتبطة». */
+.wk .wk-conn{font-size:12px;color:var(--muted)}
+.wk .wk-conn.approved{color:var(--st-success-fg)}
+.wk .wk-conn.warn{color:var(--st-warn-fg)}
+.wk .wk-conn.danger{color:var(--st-danger-fg)}
+/* Manual and assisted publishing pack in the send step. */
+.wk .wk-pack{display:grid;gap:8px;padding:10px 12px;border:1px dashed var(--w-line2);border-radius:var(--w-r);background:var(--surface-2)}
+.wk .wk-pack pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:13.5px;line-height:1.9}
+.wk .wk-pack ul{margin:0;padding-inline-start:18px;font-size:13px}

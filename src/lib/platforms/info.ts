@@ -6,6 +6,7 @@
 // platform's official documentation when it was written (`checked` is null): the info card says
 // so, and the readiness tracker is how the owner records what is true for the department.
 import type { PublishMode, Readiness } from '../work/rules.ts';
+import { TEMPLATE_LIMITS, type Limits } from './limits.ts';
 
 export const MODE_AR: Record<PublishMode, string> = {
   auto: 'نشر تلقائي',
@@ -145,13 +146,13 @@ export const KNOWLEDGE: Record<string, PlatformKnowledge> = {
 };
 
 /** Platforms the department may add to the registry in one step: not in it yet, with sensible defaults. */
-export type PlatformTemplate = { key: string; label_ar: string; publish_mode: PublishMode; requires_review: boolean; video_only: boolean };
+export type PlatformTemplate = { key: string; label_ar: string; publish_mode: PublishMode; requires_review: boolean; video_only: boolean; limits: Limits };
 export const PLATFORM_TEMPLATES: PlatformTemplate[] = [
-  { key: 'facebook', label_ar: 'فيسبوك', publish_mode: 'assisted', requires_review: true, video_only: false },
-  { key: 'tiktok', label_ar: 'تيك توك', publish_mode: 'assisted', requires_review: true, video_only: true },
-  { key: 'snapchat', label_ar: 'سناب شات', publish_mode: 'manual', requires_review: false, video_only: false },
-  { key: 'whatsapp_channel', label_ar: 'قناة واتساب', publish_mode: 'manual', requires_review: false, video_only: false },
-  { key: 'whatsapp_status', label_ar: 'حالة واتساب', publish_mode: 'manual', requires_review: false, video_only: false },
+  { key: 'facebook', label_ar: 'فيسبوك', publish_mode: 'assisted', requires_review: true, video_only: false, limits: TEMPLATE_LIMITS.facebook },
+  { key: 'tiktok', label_ar: 'تيك توك', publish_mode: 'assisted', requires_review: true, video_only: true, limits: TEMPLATE_LIMITS.tiktok },
+  { key: 'snapchat', label_ar: 'سناب شات', publish_mode: 'manual', requires_review: false, video_only: false, limits: TEMPLATE_LIMITS.snapchat },
+  { key: 'whatsapp_channel', label_ar: 'قناة واتساب', publish_mode: 'manual', requires_review: false, video_only: false, limits: TEMPLATE_LIMITS.whatsapp_channel },
+  { key: 'whatsapp_status', label_ar: 'حالة واتساب', publish_mode: 'manual', requires_review: false, video_only: false, limits: TEMPLATE_LIMITS.whatsapp_status },
 ];
 
 /** The registry's own errors, in words. */
@@ -165,6 +166,8 @@ export function platformError(message: string | null | undefined): string {
     ['MODE_INVALID', 'اختر مساراً من الثلاثة.'],
     ['URL_INVALID', 'الرابط يبدأ بـ https وطوله حتى 300 حرف.'],
     ['LIFE_INVALID', 'مدة التفويض من يوم إلى 3650 يوماً.'],
+    ['LIMIT_INVALID', 'الحد عدد صحيح من 1 إلى 1000000، أو اتركه فارغاً بلا حد.'],
+    ['LIMIT_NOTE_INVALID', 'مصدر الحدود حتى 300 حرف، وتاريخ المراجعة بصيغة سنة-شهر-يوم.'],
     ['READINESS_INVALID', 'حالة غير معروفة.'],
     ['UNKNOWN_PLATFORM', 'المنصة غير موجودة.'],
     ['APPEND_ONLY', 'السجل يُكتب ولا يُعدّل.'],
@@ -196,6 +199,7 @@ export function platformEventLine(e: { kind: string; actor_name: string | null; 
         d.mode ? `المسار المخطط «${MODE_AR[d.mode as PublishMode] ?? ''}»` : '',
         d.video_only === true ? 'تقبل الفيديو فقط' : d.video_only === false ? 'لا تقتصر على الفيديو' : '',
         d.label ? `الاسم «${String(d.label)}»` : '',
+        d.limits === true ? 'حدود النشر' : '',
       ].filter(Boolean);
       return `${who} عدّل المنصة${parts.length ? `: ${parts.join('، ')}` : ''}.`;
     }
@@ -205,3 +209,22 @@ export function platformEventLine(e: { kind: string; actor_name: string | null; 
       return `${who}: حدث.`;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Connection health, in words (the codes come from src/lib/platforms/oauth.ts)
+// ---------------------------------------------------------------------------
+export const CONN_ERROR_AR: Record<string, string> = {
+  TOKEN_REFUSED: 'رفضت المنصة الرمز. أعد ربط الحساب.',
+  TOKEN_EXPIRED: 'انتهى الرمز. أعد ربط الحساب.',
+  PERMISSION_REVOKED: 'سُحبت صلاحية من التطبيق. أعد الربط ووافق على كل الصلاحيات.',
+  NOT_CONNECTED: 'لا رمز محفوظاً لهذا الحساب. اربطه.',
+  DISCONNECTED: 'فُصل الحساب عمداً. اربطه من جديد لتعود الصلاحية.',
+  RATE_LIMIT: 'المنصة تحدّ الطلبات الآن. أعد الفحص بعد قليل.',
+  PLATFORM_DOWN: 'المنصة لا تستجيب الآن.',
+  PLATFORM_ERROR: 'ردّت المنصة بخطأ غير معروف.',
+  UNREACHABLE: 'تعذّر الوصول إلى المنصة.',
+  APP_NOT_CONFIGURED: 'تطبيق المطوّر غير مضبوط. أدخل معرّفه وسره من «الإعدادات» «المنصات».',
+  APP_REFUSED: 'رفضت المنصة المعرّف أو السر. تحقق منهما في لوحة المطوّرين.',
+  CODE_REFUSED: 'رفضت المنصة رمز الدخول. ابدأ الربط من جديد.',
+};
+export const connErrorAr = (code: string | null | undefined) => (code ? (CONN_ERROR_AR[code] ?? 'فشل فحص الاتصال.') : '');

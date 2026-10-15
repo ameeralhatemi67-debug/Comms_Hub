@@ -7,6 +7,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 export const DRIVE_INTEGRATION_ID = '00000000-0000-4000-8000-0000000000d1';
 
 const serverKey = () => process.env.MAIL_SERVER_KEY;
+/** The server key, for a route that calls a key-gated database function with the person's session. */
+export const serverKeyOrNull = serverKey;
 
 /** The vault can be asked: the database address and the server key are configured. */
 export const vaultReachable = () => Boolean(serverKey() && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
@@ -25,6 +27,39 @@ export async function vaultSecret(type: string, purpose: string, pending = false
   const { data, error } = await (client ?? db()).rpc('int_secret_use', { p_key: serverKey(), p_type: type, p_purpose: purpose, p_pending: pending });
   if (error || typeof data !== 'string' || !data) return null;
   return data;
+}
+
+/** As vaultSecret, for one integration by its id (a second provider of the same type exists). */
+export async function vaultSecretById(id: string, purpose: string, pending = false, client?: SupabaseClient): Promise<string | null> {
+  if (!vaultReachable()) return null;
+  const { data, error } = await (client ?? db()).rpc('int_secret_use_id', { p_key: serverKey(), p_id: id, p_purpose: purpose, p_pending: pending });
+  if (error || typeof data !== 'string' || !data) return null;
+  return data;
+}
+
+/** Records the result of a check for one provider by id. Failure to record never breaks the caller. */
+export async function recordHealthById(id: string, ok: boolean, error: string | null, config?: Record<string, unknown>) {
+  if (!vaultReachable()) return;
+  await db()
+    .rpc('storage_provider_health', { p_key: serverKey(), p_id: id, p_ok: ok, p_error: error, p_config: config ?? null })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
+}
+
+/** One live copy of a stored file, as storage_serving describes it. */
+export type ServedCopy = { integration_id: string; type: string; config: Record<string, unknown>; ref: string; role: string; state: string };
+
+/**
+ * Where the live copies of the file this reference belongs to are, primary first. Null when the
+ * database cannot be asked (the caller then does what it always did: read it from Drive).
+ */
+export async function storageServing(ref: string): Promise<ServedCopy[] | null> {
+  if (!vaultReachable()) return null;
+  const { data, error } = await db().rpc('storage_serving', { p_key: serverKey(), p_ref: ref });
+  if (error || !Array.isArray(data)) return null;
+  return data as ServedCopy[];
 }
 
 /** Records the result of a check. Failure to record never breaks the caller. */
@@ -49,7 +84,7 @@ export const tailOf = (secret: string) => `••••${secret.slice(-4)}`;
 export async function storeChecked(
   session: SupabaseClient,
   integration: string,
-  type: string,
+  type: string | { id: string },
   secret: string,
   check: (secret: string) => Promise<{ ok: true; config?: Record<string, unknown> } | { ok: false; error: string }>,
   /** The client without a sign-in that reads the pending secret back (tests pass a fake). */
@@ -58,7 +93,7 @@ export async function storeChecked(
   if (!vaultReachable()) return { ok: false, error: 'VAULT_UNREACHABLE' };
   const set = await session.rpc('int_secret_set', { p_id: integration, p_secret: secret });
   if (set.error) return { ok: false, error: set.error.message.includes('FORBIDDEN') ? 'FORBIDDEN' : 'VAULT_REFUSED' };
-  const pending = await vaultSecret(type, 'check before commit', true, server);
+  const pending = typeof type === 'string' ? await vaultSecret(type, 'check before commit', true, server) : await vaultSecretById(type.id, 'check before commit', true, server);
   const result = pending === secret ? await check(pending) : { ok: false as const, error: 'VAULT_MISMATCH' };
   if (!result.ok) {
     await session.rpc('int_secret_discard', { p_id: integration, p_reason: result.error });

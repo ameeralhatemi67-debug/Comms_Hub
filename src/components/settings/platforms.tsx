@@ -21,9 +21,13 @@ import {
   platformError,
   platformEventLine,
 } from '@/lib/platforms/info';
+import { limitsOf, limitsToAccepts } from '@/lib/platforms/limits';
+import { providerOf, type ConnProvider } from '@/lib/platforms/provider';
+import { STATE_AR, STATE_TONE, type Integration } from '@/lib/integrations/rules';
 import type { PlatformInfo, PublishMode, Readiness } from '@/lib/work/rules';
 import { useCaps } from '../caps';
 import { Modal } from '../ui';
+import { SetupGuide } from '../setup-guide';
 
 type Impact = { accounts: number; active_accounts: number; open_works: number; copies: number };
 type LogRow = { id: number; at: string; kind: string; actor: string | null; actor_name: string | null; data: Record<string, unknown> };
@@ -38,6 +42,7 @@ export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; im
   const [impact, setImpact] = useState<Record<string, Impact>>(initial?.impact ?? {});
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [apps, setApps] = useState<Partial<Record<ConnProvider, Integration>>>({});
   const [dlg, setDlg] = useState<{ t: 'add' } | { t: 'edit'; p: PlatformInfo } | { t: 'delete'; p: PlatformInfo } | null>(null);
   const canManage = caps.has('platforms.manage');
 
@@ -56,6 +61,12 @@ export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; im
       }),
     );
     setImpact(out);
+    // The apps' non-secret half (the secret is never read back): which are entered, and their state.
+    const ints = await db.rpc('int_list');
+    if (!ints.error) {
+      const rows = (ints.data ?? []) as Integration[];
+      setApps({ meta: rows.find((r) => r.type === 'meta_app'), tiktok: rows.find((r) => r.type === 'tiktok_app') });
+    }
   }, []);
   useEffect(() => {
     if (!initial) void load();
@@ -100,6 +111,9 @@ export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; im
           onEdit={() => setDlg({ t: 'edit', p })}
           onDelete={() => setDlg({ t: 'delete', p })}
           act={act}
+          app={providerOf(p.key) ? apps[providerOf(p.key)!] : undefined}
+          onSaved={load}
+          canSecrets={caps.has('integrations.secrets') && canManage}
         />
       ))}
 
@@ -126,6 +140,9 @@ function PlatformCard({
   onEdit,
   onDelete,
   act,
+  app,
+  onSaved,
+  canSecrets,
 }: {
   p: PlatformInfo;
   impact: Impact | undefined;
@@ -135,6 +152,9 @@ function PlatformCard({
   onEdit: () => void;
   onDelete: () => void;
   act: Act;
+  app: Integration | undefined;
+  onSaved: () => Promise<void>;
+  canSecrets: boolean;
 }) {
   const k = KNOWLEDGE[p.key];
   const [state, setState] = useState<Readiness>(p.readiness);
@@ -174,6 +194,7 @@ function PlatformCard({
             <b>{p.accepts.video_only ? 'الفيديو فقط' : 'نصاً وصورة وفيديو'}</b>
           </div>
         )}
+        {social && <LimitsFact p={p} />}
         {social && (
           <div className="between">
             <span>مراجعة المنصة للتطبيق</span>
@@ -245,6 +266,15 @@ function PlatformCard({
             </button>
           </div>
         </section>
+      )}
+
+      {social && providerOf(p.key) && (
+        <AppBlock provider={providerOf(p.key)!} app={app} canSecrets={canSecrets} onSaved={onSaved} lock={lock} />
+      )}
+      {social && !providerOf(p.key) && p.publish_mode === 'manual' && (
+        <p className="st-manual-guide muted">
+          <SetupGuide guide="manual" label="كيف يُنشر على هذه المنصة" /> مسار يدوي: يُنشر من تطبيق المنصة بحزمة جاهزة، وتؤكد أنت أنه نُشر.
+        </p>
       )}
 
       {k && (
@@ -409,7 +439,7 @@ function AddDialog({ existing, onClose, act }: { existing: string[]; onClose: ()
           className="primary"
           disabled={!finalKey || !finalLabel}
           onClick={() =>
-            void act('platform_save', { p_key: finalKey, p: { label_ar: finalLabel, publish_mode: mode, video_only: video, requires_review: review, docs_url: null } }, `أُضيفت «${finalLabel}». فعّلها لتظهر عند إضافة حساب.`).then(
+            void act('platform_save', { p_key: finalKey, p: { label_ar: finalLabel, publish_mode: mode, video_only: video, requires_review: review, docs_url: null, ...(t ? limitsToAccepts(t.limits) : {}) } }, `أُضيفت «${finalLabel}». فعّلها لتظهر عند إضافة حساب.`).then(
               (ok) => ok && onClose(),
             )
           }
@@ -431,6 +461,10 @@ function EditDialog({ p, onClose, act }: { p: PlatformInfo; onClose: () => void;
   const [review, setReview] = useState(p.requires_review);
   const [life, setLife] = useState(p.token_life_days ? String(p.token_life_days) : '');
   const [docs, setDocs] = useState(p.docs_url ?? '');
+  const l0 = limitsOf(p.accepts);
+  const [lim, setLim] = useState<Record<LimitField, string>>(() => Object.fromEntries(LIMIT_FIELDS.map(([k]) => [k, l0[k] != null ? String(l0[k]) : ''])) as Record<LimitField, string>);
+  const [limNote, setLimNote] = useState(l0.note ?? '');
+  const [limChecked, setLimChecked] = useState(l0.checked ?? '');
   return (
     <Modal title={`تعديل ${p.label_ar}`} onClose={onClose}>
       <label className="l">
@@ -466,6 +500,25 @@ function EditDialog({ p, onClose, act }: { p: PlatformInfo; onClose: () => void;
           <input className="wk-inp ltr" value={docs} maxLength={300} placeholder="https://" onChange={(e) => setDocs(e.target.value)} />
         </label>
       </div>
+      <fieldset className="st-limits">
+        <legend>حدود المنشور (تظهر في المعاينة وعند الإرسال)</legend>
+        <div className="wk-two">
+          {LIMIT_FIELDS.map(([k, name]) => (
+            <label className="l" key={k}>
+              {name}
+              <input className="wk-inp ltr" inputMode="numeric" value={lim[k]} placeholder="بلا حد" onChange={(e) => setLim({ ...lim, [k]: e.target.value.replace(/\D/g, '') })} />
+            </label>
+          ))}
+        </div>
+        <label className="l">
+          مصدر الأرقام
+          <input className="wk-inp" value={limNote} maxLength={300} placeholder="من أي وثيقة أُخذت هذه الأرقام" onChange={(e) => setLimNote(e.target.value)} />
+        </label>
+        <label className="l">
+          آخر مراجعة من وثائق المنصة
+          <input className="wk-inp ltr" type="date" value={limChecked} onChange={(e) => setLimChecked(e.target.value)} />
+        </label>
+      </fieldset>
       <div className="actions">
         <button
           type="button"
@@ -473,7 +526,20 @@ function EditDialog({ p, onClose, act }: { p: PlatformInfo; onClose: () => void;
           onClick={() =>
             void act(
               'platform_save',
-              { p_key: p.key, p: { label_ar: label, publish_mode: mode, video_only: video, requires_review: review, token_life_days: life || null, docs_url: docs.trim() || null } },
+              {
+                p_key: p.key,
+                p: {
+                  label_ar: label,
+                  publish_mode: mode,
+                  video_only: video,
+                  requires_review: review,
+                  token_life_days: life || null,
+                  docs_url: docs.trim() || null,
+                  ...lim,
+                  limits_note: limNote.trim() || null,
+                  limits_checked: limChecked || null,
+                },
+              },
               'حُفظت المنصة.',
             ).then((ok) => ok && onClose())
           }
@@ -485,6 +551,137 @@ function EditDialog({ p, onClose, act }: { p: PlatformInfo; onClose: () => void;
         </button>
       </div>
     </Modal>
+  );
+}
+
+const PROVIDER_COPY: Record<ConnProvider, { name: string; idLabel: string; secretLabel: string; where: string }> = {
+  meta: {
+    name: 'تطبيق Meta (فيسبوك وإنستغرام معاً)',
+    idLabel: 'معرّف التطبيق (App ID)',
+    secretLabel: 'سر التطبيق (App Secret)',
+    where: 'من Meta for Developers، تطبيقك، «إعدادات التطبيق» ثم «أساسي».',
+  },
+  tiktok: {
+    name: 'تطبيق TikTok',
+    idLabel: 'مفتاح العميل (Client key)',
+    secretLabel: 'سر العميل (Client secret)',
+    where: 'من TikTok for Developers، تطبيقك، «App details».',
+  },
+};
+
+/** The platform app's credentials: entered once, checked with the platform, kept in the vault, never read back. */
+function AppBlock({ provider, app, canSecrets, onSaved, lock }: { provider: ConnProvider; app: Integration | undefined; canSecrets: boolean; onSaved: () => Promise<void>; lock: (why: string) => ReturnType<typeof needProps> }) {
+  const c = PROVIDER_COPY[provider];
+  const [id, setId] = useState('');
+  const [secret, setSecret] = useState('');
+  const [scopes, setScopes] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
+  const [origin, setOrigin] = useState('');
+  useEffect(() => setOrigin(window.location.origin), []);
+  const redirect = `${origin}/api/platforms/callback/${provider}`;
+  const save = async () => {
+    setBusy(true);
+    setNote(null);
+    try {
+      const r = await fetch('/api/platforms/app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider, app_id: id, secret, scopes: scopes.trim() ? scopes.split(/[\s,]+/).filter(Boolean) : undefined }),
+      });
+      const b = (await r.json()) as { error?: string; tail?: string };
+      if (!r.ok) return setNote({ ok: false, text: b.error ?? 'تعذّر الحفظ.' });
+      setSecret('');
+      setNote({ ok: true, text: `حُفظ السر في الخزنة (${b.tail ?? ''}) بعد أن قبلته المنصة. لا يُعرض بعد الآن.` });
+      await onSaved();
+    } catch {
+      setNote({ ok: false, text: 'تعذّر الوصول إلى الخادم.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+  const have = app?.has_secret === true;
+  return (
+    <section className="st-app" aria-label={c.name} data-app={provider}>
+      <div className="between">
+        <b>
+          {c.name} <SetupGuide guide={provider} provider={provider} label="خطوات تجهيز هذا التطبيق" />
+        </b>
+        <span className={`mx-chip ${have ? STATE_TONE[app!.state] : ''}`}>{have ? STATE_AR[app!.state] : 'لم يُدخل بعد'}</span>
+      </div>
+      <small className="muted">
+        {have
+          ? `المعرّف ${String(app!.config?.app_id ?? '')}، والسر محفوظ في الخزنة (${app!.secret_tail ?? ''}). لا يُقرأ منه شيء بعد الحفظ.`
+          : 'لم يُدخل معرّف هذا التطبيق وسره. بدونه لا يبدأ ربط حساب حقيقي، ويبقى الربط محاكى.'}
+      </small>
+      <small className="muted">
+        عنوان العودة الذي تسجّله في لوحة المطوّرين: <bdi dir="ltr">{redirect}</bdi>
+      </small>
+      <div className="wk-two">
+        <label className="l">
+          {c.idLabel}
+          <input className="wk-inp ltr" value={id} autoComplete="off" disabled={!canSecrets || busy} onChange={(e) => setId(e.target.value)} />
+        </label>
+        <label className="l">
+          {c.secretLabel}
+          <input className="wk-inp ltr" type="password" value={secret} autoComplete="new-password" disabled={!canSecrets || busy} onChange={(e) => setSecret(e.target.value)} />
+        </label>
+      </div>
+      {provider === 'tiktok' && (
+        <label className="l">
+          الصلاحيات المطلوبة <small>مفصولة بفواصل، وتكون ممّا أضفته إلى التطبيق</small>
+          <input className="wk-inp ltr" value={scopes} placeholder="user.info.basic,video.publish,video.upload" disabled={!canSecrets || busy} onChange={(e) => setScopes(e.target.value)} />
+        </label>
+      )}
+      <small className="muted">{c.where}</small>
+      <div className="actions">
+        <button
+          type="button"
+          className="secondary st-app-save"
+          disabled={busy || (canSecrets && (!id.trim() || !secret.trim()))}
+          {...(canSecrets ? { onClick: () => void save() } : lock('إدخال الأسرار لمن يملك «إدارة المنصات وتطبيقاتها» و«إدخال أسرار التكاملات وتجديدها».'))}
+        >
+          {have ? 'استبدال بعد الفحص' : 'فحص وحفظ'}
+        </button>
+      </div>
+      {note && (
+        <p className={note.ok ? 'ml-hint' : 'ml-err'} role="status">
+          {note.text}
+        </p>
+      )}
+    </section>
+  );
+}
+
+const LIMIT_FIELDS = [
+  ['max_chars', 'أطول نص (حرفاً)'],
+  ['max_hashtags', 'أكثر وسوم'],
+  ['max_images', 'أكثر صور'],
+  ['max_videos', 'أكثر ملفات فيديو'],
+  ['max_media', 'أكثر عناصر (صور وفيديو معاً)'],
+] as const;
+type LimitField = (typeof LIMIT_FIELDS)[number][0];
+
+/** The limits the preview checks a copy against, with where they came from. */
+function LimitsFact({ p }: { p: PlatformInfo }) {
+  const l = limitsOf(p.accepts);
+  const parts = [
+    l.max_chars ? `نص حتى ${l.max_chars} حرفاً` : '',
+    l.title_max ? `عنوان حتى ${l.title_max}` : '',
+    l.description_max_bytes ? `وصف حتى ${l.description_max_bytes} بايت` : '',
+    l.max_hashtags ? `${l.max_hashtags} وسماً` : '',
+    l.max_images ? `${l.max_images} صور` : '',
+    l.max_videos ? `${l.max_videos} فيديو` : '',
+    l.max_media ? `${l.max_media} عناصر` : '',
+  ].filter(Boolean);
+  return (
+    <div className="between st-limits-fact">
+      <span>حدود المنشور</span>
+      <b title={l.note}>
+        {parts.length ? parts.join(' · ') : 'لا حدود مسجلة'}
+        {l.checked ? <small className="muted"> · روجعت {l.checked}</small> : parts.length ? <small className="muted"> · لم تُراجع من الوثائق</small> : null}
+      </b>
+    </div>
   );
 }
 

@@ -99,7 +99,7 @@ test('hold to confirm: the reference\'s reasons, each used by a button, about a 
   assert.equal(HOLD.roleDown, 'ينقص هذا التغيير ما يستطيع الشخص فعله فوراً.');
   assert.equal(HOLD_MS, Number(reference.match(/var HOLD_MS = (\d+);/)[1]));
   const comps = ['src/components/media/dialogs.tsx', 'src/components/media/library.tsx', 'src/components/media/asset-page.tsx', 'src/components/mail/thread.tsx', 'src/components/chat/chat-tab.tsx', 'src/components/work/item.tsx', 'src/components/work/review.tsx', 'src/components/work/publish.tsx', 'src/components/work/channels.tsx',
-    'src/components/accounts/members.tsx', 'src/components/accounts/card.tsx', 'src/components/accounts/roles.tsx', 'src/components/settings/general.tsx', 'src/components/settings/platforms.tsx'].map(read).join('\n');
+    'src/components/accounts/members.tsx', 'src/components/accounts/card.tsx', 'src/components/accounts/roles.tsx', 'src/components/settings/general.tsx', 'src/components/settings/platforms.tsx', 'src/components/settings/storage-provider.tsx', 'src/components/settings/storage-move.tsx'].map(read).join('\n');
   for (const k of Object.keys(HOLD)) assert.match(comps, new RegExp(`data-hold=\\{HOLD\\.${k}\\}`), k);
 });
 

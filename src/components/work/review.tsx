@@ -40,6 +40,7 @@ import {
 } from '@/lib/work/rules';
 import { addFileNote, fileNotes, useWork, useWorkDetail, type FileNote, type PartRow, type WorkDetail } from './data';
 import { Av, Empty, Hint, Ic, Modal } from './parts';
+import { CopyStrip, PreviewOfWork } from './post-preview';
 
 const KIND_ICON: Record<string, LucideIcon> = { text: FileText, copy: Send, asset: ImageIcon, dest: Users, date: Clock };
 const tcSeconds = (tc: string) => {
@@ -378,13 +379,20 @@ function PartRowView({
             <div className="wk-textbox">{p.snap}</div>
           )}
           {p.kind === 'copy' && (
-            <div className="wk-vmeta">
-              <span>
-                {(p.snap ?? '').length} حرفاً
-                {p.key === 'v:x' && (p.snap ?? '').length > 240 && <b className="late"> · أطول من 240</b>}
-              </span>
-            </div>
+            <PreviewOfWork
+              platform={p.key.slice(2)}
+              src={{ type: d.w.type, texts: [], variants: [{ platform: p.key.slice(2), n: 1, body: p.snap ?? '' }], assets: d.assets }}
+              account={w.accounts.find((y) => d.w.channels.includes(y.id) && y.platform === p.key.slice(2))}
+            />
           )}
+          {p.kind === 'text' && (() => {
+            // The main text goes as it is to the platforms with no copy of their own.
+            const plain = [...new Set(d.w.channels.map((c) => w.accounts.find((y) => y.id === c)?.platform).filter((k): k is string => !!k && k !== 'mail'))]
+              .filter((k) => !d.variants.some((v) => v.platform === k && v.body.trim()));
+            return plain.length ? (
+              <CopyStrip src={{ type: d.w.type, texts: [{ n: 1, body: p.snap ?? '' }], variants: [], assets: d.assets }} platforms={plain} />
+            ) : null;
+          })()}
           {p.kind === 'copy' && (() => {
             const v = d.variants.filter((y) => `v:${y.platform}` === p.key).sort((m, n) => n.n - m.n)[0];
             const t = d.texts[d.texts.length - 1];

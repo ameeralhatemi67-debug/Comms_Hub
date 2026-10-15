@@ -1,0 +1,811 @@
+{
+  "run": "2026-10-14T21:38:21.004Z",
+  "checks": [
+    {
+      "name": "preview-instagram: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-x-over: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-youtube: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "strip: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-clean: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-loading: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-director: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-publisher: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "chooser-shell: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "conn-lines: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-instagram: shows «معاينة تقريبية»",
+      "pass": true,
+      "detail": "    ا   إنستغرام · الرسمي  @company.sa   إنستغرام            صورة        1 في مج"
+    },
+    {
+      "name": "preview-instagram: shows «إنستغرام»",
+      "pass": true,
+      "detail": "    ا   إنستغرام · الرسمي  @company.sa   إنستغرام            صورة        1 في مج"
+    },
+    {
+      "name": "preview-instagram: shows «… المزيد»",
+      "pass": true,
+      "detail": "    ا   إنستغرام · الرسمي  @company.sa   إنستغرام            صورة        1 في مج"
+    },
+    {
+      "name": "preview-instagram: shows «/ 2200»",
+      "pass": true,
+      "detail": "    ا   إنستغرام · الرسمي  @company.sa   إنستغرام            صورة        1 في مج"
+    },
+    {
+      "name": "preview-instagram: shows «/ 30»",
+      "pass": true,
+      "detail": "    ا   إنستغرام · الرسمي  @company.sa   إنستغرام            صورة        1 في مج"
+    },
+    {
+      "name": "preview-instagram: shows «ضمن حدود المنصة»",
+      "pass": true,
+      "detail": "    ا   إنستغرام · الرسمي  @company.sa   إنستغرام            صورة        1 في مج"
+    },
+    {
+      "name": "preview-instagram: shows «للعلم»",
+      "pass": true,
+      "detail": "    ا   إنستغرام · الرسمي  @company.sa   إنستغرام            صورة        1 في مج"
+    },
+    {
+      "name": "preview-instagram: shows «النص الأساسي كما هو»",
+      "pass": true,
+      "detail": "    ا   إنستغرام · الرسمي  @company.sa   إنستغرام            صورة        1 في مج"
+    },
+    {
+      "name": "preview-instagram: shows «مصدر الحدود»",
+      "pass": true,
+      "detail": "    ا   إنستغرام · الرسمي  @company.sa   إنستغرام            صورة        1 في مج"
+    },
+    {
+      "name": "preview-instagram: shows «في مجلد لا تصل إليه»",
+      "pass": true,
+      "detail": "    ا   إنستغرام · الرسمي  @company.sa   إنستغرام            صورة        1 في مج"
+    },
+    {
+      "name": "preview-x-over: shows «يمنع النشر»",
+      "pass": true,
+      "detail": "    ا   X · الرسمي  @company_sa   X            صورة        1 في مجلد لا تصل إليه"
+    },
+    {
+      "name": "preview-x-over: shows «300 حرفاً والحد 280»",
+      "pass": true,
+      "detail": "    ا   X · الرسمي  @company_sa   X            صورة        1 في مجلد لا تصل إليه"
+    },
+    {
+      "name": "preview-x-over: shows «اختصره بـ 20»",
+      "pass": true,
+      "detail": "    ا   X · الرسمي  @company_sa   X            صورة        1 في مجلد لا تصل إليه"
+    },
+    {
+      "name": "preview-x-over: shows «النسخة الخاصة بـ X»",
+      "pass": true,
+      "detail": "    ا   X · الرسمي  @company_sa   X            صورة        1 في مجلد لا تصل إليه"
+    },
+    {
+      "name": "preview-x-over: shows «/ 280»",
+      "pass": true,
+      "detail": "    ا   X · الرسمي  @company_sa   X            صورة        1 في مجلد لا تصل إليه"
+    },
+    {
+      "name": "preview-youtube: shows «العنوان»",
+      "pass": true,
+      "detail": "    ا   يوتيوب · الرسمي  @CompanySA   يوتيوب            صورة        1 في مجلد لا"
+    },
+    {
+      "name": "preview-youtube: shows «العنوان (السطر الأول) 101 حرفاً والحد 100»",
+      "pass": true,
+      "detail": "    ا   يوتيوب · الرسمي  @CompanySA   يوتيوب            صورة        1 في مجلد لا"
+    },
+    {
+      "name": "preview-youtube: shows «يمنع النشر»",
+      "pass": true,
+      "detail": "    ا   يوتيوب · الرسمي  @CompanySA   يوتيوب            صورة        1 في مجلد لا"
+    },
+    {
+      "name": "preview-youtube: shows «تقبل الفيديو فقط»",
+      "pass": true,
+      "detail": "    ا   يوتيوب · الرسمي  @CompanySA   يوتيوب            صورة        1 في مجلد لا"
+    },
+    {
+      "name": "preview-youtube: shows «بايت»",
+      "pass": true,
+      "detail": "    ا   يوتيوب · الرسمي  @CompanySA   يوتيوب            صورة        1 في مجلد لا"
+    },
+    {
+      "name": "strip: shows «إنستغرام»",
+      "pass": true,
+      "detail": "     إنستغرام  ضمن الحدود  النص الأساسي      X  يتجاوز الحد  نسخة خاصة  النص 300"
+    },
+    {
+      "name": "strip: shows «ضمن الحدود»",
+      "pass": true,
+      "detail": "     إنستغرام  ضمن الحدود  النص الأساسي      X  يتجاوز الحد  نسخة خاصة  النص 300"
+    },
+    {
+      "name": "strip: shows «يتجاوز الحد»",
+      "pass": true,
+      "detail": "     إنستغرام  ضمن الحدود  النص الأساسي      X  يتجاوز الحد  نسخة خاصة  النص 300"
+    },
+    {
+      "name": "strip: shows «نسخة خاصة»",
+      "pass": true,
+      "detail": "     إنستغرام  ضمن الحدود  النص الأساسي      X  يتجاوز الحد  نسخة خاصة  النص 300"
+    },
+    {
+      "name": "strip: shows «النص الأساسي»",
+      "pass": true,
+      "detail": "     إنستغرام  ضمن الحدود  النص الأساسي      X  يتجاوز الحد  نسخة خاصة  النص 300"
+    },
+    {
+      "name": "send-checks: shows «يمنع النشر»",
+      "pass": true,
+      "detail": "      إنستغرام · الرسمي  ضمن الحدود     ا   إنستغرام · الرسمي  @company.sa   إنس"
+    },
+    {
+      "name": "send-checks: shows «ضمن الحدود»",
+      "pass": true,
+      "detail": "      إنستغرام · الرسمي  ضمن الحدود     ا   إنستغرام · الرسمي  @company.sa   إنس"
+    },
+    {
+      "name": "send-checks: shows «حزمة النشر»",
+      "pass": true,
+      "detail": "      إنستغرام · الرسمي  ضمن الحدود     ا   إنستغرام · الرسمي  @company.sa   إنس"
+    },
+    {
+      "name": "send-checks: shows «مهمة يدوية»",
+      "pass": true,
+      "detail": "      إنستغرام · الرسمي  ضمن الحدود     ا   إنستغرام · الرسمي  @company.sa   إنس"
+    },
+    {
+      "name": "send-checks: shows «نسخ النص»",
+      "pass": true,
+      "detail": "      إنستغرام · الرسمي  ضمن الحدود     ا   إنستغرام · الرسمي  @company.sa   إنس"
+    },
+    {
+      "name": "send-checks: shows «محجوب»",
+      "pass": true,
+      "detail": "      إنستغرام · الرسمي  ضمن الحدود     ا   إنستغرام · الرسمي  @company.sa   إنس"
+    },
+    {
+      "name": "send-checks-clean: shows «ضمن الحدود»",
+      "pass": true,
+      "detail": "      إنستغرام · الرسمي  ضمن الحدود     ا   إنستغرام · الرسمي  @company.sa   إنس"
+    },
+    {
+      "name": "send-checks-clean: shows «حزمة النشر»",
+      "pass": true,
+      "detail": "      إنستغرام · الرسمي  ضمن الحدود     ا   إنستغرام · الرسمي  @company.sa   إنس"
+    },
+    {
+      "name": "send-checks-clean: does not show «يمنع النشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-loading: shows «جارٍ فحص النسخ»",
+      "pass": true,
+      "detail": "   جارٍ فحص النسخ…   "
+    },
+    {
+      "name": "channels-director: shows «ربط حقيقي · سليم»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «ربط حقيقي · يحتاج ربطاً من جديد»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «رفضت المنصة الرمز»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «تعذّر الفحص»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «ربط محاكى»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «فحص الاتصال»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «إعادة الربط عبر المنصة»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «ربط عبر Meta»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «ربط عبر TikTok»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «مسار يدوي»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «يحتاج ربطاً من جديد»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: shows «النشر نفسه ما زال محاكاة»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-director: does not show «ربط حقيقي · سليم · آخر فحص لم يُفحص»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-publisher: shows «فحص الاتصال»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-publisher: shows «ربط محاكى»",
+      "pass": true,
+      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+    },
+    {
+      "name": "channels-publisher: does not show «ربط عبر Meta»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-publisher: does not show «ربط عبر TikTok»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-publisher: does not show «إعادة الربط عبر المنصة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "chooser-shell: shows «ربط حسابات عبر Meta»",
+      "pass": true,
+      "detail": "     ربط حسابات عبر Meta (فيسبوك وإنستغرام)           جارٍ قراءة ما يمكن ربطه…  "
+    },
+    {
+      "name": "chooser-shell: shows «جارٍ قراءة ما يمكن ربطه»",
+      "pass": true,
+      "detail": "     ربط حسابات عبر Meta (فيسبوك وإنستغرام)           جارٍ قراءة ما يمكن ربطه…  "
+    },
+    {
+      "name": "conn-lines: shows «ربط حقيقي»",
+      "pass": true,
+      "detail": "   ربط حقيقي · سليم · آخر فحص 15‏/10‏/2026، 11:00 ص  ربط حقيقي · يحتاج ربطاً من "
+    },
+    {
+      "name": "conn-lines: shows «ربط محاكى»",
+      "pass": true,
+      "detail": "   ربط حقيقي · سليم · آخر فحص 15‏/10‏/2026، 11:00 ص  ربط حقيقي · يحتاج ربطاً من "
+    },
+    {
+      "name": "channels: a real connection has the platform reconnect and a hold-to-confirm disconnect",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send step: the over-limit account blocks",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send step: a clean work does not block",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the pack carries the exact text to copy and no token",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-instagram a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "preview-instagram a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-x-over a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "preview-x-over a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-youtube a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "preview-youtube a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "strip a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "strip a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "send-checks a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-clean a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "send-checks-clean a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-loading a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "send-checks-loading a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-director a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-director a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-publisher a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-publisher a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "chooser-shell a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "chooser-shell a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "conn-lines a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "conn-lines a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-instagram a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "preview-instagram a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-x-over a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "preview-x-over a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-youtube a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "preview-youtube a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "strip a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "strip a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "send-checks a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-clean a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "send-checks-clean a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-loading a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "send-checks-loading a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-director a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-director a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-publisher a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-publisher a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "chooser-shell a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "chooser-shell a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "conn-lines a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "conn-lines a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-instagram e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "preview-instagram e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-x-over e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "preview-x-over e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-youtube e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "preview-youtube e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "strip e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "strip e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "send-checks e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-clean e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "send-checks-clean e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-loading e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "send-checks-loading e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-director e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-director e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-publisher e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-publisher e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "chooser-shell e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "chooser-shell e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "conn-lines e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "conn-lines e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-instagram e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "preview-instagram e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-x-over e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "preview-x-over e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "preview-youtube e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "preview-youtube e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "strip e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "strip e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "send-checks e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-clean e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "send-checks-clean e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "send-checks-loading e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "send-checks-loading e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-director e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-director e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-publisher e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-publisher e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "chooser-shell e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "chooser-shell e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "conn-lines e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "conn-lines e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "total": 160,
+    "passed": 160,
+    "failed": 0
+  }
+}

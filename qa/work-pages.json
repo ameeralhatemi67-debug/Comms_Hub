@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-14T20:47:06.083Z",
+  "run": "2026-10-14T21:34:16.240Z",
   "checks": [
     {
       "name": "list-director: renders",
@@ -2292,7 +2292,17 @@
       "detail": ""
     },
     {
-      "name": "dialog-text: shows «الحد المقترح 240 حرفاً»",
+      "name": "dialog-text: shows «حرفاً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-text: shows «ضمن حدود المنصة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-text: shows «/ 280»",
       "pass": true,
       "detail": ""
     },
@@ -5054,8 +5064,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 1010,
-    "passed": 1010,
+    "total": 1012,
+    "passed": 1012,
     "failed": 0
   }
 }

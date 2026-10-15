@@ -10,6 +10,7 @@ import { HOLD } from '@/lib/kit/hold-reasons';
 import { accountName, authOk, riyadhInstant, riyadhStamp, type AccountRow, type WorkRow } from '@/lib/work/rules';
 import { useWork } from './data';
 import { Hint, Ic, Modal } from './parts';
+import { SendChecks, blocked, useCopySource, useSendChecks } from './post-preview';
 
 type Act = (fn: string, args: Record<string, unknown>, ok: string) => Promise<boolean>;
 const channelsOf = (w: WorkRow, accounts: AccountRow[]) => w.channels.map((c) => accounts.find((a) => a.id === c)).filter((a): a is AccountRow => !!a);
@@ -33,7 +34,11 @@ export function ScheduleDialog({ w, approvedParts, at: from, onClose, act }: { w
   const moved = !!w.proposed_at && !!at && Date.parse(at) !== Date.parse(w.proposed_at);
   const bad = notMine(w, x.accounts, x.me, x.isAdmin || x.role === 'admin');
   const mail = isMailWork(w, x.accounts);
+  const src = useCopySource(w.id, w.type);
+  const checks = useSendChecks(src, chs);
+  const stop = blocked(checks);
   const go = () => {
+    if (stop) return setErr('نسخة تتجاوز حدود منصتها. عدّلها وأعدها للاعتماد قبل الجدولة.');
     if (!at) return setErr('اختر التاريخ والوقت.');
     if (Date.parse(at) < Date.now()) return setErr('الموعد مضى. اختر موعداً قادماً.');
     void act(
@@ -89,6 +94,8 @@ export function ScheduleDialog({ w, approvedParts, at: from, onClose, act }: { w
         </div>
         <small className="wk-why">الاختيار المبدئي من إعداد الحساب في «الحسابات المرتبطة».</small>
       </div>
+      {!mail && <SendChecks rows={checks} />}
+      {stop && <Hint warn>نسخة تتجاوز حدود منصتها: لا تُجدول حتى تُعدَّل. الحدود من «الإعدادات» «المنصات»، ويعدّلها من يملك «إدارة المنصات وتطبيقاتها».</Hint>}
       {bad.length > 0 && <Hint i={Lock} warn>لست ممن ينشر على: {bad.map(accountName).join('، ')}. يحدد ذلك من يدير الحسابات.</Hint>}
       {chs.filter((a) => at && !authOk(a, at)).map((a) => (
         <Hint warn key={a.id}>
@@ -101,7 +108,7 @@ export function ScheduleDialog({ w, approvedParts, at: from, onClose, act }: { w
         <button type="button" className="wk-btn quiet" onClick={onClose}>
           تراجع
         </button>
-        <button type="button" className="wk-btn primary" onClick={go}>
+        <button type="button" className="wk-btn primary" disabled={stop} onClick={go}>
           <Ic i={moved ? Send : CalendarDays} />
           {moved ? 'إرسال الموعد الجديد للاعتماد' : 'تأكيد الجدولة'}
         </button>
@@ -115,6 +122,9 @@ export function PublishNowDialog({ w, onClose, act }: { w: WorkRow; onClose: () 
   const now = new Date().toISOString();
   const mail = isMailWork(w, x.accounts);
   const bad = notMine(w, x.accounts, x.me, x.isAdmin || x.role === 'admin');
+  const src = useCopySource(w.id, w.type);
+  const checks = useSendChecks(src, channelsOf(w, x.accounts));
+  const stop = blocked(checks);
   return (
     <Modal title={mail ? 'تأكيد الإرسال' : 'تأكيد النشر'} onClose={onClose}>
       <Hint warn>محاكاة: لا يصل شيء إلى المنصات ولا تُرسل رسالة. يُنشر الإصدار المعتمد فقط.</Hint>
@@ -135,6 +145,8 @@ export function PublishNowDialog({ w, onClose, act }: { w: WorkRow; onClose: () 
           );
         })}
       </div>
+      {!mail && <SendChecks rows={checks} />}
+      {stop && <Hint warn>نسخة تتجاوز حدود منصتها: لا تُنشر حتى تُعدَّل وتُعتمد من جديد.</Hint>}
       {bad.length > 0 && <Hint i={Lock} warn>لست ممن ينشر على: {bad.map(accountName).join('، ')}.</Hint>}
       <div className="wk-row-acts">
         <button type="button" className="wk-btn quiet" onClick={onClose}>
@@ -143,6 +155,7 @@ export function PublishNowDialog({ w, onClose, act }: { w: WorkRow; onClose: () 
         <button
           type="button"
           className="wk-btn primary"
+          disabled={stop}
           data-hold={HOLD.publishNow}
           onClick={() => void act('work_publish', { p_work: w.id, p_op: 'now' }, mail ? 'أُرسل من البريد (محاكاة).' : 'نُشر (محاكاة). النتيجة لكل حساب في صفحة العمل.').then((ok) => ok && onClose())}
         >

@@ -1,0 +1,35 @@
+{
+  "script": "supabase/tests/storage_move_rules.sql",
+  "ran": "2026-10-15",
+  "target": "Supabase project comms-hub (one transaction, rolled back)",
+  "migrations": [
+    "20261015140000_storage_move_engine.sql",
+    "20261015140100_storage_move_release.sql",
+    "20261015140200_storage_verify_providers.sql",
+    "20261015140300_storage_provider_prefix.sql"
+  ],
+  "migrationNote": "Applied to comms-hub the same day, in that order. The statements are those of the files; comment lines were left out of the applied text for the first one and 140100 was applied as two statements (the new function, then create or replace of storage_move_claim).",
+  "result": { "total": 95, "passed": 95, "failed": 0 },
+  "attempts": [
+    "Run 1: 75 of 95 by the script's own count, with 3 failures listed (24, 66, 88) and 17 checks that returned null. Cause: the harness, not the product. storage_moves, storage_move_items and file_locations have row level security and no policy (by design), so a check that read them as the signed-in role saw no rows. The checks now read them through pg_temp.q, a security-definer reader, and every action still runs as the person.",
+    "Run 2: the plan's approved flag and the way back were found correct by hand (a diagnostic in a rolled-back transaction); the same cause. The final select was also changed from '=' to 'is not distinct from', because a null result had been excluded from the failure list and counted as not passed.",
+    "Between runs the review of the script found a real defect: a prefix of ../x passed the pattern, and a dot segment in an object key is collapsed by URL handling. Migration 20261015140300 refuses a '.' or '..' segment in a prefix and in the address path; checks 11 and 11b cover it.",
+    "Run 3: 95 of 95."
+  ],
+  "afterRollback": {
+    "serverKeyMd5Unchanged": true,
+    "serverKeyMd5": "ce3a4a4cb106f18eb3e1b31806500817",
+    "fileLocations": 5,
+    "mediaVersions": 5,
+    "integrations": 1,
+    "integrationEvents": 0,
+    "accounts": 3,
+    "authUsers": 2,
+    "mediaFolders": 1,
+    "vaultSecrets": 0,
+    "storageMoves": 0,
+    "storageMoveItems": 0,
+    "mailFiles": 0
+  },
+  "advisors": "Security advisors read after the migrations: the lint groups are unchanged in kind (RLS enabled with no policy: storage_moves and storage_move_items join the earlier internal tables; anon-callable security-definer functions: three more, all gated by the server key: storage_serving, int_secret_use_id, storage_provider_health; signed-in-callable: the new session functions, the product's API; leaked-password protection still off). No error-level finding."
+}

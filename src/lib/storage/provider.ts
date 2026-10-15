@@ -44,6 +44,43 @@ export type UploadRequest = {
 /** What a check of one stored copy found. */
 export type CopyCheck = { state: 'ok' | 'missing' | 'failed'; size: number | null };
 
+
+/** What a provider's resumable write keeps between requests: ids and offsets, never a secret. */
+export type SinkState = Record<string, unknown>;
+
+/** A file to write at a provider from the server, for the move engine. */
+export type SinkTarget = {
+  /** The object's name where names matter (a path without a leading slash). Drive ignores it. */
+  key: string;
+  name: string;
+  mimeType: string;
+  size: number;
+  /** The provider folder, where the provider has folders (Drive). */
+  parentId?: string;
+};
+
+/**
+ * A resumable server-side write (Settings_Integrations_Plan.md 6.3: "resumable, throttled").
+ * The engine feeds it `partSize` bytes at a time and saves the returned state after each part,
+ * so a request that ends early, or a page that is closed, loses at most one part.
+ */
+export interface StorageSink {
+  /** Bytes per part: the engine reads and writes in steps of this size (the last may be shorter). */
+  readonly partSize: number;
+  begin(target: SinkTarget): Promise<SinkState>;
+  /** Asks the destination how far it really got, after a pause or a crash. */
+  resume(state: SinkState): Promise<{ state: SinkState; offset: number }>;
+  put(state: SinkState, offset: number, bytes: Uint8Array, last: boolean): Promise<SinkState>;
+  finish(state: SinkState): Promise<{ ref: string; size: number; remoteChecksum: string | null }>;
+  /** Throws away what was written so far. Best effort. */
+  abort(state: SinkState): Promise<void>;
+  /**
+   * The checksum the destination should report for a file whose content hashes to `wholeMd5`:
+   * the md5 itself, or for an S3 multipart object the composite ETag. Null when it cannot be known.
+   */
+  expectedRemote(state: SinkState, wholeMd5: string): string | null;
+}
+
 export interface StorageProvider {
   /** The integration type this implements (google_drive). */
   readonly type: string;
@@ -71,4 +108,7 @@ export interface StorageProvider {
   account(): Promise<string | null>;
   /** Space used and the limit, or null when the provider does not say. */
   quota(): Promise<{ used: number; total: number | null } | null>;
+
+  /** A resumable server-side writer, for providers the move engine may write to. */
+  sink?(): StorageSink;
 }

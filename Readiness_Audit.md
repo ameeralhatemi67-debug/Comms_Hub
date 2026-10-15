@@ -98,8 +98,13 @@ click explains, second acts), and the page guide.
    change for files.
 4. Platform registry (S5): add, edit, delete; info tab; readiness tracker.
 5. Post preview per platform with the limits, shown through to the send step.
+   **Built 2026-10-15** (`progress.md`): the limits are registry data with their sources; the
+   interface stops at the send step, the database does not (known gap).
 6. Real OAuth connection and health, starting with Facebook and Instagram (one Meta app),
-   then TikTok; Snapchat as a manual task.
-7. S3 move engine with a second provider; then OneDrive (S8).
+   then TikTok; Snapchat as a manual task. **Built 2026-10-15**, tested against a fake platform
+   only: nothing has met a real Meta or TikTok app yet (`Platform_Connections_Setup.md`).
+7. S3 move engine with a second provider; then OneDrive (S8). **Built 2026-10-15** (`progress.md`): an S3-compatible provider and
+   the engine (plan, copy in resumable parts, verify, switch, hold, report, retire); verified against a fake store only, no real
+   second provider has been tried (`Storage_Provider_Setup.md`).
 8. Help upgrade: role-aware tours, empty-state tours, touch behaviour, the missing pages.
 9. NAS and the agent computer (S7) when they arrive.

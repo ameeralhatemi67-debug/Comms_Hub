@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-14T20:45:08.074Z",
+  "run": "2026-10-15T06:07:25.254Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -242,6 +242,66 @@
       "detail": ""
     },
     {
+      "name": "settings-storage-move-plan: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-viewer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-connect-meta: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-manual: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-storage-supabase: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-move: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "settings-platforms: renders",
       "pass": true,
       "detail": ""
@@ -307,6 +367,86 @@
       "detail": ""
     },
     {
+      "name": "settings-storage-move-plan: the plan is a dry run: «ابدأ النقل» is a working button, cancelling the plan is a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: the second provider has check, edit, a long-press switch-off, and no delete while it holds files",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: the key pair is never drawn, only its tail",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: Drive says how many held copies it keeps",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: the progress bar carries its value",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: the page says plainly that nothing runs in the background",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: cancelling is a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: retiring the sources is disabled until the hold is over, and is a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: after the hold the retire button is enabled and a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-viewer: starting, planning and adding are locked controls for «storage.migrate» and «storage.manage»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: the return address is on its own line to copy, with the platform in its path",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: the steps are numbered in a list",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: the button is the icon set's circle with an exclamation mark, labelled",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: every platform app block and manual platform carries the circled guide",
+      "pass": true,
+      "detail": "3"
+    },
+    {
+      "name": "settings-storage-move-plan: the move panel carries its guide",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one: with one provider there is no plan button, only the way to add a second",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "settings-platforms: an administrator has working controls, none locked",
       "pass": true,
       "detail": ""
@@ -314,7 +454,7 @@
     {
       "name": "settings-platforms: a viewer sees every control locked for «platforms.manage»",
       "pass": true,
-      "detail": "27"
+      "detail": "30"
     },
     {
       "name": "settings-platforms: the built-in platforms cannot be deleted, the added one can",
@@ -3762,16 +3902,6 @@
       "detail": ""
     },
     {
-      "name": "settings-storage: shows «تخزين Supabase»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-storage: shows «S3»",
-      "pass": true,
-      "detail": ""
-    },
-    {
       "name": "settings-storage: shows «جهاز تخزين شبكي»",
       "pass": true,
       "detail": ""
@@ -3782,7 +3912,17 @@
       "detail": ""
     },
     {
-      "name": "settings-storage: shows «لم يُبنيا بعد»",
+      "name": "settings-storage: shows «لم يُبنَ بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «إضافة مزود تخزين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage: shows «النقل يحتاج مزودين متصلين»",
       "pass": true,
       "detail": ""
     },
@@ -4048,6 +4188,951 @@
     },
     {
       "name": "library-storage-empty · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-move-plan · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-move-plan: shows «مزودو التخزين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «تخزين Supabase»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «تخزين متوافق مع S3»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «hub-files»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «hub-files@s3.example.org»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «مفتاح الوصول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «••••3456»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «منها نسخ محفوظة بعد نقل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «فحص الاتصال»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «تعديل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «إيقاف»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «إضافة مزود تخزين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «نقل الملفات بين المزودين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «ما يُنقل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «مكتبة الوسائط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «الاحتفاظ بالمصدر (أيام)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «احسب الخطة (تجربة بلا نسخ)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «خطة بانتظار البدء»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «أرشيف الحملات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «مجلد «الحملات» وما تحته من المكتبة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «ملفات جاهزة للنسخ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «12 · 3.00 غيغابايت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «الوقت المقدّر (تقريبي)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «المساحة الحرة عند الهدف»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «100.00 غيغابايت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «لها نسخة جاهزة عند الهدف»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «إصدارات معتمدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «لا يمكن نقلها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «نسخته الحالية مفقودة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «ابدأ النقل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «إلغاء الخطة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «آخر عمليات النقل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «عرض التقرير»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: shows «لا شيء يُحذف»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: does not show «NaN»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: does not show «null»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: does not show «secret»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: does not show «AKIA»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: does not show «mv-»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: does not show «hub/library»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: does not show «ref»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-plan · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-move-run · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-move-run: shows «يعمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: shows «التقدم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: shows «50% · 1.50 غيغابايت من 3.00 غيغابايت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: shows «نُقل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: shows «يُنسخ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: shows «ينتظر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: shows «تحقق ببصمة المحتوى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: shows «تابع التنفيذ من هذه الصفحة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: shows «لا عامل في الخلفية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: shows «إلغاء النقل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: does not show «NaN»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: does not show «null»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: does not show «secret»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: does not show «AKIA»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-run · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-move-done · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-move-done: shows «اكتمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: shows «تعذّر نقلها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: shows «تغيّر محتوى الملف عند المصدر أثناء النسخ فلم يُعتمد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: shows «أعد محاولة ما تعذّر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: shows «نسخ المصدر المحفوظة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: shows «11 نسخة بقيت عند Google Drive نسخةً احتياطية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: shows «أحل نسخ المصدر إلى التقاعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: shows «يُفتح هذا الإجراء بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: shows «التقرير: 11 ملفات نُقلت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: does not show «NaN»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: does not show «null»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: does not show «secret»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: does not show «AKIA»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: does not show «SOURCE_CHANGED»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-done · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-move-over · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-move-over: shows «اكتمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: shows «نسخ المصدر المحفوظة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: shows «أحل نسخ المصدر إلى التقاعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: shows «التقرير: 12 ملفات نُقلت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: does not show «NaN»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: does not show «null»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: does not show «secret»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: does not show «تعذّر نقلها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: does not show «أعد محاولة ما تعذّر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-over · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-move-viewer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-viewer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-move-viewer: shows «نقل الملفات بين المزودين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-viewer: shows «احسب الخطة (تجربة بلا نسخ)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-viewer: shows «ابدأ النقل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-viewer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-viewer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-move-viewer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-one · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-storage-one: shows «النقل يحتاج مزودين متصلين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one: shows «إضافة مزود تخزين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one: shows «لا شيء يُحذف»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one: does not show «NaN»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one: does not show «احسب الخطة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-storage-one · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-meta · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-meta: shows «تجهيز تطبيق Meta»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: shows «أنشئ التطبيق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: shows «Facebook Login»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: shows «Valid OAuth Redirect URIs»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: shows «/api/platforms/callback/meta»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: shows «App ID و App Secret»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: shows «ولا ترسلهما إلى أحد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: shows «النشر نفسه ما زال محاكاة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: shows «فهمت»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: does not show «NaN»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: does not show «{redirect}»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: does not show «{origin}»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: does not show «AKIA»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-meta · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-tiktok · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-tiktok: shows «تجهيز تطبيق TikTok»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok: shows «Login Kit»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok: shows «/api/platforms/callback/tiktok»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok: shows «user.info.basic»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok: shows «التدقيق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok: does not show «{redirect}»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-connect-meta · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-connect-meta · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-connect-meta: shows «ربط حسابك عبر Meta»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-connect-meta: shows «اضغط «ربط عبر Meta»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-connect-meta: shows «لا يطلب الموقع كلمة مرورك أبداً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-connect-meta: shows «تطبيق المطوّر غير مضبوط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-connect-meta: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-connect-meta · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-connect-meta · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-manual · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-manual · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-manual: shows «النشر اليدوي على هذه المنصة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-manual: shows «حزمة النشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-manual: shows «أكّد النشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-manual: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-manual · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-manual · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-storage-supabase · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-storage-supabase · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-storage-supabase: shows «إضافة تخزين Supabase»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-storage-supabase: shows «S3 connection»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-storage-supabase: shows «New access key»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-storage-supabase: shows «حفظ وفحص الاتصال»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-storage-supabase: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-storage-supabase: does not show «AKIA»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-storage-supabase: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-storage-supabase · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-storage-supabase · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-move · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-move · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "guide-move: shows «نقل الملفات بين مزودي التخزين»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-move: shows «احسب الخطة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-move: shows «أبقِ الصفحة مفتوحة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-move: shows «أحل المصدر للتقاعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-move: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-move · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-move · a · 390: no sideways scroll",
       "pass": true,
       "detail": "overflow 0px"
     },
@@ -4429,8 +5514,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 885,
-    "passed": 885,
+    "total": 1102,
+    "passed": 1102,
     "failed": 0
   }
 }

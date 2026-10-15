@@ -92,7 +92,7 @@ export function WorkProvider({ children }: { children: ReactNode }) {
       db.rpc('media_people'),
       db.rpc('work_people_load'),
       db.from('projects').select('id,name,type,start_on,end_on,owner,description').order('start_on', { ascending: false }),
-      db.from('platform_accounts').select('id,platform,label,handle,purpose,authorized_until,publishers,mode,active,fixed').order('created_at'),
+      db.from('platform_accounts').select('id,platform,label,handle,purpose,authorized_until,publishers,mode,active,fixed,conn_kind,conn_state,conn_checked_at,conn_error,external_id,external_name,scopes').order('created_at'),
       db.from('plan_templates').select('id,name,type,rows,created_by').order('created_at', { ascending: false }),
       db.from('platforms').select('key,label_ar,kind,sort,accepts,publish_mode,scheduling,requires_review,token_life_days,enabled,builtin,docs_url,readiness,readiness_note,readiness_at,readiness_by').order('sort'),
     ]);

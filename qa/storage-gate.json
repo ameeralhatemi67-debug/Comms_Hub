@@ -1,9 +1,9 @@
 {
   "script": "qa/storage-gate.cjs",
-  "ran": "2026-10-14",
+  "ran": "2026-10-15",
   "base": "http://localhost:3100",
-  "total": 10,
-  "passed": 10,
+  "total": 21,
+  "passed": 21,
   "failed": 0,
   "checks": [
     {
@@ -45,6 +45,61 @@
       "name": "moving files as a visitor is refused",
       "pass": true,
       "detail": "401"
+    },
+    {
+      "name": "the move route refuses a visitor (plan)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "the move route refuses a visitor (start)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "the move route refuses a visitor (run)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "the move route refuses a visitor (cancel)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "the move route refuses a visitor (retire)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "and a move request from another site",
+      "pass": true,
+      "detail": "403"
+    },
+    {
+      "name": "the provider route refuses a visitor (save)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "the provider route refuses a visitor (check)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "the provider route refuses a visitor (remove)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "and a provider request from another site",
+      "pass": true,
+      "detail": "403"
+    },
+    {
+      "name": "the move route has no GET",
+      "pass": true,
+      "detail": "405"
     },
     {
       "name": "the storage tab is not shown to a visitor",

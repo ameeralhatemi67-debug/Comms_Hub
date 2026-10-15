@@ -1,33 +1,52 @@
 'use client';
 // «التخزين» in Settings (Settings_Integrations_Plan.md 6): where the Hub's files are kept, which
-// provider serves which role, and whether each stored copy is still there. Read from the
+// provider serves which role, whether each stored copy is still there, a second provider
+// (S3-compatible), and the move engine that carries files between providers. Read from the
 // database (storage_overview); a check asks the provider, and only the server records what it
-// said. Moving files between providers and backups are later steps and are said to be so.
+// said. Backups are a later step and are said to be so.
 import { useCallback, useEffect, useState } from 'react';
 import { needProps } from '@/lib/kit/need';
 import { supabase } from '@/lib/supabase/client';
 import {
   COMING_PROVIDERS,
+  PROVIDER_TYPE_AR,
   STATE_AR,
   STATE_TONE,
   STORAGE_ROLE_AR,
   errorAr,
   intError,
+  moveError,
   sizeAr,
+  type MoveReport,
+  type MoveRow,
   type StorageOverview,
   type VerifyResult,
 } from '@/lib/integrations/rules';
 import { useCaps } from '../caps';
+import { ProviderControls, ProviderForm } from './storage-provider';
+import { MovePanel, type FolderRow } from './storage-move';
 
 const when = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString('ar-SA-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' }) : '');
 
-/** `initial` lets a check draw the tab without the database (qa/storage-pages.cjs). */
-export function StorageTab({ initial }: { initial?: StorageOverview }) {
+/** `initial` lets a check draw the tab without the database (qa/storage-move-pages.cjs). */
+export function StorageTab({
+  initial,
+  initialMoves,
+  initialReport,
+  initialFolders,
+}: {
+  initial?: StorageOverview;
+  initialMoves?: MoveRow[];
+  initialReport?: MoveReport | null;
+  initialFolders?: FolderRow[];
+}) {
   const caps = useCaps();
   const [data, setData] = useState<StorageOverview | null>(initial ?? null);
   const [refused, setRefused] = useState(false);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
+  // The provider form: closed, a new provider, or the settings of one.
+  const [form, setForm] = useState<{ id: string | null } | null>(null);
 
   const load = useCallback(async () => {
     const { data: d, error } = await supabase().rpc('storage_overview');
@@ -59,7 +78,7 @@ export function StorageTab({ initial }: { initial?: StorageOverview }) {
     }
   };
 
-  if (refused || (caps.ready && !caps.has('settings.view') && !caps.has('storage.manage')))
+  if (refused || (caps.ready && !caps.has('settings.view') && !caps.has('storage.manage') && !caps.has('storage.migrate')))
     return (
       <div className="st-storage">
         <p className="muted">أين تُحفظ الملفات لمن يملك «عرض صحة النظام وسجل الإعدادات» أو «إدارة مزودي التخزين»: مسؤول النظام افتراضياً.</p>
@@ -69,6 +88,14 @@ export function StorageTab({ initial }: { initial?: StorageOverview }) {
       </div>
     );
   if (!data) return <p className="muted">جارٍ تحميل التخزين…</p>;
+
+  const editing = form?.id ? data.providers.find((p) => p.id === form.id) ?? null : null;
+  const done = (text: string, ok: boolean) => {
+    setNote({ ok, text });
+    setForm(null);
+    void load();
+  };
+  const canMigrate = data.can_migrate ?? false;
 
   return (
     <div className="st-storage">
@@ -86,11 +113,25 @@ export function StorageTab({ initial }: { initial?: StorageOverview }) {
               <b>{p.label}</b>
               <span className={`mx-chip ${STATE_TONE[p.state]}`}>{STATE_AR[p.state]}</span>
             </header>
+            <small>
+              {PROVIDER_TYPE_AR[p.type] ?? p.type}
+              {p.type === 's3_compatible' && p.config?.bucket ? (
+                <>
+                  {' · الحاوية '}
+                  <bdi dir="ltr">{String(p.config.bucket)}</bdi>
+                </>
+              ) : null}
+            </small>
             {p.account ? (
               <small>
                 الحساب: <bdi dir="ltr">{p.account}</bdi>
               </small>
             ) : null}
+            {p.type === 's3_compatible' && (
+              <small>
+                مفتاح الوصول: {p.has_secret ? <bdi dir="ltr">{p.secret_tail ?? '••••'}</bdi> : 'لم يُدخل بعد'}
+              </small>
+            )}
             <div className="table st-copies">
               <div className="between">
                 <span>نسخ محفوظة هنا</span>
@@ -106,6 +147,12 @@ export function StorageTab({ initial }: { initial?: StorageOverview }) {
                 <span>منها مرفقات البريد والمراسلة</span>
                 <b>{p.mail_files}</b>
               </div>
+              {(p.replicas ?? 0) > 0 && (
+                <div className="between">
+                  <span>منها نسخ محفوظة بعد نقل (ليست الأصل)</span>
+                  <b>{p.replicas}</b>
+                </div>
+              )}
               <div className="between st-verified">
                 <span>آخر تحقق</span>
                 <b>{p.last_verified_at ? when(p.last_verified_at) : 'لم يُتحقق من شيء بعد'}</b>
@@ -123,7 +170,7 @@ export function StorageTab({ initial }: { initial?: StorageOverview }) {
                 </div>
               )}
             </div>
-            {p.last_error ? <small>{errorAr(p.last_error)}</small> : null}
+            {p.last_error ? <small>{errorAr(p.last_error) || moveError(p.last_error)}</small> : null}
             <div className="actions">
               <button
                 type="button"
@@ -134,8 +181,11 @@ export function StorageTab({ initial }: { initial?: StorageOverview }) {
                 {busy ? 'جارٍ الفحص…' : 'تحقق من عينة'}
               </button>
             </div>
+            {p.type === 's3_compatible' && (
+              <ProviderControls p={p} canManage={data.can_manage} onEdit={() => setForm({ id: p.id })} onDone={done} />
+            )}
             <small className="muted">
-              يسأل المزود عن أقدم الملفات فحصاً (حتى عشرين في المرة) ويسجّل أهي موجودة وبحجمها. لا يغيّر ولا ينقل ولا يحذف شيئاً.
+              يسأل المزود عن أقدم الملفات فحصاً (حتى عشرين في المرة، من أي مزود) ويسجّل أهي موجودة وبحجمها. لا يغيّر ولا ينقل ولا يحذف شيئاً.
             </small>
           </article>
         ))}
@@ -144,7 +194,29 @@ export function StorageTab({ initial }: { initial?: StorageOverview }) {
             {note.text}
           </p>
         )}
+        {form ? (
+          <ProviderForm key={form.id ?? 'new'} provider={editing} canSecrets={data.can_secrets ?? false} onDone={done} onCancel={() => setForm(null)} />
+        ) : (
+          <div className="actions">
+            <button
+              type="button"
+              className="secondary st-provider-add"
+              {...(data.can_manage ? { onClick: () => setForm({ id: null }) } : needProps('storage.manage', 'إضافة مزود لمن يملك «إدارة مزودي التخزين»: مسؤول النظام افتراضياً.'))}
+            >
+              إضافة مزود تخزين
+            </button>
+          </div>
+        )}
       </section>
+
+      <MovePanel
+        providers={data.providers}
+        canMigrate={canMigrate}
+        initialMoves={initialMoves}
+        initialReport={initialReport}
+        initialFolders={initialFolders}
+        onChanged={() => void load()}
+      />
 
       <section className="st-block st-roles" aria-label="أدوار التخزين">
         <h3>ما يخدمه كل مزود</h3>
@@ -157,7 +229,8 @@ export function StorageTab({ initial }: { initial?: StorageOverview }) {
           ))}
         </div>
         <p className="muted">
-          هذه الخريطة للقراءة الآن: مزود واحد يخدم كل شيء. تغيير مزود دور أو مجلد يأتي مع مزود ثانٍ ومحرك النقل.
+          هذه الخريطة للقراءة: الرفع الجديد يذهب إلى مزود كل دور كما هو، والملفات المنقولة تُخدَّم من موضعها الجديد بالمعرّف نفسه، فلا تنكسر
+          الروابط ولا صفحات المراجعة. تغيير مزود دور بعينه يأتي مع النسخ الاحتياطي.
         </p>
       </section>
 
@@ -171,9 +244,7 @@ export function StorageTab({ initial }: { initial?: StorageOverview }) {
             </li>
           ))}
         </ul>
-        <p className="muted">
-          نقل الملفات بين المزودين (كلياً أو لمجلد) والنسخ الاحتياطي لم يُبنيا بعد. حتى يأتيا، لا يُنقل ملف ولا يُحذف من مكانه.
-        </p>
+        <p className="muted">النسخ الاحتياطي المجدول لم يُبنَ بعد. لا شيء يُحذف من مكانه بالنقل: المصدر يبقى نسخة محفوظة حتى تُحيله بنفسك إلى التقاعد.</p>
       </section>
     </div>
   );

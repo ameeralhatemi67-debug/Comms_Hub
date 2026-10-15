@@ -19,6 +19,7 @@ export function driveStorage(drive: Drive): StorageProvider {
     checksum: (ref) => drive.checksum(ref),
     account: () => drive.account(),
     quota: () => drive.quota(),
+    sink: () => drive.sink(),
 
     async check(ref, expectedSize): Promise<CopyCheck> {
       try {

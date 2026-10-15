@@ -1,4 +1,4 @@
-import { storageFor } from '@/lib/storage';
+import { copiesAt, storageFor, trashEverywhere } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { cleanName } from '@/lib/drive/media';
 import { driveParentOf, isUuid } from '@/lib/drive/parents';
@@ -38,12 +38,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const drive = storageFor('library');
     const { data: versions } = await supabase.from('media_versions').select('drive_file_id').eq('asset_id', id);
-    const files = (versions ?? []).map((v) => v.drive_file_id as string);
-    if (patch.name) await drive.rename(before.drive_file_id, patch.name);
+    // The library's names and folders live in Drive only: they follow the Drive copies that are
+    // still live (a copy at another provider is named by the file's id and has no folder).
+    if (patch.name) for (const r of await copiesAt('google_drive', before.drive_file_id)) await drive.rename(r, patch.name);
     if (patch.folder_id) {
       const from = await driveParentOf(supabase, drive, before.folder_id);
       const to = await driveParentOf(supabase, drive, patch.folder_id);
-      if (from !== to) for (const f of files) await drive.move(f, from, to);
+      if (from !== to)
+        for (const v of versions ?? [])
+          for (const f of await copiesAt('google_drive', v.drive_file_id as string)) await drive.move(f, from, to);
     }
     return Response.json({ ok: true });
   } catch {
@@ -55,7 +58,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 // Removes an asset: the database decides first (manage level, not an approved version),
-// then every version's file moves to the Drive trash (30 days) and the record goes.
+// then every live copy of every version goes to its provider's trash and the record goes.
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const g = await guard(request, { mutating: true, page: 'media' });
   if (!g.ok) return g.response;
@@ -68,10 +71,9 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
   const { data: versions } = await supabase.from('media_versions').select('drive_file_id').eq('asset_id', id);
   try {
-    const drive = storageFor('library');
-    for (const v of versions ?? []) await drive.trash(v.drive_file_id as string);
+    for (const v of versions ?? []) await trashEverywhere('library', v.drive_file_id as string);
   } catch {
-    return fail(502, 'تعذّر نقل الملف إلى سلة Google Drive.');
+    return fail(502, 'تعذّر نقل الملف إلى سلة مزود التخزين.');
   }
   const { error } = await supabase.from('media_files').delete().eq('id', id);
   if (error) return fail(500, 'نُقل الملف إلى السلة لكن تعذّر حذف سجله. أعد المحاولة.');

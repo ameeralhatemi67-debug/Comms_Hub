@@ -1,9 +1,9 @@
-import { storageFor } from '@/lib/storage';
+import { openStored } from '@/lib/storage';
 import { guard, fail } from '@/lib/drive/guard';
 import { isUuid } from '@/lib/drive/parents';
 import { serverClient } from '@/lib/supabase/server';
 
-// Streams a file from Drive to a signed-in person who may see the asset (database
+// Streams a file from wherever it is kept (Drive, or the second provider after a move) to a signed-in person who may see the asset (database
 // row level security decides). `?v=N` serves an earlier version, `?download=1`
 // forces a download and records it in the log. Range is passed through so video
 // can seek; the Drive address is never given out.
@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     mime = v.mime_type;
   }
 
-  const upstream = await storageFor('library').open(driveFileId, request.headers.get('range'));
+  const upstream = await openStored('library', driveFileId, request.headers.get('range'));
   if (!upstream.ok && upstream.status !== 206) return fail(upstream.status === 404 ? 404 : 502, 'تعذّر قراءة الملف.');
 
   const download = url.searchParams.get('download') === '1';

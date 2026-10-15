@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-14
+updated: 2026-10-15
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -32,6 +32,26 @@ The owner requested a Comms Hub version of the supplied Arabic motion-video refe
 
 Verification: typecheck and production build passed; all 153 existing tests passed. Film browser and media verification passed 128 checks, including deterministic seeking, both layouts, transitions, play/pause, fonts, audio, mobile overflow, reduced-motion initial state, and full decode of all three exports. Video is Rec.709 limited-range H.264 with 48 kHz stereo AAC. Two encoded-frame color comparisons passed. Re-run `node qa/comms-hub-film.cjs`; full evidence is beside the film under `qa/`. The application interface and the paused Permissions P4 work were not changed. Next action for this deliverable: review the film and copy; the application next actions below still apply.
 
+
+## Setup guides in the site, 2026-10-15
+
+Where a platform or a storage provider needs outside steps, a circled "!" beside it opens them in order, written in the site: Meta app, TikTok app, how a publisher connects an account, the manual path (Snapchat, WhatsApp channel and status), each storage kind, and a first move. Steps 1 to 7 of the audit order are built and pushed; 6 and 7 are verified only against fakes.
+
+## Second storage provider and the move engine, 2026-10-15 (Step S3, step 7 of the audit order)
+
+An S3-compatible store (Supabase Storage's S3 endpoint, Backblaze B2, Cloudflare R2, MinIO, Amazon) can be added from «الإعدادات» «التخزين», its key pair checked by a real write, read and delete and kept in the vault, and files can be moved to it and back: a dry-run plan, a copy in resumable parts driven by the open page, verification by checksum (an approved version only by checksum), the switch, the source held as a replica for the period the plan states, a report, and a separate long-press action that sends the held sources to their provider's trash. The library, mail, messaging and review-link routes keep serving through the file's own reference from wherever the live copy is. Database rule run 95 of 95, `npm test` 252 of 252, fixture browser check 1023 of 1023, signed-out check 21 of 21, typecheck and build clean.
+
+- **Not tried against a real second provider:** no S3 key pair exists yet. The client is tested against a fake service that checks every request's signature (and the signing against AWS's published example); nothing has met Supabase Storage, B2 or R2. The signed-in screens were drawn from fixtures. Steps for the owner and the first small move are in `Storage_Provider_Setup.md`.
+- **Known limits, stated in the interface:** new uploads still go to Google Drive and are moved by a new plan; a run executes only while the page is open (no worker); a file over about 80 GB is skipped for an S3 target; the store's "trash" is a copy under `_trash/` then a delete of the original.
+- **Next action:** the owner creates the bucket and key pair and walks a first small move (`Storage_Provider_Setup.md`). Agent: S4 (backups on the same engine in copy mode), then OneDrive (S8), then the help upgrade.
+
+## Post preview and real platform connections, 2026-10-15 (steps 5 and 6 of the audit order)
+
+Every platform copy is now drawn the way its platform lays it out and counted against that platform's limits (data in the registry, each with its source and the day it was read), on the work page, in the review screen, while writing, and at the send step, where an over-limit copy stops the scheduling and publish-now dialogs; platforms that are published by hand show the exact text and files as a pack. Facebook, Instagram (one Meta app) and TikTok accounts can now be connected through the platform's own sign-in: the token goes to Vault, the authorisation becomes its real expiry, a health check records state and renews TikTok's token, a broken connection fails publishing honestly and tells the publishers once, and disconnect and delete destroy the token. Snapchat and the WhatsApp channel and status are manual tasks. Publishing itself is still a simulation. Database rule runs 28 of 28 and 65 of 65, `npm test` 234 of 234, browser checks 160 of 160 and 1012 of 1012, typecheck and build clean.
+
+- **Waiting on the owner:** `Platform_Connections_Setup.md`: whether a verified Meta Business account exists (E-7), the Meta and TikTok apps with the two redirect addresses, entering their ids and secrets in «المنصات», then the first real connection and the signed-in walkthrough. Nothing has been tried against a real platform.
+- **Known gap:** an over-limit copy is stopped by the interface at the send step, not by the database (see `progress.md`); the adapter's validate step will carry it.
+- **Next action:** step 7 of the audit order, the move engine with a second provider (S3), then OneDrive (S8); then the help upgrade, which now also owes the new screens.
 
 ## Entry flow and honest labels, 2026-10-14
 

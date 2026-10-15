@@ -10,7 +10,7 @@
 // never the rest of the account's Drive.
 
 import { vaultReachable, vaultSecret } from '../integrations/vault.ts';
-import { StorageError } from '../storage/provider.ts';
+import { StorageError, type SinkState, type SinkTarget, type StorageSink } from '../storage/provider.ts';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const API = 'https://www.googleapis.com/drive/v3';
@@ -219,6 +219,104 @@ export function createDrive(deps: Partial<Deps> = {}) {
       if (!Number.isFinite(used)) return null;
       const limit = Number(about.storageQuota?.limit ?? NaN);
       return { used, total: Number.isFinite(limit) ? limit : null };
+    },
+
+    /**
+     * A resumable server-side write into Drive, for the move engine. The session address is a
+     * capability: it is kept in the database on the move item and nowhere a browser can read it.
+     */
+    sink(): StorageSink {
+      type DriveSinkState = { kind: 'drive'; session: string; size: number; id: string | null };
+      const as = (s: SinkState) => {
+        if (s.kind !== 'drive') throw new DriveError(500, 'SINK_STATE_MISMATCH');
+        return s as unknown as DriveSinkState;
+      };
+      const done = async (res: Response, s: DriveSinkState): Promise<DriveSinkState> => {
+        const body = (await res.json().catch(() => null)) as { id?: string } | null;
+        if (!body?.id) throw new DriveError(502, 'NO_FILE_ID');
+        return { ...s, id: body.id };
+      };
+      return {
+        // A multiple of 256 KiB, as Drive's resumable protocol requires for every chunk but the last.
+        partSize: 8 * 1024 * 1024,
+
+        async begin(t: SinkTarget) {
+          const res = await http(`${UPLOAD}/files?uploadType=resumable&fields=${encodeURIComponent('id')}`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${await accessToken()}`,
+              'Content-Type': 'application/json; charset=UTF-8',
+              'X-Upload-Content-Type': t.mimeType,
+              'X-Upload-Content-Length': String(t.size),
+            },
+            body: JSON.stringify({
+              name: t.name,
+              mimeType: t.mimeType,
+              parents: [t.parentId ?? (await rootFolder())],
+              appProperties: { commsHub: '1', movedBy: 'storage-engine' },
+            }),
+          });
+          if (!res.ok) throw new DriveError(res.status, `DRIVE_${res.status}`);
+          const session = res.headers.get('location');
+          if (!session) throw new DriveError(502, 'NO_UPLOAD_SESSION');
+          return { kind: 'drive', session, size: t.size, id: null } satisfies DriveSinkState as unknown as SinkState;
+        },
+
+        // Asks Drive how many bytes the session holds (308 with a Range header), or finishes if it is complete.
+        async resume(state) {
+          const s = as(state);
+          if (s.id) return { state, offset: s.size };
+          const res = await http(s.session, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${await accessToken()}`, 'Content-Range': `bytes */${s.size}`, 'Content-Length': '0' },
+          });
+          if (res.status === 200 || res.status === 201) return { state: (await done(res, s)) as unknown as SinkState, offset: s.size };
+          if (res.status === 404 || res.status === 410) throw new DriveError(410, 'SESSION_EXPIRED');
+          if (res.status !== 308) throw new DriveError(res.status, `DRIVE_${res.status}`);
+          const range = /bytes=0-(\d+)/.exec(res.headers.get('range') ?? '');
+          return { state, offset: range ? Number(range[1]) + 1 : 0 };
+        },
+
+        async put(state, offset, bytes) {
+          const s = as(state);
+          const end = offset + bytes.length - 1;
+          const res = await http(s.session, {
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${await accessToken()}`,
+              'Content-Range': `bytes ${offset}-${end}/${s.size}`,
+              'Content-Length': String(bytes.length),
+            },
+            body: bytes as unknown as BodyInit,
+          });
+          if (res.status === 200 || res.status === 201) return (await done(res, s)) as unknown as SinkState;
+          if (res.status === 308) return state;
+          if (res.status === 404 || res.status === 410) throw new DriveError(410, 'SESSION_EXPIRED');
+          throw new DriveError(res.status, `DRIVE_${res.status}`);
+        },
+
+        async finish(state) {
+          let s = as(state);
+          if (!s.id) {
+            const r = await this.resume(state);
+            s = as(r.state);
+          }
+          if (!s.id) throw new DriveError(409, 'UPLOAD_INCOMPLETE');
+          const f = await api<{ md5Checksum?: string; size?: string }>(
+            `/files/${encodeURIComponent(s.id)}?fields=${encodeURIComponent('md5Checksum,size')}`,
+          );
+          return { ref: s.id, size: Number(f.size ?? s.size), remoteChecksum: f.md5Checksum ?? null };
+        },
+
+        async abort(state) {
+          const s = as(state);
+          if (s.id) return;
+          await http(s.session, { method: 'DELETE', headers: { Authorization: `Bearer ${await accessToken()}` } }).catch(() => undefined);
+        },
+
+        // Drive reports the plain md5 of the content.
+        expectedRemote: (_state, wholeMd5) => wholeMd5,
+      };
     },
 
     /** The Google account the refresh token belongs to. */

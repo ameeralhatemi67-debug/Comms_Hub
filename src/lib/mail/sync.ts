@@ -3,14 +3,14 @@
 // there is no background worker in Version 0. The database hands out one turn at a
 // time, so two open pages never send the same message twice.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { storageConfigured, storageFor } from '../storage';
+import { openStored, storageConfigured } from '../storage';
 import { fetchSince, mailboxConfigured, readMailEnv, sendOutgoing, type Outgoing } from './gmail';
 
 /** Gmail refuses messages over 25 MB; larger approved files go as review links instead. */
 const ATTACH_LIMIT = 25 * 1024 * 1024;
 
 async function driveBytes(id: string): Promise<Buffer> {
-  const res = await storageFor('mail').open(id);
+  const res = await openStored('mail', id);
   if (!res.ok) throw new Error(`DRIVE_${res.status}`);
   return Buffer.from(await res.arrayBuffer());
 }

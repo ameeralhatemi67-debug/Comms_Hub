@@ -33,6 +33,9 @@ const sources = [
   'lib/work/rules.ts', 'lib/work/planning.ts', 'lib/work/drag.ts', 'lib/media/rules.ts', 'lib/domain.ts', 'lib/kit/hold-reasons.ts',
   // Settings Step S5: the registry's words, used by the channels page
   'lib/platforms/info.ts',
+  // Readiness audit steps 5 and 6: the preview, the send step's checks, the connection lines
+  'components/work/post-preview.tsx', 'components/work/connect.tsx',
+  'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -51,7 +54,7 @@ for (const m of sources) {
     .replace(/from '\.\.\/perm-requests'/g, `from '${up}mocks/perm-requests.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
-    .replace(/from '(\.\/(?:work\/)?(?:plan|parts|list|item|create|publish|approvals|review|channels|calendar|projects|requests|day-dialogs))'/g, "from '$1.js'");
+    .replace(/from '(\.\/(?:work\/)?(?:plan|parts|list|item|create|publish|approvals|review|channels|calendar|projects|requests|day-dialogs|post-preview|connect))'/g, "from '$1.js'");
   const dest = path.join(build, m.replace(/\.tsx?$/, '.js'));
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, js);
@@ -432,7 +435,7 @@ window.__ready = true;
       'plan-free': ['اجعلها متتابعة', 'رجوعاً من التسليم', 'تدقيق لغوي', 'حفظ الخطة قالباً', 'فيديو قصير بمراجعة قانونية', 'نقطة اعتماد'],
       'dialog-submit': ['ما سيُراجع', 'يوتيوب', 'موعد النشر المقترح'],
       'dialog-close': ['السبب', 'إغلاق العمل'],
-      'dialog-text': ['نسخة X', 'الحد المقترح 240 حرفاً'],
+      'dialog-text': ['نسخة X', 'حرفاً', 'ضمن حدود المنصة', '/ 280'],
       'dialog-details': ['مواعيد المراحل', 'الأولوية'],
       'dialog-assign': ['ريم', 'نشطة'],
       'dialog-extension': ['الموعد الجديد', 'السبب'],

@@ -7,6 +7,7 @@
 // (reference/comms-hub-reference-v5.html).
 import type { Role } from '../domain.ts';
 import { dbErrorText } from '../media/rules.ts';
+import { BUILTIN_LIMITS, limitsToAccepts } from '../platforms/limits.ts';
 
 export type WorkType = 'post' | 'video' | 'design' | 'announce' | 'email' | 'press' | 'event';
 export type WorkStatus =
@@ -85,6 +86,14 @@ export type AccountRow = {
   mode: 'auto' | 'ask';
   active: boolean;
   fixed: boolean;
+  /** 'oauth' when the account is connected through the platform's own sign-in; absent or 'simulated' otherwise. */
+  conn_kind?: 'simulated' | 'oauth';
+  conn_state?: 'simulated' | 'pending' | 'connected' | 'needs_reconnect' | 'error';
+  conn_checked_at?: string | null;
+  conn_error?: string | null;
+  external_id?: string | null;
+  external_name?: string | null;
+  scopes?: string[];
 };
 
 export type TaskRow = {
@@ -144,7 +153,7 @@ export type PlatformInfo = {
   readiness_by: string | null;
 };
 const seed = (key: string, label_ar: string, kind: 'social' | 'mail', sort: number, video_only: boolean, requires_review: boolean): PlatformInfo => ({
-  key, label_ar, kind, sort, accepts: { video_only }, publish_mode: 'auto', scheduling: true, requires_review, token_life_days: kind === 'mail' ? null : 60,
+  key, label_ar, kind, sort, accepts: { video_only, ...limitsToAccepts({ ...BUILTIN_LIMITS[key], video_only: undefined }) }, publish_mode: 'auto', scheduling: true, requires_review, token_life_days: kind === 'mail' ? null : 60,
   enabled: true, builtin: true, docs_url: null, readiness: kind === 'mail' ? 'live' : 'not_started', readiness_note: null, readiness_at: null, readiness_by: null,
 });
 /** Equal to the rows the migration seeds; tests/platforms.test.mjs keeps them so. */
@@ -869,8 +878,10 @@ export function partLine(p: Pick<Part, 'key' | 'ver'>, approvals: ApprovalRow[],
 }
 
 /** How an account stands now: stopped, expired, running out within six days, or connected. */
-export function accountState(a: Pick<AccountRow, 'active' | 'authorized_until'>, nowIso: string): [string, '' | 'danger' | 'warn' | 'approved'] {
+export function accountState(a: Pick<AccountRow, 'active' | 'authorized_until'> & Partial<Pick<AccountRow, 'conn_kind' | 'conn_state'>>, nowIso: string): [string, '' | 'danger' | 'warn' | 'approved'] {
   if (!a.active) return ['موقوف', ''];
+  if (a.conn_kind === 'oauth' && a.conn_state === 'needs_reconnect') return ['يحتاج ربطاً من جديد', 'danger'];
+  if (a.conn_kind === 'oauth' && a.conn_state === 'error') return ['تعذّر فحص الاتصال', 'warn'];
   if (!a.authorized_until) return ['متصل', 'approved'];
   if (Date.parse(a.authorized_until) <= Date.parse(nowIso)) return ['التفويض منتهٍ', 'danger'];
   if (Date.parse(a.authorized_until) - Date.parse(nowIso) < 6 * 864e5) return [`ينتهي ${riyadhStamp(a.authorized_until)}`, 'warn'];
@@ -984,6 +995,9 @@ const ERRORS: Record<string, string> = {
   HANDLE_TAKEN: 'هذا الحساب مرتبط من قبل.',
   PUBLISHER_REQUIRED: 'اختر شخصاً واحداً على الأقل ينشر عليه.',
   PLATFORM_INVALID: 'اختر منصة مفعّلة. تفعيل المنصات لمسؤول النظام من «الإعدادات».',
+  RECONNECT_REAL: 'هذا الحساب مربوط بالمنصة نفسها: يُجدَّد بالزر «إعادة الربط» الذي يمرّ بتسجيل دخول المنصة.',
+  SECRET_INVALID: 'رفضت المنصة الرمز: أعد الربط.',
+  INT_NOT_FOUND: 'التكامل غير موجود.',
   ACCOUNT_IN_USE: 'عليه عمل معتمد أو مجدول أو قيد المراجعة. انقل هذه الأعمال أو أوقف الحساب بدل حذفه.',
   NAME_REQUIRED: 'اكتب الاسم.',
   DATES_INVALID: 'اختر بداية ونهاية صحيحتين.',

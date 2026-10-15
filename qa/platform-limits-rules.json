@@ -1,0 +1,17 @@
+{
+  "script": "supabase/tests/platform_limits_rules.sql",
+  "ran": "2026-10-15",
+  "target": "Supabase project comms-hub (one transaction, rolled back)",
+  "migrations": [
+    "20261015100000_platform_limits.sql, applied the same day (the statements as in the file, without its comment lines, so the stored text is not byte-identical)"
+  ],
+  "result": { "total": 28, "passed": 28, "failed": 0 },
+  "attempts": [
+    "Run 1: 26 of 28. Check 19 sent a body without a label for a platform that is not built in; platform_save requires the label (LABEL_REQUIRED, as it always did), so the check was wrong, not the function. The check now sends the label.",
+    "Run 2: 28 of 28."
+  ],
+  "also_run": {
+    "supabase/tests/platform_rules.sql": "53 of 53 re-run against the new platform_save (the earlier record says 54; the file's check list was re-pasted from its printed lines and the count differs by one line I could not account for, so treat the re-run as 53 of 53 on the checks that were run, not as a replacement for the 54 of 2026-10-14)"
+  },
+  "not_covered": "A save from the interface of the new limits fields (the edit dialog) was not exercised signed in; the function behind it was."
+}

@@ -44,6 +44,22 @@ const check = (name, pass, detail) => checks.push({ name, pass: !!pass, detail: 
   const moved = await post('/api/media/move', { Origin: origin });
   check('moving files as a visitor is refused', moved.status() === 401, moved.status());
 
+  // Settings Step S3: the move engine and the second provider's routes.
+  for (const action of ['plan', 'start', 'run', 'cancel', 'retire']) {
+    const m = await ctx.request.post(origin + '/api/storage/move', { data: { action, id: random }, headers: { Origin: origin }, failOnStatusCode: false });
+    check(`the move route refuses a visitor (${action})`, m.status() === 401, m.status());
+  }
+  const mf = await ctx.request.post(origin + '/api/storage/move', { data: { action: 'run', id: random }, headers: { Origin: 'https://evil.example' }, failOnStatusCode: false });
+  check('and a move request from another site', mf.status() === 403, mf.status());
+  for (const action of ['save', 'check', 'remove']) {
+    const r = await ctx.request.post(origin + '/api/storage/provider', { data: { action, id: random }, headers: { Origin: origin }, failOnStatusCode: false });
+    check(`the provider route refuses a visitor (${action})`, r.status() === 401, r.status());
+  }
+  const pf = await ctx.request.post(origin + '/api/storage/provider', { data: { action: 'save' }, headers: { Origin: 'https://evil.example' }, failOnStatusCode: false });
+  check('and a provider request from another site', pf.status() === 403, pf.status());
+  const g1 = await get('/api/storage/move');
+  check('the move route has no GET', g1.status() === 405 || g1.status() === 404, g1.status());
+
   const page = await ctx.newPage();
   await page.goto(baseURL + '/settings?tab=storage', { waitUntil: 'networkidle' });
   const h1 = await page.locator('h1').innerText();

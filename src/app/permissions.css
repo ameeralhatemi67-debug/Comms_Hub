@@ -194,3 +194,41 @@ span.pm-locked svg{width:13px;height:13px;margin-top:3px}
 .st-req{margin:0;padding-inline-start:18px}
 .st-plat-log{margin:0;padding-inline-start:18px;font-size:13px;display:grid;gap:4px}
 .wk-plat-meta{display:block;font-weight:400;margin-top:4px}
+
+/* Platform apps and limits (readiness audit steps 5 and 6). Tokens only. */
+.st-app{display:grid;gap:8px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.st-limits{display:grid;gap:8px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0}
+.st-limits legend{font-size:13px;padding:0 6px;color:var(--muted)}
+.st-limits-fact b small{font-weight:400}
+
+/* Second provider and the move engine (Settings Step S3). Tokens only. */
+.st-provider-form{gap:10px}
+.st-provider-form h4,.st-moves h4{margin:0;font-size:14px}
+.st-provider-form label,.st-move-form label{display:grid;gap:4px;font-size:13px}
+.st-provider-form label.check{display:flex;align-items:center;gap:8px}
+.st-provider-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.st-provider-keys{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:8px;margin:0}
+.st-provider-keys legend{font-size:13px;padding:0 6px;color:var(--muted)}
+.st-moves{display:grid;gap:12px}
+.st-move-form{gap:10px}
+.st-move-plan{gap:10px}
+.st-bar{height:10px;border-radius:6px;background:var(--chip-bg);overflow:hidden;border:1px solid var(--line)}
+.st-bar span{display:block;height:100%;background:var(--green);transition:width .3s ease}
+.st-move-skipped ul,.st-move-failed ul{margin:4px 0;padding-inline-start:18px;display:grid;gap:3px;font-size:13px}
+.st-move-actions{display:flex;flex-wrap:wrap;gap:8px}
+.st-move-hold{display:grid;gap:6px;padding:10px 12px;border-radius:8px;background:var(--chip-bg)}
+.st-move-history .st-events li{align-items:start}
+@media (max-width:640px){.st-provider-row{grid-template-columns:1fr}}
+
+/* The circled "!" that opens a setup guide (src/components/setup-guide.tsx). Tokens only. */
+.su-hint{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;margin-inline:4px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--green-text);cursor:pointer;vertical-align:middle;flex:none}
+.su-hint svg{width:18px;height:18px}
+.su-hint:hover,.su-hint:focus-visible{background:var(--chip-bg);border-color:var(--green)}
+.su-body{display:grid;gap:12px;max-width:560px}
+.su-steps{margin:0;padding:0;list-style:none;counter-reset:su;display:grid;gap:12px}
+.su-steps li{counter-increment:su;display:grid;gap:2px;position:relative;padding-inline-start:36px}
+.su-steps li::before{content:counter(su);position:absolute;inset-inline-start:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--green);color:var(--on-brand);display:grid;place-items:center;font-weight:600;font-size:13px}
+.su-steps li span{color:var(--muted);font-size:13px}
+.su-copy{display:block;padding:6px 10px;border-radius:6px;background:var(--chip-bg);font-size:12.5px;word-break:break-all;user-select:all}
+.su-notes{margin:0;padding-inline-start:18px;display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.st-manual-guide{display:flex;align-items:center;gap:6px;margin:0}

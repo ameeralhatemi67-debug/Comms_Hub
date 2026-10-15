@@ -38,10 +38,14 @@ const sources = [
   'components/settings/general.tsx', 'components/settings/audit.tsx', 'lib/integrations/rules.ts',
   // Settings Step S2: «التخزين» and the storage line of a library file
   'components/settings/storage.tsx', 'components/media/storage-state.tsx',
+  // Settings Step S3: a second provider and the move engine
+  'components/settings/storage-provider.tsx', 'components/settings/storage-move.tsx',
+  // The circled "!" setup guides
+  'components/setup-guide.tsx', 'lib/setup-guides.ts',
   // Entry flow: the state of a person's entry, the invitation and the log words
   'lib/entry.ts', 'components/accounts/entry-help.tsx',
   // Settings Step S5: «المنصات»
-  'components/settings/platforms.tsx', 'lib/platforms/info.ts',
+  'components/settings/platforms.tsx', 'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/provider.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -292,6 +296,42 @@ async function renderAll() {
   ];
   render('library-storage-state', 'dir@x.sa', 'director', directorCaps, h('dl', { className: 'mx-kv' }, h('dt', null, 'التخزين'), h('dd', { className: 'mx-storage-line' }, h(sst.StorageState, { assetId: 'a1', initial: copies }))), wx);
   render('library-storage-empty', 'dir@x.sa', 'director', directorCaps, h('dl', { className: 'mx-kv' }, h('dt', null, 'التخزين'), h('dd', { className: 'mx-storage-line' }, h(sst.StorageState, { assetId: 'a1', initial: [] }))), wx);
+  // Settings Step S3: the second provider and the move engine, in the states a person meets.
+  const s3 = prov({ id: 'i2', type: 's3_compatible', label: 'تخزين Supabase', account: 'hub-files@s3.example.org', files: 2, bytes: 3000, library_files: 2, ok: 2, unverified: 0, replicas: 0,
+    config: { endpoint: 'https://abc.storage.supabase.co/storage/v1/s3', bucket: 'hub-files', region: 'eu-central-1', prefix: 'hub', path_style: true, flavor: 'supabase' }, has_secret: true, secret_tail: '••••3456' });
+  const s3held = prov({ replicas: 3 });
+  const two = { providers: [s3held, s3], roles: roles4, unrecorded: 0, can_manage: true, can_migrate: true, can_secrets: true };
+  const folders = [{ id: 'fo1', name: 'الحملات', parent_id: null }, { id: 'fo2', name: 'رمضان', parent_id: 'fo1' }];
+  const GB = 1073741824;
+  const mrep = (move, extra = {}) => ({
+    move: { id: 'm1', label: 'أرشيف الحملات', mode: 'move', scope: { kind: 'library', folder_id: 'fo1' }, state: 'planned', hold_days: 14, hold_until: null, files: 12, bytes: 3 * GB,
+      dest_free: 100 * GB, dest_account: 'hub-files@s3.example.org', dest_checked_at: NOW, created_by: 'amir@x.sa', created_by_name: 'أمير', created_at: NOW, started_at: null, finished_at: null,
+      source: { id: 'i1', label: 'Google Drive', type: 'google_drive' }, dest: { id: 'i2', label: 'تخزين Supabase', type: 's3_compatible' }, ...move },
+    counts: { pending: 12 }, bytes: { planned: 3 * GB, done: 0, partial: 0 }, skipped: { source_unhealthy: 1 }, failed: {}, already_there: 2, approved: 3, verify: {},
+    retirable: 0, retired: 0, hold_over: false, can_migrate: true, ...extra });
+  const mrow = (over) => ({ id: 'm1', label: 'أرشيف الحملات', mode: 'move', state: 'planned', scope: { kind: 'library', folder_id: 'fo1' }, files: 12, bytes: 3 * GB, hold_until: null, created_at: NOW, finished_at: null,
+    source: 'Google Drive', dest: 'تخزين Supabase', switched: 0, copied: 0, failed: 0, skipped: 1, open: 12, retirable: 0, ...over });
+  const storageWith = ({ name, p, role = 'admin', caps = adminSet, email = 'amir@x.sa' }) => render(name, email, role, caps, pnl(h(sts.StorageTab, p)), wx);
+  storageWith({ name: 'settings-storage-move-plan', p: { initial: two, initialMoves: [mrow({})], initialReport: mrep({}), initialFolders: folders } });
+  storageWith({ name: 'settings-storage-move-run', p: { initial: two, initialMoves: [mrow({ state: 'running', switched: 5, open: 7 })], initialFolders: folders,
+    initialReport: mrep({ state: 'running', started_at: NOW }, { counts: { switched: 5, copying: 1, pending: 6 }, bytes: { planned: 3 * GB, done: GB, partial: GB / 2 }, verify: { checksum: 5 } }) } });
+  storageWith({ name: 'settings-storage-move-done', p: { initial: two, initialMoves: [mrow({ state: 'completed', switched: 11, failed: 1, open: 0, retirable: 11, hold_until: '2026-10-29T09:00:00Z', finished_at: NOW })], initialFolders: folders,
+    initialReport: mrep({ state: 'completed', hold_until: '2026-10-29T09:00:00Z', finished_at: NOW }, { counts: { switched: 11, failed: 1, skipped: 1 }, bytes: { planned: 3 * GB, done: 3 * GB, partial: 0 },
+      failed: { SOURCE_CHANGED: 1 }, retirable: 11, hold_over: false, verify: { checksum: 11 } }) } });
+  storageWith({ name: 'settings-storage-move-over', p: { initial: two, initialMoves: [mrow({ state: 'completed', switched: 12, open: 0, retirable: 12, hold_until: '2026-10-20T09:00:00Z' })], initialFolders: folders,
+    initialReport: mrep({ state: 'completed', hold_until: '2026-10-20T09:00:00Z' }, { counts: { switched: 12 }, bytes: { planned: 3 * GB, done: 3 * GB, partial: 0 }, skipped: {}, retirable: 12, hold_over: true, verify: { checksum: 12 } }) } });
+  storageWith({ name: 'settings-storage-move-viewer', role: 'director', email: 'dir@x.sa', caps: capsWith(directorCaps, ['settings.view']),
+    p: { initial: { ...two, can_manage: false, can_migrate: false, can_secrets: false }, initialMoves: [mrow({})], initialFolders: folders, initialReport: mrep({}, { can_migrate: false }) } });
+  storageWith({ name: 'settings-storage-one', p: { initial: { providers: [prov({})], roles: roles4, unrecorded: 0, can_manage: true, can_migrate: true, can_secrets: true }, initialMoves: [], initialFolders: [] } });
+  // The circled "!" guides, open: the steps as a person reads them.
+  const sg = await import(url('components/setup-guide.js'));
+  const guide = (name, props) => render(name, 'amir@x.sa', 'admin', adminSet, h('div', { className: 'ml' }, h(sg.SetupGuide, { ...props, initialOpen: true })), wx);
+  guide('guide-meta', { guide: 'meta', provider: 'meta' });
+  guide('guide-tiktok', { guide: 'tiktok', provider: 'tiktok' });
+  guide('guide-connect-meta', { guide: 'connect_meta' });
+  guide('guide-manual', { guide: 'manual' });
+  guide('guide-storage-supabase', { guide: 'storage_supabase' });
+  guide('guide-move', { guide: 'move' });
   // Settings Step S5.
   const stp = await import(url('components/settings/platforms.js'));
   const pinfo = (key, label_ar, kind, sort, over = {}) => ({ key, label_ar, kind, sort, accepts: { video_only: key === 'youtube' }, publish_mode: 'auto', scheduling: true, requires_review: key !== 'x' && kind === 'social',
@@ -378,12 +418,27 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
         'تيك توك', 'مفعّلة', 'موقوفة', 'قائمة', 'سجل المنصة', 'لا تُوقف منصة عليها حسابات فعّالة', 'لا تُحذف منصة عليها حسابات أو نسخ نصوص'],
       'settings-platforms-viewer': ['إنستغرام', 'فيسبوك', 'حفظ التجهيز'],
       'settings-storage': ['مزودو التخزين', 'Google Drive', 'متصل', 'hub@example.com', 'نسخ محفوظة هنا', '5 · 1.50 غيغابايت', 'منها إصدارات مكتبة الوسائط', 'آخر تحقق', 'لم تُفحص بعد', 'تحقق من عينة',
-        'ما يخدمه كل مزود', 'مكتبة الوسائط', 'مرفقات البريد', 'ملفات المراسلة', 'النسخ الاحتياطي', 'لا مزود بعد', 'غير متاح بعد', 'OneDrive', 'تخزين Supabase', 'S3', 'جهاز تخزين شبكي', 'الوكيل', 'لم يُبنيا بعد'],
+        'ما يخدمه كل مزود', 'مكتبة الوسائط', 'مرفقات البريد', 'ملفات المراسلة', 'النسخ الاحتياطي', 'لا مزود بعد', 'غير متاح بعد', 'OneDrive', 'جهاز تخزين شبكي', 'الوكيل', 'لم يُبنَ بعد', 'إضافة مزود تخزين', 'النقل يحتاج مزودين متصلين'],
       'settings-storage-bad': ['مفقودة أو تحتاج انتباهاً', '3 ملفات بلا موضع مسجّل', 'لم يُتحقق من شيء بعد'],
       'settings-storage-viewer': ['مزودو التخزين', 'تحقق من عينة'],
       'settings-storage-locked': ['أين تُحفظ الملفات لمن يملك', 'اطلب هذه الصلاحية'],
       'library-storage-state': ['الإصدار 2', 'Google Drive', 'سليم', 'تُحقق منه', 'الإصدار 1', 'مفقود', 'لم يُتحقق منه بعد'],
       'library-storage-empty': ['لا موضع مسجّل'],
+      'settings-storage-move-plan': ['مزودو التخزين', 'تخزين Supabase', 'تخزين متوافق مع S3', 'hub-files', 'hub-files@s3.example.org', 'مفتاح الوصول', '••••3456', 'منها نسخ محفوظة بعد نقل', 'فحص الاتصال', 'تعديل', 'إيقاف', 'إضافة مزود تخزين',
+        'نقل الملفات بين المزودين', 'ما يُنقل', 'مكتبة الوسائط', 'الاحتفاظ بالمصدر (أيام)', 'احسب الخطة (تجربة بلا نسخ)', 'خطة بانتظار البدء', 'أرشيف الحملات', 'مجلد «الحملات» وما تحته من المكتبة',
+        'ملفات جاهزة للنسخ', '12 · 3.00 غيغابايت', 'الوقت المقدّر (تقريبي)', 'المساحة الحرة عند الهدف', '100.00 غيغابايت', 'لها نسخة جاهزة عند الهدف', 'إصدارات معتمدة', 'لا يمكن نقلها', 'نسخته الحالية مفقودة',
+        'ابدأ النقل', 'إلغاء الخطة', 'آخر عمليات النقل', 'عرض التقرير', 'لا شيء يُحذف'],
+      'settings-storage-move-run': ['يعمل', 'التقدم', '50% · 1.50 غيغابايت من 3.00 غيغابايت', 'نُقل', 'يُنسخ', 'ينتظر', 'تحقق ببصمة المحتوى', 'تابع التنفيذ من هذه الصفحة', 'لا عامل في الخلفية', 'إلغاء النقل'],
+      'settings-storage-move-done': ['اكتمل', 'تعذّر نقلها', 'تغيّر محتوى الملف عند المصدر أثناء النسخ فلم يُعتمد', 'أعد محاولة ما تعذّر', 'نسخ المصدر المحفوظة', '11 نسخة بقيت عند Google Drive نسخةً احتياطية', 'أحل نسخ المصدر إلى التقاعد', 'يُفتح هذا الإجراء بعد', 'التقرير: 11 ملفات نُقلت'],
+      'settings-storage-move-over': ['اكتمل', 'نسخ المصدر المحفوظة', 'أحل نسخ المصدر إلى التقاعد', 'التقرير: 12 ملفات نُقلت'],
+      'settings-storage-move-viewer': ['نقل الملفات بين المزودين', 'احسب الخطة (تجربة بلا نسخ)', 'ابدأ النقل'],
+      'settings-storage-one': ['النقل يحتاج مزودين متصلين', 'إضافة مزود تخزين', 'لا شيء يُحذف'],
+      'guide-meta': ['تجهيز تطبيق Meta', 'أنشئ التطبيق', 'Facebook Login', 'Valid OAuth Redirect URIs', '/api/platforms/callback/meta', 'App ID و App Secret', 'ولا ترسلهما إلى أحد', 'النشر نفسه ما زال محاكاة', 'فهمت'],
+      'guide-tiktok': ['تجهيز تطبيق TikTok', 'Login Kit', '/api/platforms/callback/tiktok', 'user.info.basic', 'التدقيق'],
+      'guide-connect-meta': ['ربط حسابك عبر Meta', 'اضغط «ربط عبر Meta»', 'لا يطلب الموقع كلمة مرورك أبداً', 'تطبيق المطوّر غير مضبوط'],
+      'guide-manual': ['النشر اليدوي على هذه المنصة', 'حزمة النشر', 'أكّد النشر'],
+      'guide-storage-supabase': ['إضافة تخزين Supabase', 'S3 connection', 'New access key', 'حفظ وفحص الاتصال'],
+      'guide-move': ['نقل الملفات بين مزودي التخزين', 'احسب الخطة', 'أبقِ الصفحة مفتوحة', 'أحل المصدر للتقاعد'],
       // The mark and the word are flex items, so the page's text puts a line between them.
       'urgency-badges': ['!\nللانتباه', '!!\nمهم', '!!!\nعاجل'],
       'my-permissions': ['اطلب صلاحية', 'صلاحياتي', 'لديك صلاحية مؤقتة أو لمرة واحدة', 'الصفحات', 'من صفحات الحساب', 'مؤقتة حتى 2026-10-14 12:00', 'يمنح الصلاحيات ويسحبها من يدير رتبتك'],
@@ -412,6 +467,14 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'settings-storage': ['undefined', 'مفقودة أو تحتاج انتباهاً', 'بلا موضع مسجّل', 'ربط OneDrive', 'drv-', 'ref'],
       'settings-storage-locked': ['مزودو التخزين', 'Google Drive'],
       'library-storage-state': ['drv-', 'undefined'],
+      'settings-storage-move-plan': ['undefined', 'NaN', 'null', 'secret', 'AKIA', 'mv-', 'hub/library', 'ref'],
+      'settings-storage-move-run': ['undefined', 'NaN', 'null', 'secret', 'AKIA'],
+      'settings-storage-move-done': ['undefined', 'NaN', 'null', 'secret', 'AKIA', 'SOURCE_CHANGED'],
+      'settings-storage-move-over': ['undefined', 'NaN', 'null', 'secret', 'تعذّر نقلها', 'أعد محاولة ما تعذّر'],
+      'settings-storage-one': ['undefined', 'NaN', 'احسب الخطة'],
+      'guide-meta': ['undefined', 'NaN', '{redirect}', '{origin}', 'AKIA'],
+      'guide-tiktok': ['undefined', '{redirect}'],
+      'guide-storage-supabase': ['undefined', 'AKIA'],
       'urgency-picker-granted': ['رسائل «مهم» لمن يملك صلاحيتها'],
       'urgency-picker-director': ['رسائل «مهم» لمن يملك صلاحيتها', 'حتى يبقى العاجل نادراً'],
       'urgency-badges': ['بلا درجة'],
@@ -428,6 +491,25 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     check('settings-storage: nothing in «غير متاح بعد» is a button', !/<button[^>]*>[^<]*(OneDrive|NAS|S3)/.test(pages['settings-storage']));
     check('settings-storage-bad: the missing copies are flagged and counted', />1 · 2</.test(pages['settings-storage-bad'].replace(/<!-- -->/g, '')) || /1 · 2/.test(pages['settings-storage-bad'].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')));
     check('library-storage-state: a missing copy is marked for the colour rule', /data-state="missing"/.test(pages['library-storage-state']));
+    // Settings Step S3: the second provider and the move engine.
+    const nospace = (h) => h.replace(/<!-- -->/g, '');
+    check('settings-storage-move-plan: the plan is a dry run: «ابدأ النقل» is a working button, cancelling the plan is a long press', /class="primary st-move-start"/.test(pages['settings-storage-move-plan']) && /class="secondary danger st-move-cancel"[^>]*data-hold="الإلغاء يوقف النقل/.test(pages['settings-storage-move-plan']));
+    check('settings-storage-move-plan: the second provider has check, edit, a long-press switch-off, and no delete while it holds files', /st-provider-check/.test(pages['settings-storage-move-plan']) && /st-provider-edit/.test(pages['settings-storage-move-plan']) && /st-disable/.test(pages['settings-storage-move-plan']) && !/st-provider-remove/.test(pages['settings-storage-move-plan']));
+    check('settings-storage-move-plan: the key pair is never drawn, only its tail', !/AKIA|secretAccessKey|type="password"/.test(pages['settings-storage-move-plan']));
+    check('settings-storage-move-plan: Drive says how many held copies it keeps', /3<\/b>/.test(nospace(pages['settings-storage-move-plan'])));
+    check('settings-storage-move-run: the progress bar carries its value', /role="progressbar"[^>]*aria-valuenow="50"/.test(pages['settings-storage-move-run']));
+    check('settings-storage-move-run: the page says plainly that nothing runs in the background', /لا عامل في الخلفية/.test(pages['settings-storage-move-run']));
+    check('settings-storage-move-run: cancelling is a long press', /st-move-cancel"[^>]*data-hold=/.test(pages['settings-storage-move-run']));
+    check('settings-storage-move-done: retiring the sources is disabled until the hold is over, and is a long press', /st-move-retire"[^>]*disabled=""[^>]*data-hold="تنتقل نسخ المصدر|st-move-retire"[^>]*data-hold="تنتقل نسخ المصدر[^>]*disabled=""/.test(pages['settings-storage-move-done']) || /disabled=""[^>]*st-move-retire|st-move-retire[^>]*disabled/.test(pages['settings-storage-move-done']));
+    check('settings-storage-move-over: after the hold the retire button is enabled and a long press', /class="secondary danger st-move-retire"(?![^>]*disabled)[^>]*data-hold="تنتقل نسخ المصدر/.test(pages['settings-storage-move-over']));
+    check('settings-storage-move-viewer: starting, planning and adding are locked controls for «storage.migrate» and «storage.manage»', /data-need="storage.migrate"/.test(pages['settings-storage-move-viewer']) && /data-need="storage.manage"/.test(pages['settings-storage-move-viewer']));
+    // The circled "!" guides.
+    check('guide-meta: the return address is on its own line to copy, with the platform in its path', /class="su-copy"[^>]*>https:\/\/[^<]*\/api\/platforms\/callback\/meta</.test(pages['guide-meta']));
+    check('guide-meta: the steps are numbered in a list', (pages['guide-meta'].match(/<li>/g) ?? []).length >= 7 && /<ol class="su-steps">/.test(pages['guide-meta']));
+    check('guide-meta: the button is the icon set\'s circle with an exclamation mark, labelled', /class="su-hint"[^>]*aria-label="[^"]+"/.test(pages['guide-meta']) && /lucide-circle-alert|circle-alert/.test(pages['guide-meta']));
+    check('settings-platforms: every platform app block and manual platform carries the circled guide', (pages['settings-platforms'].match(/class="su-hint"/g) ?? []).length >= 2, (pages['settings-platforms'].match(/class="su-hint"/g) ?? []).length);
+    check('settings-storage-move-plan: the move panel carries its guide', /data-guide="move"/.test(pages['settings-storage-move-plan']));
+    check('settings-storage-one: with one provider there is no plan button, only the way to add a second', !/st-move-plan-btn/.test(pages['settings-storage-one']) && /st-provider-add/.test(pages['settings-storage-one']));
     // Settings Step S5: reading is open, writing needs «platforms.manage».
     check('settings-platforms: an administrator has working controls, none locked', !/data-need="platforms.manage"/.test(pages['settings-platforms']));
     check('settings-platforms: a viewer sees every control locked for «platforms.manage»', (pages['settings-platforms-viewer'].match(/data-need="platforms.manage"/g) ?? []).length >= 8, (pages['settings-platforms-viewer'].match(/data-need="platforms.manage"/g) ?? []).length);

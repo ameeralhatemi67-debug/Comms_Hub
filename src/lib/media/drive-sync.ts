@@ -1,6 +1,7 @@
 // Brings Google Drive into step with rows the database has just changed back (an undo):
 // a file's name, a file's folder (every version moves), a folder's name.
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { copiesAt } from '@/lib/storage';
 import type { StorageProvider } from '@/lib/storage/provider';
 import { driveParentOf } from '@/lib/drive/parents';
 
@@ -27,13 +28,14 @@ export async function syncDrive(supabase: SupabaseClient, drive: StorageProvider
     }
     const { data: file } = await supabase.from('media_files').select('drive_file_id').eq('id', r.id).maybeSingle();
     if (!file) continue;
-    if ('name' in before) await drive.rename(file.drive_file_id as string, String(before.name));
+    if ('name' in before) for (const f of await copiesAt('google_drive', file.drive_file_id as string)) await drive.rename(f, String(before.name));
     if ('folder_id' in before) {
       const from = await driveParentOf(supabase, drive, (after.folder_id as string) ?? null);
       const to = await driveParentOf(supabase, drive, (before.folder_id as string) ?? null);
       if (from !== to) {
         const { data: versions } = await supabase.from('media_versions').select('drive_file_id').eq('asset_id', r.id);
-        for (const v of versions ?? []) await drive.move(v.drive_file_id as string, from, to);
+        for (const v of versions ?? [])
+          for (const f of await copiesAt('google_drive', v.drive_file_id as string)) await drive.move(f, from, to);
       }
     }
   }

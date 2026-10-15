@@ -1,0 +1,29 @@
+{
+  "script": "supabase/tests/platform_connections_rules.sql",
+  "ran": "2026-10-15",
+  "target": "Supabase project comms-hub (one transaction, rolled back; the site's server key replaced by a throwaway inside it only)",
+  "migrations": [
+    "20261015110000_platform_connections.sql, applied the same day (the statements as in the file, without its comment lines)",
+    "20261015120000_account_delete_vault.sql, applied the same day",
+    "20261015130000_platform_conn_due_all.sql, applied the same day"
+  ],
+  "result": { "total": 65, "passed": 65, "failed": 0 },
+  "attempts": [
+    "Migration attempt 1 failed at creation: a PL/pgSQL variable named next collides with RETURN NEXT. Renamed v_next; nothing had been applied (the migration is one transaction).",
+    "Run 0 stopped before any check: the temp table the checks read was not granted to the test role (harness mistake).",
+    "Run 1 stopped on a check that read vault.secrets as the signed-in role: the role has no access to the vault schema, which is the property under test; those checks moved to after the role is reset.",
+    "Run 2: 62 of 66. Three checks counted another person's notices and one counted the event log as a person without settings.view: both are closed to that role by design, so the checks were moved to run as the table owner and the counts corrected. One defect found by reading the functions before the first apply and fixed there: FOUND was read after statements that reset it (platform_conn_link, platform_conn_health, platform_conn_app_set).",
+    "A defect found by writing check 21: platform_conn_due(0) returned nothing right after connecting, so «فحص الاتصال» straight after a link would have had nothing to check. Fixed by 20261015130000 (p_minutes <= 0 means all)."
+  ],
+  "properties_checked": [
+    "only people who manage accounts or hold platforms.manage may connect; a wrong server key is refused by every key-gated function",
+    "a person's passing sign-in token is readable only by them, is removed when the pages are chosen, and its vault secret is destroyed",
+    "an existing simulated account on the same handle is upgraded in place; a connected handle with another identity is refused",
+    "health records state, real expiry and renewed token; a refused token ends the authorisation at once and tells the publishers once; a network failure does not",
+    "the work cycle's publish rule (active and authorisation covers the moment) says no for a broken connection",
+    "the simulated reconnect is refused for a real account; disconnect and delete destroy the token",
+    "app secrets need two rights; replacing keeps one row",
+    "no secret marker in the event log, the integrations rows, the account rows, the platform log or notices; the anonymous role can call none of the functions"
+  ],
+  "not_covered": "A real sign-in at Meta or TikTok, a real token, the platforms' App Review. The site's half is tested against a fake platform (tests/connections.test.mjs, 15 tests)."
+}

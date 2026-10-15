@@ -26,6 +26,8 @@ export const HOLD = {
   publishNow: 'النشر يصل إلى المنصات ولا يُتراجع عنه.',
   /** «الحسابات المرتبطة»: delete an account. */
   accountDelete: 'حذف الحساب يفصله عن المركز ويحذف مفاتيحه.',
+  /** «الحسابات المرتبطة»: disconnect a really-connected account. */
+  accountDisconnect: 'الفصل يدمّر رمز الحساب وينهي تفويضه فوراً، فلا يُنشر عليه حتى يُعاد ربطه.',
   // Permissions (Permissions_Plan.md 10, «New hold buttons»).
   /** «الحسابات»: remove a member. */
   removeMember: 'إزالة العضو تفصله عن المركز وتبقي أعماله لدى من يُسند إليه.',
@@ -40,6 +42,12 @@ export const HOLD = {
   // Settings and integrations (Settings_Integrations_Plan.md 10).
   /** «الإعدادات»: switch an integration off. */
   intDisable: 'إيقاف المزوّد يوقف الرفع إليه والقراءة منه حتى يُشغّل من جديد.',
+  /** «الإعدادات»، التخزين: delete a provider that holds nothing. */
+  providerRemove: 'يُحذف المزود من القائمة ويُتلف مفتاحه المحفوظ، ويبقى في السجل أنه كان.',
+  /** «الإعدادات»، التخزين: cancel a move plan or a run. */
+  moveCancel: 'الإلغاء يوقف النقل. ما نُقل قبله يبقى منقولاً ومصدره محفوظ، ولا يُحذف شيء.',
+  /** «الإعدادات»، التخزين: retire the held source copies after a move. */
+  retireSource: 'تنتقل نسخ المصدر إلى سلة مزودها الأول، وتُستعاد منه وحده. بعدها لا يرجع المركز إليها.',
   /** «الإعدادات»، المنصات: delete a platform nothing has used. */
   platformDelete: 'تُحذف المنصة من القائمة ويبقى في السجل أنها كانت.',
 } as const;

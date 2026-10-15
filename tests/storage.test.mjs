@@ -115,12 +115,12 @@ test('the log line for a check says the counts and never a reference', () => {
   assert.match(checkedAr('2026-10-14T10:00:00Z'), /^تُحقق منه /);
 });
 
-test('what is not built is listed as not available, with a reason, and nothing offers to connect it', () => {
+test('what is not built is listed as not available, with a reason, and nothing offers to connect it (S3 and Supabase Storage came with Step S3)', () => {
   const ids = COMING_PROVIDERS.map((c) => c.id).sort();
-  assert.deepEqual(ids, ['nas', 'onedrive', 's3', 'supabase_storage']);
+  assert.deepEqual(ids, ['nas', 'onedrive']);
   for (const c of COMING_PROVIDERS) assert.ok(c.why.length > 10, c.id);
   const tab = readFileSync('src/components/settings/storage.tsx', 'utf8');
-  assert.doesNotMatch(tab, /ربط OneDrive|ربط NAS|ربط S3/);
+  assert.doesNotMatch(tab, /ربط OneDrive|ربط NAS/);
 });
 
 test('no file location carries a policy: it is read only through functions', () => {
