@@ -178,6 +178,10 @@ Guides and what-is-new notes (`v` and `news` per page) for «سجل النشاط
 
 ## 3. Part C: the audit order that remains
 
+> 2026-10-15: every item below needs the owner's accounts or a signed-in browser. They are written
+> out step by step, with the walkthrough, in `Owner_Handoff.md`. OneDrive (C1) is not built before
+> an account exists, for the reasons stated there.
+
 | Step | What | Gate |
 |---|---|---|
 | C1 | OneDrive as a storage provider (S8) on the move engine | A real Microsoft app registration by the owner |
