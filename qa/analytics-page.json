@@ -1,0 +1,98 @@
+{
+  "script": "qa/analytics-page.cjs",
+  "run": "2026-10-15T08:54:18.534Z",
+  "checks": [
+    {
+      "name": "total and open",
+      "pass": true,
+      "detail": "6/4"
+    },
+    {
+      "name": "late: only the open work past its due date",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "review numbers",
+      "pass": true,
+      "detail": "{\"waiting\":1,\"changes\":1,\"reviewed\":4,\"meanRounds\":1.25,\"firstRound\":1}"
+    },
+    {
+      "name": "first round share among approved or beyond",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "instagram: connected, expiring, addressed, one result ok",
+      "pass": true,
+      "detail": "{\"key\":\"instagram\",\"label\":\"إنستغرام\",\"accounts\":1,\"active\":1,\"connected\":1,\"attention\":0,\"expiring\":1,\"addressed\":2,\"ok\":1,\"failed\":0,\"readiness\":\"live\"}"
+    },
+    {
+      "name": "youtube: authorisation ended is attention, one failed result",
+      "pass": true,
+      "detail": "{\"key\":\"youtube\",\"label\":\"يوتيوب\",\"accounts\":1,\"active\":1,\"connected\":0,\"attention\":1,\"expiring\":0,\"addressed\":1,\"ok\":0,\"failed\":1,\"readiness\":\"not_started\"}"
+    },
+    {
+      "name": "1280: the page does not overflow sideways",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"tiles\":6,\"statusRows\":11,\"weekRows\":8,\"tableScrolls\":false,\"tableOverflowX\":\"auto\",\"bars\":true,\"late\":\"rgb(162, 58, 46)\"}"
+    },
+    {
+      "name": "1280: six tiles, eleven status rows, eight week rows",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"tiles\":6,\"statusRows\":11,\"weekRows\":8,\"tableScrolls\":false,\"tableOverflowX\":\"auto\",\"bars\":true,\"late\":\"rgb(162, 58, 46)\"}"
+    },
+    {
+      "name": "1280: every bar has width and the late tile is in the danger colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1280: the platform table is scrollable by itself when it does not fit",
+      "pass": true,
+      "detail": "auto false"
+    },
+    {
+      "name": "900: the page does not overflow sideways",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"tiles\":6,\"statusRows\":11,\"weekRows\":8,\"tableScrolls\":false,\"tableOverflowX\":\"auto\",\"bars\":true,\"late\":\"rgb(162, 58, 46)\"}"
+    },
+    {
+      "name": "900: six tiles, eleven status rows, eight week rows",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"tiles\":6,\"statusRows\":11,\"weekRows\":8,\"tableScrolls\":false,\"tableOverflowX\":\"auto\",\"bars\":true,\"late\":\"rgb(162, 58, 46)\"}"
+    },
+    {
+      "name": "900: every bar has width and the late tile is in the danger colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "900: the platform table is scrollable by itself when it does not fit",
+      "pass": true,
+      "detail": "auto false"
+    },
+    {
+      "name": "390: the page does not overflow sideways",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"tiles\":6,\"statusRows\":11,\"weekRows\":8,\"tableScrolls\":true,\"tableOverflowX\":\"auto\",\"bars\":true,\"late\":\"rgb(162, 58, 46)\"}"
+    },
+    {
+      "name": "390: six tiles, eleven status rows, eight week rows",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"tiles\":6,\"statusRows\":11,\"weekRows\":8,\"tableScrolls\":true,\"tableOverflowX\":\"auto\",\"bars\":true,\"late\":\"rgb(162, 58, 46)\"}"
+    },
+    {
+      "name": "390: every bar has width and the late tile is in the danger colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: the platform table is scrollable by itself when it does not fit",
+      "pass": true,
+      "detail": "auto true"
+    }
+  ],
+  "passed": 18,
+  "total": 18
+}

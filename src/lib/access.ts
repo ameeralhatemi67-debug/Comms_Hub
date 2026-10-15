@@ -127,6 +127,7 @@ export const menuEntries = [
   { href: '/media', label: 'مكتبة الوسائط' },
   { href: '/tasks', label: 'المهام' },
   { href: '/activity', label: 'سجل النشاط' },
+  { href: '/analytics', label: 'التحليلات' },
   { href: '/motion', label: 'استوديو الحركة' },
   { href: '/mail', label: 'البريد' },
   { href: '/channels', label: 'حسابات المنصات' },

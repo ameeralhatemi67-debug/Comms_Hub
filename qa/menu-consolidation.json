@@ -1,11 +1,11 @@
 {
   "script": "qa/menu-consolidation.cjs",
-  "run": "2026-10-15T08:34:20.330Z",
+  "run": "2026-10-15T08:54:06.091Z",
   "checks": [
     {
-      "name": "the menu has 16 entries",
+      "name": "the menu has 17 entries",
       "pass": true,
-      "detail": "16"
+      "detail": "17"
     },
     {
       "name": "the menu does not list «الإدارة»",
@@ -14,11 +14,6 @@
     },
     {
       "name": "the menu does not list «الحساب»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "the menu does not list «التحليلات»",
       "pass": true,
       "detail": ""
     },
@@ -98,6 +93,6 @@
       "detail": ""
     }
   ],
-  "passed": 19,
-  "total": 19
+  "passed": 18,
+  "total": 18
 }

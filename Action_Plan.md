@@ -132,7 +132,14 @@ seeded page list in the permissions functions (a migration) and `tests/access-ma
 Second item: align `page.create` for the member with the domain role (the member creates), or hide
 «إنشاء» from the member; the owner chooses which is true. Not changed in B4.
 
-### Step B5: «التحليلات» made real, or left hidden
+### Step B5: «التحليلات» made real - BUILT 2026-10-15
+
+The owner asked to "work on" it without choosing numbers, so the metrics were chosen from what the
+database holds and each names its source on the page: the flow of work (by status, late, due soon,
+made and published per week), review (waiting, changes, rounds, first-round share) and the platforms
+(accounts and health, what was addressed, simulated results). Team workload stays in «سجل النشاط».
+Change the list by editing `src/lib/work/analytics.ts` and `analytics.tsx`. Built in `progress.md`
+(entry of 2026-10-15, B5 and B8).
 
 It reads the database: works by status, platform account health and expiry, results of the
 publishing simulation, with each number saying where it comes from. Real publishing numbers
@@ -153,7 +160,13 @@ retiring the whole mock store is its own step (B8 below).
 
 Built in the same entry.
 
-### Step B8 (new, optional): retire the legacy mock store
+### Step B8: retire the legacy mock store - BUILT 2026-10-15
+
+Done: `domain.ts` went from 1,600 lines of sample state to 196 (the role table, the status words and
+the fixed channel list the library dialogs still offer); the reducer became `ui-state.ts` (role, lock,
+message); messaging links and the global search read real works; the page header says the real day;
+the component gallery and the sample reset button are gone. Left on purpose: the fixed channel list
+in `domain.ts` (library publishing dialogs, not the platform registry). The original note:
 
 `src/lib/domain.ts` still carries the prototype's sample state (works, notices, directory, the
 admin tiles) behind `useHub`, read now only by «التحليلات», the reset button on «الحساب», the

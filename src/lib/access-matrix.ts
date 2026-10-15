@@ -16,7 +16,6 @@ export const MATRIX_ROLES: Role[] = ['admin', 'director', 'assistant', 'writer',
 export const MATRIX_ROUTES: { id: string; label: string; how: 'menu' | 'badge' | 'direct' | 'redirect'; note?: string }[] = [
   ...menuEntries.map((e) => ({ id: e.href === '/' ? '' : e.href.slice(1), label: e.label, how: 'menu' as const })),
   { id: 'account', label: 'الحساب', how: 'badge', note: 'من اسمك أسفل القائمة' },
-  { id: 'analytics', label: 'التحليلات', how: 'direct', note: 'خارج القائمة حتى تقرأ بياناً حقيقياً' },
   { id: 'monitoring', label: 'المراقبة', how: 'redirect', note: 'يفتح «سجل النشاط»' },
   { id: 'admin', label: 'الإدارة', how: 'redirect', note: 'يفتح «الحسابات»' },
 ];

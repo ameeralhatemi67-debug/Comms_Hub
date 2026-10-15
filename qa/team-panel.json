@@ -1,6 +1,6 @@
 {
   "script": "qa/team-panel.cjs",
-  "run": "2026-10-15T08:34:29.602Z",
+  "run": "2026-10-15T08:54:14.662Z",
   "checks": [
     {
       "name": "order: latest first, silent last",

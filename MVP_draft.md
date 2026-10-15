@@ -679,10 +679,10 @@ Potential Arabic navigation:
 **Amendment of 2026-10-15** (owner directive after the health check, `progress.md`, `Action_Plan.md`
 Part B). The list above is the first sketch; the sidebar is now: الرئيسية، العمل، إنشاء،
 الموافقات والنشر، التقويم، المشاريع، الطلبات، مكتبة الوسائط، المهام، سجل النشاط، استوديو الحركة،
-البريد، «حسابات المنصات»، الأفكار، الحسابات، الإعدادات. «المراقبة» لم تعد صفحة: صارت لوحة «الفريق» في «سجل النشاط» (`/monitoring` يفتح السجل) لمن يرى السجل كاملاً.
+البريد، «حسابات المنصات»، الأفكار، التحليلات، الحسابات، الإعدادات. «المراقبة» لم تعد صفحة: صارت لوحة «الفريق» في «سجل النشاط» (`/monitoring` يفتح السجل) لمن يرى السجل كاملاً.
 «الإعدادات» is the system's page only (six tabs); the appearance choices are on «الحساب».
 «الإدارة» no longer exists (`/admin` opens «الحسابات»). «الحساب» is opened from the name badge at
-the foot of the sidebar. «التحليلات» is out of the menu until it reads real data. «الحسابات المرتبطة»
+the foot of the sidebar. «التحليلات» is back in the menu since 2026-10-15, reading the database (flow of work, review, platforms; publishing numbers are the simulation's). The component gallery page was removed with the prototype's sample model. «الحسابات المرتبطة»
 is called «حسابات المنصات». Each person sees only the pages their role, page grants and capabilities
 allow (`src/lib/access.ts`).
 
@@ -706,6 +706,7 @@ database decides which rows come back.
 | مكتبة الوسائط | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
 | المهام | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
 | سجل النشاط | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| التحليلات | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
 | استوديو الحركة | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
 | البريد | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
 | حسابات المنصات | نعم | نعم | نعم | لا | لا | لا | نعم | لا | القائمة |
@@ -713,7 +714,6 @@ database decides which rows come back.
 | الحسابات | نعم | لا | لا | لا | لا | لا | لا | لا | القائمة |
 | الإعدادات | نعم | لا | لا | لا | لا | لا | لا | لا | القائمة |
 | الحساب | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | الاسم أسفل القائمة |
-| التحليلات | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | خارج القائمة حتى تقرأ بياناً حقيقياً |
 | المراقبة | - | - | - | - | - | - | - | - | يفتح «سجل النشاط» |
 | الإدارة | - | - | - | - | - | - | - | - | يفتح «الحسابات» |
 

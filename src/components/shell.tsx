@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   House,
   BriefcaseBusiness,
@@ -14,6 +14,7 @@ import {
   Images,
   Clapperboard,
   Lightbulb,
+  ChartNoAxesCombined,
   Settings,
   UserCog,
   ListChecks,
@@ -25,7 +26,7 @@ import {
   Menu,
   Link2,
 } from 'lucide-react';
-import { roles, type Role } from '@/lib/domain';
+import { roles, statusLabels, type Role } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { useAccount } from '@/lib/account-context';
 import { canSwitchRole, menuFor } from '@/lib/access';
@@ -49,6 +50,7 @@ const menuIcons = {
   '/media': Images,
   '/tasks': ListChecks,
   '/activity': History,
+  '/analytics': ChartNoAxesCombined,
   '/motion': Clapperboard,
   '/mail': Mail,
   '/channels': Link2,
@@ -70,17 +72,27 @@ export function Shell({ children }: { children: ReactNode }) {
   const kit = useKit();
   const notices = useNotices();
 
-  const normalized = (s: string) =>
-    s
-      .normalize('NFKD')
-      .replace(/[ً-ٟ]/g, '')
-      .replace(/[أإآ]/g, 'ا')
-      .replace(/ى/g, 'ي')
-      .toLowerCase();
-
-  const results = state.work.filter((w) =>
-    normalized(w.title + ' اليوم الوطني national day').includes(normalized(query)),
-  );
+  // The global search asks the database for works whose title or number matches; row level security
+  // decides which this person may see (Action_Plan.md B8: it used to search sample works).
+  const [found, setFound] = useState<{ id: string; title: string; status: string }[]>([]);
+  useEffect(() => {
+    if (overlay !== 'search') return;
+    const q = query.replace(/[,()%_*\\]/g, ' ').trim();
+    if (!q) {
+      setFound([]);
+      return;
+    }
+    let live = true;
+    const t = setTimeout(() => {
+      void Promise.resolve(
+        supabase().from('works').select('id,title,status').or(`title.ilike.%${q}%,id.ilike.%${q}%`).order('updated_at', { ascending: false }).limit(8),
+      ).then((r) => live && setFound((r.data as { id: string; title: string; status: string }[] | null) ?? []));
+    }, 200);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [overlay, query]);
 
   // A double-click on the logo switches between the current design and the second
   // design (Roadmap Checkpoint 0.3). mousedown is cancelled on the second click so
@@ -306,16 +318,18 @@ export function Shell({ children }: { children: ReactNode }) {
       {overlay === 'search' && (
         <Modal title="البحث الشامل" onClose={() => setOverlay('')}>
           <label>
-            ابحث عن عمل أو حملة
-            <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="اليوم الوطني" />
+            ابحث عن عمل بعنوانه أو رقمه
+            <input autoFocus value={query} onChange={(e) => setQuery(e.target.value)} placeholder="مثال: CH-241" />
           </label>
-          {results.map((w) => (
+          {found.map((w) => (
             <Link className="notice" href={`/work/${w.id}`} key={w.id} onClick={() => setOverlay('')}>
               <b>{w.title}</b>
-              <small>{w.id} · اليوم الوطني السعودي 2026</small>
+              <small>
+                <bdi dir="ltr">{w.id}</bdi> · {statusLabels[w.status as keyof typeof statusLabels] ?? w.status}
+              </small>
             </Link>
           ))}
-          {!results.length && <Empty>جرّب عنواناً أو كلمة أخرى.</Empty>}
+          {query.trim() && !found.length && <Empty>جرّب عنواناً أو رقم عمل آخر.</Empty>}
         </Modal>
       )}
     </div>

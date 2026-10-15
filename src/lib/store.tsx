@@ -1,8 +1,9 @@
 'use client';
 import { createContext, useContext, useReducer, type Dispatch, type ReactNode } from 'react';
-import { initialState, reducer, type Role, type State, type Action } from './domain';
+import type { Role } from './domain';
+import { initialState, reducer, type UiState, type UiAction } from './ui-state';
 
-const Context = createContext<{ state: State; dispatch: Dispatch<Action> } | null>(null);
+const Context = createContext<{ state: UiState; dispatch: Dispatch<UiAction> } | null>(null);
 
 /**
  * `role` is the signed-in person's own role. `roleLocked` is true for everyone but an

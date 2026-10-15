@@ -4,8 +4,8 @@
 // as the rest of the Hub. Approved design: artifact «البريد الجديد», messaging tab.
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { campaign, statusLabels } from '@/lib/domain';
-import { useHub } from '@/lib/store';
+import { statusLabels } from '@/lib/work/rules';
+import { useLinkableWorks } from './works';
 import { supabase } from '@/lib/supabase/client';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import {
@@ -367,7 +367,7 @@ function Conversation({
 }) {
   const c = useChat();
   const people = usePeople();
-  const { state } = useHub();
+  const works = useLinkableWorks();
   const msgs = c.messagesOf(room.id);
   const members = c.membersOf(room.id);
   const me = c.myMember(room.id);
@@ -464,7 +464,7 @@ function Conversation({
         </button>
       </header>
 
-      {room.link && <ContextStrip room={room} work={state.work} />}
+      {room.link && <ContextStrip room={room} work={works} />}
       {pinned && (
         <button type="button" className="cx-pin" onClick={() => jump(pinned.id)}>
           <I n="tag" />
@@ -613,13 +613,9 @@ function ContextStrip({ room, work }: { room: RoomRow; work: { id: string; title
       <div className="cx-ctx">
         <span className="k">
           <I n="flag" />
-          <b>{campaign.title}</b>
+          <b>حملة</b>
         </span>
         <span className="mx-chip review">{inReview} أصول قيد المراجعة</span>
-        <span className="k">
-          <I n="cal" />
-          موعد الحملة <bdi dir="ltr">{campaign.date}</bdi>
-        </span>
         <span className="grow" />
         <Link className="ml-btn sm" href="/media">
           مكتبة الوسائط
@@ -947,8 +943,8 @@ function AssetCard({ id }: { id: string }) {
 }
 
 function WorkCard({ id, title }: { id: string; title: string }) {
-  const { state } = useHub();
-  const w = state.work.find((x) => x.id === id);
+  const works = useLinkableWorks();
+  const w = works.find((x) => x.id === id);
   return (
     <div className="ccard">
       <div className="hd">
@@ -1843,7 +1839,7 @@ function Pop({ x, y, onClose, children }: { x: number; y: number; onClose: () =>
 function NewChat({ onClose, onOpen }: { onClose: () => void; onOpen: (id: string) => void }) {
   const c = useChat();
   const people = usePeople();
-  const { state } = useHub();
+  const works = useLinkableWorks();
   const [tab, setTab] = useState<'dm' | 'group'>('dm');
   const [name, setName] = useState('');
   const [pick, setPick] = useState<string[]>([]);
@@ -1862,7 +1858,7 @@ function NewChat({ onClose, onOpen }: { onClose: () => void; onOpen: (id: string
   const create = async () => {
     if (!name.trim() || !pick.length) return setError('اكتب اسم المجموعة واختر عضواً واحداً على الأقل.');
     setBusy(true);
-    const w = state.work.find((x) => x.id === link);
+    const w = works.find((x) => x.id === link);
     const r = await c.rpc('chat_create_room', {
       p_type: channel ? 'channel' : 'group',
       p_name: name.trim(),
@@ -1925,8 +1921,7 @@ function NewChat({ onClose, onOpen }: { onClose: () => void; onOpen: (id: string
             ربطها بـ
             <select id="cx-glink" value={link} onChange={(e) => setLink(e.target.value)}>
               <option value="">بلا ربط</option>
-              <option value="campaign">{campaign.title}</option>
-              {state.work.map((w) => (
+              {works.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.id} · {w.title}
                 </option>
@@ -2175,7 +2170,7 @@ function AssetDialog({ room, approval, onClose }: { room: RoomRow; approval: boo
 
 function WorkDialog({ room, onClose }: { room: RoomRow; onClose: () => void }) {
   const c = useChat();
-  const { state } = useHub();
+  const works = useLinkableWorks();
   const go = async (id: string, title: string, status: string) => {
     const r = await c.send(room.id, 'work', '', { id, title, status });
     if (!r.ok) return c.say(r.error);
@@ -2184,7 +2179,7 @@ function WorkDialog({ room, onClose }: { room: RoomRow; onClose: () => void }) {
   return (
     <Dlg title="عمل من صفحة العمل" onClose={onClose}>
       <div className="cx-pick">
-        {state.work.map((w) => (
+        {works.map((w) => (
           <button type="button" key={w.id} onClick={() => void go(w.id, w.title, w.status)}>
             <I n="work" />
             <span>

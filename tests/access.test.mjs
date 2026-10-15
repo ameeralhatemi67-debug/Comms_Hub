@@ -10,7 +10,8 @@ import {
   pageOf,
   adminOnlyPages,
 } from '../src/lib/access.ts';
-import { initialState, reducer, roleIds, roles } from '../src/lib/domain.ts';
+import { roleIds, roles } from '../src/lib/domain.ts';
+import { initialState, reducer } from '../src/lib/ui-state.ts';
 
 const admin = { role: 'admin', pages: [] };
 const writer = (pages) => ({ role: 'writer', pages });

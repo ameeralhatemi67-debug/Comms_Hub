@@ -2,15 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
-import { BarChart3, Bell, Check, SlidersHorizontal, UserRound } from 'lucide-react';
+import { SlidersHorizontal, UserRound } from 'lucide-react';
 import {
   roles,
-  teamLoad,
 } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { useAccount } from '@/lib/account-context';
 import { supabase } from '@/lib/supabase/client';
-import { Empty, Modal, Panel, Tabs, Title } from './ui';
+import { Empty, Panel, Tabs, Title } from './ui';
 import { ProfileEditor } from './profile-editor';
 import { MyPermissions } from './my-permissions';
 import { AppearancePanel } from './appearance-panel';
@@ -25,7 +24,6 @@ import { PlatformsTab } from './settings/platforms';
 const pageNames: Record<string, string> = {
   mail: 'البريد',
   ideas: 'الأفكار',
-  analytics: 'التحليلات',
   settings: 'الإعدادات',
   account: 'الحساب',
 };
@@ -35,16 +33,6 @@ function pageTitle(page: string) {
 }
 
 const yesNo = (value: boolean) => (value ? 'متاح' : 'غير متاح');
-
-/** Said plainly at the top of every part that still runs on sample data. */
-function SampleNotice({ children }: { children: ReactNode }) {
-  return (
-    <div className="sample-notice" role="note">
-      <b>لم يُبنَ بعد</b>
-      <span>{children}</span>
-    </div>
-  );
-}
 
 /**
  * Settings sections: the system's own, all real (Action_Plan.md B3). The personal ones (appearance)
@@ -61,77 +49,15 @@ const settingsSections = [
 ];
 
 export function Supporting({ page }: { page: string }) {
-  const { state, dispatch } = useHub();
+  const { state } = useHub();
   const router = useRouter();
   const actor = roles[state.role];
   const account = useAccount();
-  const [confirmReset, setConfirmReset] = useState(false);
   // «/settings?tab=general» opens a tab directly (the Drive connection returns there).
   const [settingsTab, setSettingsTab] = useState(() => {
     const t = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('tab');
     return t && settingsSections.some((s) => s.id === t) ? t : 'general';
   });
-
-  if (page === 'analytics') {
-    const done = state.work.filter((w) => ['APPROVED', 'SCHEDULED', 'PUBLISHED'].includes(w.status)).length;
-    const review = state.work.filter((w) => w.status === 'IN_REVIEW').length;
-    const published = state.work.reduce(
-      (sum, w) => sum + Object.values(w.results).filter((x) => x === 'SUCCESS').length,
-      0,
-    );
-    const failed = state.work.reduce(
-      (sum, w) => sum + Object.values(w.results).filter((x) => x === 'FAILED').length,
-      0,
-    );
-    const workload = teamLoad(state.work).map((x) => ({ id: x.person.id, name: x.person.name, count: x.items.length }));
-
-    return (
-      <div dir="rtl">
-        <Title title="التحليلات" sub="قراءة سريعة لحالة العمل في الحملة">
-          <span className="chip">تجريبية، لم تُبنَ بعد</span>
-        </Title>
-        <SampleNotice>
-          هذه الأرقام تُحسب من أعمال تجريبية محفوظة في هذا المتصفح، لا من أعمالك في «العمل». لن تطابق ما تراه هناك، ولا تعتمد عليها.
-        </SampleNotice>
-        <div className="stats">
-          <div className="stat">
-            <BarChart3 />
-            <b>{state.work.length}</b>
-            <span>إجمالي الأعمال</span>
-          </div>
-          <div className="stat">
-            <Check />
-            <b>{done}</b>
-            <span>جاهزة أو منشورة</span>
-          </div>
-          <div className="stat">
-            <Bell />
-            <b>{review}</b>
-            <span>بانتظار المراجعة</span>
-          </div>
-          <div className="stat">
-            <b>{published}</b>
-            <span>قنوات منشورة</span>
-          </div>
-          <div className="stat">
-            <b>{failed}</b>
-            <span>قنوات فاشلة</span>
-          </div>
-        </div>
-        <Panel title="توزيع الحمل">
-          <div className="table">
-            {workload.map((x) => (
-              <div className="between" key={x.id}>
-                <span>{x.name}</span>
-                <b>{x.count} أعمال</b>
-              </div>
-            ))}
-          </div>
-          <p className="muted">المؤشر يعتمد على الأعمال الموجودة في هذا النموذج المحلي.</p>
-        </Panel>
-      </div>
-    );
-  }
 
   if (page === 'settings')
     return (
@@ -223,11 +149,6 @@ export function Supporting({ page }: { page: string }) {
                 </b>
               </div>
             </div>
-            <div className="actions">
-              <button className="secondary" onClick={() => setConfirmReset(true)}>
-                إعادة البيانات التجريبية في هذا المتصفح
-              </button>
-            </div>
           </Panel>
           <Panel title="الجلسة">
             <div className="notice">
@@ -263,25 +184,6 @@ export function Supporting({ page }: { page: string }) {
             </p>
           </Panel>
         </div>
-        {confirmReset && (
-          <Modal title="إعادة النموذج" onClose={() => setConfirmReset(false)}>
-            <p>يعيد هذا بيانات العرض التجريبية في هذا المتصفح فقط (صفحة «التحليلات»). لا يمسّ أعمالك ولا بريدك ولا حسابك.</p>
-            <div className="actions">
-              <button
-                className="primary"
-                onClick={() => {
-                  dispatch({ type: 'reset' });
-                  setConfirmReset(false);
-                }}
-              >
-                تأكيد الإعادة
-              </button>
-              <button className="secondary" onClick={() => setConfirmReset(false)}>
-                إلغاء
-              </button>
-            </div>
-          </Modal>
-        )}
       </div>
     );
 

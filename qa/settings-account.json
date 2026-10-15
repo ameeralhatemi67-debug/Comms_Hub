@@ -1,6 +1,6 @@
 {
   "script": "qa/settings-account.cjs",
-  "run": "2026-10-15T08:34:25.764Z",
+  "run": "2026-10-15T08:54:10.856Z",
   "checks": [
     {
       "name": "six tabs, in order",

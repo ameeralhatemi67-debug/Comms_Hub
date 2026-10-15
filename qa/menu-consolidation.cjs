@@ -57,8 +57,8 @@ const pages = {
   const browser = await chromium.launch(launchOptions);
 
   const labels = nav.map((n) => n.label);
-  check('the menu has 16 entries', nav.length === 16, nav.length);
-  for (const gone of ['الإدارة', 'الحساب', 'التحليلات', 'المراقبة']) check(`the menu does not list «${gone}»`, !labels.includes(gone));
+  check('the menu has 17 entries', nav.length === 17, nav.length);
+  for (const gone of ['الإدارة', 'الحساب', 'المراقبة']) check(`the menu does not list «${gone}»`, !labels.includes(gone));
   check('«حسابات المنصات» is in the menu', labels.includes('حسابات المنصات'));
   check('«الحسابات المرتبطة» is not', !labels.includes('الحسابات المرتبطة'));
 

@@ -32,7 +32,6 @@ export function pageKeyOf(path: string): string | null {
   if (p === '/ideas') return 'ideas';
   if (p === '/analytics') return 'analytics';
   if (p === '/motion') return 'motion';
-  if (p === '/components') return 'components';
   return null;
 }
 
@@ -60,7 +59,6 @@ export const PAGE_HREF: Record<string, string> = {
   ideas: '/ideas',
   analytics: '/analytics',
   motion: '/motion',
-  components: '/components',
   home: '/',
 };
 
@@ -103,8 +101,7 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   settings: ['src/components/supporting.tsx', 'src/components/whatsapp/system-panel.tsx', 'src/components/settings/general.tsx', 'src/components/settings/storage.tsx', 'src/components/settings/storage-provider.tsx', 'src/components/settings/storage-move.tsx', 'src/components/settings/backups.tsx', 'src/components/setup-guide.tsx', 'src/components/settings/platforms.tsx', 'src/components/settings/audit.tsx'],
   home: ['src/components/home.tsx', 'src/components/home-perms.tsx', 'src/components/work/parts.tsx'],
   ideas: ['src/components/ideas.tsx'],
-  analytics: ['src/components/supporting.tsx'],
+  analytics: ['src/components/work/analytics.tsx'],
   motion: ['src/components/motion-studio.tsx', 'src/components/motion-controls.tsx', 'src/components/motion-stage.tsx', 'src/components/motion-export.tsx'],
-  components: ['src/components/gallery.tsx'],
 };
 export const SHARED_SOURCES = ['src/components/ui.tsx', 'src/components/shell.tsx', 'src/components/kit.tsx'];

@@ -16,7 +16,7 @@ const inOrder = (set) => order.filter((id) => set.includes(id));
 
 // Pages every role opens by default. «settings» is the administrator's alone (Action_Plan.md B4b):
 // another person has it only with the page grant or by holding «settings.view» or «settings.manage».
-const COMMON = ['', 'work', 'approvals', 'calendar', 'projects', 'requests', 'media', 'tasks', 'activity', 'motion', 'mail', 'ideas'];
+const COMMON = ['', 'work', 'approvals', 'calendar', 'projects', 'requests', 'media', 'tasks', 'activity', 'analytics', 'motion', 'mail', 'ideas'];
 const EXPECTED_MENU = {
   admin: [...COMMON, 'settings', 'channels', 'accounts'],
   director: [...COMMON, 'create', 'channels'],
@@ -33,9 +33,9 @@ test('the sidebar each role starts with is exactly the written table', () => {
   for (const role of MATRIX_ROLES) assert.deepEqual(byRole[role].menu, inOrder(EXPECTED_MENU[role]), role);
 });
 
-test('by address a role opens its menu, its own page and the hidden analytics page; only the administrator opens the rest', () => {
+test('by address a role opens its menu and its own page; only the administrator opens the rest', () => {
   for (const role of MATRIX_ROLES) {
-    const want = new Set([...EXPECTED_MENU[role], 'account', 'analytics']);
+    const want = new Set([...EXPECTED_MENU[role], 'account']);
     if (role === 'admin') want.add('create'); // opens it by address, never offered it in the menu
     assert.deepEqual([...byRole[role].open].sort(), [...want].sort(), role);
   }

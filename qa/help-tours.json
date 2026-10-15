@@ -1,6 +1,6 @@
 {
   "script": "qa/help-tours.cjs",
-  "run": "2026-10-15T08:38:16.047Z",
+  "run": "2026-10-15T08:54:22.487Z",
   "checks": [
     {
       "name": "lead: the first card says what the page means for the lead group",

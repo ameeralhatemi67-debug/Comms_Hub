@@ -1,18 +1,17 @@
 'use client';
-import { useEffect, useRef, type ReactNode } from 'react';
-import { Play, Image as ImageIcon } from 'lucide-react';
-import {
-  assets,
-  diffWords,
-  releaseChanges,
-  scenario,
-  staleVariants,
-  statusLabels,
-  type Channel,
-  type Content,
-  type Release,
-  type Status,
-} from '@/lib/domain';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Image as ImageIcon } from 'lucide-react';
+
+/** Today in Riyadh, written out; empty until the page is in the browser (the server's day may differ). */
+function useToday() {
+  const [text, setText] = useState('');
+  useEffect(() => {
+    setText(
+      new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Riyadh' }).format(new Date()),
+    );
+  }, []);
+  return text;
+}
 
 export function Title({
   title,
@@ -26,11 +25,12 @@ export function Title({
   sub?: string;
   children?: ReactNode;
 }) {
+  const today = useToday();
   return (
     <header className="page-heading">
       <div>
         <span className="eyebrow">
-          مركز الاتصال المؤسسي · <span className="scenario-date">اليوم في النموذج: {scenario.label}</span>
+          مركز الاتصال المؤسسي{today && <> · <span className="scenario-date">اليوم: {today}</span></>}
         </span>
         <h1>
           {title}
@@ -60,111 +60,12 @@ export function Panel({
   );
 }
 
-export function StatusChip({ status }: { status: Status }) {
-  return <span className={`chip status-${status}`}>{statusLabels[status]}</span>;
-}
-
-/** One channel's text, flagged when written before the latest master text (F-R01-05). */
-export function VariantCopy({ content, channel }: { content: Content; channel: Channel }) {
-  const stale = staleVariants(content).includes(channel);
-  return (
-    <div className={`variant-copy ${stale ? 'stale' : ''}`}>
-      <b>{channel}</b>
-      {stale && <span className="chip status-CHANGES_REQUESTED stale-flag">تحتاج مراجعة: كُتبت قبل تعديل النص الأساسي</span>}
-      <p>{content.variants[channel] || content.body}</p>
-    </div>
-  );
-}
-
-/** What changed between two versions: highlighted text and changed fields (F-R01-06). */
-export function VersionDiff({ before, after }: { before: Release; after: Release }) {
-  const parts = diffWords(before.body, after.body);
-  const fields = releaseChanges(before, after);
-  const textChanged = parts.some((p) => p.kind !== 'same');
-  return (
-    <section className="version-diff" aria-label={`الفرق بين الإصدار ${before.revision} والإصدار ${after.revision}`}>
-      <h3>
-        ما الذي تغيّر منذ الإصدار {before.revision}
-      </h3>
-      {textChanged ? (
-        <>
-          <p className="diff-text">
-            {parts.map((p, i) =>
-              p.kind === 'add' ? (
-                <ins key={i}>{p.text}</ins>
-              ) : p.kind === 'del' ? (
-                <del key={i}>{p.text}</del>
-              ) : (
-                <span key={i}>{p.text}</span>
-              ),
-            )}
-          </p>
-          <small className="diff-legend">
-            <ins>المضاف مظلل</ins> · <del>المحذوف مشطوب</del>
-          </small>
-        </>
-      ) : (
-        <p className="muted">لم يتغير النص الأساسي.</p>
-      )}
-      {fields.length > 0 ? (
-        <dl className="diff-fields">
-          {fields.map((f) => (
-            <div key={f.label}>
-              <dt>{f.label}</dt>
-              <dd>
-                <del>{f.before}</del> ← <ins>{f.after}</ins>
-              </dd>
-            </div>
-          ))}
-        </dl>
-      ) : (
-        <p className="muted">لم تتغير الحقول الأخرى.</p>
-      )}
-    </section>
-  );
-}
-
 export function Empty({ children }: { children: ReactNode }) {
   return (
     <div className="empty">
       <ImageIcon />
       <h3>لا توجد نتائج هنا</h3>
       <p>{children}</p>
-    </div>
-  );
-}
-
-export function MediaPreview({
-  assetId = 'poster',
-  version = 5,
-  large = false,
-}: {
-  assetId?: string;
-  version?: number;
-  large?: boolean;
-}) {
-  const a = assets.find((x) => x.id === assetId) || assets[0];
-  return (
-    <div
-      className={`media-preview ${a.kind} ${large ? 'media-large' : ''}`}
-      role="img"
-      aria-label={`${a.title}، الإصدار ${version}، رسم توضيحي تجريبي`}
-    >
-      <div className="art-brand">
-        <span>الاتصال المؤسسي</span>
-        <span>2026 / v{version}</span>
-      </div>
-      <div className="art-lines" />
-      <div className="art-copy">
-        <span>23 سبتمبر · اليوم الوطني السعودي</span>
-        <strong>{a.kind === 'video' ? 'حكاية وطن' : a.kind === 'raw' ? 'من الميدان' : 'وطنٌ نعتزّ به'}</strong>
-        <p>نحتفي بمنجزاتنا، ونصنع مستقبلنا معاً.</p>
-      </div>
-      <div className="art-base">
-        <span>تصوّر تجريبي · ليس هوية رسمية</span>
-        <b>96</b>
-      </div>
-      {a.kind === 'video' && <Play className="play" />}
     </div>
   );
 }

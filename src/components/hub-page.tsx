@@ -11,12 +11,12 @@ import { CreatePage } from './work/create';
 import { CalendarPage } from './work/calendar';
 import { ProjectPage, ProjectsPage } from './work/projects';
 import { RequestsPage } from './work/requests';
+import { AnalyticsPage } from './work/analytics';
 import { ApprovalsPage } from './work/approvals';
 import { ReviewPage } from './work/review';
 import { ChannelsPage } from './work/channels';
 import { Supporting } from './supporting';
 import { IdeasPage } from './ideas';
-import { ComponentGallery } from './gallery';
 import { AccountsPage } from './accounts';
 import { MediaProvider } from './media/provider';
 import { MediaLibrary } from './media/library';
@@ -51,6 +51,12 @@ export function HubPage({ route }: { route: string[] }) {
     );
   if (page === 'approvals')
     return <WorkProvider key={state.role}>{id ? <ReviewPage key={id} id={decodeURIComponent(id)} /> : <ApprovalsPage />}</WorkProvider>;
+  if (page === 'analytics')
+    return (
+      <WorkProvider key={state.role}>
+        <AnalyticsPage />
+      </WorkProvider>
+    );
   if (page === 'channels')
     return (
       <WorkProvider key={state.role}>
@@ -86,10 +92,9 @@ export function HubPage({ route }: { route: string[] }) {
     );
   if (page === 'mail') return <MailPage key={id === 'chat' ? 'chat' : 'mail'} tab={id === 'chat' ? 'chat' : 'mail'} />;
   if (page === 'motion') return <MotionStudio />;
-  if (page === 'components') return <ComponentGallery />;
   if (page === 'accounts') return <AccountsPage />;
   if (page === 'ideas') return <IdeasPage />;
-  if (['analytics', 'settings', 'account'].includes(page))
+  if (['settings', 'account'].includes(page))
     return <Supporting page={page} />;
 
   return (

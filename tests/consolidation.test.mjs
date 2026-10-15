@@ -13,9 +13,9 @@ const shell = read('src/components/shell.tsx');
 const accessSrc = read('src/lib/access.ts');
 const navBlock = accessSrc.slice(accessSrc.indexOf('export const menuEntries = ['), accessSrc.indexOf('] as const;', accessSrc.indexOf('export const menuEntries = [')));
 
-test('the menu no longer lists «الإدارة», «الحساب» or «التحليلات»', () => {
-  for (const href of ['/admin', '/account', '/analytics', '/monitoring']) assert.doesNotMatch(navBlock, new RegExp(`'${href}'`), href);
-  for (const href of ['/accounts', '/settings', '/channels', '/activity'])
+test('the menu no longer lists «الإدارة», «الحساب» or «المراقبة»', () => {
+  for (const href of ['/admin', '/account', '/monitoring']) assert.doesNotMatch(navBlock, new RegExp(`'${href}'`), href);
+  for (const href of ['/accounts', '/settings', '/channels', '/activity', '/analytics'])
     assert.match(navBlock, new RegExp(`'${href}'`), href);
 });
 
