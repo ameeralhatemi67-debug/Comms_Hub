@@ -680,6 +680,7 @@ Potential Arabic navigation:
 Part B). The list above is the first sketch; the sidebar is now: الرئيسية، العمل، إنشاء،
 الموافقات والنشر، التقويم، المشاريع، الطلبات، مكتبة الوسائط، المهام، سجل النشاط، استوديو الحركة،
 البريد، «حسابات المنصات»، الأفكار، الحسابات، الإعدادات. «المراقبة» لم تعد صفحة: صارت لوحة «الفريق» في «سجل النشاط» (`/monitoring` يفتح السجل) لمن يرى السجل كاملاً.
+«الإعدادات» is the system's page only (six tabs); the appearance choices are on «الحساب».
 «الإدارة» no longer exists (`/admin` opens «الحسابات»). «الحساب» is opened from the name badge at
 the foot of the sidebar. «التحليلات» is out of the menu until it reads real data. «الحسابات المرتبطة»
 is called «حسابات المنصات». Each person sees only the pages their role, page grants and capabilities

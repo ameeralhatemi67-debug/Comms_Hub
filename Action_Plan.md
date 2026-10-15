@@ -96,7 +96,11 @@ and decided in the step). Decide there whether the permission events of «الح
 integration events of «الإعدادات» become filters here or stay where they are (default:
 stay, they have different readers).
 
-### Step B3: settings split
+### Step B3: settings split - BUILT 2026-10-15
+
+Built (`progress.md`, third entry of 2026-10-15). The display-only tabs were removed, not built:
+none had a stored value or a behaviour behind it. If an organisation name or a publish-time
+default is wanted later, it returns as a real setting with its own step.
 
 Personal tabs (المظهر, اللغة, الإشعارات) move to «الحساب». «الإعدادات» becomes the system
 page: general and health, storage, backups, platforms, WhatsApp, audit. The display-only

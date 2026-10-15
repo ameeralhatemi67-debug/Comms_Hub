@@ -4,18 +4,16 @@ import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { BarChart3, Bell, Check, SlidersHorizontal, UserRound } from 'lucide-react';
 import {
-  channelAccounts,
   roles,
   teamLoad,
 } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { useAccount } from '@/lib/account-context';
 import { supabase } from '@/lib/supabase/client';
-import { setTheme, toggleIdentity } from '@/lib/identity';
-import { useIdentity, useTheme } from '@/lib/use-identity';
 import { Empty, Modal, Panel, Tabs, Title } from './ui';
 import { ProfileEditor } from './profile-editor';
 import { MyPermissions } from './my-permissions';
+import { AppearancePanel } from './appearance-panel';
 import { WhatsAppSettings } from './whatsapp/member';
 import { WhatsAppSystemPanel } from './whatsapp/system-panel';
 import { GeneralTab } from './settings/general';
@@ -48,34 +46,25 @@ function SampleNotice({ children }: { children: ReactNode }) {
   );
 }
 
-/** Settings sections, MVP_draft.md section 38. Visual configuration only. */
+/**
+ * Settings sections: the system's own, all real (Action_Plan.md B3). The personal ones (appearance)
+ * moved to «الحساب»; the display-only ones (organisation, language, notifications, publishing and
+ * approval defaults, AI) were removed because they saved nothing and changed nothing.
+ */
 const settingsSections = [
   { id: 'general', label: 'عام وصحة النظام' },
-  { id: 'organization', label: 'المؤسسة' },
-  { id: 'appearance', label: 'المظهر' },
-  { id: 'language', label: 'اللغة' },
-  { id: 'notifications', label: 'الإشعارات' },
-  { id: 'publishing', label: 'افتراضات النشر' },
-  { id: 'approvals', label: 'افتراضات الاعتماد' },
-  { id: 'ai', label: 'الذكاء والأتمتة' },
   { id: 'storage', label: 'التخزين' },
   { id: 'backups', label: 'النسخ الاحتياطي' },
   { id: 'platforms', label: 'المنصات' },
   { id: 'whatsapp', label: 'واتساب النظام' },
   { id: 'audit', label: 'السجل' },
 ];
-/** The settings tabs that are real (in the database); the others are visual in the prototype. */
-const REAL_SETTINGS = ['general', 'storage', 'backups', 'platforms', 'whatsapp', 'audit'];
 
 export function Supporting({ page }: { page: string }) {
   const { state, dispatch } = useHub();
   const router = useRouter();
   const actor = roles[state.role];
-  const second = useIdentity();
-  const theme = useTheme();
   const account = useAccount();
-  const [compact, setCompact] = useState(true);
-  const [alerts, setAlerts] = useState(true);
   const [confirmReset, setConfirmReset] = useState(false);
   // «/settings?tab=general» opens a tab directly (the Drive connection returns there).
   const [settingsTab, setSettingsTab] = useState(() => {
@@ -147,19 +136,10 @@ export function Supporting({ page }: { page: string }) {
   if (page === 'settings')
     return (
       <div dir="rtl">
-        <Title title="الإعدادات" sub="تفضيلات العرض والتشغيل لهذا المتصفح">
+        <Title title="الإعدادات" sub="إعدادات النظام: ما يتصل به المركز، والتخزين والنسخ، والمنصات، وواتساب النظام، والسجل">
           <SlidersHorizontal />
         </Title>
         <Tabs items={settingsSections} value={settingsTab} onChange={setSettingsTab} />
-        {REAL_SETTINGS.includes(settingsTab) ? (
-          <p className="muted">هذا القسم حقيقي: بياناته في قاعدة البيانات، ويقرر فيه من يملك صلاحيته.</p>
-        ) : (
-          <SampleNotice>
-            {settingsTab === 'appearance'
-              ? 'التصميم والوضع يُحفظان في هذا المتصفح وحده وهما حقيقيان. «العرض المختصر» والمعاينة تحتها لا تفعل شيئاً بعد.'
-              : 'هذا التبويب عرض فقط: لا يُحفظ شيء منه ولا يغيّر سلوك النظام.'}
-          </SampleNotice>
-        )}
 
         {settingsTab === 'general' && (
           <Panel title="عام وصحة النظام" className="st-panel">
@@ -191,156 +171,6 @@ export function Supporting({ page }: { page: string }) {
             <WhatsAppSystemPanel />
           </Panel>
         )}
-
-        {settingsTab === 'organization' && (
-          <Panel title="المؤسسة">
-            <label>
-              اسم الجهة
-              <input readOnly value="الاتصال المؤسسي" />
-            </label>
-            <label>
-              القسم
-              <input readOnly value="إدارة الاتصال المؤسسي" />
-            </label>
-            <label>
-              المنطقة الزمنية
-              <input readOnly value="آسيا / الرياض (+03:00)" />
-            </label>
-          </Panel>
-        )}
-
-        {settingsTab === 'appearance' && (
-          <Panel title="المظهر">
-            <div className="notice">
-              <b>التصميم</b>
-              <small>الهوية الجديدة لمركز الاتصال أو التصميم الحالي</small>
-              <div className="seg" role="group" aria-label="التصميم">
-                <button type="button" aria-pressed={!second} onClick={() => second && toggleIdentity()}>
-                  التصميم الحالي
-                </button>
-                <button type="button" aria-pressed={second} onClick={() => !second && toggleIdentity()}>
-                  الهوية الجديدة
-                </button>
-              </div>
-            </div>
-            <div className="notice">
-              <b>الوضع</b>
-              <small>
-                {second
-                  ? 'الوضع الفاتح هو الافتراضي. الوضع الداكن اختيار شخصي يُحفظ في هذا المتصفح.'
-                  : 'الوضع الداكن متاح في الهوية الجديدة فقط. فعّلها من الخيار أعلاه.'}
-              </small>
-              <div className="seg" role="group" aria-label="الوضع">
-                <button type="button" aria-pressed={theme === 'light'} onClick={() => setTheme('light')}>
-                  فاتح
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={theme === 'dark'}
-                  disabled={!second}
-                  title={!second ? 'متاح في الهوية الجديدة فقط' : ''}
-                  onClick={() => setTheme('dark')}
-                >
-                  داكن
-                </button>
-              </div>
-            </div>
-            <label className="between notice">
-              <span>
-                <b>عرض مختصر</b>
-                <small>تقليل التفاصيل في القوائم</small>
-              </span>
-              <input type="checkbox" checked={compact} onChange={(e) => setCompact(e.target.checked)} />
-            </label>
-            <div className="notice">
-              <b>معاينة الإعدادات</b>
-              <p>
-                {compact
-                  ? 'المعاينة المختصرة تعرض العناوين والحالة فقط.'
-                  : 'المعاينة الكاملة تعرض العناوين والتفاصيل.'}
-              </p>
-            </div>
-          </Panel>
-        )}
-
-        {settingsTab === 'language' && (
-          <Panel title="اللغة">
-            <label>
-              لغة الواجهة
-              <select defaultValue="ar">
-                <option value="ar">العربية · اتجاه من اليمين إلى اليسار</option>
-              </select>
-            </label>
-            <p className="muted">الواجهة عربية بالكامل في هذا النموذج. لغات أخرى خارج النطاق الحالي.</p>
-          </Panel>
-        )}
-
-        {settingsTab === 'notifications' && (
-          <Panel title="الإشعارات">
-            <label className="between notice">
-              <span>
-                <b>تنبيهات العمل</b>
-                <small>إظهار تنبيه عند وجود إجراء جديد</small>
-              </span>
-              <input type="checkbox" checked={alerts} onChange={(e) => setAlerts(e.target.checked)} />
-            </label>
-            <div className="notice">
-              <p>
-                {alerts ? 'ستظهر تنبيهات الإجراء في هذه الصفحة.' : 'لن يظهر شريط تنبيه في هذه المعاينة.'}
-              </p>
-            </div>
-          </Panel>
-        )}
-
-        {settingsTab === 'publishing' && (
-          <Panel title="افتراضات النشر">
-            <label>
-              القنوات الافتراضية
-              <input readOnly value={channelAccounts.map((c) => c.name).join('، ')} />
-            </label>
-            <label>
-              موعد النشر الافتراضي
-              <input readOnly value="18:00 بتوقيت الرياض" />
-            </label>
-            <p className="muted">لا يُرسل شيء خارج المتصفح في النموذج.</p>
-          </Panel>
-        )}
-
-        {settingsTab === 'approvals' && (
-          <Panel title="افتراضات الاعتماد">
-            <div className="table">
-              <div className="between">
-                <span>مستويات الاعتماد</span>
-                <b>مراجعة واحدة قبل النشر</b>
-              </div>
-              <div className="between">
-                <span>التعديل بعد الاعتماد</span>
-                <b>يلغي الاعتماد ويستلزم مراجعة جديدة</b>
-              </div>
-              <div className="between">
-                <span>التفويض المؤقت</span>
-                <b>مؤجل إلى مرحلة الإنتاج</b>
-              </div>
-            </div>
-          </Panel>
-        )}
-
-        {settingsTab === 'ai' && (
-          <Panel title="الذكاء والأتمتة">
-            <div className="table">
-              <div className="between">
-                <span>المساعدة في الصياغة</span>
-                <b>غير مفعلة</b>
-              </div>
-              <div className="between">
-                <span>الوسم التلقائي</span>
-                <b>غير مفعل</b>
-              </div>
-            </div>
-            <p className="muted">الذكاء الاصطناعي خارج نطاق النموذج الأولي بالكامل.</p>
-          </Panel>
-        )}
-
       </div>
     );
 
@@ -352,6 +182,9 @@ export function Supporting({ page }: { page: string }) {
         </Title>
         <Panel title="مظهرك في البريد والمراسلة">
           <ProfileEditor />
+        </Panel>
+        <Panel title="المظهر">
+          <AppearancePanel />
         </Panel>
         <Panel title="صلاحياتي" className="pm-minepanel">
           <MyPermissions />

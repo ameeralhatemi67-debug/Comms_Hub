@@ -89,3 +89,23 @@ test('the team panel is for those who see the whole log, and writes nothing', ()
   assert.match(page, /teamSummary\(m\.people, rows \?\? \[\], m\.tasks\)/);
   assert.doesNotMatch(read('src/lib/media/team.ts'), /supabase|fetch\(/);
 });
+
+// Step B3: settings is the system's page, appearance is the person's.
+test('«الإعدادات» keeps only its real tabs, and the display-only ones are gone', () => {
+  const sup = read('src/components/supporting.tsx');
+  const list = sup.slice(sup.indexOf('const settingsSections = ['), sup.indexOf('];', sup.indexOf('const settingsSections = [')));
+  const ids = [...list.matchAll(/id: '([a-z]+)'/g)].map((m) => m[1]);
+  assert.deepEqual(ids, ['general', 'storage', 'backups', 'platforms', 'whatsapp', 'audit']);
+  for (const gone of ['organization', 'language', 'publishing', 'ai'])
+    assert.doesNotMatch(sup, new RegExp(`settingsTab === '${gone}'`), gone);
+  assert.doesNotMatch(sup, /REAL_SETTINGS/);
+  assert.doesNotMatch(sup, /useState\(true\)/, 'the two switches that did nothing are gone');
+});
+
+test('the appearance choices are on «الحساب» and still kept in the browser only', () => {
+  assert.match(read('src/components/supporting.tsx'), /<AppearancePanel \/>/);
+  const panel = read('src/components/appearance-panel.tsx');
+  assert.match(panel, /toggleIdentity/);
+  assert.match(panel, /setTheme/);
+  assert.doesNotMatch(panel, /supabase|fetch\(/);
+});

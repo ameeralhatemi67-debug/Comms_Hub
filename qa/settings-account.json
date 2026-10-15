@@ -1,0 +1,58 @@
+{
+  "script": "qa/settings-account.cjs",
+  "run": "2026-10-15T08:16:13.709Z",
+  "checks": [
+    {
+      "name": "six tabs, in order",
+      "pass": true,
+      "detail": "general,storage,backups,platforms,whatsapp,audit"
+    },
+    {
+      "name": "none of the removed tab names is listed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1280: settings shows six tabs and the page does not overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"tabs\":6,\"strip\":{\"scroll\":1216,\"client\":1216,\"over\":\"auto\"}}"
+    },
+    {
+      "name": "1280: the tab strip scrolls inside itself when it is wider than the screen",
+      "pass": true,
+      "detail": "{\"scroll\":1216,\"client\":1216,\"over\":\"auto\"}"
+    },
+    {
+      "name": "1280: «الحساب» shows both appearance groups with one pressed choice each",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"groups\":2,\"heights\":[34,34,34,34],\"pressed\":2,\"inside\":true}"
+    },
+    {
+      "name": "1280: buttons are at least 30 px tall and inside the screen, no overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"groups\":2,\"heights\":[34,34,34,34],\"pressed\":2,\"inside\":true}"
+    },
+    {
+      "name": "390: settings shows six tabs and the page does not overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"tabs\":6,\"strip\":{\"scroll\":483,\"client\":358,\"over\":\"auto\"}}"
+    },
+    {
+      "name": "390: the tab strip scrolls inside itself when it is wider than the screen",
+      "pass": true,
+      "detail": "{\"scroll\":483,\"client\":358,\"over\":\"auto\"}"
+    },
+    {
+      "name": "390: «الحساب» shows both appearance groups with one pressed choice each",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"groups\":2,\"heights\":[34,34,34,34],\"pressed\":2,\"inside\":true}"
+    },
+    {
+      "name": "390: buttons are at least 30 px tall and inside the screen, no overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"groups\":2,\"heights\":[34,34,34,34],\"pressed\":2,\"inside\":true}"
+    }
+  ],
+  "passed": 10,
+  "total": 10
+}
