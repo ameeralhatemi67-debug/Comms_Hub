@@ -179,8 +179,8 @@ Guides and what-is-new notes (`v` and `news` per page) for «سجل النشاط
 ## 3. Part C: the audit order that remains
 
 > 2026-10-15: every item below needs the owner's accounts or a signed-in browser. They are written
-> out step by step, with the walkthrough, in `Owner_Handoff.md`. OneDrive (C1) is not built before
-> an account exists, for the reasons stated there.
+> out step by step, with the walkthrough, in `Owner_Handoff.md`. OneDrive (C1) was built later the
+> same day (B10) and is untried against a real Microsoft account.
 
 | Step | What | Gate |
 |---|---|---|
@@ -235,4 +235,4 @@ Built the same day (`progress.md`, entry of B9). The Director holds `platforms.m
 from a form: publishing itself (each platform's adapter and approval), Snapchat and the WhatsApp
 channel (manual), Supabase's own address, key and SMTP (the vault needs something to open it).
 Next in this line: the adapters, one platform at a time, each after its app is approved
-(`Settings_Integrations_Plan.md` S9), and OneDrive (S8) when an account exists.
+(`Settings_Integrations_Plan.md` S9). OneDrive (S8) is built (B10), untried with a real account.
