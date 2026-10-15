@@ -82,7 +82,11 @@ unused now and are removed there.
 Exit: typecheck, build and `npm test` pass; signed-out gate check still passes; a fixture
 browser check shows the new menu in four widths; the per-role menu list is recorded.
 
-### Step B2: one activity log
+### Step B2: one activity log - BUILT 2026-10-15
+
+Built (`progress.md`, second entry of 2026-10-15). The `monitoring` grant is kept as an alias that
+opens «سجل النشاط»; folding it into `activity` by migration (the validation lists in the
+permissions functions name it) moves to B6.
 
 «المراقبة» is merged into «سجل النشاط»: the real log stays the base; a "team" panel adds
 what «المراقبة» promised and only that: each member, role, last activity, open works, from

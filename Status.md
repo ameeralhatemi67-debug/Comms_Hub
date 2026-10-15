@@ -30,7 +30,8 @@ related:
 
 The seven supporting pages were audited (what each does, who sees it) and `Action_Plan.md` now carries what is left: Part B consolidates the pages, Part C the owner-gated audit steps, Part D the agent computer and NAS. Step B1 is built: «الإدارة» is dissolved (`/admin` opens «الحسابات»), «الحساب» is opened from the name badge at the foot of the sidebar, «الحسابات المرتبطة» is «حسابات المنصات», «التحليلات» is out of the menu until it is real. The menu is 17 entries, was 20. `npm test` 275 of 275, typecheck and build clean, fixture check of the sidebar 18 of 18. Not seen signed in.
 
-- **Next action:** step B2 of `Action_Plan.md`: merge «المراقبة» into «سجل النشاط» (a team panel from the database, `/monitoring` redirects), then B3 (split personal settings from system settings).
+- **Step B2, built the same day:** «المراقبة» is merged into «سجل النشاط»: a team panel (each member, role, last action, the week's actions, open and late tasks) for those who see the whole log; `/monitoring` opens the log and the old grant still opens it; the menu is 16 entries. `npm test` 279 of 279, panel fixture check 16 of 16, build clean. Not seen signed in.
+- **Next action:** step B3 of `Action_Plan.md`: split personal settings (appearance, language, notifications) into «الحساب», make «الإعدادات» the system page, and build or remove the display-only tabs.
 - **Correction to earlier lists:** step 8 of the audit order (help upgrade) and S4 (backups) are built; open are OneDrive (S8) and step 9 (hardware).
 
 ## Film deliverable completed 2026-10-14
