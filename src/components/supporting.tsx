@@ -1,15 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { BarChart3, Bell, Check, SlidersHorizontal, UserRound } from 'lucide-react';
 import {
   channelAccounts,
-  noticesFor,
   roles,
   teamLoad,
-  statusLabels,
 } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { useAccount } from '@/lib/account-context';
@@ -31,7 +28,6 @@ const pageNames: Record<string, string> = {
   mail: 'البريد',
   ideas: 'الأفكار',
   analytics: 'التحليلات',
-  monitoring: 'المراقبة',
   settings: 'الإعدادات',
   account: 'الحساب',
 };
@@ -144,59 +140,6 @@ export function Supporting({ page }: { page: string }) {
           </div>
           <p className="muted">المؤشر يعتمد على الأعمال الموجودة في هذا النموذج المحلي.</p>
         </Panel>
-      </div>
-    );
-  }
-
-  if (page === 'monitoring') {
-    const workload = teamLoad(state.work).map((x) => ({ id: x.person.id, name: x.person.name, count: x.items.length }));
-    const unread = noticesFor(state.role, state.notices).filter((n) => !n.read);
-
-    return (
-      <div dir="rtl">
-        <Title title="المراقبة" sub="آخر التغييرات والتنبيهات التي تحتاج انتباهاً">
-          <span className="chip">تجريبية، لم تُبنَ بعد</span>
-        </Title>
-        <SampleNotice>
-          التنبيهات والأعمال هنا من بيانات تجريبية في هذا المتصفح، وليست إشعاراتك الحقيقية. إشعاراتك في الجرس أعلى الصفحة، وأعمالك في «العمل».
-        </SampleNotice>
-        <div className="columns">
-          <Panel title="التنبيهات الموجهة لدورك">
-            <div className="stack">
-              {unread.map((n) => (
-                <Link className="notice" href={`/work/${n.workId}`} key={n.id}>
-                  <b>{n.title}</b>
-                  <small>{n.kind === 'action' ? 'إجراء مطلوب' : 'تنبيه للفريق'}</small>
-                </Link>
-              ))}
-              {!unread.length && <Empty>لا توجد تنبيهات غير مقروءة لهذا الدور.</Empty>}
-            </div>
-          </Panel>
-          <Panel title="حالة الفريق">
-            <div className="stack">
-              {workload.map((x) => (
-                <div className="between" key={x.id}>
-                  <span>{x.name}</span>
-                  <b>{x.count} أعمال</b>
-                </div>
-              ))}
-            </div>
-            <p className="muted">يعرض هذا التوزيع عدد الأعمال الحالية لكل عضو.</p>
-          </Panel>
-          <Panel title="نشاط الأعمال">
-            <div className="stack">
-              {state.work.slice(0, 5).map((w) => (
-                <Link className="notice" href={`/work/${w.id}`} key={w.id}>
-                  <span className="between">
-                    <b>{w.title}</b>
-                    <span className="chip">{statusLabels[w.status]}</span>
-                  </span>
-                  <small>{w.activity[0]}</small>
-                </Link>
-              ))}
-            </div>
-          </Panel>
-        </div>
       </div>
     );
   }
@@ -489,7 +432,7 @@ export function Supporting({ page }: { page: string }) {
         </div>
         {confirmReset && (
           <Modal title="إعادة النموذج" onClose={() => setConfirmReset(false)}>
-            <p>يعيد هذا بيانات العرض التجريبية في هذا المتصفح فقط (صفحات «التحليلات» و«المراقبة»). لا يمسّ أعمالك ولا بريدك ولا حسابك.</p>
+            <p>يعيد هذا بيانات العرض التجريبية في هذا المتصفح فقط (صفحة «التحليلات»). لا يمسّ أعمالك ولا بريدك ولا حسابك.</p>
             <div className="actions">
               <button
                 className="primary"

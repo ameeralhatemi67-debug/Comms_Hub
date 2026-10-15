@@ -14,7 +14,6 @@ import {
   Images,
   Clapperboard,
   Lightbulb,
-  Users,
   Settings,
   UserCog,
   ListChecks,
@@ -53,13 +52,9 @@ const nav = [
   ['/mail', 'البريد', Mail],
   ['/channels', 'حسابات المنصات', Link2],
   ['/ideas', 'الأفكار', Lightbulb],
-  ['/monitoring', 'المراقبة', Users],
   ['/accounts', 'الحسابات', UserCog],
   ['/settings', 'الإعدادات', Settings],
 ] as const;
-
-/** Pages still on sample data in the browser, not the database. Marked in the menu. */
-const SAMPLE_PAGES = ['/monitoring'];
 
 export function Shell({ children }: { children: ReactNode }) {
   const { state, dispatch } = useHub();
@@ -154,7 +149,6 @@ export function Shell({ children }: { children: ReactNode }) {
             >
               <Icon />
               <span>{label}</span>
-              {SAMPLE_PAGES.includes(href) && <small className="nav-sample">تجريبي</small>}
             </Link>
           ))}
         </nav>
@@ -279,7 +273,6 @@ export function Shell({ children }: { children: ReactNode }) {
               <Link className="nav-item" href={href} key={href} onClick={() => setMobile(false)}>
                 <Icon />
                 <span>{label}</span>
-                {SAMPLE_PAGES.includes(href) && <small className="nav-sample">تجريبي</small>}
               </Link>
             ))}
           </nav>

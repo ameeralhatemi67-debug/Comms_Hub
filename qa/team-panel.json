@@ -1,0 +1,88 @@
+{
+  "script": "qa/team-panel.cjs",
+  "run": "2026-10-15T08:09:51.886Z",
+  "checks": [
+    {
+      "name": "order: latest first, silent last",
+      "pass": true,
+      "detail": "خالد,سارة,نورة,عبدالله"
+    },
+    {
+      "name": "numbers: week and open and late for the designer",
+      "pass": true,
+      "detail": "{\"email\":\"a@x\",\"name\":\"سارة\",\"role\":\"designer\",\"last\":\"2026-10-13T09:00:00Z\",\"week\":1,\"open\":2,\"late\":1}"
+    },
+    {
+      "name": "a done task is not open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a person with no action has no last",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1280: four member rows, no sideways overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"rows\":4,\"headShown\":true,\"inside\":true,\"late\":[\"rgb(170, 64, 52)\"]}"
+    },
+    {
+      "name": "1280: every row stays inside the panel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1280: the header row is shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1280: the late count is drawn in the danger colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "900: four member rows, no sideways overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"rows\":4,\"headShown\":true,\"inside\":true,\"late\":[\"rgb(170, 64, 52)\"]}"
+    },
+    {
+      "name": "900: every row stays inside the panel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "900: the header row is shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "900: the late count is drawn in the danger colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: four member rows, no sideways overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"rows\":4,\"headShown\":false,\"inside\":true,\"late\":[\"rgb(170, 64, 52)\"]}"
+    },
+    {
+      "name": "390: every row stays inside the panel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: the header row is hidden on a phone",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: the late count is drawn in the danger colour",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "passed": 16,
+  "total": 16
+}

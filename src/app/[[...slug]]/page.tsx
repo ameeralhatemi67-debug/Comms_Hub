@@ -13,6 +13,8 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
   if (session.status !== 'ready') return null;
   // «الإدارة» was dissolved (Action_Plan.md B1): its real parts are in «الحسابات» and «الإعدادات».
   if (slug[0] === 'admin') redirect('/accounts');
+  // «المراقبة» joined «سجل النشاط» (Action_Plan.md B2).
+  if (slug[0] === 'monitoring') redirect('/activity');
   if (!canOpen(session.account, slug[0] ?? '')) return <NoAccess />;
   return <HubPage route={slug} />;
 }

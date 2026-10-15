@@ -1,12 +1,15 @@
 'use client';
 // سجل النشاط: every action by everyone, with what changed. Append-only in the database.
-// Managers and administrators see all of it; everyone else sees their own actions.
+// Managers and administrators see all of it, with a panel of the team (Action_Plan.md B2: what
+// «المراقبة» promised and nothing else); everyone else sees their own actions.
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { describe, logTypeLabels, type LogRow } from '@/lib/media/log-text';
 import { eventText, type PermEvent } from '@/lib/permissions';
 import { logAllRoles, riyadhStamp } from '@/lib/media/rules';
+import { teamSummary } from '@/lib/media/team';
+import { roles } from '@/lib/domain';
 import { Title } from '../ui';
 import { Avatar, Icon, StageChip, Ts } from './parts';
 import { useMedia } from './provider';
@@ -91,6 +94,8 @@ export function ActivityPage() {
   shown.forEach((x) => counts.set(x.r.actor_email, (counts.get(x.r.actor_email) ?? 0) + 1));
   const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
 
+  const team = useMemo(() => (all ? teamSummary(m.people, rows ?? [], m.tasks) : []), [all, m.people, rows, m.tasks]);
+
   if (m.status === 'loading' || rows === null) return <p role="status">جارٍ التحميل…</p>;
 
   return (
@@ -120,6 +125,41 @@ export function ActivityPage() {
           <span>الأكثر نشاطاً</span>
         </div>
       </div>
+      {all && team.length > 0 && (
+        <section className="mx-team" aria-label="الفريق">
+          <div className="mx-team-head">
+            <b>الفريق</b>
+            <span>آخر إجراء لكل عضو، وما أنجزه في الأسبوع الأخير، وما ينتظره من مهام.</span>
+          </div>
+          <div className="mx-team-grid" role="table">
+            <div className="mx-team-row head" role="row">
+              <span role="columnheader">العضو</span>
+              <span role="columnheader">الدور</span>
+              <span role="columnheader">آخر إجراء</span>
+              <span role="columnheader">إجراءات الأسبوع</span>
+              <span role="columnheader">مهام مفتوحة</span>
+            </div>
+            {team.map((t) => (
+              <div className={`mx-team-row ${who === t.email ? 'on' : ''}`} role="row" key={t.email}>
+                <span role="cell">
+                  <button type="button" className="mx-team-who" aria-pressed={who === t.email} onClick={() => setWho(who === t.email ? 'all' : t.email)} title="اعرض أحداثه وحدها">
+                    <Avatar name={t.name} />
+                    <b>{t.name}</b>
+                  </button>
+                </span>
+                <span role="cell">{roles[t.role as keyof typeof roles]?.name ?? t.role}</span>
+                <span role="cell">{t.last ? <Ts>{riyadhStamp(t.last)}</Ts> : <small className="muted">لا إجراء مسجلاً</small>}</span>
+                <span role="cell">{t.week}</span>
+                <span role="cell">
+                  {t.open}
+                  {t.late > 0 && <small className="late"> · متأخرة {t.late}</small>}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="muted">المحسوب من آخر {rows.length} حدثاً مقروءاً من السجل؛ ما قبلها لا يدخل في «آخر إجراء» ولا في أعداد الأسبوع.</p>
+        </section>
+      )}
       <div className="mx-toolbar">
         <label className="mx-field">
           <Icon name="search" />

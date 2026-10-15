@@ -97,6 +97,9 @@ export function canOpen(account: Pick<Account, 'role' | 'pages' | 'caps'>, page:
   if (page === 'projects') return projectPageGrants.some((p) => account.pages.includes(p));
   if (page === 'requests') return requestPageGrants.some((p) => account.pages.includes(p));
   if (!grantable.has(page)) return false;
+  // «المراقبة» joined «سجل النشاط» (Action_Plan.md B2): the old grant still opens the log, so no one
+  // loses a page. The catalog keeps the grant until a migration folds it into `activity` (step B6).
+  if (page === 'activity') return account.pages.includes('activity') || account.pages.includes('monitoring');
   // Creating is also a role ability; a page grant cannot give it to a role that lacks it.
   if (page === 'create' && !roles[account.role].create) return false;
   return account.pages.includes(page);

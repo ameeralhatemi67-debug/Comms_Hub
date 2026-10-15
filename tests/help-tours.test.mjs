@@ -43,13 +43,13 @@ test('the news key is one the database accepts for a seen page', () => {
 });
 
 test('every page that had no guide has one now, in plain words about what is sample and what is real', () => {
-  for (const k of ['ideas', 'analytics', 'monitoring', 'motion', 'components']) {
+  for (const k of ['ideas', 'analytics', 'motion', 'components']) {
     const h = PAGES[k];
     assert.ok(h, k);
     for (const g of GROUPS) assert.ok(h.roles[g], `${k}: ${g}`);
     assert.ok(h.empty && h.empty.length > 10, `${k}: empty`);
   }
-  for (const k of ['analytics', 'monitoring']) assert.match(PAGES[k].purpose + PAGES[k].tip, /تجريب/, k);
+  for (const k of ['analytics']) assert.match(PAGES[k].purpose + PAGES[k].tip, /تجريب/, k);
 });
 
 test('the engine says the role, shows what is new once, closes an empty page with a card, and has touch words', () => {
@@ -67,6 +67,6 @@ test('the engine says the role, shows what is new once, closes an empty page wit
 });
 
 test('no emoji in the new guide words', () => {
-  const text = JSON.stringify(['ideas', 'analytics', 'monitoring', 'motion', 'components'].map((k) => PAGES[k])) + JSON.stringify(PAGES.settings.news);
+  const text = JSON.stringify(['ideas', 'analytics', 'motion', 'components'].map((k) => PAGES[k])) + JSON.stringify(PAGES.settings.news);
   assert.doesNotMatch(text, /\p{Extended_Pictographic}/u);
 });

@@ -330,3 +330,14 @@
   .mx-task{grid-template-columns:44px minmax(0,1fr)}.mx-task>:last-child{grid-column:1/-1}
 }
 @media (prefers-reduced-motion:reduce){.mx *{transition:none!important;animation:none!important}}
+/* The team panel of «سجل النشاط» (Action_Plan.md B2). */
+.mx-team{background:var(--surface);border:1px solid var(--line);border-radius:var(--m-rl);padding:14px 16px;margin:14px 0;box-shadow:var(--m-e1)}
+.mx-team-head{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;margin-bottom:8px}
+.mx-team-head span{font-size:12.5px;color:var(--muted)}
+.mx-team-row{display:grid;grid-template-columns:minmax(150px,1.6fr) minmax(120px,1.2fr) minmax(130px,1fr) 100px minmax(110px,.9fr);gap:10px;align-items:center;padding:8px 6px;border-top:1px solid var(--line);font-size:13px}
+.mx-team-row.head{border-top:0;font-size:11.5px;color:var(--muted)}
+.mx-team-row.on{background:var(--soft)}
+.mx-team-who{display:flex;gap:8px;align-items:center;border:0;background:transparent;padding:2px;min-height:32px;text-align:start}
+.mx-team .late{color:var(--danger)}
+.mx-team>p{margin-top:8px}
+@media(max-width:760px){.mx-team-row{grid-template-columns:1fr 1fr;gap:4px 10px}.mx-team-row.head{display:none}}

@@ -31,7 +31,6 @@ export function pageKeyOf(path: string): string | null {
   if (p === '/settings') return 'settings';
   if (p === '/ideas') return 'ideas';
   if (p === '/analytics') return 'analytics';
-  if (p === '/monitoring') return 'monitoring';
   if (p === '/motion') return 'motion';
   if (p === '/components') return 'components';
   return null;
@@ -60,7 +59,6 @@ export const PAGE_HREF: Record<string, string> = {
   settings: '/settings',
   ideas: '/ideas',
   analytics: '/analytics',
-  monitoring: '/monitoring',
   motion: '/motion',
   components: '/components',
   home: '/',
@@ -106,7 +104,6 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   home: ['src/components/home.tsx', 'src/components/home-perms.tsx', 'src/components/work/parts.tsx'],
   ideas: ['src/components/ideas.tsx'],
   analytics: ['src/components/supporting.tsx'],
-  monitoring: ['src/components/supporting.tsx'],
   motion: ['src/components/motion-studio.tsx', 'src/components/motion-controls.tsx', 'src/components/motion-stage.tsx', 'src/components/motion-export.tsx'],
   components: ['src/components/gallery.tsx'],
 };
