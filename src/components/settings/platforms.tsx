@@ -24,6 +24,7 @@ import {
 import { limitsOf, limitsToAccepts } from '@/lib/platforms/limits';
 import { APP_INTEGRATION_TYPE, CONN_PROVIDERS, providerOf, type ConnProvider } from '@/lib/platforms/provider';
 import { STATE_AR, STATE_TONE, type Integration } from '@/lib/integrations/rules';
+import { expiryLineAr, expiryOf, riyadhToday } from '@/lib/integrations/expiry';
 import type { PlatformInfo, PublishMode, Readiness } from '@/lib/work/rules';
 import { useCaps } from '../caps';
 import { Modal } from '../ui';
@@ -599,11 +600,13 @@ export function AppBlock({ provider, app, canSecrets, onSaved, lock }: { provide
   const [id, setId] = useState('');
   const [secret, setSecret] = useState('');
   const [scopes, setScopes] = useState('');
+  const [expires, setExpires] = useState('');
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [origin, setOrigin] = useState('');
   useEffect(() => setOrigin(window.location.origin), []);
   const redirect = `${origin}/api/platforms/callback/${provider}`;
+  const expiry = expiryOf(app?.config, riyadhToday());
   const save = async () => {
     setBusy(true);
     setNote(null);
@@ -611,11 +614,12 @@ export function AppBlock({ provider, app, canSecrets, onSaved, lock }: { provide
       const r = await fetch('/api/platforms/app', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, app_id: id, secret, scopes: scopes.trim() ? scopes.split(/[\s,]+/).filter(Boolean) : undefined }),
+        body: JSON.stringify({ provider, app_id: id, secret, scopes: scopes.trim() ? scopes.split(/[\s,]+/).filter(Boolean) : undefined, secret_expires_on: expires || undefined }),
       });
       const b = (await r.json()) as { error?: string; tail?: string };
       if (!r.ok) return setNote({ ok: false, text: b.error ?? 'تعذّر الحفظ.' });
       setSecret('');
+      setExpires('');
       setNote({ ok: true, text: `حُفظ السر في الخزنة (${b.tail ?? ''}) بعد أن قبلته المنصة. لا يُعرض بعد الآن.` });
       await onSaved();
     } catch {
@@ -638,6 +642,11 @@ export function AppBlock({ provider, app, canSecrets, onSaved, lock }: { provide
           ? `المعرّف ${String(app!.config?.app_id ?? '')}، والسر محفوظ في الخزنة (${app!.secret_tail ?? ''}). لا يُقرأ منه شيء بعد الحفظ.`
           : 'لم يُدخل معرّف هذا التطبيق وسره. بدونه لا يبدأ ربط حساب حقيقي، ويبقى الربط محاكى.'}
       </small>
+      {have && expiry.state !== 'none' && (
+        <small className={expiry.state === 'ok' ? 'muted' : 'ml-err'} role={expiry.state === 'ok' ? undefined : 'status'} data-expiry={expiry.state}>
+          {expiryLineAr(expiry)}
+        </small>
+      )}
       <small className="muted">
         عنوان العودة الذي تسجّله في لوحة المطوّرين: <bdi dir="ltr">{redirect}</bdi>
       </small>
@@ -656,6 +665,10 @@ export function AppBlock({ provider, app, canSecrets, onSaved, lock }: { provide
           <input className="wk-inp ltr" type="password" value={secret} autoComplete="new-password" disabled={!canSecrets || busy} onChange={(e) => setSecret(e.target.value)} />
         </label>
       </div>
+      <label className="l">
+        ينتهي السر في <small>اختياري، ويذكّرك الموقع قبله بشهر{provider === 'microsoft' ? ' (سر Microsoft ينتهي خلال 6 إلى 24 شهراً بحسب ما اخترته)' : ''}</small>
+        <input className="wk-inp ltr st-app-expires" type="date" value={expires} disabled={!canSecrets || busy} onChange={(e) => setExpires(e.target.value)} />
+      </label>
       {provider === 'tiktok' && (
         <label className="l">
           الصلاحيات المطلوبة <small>مفصولة بفواصل، وتكون ممّا أضفته إلى التطبيق</small>

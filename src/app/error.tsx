@@ -1,6 +1,12 @@
 'use client';
+import { useEffect } from 'react';
+import { reportError } from '@/components/feedback';
 
-export default function ErrorPage({ reset }: { reset: () => void }) {
+export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  // The site's own record of a failed render (Action_Plan.md section 5), silent and scrubbed.
+  useEffect(() => {
+    reportError(error);
+  }, [error]);
   return (
     <div className="panel">
       <h1>تعذر عرض الصفحة</h1>

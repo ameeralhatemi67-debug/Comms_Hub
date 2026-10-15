@@ -1,0 +1,15 @@
+{
+  "run": "2026-10-15",
+  "what": "Database rule run for step C4: the database enforces a platform's limits at the send step (work_schedule, work_publish now/confirm/retry, work_due_run)",
+  "script": "supabase/tests/limits_rules.sql",
+  "migrations": [
+    "supabase/migrations/20261015220000_limits_enforced.sql (applied as limits_enforced, then limits_enforced_fix: array_append instead of '||' on an untyped literal)"
+  ],
+  "how": "One transaction against the Supabase project comms-hub, aborted at the end by a raised exception that carried the result out (nothing committed). Part A: 50 cases through work_copy_issues against the expected codes generated from the TypeScript rule. Part B: 13 checks driving the real functions with throwaway rows.",
+  "total": 63,
+  "passed": 63,
+  "failed": [],
+  "found_and_fixed": [
+    "first run: 'out := out || ''EMPTY''' treated the untyped literal as an array; replaced by array_append (all 13 sites)"
+  ]
+}

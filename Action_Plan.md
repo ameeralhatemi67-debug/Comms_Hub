@@ -195,12 +195,20 @@ Scheduled backups, timed retries (idea I-024), the NAS provider (S7), email noti
 that need a worker. Designed in `Settings_Integrations_Plan.md`; nothing here starts before
 the hardware exists (E-1).
 
-## 5. Carried over from `Readiness_Audit.md` section 3, not scheduled
+## 5. Carried over from `Readiness_Audit.md` section 3
 
-Delegation while away (owner decision: waits for approval-rights work); email notifications
-to members; error monitoring and a tester feedback channel; data handling when a person
-leaves; the mobile walk-through by a person; leaked-password protection switch in the
-Supabase dashboard; adoption of the Drive refresh token into Vault.
+Worked on 2026-10-15 (owner direction: "work on these"). State of each:
+
+| Item | State | What is left |
+|---|---|---|
+| C4: database enforcement of platform limits | **Built** (`20261015220000_limits_enforced.sql`; 63 of 63 rule checks) | Nothing; submit-for-review is deliberately not blocked |
+| Reminder before an app's secret expires | **Built** (`20261015230000_secret_expiry.sql`; 11 of 11) | The Director states the date when entering the secret; the site cannot read it from Microsoft |
+| Adoption of the Drive refresh token into the vault | **Built earlier** (`/api/integrations/drive-adopt`); the button is now also on the Drive card in «الاتصالات» | One click by someone holding `integrations.secrets`; then remove `GOOGLE_DRIVE_REFRESH_TOKEN` from Vercel. The live row still has no secret in the vault (checked 2026-10-15) |
+| Error monitoring and a tester feedback channel | **Built** (`20261015240000_feedback_errors.sql`; 32 of 32): a note button in the top bar, errors caught by the page, inbox «ملاحظات وأخطاء» in «الإعدادات» | Nothing leaves the site; no external monitoring service |
+| Platform adapters (real publishing) | **Not built, on purpose** | Each needs its platform's approved app and a real account to try against; a publisher that has never posted is the riskiest code in the system |
+| Delegation while away | **Not built: owner decision needed** | Approval is fixed by the reference (no grant can make a person approve); delegation must say what a delegate may do, for how long, and who sees it |
+| Email notifications to members | **Not built: owner decision needed** | Which tiers, opt-in or default, and the fact that the site has no worker: it can only send while someone has a page open |
+| Data handling when a person leaves | **Not built: owner decision needed** | What happens to their works, private mail, rooms and grants; retention |
 
 ## 6. Order and why
 

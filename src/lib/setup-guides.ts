@@ -249,7 +249,7 @@ export const GUIDES: Record<string, Guide> = {
       { t: 'اضغط «New registration»', b: 'سمّه «Comms Hub». في «Supported account types» اختر «Accounts in any organizational directory and personal Microsoft accounts»: هكذا يصلح لحساب شخصي ولحساب عمل.' },
       { t: 'سجّل عنوان العودة', b: 'في «Redirect URI» اختر النوع «Web» والصق هذا العنوان تماماً.', copy: '{origin}/api/onedrive/callback' },
       { t: 'اضغط «Register»', b: 'تفتح صفحة التطبيق. انسخ «Application (client) ID» من «Overview».' },
-      { t: 'أنشئ سراً', b: 'من «Certificates & secrets» ثم «New client secret»، ومدة مثل 24 شهراً. انسخ العمود «Value» فوراً (لا «Secret ID»): لا يُعرض مرة ثانية.' },
+      { t: 'أنشئ سراً', b: 'من «Certificates & secrets» ثم «New client secret»، ومدة مثل 24 شهراً. دوّن تاريخ الانتهاء الذي يظهر: تكتبه في حقل «ينتهي السر في» ليذكّرك الموقع قبله بشهر. انسخ العمود «Value» فوراً (لا «Secret ID»): لا يُعرض مرة ثانية.' },
       { t: 'تأكد من الصلاحيات', b: 'من «API permissions»: «Microsoft Graph» ثم «Delegated»: Files.ReadWrite وUser.Read وoffline_access. الأخيرة تعطي الرمز الدائم. لا تحتاج موافقة مسؤول لحساب شخصي.' },
       { t: 'الصق المعرّف والسر', b: 'في الحقلين أسفل البطاقة، ثم «فحص وحفظ». يسأل الموقع Microsoft أولاً ولا يحفظ شيئاً إن رفضت.' },
       { t: 'اربط الحساب', b: 'من بطاقة «OneDrive» في الصفحة نفسها: «ربط OneDrive».' },

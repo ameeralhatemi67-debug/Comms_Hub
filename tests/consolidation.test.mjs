@@ -99,11 +99,11 @@ test('the team panel is for those who see the whole log, and writes nothing', ()
 });
 
 // Step B3: settings is the system's page, appearance is the person's.
-test('«الإعدادات» keeps only its real tabs (the connections tab joined in B9), and the display-only ones are gone', () => {
+test('«الإعدادات» keeps only its real tabs (the connections tab joined in B9, the feedback tab in section 5), and the display-only ones are gone', () => {
   const sup = read('src/components/supporting.tsx');
   const list = sup.slice(sup.indexOf('const settingsSections = ['), sup.indexOf('];', sup.indexOf('const settingsSections = [')));
   const ids = [...list.matchAll(/id: '([a-z]+)'/g)].map((m) => m[1]);
-  assert.deepEqual(ids, ['general', 'connections', 'storage', 'backups', 'platforms', 'whatsapp', 'audit']);
+  assert.deepEqual(ids, ['general', 'connections', 'storage', 'backups', 'platforms', 'whatsapp', 'feedback', 'audit']);
   for (const gone of ['organization', 'language', 'publishing', 'ai'])
     assert.doesNotMatch(sup, new RegExp(`settingsTab === '${gone}'`), gone);
   assert.doesNotMatch(sup, /REAL_SETTINGS/);

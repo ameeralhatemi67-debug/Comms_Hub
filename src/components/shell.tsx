@@ -37,6 +37,7 @@ import { HelpButton, ToastUndo, UndoButton, useKit } from './kit';
 import { NoticeDrawer, useNotices } from './notices';
 import { useCaps } from './caps';
 import { MaintenanceBanner } from './settings/maintenance-banner';
+import { FeedbackButton, useErrorReporter } from './feedback';
 
 /** The icon of each menu entry; the entries themselves (and who sees them) are in src/lib/access.ts. */
 const menuIcons = {
@@ -113,6 +114,7 @@ export function Shell({ children }: { children: ReactNode }) {
   // «الحسابات» follows «فتح صفحة الحسابات» (Permissions_Plan.md 5), read live from the
   // database; an administrator viewing as another role sees it as that role's leaders do.
   const caps = useCaps();
+  useErrorReporter();
   const visible = menuFor(account, { viewAs: state.role, hasCap: caps.has }).map((e) => [e.href, e.label, menuIcons[e.href]] as const);
   const allowed = (href: string) => visible.some((n) => n[0] === href);
 
@@ -223,6 +225,7 @@ export function Shell({ children }: { children: ReactNode }) {
               </span>
             )}
             <UndoButton />
+            <FeedbackButton />
             <HelpButton />
             <button
               aria-label={notices.unread ? `الإشعارات (${notices.unread} غير مقروءة)` : 'الإشعارات'}

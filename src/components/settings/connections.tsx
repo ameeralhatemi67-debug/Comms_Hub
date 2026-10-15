@@ -24,6 +24,8 @@ export function ConnectionsTab({ initial }: { initial?: { rows: Integration[]; p
   const [rows, setRows] = useState<Integration[]>(initial?.rows ?? []);
   const [present, setPresent] = useState<Present>(initial?.present ?? {});
   const [drive, setDrive] = useState<DriveState>(initial?.drive ?? { state: 'loading' });
+  // Where the Drive refresh token is kept: the vault, or still the server's environment (Action_Plan.md section 5).
+  const [driveToken, setDriveToken] = useState<'vault' | 'env' | 'none' | null>(null);
   const canMail = caps.has('settings.manage') && caps.has('integrations.secrets');
   const canGoogle = caps.has('platforms.manage') && caps.has('integrations.secrets');
   const canDrive = caps.has('storage.manage');
@@ -33,7 +35,10 @@ export function ConnectionsTab({ initial }: { initial?: { rows: Integration[]; p
     if (!ints.error) setRows((ints.data ?? []) as Integration[]);
     void fetch('/api/integrations/config', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((b: { present?: Present } | null) => b?.present && setPresent(b.present))
+      .then((b: { present?: Present; driveToken?: 'vault' | 'env' | 'none' } | null) => {
+        if (b?.present) setPresent(b.present);
+        if (b?.driveToken) setDriveToken(b.driveToken);
+      })
       .catch(() => undefined);
     void fetch('/api/drive/status', { cache: 'no-store' })
       .then((r) => r.json() as Promise<DriveState>)
@@ -57,7 +62,7 @@ export function ConnectionsTab({ initial }: { initial?: { rows: Integration[]; p
       </p>
       <MailBlock row={mail} envPresent={Boolean(present.GMAIL_ADDRESS && present.GMAIL_APP_PASSWORD)} canEdit={canMail} onSaved={load} lock={lock} />
       <AppBlock provider="google" app={google} canSecrets={canGoogle} onSaved={load} lock={lock} />
-      <DriveBlock drive={drive} googleReady={Boolean(google?.has_secret) || Boolean(present.GOOGLE_CLIENT_ID && present.GOOGLE_CLIENT_SECRET)} canConnect={canDrive || Boolean(drive.canConnect)} />
+      <DriveBlock drive={drive} googleReady={Boolean(google?.has_secret) || Boolean(present.GOOGLE_CLIENT_ID && present.GOOGLE_CLIENT_SECRET)} canConnect={canDrive || Boolean(drive.canConnect)} tokenSource={driveToken} canAdopt={caps.has('integrations.secrets')} onAdopted={load} />
       <AppBlock provider="microsoft" app={microsoft} canSecrets={canGoogle} onSaved={load} lock={lock} />
       <OneDriveBlock accounts={onedrives} appReady={Boolean(microsoft?.has_secret)} canConnect={canDrive} onChecked={load} />
     </div>
@@ -132,7 +137,23 @@ function MailBlock({ row, envPresent, canEdit, onSaved, lock }: { row: Integrati
   );
 }
 
-function DriveBlock({ drive, googleReady, canConnect }: { drive: DriveState; googleReady: boolean; canConnect: boolean }) {
+function DriveBlock({ drive, googleReady, canConnect, tokenSource, canAdopt, onAdopted }: { drive: DriveState; googleReady: boolean; canConnect: boolean; tokenSource: 'vault' | 'env' | 'none' | null; canAdopt: boolean; onAdopted: () => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  const [adoptNote, setAdoptNote] = useState<{ ok: boolean; text: string } | null>(null);
+  const adopt = async () => {
+    setBusy(true);
+    setAdoptNote(null);
+    try {
+      const r = await fetch('/api/integrations/drive-adopt', { method: 'POST' });
+      const b = (await r.json().catch(() => ({}))) as { error?: string };
+      setAdoptNote(r.ok ? { ok: true, text: 'نُقل رمز Drive إلى خزنة الأسرار بعد أن قبلته Google. يمكنك الآن حذف GOOGLE_DRIVE_REFRESH_TOKEN من Vercel.' } : { ok: false, text: b.error ?? 'تعذّر النقل.' });
+      if (r.ok) await onAdopted();
+    } catch {
+      setAdoptNote({ ok: false, text: 'تعذّر الوصول إلى الخادم.' });
+    } finally {
+      setBusy(false);
+    }
+  };
   const text =
     drive.state === 'connected'
       ? `متصل${drive.account ? ` بحساب ${drive.account}` : ''}.`
@@ -154,7 +175,23 @@ function DriveBlock({ drive, googleReady, canConnect }: { drive: DriveState; goo
       </div>
       <small className="muted">{text}</small>
       <small className="muted">يحفظ الموقع في Drive ملفات المكتبة ومرفقات البريد في مجلد «Comms Hub». النقل إلى مزود آخر والنسخ الاحتياطي من «التخزين» و«النسخ الاحتياطي».</small>
+      {tokenSource === 'env' && (
+        <small className="muted">
+          رمز Drive الدائم ما زال في متغيرات الخادم (GOOGLE_DRIVE_REFRESH_TOKEN). انقله إلى خزنة الأسرار بضغطة: يفحصه الموقع عند Google أولاً ولا يظهر لأحد.
+        </small>
+      )}
       <div className="actions">
+        {tokenSource === 'env' && (
+          <button
+            type="button"
+            className="primary st-adopt"
+            disabled={busy || !canAdopt}
+            title={canAdopt ? undefined : 'لمن يملك «إدخال أسرار التكاملات وتجديدها».'}
+            onClick={() => void adopt()}
+          >
+            نقل الرمز إلى خزنة الأسرار
+          </button>
+        )}
         {canConnect && googleReady ? (
           <a className="button secondary st-drive-connect" href="/api/drive/connect">
             {drive.state === 'connected' ? 'إعادة ربط حساب Google' : 'ربط Google Drive'}
@@ -165,6 +202,11 @@ function DriveBlock({ drive, googleReady, canConnect }: { drive: DriveState; goo
           </button>
         )}
       </div>
+      {adoptNote && (
+        <p className={adoptNote.ok ? 'ml-hint' : 'ml-err'} role="status">
+          {adoptNote.text}
+        </p>
+      )}
     </section>
   );
 }

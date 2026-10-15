@@ -1,0 +1,472 @@
+{
+  "script": "node --experimental-strip-types qa/help-coverage.mjs",
+  "run": "2026-10-15T10:54:30.681Z",
+  "meaning": "Authored help coverage only. No live account, permissions or user comprehension is tested.",
+  "sourceHashes": {
+    "src/lib/help/pages.ts": "0b8320efd52bf1e8537368b055957ef6a68a7ee4a2535aa4a27d26e181739c25",
+    "src/lib/help/types.ts": "d70e2924115bf6fcbf0c3d23115df9098420bac83ba5c2b570ab89bb9d10c5fa",
+    "src/lib/help/registry.ts": "71156a9c6a74553f9f8868864c7f89f07da30b5667545b2a1b66e3dac7186990",
+    "src/lib/kit/guide.ts": "fdafa42bf940ca03125d8d07d40b2eacf974de7aab28f3d0b809a4eb01fca85f",
+    "src/components/kit.tsx": "eb01431836df9338d2d8f49f0164d8d72c909553438c1edb47fe21b164081904",
+    "src/lib/domain.ts": "aa08a9c8af337045303823620e49d3b567df63858a93a25980f3035ec4f7ac73",
+    "src/lib/access.ts": "f2a8a741195f842426261336d0d846266e4302c35ea72d943059e08a3f632f7b",
+    "src/lib/permissions.ts": "c244363ba783ef864198c6d0c1ee09a8bcbcc21b37ff24660811dbf1c8e08f3a"
+  },
+  "totals": {
+    "pages": 23,
+    "pagesWithRoleSteps": 3,
+    "extraRoleSteps": 5,
+    "roleFilteredCommonSteps": 0,
+    "parts": 236,
+    "authoredActions": 8,
+    "pagesWithDedicatedEmptyText": 3
+  },
+  "roles": [
+    {
+      "key": "director",
+      "name": "مدير الاتصال المؤسسي",
+      "helpGroup": "lead"
+    },
+    {
+      "key": "assistant",
+      "name": "مساعد مدير الاتصال المؤسسي",
+      "helpGroup": "lead"
+    },
+    {
+      "key": "writer",
+      "name": "كاتب المحتوى",
+      "helpGroup": "maker"
+    },
+    {
+      "key": "designer",
+      "name": "المصمم",
+      "helpGroup": "maker"
+    },
+    {
+      "key": "producer",
+      "name": "المنتج الإعلامي",
+      "helpGroup": "maker"
+    },
+    {
+      "key": "publisher",
+      "name": "مسؤول النشر وإدارة الحسابات",
+      "helpGroup": "publisher"
+    },
+    {
+      "key": "member",
+      "name": "عضو",
+      "helpGroup": "member"
+    },
+    {
+      "key": "admin",
+      "name": "Admin",
+      "helpGroup": "lead"
+    }
+  ],
+  "pages": [
+    {
+      "key": "library",
+      "name": "مكتبة الوسائط",
+      "href": "/media",
+      "sources": [
+        "src/components/media/library.tsx",
+        "src/components/media/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 14,
+      "firstUseTips": 5,
+      "authoredActions": 1,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "asset",
+      "name": "صفحة الملف",
+      "href": "/media",
+      "sources": [
+        "src/components/media/asset-page.tsx",
+        "src/components/media/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 12,
+      "firstUseTips": 2,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "tasks",
+      "name": "المهام",
+      "href": "/tasks",
+      "sources": [
+        "src/components/media/tasks-page.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 3,
+      "firstUseTips": 2,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "activity",
+      "name": "سجل النشاط",
+      "href": "/activity",
+      "sources": [
+        "src/components/media/activity-page.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 5,
+      "firstUseTips": 1,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 2
+    },
+    {
+      "key": "mail",
+      "name": "البريد",
+      "href": "/mail",
+      "sources": [
+        "src/components/mail/mail-page.tsx",
+        "src/components/mail/thread.tsx",
+        "src/components/mail/parts.tsx",
+        "src/components/mail/composer.tsx"
+      ],
+      "commonSteps": 4,
+      "roleSteps": {},
+      "parts": 15,
+      "firstUseTips": 6,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "chat",
+      "name": "المراسلة",
+      "href": "/mail/chat",
+      "sources": [
+        "src/components/chat/chat-tab.tsx",
+        "src/components/chat/urgency.tsx",
+        "src/components/chat/whatsapp.tsx",
+        "src/components/mail/mail-page.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 20,
+      "firstUseTips": 6,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "work",
+      "name": "العمل",
+      "href": "/work",
+      "sources": [
+        "src/components/work/list.tsx",
+        "src/components/work/parts.tsx"
+      ],
+      "commonSteps": 4,
+      "roleSteps": {},
+      "parts": 8,
+      "firstUseTips": 5,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "item",
+      "name": "صفحة العمل",
+      "href": "/work",
+      "sources": [
+        "src/components/work/item.tsx",
+        "src/components/work/plan.tsx",
+        "src/components/work/publish.tsx",
+        "src/components/work/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 13,
+      "firstUseTips": 5,
+      "authoredActions": 2,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "create",
+      "name": "إنشاء",
+      "href": "/create",
+      "sources": [
+        "src/components/work/create.tsx",
+        "src/components/work/plan.tsx",
+        "src/components/work/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 10,
+      "firstUseTips": 4,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "approvals",
+      "name": "الموافقات والنشر",
+      "href": "/approvals",
+      "sources": [
+        "src/components/work/approvals.tsx",
+        "src/components/work/publish.tsx",
+        "src/components/work/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {
+        "lead": 1,
+        "publisher": 1
+      },
+      "parts": 8,
+      "firstUseTips": 5,
+      "authoredActions": 1,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "review",
+      "name": "شاشة المراجعة",
+      "href": "/approvals",
+      "sources": [
+        "src/components/work/review.tsx",
+        "src/components/work/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 7,
+      "firstUseTips": 3,
+      "authoredActions": 1,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "channels",
+      "name": "حسابات المنصات",
+      "href": "/channels",
+      "sources": [
+        "src/components/work/channels.tsx",
+        "src/components/work/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {
+        "lead": 1,
+        "publisher": 1
+      },
+      "parts": 5,
+      "firstUseTips": 2,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 2
+    },
+    {
+      "key": "calendar",
+      "name": "التقويم",
+      "href": "/calendar",
+      "sources": [
+        "src/components/work/calendar.tsx",
+        "src/components/work/day-dialogs.tsx",
+        "src/components/work/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 11,
+      "firstUseTips": 5,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "projects",
+      "name": "المشاريع",
+      "href": "/projects",
+      "sources": [
+        "src/components/work/projects.tsx",
+        "src/components/work/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 3,
+      "firstUseTips": 2,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "project",
+      "name": "صفحة المشروع",
+      "href": "/projects",
+      "sources": [
+        "src/components/work/projects.tsx",
+        "src/components/work/list.tsx",
+        "src/components/work/day-dialogs.tsx",
+        "src/components/work/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 4,
+      "firstUseTips": 3,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "requests",
+      "name": "الطلبات",
+      "href": "/requests",
+      "sources": [
+        "src/components/work/requests.tsx",
+        "src/components/work/day-dialogs.tsx",
+        "src/components/work/parts.tsx",
+        "src/components/perm-requests.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 5,
+      "firstUseTips": 4,
+      "authoredActions": 1,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "ideas",
+      "name": "الأفكار",
+      "href": "/ideas",
+      "sources": [
+        "src/components/ideas.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 3,
+      "firstUseTips": 1,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": true,
+      "version": 1
+    },
+    {
+      "key": "analytics",
+      "name": "التحليلات",
+      "href": "/analytics",
+      "sources": [
+        "src/components/work/analytics.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 5,
+      "firstUseTips": 1,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": true,
+      "version": 2
+    },
+    {
+      "key": "motion",
+      "name": "استوديو الحركة",
+      "href": "/motion",
+      "sources": [
+        "src/components/motion-studio.tsx",
+        "src/components/motion-controls.tsx",
+        "src/components/motion-stage.tsx",
+        "src/components/motion-export.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 5,
+      "firstUseTips": 1,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": true,
+      "version": 1
+    },
+    {
+      "key": "home",
+      "name": "الرئيسية",
+      "href": "/",
+      "sources": [
+        "src/components/home.tsx",
+        "src/components/home-perms.tsx",
+        "src/components/work/parts.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {
+        "lead": 1
+      },
+      "parts": 3,
+      "firstUseTips": 2,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 1
+    },
+    {
+      "key": "accounts",
+      "name": "الحسابات",
+      "href": "/accounts",
+      "sources": [
+        "src/components/accounts/page.tsx",
+        "src/components/accounts/members.tsx",
+        "src/components/accounts/card.tsx",
+        "src/components/accounts/roles.tsx",
+        "src/components/accounts/log.tsx",
+        "src/components/perm-requests.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 15,
+      "firstUseTips": 5,
+      "authoredActions": 2,
+      "hasDedicatedEmptyText": false,
+      "version": 2
+    },
+    {
+      "key": "account",
+      "name": "الحساب",
+      "href": "/account",
+      "sources": [
+        "src/components/supporting.tsx",
+        "src/components/profile-editor.tsx",
+        "src/components/my-permissions.tsx",
+        "src/components/whatsapp/member.tsx",
+        "src/components/appearance-panel.tsx"
+      ],
+      "commonSteps": 4,
+      "roleSteps": {},
+      "parts": 12,
+      "firstUseTips": 3,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 2
+    },
+    {
+      "key": "settings",
+      "name": "الإعدادات",
+      "href": "/settings",
+      "sources": [
+        "src/components/supporting.tsx",
+        "src/components/settings/connections.tsx",
+        "src/components/whatsapp/system-panel.tsx",
+        "src/components/settings/general.tsx",
+        "src/components/settings/storage.tsx",
+        "src/components/settings/storage-provider.tsx",
+        "src/components/settings/storage-move.tsx",
+        "src/components/settings/backups.tsx",
+        "src/components/setup-guide.tsx",
+        "src/components/settings/platforms.tsx",
+        "src/components/settings/audit.tsx"
+      ],
+      "commonSteps": 3,
+      "roleSteps": {},
+      "parts": 50,
+      "firstUseTips": 6,
+      "authoredActions": 0,
+      "hasDedicatedEmptyText": false,
+      "version": 5
+    }
+  ]
+}

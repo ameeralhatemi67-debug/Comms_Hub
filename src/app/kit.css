@@ -104,3 +104,17 @@ main.guide-view-open>:not(#guide-view){display:none!important}
   .gd-pop{width:min(420px,calc(100vw - 16px));padding:16px}
   #gd-bar,.gd-bar{flex-wrap:wrap;gap:8px}
 }
+
+/* Feedback channel (Action_Plan.md section 5): the top-bar button, the note dialog and the inbox. */
+.fb-open{min-width:42px;padding:9px}
+.fb-form{display:grid;gap:12px}
+.fb-kinds{display:flex;flex-wrap:wrap;gap:8px}
+.fb-kinds label{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:7px;cursor:pointer;background:var(--surface)}
+.fb-kinds label.on{border-color:var(--green);background:var(--soft)}
+.fb-text{width:100%;padding:10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);resize:vertical}
+.fb-filters{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0}
+.fb-filters label{display:grid;gap:4px;font-size:13px}
+.fb-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.fb-item{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+.fb-item.new{border-inline-start:3px solid var(--accent)}
+.fb-body{color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere}

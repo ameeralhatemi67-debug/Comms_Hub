@@ -87,6 +87,8 @@ export function WorkProvider({ children }: { children: ReactNode }) {
     if (!ran.current) {
       ran.current = true;
       await db.rpc('work_due_run');
+      // Also once per visit: tells the holders of the secrets right that an app's secret is near its end.
+      await db.rpc('integration_expiry_notes');
     }
     const [p, l, j, a, t, pl] = await Promise.all([
       db.rpc('media_people'),

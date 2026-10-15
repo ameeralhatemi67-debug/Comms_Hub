@@ -1,0 +1,10 @@
+{
+  "run": "2026-10-15",
+  "what": "Database rule run for the feedback channel and error monitoring (Action_Plan.md section 5)",
+  "script": "supabase/tests/feedback_errors_rules.sql",
+  "migrations": ["supabase/migrations/20261015240000_feedback_errors.sql (applied as feedback_errors)"],
+  "how": "One transaction against the Supabase project comms-hub, aborted at the end by a raised exception that carried the result out (nothing committed). Four throwaway accounts (@t.test).",
+  "total": 32,
+  "passed": 32,
+  "failed": []
+}

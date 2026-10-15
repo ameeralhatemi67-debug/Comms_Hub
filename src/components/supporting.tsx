@@ -21,6 +21,7 @@ import { StorageTab } from './settings/storage';
 import { BackupsTab } from './settings/backups';
 import { PlatformsTab } from './settings/platforms';
 import { ConnectionsTab } from './settings/connections';
+import { FeedbackTab } from './feedback';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
@@ -47,6 +48,7 @@ const settingsSections = [
   { id: 'backups', label: 'النسخ الاحتياطي' },
   { id: 'platforms', label: 'المنصات' },
   { id: 'whatsapp', label: 'واتساب النظام' },
+  { id: 'feedback', label: 'ملاحظات وأخطاء' },
   { id: 'audit', label: 'السجل' },
 ];
 
@@ -97,6 +99,11 @@ export function Supporting({ page }: { page: string }) {
         {settingsTab === 'audit' && (
           <Panel title="سجل التكاملات والإعدادات" className="st-panel">
             <AuditTab />
+          </Panel>
+        )}
+        {settingsTab === 'feedback' && (
+          <Panel title="ملاحظات وأخطاء" className="st-panel">
+            <FeedbackTab />
           </Panel>
         )}
         {settingsTab === 'whatsapp' && (

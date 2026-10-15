@@ -7,7 +7,7 @@
 // (reference/comms-hub-reference-v5.html).
 import type { Role } from '../domain.ts';
 import { dbErrorText } from '../media/rules.ts';
-import { BUILTIN_LIMITS, limitsToAccepts } from '../platforms/limits.ts';
+import { BUILTIN_LIMITS, ENFORCED_AR, limitsToAccepts } from '../platforms/limits.ts';
 
 export type WorkType = 'post' | 'video' | 'design' | 'announce' | 'email' | 'press' | 'event';
 export type WorkStatus =
@@ -928,6 +928,9 @@ export function noticeHref(go: { page?: string; id?: string; tab?: string } | nu
     // page; the people, roles, requests and log are on «الحسابات».
     case 'profile':
       return '/account';
+    // An app's secret is about to expire (integration_expiry_notes): the Director's «الاتصالات» tab.
+    case 'settings':
+      return g.tab ? `/settings?tab=${g.tab}` : '/settings';
     case 'members':
       return g.tab ? `/accounts?tab=${g.tab}` : g.id ? `/accounts?person=${encodeURIComponent(g.id)}` : '/accounts';
     default:
@@ -955,6 +958,7 @@ const ERRORS: Record<string, string> = {
   PROJECT_INVALID: 'المشروع غير موجود.',
   ACCOUNT_INVALID: 'أحد الحسابات موقوف أو غير موجود.',
   CHANNEL_REQUIRED: 'اختر حساباً واحداً على الأقل.',
+  COPY_OVER_LIMIT: 'نسخة أحد الحسابات تتجاوز حد منصتها. افتح الإرسال لترى أي منصة وأي حد.',
   YOUTUBE_VIDEO_ONLY: 'أحد الحسابات المختارة (مثل يوتيوب) يقبل الفيديو فقط. أضف فيديو من المكتبة أو أزل ذلك الحساب.',
   PLATFORM_IN_USE: 'عليها حسابات أو نسخ نصوص، فلا تُوقف ولا تُحذف قبل أن تخلو.',
   PLATFORM_BUILTIN: 'منصة أساسية في المركز: لا تُحذف ولا يتغير اسمها.',
@@ -1006,6 +1010,12 @@ const ERRORS: Record<string, string> = {
 };
 export function workErrorText(message: string | null | undefined): string {
   const m = message ?? '';
+  // The database names the platform and the first broken limit: «COPY_OVER_LIMIT: instagram TOO_LONG».
+  const over = /COPY_OVER_LIMIT:\s*(\S+)\s+([A-Z_]+)/.exec(m);
+  if (over) {
+    const why = ENFORCED_AR[over[2]];
+    return `نسخة ${labelOf(over[1])} تتجاوز حد المنصة${why ? `: ${why}` : ''}. صحّحها في الإرسال قبل الجدولة أو النشر.`;
+  }
   const code = Object.keys(ERRORS).sort((a, b) => b.length - a.length).find((k) => m.includes(k));
   // A file approved from a work page goes through the library's guard, which words its own codes.
   return code ? ERRORS[code] : dbErrorText(m);

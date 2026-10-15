@@ -205,7 +205,9 @@ platform's own sign-in, the token in Vault, the authorisation equal to the token
 a health check recorded in the account's row. Publishing is still a simulation. A platform
 copy is checked against its platform's limits (data in `platforms.accepts`, with a stated source
 and date) by `src/lib/platforms/limits.ts`; the interface stops the send step on a broken limit,
-and the database enforces only `video_only`. Never put a token, an app secret or a
+and since 2026-10-15 (C4) the database refuses it too (`work_copy_issues`, called by `work_schedule`,
+`work_publish` and the due run; the rule exists once in `src/lib/platforms/limits.ts` and once in SQL,
+held equal by `tests/limits-parity.test.mjs` and `supabase/tests/limits_rules.sql`). Never put a token, an app secret or a
 platform's response body in a log, a URL, an event or a notification.
 
 Integrations, storage providers and backups are real, by owner directive of 2026-10-14

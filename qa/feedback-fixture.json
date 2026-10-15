@@ -1,0 +1,58 @@
+{
+  "script": "qa/feedback-fixture.cjs",
+  "run": "2026-10-15T11:00:56.556Z",
+  "checks": [
+    {
+      "name": "1280: the note dialog fits the screen with no sideways overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"dialogInside\":true,\"textInside\":true,\"kinds\":3,\"minButton\":43.796875,\"textRows\":5}"
+    },
+    {
+      "name": "1280: the text box is inside the dialog",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1280: three kinds and buttons at least 42px high",
+      "pass": true,
+      "detail": "43.796875"
+    },
+    {
+      "name": "1280: the inbox lists notes and errors, new ones marked, no sideways overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"items\":4,\"newMarked\":2,\"inside\":true,\"counter\":\"خطأ في الصفحة · تكرر 7 مرة\"}"
+    },
+    {
+      "name": "1280: a repeated error shows its counter",
+      "pass": true,
+      "detail": "خطأ في الصفحة · تكرر 7 مرة"
+    },
+    {
+      "name": "390: the note dialog fits the screen with no sideways overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"dialogInside\":true,\"textInside\":true,\"kinds\":3,\"minButton\":43.796875,\"textRows\":5}"
+    },
+    {
+      "name": "390: the text box is inside the dialog",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: three kinds and buttons at least 42px high",
+      "pass": true,
+      "detail": "43.796875"
+    },
+    {
+      "name": "390: the inbox lists notes and errors, new ones marked, no sideways overflow",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"items\":4,\"newMarked\":2,\"inside\":true,\"counter\":\"خطأ في الصفحة · تكرر 7 مرة\"}"
+    },
+    {
+      "name": "390: a repeated error shows its counter",
+      "pass": true,
+      "detail": "خطأ في الصفحة · تكرر 7 مرة"
+    }
+  ],
+  "total": 10,
+  "passed": 10
+}

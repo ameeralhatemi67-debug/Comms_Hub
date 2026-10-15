@@ -7,6 +7,7 @@ import { forgetCreds } from '@/lib/integrations/vault';
 import { isProvider, json } from '@/lib/platforms/route';
 import { APP_TYPE } from '@/lib/platforms/oauth';
 import { serverClient } from '@/lib/supabase/server';
+import { expiryInputOk, riyadhToday } from '@/lib/integrations/expiry';
 
 // Enters a platform app's id and secret (Meta, TikTok, Google for YouTube and Drive, LinkedIn, X)
 // once, into the vault. The secret is write-only: it is asked of the platform first where the
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
   if (!g.ok) return g.response;
   if (!vaultReachable()) return fail(503, 'خزنة الأسرار غير متاحة: مفتاح الخادم غير مضبوط.');
 
-  const body = (await request.json().catch(() => null)) as { provider?: unknown; app_id?: unknown; secret?: unknown; scopes?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { provider?: unknown; app_id?: unknown; secret?: unknown; scopes?: unknown; secret_expires_on?: unknown } | null;
   if (!body || !isProvider(body.provider)) return fail(400, 'اختر منصة التطبيق.');
   const provider = body.provider;
   const appId = typeof body.app_id === 'string' ? body.app_id.trim() : '';
@@ -39,6 +40,10 @@ export async function POST(request: Request) {
     provider === 'tiktok' && Array.isArray(body.scopes) && body.scopes.every((s) => typeof s === 'string' && /^[a-z_.]{3,60}$/.test(s)) && body.scopes.length <= 12
       ? (body.scopes as string[])
       : null;
+
+  // The date the secret was made to last until (optional): the site reminds before it.
+  const rawExpiry = typeof body.secret_expires_on === 'string' ? body.secret_expires_on.trim() : '';
+  if (rawExpiry && !expiryInputOk(rawExpiry, riyadhToday())) return fail(400, 'تاريخ انتهاء السر غير صحيح. اكتب تاريخاً قريباً بصيغة سنة-شهر-يوم.');
 
   const db = await serverClient();
   const allowed = await Promise.all([db.rpc('has_capability', { p_cap: 'platforms.manage', p_scope: null }), db.rpc('has_capability', { p_cap: 'integrations.secrets', p_scope: null })]);
@@ -66,7 +71,7 @@ export async function POST(request: Request) {
     p_key: serverKeyOrNull(),
     p_type: APP_TYPE[provider],
     p_label: LABEL[provider],
-    p_config: { app_id: appId, ...(scopes ? { scopes } : provider === 'tiktok' ? { scopes: [...TIKTOK_SCOPES] } : {}) },
+    p_config: { app_id: appId, ...(scopes ? { scopes } : provider === 'tiktok' ? { scopes: [...TIKTOK_SCOPES] } : {}), ...(rawExpiry ? { secret_expires_on: rawExpiry } : {}) },
     p_secret: secret,
   });
   if (error) return fail(error.message.includes('FORBIDDEN') ? 403 : 400, 'تعذّر حفظ السر.');

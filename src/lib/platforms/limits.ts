@@ -277,3 +277,23 @@ export const layoutOf = (key: string): Layout => LAYOUTS[key] ?? 'feed';
 
 /** The Arabic words of one issue code's level, for a badge. */
 export const LEVEL_AR: Record<Level, string> = { error: 'يمنع النشر', warn: 'تنبيه', info: 'للعلم' };
+
+/**
+ * The error-level codes of checkCopy that the database also enforces at the send step
+ * (work_copy_issues, supabase/migrations/*limits_enforced*), in short Arabic for the refusal.
+ */
+export const ENFORCED_AR: Record<string, string> = {
+  EMPTY: 'لا نص ولا ملف',
+  TITLE_TOO_LONG: 'العنوان (السطر الأول) أطول من الحد',
+  NO_TITLE: 'السطر الأول فارغ وهو العنوان',
+  TITLE_BRACKETS: 'العنوان فيه < أو >',
+  DESCRIPTION_TOO_LONG: 'الوصف أطول من الحد',
+  DESCRIPTION_BRACKETS: 'الوصف فيه < أو >',
+  TOO_LONG: 'النص أطول من الحد',
+  TOO_MANY_HASHTAGS: 'وسوم أكثر من الحد',
+  TOO_MANY_IMAGES: 'صور أكثر من الحد',
+  TOO_MANY_VIDEOS: 'ملفات فيديو أكثر من الحد',
+  TOO_MANY_MEDIA: 'عناصر أكثر من الحد',
+  MIXED_MEDIA: 'صور وفيديو معاً',
+  VIDEO_REQUIRED: 'تقبل الفيديو فقط',
+};
