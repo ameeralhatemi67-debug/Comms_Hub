@@ -70,11 +70,11 @@ test('a Drive error is a storage error, so any provider can be caught the same w
   assert.equal(e.message, 'DRIVE_404');
 });
 
-test('the library, mail and chat roles have a provider; backup has none yet', () => {
+test('the library, mail and chat roles have a provider; backup has none yet', async () => {
   assert.deepEqual([...SERVED_ROLES], ['library', 'mail', 'chat']);
   for (const r of SERVED_ROLES) assert.equal(storageFor(r).type, 'google_drive');
   assert.throws(() => storageFor('backup'), (e) => e instanceof StorageError && e.status === 503);
-  assert.equal(storageConfigured('backup'), false);
+  assert.equal(await storageConfigured('backup'), false);
 });
 
 test('the routes that serve and change files go through the role map, not Drive by name', () => {

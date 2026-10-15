@@ -8,7 +8,7 @@ import { MAIL_ATTACH_BYTES } from '@/lib/mail/rules';
 export async function POST(request: Request) {
   const g = await guard(request, { mutating: true, page: 'mail' });
   if (!g.ok) return g.response;
-  if (!storageConfigured('mail')) return fail(503, 'لم يُربط Google Drive بعد، فلا تُرفق ملفات من الجهاز.');
+  if (!(await storageConfigured('mail'))) return fail(503, 'لم يُربط Google Drive بعد، فلا تُرفق ملفات من الجهاز.');
 
   const body = (await request.json().catch(() => null)) as { name?: unknown; mimeType?: unknown; size?: unknown } | null;
   if (!body || typeof body.name !== 'string' || typeof body.mimeType !== 'string' || typeof body.size !== 'number')

@@ -22,7 +22,7 @@ import {
   platformEventLine,
 } from '@/lib/platforms/info';
 import { limitsOf, limitsToAccepts } from '@/lib/platforms/limits';
-import { providerOf, type ConnProvider } from '@/lib/platforms/provider';
+import { APP_INTEGRATION_TYPE, CONN_PROVIDERS, providerOf, type ConnProvider } from '@/lib/platforms/provider';
 import { STATE_AR, STATE_TONE, type Integration } from '@/lib/integrations/rules';
 import type { PlatformInfo, PublishMode, Readiness } from '@/lib/work/rules';
 import { useCaps } from '../caps';
@@ -65,7 +65,7 @@ export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; im
     const ints = await db.rpc('int_list');
     if (!ints.error) {
       const rows = (ints.data ?? []) as Integration[];
-      setApps({ meta: rows.find((r) => r.type === 'meta_app'), tiktok: rows.find((r) => r.type === 'tiktok_app') });
+      setApps(Object.fromEntries(CONN_PROVIDERS.map((p) => [p, rows.find((r) => r.type === APP_INTEGRATION_TYPE[p])])) as Partial<Record<ConnProvider, Integration>>);
     }
   }, []);
   useEffect(() => {
@@ -567,10 +567,28 @@ const PROVIDER_COPY: Record<ConnProvider, { name: string; idLabel: string; secre
     secretLabel: 'سر العميل (Client secret)',
     where: 'من TikTok for Developers، تطبيقك، «App details».',
   },
+  google: {
+    name: 'تطبيق Google (يوتيوب وDrive)',
+    idLabel: 'معرّف العميل (Client ID)',
+    secretLabel: 'سر العميل (Client secret)',
+    where: 'من Google Cloud Console، «APIs & Services» ثم «Credentials»، عميل OAuth من نوع «Web application». هذا التطبيق نفسه يخدم ربط قناة يوتيوب واتصال Google Drive.',
+  },
+  linkedin: {
+    name: 'تطبيق LinkedIn',
+    idLabel: 'معرّف العميل (Client ID)',
+    secretLabel: 'سر العميل (Primary Client Secret)',
+    where: 'من LinkedIn Developers، تطبيقك، تبويب «Auth».',
+  },
+  x: {
+    name: 'تطبيق X',
+    idLabel: 'معرّف العميل (OAuth 2.0 Client ID)',
+    secretLabel: 'سر العميل (OAuth 2.0 Client Secret)',
+    where: 'من X Developer Portal، تطبيقك، «Keys and tokens»، قسم OAuth 2.0.',
+  },
 };
 
 /** The platform app's credentials: entered once, checked with the platform, kept in the vault, never read back. */
-function AppBlock({ provider, app, canSecrets, onSaved, lock }: { provider: ConnProvider; app: Integration | undefined; canSecrets: boolean; onSaved: () => Promise<void>; lock: (why: string) => ReturnType<typeof needProps> }) {
+export function AppBlock({ provider, app, canSecrets, onSaved, lock }: { provider: ConnProvider; app: Integration | undefined; canSecrets: boolean; onSaved: () => Promise<void>; lock: (why: string) => ReturnType<typeof needProps> }) {
   const c = PROVIDER_COPY[provider];
   const [id, setId] = useState('');
   const [secret, setSecret] = useState('');
@@ -617,6 +635,11 @@ function AppBlock({ provider, app, canSecrets, onSaved, lock }: { provider: Conn
       <small className="muted">
         عنوان العودة الذي تسجّله في لوحة المطوّرين: <bdi dir="ltr">{redirect}</bdi>
       </small>
+      {provider === 'google' && (
+        <small className="muted">
+          وعنوان العودة لـ Google Drive، في القائمة نفسها: <bdi dir="ltr">{origin}/api/drive/callback</bdi>
+        </small>
+      )}
       <div className="wk-two">
         <label className="l">
           {c.idLabel}

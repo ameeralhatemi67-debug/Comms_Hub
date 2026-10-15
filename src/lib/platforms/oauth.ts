@@ -22,14 +22,43 @@ const TIKTOK_API = 'https://open.tiktokapis.com/v2';
 /** user.info.basic reads the profile (health); video.publish posts directly; video.upload sends a draft. */
 export const TIKTOK_SCOPES = ['user.info.basic', 'video.publish', 'video.upload'] as const;
 
-export type Provider = 'meta' | 'tiktok';
-export const APP_TYPE: Record<Provider, 'meta_app' | 'tiktok_app'> = { meta: 'meta_app', tiktok: 'tiktok_app' };
-export const OFFER_TYPE: Record<Provider, 'meta_user' | 'tiktok_user_offer'> = { meta: 'meta_user', tiktok: 'tiktok_user_offer' };
+export type Provider = 'meta' | 'tiktok' | 'google' | 'linkedin' | 'x';
+export const APP_TYPE: Record<Provider, string> = {
+  meta: 'meta_app',
+  tiktok: 'tiktok_app',
+  google: 'google_app',
+  linkedin: 'linkedin_app',
+  x: 'x_app',
+};
+export const OFFER_TYPE: Record<Provider, string> = {
+  meta: 'meta_user',
+  tiktok: 'tiktok_user_offer',
+  google: 'google_user_offer',
+  linkedin: 'linkedin_user_offer',
+  x: 'x_user_offer',
+};
 /** The account type each registry platform connects as. */
-export const ACCOUNT_TYPE: Record<string, { provider: Provider; type: 'meta_page' | 'meta_instagram' | 'tiktok_user' }> = {
+export const ACCOUNT_TYPE: Record<string, { provider: Provider; type: string }> = {
   facebook: { provider: 'meta', type: 'meta_page' },
   instagram: { provider: 'meta', type: 'meta_instagram' },
   tiktok: { provider: 'tiktok', type: 'tiktok_user' },
+  youtube: { provider: 'google', type: 'youtube_channel' },
+  linkedin: { provider: 'linkedin', type: 'linkedin_member' },
+  x: { provider: 'x', type: 'x_user' },
+};
+/** Which provider an integration type of an account (or of a passing offer) belongs to. */
+export const PROVIDER_OF_TYPE: Record<string, Provider> = {
+  meta_page: 'meta',
+  meta_instagram: 'meta',
+  meta_user: 'meta',
+  tiktok_user: 'tiktok',
+  tiktok_user_offer: 'tiktok',
+  youtube_channel: 'google',
+  google_user_offer: 'google',
+  linkedin_member: 'linkedin',
+  linkedin_user_offer: 'linkedin',
+  x_user: 'x',
+  x_user_offer: 'x',
 };
 export const providerOf = (platform: string): Provider | null => ACCOUNT_TYPE[platform]?.provider ?? null;
 
@@ -46,7 +75,7 @@ export class PlatformCallError extends Error {
 
 const TIMEOUT = 12_000;
 
-async function getJson(f: Fetch, url: string, init?: RequestInit): Promise<{ status: number; body: Record<string, unknown> }> {
+export async function getJson(f: Fetch, url: string, init?: RequestInit): Promise<{ status: number; body: Record<string, unknown> }> {
   let res: Response;
   try {
     res = await f(url, { ...init, signal: AbortSignal.timeout(TIMEOUT), cache: 'no-store' });
@@ -76,7 +105,7 @@ export function metaErrorCode(body: Record<string, unknown>, status = 400): stri
   return 'PLATFORM_ERROR';
 }
 
-const qs = (o: Record<string, string>) => new URLSearchParams(o).toString();
+export const qs = (o: Record<string, string>) => new URLSearchParams(o).toString();
 const toIso = (unixSeconds: unknown): string | null => {
   const n = Number(unixSeconds);
   return Number.isFinite(n) && n > 0 ? new Date(n * 1000).toISOString() : null;

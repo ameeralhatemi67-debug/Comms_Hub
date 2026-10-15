@@ -31,6 +31,27 @@ export async function GET(request: Request) {
     });
   }
 
+  if (offer.type === 'google_user_offer') {
+    const channels = Array.isArray(offer.config.channels) ? (offer.config.channels as { id?: string; title?: string; handle?: string | null }[]) : [];
+    return json({
+      provider: 'google',
+      candidates: channels
+        .filter((c) => typeof c.id === 'string')
+        .map((c) => ({ platform: 'youtube', id: String(c.id), name: String(c.title ?? c.id), handle: c.handle ? String(c.handle) : null, parent: null, canPost: true })),
+    });
+  }
+  if (offer.type === 'linkedin_user_offer') {
+    const c = offer.config;
+    return json({ provider: 'linkedin', candidates: [{ platform: 'linkedin', id: String(c.sub ?? ''), name: String(c.name ?? 'عضو LinkedIn'), handle: null, parent: null, canPost: true }] });
+  }
+  if (offer.type === 'x_user_offer') {
+    const c = offer.config;
+    return json({
+      provider: 'x',
+      candidates: [{ platform: 'x', id: String(c.user_id ?? ''), name: String(c.name ?? 'حساب X'), handle: c.username ? `@${String(c.username)}` : null, parent: null, canPost: true }],
+    });
+  }
+
   const token = await loadSecret(g.db, id, 'قائمة صفحات للاختيار');
   if (!token) return fail(404, 'انتهت صلاحية الربط. ابدأ من جديد.');
   try {

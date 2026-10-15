@@ -7,18 +7,33 @@ import { useEffect, useState } from 'react';
 import { Check, TriangleAlert } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import { connErrorAr } from '@/lib/platforms/info';
+import { PROVIDER_NAME, type ConnProvider } from '@/lib/platforms/provider';
 import { platformLabels } from '@/lib/work/rules';
 import { useWork } from './data';
 import { Hint, Ic, Modal } from './parts';
 import { staffOf } from './plan';
 
-type Candidate = { platform: 'facebook' | 'instagram' | 'tiktok'; id: string; name: string; handle: string | null; parent: string | null; canPost?: boolean };
+type Candidate = { platform: 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'linkedin' | 'x'; id: string; name: string; handle: string | null; parent: string | null; canPost?: boolean };
 type Result = { platform: string; id: string; ok: boolean; account?: string; error?: string; missing?: string[] };
 export const RECONNECT_KEY = 'hub_platform_reconnect';
 
-const PROVIDER_AR = { meta: 'Meta (فيسبوك وإنستغرام)', tiktok: 'TikTok' } as const;
+const PROVIDER_AR: Record<ConnProvider, string> = {
+  meta: 'Meta (فيسبوك وإنستغرام)',
+  tiktok: PROVIDER_NAME.tiktok,
+  google: 'Google (قنوات يوتيوب)',
+  linkedin: PROVIDER_NAME.linkedin,
+  x: PROVIDER_NAME.x,
+};
+/** What to check when a sign-in offers nothing to connect, per provider. */
+const EMPTY_AR: Record<ConnProvider, string> = {
+  meta: 'لا صفحة ولا حساب يمكن ربطه بهذا الدخول. يلزم أن تدير صفحة فيسبوك، وأن يكون حساب إنستغرام احترافياً ومربوطاً بصفحة.',
+  tiktok: 'لا حساب يمكن ربطه بهذا الدخول.',
+  google: 'لا قناة يوتيوب لهذا الحساب. أنشئ قناة على يوتيوب بهذا الحساب أولاً ثم أعد الربط.',
+  linkedin: 'لا ملف يمكن ربطه بهذا الدخول.',
+  x: 'لا حساب يمكن ربطه بهذا الدخول.',
+};
 
-export function ConnectChooser({ provider, offer, onClose, onDone }: { provider: 'meta' | 'tiktok'; offer: string; onClose: () => void; onDone: () => void }) {
+export function ConnectChooser({ provider, offer, onClose, onDone }: { provider: ConnProvider; offer: string; onClose: () => void; onDone: () => void }) {
   const w = useWork();
   const [cands, setCands] = useState<Candidate[] | null>(null);
   const [err, setErr] = useState('');
@@ -110,7 +125,7 @@ export function ConnectChooser({ provider, offer, onClose, onDone }: { provider:
             سجّلت الدخول عند المنصة نفسها. اختر ما يُربط: يُحفظ رمز كل حساب في خزنة الأسرار على الخادم وحده، ولا يظهر هنا ولا في أي صفحة. صلاحية الربط تأتي من المنصة وتنتهي بانتهاء رمزها.
           </Hint>
           {cands.length === 0 && (
-            <Hint warn>لا صفحة ولا حساب يمكن ربطه بهذا الدخول. يلزم أن تدير صفحة فيسبوك، وأن يكون حساب إنستغرام احترافياً ومرتبطاً بها.</Hint>
+            <Hint warn>{EMPTY_AR[provider]}</Hint>
           )}
           <div className="wk-pick" role="group" aria-label="ما يُربط">
             {cands.map((c) => (

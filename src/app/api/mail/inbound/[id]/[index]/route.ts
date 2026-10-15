@@ -1,6 +1,6 @@
 import { guard, fail } from '@/lib/drive/guard';
 import { isUuid } from '@/lib/drive/parents';
-import { inboundAttachment, mailboxConfigured, readMailEnv } from '@/lib/mail/gmail';
+import { inboundAttachment, mailboxConfigured, resolveMailEnv } from '@/lib/mail/gmail';
 import { serverClient } from '@/lib/supabase/server';
 
 // An attachment of mail received from outside. It stays in Gmail; the server reads it
@@ -11,7 +11,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const { id, index } = await params;
   const i = Number(index);
   if (!isUuid(id) || !Number.isInteger(i) || i < 0 || i > 50) return fail(404, 'غير موجود.');
-  const env = readMailEnv();
+  const env = await resolveMailEnv();
   if (!mailboxConfigured(env)) return fail(503, 'صندوق القسم غير متصل.');
 
   const supabase = await serverClient();

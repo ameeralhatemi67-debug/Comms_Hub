@@ -14,7 +14,7 @@ import { roles } from '@/lib/domain';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { accountName, accountState, isLead, canPublish, platformLabels, statusLabels, VIDEO_ONLY, type AccountRow, type Platform } from '@/lib/work/rules';
 import { MODE_AR, READINESS_AR, connErrorAr } from '@/lib/platforms/info';
-import { providerOf } from '@/lib/platforms/provider';
+import { CONN_PROVIDERS, PROVIDER_NAME, providerOf, type ConnProvider } from '@/lib/platforms/provider';
 import { useWork, useWorkList, type ListItem } from './data';
 import { ConnectChooser, RECONNECT_KEY, connLine } from './connect';
 import { Empty, Hint, Ic, Modal } from './parts';
@@ -28,7 +28,7 @@ export function ChannelsPage() {
   const mgr = isLead(w.role);
   const pub = canPublish(w.role);
   const [dlg, setDlg] = useState<{ t: 'edit'; a: AccountRow | null } | { t: 'delete'; a: AccountRow } | null>(null);
-  const [choose, setChoose] = useState<{ provider: 'meta' | 'tiktok'; offer: string } | null>(null);
+  const [choose, setChoose] = useState<{ provider: ConnProvider; offer: string } | null>(null);
   const [connNote, setConnNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [checking, setChecking] = useState(false);
   const router = useRouter();
@@ -41,8 +41,8 @@ export function ChannelsPage() {
     const provider = params.get('connect');
     const offer = params.get('offer');
     const error = params.get('connect_error');
-    if (provider && offer && (provider === 'meta' || provider === 'tiktok')) {
-      setChoose({ provider, offer });
+    if (provider && offer && (CONN_PROVIDERS as readonly string[]).includes(provider)) {
+      setChoose({ provider: provider as ConnProvider, offer });
       router.replace('/channels');
     } else if (error) {
       setConnNote({ ok: false, text: connErrorAr(error) || 'لم يكتمل الربط.' });
@@ -76,7 +76,7 @@ export function ChannelsPage() {
       setChecking(false);
     }
   };
-  const startConnect = (provider: 'meta' | 'tiktok', a?: AccountRow) => {
+  const startConnect = (provider: ConnProvider, a?: AccountRow) => {
     try {
       if (a?.external_id) sessionStorage.setItem(RECONNECT_KEY, JSON.stringify({ account: a.id, external_id: a.external_id }));
       else sessionStorage.removeItem(RECONNECT_KEY);
@@ -172,7 +172,7 @@ export function ChannelsPage() {
                 {mgr && info.enabled && providerOf(pl) && (
                   <button type="button" className="wk-btn sm" onClick={() => startConnect(providerOf(pl)!)}>
                     <Ic i={Link2} />
-                    ربط عبر {providerOf(pl) === 'meta' ? 'Meta' : 'TikTok'}
+                    ربط عبر {PROVIDER_NAME[providerOf(pl)!]}
                   </button>
                 )}
               </h3>

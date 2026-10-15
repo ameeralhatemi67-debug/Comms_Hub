@@ -5,7 +5,7 @@
 //
 // New uploads still go to the role's provider, Google Drive: changing a role's provider is not
 // offered, and the plan's step 6.3 moves existing files only.
-import { driveConfigured, getDrive } from '../drive/google.ts';
+import { driveConfigured, getDrive, resolveDriveEnv } from '../drive/google.ts';
 import { storageServing, vaultSecretById, type ServedCopy } from '../integrations/vault.ts';
 import { driveStorage } from './drive.ts';
 import { StorageError, type StorageProvider, type StorageRole } from './provider.ts';
@@ -24,8 +24,8 @@ export function storageFor(role: StorageRole): StorageProvider {
 }
 
 /** The provider for this role is set up and may hold a token (not proof that it works). */
-export function storageConfigured(role: StorageRole): boolean {
-  return SERVED_ROLES.includes(role) && driveConfigured();
+export async function storageConfigured(role: StorageRole): Promise<boolean> {
+  return SERVED_ROLES.includes(role) && driveConfigured(await resolveDriveEnv());
 }
 
 // A second provider's connection, kept in this process for a minute so a burst of reads

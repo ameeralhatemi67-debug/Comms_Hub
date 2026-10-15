@@ -6,12 +6,14 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { serverKeyOrNull } from '../integrations/vault.ts';
 import {
   APP_TYPE,
+  PROVIDER_OF_TYPE,
   metaAccountHealth,
   tiktokAccountHealth,
   type Fetch,
   type Health,
   type Provider,
 } from './oauth.ts';
+import { googleAccountHealth, linkedinAccountHealth, xAccountHealth } from './oauth2.ts';
 
 export type AppCreds = { id: string; appId: string; secret: string; scopes: string[] | null };
 
@@ -42,7 +44,7 @@ export type CheckResult = { id: string; state: string | null; error: string | nu
 /** One account's check, made and recorded. Never throws: a failure to check is an `error` state. */
 export async function checkAccount(db: SupabaseClient, f: Fetch, apps: Partial<Record<Provider, AppCreds | null>>, a: DueAccount): Promise<CheckResult> {
   const key = serverKeyOrNull();
-  const provider: Provider = a.type === 'tiktok_user' ? 'tiktok' : 'meta';
+  const provider: Provider = PROVIDER_OF_TYPE[a.type] ?? 'meta';
   const app = apps[provider];
   const record = async (h: Health) => {
     const { data, error } = await db.rpc('platform_conn_health', {
@@ -60,10 +62,12 @@ export async function checkAccount(db: SupabaseClient, f: Fetch, apps: Partial<R
   const secret = await loadSecret(db, a.integration, 'فحص اتصال حساب');
   if (!secret) return record({ ok: false, error: 'NOT_CONNECTED', expiresAt: null, scopes: [], newSecret: null });
   try {
-    const h =
-      provider === 'tiktok'
-        ? await tiktokAccountHealth(f, { clientKey: app.appId, secret: app.secret, packed: secret })
-        : await metaAccountHealth(f, { appId: app.appId, secret: app.secret, objectId: a.external_id ?? '', token: secret, instagram: a.type === 'meta_instagram' });
+    let h: Health;
+    if (provider === 'tiktok') h = await tiktokAccountHealth(f, { clientKey: app.appId, secret: app.secret, packed: secret });
+    else if (provider === 'google') h = await googleAccountHealth(f, { clientId: app.appId, secret: app.secret, packed: secret, externalId: a.external_id });
+    else if (provider === 'linkedin') h = await linkedinAccountHealth(f, { packed: secret, externalId: a.external_id });
+    else if (provider === 'x') h = await xAccountHealth(f, { clientId: app.appId, secret: app.secret, packed: secret, externalId: a.external_id });
+    else h = await metaAccountHealth(f, { appId: app.appId, secret: app.secret, objectId: a.external_id ?? '', token: secret, instagram: a.type === 'meta_instagram' });
     return record(h);
   } catch {
     return record({ ok: false, error: 'UNREACHABLE', expiresAt: null, scopes: [], newSecret: null });

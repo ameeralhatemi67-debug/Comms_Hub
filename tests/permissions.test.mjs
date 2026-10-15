@@ -55,16 +55,26 @@ test('approval and publishing are fixed by the reference and explain why (D-9)',
   assert.deepEqual(CAPABILITIES.find((x) => x.key === 'approve.own').fixedRoles, [], 'nobody approves what they sent');
 });
 
-test('installed role templates equal the rules before the engine', () => {
+test('installed role templates equal what the migrations leave in role_capabilities', () => {
   const grantable = CAPABILITIES.filter((c) => c.grantable && c.scope !== 'page').map((c) => c.key);
   for (const k of grantable) assert.equal(installedDefault('admin', k), k !== 'whatsapp.push', `admin ${k}`);
-  for (const role of ['director', 'assistant'])
-    assert.deepEqual(grantable.filter((k) => installedDefault(role, k)), ['urgency.2', 'mail.outside.send', 'room.create'], role);
   for (const role of ['writer', 'designer', 'producer', 'publisher', 'member'])
     assert.deepEqual(grantable.filter((k) => installedDefault(role, k)), [], role);
   // The same cases appear in the migration's seed.
   assert.match(sql, /when c\.key = 'whatsapp\.push' then false/);
   assert.match(sql, /when c\.key in \('urgency\.2','mail\.outside\.send','room\.create'\) then r in \('director','assistant'\)/);
+  // Step P2 and the owner decision of 2026-10-15 add to the director's and the assistant's.
+  const p2 = readFileSync('supabase/migrations/20261013160000_permissions_accounts.sql', 'utf8');
+  const fromP2 = (role) => [...p2.matchAll(new RegExp(`\\('${role}','([a-z.]+)'\\)`, 'g'))].map((m) => m[1]);
+  const b9 = readFileSync('supabase/migrations/20261015180000_director_connection_rights.sql', 'utf8');
+  const fromB9 = [...b9.slice(b9.indexOf('with wanted'), b9.indexOf('changed as')).matchAll(/\('([a-z.]+)'\)/g)].map((m) => m[1]);
+  const seed = ['urgency.2', 'mail.outside.send', 'room.create'];
+  assert.deepEqual([...grantable.filter((k) => installedDefault('assistant', k))].sort(), [...seed, ...fromP2('assistant')].sort());
+  assert.deepEqual([...grantable.filter((k) => installedDefault('director', k))].sort(), [...seed, ...fromP2('director'), ...fromB9].sort());
+  // The Director, and nobody below, enters the platforms' apps and secrets by default.
+  for (const k of ['platforms.manage', 'integrations.secrets', 'settings.view', 'settings.manage', 'storage.manage'])
+    assert.equal(installedDefault('assistant', k), false, `assistant ${k}`);
+  for (const k of ['storage.migrate', 'backups.run', 'backups.restore']) assert.equal(installedDefault('director', k), false, `director ${k}`);
 });
 
 const NOW = Date.parse('2026-10-13T09:00:00Z');

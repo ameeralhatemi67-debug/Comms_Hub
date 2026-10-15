@@ -5,6 +5,7 @@
 import { ImapFlow } from 'imapflow';
 import nodemailer from 'nodemailer';
 import { simpleParser, type AddressObject } from 'mailparser';
+import { integrationCreds } from '../integrations/vault.ts';
 import { fullWhen } from './rules.ts';
 
 export type MailEnv = { address?: string; password?: string; key?: string; site?: string };
@@ -15,6 +16,40 @@ export const readMailEnv = (): MailEnv => ({
   key: process.env.MAIL_SERVER_KEY,
   site: process.env.MAIL_SITE_URL,
 });
+
+/**
+ * The mailbox the Director entered in the site wins over the environment, which stays as the
+ * fallback. The app password is read from the vault for a stated purpose and lives here for a minute.
+ */
+export async function resolveMailEnv(): Promise<MailEnv> {
+  const base = readMailEnv();
+  const c = await integrationCreds('gmail_account', 'mail access');
+  const address = typeof c?.config.address === 'string' ? c.config.address : '';
+  return c && address ? { ...base, address, password: c.secret.replace(/\s+/g, '') } : base;
+}
+
+/** Which Gmail refusal is which, in a code the page has words for. */
+export type MailboxCheck = { ok: true } | { ok: false; error: 'MAIL_AUTH_REFUSED' | 'MAIL_UNREACHABLE' };
+
+/**
+ * Logs in to the mailbox over IMAP and out again: the check made before an address and app password
+ * are kept. `connect` is the client factory (tests pass a fake). Nothing is read from the mailbox.
+ */
+export async function testMailbox(
+  address: string,
+  password: string,
+  connect: (a: string, p: string) => { connect(): Promise<void>; logout(): Promise<void> } = (a, p) => imapClient({ address: a, password: p }),
+): Promise<MailboxCheck> {
+  const client = connect(address, password.replace(/\s+/g, ''));
+  try {
+    await client.connect();
+    await client.logout().catch(() => undefined);
+    return { ok: true };
+  } catch (e) {
+    const x = e as { authenticationFailed?: boolean; responseText?: string };
+    return { ok: false, error: x.authenticationFailed || /AUTHENTICATIONFAILED|Invalid credentials/i.test(x.responseText ?? '') ? 'MAIL_AUTH_REFUSED' : 'MAIL_UNREACHABLE' };
+  }
+}
 
 /** The server can prove itself to the database (internal mail, files, outside answers). */
 export const keyConfigured = (env: MailEnv = readMailEnv()) => Boolean(env.key);

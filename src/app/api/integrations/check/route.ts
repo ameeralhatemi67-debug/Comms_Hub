@@ -1,4 +1,4 @@
-import { DriveError, getDrive, oauthConfigured, resetDrive } from '@/lib/drive/google';
+import { DriveError, getDrive, oauthConfigured, resetDrive, resolveDriveEnv } from '@/lib/drive/google';
 import { capGuard } from '@/lib/integrations/guard';
 import { recordHealth } from '@/lib/integrations/vault';
 
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     ok = true;
     await recordHealth('google_drive', true, null, email ? { account: email } : undefined);
   } catch (e) {
-    error = !oauthConfigured() ? 'NOT_CONFIGURED' : e instanceof DriveError && e.message === 'DRIVE_NOT_CONFIGURED' ? 'NOT_CONNECTED' : e instanceof DriveError ? e.message : 'DRIVE_ERROR';
+    error = !oauthConfigured(await resolveDriveEnv()) ? 'NOT_CONFIGURED' : e instanceof DriveError && e.message === 'DRIVE_NOT_CONFIGURED' ? 'NOT_CONNECTED' : e instanceof DriveError ? e.message : 'DRIVE_ERROR';
     await recordHealth('google_drive', false, error);
   }
   return Response.json({ google_drive: { ok, error } }, { headers: { 'Cache-Control': 'no-store' } });

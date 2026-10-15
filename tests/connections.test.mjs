@@ -225,8 +225,10 @@ test('which registry platform connects through which sign-in', () => {
   assert.equal(providerOf('tiktok'), 'tiktok');
   assert.equal(providerOf('snapchat'), null);
   assert.equal(clientProviderOf('instagram'), 'meta');
-  assert.equal(clientProviderOf('x'), null);
-  assert.deepEqual(Object.keys(ACCOUNT_TYPE).sort(), ['facebook', 'instagram', 'tiktok']);
+  // YouTube, LinkedIn and X joined on the same model (Action_Plan.md B9, tests/connections2.test.mjs).
+  assert.equal(clientProviderOf('x'), 'x');
+  assert.equal(clientProviderOf('whatsapp'), null);
+  assert.deepEqual(Object.keys(ACCOUNT_TYPE).sort(), ['facebook', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube']);
 });
 
 // ---------------------------------------------------------------------------

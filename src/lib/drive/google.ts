@@ -9,7 +9,7 @@
 // access. The scope is drive.file: the Hub can only see and change files it created,
 // never the rest of the account's Drive.
 
-import { vaultReachable, vaultSecret } from '../integrations/vault.ts';
+import { forgetCreds, integrationCreds, vaultReachable, vaultSecret } from '../integrations/vault.ts';
 import { StorageError, type SinkState, type SinkTarget, type StorageSink } from '../storage/provider.ts';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
@@ -33,6 +33,21 @@ export const readDriveEnv = (): DriveEnv => ({
   refreshToken: process.env.GOOGLE_DRIVE_REFRESH_TOKEN,
   folderId: process.env.GOOGLE_DRIVE_FOLDER_ID,
 });
+
+// The OAuth client entered in the site (the Google app, shared with YouTube) wins over the
+// environment, which stays as the fallback. Kept in this process for a minute.
+let envCache: { env: DriveEnv; source: 'vault' | 'env'; at: number } | null = null;
+export async function resolveDriveEnv(): Promise<DriveEnv> {
+  return (await resolveDriveEnvWithSource()).env;
+}
+export async function resolveDriveEnvWithSource(): Promise<{ env: DriveEnv; source: 'vault' | 'env' }> {
+  if (envCache && Date.now() - envCache.at < 60_000) return envCache;
+  const base = readDriveEnv();
+  const c = await integrationCreds('google_app', 'drive access');
+  const clientId = typeof c?.config.app_id === 'string' ? c.config.app_id : '';
+  envCache = c && clientId ? { env: { ...base, clientId, clientSecret: c.secret }, source: 'vault', at: Date.now() } : { env: base, source: 'env', at: Date.now() };
+  return envCache;
+}
 
 /** The OAuth client is set up (enough to run the connect flow). */
 export const oauthConfigured = (env: DriveEnv = readDriveEnv()) => Boolean(env.clientId && env.clientSecret);
@@ -65,15 +80,17 @@ type Deps = {
 };
 
 export function createDrive(deps: Partial<Deps> = {}) {
-  const env = deps.env ?? readDriveEnv();
+  const fixed = deps.env;
+  const getEnv = async (): Promise<DriveEnv> => fixed ?? (await resolveDriveEnv());
   const http = deps.fetch ?? fetch;
   const now = deps.now ?? Date.now;
-  const source = deps.tokenSource ?? (async () => env.refreshToken);
+  const source = deps.tokenSource ?? (async () => (await getEnv()).refreshToken);
   let token: { value: string; expires: number } | null = null;
-  let folder: string | null = env.folderId ?? null;
+  let folder: string | null = null;
 
   async function accessToken(): Promise<string> {
     if (token && token.expires - 60_000 > now()) return token.value;
+    const env = await getEnv();
     if (!oauthConfigured(env)) throw new DriveError(503, 'DRIVE_NOT_CONFIGURED');
     const refreshToken = await source();
     if (!refreshToken) throw new DriveError(503, 'DRIVE_NOT_CONFIGURED');
@@ -111,6 +128,8 @@ export function createDrive(deps: Partial<Deps> = {}) {
   /** The Hub's own folder in the account's Drive, created on first use. */
   async function rootFolder(): Promise<string> {
     if (folder) return folder;
+    const pinned = (await getEnv()).folderId;
+    if (pinned) return (folder = pinned);
     const q = `mimeType='${FOLDER_MIME}' and trashed=false and appProperties has { key='commsHubRoot' and value='1' }`;
     const found = await api<{ files?: { id: string }[] }>(
       `/files?q=${encodeURIComponent(q)}&fields=${encodeURIComponent('files(id)')}&pageSize=1&spaces=drive`,
@@ -351,6 +370,8 @@ export function getDrive(): Drive {
 export function resetDrive() {
   cached = null;
   shared = undefined;
+  envCache = null;
+  forgetCreds('google_app');
 }
 
 /** The address Google sends the person back to after they approve the connection. */

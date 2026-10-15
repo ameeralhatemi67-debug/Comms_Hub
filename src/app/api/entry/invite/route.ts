@@ -1,6 +1,6 @@
 import { guard, fail } from '@/lib/drive/guard';
 import { inviteMessage, rejectedMessage } from '@/lib/entry';
-import { mailboxConfigured, readMailEnv, sendNotice } from '@/lib/mail/gmail';
+import { mailboxConfigured, resolveMailEnv, sendNotice } from '@/lib/mail/gmail';
 import { permError } from '@/lib/permissions';
 import { serverClient } from '@/lib/supabase/server';
 
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   const kind = body?.kind === 'rejected' ? 'rejected' : 'invite';
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail(400, 'اكتب بريداً إلكترونياً صحيحاً.');
 
-  const env = readMailEnv();
+  const env = await resolveMailEnv();
   if (!mailboxConfigured(env)) return fail(503, 'صندوق البريد غير مضبوط على الخادم، فلا يُرسل الموقع رسائل.');
   const site = (env.site || new URL(request.url).origin).replace(/\/+$/, '');
   const db = await serverClient();

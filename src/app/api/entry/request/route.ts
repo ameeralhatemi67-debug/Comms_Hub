@@ -1,7 +1,7 @@
 import { fail } from '@/lib/drive/guard';
 import { sameOrigin } from '@/lib/drive/media';
 import { requestNoticeMessage } from '@/lib/entry';
-import { mailboxConfigured, readMailEnv, sendNotice } from '@/lib/mail/gmail';
+import { mailboxConfigured, resolveMailEnv, sendNotice } from '@/lib/mail/gmail';
 import { serverClient } from '@/lib/supabase/server';
 
 // «طلب وصول» from the sign-in screen, which has no session. The database records the
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   const result = String(r.data);
 
   // Best effort: the notice in the site already exists whether or not the email leaves.
-  const env = readMailEnv();
+  const env = await resolveMailEnv();
   if (result === 'received' && mailboxConfigured(env)) {
     try {
       const t = await db.rpc('entry_notice_targets', { p_key: env.key, p_email: email });

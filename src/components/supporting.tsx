@@ -20,6 +20,7 @@ import { AuditTab } from './settings/audit';
 import { StorageTab } from './settings/storage';
 import { BackupsTab } from './settings/backups';
 import { PlatformsTab } from './settings/platforms';
+import { ConnectionsTab } from './settings/connections';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
@@ -41,6 +42,7 @@ const yesNo = (value: boolean) => (value ? 'متاح' : 'غير متاح');
  */
 const settingsSections = [
   { id: 'general', label: 'عام وصحة النظام' },
+  { id: 'connections', label: 'الاتصالات' },
   { id: 'storage', label: 'التخزين' },
   { id: 'backups', label: 'النسخ الاحتياطي' },
   { id: 'platforms', label: 'المنصات' },
@@ -70,6 +72,11 @@ export function Supporting({ page }: { page: string }) {
         {settingsTab === 'general' && (
           <Panel title="عام وصحة النظام" className="st-panel">
             <GeneralTab />
+          </Panel>
+        )}
+        {settingsTab === 'connections' && (
+          <Panel title="الاتصالات" className="st-panel">
+            <ConnectionsTab />
           </Panel>
         )}
         {settingsTab === 'storage' && (

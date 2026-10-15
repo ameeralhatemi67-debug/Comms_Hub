@@ -19,8 +19,10 @@ const inOrder = (set) => order.filter((id) => set.includes(id));
 const COMMON = ['', 'work', 'approvals', 'calendar', 'projects', 'requests', 'media', 'tasks', 'activity', 'analytics', 'motion', 'mail', 'ideas'];
 const EXPECTED_MENU = {
   admin: [...COMMON, 'settings', 'channels', 'accounts'],
-  director: [...COMMON, 'create', 'channels'],
-  assistant: [...COMMON, 'create', 'channels'],
+  // The director and the assistant open «الحسابات» by the capability the templates give them (P2);
+  // «الإعدادات» opens for the director by settings.view (2026-10-15 decision).
+  director: [...COMMON, 'settings', 'create', 'channels', 'accounts'],
+  assistant: [...COMMON, 'create', 'channels', 'accounts'],
   writer: [...COMMON, 'create'],
   designer: [...COMMON, 'create'],
   producer: [...COMMON, 'create'],
@@ -43,7 +45,7 @@ test('by address a role opens its menu and its own page; only the administrator 
 
 test('«الحسابات» and «حسابات المنصات» are not given to the wrong roles', () => {
   for (const role of MATRIX_ROLES) {
-    assert.equal(byRole[role].menu.includes('accounts'), role === 'admin', `${role}: accounts`);
+    assert.equal(byRole[role].menu.includes('accounts'), ['admin', 'director', 'assistant'].includes(role), `${role}: accounts`);
     assert.equal(byRole[role].menu.includes('channels'), ['admin', 'director', 'assistant', 'publisher'].includes(role), `${role}: channels`);
   }
   // «حسابات المنصات» goes with «الموافقات والنشر»: without that page the entry goes.
@@ -69,9 +71,11 @@ test('the whole log and the team panel are for the administrator, the director a
 
 test("the capabilities held by default are the administrator's, the leaders' and the publisher's, and nobody else's", () => {
   const holders = Object.fromEntries(m.capabilities.map((c) => [c.key, c.heldBy]));
-  assert.deepEqual(holders['accounts.view'], ['admin']);
-  for (const k of ['settings.view', 'settings.manage', 'storage.manage', 'storage.migrate', 'backups.run', 'backups.restore', 'platforms.manage', 'integrations.secrets'])
-    assert.deepEqual(holders[k], ['admin'], k);
+  assert.deepEqual(holders['accounts.view'], ['admin', 'director', 'assistant']);
+  // The Director connects the platforms, the mail and the storage from the site (owner decision of 2026-10-15).
+  for (const k of ['settings.view', 'settings.manage', 'storage.manage', 'platforms.manage', 'integrations.secrets'])
+    assert.deepEqual(holders[k], ['admin', 'director'], k);
+  for (const k of ['storage.migrate', 'backups.run', 'backups.restore']) assert.deepEqual(holders[k], ['admin'], k);
   assert.deepEqual(holders['work.publish'], ['admin', 'publisher']);
   assert.deepEqual(holders['work.approve'], ['admin', 'director', 'assistant']);
   assert.deepEqual(holders['urgency.3'], ['admin', 'director', 'assistant']);

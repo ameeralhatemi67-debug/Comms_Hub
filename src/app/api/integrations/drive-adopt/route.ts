@@ -1,5 +1,5 @@
 import { fail } from '@/lib/drive/guard';
-import { createDrive, readDriveEnv, resetDrive } from '@/lib/drive/google';
+import { createDrive, readDriveEnv, resetDrive, resolveDriveEnv } from '@/lib/drive/google';
 import { capGuard } from '@/lib/integrations/guard';
 import { DRIVE_INTEGRATION_ID, storeChecked } from '@/lib/integrations/vault';
 
@@ -9,9 +9,10 @@ import { DRIVE_INTEGRATION_ID, storeChecked } from '@/lib/integrations/vault';
 export async function POST(request: Request) {
   const g = await capGuard(request, 'integrations.secrets', true);
   if (!g.ok) return g.response;
-  const env = readDriveEnv();
-  if (!env.refreshToken) return fail(404, 'لا يوجد رمز في متغيرات الخادم لنقله.');
-  const stored = await storeChecked(g.db, DRIVE_INTEGRATION_ID, 'google_drive', env.refreshToken, async (t) => {
+  const env = await resolveDriveEnv();
+  const fallback = readDriveEnv().refreshToken;
+  if (!fallback) return fail(404, 'لا يوجد رمز في متغيرات الخادم لنقله.');
+  const stored = await storeChecked(g.db, DRIVE_INTEGRATION_ID, 'google_drive', fallback, async (t) => {
     const who = await createDrive({ env: { ...env, refreshToken: t } }).account().catch(() => null);
     return who ? { ok: true, config: { account: who } } : { ok: false, error: 'TOKEN_REFUSED' };
   });

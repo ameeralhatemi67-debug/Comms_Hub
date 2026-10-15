@@ -226,5 +226,6 @@ export const CONN_ERROR_AR: Record<string, string> = {
   APP_NOT_CONFIGURED: 'تطبيق المطوّر غير مضبوط. أدخل معرّفه وسره من «الإعدادات» «المنصات».',
   APP_REFUSED: 'رفضت المنصة المعرّف أو السر. تحقق منهما في لوحة المطوّرين.',
   CODE_REFUSED: 'رفضت المنصة رمز الدخول. ابدأ الربط من جديد.',
+  REFRESH_MISSING: 'لم تُعطِ المنصة رمزاً للتجديد. أزل وصول التطبيق من حسابك على المنصة ثم أعد الربط.',
 };
 export const connErrorAr = (code: string | null | undefined) => (code ? (CONN_ERROR_AR[code] ?? 'فشل فحص الاتصال.') : '');

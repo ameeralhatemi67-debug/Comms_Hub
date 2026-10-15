@@ -118,17 +118,34 @@ export function rankOf(role: Role | string | null | undefined): number {
 const CREATORS = ['admin', 'director', 'assistant', 'writer', 'designer', 'producer', 'member'];
 
 /**
- * The role templates as installed on 2026-10-13, equal to the rules before the engine:
- * Admin everything except the WhatsApp push (D-13); director and assistant urgency 2,
- * outside mail without waiting and announcement channels; everyone else nothing extra.
- * Pages are the account's own list, not part of the templates.
+ * What each role holds from its template (role_capabilities), as the migrations leave it:
+ *   - 2026-10-13, Step P1: the administrator everything except the WhatsApp push (D-13); the
+ *     director and the assistant urgency 2, outside mail without waiting and announcement
+ *     channels; everyone else nothing extra.
+ *   - Step P2 (20261013160000): the director adds accounts.view, permissions.grant, roles.assign,
+ *     members.invite, members.remove, roles.templates.edit; the assistant adds accounts.view and
+ *     permissions.grant.
+ *   - 2026-10-15, owner decision (20261015180000): the director also holds settings.view,
+ *     settings.manage, platforms.manage, integrations.secrets and storage.manage, because the
+ *     Director connects the platforms, the mail and the storage from the site.
+ * tests/permissions.test.mjs reads those migrations and holds this table to them. Pages are the
+ * account's own list, not part of the templates.
  */
+export const TEMPLATE_HOLDS: Partial<Record<Role, readonly string[]>> = {
+  director: [
+    'urgency.2', 'mail.outside.send', 'room.create',
+    'accounts.view', 'permissions.grant', 'roles.assign', 'members.invite', 'members.remove', 'roles.templates.edit',
+    'settings.view', 'settings.manage', 'platforms.manage', 'integrations.secrets', 'storage.manage',
+  ],
+  assistant: ['urgency.2', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant'],
+};
+
 export function installedDefault(role: Role, key: string): boolean {
   const c = capability(key);
   if (!c || !c.grantable || c.scope === 'page') return false;
   if (key === 'whatsapp.push') return false;
   if (role === 'admin') return true;
-  return ['urgency.2', 'mail.outside.send', 'room.create'].includes(key) && (role === 'director' || role === 'assistant');
+  return TEMPLATE_HOLDS[role]?.includes(key) ?? false;
 }
 
 export type Source = 'role' | 'page' | 'added' | 'removed' | 'timed' | 'once' | 'fixed' | 'rank' | 'none';

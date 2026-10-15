@@ -37,7 +37,7 @@ const pages = {
 };
 
 (async () => {
-  check('six tabs, in order', tabs.map((t) => t.id).join() === 'general,storage,backups,platforms,whatsapp,audit', tabs.map((t) => t.id).join());
+  check('seven tabs, in order', tabs.map((t) => t.id).join() === 'general,connections,storage,backups,platforms,whatsapp,audit', tabs.map((t) => t.id).join());
   check('none of the removed tab names is listed', !tabs.some((t) => ['المؤسسة', 'اللغة', 'الإشعارات', 'افتراضات النشر', 'افتراضات الاعتماد', 'الذكاء والأتمتة', 'المظهر'].includes(t.label)));
 
   const server = http.createServer((req, res) => {
@@ -67,7 +67,7 @@ const pages = {
       strip: (() => { const t = document.querySelector('.tabs'); return { scroll: t.scrollWidth, client: t.clientWidth, over: getComputedStyle(t).overflowX }; })(),
     }));
     await p.screenshot({ path: path.join(out, `settings-${width}.png`) });
-    check(`${width}: settings shows six tabs and the page does not overflow`, r.tabs === 6 && !r.overflow, JSON.stringify(r));
+    check(`${width}: settings shows seven tabs and the page does not overflow`, r.tabs === 7 && !r.overflow, JSON.stringify(r));
     check(`${width}: the tab strip scrolls inside itself when it is wider than the screen`, r.strip.scroll <= r.strip.client || ['auto', 'scroll'].includes(r.strip.over), JSON.stringify(r.strip));
 
     await p.goto(base + 'account.html');

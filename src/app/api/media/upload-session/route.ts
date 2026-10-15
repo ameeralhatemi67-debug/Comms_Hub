@@ -11,7 +11,7 @@ import { overLimitText, uploadLimit } from '@/lib/integrations/limits';
 export async function POST(request: Request) {
   const g = await guard(request, { mutating: true, page: 'media' });
   if (!g.ok) return g.response;
-  if (!storageConfigured('library')) return fail(503, 'لم يُربط Google Drive بعد.');
+  if (!(await storageConfigured('library'))) return fail(503, 'لم يُربط Google Drive بعد.');
 
   const body = (await request.json().catch(() => null)) as
     | { name?: unknown; mimeType?: unknown; size?: unknown; folderId?: unknown }

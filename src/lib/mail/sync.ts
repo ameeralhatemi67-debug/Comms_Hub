@@ -4,7 +4,7 @@
 // time, so two open pages never send the same message twice.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { openStored, storageConfigured } from '../storage';
-import { fetchSince, mailboxConfigured, readMailEnv, sendOutgoing, type Outgoing } from './gmail';
+import { fetchSince, mailboxConfigured, resolveMailEnv, sendOutgoing, type Outgoing } from './gmail';
 
 /** Gmail refuses messages over 25 MB; larger approved files go as review links instead. */
 const ATTACH_LIMIT = 25 * 1024 * 1024;
@@ -21,7 +21,7 @@ export type SyncResult =
   | { configured: true; skipped: false; received: number; sent: number; failed: number };
 
 export async function runSync(supabase: SupabaseClient, site: string, force: boolean): Promise<SyncResult> {
-  const env = readMailEnv();
+  const env = await resolveMailEnv();
   if (!mailboxConfigured(env)) return { configured: false };
 
   const begin = await supabase.rpc('mail_sync_begin', { p_key: env.key, p_force: force });
@@ -51,7 +51,7 @@ export async function runSync(supabase: SupabaseClient, site: string, force: boo
       try {
         const attachments: { filename: string; content: Buffer; contentType: string }[] = [];
         const needsDrive = item.files.length > 0 || item.refs.some((r) => !r.link);
-        if (needsDrive && !storageConfigured('mail')) throw new Error('DRIVE_NOT_CONFIGURED');
+        if (needsDrive && !(await storageConfigured('mail'))) throw new Error('DRIVE_NOT_CONFIGURED');
         for (const r of item.refs.filter((x) => !x.link && x.size <= ATTACH_LIMIT))
           attachments.push({ filename: r.name, content: await driveBytes(r.drive), contentType: r.mime });
         for (const f of item.files) attachments.push({ filename: f.name, content: await driveBytes(f.drive), contentType: f.mime });

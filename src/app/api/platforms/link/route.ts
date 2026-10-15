@@ -2,6 +2,7 @@ import { fail } from '@/lib/drive/guard';
 import { serverKeyOrNull } from '@/lib/integrations/vault';
 import { loadApp, loadSecret } from '@/lib/platforms/connect';
 import { PlatformCallError, connErrorAr, metaDebugToken, metaPages, unpackTikTok } from '@/lib/platforms/oauth';
+import { unpackTokens } from '@/lib/platforms/oauth2';
 import { connectGuard, isUuid, json } from '@/lib/platforms/route';
 import { workErrorText } from '@/lib/work/rules';
 
@@ -9,7 +10,7 @@ import { workErrorText } from '@/lib/work/rules';
 // with its own token in the vault and its real expiry as the authorisation. A simulated account
 // on the same platform and handle is upgraded in place, so its works and approvals stay. The
 // person's passing user token is removed with the last one.
-type Pick = { platform: 'facebook' | 'instagram' | 'tiktok'; id: string; label?: string };
+type Pick = { platform: 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'linkedin' | 'x'; id: string; label?: string };
 type Result = { platform: string; id: string; ok: boolean; account?: string; error?: string; missing?: string[] };
 
 const NEEDED: Record<string, string> = { facebook: 'pages_manage_posts', instagram: 'instagram_content_publish' };
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
   if (!body || !isUuid(body.offer) || !Array.isArray(body.picks) || body.picks.length < 1 || body.picks.length > 20) return fail(400, 'اختر ما تربطه.');
   const picks: Pick[] = [];
   for (const p of body.picks as Record<string, unknown>[]) {
-    if (!['facebook', 'instagram', 'tiktok'].includes(String(p.platform)) || typeof p.id !== 'string' || !/^[A-Za-z0-9_.:-]{1,120}$/.test(p.id)) return fail(400, 'اختيار غير صالح.');
+    if (!['facebook', 'instagram', 'tiktok', 'youtube', 'linkedin', 'x'].includes(String(p.platform)) || typeof p.id !== 'string' || !/^[A-Za-z0-9_.:-]{1,120}$/.test(p.id)) return fail(400, 'اختيار غير صالح.');
     picks.push({ platform: p.platform as Pick['platform'], id: p.id, label: typeof p.label === 'string' ? p.label.trim().slice(0, 60) : undefined });
   }
   const publishers = Array.isArray(body.publishers) ? (body.publishers as unknown[]).filter((x): x is string => typeof x === 'string').slice(0, 30) : [];
@@ -70,6 +71,60 @@ export async function POST(request: Request) {
       p_secret: secret,
     });
     results.push(error ? { platform: 'tiktok', id: pick.id, ok: false, error: workErrorText(error.message) } : { platform: 'tiktok', id: pick.id, ok: true, account: String(data) });
+    return json({ results });
+  }
+
+  // YouTube, LinkedIn and X: the person's own sign-in is the account's token (packed with its refresh
+  // token where the platform gives one); each pick must be what that sign-in is.
+  const NEW_OFFER: Record<string, { platform: Pick['platform']; type: string }> = {
+    google_user_offer: { platform: 'youtube', type: 'youtube_channel' },
+    linkedin_user_offer: { platform: 'linkedin', type: 'linkedin_member' },
+    x_user_offer: { platform: 'x', type: 'x_user' },
+  };
+  const kind = NEW_OFFER[offerRow.type];
+  if (kind) {
+    const secret = await loadSecret(g.db, body.offer, 'ربط حساب');
+    const t = secret ? unpackTokens(secret) : null;
+    if (!secret || !t) return fail(404, 'انتهت صلاحية الربط. ابدأ من جديد.');
+    const c = offerRow.config;
+    const rolling = typeof c.refresh_expires_at === 'string' ? c.refresh_expires_at : t.refreshExpiresAt;
+    for (let i = 0; i < picks.length; i++) {
+      const pick = picks[i];
+      let found: { id: string; name: string; handle: string; expires: string | null } | null = null;
+      if (kind.platform === 'youtube') {
+        const ch = (Array.isArray(c.channels) ? (c.channels as { id?: string; title?: string; handle?: string | null }[]) : []).find((x) => x.id === pick.id);
+        if (ch?.id) found = { id: ch.id, name: String(ch.title ?? ch.id), handle: ch.handle ? (ch.handle.startsWith('@') ? ch.handle : `@${ch.handle}`) : `yt:${ch.id}`, expires: rolling || null };
+      } else if (kind.platform === 'linkedin') {
+        if (typeof c.sub === 'string' && c.sub === pick.id) found = { id: c.sub, name: String(c.name ?? 'عضو LinkedIn'), handle: `li:${c.sub}`, expires: typeof c.expires_at === 'string' ? c.expires_at : t.accessExpiresAt || null };
+      } else if (typeof c.user_id === 'string' && c.user_id === pick.id) {
+        const user = typeof c.username === 'string' && c.username ? `@${c.username}` : `x:${c.user_id}`;
+        found = { id: c.user_id, name: String(c.name ?? user), handle: user, expires: rolling || null };
+      }
+      if (!found || pick.platform !== kind.platform) {
+        results.push({ platform: pick.platform, id: pick.id, ok: false, error: 'لم يعد هذا الحساب ضمن ما سجّلت به الدخول. ابدأ الربط من جديد.' });
+        continue;
+      }
+      const { data, error } = await g.db.rpc('platform_conn_link', {
+        p_key: key,
+        p: {
+          platform: kind.platform,
+          type: kind.type,
+          label: (pick.label || found.name).slice(0, 60),
+          handle: found.handle,
+          purpose,
+          publishers,
+          mode,
+          external_id: found.id,
+          external_name: found.name,
+          scopes: Array.isArray(c.scopes) ? c.scopes : [],
+          expires_at: found.expires,
+          account_id: reconnect,
+          offer: i === last ? body.offer : null,
+        },
+        p_secret: secret,
+      });
+      results.push(error ? { platform: pick.platform, id: pick.id, ok: false, error: workErrorText(error.message) } : { platform: pick.platform, id: pick.id, ok: true, account: String(data) });
+    }
     return json({ results });
   }
 

@@ -16,9 +16,10 @@ const walk = (dir) =>
 test('every guide has a title, who it is for, and numbered steps with something to do in each', () => {
   for (const [key, g] of Object.entries(GUIDES)) {
     assert.ok(g.title.length > 5 && g.intro.length > 20, key);
-    assert.ok(g.steps.length >= 2 && g.steps.length <= 8, `${key}: ${g.steps.length} steps`);
+    assert.ok(g.steps.length >= 2 && g.steps.length <= 10, `${key}: ${g.steps.length} steps`);
     for (const s of g.steps) assert.ok(s.t.length > 3, `${key}: a step has a title`);
     if (g.link) assert.match(g.link.href, /^https:\/\//, key);
+    for (const s of g.steps) if (s.link) assert.match(s.link.href, /^https:\/\//, `${key}: ${s.t}`);
   }
 });
 

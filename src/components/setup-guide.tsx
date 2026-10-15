@@ -57,6 +57,11 @@ export function SetupGuide({
                       {s.copy}
                     </bdi>
                   )}
+                  {s.link && (
+                    <a className="su-link" href={s.link.href} target="_blank" rel="noopener noreferrer">
+                      {s.link.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ol>

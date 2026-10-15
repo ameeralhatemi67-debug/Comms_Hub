@@ -29,6 +29,33 @@ export async function vaultSecret(type: string, purpose: string, pending = false
   return data;
 }
 
+export type StoredCreds = { id: string; config: Record<string, unknown>; secret: string };
+const credsCache = new Map<string, { at: number; value: StoredCreds | null }>();
+const CREDS_TTL = 60_000;
+
+/**
+ * A credential entered in the site: the Google app (client id in config, secret in the vault) or the
+ * shared mailbox (address in config, app password in the vault). The server key decides, not a
+ * session, because share links and the mail sync have none; each read is logged with its purpose.
+ * Kept in this process for a minute so a burst of requests asks once.
+ */
+export async function integrationCreds(type: 'google_app' | 'gmail_account', purpose: string): Promise<StoredCreds | null> {
+  if (!vaultReachable()) return null;
+  const hit = credsCache.get(type);
+  if (hit && Date.now() - hit.at < CREDS_TTL) return hit.value;
+  const { data, error } = await db().rpc('integration_creds', { p_key: serverKey(), p_type: type, p_purpose: purpose });
+  const d = data as { id?: string; config?: Record<string, unknown>; secret?: string } | null;
+  const value = !error && d && typeof d.secret === 'string' && d.secret ? { id: String(d.id ?? ''), config: d.config ?? {}, secret: d.secret } : null;
+  credsCache.set(type, { at: Date.now(), value });
+  return value;
+}
+
+/** Forget what was read (after a new value was entered). */
+export function forgetCreds(type?: 'google_app' | 'gmail_account') {
+  if (type) credsCache.delete(type);
+  else credsCache.clear();
+}
+
 /** As vaultSecret, for one integration by its id (a second provider of the same type exists). */
 export async function vaultSecretById(id: string, purpose: string, pending = false, client?: SupabaseClient): Promise<string | null> {
   if (!vaultReachable()) return null;

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { createDrive, exchangeCode, oauthConfigured, readDriveEnv, resetDrive } from '@/lib/drive/google';
-import { guard } from '@/lib/drive/guard';
+import { createDrive, exchangeCode, oauthConfigured, resolveDriveEnv, resetDrive } from '@/lib/drive/google';
+import { capGuard } from '@/lib/integrations/guard';
 import { DRIVE_INTEGRATION_ID, storeChecked } from '@/lib/integrations/vault';
 import { serverClient } from '@/lib/supabase/server';
 
@@ -22,9 +22,10 @@ function page(body: string, status = 200) {
 // configured, or the person lacks «إدخال أسرار التكاملات وتجديدها») is it shown once, as
 // before, to be pasted into the server's environment. It is never written to a log.
 export async function GET(request: NextRequest) {
-  const g = await guard(request, { admin: true });
+  const g = await capGuard(request, 'storage.manage', false);
   if (!g.ok) return g.response;
-  if (!oauthConfigured()) return page('<p>لم يُضبط عميل Google OAuth.</p>', 503);
+  const env = await resolveDriveEnv();
+  if (!oauthConfigured(env)) return page('<p>لم يُضبط عميل Google OAuth.</p>', 503);
 
   const url = new URL(request.url);
   const expected = request.cookies.get('drive_oauth_state')?.value;
@@ -36,7 +37,6 @@ export async function GET(request: NextRequest) {
     return page('<h1>لم يكتمل الربط</h1><p>انتهت صلاحية الطلب أو لم يبدأ من هنا. ابدأ من «ربط Google Drive» مجدداً.</p>', 400);
 
   try {
-    const env = readDriveEnv();
     const { refreshToken } = await exchangeCode(env, url.origin, code);
     if (!refreshToken)
       return page(

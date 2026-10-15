@@ -1,6 +1,6 @@
 import { fail, guard } from '@/lib/drive/guard';
 import { checkAccount, loadApp, type DueAccount } from '@/lib/platforms/connect';
-import type { Provider } from '@/lib/platforms/oauth';
+import { PROVIDER_OF_TYPE, type Provider } from '@/lib/platforms/oauth';
 import { isUuid, json } from '@/lib/platforms/route';
 import { serverClient } from '@/lib/supabase/server';
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (isUuid(body?.account)) due = due.filter((d) => d.id === body!.account);
   if (!due.length) return json({ checked: 0, results: [] });
 
-  const needed = new Set<Provider>(due.map((d) => (d.type === 'tiktok_user' ? 'tiktok' : 'meta')));
+  const needed = new Set<Provider>(due.map((d) => PROVIDER_OF_TYPE[d.type] ?? 'meta'));
   const apps: Partial<Record<Provider, Awaited<ReturnType<typeof loadApp>>>> = {};
   for (const p of needed) apps[p] = await loadApp(db, p, 'فحص اتصال الحسابات');
 

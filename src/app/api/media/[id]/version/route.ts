@@ -10,7 +10,7 @@ import { overLimitText, uploadLimit } from '@/lib/integrations/limits';
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const g = await guard(request, { mutating: true, page: 'media' });
   if (!g.ok) return g.response;
-  if (!storageConfigured('library')) return fail(503, 'لم يُربط Google Drive بعد.');
+  if (!(await storageConfigured('library'))) return fail(503, 'لم يُربط Google Drive بعد.');
   const { id } = await params;
   if (!isUuid(id)) return fail(404, 'غير موجود.');
 

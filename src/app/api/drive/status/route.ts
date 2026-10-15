@@ -1,7 +1,7 @@
-import { DriveError, getDrive, driveConfigured, oauthConfigured } from '@/lib/drive/google';
+import { DriveError, getDrive, driveConfigured, oauthConfigured, resolveDriveEnv } from '@/lib/drive/google';
 import { recordHealth } from '@/lib/integrations/vault';
 import { guard } from '@/lib/drive/guard';
-import { isAdmin } from '@/lib/access';
+import { serverClient } from '@/lib/supabase/server';
 
 const noStore = { 'Cache-Control': 'no-store' };
 
@@ -9,11 +9,13 @@ const noStore = { 'Cache-Control': 'no-store' };
 export async function GET(request: Request) {
   const g = await guard(request);
   if (!g.ok) return g.response;
-  const admin = isAdmin(g.account);
+  // Who may connect: the capability, not the role (the Director holds it by default).
+  const admin = (await (await serverClient()).rpc('has_capability', { p_cap: 'storage.manage', p_scope: null })).data === true;
+  const env = await resolveDriveEnv();
 
-  if (!driveConfigured()) {
+  if (!driveConfigured(env)) {
     return Response.json(
-      { state: oauthConfigured() ? 'needs-connection' : 'not-configured', canConnect: admin && oauthConfigured() },
+      { state: oauthConfigured(env) ? 'needs-connection' : 'not-configured', canConnect: admin && oauthConfigured(env) },
       { headers: noStore },
     );
   }
@@ -27,7 +29,7 @@ export async function GET(request: Request) {
     const none = e instanceof DriveError && e.message === 'DRIVE_NOT_CONFIGURED';
     await recordHealth('google_drive', false, none ? 'NOT_CONNECTED' : e instanceof DriveError ? e.message : 'DRIVE_ERROR');
     if (none)
-      return Response.json({ state: oauthConfigured() ? 'needs-connection' : 'not-configured', canConnect: admin && oauthConfigured() }, { headers: noStore });
+      return Response.json({ state: oauthConfigured(env) ? 'needs-connection' : 'not-configured', canConnect: admin && oauthConfigured(env) }, { headers: noStore });
     return Response.json({ state: 'error', canConnect: admin }, { headers: noStore });
   }
 }

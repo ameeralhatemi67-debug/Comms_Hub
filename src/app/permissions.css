@@ -232,3 +232,4 @@ span.pm-locked svg{width:13px;height:13px;margin-top:3px}
 .su-copy{display:block;padding:6px 10px;border-radius:6px;background:var(--chip-bg);font-size:12.5px;word-break:break-all;user-select:all}
 .su-notes{margin:0;padding-inline-start:18px;display:grid;gap:4px;font-size:13px;color:var(--muted)}
 .st-manual-guide{display:flex;align-items:center;gap:6px;margin:0}
+.su-steps li a.su-link{font-size:13px;color:var(--green-text);text-decoration:underline;text-underline-offset:3px;width:fit-content}
