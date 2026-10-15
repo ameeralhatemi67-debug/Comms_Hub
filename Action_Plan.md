@@ -221,3 +221,18 @@ and truer on a page set that has settled.
   the owner.
 - Next.js here is not the one you know: read `node_modules/next/dist/docs/` before using
   a framework API.
+
+---
+
+## 8. Step B9 (added 2026-10-15, owner decision): the Director connects everything from the site
+
+Built the same day (`progress.md`, entry of B9). The Director holds `platforms.manage`,
+`integrations.secrets`, `settings.view`, `settings.manage`, `storage.manage` and
+`whatsapp.system.manage` by default (the assistant none; the administrator everything). From
+«الإعدادات»: «الاتصالات» (mailbox, the Google app shared by YouTube and Drive, Drive), «المنصات»
+(Meta, TikTok, LinkedIn, X apps), «واتساب النظام» (the bridge key). Accounts connect from «حسابات
+المنصات». YouTube, LinkedIn and X connect on the Meta and TikTok model. Not done and not doable
+from a form: publishing itself (each platform's adapter and approval), Snapchat and the WhatsApp
+channel (manual), Supabase's own address, key and SMTP (the vault needs something to open it).
+Next in this line: the adapters, one platform at a time, each after its app is approved
+(`Settings_Integrations_Plan.md` S9), and OneDrive (S8) when an account exists.

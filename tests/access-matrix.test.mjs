@@ -76,6 +76,7 @@ test("the capabilities held by default are the administrator's, the leaders' and
   for (const k of ['settings.view', 'settings.manage', 'storage.manage', 'platforms.manage', 'integrations.secrets'])
     assert.deepEqual(holders[k], ['admin', 'director'], k);
   for (const k of ['storage.migrate', 'backups.run', 'backups.restore']) assert.deepEqual(holders[k], ['admin'], k);
+  assert.deepEqual(holders['whatsapp.system.manage'], ['admin', 'director'], 'the Director sets up the WhatsApp bridge from the site');
   assert.deepEqual(holders['work.publish'], ['admin', 'publisher']);
   assert.deepEqual(holders['work.approve'], ['admin', 'director', 'assistant']);
   assert.deepEqual(holders['urgency.3'], ['admin', 'director', 'assistant']);

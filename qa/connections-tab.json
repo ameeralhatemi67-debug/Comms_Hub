@@ -1,0 +1,203 @@
+{
+  "script": "qa/connections-tab.cjs",
+  "run": "2026-10-15T09:38:07.050Z",
+  "checks": [
+    {
+      "name": "guide meta exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide tiktok exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide google exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide linkedin exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide x exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide connect_google exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide connect_linkedin exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide connect_x exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide mail exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide drive exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide whatsapp exists",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide meta: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "7 steps"
+    },
+    {
+      "name": "guide tiktok: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "6 steps"
+    },
+    {
+      "name": "guide google: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "9 steps"
+    },
+    {
+      "name": "guide linkedin: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "5 steps"
+    },
+    {
+      "name": "guide x: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "6 steps"
+    },
+    {
+      "name": "guide connect_google: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "4 steps"
+    },
+    {
+      "name": "guide connect_linkedin: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "3 steps"
+    },
+    {
+      "name": "guide connect_x: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "3 steps"
+    },
+    {
+      "name": "guide mail: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "5 steps"
+    },
+    {
+      "name": "guide drive: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "5 steps"
+    },
+    {
+      "name": "guide whatsapp: has steps and a way to the platform's page",
+      "pass": true,
+      "detail": "9 steps"
+    },
+    {
+      "name": "the app guides carry the return address to copy, resolved to this site",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Drive's return address is in the Google guide",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "there are links to follow in the steps",
+      "pass": true,
+      "detail": "14"
+    },
+    {
+      "name": "no unresolved placeholder in any guide",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "every guide is in the list of guides",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1280: eleven guides drawn, no sideways overflow",
+      "pass": true,
+      "detail": "{\"guides\":11,\"overflow\":false}"
+    },
+    {
+      "name": "1280: every link is https, opens in a new page and is visible",
+      "pass": true,
+      "detail": "22"
+    },
+    {
+      "name": "1280: copy lines are left-to-right and inside the screen",
+      "pass": true,
+      "detail": "8"
+    },
+    {
+      "name": "1280: the connections tab has mail, Google app and Drive, each with its guide",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"blocks\":3,\"guides\":3,\"drivesDisabled\":true,\"inputs\":[{\"type\":\"email\",\"inside\":true},{\"type\":\"password\",\"inside\":true},{\"type\":\"text\",\"inside\":true},{\"type\":\"password\",\"inside\":true}]}"
+    },
+    {
+      "name": "1280: the password and secret fields are password fields, inside the screen",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1280: Drive's button is disabled until the Google app is in",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: eleven guides drawn, no sideways overflow",
+      "pass": true,
+      "detail": "{\"guides\":11,\"overflow\":false}"
+    },
+    {
+      "name": "390: every link is https, opens in a new page and is visible",
+      "pass": true,
+      "detail": "22"
+    },
+    {
+      "name": "390: copy lines are left-to-right and inside the screen",
+      "pass": true,
+      "detail": "8"
+    },
+    {
+      "name": "390: the connections tab has mail, Google app and Drive, each with its guide",
+      "pass": true,
+      "detail": "{\"overflow\":false,\"blocks\":3,\"guides\":3,\"drivesDisabled\":true,\"inputs\":[{\"type\":\"email\",\"inside\":true},{\"type\":\"password\",\"inside\":true},{\"type\":\"text\",\"inside\":true},{\"type\":\"password\",\"inside\":true}]}"
+    },
+    {
+      "name": "390: the password and secret fields are password fields, inside the screen",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: Drive's button is disabled until the Google app is in",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "passed": 39,
+  "total": 39
+}

@@ -1,6 +1,6 @@
 {
   "script": "qa/help-tours.cjs",
-  "run": "2026-10-15T08:54:22.487Z",
+  "run": "2026-10-15T09:36:18.250Z",
   "checks": [
     {
       "name": "lead: the first card says what the page means for the lead group",
@@ -60,7 +60,7 @@
     {
       "name": "news: someone who saw the guide before gets «جديد في» with only the added steps",
       "pass": true,
-      "detail": "جديد في «الإعدادات» · 1 من 1 الإعدادات صارت للنظام فقط جديد: المظهر انتقل إلى صفحة «الحساب» لأنه لك وحدك، وأُزيلت الأقسام التي لم تكن تحفظ شيئاً (المؤسسة واللغة والإشعارات وافتراضات النشر والاعتماد وا"
+      "detail": "جديد في «الإعدادات» · 1 من 1 تبويب الاتصالات جديد: «الاتصالات» لإدخال صندوق بريد القسم وتطبيق Google (يوتيوب وDrive) وربط Drive من الموقع نفسه، و«مفتاح الجسر» في «واتساب النظام» يُنشأ بضغطة بدل الأوام"
     },
     {
       "name": "news: no role line on a news card",
@@ -70,7 +70,7 @@
     {
       "name": "news: seeing it marks the versioned key, so it is not shown again",
       "pass": true,
-      "detail": "settings,settings:v4"
+      "detail": "settings,settings:v5"
     },
     {
       "name": "news already seen: nothing is shown",
@@ -85,7 +85,7 @@
     {
       "name": "first visit: finishing marks the page and its current version",
       "pass": true,
-      "detail": "settings,settings:v4"
+      "detail": "settings,settings:v5"
     },
     {
       "name": "touch: guide mode speaks of touching, not clicking",

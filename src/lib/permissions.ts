@@ -127,7 +127,8 @@ const CREATORS = ['admin', 'director', 'assistant', 'writer', 'designer', 'produ
  *     permissions.grant.
  *   - 2026-10-15, owner decision (20261015180000): the director also holds settings.view,
  *     settings.manage, platforms.manage, integrations.secrets and storage.manage, because the
- *     Director connects the platforms, the mail and the storage from the site.
+ *     Director connects the platforms, the mail and the storage from the site; and
+ *     (20261015200000) whatsapp.system.manage, to set up the WhatsApp bridge from the site.
  * tests/permissions.test.mjs reads those migrations and holds this table to them. Pages are the
  * account's own list, not part of the templates.
  */
@@ -136,6 +137,7 @@ export const TEMPLATE_HOLDS: Partial<Record<Role, readonly string[]>> = {
     'urgency.2', 'mail.outside.send', 'room.create',
     'accounts.view', 'permissions.grant', 'roles.assign', 'members.invite', 'members.remove', 'roles.templates.edit',
     'settings.view', 'settings.manage', 'platforms.manage', 'integrations.secrets', 'storage.manage',
+    'whatsapp.system.manage',
   ],
   assistant: ['urgency.2', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant'],
 };

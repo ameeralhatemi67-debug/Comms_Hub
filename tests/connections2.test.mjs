@@ -331,3 +331,21 @@ test('the site\'s own values win over the environment for Drive and the mailbox,
   // the mailbox form is write-only: nothing the route returns carries the password
   assert.doesNotMatch(acct.slice(acct.indexOf('return json')), /password/);
 });
+
+test('the WhatsApp bridge key is made in the site, kept in the vault, shown once, and the old way still answers', () => {
+  const route = readFileSync('src/app/api/whatsapp/bridge-key/route.ts', 'utf8');
+  assert.match(route, /randomBytes\(32\)/);
+  assert.match(route, /whatsapp\.system\.manage[\s\S]*integrations\.secrets/);
+  assert.match(route, /sha256Hex\(key\)/, 'the database gets the fingerprint, never the key');
+  assert.doesNotMatch(route, /console\./);
+  const server = readFileSync('src/lib/whatsapp/server.ts', 'utf8');
+  assert.match(server, /integrationCreds\('whatsapp_bridge'/);
+  assert.match(server, /return base;/, 'the environment is the fallback');
+  for (const f of ['src/app/api/whatsapp/code/route.ts', 'src/app/api/whatsapp/dispatch/route.ts', 'src/app/w/[token]/route.ts'])
+    assert.match(readFileSync(f, 'utf8'), /resolveWaEnv/, f);
+  const panel = readFileSync('src/components/whatsapp/system-panel.tsx', 'utf8');
+  assert.match(panel, /api\/whatsapp\/bridge-key/);
+  assert.match(panel, /setShown\(null\)/, 'the key is dropped from the page on close');
+  assert.ok(GUIDES.whatsapp && GUIDES.whatsapp.steps.length >= 6);
+  assert.match(GUIDES.whatsapp.link.href, /^https:\/\//);
+});

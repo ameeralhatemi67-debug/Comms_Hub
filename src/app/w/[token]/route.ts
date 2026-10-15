@@ -1,4 +1,4 @@
-import { readWaEnv, verifyLink } from '@/lib/whatsapp/server';
+import { resolveWaEnv, verifyLink } from '@/lib/whatsapp/server';
 
 // The link at the end of a WhatsApp message (Permissions_Plan.md 8.6): a signed token of the
 // outbox row, the recipient, the message, its room and an expiry. A valid one opens that
@@ -18,7 +18,7 @@ const gone = () =>
 
 export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const secret = readWaEnv().secret;
+  const secret = (await resolveWaEnv()).secret;
   if (!secret) return gone();
   const p = verifyLink(secret, decodeURIComponent(token), Date.now());
   if (!p) return gone();

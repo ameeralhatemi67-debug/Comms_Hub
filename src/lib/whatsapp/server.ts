@@ -2,6 +2,7 @@
 // bridge receives. Never imported by a client component: it reads WHATSAPP_SERVER_KEY and
 // WHATSAPP_LINK_SECRET, which exist only in the server's environment.
 import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { integrationCreds } from '../integrations/vault.ts';
 import { LINK_DAYS, packageText, type Claimed, type WaItem } from './rules.ts';
 
 export type WaEnv = { key?: string; secret?: string; site?: string };
@@ -10,6 +11,25 @@ export const readWaEnv = (): WaEnv => ({
   secret: process.env.WHATSAPP_LINK_SECRET,
   site: process.env.MAIL_SITE_URL,
 });
+
+/**
+ * The bridge key and the link secret the Director made in the site win over the environment, which
+ * stays as the fallback (the older way). Both live in the vault as one value; the database keeps
+ * only the key's fingerprint.
+ */
+export async function resolveWaEnv(): Promise<WaEnv> {
+  const base = readWaEnv();
+  const c = await integrationCreds('whatsapp_bridge', 'whatsapp bridge');
+  if (c) {
+    try {
+      const v = JSON.parse(c.secret) as { key?: unknown; secret?: unknown };
+      if (typeof v.key === 'string' && v.key && typeof v.secret === 'string' && v.secret) return { ...base, key: v.key, secret: v.secret };
+    } catch {
+      // A value that is not the pair is ignored: the environment answers.
+    }
+  }
+  return base;
+}
 
 export const newNonce = () => randomBytes(16).toString('hex');
 

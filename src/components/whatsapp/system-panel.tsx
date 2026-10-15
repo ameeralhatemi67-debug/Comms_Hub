@@ -3,13 +3,15 @@
 // and about line the messages are signed with, the daily cap on pushed messages per sender,
 // the length cap of a message, the bridge's last heartbeat, counts, the last failures and a
 // test send to the manager's own number. For «إدارة رقم واتساب النظام» (the administrator by
-// default). No key, token or number is ever shown or stored here: the server key lives in the
-// server's environment and only its sha256 is in the database.
+// default). The bridge's key is made here (Action_Plan.md B9): shown once, kept in the vault, and
+// only its sha256 is in the database. No number is ever shown or stored here.
 import { useCallback, useEffect, useState } from 'react';
 import { needProps } from '@/lib/kit/need';
 import { supabase } from '@/lib/supabase/client';
 import { KIND_AR, systemLine, waError, type OutboxKind } from '@/lib/whatsapp/rules';
 import { useCaps } from '../caps';
+import { SetupGuide } from '../setup-guide';
+import { Modal } from '../ui';
 
 type View = {
   enabled: boolean;
@@ -41,6 +43,7 @@ export function WhatsAppSystemPanel({ initial }: { initial?: View }) {
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [refused, setRefused] = useState(false);
+  const [bridge, setBridge] = useState<{ tail: string | null; at: string | null } | null | undefined>(undefined);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase().rpc('wa_system_view');
@@ -53,6 +56,19 @@ export function WhatsAppSystemPanel({ initial }: { initial?: View }) {
   useEffect(() => {
     void load();
   }, [load]);
+  // Whether a key was made in the site (the settings list; whoever may open this panel may read it).
+  const loadBridge = useCallback(async () => {
+    try {
+      const r = await supabase().rpc('int_list');
+      const row = ((r.data ?? []) as { type: string; secret_tail: string | null; secret_set_at: string | null }[]).find((x) => x.type === 'whatsapp_bridge');
+      setBridge(row ? { tail: row.secret_tail, at: row.secret_set_at } : null);
+    } catch {
+      setBridge(null);
+    }
+  }, []);
+  useEffect(() => {
+    if (!initial) void loadBridge();
+  }, [initial, loadBridge]);
 
   const call = async (fn: string, args: Record<string, unknown>, ok: string) => {
     setBusy(true);
@@ -84,6 +100,8 @@ export function WhatsAppSystemPanel({ initial }: { initial?: View }) {
           يعمل الإرسال عبر جسر على جهاز يبقى مشغّلاً، يسأل الموقع كل بضع ثوانٍ عمّا ينتظر. ربط الرقم أول مرة بمسح رمز QR من هاتف الرقم نفسه، ولا يتم من هنا.
         </small>
       </div>
+
+      <BridgeKeyBlock bridge={bridge} onIssued={loadBridge} />
 
       <label className="ml-check wa-sys-switch">
         <input type="checkbox" checked={v.enabled} disabled={busy} onChange={(e) => void call('wa_system_update', { p: { enabled: e.target.checked } }, e.target.checked ? 'شُغّل واتساب النظام.' : 'أُوقف واتساب النظام. ما في الطابور يبقى حتى يعود.')} />
@@ -158,5 +176,92 @@ export function WhatsAppSystemPanel({ initial }: { initial?: View }) {
         </p>
       )}
     </div>
+  );
+}
+
+/** The bridge's key: made in the site, shown once, never read back. */
+function BridgeKeyBlock({ bridge, onIssued }: { bridge: { tail: string | null; at: string | null } | null | undefined; onIssued: () => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [shown, setShown] = useState<{ key: string; site: string } | null>(null);
+  const [asking, setAsking] = useState(false);
+  const [copied, setCopied] = useState('');
+  const make = async () => {
+    setBusy(true);
+    setErr('');
+    try {
+      const r = await fetch('/api/whatsapp/bridge-key', { method: 'POST' });
+      const b = (await r.json()) as { key?: string; site?: string; error?: string };
+      if (!r.ok || !b.key) return setErr(b.error ?? 'تعذّر إنشاء المفتاح.');
+      setAsking(false);
+      setShown({ key: b.key, site: b.site ?? window.location.origin });
+      await onIssued();
+    } catch {
+      setErr('تعذّر الوصول إلى الخادم.');
+    } finally {
+      setBusy(false);
+    }
+  };
+  const copy = async (text: string, tag: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(tag);
+    } catch {
+      setCopied('');
+    }
+  };
+  const have = Boolean(bridge);
+  const env = shown ? `COMMS_SITE_URL=${shown.site}\nWHATSAPP_SERVER_KEY=${shown.key}` : '';
+  return (
+    <section className="wa-sys-bridge notice" aria-label="مفتاح الجسر">
+      <div className="between">
+        <b>
+          مفتاح الجسر <SetupGuide guide="whatsapp" label="خطوات إعداد واتساب النظام" />
+        </b>
+        <span className="mx-chip">{bridge === undefined ? '…' : have ? 'أُنشئ' : 'لم يُنشأ بعد'}</span>
+      </div>
+      <small className="muted">
+        {have
+          ? `المفتاح محفوظ في الخزنة (${bridge!.tail ?? ''})${bridge!.at ? ` منذ ${when(bridge!.at)}` : ''}. لا يُعرض بعد إنشائه. هو ما يضعه جهاز الجسر في ملف إعداده.`
+          : 'يُنشأ هنا بدل الأوامر والمحرّر: يظهر مرة واحدة لتضعه في ملف إعداد جهاز الجسر، ولا يُحفظ في أي مكان آخر.'}
+      </small>
+      {err && (
+        <p className="ml-err" role="status">
+          {err}
+        </p>
+      )}
+      <div className="actions">
+        <button type="button" className="secondary wa-sys-keygen" disabled={busy} onClick={() => (have ? setAsking(true) : void make())}>
+          {have ? 'إنشاء مفتاح جديد' : 'إنشاء مفتاح الجسر'}
+        </button>
+      </div>
+      {asking && (
+        <Modal title="إنشاء مفتاح جديد؟" onClose={() => setAsking(false)}>
+          <p>المفتاح الحالي يتوقف عن العمل فوراً، فلا يرسل الجسر القائم شيئاً حتى تضع المفتاح الجديد في ملف إعداده. ما في الطابور ينتظر ولا يضيع.</p>
+          <div className="actions">
+            <button type="button" className="primary" disabled={busy} onClick={() => void make()}>
+              إنشاء مفتاح جديد
+            </button>
+            <button type="button" className="secondary" onClick={() => setAsking(false)}>
+              تراجع
+            </button>
+          </div>
+        </Modal>
+      )}
+      {shown && (
+        <Modal title="مفتاح الجسر" onClose={() => setShown(null)}>
+          <p>انسخ السطرين إلى ملف <bdi dir="ltr">.env</bdi> في مجلد الجسر على الجهاز المشغّل. لن يظهر المفتاح مرة ثانية؛ إن ضاع أنشئ غيره.</p>
+          <textarea readOnly dir="ltr" rows={3} className="wa-sys-keybox" value={env} onFocus={(e) => e.currentTarget.select()} />
+          <div className="actions">
+            <button type="button" className="primary" onClick={() => void copy(env, 'env')}>
+              {copied === 'env' ? 'نُسخ' : 'نسخ السطرين'}
+            </button>
+            <button type="button" className="secondary" onClick={() => setShown(null)}>
+              تم، أغلق
+            </button>
+          </div>
+        </Modal>
+      )}
+    </section>
   );
 }

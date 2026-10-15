@@ -39,7 +39,7 @@ const CREDS_TTL = 60_000;
  * session, because share links and the mail sync have none; each read is logged with its purpose.
  * Kept in this process for a minute so a burst of requests asks once.
  */
-export async function integrationCreds(type: 'google_app' | 'gmail_account', purpose: string): Promise<StoredCreds | null> {
+export async function integrationCreds(type: 'google_app' | 'gmail_account' | 'whatsapp_bridge', purpose: string): Promise<StoredCreds | null> {
   if (!vaultReachable()) return null;
   const hit = credsCache.get(type);
   if (hit && Date.now() - hit.at < CREDS_TTL) return hit.value;
@@ -51,7 +51,7 @@ export async function integrationCreds(type: 'google_app' | 'gmail_account', pur
 }
 
 /** Forget what was read (after a new value was entered). */
-export function forgetCreds(type?: 'google_app' | 'gmail_account') {
+export function forgetCreds(type?: 'google_app' | 'gmail_account' | 'whatsapp_bridge') {
   if (type) credsCache.delete(type);
   else credsCache.clear();
 }

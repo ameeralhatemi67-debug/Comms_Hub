@@ -711,8 +711,8 @@ database decides which rows come back.
 | البريد | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
 | حسابات المنصات | نعم | نعم | نعم | لا | لا | لا | نعم | لا | القائمة |
 | الأفكار | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
-| الحسابات | نعم | لا | لا | لا | لا | لا | لا | لا | القائمة |
-| الإعدادات | نعم | لا | لا | لا | لا | لا | لا | لا | القائمة |
+| الحسابات | نعم | نعم | نعم | لا | لا | لا | لا | لا | القائمة |
+| الإعدادات | نعم | نعم | لا | لا | لا | لا | لا | لا | القائمة |
 | الحساب | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | الاسم أسفل القائمة |
 | المراقبة | - | - | - | - | - | - | - | - | يفتح «سجل النشاط» |
 | الإدارة | - | - | - | - | - | - | - | - | يفتح «الحسابات» |
@@ -721,12 +721,18 @@ Reading it:
 
 - **What differs by role, by default, is small:** «إنشاء» (not the publisher, and not offered to the
   administrator), «حسابات المنصات» (administrator, director, assistant, publisher; with «الموافقات والنشر»),
-  «الحسابات» (the administrator; others only by the capability «فتح صفحة الحسابات»), and what
+  «الحسابات» (the administrator, the director and the assistant, by the capability «فتح صفحة الحسابات»
+  their templates carry since Step P2; the table of 2026-10-15 first listed it for the administrator
+  alone because the interface's mirror of the templates was out of date: corrected the same day), and what
   «سجل النشاط» shows (the whole log and the team panel for the administrator, director and assistant;
   everyone else sees their own actions and the files they reach).
-- **«الإعدادات» is the administrator's by default** (decision of 2026-10-15, B4b). Another person has it
-  only with the page grant, or by holding «settings.view» or «settings.manage» (the page and the menu then
-  open; each tab still asks for its own capability). Existing accounts keep the page list they have.
+- **«الإعدادات» is the administrator's and the Director's by default** (decisions of 2026-10-15, B4b and
+  B9). The Director opens it because the template carries «settings.view», «settings.manage»,
+  «platforms.manage», «integrations.secrets», «storage.manage» and «whatsapp.system.manage»: the Director
+  connects the platforms, the mail, Drive and the WhatsApp bridge from the site (tab «الاتصالات», tab
+  «المنصات», tab «واتساب النظام»). Another person has the page only with the page grant, or by holding
+  «settings.view» or «settings.manage». The assistant has none of these. Backups and moving files stay
+  the administrator's (`backups.*`, `storage.migrate`).
 - **An administrator viewing as a role** (`عرض بصفة`) still opens every page; only «إنشاء» and «الحسابات»
   follow the viewed role (leaders see «الحسابات», the publisher does not see «إنشاء»).
 - **The member creates** (decision of 2026-10-15, B4b): «إنشاء» is offered to the member and the capability

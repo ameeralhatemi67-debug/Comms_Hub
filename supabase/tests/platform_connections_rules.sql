@@ -122,10 +122,11 @@ select pg_temp.t('31 deleting a real account destroys its secret and closes its 
 select pg_temp.c('31b', (select count(*)::text from public.platform_accounts where id = pg_temp.g('up')::uuid), '0');
 
 -- The app credentials ----------------------------------------------------------------------------------------------
-select pg_temp.t('32 the director cannot enter app secrets', $q$ select public.platform_conn_app_set('k-rule-run-only', 'meta_app', 'تطبيق', '{"app_id":"123456"}', 'app-SECRETMARK-secret-0001') $q$, 'ERR FORBIDDEN');
+-- 2026-10-15 (Action_Plan.md B9): the Director holds platforms.manage and integrations.secrets by default.
+select pg_temp.t('32 the director enters app secrets (owner decision of 2026-10-15)', $q$ select public.platform_conn_app_set('k-rule-run-only', 'meta_app', 'تطبيق', '{"app_id":"123456"}', 'app-SECRETMARK-secret-0001') $q$, 'ok');
 select pg_temp.who('00000000-0000-0000-0000-0000000000a1');
 select pg_temp.t('33 a wrong key cannot', $q$ select public.platform_conn_app_set('wrong', 'meta_app', 'تطبيق', '{"app_id":"123456"}', 'app-SECRETMARK-secret-0001') $q$, 'ERR FORBIDDEN');
-select pg_temp.t('34 only the two app types', $q$ select public.platform_conn_app_set('k-rule-run-only', 'google_drive', 'x', '{}', 'app-SECRETMARK-secret-0001') $q$, 'ERR INT_NOT_FOUND');
+select pg_temp.t('34 only the app types (five since B9), not a storage provider', $q$ select public.platform_conn_app_set('k-rule-run-only', 'google_drive', 'x', '{}', 'app-SECRETMARK-secret-0001') $q$, 'ERR INT_NOT_FOUND');
 select pg_temp.c('35 the administrator enters them: a masked tail comes back', (select public.platform_conn_app_set('k-rule-run-only', 'meta_app', 'تطبيق', '{"app_id":"123456"}', 'app-SECRETMARK-secret-0001')), '••••0001');
 select pg_temp.c('36 the server reads the id and the secret back', (select (public.platform_conn_app_get('k-rule-run-only', 'meta_app', 'فحص')->'config'->>'app_id') || ':' || (public.platform_conn_app_get('k-rule-run-only', 'meta_app', 'فحص')->>'secret')), '123456:app-SECRETMARK-secret-0001');
 select pg_temp.t('37 replacing keeps one row', $q$ select public.platform_conn_app_set('k-rule-run-only', 'meta_app', 'تطبيق', '{"app_id":"123456"}', 'app-SECRETMARK-secret-0002') $q$, 'ok');

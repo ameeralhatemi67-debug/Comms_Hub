@@ -68,9 +68,12 @@ test('installed role templates equal what the migrations leave in role_capabilit
   const fromP2 = (role) => [...p2.matchAll(new RegExp(`\\('${role}','([a-z.]+)'\\)`, 'g'))].map((m) => m[1]);
   const b9 = readFileSync('supabase/migrations/20261015180000_director_connection_rights.sql', 'utf8');
   const fromB9 = [...b9.slice(b9.indexOf('with wanted'), b9.indexOf('changed as')).matchAll(/\('([a-z.]+)'\)/g)].map((m) => m[1]);
+  const wa = readFileSync('supabase/migrations/20261015200000_whatsapp_bridge_from_site.sql', 'utf8');
+  const fromWa = [...wa.matchAll(/rc\.capability = '([a-z.]+)'/g)].map((m) => m[1]);
+  assert.deepEqual(fromWa, ['whatsapp.system.manage']);
   const seed = ['urgency.2', 'mail.outside.send', 'room.create'];
   assert.deepEqual([...grantable.filter((k) => installedDefault('assistant', k))].sort(), [...seed, ...fromP2('assistant')].sort());
-  assert.deepEqual([...grantable.filter((k) => installedDefault('director', k))].sort(), [...seed, ...fromP2('director'), ...fromB9].sort());
+  assert.deepEqual([...grantable.filter((k) => installedDefault('director', k))].sort(), [...seed, ...fromP2('director'), ...fromB9, ...fromWa].sort());
   // The Director, and nobody below, enters the platforms' apps and secrets by default.
   for (const k of ['platforms.manage', 'integrations.secrets', 'settings.view', 'settings.manage', 'storage.manage'])
     assert.equal(installedDefault('assistant', k), false, `assistant ${k}`);

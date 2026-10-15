@@ -1,7 +1,7 @@
 import { serverClient } from '@/lib/supabase/server';
 import { readMailEnv } from '@/lib/mail/gmail';
 import { DEFAULT_MAX_CHARS, type Claimed } from '@/lib/whatsapp/rules';
-import { buildItems, readWaEnv, sameKey } from '@/lib/whatsapp/server';
+import { buildItems, resolveWaEnv, sameKey } from '@/lib/whatsapp/server';
 
 // The pull bridge's only door (Permissions_Plan.md 8.1). The bridge, on the owner's computer,
 // calls this every few seconds with WHATSAPP_SERVER_KEY: it reports what it sent, says it is
@@ -15,7 +15,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 type Body = { reports?: { id?: unknown; ok?: unknown; error?: unknown }[]; note?: unknown; claim?: unknown };
 
 export async function POST(request: Request) {
-  const env = readWaEnv();
+  const env = await resolveWaEnv();
   if (!env.key || !env.secret) return no(503, 'not configured');
   const given = (request.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
   if (!given || !sameKey(given, env.key)) return no(401, 'forbidden');

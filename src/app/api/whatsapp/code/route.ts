@@ -1,7 +1,7 @@
 import { guard, fail } from '@/lib/drive/guard';
 import { serverClient } from '@/lib/supabase/server';
 import { normalisePhone, waError } from '@/lib/whatsapp/rules';
-import { codeFor, codeHash, newNonce, readWaEnv } from '@/lib/whatsapp/server';
+import { codeFor, codeHash, newNonce, resolveWaEnv } from '@/lib/whatsapp/server';
 
 // The member asks for a code to prove a number (Permissions_Plan.md 8.3). The server makes
 // the code from its secret and a fresh nonce, and gives the database only the nonce and the
@@ -10,7 +10,7 @@ import { codeFor, codeHash, newNonce, readWaEnv } from '@/lib/whatsapp/server';
 export async function POST(request: Request) {
   const g = await guard(request, { mutating: true });
   if (!g.ok) return g.response;
-  const env = readWaEnv();
+  const env = await resolveWaEnv();
   if (!env.key || !env.secret) return fail(503, 'واتساب النظام غير مهيأ بعد. يكمل مسؤول النظام إعداده.');
   const body = (await request.json().catch(() => null)) as { phone?: unknown } | null;
   const phone = normalisePhone(typeof body?.phone === 'string' ? body.phone : '');

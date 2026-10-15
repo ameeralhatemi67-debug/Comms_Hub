@@ -1,6 +1,7 @@
 # Owner handoff: what only you can do, in order, and what happens after each
 
-Written 2026-10-15, after steps B1 to B8 of `Action_Plan.md`. Everything an agent could build or
+Written 2026-10-15, after steps B1 to B8 of `Action_Plan.md`; updated the same day for B9 (the
+Director connects everything from the site). Everything an agent could build or
 check without your accounts, your hardware or a signed-in browser is built and recorded in
 `progress.md`. What is left needs one of those three, so each item below says what you do, what
 the agent does with the answer, and what evidence closes it.
@@ -16,6 +17,7 @@ you type secrets into the site's own screens.
 |---|---|---|---|
 | 1 | Signed-in walkthrough (section 2) | Nothing built since 2026-10-12 has been seen by a person; this is the cheapest way to find what is wrong | 30 to 45 minutes |
 | 2 | Supabase Auth SMTP (section 1.1) | Without it a tester's confirmation and reset emails hit a small hourly limit | 10 minutes |
+| 2b | In the site, as the Director, «الإعدادات» ثم «الاتصالات» (section 1.0) | Mail, the Google app (YouTube and Drive), Drive, then «المنصات» for LinkedIn, X, Meta, TikTok, then «واتساب النظام» | each has a circled "!" with the steps and the links |
 | 3 | Second storage provider and a first small move (1.3) | The backup system and the move engine have never met a real provider | 30 minutes |
 | 4 | Meta and TikTok apps (1.2) | The long pole: App Review takes weeks, so start early even if publishing is far | an afternoon, then waiting |
 | 5 | OneDrive app registration (1.4) | Only if you want OneDrive | 15 minutes |
@@ -24,6 +26,25 @@ you type secrets into the site's own screens.
 ---
 
 ## 1. Outside the site
+
+### 1.0 What the Director enters in the site (nothing is typed into a server setting)
+
+The Director holds the rights by default (the assistant does not; the administrator holds everything).
+Each value is checked with its own service, kept in the vault, and never shown again. The circled "!"
+beside each block opens the steps with the links to the platform's own pages.
+
+| Where | What | Needs from the platform's side |
+|---|---|---|
+| «الإعدادات» ثم «الاتصالات» | Shared mailbox: address and app password | 2-step verification and an app password on the Gmail account |
+| «الإعدادات» ثم «الاتصالات» | Google app: client ID and secret (serves YouTube and Drive) | A project in Google Cloud with the two APIs on |
+| «الإعدادات» ثم «الاتصالات» | Connect Google Drive (the button) | The Google app above |
+| «الإعدادات» ثم «المنصات»، بطاقة كل منصة | Meta, TikTok, LinkedIn, X: app id and secret | An app in each developer console |
+| «حسابات المنصات» | Connect each account: «ربط عبر ...», sign in on the platform's page, choose | The app above, and the platform's approval before publishing is real |
+| «الإعدادات» ثم «واتساب النظام» | Make the bridge key, shown once | A computer that stays on, with the phone of the number |
+
+What no form can do: create the developer app in the platform's console (a person with the
+platform's account must), pass a platform's app review (weeks, on their side), or scan the WhatsApp
+code on the phone. Publishing stays a simulation until each platform's adapter exists.
 
 ### 1.1 Send sign-in emails from the site's Gmail
 

@@ -1,0 +1,8 @@
+{
+  "run": "2026-10-15",
+  "what": "Database rule run for the WhatsApp bridge key made in the site (migration 20261015200000_whatsapp_bridge_from_site.sql, applied as whatsapp_bridge_from_site)",
+  "script": "supabase/tests/whatsapp_bridge_from_site_rules.sql",
+  "how": "One transaction against comms-hub, rolled back at the end (the real key fingerprint untouched).",
+  "total": 15,
+  "passed": 15
+}

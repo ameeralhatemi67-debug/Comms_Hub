@@ -42,6 +42,12 @@ volume low, and expect to link again occasionally (plan section 13).
 
 ## Owner walkthrough (needs the phone of the system number; not performed by the agent)
 
+> Since 2026-10-15 the key is made in the site: «الإعدادات», «واتساب النظام», «إنشاء مفتاح الجسر».
+> It shows two lines once (`COMMS_SITE_URL`, `WHATSAPP_SERVER_KEY`) to paste into this folder's `.env`,
+> and the site keeps the pair in its vault and the key's fingerprint in the database. Steps 2 to 4
+> below (PowerShell, hosting variables, the SQL statement) are the older way and still work as a
+> fallback. The circled "!" on that panel lists the whole sequence with links.
+
 1. **Choose the number.** A dedicated WhatsApp number for the department, on a phone you keep.
 2. **Make two secrets** in PowerShell on this computer (run the line twice; each prints 64
    hexadecimal characters):

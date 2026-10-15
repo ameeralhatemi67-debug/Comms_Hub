@@ -1,0 +1,17 @@
+{
+  "run": "2026-10-15",
+  "what": "Database rule run for step B9: the Director's connection rights, the Google, LinkedIn and X app/offer/account types, the server's read of the Google app and the mailbox, the mailbox entry",
+  "script": "supabase/tests/connections_generalised_rules.sql",
+  "migrations": [
+    "supabase/migrations/20261015180000_director_connection_rights.sql (applied as director_connection_rights)",
+    "supabase/migrations/20261015190000_connections_generalised.sql (applied as connections_generalised)"
+  ],
+  "how": "One transaction against the Supabase project comms-hub, rolled back at the end. Four throwaway accounts (@t.test); the server key is replaced by a throwaway inside the transaction only.",
+  "total": 40,
+  "passed": 40,
+  "found_and_fixed_in_the_script": [
+    "the reminder goes to the other publishers, not the acting person (test 24 now looks at the assistant)",
+    "the integrations table has no read policy: counts go through int_list (test 34b)"
+  ],
+  "not_rerun": "supabase/tests/platform_connections_rules.sql check 32 ('the director cannot enter app secrets') is out of date since the owner decision of 2026-10-15; the script was edited to expect the Director to hold the right, and was not re-run in full."
+}
