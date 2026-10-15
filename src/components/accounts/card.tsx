@@ -388,7 +388,7 @@ export function GrantDialog({ emails, initial, requestId, defaults, onClose, onD
       let why = '';
       if (!a.can(x.key) && a.me.role !== 'admin') why = 'لا تملكها أنت';
       else if (minRank < x.minRank) why = 'لا تناسب دور من اخترت';
-      else if (x.key === 'page.create' && people.some((p) => !['director', 'assistant', 'writer', 'designer', 'producer'].includes(p.role))) why = 'لمن يملك دوره الإنشاء';
+      else if (x.key === 'page.create' && people.some((p) => !['director', 'assistant', 'writer', 'designer', 'producer', 'member'].includes(p.role))) why = 'لمن يملك دوره الإنشاء';
       return { x, why };
     });
   }, [q, a, minRank, people]);

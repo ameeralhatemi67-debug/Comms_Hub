@@ -119,7 +119,11 @@ capability catalog, saved under `qa/` as a re-runnable script and its JSON resul
 recorded in `MVP_draft.md`. A test fails when a page is reachable by a role the table says
 should not reach it. This is the "each member sees a somewhat different view" document.
 
-### Step B4b: default pages per role (owner decision, small)
+### Step B4b: default pages per role - BUILT 2026-10-15
+
+Owner decided: «الإعدادات» by default for the administrator only (others with the page grant, or
+`settings.view` or `settings.manage`); the member keeps creating and `page.create` says so
+(migration `20261015160000_member_creates.sql`). Recorded in `progress.md`. The original proposal:
 
 The default page list gives every role «الإعدادات», so a writer or a member sees a page whose every
 tab refuses. Proposed: «الإعدادات» only for the administrator and whoever holds `settings.view` or

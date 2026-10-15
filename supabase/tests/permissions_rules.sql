@@ -41,7 +41,7 @@ create function pg_temp.before(cap text) returns boolean language sql as $$
     when cap = 'room.create' then public.media_acts(array['director','assistant'])
     when cap in ('accounts.view','permissions.grant','roles.assign','members.invite','members.remove','roles.templates.edit','whatsapp.system.manage') then public.is_admin()
     when cap like 'page.%' then public.is_admin() or (substr(cap, 6) in (select unnest(pages) from public.accounts where email = public.current_email())
-         and (cap <> 'page.create' or public.media_my_role() in ('director','assistant','writer','designer','producer')))
+         and (cap <> 'page.create' or public.media_my_role() in ('director','assistant','writer','designer','producer','member')))
     when cap = 'whatsapp.push' then false
   end $$;
 grant execute on function pg_temp.before(text) to authenticated;

@@ -1,0 +1,19 @@
+{
+  "run": "2026-10-15",
+  "what": "Database rule run for step B4b (the member holds page.create)",
+  "migration": "supabase/migrations/20261015160000_member_creates.sql, applied to comms-hub as version 20261015082747 'member_creates'",
+  "how": "One transaction against the Supabase project comms-hub, rolled back at the end. Five throwaway accounts (@t.test) and two auth users; the administrator acts through row level security for the two calls.",
+  "migration_check": "perm_eval, grant_capability and request_capability each carry the widened list exactly once after the migration (position of the new list in prosrc)",
+  "checks": [
+    { "k": "member holding the create page: held", "v": "true", "expect": "true", "pass": true },
+    { "k": "member without the page: not held", "v": "false", "expect": "false", "pass": true },
+    { "k": "publisher with the page: still fixed-denied", "v": "false fixed", "expect": "false fixed", "pass": true },
+    { "k": "writer unchanged", "v": "true", "expect": "true", "pass": true },
+    { "k": "the administrator may give a member the create page (account_update)", "v": "ok", "expect": "ok", "pass": true },
+    { "k": "the administrator may not give a publisher a standing create grant", "v": "ERR PAGE_NEEDS_CREATE", "expect": "ERR", "pass": true },
+    { "k": "the member now holds it", "v": "true", "expect": "true", "pass": true }
+  ],
+  "passed": 7,
+  "total": 7,
+  "not_rerun": "supabase/tests/permissions_rules.sql (its 'before' list was widened to include the member to match; not re-run in full here, 38 KB). Re-run it with the MCP execute_sql tool before relying on its totals."
+}

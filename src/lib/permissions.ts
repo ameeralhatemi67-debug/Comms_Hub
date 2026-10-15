@@ -116,7 +116,7 @@ export function rankOf(role: Role | string | null | undefined): number {
   return role === 'admin' ? 4 : role === 'director' ? 3 : role === 'assistant' ? 2 : 1;
 }
 
-const CREATORS = ['admin', 'director', 'assistant', 'writer', 'designer', 'producer'];
+const CREATORS = ['admin', 'director', 'assistant', 'writer', 'designer', 'producer', 'member'];
 
 /**
  * The role templates as installed on 2026-10-13, equal to the rules before the engine:
@@ -463,7 +463,7 @@ export const REQUEST_STATUS: Record<string, string> = {
 export function askable(role: Role, evals: Pick<CapEval, 'k' | 'ok' | 'src'>[]): Capability[] {
   return CAPABILITIES.filter((c) => {
     if (!c.grantable || rankOf(role) < c.minRank) return false;
-    if (c.key === 'page.create' && !['director', 'assistant', 'writer', 'designer', 'producer'].includes(role)) return false;
+    if (c.key === 'page.create' && !['director', 'assistant', 'writer', 'designer', 'producer', 'member'].includes(role)) return false;
     const e = evals.find((x) => x.k === c.key);
     return !(e?.ok && ['role', 'added', 'page'].includes(e.src));
   });

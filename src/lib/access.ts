@@ -50,6 +50,9 @@ export const adminOnlyPages = ['admin', 'accounts'] as const;
  */
 export const ACCOUNTS_CAP = 'accounts.view';
 
+/** Holding either of these opens «الإعدادات» without the page grant (its tabs still ask their own). */
+export const SETTINGS_CAPS = ['settings.view', 'settings.manage'] as const;
+
 export type Account = {
   email: string;
   name: string;
@@ -73,9 +76,15 @@ export function sanitizePages(pages: readonly string[] | null | undefined): Gran
   return grantablePages.filter((p) => wanted.has(p.id)).map((p) => p.id);
 }
 
-/** The pages a new account of this role starts with: everything the role can use. */
+/**
+ * The pages a new account of this role starts with: everything the role can use, except
+ * «الإعدادات», which is the administrator's (Action_Plan.md B4b): another person opens it with the
+ * page grant or by holding «settings.view» or «settings.manage» (SETTINGS_CAPS).
+ */
 export function defaultPages(role: Role): GrantablePage[] {
-  return grantablePages.filter((p) => p.id !== 'create' || roles[role].create).map((p) => p.id);
+  return grantablePages
+    .filter((p) => (p.id !== 'create' || roles[role].create) && (p.id !== 'settings' || role === 'admin'))
+    .map((p) => p.id);
 }
 
 export const isAdmin = (account: Pick<Account, 'role'>) => account.role === 'admin';
@@ -88,6 +97,7 @@ export function canOpen(account: Pick<Account, 'role' | 'pages' | 'caps'>, page:
   if (isAdmin(account)) return true;
   if (alwaysOpen.has(page)) return true;
   if (page === 'accounts') return !!account.caps?.includes(ACCOUNTS_CAP);
+  if (page === 'settings') return account.pages.includes('settings') || SETTINGS_CAPS.some((c) => account.caps?.includes(c));
   // «حسابات المنصات» goes with «الموافقات والنشر», for the roles that manage the
   // accounts (director, assistant) or publish on them (publisher).
   if (page === 'channels') return linkedAccountRoles.includes(account.role) && account.pages.includes('approvals');
@@ -147,7 +157,11 @@ export function menuFor(
   const accountsOpen = isAdmin(account) ? roles[viewAs].admin || viewAs === 'director' || viewAs === 'assistant' : hasCap(ACCOUNTS_CAP);
   return menuEntries.filter(
     (e) =>
-      (e.href === '/accounts' ? accountsOpen : canOpen(account, e.href.slice(1))) &&
+      (e.href === '/accounts'
+        ? accountsOpen
+        : e.href === '/settings'
+          ? canOpen(account, 'settings') || SETTINGS_CAPS.some((c) => hasCap(c))
+          : canOpen(account, e.href.slice(1))) &&
       (e.href !== '/create' || roles[viewAs].create),
   );
 }

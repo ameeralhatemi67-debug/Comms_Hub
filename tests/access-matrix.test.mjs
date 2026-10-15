@@ -7,17 +7,18 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { accessMatrix, MATRIX_ROLES } from '../src/lib/access-matrix.ts';
 import { menuEntries, menuFor, canOpen, defaultPages } from '../src/lib/access.ts';
+import { resolve, installedDefault } from '../src/lib/permissions.ts';
 
 const m = accessMatrix();
 const byRole = Object.fromEntries(m.roles.map((r) => [r.role, r]));
 const order = menuEntries.map((e) => (e.href === '/' ? '' : e.href.slice(1)));
 const inOrder = (set) => order.filter((id) => set.includes(id));
 
-// Pages every role opens by default. «settings» is here because the default page list of every role
-// contains it (access.ts defaultPages); its tabs refuse without «settings.view». See Action_Plan.md B4.
-const COMMON = ['', 'work', 'approvals', 'calendar', 'projects', 'requests', 'media', 'tasks', 'activity', 'motion', 'mail', 'ideas', 'settings'];
+// Pages every role opens by default. «settings» is the administrator's alone (Action_Plan.md B4b):
+// another person has it only with the page grant or by holding «settings.view» or «settings.manage».
+const COMMON = ['', 'work', 'approvals', 'calendar', 'projects', 'requests', 'media', 'tasks', 'activity', 'motion', 'mail', 'ideas'];
 const EXPECTED_MENU = {
-  admin: [...COMMON, 'channels', 'accounts'],
+  admin: [...COMMON, 'settings', 'channels', 'accounts'],
   director: [...COMMON, 'create', 'channels'],
   assistant: [...COMMON, 'create', 'channels'],
   writer: [...COMMON, 'create'],
@@ -75,6 +76,31 @@ test("the capabilities held by default are the administrator's, the leaders' and
   assert.deepEqual(holders['work.approve'], ['admin', 'director', 'assistant']);
   assert.deepEqual(holders['urgency.3'], ['admin', 'director', 'assistant']);
   assert.deepEqual(holders['whatsapp.push'], [], 'nobody holds the WhatsApp push by default (D-13)');
+});
+
+test('«الإعدادات» is the administrator\'s by default, and opens for others only with the page grant or a settings capability', () => {
+  for (const role of MATRIX_ROLES) assert.equal(defaultPages(role).includes('settings'), role === 'admin', role);
+  const writer = { role: 'writer', pages: defaultPages('writer'), caps: [] };
+  assert.equal(canOpen(writer, 'settings'), false);
+  assert.equal(menuFor(writer).some((e) => e.href === '/settings'), false);
+  // the page grant still opens it
+  assert.equal(canOpen({ ...writer, pages: [...writer.pages, 'settings'] }, 'settings'), true);
+  // so does either capability, in the page guard and in the menu (read live)
+  for (const cap of ['settings.view', 'settings.manage']) {
+    assert.equal(canOpen({ ...writer, caps: [cap] }, 'settings'), true, cap);
+    assert.equal(menuFor(writer, { hasCap: (k) => k === cap }).some((e) => e.href === '/settings'), true, cap);
+  }
+  // a storage capability alone does not open the page (the owner named settings.view and settings.manage)
+  assert.equal(canOpen({ ...writer, caps: ['storage.manage'] }, 'settings'), false);
+});
+
+test('the member creates: «إنشاء» is held by the member in the permissions list as in the menu', () => {
+  assert.equal(resolve({ role: 'member', pages: ['create'], templates: installedDefault, grants: [] }, 'page.create', 0).ok, true);
+  assert.equal(resolve({ role: 'publisher', pages: ['create'], templates: installedDefault, grants: [] }, 'page.create', 0).ok, false);
+  assert.equal(byRole.member.menu.includes('create'), true);
+  const sql = readFileSync('supabase/migrations/20261015160000_member_creates.sql', 'utf8');
+  assert.match(sql, /'designer'',''producer''\)'/);
+  assert.match(sql, /'perm_eval', 'grant_capability', 'request_capability'/);
 });
 
 test('the shell draws its menu from menuFor and has an icon for every entry', () => {
