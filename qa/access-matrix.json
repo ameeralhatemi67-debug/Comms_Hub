@@ -1,0 +1,928 @@
+{
+  "script": "qa/access-matrix.mjs",
+  "run": "2026-10-15T08:23:28.101Z",
+  "roles": [
+    {
+      "role": "admin",
+      "name": "Admin",
+      "pages": [
+        "work",
+        "approvals",
+        "calendar",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "analytics",
+        "monitoring",
+        "settings"
+      ],
+      "caps": [
+        "urgency.2",
+        "urgency.3",
+        "mail.outside.send",
+        "room.create",
+        "accounts.view",
+        "permissions.grant",
+        "roles.assign",
+        "members.invite",
+        "members.remove",
+        "roles.templates.edit",
+        "whatsapp.system.manage",
+        "settings.view",
+        "settings.manage",
+        "storage.manage",
+        "storage.migrate",
+        "backups.run",
+        "backups.restore",
+        "platforms.manage",
+        "integrations.secrets",
+        "work.approve",
+        "work.publish",
+        "media.approve",
+        "role.switch"
+      ],
+      "menu": [
+        "",
+        "work",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "channels",
+        "ideas",
+        "accounts",
+        "settings"
+      ],
+      "open": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "channels",
+        "ideas",
+        "accounts",
+        "settings",
+        "account",
+        "analytics"
+      ],
+      "activity": "whole"
+    },
+    {
+      "role": "director",
+      "name": "مدير الاتصال المؤسسي",
+      "pages": [
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "analytics",
+        "monitoring",
+        "settings"
+      ],
+      "caps": [
+        "urgency.2",
+        "urgency.3",
+        "mail.outside.send",
+        "room.create",
+        "work.approve",
+        "media.approve"
+      ],
+      "menu": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "channels",
+        "ideas",
+        "settings"
+      ],
+      "open": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "channels",
+        "ideas",
+        "settings",
+        "account",
+        "analytics"
+      ],
+      "activity": "whole"
+    },
+    {
+      "role": "assistant",
+      "name": "مساعد مدير الاتصال المؤسسي",
+      "pages": [
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "analytics",
+        "monitoring",
+        "settings"
+      ],
+      "caps": [
+        "urgency.2",
+        "urgency.3",
+        "mail.outside.send",
+        "room.create",
+        "work.approve",
+        "media.approve"
+      ],
+      "menu": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "channels",
+        "ideas",
+        "settings"
+      ],
+      "open": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "channels",
+        "ideas",
+        "settings",
+        "account",
+        "analytics"
+      ],
+      "activity": "whole"
+    },
+    {
+      "role": "writer",
+      "name": "كاتب المحتوى",
+      "pages": [
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "analytics",
+        "monitoring",
+        "settings"
+      ],
+      "caps": [],
+      "menu": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "settings"
+      ],
+      "open": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "settings",
+        "account",
+        "analytics"
+      ],
+      "activity": "own"
+    },
+    {
+      "role": "designer",
+      "name": "المصمم",
+      "pages": [
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "analytics",
+        "monitoring",
+        "settings"
+      ],
+      "caps": [],
+      "menu": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "settings"
+      ],
+      "open": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "settings",
+        "account",
+        "analytics"
+      ],
+      "activity": "own"
+    },
+    {
+      "role": "producer",
+      "name": "المنتج الإعلامي",
+      "pages": [
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "analytics",
+        "monitoring",
+        "settings"
+      ],
+      "caps": [],
+      "menu": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "settings"
+      ],
+      "open": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "settings",
+        "account",
+        "analytics"
+      ],
+      "activity": "own"
+    },
+    {
+      "role": "publisher",
+      "name": "مسؤول النشر وإدارة الحسابات",
+      "pages": [
+        "work",
+        "approvals",
+        "calendar",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "analytics",
+        "monitoring",
+        "settings"
+      ],
+      "caps": [
+        "work.publish"
+      ],
+      "menu": [
+        "",
+        "work",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "channels",
+        "ideas",
+        "settings"
+      ],
+      "open": [
+        "",
+        "work",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "channels",
+        "ideas",
+        "settings",
+        "account",
+        "analytics"
+      ],
+      "activity": "own"
+    },
+    {
+      "role": "member",
+      "name": "عضو",
+      "pages": [
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "analytics",
+        "monitoring",
+        "settings"
+      ],
+      "caps": [],
+      "menu": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "settings"
+      ],
+      "open": [
+        "",
+        "work",
+        "create",
+        "approvals",
+        "calendar",
+        "projects",
+        "requests",
+        "media",
+        "tasks",
+        "activity",
+        "motion",
+        "mail",
+        "ideas",
+        "settings",
+        "account",
+        "analytics"
+      ],
+      "activity": "own"
+    }
+  ],
+  "routes": [
+    {
+      "id": "",
+      "label": "الرئيسية",
+      "how": "menu"
+    },
+    {
+      "id": "work",
+      "label": "العمل",
+      "how": "menu"
+    },
+    {
+      "id": "create",
+      "label": "إنشاء",
+      "how": "menu"
+    },
+    {
+      "id": "approvals",
+      "label": "الموافقات والنشر",
+      "how": "menu"
+    },
+    {
+      "id": "calendar",
+      "label": "التقويم",
+      "how": "menu"
+    },
+    {
+      "id": "projects",
+      "label": "المشاريع",
+      "how": "menu"
+    },
+    {
+      "id": "requests",
+      "label": "الطلبات",
+      "how": "menu"
+    },
+    {
+      "id": "media",
+      "label": "مكتبة الوسائط",
+      "how": "menu"
+    },
+    {
+      "id": "tasks",
+      "label": "المهام",
+      "how": "menu"
+    },
+    {
+      "id": "activity",
+      "label": "سجل النشاط",
+      "how": "menu"
+    },
+    {
+      "id": "motion",
+      "label": "استوديو الحركة",
+      "how": "menu"
+    },
+    {
+      "id": "mail",
+      "label": "البريد",
+      "how": "menu"
+    },
+    {
+      "id": "channels",
+      "label": "حسابات المنصات",
+      "how": "menu"
+    },
+    {
+      "id": "ideas",
+      "label": "الأفكار",
+      "how": "menu"
+    },
+    {
+      "id": "accounts",
+      "label": "الحسابات",
+      "how": "menu"
+    },
+    {
+      "id": "settings",
+      "label": "الإعدادات",
+      "how": "menu"
+    },
+    {
+      "id": "account",
+      "label": "الحساب",
+      "how": "badge",
+      "note": "من اسمك أسفل القائمة"
+    },
+    {
+      "id": "analytics",
+      "label": "التحليلات",
+      "how": "direct",
+      "note": "خارج القائمة حتى تقرأ بياناً حقيقياً"
+    },
+    {
+      "id": "monitoring",
+      "label": "المراقبة",
+      "how": "redirect",
+      "note": "يفتح «سجل النشاط»"
+    },
+    {
+      "id": "admin",
+      "label": "الإدارة",
+      "how": "redirect",
+      "note": "يفتح «الحسابات»"
+    }
+  ],
+  "adminViewAs": {
+    "admin": [
+      "",
+      "work",
+      "approvals",
+      "calendar",
+      "projects",
+      "requests",
+      "media",
+      "tasks",
+      "activity",
+      "motion",
+      "mail",
+      "channels",
+      "ideas",
+      "accounts",
+      "settings"
+    ],
+    "director": [
+      "",
+      "work",
+      "create",
+      "approvals",
+      "calendar",
+      "projects",
+      "requests",
+      "media",
+      "tasks",
+      "activity",
+      "motion",
+      "mail",
+      "channels",
+      "ideas",
+      "accounts",
+      "settings"
+    ],
+    "assistant": [
+      "",
+      "work",
+      "create",
+      "approvals",
+      "calendar",
+      "projects",
+      "requests",
+      "media",
+      "tasks",
+      "activity",
+      "motion",
+      "mail",
+      "channels",
+      "ideas",
+      "accounts",
+      "settings"
+    ],
+    "writer": [
+      "",
+      "work",
+      "create",
+      "approvals",
+      "calendar",
+      "projects",
+      "requests",
+      "media",
+      "tasks",
+      "activity",
+      "motion",
+      "mail",
+      "channels",
+      "ideas",
+      "settings"
+    ],
+    "designer": [
+      "",
+      "work",
+      "create",
+      "approvals",
+      "calendar",
+      "projects",
+      "requests",
+      "media",
+      "tasks",
+      "activity",
+      "motion",
+      "mail",
+      "channels",
+      "ideas",
+      "settings"
+    ],
+    "producer": [
+      "",
+      "work",
+      "create",
+      "approvals",
+      "calendar",
+      "projects",
+      "requests",
+      "media",
+      "tasks",
+      "activity",
+      "motion",
+      "mail",
+      "channels",
+      "ideas",
+      "settings"
+    ],
+    "publisher": [
+      "",
+      "work",
+      "approvals",
+      "calendar",
+      "projects",
+      "requests",
+      "media",
+      "tasks",
+      "activity",
+      "motion",
+      "mail",
+      "channels",
+      "ideas",
+      "settings"
+    ],
+    "member": [
+      "",
+      "work",
+      "create",
+      "approvals",
+      "calendar",
+      "projects",
+      "requests",
+      "media",
+      "tasks",
+      "activity",
+      "motion",
+      "mail",
+      "channels",
+      "ideas",
+      "settings"
+    ]
+  },
+  "capabilities": [
+    {
+      "key": "urgency.2",
+      "label": "رسائل «مهم» (المستوى 2)",
+      "heldBy": [
+        "admin",
+        "director",
+        "assistant"
+      ]
+    },
+    {
+      "key": "urgency.3",
+      "label": "رسائل «عاجل» (المستوى 3)",
+      "heldBy": [
+        "admin",
+        "director",
+        "assistant"
+      ]
+    },
+    {
+      "key": "whatsapp.push",
+      "label": "إرسال رسالة إلى واتساب زميل",
+      "heldBy": []
+    },
+    {
+      "key": "mail.outside.send",
+      "label": "بريد خارجي دون انتظار الاعتماد",
+      "heldBy": [
+        "admin",
+        "director",
+        "assistant"
+      ]
+    },
+    {
+      "key": "room.create",
+      "label": "إنشاء قناة إعلانات في المراسلة",
+      "heldBy": [
+        "admin",
+        "director",
+        "assistant"
+      ]
+    },
+    {
+      "key": "accounts.view",
+      "label": "فتح صفحة «الحسابات»",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "permissions.grant",
+      "label": "منح الصلاحيات وسحبها",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "roles.assign",
+      "label": "تغيير دور عضو",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "members.invite",
+      "label": "إضافة الأعضاء وقبول طلبات الوصول",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "members.remove",
+      "label": "إزالة عضو",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "roles.templates.edit",
+      "label": "تعديل صلاحيات الأدوار",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "whatsapp.system.manage",
+      "label": "إدارة رقم واتساب النظام",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "settings.view",
+      "label": "عرض صحة النظام وسجل الإعدادات",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "settings.manage",
+      "label": "تعديل الإعدادات العامة للنظام",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "storage.manage",
+      "label": "إدارة مزودي التخزين",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "storage.migrate",
+      "label": "نقل الملفات بين مزودي التخزين",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "backups.run",
+      "label": "تشغيل النسخ الاحتياطي",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "backups.restore",
+      "label": "استعادة ملفات من نسخة احتياطية",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "platforms.manage",
+      "label": "إدارة المنصات وتطبيقاتها",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "integrations.secrets",
+      "label": "إدخال أسرار التكاملات وتجديدها",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "work.approve",
+      "label": "اعتماد جزء من عمل أو رفضه",
+      "heldBy": [
+        "admin",
+        "director",
+        "assistant"
+      ]
+    },
+    {
+      "key": "work.publish",
+      "label": "النشر والجدولة",
+      "heldBy": [
+        "admin",
+        "publisher"
+      ]
+    },
+    {
+      "key": "media.approve",
+      "label": "اعتماد إصدار ملف في المكتبة",
+      "heldBy": [
+        "admin",
+        "director",
+        "assistant"
+      ]
+    },
+    {
+      "key": "approve.own",
+      "label": "اعتماد ما أرسلته أو رفعته بنفسك",
+      "heldBy": []
+    },
+    {
+      "key": "role.switch",
+      "label": "عرض النظام بصفة دور آخر",
+      "heldBy": [
+        "admin"
+      ]
+    },
+    {
+      "key": "account.protected",
+      "label": "إزالة حساب مؤسس أو تغيير دوره",
+      "heldBy": []
+    }
+  ],
+  "markdown": "| الصفحة | Admin | مدير الاتصال المؤسسي | مساعد مدير الاتصال المؤسسي | كاتب المحتوى | المصمم | المنتج الإعلامي | مسؤول النشر وإدارة الحسابات | عضو | كيف تُفتح |\n|---|---|---|---|---|---|---|---|---|---|\n| الرئيسية | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| العمل | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| إنشاء | بالعنوان | نعم | نعم | نعم | نعم | نعم | لا | نعم | القائمة |\n| الموافقات والنشر | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| التقويم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| المشاريع | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| الطلبات | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| مكتبة الوسائط | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| المهام | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| سجل النشاط | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| استوديو الحركة | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| البريد | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| حسابات المنصات | نعم | نعم | نعم | لا | لا | لا | نعم | لا | القائمة |\n| الأفكار | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| الحسابات | نعم | لا | لا | لا | لا | لا | لا | لا | القائمة |\n| الإعدادات | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |\n| الحساب | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | الاسم أسفل القائمة |\n| التحليلات | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | خارج القائمة حتى تقرأ بياناً حقيقياً |\n| المراقبة | - | - | - | - | - | - | - | - | يفتح «سجل النشاط» |\n| الإدارة | - | - | - | - | - | - | - | - | يفتح «الحسابات» |"
+}

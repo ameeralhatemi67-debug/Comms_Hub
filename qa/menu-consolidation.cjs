@@ -1,5 +1,5 @@
 // Browser check of Action_Plan.md step B1: the sidebar after «الإدارة» left the menu and «الحساب»
-// moved to the name badge. The menu entries are read from src/components/shell.tsx, the styles are
+// moved to the name badge. The menu entries are read from src/lib/access.ts (menuEntries), the styles are
 // the real stylesheets, and the footer markup is the one the shell renders; the signed-in application
 // cannot be driven by an agent, so the page around them is a fixture.
 // Usage: node qa/menu-consolidation.cjs   (writes qa/menu-consolidation.json)
@@ -17,9 +17,10 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 for (const f of ['globals.css', 'identity.css', 'auth.css']) fs.copyFileSync(path.join(root, 'src/app', f), path.join(out, f));
 
-const shell = fs.readFileSync(path.join(root, 'src/components/shell.tsx'), 'utf8');
-const block = shell.slice(shell.indexOf('const nav = ['), shell.indexOf('] as const;'));
-const nav = [...block.matchAll(/\['(\/[^']*)', '([^']+)'/g)].map((m) => ({ href: m[1], label: m[2] }));
+const access = fs.readFileSync(path.join(root, 'src/lib/access.ts'), 'utf8');
+const from = access.indexOf('export const menuEntries = [');
+const block = access.slice(from, access.indexOf('] as const;', from));
+const nav = [...block.matchAll(/href: '(\/[^']*)', label: '([^']+)'/g)].map((m) => ({ href: m[1], label: m[2] }));
 
 const page = (identity, collapsed, onAccount) => `<!doctype html><html lang="ar" dir="rtl"${identity ? ' data-identity="emerald"' : ''}><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">

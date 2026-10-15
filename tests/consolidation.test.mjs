@@ -9,7 +9,8 @@ import { teamSummary } from '../src/lib/media/team.ts';
 
 const read = (p) => readFileSync(p, 'utf8');
 const shell = read('src/components/shell.tsx');
-const navBlock = shell.slice(shell.indexOf('const nav = ['), shell.indexOf('] as const;'));
+const accessSrc = read('src/lib/access.ts');
+const navBlock = accessSrc.slice(accessSrc.indexOf('export const menuEntries = ['), accessSrc.indexOf('] as const;', accessSrc.indexOf('export const menuEntries = [')));
 
 test('the menu no longer lists «الإدارة», «الحساب» or «التحليلات»', () => {
   for (const href of ['/admin', '/account', '/analytics', '/monitoring']) assert.doesNotMatch(navBlock, new RegExp(`'${href}'`), href);
@@ -33,7 +34,7 @@ test('«الحسابات المرتبطة» is «حسابات المنصات» e
     });
   const left = walk('src').filter((p) => read(p).includes('الحسابات المرتبطة'));
   assert.deepEqual(left, []);
-  assert.match(navBlock, /'\/channels', 'حسابات المنصات'/);
+  assert.match(navBlock, /href: '\/channels', label: 'حسابات المنصات'/);
 });
 
 test('/admin sends a visitor to «الحسابات», and no page or guide is left for it', () => {

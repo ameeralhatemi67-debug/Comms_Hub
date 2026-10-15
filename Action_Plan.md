@@ -108,12 +108,25 @@ tabs (المؤسسة, افتراضات النشر, افتراضات الاعتم
 settings in the same step or removed; none stays as decoration. Page title and subtitle
 corrected to say what it is.
 
-### Step B4: who sees what, written down and tested
+### Step B4: who sees what, written down and tested - BUILT 2026-10-15
+
+Built (`progress.md`, fourth entry of 2026-10-15). The menu list and its rule are one place
+(`menuEntries` and `menuFor` in `src/lib/access.ts`); the table is in `MVP_draft.md` "Access by role".
+It surfaced two owner decisions, carried as **B4b** below.
 
 A table of menu and page access per role is generated from `src/lib/access.ts` and the
 capability catalog, saved under `qa/` as a re-runnable script and its JSON result, and
 recorded in `MVP_draft.md`. A test fails when a page is reachable by a role the table says
 should not reach it. This is the "each member sees a somewhat different view" document.
+
+### Step B4b: default pages per role (owner decision, small)
+
+The default page list gives every role «الإعدادات», so a writer or a member sees a page whose every
+tab refuses. Proposed: «الإعدادات» only for the administrator and whoever holds `settings.view` or
+`settings.manage`; existing accounts keep what they have. It touches `defaultPages` (access.ts), the
+seeded page list in the permissions functions (a migration) and `tests/access-matrix.test.mjs`.
+Second item: align `page.create` for the member with the domain role (the member creates), or hide
+«إنشاء» from the member; the owner chooses which is true. Not changed in B4.
 
 ### Step B5: «التحليلات» made real, or left hidden
 

@@ -105,6 +105,53 @@ export function canOpen(account: Pick<Account, 'role' | 'pages' | 'caps'>, page:
   return account.pages.includes(page);
 }
 
+/**
+ * The sidebar, in order: where each entry goes and what it is called. The one list the shell draws
+ * from (icons are the shell's) and the access table is generated from (Action_Plan.md B4,
+ * `src/lib/access-matrix.ts`). «الحساب» is not in it: it is reached from the name badge.
+ */
+export const menuEntries = [
+  { href: '/', label: 'الرئيسية' },
+  { href: '/work', label: 'العمل' },
+  { href: '/create', label: 'إنشاء' },
+  { href: '/approvals', label: 'الموافقات والنشر' },
+  { href: '/calendar', label: 'التقويم' },
+  { href: '/projects', label: 'المشاريع' },
+  { href: '/requests', label: 'الطلبات' },
+  { href: '/media', label: 'مكتبة الوسائط' },
+  { href: '/tasks', label: 'المهام' },
+  { href: '/activity', label: 'سجل النشاط' },
+  { href: '/motion', label: 'استوديو الحركة' },
+  { href: '/mail', label: 'البريد' },
+  { href: '/channels', label: 'حسابات المنصات' },
+  { href: '/ideas', label: 'الأفكار' },
+  { href: '/accounts', label: 'الحسابات' },
+  { href: '/settings', label: 'الإعدادات' },
+] as const;
+
+export type MenuHref = (typeof menuEntries)[number]['href'];
+
+/**
+ * The entries the sidebar offers this person: the pages their account may open (canOpen), and only
+ * what the role being viewed can use. Administrators open every page and alone choose the role they
+ * view as (`viewAs`); everyone else views as their own role. «الحسابات» follows the capability
+ * «فتح صفحة الحسابات», which the caller reads live (`hasCap`); an administrator viewing as another
+ * role sees it as that role's leaders do.
+ */
+export function menuFor(
+  account: Pick<Account, 'role' | 'pages' | 'caps'>,
+  opts: { viewAs?: Role; hasCap?: (key: string) => boolean } = {},
+): (typeof menuEntries)[number][] {
+  const viewAs = opts.viewAs ?? account.role;
+  const hasCap = opts.hasCap ?? ((k: string) => !!account.caps?.includes(k));
+  const accountsOpen = isAdmin(account) ? roles[viewAs].admin || viewAs === 'director' || viewAs === 'assistant' : hasCap(ACCOUNTS_CAP);
+  return menuEntries.filter(
+    (e) =>
+      (e.href === '/accounts' ? accountsOpen : canOpen(account, e.href.slice(1))) &&
+      (e.href !== '/create' || roles[viewAs].create),
+  );
+}
+
 /** Only an administrator may switch the role the product is viewed as. */
 export const canSwitchRole = (account: Pick<Account, 'role'>) => isAdmin(account);
 

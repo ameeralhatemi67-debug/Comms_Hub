@@ -686,6 +686,53 @@ the foot of the sidebar. «التحليلات» is out of the menu until it read
 is called «حسابات المنصات». Each person sees only the pages their role, page grants and capabilities
 allow (`src/lib/access.ts`).
 
+### Access by role (generated 2026-10-15, `Action_Plan.md` B4)
+
+What a new account of each role sees and may open, computed from `src/lib/access.ts` and the
+capability templates by `qa/access-matrix.mjs` (result in `qa/access-matrix.json`) and held by
+`tests/access-matrix.test.mjs`. «نعم» is in the menu and opens; «بالعنوان» opens by address only; «لا» is
+refused. It is the default: an account's own page list and grants change it, and inside a page the
+database decides which rows come back.
+
+| الصفحة | Admin | مدير الاتصال المؤسسي | مساعد مدير الاتصال المؤسسي | كاتب المحتوى | المصمم | المنتج الإعلامي | مسؤول النشر وإدارة الحسابات | عضو | كيف تُفتح |
+|---|---|---|---|---|---|---|---|---|---|
+| الرئيسية | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| العمل | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| إنشاء | بالعنوان | نعم | نعم | نعم | نعم | نعم | لا | نعم | القائمة |
+| الموافقات والنشر | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| التقويم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| المشاريع | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| الطلبات | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| مكتبة الوسائط | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| المهام | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| سجل النشاط | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| استوديو الحركة | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| البريد | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| حسابات المنصات | نعم | نعم | نعم | لا | لا | لا | نعم | لا | القائمة |
+| الأفكار | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| الحسابات | نعم | لا | لا | لا | لا | لا | لا | لا | القائمة |
+| الإعدادات | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
+| الحساب | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | الاسم أسفل القائمة |
+| التحليلات | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | بالعنوان | خارج القائمة حتى تقرأ بياناً حقيقياً |
+| المراقبة | - | - | - | - | - | - | - | - | يفتح «سجل النشاط» |
+| الإدارة | - | - | - | - | - | - | - | - | يفتح «الحسابات» |
+
+Reading it:
+
+- **What differs by role, by default, is small:** «إنشاء» (not the publisher, and not offered to the
+  administrator), «حسابات المنصات» (administrator, director, assistant, publisher; with «الموافقات والنشر»),
+  «الحسابات» (the administrator; others only by the capability «فتح صفحة الحسابات»), and what
+  «سجل النشاط» shows (the whole log and the team panel for the administrator, director and assistant;
+  everyone else sees their own actions and the files they reach).
+- **«الإعدادات» is in every role's menu** because the default page list of every role contains it. Its
+  tabs refuse without «settings.view», held by the administrator only, so a writer sees a page of
+  explanations. Open owner decision, Action_Plan.md B4b.
+- **An administrator viewing as a role** (`عرض بصفة`) still opens every page; only «إنشاء» and «الحسابات»
+  follow the viewed role (leaders see «الحسابات», the publisher does not see «إنشاء»).
+- **Known display mismatch:** the member is offered «إنشاء» (the domain role creates, the database's
+  `work_create` has a member branch), while the capability `page.create` is fixed-denied for the member in
+  «صلاحياتي». The page works; the permissions list says otherwise. Recorded for B4b.
+
 Selected state:
 
 ```text

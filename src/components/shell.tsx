@@ -28,7 +28,7 @@ import {
 import { roles, type Role } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { useAccount } from '@/lib/account-context';
-import { canOpen, canSwitchRole } from '@/lib/access';
+import { canSwitchRole, menuFor } from '@/lib/access';
 import { supabase } from '@/lib/supabase/client';
 import { toggleIdentity } from '@/lib/identity';
 import { Modal, Empty, LogoLoader } from './ui';
@@ -37,24 +37,25 @@ import { NoticeDrawer, useNotices } from './notices';
 import { useCaps } from './caps';
 import { MaintenanceBanner } from './settings/maintenance-banner';
 
-const nav = [
-  ['/', 'الرئيسية', House],
-  ['/work', 'العمل', BriefcaseBusiness],
-  ['/create', 'إنشاء', Plus],
-  ['/approvals', 'الموافقات والنشر', CheckCheck],
-  ['/calendar', 'التقويم', CalendarDays],
-  ['/projects', 'المشاريع', FolderKanban],
-  ['/requests', 'الطلبات', Inbox],
-  ['/media', 'مكتبة الوسائط', Images],
-  ['/tasks', 'المهام', ListChecks],
-  ['/activity', 'سجل النشاط', History],
-  ['/motion', 'استوديو الحركة', Clapperboard],
-  ['/mail', 'البريد', Mail],
-  ['/channels', 'حسابات المنصات', Link2],
-  ['/ideas', 'الأفكار', Lightbulb],
-  ['/accounts', 'الحسابات', UserCog],
-  ['/settings', 'الإعدادات', Settings],
-] as const;
+/** The icon of each menu entry; the entries themselves (and who sees them) are in src/lib/access.ts. */
+const menuIcons = {
+  '/': House,
+  '/work': BriefcaseBusiness,
+  '/create': Plus,
+  '/approvals': CheckCheck,
+  '/calendar': CalendarDays,
+  '/projects': FolderKanban,
+  '/requests': Inbox,
+  '/media': Images,
+  '/tasks': ListChecks,
+  '/activity': History,
+  '/motion': Clapperboard,
+  '/mail': Mail,
+  '/channels': Link2,
+  '/ideas': Lightbulb,
+  '/accounts': UserCog,
+  '/settings': Settings,
+} as const;
 
 export function Shell({ children }: { children: ReactNode }) {
   const { state, dispatch } = useHub();
@@ -100,12 +101,7 @@ export function Shell({ children }: { children: ReactNode }) {
   // «الحسابات» follows «فتح صفحة الحسابات» (Permissions_Plan.md 5), read live from the
   // database; an administrator viewing as another role sees it as that role's leaders do.
   const caps = useCaps();
-  const accountsOpen = account.role === 'admin' ? actor.admin || state.role === 'director' || state.role === 'assistant' : caps.has('accounts.view');
-  const visible = nav.filter(
-    ([href]) =>
-      (href === '/accounts' ? accountsOpen : canOpen(account, href.slice(1))) &&
-      (href !== '/create' || actor.create),
-  );
+  const visible = menuFor(account, { viewAs: state.role, hasCap: caps.has }).map((e) => [e.href, e.label, menuIcons[e.href]] as const);
   const allowed = (href: string) => visible.some((n) => n[0] === href);
 
   const signOut = async () => {
