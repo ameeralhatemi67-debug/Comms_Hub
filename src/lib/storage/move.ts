@@ -33,7 +33,7 @@ export type ClaimItem = {
   parent: string | null;
   dest_location: DestLocation | null;
 };
-export type Claim = { state: string; mode: 'move' | 'copy'; source: ProviderInfo; dest: ProviderInfo; items: ClaimItem[] };
+export type Claim = { state: string; mode: 'move' | 'copy' | 'backup'; source: ProviderInfo; dest: ProviderInfo; items: ClaimItem[] };
 
 export type BatchDeps = {
   /** The signed-in person's database client: the right to move files is theirs, checked again there. */

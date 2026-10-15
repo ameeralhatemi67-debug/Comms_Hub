@@ -372,7 +372,7 @@ export function MovePanel({
                   <span className={`mx-chip ${MOVE_STATE_TONE[m.state]}`}>{MOVE_STATE_AR[m.state]}</span>
                 </span>
                 <small>
-                  {moveScopeAr(m.scope, folderName(m.scope.folder_id))} · {m.mode === 'copy' ? 'نسخ فقط' : 'نقل'} · {m.switched + m.copied} من {m.files} · {sizeAr(m.bytes)}
+                  {moveScopeAr(m.scope, folderName(m.scope.folder_id))} · {m.mode === 'backup' ? 'نسخ احتياطي' : m.mode === 'copy' ? 'نسخ فقط' : 'نقل'} · {m.switched + m.copied} من {m.files} · {sizeAr(m.bytes)}
                   {m.failed ? ` · تعذّر ${m.failed}` : ''}
                   {m.skipped ? ` · تُخطّي ${m.skipped}` : ''} · {when(m.created_at)}
                 </small>

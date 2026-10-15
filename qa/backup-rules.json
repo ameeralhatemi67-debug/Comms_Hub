@@ -1,0 +1,28 @@
+{
+  "script": "supabase/tests/backup_rules.sql",
+  "ran": "2026-10-15",
+  "target": "Supabase project comms-hub (one transaction, rolled back)",
+  "migrations": [
+    "20261015150000_backups.sql",
+    "20261015150100_backup_run_ref.sql",
+    "20261015150200_move_start_per_scope.sql"
+  ],
+  "migrationNote": "Applied to comms-hub the same day, in that order: the statements of the files, without their comment lines. 150000 replaces storage_move_plan, storage_move_copied and settings_overview; 150200 replaces storage_move_start.",
+  "result": { "total": 61, "passed": 61, "failed": 0 },
+  "attempts": [
+    "Run 1: failed at once: format() in check 38 read the % of a LIKE pattern as a format specifier (the harness; escaped as %%).",
+    "Run 2: 59 of 61. Check 28 expected the oldest export to be offered for removal, got the newest: a transaction has one clock (finished_at = now() is the same for the three runs), so their age order was a tie. The harness now gives the three runs the ages three separate transactions would have; the function is unchanged (in use each run is its own transaction). Check 38 counted real files under the 'bk-' prefix they do not have.",
+    "Run 3: 61 of 61."
+  ],
+  "found_by_the_run": "The engine refused to start the library plan and the attachments plan of one backup together (MOVE_ALREADY_RUNNING: same two providers). The refusal exists so two plans do not copy the same files at once; plans of different scopes cannot overlap, so migration 20261015150200 narrows it to the same scope. The mail route of /api/backups/run would have silently never started.",
+  "engineRegression": {
+    "script": "supabase/tests/backup_engine_regression.sql",
+    "result": { "total": 15, "passed": 15, "failed": 0 },
+    "covers": "The S3 move engine's core after three of its functions were replaced: folder scope, the approved flag, a copy recorded as a replica, the switch, the approved-by-checksum rule, plans of different scopes starting together while the same scope waits, an unknown mode refused, a backup plan holding nothing. The first run of this script had one harness mistake (check 62 read the integrations table as a signed-in role, which has no policy); the product answered correctly. The full 95-check S3 script was run before these migrations and is not re-run here."
+  },
+  "afterRollback": {
+    "note": "Counts read after the first complete run of backup_rules.sql (before the engine regression): the server key md5, locations, versions, integrations, events, accounts, vault secrets, moves, runs and jobs are as before the run; the three backup_jobs rows and the migration's own objects are the only difference from before the migration.",
+    "serverKeyMd5Unchanged": true
+  },
+  "advisors": "Not re-read after S4: new rls-without-policy tables are backup_jobs and backup_runs (read only through backup_overview); no new function is callable by a visitor."
+}

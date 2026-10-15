@@ -42,6 +42,8 @@ const sources = [
   'components/settings/storage-provider.tsx', 'components/settings/storage-move.tsx',
   // The circled "!" setup guides
   'components/setup-guide.tsx', 'lib/setup-guides.ts',
+  // Settings Step S4: backups
+  'components/settings/backups.tsx',
   // Entry flow: the state of a person's entry, the invitation and the log words
   'lib/entry.ts', 'components/accounts/entry-help.tsx',
   // Settings Step S5: «المنصات»
@@ -323,6 +325,34 @@ async function renderAll() {
   storageWith({ name: 'settings-storage-move-viewer', role: 'director', email: 'dir@x.sa', caps: capsWith(directorCaps, ['settings.view']),
     p: { initial: { ...two, can_manage: false, can_migrate: false, can_secrets: false }, initialMoves: [mrow({})], initialFolders: folders, initialReport: mrep({}, { can_migrate: false }) } });
   storageWith({ name: 'settings-storage-one', p: { initial: { providers: [prov({})], roles: roles4, unrecorded: 0, can_manage: true, can_migrate: true, can_secrets: true }, initialMoves: [], initialFolders: [] } });
+  // Settings Step S4: «النسخ الاحتياطي» in the states a person meets.
+  const stb = await import(url('components/settings/backups.js'));
+  const DAY = 86400000;
+  const ago = (d) => new Date(Date.now() - d * DAY - 3600000).toISOString();
+  const bjob = (kind, over = {}) => ({ kind, frequency: 'manual', retention_count: 7, warn_days: 7, enabled: true, last_good: null, last_run: null, stale: true, ...over });
+  const good = (d, over = {}) => ({ id: 'run-' + d, at: ago(d), items: 5, size_bytes: 1610612736, verified_at: ago(d), verify_ok: true, verify_note: 'أُعيدت قراءة 3 نسخة: 3 سليمة، 0 تعذّرت', kept: true, ...over });
+  const bov = (over = {}) => ({
+    jobs: [
+      bjob('files', { last_good: good(3), stale: false, last_run: { id: 'r1', state: 'completed', at: ago(3), failed: 0 } }),
+      bjob('database', { last_good: null, stale: true }),
+      bjob('config', { last_good: good(1, { verified_at: null, verify_ok: null, verify_note: null, kept: false, items: 61, size_bytes: 20480 }), stale: false }),
+    ],
+    target: { id: 'i2', label: 'تخزين Supabase', type: 's3_compatible', state: 'connected' },
+    candidates: [{ id: 'i2', label: 'تخزين Supabase', type: 's3_compatible', state: 'connected' }],
+    files: { total: 6, backed_up: 5, pending_copies: 0, failed_copies: 1 },
+    restorable: 1,
+    runs: [
+      { id: 'r1', kind: 'files', state: 'completed', at: ago(3), finished_at: ago(3), items: 5, failed: 0, size_bytes: 1610612736, verified_at: ago(3), verify_ok: true, pruned: false, by: 'أمير' },
+      { id: 'r2', kind: 'config', state: 'completed', at: ago(1), finished_at: ago(1), items: 61, failed: 0, size_bytes: 20480, verified_at: null, verify_ok: null, pruned: false, by: 'أمير' },
+      { id: 'r3', kind: 'database', state: 'failed', at: ago(2), finished_at: ago(2), items: 0, failed: 1, size_bytes: 0, verified_at: null, verify_ok: null, pruned: false, by: 'أمير' },
+    ],
+    tables: { database: ['works', 'media_files'], config: ['capabilities', 'platforms'] },
+    can_run: true, can_restore: true, can_migrate: true, can_manage: true, ...over });
+  const lost = [{ kind: 'media_version', subject: 'v1', name: 'شعار الحملة.png', version: 2, size_bytes: 482304, state: 'missing' }];
+  render('settings-backups', 'amir@x.sa', 'admin', adminSet, pnl(h(stb.BackupsTab, { initial: bov(), initialRestorable: lost })), wx);
+  render('settings-backups-empty', 'amir@x.sa', 'admin', adminSet, pnl(h(stb.BackupsTab, { initial: bov({ jobs: ['files', 'database', 'config'].map((k) => bjob(k)), target: null, candidates: [], restorable: 0, runs: [], files: { total: 6, backed_up: 0, pending_copies: 0, failed_copies: 0 } }), initialRestorable: [] })), wx);
+  render('settings-backups-viewer', 'dir@x.sa', 'director', capsWith(directorCaps, ['settings.view']), pnl(h(stb.BackupsTab, { initial: bov({ can_run: false, can_restore: false, can_migrate: false, can_manage: false }), initialRestorable: [] })), wx);
+  render('settings-backups-locked', 'khalid@x.sa', 'writer', writerCaps, pnl(h(stb.BackupsTab, {})), wx);
   // The circled "!" guides, open: the steps as a person reads them.
   const sg = await import(url('components/setup-guide.js'));
   const guide = (name, props) => render(name, 'amir@x.sa', 'admin', adminSet, h('div', { className: 'ml' }, h(sg.SetupGuide, { ...props, initialOpen: true })), wx);
@@ -433,6 +463,12 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'settings-storage-move-over': ['اكتمل', 'نسخ المصدر المحفوظة', 'أحل نسخ المصدر إلى التقاعد', 'التقرير: 12 ملفات نُقلت'],
       'settings-storage-move-viewer': ['نقل الملفات بين المزودين', 'احسب الخطة (تجربة بلا نسخ)', 'ابدأ النقل'],
       'settings-storage-one': ['النقل يحتاج مزودين متصلين', 'إضافة مزود تخزين', 'لا شيء يُحذف'],
+      'settings-backups': ['أين تُحفظ النسخ', 'تخزين Supabase', 'ملفات المكتبة والمرفقات', 'سجلات الأعمال والمكتبة', 'الإعدادات والصلاحيات', 'آخر نسخة سليمة', 'متحقق منها', 'لم يُتحقق منها بعد',
+        'منذ 3 أيام', 'لا توجد نسخة بعد', 'نُزّلت إلى جهازك فقط', '5 من 6', 'انسخ الملفات الجديدة', 'صدّر ونزّل', 'تحقق من النسخة', 'حفظ السياسة', 'التكرار: يدوي',
+        'استعادة ملف من نسخته', 'شعار الحملة.png (الإصدار 2)', 'استعادة من النسخة الاحتياطية', 'آخر النسخ', 'الدليل: كيف تُستعاد الأشياء', 'قاعدة البيانات', 'الأسرار', 'ما لا يدخل في التصدير', 'البريد الداخلي ومحادثات المراسلة', 'سجلات الأعمال والمكتبة: لا توجد نسخة سليمة بعد'],
+      'settings-backups-empty': ['لم يُحدَّد مزود', 'لا مزود متصل غير مزود المكتبة', 'لا ملف يحتاج استعادة الآن', 'لم تُؤخذ نسخة بعد', 'حدّد مزود النسخ أعلاه أولاً'],
+      'settings-backups-viewer': ['ملفات المكتبة والمرفقات', 'انسخ الملفات الجديدة', 'تحقق من النسخة'],
+      'settings-backups-locked': ['النسخ الاحتياطي لمن يملك', 'اطلب هذه الصلاحية'],
       'guide-meta': ['تجهيز تطبيق Meta', 'أنشئ التطبيق', 'Facebook Login', 'Valid OAuth Redirect URIs', '/api/platforms/callback/meta', 'App ID و App Secret', 'ولا ترسلهما إلى أحد', 'النشر نفسه ما زال محاكاة', 'فهمت'],
       'guide-tiktok': ['تجهيز تطبيق TikTok', 'Login Kit', '/api/platforms/callback/tiktok', 'user.info.basic', 'التدقيق'],
       'guide-connect-meta': ['ربط حسابك عبر Meta', 'اضغط «ربط عبر Meta»', 'لا يطلب الموقع كلمة مرورك أبداً', 'تطبيق المطوّر غير مضبوط'],
@@ -473,6 +509,9 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'settings-storage-move-over': ['undefined', 'NaN', 'null', 'secret', 'تعذّر نقلها', 'أعد محاولة ما تعذّر'],
       'settings-storage-one': ['undefined', 'NaN', 'احسب الخطة'],
       'guide-meta': ['undefined', 'NaN', '{redirect}', '{origin}', 'AKIA'],
+      'settings-backups': ['undefined', 'NaN', 'null', 'private-attachment', 'secret', 'backups/', 'ref'],
+      'settings-backups-empty': ['undefined', 'NaN', 'استعادة من النسخة الاحتياطية'],
+      'settings-backups-locked': ['ملفات المكتبة والمرفقات', 'آخر نسخة سليمة'],
       'guide-tiktok': ['undefined', '{redirect}'],
       'guide-storage-supabase': ['undefined', 'AKIA'],
       'urgency-picker-granted': ['رسائل «مهم» لمن يملك صلاحيتها'],
@@ -503,6 +542,15 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     check('settings-storage-move-done: retiring the sources is disabled until the hold is over, and is a long press', /st-move-retire"[^>]*disabled=""[^>]*data-hold="تنتقل نسخ المصدر|st-move-retire"[^>]*data-hold="تنتقل نسخ المصدر[^>]*disabled=""/.test(pages['settings-storage-move-done']) || /disabled=""[^>]*st-move-retire|st-move-retire[^>]*disabled/.test(pages['settings-storage-move-done']));
     check('settings-storage-move-over: after the hold the retire button is enabled and a long press', /class="secondary danger st-move-retire"(?![^>]*disabled)[^>]*data-hold="تنتقل نسخ المصدر/.test(pages['settings-storage-move-over']));
     check('settings-storage-move-viewer: starting, planning and adding are locked controls for «storage.migrate» and «storage.manage»', /data-need="storage.migrate"/.test(pages['settings-storage-move-viewer']) && /data-need="storage.manage"/.test(pages['settings-storage-move-viewer']));
+    // Settings Step S4: backups.
+    check('settings-backups: the restore is a long press with its reason', /class="secondary danger st-restore"[^>]*data-hold="تصير النسخة الاحتياطية هي الأصل/.test(pages['settings-backups']));
+    check('settings-backups: a stale kind is flagged, a fresh one is not', /st-backup-stale/.test(pages['settings-backups']) && (pages['settings-backups'].match(/class="mx-chip danger">متقادمة|class="mx-chip danger">لا نسخة/g) ?? []).length === 1);
+    check('settings-backups: each kind has run and verify buttons, the policy is manual only', (pages['settings-backups'].match(/class="primary st-backup-run"/g) ?? []).length === 3 && (pages['settings-backups'].match(/class="secondary st-backup-verify"/g) ?? []).length === 3 && !/daily|weekly/.test(pages['settings-backups']));
+    check('settings-backups: the unverified config backup says so and says it was downloaded only', /لم يُتحقق منها بعد/.test(pages['settings-backups']) && /نُزّلت إلى جهازك فقط/.test(pages['settings-backups']));
+    check('settings-backups: the guide button is there', /data-guide="backups"/.test(pages['settings-backups']));
+    check('settings-backups-empty: running the files backup waits for a target', /st-backup-run[^>]*disabled/.test(pages['settings-backups-empty']));
+    check('settings-backups-viewer: every control is locked for «backups.run», none works', /data-need="backups.run"/.test(pages['settings-backups-viewer']) && !/class="primary st-backup-run"(?![^>]*aria-disabled)[^>]*onclick/.test(pages['settings-backups-viewer']));
+    check('settings-backups-locked: the request is for «backups.run»', /data-need="backups.run"/.test(pages['settings-backups-locked']));
     // The circled "!" guides.
     check('guide-meta: the return address is on its own line to copy, with the platform in its path', /class="su-copy"[^>]*>https:\/\/[^<]*\/api\/platforms\/callback\/meta</.test(pages['guide-meta']));
     check('guide-meta: the steps are numbered in a list', (pages['guide-meta'].match(/<li>/g) ?? []).length >= 7 && /<ol class="su-steps">/.test(pages['guide-meta']));

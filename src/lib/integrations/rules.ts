@@ -21,6 +21,9 @@ export type Integration = {
 };
 export type IntEvent = { id: number; at: string; kind: string; actor: string | null; actor_name: string | null; integration: string | null; data: Record<string, unknown> };
 export type Overview = {
+  /** When the last good backup of any kind finished, and whether any enabled kind has passed its warning age. */
+  last_backup?: string | null;
+  backup_stale?: boolean | null;
   library_files: number;
   library_bytes: number;
   mail_files: number;
@@ -89,6 +92,11 @@ export const EVENT_AR: Record<string, string> = {
   storage_move_completed: 'اكتمل نقل ملفات',
   storage_move_cancelled: 'أُلغي نقل ملفات',
   storage_retired: 'أُحيلت نسخ المصدر إلى التقاعد',
+  backup_run: 'نسخة احتياطية',
+  backup_verified: 'فُحصت نسخة احتياطية',
+  backup_restored: 'استُعيد ملف من نسخته الاحتياطية',
+  backup_policy: 'تغيّرت سياسة النسخ الاحتياطي',
+  backup_target: 'تغيّر مزود النسخ الاحتياطي',
 };
 
 /** One line per event, never a value. */
@@ -105,6 +113,11 @@ export function eventLine(e: IntEvent): string {
   if (e.kind === 'storage_move_completed')
     return `${head}: ${Number(d.switched ?? 0)} حُوّل، ${Number(d.copied ?? 0)} نُسخ فقط، ${Number(d.failed ?? 0)} تعذّر، ${Number(d.skipped ?? 0)} تُخطّي`;
   if (e.kind === 'storage_retired') return `${head}: ${Number(d.retired ?? 0)} نسخة`;
+  if (e.kind === 'backup_run')
+    return `${head} (${d.kind === 'files' ? 'ملفات' : d.kind === 'database' ? 'سجلات' : 'إعدادات'}): ${d.ok === false ? 'فشلت' : `${Number(d.items ?? 0)} ${d.kind === 'files' ? 'ملف' : 'سجل'}`}${Number(d.failed ?? 0) > 0 && d.kind === 'files' ? `، تعذّر ${Number(d.failed)}` : ''}`;
+  if (e.kind === 'backup_verified')
+    return `${head}: ${d.kind === 'files' ? `قُرئت ${Number(d.checked ?? 0)}، سليمة ${Number(d.ok ?? 0)}، تعذّرت ${Number(d.failed ?? 0)}` : d.ok ? 'تطابقت بصمتها' : 'لم تتطابق بصمتها'}`;
+  if (e.kind === 'backup_policy') return `${head}: الاحتفاظ ${Number(d.retention ?? 0)}، التنبيه بعد ${Number(d.warn_days ?? 0)} يوماً`;
   if (e.kind === 'settings' && d.provider === true) return `${head}: عُدّلت إعدادات مزود التخزين`;
   if (e.kind === 'settings') {
     const parts = [
@@ -250,7 +263,7 @@ export type MoveScope = { kind: 'library' | 'mail'; folder_id?: string; asset_id
 export type MoveRow = {
   id: string;
   label: string | null;
-  mode: 'move' | 'copy';
+  mode: 'move' | 'copy' | 'backup';
   state: MoveState;
   scope: MoveScope;
   files: number;
@@ -272,7 +285,7 @@ export type MoveReport = {
   move: {
     id: string;
     label: string | null;
-    mode: 'move' | 'copy';
+    mode: 'move' | 'copy' | 'backup';
     scope: MoveScope;
     state: MoveState;
     hold_days: number;
@@ -404,3 +417,104 @@ export function moveProgress(r: MoveReport): number {
   if (planned <= 0) return r.move.state === 'completed' ? 1 : 0;
   return Math.max(0, Math.min(1, (r.bytes.done + r.bytes.partial) / planned));
 }
+
+// ---------------------------------------------------------------------------
+// Backups (Settings Step S4, migration 20261015150000)
+// ---------------------------------------------------------------------------
+export type BackupKind = 'files' | 'database' | 'config';
+export type BackupRunState = 'running' | 'completed' | 'partial' | 'failed';
+export type BackupJob = {
+  kind: BackupKind;
+  frequency: 'manual' | 'daily' | 'weekly';
+  retention_count: number;
+  warn_days: number;
+  enabled: boolean;
+  last_good: { id: string; at: string; items: number; size_bytes: number; verified_at: string | null; verify_ok: boolean | null; verify_note: string | null; kept: boolean } | null;
+  last_run: { id: string; state: BackupRunState; at: string; failed: number } | null;
+  stale: boolean;
+};
+export type BackupRunRow = {
+  id: string;
+  kind: BackupKind;
+  state: BackupRunState;
+  at: string;
+  finished_at: string | null;
+  items: number;
+  failed: number;
+  size_bytes: number;
+  verified_at: string | null;
+  verify_ok: boolean | null;
+  pruned: boolean;
+  by: string | null;
+};
+export type BackupOverview = {
+  jobs: BackupJob[];
+  target: { id: string; label: string; type: string; state: IntState } | null;
+  candidates: { id: string; label: string; type: string; state: IntState }[];
+  files: { total: number; backed_up: number; pending_copies: number; failed_copies: number };
+  restorable: number;
+  runs: BackupRunRow[];
+  tables: { database: string[]; config: string[] };
+  can_run: boolean;
+  can_restore: boolean;
+  can_migrate: boolean;
+  can_manage: boolean;
+};
+export type Restorable = { kind: 'media_version' | 'mail_file'; subject: string; name: string | null; version: number | null; size_bytes: number | null; state: string };
+
+export const BACKUP_KIND_AR: Record<BackupKind, string> = {
+  files: 'ملفات المكتبة والمرفقات',
+  database: 'سجلات الأعمال والمكتبة',
+  config: 'الإعدادات والصلاحيات',
+};
+export const BACKUP_KIND_NOTE: Record<BackupKind, string> = {
+  files: 'تُنسخ إلى مزود النسخ الاحتياطي وتُتحقق ببصمتها. لا يتغير الأصل، وكل مرة تنسخ الجديد فقط.',
+  database: 'الأعمال ونصوصها واعتماداتها والمشاريع والتقويم والطلبات وسجل المكتبة ومواضع الملفات والحسابات المرتبطة. لا بريد ولا مراسلة.',
+  config: 'الأدوار والصلاحيات وقوالب الخطط والمنصات وإعدادات النظام والحسابات (الأدوار) وقواعد البريد ومزودو التخزين، بلا أي سر.',
+};
+export const BACKUP_STATE_AR: Record<BackupRunState, string> = {
+  running: 'يعمل',
+  completed: 'اكتملت',
+  partial: 'اكتملت جزئياً',
+  failed: 'فشلت',
+};
+export const BACKUP_STATE_TONE: Record<BackupRunState, string> = { running: '', completed: 'success', partial: 'warn', failed: 'danger' };
+
+/** How old, in words: «اليوم» or «منذ 3 أيام». */
+export function ageAr(iso: string | null | undefined, now: number = Date.now()): string {
+  if (!iso) return 'لا توجد نسخة بعد';
+  const days = Math.floor((now - new Date(iso).getTime()) / 86_400_000);
+  if (days <= 0) return 'اليوم';
+  if (days === 1) return 'منذ يوم';
+  if (days === 2) return 'منذ يومين';
+  if (days <= 10) return `منذ ${days} أيام`;
+  return `منذ ${days} يوماً`;
+}
+
+const BACKUP_ERRORS: Record<string, string> = {
+  BACKUP_NO_TARGET: 'لم يُحدَّد مزود للنسخ الاحتياطي بعد.',
+  BACKUP_TARGET_NOT_READY: 'مزود النسخ الاحتياطي غير متصل: افحص اتصاله.',
+  BACKUP_SAME_PROVIDER: 'نسخة في المكان نفسه ليست نسخة احتياطية: اختر مزوداً غير مزود المكتبة.',
+  BACKUP_RUNNING: 'نسخة من هذا النوع تعمل الآن.',
+  BACKUP_DISABLED: 'هذا النوع من النسخ موقوف في السياسة.',
+  BACKUP_NOT_DONE: 'لم تنتهِ خطط النسخ بعد.',
+  BACKUP_NO_SCHEDULER: 'لا جدولة في الموقع بعد: النسخ يدوي حتى يصل جهاز الوكيل.',
+  BACKUP_BAD_POLICY: 'الاحتفاظ من 1 إلى 60 نسخة، والتنبيه من 1 إلى 365 يوماً.',
+  BACKUP_NOT_NEEDED: 'الملف سليم الآن: لا حاجة لاستعادته.',
+  BACKUP_NONE: 'لا نسخة احتياطية متحقق منها لهذا الملف.',
+  BACKUP_TOO_LARGE: 'التصدير أكبر مما يبنيه الخادم في الذاكرة.',
+};
+export function backupError(message: string | null | undefined): string {
+  const m = message ?? '';
+  const code = Object.keys(BACKUP_ERRORS).find((k) => m.includes(k));
+  return code ? BACKUP_ERRORS[code] : moveError(m);
+}
+
+/** What is never in an export, and why: the privacy rule of the product (AGENTS.md). */
+export const BACKUP_EXCLUDED: { what: string; why: string }[] = [
+  { what: 'البريد الداخلي ومحادثات المراسلة', why: 'خاصة بأصحابها حتى عن مسؤول النظام' },
+  { what: 'التذكيرات الخاصة والإشعارات وتقدم الإرشاد وخطوات التراجع', why: 'خاصة بكل شخص' },
+  { what: 'أرقام واتساب ورموز التحقق', why: 'يراها مسؤول النظام في صفحة الأعضاء فقط' },
+  { what: 'جلسات الرفع الجارية ومفاتيح الخادم وكل سر', why: 'لا يغادر الخزنة ولا يُصدَّر' },
+  { what: 'صور الملفات الشخصية', why: 'صور مصغّرة محفوظة في قاعدة البيانات، لا قيمة لها في نسخة السجلات' },
+];

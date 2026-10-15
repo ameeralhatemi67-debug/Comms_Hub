@@ -104,7 +104,7 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   requests: ['src/components/work/requests.tsx', 'src/components/work/day-dialogs.tsx', 'src/components/work/parts.tsx', 'src/components/perm-requests.tsx'],
   accounts: ['src/components/accounts/page.tsx', 'src/components/accounts/members.tsx', 'src/components/accounts/card.tsx', 'src/components/accounts/roles.tsx', 'src/components/accounts/log.tsx', 'src/components/perm-requests.tsx'],
   account: ['src/components/supporting.tsx', 'src/components/profile-editor.tsx', 'src/components/my-permissions.tsx', 'src/components/whatsapp/member.tsx'],
-  settings: ['src/components/supporting.tsx', 'src/components/whatsapp/system-panel.tsx', 'src/components/settings/general.tsx', 'src/components/settings/storage.tsx', 'src/components/settings/storage-provider.tsx', 'src/components/settings/storage-move.tsx', 'src/components/setup-guide.tsx', 'src/components/settings/platforms.tsx', 'src/components/settings/audit.tsx'],
+  settings: ['src/components/supporting.tsx', 'src/components/whatsapp/system-panel.tsx', 'src/components/settings/general.tsx', 'src/components/settings/storage.tsx', 'src/components/settings/storage-provider.tsx', 'src/components/settings/storage-move.tsx', 'src/components/settings/backups.tsx', 'src/components/setup-guide.tsx', 'src/components/settings/platforms.tsx', 'src/components/settings/audit.tsx'],
   home: ['src/components/home.tsx', 'src/components/home-perms.tsx', 'src/components/work/parts.tsx'],
   ideas: ['src/components/ideas.tsx'],
   analytics: ['src/components/supporting.tsx'],

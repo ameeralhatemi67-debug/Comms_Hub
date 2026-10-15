@@ -33,6 +33,14 @@ The owner requested a Comms Hub version of the supplied Arabic motion-video refe
 Verification: typecheck and production build passed; all 153 existing tests passed. Film browser and media verification passed 128 checks, including deterministic seeking, both layouts, transitions, play/pause, fonts, audio, mobile overflow, reduced-motion initial state, and full decode of all three exports. Video is Rec.709 limited-range H.264 with 48 kHz stereo AAC. Two encoded-frame color comparisons passed. Re-run `node qa/comms-hub-film.cjs`; full evidence is beside the film under `qa/`. The application interface and the paused Permissions P4 work were not changed. Next action for this deliverable: review the film and copy; the application next actions below still apply.
 
 
+## Backups, 2026-10-15 (Step S4)
+
+«الإعدادات» has a tab «النسخ الاحتياطي»: a provider that holds backups (never the library's own), files copied there incrementally by the move engine's backup mode and verified by checksum, the records and the settings exported as one file kept at the provider and read back, policy (manual, a warning age, how many exports to keep), the age and state of the last good backup of each kind with a stale warning, a sample re-read to call a backup verified, a long-press restore of a file whose original is gone, and runbooks. Database rule run 61 of 61, engine regression 15 of 15, `npm test` 271 of 271, fixture check 1183 of 1183, signed-out gate 27 of 27.
+
+- **Waiting on the owner:** a second storage provider (`Storage_Provider_Setup.md`), then in the tab: choose it, «انسخ الملفات الجديدة», «صدّر ونزّل» for each kind and «تحقق من النسخة». Nothing has met a real provider.
+- **Known limits:** manual only; no database restore from the site; an export is built in memory (refused above 300,000 rows).
+- **Next action:** OneDrive (S8), or role-aware tours for the remaining pages, or the agent-computer items (S7) when it arrives.
+
 ## Help upgrade, 2026-10-15 (step 8 of the audit order)
 
 The guide now says what a page means for the person's role and adds the role's own steps, closes an empty or partly drawn page with a card instead of going silent, shows only what was added to a page the person already knows (once), speaks of touching on a phone and has the page guide as a button, and every route has a guide (six were missing). `npm test` 263 of 263, the engine driven in a browser 25 of 25, fixture check 1102 of 1102.

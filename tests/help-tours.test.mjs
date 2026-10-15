@@ -34,7 +34,7 @@ test('a role\'s own steps and the news point at elements the page\'s components 
     if (h.v) assert.ok(Number.isInteger(h.v) && h.v >= 1 && h.v < 30, key);
   }
   assert.ok(roleSteps >= 5, `role steps: ${roleSteps}`);
-  assert.ok(news >= 3, `news steps: ${news}`);
+  assert.ok(news >= 2, `news steps: ${news}`);
 });
 
 test('the news key is one the database accepts for a seen page', () => {

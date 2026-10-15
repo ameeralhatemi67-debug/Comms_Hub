@@ -60,6 +60,14 @@ const check = (name, pass, detail) => checks.push({ name, pass: !!pass, detail: 
   const g1 = await get('/api/storage/move');
   check('the move route has no GET', g1.status() === 405 || g1.status() === 404, g1.status());
 
+  // Settings Step S4: the backup routes.
+  for (const route of ['export', 'run', 'verify']) {
+    const b = await ctx.request.post(origin + '/api/backups/' + route, { data: { kind: 'database', run: random }, headers: { Origin: origin }, failOnStatusCode: false });
+    check(`the backup route refuses a visitor (${route})`, b.status() === 401, b.status());
+    const bf = await ctx.request.post(origin + '/api/backups/' + route, { data: {}, headers: { Origin: 'https://evil.example' }, failOnStatusCode: false });
+    check(`and a request from another site (${route})`, bf.status() === 403, bf.status());
+  }
+
   const page = await ctx.newPage();
   await page.goto(baseURL + '/settings?tab=storage', { waitUntil: 'networkidle' });
   const h1 = await page.locator('h1').innerText();

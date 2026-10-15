@@ -13,6 +13,7 @@ import {
   STATE_AR,
   STATE_TONE,
   TOKEN_SOURCE_AR,
+  ageAr,
   errorAr,
   intError,
   sizeAr,
@@ -197,10 +198,12 @@ export function GeneralTab({ initial }: { initial?: GeneralInitial }) {
           </div>
           <div className="between st-backup">
             <span>آخر نسخة احتياطية</span>
-            <b>لا توجد نسخة بعد</b>
+            <b className={overview.backup_stale ? 'danger' : ''}>
+              {overview.last_backup ? `${ageAr(overview.last_backup)}${overview.backup_stale ? ' · متقادمة لبعض الأنواع' : ''}` : 'لا توجد نسخة بعد'}
+            </b>
           </div>
         </div>
-        <p className="muted">النسخ الاحتياطي ونقل الملفات بين مزودي التخزين يأتيان في مرحلتين تاليتين. أين يُحفظ كل ملف ظاهر في «التخزين».</p>
+        <p className="muted">النسخ الاحتياطي من تبويب «النسخ الاحتياطي»، وأين يُحفظ كل ملف ظاهر في «التخزين».</p>
       </section>
 
       <section className="st-block st-site" aria-label="الإعدادات العامة">

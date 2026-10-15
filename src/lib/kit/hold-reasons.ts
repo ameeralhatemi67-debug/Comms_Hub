@@ -46,6 +46,8 @@ export const HOLD = {
   providerRemove: 'يُحذف المزود من القائمة ويُتلف مفتاحه المحفوظ، ويبقى في السجل أنه كان.',
   /** «الإعدادات»، التخزين: cancel a move plan or a run. */
   moveCancel: 'الإلغاء يوقف النقل. ما نُقل قبله يبقى منقولاً ومصدره محفوظ، ولا يُحذف شيء.',
+  /** «الإعدادات»، النسخ الاحتياطي: serve a file from its verified backup copy. */
+  backupRestore: 'تصير النسخة الاحتياطية هي الأصل الذي يُخدَّم منه الملف الآن، ويبقى الأصل المفقود مسجلاً نسخةً.',
   /** «الإعدادات»، التخزين: retire the held source copies after a move. */
   retireSource: 'تنتقل نسخ المصدر إلى سلة مزودها الأول، وتُستعاد منه وحده. بعدها لا يرجع المركز إليها.',
   /** «الإعدادات»، المنصات: delete a platform nothing has used. */

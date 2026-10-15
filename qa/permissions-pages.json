@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-15T06:19:08.063Z",
+  "run": "2026-10-15T06:57:51.892Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -272,6 +272,26 @@
       "detail": ""
     },
     {
+      "name": "settings-backups: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-viewer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-locked: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "guide-meta: renders",
       "pass": true,
       "detail": ""
@@ -413,6 +433,46 @@
     },
     {
       "name": "settings-storage-move-viewer: starting, planning and adding are locked controls for «storage.migrate» and «storage.manage»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: the restore is a long press with its reason",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: a stale kind is flagged, a fresh one is not",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: each kind has run and verify buttons, the policy is manual only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: the unverified config backup says so and says it was downloaded only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: the guide button is there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty: running the files backup waits for a target",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-viewer: every control is locked for «backups.run», none works",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-locked: the request is for «backups.run»",
       "pass": true,
       "detail": ""
     },
@@ -4797,6 +4857,351 @@
       "detail": "overflow 0px"
     },
     {
+      "name": "settings-backups · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-backups: shows «أين تُحفظ النسخ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «تخزين Supabase»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «ملفات المكتبة والمرفقات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «سجلات الأعمال والمكتبة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «الإعدادات والصلاحيات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «آخر نسخة سليمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «متحقق منها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «لم يُتحقق منها بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «منذ 3 أيام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «لا توجد نسخة بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «نُزّلت إلى جهازك فقط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «5 من 6»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «انسخ الملفات الجديدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «صدّر ونزّل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «تحقق من النسخة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «حفظ السياسة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «التكرار: يدوي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «استعادة ملف من نسخته»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «شعار الحملة.png (الإصدار 2)»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «استعادة من النسخة الاحتياطية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «آخر النسخ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «الدليل: كيف تُستعاد الأشياء»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «قاعدة البيانات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «الأسرار»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «ما لا يدخل في التصدير»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «البريد الداخلي ومحادثات المراسلة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: shows «سجلات الأعمال والمكتبة: لا توجد نسخة سليمة بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: does not show «NaN»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: does not show «null»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: does not show «private-attachment»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: does not show «secret»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: does not show «backups/»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: does not show «ref»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-backups-empty · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-backups-empty: shows «لم يُحدَّد مزود»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty: shows «لا مزود متصل غير مزود المكتبة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty: shows «لا ملف يحتاج استعادة الآن»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty: shows «لم تُؤخذ نسخة بعد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty: shows «حدّد مزود النسخ أعلاه أولاً»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty: does not show «NaN»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty: does not show «استعادة من النسخة الاحتياطية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-empty · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-backups-viewer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-viewer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-backups-viewer: shows «ملفات المكتبة والمرفقات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-viewer: shows «انسخ الملفات الجديدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-viewer: shows «تحقق من النسخة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-viewer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-viewer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-viewer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-backups-locked · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-locked · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-backups-locked: shows «النسخ الاحتياطي لمن يملك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-locked: shows «اطلب هذه الصلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-locked: does not show «ملفات المكتبة والمرفقات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-locked: does not show «آخر نسخة سليمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-locked: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-locked · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-backups-locked · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
       "name": "guide-meta · a · 1280: no page errors",
       "pass": true,
       "detail": ""
@@ -5514,8 +5919,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 1102,
-    "passed": 1102,
+    "total": 1183,
+    "passed": 1183,
     "failed": 0
   }
 }

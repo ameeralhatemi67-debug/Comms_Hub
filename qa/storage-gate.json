@@ -2,8 +2,8 @@
   "script": "qa/storage-gate.cjs",
   "ran": "2026-10-15",
   "base": "http://localhost:3100",
-  "total": 21,
-  "passed": 21,
+  "total": 27,
+  "passed": 27,
   "failed": 0,
   "checks": [
     {
@@ -100,6 +100,36 @@
       "name": "the move route has no GET",
       "pass": true,
       "detail": "405"
+    },
+    {
+      "name": "the backup route refuses a visitor (export)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "and a request from another site (export)",
+      "pass": true,
+      "detail": "403"
+    },
+    {
+      "name": "the backup route refuses a visitor (run)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "and a request from another site (run)",
+      "pass": true,
+      "detail": "403"
+    },
+    {
+      "name": "the backup route refuses a visitor (verify)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "and a request from another site (verify)",
+      "pass": true,
+      "detail": "403"
     },
     {
       "name": "the storage tab is not shown to a visitor",

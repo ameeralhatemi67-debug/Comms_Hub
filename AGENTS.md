@@ -224,7 +224,13 @@ state in `storage_moves` and `storage_move_items`, driven by the settings page w
 open, every record needing the right «نقل الملفات بين مزودي التخزين» and the server key; an
 approved version moves only by checksum; the library, mail and messaging routes serve through
 the file's own reference with `storage_serving` (`src/lib/storage/index.ts`, `openStored`).
-Retiring a source sends it to its provider's recoverable trash and is a separate long press. Capabilities `settings.view`, `settings.manage`,
+Retiring a source sends it to its provider's recoverable trash and is a separate long press.
+Backups are real too (Step S4, `*backups*`, owner directive of 2026-10-15): files are copied to a
+backup provider by the same engine in `backup` mode (incremental, the primary never changes),
+the records and the settings are exported from an allow-list that excludes everything private
+to a person (internal mail, messaging, private reminders, numbers) and every secret, and a
+backup is called verified only after its copies were re-read from the provider. Everything
+is run by a person: nothing is scheduled. A database restore is not offered from the site. Capabilities `settings.view`, `settings.manage`,
 `storage.manage`, `storage.migrate`, `backups.run`, `backups.restore`, `platforms.manage`
 and `integrations.secrets` are the administrator's by default. Nothing is scheduled in the
 site: what needs a timer waits for the owner's agent computer (E-1), and the NAS likewise.
