@@ -34,7 +34,7 @@ const grantable = new Set<string>(grantablePages.map((p) => p.id));
 /** Open to every signed-in person. */
 const alwaysOpen = new Set(['', 'account']);
 
-/** The roles that open «الحسابات المرتبطة» (/channels), with the «الموافقات والنشر» page. */
+/** The roles that open «حسابات المنصات» (/channels), with the «الموافقات والنشر» page. */
 export const linkedAccountRoles: Role[] = ['director', 'assistant', 'publisher'];
 
 /** The grants that open «المشاريع» (/projects) and «الطلبات» (/requests). */
@@ -88,7 +88,7 @@ export function canOpen(account: Pick<Account, 'role' | 'pages' | 'caps'>, page:
   if (isAdmin(account)) return true;
   if (alwaysOpen.has(page)) return true;
   if (page === 'accounts') return !!account.caps?.includes(ACCOUNTS_CAP);
-  // «الحسابات المرتبطة» goes with «الموافقات والنشر», for the roles that manage the
+  // «حسابات المنصات» goes with «الموافقات والنشر», for the roles that manage the
   // accounts (director, assistant) or publish on them (publisher).
   if (page === 'channels') return linkedAccountRoles.includes(account.role) && account.pages.includes('approvals');
   // «المشاريع» and «الطلبات» (Step 5) are not granted on their own, so existing accounts need no

@@ -485,7 +485,7 @@
 .wk .wk-dbar .l{margin-inline-end:auto;font-size:12.5px;color:var(--w-ink2);max-width:60ch}
 @media (max-width:860px){ .wk .wk-rprev{grid-template-columns:minmax(0,1fr)} }
 
-/* «الحسابات المرتبطة» */
+/* «حسابات المنصات» */
 .wk .wk-accgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
 .wk .wk-acccard{display:grid;gap:8px;align-content:start;padding:14px 16px;border-radius:var(--w-rl);background:var(--surface);border:1px solid var(--line);box-shadow:var(--w-e1)}
 .wk .wk-acccard.off{opacity:.65;box-shadow:none}
@@ -768,7 +768,7 @@ dialog.nt-drawer::backdrop{background:var(--backdrop)}
 .wk .wk-pv-strip button{cursor:pointer}
 .wk .wk-pv-strip small{color:var(--muted)}
 
-/* Connection line of an account on «الحسابات المرتبطة». */
+/* Connection line of an account on «حسابات المنصات». */
 .wk .wk-conn{font-size:12px;color:var(--muted)}
 .wk .wk-conn.approved{color:var(--st-success-fg)}
 .wk .wk-conn.warn{color:var(--st-warn-fg)}

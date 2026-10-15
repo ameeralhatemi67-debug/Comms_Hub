@@ -409,7 +409,7 @@ test('every database function the work pages call exists in a migration and is g
 });
 
 // ---------------------------------------------------------------------------
-// Step 4: «الموافقات والنشر», the review screen, «الحسابات المرتبطة», notifications
+// Step 4: «الموافقات والنشر», the review screen, «حسابات المنصات», notifications
 // ---------------------------------------------------------------------------
 import { diffWords, partLine, accountState, atRisk, accountName, noticeHref } from '../src/lib/work/rules.ts';
 

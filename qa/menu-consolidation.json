@@ -1,0 +1,98 @@
+{
+  "script": "qa/menu-consolidation.cjs",
+  "run": "2026-10-15T08:05:15.984Z",
+  "checks": [
+    {
+      "name": "the menu has 17 entries",
+      "pass": true,
+      "detail": "17"
+    },
+    {
+      "name": "the menu does not list «الإدارة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the menu does not list «الحساب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the menu does not list «التحليلات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«حسابات المنصات» is in the menu",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«الحسابات المرتبطة» is not",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1400: the badge is shown with the name",
+      "pass": true,
+      "detail": "{\"w\":151,\"h\":49.390625,\"x\":1233,\"shown\":true,\"bg\":\"rgba(0, 0, 0, 0)\"}"
+    },
+    {
+      "name": "1400: the badge sits inside the sidebar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1400: sign-out is still a separate control",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1400: no horizontal overflow",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1400: the active badge has a background",
+      "pass": true,
+      "detail": "rgba(255, 255, 255, 0.12)"
+    },
+    {
+      "name": "collapsed: the avatar stays, the words go",
+      "pass": true,
+      "detail": "{\"avatar\":{\"w\":33,\"h\":33,\"x\":1351,\"shown\":true,\"bg\":\"rgba(0, 0, 0, 0)\"},\"who\":{\"w\":0,\"h\":0,\"x\":0,\"shown\":false,\"bg\":\"rgba(0, 0, 0, 0)\"}}"
+    },
+    {
+      "name": "collapsed: the badge fits the narrow sidebar",
+      "pass": true,
+      "detail": "55 in 76"
+    },
+    {
+      "name": "1000: the avatar stays, the words go",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1000: sign-out is hidden (it is on the account page and in the menu)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1000: the badge fits the narrow sidebar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plain design: the badge is shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "plain design: no horizontal overflow",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "passed": 18,
+  "total": 18
+}

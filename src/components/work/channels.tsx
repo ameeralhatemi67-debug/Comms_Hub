@@ -1,5 +1,5 @@
 'use client';
-// «الحسابات المرتبطة», after «النموذج المرجعي للمركز» version 5: the department's accounts on
+// «حسابات المنصات», after «النموذج المرجعي للمركز» version 5: the department's accounts on
 // each platform (several per platform, YouTube for video only), who publishes on each, and
 // whether it publishes by itself or asks first. The director, the assistant and the
 // administrator add, edit, stop and delete them; the publisher reconnects them. Linking is a
@@ -111,7 +111,7 @@ export function ChannelsPage() {
   if (!mgr && !pub)
     return (
       <div className="wk">
-        <Empty i={Lock} title="الحسابات المرتبطة لمن يديرها وينشر عليها">
+        <Empty i={Lock} title="حسابات المنصات لمن يديرها وينشر عليها">
           يديرها مدير الاتصال ومساعده والمسؤول عن النظام، ويعيد ربطها مسؤول النشر.
         </Empty>
       </div>
@@ -120,7 +120,7 @@ export function ChannelsPage() {
     <div className="wk">
       <div className="wk-head">
         <div>
-          <h1>الحسابات المرتبطة</h1>
+          <h1>حسابات المنصات</h1>
           <p>حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر المبدئية. الاعتماد يرتبط بالحساب بعينه، فتغيير اسمه يعيد «المنصات والحسابات» للاعتماد.</p>
         </div>
         {mgr && (

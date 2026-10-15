@@ -26,6 +26,13 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Page health check and consolidation, step B1, 2026-10-15
+
+The seven supporting pages were audited (what each does, who sees it) and `Action_Plan.md` now carries what is left: Part B consolidates the pages, Part C the owner-gated audit steps, Part D the agent computer and NAS. Step B1 is built: «الإدارة» is dissolved (`/admin` opens «الحسابات»), «الحساب» is opened from the name badge at the foot of the sidebar, «الحسابات المرتبطة» is «حسابات المنصات», «التحليلات» is out of the menu until it is real. The menu is 17 entries, was 20. `npm test` 275 of 275, typecheck and build clean, fixture check of the sidebar 18 of 18. Not seen signed in.
+
+- **Next action:** step B2 of `Action_Plan.md`: merge «المراقبة» into «سجل النشاط» (a team panel from the database, `/monitoring` redirects), then B3 (split personal settings from system settings).
+- **Correction to earlier lists:** step 8 of the audit order (help upgrade) and S4 (backups) are built; open are OneDrive (S8) and step 9 (hardware).
+
 ## Film deliverable completed 2026-10-14
 
 The owner requested a Comms Hub version of the supplied Arabic motion-video reference. The standalone package is in `videos/comms-hub-launch/`: a 38.4-second portrait film, a separately composed landscape film, and a 15-second portrait teaser, all at 60 fps, with original synthesized music, Arabic captions, poster frames, editable artwork, a local preview, and render scripts. It uses the existing forest-green and gold brand and preserves the established Arabic terms. Illustrative scenes explain work, version-bound approval, the media library, mail and messaging, planning, and permissions; no live publishing or AI capability is claimed.

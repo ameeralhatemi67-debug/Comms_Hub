@@ -65,3 +65,4 @@ button.primary.danger{background:var(--danger);border-color:var(--danger);color:
 .drive-samples{margin:28px 0 14px;font-size:16px;color:var(--muted)}
 progress{width:100%;accent-color:var(--green)}
 [data-identity="emerald"] .drive-card{border-radius:var(--r-lg)}
+@media(max-width:1099px){.sidebar .sign-out{display:none}}

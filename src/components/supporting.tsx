@@ -3,19 +3,13 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
-import { BarChart3, Bell, Check, ShieldAlert, SlidersHorizontal, UserRound } from 'lucide-react';
+import { BarChart3, Bell, Check, SlidersHorizontal, UserRound } from 'lucide-react';
 import {
   channelAccounts,
-  integrationStatusLabels,
-  integrations,
   noticesFor,
-  permissionMatrix,
   roles,
   teamLoad,
-  securityEvents,
   statusLabels,
-  storageUsage,
-  systemHealth,
 } from '@/lib/domain';
 import { useHub } from '@/lib/store';
 import { useAccount } from '@/lib/account-context';
@@ -32,14 +26,12 @@ import { AuditTab } from './settings/audit';
 import { StorageTab } from './settings/storage';
 import { BackupsTab } from './settings/backups';
 import { PlatformsTab } from './settings/platforms';
-import { DriveIntegration } from './drive-files';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
   ideas: 'الأفكار',
   analytics: 'التحليلات',
   monitoring: 'المراقبة',
-  admin: 'الإدارة',
   settings: 'الإعدادات',
   account: 'الحساب',
 };
@@ -59,18 +51,6 @@ function SampleNotice({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-/** Admin sections, MVP_draft.md section 35. Visual shells only, no enforcement. */
-const adminSections = [
-  { id: 'users', label: 'المستخدمون' },
-  { id: 'permissions', label: 'الأدوار والصلاحيات' },
-  { id: 'integrations', label: 'التكاملات' },
-  { id: 'health', label: 'حالة النظام' },
-  { id: 'storage', label: 'التخزين' },
-  { id: 'security', label: 'الأمن' },
-  { id: 'automation', label: 'الأتمتة' },
-  { id: 'notifications', label: 'سياسة الإشعارات' },
-];
 
 /** Settings sections, MVP_draft.md section 38. Visual configuration only. */
 const settingsSections = [
@@ -101,7 +81,6 @@ export function Supporting({ page }: { page: string }) {
   const [compact, setCompact] = useState(true);
   const [alerts, setAlerts] = useState(true);
   const [confirmReset, setConfirmReset] = useState(false);
-  const [adminTab, setAdminTab] = useState('users');
   // «/settings?tab=general» opens a tab directly (the Drive connection returns there).
   const [settingsTab, setSettingsTab] = useState(() => {
     const t = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('tab');
@@ -221,207 +200,6 @@ export function Supporting({ page }: { page: string }) {
       </div>
     );
   }
-
-  if (page === 'admin')
-    return (
-      <div dir="rtl">
-        <Title title="الإدارة" sub="إدارة حالة النظام والمستخدمين والتكاملات">
-          <span className="chip">صلاحيات النظام</span>
-        </Title>
-        {!actor.admin ? (
-          <Panel>
-            <Empty>هذه الصفحة متاحة لمسؤول النظام فقط.</Empty>
-          </Panel>
-        ) : (
-          <>
-            <Tabs items={adminSections} value={adminTab} onChange={setAdminTab} />
-            {adminTab === 'users' ? (
-              <p className="muted">الحسابات وطلبات الوصول والصلاحيات حقيقية وتُدار من صفحة «الحسابات».</p>
-            ) : adminTab === 'integrations' ? (
-              <SampleNotice>Google Drive وحده حقيقي في هذا القسم. بقية البطاقات عرض فقط، وتُدار التكاملات الحقيقية من «الإعدادات».</SampleNotice>
-            ) : adminTab === 'permissions' ? (
-              <SampleNotice>الجدول عرض لما يحدده الدور فقط. الصلاحيات الحقيقية وتعديلها في «الحسابات»، وصلاحياتك أنت في «الحساب».</SampleNotice>
-            ) : (
-              <SampleNotice>هذا القسم عرض تجريبي: أرقامه وأحداثه ليست من النظام الحقيقي، ولا يغيّر شيئاً.</SampleNotice>
-            )}
-
-            {adminTab === 'users' && (
-              <Panel title="المستخدمون">
-                <p>
-                  الدخول بالبريد وكلمة المرور، ولا يدخل إلا بريد أضافه مسؤول النظام أو قبل طلبه. من الحسابات
-                  تُضاف الحسابات وتُحذف، وتُمنح الأدوار والصفحات.
-                </p>
-                <div className="actions">
-                  <Link className="button primary" href="/accounts">
-                    فتح الحسابات
-                  </Link>
-                </div>
-              </Panel>
-            )}
-
-            {adminTab === 'permissions' && (
-              <Panel title="الأدوار والصلاحيات">
-                <div className="table-head">
-                  <span>الدور</span>
-                  <span>الإنشاء</span>
-                  <span>المراجعة</span>
-                  <span>النشر</span>
-                </div>
-                {permissionMatrix.map((row) => (
-                  <div className="work-row" key={row.id}>
-                    <span className="work-name">
-                      <b>{row.name}</b>
-                      <small>{row.admin ? 'سلطة النظام، بلا اعتماد للمحتوى' : 'دور تشغيلي'}</small>
-                    </span>
-                    <span className="owner">{yesNo(row.create)}</span>
-                    <span className="owner">{yesNo(row.review)}</span>
-                    <span className="owner">{yesNo(row.publish)}</span>
-                  </div>
-                ))}
-                <p className="muted">
-                  فصل السلطة مقصود: مسؤول النظام لا يعتمد المحتوى، ومسؤول النشر لا يعتمد ما ينشره.
-                </p>
-              </Panel>
-            )}
-
-            {adminTab === 'integrations' && (
-              <Panel title="التكاملات">
-                <div className="stack">
-                  {integrations.map((item) =>
-                    item.id === 'drive' ? (
-                      <DriveIntegration key={item.id} />
-                    ) : (
-                    <div className="notice" key={item.id}>
-                      <span className="between">
-                        <b>{item.name}</b>
-                        <span className={`chip ${item.status === 'CONNECTED' ? 'success' : 'danger'}`}>
-                          {integrationStatusLabels[item.status]}
-                        </span>
-                      </span>
-                      <small>{item.detail}</small>
-                      <div className="actions">
-                        <button className="secondary" disabled>
-                          {item.status === 'NOT_CONFIGURED' ? 'ربط' : 'إعادة الربط'}
-                        </button>
-                      </div>
-                    </div>
-                    ),
-                  )}
-                </div>
-                <p className="muted">
-                  Google Drive حقيقي. بقية التكاملات واجهات عرض، وتدفق ربطها ومعالجة رموزها مؤجلان إلى مرحلة
-                  التكاملات الحقيقية.
-                </p>
-              </Panel>
-            )}
-
-            {adminTab === 'health' && (
-              <Panel title="حالة النظام">
-                <div className="table">
-                  {systemHealth.map((item) => (
-                    <div className="between" key={item.id}>
-                      <span>{item.label}</span>
-                      <b className={item.ok ? 'success' : 'danger'}>{item.value}</b>
-                    </div>
-                  ))}
-                </div>
-                <div className="notice">
-                  <ShieldAlert />
-                  <b>النموذج المحلي يعمل</b>
-                  <p className="muted">لا توجد اتصالات خارجية أو مهام خلفية.</p>
-                </div>
-              </Panel>
-            )}
-
-            {adminTab === 'storage' && (
-              <Panel title="التخزين">
-                <p>
-                  <b>{storageUsage.percent}%</b> مستخدم · {storageUsage.usedGb} من {storageUsage.totalGb} غيغابايت
-                </p>
-                <div className="table">
-                  {storageUsage.buckets.map((bucket) => (
-                    <div className="between" key={bucket.id}>
-                      <span>{bucket.label}</span>
-                      <b>{bucket.gb} غيغابايت</b>
-                    </div>
-                  ))}
-                </div>
-                <p className="muted">
-                  أرقام توضيحية. دورة حياة التخزين ونسخ 3-2-1 موصوفة في وثائق البنية، وغير منفذة هنا.
-                </p>
-              </Panel>
-            )}
-
-            {adminTab === 'security' && (
-              <Panel title="الأمن">
-                <div className="stack">
-                  {securityEvents.map((event) => (
-                    <div className="notice" key={event.id}>
-                      <b>{event.text}</b>
-                      <small>
-                        {event.at} · {event.actor}
-                      </small>
-                    </div>
-                  ))}
-                </div>
-                <div className="table">
-                  <div className="between">
-                    <span>سجل التدقيق غير القابل للتعديل</span>
-                    <b>مؤجل إلى مرحلة الإنتاج</b>
-                  </div>
-                  <div className="between">
-                    <span>مفتاح الإيقاف الطارئ</span>
-                    <b>غير مفعل في النموذج</b>
-                  </div>
-                </div>
-              </Panel>
-            )}
-
-            {adminTab === 'automation' && (
-              <Panel title="الأتمتة">
-                <div className="table">
-                  <div className="between">
-                    <span>التوجيه التلقائي للمهام</span>
-                    <b>غير مفعل</b>
-                  </div>
-                  <div className="between">
-                    <span>النشر التلقائي بعد الاعتماد</span>
-                    <b>غير مفعل</b>
-                  </div>
-                  <div className="between">
-                    <span>المساعدة اللغوية بالذكاء الاصطناعي</span>
-                    <b>خارج نطاق النموذج</b>
-                  </div>
-                </div>
-                <p className="muted">الأتمتة مؤجلة إلى ما بعد التحقق من سير العمل الفعلي للقسم.</p>
-              </Panel>
-            )}
-
-            {adminTab === 'notifications' && (
-              <Panel title="سياسة الإشعارات">
-                <div className="table">
-                  <div className="between">
-                    <span>إجراء مطلوب</span>
-                    <b>يصل إلى صاحب القرار فقط</b>
-                  </div>
-                  <div className="between">
-                    <span>يحتاج انتباه</span>
-                    <b>مسؤول النشر ومسؤول النظام</b>
-                  </div>
-                  <div className="between">
-                    <span>معلومة</span>
-                    <b>أصحاب العمل والمراجعون</b>
-                  </div>
-                </div>
-                <p className="muted">
-                  النموذج الثلاثي للانتباه موصوف في وثيقة نموذج الإشعارات، والتوجيه هنا محاكاة محلية.
-                </p>
-              </Panel>
-            )}
-          </>
-        )}
-      </div>
-    );
 
   if (page === 'settings')
     return (

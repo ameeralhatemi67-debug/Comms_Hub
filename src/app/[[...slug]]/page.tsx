@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { HubPage } from '@/components/hub-page';
 import { NoAccess } from '@/components/no-access';
 import { canOpen } from '@/lib/access';
@@ -10,6 +11,8 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
   // client-side navigation, a page is).
   const session = await getSession();
   if (session.status !== 'ready') return null;
+  // «الإدارة» was dissolved (Action_Plan.md B1): its real parts are in «الحسابات» and «الإعدادات».
+  if (slug[0] === 'admin') redirect('/accounts');
   if (!canOpen(session.account, slug[0] ?? '')) return <NoAccess />;
   return <HubPage route={slug} />;
 }

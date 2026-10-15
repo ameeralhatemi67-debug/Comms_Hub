@@ -89,7 +89,7 @@ export function HubPage({ route }: { route: string[] }) {
   if (page === 'components') return <ComponentGallery />;
   if (page === 'accounts') return <AccountsPage />;
   if (page === 'ideas') return <IdeasPage />;
-  if (['analytics', 'monitoring', 'admin', 'settings', 'account'].includes(page))
+  if (['analytics', 'monitoring', 'settings', 'account'].includes(page))
     return <Supporting page={page} />;
 
   return (

@@ -24,9 +24,9 @@ export const HOLD = {
   rejectWork: 'الرفض يوقف العمل عن غرضه، وقد يغلقه.',
   /** Publishing: publish now, and confirm an ask-first publication when its time comes. */
   publishNow: 'النشر يصل إلى المنصات ولا يُتراجع عنه.',
-  /** «الحسابات المرتبطة»: delete an account. */
+  /** «حسابات المنصات»: delete an account. */
   accountDelete: 'حذف الحساب يفصله عن المركز ويحذف مفاتيحه.',
-  /** «الحسابات المرتبطة»: disconnect a really-connected account. */
+  /** «حسابات المنصات»: disconnect a really-connected account. */
   accountDisconnect: 'الفصل يدمّر رمز الحساب وينهي تفويضه فوراً، فلا يُنشر عليه حتى يُعاد ربطه.',
   // Permissions (Permissions_Plan.md 10, «New hold buttons»).
   /** «الحسابات»: remove a member. */

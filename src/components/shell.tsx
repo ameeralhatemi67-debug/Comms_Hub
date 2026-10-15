@@ -14,11 +14,8 @@ import {
   Images,
   Clapperboard,
   Lightbulb,
-  ChartNoAxesCombined,
   Users,
   Settings,
-  User,
-  Shield,
   UserCog,
   ListChecks,
   History,
@@ -54,18 +51,15 @@ const nav = [
   ['/activity', 'سجل النشاط', History],
   ['/motion', 'استوديو الحركة', Clapperboard],
   ['/mail', 'البريد', Mail],
-  ['/channels', 'الحسابات المرتبطة', Link2],
+  ['/channels', 'حسابات المنصات', Link2],
   ['/ideas', 'الأفكار', Lightbulb],
-  ['/analytics', 'التحليلات', ChartNoAxesCombined],
   ['/monitoring', 'المراقبة', Users],
-  ['/admin', 'الإدارة', Shield],
   ['/accounts', 'الحسابات', UserCog],
   ['/settings', 'الإعدادات', Settings],
-  ['/account', 'الحساب', User],
 ] as const;
 
 /** Pages still on sample data in the browser, not the database. Marked in the menu. */
-const SAMPLE_PAGES = ['/analytics', '/monitoring', '/admin'];
+const SAMPLE_PAGES = ['/monitoring'];
 
 export function Shell({ children }: { children: ReactNode }) {
   const { state, dispatch } = useHub();
@@ -115,7 +109,6 @@ export function Shell({ children }: { children: ReactNode }) {
   const visible = nav.filter(
     ([href]) =>
       (href === '/accounts' ? accountsOpen : canOpen(account, href.slice(1))) &&
-      (href !== '/admin' || actor.admin) &&
       (href !== '/create' || actor.create),
   );
   const allowed = (href: string) => visible.some((n) => n[0] === href);
@@ -166,11 +159,21 @@ export function Shell({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="sidebar-foot">
-          <span className="avatar">{account.name[0]}</span>
-          <span>
-            <b>{account.name}</b>
-            <small>{state.role === account.role ? actor.name : `عرض بصفة ${actor.name}`}</small>
-          </span>
+          {/* «الحساب» is reached from the person's own badge, not from the page list (Action_Plan.md B1). */}
+          <Link
+            href="/account"
+            className={`account-link ${path === '/account' ? 'active' : ''}`}
+            title="حسابك: الملف الشخصي وصلاحياتك"
+            aria-label={`حسابك، ${account.name}`}
+            aria-current={path === '/account' ? 'page' : undefined}
+            onClick={() => setMobile(false)}
+          >
+            <span className="avatar">{account.name[0]}</span>
+            <span className="who">
+              <b>{account.name}</b>
+              <small>{state.role === account.role ? actor.name : `عرض بصفة ${actor.name}`}</small>
+            </span>
+          </Link>
           <button className="sign-out" onClick={signOut} aria-label="تسجيل الخروج" title="تسجيل الخروج">
             <LogOut />
           </button>
@@ -280,6 +283,13 @@ export function Shell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
+          <Link className="nav-item account-menu-link" href="/account" onClick={() => setMobile(false)}>
+            <span className="avatar">{account.name[0]}</span>
+            <span>
+              <b>الحساب</b>
+              <small>{account.name}</small>
+            </span>
+          </Link>
           <button className="secondary" onClick={signOut}>
             <LogOut />
             تسجيل الخروج

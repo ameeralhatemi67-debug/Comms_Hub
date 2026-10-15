@@ -215,3 +215,5 @@
 @media (prefers-reduced-motion:no-preference){
   [data-identity="emerald"] .switch i,[data-identity="emerald"] .switch i::after{transition:background-color var(--d2),inset-inline-start var(--d2) var(--ease)}
 }
+[data-identity="emerald"] .account-link:hover{background:var(--side-hover)}
+[data-identity="emerald"] .account-link.active{background:var(--side-active)}

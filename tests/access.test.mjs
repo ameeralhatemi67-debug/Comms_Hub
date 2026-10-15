@@ -41,7 +41,7 @@ test('a page grant cannot give create to a role that lacks it', () => {
   assert.equal(canOpen(publisher, 'approvals'), true);
 });
 
-test('«الحسابات المرتبطة» goes with «الموافقات والنشر», for the roles that manage or publish on the accounts', () => {
+test('«حسابات المنصات» goes with «الموافقات والنشر», for the roles that manage or publish on the accounts', () => {
   for (const role of ['director', 'assistant', 'publisher']) {
     assert.equal(canOpen({ role, pages: ['approvals'] }, 'channels'), true, role);
     assert.equal(canOpen({ role, pages: ['work'] }, 'channels'), false, `${role} without approvals`);

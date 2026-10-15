@@ -347,7 +347,7 @@ function PlatformCard({
         </button>
       </div>
       {social && p.enabled && (impact?.active_accounts ?? 0) > 0 && (
-        <small className="muted">لا تُوقف منصة عليها حسابات فعّالة: أوقف حساباتها من «الحسابات المرتبطة» أولاً.</small>
+        <small className="muted">لا تُوقف منصة عليها حسابات فعّالة: أوقف حساباتها من «حسابات المنصات» أولاً.</small>
       )}
       {social && !p.builtin && inUse && <small className="muted">لا تُحذف منصة عليها حسابات أو نسخ نصوص.</small>}
       {log && (

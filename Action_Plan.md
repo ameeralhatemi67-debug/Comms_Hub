@@ -59,7 +59,11 @@ Target menu, in order:
 | System | الحسابات (people and permissions), «حسابات المنصات» (was «الحسابات المرتبطة»), الإعدادات (system) |
 | Personal | «الحساب», reached from the name badge at the foot of the sidebar, not from the list |
 
-### Step B1: menu and routes (first, small, no data change)
+### Step B1: menu and routes (first, small, no data change) - BUILT 2026-10-15
+
+Built and recorded in `progress.md` (entry of 2026-10-15). Leftovers carried to B6: the sample
+constants in `src/lib/domain.ts` and `DriveIntegration` in `src/components/drive-files.tsx` are
+unused now and are removed there.
 
 1. «الإدارة» leaves the menu; `/admin` redirects to `/accounts`. Its sample tabs are
    deleted from `src/components/supporting.tsx`; nothing real is lost (users: «الحسابات»;

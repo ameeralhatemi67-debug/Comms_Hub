@@ -13,7 +13,7 @@ import { connectGuard, isProvider, redirectUri } from '@/lib/platforms/route';
 
 // The platform sends the person back here with a one-time code. The code is exchanged for a
 // token on the server, the token goes straight into the vault as a passing "offer" owned by the
-// person, and the person is sent back to «الحسابات المرتبطة» to choose what to connect. No token
+// person, and the person is sent back to «حسابات المنصات» to choose what to connect. No token
 // is ever in a URL, a page or a log; only the id of the offer is.
 export async function GET(request: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
   const { provider } = await params;

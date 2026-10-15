@@ -439,13 +439,13 @@ function PublishTab({ items, dec, act }: { items: ListItem[]; dec: Dec; act: Act
           })}
         </div>
       ) : (
-        <Hint i={LinkIcon}>لا حسابات مرتبطة بعد. تُضاف من «الحسابات المرتبطة».</Hint>
+        <Hint i={LinkIcon}>لا حسابات مرتبطة بعد. تُضاف من «حسابات المنصات».</Hint>
       )}
       {(isLead(w.role) || pub) && (
         <div>
           <Link className="wk-btn sm quiet" href="/channels">
             <Ic i={LinkIcon} />
-            إدارة الحسابات المرتبطة
+            إدارة حسابات المنصات
           </Link>
         </div>
       )}

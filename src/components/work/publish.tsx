@@ -92,7 +92,7 @@ export function ScheduleDialog({ w, approvedParts, at: from, onClose, act }: { w
             </span>
           </label>
         </div>
-        <small className="wk-why">الاختيار المبدئي من إعداد الحساب في «الحسابات المرتبطة».</small>
+        <small className="wk-why">الاختيار المبدئي من إعداد الحساب في «حسابات المنصات».</small>
       </div>
       {!mail && <SendChecks rows={checks} />}
       {stop && <Hint warn>نسخة تتجاوز حدود منصتها: لا تُجدول حتى تُعدَّل. الحدود من «الإعدادات» «المنصات»، ويعدّلها من يملك «إدارة المنصات وتطبيقاتها».</Hint>}
