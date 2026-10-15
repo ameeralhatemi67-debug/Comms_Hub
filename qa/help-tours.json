@@ -1,0 +1,134 @@
+{
+  "script": "qa/help-tours.cjs",
+  "run": "2026-10-15T06:18:24.953Z",
+  "checks": [
+    {
+      "name": "lead: the first card says what the page means for the lead group",
+      "pass": true,
+      "detail": "إرشاد «الموافقات والنشر» · 1 من 4 الموافقات والنشر القرار على كل جزء بإصداره، ثم الجدولة والنشر لمسؤول النشر. بصفتك «مدير الاتصال المؤسسي ومساعده والمسؤول عن النظام»: ترى «بانتظار قراري» وتقرر فيما لم"
+    },
+    {
+      "name": "lead: four steps (three common and one for the lead)",
+      "pass": true,
+      "detail": "1 من 4"
+    },
+    {
+      "name": "lead: the last step is the lead's own: what waits for approval",
+      "pass": true,
+      "detail": "إرشاد «الموافقات والنشر» · 4 من 4 ما ينتظر اعتمادك تعتمد أو ترفض بصفتك مدير الاتصال أو مساعده؛ الاعتماد لا ينشر، والنشر "
+    },
+    {
+      "name": "lead: finishing marks the page seen",
+      "pass": true,
+      "detail": "approvals"
+    },
+    {
+      "name": "publisher: four steps, with their own line",
+      "pass": true,
+      "detail": "1 من 4"
+    },
+    {
+      "name": "publisher: the last step is publishing and scheduling",
+      "pass": true,
+      "detail": "إرشاد «الموافقات والنشر» · 4 من 4 النشر والجدولة تجدول ما اعتُمد أو تنشره الآن. لا يُنشر ما لم يُعتمد، ونشر المنصات ما ز"
+    },
+    {
+      "name": "member: three steps, no role step",
+      "pass": true,
+      "detail": "1 من 3"
+    },
+    {
+      "name": "partial: the tour is the heading and a closing card",
+      "pass": true,
+      "detail": "1 من 2"
+    },
+    {
+      "name": "partial: the closing card says some parts appear with content or permission, and points at the page guide",
+      "pass": true,
+      "detail": "إرشاد «الموافقات والنشر» · 2 من 2 ما لا يظهر بعد بعض أجزاء «الموافقات والنشر» تظهر حين يوجد محتوى أو حين تسمح بها صلاحيتك. «الموافقات» تجمع ما ينتظر القرار: كل بطاقة تقول كم جزءاً يحتاج قراراً ومن أرسلها ومتى. «النشر» يع"
+    },
+    {
+      "name": "nothing drawn: a single card says what the page is for, instead of no guide at all",
+      "pass": true,
+      "detail": "إرشاد «الموافقات والنشر» · 1 من 1 ما تفعله في «الموافقات والنشر» «الموافقات» تجمع ما ينتظر القرار: كل بطاقة تقول كم جزءاً يحتاج قراراً ومن أرسلها ومتى. «النشر» يعرض المعتمد والمجدول والمنشور وما فشل، "
+    },
+    {
+      "name": "nothing drawn: dismissing it marks the page seen",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "news: someone who saw the guide before gets «جديد في» with only the added steps",
+      "pass": true,
+      "detail": "جديد في «الإعدادات» · 1 من 2 نقل الملفات بين المزودين جديد: مزود تخزين ثانٍ ونقل الملفات إليه وإليك بتحقق ببصمة المحتوى. تبويب «التخزين». أضفنا إلى هذه الصفحة ما يلي منذ زيارتك السابقة. الإرشاد الكامل"
+    },
+    {
+      "name": "news: no role line on a news card",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "news: seeing it marks the versioned key, so it is not shown again",
+      "pass": true,
+      "detail": "settings,settings:v2"
+    },
+    {
+      "name": "news already seen: nothing is shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "first visit: the ordinary tour",
+      "pass": true,
+      "detail": "إرشاد «الإعدادات» · 1 من 3 الإعدادات «عام وصحة النظام» أولاً، ثم أقسام العرض، و«واتساب النظام» و«الس"
+    },
+    {
+      "name": "first visit: finishing marks the page and its current version",
+      "pass": true,
+      "detail": "settings,settings:v2"
+    },
+    {
+      "name": "touch: guide mode speaks of touching, not clicking",
+      "pass": true,
+      "detail": "وضع الإرشاد · المس أي عنصر في «الموافقات والنشر» لتعرف ما يفعله ولمن، والمسه مرة ثانية لتجربته. دليل الصفحة إنهاء وضع الإرشاد"
+    },
+    {
+      "name": "touch: the page guide is a button in the bar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "touch: the bar's buttons are finger-sized (44 px high)",
+      "pass": true,
+      "detail": "44"
+    },
+    {
+      "name": "touch: the close button of the window is finger-sized",
+      "pass": true,
+      "detail": "{\"x\":27,\"y\":78,\"width\":46,\"height\":44}"
+    },
+    {
+      "name": "touch: the explanation opens and stays inside the 390 px screen",
+      "pass": true,
+      "detail": "{\"x\":10,\"y\":332.59375,\"width\":374,\"height\":247.265625}"
+    },
+    {
+      "name": "touch: the explanation's buttons are finger-sized",
+      "pass": true,
+      "detail": "44"
+    },
+    {
+      "name": "touch: the page guide opens from its button",
+      "pass": true,
+      "detail": "دليل الصفحة «الموافقات والنشر» الموافقة قرار على إصدار بعينه، والنشر خطوة منفصلة"
+    },
+    {
+      "name": "no script errors on any page",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "total": 25,
+  "passed": 25,
+  "failed": 0
+}

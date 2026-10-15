@@ -29,6 +29,12 @@ export function pageKeyOf(path: string): string | null {
   if (p === '/accounts') return 'accounts';
   if (p === '/account') return 'account';
   if (p === '/settings') return 'settings';
+  if (p === '/ideas') return 'ideas';
+  if (p === '/analytics') return 'analytics';
+  if (p === '/monitoring') return 'monitoring';
+  if (p === '/admin') return 'admin';
+  if (p === '/motion') return 'motion';
+  if (p === '/components') return 'components';
   return null;
 }
 
@@ -53,6 +59,12 @@ export const PAGE_HREF: Record<string, string> = {
   accounts: '/accounts',
   account: '/account',
   settings: '/settings',
+  ideas: '/ideas',
+  analytics: '/analytics',
+  monitoring: '/monitoring',
+  admin: '/admin',
+  motion: '/motion',
+  components: '/components',
   home: '/',
 };
 
@@ -94,5 +106,11 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   account: ['src/components/supporting.tsx', 'src/components/profile-editor.tsx', 'src/components/my-permissions.tsx', 'src/components/whatsapp/member.tsx'],
   settings: ['src/components/supporting.tsx', 'src/components/whatsapp/system-panel.tsx', 'src/components/settings/general.tsx', 'src/components/settings/storage.tsx', 'src/components/settings/storage-provider.tsx', 'src/components/settings/storage-move.tsx', 'src/components/setup-guide.tsx', 'src/components/settings/platforms.tsx', 'src/components/settings/audit.tsx'],
   home: ['src/components/home.tsx', 'src/components/home-perms.tsx', 'src/components/work/parts.tsx'],
+  ideas: ['src/components/ideas.tsx'],
+  analytics: ['src/components/supporting.tsx'],
+  monitoring: ['src/components/supporting.tsx'],
+  admin: ['src/components/supporting.tsx'],
+  motion: ['src/components/motion-studio.tsx', 'src/components/motion-controls.tsx', 'src/components/motion-stage.tsx', 'src/components/motion-export.tsx'],
+  components: ['src/components/gallery.tsx'],
 };
 export const SHARED_SOURCES = ['src/components/ui.tsx', 'src/components/shell.tsx', 'src/components/kit.tsx'];

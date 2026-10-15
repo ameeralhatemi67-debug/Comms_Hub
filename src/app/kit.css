@@ -94,3 +94,13 @@ main.guide-view-open>:not(#guide-view){display:none!important}
 .hv-faq p{margin:6px 0 0;font-size:13px;line-height:1.85}
 .hv-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 18px;border-radius:12px;background:var(--soft);border:1px dashed var(--green)}
 @media (max-width:760px){.hv-grid{grid-template-columns:minmax(0,1fr)}.hv-toc{position:static}.hv-role{grid-template-columns:minmax(0,1fr)}}
+/* Step 8: the guide on a touch screen and the line that says what the page means for the person's role. */
+.gd-pop .gd-me{display:block;padding:6px 8px;border-radius:8px;background:var(--chip-bg);color:var(--ink)}
+.help-q,.gdl .gb,.gd-pop .gb{touch-action:manipulation}
+@media (pointer:coarse){
+  .gd-pop .gb,.gdl .gb{min-height:44px;padding-inline:14px}
+  .gd-pop .gb.q{min-width:44px}
+  .help-q{min-width:44px;min-height:44px}
+  .gd-pop{width:min(420px,calc(100vw - 16px));padding:16px}
+  #gd-bar,.gd-bar{flex-wrap:wrap;gap:8px}
+}

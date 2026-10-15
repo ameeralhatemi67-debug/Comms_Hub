@@ -33,6 +33,13 @@ The owner requested a Comms Hub version of the supplied Arabic motion-video refe
 Verification: typecheck and production build passed; all 153 existing tests passed. Film browser and media verification passed 128 checks, including deterministic seeking, both layouts, transitions, play/pause, fonts, audio, mobile overflow, reduced-motion initial state, and full decode of all three exports. Video is Rec.709 limited-range H.264 with 48 kHz stereo AAC. Two encoded-frame color comparisons passed. Re-run `node qa/comms-hub-film.cjs`; full evidence is beside the film under `qa/`. The application interface and the paused Permissions P4 work were not changed. Next action for this deliverable: review the film and copy; the application next actions below still apply.
 
 
+## Help upgrade, 2026-10-15 (step 8 of the audit order)
+
+The guide now says what a page means for the person's role and adds the role's own steps, closes an empty or partly drawn page with a card instead of going silent, shows only what was added to a page the person already knows (once), speaks of touching on a phone and has the page guide as a button, and every route has a guide (six were missing). `npm test` 263 of 263, the engine driven in a browser 25 of 25, fixture check 1102 of 1102.
+
+- **Waiting on the owner:** the signed-in walkthroughs, which now also include the tours.
+- **Next action:** S4 (backups on the move engine in copy mode) or OneDrive (S8); a role-aware tour for the remaining pages.
+
 ## Setup guides in the site, 2026-10-15
 
 Where a platform or a storage provider needs outside steps, a circled "!" beside it opens them in order, written in the site: Meta app, TikTok app, how a publisher connects an account, the manual path (Snapchat, WhatsApp channel and status), each storage kind, and a first move. Steps 1 to 7 of the audit order are built and pushed; 6 and 7 are verified only against fakes.

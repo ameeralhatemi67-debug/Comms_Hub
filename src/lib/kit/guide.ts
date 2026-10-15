@@ -4,7 +4,7 @@
 // (src/lib/help) and the page's own markup; progress is kept per person by the host.
 // After the reference (pass 5, «النموذج المرجعي للمركز»).
 import { PAGES, PAGE_HREF, ROLE_GROUP, SHELL_PARTS } from '../help/registry.ts';
-import type { HelpPage, HelpPart, RoleGroup } from '../help/types.ts';
+import type { HelpPage, HelpPart, HelpStep, RoleGroup } from '../help/types.ts';
 import { holdTip } from './hold.ts';
 import { askFor, askableCap, isLocked, needWhy } from './need.ts';
 import { esc, layer, layerEl, layerRemove, reducedMotion } from './layer.ts';
@@ -36,9 +36,12 @@ export type GuideApi = {
 };
 
 type Explain = { el: Element; t: string; b: string; w?: string; g?: string[]; inner?: string };
-type Tour = { page: string; steps: { sel: string; t: string; b: string }[]; i: number };
+type Tour = { page: string; steps: HelpStep[]; i: number; /** Shown to someone who saw the guide before: only what was added. */ news?: boolean };
 
 const OPEN_LAYERS = 'dialog[open], [role="menu"], [role="listbox"], .mx-menu, .mx-tray, .cx-info, .cx-pop';
+/** The verb for pressing: a finger touches, a pointer clicks. */
+const coarse = () => typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
+const tapWord = () => (coarse() ? 'المس' : 'انقر');
 const icon = (d: string) => `<svg class="gd-i" viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
 const X = icon('M18 6 6 18M6 6l12 12');
 
@@ -190,7 +193,8 @@ export function installGuide(host: GuideHost): GuideApi {
   function bar() {
     const b = layerEl('gd-bar');
     b.innerHTML =
-      `<span><b>وضع الإرشاد</b> · انقر أي عنصر في «${esc(pageName(host.page()))}» لتعرف ما يفعله ولمن، وانقره مرة ثانية لتجربته.</span>` +
+      `<span><b>وضع الإرشاد</b> · ${tapWord()} أي عنصر في «${esc(pageName(host.page()))}» لتعرف ما يفعله ولمن، و${tapWord()}ه مرة ثانية لتجربته.</span>` +
+      (host.page() && PAGES[host.page()!] ? '<button class="gb" data-gda="doc">دليل الصفحة</button>' : '') +
       '<button class="gb" data-gda="exit">إنهاء وضع الإرشاد</button>';
   }
   const parts = (): HelpPart[] => [...(H()?.parts ?? []), ...SHELL_PARTS];
@@ -260,7 +264,7 @@ export function installGuide(host: GuideHost): GuideApi {
       (links.length ? `<div class="gd-l"><span>يرتبط بـ</span>${links.map((p) => `<button data-gda="go" data-p="${p}">${esc(PAGES[p]?.name ?? p)}</button>`).join('')}</div>` : '') +
       `<div class="gd-a">${tryable(x.el) && !dis ? `<button class="gb pri" data-gda="try">${x.el.hasAttribute('data-hold') ? 'كيف أجرّبه' : 'جرّبه'}</button>` : ''}` +
       `${H() ? '<button class="gb" data-gda="doc">في دليل الصفحة</button>' : ''}<span class="sp"></span><button class="gb q" data-gda="exit">إنهاء</button></div>` +
-      '<small>انقر العنصر نفسه مرة ثانية لتجربته، أو أي عنصر آخر لشرحه. Esc يغلق.</small>'
+      `<small>${tapWord()} العنصر نفسه مرة ثانية لتجربته، أو أي عنصر آخر لشرحه.${coarse() ? '' : ' Esc يغلق.'}</small>`
     );
   }
   function showExplain(x: Explain) {
@@ -292,8 +296,8 @@ export function installGuide(host: GuideHost): GuideApi {
     if (q)
       showPop(
         `<div class="gd-k"><span>وضع الإرشاد</span><button class="gb q" data-gda="xclose" aria-label="إغلاق">${X}</button></div>` +
-          '<p class="gd-t">انقر أي عنصر لتعرف ما يفعله</p><p>تظهر نافذة بجانب العنصر تشرحه ولمن هو ومع أي صفحة يرتبط. النقرة الثانية على العنصر نفسه تجربه، والنافذة تبتعد عن أي نافذة أو قائمة يفتحها.</p>' +
-          '<small>انقر زر المساعدة مرتين لدليل الصفحة كاملاً.</small>',
+          `<p class="gd-t">${tapWord()} أي عنصر لتعرف ما يفعله</p><p>تظهر نافذة بجانب العنصر تشرحه ولمن هو ومع أي صفحة يرتبط. اللمسة الثانية على العنصر نفسه تجربه، والنافذة تبتعد عن أي نافذة أو قائمة يفتحها.</p>` +
+          '<small>«دليل الصفحة» في الشريط يفتح الدليل كاملاً.</small>',
         q,
         'explain',
         null,
@@ -307,23 +311,51 @@ export function installGuide(host: GuideHost): GuideApi {
     const T = G.tour!;
     const st = T.steps[T.i];
     const n = T.steps.length;
+    const h = PAGES[T.page];
+    const me = host.role();
+    const roleLine = T.i === 0 && h && !T.news ? `<small class="gd-me">بصفتك «${esc(ROLE_GROUP[me])}»: ${esc(h.roles[me])}</small>` : '';
     return (
-      `<div class="gd-k"><span>إرشاد «${esc(pageName(T.page))}» · ${T.i + 1} من ${n}</span><span class="gd-dots" aria-hidden="true">${T.steps.map((_, k) => `<i class="${k === T.i ? 'on' : ''}"></i>`).join('')}</span></div>` +
+      `<div class="gd-k"><span>${T.news ? 'جديد في' : 'إرشاد'} «${esc(pageName(T.page))}» · ${T.i + 1} من ${n}</span><span class="gd-dots" aria-hidden="true">${T.steps.map((_, k) => `<i class="${k === T.i ? 'on' : ''}"></i>`).join('')}</span></div>` +
       `<p class="gd-t">${esc(st.t)}</p><p>${esc(st.b)}</p>` +
-      (T.i === 0 ? '<small>أول دخول لك إلى هذه الصفحة. نعرض استخدامها الأساسي فقط، وحين تنقر قسماً لأول مرة تظهر نصيحته.</small>' : '') +
+      roleLine +
+      (T.i === 0 && !T.news ? `<small>أول دخول لك إلى هذه الصفحة. نعرض استخدامها الأساسي فقط، وحين ${tapWord()} قسماً لأول مرة تظهر نصيحته.</small>` : '') +
+      (T.i === 0 && T.news ? '<small>أضفنا إلى هذه الصفحة ما يلي منذ زيارتك السابقة. الإرشاد الكامل في «دليل الصفحة».</small>' : '') +
       `<div class="gd-a">${T.i > 0 ? '<button class="gb" data-gda="tprev">السابق</button>' : ''}<button class="gb pri" data-gda="tnext">${T.i === n - 1 ? 'ابدأ' : 'التالي'}</button><span class="sp"></span><button class="gb q" data-gda="tskip">تخطَّ الإرشاد</button></div>` +
-      (T.i === n - 1 ? '<small>زر المساعدة في الشريط العلوي يشرح أي عنصر، والنقر عليه مرتين يفتح دليل الصفحة.</small>' : '')
+      (T.i === n - 1 ? '<small>زر المساعدة في الشريط العلوي يشرح أي عنصر. «دليل الصفحة» يفتح الدليل كاملاً من وضع الإرشاد أو بالنقر عليه مرتين.</small>' : '')
     );
   }
-  /** Starts the page's guide. False when nothing of it is on screen yet. */
-  function startTour(page: string): boolean {
+  /** The steps this person's role group is shown, in order: the common ones, then the role's own. */
+  const stepsFor = (h: HelpPage, news: boolean): HelpStep[] => {
+    const me = host.role();
+    const all = news ? h.news ?? [] : [...h.onb, ...(h.onbRole?.[me] ?? [])];
+    return all.filter((s) => !s.g || s.g.includes(me));
+  };
+  /** The key under which the page's current version of the guide is seen (page:v2). */
+  const newsKey = (page: string, h: HelpPage) => (h.v && h.v > 1 ? `${page}:v${h.v}` : null);
+  /**
+   * Starts the page's guide. `news`: only the steps added in the page's current version. When some
+   * steps are not on screen (an empty page, a part the role does not have), a closing card says so
+   * and points at the page guide instead of the tour silently being shorter. False when nothing of
+   * it is on screen yet, unless `force` (the page has been given time to draw and still shows none).
+   */
+  function startTour(page: string, force = false, news = false): boolean {
     const h = PAGES[page];
     if (!h) return false;
+    const wanted = stepsFor(h, news);
+    const steps = wanted.filter((s) => !!visibleEl(s.sel));
+    if (!steps.length && !force) return false;
+    if (!steps.length && news) return false;
     closeExplain();
     hideCoach();
-    const steps = h.onb.filter((s) => !!visibleEl(s.sel));
-    if (!steps.length) return false;
-    G.tour = { page, steps, i: 0 };
+    const missing = wanted.length - steps.length;
+    if (!news && (missing > 0 || !steps.length)) {
+      steps.push({
+        sel: '',
+        t: steps.length ? 'ما لا يظهر بعد' : `ما تفعله في «${h.name}»`,
+        b: `${steps.length ? `بعض أجزاء «${h.name}» تظهر حين يوجد محتوى أو حين تسمح بها صلاحيتك. ` : ''}${h.empty ?? h.purpose} «دليل الصفحة» يشرح كل أجزائها.`,
+      });
+    }
+    G.tour = { page, steps, i: 0, news };
     tourStep();
     return true;
   }
@@ -331,6 +363,12 @@ export function installGuide(host: GuideHost): GuideApi {
     const T = G.tour;
     if (!T) return;
     const st = T.steps[T.i];
+    if (!st.sel) {
+      // A card with nothing to point at (the closing card of an empty page).
+      layerRemove('gd-spot');
+      showPop(tourHtml(), null, 'tour', null, true);
+      return;
+    }
     const el = visibleEl(st.sel);
     if (!el) {
       if (T.i < T.steps.length - 1) {
@@ -350,7 +388,13 @@ export function installGuide(host: GuideHost): GuideApi {
     const T = G.tour;
     if (!T) return;
     G.tour = null;
-    if (mark) host.progress.mark(T.page);
+    if (mark) {
+      host.progress.mark(T.page);
+      // Seen now, so its steps are not shown again as news.
+      const h = PAGES[T.page];
+      const k = h ? newsKey(T.page, h) : null;
+      if (k) host.progress.mark(k);
+    }
     if (P.kind === 'tour') hidePop();
     layerRemove('gd-spot');
   }
@@ -640,9 +684,22 @@ export function installGuide(host: GuideHost): GuideApi {
     clearTimeout(G.autoTimer);
     G.autoTimer = setTimeout(() => {
       const page = host.page();
-      if (!page || !PAGES[page] || G.on || G.help || G.tour || !host.progress.ready() || !host.progress.auto() || host.progress.seen(page)) return;
+      if (!page || !PAGES[page] || G.on || G.help || G.tour || !host.progress.ready() || !host.progress.auto()) return;
       if (document.querySelector('dialog[open]')) return;
+      const h = PAGES[page];
+      const k = newsKey(page, h);
+      // Seen before: only what was added since, once.
+      if (host.progress.seen(page)) {
+        if (k && !host.progress.seen(k)) {
+          if (!startTour(page, false, true)) {
+            if (G.autoTries++ < 8) maybeAuto();
+            else host.progress.mark(k);
+          }
+        }
+        return;
+      }
       if (!startTour(page) && G.autoTries++ < 8) maybeAuto();
+      else if (G.autoTries >= 8 && !G.tour) startTour(page, true);
     }, G.autoTries ? 600 : 500);
   }
   function refresh() {

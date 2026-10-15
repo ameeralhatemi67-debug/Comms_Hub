@@ -106,5 +106,7 @@ click explains, second acts), and the page guide.
 7. S3 move engine with a second provider; then OneDrive (S8). **Built 2026-10-15** (`progress.md`): an S3-compatible provider and
    the engine (plan, copy in resumable parts, verify, switch, hold, report, retire); verified against a fake store only, no real
    second provider has been tried (`Storage_Provider_Setup.md`).
-8. Help upgrade: role-aware tours, empty-state tours, touch behaviour, the missing pages.
+8. Help upgrade: role-aware tours, empty-state tours, touch behaviour, the missing pages. **Built 2026-10-15** (`progress.md`):
+   role line and role steps, a closing card for empty pages, what-is-new per page version, touch words and finger-sized controls,
+   guides for the six routes that had none; verified in a browser over fixtures, not on the signed-in pages.
 9. NAS and the agent computer (S7) when they arrive.
