@@ -191,8 +191,17 @@ const labels = { numbers: 'الأرقام', repine: 'تصاميم ريبين', f
     check('result card keeps a working link', await page.locator('.ms-result a[download]').getAttribute('href').then(h => h.startsWith('blob:')));
     const mov = await exportFormat('mov', /فيديو شفاف/);
     const movInfo = probe(mov.file);
-    check('mov: transparent video with alpha', movInfo.pix_fmt === 'rgba' && movInfo.width === expect.w && movInfo.nb_read_frames === '38', movInfo);
+    check('mov: ProRes 4444 transparent video', movInfo.codec_name === 'prores' && movInfo.pix_fmt === 'yuva444p12le' && movInfo.width === expect.w && movInfo.nb_read_frames === '38', movInfo);
     execFileSync('ffmpeg', ['-v', 'error', '-i', mov.file, '-f', 'null', '-'], { stdio: 'pipe' }); check('mov: complete decode without errors', true);
+    /* the transparent file must really carry alpha: export a numbers design (no background) and decode a frame */
+    await page.getByRole('button', { name: 'الأرقام (8)', exact: true }).click(); await pick('arc-gauge');
+    const alphaMov = await exportFormat('mov-alpha', /فيديو شفاف/);
+    const alphaInfo = probe(alphaMov.file);
+    check('mov (numbers): ProRes 4444 with alpha pixel format', alphaInfo.codec_name === 'prores' && alphaInfo.pix_fmt === 'yuva444p12le', alphaInfo);
+    const rawFile = path.join(artifacts, 'alpha-frame.rgba');
+    execFileSync('ffmpeg', ['-v', 'error', '-y', '-ss', '2', '-i', alphaMov.file, '-frames:v', '1', '-f', 'rawvideo', '-pix_fmt', 'rgba', rawFile], { stdio: 'pipe' });
+    const rgba = fs.readFileSync(rawFile); let clear = 0, solid = 0; for (let i = 3; i < rgba.length; i += 4) { if (rgba[i] === 0) clear++; else if (rgba[i] > 200) solid++; }
+    check('mov (numbers): decoded frame has clear and solid pixels', clear > rgba.length / 4 * .3 && solid > 200, { clear, solid, total: rgba.length / 4 });
     const zip = await exportFormat('zip', /تسلسل صور شفافة/);
     check('zip: archive of PNG frames', zip.data.subarray(0, 2).toString() === 'PK' && zip.name.endsWith('png-sequence.zip'), zip.name);
     const unzipDir = path.join(artifacts, 'zip-frames'); fs.rmSync(unzipDir, { recursive: true, force: true }); fs.mkdirSync(unzipDir, { recursive: true });

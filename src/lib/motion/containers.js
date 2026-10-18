@@ -31,7 +31,7 @@ const bx = {
   }
 };
 function buildMoov(o, dataOffset) {
-  const { w, h, fps, samples, fourcc, avcC, depth, name } = o;
+  const { w, h, fps, samples, fourcc, avcC, depth, name, vendor = '\0\0\0\0', spatial = 0, extra = [] } = o;
   const ts = fps * 1000, delta = 1000, n = samples.length, dur = n * delta, movTs = 1000, movDur = Math.round(dur * movTs / ts);
   const now = Math.floor(Date.now() / 1000) + 2082844800, B = bx.box, U32 = bx.u32, U16 = bx.u16;
   const matrix = U32(0x10000, 0, 0, 0, 0x10000, 0, 0, 0, 0x40000000);
@@ -42,14 +42,15 @@ function buildMoov(o, dataOffset) {
   const vmhd = B('vmhd', U32(1), U16(0, 0, 0, 0));
   const dinf = B('dinf', B('dref', U32(0, 1), B('url ', U32(1))));
   const cname = new Uint8Array(32); cname[0] = name.length; cname.set(bx.str(name), 1);
-  const entry = B(fourcc, new Uint8Array(6), U16(1), U16(0, 0), U32(0, 0, 0), U16(w, h), U32(0x00480000, 0x00480000, 0), U16(1), cname, U16(depth, 0xFFFF), avcC ? B('avcC', avcC) : new Uint8Array(0));
+  const entry = B(fourcc, new Uint8Array(6), U16(1), U16(0, 0), bx.str(vendor), U32(0, spatial), U16(w, h), U32(0x00480000, 0x00480000, 0), U16(1), cname, U16(depth, 0xFFFF), avcC ? B('avcC', avcC) : new Uint8Array(0), ...extra);
   const sizes = U32(...samples.map(s => s.data.length));
   const keys = samples.map((s, i) => s.key ? i + 1 : 0).filter(Boolean);
   const stbl = B('stbl', B('stsd', U32(0, 1), entry), B('stts', U32(0, 1, n, delta)), B('stsc', U32(0, 1, 1, n, 1)),
     B('stsz', U32(0, 0, n), sizes), B('stco', U32(0, 1, dataOffset)), avcC ? B('stss', U32(0, keys.length, ...keys)) : new Uint8Array(0));
   return B('moov', mvhd, B('trak', tkhd, B('mdia', mdhd, hdlr, B('minf', vmhd, dinf, stbl))));
 }
-function muxVideo(o) {                                   // o: {kind:'mp4'|'mov', fourcc, w,h,fps, samples:[{data,key}], avcC?, depth, name}
+/* o: {kind:'mp4'|'mov', fourcc, w,h,fps, samples:[{data,key}], avcC?, depth, name, vendor?, spatial?, extra?: sample-entry boxes} */
+function muxVideo(o) {
   const ftyp = o.kind === 'mp4' ? bx.box('ftyp', bx.str('isom'), bx.u32(512), bx.str('isomiso2avc1mp41')) : bx.box('ftyp', bx.str('qt  '), bx.u32(0x20050300), bx.str('qt  '));
   const moovLen = buildMoov(o, 0).length, offset = ftyp.length + moovLen + 8, moov = buildMoov(o, offset);
   let mdatSize = 8; o.samples.forEach(s => mdatSize += s.data.length);
@@ -58,4 +59,4 @@ function muxVideo(o) {                                   // o: {kind:'mp4'|'mov'
 }
 
 
-export { makeZip, muxVideo, crc32 };
+export { makeZip, muxVideo, crc32, bx };

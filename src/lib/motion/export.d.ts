@@ -1,7 +1,7 @@
 import type { Graphic, Params } from './types';
 export type ExportFormat = 'png' | 'zip' | 'mov' | 'mp4';
 export type ExportProgress = { phase: 'render' | 'encode' | 'record' | 'pack'; done: number; total: number; fraction: number; eta: number | null; bytes: number };
-export type ExportResult = { blob: Blob; name: string; w: number; h: number; fps: number; seconds: number; frames: number; method: 'still' | 'png' | 'webcodecs' | 'recorder' };
+export type ExportResult = { blob: Blob; name: string; w: number; h: number; fps: number; seconds: number; frames: number; method: 'still' | 'png' | 'prores' | 'webcodecs' | 'recorder' };
 export type ExportPlan = { dims: { w: number; h: number }; scale: number; w: number; h: number; fps: number; duration: number; frames: number; pixels: number };
 export const MAX_BYTES: number;
 export function hasWebCodecs(): boolean;

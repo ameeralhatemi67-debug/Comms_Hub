@@ -1,0 +1,100 @@
+{
+  "when": "2026-10-18T05:25:06.268Z",
+  "checks": [
+    {
+      "name": "rp-editorial: file name states transparent mov",
+      "pass": true,
+      "detail": "rp-editorial_1920x1080_30fps_transparent.mov"
+    },
+    {
+      "name": "rp-editorial: ProRes 4444 with an alpha pixel format",
+      "pass": true,
+      "detail": {
+        "codec_name": "prores",
+        "profile": "4444",
+        "codec_tag_string": "ap4h",
+        "width": 1920,
+        "height": 1080,
+        "pix_fmt": "yuva444p12le",
+        "r_frame_rate": "30/1",
+        "nb_read_frames": "246"
+      }
+    },
+    {
+      "name": "rp-editorial: every frame is in the file",
+      "pass": true,
+      "detail": {
+        "frames": "246",
+        "expected": 246,
+        "rate": "30/1"
+      }
+    },
+    {
+      "name": "rp-editorial: complete decode without errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-editorial: decoded frame has clear and solid pixels",
+      "pass": true,
+      "detail": {
+        "clear": 1670070,
+        "solid": 271103,
+        "partial": 132427,
+        "total": 2073600,
+        "megabytes": 53.9,
+        "exportSeconds": 52.3
+      }
+    },
+    {
+      "name": "arc-gauge: file name states transparent mov",
+      "pass": true,
+      "detail": "arc-gauge_1280x720_30fps_transparent.mov"
+    },
+    {
+      "name": "arc-gauge: ProRes 4444 with an alpha pixel format",
+      "pass": true,
+      "detail": {
+        "codec_name": "prores",
+        "profile": "4444",
+        "codec_tag_string": "ap4h",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "yuva444p12le",
+        "r_frame_rate": "30/1",
+        "nb_read_frames": "159"
+      }
+    },
+    {
+      "name": "arc-gauge: every frame is in the file",
+      "pass": true,
+      "detail": {
+        "frames": "159",
+        "expected": 159,
+        "rate": "30/1"
+      }
+    },
+    {
+      "name": "arc-gauge: complete decode without errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "arc-gauge: decoded frame has clear and solid pixels",
+      "pass": true,
+      "detail": {
+        "clear": 793675,
+        "solid": 26621,
+        "partial": 101304,
+        "total": 921600,
+        "megabytes": 67.1,
+        "exportSeconds": 23.7
+      }
+    },
+    {
+      "name": "no console or page errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-15
+updated: 2026-10-16
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -25,6 +25,16 @@ related:
 ---
 
 # Communication Department Hub — Current Status
+
+## Transparent motion video, 2026-10-18
+
+The «فيديو شفاف» download of the Motion Studio is now ProRes 4444 with real alpha (it was PNG frames in a MOV, which Windows players and most editors could not open). Decoded and checked with ffmpeg for the reported `rp-editorial` export (1080p, 30 fps, 246 frames, 54 MB); not yet opened in an editor. It works in CapCut (owner-tested); normal players and phone galleries do not open it, and the studio says so next to the format. Details in `progress.md`.
+
+## Local simulation retained after cleanup, 2026-10-16
+
+By the owner's instruction, run `sim-20261015-03` has been shut down and its duplicate package, relocated worktree, ten Docker containers, two exclusive volumes and one network removed. The local inspection site at port 3386 is no longer running. The complete evidence viewer remains at `D:/Agents/testingh/sim-20261015-03/archive/index.html`; its screenshots, films and reports remain available without the site. The run ended with 100 PASS, five FAIL and one NOT_APPLICABLE; the high media approval race is still unresolved.
+
+The test branch `codex/role-simulation-sim-20261015-03` remains at `fea9f61`. A standalone Git bundle, committed-source ZIP, uncommitted patches, six untracked files and nineteen final receipts are saved in `D:/Agents/testingh/sim-20261015-03/recovery`. Database dumps, private local configuration and files, recovery keys and mail data are retained separately from the evidence archive. A fresh dump's catalog was read successfully; a database restore has not been tested. Other Docker projects, earlier simulation runs and application source in main were preserved. The next action for the simulation is to review the archived findings and choose fixes for main; none was merged or pushed during cleanup. Exact verification and disk measurements are in `recovery/cleanup-result.json`.
 
 ## Page health check and consolidation, step B1, 2026-10-15
 

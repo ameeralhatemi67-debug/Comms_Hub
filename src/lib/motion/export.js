@@ -1,8 +1,10 @@
 /* Frame-exact export. Every frame is drawn at its own timestamp, so the result never depends on how fast the computer is.
    PNG frames are encoded by a small built-in encoder on top of CompressionStream, which is far faster than canvas.toBlob.
+   Transparent video is ProRes 4444 (prores.js), written into a QuickTime MOV.
    MP4 uses WebCodecs, and falls back to a real-time recording when the browser does not offer it (for example over plain http on a LAN). */
 import { renderFrame, timingOf } from './renderers.js';
 import { makeZip, muxVideo, crc32 } from './containers.js';
+import { createProresEncoder, proresSampleEntry } from './prores.js';
 
 export const MAX_BYTES = 1.6e9;                         // in-memory ceiling for ZIP / MOV
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -144,7 +146,7 @@ async function exportRecorded(g, p, plan, ctx, canvas, options, signal, onProgre
 export async function exportDesign(g, params, options, signal, onProgress) {
   const p = { ...params }, plan = planExport(g, p, options);
   const canvas = document.createElement('canvas'); canvas.width = plan.w; canvas.height = plan.h;
-  const ctx = canvas.getContext('2d', { alpha: true });
+  const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently: options.format === 'mov' || options.format === 'zip' });
   const base = { w: plan.w, h: plan.h, fps: plan.fps, seconds: plan.duration, frames: plan.frames };
   if (options.format === 'png') {
     renderFrame(g, p, options.time, ctx, plan.w / plan.dims.w, null);
@@ -157,12 +159,29 @@ export async function exportDesign(g, params, options, signal, onProgress) {
     if (!result) result = await exportRecorded(g, p, plan, ctx, canvas, options, signal, onProgress);
     return { ...base, blob: result.blob, method: result.method, name: baseName(g, plan, `greenscreen.${result.ext || 'mp4'}`) };
   }
+  if (options.format === 'mov') return { ...base, ...await exportProres(g, p, plan, ctx, signal, onProgress) };
   const report = progressTracker(plan.frames, onProgress, 'render');
   const { frames, bytes } = await renderPngFrames(g, p, plan, ctx, canvas, signal, report, null);
   if (signal.aborted) throw aborted();
   onProgress({ phase: 'pack', done: plan.frames, total: plan.frames, fraction: 1, eta: 0, bytes }); await tick();
-  const blob = options.format === 'zip'
-    ? makeZip(frames.map((data, i) => ({ name: `${g.id}_${String(i + 1).padStart(5, '0')}.png`, data })))
-    : muxVideo({ kind: 'mov', fourcc: 'png ', w: plan.w, h: plan.h, fps: plan.fps, depth: 32, name: 'PNG', samples: frames.map(data => ({ data, key: true })) });
-  return { ...base, blob, method: 'png', name: baseName(g, plan, options.format === 'zip' ? 'png-sequence.zip' : 'transparent.mov') };
+  const blob = makeZip(frames.map((data, i) => ({ name: `${g.id}_${String(i + 1).padStart(5, '0')}.png`, data })));
+  return { ...base, blob, method: 'png', name: baseName(g, plan, 'png-sequence.zip') };
+}
+
+/* Transparent video: every frame becomes one ProRes 4444 picture with a real alpha channel. PNG inside a MOV is not used because
+   Windows players and most editors cannot open it. */
+async function exportProres(g, p, plan, ctx, signal, onProgress) {
+  const report = progressTracker(plan.frames, onProgress, 'encode'), encode = createProresEncoder(plan.w, plan.h), samples = []; let bytes = 0;
+  for (let i = 0; i < plan.frames; i++) {
+    if (signal.aborted) throw aborted();
+    renderFrame(g, p, i / plan.fps * p.speed, ctx, plan.w / plan.dims.w, null);
+    const data = encode(ctx.getImageData(0, 0, plan.w, plan.h).data);
+    samples.push({ data, key: true }); bytes += data.length;
+    if (bytes / (i + 1) * plan.frames > MAX_BYTES && i > 2) throw new Error('الملف سيكون كبيراً جداً على ذاكرة المتصفح. اختر MP4، أو دقة أقل، أو قلّل مدة العرض.');
+    report(i + 1, bytes);
+    await tick();
+  }
+  onProgress({ phase: 'pack', done: plan.frames, total: plan.frames, fraction: 1, eta: 0, bytes }); await tick();
+  const blob = muxVideo({ kind: 'mov', fourcc: 'ap4h', w: plan.w, h: plan.h, fps: plan.fps, depth: 32, name: 'Apple ProRes 4444', ...proresSampleEntry(), samples });
+  return { blob, method: 'prores', name: baseName(g, plan, 'transparent.mov') };
 }

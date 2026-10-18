@@ -8,7 +8,7 @@ import { ColorInput, Segmented } from './motion-controls';
 
 const formats: { value: ExportFormat; icon: typeof Film; title: string; text: string }[] = [
   { value: 'mp4', icon: FileVideo, title: 'فيديو بخلفية خضراء', text: 'MP4 يعمل في أي برنامج مونتاج. أزل اللون الأخضر بأداة Chroma Key فيظهر التصميم فوق مقطعك.' },
-  { value: 'mov', icon: Film, title: 'فيديو شفاف', text: 'MOV بشفافية حقيقية دون إزالة لون، لبرامج Premiere وAfter Effects وDaVinci Resolve وFinal Cut.' },
+  { value: 'mov', icon: Film, title: 'فيديو شفاف', text: 'MOV بصيغة ProRes 4444 وبشفافية حقيقية دون إزالة لون، يعمل داخل برامج المونتاج مثل CapCut وPremiere Pro وAfter Effects وDaVinci Resolve وFinal Cut.' },
   { value: 'zip', icon: FileArchive, title: 'تسلسل صور شفافة', text: 'ZIP أعلى جودة وأوسع توافقاً. فك الضغط واستورد الصور كتسلسل في برنامج المونتاج.' },
   { value: 'png', icon: ImageIcon, title: 'صورة واحدة', text: 'PNG للقطة المعروضة الآن بخلفية شفافة.' },
 ];
@@ -78,7 +78,8 @@ export function ExportPanel({ g, p, time, keyColor, onKeyColor, onBusy }: { g: G
           <div><dt>الحجم التقريبي</dt><dd>{size(estimate)}</dd></div>
         </dl>
         {active === 'mp4' && !codecs && <p className="ms-warn"><TriangleAlert />هذا المتصفح لا يوفر الترميز السريع، لذلك سيُسجَّل الفيديو بالوقت الحقيقي وتستغرق العملية مدة التصميم نفسها. افتح الاستوديو عبر العنوان المحلي localhost أو استخدم المتصفح Chrome الحديث لتسريعها.</p>}
-        {heavy && <p className="ms-warn"><TriangleAlert />الملف كبير وقد يبطئ المتصفح. MP4 أو دقة أقل أنسب لهذه المدة.</p>}
+        {active === 'mov' && <p className="ms-warn"><TriangleAlert />هذا الملف يعمل داخل برامج المونتاج فقط (مثل CapCut وPremiere Pro وAfter Effects وDaVinci Resolve وFinal Cut). مشغّلات الفيديو العادية، مثل مشغّل ويندوز وتطبيق الصور في الهاتف، لا تفتحه، ولا يوجد مشغّل عادي يعرض الشفافية. للمعاينة السريعة أو للمشاركة اختر «فيديو بخلفية خضراء».</p>}
+        {heavy &&<p className="ms-warn"><TriangleAlert />الملف كبير وقد يبطئ المتصفح. MP4 أو دقة أقل أنسب لهذه المدة.</p>}
         {tooBig && <p className="ms-warn danger"><TriangleAlert />الملف أكبر مما تتحمله ذاكرة المتصفح. اختر MP4، أو قلّل الدقة أو مدة العرض.</p>}
         <div className="ms-export-actions">
           <button type="button" className="primary" disabled={busy || tooBig} onClick={start}><Download />{busy ? 'جارٍ التصدير…' : 'تنزيل التصميم'}</button>
