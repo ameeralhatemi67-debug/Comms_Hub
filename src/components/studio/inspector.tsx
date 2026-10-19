@@ -15,6 +15,7 @@ import { setFormat, sourceOf } from '@/lib/studio/timeline';
 import { shortTime } from '@/lib/studio/time';
 import { transformOf } from '@/lib/studio/compose';
 import { ColorInput, Segmented, Slider, Switch, TextInput } from '../motion-controls';
+import { DesktopOnly } from './compact';
 
 export type Patch = (patch: Partial<Clip> | ((c: Clip) => Clip), label: string, key?: string) => void;
 
@@ -164,7 +165,7 @@ export function MotionControls({ item, ratio, onParams, onLength, disabled, time
 }
 
 export function Inspector({
-  doc, clip, onClip, onDoc, readOnly, actions, canFillWindow, hasPrevAdjacent, cachePanel, sourceNote, onLength,
+  doc, clip, onClip, onDoc, readOnly, actions, canFillWindow, hasPrevAdjacent, cachePanel, sourceNote, onLength, compact = false,
 }: {
   doc: ProjectDoc;
   clip: Clip | null;
@@ -177,6 +178,8 @@ export function Inspector({
   cachePanel: ReactNode;
   sourceNote: string | null;
   onLength: (us: number) => void;
+  /** A phone: cross-fade, crop and colours are kept for the computer. */
+  compact?: boolean;
 }) {
   const { w: W, h: H } = canvasOf(doc);
   const ratio = doc.video?.ratio ?? '9:16';
@@ -230,7 +233,8 @@ export function Inspector({
             <Slider label="اختفاء تدريجي" value={sec(clip.fadeOut ?? 0)} min={0} max={3} step={0.05} decimals={2} unit="ث" disabled={readOnly} onChange={(v) => onClip({ fadeOut: usOf(v) }, 'اختفاء تدريجي', 'fadeOut')} />
           </>
         )}
-        {(hasPrevAdjacent || clip.transition) && (
+        {(hasPrevAdjacent || clip.transition) && compact && <DesktopOnly what="المزج مع المقطع السابق" />}
+        {(hasPrevAdjacent || clip.transition) && !compact && (
           <Slider label="مزج مع المقطع السابق" value={sec(clip.transition?.length ?? 0)} min={0} max={2} step={0.05} decimals={2} unit="ث" disabled={readOnly} onChange={(v) => actions.setTransition(v > 0 ? usOf(v) : null)} hint="يتداخل المقطعان بهذه المدة، ويُمزج الصوت معهما." />
         )}
       </Section>
@@ -264,7 +268,8 @@ export function Inspector({
           )}
         </Section>
       )}
-      {(media === 'video' || media === 'image') && (
+      {(media === 'video' || media === 'image') && compact && <Section title="القص والألوان" open={false}><DesktopOnly what="القص والألوان" /></Section>}
+      {(media === 'video' || media === 'image') && !compact && (
         <>
           <Section title="القص" open={false}>
             <CropControls crop={clip.crop} disabled={readOnly} onChange={(c, key) => onClip({ crop: c }, 'القص', key)} />

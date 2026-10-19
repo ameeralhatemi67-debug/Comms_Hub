@@ -21,6 +21,7 @@ import { historyKey, redoLabel, undoLabel } from '@/lib/studio/history';
 import { ColorInput, Segmented, Slider, Switch } from '../motion-controls';
 import { Bin, type LibraryItem } from './bin';
 import { CachePanel } from './cache-panel';
+import { DesktopOnly, PanelTabs, useCompact, type Panel } from './compact';
 import { ExportPanel } from './export-panel';
 import { CropControls, MotionControls, TextControls, TransformControls } from './inspector';
 import { librarySource } from './library';
@@ -61,6 +62,8 @@ export function PhotoEditor(p: EditorProps) {
   const [size, setSize] = useState({ w: 400, h: 400 });
   const [uploading, setUploading] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const compact = useCompact();
+  const [panel, setPanel] = useState<Panel>('timeline');
   // pictures with their adjustment applied (by the worker), by layer
   const [adjusted, setAdjusted] = useState<Map<string, { key: string; canvas: HTMLCanvasElement }>>(new Map());
   const layers = doc.photo?.layers ?? [];
@@ -235,15 +238,7 @@ export function PhotoEditor(p: EditorProps) {
   const src = sel?.source ? doc.sources.find((s) => s.id === sel.source) : undefined;
   const presetIndex = PHOTO_PRESETS.findIndex((x) => x.w === W && x.h === H);
 
-  return (
-    <div className="st-editor st-photo" data-readonly={p.readOnly ? 'yes' : 'no'}>
-      {error && (
-        <p className="warning st-err" role="alert">
-          {error}
-          <button type="button" onClick={() => setError(null)} aria-label="إغلاق">×</button>
-        </p>
-      )}
-      <div className="st-work">
+  const binEl = (
         <Bin
           ratio={W >= H ? '16:9' : '9:16'}
           photo
@@ -257,8 +252,10 @@ export function PhotoEditor(p: EditorProps) {
           onMark={addMark}
           onShape={addShape}
           assetsReady={assetsReady}
+          compact={compact}
         />
-        <div className="st-center">
+  );
+  const stageEl = (
           <section className="st-stage" aria-label="الصورة">
             <div className="st-tl-bar">
               <button type="button" onClick={h.undo} disabled={p.readOnly || !h.hist.past.length} title={undoLabel(h.hist)} aria-label={undoLabel(h.hist)}>
@@ -286,6 +283,8 @@ export function PhotoEditor(p: EditorProps) {
               {!assetsReady && <div className="st-stage-wait" role="status">جارٍ تجهيز القوالب والخطوط…</div>}
             </div>
           </section>
+  );
+  const layersEl = (
           <section className="st-layers" aria-label="الطبقات">
             <h2>الطبقات</h2>
             {layers.length === 0 ? (
@@ -316,8 +315,9 @@ export function PhotoEditor(p: EditorProps) {
               </ol>
             )}
           </section>
-          <ExportPanel doc={doc} pool={pool} t={0} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} photo adjusted={resolver.adjusted} />
-        </div>
+  );
+  const exportEl = <ExportPanel doc={doc} pool={pool} t={0} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} photo adjusted={resolver.adjusted} />;
+  const inspEl = (
         <aside className="st-insp" aria-label={sel ? 'إعدادات الطبقة' : 'إعدادات الصورة'}>
           {sel ? (
             <>
@@ -327,10 +327,14 @@ export function PhotoEditor(p: EditorProps) {
                 <div className="st-insp-acts">
                   <button type="button" onClick={duplicate} disabled={p.readOnly} title="نسخ (Ctrl+D)"><Copy aria-hidden="true" />نسخ</button>
                   <button type="button" onClick={remove} disabled={p.readOnly || sel.locked} title="حذف (Delete)"><Trash2 aria-hidden="true" />حذف</button>
+                  {!compact && (
+                    <>
                   <button type="button" onClick={() => align('start')} disabled={p.readOnly} aria-label="محاذاة إلى اليمين" title="محاذاة إلى اليمين"><AlignRight aria-hidden="true" /></button>
                   <button type="button" onClick={() => align('centerX')} disabled={p.readOnly} aria-label="توسيط أفقي" title="توسيط أفقي"><AlignCenter aria-hidden="true" /></button>
                   <button type="button" onClick={() => align('end')} disabled={p.readOnly} aria-label="محاذاة إلى اليسار" title="محاذاة إلى اليسار"><AlignLeft aria-hidden="true" /></button>
                   <button type="button" onClick={() => align('centerY')} disabled={p.readOnly} title="توسيط عمودي">وسط عمودي</button>
+                    </>
+                  )}
                 </div>
               </div>
               {sel.text && (
@@ -381,7 +385,7 @@ export function PhotoEditor(p: EditorProps) {
                 <summary>الموضع والحجم</summary>
                 <div className="st-sec-body">
                   <TransformControls item={sel} W={W} H={H} disabled={p.readOnly || !!sel.locked} onChange={(tr, key) => patch({ transform: tr }, 'الموضع والحجم', key)} />
-                  <Segmented label="الدمج" size="sm" value={sel.blend ?? 'normal'} disabled={p.readOnly} onChange={(v) => patch({ blend: v }, 'الدمج')} options={BLENDS} />
+                  {compact ? <DesktopOnly what="الدمج" /> : <Segmented label="الدمج" size="sm" value={sel.blend ?? 'normal'} disabled={p.readOnly} onChange={(v) => patch({ blend: v }, 'الدمج')} options={BLENDS} />}
                   <div className="st-flip">
                     <Switch label="قلب أفقي" checked={!!sel.flip?.h} disabled={p.readOnly} onChange={(v) => patch({ flip: { h: v, v: !!sel.flip?.v } }, 'قلب أفقي')} />
                     <Switch label="قلب عمودي" checked={!!sel.flip?.v} disabled={p.readOnly} onChange={(v) => patch({ flip: { h: !!sel.flip?.h, v } }, 'قلب عمودي')} />
@@ -429,8 +433,14 @@ export function PhotoEditor(p: EditorProps) {
                     onChange={(i) => i >= 0 && h.apply(setCanvas(doc, { w: PHOTO_PRESETS[i].w, h: PHOTO_PRESETS[i].h }), 'مقاس الصورة')}
                     options={[...PHOTO_PRESETS.map((x, i) => ({ value: i, label: x.label })), ...(presetIndex < 0 ? [{ value: -1, label: 'مقاس آخر' }] : [])]}
                   />
-                  <Slider label="العرض" value={W} min={16} max={PHOTO_MAX_SIDE} step={1} unit="px" box disabled={p.readOnly} onChange={(v) => h.apply(setCanvas(h.get(), { w: v }), 'مقاس الصورة', 'canvas-w')} />
-                  <Slider label="الارتفاع" value={H} min={16} max={PHOTO_MAX_SIDE} step={1} unit="px" box disabled={p.readOnly} onChange={(v) => h.apply(setCanvas(h.get(), { h: v }), 'مقاس الصورة', 'canvas-h')} />
+                  {compact ? (
+                    <DesktopOnly what="مقاس آخر" />
+                  ) : (
+                    <>
+                      <Slider label="العرض" value={W} min={16} max={PHOTO_MAX_SIDE} step={1} unit="px" box disabled={p.readOnly} onChange={(v) => h.apply(setCanvas(h.get(), { w: v }), 'مقاس الصورة', 'canvas-w')} />
+                      <Slider label="الارتفاع" value={H} min={16} max={PHOTO_MAX_SIDE} step={1} unit="px" box disabled={p.readOnly} onChange={(v) => h.apply(setCanvas(h.get(), { h: v }), 'مقاس الصورة', 'canvas-h')} />
+                    </>
+                  )}
                   <Switch label="خلفية شفافة (PNG)" checked={doc.photo?.background === null} disabled={p.readOnly} onChange={(on) => h.apply(setCanvas(doc, { background: on ? null : '#ffffff' }), 'الخلفية')} />
                   {doc.photo?.background !== null && <ColorInput label="لون الخلفية" value={doc.photo?.background ?? '#ffffff'} disabled={p.readOnly} onChange={(v) => h.apply(setCanvas(h.get(), { background: v }), 'لون الخلفية', 'bg')} />}
                 </div>
@@ -439,7 +449,36 @@ export function PhotoEditor(p: EditorProps) {
             </>
           )}
         </aside>
-      </div>
+  );
+
+  return (
+    <div className="st-editor st-photo" data-readonly={p.readOnly ? 'yes' : 'no'} data-compact={compact ? 'yes' : 'no'}>
+      {error && (
+        <p className="warning st-err" role="alert">
+          {error}
+          <button type="button" onClick={() => setError(null)} aria-label="إغلاق">×</button>
+        </p>
+      )}
+      {compact ? (
+        <>
+          {stageEl}
+          <PanelTabs value={panel} onChange={setPanel} panels={[{ id: 'timeline', label: 'الطبقات' }, { id: 'add', label: 'إضافة' }, { id: 'settings', label: 'الإعدادات' }, { id: 'export', label: 'التصدير' }]} />
+          {panel === 'timeline' && layersEl}
+          {panel === 'add' && binEl}
+          {panel === 'settings' && inspEl}
+          {panel === 'export' && exportEl}
+        </>
+      ) : (
+        <div className="st-work">
+          {binEl}
+          <div className="st-center">
+            {stageEl}
+            {layersEl}
+            {exportEl}
+          </div>
+          {inspEl}
+        </div>
+      )}
       {uploading && (
         <UploadDialog
           file={uploading}

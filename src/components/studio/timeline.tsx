@@ -12,6 +12,7 @@ import type { SourceState } from '@/lib/studio/media';
 import { graphicById } from '@/lib/studio/motion-adapter';
 
 export const ROW_H = 54;
+export const ROW_H_PHONE = 62;
 const SNAP_PX = 8;
 
 export type TimelineProps = {
@@ -21,6 +22,8 @@ export type TimelineProps = {
   zoom: number;
   selected: string | null;
   readOnly: boolean;
+  /** A phone: tracks are not added here; rows and edges are finger-sized. */
+  compact?: boolean;
   stateOf: (sourceId: string) => SourceState | undefined;
   onSelect: (id: string | null) => void;
   onSeek: (t: Micros) => void;
@@ -45,6 +48,7 @@ type Drag = { id: string; mode: 'move' | 'start' | 'end'; x0: number; y0: number
 
 export function Timeline(p: TimelineProps) {
   const { doc, zoom } = p;
+  const rowH = p.compact ? ROW_H_PHONE : ROW_H;
   const tracks = doc.video?.tracks ?? [];
   const total = Math.max(durationOf(doc), p.t) + 10 * US;
   const width = Math.max(600, (total / US) * zoom);
@@ -82,7 +86,7 @@ export function Timeline(p: TimelineProps) {
       if (drag.mode === 'move') {
         const track0 = tracks.find((t) => t.id === drag.track0)!;
         const same = tracks.filter((t) => t.kind === track0.kind && !t.locked);
-        const rows = Math.round((e.clientY - drag.y0) / ROW_H);
+        const rows = Math.round((e.clientY - drag.y0) / rowH);
         const idx = tracks.indexOf(track0) + rows;
         const dest = tracks[Math.max(0, Math.min(tracks.length - 1, idx))];
         const target = dest && same.includes(dest) ? dest : track0;
@@ -115,10 +119,10 @@ export function Timeline(p: TimelineProps) {
   const kinds = (Object.keys(TRACK_LIMITS) as TrackKind[]).filter((k) => tracks.filter((t) => t.kind === k).length < TRACK_LIMITS[k]);
 
   return (
-    <div className="st-tl" aria-label="الخط الزمني">
+    <div className="st-tl" aria-label="الخط الزمني" data-compact={p.compact ? 'yes' : 'no'}>
       <div className="st-tl-heads">
         <div className="st-tl-corner">
-          {!p.readOnly && kinds.length > 0 && (
+          {!p.readOnly && !p.compact && kinds.length > 0 && (
             <details className="st-tl-add">
               <summary aria-label="إضافة مسار">
                 <Plus aria-hidden="true" />
@@ -135,7 +139,7 @@ export function Timeline(p: TimelineProps) {
           )}
         </div>
         {tracks.map((t) => (
-          <div key={t.id} className="st-tl-head" data-kind={t.kind} style={{ height: ROW_H }}>
+          <div key={t.id} className="st-tl-head" data-kind={t.kind} style={{ height: rowH }}>
             <span>{TRACK_LABELS[t.kind]}</span>
             <span className="st-tl-flags">
               {t.kind !== 'audio' && (
@@ -166,7 +170,7 @@ export function Timeline(p: TimelineProps) {
           </div>
           <div className="st-tl-lanes" ref={lanes} onPointerDown={(e) => e.target === e.currentTarget && p.onSelect(null)}>
             {tracks.map((t) => (
-              <div key={t.id} className="st-tl-lane" data-kind={t.kind} data-locked={t.locked ? 'yes' : 'no'} data-hidden={t.hidden ? 'yes' : 'no'} style={{ height: ROW_H }} onPointerDown={(e) => e.target === e.currentTarget && p.onSelect(null)}>
+              <div key={t.id} className="st-tl-lane" data-kind={t.kind} data-locked={t.locked ? 'yes' : 'no'} data-hidden={t.hidden ? 'yes' : 'no'} style={{ height: rowH }} onPointerDown={(e) => e.target === e.currentTarget && p.onSelect(null)}>
                 {t.clips.map((c) => {
                   const src = c.source ? p.stateOf(c.source) : undefined;
                   const missing = src?.kind === 'missing' || src?.kind === 'error';

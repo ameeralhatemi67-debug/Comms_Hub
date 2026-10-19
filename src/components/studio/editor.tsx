@@ -25,6 +25,7 @@ import { frameUs } from '@/lib/studio/time';
 import { Modal } from '../ui';
 import { Bin, type LibraryItem } from './bin';
 import { CachePanel } from './cache-panel';
+import { PanelTabs, useCompact, type Panel } from './compact';
 import { ExportPanel } from './export-panel';
 import { FolderSelect } from './folder-picker';
 import { Inspector } from './inspector';
@@ -165,6 +166,8 @@ export function VideoEditor(p: EditorProps) {
   const [zoom, setZoom] = useState(40);
   const [uploading, setUploading] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const compact = useCompact();
+  const [panel, setPanel] = useState<Panel>('timeline');
   const live = useRef({ doc, selected, safe });
   live.current = { doc, selected, safe };
 
@@ -309,15 +312,7 @@ export function VideoEditor(p: EditorProps) {
 
   const missing = doc.sources.map((s) => pool?.state(s.id)).filter((s) => s?.kind === 'missing' || s?.kind === 'error').length;
 
-  return (
-    <div className="st-editor" data-readonly={p.readOnly ? 'yes' : 'no'}>
-      {error && (
-        <p className="warning st-err" role="alert">
-          {error}
-          <button type="button" onClick={() => setError(null)} aria-label="إغلاق">×</button>
-        </p>
-      )}
-      <div className="st-work">
+  const binEl = (
         <Bin
           ratio={doc.video?.ratio ?? '9:16'}
           readOnly={p.readOnly}
@@ -330,8 +325,10 @@ export function VideoEditor(p: EditorProps) {
           onSrt={addSrt}
           onMark={addMark}
           assetsReady={assetsReady}
+          compact={compact}
         />
-        <div className="st-center">
+  );
+  const stageEl = (
           <Stage
             doc={doc}
             player={player}
@@ -347,14 +344,16 @@ export function VideoEditor(p: EditorProps) {
             ready={assetsReady && !!pool}
             note={missing ? `${missing} من ملفات المشروع غير متاح هنا، ويبقى في المشروع.` : null}
           />
-          <ExportPanel doc={doc} pool={pool} t={at} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} />
-        </div>
+  );
+  const exportEl = <ExportPanel doc={doc} pool={pool} t={at} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} />;
+  const inspEl = (
         <Inspector
           doc={doc}
           clip={sel?.clip ?? null}
           onClip={patch}
           onDoc={(d, label, key) => h.apply(d, label, key ?? null)}
           readOnly={p.readOnly}
+          compact={compact}
           canFillWindow={!!frameAbove}
           hasPrevAdjacent={hasPrevAdjacent}
           sourceNote={sel?.clip.source ? sourceNote(pool?.state(sel.clip.source)) : null}
@@ -375,7 +374,8 @@ export function VideoEditor(p: EditorProps) {
             setLength: (us) => selected && h.apply(trimEnd(h.get(), selected, (locate(h.get(), selected)?.clip.start ?? 0) + Math.min(us, maxLengthOf(h.get(), locate(h.get(), selected)!.clip))), 'مدة المقطع', `len-${selected}`),
           }}
         />
-      </div>
+  );
+  const barEl = (
       <div className="st-tl-bar">
         <button type="button" onClick={h.undo} disabled={p.readOnly || !h.hist.past.length} title={undoLabel(h.hist)} aria-label={undoLabel(h.hist)}>
           <Undo2 aria-hidden="true" />
@@ -397,12 +397,15 @@ export function VideoEditor(p: EditorProps) {
           <input type="range" min={6} max={240} step={1} value={zoom} onChange={(e) => setZoom(Number(e.target.value))} aria-label="تكبير الخط الزمني" />
         </label>
       </div>
+  );
+  const tlEl = (
       <Timeline
         doc={doc}
         t={t}
         zoom={zoom}
         selected={selected}
         readOnly={p.readOnly}
+        compact={compact}
         stateOf={(id) => pool?.state(id)}
         onSelect={setSelected}
         onSeek={seek}
@@ -411,6 +414,44 @@ export function VideoEditor(p: EditorProps) {
         onTrack={(id, pt) => h.apply(setTrack(doc, id, pt), 'إعدادات المسار')}
         onAddTrack={(k) => h.apply(addTrack(doc, k), 'إضافة مسار')}
       />
+  );
+
+  return (
+    <div className="st-editor" data-readonly={p.readOnly ? 'yes' : 'no'} data-compact={compact ? 'yes' : 'no'}>
+      {error && (
+        <p className="warning st-err" role="alert">
+          {error}
+          <button type="button" onClick={() => setError(null)} aria-label="إغلاق">×</button>
+        </p>
+      )}
+      {compact ? (
+        <>
+          {stageEl}
+          <PanelTabs value={panel} onChange={setPanel} panels={[{ id: 'timeline', label: 'الخط الزمني' }, { id: 'add', label: 'إضافة' }, { id: 'settings', label: 'الإعدادات' }, { id: 'export', label: 'التصدير' }]} />
+          {panel === 'timeline' && (
+            <>
+              {barEl}
+              {tlEl}
+            </>
+          )}
+          {panel === 'add' && binEl}
+          {panel === 'settings' && inspEl}
+          {panel === 'export' && exportEl}
+        </>
+      ) : (
+        <>
+          <div className="st-work">
+            {binEl}
+            <div className="st-center">
+              {stageEl}
+              {exportEl}
+            </div>
+            {inspEl}
+          </div>
+          {barEl}
+          {tlEl}
+        </>
+      )}
       {uploading && (
         <UploadDialog
           file={uploading}

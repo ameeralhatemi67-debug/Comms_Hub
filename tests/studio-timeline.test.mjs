@@ -283,3 +283,33 @@ test('the device cache: library copies unused for ten days are due, device files
   assert.equal(totalFromRange(null), null);
   assert.equal(libraryName(A, 3), `asset-${A}-v3`);
 });
+
+test('a phone (or any simpler client) never drops what it does not edit: unknown fields survive every operation', async () => {
+  const { updateLayer, addLayer } = await import('../src/lib/studio/photo.ts');
+  const { newPhotoDoc } = await import('../src/lib/studio/schema.ts');
+  let { doc, vid } = project();
+  doc = { ...doc, fromDesktop: { proxies: ['p1'] }, video: { ...doc.video, grade: 'rec709', tracks: doc.video.tracks.map((t) => ({ ...t, lane: 'x' })) } };
+  const a = addClip(doc, { source: vid, start: 0, length: 4 * US, keyframes: [{ t: 0, scale: 1 }], effect: { lut: 'warm' } });
+  const b = addClip(a.doc, { source: vid, start: 4 * US, length: 2 * US, in: 4 * US });
+  let d = b.doc;
+  d = moveClip(d, b.clipId, 5 * US);
+  d = trimEnd(d, a.clipId, 3.5 * US);
+  d = trimStart(d, a.clipId, 0.5 * US);
+  d = setTransition(moveClip(d, b.clipId, 3.5 * US), b.clipId, 500_000);
+  const s = splitClip(d, a.clipId, 2 * US);
+  d = s.doc;
+  const clips = d.video.tracks.flatMap((t) => t.clips);
+  const first = clips.find((c) => c.id === a.clipId);
+  const second = clips.find((c) => c.id === s.secondId);
+  assert.deepEqual(d.fromDesktop, { proxies: ['p1'] });
+  assert.equal(d.video.grade, 'rec709');
+  assert.ok(d.video.tracks.every((t) => t.lane === 'x'));
+  for (const c of [first, second]) {
+    assert.deepEqual(c.keyframes, [{ t: 0, scale: 1 }]);
+    assert.deepEqual(c.effect, { lut: 'warm' });
+  }
+  const p = addLayer(newPhotoDoc(), { text: { content: 'أ' }, mask: { path: 'M0 0' } });
+  const p2 = updateLayer({ ...p.doc, retouch: [1] }, p.id, (l) => ({ ...l, transform: { ...l.transform, x: 1 } }));
+  assert.deepEqual(p2.photo.layers[0].mask, { path: 'M0 0' });
+  assert.deepEqual(p2.retouch, [1]);
+});

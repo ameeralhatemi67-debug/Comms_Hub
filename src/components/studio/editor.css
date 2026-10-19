@@ -153,3 +153,32 @@
 .st-layer-acts button{min-height:30px;width:30px;padding:0;border:0;background:transparent}
 .st-layer-acts svg{width:15px;height:15px}
 .st-flip{display:flex;gap:14px;flex-wrap:wrap}
+
+/* phones (760 px or less): the preview, then one panel at a time; finger-sized controls */
+.st-phone-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:4px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.st-phone-tabs button{min-height:44px;padding:4px 6px;font-size:13px;border-radius:9px;border:0}
+.st-phone-tabs button.on{background:var(--green);color:var(--on-brand);font-weight:600}
+.st-desktop-only{background:var(--surface-2);padding:8px 10px;border-radius:7px}
+.st-editor[data-compact="yes"]{gap:8px}
+.st-editor[data-compact="yes"] .st-bin,.st-editor[data-compact="yes"] .st-insp{position:static;max-height:none}
+.st-editor[data-compact="yes"] .st-stage{padding:6px}
+.st-editor[data-compact="yes"] .st-stage-box{padding:4px;min-height:0}
+.st-editor[data-compact="yes"] .st-transport button,.st-editor[data-compact="yes"] .st-tl-bar button{min-height:44px;min-width:44px}
+.st-editor[data-compact="yes"] .st-transport{gap:4px}
+.st-editor[data-compact="yes"] .st-time{min-width:0;width:100%;order:9}
+.st-editor[data-compact="yes"] .st-bin-tabs button,.st-editor[data-compact="yes"] .st-seg-mini button{min-height:44px}
+.st-editor[data-compact="yes"] .ms-seg-row button{min-height:44px}
+.st-editor[data-compact="yes"] .st-insp-acts button,.st-editor[data-compact="yes"] .st-mini{min-height:44px}
+.st-editor[data-compact="yes"] .st-layer-acts button{min-height:44px;width:40px}
+.st-editor[data-compact="yes"] .st-layer-name{min-height:44px}
+.st-editor[data-compact="yes"] .st-zoom{min-width:0;flex:1}
+.st-tl[data-compact="yes"]{grid-template-columns:96px minmax(0,1fr)}
+.st-tl[data-compact="yes"] .st-tl-head{flex-direction:column;align-items:stretch;justify-content:center;gap:0;padding:0 4px;font-size:11px}
+.st-tl[data-compact="yes"] .st-tl-flags button{min-height:30px;width:30px}
+.st-tl[data-compact="yes"] .st-clip-edge{width:18px}
+.st-tl[data-compact="yes"] .st-clip{top:4px;bottom:4px}
+@media(max-width:760px){
+  .st-bar .st-back{width:44px;height:44px}
+  .st-bar .st-version,.st-banner button{min-height:44px}
+  .st-card-acts button{min-height:44px;min-width:44px}
+}

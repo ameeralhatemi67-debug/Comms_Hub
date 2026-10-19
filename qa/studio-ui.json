@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-ui.cjs",
-  "run": "2026-10-19T18:49:49.518Z",
+  "run": "2026-10-19T18:56:30.565Z",
   "checks": [
     {
       "name": "the empty home says there are no projects yet and offers both kinds",
@@ -10,7 +10,7 @@
     {
       "name": "a new video project is created and opened in the editor",
       "pass": true,
-      "detail": "fa3733ad-286c-4a7c-a6df-284b6f0914d4"
+      "detail": "02f7166f-2786-49ab-96f4-ad1a003e660c"
     },
     {
       "name": "the bar names the project and its first numbered version",
@@ -70,7 +70,7 @@
     {
       "name": "«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it",
       "pass": true,
-      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"e01a2302-742c-403f-8b18-e6aefbbefe92\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
+      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"66b1a9a1-f20a-40b7-8abb-3de8093fe051\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
     },
     {
       "name": "the result says it is in the library and that its uploader does not approve it",
@@ -80,7 +80,7 @@
     {
       "name": "«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4",
       "pass": true,
-      "detail": "[{\"asset\":\"e01a2302-742c-403f-8b18-e6aefbbefe92\",\"version\":1,\"revision\":3},{\"asset\":\"e01a2302-742c-403f-8b18-e6aefbbefe92\",\"version\":2,\"revision\":4}]"
+      "detail": "[{\"asset\":\"66b1a9a1-f20a-40b7-8abb-3de8093fe051\",\"version\":1,\"revision\":3},{\"asset\":\"66b1a9a1-f20a-40b7-8abb-3de8093fe051\",\"version\":2,\"revision\":4}]"
     },
     {
       "name": "when another person takes the editing, a save is refused and the editor turns to reading",
@@ -135,7 +135,7 @@
     {
       "name": "dragging a layer on the canvas moves it",
       "pass": true,
-      "detail": "540 to 645"
+      "detail": "540 to 624"
     },
     {
       "name": "the PNG export is the full 1080x1080 picture with the rectangle in the middle",
@@ -148,14 +148,69 @@
       "detail": ""
     },
     {
+      "name": "390: the home fits the screen",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "390: the editor shows the preview with one panel at a time",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: the time axis runs left to right inside the right-to-left page",
+      "pass": true,
+      "detail": "ltr"
+    },
+    {
+      "name": "390: a clip is split on the phone",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: the timeline panel fits the screen (the timeline scrolls inside itself)",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "390: the panel tabs, the transport and the timeline buttons are at least 44 px tall",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: clips are tall enough to touch",
+      "pass": true,
+      "detail": "53"
+    },
+    {
+      "name": "390: crop and colours are kept for the computer, said in place of their controls",
+      "pass": true,
+      "detail": "القص والألوان · متاح على الحاسوب: يبقى في المشروع كما هو."
+    },
+    {
+      "name": "390: the settings panel fits the screen",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "390: the export panel is there and fits the screen",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "390: a photo on the phone keeps the four sizes and leaves other sizes for the computer",
+      "pass": true,
+      "detail": "مقاس آخر · متاح على الحاسوب: يبقى في المشروع كما هو."
+    },
+    {
       "name": "no page errors",
       "pass": true,
       "detail": ""
     }
   ],
   "debugTime": "00:02.00 / 00:07.24",
-  "projectId": "fa3733ad-286c-4a7c-a6df-284b6f0914d4",
-  "total": 30,
-  "passed": 30,
+  "projectId": "02f7166f-2786-49ab-96f4-ad1a003e660c",
+  "total": 41,
+  "passed": 41,
   "failed": 0
 }

@@ -276,6 +276,58 @@ async function photoFlow(browser, base, errors) {
   await ctx.close();
 }
 
+async function phoneFlow(browser, base, errors) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  const tab = await ctx.newPage();
+  tab.on('pageerror', (e) => errors.push(e.message));
+  tab.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  tab.on('response', (q) => q.status() >= 400 && errors.push(`HTTP ${q.status()}: ${q.url()}`));
+  const overflow = () => tab.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  const small = (sel) => tab.evaluate((q) => [...document.querySelectorAll(q)].filter((e) => e.offsetParent && e.getBoundingClientRect().height < 44).map((e) => (e.textContent || e.getAttribute('aria-label') || '').trim().slice(0, 20) + ':' + Math.round(e.getBoundingClientRect().height)), sel);
+  await tab.goto(base + '/motion/studio');
+  await tab.getByRole('button', { name: 'مشروع فيديو جديد' }).waitFor();
+  check('390: the home fits the screen', (await overflow()) <= 0, await overflow());
+  await tab.getByRole('button', { name: 'مشروع فيديو جديد' }).tap();
+  await tab.getByLabel('اسم المشروع').fill('مقطع الهاتف');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).tap();
+  await tab.locator('.st-editor[data-compact="yes"]').waitFor({ timeout: 15000 });
+  check('390: the editor shows the preview with one panel at a time', (await tab.locator('.st-phone-tabs button').count()) === 4 && (await tab.locator('.st-canvas').isVisible()) && (await tab.locator('.st-bin').count()) === 0, '');
+  await tab.locator('.st-phone-tabs').getByRole('button', { name: 'إضافة' }).tap();
+  await tab.locator('.st-lib button', { hasText: 'ألوان الحملة' }).tap();
+  await tab.locator('.st-phone-tabs').getByRole('button', { name: 'الخط الزمني' }).tap();
+  await tab.locator('.st-clip[data-kind="video"]').waitFor();
+  const dir = await tab.evaluate(() => getComputedStyle(document.querySelector('.st-tl-scroll')).direction);
+  check('390: the time axis runs left to right inside the right-to-left page', dir === 'ltr', dir);
+  await tab.locator('.st-clip[data-kind="video"]').tap();
+  const ruler = await tab.locator('.st-tl-ruler').boundingBox();
+  await tab.mouse.click(ruler.x + 80, ruler.y + 10);
+  await tab.getByRole('button', { name: 'قص', exact: true }).tap();
+  check('390: a clip is split on the phone', (await tab.locator('.st-clip[data-kind="video"]').count()) === 2);
+  check('390: the timeline panel fits the screen (the timeline scrolls inside itself)', (await overflow()) <= 0, await overflow());
+  const tooSmall = await small('.st-phone-tabs button, .st-transport button, .st-tl-bar button');
+  check('390: the panel tabs, the transport and the timeline buttons are at least 44 px tall', tooSmall.length === 0, tooSmall.join(' | '));
+  const clipH = await tab.evaluate(() => document.querySelector('.st-clip').getBoundingClientRect().height);
+  check('390: clips are tall enough to touch', clipH >= 44, clipH);
+  await tab.locator('.st-clip[data-kind="video"]').first().tap();
+  await tab.locator('.st-phone-tabs').getByRole('button', { name: 'الإعدادات' }).tap();
+  const desk = await tab.locator('.st-desktop-only').allTextContents();
+  check('390: crop and colours are kept for the computer, said in place of their controls', desk.some((t) => t.includes('القص والألوان') && t.includes('متاح على الحاسوب')), desk.join(' | '));
+  check('390: the settings panel fits the screen', (await overflow()) <= 0, await overflow());
+  await tab.locator('.st-phone-tabs').getByRole('button', { name: 'التصدير' }).tap();
+  check('390: the export panel is there and fits the screen', (await tab.locator('.st-export').isVisible()) && (await overflow()) <= 0, await overflow());
+  await tab.screenshot({ path: path.join(out, 'phone-390.png'), fullPage: true });
+  await tab.goto(base + '/motion/studio');
+  await tab.getByRole('button', { name: 'مشروع صورة جديد' }).tap();
+  await tab.getByLabel('اسم المشروع').fill('صورة الهاتف');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).tap();
+  await tab.locator('.st-photo[data-compact="yes"]').waitFor({ timeout: 15000 });
+  await tab.locator('.st-phone-tabs').getByRole('button', { name: 'الإعدادات' }).tap();
+  const deskP = await tab.locator('.st-desktop-only').allTextContents();
+  check('390: a photo on the phone keeps the four sizes and leaves other sizes for the computer', deskP.some((t) => t.includes('مقاس آخر')) && (await overflow()) <= 0, deskP.join(' | '));
+  await tab.screenshot({ path: path.join(out, 'phone-photo-390.png'), fullPage: true });
+  await ctx.close();
+}
+
 (async () => {
   await build();
   const { server, base } = await serve(out, (p) => (p.startsWith('/motion/studio') ? page : undefined));
@@ -284,7 +336,7 @@ async function photoFlow(browser, base, errors) {
   try {
     if (!only || only === 'video') await videoFlow(browser, base, errors);
     if (!only || only === 'photo') await photoFlow(browser, base, errors);
-    if ((!only || only === 'phone') && typeof module.exports.phoneFlow === 'function') await module.exports.phoneFlow(browser, base, errors, { check, out, near });
+    if (!only || only === 'phone') await phoneFlow(browser, base, errors);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));
   } finally {

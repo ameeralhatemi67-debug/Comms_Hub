@@ -11,6 +11,7 @@ import { STICKERS, STICKER_LABELS, type StickerKey } from '@/lib/studio/schema';
 import { motionCatalog, motionParams, motionDims, settledSec, STICKER_SRC } from '@/lib/studio/motion-adapter';
 import { renderFrame } from '@/lib/motion/renderers.js';
 import type { Category, Graphic } from '@/lib/motion/types';
+import { DesktopOnly } from './compact';
 
 export type LibraryItem = { id: string; name: string; kind: 'video' | 'image' | 'audio'; current_version: number; mime_type: string; dims: string | null; duration: string | null };
 
@@ -66,6 +67,8 @@ export type BinProps = {
   /** Photos: a rectangle, an ellipse or a line. */
   onShape?: (type: 'rect' | 'ellipse' | 'line') => void;
   assetsReady: boolean;
+  /** A phone: SRT import is kept for the computer. */
+  compact?: boolean;
 };
 
 function MotionTile({ g, ratio, onPick, ready, disabled }: { g: Graphic; ratio: string; onPick: () => void; ready: boolean; disabled: boolean }) {
@@ -234,7 +237,8 @@ export function Bin(p: BinProps) {
                 </button>
               </>
             )}
-            {p.onSrt && (
+            {p.onSrt && p.compact && <DesktopOnly what="استيراد ترجمة SRT" />}
+            {p.onSrt && !p.compact && (
               <>
                 <button type="button" disabled={p.readOnly} onClick={() => srtInput.current?.click()}>
                   <Subtitles aria-hidden="true" />
