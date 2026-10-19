@@ -113,7 +113,8 @@ test('«الإعدادات» keeps only its real tabs (the connections tab joine
 test('the appearance choices are on «الحساب» and still kept in the browser only', () => {
   assert.match(read('src/components/supporting.tsx'), /<AppearancePanel \/>/);
   const panel = read('src/components/appearance-panel.tsx');
-  assert.match(panel, /toggleIdentity/);
+  assert.doesNotMatch(panel, /toggleIdentity/, 'the old design is gone, there is no design switch');
+  assert.doesNotMatch(panel, /التصميم الحالي/);
   assert.match(panel, /setTheme/);
   assert.doesNotMatch(panel, /supabase|fetch\(/);
 });

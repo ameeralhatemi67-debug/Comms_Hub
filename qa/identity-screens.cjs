@@ -226,10 +226,7 @@ const asRole = async (page, role) => {
     check(T, 'the logo is in the phone top bar', await brand.isVisible(), 'visible');
     await brand.dblclick();
     await page.waitForTimeout(200);
-    check(T, 'double-tapping the phone logo switches the design off', (await page.evaluate(() => document.documentElement.getAttribute('data-identity'))) === null, 'off');
-    await brand.dblclick();
-    await page.waitForTimeout(200);
-    check(T, 'and on again', (await page.evaluate(() => document.documentElement.getAttribute('data-identity'))) === 'emerald', 'on');
+    check(T, 'double-tapping the phone logo no longer switches the design (the old design is removed)', (await page.evaluate(() => document.documentElement.getAttribute('data-identity'))) === 'emerald', 'still on');
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
     check(T, 'no sideways scrolling on the phone', !overflow, 'ok');
     await ctx.close();

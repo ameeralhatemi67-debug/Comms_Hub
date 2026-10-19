@@ -117,7 +117,7 @@ Where each stored file lives is now recorded (`file_locations`, backfilled and k
 
 Updated 2026-10-10. **CHECKPOINT 0.2 IN PROGRESS.** Checkpoint 0.1 is complete and accepted. Phase 0.2.1 (Workflow Mapping) is complete. **Phase 0.2.2 (Guided Department Validation) is closed on the Director's response alone:** R01 arrived on 2026-10-10, and the same day the owner directed that the Director's input is enough, so the remaining participants and the frozen build are skipped (`[-]` in `Roadmap.md`; exit gate criteria 1 and 2 waived by that directive). Phase 0.2.3 Round 1 corrections start on 2026-10-11. The day-by-day plan is in `Roadmap.md` under "Work plan from 2026-10-11".
 
-Design: Direction A is the default; B only for larger media previews. See DESIGN.md. The new identity, «الهوية الجديدة لمركز الاتصال», is **built as an option, not approved as the default** (2026-10-10, owner directive): a double-click on the sidebar logo switches between the two designs, remembered per browser. See `MVP_draft.md` section 58. D-01 decides which design is the default.
+Design: «الهوية الجديدة لمركز الاتصال» is **the only design** (2026-10-19): the Director approved it, so the old design («التصميم الحالي») and its switch (double-click on the logo, the design choice in «الحساب» «المظهر») were removed. Only the light/evening mode remains a personal choice. The old design's CSS rules still sit under the unused default selectors and can be cleaned later. See `MVP_draft.md` section 58.
 
 ## Building the reference into the site (from 2026-10-12)
 

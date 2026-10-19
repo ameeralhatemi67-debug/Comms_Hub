@@ -31,7 +31,6 @@ import { useHub } from '@/lib/store';
 import { useAccount } from '@/lib/account-context';
 import { canSwitchRole, menuFor } from '@/lib/access';
 import { supabase } from '@/lib/supabase/client';
-import { toggleIdentity } from '@/lib/identity';
 import { Modal, Empty, LogoLoader } from './ui';
 import { HelpButton, ToastUndo, UndoButton, useKit } from './kit';
 import { NoticeDrawer, useNotices } from './notices';
@@ -95,20 +94,6 @@ export function Shell({ children }: { children: ReactNode }) {
     };
   }, [overlay, query]);
 
-  // A double-click on the logo switches between the current design and the second
-  // design (Roadmap Checkpoint 0.3). mousedown is cancelled on the second click so
-  // the double-click does not select text. The same logo sits in the phone top bar.
-  const designSwitch = {
-    onMouseDown: (e: React.MouseEvent) => {
-      if (e.detail > 1) e.preventDefault();
-    },
-    onDoubleClick: () =>
-      dispatch({
-        type: 'notify',
-        text: toggleIdentity() ? 'التصميم: الهوية الجديدة لمركز الاتصال' : 'التصميم: التصميم الحالي',
-      }),
-  };
-
   // What the sidebar offers: pages this account was granted (access.ts), and, as
   // before, only what the role being viewed can use. Administrators see every page.
   // «الحسابات» follows «فتح صفحة الحسابات» (Permissions_Plan.md 5), read live from the
@@ -129,7 +114,7 @@ export function Shell({ children }: { children: ReactNode }) {
         انتقل إلى المحتوى
       </a>
       <aside className="sidebar">
-        <Link href="/" className="brand" {...designSwitch}>
+        <Link href="/" className="brand">
           <span className="brandmark">
             <LogoLoader size={26} mode="static" color="currentColor" ariaLabel="شعار مركز الاتصال" />
           </span>
@@ -186,7 +171,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
       <div className="workspace">
         <header className="topbar">
-          <Link href="/" className="mobile-brand" aria-label="مركز الاتصال، الرئيسية" {...designSwitch}>
+          <Link href="/" className="mobile-brand" aria-label="مركز الاتصال، الرئيسية">
             <span className="brandmark">
               <LogoLoader size={22} mode="static" color="currentColor" ariaLabel="شعار مركز الاتصال" />
             </span>
