@@ -4,7 +4,7 @@
 // change makes a new document, goes into the studio's own undo history, and is handed to the project
 // shell, which autosaves it. Media come from the device cache; the 26 templates and the brand marks
 // from the template tab's renderers and files.
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Redo2, Undo2, ZoomIn, Scissors, Trash2 } from 'lucide-react';
 import { canOpen } from '@/lib/access';
 import { useAccount } from '@/lib/account-context';
@@ -25,6 +25,7 @@ import { frameUs } from '@/lib/studio/time';
 import { Modal } from '../ui';
 import { Bin, type LibraryItem } from './bin';
 import { CachePanel } from './cache-panel';
+import { ExportPanel } from './export-panel';
 import { FolderSelect } from './folder-picker';
 import { Inspector } from './inspector';
 import { librarySource, uploadToLibrary } from './library';
@@ -144,7 +145,7 @@ export function useExactSources(doc: ProjectDoc, pool: MediaPool | null, tick: n
   }, [tick]); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
-export function VideoEditor(p: EditorProps & { exportPanel?: (a: { doc: ProjectDoc; pool: MediaPool | null; motion: MotionRenderer; t: Micros }) => ReactNode }) {
+export function VideoEditor(p: EditorProps) {
   const account = useAccount();
   const canLibrary = canOpen(account, 'media');
   const h = useDocHistory(p);
@@ -346,7 +347,7 @@ export function VideoEditor(p: EditorProps & { exportPanel?: (a: { doc: ProjectD
             ready={assetsReady && !!pool}
             note={missing ? `${missing} من ملفات المشروع غير متاح هنا، ويبقى في المشروع.` : null}
           />
-          {p.exportPanel?.({ doc, pool, motion, t: at })}
+          <ExportPanel doc={doc} pool={pool} t={at} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} />
         </div>
         <Inspector
           doc={doc}

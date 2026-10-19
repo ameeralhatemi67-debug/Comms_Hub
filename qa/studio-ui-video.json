@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-ui.cjs",
-  "run": "2026-10-19T18:24:18.248Z",
+  "run": "2026-10-19T18:41:04.637Z",
   "checks": [
     {
       "name": "the empty home says there are no projects yet and offers both kinds",
@@ -10,7 +10,7 @@
     {
       "name": "a new video project is created and opened in the editor",
       "pass": true,
-      "detail": "86db862e-da68-408f-9d3d-a0111ff24fec"
+      "detail": "099e7e34-afe3-4863-bfbc-147ab716a0fb"
     },
     {
       "name": "the bar names the project and its first numbered version",
@@ -63,6 +63,26 @@
       "detail": "1,2"
     },
     {
+      "name": "«تصدير وتنزيل» downloads an H.264 file of the project at 720p (1280x720) with its sound",
+      "pass": true,
+      "detail": "{\"programs\":[],\"stream_groups\":[],\"streams\":[{\"codec_name\":\"h264\",\"codec_type\":\"video\",\"width\":1280,\"height\":720},{\"codec_name\":\"aac\",\"codec_type\":\"audio\"}],\"format\":{\"duration\":\"7.808000\"}}"
+    },
+    {
+      "name": "«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it",
+      "pass": true,
+      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"3e67d392-e657-4e79-b2ec-662d2765b8f2\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
+    },
+    {
+      "name": "the result says it is in the library and that its uploader does not approve it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4",
+      "pass": true,
+      "detail": "[{\"asset\":\"3e67d392-e657-4e79-b2ec-662d2765b8f2\",\"version\":1,\"revision\":3},{\"asset\":\"3e67d392-e657-4e79-b2ec-662d2765b8f2\",\"version\":2,\"revision\":4}]"
+    },
+    {
       "name": "when another person takes the editing, a save is refused and the editor turns to reading",
       "pass": true,
       "detail": "لم يعد التحرير لك: فتح شخص آخر المشروع للتحرير، أو انقطع الاتصال طويلاً. تغييراتك محفوظة على هذا الجهاز. | لم يعد التحرير لك: فتح شخص آخر المشروع للتحرير، أو انقطع الاتصال طويلاً. تغييراتك محفوظة على هذا الجهاز.تولي التحرير"
@@ -89,8 +109,8 @@
     }
   ],
   "debugTime": "00:02.00 / 00:07.24",
-  "projectId": "86db862e-da68-408f-9d3d-a0111ff24fec",
-  "total": 17,
-  "passed": 17,
+  "projectId": "099e7e34-afe3-4863-bfbc-147ab716a0fb",
+  "total": 21,
+  "passed": 21,
   "failed": 0
 }

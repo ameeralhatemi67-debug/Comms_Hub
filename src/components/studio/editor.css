@@ -129,3 +129,14 @@
   .st-work{grid-template-columns:240px minmax(0,1fr)}
   .st-insp{grid-column:1/-1;position:static;max-height:none}
 }
+
+/* export */
+.st-export{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.st-export h2{font-size:15px;margin:0}
+.st-export .ms-seg-row button svg{width:15px;height:15px}
+.st-export>button{justify-self:start}
+.st-export-run{display:flex;align-items:center;gap:8px}
+.st-export-run .st-progress{flex:1}
+.st-export-run button{min-height:34px;padding:4px 12px}
+.st-done{font-size:13px;margin:0;padding:10px 12px;border-radius:8px;background:var(--soft);display:grid;gap:4px}
+.st-done a{color:var(--green-text);text-decoration:underline}

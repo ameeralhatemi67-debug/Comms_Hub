@@ -1,0 +1,69 @@
+{
+  "script": "qa/studio-export.cjs",
+  "run": "2026-10-19T18:33:42.853Z",
+  "checks": [
+    {
+      "name": "the export is H.264 at 1280x720 with AAC sound at 48 kHz stereo",
+      "pass": true,
+      "detail": "[{\"codec_name\":\"h264\",\"codec_type\":\"video\",\"width\":1280,\"height\":720,\"nb_read_frames\":\"210\"},{\"codec_name\":\"aac\",\"codec_type\":\"audio\",\"sample_rate\":\"48000\",\"channels\":2,\"nb_read_frames\":\"329\"}]"
+    },
+    {
+      "name": "it has every frame: 7 s at 30 frames, 210 frames",
+      "pass": true,
+      "detail": "210"
+    },
+    {
+      "name": "its length is 7 s within one frame",
+      "pass": true,
+      "detail": "7.018667"
+    },
+    {
+      "name": "the progress reached the last frame",
+      "pass": true,
+      "detail": "210"
+    },
+    {
+      "name": "the file was written through the browser's private storage, not memory",
+      "pass": true,
+      "detail": "device تزامن.mp4"
+    },
+    {
+      "name": "frames on each side of the split and the gap are exact: 59 red, 60 and 89 black, 90 green",
+      "pass": true,
+      "detail": "[[253,24,0],[0,0,0],[0,0,0],[1,216,0]]"
+    },
+    {
+      "name": "sound plays in [0,2) and [3,7) and is silent in the gap",
+      "pass": true,
+      "detail": "-18.1 -18.1 -18.1 -18.1 -90.3 -89.3 -18.1 -18.1 -18.1 -18.1 -18.1 -18.1 -18.1 -18.2 -87.9"
+    },
+    {
+      "name": "a clip at half volume is about 6 dB quieter",
+      "pass": true,
+      "detail": "6.02 dB"
+    },
+    {
+      "name": "picture and sound stay in step: flashes and beeps at 1 s and 3 s within 45 ms",
+      "pass": true,
+      "detail": "{\"flashes\":[1,3],\"onsets\":[1.0026666666666666,3.0080625]}"
+    },
+    {
+      "name": "a still is a PNG of the project size showing the frame at 5 s (blue)",
+      "pass": true,
+      "detail": "png,1920,1080 0,15,255"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "timing": {
+    "exportMs": 2878,
+    "bytes": 181002,
+    "estimate": 4543000
+  },
+  "total": 11,
+  "passed": 11,
+  "failed": 0
+}

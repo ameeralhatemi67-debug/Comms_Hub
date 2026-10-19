@@ -156,12 +156,20 @@ const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; erro
 
 /** The query builder for `from('media_files')`: select, in, order, limit, ilike, eq, maybeSingle. */
 function query(table: string) {
-  let rows = table === 'media_files' ? [...db.files] : [];
+  let rows: Record<string, unknown>[] =
+    table === 'media_files' ? [...db.files]
+    : table === 'studio_exports' ? db.projects.flatMap((p) => p.exports.map((e, i) => ({ project_id: p.id, asset_id: e.asset, version: e.version, revision: e.revision, created_at: String(i).padStart(4, '0') }))).reverse()
+    : [];
   let single = false;
+  let byId: string | null = null;
   const q = {
     select: () => q,
     in: (col: string, vals: unknown[]) => ((rows = rows.filter((r) => vals.includes(r[col]))), q),
-    eq: (col: string, v: unknown) => ((rows = rows.filter((r) => r[col] === v)), q),
+    eq: (col: string, v: unknown) => {
+      if (col === 'id') byId = String(v);
+      rows = rows.filter((r) => r[col] === v);
+      return q;
+    },
     ilike: (col: string, pat: string) => {
       const needle = pat.replace(/%/g, '').toLowerCase();
       rows = rows.filter((r) => String(r[col]).toLowerCase().includes(needle));
@@ -170,7 +178,12 @@ function query(table: string) {
     order: () => q,
     limit: (n: number) => ((rows = rows.slice(0, n)), q),
     maybeSingle: () => ((single = true), q),
-    then: (resolve: (v: unknown) => void) => resolve({ data: single ? (rows[0] ?? null) : rows, error: null }),
+    then: (resolve: (v: unknown) => void) => {
+      // a file uploaded during the run lives in the fixture server's library
+      if (table === 'media_files' && single && !rows.length && byId)
+        return void fetch(`/__asset/${byId}`).then((r) => (r.ok ? r.json() : null)).then((row) => resolve({ data: row, error: null }));
+      resolve({ data: single ? (rows[0] ?? null) : rows, error: null });
+    },
   };
   return q;
 }

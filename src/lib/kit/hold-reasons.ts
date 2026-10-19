@@ -60,6 +60,8 @@ export const HOLD = {
   studioClearCache: 'تُحذف نسخ ملفات المكتبة من هذا الجهاز فقط. لا يُحذف أي أصل ولا أي مشروع، وتُنسخ الملفات من جديد عند الحاجة.',
   /** «الاستوديو»: remove a file kept on this device only. */
   studioRemoveLocal: 'هذا الملف على هذا الجهاز فقط: المشاريع التي تستعمله لن تجده هنا بعد الحذف.',
+  /** «الاستوديو»: save an export as a new version of a library file that was already reviewed. */
+  studioNewVersion: 'الإصدار الجديد يعيد الملف إلى «قيد المراجعة»، ويبقى الإصدار المعتمد قبله مسجلاً.',
 } as const;
 
 export const HOLD_MS = 900;

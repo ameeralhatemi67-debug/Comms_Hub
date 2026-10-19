@@ -56,3 +56,12 @@ export async function uploadToLibrary(file: File, folderId: string, onProgress: 
 export async function uploadVersion(assetId: string, file: File, note: string, onProgress: (f: number) => void): Promise<number> {
   return uploadNewVersion(assetId, file, note, onProgress);
 }
+
+/** The library files a project has exported to, newest first (studio_exports; the studio's own rows). */
+export async function projectExports(projectId: string): Promise<{ asset_id: string; version: number; revision: number; created_at: string }[]> {
+  const { data } = await supabase().from('studio_exports').select('asset_id,version,revision,created_at').eq('project_id', projectId).order('created_at', { ascending: false });
+  return (data ?? []) as { asset_id: string; version: number; revision: number; created_at: string }[];
+}
+
+/** Stages of a file that has been in review: a new version sends it back to «قيد المراجعة». */
+export const REVIEWED_STAGES = ['review', 'changes', 'rejected', 'ready', 'scheduled', 'partial', 'failed'];

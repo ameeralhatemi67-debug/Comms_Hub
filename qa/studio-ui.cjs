@@ -147,6 +147,31 @@ async function videoFlow(browser, base, errors) {
   const rev = await tab.evaluate((pid) => window.__db.projects.find((x) => x.id === pid).revs.map((r) => r.revision).join(','), id);
   check('«حفظ نسخة» makes numbered revision 2 and empties the autosave slot', rev === '1,2', rev);
 
+  // export: a download, then a new library file, then a new version of it
+  await tab.locator('.st-export').scrollIntoViewIfNeeded();
+  await tab.locator('.st-export').getByRole('radio', { name: '720p' }).click();
+  const [dl] = await Promise.all([tab.waitForEvent('download', { timeout: 60000 }), tab.getByRole('button', { name: 'تصدير وتنزيل' }).click()]);
+  const dlPath = path.join(out, 'download.mp4');
+  await dl.saveAs(dlPath);
+  await tab.locator('.st-done').waitFor({ timeout: 30000 });
+  const dprobe = JSON.parse(require('node:child_process').spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,width,height:format=duration', '-of', 'json', dlPath]).stdout.toString());
+  const dv = dprobe.streams.find((x) => x.codec_type === 'video');
+  check('«تصدير وتنزيل» downloads an H.264 file of the project at 720p (1280x720) with its sound', dv?.codec_name === 'h264' && dv.width === 1280 && dv.height === 720 && dprobe.streams.some((x) => x.codec_name === 'aac') && /جاهز/.test(await tab.locator('.st-done').textContent()), JSON.stringify(dprobe));
+  await tab.locator('.st-export').getByRole('radio', { name: /ملف جديد في المكتبة/ }).click();
+  await tab.locator('.st-export select').waitFor();
+  await tab.getByRole('button', { name: 'تصدير وحفظ في المكتبة' }).click();
+  await tab.locator('.st-done', { hasText: 'حُفظ في المكتبة' }).waitFor({ timeout: 60000 });
+  const lib1 = await tab.evaluate(async (pid) => ({ p: window.__db.projects.find((x) => x.id === pid), up: await (await fetch('/__uploads')).json() }), id);
+  check('«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it', lib1.p.revision === 3 && lib1.up.length === 1 && lib1.up[0].folder_id === 'f1' && lib1.p.exports.length === 1 && lib1.p.exports[0].revision === 3 && lib1.p.exports[0].version === 1, JSON.stringify({ rev: lib1.p.revision, exports: lib1.p.exports, up: lib1.up.map((u) => [u.name, u.folder_id, u.current_version]) }));
+  check('the result says it is in the library and that its uploader does not approve it', /لا يعتمد أحد ما رفعه/.test(await tab.locator('.st-done').textContent()));
+  await tab.locator('.st-export').getByRole('radio', { name: /إصدار جديد من ملف/ }).click();
+  await tab.locator('.st-export select option').first().waitFor({ state: 'attached' });
+  await tab.getByRole('button', { name: 'تصدير وحفظ في المكتبة' }).click();
+  await tab.locator('.st-done', { hasText: 'الإصدار 2' }).waitFor({ timeout: 60000 });
+  const lib2 = await tab.evaluate(async (pid) => ({ p: window.__db.projects.find((x) => x.id === pid), up: await (await fetch('/__uploads')).json() }), id);
+  check('«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4', lib2.up.length === 1 && lib2.up[0].current_version === 2 && lib2.p.exports.length === 2 && lib2.p.exports[1].version === 2 && lib2.p.exports[1].revision === 4, JSON.stringify(lib2.p.exports));
+  await tab.locator('.st-export').getByRole('radio', { name: /تنزيل إلى الجهاز/ }).click();
+
   // someone else takes the editing
   await tab.evaluate((pid) => window.__db.takeLease(pid), id);
   await tab.getByRole('button', { name: 'حفظ نسخة' }).click();
