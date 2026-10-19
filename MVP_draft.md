@@ -713,6 +713,7 @@ database decides which rows come back.
 | الأفكار | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
 | الحسابات | نعم | نعم | نعم | لا | لا | لا | لا | لا | القائمة |
 | الإعدادات | نعم | نعم | لا | لا | لا | لا | لا | لا | القائمة |
+| الاستوديو | نعم | نعم | لا | لا | لا | لا | لا | لا | تبويب في «استوديو الحركة» |
 | الحساب | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | الاسم أسفل القائمة |
 | المراقبة | - | - | - | - | - | - | - | - | يفتح «سجل النشاط» |
 | الإدارة | - | - | - | - | - | - | - | - | يفتح «الحسابات» |
@@ -735,6 +736,9 @@ Reading it:
   the administrator's (`backups.*`, `storage.migrate`).
 - **An administrator viewing as a role** (`عرض بصفة`) still opens every page; only «إنشاء» and «الحسابات»
   follow the viewed role (leaders see «الحسابات», the publisher does not see «إنشاء»).
+- **«الاستوديو»** (`/motion/studio`, section 62) is a tab of «استوديو الحركة», the Admin's and the director's only
+  (fixed capability `motion.studio`, owner decision of 2026-10-19), together with the page of «استوديو الحركة». An
+  administrator viewing as another role sees the tab only as the Admin or the director; the address still opens.
 - **The member creates** (decision of 2026-10-15, B4b): «إنشاء» is offered to the member and the capability
   `page.create` is held by the member as by the other creating roles (migration `member_creates`); the
   publisher stays without it.

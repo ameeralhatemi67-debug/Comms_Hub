@@ -30,6 +30,12 @@ const MotionStudio = dynamic(() => import('./motion-studio'), {
   loading: () => <div className="panel" role="status">جارٍ تحميل استوديو الحركة…</div>,
 });
 
+// «الاستوديو», the studio tab of «استوديو الحركة» (MVP_draft.md 62). The server has checked canOpenRoute.
+const StudioPage = dynamic(() => import('./studio/studio-page'), {
+  ssr: false,
+  loading: () => <div className="panel" role="status">جارٍ تحميل الاستوديو…</div>,
+});
+
 export function HubPage({ route }: { route: string[] }) {
   const { state } = useHub();
   const [page, id] = route;
@@ -91,7 +97,7 @@ export function HubPage({ route }: { route: string[] }) {
       </MediaProvider>
     );
   if (page === 'mail') return <MailPage key={id === 'chat' ? 'chat' : 'mail'} tab={id === 'chat' ? 'chat' : 'mail'} />;
-  if (page === 'motion') return <MotionStudio />;
+  if (page === 'motion') return id === 'studio' ? <StudioPage projectId={route[2]} /> : <MotionStudio />;
   if (page === 'accounts') return <AccountsPage />;
   if (page === 'ideas') return <IdeasPage />;
   if (['settings', 'account'].includes(page))

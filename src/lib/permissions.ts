@@ -15,9 +15,9 @@ export type Capability = {
   grantable: boolean;
   scope: ScopeKind;
   minRank: number;
-  /** For a capability fixed by the reference: the roles that hold it. */
+  /** For a capability fixed by the reference or by an owner decision: the roles that hold it. */
   fixedRoles: Role[];
-  /** For a capability fixed by the reference: why it cannot be granted. */
+  /** For a fixed capability: why it cannot be granted. */
   why?: string;
   sort: number;
 };
@@ -95,6 +95,11 @@ export const CAPABILITIES: Capability[] = [
   {
     key: 'account.protected', grp: 'fixed', label: 'إزالة حساب مؤسس أو تغيير دوره', grantable: false, scope: 'none', minRank: 4,
     fixedRoles: [], why: 'حسابات المؤسسين محمية ولا تتغير من التطبيق.', sort: 65,
+  },
+  // The studio tab of «استوديو الحركة» (MVP_draft.md 62), fixed by the owner's decision of 2026-10-19.
+  {
+    key: 'motion.studio', grp: 'fixed', label: 'الاستوديو في «استوديو الحركة»', grantable: false, scope: 'none', minRank: 3,
+    fixedRoles: ['admin', 'director'], why: 'الاستوديو لمسؤول النظام ومدير الاتصال المؤسسي فقط، بقرار المالك في 2026-10-19.', sort: 66,
   },
 ];
 

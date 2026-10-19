@@ -5,16 +5,17 @@
 // What it describes is the default: an account's own page list and its grants change it, and the
 // database decides every use (has_capability, use_capability).
 import { roles, type Role } from './domain.ts';
-import { canOpen, defaultPages, linkedAccountRoles, menuEntries, menuFor, type Account } from './access.ts';
+import { canOpenRoute, defaultPages, linkedAccountRoles, menuEntries, menuFor, type Account } from './access.ts';
 import { CAPABILITIES, installedDefault, resolve } from './permissions.ts';
 import { logAllRoles } from './media/rules.ts';
 
 /** Administrator first, then the department's roles in the order the product lists them. */
 export const MATRIX_ROLES: Role[] = ['admin', 'director', 'assistant', 'writer', 'designer', 'producer', 'publisher', 'member'];
 
-/** Every route's first segment, and how it is reached. */
-export const MATRIX_ROUTES: { id: string; label: string; how: 'menu' | 'badge' | 'direct' | 'redirect'; note?: string }[] = [
+/** Every route's first segment (and the studio tab, which has its own rule), and how it is reached. */
+export const MATRIX_ROUTES: { id: string; label: string; how: 'menu' | 'badge' | 'tab' | 'direct' | 'redirect'; note?: string }[] = [
   ...menuEntries.map((e) => ({ id: e.href === '/' ? '' : e.href.slice(1), label: e.label, how: 'menu' as const })),
+  { id: 'motion/studio', label: 'الاستوديو', how: 'tab', note: 'تبويب في «استوديو الحركة»' },
   { id: 'account', label: 'الحساب', how: 'badge', note: 'من اسمك أسفل القائمة' },
   { id: 'monitoring', label: 'المراقبة', how: 'redirect', note: 'يفتح «سجل النشاط»' },
   { id: 'admin', label: 'الإدارة', how: 'redirect', note: 'يفتح «الحسابات»' },
@@ -59,7 +60,7 @@ export function accessMatrix(): AccessMatrix {
       pages: account.pages,
       caps,
       menu: menuFor(account, { viewAs: role }).map((e) => homeId(e.href)),
-      open: MATRIX_ROUTES.map((r) => r.id).filter((id) => canOpen(account, id) && !['monitoring', 'admin'].includes(id)),
+      open: MATRIX_ROUTES.map((r) => r.id).filter((id) => canOpenRoute(account, id.split('/')) && !['monitoring', 'admin'].includes(id)),
       activity: role === 'admin' || logAllRoles.includes(role) ? 'whole' : 'own',
     };
   });
@@ -89,7 +90,7 @@ export function matrixMarkdown(m: AccessMatrix = accessMatrix()): string {
       if (route.how === 'redirect') return '-';
       const open = r.open.includes(route.id);
       const inMenu = r.menu.includes(route.id);
-      return open ? (inMenu || route.how === 'badge' ? 'نعم' : 'بالعنوان') : 'لا';
+      return open ? (inMenu || route.how === 'badge' || route.how === 'tab' ? 'نعم' : 'بالعنوان') : 'لا';
     });
     const how = route.how === 'menu' ? 'القائمة' : route.how === 'badge' ? 'الاسم أسفل القائمة' : (route.note ?? '');
     lines.push(`| ${route.label} | ${cells.join(' | ')} | ${how} |`);

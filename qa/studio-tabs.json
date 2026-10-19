@@ -1,0 +1,94 @@
+{
+  "script": "qa/studio-tabs.cjs",
+  "run": "2026-10-19T17:24:10.961Z",
+  "checks": [
+    {
+      "name": "1440: the bar has two tabs, «قوالب الحركة» to /motion and «الاستوديو» to /motion/studio, each with an icon",
+      "pass": true,
+      "detail": "[[\"قوالب الحركة\",\"/motion\"],[\"الاستوديو\",\"/motion/studio\"]]"
+    },
+    {
+      "name": "1440: on the template tab «قوالب الحركة» is the current page, on the studio tab «الاستوديو»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1440: the current tab is filled with the brand green, the other is not",
+      "pass": true,
+      "detail": "rgb(20, 104, 79) / rgba(0, 0, 0, 0)"
+    },
+    {
+      "name": "1440: the bar has a name for screen readers",
+      "pass": true,
+      "detail": "أقسام استوديو الحركة"
+    },
+    {
+      "name": "1440: nothing runs past the screen",
+      "pass": true,
+      "detail": "1440 / 1440"
+    },
+    {
+      "name": "1440: the bar sits inside the page heading",
+      "pass": true,
+      "detail": "{\"l\":156,\"r\":412,\"t\":58,\"w\":256,\"h\":48}"
+    },
+    {
+      "name": "1440: without the studio there is no bar and the media button is where it was",
+      "pass": true,
+      "detail": "{\"l\":32,\"r\":146,\"t\":60,\"w\":114,\"h\":44}"
+    },
+    {
+      "name": "1440: on a laptop the bar and the media button share one row",
+      "pass": true,
+      "detail": "58/60"
+    },
+    {
+      "name": "390: the bar has two tabs, «قوالب الحركة» to /motion and «الاستوديو» to /motion/studio, each with an icon",
+      "pass": true,
+      "detail": "[[\"قوالب الحركة\",\"/motion\"],[\"الاستوديو\",\"/motion/studio\"]]"
+    },
+    {
+      "name": "390: on the template tab «قوالب الحركة» is the current page, on the studio tab «الاستوديو»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: the current tab is filled with the brand green, the other is not",
+      "pass": true,
+      "detail": "rgb(20, 104, 79) / rgba(0, 0, 0, 0)"
+    },
+    {
+      "name": "390: the bar has a name for screen readers",
+      "pass": true,
+      "detail": "أقسام استوديو الحركة"
+    },
+    {
+      "name": "390: nothing runs past the screen",
+      "pass": true,
+      "detail": "390 / 390"
+    },
+    {
+      "name": "390: the bar sits inside the page heading",
+      "pass": true,
+      "detail": "{\"l\":30,\"r\":374,\"t\":127,\"w\":344,\"h\":54}"
+    },
+    {
+      "name": "390: without the studio there is no bar and the media button is where it was",
+      "pass": true,
+      "detail": "{\"l\":272,\"r\":374,\"t\":127,\"w\":102,\"h\":42}"
+    },
+    {
+      "name": "390: on a phone the bar takes the full row and each tab is at least 44 px tall",
+      "pass": true,
+      "detail": "344 of 344; 44,44"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "total": 17,
+  "passed": 17,
+  "failed": 0
+}

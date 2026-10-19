@@ -11,6 +11,7 @@ import type { Category, Graphic, Params, ToggleKey } from '@/lib/motion/types';
 import { ColorInput, Segmented, Slider, Switch, TextInput } from './motion-controls';
 import { Stage, paint, settledTime, type Backdrop, type WinMode } from './motion-stage';
 import { ExportPanel } from './motion-export';
+import { MotionTabs } from './studio/motion-tabs';
 import './motion-studio.css';
 
 const groups: { id: Category; label: string }[] = [{ id: 'numbers', label: 'الأرقام' }, { id: 'repine', label: 'تصاميم ريبين' }, { id: 'frames', label: 'إطارات الفيديو' }];
@@ -158,6 +159,7 @@ export default function MotionStudio() {
 
   return <div className="ms">
     <Title title="استوديو الحركة" sub={start.work ? `مفتوح من العمل ${start.work} بقالب مقترح. ${intro[category]}` : intro[category]}>
+      <MotionTabs active="templates" />
       <Link href="/media" className="button">مكتبة الوسائط</Link>
     </Title>
     <Tabs items={groups.map(group => ({ id: group.id, label: `${group.label} (${catalog.filter(item => item.category === group.id).length})` }))} value={category} onChange={value => changeCategory(value as Category)} />

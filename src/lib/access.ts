@@ -52,6 +52,15 @@ export const ACCOUNTS_CAP = 'accounts.view';
 /** Holding either of these opens «الإعدادات» without the page grant (its tabs still ask their own). */
 export const SETTINGS_CAPS = ['settings.view', 'settings.manage'] as const;
 
+/**
+ * «الاستوديو», the studio tab of «استوديو الحركة» at /motion/studio (MVP_draft.md 62): a fixed
+ * capability, the Admin's and the director's by the owner's decision of 2026-10-19. The database
+ * checks the same pair as canOpenStudio (studio_can(): this capability and the motion page).
+ */
+export const STUDIO_CAP = 'motion.studio';
+/** The roles the studio is fixed to; an administrator viewing as one of them sees its tab. */
+export const studioRoles: readonly Role[] = ['admin', 'director'];
+
 export type Account = {
   email: string;
   name: string;
@@ -109,6 +118,38 @@ export function canOpen(account: Pick<Account, 'role' | 'pages' | 'caps'>, page:
   // Creating is also a role ability; a page grant cannot give it to a role that lacks it.
   if (page === 'create' && !roles[account.role].create) return false;
   return account.pages.includes(page);
+}
+
+/** May this person open the studio? The motion page and the studio capability, as studio_can() decides. */
+export function canOpenStudio(account: Pick<Account, 'role' | 'pages' | 'caps'>): boolean {
+  return canOpen(account, 'motion') && (isAdmin(account) || !!account.caps?.includes(STUDIO_CAP));
+}
+
+/**
+ * May this person open the address whose segments are `slug` (['work', 'CH-241'], [] for Home)?
+ * The page of its first segment (canOpen), and for /motion/studio the studio's own rule: the
+ * first segment alone would open the studio to everyone who opens «استوديو الحركة».
+ */
+export function canOpenRoute(account: Pick<Account, 'role' | 'pages' | 'caps'>, slug: readonly string[]): boolean {
+  const [page = '', sub] = slug;
+  if (!canOpen(account, page)) return false;
+  if (page === 'motion' && sub === 'studio') return canOpenStudio(account);
+  return true;
+}
+
+/**
+ * Does «استوديو الحركة» show its tab bar («قوالب الحركة»، «الاستوديو»)? For those who may open the
+ * studio. An administrator viewing as another role sees it only as the Admin or the director, as
+ * «الحسابات» follows the viewed role in the menu; the address still opens for the administrator.
+ * `hasCap` reads the capability live (useCaps); without it, the account's own list is used.
+ */
+export function studioTabVisible(
+  account: Pick<Account, 'role' | 'pages' | 'caps'>,
+  opts: { viewAs?: Role; hasCap?: (key: string) => boolean } = {},
+): boolean {
+  if (isAdmin(account)) return studioRoles.includes(opts.viewAs ?? account.role);
+  const hasCap = opts.hasCap ?? ((k: string) => !!account.caps?.includes(k));
+  return canOpen(account, 'motion') && hasCap(STUDIO_CAP);
 }
 
 /**

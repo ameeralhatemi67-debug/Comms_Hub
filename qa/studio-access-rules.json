@@ -1,0 +1,137 @@
+{
+  "run": "2026-10-19",
+  "what": "Database rule run for the studio, Phase 1 (Studio_Build_Plan.md): who may open «الاستوديو»",
+  "migration": "supabase/migrations/20261019120000_studio_access.sql, applied to comms-hub as version 20261019172208 'studio_access'",
+  "how": "supabase/tests/studio_access_rules.sql: one transaction against the Supabase project comms-hub, rolled back at the end. Nine throwaway accounts (@t.test), one per role and a second director without the motion page, acting through row level security; the last check runs as anon.",
+  "result": "TOTAL row: 21 checks, 21 passed; no check differed from its expectation",
+  "checks": [
+    {
+      "k": "01 the studio is a fixed capability of the Admin and the director",
+      "expect": "fixed false admin,director 3",
+      "v": "fixed false admin,director 3",
+      "pass": true
+    },
+    {
+      "k": "02 Admin holds the studio and opens it",
+      "expect": "true true",
+      "v": "true true",
+      "pass": true
+    },
+    {
+      "k": "03 the director holds the studio and opens it",
+      "expect": "true true",
+      "v": "true true",
+      "pass": true
+    },
+    {
+      "k": "03b the director's capability list says fixed",
+      "expect": "true fixed",
+      "v": "true fixed",
+      "pass": true
+    },
+    {
+      "k": "04 a director without the page of «استوديو الحركة» holds it but cannot open the studio",
+      "expect": "true false",
+      "v": "true false",
+      "pass": true
+    },
+    {
+      "k": "05 the assistant does not",
+      "expect": "false false",
+      "v": "false false",
+      "pass": true
+    },
+    {
+      "k": "06 the writer does not",
+      "expect": "false false",
+      "v": "false false",
+      "pass": true
+    },
+    {
+      "k": "06b the writer's capability list says not held, fixed",
+      "expect": "false fixed",
+      "v": "false fixed",
+      "pass": true
+    },
+    {
+      "k": "07 the designer does not",
+      "expect": "false",
+      "v": "false",
+      "pass": true
+    },
+    {
+      "k": "08 the producer does not",
+      "expect": "false",
+      "v": "false",
+      "pass": true
+    },
+    {
+      "k": "09 the publisher does not",
+      "expect": "false",
+      "v": "false",
+      "pass": true
+    },
+    {
+      "k": "10 the member does not",
+      "expect": "false",
+      "v": "false",
+      "pass": true
+    },
+    {
+      "k": "11 not granted for a time",
+      "expect": "ERR CAP_FIXED",
+      "v": "ERR CAP_FIXED",
+      "pass": true
+    },
+    {
+      "k": "12 not granted once",
+      "expect": "ERR CAP_FIXED",
+      "v": "ERR CAP_FIXED",
+      "pass": true
+    },
+    {
+      "k": "13 not switched on for a person",
+      "expect": "ERR CAP_FIXED",
+      "v": "ERR CAP_FIXED",
+      "pass": true
+    },
+    {
+      "k": "14 not switched off for the director either",
+      "expect": "ERR CAP_FIXED",
+      "v": "ERR CAP_FIXED",
+      "pass": true
+    },
+    {
+      "k": "15 not switched on for a role",
+      "expect": "ERR CAP_FIXED",
+      "v": "ERR CAP_FIXED",
+      "pass": true
+    },
+    {
+      "k": "16 not held in a preset",
+      "expect": "ERR CAP_FIXED",
+      "v": "ERR CAP_FIXED",
+      "pass": true
+    },
+    {
+      "k": "17 not asked for",
+      "expect": "ERR CAP_FIXED",
+      "v": "ERR CAP_FIXED",
+      "pass": true
+    },
+    {
+      "k": "18 and the writer still cannot open it",
+      "expect": "false",
+      "v": "false",
+      "pass": true
+    },
+    {
+      "k": "19 anonymous callers cannot run studio_can",
+      "expect": "ERR permission denied for function studio_can",
+      "v": "ERR permission denied for function studio_can",
+      "pass": true
+    }
+  ],
+  "passed": 21,
+  "total": 21
+}

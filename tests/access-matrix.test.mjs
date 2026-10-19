@@ -39,6 +39,8 @@ test('by address a role opens its menu and its own page; only the administrator 
   for (const role of MATRIX_ROLES) {
     const want = new Set([...EXPECTED_MENU[role], 'account']);
     if (role === 'admin') want.add('create'); // opens it by address, never offered it in the menu
+    // «الاستوديو», the studio tab of «استوديو الحركة» (MVP_draft.md 62): the Admin's and the director's only.
+    if (['admin', 'director'].includes(role)) want.add('motion/studio');
     assert.deepEqual([...byRole[role].open].sort(), [...want].sort(), role);
   }
 });
@@ -80,6 +82,7 @@ test("the capabilities held by default are the administrator's, the leaders' and
   assert.deepEqual(holders['work.publish'], ['admin', 'publisher']);
   assert.deepEqual(holders['work.approve'], ['admin', 'director', 'assistant']);
   assert.deepEqual(holders['urgency.3'], ['admin', 'director', 'assistant']);
+  assert.deepEqual(holders['motion.studio'], ['admin', 'director'], 'the studio, by the owner decision of 2026-10-19');
   assert.deepEqual(holders['whatsapp.push'], [], 'nobody holds the WhatsApp push by default (D-13)');
 });
 

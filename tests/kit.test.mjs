@@ -137,6 +137,8 @@ test('undo: the reasons it is refused, the button title, and when Ctrl+Z belongs
   assert.equal(undoKeyApplies(k, { tagName: 'DIV' }, '/media'), true);
   assert.equal(undoKeyApplies(k, { tagName: 'INPUT' }, '/media'), false, 'a text field keeps its own undo');
   assert.equal(undoKeyApplies(k, { tagName: 'DIV' }, '/mail'), false, 'the mail page keeps its own undo');
+  assert.equal(undoKeyApplies(k, { tagName: 'DIV' }, '/motion/studio/p1'), false, 'the studio keeps its own history: Ctrl+Z there never undoes a library action');
+  assert.equal(undoKeyApplies(k, { tagName: 'DIV' }, '/motion'), true, 'the template tab has no history of its own');
   assert.equal(undoKeyApplies({ ...k, shiftKey: true }, { tagName: 'DIV' }, '/media'), false);
   assert.equal(describe({ id: 1, at: '', actor_email: 'a@x.sa', type: 'undo', asset_id: null, folder_id: null, task_id: null, data: { label: 'نقل «أ»' } }, () => 'أمل').text, 'تراجع أمل عن: نقل «أ»');
 });

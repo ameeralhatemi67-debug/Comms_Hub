@@ -20,11 +20,14 @@ import { noticeHref } from '../src/lib/work/rules.ts';
 const sql = readFileSync('supabase/migrations/20261013150000_permissions.sql', 'utf8');
 // Settings and integrations add theirs (Settings_Integrations_Plan.md, Step S1).
 const intSql = readFileSync('supabase/migrations/20261014120000_integrations.sql', 'utf8');
+// The studio adds its fixed capability (Studio_Build_Plan.md, Phase 1).
+const studioSql = readFileSync('supabase/migrations/20261019120000_studio_access.sql', 'utf8');
 
 /** The catalog rows of the migration's insert, parsed. */
 function seeded() {
   const block = sql.slice(sql.indexOf('insert into public.capabilities'), sql.indexOf('-- Role templates equal'))
-    + intSql.slice(intSql.indexOf('insert into public.capabilities'), intSql.indexOf('insert into public.role_capabilities'));
+    + intSql.slice(intSql.indexOf('insert into public.capabilities'), intSql.indexOf('insert into public.role_capabilities'))
+    + studioSql.slice(studioSql.indexOf('insert into public.capabilities'), studioSql.indexOf('create function public.studio_can'));
   const rows = [];
   // A later migration removes a page from the catalogue (Action_Plan.md B6, «المراقبة» folded into «سجل النشاط»).
   const foldSql = readFileSync('supabase/migrations/20261015170000_fold_monitoring.sql', 'utf8');
@@ -53,6 +56,19 @@ test('approval and publishing are fixed by the reference and explain why (D-9)',
   }
   assert.deepEqual(CAPABILITIES.find((x) => x.key === 'urgency.3').fixedRoles, ['admin', 'director', 'assistant'], 'D-4');
   assert.deepEqual(CAPABILITIES.find((x) => x.key === 'approve.own').fixedRoles, [], 'nobody approves what they sent');
+});
+
+test('the studio is fixed to the Admin and the director, with its reason in Arabic (owner decision of 2026-10-19)', () => {
+  const c = CAPABILITIES.find((x) => x.key === 'motion.studio');
+  assert.equal(c.grantable, false);
+  assert.equal(c.grp, 'fixed');
+  assert.deepEqual(c.fixedRoles, ['admin', 'director']);
+  assert.ok(c.why && /[؀-ۿ]/.test(c.why) && c.why.includes('2026-10-19'));
+  for (const role of ['admin', 'director', 'assistant', 'writer', 'designer', 'producer', 'publisher', 'member'])
+    assert.equal(resolve({ role, pages: ['motion'], templates: installedDefault, grants: [] }, 'motion.studio', 0).ok, ['admin', 'director'].includes(role), role);
+  // a grant row cannot change a fixed rule
+  const g = { capability: 'motion.studio', mode: 'standing', effect: 'allow', expiresAt: null, usesLeft: null, scope: null, id: 'x' };
+  assert.equal(resolve({ role: 'writer', pages: ['motion'], templates: installedDefault, grants: [g] }, 'motion.studio', 0).ok, false);
 });
 
 test('installed role templates equal what the migrations leave in role_capabilities', () => {

@@ -140,7 +140,7 @@ export function Shell({ children }: { children: ReactNode }) {
               key={href}
               href={href}
               onClick={() => setMobile(false)}
-              className={`nav-item ${path === href || (href === '/work' && path.startsWith('/work/')) ? 'active' : ''}`}
+              className={`nav-item ${path === href || (href === '/work' && path.startsWith('/work/')) || (href === '/motion' && path.startsWith('/motion/')) ? 'active' : ''}`}
             >
               <Icon />
               <span>{label}</span>

@@ -1,0 +1,9 @@
+/* «الاستوديو» (MVP_draft.md 62). Everything is scoped under .st so the template tab (.ms) and the
+   rest of the hub are untouched. Global tokens only, so the studio follows the light and evening modes;
+   the preview stage is dark in both, as the template tab's stage is. */
+.st{min-width:0}
+.st-support ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.st-support li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink)}
+.st-support li svg{width:18px;height:18px;margin-top:3px}
+.st-support li.ok svg{color:var(--success)}
+.st-support li.no svg{color:var(--warning-fg)}

@@ -31,10 +31,10 @@ export function undoTip(items: UndoItem[]): string {
   return `تراجع عن: ${last.label}${rest.length ? ` · و${rest.length} قبله` : ''} · Ctrl+Z`;
 }
 
-/** Ctrl+Z belongs to text fields while one has the focus, and to the mail page's own undo. */
+/** Ctrl+Z belongs to text fields while one has the focus, to the mail page's own undo, and to the studio's own history (MVP_draft.md 62). */
 export function undoKeyApplies(e: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean; altKey: boolean; key: string; code?: string }, target: { tagName?: string; isContentEditable?: boolean } | null, path: string): boolean {
   if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return false;
   if (!(e.code === 'KeyZ' || e.key === 'z' || e.key === 'Z')) return false;
   if (target && (/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName ?? '') || target.isContentEditable)) return false;
-  return !path.startsWith('/mail');
+  return !path.startsWith('/mail') && !path.startsWith('/motion/studio');
 }

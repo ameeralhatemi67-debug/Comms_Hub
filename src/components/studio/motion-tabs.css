@@ -1,0 +1,9 @@
+/* The tab bar of «استوديو الحركة» (MVP_draft.md 62), in the page heading, after the pattern of the
+   mail page's tabs. Global tokens only, so it reads the same on the template tab (kept light inside
+   .ms) and on the studio tab. */
+.mt-tabs{display:inline-flex;flex-shrink:0;padding:4px;border-radius:14px;background:var(--surface);border:1px solid var(--line);gap:4px}
+.mt-tabs a{display:inline-flex;align-items:center;gap:8px;border-radius:10px;min-height:38px;padding:4px 16px;font-size:14px;color:var(--ink-2);font-weight:500;white-space:nowrap}
+.mt-tabs a:hover{background:var(--soft)}
+.mt-tabs a[aria-current="page"]{background:var(--green);color:var(--on-brand);font-weight:600}
+.mt-tabs svg{width:17px;height:17px}
+@media(max-width:699px){.mt-tabs{width:100%}.mt-tabs a{flex:1;justify-content:center;min-height:44px;padding-inline:10px}}
