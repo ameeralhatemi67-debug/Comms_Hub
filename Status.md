@@ -38,6 +38,7 @@ The owner's notes on the first version are built (`Studio_Build_Plan.md` section
 - **Fonts.** Twelve Arabic and ten English fonts, served by the site.
 - **Handling.** Handles to scale and turn, drag and drop from every window, a clip menu, copy and paste, the razor, wheel zoom, a snap line and a history window.
 - **Evidence.** `npm test` 435 of 435; fixtures: interface 70 of 70, engine 34 of 34, export 11 of 11, help tours 32 of 32; typecheck and build clean.
+- **Deployed.** Pushed on the owner's request (`294b8cc`) and serving in production (deployment `dpl_7vPfQGLbnHSTAVDJm5XWZ492bbu6`).
 - **Not verified.** Nothing was seen signed in, and the walkthrough of `Studio_Build_Plan.md` section 8 is still the owner's to do.
 
 ## The studio, 2026-10-19

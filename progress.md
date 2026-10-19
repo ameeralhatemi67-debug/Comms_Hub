@@ -1046,3 +1046,4 @@ When recording future implementation outcomes, follow this standardized template
   - Safari, Firefox and real phones were not run: the drag and drop of windows and effects was tried in Edge only.
   - The look of the dark chrome was judged from screenshots, not by the owner.
   - Performance at 1/32 against full on a slow computer was not measured; only that the canvas is drawn at the chosen size.
+- **Deployed.** On the owner's request `main` was pushed (`8258a13..294b8cc`, with the earlier record commit `72ce966`). Vercel deployment `dpl_7vPfQGLbnHSTAVDJm5XWZ492bbu6` was serving within about 40 seconds: the live pages name it. Signed out, `/health` answers 200, and `/motion`, `/motion/studio`, a project address and `/login` each show the sign-in form. Vercel reported no runtime errors in the first ten minutes.
