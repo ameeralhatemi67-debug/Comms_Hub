@@ -26,11 +26,14 @@ export const RATIOS: Record<Ratio, { w: number; h: number; label: string }> = {
 };
 export const FPS_CHOICES: Fps[] = [24, 25, 30, 60];
 
+/** Width by height, kept left to right inside Arabic text (Unicode isolates). */
+export const dims = (w: number, h: number) => `⁦${w}×${h}⁩`;
+
 export const PHOTO_PRESETS = [
   { w: 1080, h: 1080, label: 'مربع 1080' },
-  { w: 1080, h: 1350, label: 'طولي 1080×1350' },
-  { w: 1080, h: 1920, label: 'قصة 1080×1920' },
-  { w: 1920, h: 1080, label: 'عرضي 1920×1080' },
+  { w: 1080, h: 1350, label: `طولي ${dims(1080, 1350)}` },
+  { w: 1080, h: 1920, label: `قصة ${dims(1080, 1920)}` },
+  { w: 1920, h: 1080, label: `عرضي ${dims(1920, 1080)}` },
 ] as const;
 export const PHOTO_MAX_SIDE = 8000;
 

@@ -9,10 +9,10 @@ import type { Account } from '../../src/lib/access';
 import { ProjectList } from '../../src/components/studio/project-list';
 import { ProjectShell } from '../../src/components/studio/project-shell';
 import { VideoEditor } from '../../src/components/studio/editor';
+import { PhotoEditor } from '../../src/components/studio/photo-editor';
 import '../../src/components/studio/studio.css';
 
 const account: Account = { email: 'dir@t.test', name: 'مدير الاختبار', role: 'director', pages: ['work', 'motion', 'media'], protected: false, caps: ['motion.studio'] };
-const Photo = (window as unknown as { __PhotoEditor?: typeof VideoEditor }).__PhotoEditor;
 
 function App() {
   const [path, setPath] = useState(location.pathname);
@@ -29,7 +29,7 @@ function App() {
       <main>
         {m ? (
           <div className="st st-open">
-            <ProjectShell key={m[1]} id={m[1]} editor={(p) => (p.doc.kind === 'video' ? <VideoEditor {...p} /> : Photo ? <Photo {...p} /> : <section className="panel">photo</section>)} />
+            <ProjectShell key={m[1]} id={m[1]} editor={(p) => (p.doc.kind === 'video' ? <VideoEditor {...p} /> : <PhotoEditor {...p} />)} />
           </div>
         ) : (
           <div className="st">

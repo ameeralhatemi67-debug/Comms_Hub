@@ -5,7 +5,7 @@
 // this browser only, marked so, with uploading to the library offered first), «قوالب الحركة» (the 26
 // templates of the template tab), «نص» (titles, captions, SRT) and «علامات الهوية» (the brand marks).
 import { useEffect, useRef, useState } from 'react';
-import { FileUp, Film, Music, Search, Subtitles, Type, Upload } from 'lucide-react';
+import { Circle, FileUp, Film, Minus, Music, Search, Square, Subtitles, Type, Upload } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { STICKERS, STICKER_LABELS, type StickerKey } from '@/lib/studio/schema';
 import { motionCatalog, motionParams, motionDims, settledSec, STICKER_SRC } from '@/lib/studio/motion-adapter';
@@ -63,6 +63,8 @@ export type BinProps = {
   onText: (kind: 'title' | 'body' | 'caption') => void;
   onSrt?: (text: string) => void;
   onMark: (key: StickerKey, color: string) => void;
+  /** Photos: a rectangle, an ellipse or a line. */
+  onShape?: (type: 'rect' | 'ellipse' | 'line') => void;
   assetsReady: boolean;
 };
 
@@ -109,7 +111,7 @@ export function Bin(p: BinProps) {
     };
   }, [q, tab, p.canLibrary, p.photo]);
 
-  const tabs = TABS.filter((t) => !(p.photo && t.id === 'text'));
+  const tabs = TABS.map((t) => (p.photo && t.id === 'text' ? { ...t, label: 'نص وأشكال' } : t));
   return (
     <aside className="st-bin" aria-label="الوسائط">
       <div className="st-bin-tabs" role="tablist" aria-label="مصادر الوسائط">
@@ -210,10 +212,28 @@ export function Bin(p: BinProps) {
               <Type aria-hidden="true" />
               نص عادي
             </button>
-            <button type="button" disabled={p.readOnly} onClick={() => p.onText('caption')}>
-              <Subtitles aria-hidden="true" />
-              تعليق أسفل الشاشة
-            </button>
+            {!p.photo && (
+              <button type="button" disabled={p.readOnly} onClick={() => p.onText('caption')}>
+                <Subtitles aria-hidden="true" />
+                تعليق أسفل الشاشة
+              </button>
+            )}
+            {p.onShape && (
+              <>
+                <button type="button" disabled={p.readOnly} onClick={() => p.onShape!('rect')}>
+                  <Square aria-hidden="true" />
+                  مستطيل
+                </button>
+                <button type="button" disabled={p.readOnly} onClick={() => p.onShape!('ellipse')}>
+                  <Circle aria-hidden="true" />
+                  دائرة
+                </button>
+                <button type="button" disabled={p.readOnly} onClick={() => p.onShape!('line')}>
+                  <Minus aria-hidden="true" />
+                  خط
+                </button>
+              </>
+            )}
             {p.onSrt && (
               <>
                 <button type="button" disabled={p.readOnly} onClick={() => srtInput.current?.click()}>

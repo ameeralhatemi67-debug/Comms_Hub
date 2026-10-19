@@ -16,6 +16,7 @@ import { download } from '@/lib/studio/target';
 import { formatBytes, probeSupport } from '@/lib/studio/support';
 import { shortTime } from '@/lib/studio/time';
 import type { MediaPool } from '@/lib/studio/media';
+import type { Resolver } from '@/lib/studio/compose';
 import type { StudioApi } from '@/lib/studio/persist';
 import { Segmented } from '../motion-controls';
 import { FolderSelect } from './folder-picker';
@@ -25,7 +26,7 @@ type Dest = 'device' | 'new' | 'version';
 type Done = { kind: 'device'; name: string; bytes: number; url: string } | { kind: 'library'; name: string; asset: string; version: number };
 
 export function ExportPanel({
-  doc, pool, t, projectId, title, readOnly, canLibrary, api, saveVersion, revision, photo,
+  doc, pool, t, projectId, title, readOnly, canLibrary, api, saveVersion, revision, photo, adjusted,
 }: {
   doc: ProjectDoc;
   pool: MediaPool | null;
@@ -39,6 +40,8 @@ export function ExportPanel({
   revision: () => number;
   /** A photo project: pictures only. */
   photo?: boolean;
+  /** Photos: pictures already adjusted, as the editor shows them. */
+  adjusted?: Resolver['adjusted'];
 }) {
   const [what, setWhat] = useState<'video' | 'still'>(photo ? 'still' : 'video');
   const [short, setShort] = useState<Short>(1080);
@@ -123,7 +126,7 @@ export function ExportPanel({
       let file: File;
       if (what === 'still') {
         setProgress({ label: 'جارٍ إنشاء الصورة…', f: 0.5 });
-        file = await exportStill(doc, pool, { t, name, type: stillType, short: photo ? undefined : short });
+        file = await exportStill(doc, pool, { t, name, type: stillType, short: photo ? undefined : short, adjusted });
       } else {
         const r = await exportVideo(doc, pool, {
           short,

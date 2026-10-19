@@ -1,0 +1,161 @@
+{
+  "script": "qa/studio-ui.cjs",
+  "run": "2026-10-19T18:49:49.518Z",
+  "checks": [
+    {
+      "name": "the empty home says there are no projects yet and offers both kinds",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a new video project is created and opened in the editor",
+      "pass": true,
+      "detail": "fa3733ad-286c-4a7c-a6df-284b6f0914d4"
+    },
+    {
+      "name": "the bar names the project and its first numbered version",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a library video lands on the timeline and the preview shows its frame",
+      "pass": true,
+      "detail": "[255,24,0]"
+    },
+    {
+      "name": "a motion template goes on a graphics track and a title on a text track",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "selecting a clip opens its settings",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "S splits the selected clip at the playhead; Ctrl+Z and Ctrl+Shift+Z undo and redo it",
+      "pass": true,
+      "detail": "2 1 2"
+    },
+    {
+      "name": "the playhead at 2 s shows the source's green",
+      "pass": true,
+      "detail": "[0,216,0]"
+    },
+    {
+      "name": "dragging a clip moves it along the timeline",
+      "pass": true,
+      "detail": "17 to 137"
+    },
+    {
+      "name": "the inspector edits the title's words",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the changes are autosaved to the project's autosave slot after 15 seconds",
+      "pass": true,
+      "detail": "4 clips"
+    },
+    {
+      "name": "«حفظ نسخة» makes numbered revision 2 and empties the autosave slot",
+      "pass": true,
+      "detail": "1,2"
+    },
+    {
+      "name": "«تصدير وتنزيل» downloads an H.264 file of the project at 720p (1280x720) with its sound",
+      "pass": true,
+      "detail": "{\"programs\":[],\"stream_groups\":[],\"streams\":[{\"codec_name\":\"h264\",\"codec_type\":\"video\",\"width\":1280,\"height\":720},{\"codec_name\":\"aac\",\"codec_type\":\"audio\"}],\"format\":{\"duration\":\"7.808000\"}}"
+    },
+    {
+      "name": "«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it",
+      "pass": true,
+      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"e01a2302-742c-403f-8b18-e6aefbbefe92\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
+    },
+    {
+      "name": "the result says it is in the library and that its uploader does not approve it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4",
+      "pass": true,
+      "detail": "[{\"asset\":\"e01a2302-742c-403f-8b18-e6aefbbefe92\",\"version\":1,\"revision\":3},{\"asset\":\"e01a2302-742c-403f-8b18-e6aefbbefe92\",\"version\":2,\"revision\":4}]"
+    },
+    {
+      "name": "when another person takes the editing, a save is refused and the editor turns to reading",
+      "pass": true,
+      "detail": "لم يعد التحرير لك: فتح شخص آخر المشروع للتحرير، أو انقطع الاتصال طويلاً. تغييراتك محفوظة على هذا الجهاز. | لم يعد التحرير لك: فتح شخص آخر المشروع للتحرير، أو انقطع الاتصال طويلاً. تغييراتك محفوظة على هذا الجهاز.تولي التحرير"
+    },
+    {
+      "name": "«تولي التحرير» takes the editing back on the latest saved state",
+      "pass": true,
+      "detail": "yes"
+    },
+    {
+      "name": "after a reload, the newer changes kept on this device are offered back and restored",
+      "pass": true,
+      "detail": "1 then 0"
+    },
+    {
+      "name": "the space bar plays and pauses, and the time runs",
+      "pass": true,
+      "detail": "00:00.03 / 00:06.00 to 00:01.01 / 00:06.00"
+    },
+    {
+      "name": "a new photo project opens in the photo editor at 1080x1080",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a library picture becomes a layer, drawn on the canvas",
+      "pass": true,
+      "detail": "[254,0,253]"
+    },
+    {
+      "name": "brightness -50 is applied by the pixel functions in the worker",
+      "pass": true,
+      "detail": "[127,0,126]"
+    },
+    {
+      "name": "a title and a rectangle are added on top (the list shows the top first)",
+      "pass": true,
+      "detail": "[\"مستطيل\",\"عنوان\",\"بطاقة.png\"]"
+    },
+    {
+      "name": "the rectangle on top covers the centre in the brand green",
+      "pass": true,
+      "detail": "[23,99,75]"
+    },
+    {
+      "name": "a layer moves down the stack, and Ctrl+Z puts it back",
+      "pass": true,
+      "detail": "{\"moved\":[\"عنوان\",\"مستطيل\",\"بطاقة.png\"],\"undone\":[\"مستطيل\",\"عنوان\",\"بطاقة.png\"]}"
+    },
+    {
+      "name": "dragging a layer on the canvas moves it",
+      "pass": true,
+      "detail": "540 to 645"
+    },
+    {
+      "name": "the PNG export is the full 1080x1080 picture with the rectangle in the middle",
+      "pass": true,
+      "detail": "png,1080,1080 23,99,75"
+    },
+    {
+      "name": "Delete removes the selected layer",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "debugTime": "00:02.00 / 00:07.24",
+  "projectId": "fa3733ad-286c-4a7c-a6df-284b6f0914d4",
+  "total": 30,
+  "passed": 30,
+  "failed": 0
+}

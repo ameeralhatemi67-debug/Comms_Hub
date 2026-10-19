@@ -213,6 +213,69 @@ async function videoFlow(browser, base, errors) {
   await ctx.close();
 }
 
+async function photoFlow(browser, base, errors) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const tab = await ctx.newPage();
+  tab.on('pageerror', (e) => errors.push(e.message));
+  tab.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  tab.on('response', (q) => q.status() >= 400 && errors.push(`HTTP ${q.status()}: ${q.url()}`));
+  await tab.goto(base + '/motion/studio');
+  await tab.getByRole('button', { name: 'مشروع صورة جديد' }).click();
+  await tab.getByLabel('اسم المشروع').fill('بطاقة الاختبار');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).click();
+  await tab.locator('.st-photo').waitFor({ timeout: 15000 });
+  check('a new photo project opens in the photo editor at 1080x1080', /1080×1080/.test(await tab.locator('.st-photo .st-tl-bar .st-hint').textContent()));
+  const centre = () => tab.evaluate(() => { const c = document.querySelector('.st-canvas'); const d = c.getContext('2d').getImageData(c.width >> 1, c.height >> 1, 1, 1).data; return [d[0], d[1], d[2]]; });
+  await tab.locator('.st-lib button', { hasText: 'بطاقة' }).click();
+  await tab.waitForTimeout(1200);
+  const c0 = await centre();
+  check('a library picture becomes a layer, drawn on the canvas', (await tab.locator('.st-layers li').count()) === 1 && near(c0, [255, 0, 255]), JSON.stringify(c0));
+  await tab.evaluate(() => {
+    const el = [...document.querySelectorAll('.st-insp input[type=range]')].find((x) => x.closest('.ms-slider')?.textContent.includes('السطوع'));
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, '-50');
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await tab.waitForTimeout(1200);
+  const c1 = await centre();
+  check('brightness -50 is applied by the pixel functions in the worker', near(c1, [128, 0, 128], 20), JSON.stringify(c1));
+  await tab.getByRole('tab', { name: 'نص وأشكال' }).click();
+  await tab.getByRole('button', { name: 'عنوان كبير' }).click();
+  await tab.getByRole('button', { name: 'مستطيل' }).click();
+  const names = () => tab.locator('.st-layers .st-layer-name').allTextContents();
+  const n3 = await names();
+  check('a title and a rectangle are added on top (the list shows the top first)', n3.length === 3 && n3[0] === 'مستطيل' && n3[1] === 'عنوان', JSON.stringify(n3));
+  const c2 = await centre();
+  check('the rectangle on top covers the centre in the brand green', near(c2, [23, 99, 75], 25), JSON.stringify(c2));
+  await tab.locator('.st-layers li', { hasText: 'مستطيل' }).getByRole('button', { name: 'إلى الأسفل' }).click();
+  const moved = await names();
+  await tab.locator('body').press('Control+z');
+  const undone = await names();
+  check('a layer moves down the stack, and Ctrl+Z puts it back', moved[1] === 'مستطيل' && undone[0] === 'مستطيل', JSON.stringify({ moved, undone }));
+  const box = await tab.locator('.st-canvas').boundingBox();
+  await tab.locator('.st-layers .st-layer-name', { hasText: 'مستطيل' }).click();
+  const x0 = await tab.getByLabel('الموضع أفقياً، قيمة دقيقة').inputValue();
+  await tab.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await tab.mouse.down();
+  await tab.mouse.move(box.x + box.width / 2 + 60, box.y + box.height / 2, { steps: 5 });
+  await tab.mouse.up();
+  const x1 = await tab.getByLabel('الموضع أفقياً، قيمة دقيقة').inputValue();
+  check('dragging a layer on the canvas moves it', Number(x1) > Number(x0) + 50, `${x0} to ${x1}`);
+  await tab.locator('body').press('Control+z');
+  await tab.locator('.st-export').scrollIntoViewIfNeeded();
+  const [dl] = await Promise.all([tab.waitForEvent('download', { timeout: 30000 }), tab.getByRole('button', { name: 'تصدير وتنزيل' }).click()]);
+  const png = path.join(out, 'photo.png');
+  await dl.saveAs(png);
+  const { spawnSync } = require('node:child_process');
+  const meta = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_name,width,height', '-of', 'csv=p=0', png]).stdout.toString().trim();
+  const mid = spawnSync('ffmpeg', ['-v', 'error', '-i', png, '-vf', 'crop=4:4:538:538,scale=1:1', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-']).stdout;
+  check('the PNG export is the full 1080x1080 picture with the rectangle in the middle', meta === 'png,1080,1080' && near([mid[0], mid[1], mid[2]], [23, 99, 75], 25), `${meta} ${[...mid].join(',')}`);
+  await tab.locator('.st-layers .st-layer-name', { hasText: 'مستطيل' }).click();
+  await tab.locator('body').press('Delete');
+  check('Delete removes the selected layer', (await tab.locator('.st-layers li').count()) === 2);
+  await tab.screenshot({ path: path.join(out, 'photo-1440.png'), fullPage: true });
+  await ctx.close();
+}
+
 (async () => {
   await build();
   const { server, base } = await serve(out, (p) => (p.startsWith('/motion/studio') ? page : undefined));
@@ -220,7 +283,7 @@ async function videoFlow(browser, base, errors) {
   const errors = [];
   try {
     if (!only || only === 'video') await videoFlow(browser, base, errors);
-    if ((!only || only === 'photo') && typeof module.exports.photoFlow === 'function') await module.exports.photoFlow(browser, base, errors, { check, out, near });
+    if (!only || only === 'photo') await photoFlow(browser, base, errors);
     if ((!only || only === 'phone') && typeof module.exports.phoneFlow === 'function') await module.exports.phoneFlow(browser, base, errors, { check, out, near });
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));

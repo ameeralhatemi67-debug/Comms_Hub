@@ -140,3 +140,16 @@
 .st-export-run button{min-height:34px;padding:4px 12px}
 .st-done{font-size:13px;margin:0;padding:10px 12px;border-radius:8px;background:var(--soft);display:grid;gap:4px}
 .st-done a{color:var(--green-text);text-decoration:underline}
+
+/* photo editor */
+.st-photo-box{min-height:300px}
+.st-layers{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.st-layers h2{font-size:15px;margin:0}
+.st-layers ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.st-layers li{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:2px 4px}
+.st-layers li[data-selected="yes"]{border-color:var(--green);background:var(--soft)}
+.st-layer-name{flex:1;justify-content:flex-start;border:0;background:transparent;min-height:34px;padding:2px 8px;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:start}
+.st-layer-acts{display:flex;gap:2px}
+.st-layer-acts button{min-height:30px;width:30px;padding:0;border:0;background:transparent}
+.st-layer-acts svg{width:15px;height:15px}
+.st-flip{display:flex;gap:14px;flex-wrap:wrap}

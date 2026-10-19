@@ -154,7 +154,7 @@ export async function exportVideo(
 }
 
 /** One frame (a video project at time t, or a photo) as a PNG, JPEG or WebP file at `short` (or full size). */
-export async function exportStill(doc: ProjectDoc, pool: MediaPool, opts: { t?: Micros; short?: number; type?: 'image/png' | 'image/jpeg' | 'image/webp'; name: string; quality?: number }): Promise<File> {
+export async function exportStill(doc: ProjectDoc, pool: MediaPool, opts: { t?: Micros; short?: number; type?: 'image/png' | 'image/jpeg' | 'image/webp'; name: string; quality?: number; adjusted?: Resolver['adjusted'] }): Promise<File> {
   const { w: W, h: H } = canvasOf(doc);
   const size = opts.short ? outputSize(doc, opts.short) : { w: W, h: H };
   const canvas = document.createElement('canvas');
@@ -164,7 +164,7 @@ export async function exportStill(doc: ProjectDoc, pool: MediaPool, opts: { t?: 
   const motion = new MotionRenderer();
   const type = opts.type ?? 'image/png';
   if (doc.kind === 'photo') {
-    composePhoto(ctx, doc, { motion, image: (id) => pool.image(id), videoFrame: () => null }, { scale: size.w / W, transparent: type === 'image/png' && doc.photo?.background === null });
+    composePhoto(ctx, doc, { motion, image: (id) => pool.image(id), videoFrame: () => null, adjusted: opts.adjusted }, { scale: size.w / W, transparent: type === 'image/png' && doc.photo?.background === null });
   } else {
     const t = opts.t ?? 0;
     const frames = new Map<string, CanvasImageSource | null>();

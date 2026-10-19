@@ -13,6 +13,8 @@ export type Resolver = {
   /** A picture source, or null while it is not ready. */
   image(sourceId: string): CanvasImageSource | null;
   motion: MotionRenderer;
+  /** A picture already adjusted for this item (photos: the pixel functions of photo.ts), or null. */
+  adjusted?: (item: Clip | Layer) => CanvasImageSource | null;
 };
 
 export type Box = { cx: number; cy: number; w: number; h: number; rotation: number };
@@ -65,7 +67,7 @@ export function filterOf(a: Adjust | undefined): string {
   return parts.length ? parts.join(' ') : 'none';
 }
 
-type Drawn = { img: CanvasImageSource | null; natural: { w: number; h: number }; fitInCanvas: boolean; draw?: (ctx: CanvasRenderingContext2D, w: number, h: number, scale: number) => void };
+type Drawn = { img: CanvasImageSource | null; natural: { w: number; h: number }; fitInCanvas: boolean; preAdjusted?: boolean; draw?: (ctx: CanvasRenderingContext2D, w: number, h: number, scale: number) => void };
 
 /**
  * What an item shows at time t, and its natural size. With `measure`, only the size is wanted: no video
@@ -76,6 +78,11 @@ function contentOf(doc: ProjectDoc, item: Clip | Layer, t: Micros | null, res: R
     const s = sourceOf(doc, item.source);
     if (!s) return null;
     if (measure && s.media === 'video') return s.w && s.h ? { img: null, natural: { w: s.w, h: s.h }, fitInCanvas: true } : null;
+    const pre = s.media === 'image' && item.adjust ? (res.adjusted?.(item) ?? null) : null;
+    if (pre) {
+      const natural = sizeOf(pre) ?? (s.w && s.h ? { w: s.w, h: s.h } : null);
+      return natural ? { img: pre, natural, fitInCanvas: true, preAdjusted: true } : null;
+    }
     const img = s.media === 'video' ? res.videoFrame(s.id, Math.max(0, ((item as Clip).in ?? 0) + (t === null ? 0 : t - ((item as Clip).start ?? 0))), item.id) : s.media === 'image' ? res.image(s.id) : null;
     const natural = sizeOf(img) ?? (s.w && s.h ? { w: s.w, h: s.h } : null);
     if (!natural) return null;
@@ -193,7 +200,8 @@ export function drawItem(ctx: CanvasRenderingContext2D, doc: ProjectDoc, item: C
   const flip = (item as Layer).flip;
   if (flip?.h || flip?.v) ctx.scale(flip.h ? -1 : 1, flip.v ? -1 : 1);
   const f = filterOf((item as Clip).adjust);
-  if (f !== 'none' && supportsFilter()) ctx.filter = f;
+  // photos are adjusted by the pixel functions (resolver.adjusted); video uses the canvas filter
+  if (f !== 'none' && !c.preAdjusted && doc.kind !== 'photo' && supportsFilter()) ctx.filter = f;
   if (item.text) {
     ctx.scale(tr.scale, tr.scale);
     drawText(ctx, item.text, 0, 0, W, scale);
