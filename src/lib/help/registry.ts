@@ -32,6 +32,8 @@ export function pageKeyOf(path: string): string | null {
   if (p === '/ideas') return 'ideas';
   if (p === '/analytics') return 'analytics';
   if (p === '/motion') return 'motion';
+  if (p === '/motion/studio') return 'studio';
+  if (/^\/motion\/studio\/[^/]+$/.test(p)) return 'studio-edit';
   return null;
 }
 
@@ -59,6 +61,8 @@ export const PAGE_HREF: Record<string, string> = {
   ideas: '/ideas',
   analytics: '/analytics',
   motion: '/motion',
+  studio: '/motion/studio',
+  'studio-edit': '/motion/studio',
   home: '/',
 };
 
@@ -103,5 +107,7 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   ideas: ['src/components/ideas.tsx'],
   analytics: ['src/components/work/analytics.tsx'],
   motion: ['src/components/motion-studio.tsx', 'src/components/motion-controls.tsx', 'src/components/motion-stage.tsx', 'src/components/motion-export.tsx'],
+  studio: ['src/components/studio/studio-page.tsx', 'src/components/studio/project-list.tsx', 'src/components/studio/motion-tabs.tsx'],
+  'studio-edit': ['src/components/studio/project-shell.tsx', 'src/components/studio/editor.tsx', 'src/components/studio/photo-editor.tsx', 'src/components/studio/bin.tsx', 'src/components/studio/stage.tsx', 'src/components/studio/timeline.tsx', 'src/components/studio/inspector.tsx', 'src/components/studio/export-panel.tsx', 'src/components/studio/work-links.tsx'],
 };
 export const SHARED_SOURCES = ['src/components/ui.tsx', 'src/components/shell.tsx', 'src/components/kit.tsx'];

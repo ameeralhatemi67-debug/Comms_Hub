@@ -1,6 +1,6 @@
 {
   "script": "qa/help-tours.cjs",
-  "run": "2026-10-19T06:48:39.745Z",
+  "run": "2026-10-19T19:14:44.806Z",
   "checks": [
     {
       "name": "lead: the first card says the director, by the exact role name, what the page is for",
@@ -128,12 +128,42 @@
       "detail": "دليل الصفحة «الموافقات والنشر» الموافقة قرار على إصدار بعينه، والنشر خطوة منفصلة بعدها يتولاها مسؤول النشر. العودة إلى الصفحة إعادة الإرشاد لهذه الصفحة وضع الإر"
     },
     {
+      "name": "studio: the director gets four cards, starting a project first, with the director's introduction",
+      "pass": true,
+      "detail": "إرشاد «الاستوديو» · 1 من 4 ابدأ مشروعاً اختر فيديو بشكله وإطاراته، أو صورة بمقاسها. يُفتح المشروع مباشرة ويُحفظ تلقائياً. بصفتك «مدير الاتصال المؤسسي»: ابدأ مشروع فيديو أو صورة، وتابع من يحرر كل مشروع"
+    },
+    {
+      "name": "studio: the last card checks the browser before starting",
+      "pass": true,
+      "detail": "إرشاد «الاستوديو» · 4 من 4 افحص المتصفح أولاً إن لم يصنع المتصفح MP4 أو لم يحفظ الملفات على الجهاز، يقول ذلك هنا قبل أن "
+    },
+    {
+      "name": "studio editor: the Admin gets four cards, saving first, with the Admin's introduction",
+      "pass": true,
+      "detail": "إرشاد «محرر الاستوديو» · 1 من 4 الحفظ تلقائي يُحفظ المشروع بعد التعديل بثوانٍ، وعلى هذا الجهاز خلال ثانية. «حفظ نسخة» يصنع نسخة مرقّمة تبقى كما هي. بصفتك «Admin»: حرّر وصدّر لتختبر المسار. التصدير لا "
+    },
+    {
+      "name": "studio editor: the last card says exporting to the library approves nothing and publishing is a simulation",
+      "pass": true,
+      "detail": "إرشاد «محرر الاستوديو» · 4 من 4 التصدير إلى المكتبة يحفظ نسخة مرقّمة ثم يرفع الملف ويسجّل مصدره. لا يعتمد أحد ما رفعه، والنشر ما يزال محاكاة. السابق ابدأ تخطَّ "
+    },
+    {
+      "name": "studio: a designer gets three plain cards and is told the studio does not open for the role",
+      "pass": true,
+      "detail": "إرشاد «الاستوديو» · 1 من 3 هذه الصفحة غير متاحة لحسابك الوصول إلى الصفحة يختلف عن صلاحية تنفيذ إجراءاتها. يوضح السبب هنا ما يمنعك الآن. بصفتك «المصمم»: الاستوديو لا يُفتح لدورك. قوالب الحركة متاحة لك "
+    },
+    {
+      "name": "studio: the second card names who the studio is for, by owner decision",
+      "pass": true,
+      "detail": "إرشاد «الاستوديو» · 2 من 3 الاستوديو لمسؤول النظام ومدير الاتصال المؤسسي بقرار المالك لا يُمنح لغيرهما. ما يُحفظ منه في المكتبة يصلك عبر الأعمال والمراجعة. السا"
+    },
+    {
       "name": "no script errors on any page",
       "pass": true,
       "detail": ""
     }
   ],
-  "total": 26,
-  "passed": 26,
+  "total": 32,
+  "passed": 32,
   "failed": 0
 }

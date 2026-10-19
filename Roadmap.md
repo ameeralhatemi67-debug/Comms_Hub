@@ -244,6 +244,22 @@ By owner directive of 2026-10-13 (recorded in `progress.md` and `AGENTS.md`) per
 - [/] **P5b, the pull bridge** (2026-10-14, `1f22f48`). Built in `bridge/whatsapp/`; offline tests 14 of 14 with the pinned library. The first QR link of the system number and a real message need the owner's phone and were not performed.
   *Exit gate:* standard checks pass (met); the owner links the system number and runs the WhatsApp walkthrough of the P5b entry in `progress.md` (pending); the owner's signed-in walkthroughs of P2 to P5a (pending); a push to deploy on the owner's request (pending: all steps are local commits).
 
+### Requested scope addition, 2026-10-19: «الاستوديو» in «استوديو الحركة»
+
+By owner directive of 2026-10-19 (recorded in `progress.md` and `AGENTS.md`), a video and photo studio is built as a new tab of «استوديو الحركة». The template tab stays as it was. The studio is open to the Admin and the director only, through a fixed capability that no grant can give. The research `Studio_Feasibility_and_App_Path.md` was audited into `Studio_Build_Plan.md`, and the engine is our own Canvas compositor with Mediabunny. Publishing stays a simulation, and the studio never approves. This is independent of the department validation and does not count as stakeholder acceptance.
+
+- [x] **Phase 0, baseline, specification and the media base on trial** (2026-10-19, `50f19b0`; `MVP_draft.md` sections 12 to 61 restored in `58cc255`). Trial 13 of 13.
+- [x] **Phase 1, the tab and its access** (2026-10-19, `14680bd`). Rule run 21 of 21.
+- [x] **Phase 2, projects in the database** (2026-10-19, `3fdbad2`). Rule run 51 of 51.
+- [x] **Phase 3, the engine and the video editor** (2026-10-19, `d56a36b`). Engine 25 of 25, interface 17 of 17.
+- [x] **Phase 4, export and saving to the library** (2026-10-19, `81ba8e6`). Export 11 of 11, interface 21 of 21.
+- [x] **Phase 5, the photo editor** (2026-10-19, `ad09e33`). Interface 30 of 30.
+- [x] **Phase 6, phones** (2026-10-19, `d0b0667`). Interface 41 of 41.
+- [x] **Phase 7, links to works and review notes** (2026-10-19, `a09c0b2`). Rule run 13 of 13, interface 45 of 45.
+- [x] **Phase 8, the guide and the records** (2026-10-19). Two guide pages with cards for each exact role, drafted for the owner's review.
+  *Exit gate:* standard checks pass (met). The owner's signed-in walkthrough in `Studio_Build_Plan.md` section 8 is pending, and so is the owner's review of the two drafted help blocks. A push to deploy waits for the owner's request: all phases are local commits.
+  *Deferred* (`Studio_Build_Plan.md` section 7): export on the organisation computer, shared temporary storage, desktop and phone apps, and review notes bound to a version.
+
 ### Checkpoint 0.1: UI Prototype MVP 0.1
 
 **State:** Complete and verified (2026-09-19). **Authority:** [[MVP_draft]].

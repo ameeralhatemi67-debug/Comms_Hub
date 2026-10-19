@@ -904,6 +904,56 @@ Empty: «لا خدمات أو نسخ ظاهرة في هذا القسم. راجع
 
 Deeper help: provider-specific setup guides, prerequisites and exact rights, secret renewal, app/token expiry, file serving and migration, resumable execution, recoverable source retirement, incremental backups, verification/restore, WhatsApp bridge operations, and feedback triage.
 
+## 24. الاستوديو
+
+Page key: `studio`. Route: `/motion/studio`. Priority: P2. Sources: `src/components/studio/studio-page.tsx`, `project-list.tsx`, `motion-tabs.tsx`.
+
+Drafted 2026-10-19 with the studio (MVP_draft.md 62), for the owner's review like the rest of this file. Gate: the fixed capability `motion.studio` (Admin and director) with the page of «استوديو الحركة». The other roles never reach the page; their rows use the restricted-state cards.
+
+| Role | Access | Proposed Arabic introduction | Cards in order | Success to validate |
+|---|---|---|---|---|
+| مدير الاتصال المؤسسي | A | ابدأ مشروع فيديو أو صورة، وتابع من يحرر كل مشروع الآن. | SD01, SD02, SD03, SD04 | Edits and saves without assuming approval or publication. |
+| مساعد مدير الاتصال المؤسسي | R | الاستوديو لمسؤول النظام ومدير الاتصال المؤسسي. ما يُحفظ منه في المكتبة يصل إليك للمراجعة. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| كاتب المحتوى | R | الاستوديو لا يُفتح لدورك. ما يُصنع فيه يصل إلى الأعمال عبر المكتبة. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| المصمم | R | الاستوديو لا يُفتح لدورك. قوالب الحركة متاحة لك في تبويبها. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| المنتج الإعلامي | R | الاستوديو لا يُفتح لدورك. قوالب الحركة متاحة لك في تبويبها. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| مسؤول النشر وإدارة الحسابات | R | الاستوديو لا يُفتح لدورك. ترى مخرجاته في المكتبة والأعمال بعد مراجعتها. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| عضو | R | الاستوديو لا يُفتح لدورك. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| Admin | A | المشاريع مشتركة مع مدير الاتصال المؤسسي. ما ترفعه أنت يعتمده غيرك. | SD01, SD02, SD03, SD04 | Edits and saves without assuming approval or publication. |
+
+| ID | Target | Proposed Arabic title | Proposed Arabic body |
+|---|---|---|---|
+| SD01 | .st-home-bar | ابدأ مشروعاً | اختر فيديو بشكله وإطاراته، أو صورة بمقاسها. يُفتح المشروع مباشرة ويُحفظ تلقائياً. |
+| SD02 | .st-cards | المشاريع مشتركة | يرى مسؤول النظام ومدير الاتصال المؤسسي المشاريع نفسها، ويحرر المشروع شخص واحد في كل وقت. |
+| SD03 | .st-cards | الأرشفة لا تحذف | الأرشفة بضغطة مطولة تنقل المشروع بكل نسخه إلى الأرشيف، ويُعاد منه متى شئت. |
+| SD04 | .st-support | افحص المتصفح أولاً | إن لم يصنع المتصفح MP4 أو لم يحفظ الملفات على الجهاز، يقول ذلك هنا قبل أن تبدأ. |
+| SD05 | Restricted state | الاستوديو لمسؤول النظام ومدير الاتصال المؤسسي | بقرار المالك لا يُمنح لغيرهما. ما يُحفظ منه في المكتبة يصلك عبر الأعمال والمراجعة. |
+
+## 25. محرر الاستوديو
+
+Page key: `studio-edit`. Route: `/motion/studio/<id>`. Priority: P2. Sources: `src/components/studio/project-shell.tsx`, `editor.tsx`, `photo-editor.tsx`, `bin.tsx`, `stage.tsx`, `timeline.tsx`, `inspector.tsx`, `export-panel.tsx`, `work-links.tsx`.
+
+Drafted 2026-10-19, for the owner's review. Same gate as «الاستوديو». The card SE05 (review in the settings) is written for a later round and is not in the first tour.
+
+| Role | Access | Proposed Arabic introduction | Cards in order | Success to validate |
+|---|---|---|---|---|
+| مدير الاتصال المؤسسي | A | حرّر وصدّر. ما ترفعه أنت إلى المكتبة يعتمده المساعد، فلا يعتمد أحد ما رفعه. | SE01, SE02, SE03, SE04 | Edits and saves without assuming approval or publication. |
+| مساعد مدير الاتصال المؤسسي | R | المحرر لمسؤول النظام ومدير الاتصال المؤسسي. ملفاته تصلك في المراجعة. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| كاتب المحتوى | R | المحرر لا يُفتح لدورك. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| المصمم | R | المحرر لا يُفتح لدورك. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| المنتج الإعلامي | R | المحرر لا يُفتح لدورك. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| مسؤول النشر وإدارة الحسابات | R | المحرر لا يُفتح لدورك. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| عضو | R | المحرر لا يُفتح لدورك. | B01, SD05, B03 | Understands the studio is not theirs and where its output reaches them. |
+| Admin | A | حرّر وصدّر لتختبر المسار. التصدير لا يعتمد ولا ينشر، والنشر محاكاة. | SE01, SE02, SE03, SE04 | Edits and saves without assuming approval or publication. |
+
+| ID | Target | Proposed Arabic title | Proposed Arabic body |
+|---|---|---|---|
+| SE01 | .st-bar | الحفظ تلقائي | يُحفظ المشروع بعد التعديل بثوانٍ، وعلى هذا الجهاز خلال ثانية. «حفظ نسخة» يصنع نسخة مرقّمة تبقى كما هي. |
+| SE02 | .st-bin | أضف من المكتبة أو القوالب | ملف المكتبة يُستعمل بإصداره المحدد، وقوالب الحركة تُعدَّل حقولها من الإعدادات. ملف هذا الجهاز لا يُفتح من جهاز آخر. |
+| SE03 | .st-stage | المعاينة هي التصدير | اسحب العنصر المحدد لتحريكه. على الخط الزمني: S للقص، وCtrl+Z للتراجع في الاستوديو وحده. |
+| SE04 | .st-export | التصدير إلى المكتبة | يحفظ نسخة مرقّمة ثم يرفع الملف ويسجّل مصدره. لا يعتمد أحد ما رفعه، والنشر ما يزال محاكاة. |
+| SE05 | .st-insp | المراجعة في الإعدادات | اربط المشروع بعمل، وتابع ملاحظات المراجعة الزمنية على الملف المصدَّر وانتقل إلى أوقاتها. |
+
 ## Shared first-use guidance outside the 23 page tours
 
 These are section tips for the common shell and entry/recovery flows. They are not additional page entries in the 23-page count. They must not replay as a global onboarding sequence on every route.
@@ -1017,3 +1067,5 @@ Implemented: the first-visit guide and the page guide, for all 23 pages and all 
 - Wording changes made while implementing: Y02 now speaks only of the mode (the design choice was removed on 2026-10-19), A04 uses the status «بحاجة إلى تعديل», and five of the longest cards were shortened (I02, I06, M04, ST10, S04).
 
 Not implemented, and still proposals in this file: the first-section tips of each page, the role-specific empty-state texts, the settings tab tips ST01 to ST19, the shared shell, entry and external-link cards (SH, EN, EX), the conditional replacement cards that need a runtime check of the person's actual grant (L07, Z06, D06 and G01 to G06), dismissed-versus-completed tracking, and levels 2 and 3. The section "Corrections to make before implementing" above is therefore only partly closed: its first two P1 rows (exact roles, the member creation path) are done.
+
+Added 2026-10-19 with the studio: sections 24 «الاستوديو» and 25 «محرر الاستوديو», drafted by the implementer and waiting for the owner's review. They are implemented and held by the same test (25 pages, 200 rows); until the review, the reviewed scope of this file stays the 23 pages above. The six roles that never reach the studio see B01, then the restricted-state card SD05, then B03.

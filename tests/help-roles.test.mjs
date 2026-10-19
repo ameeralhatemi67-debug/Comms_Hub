@@ -38,7 +38,7 @@ test('the role guide covers every help page and every exact role, three or four 
 });
 
 test('src/lib/help/roles.ts says what Help_Content_Matrix.md says: wording, introductions, access notes and card order', () => {
-  assert.equal(Object.keys(rows).length, 23);
+  assert.equal(Object.keys(rows).length, 25);
   for (const [page, byRole] of Object.entries(rows)) {
     for (const role of roleIds) assert.deepEqual(ROLE_GUIDE[page][role], byRole[role], `${page}/${role}`);
   }

@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-16
+updated: 2026-10-19
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -25,6 +25,23 @@ related:
 ---
 
 # Communication Department Hub — Current Status
+
+## The studio, 2026-10-19
+
+«الاستوديو» is built as a new tab of «استوديو الحركة» (`/motion/studio`), by owner directive of 2026-10-19. The build followed `Studio_Build_Plan.md` (the audit of `Studio_Feasibility_and_App_Path.md`, in nine phases) and is specified in `MVP_draft.md` section 62, restored the same day with sections 12 to 61. The template tab at `/motion` is unchanged for every role, and its 26 motion templates and the brand marks are usable inside the studio.
+
+- **Access.** The studio opens only through the fixed capability `motion.studio`, held by the Admin and the director together with the page of «استوديو الحركة». No grant can give it. The server checks it for the whole address, and so does the database (rules 21 of 21).
+- **Projects.** Stored in Postgres and shared between the two holders. Each project has an autosave plus numbered revisions, one editor at a time under a lease, and a draft on the device (rules 51 of 51).
+- **Editors.**
+  - Video on a timeline (3 video, 2 graphics, 2 text and 3 audio tracks) and photo with layers.
+  - One Canvas compositor draws both preview and export, with Mediabunny 1.61.2 for decoding and encoding.
+  - Exports are MP4 (or WebM) and stills, to the device or to the library as a new file or version.
+  - A project can join a work and shows the timed review notes on its exported file (rules 13 of 13).
+- **Phones.** Below 760 px wide the editor shows one panel at a time. Tools kept for the computer are named in place, and nothing is removed from a project.
+- **Help.** Two guide pages (`studio`, `studio-edit`) have cards for each exact role. Their blocks in `Help_Content_Matrix.md` (sections 24 and 25) are drafts for the owner's review.
+- **Evidence.** Fixture checks: interface 45 of 45, engine 25 of 25, export 11 of 11. Per-phase numbers, and the final `npm test` total, are in `progress.md`. All work is in local commits; nothing is pushed.
+- **Not verified.** Nothing was seen signed in. Real phones, Safari and a long Drive video were not tried.
+- **Next action for the studio.** The owner's signed-in walkthrough in `Studio_Build_Plan.md` section 8, then a push when asked.
 
 ## Transparent motion video, 2026-10-18
 

@@ -237,6 +237,24 @@ is run by a person: nothing is scheduled. A database restore is not offered from
 and `integrations.secrets` are the administrator's by default. Nothing is scheduled in the
 site: what needs a timer waits for the owner's agent computer (E-1), and the NAS likewise.
 
+The studio is real too, by owner directive of 2026-10-19 (`Studio_Build_Plan.md`, `MVP_draft.md`
+section 62, recorded in `progress.md`). It is the «الاستوديو» tab of «استوديو الحركة»
+(`/motion/studio`); the template tab at `/motion` stays as it was for every role, and its 26
+templates and the brand marks are usable inside the studio. Who may open it is the fixed capability
+`motion.studio`: the Admin and the director only, together with the page of «استوديو الحركة».
+No grant, template, preset or request can give it (`CAP_FIXED`), and the server checks the whole
+address (`canOpenRoute`). Projects, numbered revisions, the autosave slot, the editing lease, the
+sources and the exports live in Postgres (`supabase/migrations/*studio*`), and every write is a
+database function. Editing, preview and export run in the browser on one Canvas 2D compositor
+with Mediabunny (pinned, MPL-2.0, `THIRD_PARTY_NOTICES.md`). A library file is copied to the
+device's private storage (OPFS) once per version, and a file from the device stays on that
+device. There is no shared temporary storage and no remote render (they wait for the agent
+computer, E-1). The studio never approves or publishes: what it saves to the library is a new
+file or version that goes through review like any other, and nobody approves what they uploaded.
+Ctrl+Z inside the studio is the studio's own and never reaches the library's undo. Its rules are
+held by `supabase/tests/studio_*_rules.sql`, `tests/studio-*.test.mjs` and the fixture checks
+`qa/studio-*.cjs`.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted

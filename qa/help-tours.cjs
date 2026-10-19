@@ -63,6 +63,9 @@ const make = (cfg, body) => {
 };
 
 const APPROVALS = '<div class="wk-head"><h1>الموافقات والنشر</h1></div><div data-gd="atabs"><button>بانتظارك</button></div><div data-gd="aq"><button>بانتظار قراري</button></div><div class="wk-qcards"><article>بطاقة</article></div><div class="wk-lg">سجل القرارات</div>';
+// «الاستوديو» and its editor (MVP_draft.md 62), with the classes of the real components (held by tests/help-roles.test.mjs).
+const STUDIO = '<nav class="mt-tabs"><a>قوالب الحركة</a><a>الاستوديو</a></nav><div class="st-home-bar"><button>مشروع فيديو جديد</button></div><div class="st-cards"><article>مشروع</article></div><div class="st-support">قدرات المتصفح</div>';
+const STUDIO_EDIT = '<div class="st-bar">محفوظ</div><div class="st-bin">الوسائط</div><div class="st-stage"><canvas width="90" height="160"></canvas></div><div class="st-insp">الإعدادات</div><div class="st-export">التصدير</div>';
 const PUB = '<div class="wk-head"><h1>الموافقات والنشر</h1></div><div data-gd="atabs"><button>بانتظارك</button></div><div class="wk-qcards"><article>بطاقة</article></div><div class="wk-accts">تفويض الحسابات</div><section data-gd="pub-1">نشر</section>';
 const scenes = {
   lead: make({ page: 'approvals', role: 'lead', exact: 'director', seen: {} }, APPROVALS),
@@ -74,6 +77,9 @@ const scenes = {
   newsSeen: make({ page: 'settings', role: 'lead', exact: 'director', seen: { settings: true, [`settings:v${SV}`]: true } }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div>'),
   first: make({ page: 'settings', role: 'lead', exact: 'director', seen: {} }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div><section class="st-health">صحة</section>'),
   touch: make({ page: 'approvals', role: 'lead', exact: 'director', seen: { approvals: true } }, APPROVALS),
+  studioLead: make({ page: 'studio', role: 'lead', exact: 'director', seen: {} }, STUDIO),
+  studioEdit: make({ page: 'studio-edit', role: 'lead', exact: 'admin', seen: {} }, STUDIO_EDIT),
+  studioOther: make({ page: 'studio', role: 'maker', exact: 'designer', seen: {} }, '<div class="wk-head"><h1>الاستوديو</h1></div>'),
 };
 
 (async () => {
@@ -220,6 +226,33 @@ const scenes = {
     check('touch: the page guide opens from its button', /الموافقات والنشر/.test(view) && /ماذا يرى كل دور/.test(view), view.replace(/\s+/g, ' ').slice(0, 80));
     check('the page guide starts with what concerns the exact role: its introduction and its cards', /ما يخصك بصفتك «مدير الاتصال المؤسسي»/.test(view) && /ابدأ بما ينتظر قرارك/.test(view) && /افتح المراجعة قبل القرار/.test(view) && /الاعتماد خطوة مستقلة/.test(view), view.replace(/\s+/g, ' ').slice(0, 160));
     await page.screenshot({ path: path.join(out, 'touch-guide.png') });
+    await ctx.close();
+
+    // 9. The studio: the director's four cards on the projects, the Admin's four in the editor, and a role
+    // without the studio told so in plain cards (it never reaches the page; the cards are the restricted state).
+    ({ ctx, page } = await open(scenes.studioLead));
+    t = await pop(page);
+    check('studio: the director gets four cards, starting a project first, with the director\'s introduction', t && /1 من 4/.test(t) && /بصفتك «مدير الاتصال المؤسسي»/.test(t) && /ابدأ مشروعاً/.test(t) && /وتابع من يحرر كل مشروع الآن/.test(t), t?.replace(/\s+/g, ' ').slice(0, 200));
+    for (let i = 0; i < 3; i++) await nextStep(page);
+    t = await pop(page);
+    check('studio: the last card checks the browser before starting', t && /افحص المتصفح أولاً/.test(t) && /4 من 4/.test(t), t?.replace(/\s+/g, ' ').slice(0, 120));
+    await ctx.close();
+
+    ({ ctx, page } = await open(scenes.studioEdit));
+    t = await pop(page);
+    check('studio editor: the Admin gets four cards, saving first, with the Admin\'s introduction', t && /1 من 4/.test(t) && /بصفتك «Admin»/.test(t) && /الحفظ تلقائي/.test(t) && /التصدير لا يعتمد ولا ينشر/.test(t), t?.replace(/\s+/g, ' ').slice(0, 200));
+    for (let i = 0; i < 3; i++) await nextStep(page);
+    t = await pop(page);
+    check('studio editor: the last card says exporting to the library approves nothing and publishing is a simulation', t && /التصدير إلى المكتبة/.test(t) && /لا يعتمد أحد ما رفعه/.test(t) && /محاكاة/.test(t), t?.replace(/\s+/g, ' ').slice(0, 160));
+    await ctx.close();
+
+    ({ ctx, page } = await open(scenes.studioOther));
+    t = await pop(page);
+    check('studio: a designer gets three plain cards and is told the studio does not open for the role', t && /1 من 3/.test(t) && /بصفتك «المصمم»/.test(t) && /الاستوديو لا يُفتح لدورك/.test(t), t?.replace(/\s+/g, ' ').slice(0, 200));
+    await nextStep(page);
+    t = await pop(page);
+    check('studio: the second card names who the studio is for, by owner decision', t && /الاستوديو لمسؤول النظام ومدير الاتصال المؤسسي/.test(t) && /بقرار المالك/.test(t), t?.replace(/\s+/g, ' ').slice(0, 160));
+    await page.screenshot({ path: path.join(out, 'studio-restricted.png') });
     await ctx.close();
   } finally {
     await browser.close();
