@@ -9,7 +9,10 @@ import { buildExport, exportFileName, ExportTooLarge, MAX_ROWS, PAGE } from '../
 import { BACKUP_EXCLUDED, BACKUP_KIND_AR, BACKUP_STATE_AR, EVENT_AR, ageAr, backupError, eventLine } from '../src/lib/integrations/rules.ts';
 
 const sql = readFileSync(new URL('../supabase/migrations/20261015150000_backups.sql', import.meta.url), 'utf8');
-const body = (name) => sql.match(new RegExp(`create (?:or replace )?function public\\.${name}\\([^)]*\\)[\\s\\S]*?\\n\\$\\$;`))?.[0] ?? '';
+// The studio (Studio_Build_Plan.md Phase 2) redefines the list and the plan: the latest definition is in force.
+const later = [readFileSync(new URL('../supabase/migrations/20261019130000_studio_projects.sql', import.meta.url), 'utf8')];
+const find = (text, name) => text.match(new RegExp(`create (?:or replace )?function public\\.${name}\\([^)]*\\)[\\s\\S]*?\\n\\$\\$;`))?.[0];
+const body = (name) => later.map((t) => find(t, name)).find(Boolean) ?? find(sql, name) ?? '';
 
 test('an export is one gzipped JSON file with a header, the tables, their counts, and what is not in it', async () => {
   const rows = { works: Array.from({ length: PAGE + 20 }, (_, i) => ({ id: i, title: `عمل ${i}` })), projects: [{ id: 'p1', name: 'مشروع' }] };
@@ -117,4 +120,20 @@ test('the words: kinds, states, age, events and every refusal the migration rais
   }
   assert.equal(eventLine({ kind: 'backup_verified', integration: 'S3', data: { kind: 'files', checked: 3, ok: 3, failed: 0 } }), 'فُحصت نسخة احتياطية · S3: قُرئت 3، سليمة 3، تعذّرت 0');
   assert.doesNotMatch(JSON.stringify([BACKUP_KIND_AR, BACKUP_STATE_AR, BACKUP_EXCLUDED]), /\p{Extended_Pictographic}/u);
+});
+
+test('the studio\'s records are in the database export, without the editing lease, and revisions are read 25 at a time', async () => {
+  const list = body('backup_table_list');
+  for (const t of ['studio_projects', 'studio_revisions', 'studio_sources', 'studio_exports']) assert.match(list, new RegExp(`'table','${t}'`), t);
+  assert.match(list, /'table','studio_projects', 'drop', jsonb_build_array\('lease_holder','lease_until'\)/);
+  assert.match(list, /'table','studio_revisions', 'page', 25/);
+  assert.match(body('backup_export_plan'), /jsonb_strip_nulls\(jsonb_build_object\('table', e->>'table', 'rows', n, 'page', e->'page'\)\)/);
+  const calls = [];
+  const rows = Array.from({ length: 60 }, (_, i) => ({ project_id: 'p', revision: i }));
+  const built = await buildExport(
+    { kind: 'database', takenAt: 't', takenBy: 'a', run: 'r' },
+    { plan: [{ table: 'studio_revisions', rows: 60, page: 25 }], page: async (t, off, lim) => (calls.push([off, lim]), rows.slice(off, off + lim)) },
+  );
+  assert.deepEqual(calls, [[0, 25], [25, 25], [50, 25]]);
+  assert.equal(built.tables.studio_revisions, 60);
 });

@@ -16,7 +16,8 @@ export const PAGE = 500;
 /** What is never in an export, and why: the privacy rule of the product (AGENTS.md). */
 export const EXCLUDED = BACKUP_EXCLUDED;
 
-export type TablePlan = { table: string; rows: number };
+/** `page`: rows read at a time when the list sets it (studio revisions hold large documents: 25). */
+export type TablePlan = { table: string; rows: number; page?: number };
 export type ExportDeps = {
   plan: TablePlan[];
   page: (table: string, offset: number, limit: number) => Promise<unknown[]>;
@@ -44,8 +45,9 @@ export async function buildExport(meta: ExportMeta, deps: ExportDeps, maxRows = 
     parts.push(`${first ? '' : ','}${JSON.stringify(t.table)}:[`);
     first = false;
     let got = 0;
-    for (let offset = 0; offset < t.rows; offset += PAGE) {
-      const rows = await deps.page(t.table, offset, PAGE);
+    const size = t.page && t.page > 0 ? Math.min(t.page, PAGE) : PAGE;
+    for (let offset = 0; offset < t.rows; offset += size) {
+      const rows = await deps.page(t.table, offset, size);
       if (!rows.length) break;
       for (const r of rows) parts.push(`${got ? ',' : ''}${JSON.stringify(r)}`), got++;
     }

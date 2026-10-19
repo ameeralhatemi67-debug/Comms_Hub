@@ -1,0 +1,215 @@
+{
+  "run": "2026-10-19",
+  "what": "Database rule run for the studio, Phase 2 (Studio_Build_Plan.md): projects, revisions, sources, exports, the editing lease and backups",
+  "migration": "supabase/migrations/20261019130000_studio_projects.sql, applied to comms-hub as version 20261019173321 'studio_projects' (after 20261019172208 'studio_access')",
+  "how": "supabase/tests/studio_rules.sql: one transaction against the Supabase project comms-hub, rolled back at the end. Four throwaway accounts (@t.test: admin, director, assistant, writer), a restricted test folder and two test files uploaded by the admin, acting through row level security; one check as anon, one after demoting the director.",
+  "result": "TOTAL row: 51 checks, 51 passed; no check differed from its expectation",
+  "checks": [
+    {
+      "k": "01 the writer cannot list projects",
+      "pass": true
+    },
+    {
+      "k": "02 nor create one",
+      "pass": true
+    },
+    {
+      "k": "03 the director creates a video project from a file she can see",
+      "pass": true
+    },
+    {
+      "k": "04 but not from a file in a folder she cannot see",
+      "pass": true
+    },
+    {
+      "k": "05 nor from a version that does not exist",
+      "pass": true
+    },
+    {
+      "k": "06 a title is needed",
+      "pass": true
+    },
+    {
+      "k": "07 a document of another schema is refused",
+      "pass": true
+    },
+    {
+      "k": "08 a document of the other kind is refused",
+      "pass": true
+    },
+    {
+      "k": "09 two sources with one id are refused",
+      "pass": true
+    },
+    {
+      "k": "10 a library source without a real file id is refused",
+      "pass": true
+    },
+    {
+      "k": "11 a document above the limit is refused",
+      "pass": true
+    },
+    {
+      "k": "12 the new project is numbered revision 1 and its file is recorded at its version",
+      "pass": true
+    },
+    {
+      "k": "13 the Admin creates a photo project from the restricted file",
+      "pass": true
+    },
+    {
+      "k": "14 the Admin and the director share the projects",
+      "pass": true
+    },
+    {
+      "k": "15 the director sees both, with the owner's name",
+      "pass": true
+    },
+    {
+      "k": "16 an autosave on top of revision 1",
+      "pass": true
+    },
+    {
+      "k": "17 a second autosave",
+      "pass": true
+    },
+    {
+      "k": "18 the autosave slot was replaced, not added to",
+      "pass": true
+    },
+    {
+      "k": "19 opening gives the autosave, the newest state",
+      "pass": true
+    },
+    {
+      "k": "20 an explicit save makes revision 2",
+      "pass": true
+    },
+    {
+      "k": "21 revisions 1 and 2 are kept, the autosave slot is empty",
+      "pass": true
+    },
+    {
+      "k": "22 revision 1 is unchanged",
+      "pass": true
+    },
+    {
+      "k": "23 a save on top of an old revision is refused",
+      "pass": true
+    },
+    {
+      "k": "24 the Admin cannot save the director's project while she edits it",
+      "pass": true
+    },
+    {
+      "k": "25 asking for the lease names who is editing",
+      "pass": true
+    },
+    {
+      "k": "26 taking over (a long press) gives the lease and says from whom",
+      "pass": true
+    },
+    {
+      "k": "27 the director's next save is refused: she drops to reading",
+      "pass": true
+    },
+    {
+      "k": "28 and she cannot archive a project the Admin is editing",
+      "pass": true
+    },
+    {
+      "k": "29 the director takes the Admin's photo project",
+      "pass": true
+    },
+    {
+      "k": "30 and saves it with the restricted file she cannot see: carried over, kept",
+      "pass": true
+    },
+    {
+      "k": "31 the restricted file is recorded for revision 2 from the document itself",
+      "pass": true
+    },
+    {
+      "k": "32 the director takes her video project back",
+      "pass": true
+    },
+    {
+      "k": "33 adding the restricted file to it is refused: new to this project",
+      "pass": true
+    },
+    {
+      "k": "34 no direct insert",
+      "pass": true
+    },
+    {
+      "k": "35 a direct update or delete changes nothing",
+      "pass": true
+    },
+    {
+      "k": "36 an export record needs a version the caller uploaded",
+      "pass": true
+    },
+    {
+      "k": "37 and a numbered revision, not the autosave slot",
+      "pass": true
+    },
+    {
+      "k": "38 the Admin records her upload as the export of revision 2",
+      "pass": true
+    },
+    {
+      "k": "39 the project now counts one export",
+      "pass": true
+    },
+    {
+      "k": "40 a project cannot be linked to a work the caller cannot see",
+      "pass": true
+    },
+    {
+      "k": "41a the director closes her video project",
+      "pass": true
+    },
+    {
+      "k": "41b releasing the lease frees the project",
+      "pass": true
+    },
+    {
+      "k": "42 the Admin cannot archive the photo project while the director edits it",
+      "pass": true
+    },
+    {
+      "k": "43 the director, who edits it, archives it",
+      "pass": true
+    },
+    {
+      "k": "44 an archived project leaves the list and is kept",
+      "pass": true
+    },
+    {
+      "k": "45 an archived project takes no lease",
+      "pass": true
+    },
+    {
+      "k": "46 the assistant cannot save",
+      "pass": true
+    },
+    {
+      "k": "47 and reads no project, revision, source or export",
+      "pass": true
+    },
+    {
+      "k": "48 a director made a writer loses the studio at once",
+      "pass": true
+    },
+    {
+      "k": "49 anonymous callers cannot reach the functions",
+      "pass": true
+    },
+    {
+      "k": "50 the database export lists the four studio tables, revisions 25 at a time",
+      "pass": true
+    }
+  ],
+  "passed": 51,
+  "total": 51
+}

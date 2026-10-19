@@ -4,14 +4,35 @@ import { useEffect, useState } from 'react';
 import { CircleCheck, CircleAlert } from 'lucide-react';
 import { Title } from '../ui';
 import { MotionTabs } from './motion-tabs';
+import { ProjectList } from './project-list';
+import { ProjectShell } from './project-shell';
+import { canvasOf, durationOf, localSources } from '@/lib/studio/schema';
 import { probeSupport, supportLines, type StudioSupport } from '@/lib/studio/support';
 import './studio.css';
 
 /**
  * «الاستوديو» (MVP_draft.md 62), the studio tab of «استوديو الحركة». The server has already checked
- * canOpenRoute; the database checks studio_can() on every studio record.
+ * canOpenRoute; the database checks studio_can() on every studio record and function.
  */
 export default function StudioPage({ projectId }: { projectId?: string }) {
+  if (projectId)
+    return (
+      <div className="st st-open">
+        <ProjectShell id={projectId} editor={(p) => <section className="panel">{`${canvasOf(p.doc).w}×${canvasOf(p.doc).h} · ${Math.round(durationOf(p.doc) / 1e6)} ث · ${localSources(p.doc).length} ملف على الجهاز`}</section>} />
+      </div>
+    );
+  return (
+    <div className="st">
+      <Title title="الاستوديو" sub="مشاريع فيديو وصور تُحرَّر هنا وتُحفظ في قاعدة البيانات، وتستعمل قوالب الحركة وعلامات الهوية وملفات المكتبة.">
+        <MotionTabs active="studio" />
+      </Title>
+      <ProjectList />
+      <SupportPanel />
+    </div>
+  );
+}
+
+function SupportPanel() {
   const [support, setSupport] = useState<StudioSupport | null>(null);
   useEffect(() => {
     let live = true;
@@ -21,25 +42,20 @@ export default function StudioPage({ projectId }: { projectId?: string }) {
     };
   }, []);
   return (
-    <div className="st" data-project={projectId ?? ''}>
-      <Title title="الاستوديو" sub="مشاريع فيديو وصور تُحرَّر هنا وتُحفظ في قاعدة البيانات، وتستعمل قوالب الحركة وعلامات الهوية وملفات المكتبة.">
-        <MotionTabs active="studio" />
-      </Title>
-      <section className="panel st-support" aria-label="ما يقدر عليه هذا المتصفح">
-        <h2>ما يقدر عليه هذا المتصفح</h2>
-        {!support ? (
-          <p role="status">جارٍ الفحص…</p>
-        ) : (
-          <ul>
-            {supportLines(support).map((l) => (
-              <li key={l.text} className={l.ok ? 'ok' : 'no'}>
-                {l.ok ? <CircleCheck aria-hidden="true" /> : <CircleAlert aria-hidden="true" />}
-                {l.text}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </div>
+    <details className="panel st-support">
+      <summary>ما يقدر عليه هذا المتصفح</summary>
+      {!support ? (
+        <p role="status">جارٍ الفحص…</p>
+      ) : (
+        <ul>
+          {supportLines(support).map((l) => (
+            <li key={l.text} className={l.ok ? 'ok' : 'no'}>
+              {l.ok ? <CircleCheck aria-hidden="true" /> : <CircleAlert aria-hidden="true" />}
+              {l.text}
+            </li>
+          ))}
+        </ul>
+      )}
+    </details>
   );
 }

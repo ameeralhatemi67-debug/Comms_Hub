@@ -52,6 +52,10 @@ export const HOLD = {
   retireSource: 'تنتقل نسخ المصدر إلى سلة مزودها الأول، وتُستعاد منه وحده. بعدها لا يرجع المركز إليها.',
   /** «الإعدادات»، المنصات: delete a platform nothing has used. */
   platformDelete: 'تُحذف المنصة من القائمة ويبقى في السجل أنها كانت.',
+  /** «الاستوديو»: move a project to the archive (MVP_draft.md 62; never a deletion). */
+  studioArchive: 'يخرج المشروع من القائمة إلى الأرشيف بكل نسخه، ويُعاد منه متى شئت.',
+  /** «الاستوديو»: take the editing over from the person editing now. */
+  studioTakeOver: 'يتحول من يحرر الآن إلى القراءة فقط، وتبقى تغييراته غير المحفوظة على جهازه.',
 } as const;
 
 export const HOLD_MS = 900;
