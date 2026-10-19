@@ -1,21 +1,21 @@
 {
   "script": "qa/help-tours.cjs",
-  "run": "2026-10-15T10:49:30.211Z",
+  "run": "2026-10-19T06:48:39.745Z",
   "checks": [
     {
-      "name": "lead: the first card says what the page means for the lead group",
+      "name": "lead: the first card says the director, by the exact role name, what the page is for",
       "pass": true,
-      "detail": "إرشاد «الموافقات والنشر» · 1 من 4 الموافقات والنشر القرار على كل جزء بإصداره، ثم الجدولة والنشر لمسؤول النشر. بصفتك «مدير الاتصال المؤسسي ومساعده والمسؤول عن النظام»: ترى «بانتظار قراري» وتقرر فيما لم"
+      "detail": "إرشاد «الموافقات والنشر» · 1 من 3 ابدأ بما ينتظر قرارك «بانتظار قراري» يعرض ما يمكنك مراجعته. ما أرسلته أو رفعته بنفسك له منع يوضحه المركز. بصفتك «مدير الاتصال المؤسسي»: ابدأ بما ينتظر قرارك. تعتمد ال"
     },
     {
-      "name": "lead: four steps (three common and one for the lead)",
+      "name": "lead: three cards written for the director (A01, A02, A03)",
       "pass": true,
-      "detail": "1 من 4"
+      "detail": "1 من 3"
     },
     {
-      "name": "lead: the last step is the lead's own: what waits for approval",
+      "name": "lead: the last card says approval is a separate step from publishing",
       "pass": true,
-      "detail": "إرشاد «الموافقات والنشر» · 4 من 4 ما ينتظر اعتمادك تعتمد أو ترفض بصفتك مدير الاتصال أو مساعده؛ الاعتماد لا ينشر، والنشر "
+      "detail": "إرشاد «الموافقات والنشر» · 3 من 3 الاعتماد خطوة مستقلة اعتماد العمل لا ينشره. راجع الحالة وسجل القرارات؛ الجدولة والنشر "
     },
     {
       "name": "lead: finishing marks the page seen",
@@ -28,12 +28,12 @@
       "detail": "1 من 4"
     },
     {
-      "name": "publisher: the last step is publishing and scheduling",
+      "name": "publisher: the last card is the result per account",
       "pass": true,
-      "detail": "إرشاد «الموافقات والنشر» · 4 من 4 النشر والجدولة تجدول ما اعتُمد أو تنشره الآن. لا يُنشر ما لم يُعتمد، ونشر المنصات ما ز"
+      "detail": "إرشاد «الموافقات والنشر» · 4 من 4 النتيجة لكل حساب النشر هنا محاكاة. في «نشر جزئي» أو «فشل النشر» راجع السبب وأعد المحاو"
     },
     {
-      "name": "member: three steps, no role step",
+      "name": "member: three read-only cards, and the member is told approval and scheduling are not theirs",
       "pass": true,
       "detail": "1 من 3"
     },
@@ -70,7 +70,7 @@
     {
       "name": "news: seeing it marks the versioned key, so it is not shown again",
       "pass": true,
-      "detail": "settings,settings:v5"
+      "detail": "settings,settings:v6"
     },
     {
       "name": "news already seen: nothing is shown",
@@ -80,12 +80,12 @@
     {
       "name": "first visit: the ordinary tour",
       "pass": true,
-      "detail": "إرشاد «الإعدادات» · 1 من 3 الإعدادات إعدادات النظام كلها حقيقية: «عام وصحة النظام» أولاً، ثم التخزين"
+      "detail": "إرشاد «الإعدادات» · 1 من 3 اختر المهمة أولاً «الاتصالات» للربط، و«التخزين» للملفات ومزوديها، و«النسخ"
     },
     {
       "name": "first visit: finishing marks the page and its current version",
       "pass": true,
-      "detail": "settings,settings:v5"
+      "detail": "settings,settings:v6"
     },
     {
       "name": "touch: guide mode speaks of touching, not clicking",
@@ -110,7 +110,7 @@
     {
       "name": "touch: the explanation opens and stays inside the 390 px screen",
       "pass": true,
-      "detail": "{\"x\":10,\"y\":332.59375,\"width\":374,\"height\":247.265625}"
+      "detail": "{\"x\":10,\"y\":376.390625,\"width\":374,\"height\":247.265625}"
     },
     {
       "name": "touch: the explanation's buttons are finger-sized",
@@ -123,12 +123,17 @@
       "detail": "دليل الصفحة «الموافقات والنشر» الموافقة قرار على إصدار بعينه، والنشر خطوة منفصلة"
     },
     {
+      "name": "the page guide starts with what concerns the exact role: its introduction and its cards",
+      "pass": true,
+      "detail": "دليل الصفحة «الموافقات والنشر» الموافقة قرار على إصدار بعينه، والنشر خطوة منفصلة بعدها يتولاها مسؤول النشر. العودة إلى الصفحة إعادة الإرشاد لهذه الصفحة وضع الإر"
+    },
+    {
       "name": "no script errors on any page",
       "pass": true,
       "detail": ""
     }
   ],
-  "total": 25,
-  "passed": 25,
+  "total": 26,
+  "passed": 26,
   "failed": 0
 }

@@ -24,7 +24,7 @@ const check = (name, pass, detail = '') => result.checks.push({ name, pass: Bool
 
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
-for (const m of ['lib/kit/guide.ts', 'lib/kit/hold.ts', 'lib/kit/hold-reasons.ts', 'lib/kit/need.ts', 'lib/kit/layer.ts', 'lib/kit/place.ts', 'lib/help/registry.ts', 'lib/help/pages.ts', 'lib/help/types.ts', 'lib/permissions.ts']) {
+for (const m of ['lib/kit/guide.ts', 'lib/kit/hold.ts', 'lib/kit/hold-reasons.ts', 'lib/kit/need.ts', 'lib/kit/layer.ts', 'lib/kit/place.ts', 'lib/help/registry.ts', 'lib/help/pages.ts', 'lib/help/roles.ts', 'lib/domain.ts', 'lib/help/types.ts', 'lib/permissions.ts']) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
   const js = ts.transpileModule(src, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText.replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'");
   const dest = path.join(out, m.replace(/\.ts$/, '.js'));
@@ -46,6 +46,7 @@ window.__G = installGuide({
   root: () => document.querySelector('.app-shell'),
   page: () => c.page,
   role: () => c.role,
+  exactRole: () => c.exact,
   progress: { ready: () => true, seen: (k) => !!seen[k], mark: (k) => { seen[k] = true; window.__marks.push(k); }, unmarkPage: () => {}, auto: () => true },
   go: () => {}, say: () => {},
 });
@@ -61,18 +62,18 @@ const make = (cfg, body) => {
   return id;
 };
 
-const APPROVALS = '<div class="wk-head"><h1>الموافقات والنشر</h1></div><div data-gd="atabs"><button>بانتظارك</button></div><div class="wk-qcards"><article>بطاقة</article></div>';
-const PUB = '<div class="wk-head"><h1>الموافقات والنشر</h1></div><div data-gd="atabs"><button>بانتظارك</button></div><div class="wk-qcards"><article>بطاقة</article></div><section data-gd="pub-1">نشر</section>';
+const APPROVALS = '<div class="wk-head"><h1>الموافقات والنشر</h1></div><div data-gd="atabs"><button>بانتظارك</button></div><div data-gd="aq"><button>بانتظار قراري</button></div><div class="wk-qcards"><article>بطاقة</article></div><div class="wk-lg">سجل القرارات</div>';
+const PUB = '<div class="wk-head"><h1>الموافقات والنشر</h1></div><div data-gd="atabs"><button>بانتظارك</button></div><div class="wk-qcards"><article>بطاقة</article></div><div class="wk-accts">تفويض الحسابات</div><section data-gd="pub-1">نشر</section>';
 const scenes = {
-  lead: make({ page: 'approvals', role: 'lead', seen: {} }, APPROVALS),
-  publisher: make({ page: 'approvals', role: 'publisher', seen: {} }, PUB),
-  member: make({ page: 'approvals', role: 'member', seen: {} }, APPROVALS),
-  partial: make({ page: 'approvals', role: 'maker', seen: {} }, '<div class="wk-head"><h1>الموافقات والنشر</h1></div>'),
-  nothing: make({ page: 'approvals', role: 'maker', seen: {} }, '<p>جارٍ التحميل</p>'),
-  news: make({ page: 'settings', role: 'lead', seen: { settings: true } }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div><button class="su-hint">!</button>'),
-  newsSeen: make({ page: 'settings', role: 'lead', seen: { settings: true, [`settings:v${SV}`]: true } }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div>'),
-  first: make({ page: 'settings', role: 'lead', seen: {} }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div><section class="st-health">صحة</section>'),
-  touch: make({ page: 'approvals', role: 'lead', seen: { approvals: true } }, APPROVALS),
+  lead: make({ page: 'approvals', role: 'lead', exact: 'director', seen: {} }, APPROVALS),
+  publisher: make({ page: 'approvals', role: 'publisher', exact: 'publisher', seen: {} }, PUB),
+  member: make({ page: 'approvals', role: 'member', exact: 'member', seen: {} }, APPROVALS),
+  partial: make({ page: 'approvals', role: 'maker', exact: 'writer', seen: {} }, '<div class="wk-head"><h1>الموافقات والنشر</h1></div><div class="wk-qcards"><article>بطاقة</article></div>'),
+  nothing: make({ page: 'approvals', role: 'maker', exact: 'writer', seen: {} }, '<p>جارٍ التحميل</p>'),
+  news: make({ page: 'settings', role: 'lead', exact: 'director', seen: { settings: true } }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div><button class="su-hint">!</button>'),
+  newsSeen: make({ page: 'settings', role: 'lead', exact: 'director', seen: { settings: true, [`settings:v${SV}`]: true } }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div>'),
+  first: make({ page: 'settings', role: 'lead', exact: 'director', seen: {} }, '<div class="page-heading"><h1>الإعدادات</h1></div><div class="tabs"><button>عام</button></div><section class="st-health">صحة</section>'),
+  touch: make({ page: 'approvals', role: 'lead', exact: 'director', seen: { approvals: true } }, APPROVALS),
 };
 
 (async () => {
@@ -116,14 +117,14 @@ const scenes = {
   };
 
   try {
-    // 1. A lead sees their own line and the lead's extra step: four steps, not three.
+    // 1. A director gets the cards written for the director (Help_Content_Matrix.md), by the exact role name.
     let { ctx, page } = await open(scenes.lead);
     let t = await pop(page);
-    check('lead: the first card says what the page means for the lead group', t && /بصفتك «مدير الاتصال المؤسسي ومساعده والمسؤول عن النظام»/.test(t) && /تعتمد|اعتماد|ترى/.test(t), t?.replace(/\s+/g, ' ').slice(0, 200));
-    check('lead: four steps (three common and one for the lead)', t && /1 من 4/.test(t), t?.match(/\d من \d/)?.[0]);
-    for (let i = 0; i < 3; i++) await nextStep(page);
+    check('lead: the first card says the director, by the exact role name, what the page is for', t && /بصفتك «مدير الاتصال المؤسسي»/.test(t) && /ابدأ بما ينتظر قرارك/.test(t), t?.replace(/\s+/g, ' ').slice(0, 200));
+    check('lead: three cards written for the director (A01, A02, A03)', t && /1 من 3/.test(t), t?.match(/\d من \d/)?.[0]);
+    for (let i = 0; i < 2; i++) await nextStep(page);
     t = await pop(page);
-    check('lead: the last step is the lead\'s own: what waits for approval', t && /ما ينتظر اعتمادك/.test(t), t?.replace(/\s+/g, ' ').slice(0, 120));
+    check('lead: the last card says approval is a separate step from publishing', t && /الاعتماد خطوة مستقلة/.test(t), t?.replace(/\s+/g, ' ').slice(0, 120));
     await page.locator('.gd-pop [data-gda="tnext"]').click();
     await page.waitForTimeout(150);
     const marks = await page.evaluate(() => window.__marks);
@@ -136,13 +137,13 @@ const scenes = {
     check('publisher: four steps, with their own line', t && /1 من 4/.test(t) && /بصفتك «مسؤول النشر وإدارة الحسابات»/.test(t), t?.match(/\d من \d/)?.[0]);
     for (let i = 0; i < 3; i++) await nextStep(page);
     t = await pop(page);
-    check('publisher: the last step is publishing and scheduling', t && /النشر والجدولة/.test(t), t?.replace(/\s+/g, ' ').slice(0, 120));
+    check('publisher: the last card is the result per account', t && /النتيجة لكل حساب/.test(t), t?.replace(/\s+/g, ' ').slice(0, 120));
     await ctx.close();
 
     // 3. A member has no role steps: the common three.
     ({ ctx, page } = await open(scenes.member));
     t = await pop(page);
-    check('member: three steps, no role step', t && /1 من 3/.test(t) && /بصفتك «العضو»/.test(t), t?.match(/\d من \d/)?.[0]);
+    check('member: three read-only cards, and the member is told approval and scheduling are not theirs', t && /1 من 3/.test(t) && /بصفتك «عضو»/.test(t) && /الاعتماد والجدولة ليسا من إجراءات دورك/.test(t), t?.match(/\d من \d/)?.[0]);
     await ctx.close();
 
     // 4. Partly drawn page: the heading, then a closing card that says why the rest is missing.
@@ -217,6 +218,7 @@ const scenes = {
     await page.waitForTimeout(200);
     const view = await page.locator('#guide-view').innerText();
     check('touch: the page guide opens from its button', /الموافقات والنشر/.test(view) && /ماذا يرى كل دور/.test(view), view.replace(/\s+/g, ' ').slice(0, 80));
+    check('the page guide starts with what concerns the exact role: its introduction and its cards', /ما يخصك بصفتك «مدير الاتصال المؤسسي»/.test(view) && /ابدأ بما ينتظر قرارك/.test(view) && /افتح المراجعة قبل القرار/.test(view) && /الاعتماد خطوة مستقلة/.test(view), view.replace(/\s+/g, ' ').slice(0, 160));
     await page.screenshot({ path: path.join(out, 'touch-guide.png') });
     await ctx.close();
   } finally {

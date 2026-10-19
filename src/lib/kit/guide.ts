@@ -4,6 +4,8 @@
 // (src/lib/help) and the page's own markup; progress is kept per person by the host.
 // After the reference (pass 5, «النموذج المرجعي للمركز»).
 import { PAGES, PAGE_HREF, ROLE_GROUP, SHELL_PARTS } from '../help/registry.ts';
+import { CARDS, ROLE_GUIDE } from '../help/roles.ts';
+import { roles, type Role } from '../domain.ts';
 import type { HelpPage, HelpPart, HelpStep, RoleGroup } from '../help/types.ts';
 import { holdTip } from './hold.ts';
 import { askFor, askableCap, isLocked, needWhy } from './need.ts';
@@ -16,6 +18,8 @@ export type GuideHost = {
   /** The help page of the current route, or null where none is written yet. */
   page: () => string | null;
   role: () => RoleGroup;
+  /** The exact role being viewed: the first-visit guide and the page guide are written for it (Help_Content_Matrix.md). */
+  exactRole: () => Role;
   progress: {
     ready: () => boolean;
     seen: (key: string) => boolean;
@@ -313,7 +317,13 @@ export function installGuide(host: GuideHost): GuideApi {
     const n = T.steps.length;
     const h = PAGES[T.page];
     const me = host.role();
-    const roleLine = T.i === 0 && h && !T.news ? `<small class="gd-me">بصفتك «${esc(ROLE_GROUP[me])}»: ${esc(h.roles[me])}</small>` : '';
+    const mine = roleEntry(T.page);
+    const roleLine =
+      T.i === 0 && h && !T.news
+        ? mine
+          ? `<small class="gd-me">بصفتك «${esc(roles[host.exactRole()].name)}»: ${esc(mine.intro)}</small>`
+          : `<small class="gd-me">بصفتك «${esc(ROLE_GROUP[me])}»: ${esc(h.roles[me])}</small>`
+        : '';
     return (
       `<div class="gd-k"><span>${T.news ? 'جديد في' : 'إرشاد'} «${esc(pageName(T.page))}» · ${T.i + 1} من ${n}</span><span class="gd-dots" aria-hidden="true">${T.steps.map((_, k) => `<i class="${k === T.i ? 'on' : ''}"></i>`).join('')}</span></div>` +
       `<p class="gd-t">${esc(st.t)}</p><p>${esc(st.b)}</p>` +
@@ -324,8 +334,16 @@ export function installGuide(host: GuideHost): GuideApi {
       (T.i === n - 1 ? '<small>زر المساعدة في الشريط العلوي يشرح أي عنصر. «دليل الصفحة» يفتح الدليل كاملاً من وضع الإرشاد أو بالنقر عليه مرتين.</small>' : '')
     );
   }
-  /** The steps this person's role group is shown, in order: the common ones, then the role's own. */
-  const stepsFor = (h: HelpPage, news: boolean): HelpStep[] => {
+  /** What Help_Content_Matrix.md says to this exact role on this page: an introduction and its cards, in order. */
+  const roleEntry = (page: string) => ROLE_GUIDE[page]?.[host.exactRole()] ?? null;
+  /**
+   * The steps this person is shown, in order. A page with a role guide shows the cards written for the
+   * exact role; a page without one (and the news of a changed page) shows the common steps, then the
+   * role group's own.
+   */
+  const stepsFor = (h: HelpPage, news: boolean, page: string): HelpStep[] => {
+    const mine = news ? null : roleEntry(page);
+    if (mine) return mine.cards.map((id) => CARDS[id]).filter(Boolean);
     const me = host.role();
     const all = news ? h.news ?? [] : [...h.onb, ...(h.onbRole?.[me] ?? [])];
     return all.filter((s) => !s.g || s.g.includes(me));
@@ -341,8 +359,9 @@ export function installGuide(host: GuideHost): GuideApi {
   function startTour(page: string, force = false, news = false): boolean {
     const h = PAGES[page];
     if (!h) return false;
-    const wanted = stepsFor(h, news);
-    const steps = wanted.filter((s) => !!visibleEl(s.sel));
+    const wanted = stepsFor(h, news, page);
+    // A card with no selector (the restricted-state cards) has nothing to wait for.
+    const steps = wanted.filter((s) => !s.sel || !!visibleEl(s.sel));
     if (!steps.length && !force) return false;
     if (!steps.length && news) return false;
     closeExplain();
@@ -434,12 +453,20 @@ export function installGuide(host: GuideHost): GuideApi {
   function helpHtml(page: string, present: Set<string>) {
     const h = PAGES[page];
     const me = host.role();
-    const toc: [string, string][] = [['hv-purpose', 'الغرض'], ['hv-roles', 'ماذا يرى كل دور'], ['hv-parts', 'أجزاء الصفحة'], ['hv-rules', 'القواعد'], ['hv-links', 'الارتباط بالصفحات الأخرى'], ['hv-faq', 'أسئلة شائعة']];
+    const mine = roleEntry(page);
+    const toc: [string, string][] = [['hv-purpose', 'الغرض'], ...(mine ? ([['hv-mine', 'ما يخصك']] as [string, string][]) : []), ['hv-roles', 'ماذا يرى كل دور'], ['hv-parts', 'أجزاء الصفحة'], ['hv-rules', 'القواعد'], ['hv-links', 'الارتباط بالصفحات الأخرى'], ['hv-faq', 'أسئلة شائعة']];
     return (
       `<section class="hv-head"><span class="eyebrow">دليل الصفحة</span><h2>«${esc(h.name)}»</h2><p>${esc(h.tip)}</p>` +
       '<div class="hv-acts"><button class="secondary" data-gda="hclose">العودة إلى الصفحة</button><button class="primary" data-gda="replay">إعادة الإرشاد لهذه الصفحة</button><button class="secondary" data-gda="hguide">وضع الإرشاد</button></div></section>' +
       `<div class="hv-grid"><nav class="hv-toc" aria-label="محتوى الدليل"><b>في هذا الدليل</b>${toc.map(([id, t]) => `<button data-gda="toc" data-id="${id}">${t}</button>`).join('')}</nav><div class="hv-body">` +
       `<section class="hv-sec" id="hv-purpose"><h3>الغرض</h3><p>${esc(h.purpose)}</p></section>` +
+      (mine
+        ? `<section class="hv-sec" id="hv-mine"><h3>ما يخصك بصفتك «${esc(roles[host.exactRole()].name)}»</h3><p>${esc(mine.intro)}</p><div class="hv-parts">${mine.cards
+            .map((id) => CARDS[id])
+            .filter(Boolean)
+            .map((c) => `<div class="hv-part mine"><b>${esc(c.t)}</b><p>${esc(c.b)}</p></div>`)
+            .join('')}</div></section>`
+        : '') +
       `<section class="hv-sec" id="hv-roles"><h3>ماذا يرى كل دور</h3><div class="hv-roles">${(['lead', 'maker', 'publisher', 'member'] as RoleGroup[])
         .map((k) => `<div class="hv-role${k === me ? ' me' : ''}"><b>${ROLE_GROUP[k]}${k === me ? ' · أنت' : ''}</b><span>${esc(h.roles[k])}</span></div>`)
         .join('')}</div></section>` +

@@ -150,7 +150,7 @@ export function HomePage() {
           <HomePermissions />
 
           <div className="wk-home">
-            <section className="wk-pn">
+            <section className="wk-pn" data-gd="focus">
               <h3>
                 {focusTitle} <small>{focus.length ? `${focus.length} أعمال` : ''}</small>
               </h3>
@@ -185,7 +185,7 @@ export function HomePage() {
             </section>
 
             <aside className="wk-col">
-              <section className="wk-pn">
+              <section className="wk-pn" data-gd="upcoming">
                 <h3>
                   الأيام السبعة القادمة <small>من التقويم</small>
                 </h3>

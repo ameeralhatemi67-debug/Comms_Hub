@@ -119,6 +119,8 @@ Updated 2026-10-10. **CHECKPOINT 0.2 IN PROGRESS.** Checkpoint 0.1 is complete a
 
 Design: «الهوية الجديدة لمركز الاتصال» is **the only design** (2026-10-19): the Director approved it, so the old design («التصميم الحالي») and its switch (double-click on the logo, the design choice in «الحساب» «المظهر») were removed. Only the light/evening mode remains a personal choice. The old design's CSS rules still sit under the unused default selectors and can be cleaned later. See `MVP_draft.md` section 58.
 
+Help: the first-visit guide and the page guide are written for each of the eight exact roles on all 23 pages (2026-10-19, `Help_Content_Matrix.md`, `src/lib/help/roles.ts`). Section tips, role-specific empty texts, settings tab tips and the shared entry cards from the matrix are not built yet.
+
 ## Building the reference into the site (from 2026-10-12)
 
 The plan is `Reference_Build_Plan.md`, five steps; the reference is kept in `reference/comms-hub-reference-v5.html`.

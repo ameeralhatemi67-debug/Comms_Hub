@@ -135,6 +135,7 @@ export function KitProvider({ children }: { children: ReactNode }) {
       root: () => document.querySelector('.app-shell'),
       page: () => pageKeyOf(pathRef.current),
       role: () => roleGroup(roleRef.current),
+      exactRole: () => roleRef.current,
       progress: {
         ready: () => progress.current.ready,
         seen: (k) => !!progress.current.seen[k],

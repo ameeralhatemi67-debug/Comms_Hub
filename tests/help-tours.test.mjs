@@ -56,7 +56,8 @@ test('every page that had no guide has one now, in plain words about what is sam
 
 test('the engine says the role, shows what is new once, closes an empty page with a card, and has touch words', () => {
   const g = read('src/lib/kit/guide.ts');
-  assert.match(g, /const roleLine = /);
+  assert.match(g, /const roleLine =/);
+  assert.match(g, /roleEntry\(T\.page\)/, 'the first card says the exact role what it is for');
   assert.match(g, /ROLE_GROUP\[me\]/);
   assert.match(g, /newsKey\(page, h\)/);
   assert.match(g, /ما لا يظهر بعد/);
