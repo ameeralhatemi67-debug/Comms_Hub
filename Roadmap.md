@@ -257,7 +257,7 @@ By owner directive of 2026-10-19 (recorded in `progress.md` and `AGENTS.md`), a 
 - [x] **Phase 6, phones** (2026-10-19, `d0b0667`). Interface 41 of 41.
 - [x] **Phase 7, links to works and review notes** (2026-10-19, `a09c0b2`). Rule run 13 of 13, interface 45 of 45.
 - [x] **Phase 8, the guide and the records** (2026-10-19). Two guide pages with cards for each exact role, drafted for the owner's review.
-  *Exit gate:* standard checks pass (met). The owner's signed-in walkthrough in `Studio_Build_Plan.md` section 8 is pending, and so is the owner's review of the two drafted help blocks. A push to deploy waits for the owner's request: all phases are local commits.
+  *Exit gate:* standard checks pass (met). The owner's signed-in walkthrough in `Studio_Build_Plan.md` section 8 is pending, and so is the owner's review of the two drafted help blocks. Pushed and deployed on the owner's request, 2026-10-19 (`8258a13`).
   *Deferred* (`Studio_Build_Plan.md` section 7): export on the organisation computer, shared temporary storage, desktop and phone apps, and review notes bound to a version.
 
 ### Checkpoint 0.1: UI Prototype MVP 0.1

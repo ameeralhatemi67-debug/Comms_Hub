@@ -39,9 +39,9 @@ related:
   - A project can join a work and shows the timed review notes on its exported file (rules 13 of 13).
 - **Phones.** Below 760 px wide the editor shows one panel at a time. Tools kept for the computer are named in place, and nothing is removed from a project.
 - **Help.** Two guide pages (`studio`, `studio-edit`) have cards for each exact role. Their blocks in `Help_Content_Matrix.md` (sections 24 and 25) are drafts for the owner's review.
-- **Evidence.** Fixture checks: interface 45 of 45, engine 25 of 25, export 11 of 11. Per-phase numbers, and the final `npm test` total, are in `progress.md`. All work is in local commits; nothing is pushed.
+- **Evidence.** Fixture checks: interface 45 of 45, engine 25 of 25, export 11 of 11. Per-phase numbers, and the final `npm test` total, are in `progress.md`. Pushed to `main` on the owner's request (`fe38143..8258a13`) and deployed to production by Vercel (deployment `dpl_9q76oSSue99XXc5SCeUD6MZX9PNC`).
 - **Not verified.** Nothing was seen signed in. Real phones, Safari and a long Drive video were not tried.
-- **Next action for the studio.** The owner's signed-in walkthrough in `Studio_Build_Plan.md` section 8, then a push when asked.
+- **Next action for the studio.** The owner's signed-in walkthrough in `Studio_Build_Plan.md` section 8, on the live site, and the review of the two drafted help blocks.
 
 ## Transparent motion video, 2026-10-18
 
