@@ -738,3 +738,1778 @@ Reading it:
 - **The member creates** (decision of 2026-10-15, B4b): «إنشاء» is offered to the member and the capability
   `page.create` is held by the member as by the other creating roles (migration `member_creates`); the
   publisher stays without it.
+
+Selected state:
+
+```text
+green accent
+light tinted background
+clear icon
+```
+
+Desktop may support a collapsed icon-only mode.
+
+Mobile can use:
+
+```text
+Bottom Navigation
++
+More Drawer
+```
+
+---
+
+# 12. Global Top Bar
+
+Suggested items:
+
+```text
+Global Search
+
+Quick Create [+]
+
+Notifications
+
+Needs Attention indicator
+
+Profile
+```
+
+Example:
+
+```text
+[ ابحث في مركز الاتصال... ]
+
+                         [+ إنشاء]
+                         [الإشعارات 3]
+                         [محمد ▼]
+```
+
+Prototype search can operate entirely on mock data.
+
+---
+
+# 13. Home Page
+
+The Home page should answer:
+
+> **What matters to me right now?**
+
+It should not try to show every metric.
+
+## Director Example
+
+Header:
+
+```text
+صباح الخير، محمد
+الخميس، 18 سبتمبر
+```
+
+KPI cards:
+
+```text
+بانتظار الموافقة      4
+متأخر                  3
+مجدول اليوم            6
+يحتاج انتباه           2
+```
+
+### Needs Attention
+
+Example items:
+
+```text
+LinkedIn needs reconnection
+National Day Reel awaiting approval
+Video task overdue
+```
+
+### Today's Work
+
+```text
+11:00  Event photography
+14:30  Review campaign
+18:00  Instagram publication
+```
+
+### Approval Queue
+
+```text
+National Day Reel
+Sara
+18 min ago
+
+Event Poster
+Ahmed
+1h ago
+```
+
+### Active Campaigns
+
+```text
+National Day
+72%
+
+Volunteer Campaign
+46%
+
+Annual Report
+89%
+```
+
+---
+
+# 14. Specialist Home
+
+A specialist homepage may show:
+
+```text
+MY WORK
+
+Due today               3
+Changes requested       1
+Awaiting review         2
+Completed this week     6
+```
+
+Then sections such as:
+
+```text
+My Tasks
+Recent Comments
+Upcoming Deadlines
+```
+
+Avoid management-heavy dashboards for specialist roles.
+
+---
+
+# 15. Work Page
+
+This should be one of the strongest screens in the prototype.
+
+Header:
+
+```text
+العمل
+
+[+ مهمة جديدة]
+[+ حملة]
+```
+
+Possible tabs:
+
+```text
+الكل
+مهامي
+الحملات
+طلبات
+متأخر
+مكتمل
+```
+
+Views:
+
+```text
+List
+Board
+```
+
+Timeline can be postponed.
+
+---
+
+# 16. Work List
+
+Columns:
+
+```text
+Title
+Type
+Campaign
+Owner / Assignee
+Status
+Priority
+Due Date
+```
+
+Example:
+
+```text
+National Day Main Reel
+
+Video
+
+National Day Campaign
+
+Ahmed
+
+In Production
+
+High
+
+22 Sep
+```
+
+Clicking a row should open a Work Item detail drawer/page.
+
+---
+
+# 17. Work Item Detail
+
+Example header:
+
+```text
+National Day Main Reel
+
+VIDEO
+
+IN PRODUCTION
+```
+
+Information:
+
+```text
+Campaign
+National Day 2026
+
+Due
+22 Sep
+
+Priority
+High
+
+Owner
+Ahmed — Media Producer
+```
+
+Participants:
+
+```text
+Ahmed       Media Producer
+Sara        Designer
+Khalid      Content Writer
+```
+
+Tabs:
+
+```text
+Overview
+Files
+Comments
+Activity
+Approval
+```
+
+Mock production checklist:
+
+```text
+Script              ✓
+Filming             ✓
+Editing             In progress
+Graphics            Waiting
+Final review        Waiting
+```
+
+Buttons:
+
+```text
+[Add File]
+[Comment]
+[Submit for Review]
+```
+
+### Work Item Lifecycle State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT : Create Work Item
+    DRAFT --> IN_PRODUCTION : Assign Specialist
+    IN_PRODUCTION --> IN_REVIEW : Submit for Review
+    IN_REVIEW --> CHANGES_REQUESTED : Request Changes
+    CHANGES_REQUESTED --> IN_PRODUCTION : Revision Work
+    IN_REVIEW --> APPROVED : Approve Release
+    APPROVED --> SCHEDULED : Schedule Publication
+    SCHEDULED --> PUBLISHED : Publish Job Complete
+    SCHEDULED --> FAILED : API or Network Failure
+    FAILED --> SCHEDULED : Retry Publication
+    PUBLISHED --> [*]
+```
+
+---
+
+
+# 18. Create Page
+
+The Create page should begin by asking:
+
+> **What are we creating?**
+
+Possible creation types:
+
+```text
+Social Post
+Video
+Design
+Announcement
+Email
+Press Release
+Event Coverage
+```
+
+Selecting a type changes the form.
+
+---
+
+# 19. Social Post Form
+
+Possible fields:
+
+```text
+Title
+
+Campaign
+
+Main Content
+
+Platforms
+☑ Instagram
+☑ X
+☑ LinkedIn
+
+Media
+
+Schedule
+
+[Save Draft]
+[Submit for Review]
+```
+
+---
+
+# 20. Platform Variants
+
+Tabs:
+
+```text
+MASTER
+Instagram
+X
+LinkedIn
+```
+
+Example:
+
+```text
+MASTER
+Main Arabic copy
+```
+
+Then:
+
+```text
+X
+Shortened platform variant
+```
+
+A future AI button may already be placed:
+
+```text
+[اقتراح بالذكاء الاصطناعي]
+```
+
+In this MVP it may:
+
+```text
+show a mock result
+```
+
+or:
+
+```text
+show “Coming later”
+```
+
+The goal is to test placement and workflow.
+
+---
+
+# 21. Media Attachment UI
+
+Prototype interaction:
+
+```text
+Drag files here
+
+or
+
+[Browse Files]
+```
+
+Mock results:
+
+```text
+national-day-image.jpg
+2.8 MB
+
+national-day-video.mp4
+1.4 GB
+```
+
+Actions:
+
+```text
+Preview
+Remove
+Replace
+```
+
+No real cloud upload is required.
+
+---
+
+# 22. Approvals / Publishing Page
+
+> [!note] Policy Reference
+> See comprehensive approval criteria and multi-stage sign-off rules in [[disscussios/approval_policy_design|Approval Policy Design]].
+
+Use two major tabs initially:
+
+```text
+الموافقات
+النشر
+```
+
+Approval and publishing remain different concepts but are closely related enough to share a page in the prototype.
+
+---
+
+# 23. Approvals Tab
+
+Possible sections:
+
+```text
+Needs My Review
+Submitted by Me
+Completed
+```
+
+Example card:
+
+```text
+National Day Reel
+
+Submitted by:
+Ahmed
+
+Campaign:
+National Day
+
+Channels:
+Instagram
+X
+LinkedIn
+
+Submitted:
+18 min ago
+
+[Review]
+```
+
+---
+
+# 24. Review Screen
+
+Header:
+
+```text
+YOU ARE REVIEWING
+
+National Day Reel
+Release 4
+```
+
+Display:
+
+```text
+Copy
+Media
+Channel variants
+Schedule
+Destinations
+Previous revisions
+Comments
+```
+
+Actions:
+
+```text
+[Request Changes]
+[Reject]
+[Approve]
+```
+
+Mock Request Changes modal:
+
+```text
+Reason:
+___________________
+
+[Send]
+```
+
+---
+
+# 25. Publishing Tab
+
+Sections:
+
+```text
+Ready to Publish
+Scheduled
+Published
+Failed
+```
+
+Example:
+
+```text
+National Day Reel
+
+Approved ✓
+
+Instagram
+X
+LinkedIn
+
+Scheduled:
+23 Sep — 18:00
+
+[View]
+```
+
+Another:
+
+```text
+Volunteer Story
+
+Approved ✓
+
+No schedule
+
+[Publish]
+[Schedule]
+```
+
+---
+
+# 26. Mock Publishing Interaction
+
+Click:
+
+```text
+[Publish]
+```
+
+Show confirmation:
+
+```text
+CONFIRM PUBLICATION
+
+Instagram @organization
+X @organization
+
+[Cancel]
+[Confirm]
+```
+
+Then simulate:
+
+```text
+Publishing...
+```
+
+followed by:
+
+```text
+Instagram ✓
+X ✓
+LinkedIn ✕
+```
+
+This lets us test partial-failure UX before APIs exist.
+
+> [!warning] Asynchronous Queue & Failure Handling
+> Background failure recovery, retry policies, and worker queues are analyzed in [[disscussios/failure_handling_background_jobs|Failure Handling Background Jobs]].
+
+---
+
+
+# 27. Calendar
+
+Views:
+
+```text
+Month
+Week
+Day
+```
+
+Filters:
+
+```text
+Tasks
+Publications
+Campaigns
+Events
+Deadlines
+```
+
+Example entries:
+
+```text
+18:00
+Instagram Post
+
+14:00
+Video Deadline
+
+10:00
+Event Coverage
+```
+
+Clicking an entry opens a detail drawer.
+
+A date-level create action may offer:
+
+```text
+Create:
+Task
+Event
+Publication
+Reminder
+```
+
+---
+
+# 28. Media Library
+
+Header:
+
+```text
+مكتبة الوسائط
+
+[Upload]
+
+Search...
+
+Filters
+```
+
+Tabs:
+
+```text
+All
+Images
+Videos
+Documents
+Design
+Archived
+```
+
+Views:
+
+```text
+Grid
+List
+```
+
+---
+
+# 29. Media Card
+
+Example:
+
+```text
+[Thumbnail]
+
+National Day Hero Image
+
+IMAGE
+
+National Day Campaign
+
+v5
+
+Approved
+```
+
+Clicking opens the asset detail view.
+
+---
+
+# 30. Asset Detail
+
+Example:
+
+```text
+National Day Hero Image
+
+[large preview]
+
+Current Version:
+v5
+
+Approved Version:
+v5
+```
+
+Metadata:
+
+```text
+Campaign
+National Day
+
+Created by
+Sara
+
+Type
+Image
+
+Status
+Approved
+```
+
+Sections:
+
+```text
+Versions
+Used In
+Comments
+Activity
+```
+
+Storage placeholder:
+
+```text
+Cloud
+Available
+```
+
+Later this can be backed by Google Drive, Supabase Storage, or NAS.
+
+> [!note] Storage Architecture
+> See storage tiers, quotas, and NAS/Cloud replication details in [[disscussios/storage_lifecycle_disaster_recovery|Storage Lifecycle & Disaster Recovery]].
+
+---
+
+
+# 31. Mail Page
+
+The MVP does not need real email.
+
+Prototype layout:
+
+```text
+Inbox
+Sent
+Assigned
+Waiting
+Archived
+```
+
+Message list on one side.
+
+Thread/conversation on the other.
+
+Example:
+
+```text
+Subject:
+Media coverage request
+
+From:
+Department X
+
+[Reply]
+[Assign]
+[Create Work Item]
+```
+
+The important workflow interaction is:
+
+```text
+[Create Work Item]
+```
+
+which opens a mock Work Item creation modal.
+
+---
+
+# 32. Ideas Page
+
+Simple cards:
+
+```text
+Idea title
+Author
+Tags
+Related campaign
+Status
+```
+
+Actions:
+
+```text
+[+ New Idea]
+[Turn into Campaign]
+[Turn into Work Item]
+```
+
+Visual transitions only.
+
+---
+
+# 33. Analytics Page
+
+Use mock data only.
+
+Example:
+
+```text
+Last 30 Days
+
+Posts Published        28
+Total Reach            142K
+Engagement             8.3K
+Top Platform           Instagram
+```
+
+Sections:
+
+```text
+Content Performance
+Campaign Performance
+Platform Performance
+```
+
+The goal is to discover what metrics management actually wants.
+
+---
+
+# 34. Monitoring Page
+
+Monitoring should focus on workflow and workload, not surveillance.
+
+Example:
+
+```text
+TEAM WORKLOAD
+
+Ahmed
+4 active
+1 overdue
+
+Sara
+3 active
+0 overdue
+
+Khalid
+5 active
+2 awaiting review
+```
+
+Workflow summary:
+
+```text
+Awaiting Review       5
+Changes Requested     3
+Scheduled             6
+Overdue               4
+```
+
+Avoid:
+
+```text
+productivity score
+mouse movement
+screen surveillance
+```
+
+---
+
+# 35. Admin Page
+
+Prototype sections:
+
+```text
+Users
+Roles & Permissions
+Integrations
+System Health
+Storage
+Security
+Automation
+Notification Policy
+```
+
+Only UI shells are needed.
+
+---
+
+# 36. Users Page
+
+Example:
+
+```text
+Ahmed
+Media Producer
+Active
+
+Sara
+Designer
+Active
+
+Mohammed
+Director
+Active
+```
+
+User detail may show:
+
+```text
+Role
+Status
+Campaign access
+Additional permissions
+```
+
+No real enforcement yet.
+
+---
+
+# 37. Integrations Page
+
+Mock cards:
+
+```text
+Instagram
+Connected
+
+X
+Connected
+
+LinkedIn
+Reconnect Required
+
+Google Drive
+Not Configured
+
+Mail
+Connected
+
+NAS
+Not Configured
+```
+
+Clicking:
+
+```text
+[Connect]
+```
+
+opens a mock connection flow.
+
+> [!note] Secret Management & OAuth Architecture
+> Token refreshing, scopes, and credential isolation are detailed in [[disscussios/connected_account_secrets_management|Connected Account Secrets Management]].
+
+---
+
+
+# 38. Settings Page
+
+Possible sections:
+
+```text
+Organization
+Appearance
+Language
+Notifications
+Publishing Defaults
+Approval Defaults
+AI & Automation
+Storage
+```
+
+Visual configuration only.
+
+---
+
+# 39. Account Page
+
+Possible sections:
+
+```text
+Profile
+
+Name
+Role
+Email
+Language
+
+Notification preferences
+
+Active sessions
+```
+
+Sessions are mock data.
+
+---
+
+# 40. Notification Center
+
+> [!note] Notification Framework
+> Category definitions, mute rules, and channel routing are outlined in [[disscussios/notification_model|Notification Model]].
+
+Use the notification model already discussed.
+
+Tabs:
+
+```text
+All
+Actions
+Attention
+Mentions
+```
+
+Examples:
+
+```text
+ACTION
+National Day Reel needs your approval
+
+ATTENTION
+LinkedIn requires reconnection
+
+MENTION
+Sara mentioned you
+
+INFO
+Publication completed
+```
+
+Clicking should deep-link to the relevant mock screen.
+
+---
+
+# 41. Global Search
+
+Search can operate entirely on the mock dataset.
+
+Example:
+
+```text
+national day
+```
+
+Results:
+
+```text
+Campaign
+National Day 2026
+
+Work
+National Day Reel
+
+Asset
+National Day Hero Image
+
+Publication
+National Day Instagram Post
+```
+
+This allows search UX to be validated before building a real search index.
+
+> [!note] Metadata Taxonomy & Indexing
+> Entity search queries, tagging hierarchies, and filtering schemas are documented in [[disscussios/search_and_metadata|Search and Metadata]].
+
+---
+
+
+# 42. UI States to Prototype
+
+Important components should include:
+
+```text
+Normal
+Hover
+Selected
+Disabled
+Loading
+Empty
+Success
+Warning
+Error
+Needs Attention
+```
+
+Examples:
+
+```text
+No tasks yet
+
+No approvals waiting
+
+Upload processing...
+
+Publishing failed
+
+Integration disconnected
+
+Search returned no results
+```
+
+The MVP should not show only perfect/happy-path states.
+
+---
+
+# 43. Responsive Targets
+
+The design should deliberately support at least:
+
+```text
+Desktop
+1440 px
+
+Laptop
+1280 px
+
+Tablet
+768–1024 px
+
+Mobile
+~390 px
+```
+
+The goal is to establish a reliable responsive system, not optimize for every possible device immediately.
+
+---
+
+# 44. Mobile Priorities
+
+Primary mobile navigation:
+
+```text
+Home
+My Work
+Create
+Calendar
+Notifications
+```
+
+Then:
+
+```text
+More
+```
+
+opens:
+
+```text
+Approvals
+Mail
+Media
+Analytics
+Settings
+```
+
+Role-specific priorities may alter this.
+
+---
+
+# 45. Mobile Work Item
+
+Avoid squeezing desktop tables into a phone.
+
+Example card:
+
+```text
+National Day Reel
+VIDEO
+
+In Production
+
+Due:
+22 Sep
+
+Owner:
+Ahmed
+
+[Open]
+```
+
+Mobile should rely heavily on cards, drawers, and focused actions.
+
+---
+
+# 46. Prototype Interactions
+
+The following should work visually:
+
+```text
+Navigate between pages
+Open/close sidebar
+Open drawers
+Open modals
+Switch tabs
+Switch list/grid
+Search mock data
+Filter mock data
+Change View As role
+Toggle mock settings
+Add mock task
+Edit mock task
+Submit mock approval
+Approve/reject mock release
+Schedule mock publication
+Show simulated publish result
+Show notifications
+Preview mock assets
+Responsive navigation
+```
+
+Client-side state is enough.
+
+No persistence is required.
+
+---
+
+# 47. One Coherent Demo Scenario
+
+The prototype should contain one polished, realistic campaign that connects multiple pages.
+
+Recommended example:
+
+```text
+Saudi National Day 2026
+```
+
+Campaign:
+
+```text
+Saudi National Day 2026
+```
+
+Work Items:
+
+```text
+Main Reel
+Poster
+X Copy
+Instagram Carousel
+Event Photography
+```
+
+Participants:
+
+```text
+Content Writer
+Designer
+Media Producer
+Publishing Officer
+Assistant Manager
+Director
+```
+
+Assets:
+
+```text
+poster-v3.psd
+poster-final.jpg
+main-reel-v4.mp4
+drone-shot.mov
+```
+
+Approval:
+
+```text
+Main Reel awaiting review
+```
+
+Calendar:
+
+```text
+23 Sep
+18:00 publish
+```
+
+Analytics:
+
+```text
+Older mock publication data
+```
+
+Everything should tell one coherent story.
+
+### Saudi National Day 2026 Demo Topology
+
+```mermaid
+graph LR
+    Campaign[Campaign: Saudi National Day 2026]
+    
+    subgraph WorkItems [Work Items]
+        WI1[Main Reel - Video]
+        WI2[Poster - Design]
+        WI3[X Copy - Content]
+        WI4[Instagram Carousel - Media]
+        WI5[Event Photography - Production]
+    end
+    
+    subgraph TeamRoles [Assigned Roles]
+        R1[Mohammed: Director]
+        R2[Sara: Designer]
+        R3[Ahmed: Media Producer]
+        R4[Khalid: Content Writer]
+        R5[Publishing Officer]
+    end
+    
+    subgraph Assets [Media Assets]
+        A1[poster-v3.psd]
+        A2[poster-final.jpg]
+        A3[main-reel-v4.mp4]
+        A4[drone-shot.mov]
+    end
+    
+    Campaign --> WorkItems
+    WorkItems --> TeamRoles
+    WorkItems --> Assets
+```
+
+---
+
+
+# 48. Use Real-Looking Arabic Content
+
+Avoid placeholder text such as:
+
+```text
+Lorem ipsum
+Task 1
+Campaign test
+User A
+```
+
+Use believable Arabic departmental data.
+
+Example:
+
+```text
+الحملة:
+اليوم الوطني السعودي
+
+المهمة:
+إعداد الفيديو الرئيسي
+
+الحالة:
+قيد الإنتاج
+
+الموعد:
+22 سبتمبر
+```
+
+This will produce much better feedback from real users.
+
+---
+
+# 49. Keep Clean Internal Status Vocabulary
+
+User-facing Arabic:
+
+```text
+قيد المراجعة
+```
+
+Internal mock state:
+
+```text
+IN_REVIEW
+```
+
+User-facing:
+
+```text
+بحاجة إلى تعديل
+```
+
+Internal:
+
+```text
+CHANGES_REQUESTED
+```
+
+This makes future backend implementation cleaner.
+
+---
+
+# 50. Features Not Worth Deep Prototyping Yet
+
+Do not spend much time on:
+
+```text
+Complex automation builder
+Advanced disaster-recovery UI
+Detailed secret-management UI
+Incident simulation platform
+Semantic AI search
+NAS administration
+Full analytics suite
+Advanced employee monitoring
+Custom workflow designer
+Complex taxonomy administration
+```
+
+These have already been discussed conceptually and can be implemented later.
+
+> [!note] Emergency Protocol Handling
+> Kill switches, urgent publishing overrides, and crisis modes are addressed in [[disscussios/emergency_workflows|Emergency Workflows]].
+
+---
+
+
+# 51. Provisional End-to-End Demo Workflow
+
+Until Astra completes real workflow mapping, use this provisional flow:
+
+```text
+Manager creates campaign
+       ↓
+Creates Work Item
+       ↓
+Assigns Writer / Designer / Producer
+       ↓
+Specialists create mock work
+       ↓
+Submit for Review
+       ↓
+Assistant / Director reviews
+       ↓
+Changes requested OR Approved
+       ↓
+Publishing Officer sees Ready to Publish
+       ↓
+Schedules publication
+       ↓
+Calendar displays it
+       ↓
+Mock publication result
+       ↓
+Activity / Analytics update visually
+```
+
+Once real workflow discovery is complete, this flow should be revised to match actual department practice.
+
+### End-to-End Workflow Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Manager as Manager / Director
+    actor Specialist as Specialists (Writer/Designer/Producer)
+    actor Reviewer as Reviewer (Director / Asst. Director)
+    actor Publisher as Publishing Officer
+    participant System as Comms Hub Prototype
+    participant Channels as Social Channels (IG, X, LinkedIn)
+
+    Manager->>System: Create Campaign and Work Items
+    Manager->>Specialist: Assign Work Item
+    Specialist->>System: Upload Mock Assets and Copy
+    Specialist->>System: Submit for Review
+    System->>Reviewer: Notify: Pending Review
+    alt Changes Requested
+        Reviewer->>Specialist: Request Changes (Feedback Modal)
+    else Approved
+        Reviewer->>System: Approve Release
+        System->>Publisher: Move to Ready to Publish
+        Publisher->>System: Schedule / Trigger Publication
+        System->>Channels: Simulate Publishing Action
+        Channels-->>System: Return Mock Result (Success / Partial Failure)
+        System-->>Manager: Update Analytics and Feed
+    end
+```
+
+---
+
+
+# 52. What Success Looks Like
+
+The prototype succeeds when it can be placed in front of actual department users and they can:
+
+> **Pretend this is the real system and show how they would do their job.**
+
+The prototype should reveal:
+
+```text
+Which pages matter?
+Which do not?
+What terminology feels wrong?
+Which roles need different experiences?
+Which actions are missing?
+What takes too many clicks?
+What information belongs together?
+Does mobile work?
+Does approval feel natural?
+Does Work match the department?
+Does Create match real content creation?
+Does Publishing expose the right information?
+```
+
+The main output of the MVP is **validated product knowledge**.
+
+---
+
+# 53. Recommended Prototype MVP 0.1 Boundary
+
+```text
+Application shell
+RTL design system
+Responsive navigation
+
+Home
+Work
+Create
+Approvals / Publishing
+Calendar
+Media Library
+
+Light versions:
+Mail
+Ideas
+Analytics
+Monitoring
+Admin
+Settings
+Account
+
+Mock role switcher
+Mock data
+One coherent demo campaign
+Client-side interactions only
+No persistence
+No external integrations
+```
+
+---
+
+# 54. Development Sequence
+
+The recommended sequence is:
+
+```text
+NOW
+Skeleton + Skin
+
+NEXT
+Validate anatomy against real workflows
+
+THEN
+Nervous System
+Database / events / permissions / jobs / APIs
+
+THEN
+Brain
+Automation / AI / analytics
+
+THEN
+Muscles
+Real integrations / publishing / storage
+```
+
+The MVP should remain intentionally UI-first.
+
+### Development Sequence Flowchart
+
+```mermaid
+flowchart LR
+    Phase1[NOW: Skeleton + Skin<br/>UI Shell, RTL System, Mock Data] --> Phase2[NEXT: Validate Anatomy<br/>Compare Prototype vs Real Department Workflows]
+    Phase2 --> Phase3[THEN: Nervous System<br/>Database, Events, Permissions, Jobs, APIs]
+    Phase3 --> Phase4[THEN: Brain<br/>Automation, AI Orchestration, Analytics Engine]
+    Phase4 --> Phase5[THEN: Muscles<br/>Production Integrations, Cloud Storage, Publishing]
+```
+
+---
+
+
+# 55. Relationship With Astra Workflow Discovery
+
+Astra should map real department workflows using the confirmed organizational roles.
+
+Then compare:
+
+```text
+Prototype assumed workflow
+           VS
+Real department workflow
+```
+
+The prototype should be revised before backend architecture is frozen.
+
+This prevents the product from encoding theoretical workflows that employees do not actually use.
+
+---
+
+# 56. Core MVP Principle
+
+> **Build enough of the product visually that the department can meaningfully criticize it before we spend time building the backend.**
+
+And:
+
+> **The prototype should look like the future Communication Hub, but it should not pretend that its integrations, security, publishing, automation, storage, or analytics are real yet.**
+
+This document defines the MVP shell only. It is not yet the Version 1 technical specification or implementation roadmap. ^core-mvp-boundary
+
+# 57. Motion studio addition, 2026-10-08 (revised after first review)
+
+User-requested extension to Version 0: add **استوديو الحركة** at `/motion`, next to the media library in the shared navigation. It uses Direction A's Arabic RTL shell, tokens and controls, with Direction B's larger preview treatment. The first integration was reviewed the same day and revised; this section describes the revised scope.
+
+**Inventory.** Twenty-six templates: eight number animations, eight Repine lower-thirds and ten video frames. Sixteen come from `motion_design/numbers-library` and are preserved; ten are Hub additions. Four additions are new (المخطوطة, الهلال المضيء, أبواب المشربية, طيف التلاوة) and six replace the first integration's basic versions with full designs (مقياس الأثر, محطات الإنجاز, الشريط التحريري, مدار الهوية, بوابة الأثر, إطار التغطية). Badges: "جديد" and "مُحدَّث".
+
+**Layout.** Operate mode, one workbench: category tabs, a horizontal template rail with live thumbnails, then the preview stage beside a tabbed settings panel, then the download panel. The settings panel stays in view while the page scrolls. At 1000px and below the panel moves under the stage. The stage is dark with a checkerboard only where transparency is being shown.
+
+**Preview.**
+- Transport: play/pause, restart, loop, scrubber, readout. A strip under the scrubber shows the proportional lengths of entry, showcase and exit.
+- Numbers and Repine: backdrop choice (scene, transparent, dark, light). Frames: what shows in the window (sample footage, the user's own clip loaded locally for preview only, key green, transparent) and Reels safe zones at 9:16. The backdrop and clip are never part of an export.
+- Frames: ratio chooser (9:16, 4:5, 1:1, 16:9) with a glyph of the true shape, and the explicit output width and height at 1080p.
+- Starts playing on selection unless the user prefers reduced motion; then it starts paused with idle motion and particles off.
+
+**Settings (restored from the source library).**
+- Content: text per design, number value (slider and exact box), contact and social details revealed by their own switches.
+- Colors: per-design pickers with Arabic names; restore original colors.
+- Elements (frames): logo, verse, waveform, particles, background fade.
+- Timing: entry, showcase (up to 180 seconds by slider, 900 exact), exit (0 keeps the frame to the end), speed. Numbers: hold and speed.
+- Motion (Repine and frames): entry, exit and showcase motion intensity, 0 to 100 percent.
+- Edits are kept per design while the page is mounted and reset on refresh.
+
+**Download.** Four formats: MP4 on a key color (WebCodecs; real-time recording when the browser lacks it), transparent MOV (PNG codec), PNG sequence in ZIP, single PNG. Short side 720, 1080 or 4K; 24, 30 or 60 frames per second. PNG frames use a built-in encoder over `CompressionStream`, with four encodes in flight. The panel states output size, duration, frames and an approximate file size, warns about heavy files, refuses estimates above 1.6 GB, shows progress with time remaining, can be cancelled, and keeps a working save link after completion in case the automatic download is blocked. Nothing is uploaded.
+
+**Boundaries.** Contact defaults are empty and hidden: the source library's numbers belong to another organization. Templates containing the Hedayah logo and verses say so. Chart trajectories and waveform decoration are illustrative. Downloads do not attach to work, enter the media library or publish. Access restrictions, persisted settings, asset upload and storage are deferred; the page is open to every prototype persona and implies no authentication or RBAC.
+
+The immutable architecture records remain unchanged. This addition does not satisfy or bypass the department-validation gate.
+
+# 58. Second design behind a toggle, 2026-10-10
+
+Owner directive: the proposed identity «الهوية الجديدة لمركز الاتصال» (Roadmap Checkpoint 0.3) is available in the prototype as an option, not as a replacement. Direction A (`DESIGN.md`) remains the default.
+
+**Switch.** A double-click on the logo at the top of the sidebar switches between the current design and the second design. A status message confirms the result: «التصميم: الهوية الجديدة لمركز الاتصال» or «التصميم: التصميم الحالي». A single click on the logo still opens Home. The choice is remembered in that browser only and is restored before the page first paints. There is no visible control and no keyboard path; the switch is for comparing the two designs, not a user setting. On phone widths the sidebar, and so the logo, is hidden, so a phone shows whichever design that browser last chose.
+
+**What changes.** Colour tokens, type faces (Reem Kufi for headings, IBM Plex Sans Arabic for text, both served by the app), the emerald-depth sidebar with the lattice texture and a gold marker on the active item, rounder surfaces with soft elevation, pill status chips with a dot, a gold campaign action, and short motion that is off when the user asks for reduced motion.
+
+**What does not change.** Pages, layout, navigation, roles, statuses, Arabic terms, version-bound approval, and the local-simulation boundary. Evening mode, the Aref Ruqaa accent word and the decision screens of Checkpoint 0.3 are not built.
+
+# 59. Round 1 corrections from the Director's response, 2026-10-11
+
+Phase 0.2.3 corrections built on findings of response R01 (`validation/responses/R01-2026-10-10-director.md`), severities confirmed by the owner (D-03). Each subsection names its finding. They apply to both designs.
+
+## 59.1 Scenario date, overdue and due soon (F-R01-02, task 0.2.3.5)
+
+- The prototype has a fixed "today": **Monday 21 September 2026**, two days before the campaign. Every page header states it: «اليوم في النموذج: الاثنين 21 سبتمبر 2026». Dates are never read from the viewer's clock.
+- **Overdue (متأخر):** delivery is still outstanding (draft, in production, in review, changes requested or rejected) and the delivery date is before the scenario date. Approved, scheduled and published work is delivered and never counts as overdue.
+- **Due soon (قريب الموعد):** outstanding and due today or within two days.
+- The Director's and Assistant Director's Home show both counts. Each count is a link to Work filtered to exactly those items.
+- Work has a delivery filter (كل المواعيد، متأخر، قريب الموعد). Each row says how late or how close it is, for example «متأخر يومين» or «يستحق غداً».
+- The seed now holds eleven work items in a realistic mix: three overdue, three due soon, three on time, plus the approved and scheduled ones.
+
+## 59.2 Named people, team view and load (F-R01-01, F-R01-17, task 0.2.3.6)
+
+- Work is assigned to a **named person**, not to a role. The department in the prototype: محمد (Director), ريم (Assistant Director), خالد and لمى (writers), سارة and فهد (designers), أحمد and ماجد (producers), نورة (Publishing Officer), عبدالله (member). The role still decides authority; "View As" simulates the first person of each role.
+- A specialist edits and submits only work assigned to them; leadership may edit any work. «مهامي» shows only the simulated person's work.
+- Work states its purpose under the title: «قائمة عمل الفريق: من يعمل على ماذا، وفي أي مرحلة، وما المتأخر، وما ينتظر المراجعة أو الاعتماد». The section name «العمل» is unchanged until terminology item T6 has a verdict.
+- Work has three tabs: «الفريق» (team view), «الكل» (list) and «مهامي». Leadership opens on «الفريق», unless arriving from a Home count, which opens the filtered list.
+- **Team view:** one card per person, with counts (works, overdue, due soon, awaiting review), then each item with its status, its **stage** and its delivery note. The stage says where the work stands: the next production step, «تعديل بعد المراجعة», «بانتظار المراجعة والاعتماد», «معتمد · بانتظار الجدولة», «مجدول للنشر», and so on.
+- **Home for the Director and Assistant Director** shows «حمل الفريق»: active work per person with overdue and awaiting-review counts and a bar, red when the person has late work.
+- The Composer's «المسؤول» chooses a person; the role follows from the person.
+
+## 59.3 Stale channel versions (F-R01-05, task 0.2.3.7)
+
+- Each channel version (Instagram, X, LinkedIn) remembers the main text it was written against. When the main text changes afterwards, that version is flagged «تحتاج مراجعة: كُتبت قبل تعديل النص الأساسي».
+- The flag shows on the version in the work page, in the release the reviewer sees, and in the release history. In the composer the channel tab reads «X · تحتاج مراجعة» and the main-text tab lists the flagged versions.
+- The flag clears when the version is rewritten, or when the writer presses «تأكيد الصياغة» to confirm it is still right. Either change is saved as a new version, like any other edit.
+- An empty channel version uses the main text and is never flagged.
+
+## 59.4 Highlighted version difference (F-R01-06, task 0.2.3.8)
+
+- When a version under review has an earlier submitted version, the review screen opens with «ما الذي تغيّر منذ الإصدار N»: the main text with added words highlighted and underlined, removed words struck through, and a list of other changed fields (title, media and its version, channels, each channel version, delivery date, content type), each shown as old struck through, then new.
+- The same comparison appears inside each later revision of the release history, so the writer sees what changed between their own versions. The first revision has nothing to compare with and shows none.
+- The comparison is by word, so it works for Arabic text. Punctuation stays attached to its word.
+- Seed example: «منشور شكر المتطوعين», revision 1 (changes requested) and revision 2 (in review), with new text and the poster moved from v4 to v5.
+
+## 59.5 Early reconnect warning (F-R01-07, task 0.2.3.9)
+
+- Each channel account carries the time its publishing authorization runs out (Riyadh time). In the seed, Instagram is valid until 2 November, X runs out at 12:00 on the campaign day, and LinkedIn has already expired.
+- **At scheduling:** as soon as a time is chosen, the scheduling dialog lists every selected channel whose authorization is expired or runs out before that time, with the reason: «تفويض X ينتهي … قبل موعد النشر. أعد ربط الحساب قبل الموعد.» The warning follows the chosen time. Scheduling is still allowed; the confirmation message says what is at risk and the notice is raised as «يحتاج انتباه».
+- **Publishing Officer's Home:** a panel «مواعيد معرضة للخطر» lists every scheduled item whose channels will not be authorized at its publication time, with the reason per channel. The publishing package on the approvals page shows the same warning.
+- Reconnecting remains a simulation; nothing contacts the channels.
+
+## 59.6 Timestamped video review notes (F-R01-03, task 0.2.3.10)
+
+- A video version under review has «ملاحظات زمنية على الفيديو»: notes bound to a time such as 01:30, listed in time order with the reviewer's name. Notes belong to the asset version they were written on.
+- Playback stays deferred, so the time is **typed** in the form minutes:seconds; the panel says so. An invalid time is refused with the expected format.
+- Reviewers and the person assigned to the work may add notes. Notes appear on the review screen and on the producer's work page.
+- «طلب تعديل» offers the notes on the version under review, all ticked; the reviewer may untick any. The chosen notes are appended to the change request, in time order, under «ملاحظات زمنية», and so reach the producer's comments and the release history.
+- Only video work takes these notes.
+
+# 60. Second design: screens and evening mode, 2026-10-11
+
+Extends section 58. Everything here appears only while the second design is on; Direction A is unchanged by it. The switch is the logo: at the top of the sidebar on wider screens, and at the top of the bar on phones, where a double tap switches.
+
+- **Evening mode.** The second design follows the device's dark preference. Text pairs keep at least 4.5 to 1 in both modes. The Motion Studio keeps its own light panels.
+- **Accent word.** The name in the Home greeting is written in Aref Ruqaa, in gold: one accent word per page, as the proposal asks.
+- **Home.** «قراراتك الآن» lists what waits for this person with a count and direct actions: «اعتماد الإصدار N» (the exact version), «مراجعة», «جدولة» for the Publishing Officer, «فتح» for others. The campaign card gains the **campaign pulse**: five stations (المحتوى، التصميم، المراجعة، الجدولة، النشر), how many works stand at each, the current station and overall progress. Leadership and the Publishing Officer see an attention strip when a scheduled item's channel will not be authorized in time.
+- **Approvals.** Above the decision, a note binds it to the exact version: «الاعتماد مرتبط بالإصدار N تحديداً. أي تعديل بعده يُلغيه تلقائياً.» Approving shows the gold **approval stamp** for about two seconds; it does not animate when the user prefers reduced motion.
+- **Phone approval sheet.** On phones the decision buttons sit in a bottom sheet fixed above the navigation bar from the first moment, at least 44 px tall, approval on its own row. The page keeps space at its end so the sheet never hides content.
+- **Notification tiers.** The notification centre groups by «قرارك», «انتباه», «للعلم», with counts, decisions first (`disscussios/notification_model.md`).
+- **Calendar week.** The calendar opens on the week of the scenario date, with a lane per channel (Instagram, X, LinkedIn) and one for internal delivery dates, and a load bar under each day. Dragging a scheduled item to another day, or choosing a new time in its dialog, records a **requested time** only. Requests are listed with the channel risks of the new time and notify the Publishing Officer, who alone confirms («تأكيد النقل»); the Publishing Officer or the requester may cancel. Requests are kept while moving around the app (they reset with the page, like all prototype state). Month and agenda views remain.
+- **Motion from the work.** A poster or video work offers «أنشئ حركة» with three suggested templates; the studio opens on the template with the work's title in its title field and names the work it was opened from.
+- **Component page.** `/components`, outside the navigation, shows every shared component in each state, for whichever design is on.
+- Not built: the command palette (only if the Director wants it).
+
+# 61. «التقويم», «المشاريع» and «الطلبات» on the work-cycle database, 2026-10-13
+
+Step 5 of `Reference_Build_Plan.md`, after «النموذج المرجعي للمركز» version 5 (`reference/comms-hub-reference-v5.html`). These pages read and write the database (`supabase/migrations/*work_cycle*`); every write is a database function, and who sees what is row level security. Publishing stays a simulation, and the calendar says so. This section replaces the calendar of section 60 (a browser mock with a request list that reset with the page), which is removed.
+
+## 61.1 «التقويم» (`/calendar`)
+
+- **Views.** Day, week (Sunday to Saturday, Riyadh time), month, and a two-week list. On a phone the page opens on the list. Previous, today, next; the heading names the range. `?date=`, `?view=` and `?project=` open it on a day, a view or a project.
+- **What shows.** Filters for publishing, deliveries, stages, tasks, events, projects and «تذكيراتي», «عملي فقط», and a project. Publishing appears on each account's lane: «مجدول», «معتمد · لم يُجدول», «مقترح · لم يُعتمد بعد», a requested move as «موعد مطلوب» with the held time «معلّق حتى القرار», and «نُشر» with each account's result. The shared mailbox has its own lane, then events, then deliveries, stages, tasks and reminders. A key under the calendar names every colour.
+- **Across days.** Project bands across the week (each opens its project) and month stripes; open stages with a start and an end, and tasks with a start, as bars with the person's name (dashed while waiting, red when late). The team's load under each day counts deliveries, stages and tasks, red when one is late.
+- **Warnings that do not block.** An account whose authorisation will not cover the time; two works on one account within two hours; a day with seven or more entries («يوم مزدحم»). The lane of an expired or nearly expired account says so under its name.
+- **The entry panel.** Opens from any entry: the day and time, the work and its status, each account and whether its authorisation covers the time, and only this role's actions. Escape closes it.
+- **Moving.** A publish date is moved by a request («طلب نقل الموعد»), by the leaders, the work's owner or the publisher; only «موعد النشر» goes back to review and the current time is held until the decision. The new date is approved from the panel or «الطلبات» when it is the only part waiting, by a leader who did not ask for it; the asker, a leader or the publisher may withdraw it. Leaders move deliveries and stage dates directly; a stage never ends before an open stage it waits for ends, nor after the delivery, and the delivery never before an open stage ends. Dragging an entry to another day does the same (by mouse or finger); a press that does not move opens the panel.
+- **«إضافة» from a day.** A work due that day (or a request, for a member) and an event coverage, both opening «إنشاء» with the date; scheduling an approved work on that day (publisher); a task (one day, days in a row, or chosen days each with its person; leaders and the producer give tasks to others, with the least busy person in the kind's role suggested); an event (leaders); a private reminder. A past day cannot take a new delivery.
+- **Tasks** are managed in «المهام»; the panel offers an extension request to the task's person. Everyone but the leaders sees only the tasks given to them or by them.
+
+## 61.2 «المشاريع» (`/projects`)
+
+- A card per project: type, «جارٍ» or «قادم» or «منتهٍ», dates and length, owner, description, progress (done stages and tasks over all), works and how many are late, the next date, and the people on it.
+- **«مشروع جديد»** (the director and the assistant): name, type, dates, owner, description, and an optional **works plan**: per work a title, a type and a due date. Each planned work gets its stages from its type, given to the least busy person in each role (counting what the plan itself has given out) and dated back from its due date; its owner is the least busy in the type's main role. A post goes on the active accounts that are not YouTube. The preview under each row shows who and when. The project and all its works are created in one step (`project_create`): if any work is refused, nothing is created. The «مشروع» card in «إنشاء» opens the same dialog.
+
+## 61.3 The project page (`/projects/<id>`)
+
+- Header with type, dates, state, owner, counts and progress; «عمل في المشروع» (opens «إنشاء» linked to it, due its end), «مهمة», and for leaders «حدث» and «تعديل المشروع»; «في التقويم» opens its week filtered to it.
+- **الجدول الزمني:** a row per open work (with its delivery and publish marks) and its stages as bars by state, then the project's tasks and events, today as a gold line. **من يعمل على ماذا:** each person's stages and tasks in order, what each waits for and whom it hands over to. **الأعمال:** the works list. **المهام:** the project's tasks, with an extension request for one's own. `?tab=` opens a view.
+
+## 61.4 «الطلبات» (`/requests`)
+
+- Tabs «بانتظار قراري» (with a count), «طلباتي», «المنتهية», «التفويض». `?tab=` opens one.
+- **Kinds.** Extension of a stage or a task, with what moves after it computed by the database before the decision and, when the plan would pass the delivery, «مدّ التسليم النهائي أيضاً»; folder access («منح «عرض فقط»»); publish-date moves; work requests without an owner («إسناد»); outside mail held for approval and ask-first publish confirmations, as links to «البريد» and «النشر» where they are decided.
+- **Who decides.** Not the sender. A stage extension: the leaders and the work's owner. A task extension: the leaders and the person who gave the task. Folder access: the leaders and whoever manages the folder. The sender withdraws a pending request. A decline takes an optional reason; the sender is told either way.
+- **«طلب جديد»:** extension of one of my open stages or tasks, access to a restricted folder that shows in my library, or a new work.
+- **Delegation while away** is not built (owner decision of 2026-10-12: it waits for the work on giving the right to approve to other people). Its tab says so.
+
+## 61.5 Home
+
+Home now reads the database: tiles per role (leaders: waiting for review, late, late stages, requests without an owner; publisher: ready, scheduled, waiting for confirmation, partial or failed; makers: active work, ready stages, late, open tasks; member: open requests, waiting for an owner, tasks), each opening the page it counts; the works that need this person; the next seven days from the calendar; the team's load for the leaders; and an attention strip when a scheduled account's authorisation will not cover its time. The sample campaign and its sample work numbers are gone from Home.
+
+## 61.6 Navigation and access
+
+«المشاريع» and «الطلبات» are in the sidebar after «التقويم». They are not separate grants: «المشاريع» opens with «العمل» or «التقويم», and «الطلبات» with «العمل», «مكتبة الوسائط» or «المهام», so existing accounts need no change (`src/lib/access.ts`, tested). Notices about requests open «الطلبات», and about a project its page. Every one of the sixteen pages of the reference now has its guide.
