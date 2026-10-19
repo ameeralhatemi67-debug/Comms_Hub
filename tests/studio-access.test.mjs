@@ -89,3 +89,14 @@ test('the database check is the same pair, and nobody outside signed-in accounts
   assert.match(sql, /revoke all on function public\.studio_can\(\) from public, anon;/);
   assert.match(sql, /grant execute on function public\.studio_can\(\) to authenticated;/);
 });
+
+test('the work page offers «فتح في الاستوديو» only through the studio holders\' own read of studio_exports', () => {
+  const links = readFileSync('src/components/studio/work-links.tsx', 'utf8');
+  assert.match(links, /const allowed = canOpenStudio\(account\) && caps\.has\(STUDIO_CAP\);/);
+  assert.match(links, /if \(!allowed \|\| !key\) return setMap\(new Map\(\)\);/);
+  assert.match(links, /from\('studio_exports'\)/);
+  assert.match(links, /rpc\('work_asset_link', \{ p_work: work, p_asset: asset, p_add: true \}\)/, 'files join a work through the work cycle, not a studio shortcut');
+  const item = readFileSync('src/components/work/item.tsx', 'utf8');
+  assert.match(item, /const origins = useStudioOrigins\(d\.assets\.map\(\(a\) => a\.asset_id\)\);/);
+  assert.match(item, /origins\.get\(a\.asset_id\) && <StudioOpenLink projectId=\{origins\.get\(a\.asset_id\)!\} \/>/);
+});

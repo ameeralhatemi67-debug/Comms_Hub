@@ -38,6 +38,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { roles } from '@/lib/domain';
+import { StudioOpenLink, useStudioOrigins } from '../studio/work-links';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import {
   PLATFORM_ORDER,
@@ -845,6 +846,8 @@ function MediaPanel({ d, onAdd, act }: { d: WorkDetail; onAdd: () => void; act: 
   const w = useWork();
   const x = d.w;
   const open = !x.closed_at && ['DRAFT', 'IN_PRODUCTION', 'CHANGES_REQUESTED', 'REJECTED'].includes(x.status);
+  // the studio project each file came from: answered only to those who may open the studio (MVP_draft.md 62)
+  const origins = useStudioOrigins(d.assets.map((a) => a.asset_id));
   const part = isLead(w.role) || x.assignee === w.me || x.created_by === w.me || x.people.includes(w.me) || d.stages.some((s) => s.who === w.me);
   return (
     <section className="wk-pn" data-gd="media">
@@ -875,7 +878,10 @@ function MediaPanel({ d, onAdd, act }: { d: WorkDetail; onAdd: () => void; act: 
                     <small>يراه من يملك الوصول إلى مجلده.</small>
                   </span>
                 )}
-                {st ? <span className={`wk-chip ${st[1]}`}>{st[0]}</span> : <span />}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  {st && <span className={`wk-chip ${st[1]}`}>{st[0]}</span>}
+                  {origins.get(a.asset_id) && <StudioOpenLink projectId={origins.get(a.asset_id)!} />}
+                </span>
                 {open && part ? (
                   <button type="button" className="wk-btn sm quiet" aria-label="إزالة من العمل" title="إزالة من العمل" onClick={() => void act('work_asset_link', { p_work: x.id, p_asset: a.asset_id, p_add: false }, 'أُزيل الملف من العمل، ويبقى في المكتبة.')}>
                     <Ic i={X} />

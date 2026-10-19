@@ -22,6 +22,7 @@ import { ColorInput, Segmented, Slider, Switch } from '../motion-controls';
 import { Bin, type LibraryItem } from './bin';
 import { CachePanel } from './cache-panel';
 import { DesktopOnly, PanelTabs, useCompact, type Panel } from './compact';
+import { ReviewPanel, useProjectWork } from './work-links';
 import { ExportPanel } from './export-panel';
 import { CropControls, MotionControls, TextControls, TransformControls } from './inspector';
 import { librarySource } from './library';
@@ -64,6 +65,7 @@ export function PhotoEditor(p: EditorProps) {
   const [error, setError] = useState<string | null>(null);
   const compact = useCompact();
   const [panel, setPanel] = useState<Panel>('timeline');
+  const pw = useProjectWork(p.projectId, p.api);
   // pictures with their adjustment applied (by the worker), by layer
   const [adjusted, setAdjusted] = useState<Map<string, { key: string; canvas: HTMLCanvasElement }>>(new Map());
   const layers = doc.photo?.layers ?? [];
@@ -316,7 +318,7 @@ export function PhotoEditor(p: EditorProps) {
             )}
           </section>
   );
-  const exportEl = <ExportPanel doc={doc} pool={pool} t={0} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} photo adjusted={resolver.adjusted} />;
+  const exportEl = <ExportPanel doc={doc} pool={pool} t={0} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} photo adjusted={resolver.adjusted} workRef={pw.workRef} />;
   const inspEl = (
         <aside className="st-insp" aria-label={sel ? 'إعدادات الطبقة' : 'إعدادات الصورة'}>
           {sel ? (
@@ -445,6 +447,7 @@ export function PhotoEditor(p: EditorProps) {
                   {doc.photo?.background !== null && <ColorInput label="لون الخلفية" value={doc.photo?.background ?? '#ffffff'} disabled={p.readOnly} onChange={(v) => h.apply(setCanvas(h.get(), { background: v }), 'لون الخلفية', 'bg')} />}
                 </div>
               </details>
+              <ReviewPanel projectId={p.projectId} api={p.api} readOnly={p.readOnly} pw={pw} />
               <CachePanel cache={cache} inUse={pool ? pool.inUse(doc) : new Set()} onChanged={() => undefined} />
             </>
           )}

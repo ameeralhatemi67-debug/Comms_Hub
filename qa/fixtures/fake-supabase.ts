@@ -8,7 +8,7 @@ import { checkDoc } from '../../src/lib/studio/schema.ts';
 
 type Rev = { revision: number; base: number; doc: unknown; saved_by: string; saved_at: string; note: string | null };
 type Project = { id: string; title: string; kind: string; owner: string; created_at: string; updated_at: string; updated_by: string; revision: number; autosaved_at: string | null; work_ref: string | null; archived_at: string | null; lease_holder: string | null; lease_until: number; revs: Rev[]; exports: { asset: string; version: number; revision: number }[] };
-type Db = { projects: Project[]; files: Record<string, unknown>[]; uploads: number };
+type Db = { projects: Project[]; files: Record<string, unknown>[]; uploads: number; notes?: Record<string, unknown>[]; workLinks?: { work: string; asset: string }[] };
 
 export const ME = 'dir@t.test';
 const NAMES: Record<string, string> = { 'dir@t.test': 'مدير الاختبار', 'other@t.test': 'زميل آخر' };
@@ -151,6 +151,11 @@ const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; erro
     save();
     return ok(null);
   },
+  work_asset_link: (a) => {
+    db.workLinks = [...(db.workLinks ?? []), { work: String(a.p_work), asset: String(a.p_asset) }];
+    save();
+    return ok(null);
+  },
   media_tree: () => ok([{ id: 'f1', parent_id: null, name: 'مواد الحملة', restricted: false, locked: false, lock_reason: null, level: 3, ghost: false, locked_by: null, created_at: now() }]),
 };
 
@@ -158,6 +163,9 @@ const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; erro
 function query(table: string) {
   let rows: Record<string, unknown>[] =
     table === 'media_files' ? [...db.files]
+    : table === 'works' ? [{ id: 'CH-101', title: 'حملة اليوم الوطني', status: 'IN_PRODUCTION', closed_at: null, updated_at: '2026-10-19' }]
+    : table === 'studio_projects' ? db.projects.map((p) => ({ id: p.id, work_ref: p.work_ref }))
+    : table === 'media_notes' ? [...(db.notes ?? [])]
     : table === 'studio_exports' ? db.projects.flatMap((p) => p.exports.map((e, i) => ({ project_id: p.id, asset_id: e.asset, version: e.version, revision: e.revision, created_at: String(i).padStart(4, '0') }))).reverse()
     : [];
   let single = false;
@@ -176,6 +184,7 @@ function query(table: string) {
       return q;
     },
     order: () => q,
+    is: (col: string, v: unknown) => ((rows = rows.filter((r) => (r[col] ?? null) === v)), q),
     limit: (n: number) => ((rows = rows.slice(0, n)), q),
     maybeSingle: () => ((single = true), q),
     then: (resolve: (v: unknown) => void) => {
@@ -212,6 +221,13 @@ export function supabase() {
   },
   as(email: string) {
     me = email;
+  },
+  addNote(asset: string, timecode: string, body: string) {
+    db.notes = [...(db.notes ?? []), { id: crypto.randomUUID(), asset_id: asset, author: 'asst@t.test', body, timecode, created_at: now() }];
+    save();
+  },
+  get workLinks() {
+    return db.workLinks ?? [];
   },
   addFile(row: Record<string, unknown>) {
     db.files.unshift(row);

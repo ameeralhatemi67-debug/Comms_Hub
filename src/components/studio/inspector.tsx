@@ -165,7 +165,7 @@ export function MotionControls({ item, ratio, onParams, onLength, disabled, time
 }
 
 export function Inspector({
-  doc, clip, onClip, onDoc, readOnly, actions, canFillWindow, hasPrevAdjacent, cachePanel, sourceNote, onLength, compact = false,
+  doc, clip, onClip, onDoc, readOnly, actions, canFillWindow, hasPrevAdjacent, cachePanel, reviewPanel, sourceNote, onLength, compact = false,
 }: {
   doc: ProjectDoc;
   clip: Clip | null;
@@ -176,6 +176,8 @@ export function Inspector({
   canFillWindow: boolean;
   hasPrevAdjacent: boolean;
   cachePanel: ReactNode;
+  /** The work and the review notes of what the project saved to the library (work-links.tsx). */
+  reviewPanel?: ReactNode;
   sourceNote: string | null;
   onLength: (us: number) => void;
   /** A phone: cross-fade, crop and colours are kept for the computer. */
@@ -192,6 +194,7 @@ export function Inspector({
           <ColorInput label="لون الخلفية" value={doc.video?.background ?? '#000000'} disabled={readOnly} onChange={(v) => onDoc(setFormat(doc, { background: v }), 'لون الخلفية', 'bg')} />
           <p className="st-hint">المدة {shortTime(durationOf(doc))} · <bdi dir="ltr">{W}×{H}</bdi></p>
         </Section>
+        {reviewPanel}
         {cachePanel}
         <Section title="مفاتيح سريعة" open={false}>
           <ul className="st-keys">

@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-ui.cjs",
-  "run": "2026-10-19T18:56:30.565Z",
+  "run": "2026-10-19T19:03:58.749Z",
   "checks": [
     {
       "name": "the empty home says there are no projects yet and offers both kinds",
@@ -10,7 +10,7 @@
     {
       "name": "a new video project is created and opened in the editor",
       "pass": true,
-      "detail": "02f7166f-2786-49ab-96f4-ad1a003e660c"
+      "detail": "27166b07-9b94-4759-81dd-ad744f6c0a8c"
     },
     {
       "name": "the bar names the project and its first numbered version",
@@ -68,9 +68,19 @@
       "detail": "{\"programs\":[],\"stream_groups\":[],\"streams\":[{\"codec_name\":\"h264\",\"codec_type\":\"video\",\"width\":1280,\"height\":720},{\"codec_name\":\"aac\",\"codec_type\":\"audio\"}],\"format\":{\"duration\":\"7.808000\"}}"
     },
     {
+      "name": "a project is linked to a work from «المراجعة», which shows the work and its status",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "saving to the library offers to link the file to the work of the project",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it",
       "pass": true,
-      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"66b1a9a1-f20a-40b7-8abb-3de8093fe051\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
+      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"69f7a43f-0f71-4902-8b94-49fb9e740c2c\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
     },
     {
       "name": "the result says it is in the library and that its uploader does not approve it",
@@ -78,9 +88,19 @@
       "detail": ""
     },
     {
+      "name": "the saved file is linked to the work through the work cycle (work_asset_link)",
+      "pass": true,
+      "detail": "[{\"work\":\"CH-101\",\"asset\":\"69f7a43f-0f71-4902-8b94-49fb9e740c2c\"}]"
+    },
+    {
       "name": "«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4",
       "pass": true,
-      "detail": "[{\"asset\":\"66b1a9a1-f20a-40b7-8abb-3de8093fe051\",\"version\":1,\"revision\":3},{\"asset\":\"66b1a9a1-f20a-40b7-8abb-3de8093fe051\",\"version\":2,\"revision\":4}]"
+      "detail": "[{\"asset\":\"69f7a43f-0f71-4902-8b94-49fb9e740c2c\",\"version\":1,\"revision\":3},{\"asset\":\"69f7a43f-0f71-4902-8b94-49fb9e740c2c\",\"version\":2,\"revision\":4}]"
+    },
+    {
+      "name": "a timed review note of the exported file shows in the studio, and its time moves the playhead",
+      "pass": true,
+      "detail": "00:03.00 / 00:07.24"
     },
     {
       "name": "when another person takes the editing, a save is refused and the editor turns to reading",
@@ -135,7 +155,7 @@
     {
       "name": "dragging a layer on the canvas moves it",
       "pass": true,
-      "detail": "540 to 624"
+      "detail": "540 to 645"
     },
     {
       "name": "the PNG export is the full 1080x1080 picture with the rectangle in the middle",
@@ -209,8 +229,8 @@
     }
   ],
   "debugTime": "00:02.00 / 00:07.24",
-  "projectId": "02f7166f-2786-49ab-96f4-ad1a003e660c",
-  "total": 41,
-  "passed": 41,
+  "projectId": "27166b07-9b94-4759-81dd-ad744f6c0a8c",
+  "total": 45,
+  "passed": 45,
   "failed": 0
 }

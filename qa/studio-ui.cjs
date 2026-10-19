@@ -157,13 +157,22 @@ async function videoFlow(browser, base, errors) {
   const dprobe = JSON.parse(require('node:child_process').spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,width,height:format=duration', '-of', 'json', dlPath]).stdout.toString());
   const dv = dprobe.streams.find((x) => x.codec_type === 'video');
   check('«تصدير وتنزيل» downloads an H.264 file of the project at 720p (1280x720) with its sound', dv?.codec_name === 'h264' && dv.width === 1280 && dv.height === 720 && dprobe.streams.some((x) => x.codec_name === 'aac') && /جاهز/.test(await tab.locator('.st-done').textContent()), JSON.stringify(dprobe));
+  // the project joins a work, from «المراجعة» in the project settings
+  await tab.locator('body').press('Escape');
+  await tab.locator('.st-review select').selectOption('CH-101');
+  await tab.locator('.st-review').getByRole('button', { name: 'ربط', exact: true }).click();
+  await tab.locator('.st-review', { hasText: 'حملة اليوم الوطني' }).waitFor({ timeout: 5000 });
+  check('a project is linked to a work from «المراجعة», which shows the work and its status', /CH-101/.test(await tab.locator('.st-review').textContent()) && /قيد الإنتاج/.test(await tab.locator('.st-review').textContent()));
   await tab.locator('.st-export').getByRole('radio', { name: /ملف جديد في المكتبة/ }).click();
+  check('saving to the library offers to link the file to the work of the project', (await tab.getByText('ربط الملف بالعمل CH-101').count()) === 1);
   await tab.locator('.st-export select').waitFor();
   await tab.getByRole('button', { name: 'تصدير وحفظ في المكتبة' }).click();
   await tab.locator('.st-done', { hasText: 'حُفظ في المكتبة' }).waitFor({ timeout: 60000 });
   const lib1 = await tab.evaluate(async (pid) => ({ p: window.__db.projects.find((x) => x.id === pid), up: await (await fetch('/__uploads')).json() }), id);
   check('«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it', lib1.p.revision === 3 && lib1.up.length === 1 && lib1.up[0].folder_id === 'f1' && lib1.p.exports.length === 1 && lib1.p.exports[0].revision === 3 && lib1.p.exports[0].version === 1, JSON.stringify({ rev: lib1.p.revision, exports: lib1.p.exports, up: lib1.up.map((u) => [u.name, u.folder_id, u.current_version]) }));
   check('the result says it is in the library and that its uploader does not approve it', /لا يعتمد أحد ما رفعه/.test(await tab.locator('.st-done').textContent()));
+  const links = await tab.evaluate(() => window.__db.workLinks);
+  check('the saved file is linked to the work through the work cycle (work_asset_link)', links.length === 1 && links[0].work === 'CH-101' && links[0].asset === lib1.up[0].id && /رُبط الملف بالعمل CH-101/.test(await tab.locator('.st-done').textContent()), JSON.stringify(links));
   await tab.locator('.st-export').getByRole('radio', { name: /إصدار جديد من ملف/ }).click();
   await tab.locator('.st-export select option').first().waitFor({ state: 'attached' });
   await tab.getByRole('button', { name: 'تصدير وحفظ في المكتبة' }).click();
@@ -171,6 +180,15 @@ async function videoFlow(browser, base, errors) {
   const lib2 = await tab.evaluate(async (pid) => ({ p: window.__db.projects.find((x) => x.id === pid), up: await (await fetch('/__uploads')).json() }), id);
   check('«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4', lib2.up.length === 1 && lib2.up[0].current_version === 2 && lib2.p.exports.length === 2 && lib2.p.exports[1].version === 2 && lib2.p.exports[1].revision === 4, JSON.stringify(lib2.p.exports));
   await tab.locator('.st-export').getByRole('radio', { name: /تنزيل إلى الجهاز/ }).click();
+  // a timed review note on that file appears in the studio and moves the playhead
+  await tab.evaluate((asset) => window.__db.addNote(asset, '00:03', 'غيّر لون الخلفية هنا'), lib2.up[0].id);
+  await tab.locator('.st-clip[data-kind="text"]').click();
+  await tab.locator('body').press('Escape');
+  await tab.locator('.st-notes li').waitFor({ timeout: 8000 });
+  await tab.locator('.st-tc', { hasText: '00:03' }).click();
+  await tab.waitForTimeout(300);
+  const tAfter = await tab.locator('.st-time').textContent();
+  check('a timed review note of the exported file shows in the studio, and its time moves the playhead', /غيّر لون الخلفية هنا/.test(await tab.locator('.st-notes').textContent()) && tAfter.startsWith('00:03.00'), tAfter);
 
   // someone else takes the editing
   await tab.evaluate((pid) => window.__db.takeLease(pid), id);

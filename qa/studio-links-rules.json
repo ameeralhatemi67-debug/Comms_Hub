@@ -1,0 +1,63 @@
+{
+  "run": "2026-10-19",
+  "what": "Database rule run for the studio, Phase 7 (Studio_Build_Plan.md): a project joins a work, its export is linked to the work, the studio origin stays private to studio holders",
+  "migration": "No new migration: studio_project_link_work and studio_exports from 20261019130000_studio_projects.sql (comms-hub version 20261019173321) with the work cycle's work_create and work_asset_link",
+  "how": "supabase/tests/studio_links_rules.sql: one transaction against the Supabase project comms-hub, rolled back at the end, the work-number sequence restored with setval. Two throwaway accounts (@t.test: director, writer) and one test file, acting through row level security.",
+  "result": "TOTAL row: 13 checks, 13 passed; no check differed from its expectation",
+  "checks": [
+    {
+      "k": "01 the director opens a work",
+      "pass": true
+    },
+    {
+      "k": "02 and a studio project",
+      "pass": true
+    },
+    {
+      "k": "03 the project joins the work",
+      "pass": true
+    },
+    {
+      "k": "04 the project records its work",
+      "pass": true
+    },
+    {
+      "k": "05 the exported file is recorded against revision 1",
+      "pass": true
+    },
+    {
+      "k": "06 and linked to the work by the work cycle",
+      "pass": true
+    },
+    {
+      "k": "07 the work now carries the file",
+      "pass": true
+    },
+    {
+      "k": "08 the director reads the file's studio origin (the work page offers «فتح في الاستوديو»)",
+      "pass": true
+    },
+    {
+      "k": "09 the writer sees the file in the library",
+      "pass": true
+    },
+    {
+      "k": "10 but not its studio origin: no «فتح في الاستوديو» for the writer",
+      "pass": true
+    },
+    {
+      "k": "11 nor can the writer link a project to a work",
+      "pass": true
+    },
+    {
+      "k": "12 the director unlinks the project",
+      "pass": true
+    },
+    {
+      "k": "13 the project has no work, the file stays in the work",
+      "pass": true
+    }
+  ],
+  "passed": 13,
+  "total": 13
+}

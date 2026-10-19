@@ -21,12 +21,13 @@ import type { StudioApi } from '@/lib/studio/persist';
 import { Segmented } from '../motion-controls';
 import { FolderSelect } from './folder-picker';
 import { REVIEWED_STAGES, assetRow, projectExports, uploadToLibrary, uploadVersion, type AssetRow } from './library';
+import { linkFileToWork } from './work-links';
 
 type Dest = 'device' | 'new' | 'version';
 type Done = { kind: 'device'; name: string; bytes: number; url: string } | { kind: 'library'; name: string; asset: string; version: number };
 
 export function ExportPanel({
-  doc, pool, t, projectId, title, readOnly, canLibrary, api, saveVersion, revision, photo, adjusted,
+  doc, pool, t, projectId, title, readOnly, canLibrary, api, saveVersion, revision, photo, adjusted, workRef = null,
 }: {
   doc: ProjectDoc;
   pool: MediaPool | null;
@@ -42,6 +43,8 @@ export function ExportPanel({
   photo?: boolean;
   /** Photos: pictures already adjusted, as the editor shows them. */
   adjusted?: Resolver['adjusted'];
+  /** The work the project belongs to: the saved file can be linked to it. */
+  workRef?: string | null;
 }) {
   const [what, setWhat] = useState<'video' | 'still'>(photo ? 'still' : 'video');
   const [short, setShort] = useState<Short>(1080);
@@ -55,6 +58,8 @@ export function ExportPanel({
   const [done, setDone] = useState<Done | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hidden, setHidden] = useState(false);
+  const [linkWork, setLinkWork] = useState(true);
+  const [linkNote, setLinkNote] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
   const lastUrl = useRef<string | null>(null);
 
@@ -154,6 +159,10 @@ export function ExportPanel({
         }
         const rec = await api.exportRecord(projectId, rev, asset, version, what === 'still' ? 'image' : 'video');
         if (!rec.ok) throw new Error(rec.error);
+        if (workRef && linkWork) {
+          const err = await linkFileToWork(workRef, asset);
+          setLinkNote(err ?? `رُبط الملف بالعمل ${workRef}.`);
+        } else setLinkNote(null);
         setDone({ kind: 'library', name: file.name, asset, version });
       }
     } catch (e) {
@@ -222,6 +231,13 @@ export function ExportPanel({
           <p className="st-hint">لم يُحفظ من هذا المشروع ملف في المكتبة بعد. احفظه أولاً ملفاً جديداً، ثم تُضاف إليه الإصدارات.</p>
         )
       )}
+      {toLibrary && canLibrary && workRef && (
+        <label className="st-switch-row">
+          <input type="checkbox" checked={linkWork} onChange={(e) => setLinkWork(e.target.checked)} disabled={busy} />
+          ربط الملف بالعمل {workRef}
+        </label>
+      )}
+      {toLibrary && canLibrary && !workRef && <p className="st-hint">لربط الملف بعمل، اربط المشروع بعمل من «المراجعة» في الإعدادات.</p>}
       {published && <p className="st-hint st-warn">هذا الملف منشور، فلا يأخذ إصداراً جديداً. احفظ التصدير ملفاً جديداً.</p>}
       {reviewed && <p className="st-hint">هذا الملف مرّ بالمراجعة: الإصدار الجديد يعيده إلى «قيد المراجعة»، ويبقى الإصدار المعتمد قبله مسجلاً.</p>}
       <p className="st-hint">
@@ -268,6 +284,7 @@ export function ExportPanel({
           <p>
             حُفظ في المكتبة: {done.name}، الإصدار {done.version}. <Link href={`/media/${done.asset}`}>فتحه في المكتبة</Link>
           </p>
+          {linkNote && <p className="st-hint">{linkNote}</p>}
           <p className="st-hint">لا يعتمد أحد ما رفعه بنفسه: يعتمد هذا الإصدار مراجع غيرك. والنشر ما يزال محاكاة.</p>
         </div>
       )}

@@ -182,3 +182,12 @@
   .st-bar .st-version,.st-banner button{min-height:44px}
   .st-card-acts button{min-height:44px;min-width:44px}
 }
+
+/* review */
+.st-linkish{border:0;background:transparent;padding:0;min-height:0;color:var(--green-text);text-decoration:underline;font-size:inherit}
+.st-files,.st-notes{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:12.5px}
+.st-files a{color:var(--green-text)}
+.st-notes li{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:start;padding:6px 8px;border:1px solid var(--line);border-radius:7px}
+.st-notes li small{grid-column:2}
+.st-tc{min-height:28px;padding:2px 8px;font-variant-numeric:tabular-nums;font-size:12px}
+.st-sub svg{width:14px;height:14px;vertical-align:-2px}

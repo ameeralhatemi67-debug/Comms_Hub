@@ -26,6 +26,7 @@ import { Modal } from '../ui';
 import { Bin, type LibraryItem } from './bin';
 import { CachePanel } from './cache-panel';
 import { PanelTabs, useCompact, type Panel } from './compact';
+import { ReviewPanel, useProjectWork } from './work-links';
 import { ExportPanel } from './export-panel';
 import { FolderSelect } from './folder-picker';
 import { Inspector } from './inspector';
@@ -168,6 +169,7 @@ export function VideoEditor(p: EditorProps) {
   const [error, setError] = useState<string | null>(null);
   const compact = useCompact();
   const [panel, setPanel] = useState<Panel>('timeline');
+  const pw = useProjectWork(p.projectId, p.api);
   const live = useRef({ doc, selected, safe });
   live.current = { doc, selected, safe };
 
@@ -345,7 +347,7 @@ export function VideoEditor(p: EditorProps) {
             note={missing ? `${missing} من ملفات المشروع غير متاح هنا، ويبقى في المشروع.` : null}
           />
   );
-  const exportEl = <ExportPanel doc={doc} pool={pool} t={at} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} />;
+  const exportEl = <ExportPanel doc={doc} pool={pool} t={at} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} workRef={pw.workRef} />;
   const inspEl = (
         <Inspector
           doc={doc}
@@ -358,6 +360,7 @@ export function VideoEditor(p: EditorProps) {
           hasPrevAdjacent={hasPrevAdjacent}
           sourceNote={sel?.clip.source ? sourceNote(pool?.state(sel.clip.source)) : null}
           cachePanel={<CachePanel cache={cache} inUse={pool ? pool.inUse(doc) : new Set()} onChanged={() => player?.draw()} />}
+          reviewPanel={<ReviewPanel projectId={p.projectId} api={p.api} readOnly={p.readOnly} onSeek={seek} pw={pw} />}
           onLength={(us) => selected && h.apply(trimEnd(doc, selected, (sel?.clip.start ?? 0) + us), 'طول القالب')}
           actions={{
             split,
