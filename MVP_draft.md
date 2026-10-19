@@ -2513,3 +2513,34 @@ Home now reads the database: tiles per role (leaders: waiting for review, late, 
 ## 61.6 Navigation and access
 
 «المشاريع» and «الطلبات» are in the sidebar after «التقويم». They are not separate grants: «المشاريع» opens with «العمل» or «التقويم», and «الطلبات» with «العمل», «مكتبة الوسائط» or «المهام», so existing accounts need no change (`src/lib/access.ts`, tested). Notices about requests open «الطلبات», and about a project its page. Every one of the sixteen pages of the reference now has its guide.
+
+# 62. «الاستوديو»: the studio tab of «استوديو الحركة», 2026-10-19
+
+Owner request and decisions of 2026-10-19; build order in `Studio_Build_Plan.md`. A photo and video studio added as a second tab of «استوديو الحركة». Section 57 still describes the template tab, which is unchanged; the studio is a separate tab and section 57's boundary "downloads do not enter the media library" applies to the template tab only.
+
+**Where and who.**
+- «استوديو الحركة» gains a tab bar in its title row: «قوالب الحركة» (`/motion`, section 57) and «الاستوديو» (`/motion/studio`). The bar is shown only to those who may open the studio; everyone else sees the page as before.
+- The studio is the Admin's and the director's only (مدير الاتصال المؤسسي), by the fixed capability `motion.studio` (group «مقفلة بقواعد المركز»: it cannot be granted, requested or switched on for anyone else) together with the page grant of «استوديو الحركة». The server refuses the address to anyone else; the database refuses every studio record and function.
+- An administrator viewing as another role (`عرض بصفة`) sees the tab only while viewing as Admin or as the director; the address still opens, as with «الحسابات».
+
+**Studio home.** The projects shared by everyone who may open the studio: title, kind (فيديو، صورة), owner, last save, and who is editing now. «مشروع فيديو جديد», «مشروع صورة جديد». A project is archived by a long press, never deleted.
+
+**Video project.** A preview with transport above a timeline whose time runs left to right inside the right-to-left page; a media panel («المكتبة», «هذا الجهاز», «قوالب الحركة», «نص», «علامات الهوية»); an inspector for the selected clip.
+- Shape 9:16, 16:9, 1:1 or 4:5; 24, 25, 30 or 60 frames per second. Up to three tracks of video and pictures, one of graphics, one of text, up to three of sound.
+- Clip actions: move, trim, split at the playhead, delete, duplicate, snap, ripple delete. Clip settings: place, size, turn, opacity, crop, fit or fill, brightness, contrast, saturation, fade in and out, volume, mute, cross-fade with the neighbouring clip.
+- Text and captions in Arabic, only in the fonts the site ships; SRT captions can be imported.
+- The 26 templates of section 57 are clips: their texts, colours and switches are edited in the inspector, the clip's length sets the showcase time, and a frame template shows the video beneath through its window.
+- Undo and redo of the studio's own edits; Ctrl+Z in the studio never reaches the library's undo.
+- Export: MP4 (or WebM where the browser cannot make MP4) at 720p, 1080p or 4K with an estimate, progress and cancel; downloaded, or saved to the library as a new file in a folder the person may create in, or as a new version of a file. The current frame as PNG. While exporting the page asks to stay visible: the export runs in this browser.
+
+**Photo project.** One canvas (1080x1080, 1080x1350, 1080x1920, 1920x1080 or chosen) with layers of pictures, text, shapes, templates at their settled moment and brand marks; move, size, turn, crop, flip, opacity, blend, order, lock, hide, align; brightness, contrast, saturation, warmth, blur. PNG, JPEG or WebP, downloaded or saved to the library.
+
+**Saving.** Projects are saved in the database, never as files in the library: an autosave every few seconds while the project is open and changed, and «حفظ نسخة» for a numbered version that is kept. One person edits a project at a time; the other sees «يحرره {الاسم} الآن» and may take over by a long press. A project keeps the exact library file and version of each source; a new version in the library never changes an existing cut.
+
+**Sources and the device.** Library files are copied to this browser once and removed ten days after their last use; «حذف ملفات المعاينة المؤقتة» removes them now. A file from «هذا الجهاز» is marked «على هذا الجهاز فقط» until uploaded to the library; a project with such files says it will not open complete on another device.
+
+**Phones.** The projects, the preview, trim and split, text and template edits, and export; photos: crop, adjust, text. Other tools are shown disabled with their reason, and nothing a phone cannot edit is removed from the project.
+
+**Review.** The studio approves nothing. A studio export enters the work cycle as any library file does: a new version of a reviewed file returns to «قيد المراجعة»; a published file takes no new version; nobody approves what they uploaded, so the director's export is approved by the assistant (or the Admin while testing). The timed notes of section 59.6 written on an exported file are shown in the studio and move the playhead to their time.
+
+**Boundaries.** No rendering after the page closes, no shared temporary storage, no desktop or phone application, no editing together at once; each waits for what `Studio_Build_Plan.md` section 7 names. Publishing remains a simulation.

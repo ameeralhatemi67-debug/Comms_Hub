@@ -1,0 +1,75 @@
+{
+  "script": "qa/studio-trial.cjs",
+  "run": "2026-10-19T17:13:35.364Z",
+  "checks": [
+    {
+      "name": "native: the page runs on a secure origin and the browser can encode H.264",
+      "pass": true,
+      "detail": "{\"secure\":true,\"avc\":true,\"aac\":true}"
+    },
+    {
+      "name": "native: the MP4 was written into the browser's private storage and read back",
+      "pass": true,
+      "detail": "105743 bytes, avc + aac"
+    },
+    {
+      "name": "native: Mediabunny reads back 60 video packets and a 2 s duration",
+      "pass": true,
+      "detail": "60 packets, 2.005333333333333 s"
+    },
+    {
+      "name": "native: a frame is decoded at 1.0 s for a thumbnail",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "native: ffprobe reads H.264 with 60 frames and AAC at 48 kHz stereo",
+      "pass": true,
+      "detail": "[{\"codec_name\":\"h264\",\"codec_type\":\"video\",\"nb_frames\":\"60\"},{\"codec_name\":\"aac\",\"codec_type\":\"audio\",\"sample_rate\":\"48000\",\"channels\":2,\"nb_frames\":\"94\"}]"
+    },
+    {
+      "name": "native: ffprobe duration is 2 s within one frame",
+      "pass": true,
+      "detail": "2.005333"
+    },
+    {
+      "name": "with the AAC extension: the page runs on a secure origin and the browser can encode H.264",
+      "pass": true,
+      "detail": "{\"secure\":true,\"avc\":true,\"aac\":true}"
+    },
+    {
+      "name": "with the AAC extension: the MP4 was written into the browser's private storage and read back",
+      "pass": true,
+      "detail": "105219 bytes, avc + aac"
+    },
+    {
+      "name": "with the AAC extension: Mediabunny reads back 60 video packets and a 2 s duration",
+      "pass": true,
+      "detail": "60 packets, 2.026666666666667 s"
+    },
+    {
+      "name": "with the AAC extension: a frame is decoded at 1.0 s for a thumbnail",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "with the AAC extension: ffprobe reads H.264 with 60 frames and AAC at 48 kHz stereo",
+      "pass": true,
+      "detail": "[{\"codec_name\":\"h264\",\"codec_type\":\"video\",\"nb_frames\":\"60\"},{\"codec_name\":\"aac\",\"codec_type\":\"audio\",\"sample_rate\":\"48000\",\"channels\":2,\"nb_frames\":\"95\"}]"
+    },
+    {
+      "name": "with the AAC extension: ffprobe duration is 2 s within one frame",
+      "pass": true,
+      "detail": "2.026667"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "mediabunny": "1.61.2",
+  "total": 13,
+  "passed": 13,
+  "failed": 0
+}
