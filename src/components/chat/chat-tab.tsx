@@ -3,7 +3,7 @@
 // campaign or a work item, announcement channels, and cards that act on the same records
 // as the rest of the Hub. Approved design: artifact «البريد الجديد», messaging tab.
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { statusLabels } from '@/lib/work/rules';
 import { useLinkableWorks } from './works';
 import { supabase } from '@/lib/supabase/client';
@@ -1829,8 +1829,18 @@ function Pop({ x, y, onClose, children }: { x: number; y: number; onClose: () =>
   }, [onClose]);
   const w = typeof window !== 'undefined' ? window.innerWidth : 1200;
   const h = typeof window !== 'undefined' ? window.innerHeight : 900;
+  // Opens below the pointer, or above it when there is no room, then is kept inside the screen by its real
+  // height (the message menu is about 450 px tall); what still does not fit scrolls inside the menu.
+  const ref = useRef<HTMLDivElement>(null);
+  const [top, setTop] = useState(y + 8);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const height = Math.min(el.offsetHeight, h - 16);
+    setTop(Math.max(8, Math.min(y + 8 + height > h - 8 ? y - height - 8 : y + 8, h - 8 - height)));
+  }, [x, y, h]);
   return (
-    <div className="mx-menu cx-menu" role="menu" style={{ left: Math.max(8, Math.min(x - 130, w - 270)), top: y > h - 380 ? Math.max(8, y - 370) : y + 8 }}>
+    <div ref={ref} className="mx-menu cx-menu" role="menu" style={{ left: Math.max(8, Math.min(x - 130, w - 270)), top, maxHeight: h - 16, overflowY: 'auto' }}>
       {children}
     </div>
   );

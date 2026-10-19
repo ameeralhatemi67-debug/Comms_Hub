@@ -1,0 +1,39 @@
+{
+  "script": "qa/chat-menu.cjs",
+  "run": "2026-10-19T07:04:52.002Z",
+  "checks": [
+    {
+      "name": "the fixture reproduces the bug with the old rule: the menu is in the flow and shrinks the message list",
+      "pass": true,
+      "detail": "position=relative, list 24 px against 444 px"
+    },
+    {
+      "name": "the menu is fixed to the screen",
+      "pass": true,
+      "detail": "fixed"
+    },
+    {
+      "name": "the menu is not as wide as the conversation: it keeps its own width",
+      "pass": true,
+      "detail": "260 px"
+    },
+    {
+      "name": "the message list keeps its height while the menu is open",
+      "pass": true,
+      "detail": "444 px against 444 px"
+    },
+    {
+      "name": "the composer (and its reply bar) stays where it was",
+      "pass": true,
+      "detail": "top 521 against 521"
+    },
+    {
+      "name": "the menu is drawn above the conversation",
+      "pass": true,
+      "detail": "top 60"
+    }
+  ],
+  "total": 6,
+  "passed": 6,
+  "failed": 0
+}
