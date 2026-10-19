@@ -27,7 +27,7 @@ type Dest = 'device' | 'new' | 'version';
 type Done = { kind: 'device'; name: string; bytes: number; url: string } | { kind: 'library'; name: string; asset: string; version: number };
 
 export function ExportPanel({
-  doc, pool, t, projectId, title, readOnly, canLibrary, api, saveVersion, revision, photo, adjusted, workRef = null,
+  doc, pool, t, projectId, title, readOnly, canLibrary, api, saveVersion, revision, photo, adjusted, workRef = null, onSaved,
 }: {
   doc: ProjectDoc;
   pool: MediaPool | null;
@@ -45,6 +45,8 @@ export function ExportPanel({
   adjusted?: Resolver['adjusted'];
   /** The work the project belongs to: the saved file can be linked to it. */
   workRef?: string | null;
+  /** A file was saved to the library (the review window reads again). */
+  onSaved?: () => void;
 }) {
   const [what, setWhat] = useState<'video' | 'still'>(photo ? 'still' : 'video');
   const [short, setShort] = useState<Short>(1080);
@@ -164,6 +166,7 @@ export function ExportPanel({
           setLinkNote(err ?? `رُبط الملف بالعمل ${workRef}.`);
         } else setLinkNote(null);
         setDone({ kind: 'library', name: file.name, asset, version });
+        onSaved?.();
       }
     } catch (e) {
       const code = e instanceof ExportError ? e.code : (e as Error).message;

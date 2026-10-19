@@ -26,6 +26,20 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The studio, second round, 2026-10-20
+
+The owner's notes on the first version are built (`Studio_Build_Plan.md` section 9, `MVP_draft.md` 62.1 to 62.5).
+
+- **Windows.** Every part of an editor is a window: merged into tabs, split beside another, floated, resized and closed. A closed window is reopened from «النوافذ». There are ready-made workspaces (five for video, three for photo), the arrangement is remembered on the device, and the editor can fill the browser window.
+- **Menus and keys.** A menu bar («ملف», «تحرير», «المقطع», «عرض», «النوافذ», «مساعدة»), tools V, C, H and T, shortcuts matched by key position (so they work with an Arabic layout) and a shortcuts sheet.
+- **Look.** A dark editor chrome by default, light on request.
+- **Effects.** Sixteen transitions and seventeen entry and exit movements, with moving thumbnails, drawn alike in the preview and the export.
+- **Preview.** Separate playing and paused resolution, from full down to 1/32.
+- **Fonts.** Twelve Arabic and ten English fonts, served by the site.
+- **Handling.** Handles to scale and turn, drag and drop from every window, a clip menu, copy and paste, the razor, wheel zoom, a snap line and a history window.
+- **Evidence.** `npm test` 435 of 435; fixtures: interface 70 of 70, engine 34 of 34, export 11 of 11, help tours 32 of 32; typecheck and build clean.
+- **Not verified.** Nothing was seen signed in, and the walkthrough of `Studio_Build_Plan.md` section 8 is still the owner's to do.
+
 ## The studio, 2026-10-19
 
 «الاستوديو» is built as a new tab of «استوديو الحركة» (`/motion/studio`), by owner directive of 2026-10-19. The build followed `Studio_Build_Plan.md` (the audit of `Studio_Feasibility_and_App_Path.md`, in nine phases) and is specified in `MVP_draft.md` section 62, restored the same day with sections 12 to 61. The template tab at `/motion` is unchanged for every role, and its 26 motion templates and the brand marks are usable inside the studio.

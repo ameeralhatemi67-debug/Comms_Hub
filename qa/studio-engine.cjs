@@ -32,7 +32,8 @@ ff(['-f', 'lavfi', '-i', 'color=c=magenta:s=400x400:d=1', '-frames:v', '1', path
 
 const IDS = { '00000000-0000-4000-8000-0000000000a1': 'rgb.mp4', '00000000-0000-4000-8000-0000000000a2': 'rgb.mp4', '00000000-0000-4000-8000-0000000000b1': 'pic.png' };
 const fontDir = (pkg) => path.join(root, 'node_modules', '@fontsource', pkg);
-const fontCss = [['ibm-plex-sans-arabic', '600'], ['reem-kufi', '600'], ['aref-ruqaa', '700']]
+// the site's fonts, and three of the studio's added ones (an Arabic display, an English display, an Arabic naskh)
+const fontCss = [['ibm-plex-sans-arabic', '600'], ['ibm-plex-sans-arabic', '700'], ['reem-kufi', '600'], ['aref-ruqaa', '700'], ['cairo', '700'], ['bebas-neue', '400'], ['amiri', '400']]
   .map(([pkg, w]) => fs.readFileSync(path.join(fontDir(pkg), `${w}.css`), 'utf8').replace(/url\(\.\/files\//g, `url(/fonts/${pkg}/`))
   .join('\n');
 

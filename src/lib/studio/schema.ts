@@ -9,6 +9,9 @@
 //     simpler client (a phone) never strips what a fuller one wrote (Studio_Build_Plan.md section 4).
 //   - A source is a library file at an exact version, or a file on one device. Never a download URL.
 
+import type { FontFamily } from './fonts.ts';
+import type { Anim, TransitionKind } from './transitions.ts';
+
 export const DOC_SCHEMA = 1;
 /** The database refuses a document above 1 MiB as Postgres prints it; the client keeps a margin. */
 export const DOC_MAX_BYTES = 1_000_000;
@@ -87,12 +90,8 @@ export const STICKER_LABELS: Record<StickerKey, string> = {
   verse2: 'آية (2)',
 };
 
-export const FONTS = [
-  { family: 'IBM Plex Sans Arabic', weights: [400, 500, 600, 700], label: 'بلكس العربي' },
-  { family: 'Reem Kufi', weights: [500, 600], label: 'ريم الكوفي' },
-  { family: 'Aref Ruqaa', weights: [700], label: 'عارف رقعة' },
-] as const;
-export type FontFamily = (typeof FONTS)[number]['family'];
+// The fonts live in fonts.ts (three the site ships, twelve Arabic and ten English, MVP_draft.md 62.4).
+export { FONTS, type FontFamily } from './fonts.ts';
 
 export type TextStyle = {
   content: string;
@@ -138,8 +137,11 @@ export type ClipFields = Content & {
   fadeOut?: Micros;
   volume?: number;
   mute?: boolean;
-  /** A cross-fade with the clip that ends where this one starts, on the same track. */
-  transition?: { kind: 'fade'; length: Micros } | null;
+  /** A transition from the clip that ends where this one starts, on the same track (kinds in transitions.ts). */
+  transition?: { kind: TransitionKind; length: Micros } | null;
+  /** Entry and exit movements (transitions.ts). Absent: a text's own older enter and exit apply. */
+  animIn?: Anim | null;
+  animOut?: Anim | null;
 };
 export type Clip = ClipFields & { id: string; [extra: string]: unknown };
 /** A clip about to be added: its id is made if missing. */

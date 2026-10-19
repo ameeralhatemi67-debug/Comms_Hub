@@ -1,6 +1,6 @@
 {
   "script": "qa/help-tours.cjs",
-  "run": "2026-10-19T19:14:44.806Z",
+  "run": "2026-10-19T21:58:24.059Z",
   "checks": [
     {
       "name": "lead: the first card says the director, by the exact role name, what the page is for",

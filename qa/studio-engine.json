@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-engine.cjs",
-  "run": "2026-10-19T18:49:30.883Z",
+  "run": "2026-10-19T21:58:06.199Z",
   "checks": [
     {
       "name": "the shipped Arabic fonts load with Arabic sample text",
@@ -78,6 +78,51 @@
       "detail": "0 bright pixels at 0.05 s"
     },
     {
+      "name": "a push from the right, half way: the incoming clip fills the right half and the outgoing the left",
+      "pass": true,
+      "detail": "{\"left\":[255,24,0,255],\"right\":[0,216,0,255],\"mid\":[0,216,0,255],\"corner\":[255,24,0,255]}"
+    },
+    {
+      "name": "a wipe from the right, half way: the incoming clip shows on the right, the outgoing on the left",
+      "pass": true,
+      "detail": "{\"left\":[255,24,0,255],\"right\":[0,216,0,255],\"mid\":[0,216,0,255],\"corner\":[255,24,0,255]}"
+    },
+    {
+      "name": "a dip to black covers the frame in black at its middle",
+      "pass": true,
+      "detail": "{\"left\":[0,0,0,255],\"right\":[0,0,0,255],\"mid\":[0,0,0,255],\"corner\":[0,0,0,255]}"
+    },
+    {
+      "name": "a circle transition shows the incoming clip in the middle and the outgoing in the corner",
+      "pass": true,
+      "detail": "{\"left\":[255,24,0,255],\"right\":[255,24,0,255],\"mid\":[0,216,0,255],\"corner\":[255,24,0,255]}"
+    },
+    {
+      "name": "a cross-fade is still drawn as before: half of each at its middle",
+      "pass": true,
+      "detail": "{\"left\":[127,120,0,255],\"right\":[127,120,0,255],\"mid\":[127,120,0,255],\"corner\":[127,120,0,255]}"
+    },
+    {
+      "name": "after the transition the incoming clip is whole",
+      "pass": true,
+      "detail": "[0,216,0,255]"
+    },
+    {
+      "name": "a picture entering with a slide from the right is right of its place at 0.3 s and in place after",
+      "pass": true,
+      "detail": "202.0 then 119.5"
+    },
+    {
+      "name": "a text written letter by letter shows part of its letters half way and all of them at the end",
+      "pass": true,
+      "detail": "744 then 1930"
+    },
+    {
+      "name": "added fonts load from the site (Cairo, Bebas Neue, Amiri) and are used for drawing",
+      "pass": true,
+      "detail": "true Cairo 1250 / Plex 1128; Bebas 702 / serif 1177"
+    },
+    {
       "name": "a brand mark is tinted in its colour",
       "pass": true,
       "detail": "149258 red pixels"
@@ -120,7 +165,7 @@
     {
       "name": "playing advances the playhead in real time and pause stops it",
       "pass": true,
-      "detail": "3.69 s"
+      "detail": "3.68 s"
     },
     {
       "name": "no page errors",
@@ -131,7 +176,7 @@
   "log": [
     "requests: 4"
   ],
-  "total": 25,
-  "passed": 25,
+  "total": 34,
+  "passed": 34,
   "failed": 0
 }

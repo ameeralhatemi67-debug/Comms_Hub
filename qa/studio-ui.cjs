@@ -6,7 +6,10 @@
 // library video, a motion template and a title added, a split with S, undo and redo, a drag on the
 // timeline, autosave, a numbered version, another person taking the editing (reading only, then taking it
 // back), a device draft offered back after a reload, playing and pausing with the space bar.
-// Usage: node qa/studio-ui.cjs [--only=video|photo|phone]   (writes qa/studio-ui.json)
+// The workspace flow (MVP_draft.md 62.1 to 62.5): windows merged, split, floated, closed, reopened, maximised
+// and resized; menus and keys; preview resolution; a transition, a movement, a font; copy, paste, razor,
+// the clip menu, scaling by a corner, the history, filling the window and the light chrome.
+// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone]   (writes qa/studio-ui.json)
 const fs = require('node:fs');
 const path = require('node:path');
 const { dependency, launchOptions } = require('./runtime.cjs');
@@ -87,9 +90,9 @@ async function videoFlow(browser, base, errors) {
   check('a library video lands on the timeline and the preview shows its frame', near(c0, [255, 0, 0]), JSON.stringify(c0));
 
   // a motion template and a title
-  await tab.getByRole('tab', { name: 'قوالب الحركة' }).click();
-  await tab.locator('.st-tile').first().click();
-  await tab.getByRole('tab', { name: 'نص' }).click();
+  await tab.locator('.st-ws-tab[data-panel="templates"]').click();
+  await tab.locator('.st-tile[data-template]').first().click();
+  await tab.locator('.st-ws-tab[data-panel="graphics"]').click();
   await tab.getByRole('button', { name: 'عنوان كبير' }).click();
   check('a motion template goes on a graphics track and a title on a text track', (await tab.locator('.st-clip[data-kind="motion"]').count()) === 1 && (await tab.locator('.st-clip[data-kind="text"]').count()) === 1);
 
@@ -147,7 +150,8 @@ async function videoFlow(browser, base, errors) {
   const rev = await tab.evaluate((pid) => window.__db.projects.find((x) => x.id === pid).revs.map((r) => r.revision).join(','), id);
   check('«حفظ نسخة» makes numbered revision 2 and empties the autosave slot', rev === '1,2', rev);
 
-  // export: a download, then a new library file, then a new version of it
+  // export: a download, then a new library file, then a new version of it (the window «التصدير»)
+  await tab.locator('.st-ws-tab[data-panel="export"]').click();
   await tab.locator('.st-export').scrollIntoViewIfNeeded();
   await tab.locator('.st-export').getByRole('radio', { name: '720p' }).click();
   const [dl] = await Promise.all([tab.waitForEvent('download', { timeout: 60000 }), tab.getByRole('button', { name: 'تصدير وتنزيل' }).click()]);
@@ -159,10 +163,12 @@ async function videoFlow(browser, base, errors) {
   check('«تصدير وتنزيل» downloads an H.264 file of the project at 720p (1280x720) with its sound', dv?.codec_name === 'h264' && dv.width === 1280 && dv.height === 720 && dprobe.streams.some((x) => x.codec_name === 'aac') && /جاهز/.test(await tab.locator('.st-done').textContent()), JSON.stringify(dprobe));
   // the project joins a work, from «المراجعة» in the project settings
   await tab.locator('body').press('Escape');
+  await tab.locator('.st-ws-tab[data-panel="review"]').click();
   await tab.locator('.st-review select').selectOption('CH-101');
   await tab.locator('.st-review').getByRole('button', { name: 'ربط', exact: true }).click();
   await tab.locator('.st-review', { hasText: 'حملة اليوم الوطني' }).waitFor({ timeout: 5000 });
   check('a project is linked to a work from «المراجعة», which shows the work and its status', /CH-101/.test(await tab.locator('.st-review').textContent()) && /قيد الإنتاج/.test(await tab.locator('.st-review').textContent()));
+  await tab.locator('.st-ws-tab[data-panel="export"]').click();
   await tab.locator('.st-export').getByRole('radio', { name: /ملف جديد في المكتبة/ }).click();
   check('saving to the library offers to link the file to the work of the project', (await tab.getByText('ربط الملف بالعمل CH-101').count()) === 1);
   await tab.locator('.st-export select').waitFor();
@@ -184,6 +190,7 @@ async function videoFlow(browser, base, errors) {
   await tab.evaluate((asset) => window.__db.addNote(asset, '00:03', 'غيّر لون الخلفية هنا'), lib2.up[0].id);
   await tab.locator('.st-clip[data-kind="text"]').click();
   await tab.locator('body').press('Escape');
+  await tab.locator('.st-ws-tab[data-panel="review"]').click();
   await tab.locator('.st-notes li').waitFor({ timeout: 8000 });
   await tab.locator('.st-tc', { hasText: '00:03' }).click();
   await tab.waitForTimeout(300);
@@ -231,6 +238,237 @@ async function videoFlow(browser, base, errors) {
   await ctx.close();
 }
 
+// The windows, menus, keys, preview resolution, transitions, movements, fonts and tools (MVP_draft.md 62.1 to 62.5).
+async function workspaceFlow(browser, base, errors) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const tab = await ctx.newPage();
+  tab.on('pageerror', (e) => errors.push(e.message));
+  tab.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  tab.on('response', (q) => q.status() >= 400 && errors.push(`HTTP ${q.status()}: ${q.url()}`));
+  await tab.goto(base + '/motion/studio');
+  await tab.getByRole('button', { name: 'مشروع فيديو جديد' }).click();
+  await tab.getByLabel('اسم المشروع').fill('نوافذ الاختبار');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).click();
+  await tab.locator('.st-ws-group').first().waitFor({ timeout: 15000 });
+  const panelsIn = (sel) => tab.locator(sel).evaluateAll((els) => els.map((e) => e.dataset.panel));
+  const groupTabs = (panel) => tab.locator(`.st-ws-group:has(.st-ws-tab[data-panel="${panel}"]) .st-ws-tab`).evaluateAll((els) => els.map((e) => e.dataset.panel));
+  const centerOf = async (loc) => {
+    const b = await loc.boundingBox();
+    return { x: b.x + b.width / 2, y: b.y + b.height / 2, b };
+  };
+  const dragTab = async (panel, to) => {
+    const from = await centerOf(tab.locator(`.st-ws-tab[data-panel="${panel}"]`));
+    await tab.mouse.move(from.x, from.y);
+    await tab.mouse.down();
+    await tab.mouse.move(from.x + 12, from.y + 12, { steps: 3 });
+    await tab.mouse.move(to.x, to.y, { steps: 12 });
+    await tab.waitForTimeout(80);
+    await tab.mouse.up();
+    await tab.waitForTimeout(150);
+  };
+
+  // the editor as windows
+  const tabs = await panelsIn('.st-ws-tab');
+  const menus = await tab.locator('.st-menu-btn').allTextContents();
+  check('ws: the video editor opens as windows in tab groups, every window of the editor present', ['program', 'timeline', 'inspector', 'media', 'templates', 'graphics', 'effects', 'export', 'project', 'review', 'history'].every((p) => tabs.includes(p)) && (await tab.locator('.st-ws-group').count()) >= 4, tabs.join(','));
+  check('ws: the menu bar has «ملف», «تحرير», «المقطع», «عرض», «النوافذ» and «مساعدة»', JSON.stringify(menus) === JSON.stringify(['ملف', 'تحرير', 'المقطع', 'عرض', 'النوافذ', 'مساعدة']), menus.join(','));
+  const scroll = await tab.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+  check('ws: the editor fills the browser window and the page itself does not scroll', scroll <= 2, scroll);
+  const chromeBg = await tab.evaluate(() => getComputedStyle(document.querySelector('.st-ws-group')).backgroundColor);
+  check('ws: the editor chrome is dark by default', /rgb\((\d+), (\d+), (\d+)\)/.test(chromeBg) && Number(chromeBg.match(/\d+/)[0]) < 60, chromeBg);
+
+  // merging a window into another group's tabs
+  const prog = await centerOf(tab.locator('.st-ws-group:has(.st-ws-tab[data-panel="program"]) .st-ws-body'));
+  await dragTab('templates', prog);
+  const merged = await groupTabs('program');
+  check('ws: a tab dragged onto another window joins its tabs', merged.includes('templates') && merged.includes('program'), merged.join(','));
+
+  // splitting: a window dropped on the lower edge of another goes below it
+  const groupsBefore = await tab.locator('.st-ws-group').count();
+  const pb = (await centerOf(tab.locator('.st-ws-group:has(.st-ws-tab[data-panel="program"]) .st-ws-body'))).b;
+  await dragTab('project', { x: pb.x + pb.width / 2, y: pb.y + pb.height - 12 });
+  const projBox = await tab.locator('.st-ws-group:has(.st-ws-tab[data-panel="project"])').boundingBox();
+  const progBox = await tab.locator('.st-ws-group:has(.st-ws-tab[data-panel="program"])').boundingBox();
+  check('ws: a tab dropped on the lower edge of a window splits it, the new window below', (await tab.locator('.st-ws-group').count()) === groupsBefore + 1 && projBox.y > progBox.y + progBox.height - 4 && Math.abs(projBox.x - progBox.x) < 4, JSON.stringify({ projBox, progBox }));
+
+  // floating: dropped outside the workspace
+  const wsBox = await tab.locator('.st-ws').boundingBox();
+  await dragTab('review', { x: wsBox.x + wsBox.width / 2, y: wsBox.y - 30 });
+  const floatTabs = await panelsIn('.st-ws-float .st-ws-tab');
+  check('ws: a tab dropped outside the windows becomes a floating window', floatTabs.includes('review'), floatTabs.join(','));
+  // a floating window moves by its header
+  const fh = await tab.locator('.st-ws-float .st-ws-head').boundingBox();
+  const f0 = await tab.locator('.st-ws-float').boundingBox();
+  await tab.mouse.move(fh.x + fh.width / 2, fh.y + fh.height / 2);
+  await tab.mouse.down();
+  await tab.mouse.move(fh.x - 120, fh.y + 80, { steps: 8 });
+  await tab.mouse.up();
+  const f1 = await tab.locator('.st-ws-float').boundingBox();
+  check('ws: a floating window is moved by its header', f1.x < f0.x - 100 && f1.y > f0.y + 60, `${Math.round(f0.x)},${Math.round(f0.y)} to ${Math.round(f1.x)},${Math.round(f1.y)}`);
+  // the layout is remembered on this device
+  await tab.waitForTimeout(500);
+  await tab.reload();
+  await tab.locator('.st-ws-group').first().waitFor({ timeout: 15000 });
+  check('ws: the arrangement of the windows is remembered after a reload', (await panelsIn('.st-ws-float .st-ws-tab')).includes('review') && (await groupTabs('program')).includes('templates'), (await panelsIn('.st-ws-float .st-ws-tab')).join(','));
+
+  // closing a window, and opening it again from «النوافذ»
+  await tab.locator('.st-ws-tabwrap:has(.st-ws-tab[data-panel="history"]) .st-ws-x').click({ force: true });
+  const closed = !(await panelsIn('.st-ws-tab')).includes('history');
+  await tab.locator('.st-menu-btn', { hasText: 'النوافذ' }).click();
+  await tab.locator('.st-menu [role="menuitemcheckbox"]', { hasText: 'السجل' }).click();
+  check('ws: a window closed from its tab opens again from «النوافذ»', closed && (await panelsIn('.st-ws-tab')).includes('history'), '');
+
+  // maximising with ` and the window's shortcut
+  await tab.locator('body').press('Shift+Digit4');
+  await tab.locator('body').press('Backquote');
+  const maxGroups = await tab.locator('.st-ws-group').count();
+  await tab.locator('body').press('Backquote');
+  const restored = await tab.locator('.st-ws-group').count();
+  check('ws: Shift+4 goes to the preview and ` maximises its window, ` again restores the layout', maxGroups === 1 && restored > 3, `${maxGroups} then ${restored}`);
+
+  // a ready-made workspace, then back
+  await tab.locator('.st-presets button', { hasText: 'المؤثرات' }).click();
+  const fxOn = await tab.locator('.st-ws-tab[data-panel="effects"][aria-selected="true"]').count();
+  await tab.locator('.st-presets button', { hasText: 'التحرير' }).click();
+  check('ws: «المؤثرات» shows the effects window in front, and «التحرير» rebuilds the editing layout', fxOn === 1 && (await tab.locator('.st-ws-float').count()) === 0 && (await groupTabs('program')).length === 1, '');
+
+  // resizing by the border between two windows
+  const bar = tab.locator('.st-ws-bar[data-dir="row"]').first();
+  const bb = await bar.boundingBox();
+  const leftCell = tab.locator('.st-ws-split[data-dir="row"]').first().locator(':scope > .st-ws-cell').first();
+  const w0 = (await leftCell.boundingBox()).width;
+  await tab.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2);
+  await tab.mouse.down();
+  await tab.mouse.move(bb.x + bb.width / 2 + 80, bb.y + bb.height / 2, { steps: 6 });
+  await tab.mouse.up();
+  const w1 = (await leftCell.boundingBox()).width;
+  check('ws: dragging the border between two windows resizes them', Math.abs(w1 - w0 - 80) < 12, `${Math.round(w0)} to ${Math.round(w1)}`);
+
+  // the shortcuts sheet
+  await tab.locator('body').press('Shift+Slash');
+  await tab.locator('dialog .st-keysheet').waitFor({ timeout: 3000 });
+  const rows = await tab.locator('dialog .st-keysheet dl > div').count();
+  const hasRazor = (await tab.locator('dialog .st-keysheet').textContent()).includes('أداة الشفرة');
+  await tab.keyboard.press('Escape');
+  check('ws: «?» opens the shortcuts sheet with every key of the editor', rows >= 45 && hasRazor, rows);
+
+  // content: a library video split at 2 s into two touching clips, and a title
+  await tab.locator('.st-ws-tab[data-panel="media"]').click();
+  await tab.locator('.st-lib button', { hasText: 'ألوان الحملة' }).click();
+  await tab.locator('.st-clip[data-kind="video"]').waitFor();
+  await tab.waitForFunction(() => !document.querySelector('.st-clip-load'), null, { timeout: 15000 });
+  await tab.waitForTimeout(600);
+
+  // preview resolution
+  const fullW = await tab.evaluate(() => document.querySelector('.st-canvas').width);
+  await tab.locator('.st-res > button').click();
+  await tab.locator('.st-res-pop [role="radiogroup"]').nth(1).getByRole('radio', { name: '1/4' }).click();
+  await tab.waitForTimeout(200);
+  const quarterW = await tab.evaluate(() => document.querySelector('.st-canvas').width);
+  const badge = await tab.locator('.st-res-badge').textContent().catch(() => '');
+  await tab.locator('body').press('Escape');
+  await tab.locator('.st-menu-btn', { hasText: 'عرض' }).click();
+  await tab.locator('.st-menu-row > button', { hasText: 'دقة المعاينة عند الإيقاف' }).click();
+  await tab.locator('.st-menu-sub button', { hasText: 'كاملة' }).click();
+  await tab.waitForTimeout(200);
+  const backW = await tab.evaluate(() => document.querySelector('.st-canvas').width);
+  check('ws: the preview resolution 1/4 draws the paused frame at a quarter of its pixels, and «كاملة» from the menu restores it', Math.abs(quarterW - fullW / 4) <= 2 && badge === '1/4' && backW === fullW, `${fullW} / ${quarterW} / ${backW} ${badge}`);
+
+  await tab.locator('.st-tl-ruler').click({ position: { x: 80, y: 10 } });
+  await tab.locator('.st-clip[data-kind="video"]').first().click({ position: { x: 10, y: 10 } });
+  await tab.keyboard.press('s');
+  await tab.locator('.st-clip[data-kind="video"]').nth(1).waitFor();
+
+  // a transition from the effects window onto the selected (second) clip
+  await tab.locator('.st-ws-tab[data-panel="effects"]').click();
+  await tab.locator('.st-fx-tile[data-effect="transition:push-left"]').getByRole('button', { name: 'البداية' }).click();
+  const xf = await tab.locator('.st-clip-xfade').getAttribute('data-kind').catch(() => null);
+  check('ws: a transition from «الانتقالات والحركات» joins the two touching clips (push from the right)', xf === 'push-left', xf);
+  check('ws: the inspector names the transition and its length', (await tab.locator('.st-insp select').first().inputValue()) === 'push-left', await tab.locator('.st-insp select').first().inputValue());
+
+  // a title, then a movement dragged onto it
+  await tab.locator('.st-ws-tab[data-panel="graphics"]').click();
+  await tab.getByRole('button', { name: 'عنوان كبير' }).click();
+  await tab.locator('.st-ws-tab[data-panel="effects"]').click();
+  await tab.locator('.st-pane-tabs button', { hasText: 'الدخول والخروج' }).click();
+  const textClip = tab.locator('.st-clip[data-kind="text"]');
+  await tab.locator('.st-fx-tile[data-effect="anim:pop"]').dragTo(textClip, { targetPosition: { x: 8, y: 10 } });
+  await tab.waitForTimeout(200);
+  check('ws: a movement dragged onto the start of a clip becomes its entry', (await tab.locator('.st-clip[data-kind="text"] .st-clip-anim.in').count()) === 1, '');
+
+  // a font from the list
+  await textClip.click();
+  await tab.locator('.st-font-btn').click();
+  const options = await tab.locator('.st-font-list [role="option"]').count();
+  await tab.locator('.st-font-list [role="option"][data-font="Cairo"]').click();
+  await tab.waitForFunction(() => document.fonts.check('700 48px "Cairo"', 'نص عربي'), null, { timeout: 8000 }).catch(() => undefined);
+  const loaded = await tab.evaluate(() => document.fonts.check('700 48px "Cairo"', 'نص عربي'));
+  check('ws: the font list shows 25 fonts, and choosing «كايرو» sets and loads it', options === 25 && (await tab.locator('.st-font-btn').textContent()).includes('كايرو') && loaded, `${options} ${loaded}`);
+
+  // copy and paste a clip
+  await textClip.first().click();
+  await tab.locator('body').press('Control+c');
+  await tab.locator('body').press('Control+v');
+  check('ws: Ctrl+C and Ctrl+V copy the selected clip to the playhead', (await tab.locator('.st-clip[data-kind="text"]').count()) === 2, await tab.locator('.st-clip[data-kind="text"]').count());
+
+  // the razor tool cuts where it is clicked
+  const videosBefore = await tab.locator('.st-clip[data-kind="video"]').count();
+  await tab.locator('body').press('c');
+  const vb = await tab.locator('.st-clip[data-kind="video"]').last().boundingBox();
+  await tab.mouse.click(vb.x + vb.width * 0.6, vb.y + vb.height / 2);
+  await tab.locator('body').press('v');
+  check('ws: C picks the razor, a click cuts the clip there, and V goes back to selecting', (await tab.locator('.st-clip[data-kind="video"]').count()) === videosBefore + 1 && (await tab.locator('.st-tools [data-tool="select"][aria-checked="true"]').count()) === 1, '');
+
+  // the clip's menu
+  await tab.locator('.st-clip[data-kind="video"]').first().click({ button: 'right', position: { x: 12, y: 12 } });
+  const ctxText = await tab.locator('.st-ctx').textContent().catch(() => '');
+  await tab.keyboard.press('Escape');
+  check('ws: a right click opens the clip\'s menu (cut, copy, paste, transition, delete)', /قص عند رأس التشغيل/.test(ctxText) && /انتقال افتراضي/.test(ctxText) && /حذف وسد الفراغ/.test(ctxText), ctxText.slice(0, 80));
+
+  // scaling the title by its corner on the preview
+  await tab.locator('.st-ws-tab[data-panel="inspector"]').click();
+  await tab.locator('.st-tl-ruler').click({ position: { x: 120, y: 10 } });
+  await textClip.first().click();
+  const scale0 = Number(await tab.getByLabel('الحجم، قيمة دقيقة').inputValue());
+  const corner = await tab.evaluate(() => {
+    const c = document.querySelector('.st-canvas');
+    const r = c.getBoundingClientRect();
+    const k = r.width / 1080;
+    // the title: centred at (540, 806), 84% of the width, one line of 110 px at 1.35
+    return { x: r.left + (540 + 0.42 * 1080) * k, y: r.top + (806.4 - (110 * 1.35) / 2) * k };
+  });
+  await tab.mouse.move(corner.x, corner.y);
+  await tab.mouse.down();
+  await tab.mouse.move(corner.x + 40, corner.y - 25, { steps: 6 });
+  await tab.mouse.up();
+  const scale1 = Number(await tab.getByLabel('الحجم، قيمة دقيقة').inputValue());
+  check('ws: dragging a corner of the selected title on the preview scales it', scale1 > scale0 + 5, `${scale0} to ${scale1}`);
+
+  // «السجل»: back to the opened project and forward again
+  await tab.locator('body').press('Shift+Digit9');
+  const steps = await tab.locator('.st-hist li').count();
+  await tab.locator('.st-hist li button', { hasText: 'عند فتح المشروع' }).click();
+  const emptied = await tab.locator('.st-clip').count();
+  await tab.locator('.st-hist li[data-state="future"] button').last().click();
+  const back = await tab.locator('.st-clip').count();
+  check('ws: «السجل» lists the steps, goes back to the project as it was opened and forward to the last step', steps > 6 && emptied === 0 && back >= 5, `${steps} steps, ${emptied} then ${back} clips`);
+
+  // filling the window, and the light chrome
+  await tab.locator('body').press('Control+Shift+KeyF');
+  const fixed = await tab.evaluate(() => {
+    const p = document.querySelector('.st-project');
+    const r = p.getBoundingClientRect();
+    return getComputedStyle(p).position === 'fixed' && r.top === 0 && Math.round(r.height) === window.innerHeight;
+  });
+  await tab.locator('body').press('Control+Shift+KeyF');
+  await tab.locator('.st-bar-tools button[aria-label="محرر فاتح"]').click();
+  const lightBg = await tab.evaluate(() => getComputedStyle(document.querySelector('.st-ws-group')).backgroundColor);
+  check('ws: Ctrl+Shift+F fills the browser window and back; the light chrome is one click away', fixed && Number(lightBg.match(/\d+/)[0]) > 200, `${fixed} ${lightBg}`);
+  await tab.locator('.st-bar-tools button[aria-label="محرر داكن"]').click();
+  await tab.screenshot({ path: path.join(out, 'workspace-1440.png') });
+  await ctx.close();
+}
+
 async function photoFlow(browser, base, errors) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const tab = await ctx.newPage();
@@ -242,7 +480,7 @@ async function photoFlow(browser, base, errors) {
   await tab.getByLabel('اسم المشروع').fill('بطاقة الاختبار');
   await tab.getByRole('button', { name: 'إنشاء وفتح' }).click();
   await tab.locator('.st-photo').waitFor({ timeout: 15000 });
-  check('a new photo project opens in the photo editor at 1080x1080', /1080×1080/.test(await tab.locator('.st-photo .st-tl-bar .st-hint').textContent()));
+  check('a new photo project opens in the photo editor at 1080x1080', /1080×1080/.test(await tab.locator('.st-photo .st-mon-time').textContent()));
   const centre = () => tab.evaluate(() => { const c = document.querySelector('.st-canvas'); const d = c.getContext('2d').getImageData(c.width >> 1, c.height >> 1, 1, 1).data; return [d[0], d[1], d[2]]; });
   await tab.locator('.st-lib button', { hasText: 'بطاقة' }).click();
   await tab.waitForTimeout(1200);
@@ -256,7 +494,7 @@ async function photoFlow(browser, base, errors) {
   await tab.waitForTimeout(1200);
   const c1 = await centre();
   check('brightness -50 is applied by the pixel functions in the worker', near(c1, [128, 0, 128], 20), JSON.stringify(c1));
-  await tab.getByRole('tab', { name: 'نص وأشكال' }).click();
+  await tab.locator('.st-ws-tab[data-panel="graphics"]').click();
   await tab.getByRole('button', { name: 'عنوان كبير' }).click();
   await tab.getByRole('button', { name: 'مستطيل' }).click();
   const names = () => tab.locator('.st-layers .st-layer-name').allTextContents();
@@ -279,6 +517,7 @@ async function photoFlow(browser, base, errors) {
   const x1 = await tab.getByLabel('الموضع أفقياً، قيمة دقيقة').inputValue();
   check('dragging a layer on the canvas moves it', Number(x1) > Number(x0) + 50, `${x0} to ${x1}`);
   await tab.locator('body').press('Control+z');
+  await tab.locator('.st-ws-tab[data-panel="export"]').click();
   await tab.locator('.st-export').scrollIntoViewIfNeeded();
   const [dl] = await Promise.all([tab.waitForEvent('download', { timeout: 30000 }), tab.getByRole('button', { name: 'تصدير وتنزيل' }).click()]);
   const png = path.join(out, 'photo.png');
@@ -353,6 +592,7 @@ async function phoneFlow(browser, base, errors) {
   const errors = [];
   try {
     if (!only || only === 'video') await videoFlow(browser, base, errors);
+    if (!only || only === 'workspace') await workspaceFlow(browser, base, errors);
     if (!only || only === 'photo') await photoFlow(browser, base, errors);
     if (!only || only === 'phone') await phoneFlow(browser, base, errors);
   } catch (e) {

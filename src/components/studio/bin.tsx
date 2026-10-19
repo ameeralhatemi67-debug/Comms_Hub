@@ -1,10 +1,12 @@
 'use client';
 
-// The studio's media panel (MVP_draft.md 62): «المكتبة» (files this person may see, at their current
-// version; needs the media page, like the library's own file route), «هذا الجهاز» (a file kept in
-// this browser only, marked so, with uploading to the library offered first), «قوالب الحركة» (the 26
-// templates of the template tab), «نص» (titles, captions, SRT) and «علامات الهوية» (the brand marks).
-import { useEffect, useRef, useState } from 'react';
+// The studio's sources of things to add (MVP_draft.md 62): «المكتبة» (files this person may see, at their
+// current version; needs the media page, like the library's own file route), «هذا الجهاز» (a file kept
+// in this browser only, marked so, with uploading to the library offered first), «قوالب الحركة» (the 26
+// templates of the template tab), text, captions, SRT, shapes and «علامات الهوية» (the brand marks).
+// On a computer each is its own window (62.1) and anything in them can be dragged onto the timeline or
+// the preview; on a phone they are the tabs of one panel.
+import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { Circle, FileUp, Film, Minus, Music, Search, Square, Subtitles, Type, Upload } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { STICKERS, STICKER_LABELS, type StickerKey } from '@/lib/studio/schema';
@@ -14,6 +16,20 @@ import type { Category, Graphic } from '@/lib/motion/types';
 import { DesktopOnly } from './compact';
 
 export type LibraryItem = { id: string; name: string; kind: 'video' | 'image' | 'audio'; current_version: number; mime_type: string; dims: string | null; duration: string | null };
+
+/** What is dragged from these windows onto the timeline or the preview. */
+export const ADD_MIME = 'application/x-studio-add';
+export type AddDrop =
+  | { type: 'library'; item: LibraryItem }
+  | { type: 'motion'; id: string }
+  | { type: 'text'; kind: 'title' | 'body' | 'caption' }
+  | { type: 'mark'; key: StickerKey; color: string }
+  | { type: 'shape'; shape: 'rect' | 'ellipse' | 'line' };
+
+const dragAdd = (payload: AddDrop) => (e: DragEvent) => {
+  e.dataTransfer.setData(ADD_MIME, JSON.stringify(payload));
+  e.dataTransfer.effectAllowed = 'copy';
+};
 
 /** "1920 × 1080" and "1:05" from the library's own fields, as numbers (the exact ones come when the file is read). */
 export function parseDims(d: string | null): { w?: number; h?: number } {
@@ -88,32 +104,217 @@ function MotionTile({ g, ratio, onPick, ready, disabled }: { g: Graphic; ratio: 
     }
   }, [g, ratio, ready]);
   return (
-    <button type="button" className="st-tile" onClick={onPick} disabled={disabled} title={g.blurb} data-template={g.id}>
+    <button type="button" className="st-tile" onClick={onPick} disabled={disabled} title={`${g.blurb} · انقر للإضافة عند رأس التشغيل، أو اسحب`} data-template={g.id} draggable={!disabled} onDragStart={dragAdd({ type: 'motion', id: g.id })}>
       <canvas ref={ref} aria-hidden="true" />
       <span>{g.name}</span>
     </button>
   );
 }
 
-export function Bin(p: BinProps) {
-  const [tab, setTab] = useState<Tab>(p.canLibrary ? 'library' : 'device');
+export function LibraryPane(p: Pick<BinProps, 'canLibrary' | 'readOnly' | 'photo' | 'onLibrary'>) {
   const [q, setQ] = useState('');
   const [items, setItems] = useState<LibraryItem[] | null>(null);
-  const [group, setGroup] = useState<Category>('repine');
-  const [markColor, setMarkColor] = useState('#ffffff');
-  const [picked, setPicked] = useState<File | null>(null);
-  const srtInput = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
-    if (tab !== 'library' || !p.canLibrary) return;
+    if (!p.canLibrary) return;
     let live = true;
     const t = setTimeout(() => void searchLibrary(q).then((r) => live && setItems(p.photo ? r.filter((x) => x.kind === 'image') : r)), 250);
     return () => {
       live = false;
       clearTimeout(t);
     };
-  }, [q, tab, p.canLibrary, p.photo]);
+  }, [q, p.canLibrary, p.photo]);
+  if (!p.canLibrary) return <p className="st-hint">ملفات المكتبة تحتاج صفحة «مكتبة الوسائط»، وهي غير مفتوحة لحسابك. اطلبها من «صلاحياتي»، أو استعمل ملفاً من هذا الجهاز.</p>;
+  return (
+    <>
+      <label className="st-search">
+        <Search aria-hidden="true" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث باسم الملف" aria-label="ابحث في المكتبة" />
+      </label>
+      {!items ? (
+        <p role="status" className="st-hint">جارٍ البحث…</p>
+      ) : items.length === 0 ? (
+        <p className="st-hint">لا ملفات مطابقة تراها في المكتبة.</p>
+      ) : (
+        <ul className="st-lib">
+          {items.map((it) => (
+            <li key={it.id}>
+              <button type="button" disabled={p.readOnly} onClick={() => p.onLibrary(it)} title={`إضافة «${it.name}» عند رأس التشغيل، أو اسحبه إلى الخط الزمني`} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'library', item: it })}>
+                {it.kind === 'image' ? (
+                  <img src={`/api/media/${it.id}/content?v=${it.current_version}`} alt="" loading="lazy" draggable={false} />
+                ) : (
+                  <span className="st-lib-ico">{it.kind === 'video' ? <Film /> : <Music />}</span>
+                )}
+                <span className="st-lib-name" dir="auto">{it.name}</span>
+                <small>
+                  {it.kind === 'video' ? 'فيديو' : it.kind === 'audio' ? 'صوت' : 'صورة'}
+                  {it.duration ? ` · ${it.duration}` : ''} · الإصدار {it.current_version}
+                </small>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
 
+export function DevicePane(p: Pick<BinProps, 'canLibrary' | 'canDevice' | 'readOnly' | 'photo' | 'onDevice'>) {
+  const [picked, setPicked] = useState<File | null>(null);
+  return (
+    <div className="st-device">
+      <label className="button st-file">
+        <FileUp aria-hidden="true" />
+        اختر ملفاً من هذا الجهاز
+        <input type="file" accept={p.photo ? 'image/*' : 'video/*,image/*,audio/*'} disabled={p.readOnly} onChange={(e) => setPicked(e.target.files?.[0] ?? null)} hidden />
+      </label>
+      {picked && (
+        <div className="st-picked">
+          <b dir="auto">{picked.name}</b>
+          {p.canLibrary && (
+            <button type="button" className="primary" onClick={() => (p.onDevice(picked, true), setPicked(null))}>
+              <Upload aria-hidden="true" />
+              رفعه إلى المكتبة ثم استخدامه
+            </button>
+          )}
+          {p.canDevice ? (
+            <button type="button" onClick={() => (p.onDevice(picked, false), setPicked(null))}>
+              استخدامه من هذا الجهاز فقط
+            </button>
+          ) : (
+            <p className="st-hint">هذا المتصفح لا يحفظ الملفات على الجهاز (نافذة خاصة أو متصفح لا يدعم ذلك)، فارفع الملف إلى المكتبة.</p>
+          )}
+          <small>الملف المستعمل من هذا الجهاز فقط يظهر «على هذا الجهاز فقط»، ولا يفتح المشروع كاملاً من جهاز آخر.</small>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** «الوسائط»: the library and this device. */
+export function MediaPane(p: BinProps) {
+  const [tab, setTab] = useState<'library' | 'device'>(p.canLibrary ? 'library' : 'device');
+  return (
+    <aside className="st-bin st-pane" aria-label="الوسائط">
+      <div className="st-pane-tabs" role="tablist" aria-label="مصدر الملفات">
+        <button type="button" role="tab" aria-selected={tab === 'library'} data-on={tab === 'library' ? 'yes' : 'no'} onClick={() => setTab('library')}>المكتبة</button>
+        <button type="button" role="tab" aria-selected={tab === 'device'} data-on={tab === 'device' ? 'yes' : 'no'} onClick={() => setTab('device')}>هذا الجهاز</button>
+      </div>
+      <div className="st-bin-body" role="tabpanel">
+        {tab === 'library' ? <LibraryPane {...p} /> : <DevicePane {...p} />}
+      </div>
+    </aside>
+  );
+}
+
+export function TemplatesPane(p: Pick<BinProps, 'ratio' | 'readOnly' | 'photo' | 'onMotion' | 'assetsReady'>) {
+  const [group, setGroup] = useState<Category>('repine');
+  return (
+    <div className="st-bin-body st-pane" aria-label="قوالب الحركة">
+      <div className="st-seg-mini" role="group" aria-label="فئة القوالب">
+        {GROUPS.map((g) => (
+          <button key={g.id} type="button" aria-pressed={group === g.id} className={group === g.id ? 'on' : ''} onClick={() => setGroup(g.id)}>
+            {g.label}
+          </button>
+        ))}
+      </div>
+      {group === 'frames' && !p.photo && <p className="st-hint">إطارات الفيديو تأخذ شكل المشروع، وتظهر مقاطع المسارات التي تحتها من نافذتها.</p>}
+      <div className="st-tiles">
+        {motionCatalog.filter((g) => g.category === group).map((g) => (
+          <MotionTile key={g.id} g={g} ratio={p.ratio} ready={p.assetsReady} disabled={p.readOnly} onPick={() => p.onMotion(g)} />
+        ))}
+      </div>
+      {!p.assetsReady && <p className="st-hint" role="status">جارٍ تجهيز القوالب…</p>}
+    </div>
+  );
+}
+
+export function GraphicsPane(p: Pick<BinProps, 'readOnly' | 'photo' | 'onText' | 'onSrt' | 'onMark' | 'onShape' | 'compact'> & { marks?: boolean; texts?: boolean }) {
+  const [markColor, setMarkColor] = useState('#ffffff');
+  const srtInput = useRef<HTMLInputElement>(null);
+  const texts = p.texts !== false;
+  const marks = p.marks !== false;
+  return (
+    <div className="st-bin-body st-pane" aria-label="النصوص والعلامات">
+      {texts && (
+        <div className="st-textadd">
+          <b className="st-sub">نص</b>
+          <button type="button" disabled={p.readOnly} onClick={() => p.onText('title')} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'text', kind: 'title' })}>
+            <Type aria-hidden="true" />
+            عنوان كبير
+          </button>
+          <button type="button" disabled={p.readOnly} onClick={() => p.onText('body')} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'text', kind: 'body' })}>
+            <Type aria-hidden="true" />
+            نص عادي
+          </button>
+          {!p.photo && (
+            <button type="button" disabled={p.readOnly} onClick={() => p.onText('caption')} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'text', kind: 'caption' })}>
+              <Subtitles aria-hidden="true" />
+              تعليق أسفل الشاشة
+            </button>
+          )}
+          {p.onShape && (
+            <>
+              <b className="st-sub">أشكال</b>
+              <button type="button" disabled={p.readOnly} onClick={() => p.onShape!('rect')} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'shape', shape: 'rect' })}>
+                <Square aria-hidden="true" />
+                مستطيل
+              </button>
+              <button type="button" disabled={p.readOnly} onClick={() => p.onShape!('ellipse')} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'shape', shape: 'ellipse' })}>
+                <Circle aria-hidden="true" />
+                دائرة
+              </button>
+              <button type="button" disabled={p.readOnly} onClick={() => p.onShape!('line')} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'shape', shape: 'line' })}>
+                <Minus aria-hidden="true" />
+                خط
+              </button>
+            </>
+          )}
+          {p.onSrt && p.compact && <DesktopOnly what="استيراد ترجمة SRT" />}
+          {p.onSrt && !p.compact && (
+            <>
+              <button type="button" disabled={p.readOnly} onClick={() => srtInput.current?.click()}>
+                <Subtitles aria-hidden="true" />
+                استيراد ترجمة SRT
+              </button>
+              <input
+                ref={srtInput}
+                type="file"
+                accept=".srt,text/plain"
+                hidden
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (f) p.onSrt!(await f.text());
+                  e.target.value = '';
+                }}
+              />
+            </>
+          )}
+        </div>
+      )}
+      {marks && (
+        <>
+          <b className="st-sub">علامات الهوية</b>
+          <label className="st-markcolor">
+            لون العلامة
+            <input type="color" value={markColor} onChange={(e) => setMarkColor(e.target.value)} />
+          </label>
+          <div className="st-tiles st-marks">
+            {STICKERS.map((k) => (
+              <button key={k} type="button" className="st-tile" disabled={p.readOnly} onClick={() => p.onMark(k, markColor)} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'mark', key: k, color: markColor })}>
+                <span className="st-mark-img" style={{ WebkitMaskImage: `url(${STICKER_SRC[k]})`, maskImage: `url(${STICKER_SRC[k]})`, background: markColor === '#ffffff' ? '#17634b' : markColor }} aria-hidden="true" />
+                <span>{STICKER_LABELS[k]}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** A phone: one panel with a tab for each source. */
+export function Bin(p: BinProps) {
+  const [tab, setTab] = useState<Tab>(p.canLibrary ? 'library' : 'device');
   const tabs = TABS.map((t) => (p.photo && t.id === 'text' ? { ...t, label: 'نص وأشكال' } : t));
   return (
     <aside className="st-bin" aria-label="الوسائط">
@@ -125,157 +326,11 @@ export function Bin(p: BinProps) {
         ))}
       </div>
       <div className="st-bin-body" role="tabpanel">
-        {tab === 'library' &&
-          (!p.canLibrary ? (
-            <p className="st-hint">ملفات المكتبة تحتاج صفحة «مكتبة الوسائط»، وهي غير مفتوحة لحسابك. اطلبها من «صلاحياتي»، أو استعمل ملفاً من هذا الجهاز.</p>
-          ) : (
-            <>
-              <label className="st-search">
-                <Search aria-hidden="true" />
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث باسم الملف" aria-label="ابحث في المكتبة" />
-              </label>
-              {!items ? (
-                <p role="status" className="st-hint">جارٍ البحث…</p>
-              ) : items.length === 0 ? (
-                <p className="st-hint">لا ملفات مطابقة تراها في المكتبة.</p>
-              ) : (
-                <ul className="st-lib">
-                  {items.map((it) => (
-                    <li key={it.id}>
-                      <button type="button" disabled={p.readOnly} onClick={() => p.onLibrary(it)} title={`إضافة «${it.name}» عند رأس التشغيل`}>
-                        {it.kind === 'image' ? (
-                          <img src={`/api/media/${it.id}/content?v=${it.current_version}`} alt="" loading="lazy" />
-                        ) : (
-                          <span className="st-lib-ico">{it.kind === 'video' ? <Film /> : <Music />}</span>
-                        )}
-                        <span className="st-lib-name" dir="auto">{it.name}</span>
-                        <small>
-                          {it.kind === 'video' ? 'فيديو' : it.kind === 'audio' ? 'صوت' : 'صورة'}
-                          {it.duration ? ` · ${it.duration}` : ''} · الإصدار {it.current_version}
-                        </small>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </>
-          ))}
-        {tab === 'device' && (
-          <div className="st-device">
-            <label className="button st-file">
-              <FileUp aria-hidden="true" />
-              اختر ملفاً من هذا الجهاز
-              <input type="file" accept={p.photo ? 'image/*' : 'video/*,image/*,audio/*'} disabled={p.readOnly} onChange={(e) => setPicked(e.target.files?.[0] ?? null)} hidden />
-            </label>
-            {picked && (
-              <div className="st-picked">
-                <b dir="auto">{picked.name}</b>
-                {p.canLibrary && (
-                  <button type="button" className="primary" onClick={() => (p.onDevice(picked, true), setPicked(null))}>
-                    <Upload aria-hidden="true" />
-                    رفعه إلى المكتبة ثم استخدامه
-                  </button>
-                )}
-                {p.canDevice ? (
-                  <button type="button" onClick={() => (p.onDevice(picked, false), setPicked(null))}>
-                    استخدامه من هذا الجهاز فقط
-                  </button>
-                ) : (
-                  <p className="st-hint">هذا المتصفح لا يحفظ الملفات على الجهاز (نافذة خاصة أو متصفح لا يدعم ذلك)، فارفع الملف إلى المكتبة.</p>
-                )}
-                <small>الملف المستعمل من هذا الجهاز فقط يظهر «على هذا الجهاز فقط»، ولا يفتح المشروع كاملاً من جهاز آخر.</small>
-              </div>
-            )}
-          </div>
-        )}
-        {tab === 'motion' && (
-          <>
-            <div className="st-seg-mini" role="group" aria-label="فئة القوالب">
-              {GROUPS.map((g) => (
-                <button key={g.id} type="button" aria-pressed={group === g.id} className={group === g.id ? 'on' : ''} onClick={() => setGroup(g.id)}>
-                  {g.label}
-                </button>
-              ))}
-            </div>
-            {group === 'frames' && !p.photo && <p className="st-hint">إطارات الفيديو تأخذ شكل المشروع، وتظهر مقاطع المسارات التي تحتها من نافذتها.</p>}
-            <div className="st-tiles">
-              {motionCatalog.filter((g) => g.category === group).map((g) => (
-                <MotionTile key={g.id} g={g} ratio={p.ratio} ready={p.assetsReady} disabled={p.readOnly} onPick={() => p.onMotion(g)} />
-              ))}
-            </div>
-          </>
-        )}
-        {tab === 'text' && (
-          <div className="st-textadd">
-            <button type="button" disabled={p.readOnly} onClick={() => p.onText('title')}>
-              <Type aria-hidden="true" />
-              عنوان كبير
-            </button>
-            <button type="button" disabled={p.readOnly} onClick={() => p.onText('body')}>
-              <Type aria-hidden="true" />
-              نص عادي
-            </button>
-            {!p.photo && (
-              <button type="button" disabled={p.readOnly} onClick={() => p.onText('caption')}>
-                <Subtitles aria-hidden="true" />
-                تعليق أسفل الشاشة
-              </button>
-            )}
-            {p.onShape && (
-              <>
-                <button type="button" disabled={p.readOnly} onClick={() => p.onShape!('rect')}>
-                  <Square aria-hidden="true" />
-                  مستطيل
-                </button>
-                <button type="button" disabled={p.readOnly} onClick={() => p.onShape!('ellipse')}>
-                  <Circle aria-hidden="true" />
-                  دائرة
-                </button>
-                <button type="button" disabled={p.readOnly} onClick={() => p.onShape!('line')}>
-                  <Minus aria-hidden="true" />
-                  خط
-                </button>
-              </>
-            )}
-            {p.onSrt && p.compact && <DesktopOnly what="استيراد ترجمة SRT" />}
-            {p.onSrt && !p.compact && (
-              <>
-                <button type="button" disabled={p.readOnly} onClick={() => srtInput.current?.click()}>
-                  <Subtitles aria-hidden="true" />
-                  استيراد ترجمة SRT
-                </button>
-                <input
-                  ref={srtInput}
-                  type="file"
-                  accept=".srt,text/plain"
-                  hidden
-                  onChange={async (e) => {
-                    const f = e.target.files?.[0];
-                    if (f) p.onSrt!(await f.text());
-                    e.target.value = '';
-                  }}
-                />
-              </>
-            )}
-          </div>
-        )}
-        {tab === 'marks' && (
-          <>
-            <label className="st-markcolor">
-              لون العلامة
-              <input type="color" value={markColor} onChange={(e) => setMarkColor(e.target.value)} />
-            </label>
-            <div className="st-tiles st-marks">
-              {STICKERS.map((k) => (
-                <button key={k} type="button" className="st-tile" disabled={p.readOnly} onClick={() => p.onMark(k, markColor)}>
-                  <span className="st-mark-img" style={{ WebkitMaskImage: `url(${STICKER_SRC[k]})`, maskImage: `url(${STICKER_SRC[k]})`, background: markColor === '#ffffff' ? '#17634b' : markColor }} aria-hidden="true" />
-                  <span>{STICKER_LABELS[k]}</span>
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-        {tab !== 'library' && tab !== 'device' && !p.assetsReady && <p className="st-hint" role="status">جارٍ تجهيز القوالب…</p>}
+        {tab === 'library' && <LibraryPane {...p} />}
+        {tab === 'device' && <DevicePane {...p} />}
+        {tab === 'motion' && <TemplatesPane {...p} />}
+        {tab === 'text' && <GraphicsPane {...p} marks={false} />}
+        {tab === 'marks' && <GraphicsPane {...p} texts={false} />}
       </div>
     </aside>
   );

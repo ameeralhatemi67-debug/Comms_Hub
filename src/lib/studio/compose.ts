@@ -1,11 +1,13 @@
 // The studio's compositor (MVP_draft.md 62): one Canvas 2D drawing of a video frame at time t, or of a
 // photo, used alike by the preview, the export and the photo editor, so what is seen is what is
 // exported. Media come through a Resolver (decoded video frames, pictures); motion templates through
-// MotionRenderer; brand marks through sticker(). Pure apart from the canvas it is given.
+// MotionRenderer; brand marks through sticker(); transitions and entry and exit movements through
+// transitions.ts. Pure apart from the canvas it is given.
 import { canvasOf, type Adjust, type Clip, type Fit, type Layer, type Micros, type ProjectDoc, type Transform } from './schema.ts';
 import { clipAlpha, sourceOf, visibleAt } from './timeline.ts';
 import { MotionRenderer, fitToLength, graphicById, motionDims, motionParams, settledSec, sticker, templateTime } from './motion-adapter.ts';
 import { drawText, layoutText, textMotion } from './text.ts';
+import { NO_FX, clipAnimFx, clipTransitionFx, combine, type Fx } from './transitions.ts';
 
 export type Resolver = {
   /** The frame of a video source shown at `at` (source time) for a clip, or null while it is not ready. */
@@ -169,22 +171,25 @@ export function boxOf(doc: ProjectDoc, item: Clip | Layer, res: Resolver, ctx: C
 }
 
 /**
- * Draws one clip or layer. `scale` turns canvas pixels into the target's pixels; `alpha` is its fade.
- * The context's transform is left as it was.
+ * Draws one clip or layer. `scale` turns canvas pixels into the target's pixels; `alpha` is its fade;
+ * `fx` its transition and movement at this moment. The context's transform is left as it was.
  */
-export function drawItem(ctx: CanvasRenderingContext2D, doc: ProjectDoc, item: Clip | Layer, t: Micros | null, res: Resolver, scale: number, alpha = 1) {
+export function drawItem(ctx: CanvasRenderingContext2D, doc: ProjectDoc, item: Clip | Layer, t: Micros | null, res: Resolver, scale: number, alpha = 1, fx: Fx = NO_FX) {
   const { w: W, h: H } = canvasOf(doc);
   const tr = transformOf(item, W, H);
-  let a = alpha * tr.opacity;
-  let dx = 0;
-  let dy = 0;
-  if (item.text && t !== null && (item as Clip).length) {
+  let a = alpha * tr.opacity * fx.alpha;
+  let dx = fx.dx;
+  let dy = fx.dy;
+  // a text's own older entry and exit, for clips that never had the newer movements (transitions.ts)
+  if (item.text && t !== null && (item as Clip).length && (item as Clip).animIn === undefined && (item as Clip).animOut === undefined) {
     const m = textMotion(item.text, item as Clip, t);
     a *= m.alpha;
-    dx = m.dx;
-    dy = m.dy;
+    dx += m.dx;
+    dy += m.dy;
   }
   if (a <= 0.001) return;
+  if (fx.local && fx.local.f <= 0.001) return;
+  if (fx.clip && ((fx.clip.kind === 'rect' && (fx.clip.w <= 0 || fx.clip.h <= 0)) || (fx.clip.kind === 'circle' && fx.clip.r <= 0))) return;
   const c = contentOf(doc, item, t, res, scale, W, H);
   if (!c) return;
   const crop = (item as Clip).crop;
@@ -192,23 +197,38 @@ export function drawItem(ctx: CanvasRenderingContext2D, doc: ProjectDoc, item: C
   const nh = c.natural.h * (crop ? 1 - crop.t - crop.b : 1);
   const base = item.text ? { w: 0, h: 0 } : c.fitInCanvas ? fitSize(nw, nh, W, H, item.fit) : { w: nw, h: nh };
   ctx.save();
+  // a wipe, push or circle of a transition: the part of the canvas this item may draw into
+  if (fx.clip) {
+    ctx.beginPath();
+    if (fx.clip.kind === 'rect') ctx.rect(fx.clip.x * scale, fx.clip.y * scale, fx.clip.w * scale, fx.clip.h * scale);
+    else ctx.arc(fx.clip.cx * scale, fx.clip.cy * scale, fx.clip.r * scale, 0, Math.PI * 2);
+    ctx.clip();
+  }
   ctx.globalAlpha *= Math.min(1, a);
   const blend = (item as Layer).blend;
   if (blend && blend !== 'normal') ctx.globalCompositeOperation = blend;
   ctx.translate((tr.x + dx) * scale, (tr.y + dy) * scale);
-  if (tr.rotation) ctx.rotate((tr.rotation * Math.PI) / 180);
+  const turn = tr.rotation + fx.rotate;
+  if (turn) ctx.rotate((turn * Math.PI) / 180);
   const flip = (item as Layer).flip;
   if (flip?.h || flip?.v) ctx.scale(flip.h ? -1 : 1, flip.v ? -1 : 1);
   const f = filterOf((item as Clip).adjust);
+  const parts: string[] = [];
   // photos are adjusted by the pixel functions (resolver.adjusted); video uses the canvas filter
-  if (f !== 'none' && !c.preAdjusted && doc.kind !== 'photo' && supportsFilter()) ctx.filter = f;
+  if (f !== 'none' && !c.preAdjusted && doc.kind !== 'photo') parts.push(f);
+  if (fx.blur > 0.05) parts.push(`blur(${(fx.blur * scale).toFixed(2)}px)`);
+  if (parts.length && supportsFilter()) ctx.filter = parts.join(' ');
+  const k = tr.scale * fx.scale;
   if (item.text) {
-    ctx.scale(tr.scale, tr.scale);
-    drawText(ctx, item.text, 0, 0, W, scale);
+    ctx.scale(k, k);
+    const L = layoutText(ctx, item.text, W, scale);
+    if (fx.local) clipLocal(ctx, fx.local, L.boxW, L.height);
+    drawText(ctx, item.text, 0, 0, W, scale, L, fx.reveal);
   } else {
-    const w = base.w * tr.scale * scale;
-    const h = base.h * tr.scale * scale;
-    if (c.draw) c.draw(ctx, w, h, scale * tr.scale);
+    const w = base.w * k * scale;
+    const h = base.h * k * scale;
+    if (fx.local) clipLocal(ctx, fx.local, w, h);
+    if (c.draw) c.draw(ctx, w, h, scale * k);
     else if (c.img) {
       const full = sizeOf(c.img) ?? c.natural;
       if (crop) ctx.drawImage(c.img, full.w * crop.l, full.h * crop.t, full.w * (1 - crop.l - crop.r), full.h * (1 - crop.t - crop.b), -w / 2, -h / 2, w, h);
@@ -216,6 +236,17 @@ export function drawItem(ctx: CanvasRenderingContext2D, doc: ProjectDoc, item: C
     }
   }
   ctx.restore();
+}
+
+/** Shows only part of an item's own box, from one side (a wipe of the item, in its own coordinates). */
+function clipLocal(ctx: CanvasRenderingContext2D, l: NonNullable<Fx['local']>, w: number, h: number) {
+  const f = Math.max(0, Math.min(1, l.f));
+  ctx.beginPath();
+  if (l.from === 'right') ctx.rect(w / 2 - w * f, -h / 2, w * f, h);
+  else if (l.from === 'left') ctx.rect(-w / 2, -h / 2, w * f, h);
+  else if (l.from === 'bottom') ctx.rect(-w / 2, h / 2 - h * f, w, h * f);
+  else ctx.rect(-w / 2, -h / 2, w, h * f);
+  ctx.clip();
 }
 
 export type FrameOptions = {
@@ -238,9 +269,19 @@ export function composeFrame(ctx: CanvasRenderingContext2D, doc: ProjectDoc, t: 
     ctx.fillRect(0, 0, W * opts.scale, H * opts.scale);
   }
   const keep = new Set<string>();
-  for (const { clip } of visibleAt(doc, t)) {
+  for (const { track, clip } of visibleAt(doc, t)) {
     if (clip.motion) keep.add(clip.id);
-    drawItem(ctx, doc, clip, t, res, opts.scale, clipAlpha(clip, t));
+    const tr = clipTransitionFx(track, clip, t, W, H);
+    const fx = combine(tr.fx, clipAnimFx(clip, t, W, H));
+    drawItem(ctx, doc, clip, t, res, opts.scale, clipAlpha(clip, t), fx);
+    // a dip to black or white covers this track (tracks above it stay in front)
+    if (tr.overlay && tr.overlay.alpha > 0.001) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, tr.overlay.alpha);
+      ctx.fillStyle = tr.overlay.color;
+      ctx.fillRect(0, 0, W * opts.scale, H * opts.scale);
+      ctx.restore();
+    }
   }
   ctx.restore();
   return keep;

@@ -1,8 +1,10 @@
 // Arabic text on the studio's canvas (MVP_draft.md 62): only the fonts the site ships, loaded with
 // Arabic sample text (the font files are split by character range, so a Latin-only load would leave
 // the Arabic part unloaded), right-to-left paragraphs, no letter spacing (it breaks joined letters),
-// line breaks at word boundaries (Intl.Segmenter), a box, an outline, a shadow, entry and exit.
-import { US, type Clip, type Micros, type TextStyle } from './schema.ts';
+// line breaks at word boundaries (Intl.Segmenter), a box, an outline, a shadow, entry and exit, and a
+// reveal letter by letter or word by word (transitions.ts).
+import { US, type Clip, type Micros, type ProjectDoc, type TextStyle } from './schema.ts';
+import { fontDef, fontSample } from './fonts.ts';
 
 export const FALLBACK = '"IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif';
 export const SAMPLE = 'نص عربي للتحميل Text 0123';
@@ -25,13 +27,25 @@ export const defaultText = (content = 'اكتب النص هنا'): TextStyle => 
 
 export const fontOf = (s: Pick<TextStyle, 'font' | 'weight' | 'size'>, scale = 1) => `${s.weight} ${Math.max(1, s.size * scale)}px "${s.font}", ${FALLBACK}`;
 
-/** Loads each font and weight used, with Arabic sample text. Resolves to whether all of them are ready. */
+/**
+ * Loads each font and weight used, with sample text of its script (Arabic and Latin for an Arabic font,
+ * Latin for an English one). Resolves to whether all of them are ready.
+ */
 export async function loadFonts(styles: Pick<TextStyle, 'font' | 'weight'>[]): Promise<boolean> {
   if (typeof document === 'undefined' || !document.fonts) return false;
-  const want = new Map<string, string>();
-  for (const s of styles) want.set(`${s.weight}|${s.font}`, `${s.weight} 48px "${s.font}"`);
-  await Promise.all([...want.values()].map((f) => document.fonts.load(f, SAMPLE).catch(() => [])));
-  return [...want.values()].every((f) => document.fonts.check(f, SAMPLE));
+  const want = new Map<string, { font: string; sample: string }>();
+  for (const s of styles) want.set(`${s.weight}|${s.font}`, { font: `${s.weight} 48px "${s.font}"`, sample: fontSample(fontDef(s.font)) });
+  await Promise.all([...want.values()].map((f) => document.fonts.load(f.font, f.sample).catch(() => [])));
+  return [...want.values()].every((f) => document.fonts.check(f.font, f.sample));
+}
+
+/** Every font and weight the texts of a project use, once each. */
+export function usedFonts(doc: ProjectDoc): Pick<TextStyle, 'font' | 'weight'>[] {
+  const seen = new Map<string, Pick<TextStyle, 'font' | 'weight'>>();
+  const add = (s: TextStyle | undefined) => s && seen.set(`${s.weight}|${s.font}`, { font: s.font, weight: s.weight });
+  for (const t of doc.video?.tracks ?? []) for (const c of t.clips) add(c.text);
+  for (const l of doc.photo?.layers ?? []) add(l.text);
+  return [...seen.values()];
 }
 
 const STRONG_RTL = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
@@ -137,11 +151,38 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
+/** How many letters (graphemes) or words each line shows when a share `f` of the whole text is revealed. */
+export function revealCounts(lines: Line[], f: number, by: 'chars' | 'words'): number[] {
+  const units = lines.map((l) => (by === 'words' ? words(l.text).filter((w) => w.trim()).length : graphemes(l.text).length));
+  let left = Math.round(Math.max(0, Math.min(1, f)) * units.reduce((a, b) => a + b, 0));
+  return units.map((u) => {
+    const n = Math.min(u, left);
+    left -= n;
+    return n;
+  });
+}
+
+/** The start of a line cut to its first n letters or words. */
+export function revealText(text: string, n: number, by: 'chars' | 'words'): string {
+  if (by === 'chars') return graphemes(text).slice(0, n).join('');
+  let out = '';
+  let seen = 0;
+  for (const w of words(text)) {
+    if (w.trim()) {
+      if (seen >= n) break;
+      seen++;
+    }
+    out += w;
+  }
+  return out.trimEnd();
+}
+
 /**
  * Draws a text centred on (cx, cy) in the context's current transform. `scale` turns the style's
- * canvas pixels into the target's pixels (a preview is smaller than the project's canvas).
+ * canvas pixels into the target's pixels (a preview is smaller than the project's canvas). With
+ * `reveal`, only that share of the letters or words is drawn, each line growing from its start.
  */
-export function drawText(ctx: CanvasRenderingContext2D, s: TextStyle, cx: number, cy: number, canvasW: number, scale = 1, layout?: TextLayout) {
+export function drawText(ctx: CanvasRenderingContext2D, s: TextStyle, cx: number, cy: number, canvasW: number, scale = 1, layout?: TextLayout, reveal?: { f: number; by: 'chars' | 'words' } | null) {
   const L = layout ?? layoutText(ctx, s, canvasW, scale);
   const pad = s.box ? s.box.padding * scale : 0;
   const top = cy - L.height / 2;
@@ -160,6 +201,7 @@ export function drawText(ctx: CanvasRenderingContext2D, s: TextStyle, cx: number
   (ctx as unknown as { letterSpacing?: string }).letterSpacing = '0px';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
+  const counts = reveal && reveal.f < 1 ? revealCounts(L.lines, reveal.f, reveal.by) : null;
   L.lines.forEach((line, i) => {
     if (!line.text) return;
     const y = top + pad + L.lineH * (i + 0.5);
@@ -167,20 +209,29 @@ export function drawText(ctx: CanvasRenderingContext2D, s: TextStyle, cx: number
     // 'start' and 'end' follow each paragraph's own direction
     const align = s.align === 'center' ? 'center' : s.align;
     ctx.textAlign = align as CanvasTextAlign;
-    const x =
+    let x =
       align === 'center' ? cx : (align === 'start') === (line.dir === 'rtl') ? left + L.boxW - pad : left + pad;
+    let shown = line.text;
+    if (counts) {
+      if (!counts[i]) return;
+      shown = revealText(line.text, counts[i], reveal!.by);
+      // the cut line grows from where the whole line starts: its right edge in Arabic, its left in English
+      const lx = align === 'center' ? cx - line.width / 2 : x === left + pad ? left + pad : left + L.boxW - pad - line.width;
+      ctx.textAlign = line.dir === 'rtl' ? 'right' : 'left';
+      x = line.dir === 'rtl' ? lx + line.width : lx;
+    }
     if (s.stroke && s.stroke.width > 0) {
       ctx.shadowColor = 'transparent';
       ctx.strokeStyle = s.stroke.color;
       ctx.lineWidth = s.stroke.width * 2 * scale;
-      ctx.strokeText(line.text, x, y);
+      ctx.strokeText(shown, x, y);
     }
     if (s.shadow && s.shadow.blur > 0) {
       ctx.shadowColor = s.shadow.color;
       ctx.shadowBlur = s.shadow.blur * scale;
     } else ctx.shadowColor = 'transparent';
     ctx.fillStyle = s.color;
-    ctx.fillText(line.text, x, y);
+    ctx.fillText(shown, x, y);
   });
   ctx.restore();
   return L;

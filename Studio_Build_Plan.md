@@ -226,3 +226,19 @@ owner's review; the page guide; a studio paragraph in `AGENTS.md`; `Status.md`, 
   - taking over editing from a second browser;
   - Safari and phone messages;
   - the Vercel usage page after the first copies to a device.
+
+## 9. Second round, the owner's notes of 2026-10-20
+
+The owner found the first version very good and asked for polish, all of it built in one round and specified
+in `MVP_draft.md` 62.1 to 62.5:
+
+| Note | What was built |
+|---|---|
+| A layout like a desktop editor: everything a window, moved, merged, resized, opened and closed | A docking workspace written for the studio (`src/lib/studio/workspace.ts`, the layout as data, tested; `workspace.tsx`, the windows). No docking library was added (none was evaluated this round): the studio's own layout keeps each window's content mounted through a portal, so an export or a canvas survives a move, and it was written for the right-to-left page. Five video and three photo workspaces (`panels.ts`), remembered per device. |
+| A menu to reach the windows | A menu bar with «ملف», «تحرير», «المقطع» (or «الطبقة»), «عرض», «النوافذ», «مساعدة» (`menubar.tsx`, `editor-frame.tsx`). |
+| Shortcuts, icons, keyboard shortcuts | One list (`shortcuts.ts`) by key position, so an Arabic layout works; tools V, C, H, T; a shortcuts sheet; every menu item and button title shows its key. |
+| Better looking windows | A dark editor chrome by default (light on request), tabs with icons and an accent line, a focused outline, drop previews, floating windows with shadows. |
+| More transitions and entry and exit animations | Sixteen transitions and seventeen movements (`transitions.ts`), drawn by the compositor for preview and export alike, with an effects window of moving thumbnails. |
+| A lower preview quality for smooth playback (1/2 to 1/32) | Separate playing and paused resolutions: full, 1/2, 1/3, 1/4, 1/8, 1/16, 1/32; the export stays full. |
+| Ten English and twelve Arabic fonts | `fonts.ts` and `studio-fonts.ts`, pinned `@fontsource` packages, loaded only when used; a font list with previews. |
+| Better interface and handling | Handles to scale and turn on the canvas, drag and drop from every window to the timeline and the preview, a clip menu, copy and paste, the razor, Ctrl and wheel zoom, a snap line, the history window, the editor filling the browser window. |

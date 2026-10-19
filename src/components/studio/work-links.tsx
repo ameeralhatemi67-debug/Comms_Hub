@@ -8,8 +8,8 @@
 //   - the studio shows the work's status and the timed review notes written on its exported file
 //     (media_notes.timecode, section 59.6), and a note's time moves the playhead there.
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
-import { Clapperboard, MessageSquareText } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Clapperboard, MessageSquareText, RefreshCw } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { canOpenStudio, STUDIO_CAP } from '@/lib/access';
 import { useAccount } from '@/lib/account-context';
@@ -96,8 +96,27 @@ export async function linkFileToWork(work: string, asset: string): Promise<strin
 
 type Note = { id: string; author: string; body: string; timecode: string | null; created_at: string };
 
-/** «المراجعة» in the studio: the work, the files saved from the project, and their timed notes. */
-export function ReviewPanel({ projectId, api, readOnly, onSeek, pw }: { projectId: string; api: StudioApi; readOnly: boolean; onSeek?: (t: Micros) => void; pw: ReturnType<typeof useProjectWork> }) {
+/**
+ * «المراجعة» in the studio: the work, the files saved from the project, and their timed notes. Its window
+ * stays open while other windows are used, so it reads again when it comes into view, after an export
+ * to the library (`refreshKey`), and on «تحديث».
+ */
+export function ReviewPanel({ projectId, api, readOnly, onSeek, pw, refreshKey = 0 }: { projectId: string; api: StudioApi; readOnly: boolean; onSeek?: (t: Micros) => void; pw: ReturnType<typeof useProjectWork>; refreshKey?: number }) {
+  const root = useRef<HTMLDetailsElement>(null);
+  const [shown, setShown] = useState(0);
+  const [again, setAgain] = useState(0);
+  useEffect(() => {
+    const el = root.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    let seen = false;
+    const io = new IntersectionObserver((entries) => {
+      const vis = entries.some((e) => e.isIntersecting);
+      if (vis && !seen) setShown((x) => x + 1);
+      seen = vis;
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   const [works, setWorks] = useState<WorkRow[]>([]);
   const [pick, setPick] = useState('');
   const [files, setFiles] = useState<{ id: string; name: string; version: number }[]>([]);
@@ -131,12 +150,16 @@ export function ReviewPanel({ projectId, api, readOnly, onSeek, pw }: { projectI
     return () => {
       live = false;
     };
-  }, [projectId]);
+  }, [projectId, refreshKey, shown, again]);
 
   return (
-    <details className="st-sec st-review" open>
+    <details className="st-sec st-review" open ref={root}>
       <summary>المراجعة</summary>
       <div className="st-sec-body">
+        <button type="button" className="st-mini st-review-refresh" onClick={() => (setAgain((x) => x + 1), void pw.reload())} title="قراءة الملاحظات والعمل من جديد">
+          <RefreshCw aria-hidden="true" />
+          تحديث
+        </button>
         {pw.workRef ? (
           <p className="st-hint">
             العمل: <Link href={`/work/${pw.workRef}`}>{pw.workRef}</Link>

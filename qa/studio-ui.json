@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-ui.cjs",
-  "run": "2026-10-19T19:13:21.687Z",
+  "run": "2026-10-19T21:57:04.331Z",
   "checks": [
     {
       "name": "the empty home says there are no projects yet and offers both kinds",
@@ -10,7 +10,7 @@
     {
       "name": "a new video project is created and opened in the editor",
       "pass": true,
-      "detail": "e2a0ae3f-4f8d-4942-9f72-63080bfe75a9"
+      "detail": "85bb0b80-4a54-4afe-8f8f-24f0a419e482"
     },
     {
       "name": "the bar names the project and its first numbered version",
@@ -45,7 +45,7 @@
     {
       "name": "dragging a clip moves it along the timeline",
       "pass": true,
-      "detail": "17 to 137"
+      "detail": "21 to 141"
     },
     {
       "name": "the inspector edits the title's words",
@@ -80,7 +80,7 @@
     {
       "name": "«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it",
       "pass": true,
-      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"7747eecd-6056-49e1-b924-26eadb300426\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
+      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"90424e61-c3af-4d20-9d15-a7ccdd982c79\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
     },
     {
       "name": "the result says it is in the library and that its uploader does not approve it",
@@ -90,12 +90,12 @@
     {
       "name": "the saved file is linked to the work through the work cycle (work_asset_link)",
       "pass": true,
-      "detail": "[{\"work\":\"CH-101\",\"asset\":\"7747eecd-6056-49e1-b924-26eadb300426\"}]"
+      "detail": "[{\"work\":\"CH-101\",\"asset\":\"90424e61-c3af-4d20-9d15-a7ccdd982c79\"}]"
     },
     {
       "name": "«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4",
       "pass": true,
-      "detail": "[{\"asset\":\"7747eecd-6056-49e1-b924-26eadb300426\",\"version\":1,\"revision\":3},{\"asset\":\"7747eecd-6056-49e1-b924-26eadb300426\",\"version\":2,\"revision\":4}]"
+      "detail": "[{\"asset\":\"90424e61-c3af-4d20-9d15-a7ccdd982c79\",\"version\":1,\"revision\":3},{\"asset\":\"90424e61-c3af-4d20-9d15-a7ccdd982c79\",\"version\":2,\"revision\":4}]"
     },
     {
       "name": "a timed review note of the exported file shows in the studio, and its time moves the playhead",
@@ -120,7 +120,132 @@
     {
       "name": "the space bar plays and pauses, and the time runs",
       "pass": true,
-      "detail": "00:00.03 / 00:06.00 to 00:01.01 / 00:06.00"
+      "detail": "00:00.03 / 00:06.00 to 00:01.02 / 00:06.00"
+    },
+    {
+      "name": "ws: the video editor opens as windows in tab groups, every window of the editor present",
+      "pass": true,
+      "detail": "inspector,project,export,review,program,media,templates,graphics,effects,timeline,history"
+    },
+    {
+      "name": "ws: the menu bar has «ملف», «تحرير», «المقطع», «عرض», «النوافذ» and «مساعدة»",
+      "pass": true,
+      "detail": "ملف,تحرير,المقطع,عرض,النوافذ,مساعدة"
+    },
+    {
+      "name": "ws: the editor fills the browser window and the page itself does not scroll",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "ws: the editor chrome is dark by default",
+      "pass": true,
+      "detail": "rgb(19, 26, 23)"
+    },
+    {
+      "name": "ws: a tab dragged onto another window joins its tabs",
+      "pass": true,
+      "detail": "program,templates"
+    },
+    {
+      "name": "ws: a tab dropped on the lower edge of a window splits it, the new window below",
+      "pass": true,
+      "detail": "{\"projBox\":{\"x\":386.40625,\"y\":393.265625,\"width\":639.390625,\"height\":250.40625},\"progBox\":{\"x\":386.40625,\"y\":137.875,\"width\":639.390625,\"height\":250.390625}}"
+    },
+    {
+      "name": "ws: a tab dropped outside the windows becomes a floating window",
+      "pass": true,
+      "detail": "review"
+    },
+    {
+      "name": "ws: a floating window is moved by its header",
+      "pass": true,
+      "detail": "530,134 to 221,198"
+    },
+    {
+      "name": "ws: the arrangement of the windows is remembered after a reload",
+      "pass": true,
+      "detail": "review"
+    },
+    {
+      "name": "ws: a window closed from its tab opens again from «النوافذ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ws: Shift+4 goes to the preview and ` maximises its window, ` again restores the layout",
+      "pass": true,
+      "detail": "1 then 6"
+    },
+    {
+      "name": "ws: «المؤثرات» shows the effects window in front, and «التحرير» rebuilds the editing layout",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ws: dragging the border between two windows resizes them",
+      "pass": true,
+      "detail": "361 to 441"
+    },
+    {
+      "name": "ws: «?» opens the shortcuts sheet with every key of the editor",
+      "pass": true,
+      "detail": "48"
+    },
+    {
+      "name": "ws: the preview resolution 1/4 draws the paused frame at a quarter of its pixels, and «كاملة» from the menu restores it",
+      "pass": true,
+      "detail": "203 / 51 / 203 1/4"
+    },
+    {
+      "name": "ws: a transition from «الانتقالات والحركات» joins the two touching clips (push from the right)",
+      "pass": true,
+      "detail": "push-left"
+    },
+    {
+      "name": "ws: the inspector names the transition and its length",
+      "pass": true,
+      "detail": "push-left"
+    },
+    {
+      "name": "ws: a movement dragged onto the start of a clip becomes its entry",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ws: the font list shows 25 fonts, and choosing «كايرو» sets and loads it",
+      "pass": true,
+      "detail": "25 true"
+    },
+    {
+      "name": "ws: Ctrl+C and Ctrl+V copy the selected clip to the playhead",
+      "pass": true,
+      "detail": "2"
+    },
+    {
+      "name": "ws: C picks the razor, a click cuts the clip there, and V goes back to selecting",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ws: a right click opens the clip's menu (cut, copy, paste, transition, delete)",
+      "pass": true,
+      "detail": "قص عند رأس التشغيلSنسخCtrl+Cلصق عند رأس التشغيلCtrl+VتكرارCtrl+Dانتقال افتراضي ع"
+    },
+    {
+      "name": "ws: dragging a corner of the selected title on the preview scales it",
+      "pass": true,
+      "detail": "100 to 143"
+    },
+    {
+      "name": "ws: «السجل» lists the steps, goes back to the project as it was opened and forward to the last step",
+      "pass": true,
+      "detail": "10 steps, 0 then 5 clips"
+    },
+    {
+      "name": "ws: Ctrl+Shift+F fills the browser window and back; the light chrome is one click away",
+      "pass": true,
+      "detail": "true rgb(251, 252, 249)"
     },
     {
       "name": "a new photo project opens in the photo editor at 1080x1080",
@@ -155,7 +280,7 @@
     {
       "name": "dragging a layer on the canvas moves it",
       "pass": true,
-      "detail": "540 to 624"
+      "detail": "540 to 628"
     },
     {
       "name": "the PNG export is the full 1080x1080 picture with the rectangle in the middle",
@@ -205,7 +330,7 @@
     {
       "name": "390: crop and colours are kept for the computer, said in place of their controls",
       "pass": true,
-      "detail": "القص والألوان · متاح على الحاسوب: يبقى في المشروع كما هو."
+      "detail": "الانتقال بين المقطعين · متاح على الحاسوب: يبقى في المشروع كما هو. | القص والألوان · متاح على الحاسوب: يبقى في المشروع كما هو."
     },
     {
       "name": "390: the settings panel fits the screen",
@@ -229,8 +354,8 @@
     }
   ],
   "debugTime": "00:02.00 / 00:07.24",
-  "projectId": "e2a0ae3f-4f8d-4942-9f72-63080bfe75a9",
-  "total": 45,
-  "passed": 45,
+  "projectId": "85bb0b80-4a54-4afe-8f8f-24f0a419e482",
+  "total": 70,
+  "passed": 70,
   "failed": 0
 }

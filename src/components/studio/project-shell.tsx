@@ -23,6 +23,10 @@ export type EditorProps = {
   revision: () => number;
   saveVersion: (note: string | null) => Promise<{ ok: boolean; error?: string }>;
   api: StudioApi;
+  /** Opens «حفظ نسخة» (Ctrl+S and the menu «ملف»). */
+  onRequestVersion?: () => void;
+  /** Opens the renaming of the project (F2). */
+  onRequestRename?: () => void;
 };
 
 export function ProjectShell({ id, editor }: { id: string; editor: (p: EditorProps) => ReactNode }) {
@@ -104,6 +108,8 @@ export function ProjectShell({ id, editor }: { id: string; editor: (p: EditorPro
         revision: p.revision,
         saveVersion: p.saveVersion,
         api: p.api,
+        onRequestVersion: readOnly || state.save.kind === 'saving' ? undefined : () => setVersioning(true),
+        onRequestRename: readOnly ? undefined : () => setRenaming(true),
       })}
       {versioning && <VersionDialog onClose={() => setVersioning(false)} onSave={async (note) => {
         const r = await p.saveVersion(note);

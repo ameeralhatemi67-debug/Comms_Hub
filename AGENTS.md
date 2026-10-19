@@ -251,8 +251,12 @@ device's private storage (OPFS) once per version, and a file from the device sta
 device. There is no shared temporary storage and no remote render (they wait for the agent
 computer, E-1). The studio never approves or publishes: what it saves to the library is a new
 file or version that goes through review like any other, and nobody approves what they uploaded.
-Ctrl+Z inside the studio is the studio's own and never reaches the library's undo. Its rules are
-held by `supabase/tests/studio_*_rules.sql`, `tests/studio-*.test.mjs` and the fixture checks
+Ctrl+Z inside the studio is the studio's own and never reaches the library's undo. On a computer each
+part of an editor is a window that can be merged, split, floated and closed (by owner request of
+2026-10-20, `MVP_draft.md` 62.1 to 62.5); the arrangement, the chrome and the preview resolution are
+remembered on the device only, never as project data. The studio's added fonts (twelve Arabic, ten
+English, SIL Open Font License) are served by the site from `@fontsource`, never from a font service.
+Its rules are held by `supabase/tests/studio_*_rules.sql`, `tests/studio-*.test.mjs` and the fixture checks
 `qa/studio-*.cjs`.
 
 ## Writing markdown from a shell

@@ -12,6 +12,7 @@ import {
   RATIOS as RATIO_SIZES, TRACK_LIMITS, uid, type Clip, type Fps, type Micros, type NewClip, type NewSource, type ProjectDoc, type Ratio, type Source, type Track, type TrackKind, type VideoBody,
 } from './schema.ts';
 import { frameUs } from './time.ts';
+import type { TransitionKind } from './transitions.ts';
 
 export type Located = { track: Track; clip: Clip; ti: number; ci: number };
 
@@ -256,7 +257,7 @@ export function duplicateClip(doc: ProjectDoc, id: string): { doc: ProjectDoc; c
  * the ones after it on the track back by the fade's length, so the two overlap; removing it moves them
  * forward again. The fade is at most half of the shorter clip.
  */
-export function setTransition(doc: ProjectDoc, id: string, length: Micros | null): ProjectDoc {
+export function setTransition(doc: ProjectDoc, id: string, length: Micros | null, kind?: TransitionKind): ProjectDoc {
   const at = locate(doc, id);
   if (!at || at.track.locked) return doc;
   const b = at.clip;
@@ -273,13 +274,33 @@ export function setTransition(doc: ProjectDoc, id: string, length: Micros | null
   const tracks = body(doc).tracks.map((t, i) => {
     if (i !== at.ti) return t;
     const clips = t.clips.map((c) => {
-      if (c.id === id) return { ...c, start: c.start + shift, transition: want ? { kind: 'fade' as const, length: want } : null };
+      if (c.id === id) return { ...c, start: c.start + shift, transition: want ? { kind: kind ?? b.transition?.kind ?? 'fade', length: want } : null };
       if (c.start > b.start) return { ...c, start: c.start + shift };
       return c;
     });
     return { ...t, clips: clips.sort(byStart) };
   });
   return withTracks(doc, tracks);
+}
+
+/** The clip on the same track that ends where this one starts (within a microsecond, or overlapping by its transition). */
+export function prevAdjacent(doc: ProjectDoc, id: string): Clip | null {
+  const at = locate(doc, id);
+  if (!at) return null;
+  const sorted = [...at.track.clips].sort(byStart);
+  const prev = sorted[sorted.indexOf(at.clip) - 1];
+  if (!prev) return null;
+  const overlap = at.clip.transition ? end(prev) - at.clip.start : 0;
+  return Math.abs(end(prev) - overlap - at.clip.start) <= 1 ? prev : null;
+}
+
+/** The clip on the same track that starts where this one ends. */
+export function nextAdjacent(doc: ProjectDoc, id: string): Clip | null {
+  const at = locate(doc, id);
+  if (!at) return null;
+  const sorted = [...at.track.clips].sort(byStart);
+  const next = sorted[sorted.indexOf(at.clip) + 1];
+  return next && prevAdjacent(doc, next.id)?.id === id ? next : null;
 }
 
 /** Times a moving edge snaps to: 0, every clip edge (but the moving clip's), and extra points (the playhead). */
@@ -336,7 +357,8 @@ export function clipAlpha(c: Clip, t: Micros): number {
   const into = t - c.start;
   const left = end(c) - t;
   let a = 1;
-  const fin = c.transition ? c.transition.length : (c.fadeIn ?? 0);
+  // a cross-fade («fade», the older kind) is the clip's opacity; other transitions are drawn by compose.ts
+  const fin = c.transition ? (!c.transition.kind || c.transition.kind === 'fade' ? c.transition.length : 0) : (c.fadeIn ?? 0);
   if (fin > 0 && into < fin) a = Math.min(a, Math.max(0, into / fin));
   const fout = c.fadeOut ?? 0;
   if (fout > 0 && left < fout) a = Math.min(a, Math.max(0, left / fout));

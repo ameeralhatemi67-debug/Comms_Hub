@@ -259,6 +259,7 @@ By owner directive of 2026-10-19 (recorded in `progress.md` and `AGENTS.md`), a 
 - [x] **Phase 8, the guide and the records** (2026-10-19). Two guide pages with cards for each exact role, drafted for the owner's review.
   *Exit gate:* standard checks pass (met). The owner's signed-in walkthrough in `Studio_Build_Plan.md` section 8 is pending, and so is the owner's review of the two drafted help blocks. Pushed and deployed on the owner's request, 2026-10-19 (`8258a13`).
   *Deferred* (`Studio_Build_Plan.md` section 7): export on the organisation computer, shared temporary storage, desktop and phone apps, and review notes bound to a version.
+- [x] **Second round, the owner's notes of 2026-10-20** (`Studio_Build_Plan.md` section 9, `MVP_draft.md` 62.1 to 62.5). Windows that merge, split, float and close, a menu bar, shortcuts by key position, a dark chrome, sixteen transitions and seventeen movements, preview resolution down to 1/32, twelve Arabic and ten English fonts, handles, drag and drop, the clip menu, copy and paste, the history window. The owner asked for it to be committed and deployed.
 
 ### Checkpoint 0.1: UI Prototype MVP 0.1
 

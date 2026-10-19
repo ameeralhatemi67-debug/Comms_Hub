@@ -13,6 +13,7 @@ import { hasSound, mixWindow, windows, type AudioSourceReader } from './audio.ts
 import { ensureAac } from './support.ts';
 import { openTarget, type Target } from './target.ts';
 import type { MediaPool } from './media.ts';
+import { loadFonts, usedFonts } from './text.ts';
 
 export type Short = 720 | 1080 | 2160;
 export type VideoFormat = 'mp4' | 'webm';
@@ -76,6 +77,8 @@ export async function exportVideo(
   opts: { short: Short; format: VideoFormat; name: string; onProgress?: (p: ExportProgress) => void; signal?: AbortSignal },
 ): Promise<ExportResult> {
   const mb = await import('mediabunny');
+  // every font a text uses is ready before the first frame is drawn (fonts.ts: loaded only when used)
+  await loadFonts(usedFonts(doc));
   const fps = doc.video?.fps ?? 30;
   const duration = durationOf(doc);
   if (duration <= 0) throw new ExportError('EMPTY');
@@ -155,6 +158,7 @@ export async function exportVideo(
 
 /** One frame (a video project at time t, or a photo) as a PNG, JPEG or WebP file at `short` (or full size). */
 export async function exportStill(doc: ProjectDoc, pool: MediaPool, opts: { t?: Micros; short?: number; type?: 'image/png' | 'image/jpeg' | 'image/webp'; name: string; quality?: number; adjusted?: Resolver['adjusted'] }): Promise<File> {
+  await loadFonts(usedFonts(doc));
   const { w: W, h: H } = canvasOf(doc);
   const size = opts.short ? outputSize(doc, opts.short) : { w: W, h: H };
   const canvas = document.createElement('canvas');

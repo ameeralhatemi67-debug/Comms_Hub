@@ -169,6 +169,71 @@ export async function run(): Promise<{ checks: Check[]; log: string[] }> {
   for (let i = 0; i < early.length; i += 4) if (early[i] > 200) earlyWhite++;
   check('a text fading in is barely visible at its first frames', earlyWhite < 50, `${earlyWhite} bright pixels at 0.05 s`);
 
+  // ---------------------------------------------------------------- transitions and movements (MVP_draft.md 62.3)
+  // two clips meeting at 2 s (red, then green from the source's 2 s), with a 1 s transition: they overlap
+  // from 1 s to 2 s, and at 1.5 s the transition is half way
+  const pair = (kind: string) => {
+    const s2 = timeline.splitClip(doc, a.clipId, 2 * US);
+    return timeline.setTransition(s2.doc, s2.secondId!, US, kind as never);
+  };
+  const at15 = async (kind: string) => {
+    await draw(pair(kind), 1.5 * US);
+    return { left: px(ctx, canvas.width * 0.2, canvas.height / 2), right: px(ctx, canvas.width * 0.8, canvas.height / 2), mid: px(ctx, canvas.width / 2, canvas.height / 2), corner: px(ctx, 4, 4) };
+  };
+  const push = await at15('push-left');
+  check('a push from the right, half way: the incoming clip fills the right half and the outgoing the left', near(push.right, [0, 255, 0]) && near(push.left, [255, 0, 0]), JSON.stringify(push));
+  const wipe = await at15('wipe-left');
+  check('a wipe from the right, half way: the incoming clip shows on the right, the outgoing on the left', near(wipe.right, [0, 255, 0]) && near(wipe.left, [255, 0, 0]), JSON.stringify(wipe));
+  const dip = await at15('dip-black');
+  check('a dip to black covers the frame in black at its middle', near(dip.mid, [0, 0, 0], 20), JSON.stringify(dip));
+  const iris = await at15('iris');
+  check('a circle transition shows the incoming clip in the middle and the outgoing in the corner', near(iris.mid, [0, 255, 0]) && near(iris.corner, [255, 0, 0]), JSON.stringify(iris));
+  const fade = await at15('fade');
+  check('a cross-fade is still drawn as before: half of each at its middle', near(fade.mid, [128, 128, 0], 40), JSON.stringify(fade));
+  await draw(pair('push-left'), 2.2 * US);
+  check('after the transition the incoming clip is whole', near(px(ctx, canvas.width * 0.2, canvas.height / 2), [0, 255, 0]), JSON.stringify(px(ctx, canvas.width * 0.2, canvas.height / 2)));
+
+  // an entry movement: a picture sliding in from the right is to the right of its place early on
+  const centroid = () => {
+    const row = ctx.getImageData(0, Math.round(canvas.height / 2), canvas.width, 1).data;
+    let sum = 0;
+    let n2 = 0;
+    for (let x = 0; x < canvas.width; x++) if (row[x * 4 + 2] > 120 && row[x * 4] > 120) (sum += x, n2++);
+    return n2 ? sum / n2 : -1;
+  };
+  const slid = timeline.updateClip(b.doc, b.clipId, { animIn: { kind: 'slide-left', length: US }, animOut: { kind: 'zoom-out', length: US } });
+  await draw(slid, 0.3 * US);
+  const early2 = centroid();
+  await draw(slid, 3 * US);
+  const settled = centroid();
+  check('a picture entering with a slide from the right is right of its place at 0.3 s and in place after', early2 > settled + canvas.width * 0.05 && Math.abs(settled - W * 0.25 * scale) < 8, `${early2.toFixed(1)} then ${settled.toFixed(1)}`);
+
+  // a text revealed letter by letter has fewer letters drawn half way than at the end
+  const brightIn = () => {
+    const dd = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let c = 0;
+    for (let i = 0; i < dd.length; i += 4) if (dd[i] > 200 && dd[i + 1] > 200 && dd[i + 2] > 200) c++;
+    return c;
+  };
+  const typed = timeline.addClip(schema.newVideoDoc('16:9', 30), { start: 0, length: 3 * US, animIn: { kind: 'typewriter', length: 2 * US }, animOut: null, text: { ...text.defaultText('مركز الاتصال المؤسسي'), color: '#ffffff', shadow: null, size: 120 } });
+  await draw(typed.doc, 0.9 * US);
+  const halfTyped = brightIn();
+  await draw(typed.doc, 2.5 * US);
+  const allTyped = brightIn();
+  check('a text written letter by letter shows part of its letters half way and all of them at the end', halfTyped > 50 && halfTyped < allTyped * 0.8, `${halfTyped} then ${allTyped}`);
+
+  // the added fonts: an Arabic one and an English one load from the site and are used
+  const addedOk = await text.loadFonts([{ font: 'Cairo', weight: 700 }, { font: 'Bebas Neue', weight: 400 }, { font: 'Amiri', weight: 400 }]);
+  ctx.font = text.fontOf({ font: 'Cairo', weight: 700, size: 120 });
+  const cairo = ctx.measureText('مركز الاتصال المؤسسي').width;
+  ctx.font = text.fontOf({ font: 'IBM Plex Sans Arabic', weight: 700, size: 120 });
+  const plex7 = ctx.measureText('مركز الاتصال المؤسسي').width;
+  ctx.font = text.fontOf({ font: 'Bebas Neue', weight: 400, size: 120 });
+  const bebas = ctx.measureText('CORPORATE COMMS').width;
+  ctx.font = '400 120px serif';
+  const serifL = ctx.measureText('CORPORATE COMMS').width;
+  check('added fonts load from the site (Cairo, Bebas Neue, Amiri) and are used for drawing', addedOk && Math.abs(cairo - plex7) > 5 && Math.abs(bebas - serifL) > 20, `${addedOk} Cairo ${cairo.toFixed(0)} / Plex ${plex7.toFixed(0)}; Bebas ${bebas.toFixed(0)} / serif ${serifL.toFixed(0)}`);
+
   // a brand mark, tinted
   const mark = motion.sticker('emblem', '#ff0000');
   const mctx = mark?.getContext('2d');

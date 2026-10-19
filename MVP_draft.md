@@ -2529,10 +2529,10 @@ Owner request and decisions of 2026-10-19; build order in `Studio_Build_Plan.md`
 
 **Studio home.** The projects shared by everyone who may open the studio: title, kind (فيديو، صورة), owner, last save, and who is editing now. «مشروع فيديو جديد», «مشروع صورة جديد». A project is archived by a long press, never deleted.
 
-**Video project.** A preview with transport above a timeline whose time runs left to right inside the right-to-left page; a media panel («المكتبة», «هذا الجهاز», «قوالب الحركة», «نص», «علامات الهوية»); an inspector for the selected clip.
+**Video project.** A preview with transport above a timeline whose time runs left to right inside the right-to-left page; the sources («المكتبة», «هذا الجهاز», «قوالب الحركة», نص, «علامات الهوية»); an inspector for the selected clip. On a computer each is a window of the workspace (62.1).
 - Shape 9:16, 16:9, 1:1 or 4:5; 24, 25, 30 or 60 frames per second. Up to three tracks of video and pictures, one of graphics, one of text, up to three of sound.
-- Clip actions: move, trim, split at the playhead, delete, duplicate, snap, ripple delete. Clip settings: place, size, turn, opacity, crop, fit or fill, brightness, contrast, saturation, fade in and out, volume, mute, cross-fade with the neighbouring clip.
-- Text and captions in Arabic, only in the fonts the site ships; SRT captions can be imported.
+- Clip actions: move, trim, split at the playhead, delete, duplicate, snap, ripple delete. Clip settings: place, size, turn, opacity, crop, fit or fill, brightness, contrast, saturation, fade in and out, volume, mute, a transition from the neighbouring clip and entry and exit movements (62.3).
+- Text and captions in Arabic or English, in the fonts the site serves itself (62.4); SRT captions can be imported.
 - The 26 templates of section 57 are clips: their texts, colours and switches are edited in the inspector, the clip's length sets the showcase time, and a frame template shows the video beneath through its window.
 - Undo and redo of the studio's own edits; Ctrl+Z in the studio never reaches the library's undo.
 - Export: MP4 (or WebM where the browser cannot make MP4) at 720p, 1080p or 4K with an estimate, progress and cancel; downloaded, or saved to the library as a new file in a folder the person may create in, or as a new version of a file. The current frame as PNG. While exporting the page asks to stay visible: the export runs in this browser.
@@ -2548,3 +2548,37 @@ Owner request and decisions of 2026-10-19; build order in `Studio_Build_Plan.md`
 **Review.** The studio approves nothing. A studio export enters the work cycle as any library file does: a new version of a reviewed file returns to «قيد المراجعة»; a published file takes no new version; nobody approves what they uploaded, so the director's export is approved by the assistant (or the Admin while testing). The timed notes of section 59.6 written on an exported file are shown in the studio and move the playhead to their time.
 
 **Boundaries.** No rendering after the page closes, no shared temporary storage, no desktop or phone application, no editing together at once; each waits for what `Studio_Build_Plan.md` section 7 names. Publishing remains a simulation.
+
+## 62.1 Windows and workspaces, 2026-10-20
+
+Owner request of 2026-10-20 (the layout of a desktop video editor). On a computer every part of an editor is a window: «الوسائط», «قوالب الحركة», «النصوص والعلامات», «الانتقالات والحركات» (video), «المعاينة», «الخط الزمني» (video) or «الطبقات» (photo), «الإعدادات», «المشروع», «التصدير», «المراجعة» and «السجل».
+- Windows sit in tab groups. A tab dragged onto another window joins its tabs; onto a highlighted edge of a window it opens beside it; onto an edge of the whole workspace it docks there; outside the windows it becomes a floating window, which is moved by its header and resized from its edges. The border between two windows is dragged to resize them (a double click shares the space equally; the arrow keys move a focused border).
+- A window is closed from its tab and opened again from «النوافذ», returning beside the windows it belongs with. A window is maximised with ` or a double click on its tab, and restored the same way.
+- Ready-made workspaces in the middle of the menu bar: video «التحرير», «التجميع», «المؤثرات», «الرسوميات», «التصدير»; photo «التحرير», «الرسوميات», «التصدير». «إعادة ضبط مساحة العمل» rebuilds the chosen one. The arrangement is remembered on this device only; it is a convenience, never project data.
+- The editor fills the browser window below the site's header, and «ملء النافذة» (Ctrl+Shift+F) gives it the whole browser window. The editor chrome is dark by default and light on request; the preview stays dark in both.
+- A window's content keeps running while the window moves or waits behind another tab: an export continues, a canvas keeps its picture.
+- Phones keep the layout of the phone section above: the preview and one panel at a time.
+
+## 62.2 Menus, tools and keys, 2026-10-20
+
+- A menu bar: «ملف» (حفظ نسخة، إعادة تسمية، التصدير، العودة إلى المشاريع), «تحرير» (تراجع، إعادة، قص، نسخ، لصق، تكرار، حذف، حذف وسد الفراغ، إلغاء التحديد), «المقطع» or «الطبقة» (cut at the playhead, cut every track, a default transition, mute, add a track, the tool; photo: order, lock, hide), «عرض» (preview resolution, safe zones, snapping, timeline zoom, filling the window, the dark chrome), «النوافذ» (every window with its shortcut, the workspaces) and «مساعدة» (the shortcuts sheet, the page guide). Each item shows its shortcut.
+- Tools: selection (V), razor (C: a click cuts the clip there), hand (H: scrolls the timeline) and text (T: a click on the preview adds a text there).
+- Keys are matched by their position on the keyboard, so they work with an Arabic layout; Ctrl is Command on a Mac. Playing: Space, J, K, L, the arrows (frame, with Shift a second), Up and Down (the previous and next cut), Home, End. Editing: Ctrl+Z, Ctrl+Shift+Z, S and Ctrl+K (cut the selected clip; with none selected, every track), Ctrl+Shift+K, Delete and Shift+Delete, Ctrl+D, Ctrl+C, Ctrl+X, Ctrl+V (at the playhead), Escape, Shift+D (a default transition), Shift+S (snapping). Viewing: = and - (timeline zoom), \ (the whole timeline), ` (maximise), Shift+G (safe zones), ? (the shortcuts sheet). Windows: Shift and a digit, 1 to 9. File: Ctrl+S (a numbered version), Ctrl+M (export), F2 (rename). Photo: the arrows move the selected layer by one pixel, with Shift ten; Ctrl+] and Ctrl+[ move it up and down the stack, with Shift to the top and bottom. Keys typed into a field stay the field's.
+- The timeline: Ctrl and the wheel zoom about the pointer; a gold line shows where a move snapped; a right click opens the clip's menu; files, templates, texts and marks are dragged from their windows onto a track at the time pointed to, or onto the preview at the playhead. «السجل» lists the steps of the session and goes back or forward to any of them.
+
+## 62.3 Transitions and entry and exit movements, 2026-10-20
+
+- Sixteen transitions between two clips that meet on a track: مزج متداخل، عبور بالأسود، عبور بالأبيض، four wipes (from the right, the left, below and above), slides from the right and the left, pushes from the right, the left, below and above, تكبير متداخل، دائرة، تمويه. A transition overlaps the two clips by its length (at most half of the shorter clip) and mixes their sound with equal power. It is set from «الانتقالات والحركات» (dragged onto a clip near its start or its end, or applied to the selected clip), from the inspector («الانتقال»: kind and length) or with Shift+D. The older cross-fade is «مزج متداخل» and looks as before.
+- Seventeen entry and exit movements for any visual clip: تلاشٍ، صعود خفيف، هبوط خفيف، four slides, تكبير، تصغير، قفزة، دوران، تمويه، three wipes of the clip itself, and for texts «كتابة حرفاً حرفاً» and «كلمة كلمة» (Arabic letters joined, each line growing from its start). Each has a length; when the entry and exit together are longer than the clip they are shortened together. An exit leaves the way its entry would have continued. «تلاشٍ» is the clip's own fade, which also fades its sound; the other movements are of the picture only. A text's earlier entry and exit settings are kept and shown until changed.
+- The preview, the export and the small moving pictures of «الانتقالات والحركات» are drawn by the same calculation, so what is seen is what is exported.
+
+## 62.4 Fonts, 2026-10-20
+
+- Beside the site's three fonts (IBM Plex Sans Arabic, Reem Kufi, Aref Ruqaa), twelve Arabic fonts (Cairo، Tajawal، Almarai، Readex Pro، Noto Kufi Arabic، Changa، Amiri، Noto Naskh Arabic، Markazi Text، El Messiri، Lalezar، Rakkas) and ten English ones (Inter، Montserrat، Poppins، Raleway، Oswald، Bebas Neue، Anton، Playfair Display، Merriweather، Dancing Script), under the SIL Open Font License and served from the site itself: no request to a font service.
+- The font list shows each font in its own face, Arabic and English apart, searchable and worked with the keyboard; the weights are named («عادي»، «عريض»…). An English font has no Arabic letters: Arabic typed in it is drawn in the site's Arabic font, and the list says so.
+- A font is loaded only when a project uses it or the list shows it; an export waits until every font its texts use is ready.
+
+## 62.5 Preview resolution and handles, 2026-10-20
+
+- The preview can be drawn at a share of its size on screen, separately while playing and while paused: كاملة، 1/2، 1/3، 1/4، 1/8، 1/16، 1/32, from «المعاينة» or «عرض». A lowered resolution is marked on the preview. The export is always drawn at its full size.
+- The selected clip or layer has handles on the preview: its body moves it (snapping to the middle lines), a corner scales it about its centre, and the round handle above it turns it (Shift in steps of 15 degrees). The handles keep their size on screen.

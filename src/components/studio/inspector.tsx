@@ -1,21 +1,26 @@
 'use client';
 
 // The studio's inspector (MVP_draft.md 62): the selected clip's settings (time, place, size, turn,
-// opacity, crop, adjustments, fades, sound, cross-fade), a text's style, a motion template's own
-// fields (from the template tab's catalog, with its controls), a brand mark's colour; with nothing
-// selected, the project's shape, frame rate and background, the device cache and the keys.
+// opacity, crop, adjustments, sound), its transition from the clip before it and its entry and exit
+// movements (transitions.ts), a text's style and font (fonts.ts), a motion template's own fields (from
+// the template tab's catalog, with its controls), a brand mark's colour. The project's shape, frame rate
+// and background are the window «المشروع» (ProjectSettings).
 import type { ReactNode } from 'react';
-import { Copy, Scissors, Trash2, ArrowLeftToLine, Frame, RotateCcw } from 'lucide-react';
+import { Copy, Scissors, Trash2, ArrowLeftToLine, Frame, RotateCcw, MousePointerClick, Blend } from 'lucide-react';
 import {
-  FONTS, FPS_CHOICES, RATIOS, STICKERS, STICKER_LABELS, US, canvasOf, durationOf,
+  FPS_CHOICES, RATIOS, STICKERS, STICKER_LABELS, US, canvasOf, durationOf,
   type Clip, type Crop, type Layer, type ProjectDoc, type Ratio, type TextStyle, type Transform,
 } from '@/lib/studio/schema';
+import { WEIGHT_LABELS, fontDef, nearestWeight } from '@/lib/studio/fonts';
+import { ANIMATIONS, DEFAULT_ANIM_LENGTH, DEFAULT_TRANSITION, ENTER_NONE, TRANSITIONS, entryOf, entryPatch, type EnterValue, type TransitionKind } from '@/lib/studio/transitions';
+import { withKeys } from '@/lib/studio/shortcuts';
 import { changedParams, graphicById, motionParams, naturalLength, holdKey } from '@/lib/studio/motion-adapter';
 import { setFormat, sourceOf } from '@/lib/studio/timeline';
 import { shortTime } from '@/lib/studio/time';
 import { transformOf } from '@/lib/studio/compose';
 import { ColorInput, Segmented, Slider, Switch, TextInput } from '../motion-controls';
 import { DesktopOnly } from './compact';
+import { FontPicker } from './font-picker';
 
 export type Patch = (patch: Partial<Clip> | ((c: Clip) => Clip), label: string, key?: string) => void;
 
@@ -64,30 +69,20 @@ export function CropControls({ crop, onChange, disabled }: { crop: Crop | undefi
 }
 
 const ALIGN_LABELS = { start: 'بداية السطر', center: 'وسط', end: 'نهاية السطر' } as const;
-const MOTION_LABELS = { none: 'بلا', fade: 'ظهور', rise: 'صعود', slide: 'انزلاق' } as const;
 
-export function TextControls({ style, onChange, disabled, timed }: { style: TextStyle; onChange: (s: TextStyle, label: string, key: string) => void; disabled: boolean; timed: boolean }) {
+/** A text's content and style. A timed text's entry and exit are the clip's («الدخول والخروج»). */
+export function TextControls({ style, onChange, disabled }: { style: TextStyle; onChange: (s: TextStyle, label: string, key: string) => void; disabled: boolean; timed?: boolean }) {
   const set = <K extends keyof TextStyle>(k: K, v: TextStyle[K], label = 'تنسيق النص') => onChange({ ...style, [k]: v }, label, `text-${String(k)}`);
-  const font = FONTS.find((f) => f.family === style.font) ?? FONTS[0];
+  const font = fontDef(style.font);
   return (
     <>
       <label className="st-textarea">
         النص
         <textarea value={style.content} dir="auto" rows={3} maxLength={600} disabled={disabled} onChange={(e) => set('content', e.target.value, 'تعديل النص')} />
       </label>
-      <label>
-        الخط
-        <select value={style.font} disabled={disabled} onChange={(e) => {
-          const f = FONTS.find((x) => x.family === e.target.value)!;
-          onChange({ ...style, font: f.family, weight: (f.weights as readonly number[]).includes(style.weight) ? style.weight : f.weights[f.weights.length - 1] }, 'الخط', 'text-font');
-        }}>
-          {FONTS.map((f) => (
-            <option key={f.family} value={f.family}>{f.label}</option>
-          ))}
-        </select>
-      </label>
+      <FontPicker value={style.font} disabled={disabled} onChange={(family) => onChange({ ...style, font: family, weight: nearestWeight(family, style.weight) }, 'الخط', 'text-font')} />
       {font.weights.length > 1 && (
-        <Segmented label="السماكة" size="sm" value={style.weight} onChange={(v) => set('weight', v)} disabled={disabled} options={font.weights.map((w) => ({ value: w, label: String(w) }))} />
+        <Segmented label="السماكة" size="sm" value={nearestWeight(font.family, style.weight)} onChange={(v) => set('weight', v)} disabled={disabled} options={font.weights.map((w) => ({ value: w, label: WEIGHT_LABELS[w] ?? String(w), hint: String(w) }))} />
       )}
       <Slider label="حجم الخط" value={style.size} min={14} max={320} step={1} unit="px" onChange={(v) => set('size', v)} disabled={disabled} box />
       <ColorInput label="لون النص" value={style.color} onChange={(v) => set('color', v)} disabled={disabled} />
@@ -110,12 +105,7 @@ export function TextControls({ style, onChange, disabled, timed }: { style: Text
         </>
       )}
       <Switch label="ظل" checked={!!style.shadow} onChange={(on) => set('shadow', on ? { color: 'rgba(0,0,0,0.55)', blur: 12 } : null)} disabled={disabled} />
-      {timed && (
-        <>
-          <Segmented label="الدخول" size="sm" value={style.enter ?? 'none'} onChange={(v) => set('enter', v)} disabled={disabled} options={(['none', 'fade', 'rise', 'slide'] as const).map((k) => ({ value: k, label: MOTION_LABELS[k] }))} />
-          <Segmented label="الخروج" size="sm" value={style.exit ?? 'none'} onChange={(v) => set('exit', v)} disabled={disabled} options={(['none', 'fade', 'rise', 'slide'] as const).map((k) => ({ value: k, label: MOTION_LABELS[k] }))} />
-        </>
-      )}
+      {style.shadow && <Slider label="نعومة الظل" value={style.shadow.blur} min={0} max={60} step={1} unit="px" onChange={(v) => set('shadow', { ...style.shadow!, blur: v })} disabled={disabled} />}
     </>
   );
 }
@@ -164,23 +154,101 @@ export function MotionControls({ item, ratio, onParams, onLength, disabled, time
   );
 }
 
+/** The window «المشروع» of a video project: its shape, frame rate and background, and the device cache. */
+export function ProjectSettings({ doc, onDoc, readOnly, cachePanel }: { doc: ProjectDoc; onDoc: (doc: ProjectDoc, label: string, key?: string) => void; readOnly: boolean; cachePanel: ReactNode }) {
+  const { w: W, h: H } = canvasOf(doc);
+  const ratio = doc.video?.ratio ?? '9:16';
+  return (
+    <aside className="st-insp st-project-pane" aria-label="المشروع">
+      <Section title="المشروع">
+        <Segmented label="شكل الإطار" size="sm" value={ratio} disabled={readOnly} onChange={(v) => onDoc(setFormat(doc, { ratio: v }), 'شكل الإطار')} options={(Object.keys(RATIOS) as Ratio[]).map((r) => ({ value: r, label: RATIOS[r].label, hint: `${RATIOS[r].w}×${RATIOS[r].h}` }))} />
+        <Segmented label="الإطارات في الثانية" size="sm" value={doc.video?.fps ?? 30} disabled={readOnly} onChange={(v) => onDoc(setFormat(doc, { fps: v }), 'الإطارات في الثانية')} options={FPS_CHOICES.map((f) => ({ value: f, label: String(f) }))} />
+        <ColorInput label="لون الخلفية" value={doc.video?.background ?? '#000000'} disabled={readOnly} onChange={(v) => onDoc(setFormat(doc, { background: v }), 'لون الخلفية', 'bg')} />
+        <p className="st-hint">المدة {shortTime(durationOf(doc))} · <bdi dir="ltr">{W}×{H}</bdi></p>
+      </Section>
+      {cachePanel}
+    </aside>
+  );
+}
+
+function EntryControls({ clip, onClip, readOnly }: { clip: Clip; onClip: Patch; readOnly: boolean }) {
+  const kinds = ANIMATIONS.filter((a) => !a.textOnly || clip.text);
+  const row = (side: 'in' | 'out') => {
+    const v = entryOf(clip, side);
+    const label = side === 'in' ? 'الدخول' : 'الخروج';
+    return (
+      <div className="st-entry" data-side={side}>
+        <label>
+          {label}
+          <select value={v.kind} disabled={readOnly} onChange={(e) => onClip(entryPatch(clip, side, { kind: e.target.value as EnterValue['kind'], length: v.kind === ENTER_NONE ? DEFAULT_ANIM_LENGTH : v.length }), side === 'in' ? 'حركة الدخول' : 'حركة الخروج')}>
+            <option value={ENTER_NONE}>بلا</option>
+            {kinds.map((a) => (
+              <option key={a.kind} value={a.kind}>{a.label}</option>
+            ))}
+          </select>
+        </label>
+        {v.kind !== ENTER_NONE && (
+          <Slider label={`مدة ${label}`} value={sec(v.length)} min={0.1} max={3} step={0.05} decimals={2} unit="ث" disabled={readOnly} onChange={(x) => onClip(entryPatch(clip, side, { ...v, length: usOf(x) }), side === 'in' ? 'مدة الدخول' : 'مدة الخروج', `entry-${side}`)} />
+        )}
+      </div>
+    );
+  };
+  return (
+    <>
+      {row('in')}
+      {row('out')}
+      {clip.transition && entryOf(clip, 'in').kind === 'fade' && <p className="st-hint">يدخل هذا المقطع بانتقاله من المقطع السابق، فلا يُرى تلاشي الدخول.</p>}
+      <p className="st-hint">التلاشي يخفت الصوت معه أيضاً؛ بقية الحركات للصورة وحدها.</p>
+    </>
+  );
+}
+
+function TransitionControls({ clip, readOnly, compact, onSet, nextFree, onNext }: { clip: Clip; readOnly: boolean; compact: boolean; onSet: (length: number | null, kind?: TransitionKind) => void; nextFree: boolean; onNext: () => void }) {
+  if (compact) return <DesktopOnly what="الانتقال بين المقطعين" />;
+  const tr = clip.transition;
+  return (
+    <>
+      <label>
+        الانتقال من المقطع السابق
+        <select value={tr ? tr.kind : ''} disabled={readOnly} onChange={(e) => (e.target.value ? onSet(tr?.length ?? DEFAULT_TRANSITION.length, e.target.value as TransitionKind) : onSet(null))}>
+          <option value="">بلا انتقال (قطع مباشر)</option>
+          {TRANSITIONS.map((x) => (
+            <option key={x.kind} value={x.kind}>{x.label}</option>
+          ))}
+        </select>
+      </label>
+      {tr && (
+        <Slider label="مدة الانتقال" value={sec(tr.length)} min={0.05} max={3} step={0.05} decimals={2} unit="ث" disabled={readOnly} onChange={(v) => onSet(usOf(v))} hint="يتداخل المقطعان بهذه المدة، ويُمزج الصوت معهما." />
+      )}
+      {nextFree && (
+        <button type="button" className="st-mini" disabled={readOnly} onClick={onNext}>
+          <Blend aria-hidden="true" />
+          انتقال إلى المقطع التالي
+        </button>
+      )}
+    </>
+  );
+}
+
 export function Inspector({
-  doc, clip, onClip, onDoc, readOnly, actions, canFillWindow, hasPrevAdjacent, cachePanel, reviewPanel, sourceNote, onLength, compact = false,
+  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, onLength, compact = false,
 }: {
   doc: ProjectDoc;
   clip: Clip | null;
   onClip: Patch;
-  onDoc: (doc: ProjectDoc, label: string, key?: string) => void;
+  onDoc?: (doc: ProjectDoc, label: string, key?: string) => void;
   readOnly: boolean;
-  actions: { split: () => void; duplicate: () => void; remove: () => void; ripple: () => void; fillWindow: () => void; setTransition: (us: number | null) => void; setStart: (us: number) => void; setLength: (us: number) => void };
+  actions: { split: () => void; duplicate: () => void; remove: () => void; ripple: () => void; fillWindow: () => void; setTransition: (us: number | null, kind?: TransitionKind) => void; nextTransition: () => void; setStart: (us: number) => void; setLength: (us: number) => void };
   canFillWindow: boolean;
   hasPrevAdjacent: boolean;
-  cachePanel: ReactNode;
-  /** The work and the review notes of what the project saved to the library (work-links.tsx). */
+  /** A clip follows this one with no transition yet. */
+  hasNextFree?: boolean;
+  cachePanel?: ReactNode;
+  /** The work and the review notes (phones show them here; computers in the window «المراجعة»). */
   reviewPanel?: ReactNode;
   sourceNote: string | null;
   onLength: (us: number) => void;
-  /** A phone: cross-fade, crop and colours are kept for the computer. */
+  /** A phone: transitions, crop and colours are kept for the computer. */
   compact?: boolean;
 }) {
   const { w: W, h: H } = canvasOf(doc);
@@ -188,24 +256,13 @@ export function Inspector({
   if (!clip)
     return (
       <aside className="st-insp" aria-label="الإعدادات">
-        <Section title="المشروع">
-          <Segmented label="شكل الإطار" size="sm" value={ratio} disabled={readOnly} onChange={(v) => onDoc(setFormat(doc, { ratio: v }), 'شكل الإطار')} options={(Object.keys(RATIOS) as Ratio[]).map((r) => ({ value: r, label: RATIOS[r].label, hint: `${RATIOS[r].w}×${RATIOS[r].h}` }))} />
-          <Segmented label="الإطارات في الثانية" size="sm" value={doc.video?.fps ?? 30} disabled={readOnly} onChange={(v) => onDoc(setFormat(doc, { fps: v }), 'الإطارات في الثانية')} options={FPS_CHOICES.map((f) => ({ value: f, label: String(f) }))} />
-          <ColorInput label="لون الخلفية" value={doc.video?.background ?? '#000000'} disabled={readOnly} onChange={(v) => onDoc(setFormat(doc, { background: v }), 'لون الخلفية', 'bg')} />
-          <p className="st-hint">المدة {shortTime(durationOf(doc))} · <bdi dir="ltr">{W}×{H}</bdi></p>
-        </Section>
+        <div className="st-insp-empty">
+          <MousePointerClick aria-hidden="true" />
+          <b>لا شيء محدد</b>
+          <p>حدد مقطعاً على الخط الزمني أو في المعاينة لترى إعداداته هنا: الموضع والحجم والنص والانتقال والحركة.</p>
+          <p className="st-hint">شكل المشروع وخلفيته في نافذة «المشروع»، والاختصارات في «مساعدة».</p>
+        </div>
         {reviewPanel}
-        {cachePanel}
-        <Section title="مفاتيح سريعة" open={false}>
-          <ul className="st-keys">
-            <li><kbd>المسافة</kbd> تشغيل وإيقاف</li>
-            <li><kbd>S</kbd> قص المقطع المحدد عند رأس التشغيل</li>
-            <li><kbd>Delete</kbd> حذف، و<kbd>Shift+Delete</kbd> حذف مع سد الفراغ</li>
-            <li><kbd>Ctrl+D</kbd> نسخ المقطع</li>
-            <li><kbd>Ctrl+Z</kbd> تراجع، و<kbd>Ctrl+Shift+Z</kbd> إعادة</li>
-            <li><kbd>←</kbd> <kbd>→</kbd> إطار، ومع <kbd>Shift</kbd> ثانية</li>
-          </ul>
-        </Section>
       </aside>
     );
 
@@ -221,26 +278,35 @@ export function Inspector({
         <small dir="auto">{clip.text?.content.split('\n')[0] ?? (clip.motion ? graphicById(clip.motion.template)?.name : src?.name) ?? ''}</small>
         {sourceNote && <p className="st-hint st-warn">{sourceNote}</p>}
         <div className="st-insp-acts">
-          <button type="button" onClick={actions.split} disabled={readOnly} title="قص عند رأس التشغيل (S)"><Scissors aria-hidden="true" />قص</button>
-          <button type="button" onClick={actions.duplicate} disabled={readOnly} title="نسخ (Ctrl+D)"><Copy aria-hidden="true" />نسخ</button>
-          <button type="button" onClick={actions.remove} disabled={readOnly} title="حذف (Delete)"><Trash2 aria-hidden="true" />حذف</button>
-          <button type="button" onClick={actions.ripple} disabled={readOnly} title="حذف مع سد الفراغ (Shift+Delete)"><ArrowLeftToLine aria-hidden="true" />حذف وسد الفراغ</button>
+          <button type="button" onClick={actions.split} disabled={readOnly} title={withKeys('قص عند رأس التشغيل', 'split')}><Scissors aria-hidden="true" />قص</button>
+          <button type="button" onClick={actions.duplicate} disabled={readOnly} title={withKeys('تكرار', 'duplicate')}><Copy aria-hidden="true" />تكرار</button>
+          <button type="button" onClick={actions.remove} disabled={readOnly} title={withKeys('حذف', 'delete')}><Trash2 aria-hidden="true" />حذف</button>
+          <button type="button" onClick={actions.ripple} disabled={readOnly} title={withKeys('حذف مع سد الفراغ', 'ripple-delete')}><ArrowLeftToLine aria-hidden="true" />حذف وسد الفراغ</button>
         </div>
       </div>
       <Section title="التوقيت">
         <Slider label="البداية" value={sec(clip.start)} min={0} max={Math.max(60, sec(durationOf(doc)) + 30)} step={0.01} decimals={2} unit="ث" box boxMax={36000} disabled={readOnly} onChange={(v) => actions.setStart(usOf(v))} />
         <Slider label="المدة" value={sec(clip.length)} min={0.04} max={Math.max(30, sec(clip.length) * 2)} step={0.01} decimals={2} unit="ث" box boxMax={36000} disabled={readOnly} onChange={(v) => actions.setLength(usOf(v))} />
-        {visual && (
-          <>
-            <Slider label="ظهور تدريجي" value={sec(clip.fadeIn ?? 0)} min={0} max={3} step={0.05} decimals={2} unit="ث" disabled={readOnly || !!clip.transition} onChange={(v) => onClip({ fadeIn: usOf(v) }, 'ظهور تدريجي', 'fadeIn')} hint={clip.transition ? 'يظهر بالمزج مع المقطع السابق.' : undefined} />
-            <Slider label="اختفاء تدريجي" value={sec(clip.fadeOut ?? 0)} min={0} max={3} step={0.05} decimals={2} unit="ث" disabled={readOnly} onChange={(v) => onClip({ fadeOut: usOf(v) }, 'اختفاء تدريجي', 'fadeOut')} />
-          </>
-        )}
-        {(hasPrevAdjacent || clip.transition) && compact && <DesktopOnly what="المزج مع المقطع السابق" />}
-        {(hasPrevAdjacent || clip.transition) && !compact && (
-          <Slider label="مزج مع المقطع السابق" value={sec(clip.transition?.length ?? 0)} min={0} max={2} step={0.05} decimals={2} unit="ث" disabled={readOnly} onChange={(v) => actions.setTransition(v > 0 ? usOf(v) : null)} hint="يتداخل المقطعان بهذه المدة، ويُمزج الصوت معهما." />
-        )}
       </Section>
+      {(hasPrevAdjacent || clip.transition || hasNextFree) && media !== 'audio' && (
+        <Section title="الانتقال">
+          {hasPrevAdjacent || clip.transition ? (
+            <TransitionControls clip={clip} readOnly={readOnly} compact={compact} onSet={actions.setTransition} nextFree={!!hasNextFree} onNext={actions.nextTransition} />
+          ) : compact ? (
+            <DesktopOnly what="الانتقال بين المقطعين" />
+          ) : (
+            <button type="button" className="st-mini" disabled={readOnly} onClick={actions.nextTransition}>
+              <Blend aria-hidden="true" />
+              انتقال إلى المقطع التالي
+            </button>
+          )}
+        </Section>
+      )}
+      {visual && (
+        <Section title="الدخول والخروج">
+          <EntryControls clip={clip} onClip={onClip} readOnly={readOnly} />
+        </Section>
+      )}
       {clip.text && (
         <Section title="النص">
           <TextControls style={clip.text} timed disabled={readOnly} onChange={(s, l, k) => onClip({ text: s }, l, k)} />
