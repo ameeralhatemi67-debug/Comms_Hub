@@ -36,8 +36,7 @@ export const PHOTO_MAX_SIDE = 8000;
 
 export type MediaKind = 'video' | 'image' | 'audio';
 
-export type LibrarySource = {
-  id: string;
+type LibraryFields = {
   kind: 'library';
   asset: string;
   version: number;
@@ -47,12 +46,10 @@ export type LibrarySource = {
   w?: number;
   h?: number;
   duration?: Micros;
-  [extra: string]: unknown;
 };
-export type LocalSource = {
-  id: string;
+type LocalFields = {
   kind: 'local';
-  /** The file's key in this browser's private storage (sha-256 of its bytes). */
+  /** The file's key in this browser's private storage: a fingerprint of its size, name, date and first and last 4 MB. */
   key: string;
   name: string;
   media: MediaKind;
@@ -61,8 +58,11 @@ export type LocalSource = {
   w?: number;
   h?: number;
   duration?: Micros;
-  [extra: string]: unknown;
 };
+export type LibrarySource = LibraryFields & { id: string; [extra: string]: unknown };
+export type LocalSource = LocalFields & { id: string; [extra: string]: unknown };
+/** A source about to be added: its id is made if missing. */
+export type NewSource = (LibraryFields | LocalFields) & { id?: string };
 export type Source = LibrarySource | LocalSource;
 
 /** Where and how a visual item sits on the canvas. x and y are the centre, in canvas pixels. */
@@ -121,8 +121,8 @@ export type Content = {
   shape?: Shape;
 };
 
-export type Clip = Content & {
-  id: string;
+/** A clip's named fields; a stored clip also has its id and may carry fields from newer clients. */
+export type ClipFields = Content & {
   start: Micros;
   length: Micros;
   /** Where the clip starts inside its source (video and sound). */
@@ -137,11 +137,14 @@ export type Clip = Content & {
   mute?: boolean;
   /** A cross-fade with the clip that ends where this one starts, on the same track. */
   transition?: { kind: 'fade'; length: Micros } | null;
-  [extra: string]: unknown;
 };
+export type Clip = ClipFields & { id: string; [extra: string]: unknown };
+/** A clip about to be added: its id is made if missing. */
+export type NewClip = ClipFields & { id?: string };
 
 export type TrackKind = 'video' | 'graphics' | 'text' | 'audio';
-export const TRACK_LIMITS: Record<TrackKind, number> = { video: 3, graphics: 1, text: 1, audio: 3 };
+/** Two graphics and two text tracks, so a template or a title can sit over another (a counter and a lower third). */
+export const TRACK_LIMITS: Record<TrackKind, number> = { video: 3, graphics: 2, text: 2, audio: 3 };
 export const TRACK_LABELS: Record<TrackKind, string> = { video: 'فيديو وصور', graphics: 'رسوم الحركة', text: 'نص', audio: 'صوت' };
 
 export type Track = { id: string; kind: TrackKind; muted?: boolean; hidden?: boolean; locked?: boolean; clips: Clip[]; [extra: string]: unknown };

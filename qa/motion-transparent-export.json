@@ -1,5 +1,5 @@
 {
-  "when": "2026-10-18T05:25:06.268Z",
+  "when": "2026-10-19T18:27:36.070Z",
   "checks": [
     {
       "name": "rp-editorial: file name states transparent mov",
@@ -43,7 +43,7 @@
         "partial": 132427,
         "total": 2073600,
         "megabytes": 53.9,
-        "exportSeconds": 52.3
+        "exportSeconds": 59.4
       }
     },
     {
@@ -88,7 +88,7 @@
         "partial": 101304,
         "total": 921600,
         "megabytes": 67.1,
-        "exportSeconds": 23.7
+        "exportSeconds": 26.5
       }
     },
     {

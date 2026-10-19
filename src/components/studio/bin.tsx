@@ -1,0 +1,258 @@
+'use client';
+
+// The studio's media panel (MVP_draft.md 62): «المكتبة» (files this person may see, at their current
+// version; needs the media page, like the library's own file route), «هذا الجهاز» (a file kept in
+// this browser only, marked so, with uploading to the library offered first), «قوالب الحركة» (the 26
+// templates of the template tab), «نص» (titles, captions, SRT) and «علامات الهوية» (the brand marks).
+import { useEffect, useRef, useState } from 'react';
+import { FileUp, Film, Music, Search, Subtitles, Type, Upload } from 'lucide-react';
+import { supabase } from '@/lib/supabase/client';
+import { STICKERS, STICKER_LABELS, type StickerKey } from '@/lib/studio/schema';
+import { motionCatalog, motionParams, motionDims, settledSec, STICKER_SRC } from '@/lib/studio/motion-adapter';
+import { renderFrame } from '@/lib/motion/renderers.js';
+import type { Category, Graphic } from '@/lib/motion/types';
+
+export type LibraryItem = { id: string; name: string; kind: 'video' | 'image' | 'audio'; current_version: number; mime_type: string; dims: string | null; duration: string | null };
+
+/** "1920 × 1080" and "1:05" from the library's own fields, as numbers (the exact ones come when the file is read). */
+export function parseDims(d: string | null): { w?: number; h?: number } {
+  const m = /(\d+)\s*[×x]\s*(\d+)/.exec(d ?? '');
+  return m ? { w: Number(m[1]), h: Number(m[2]) } : {};
+}
+export function parseDuration(d: string | null): number | undefined {
+  const m = /^(\d+):(\d{2})$/.exec(d ?? '');
+  return m ? (Number(m[1]) * 60 + Number(m[2])) * 1_000_000 : undefined;
+}
+
+async function searchLibrary(q: string): Promise<LibraryItem[]> {
+  let query = supabase()
+    .from('media_files')
+    .select('id,name,kind,current_version,mime_type,dims,duration')
+    .in('kind', ['video', 'image', 'audio'])
+    .order('created_at', { ascending: false })
+    .limit(60);
+  if (q.trim()) query = query.ilike('name', `%${q.trim()}%`);
+  const { data } = await query;
+  return (data ?? []) as LibraryItem[];
+}
+
+type Tab = 'library' | 'device' | 'motion' | 'text' | 'marks';
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'library', label: 'المكتبة' },
+  { id: 'device', label: 'هذا الجهاز' },
+  { id: 'motion', label: 'قوالب الحركة' },
+  { id: 'text', label: 'نص' },
+  { id: 'marks', label: 'علامات الهوية' },
+];
+const GROUPS: { id: Category; label: string }[] = [
+  { id: 'numbers', label: 'الأرقام' },
+  { id: 'repine', label: 'تصاميم ريبين' },
+  { id: 'frames', label: 'إطارات الفيديو' },
+];
+
+export type BinProps = {
+  ratio: string;
+  readOnly: boolean;
+  canLibrary: boolean;
+  canDevice: boolean;
+  /** Images only (a photo project has no timeline). */
+  photo?: boolean;
+  onLibrary: (item: LibraryItem) => void;
+  onDevice: (file: File, upload: boolean) => void;
+  onMotion: (g: Graphic) => void;
+  onText: (kind: 'title' | 'body' | 'caption') => void;
+  onSrt?: (text: string) => void;
+  onMark: (key: StickerKey, color: string) => void;
+  assetsReady: boolean;
+};
+
+function MotionTile({ g, ratio, onPick, ready, disabled }: { g: Graphic; ratio: string; onPick: () => void; ready: boolean; disabled: boolean }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = ref.current;
+    if (!c || !ready) return;
+    const p = motionParams(g, {}, ratio as never);
+    const d = motionDims(g, p);
+    const w = 150;
+    c.width = w;
+    c.height = Math.round((w * d.h) / d.w);
+    try {
+      renderFrame(g, p, settledSec(g, p), c.getContext('2d')!, w / d.w, null);
+    } catch {
+      // a thumbnail is a convenience
+    }
+  }, [g, ratio, ready]);
+  return (
+    <button type="button" className="st-tile" onClick={onPick} disabled={disabled} title={g.blurb} data-template={g.id}>
+      <canvas ref={ref} aria-hidden="true" />
+      <span>{g.name}</span>
+    </button>
+  );
+}
+
+export function Bin(p: BinProps) {
+  const [tab, setTab] = useState<Tab>(p.canLibrary ? 'library' : 'device');
+  const [q, setQ] = useState('');
+  const [items, setItems] = useState<LibraryItem[] | null>(null);
+  const [group, setGroup] = useState<Category>('repine');
+  const [markColor, setMarkColor] = useState('#ffffff');
+  const [picked, setPicked] = useState<File | null>(null);
+  const srtInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (tab !== 'library' || !p.canLibrary) return;
+    let live = true;
+    const t = setTimeout(() => void searchLibrary(q).then((r) => live && setItems(p.photo ? r.filter((x) => x.kind === 'image') : r)), 250);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [q, tab, p.canLibrary, p.photo]);
+
+  const tabs = TABS.filter((t) => !(p.photo && t.id === 'text'));
+  return (
+    <aside className="st-bin" aria-label="الوسائط">
+      <div className="st-bin-tabs" role="tablist" aria-label="مصادر الوسائط">
+        {tabs.map((t) => (
+          <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div className="st-bin-body" role="tabpanel">
+        {tab === 'library' &&
+          (!p.canLibrary ? (
+            <p className="st-hint">ملفات المكتبة تحتاج صفحة «مكتبة الوسائط»، وهي غير مفتوحة لحسابك. اطلبها من «صلاحياتي»، أو استعمل ملفاً من هذا الجهاز.</p>
+          ) : (
+            <>
+              <label className="st-search">
+                <Search aria-hidden="true" />
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث باسم الملف" aria-label="ابحث في المكتبة" />
+              </label>
+              {!items ? (
+                <p role="status" className="st-hint">جارٍ البحث…</p>
+              ) : items.length === 0 ? (
+                <p className="st-hint">لا ملفات مطابقة تراها في المكتبة.</p>
+              ) : (
+                <ul className="st-lib">
+                  {items.map((it) => (
+                    <li key={it.id}>
+                      <button type="button" disabled={p.readOnly} onClick={() => p.onLibrary(it)} title={`إضافة «${it.name}» عند رأس التشغيل`}>
+                        {it.kind === 'image' ? (
+                          <img src={`/api/media/${it.id}/content?v=${it.current_version}`} alt="" loading="lazy" />
+                        ) : (
+                          <span className="st-lib-ico">{it.kind === 'video' ? <Film /> : <Music />}</span>
+                        )}
+                        <span className="st-lib-name" dir="auto">{it.name}</span>
+                        <small>
+                          {it.kind === 'video' ? 'فيديو' : it.kind === 'audio' ? 'صوت' : 'صورة'}
+                          {it.duration ? ` · ${it.duration}` : ''} · الإصدار {it.current_version}
+                        </small>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          ))}
+        {tab === 'device' && (
+          <div className="st-device">
+            <label className="button st-file">
+              <FileUp aria-hidden="true" />
+              اختر ملفاً من هذا الجهاز
+              <input type="file" accept={p.photo ? 'image/*' : 'video/*,image/*,audio/*'} disabled={p.readOnly} onChange={(e) => setPicked(e.target.files?.[0] ?? null)} hidden />
+            </label>
+            {picked && (
+              <div className="st-picked">
+                <b dir="auto">{picked.name}</b>
+                {p.canLibrary && (
+                  <button type="button" className="primary" onClick={() => (p.onDevice(picked, true), setPicked(null))}>
+                    <Upload aria-hidden="true" />
+                    رفعه إلى المكتبة ثم استخدامه
+                  </button>
+                )}
+                {p.canDevice ? (
+                  <button type="button" onClick={() => (p.onDevice(picked, false), setPicked(null))}>
+                    استخدامه من هذا الجهاز فقط
+                  </button>
+                ) : (
+                  <p className="st-hint">هذا المتصفح لا يحفظ الملفات على الجهاز (نافذة خاصة أو متصفح لا يدعم ذلك)، فارفع الملف إلى المكتبة.</p>
+                )}
+                <small>الملف المستعمل من هذا الجهاز فقط يظهر «على هذا الجهاز فقط»، ولا يفتح المشروع كاملاً من جهاز آخر.</small>
+              </div>
+            )}
+          </div>
+        )}
+        {tab === 'motion' && (
+          <>
+            <div className="st-seg-mini" role="group" aria-label="فئة القوالب">
+              {GROUPS.map((g) => (
+                <button key={g.id} type="button" aria-pressed={group === g.id} className={group === g.id ? 'on' : ''} onClick={() => setGroup(g.id)}>
+                  {g.label}
+                </button>
+              ))}
+            </div>
+            {group === 'frames' && !p.photo && <p className="st-hint">إطارات الفيديو تأخذ شكل المشروع، وتظهر مقاطع المسارات التي تحتها من نافذتها.</p>}
+            <div className="st-tiles">
+              {motionCatalog.filter((g) => g.category === group).map((g) => (
+                <MotionTile key={g.id} g={g} ratio={p.ratio} ready={p.assetsReady} disabled={p.readOnly} onPick={() => p.onMotion(g)} />
+              ))}
+            </div>
+          </>
+        )}
+        {tab === 'text' && (
+          <div className="st-textadd">
+            <button type="button" disabled={p.readOnly} onClick={() => p.onText('title')}>
+              <Type aria-hidden="true" />
+              عنوان كبير
+            </button>
+            <button type="button" disabled={p.readOnly} onClick={() => p.onText('body')}>
+              <Type aria-hidden="true" />
+              نص عادي
+            </button>
+            <button type="button" disabled={p.readOnly} onClick={() => p.onText('caption')}>
+              <Subtitles aria-hidden="true" />
+              تعليق أسفل الشاشة
+            </button>
+            {p.onSrt && (
+              <>
+                <button type="button" disabled={p.readOnly} onClick={() => srtInput.current?.click()}>
+                  <Subtitles aria-hidden="true" />
+                  استيراد ترجمة SRT
+                </button>
+                <input
+                  ref={srtInput}
+                  type="file"
+                  accept=".srt,text/plain"
+                  hidden
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (f) p.onSrt!(await f.text());
+                    e.target.value = '';
+                  }}
+                />
+              </>
+            )}
+          </div>
+        )}
+        {tab === 'marks' && (
+          <>
+            <label className="st-markcolor">
+              لون العلامة
+              <input type="color" value={markColor} onChange={(e) => setMarkColor(e.target.value)} />
+            </label>
+            <div className="st-tiles st-marks">
+              {STICKERS.map((k) => (
+                <button key={k} type="button" className="st-tile" disabled={p.readOnly} onClick={() => p.onMark(k, markColor)}>
+                  <span className="st-mark-img" style={{ WebkitMaskImage: `url(${STICKER_SRC[k]})`, maskImage: `url(${STICKER_SRC[k]})`, background: markColor === '#ffffff' ? '#17634b' : markColor }} aria-hidden="true" />
+                  <span>{STICKER_LABELS[k]}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+        {tab !== 'library' && tab !== 'device' && !p.assetsReady && <p className="st-hint" role="status">جارٍ تجهيز القوالب…</p>}
+      </div>
+    </aside>
+  );
+}

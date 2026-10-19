@@ -6,7 +6,7 @@ import { Title } from '../ui';
 import { MotionTabs } from './motion-tabs';
 import { ProjectList } from './project-list';
 import { ProjectShell } from './project-shell';
-import { canvasOf, durationOf, localSources } from '@/lib/studio/schema';
+import { VideoEditor } from './editor';
 import { probeSupport, supportLines, type StudioSupport } from '@/lib/studio/support';
 import './studio.css';
 
@@ -18,7 +18,7 @@ export default function StudioPage({ projectId }: { projectId?: string }) {
   if (projectId)
     return (
       <div className="st st-open">
-        <ProjectShell id={projectId} editor={(p) => <section className="panel">{`${canvasOf(p.doc).w}×${canvasOf(p.doc).h} · ${Math.round(durationOf(p.doc) / 1e6)} ث · ${localSources(p.doc).length} ملف على الجهاز`}</section>} />
+        <ProjectShell id={projectId} editor={(p) => (p.doc.kind === 'video' ? <VideoEditor {...p} /> : <section className="panel">محرر الصور يأتي في المرحلة الخامسة.</section>)} />
       </div>
     );
   return (

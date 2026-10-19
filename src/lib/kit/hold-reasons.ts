@@ -56,6 +56,10 @@ export const HOLD = {
   studioArchive: 'يخرج المشروع من القائمة إلى الأرشيف بكل نسخه، ويُعاد منه متى شئت.',
   /** «الاستوديو»: take the editing over from the person editing now. */
   studioTakeOver: 'يتحول من يحرر الآن إلى القراءة فقط، وتبقى تغييراته غير المحفوظة على جهازه.',
+  /** «الاستوديو»: remove the library copies kept on this device. */
+  studioClearCache: 'تُحذف نسخ ملفات المكتبة من هذا الجهاز فقط. لا يُحذف أي أصل ولا أي مشروع، وتُنسخ الملفات من جديد عند الحاجة.',
+  /** «الاستوديو»: remove a file kept on this device only. */
+  studioRemoveLocal: 'هذا الملف على هذا الجهاز فقط: المشاريع التي تستعمله لن تجده هنا بعد الحذف.',
 } as const;
 
 export const HOLD_MS = 900;

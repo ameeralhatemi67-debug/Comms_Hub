@@ -1,0 +1,96 @@
+{
+  "script": "qa/studio-ui.cjs",
+  "run": "2026-10-19T18:24:18.248Z",
+  "checks": [
+    {
+      "name": "the empty home says there are no projects yet and offers both kinds",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a new video project is created and opened in the editor",
+      "pass": true,
+      "detail": "86db862e-da68-408f-9d3d-a0111ff24fec"
+    },
+    {
+      "name": "the bar names the project and its first numbered version",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a library video lands on the timeline and the preview shows its frame",
+      "pass": true,
+      "detail": "[255,24,0]"
+    },
+    {
+      "name": "a motion template goes on a graphics track and a title on a text track",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "selecting a clip opens its settings",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "S splits the selected clip at the playhead; Ctrl+Z and Ctrl+Shift+Z undo and redo it",
+      "pass": true,
+      "detail": "2 1 2"
+    },
+    {
+      "name": "the playhead at 2 s shows the source's green",
+      "pass": true,
+      "detail": "[0,216,0]"
+    },
+    {
+      "name": "dragging a clip moves it along the timeline",
+      "pass": true,
+      "detail": "17 to 137"
+    },
+    {
+      "name": "the inspector edits the title's words",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the changes are autosaved to the project's autosave slot after 15 seconds",
+      "pass": true,
+      "detail": "4 clips"
+    },
+    {
+      "name": "«حفظ نسخة» makes numbered revision 2 and empties the autosave slot",
+      "pass": true,
+      "detail": "1,2"
+    },
+    {
+      "name": "when another person takes the editing, a save is refused and the editor turns to reading",
+      "pass": true,
+      "detail": "لم يعد التحرير لك: فتح شخص آخر المشروع للتحرير، أو انقطع الاتصال طويلاً. تغييراتك محفوظة على هذا الجهاز. | لم يعد التحرير لك: فتح شخص آخر المشروع للتحرير، أو انقطع الاتصال طويلاً. تغييراتك محفوظة على هذا الجهاز.تولي التحرير"
+    },
+    {
+      "name": "«تولي التحرير» takes the editing back on the latest saved state",
+      "pass": true,
+      "detail": "yes"
+    },
+    {
+      "name": "after a reload, the newer changes kept on this device are offered back and restored",
+      "pass": true,
+      "detail": "1 then 0"
+    },
+    {
+      "name": "the space bar plays and pauses, and the time runs",
+      "pass": true,
+      "detail": "00:00.03 / 00:06.00 to 00:01.01 / 00:06.00"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "debugTime": "00:02.00 / 00:07.24",
+  "projectId": "86db862e-da68-408f-9d3d-a0111ff24fec",
+  "total": 17,
+  "passed": 17,
+  "failed": 0
+}

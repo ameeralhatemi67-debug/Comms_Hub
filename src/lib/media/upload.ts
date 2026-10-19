@@ -121,13 +121,13 @@ export async function uploadNewAsset(file: File, folderId: string, onProgress: (
   return ((await done.json()) as { id: string }).id;
 }
 
-/** A new version of an existing asset. */
+/** A new version of an existing asset. Returns the version number it became (the studio records it). */
 export async function uploadNewVersion(
   assetId: string,
   file: File,
   note: string,
   onProgress: (f: number) => void,
-): Promise<void> {
+): Promise<number> {
   const session = await fetch(`/api/media/${assetId}/version`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -142,4 +142,5 @@ export async function uploadNewVersion(
     body: JSON.stringify({ fileId, note }),
   });
   if (!done.ok) throw new Error(await errorOf(done, 'تعذّر تسجيل الإصدار.'));
+  return ((await done.json()) as { version: number }).version;
 }

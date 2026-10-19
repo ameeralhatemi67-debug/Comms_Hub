@@ -1,0 +1,137 @@
+{
+  "script": "qa/studio-engine.cjs",
+  "run": "2026-10-19T18:25:37.355Z",
+  "checks": [
+    {
+      "name": "the shipped Arabic fonts load with Arabic sample text",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "the browser's private storage opens for the device cache",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "library sources are copied to the device and made ready",
+      "pass": true,
+      "detail": "ready,ready"
+    },
+    {
+      "name": "the exact length and size are read from the file by Mediabunny",
+      "pass": true,
+      "detail": "{\"w\":640,\"h\":360,\"duration\":6000000,\"hasAudio\":true}"
+    },
+    {
+      "name": "the copy went through the file route with byte ranges",
+      "pass": true,
+      "detail": "/api/media/00000000-0000-4000-8000-0000000000a1/content?v=1 range=bytes=0-16777215"
+    },
+    {
+      "name": "the composed frame shows the source's own colour at 1 s, 3 s and 5 s (red, green, blue)",
+      "pass": true,
+      "detail": "[[255,24,0,255],[0,216,0,255],[0,15,255,255]]"
+    },
+    {
+      "name": "a split on a frame boundary: the last frame of the first part and the first of the second are exact",
+      "pass": true,
+      "detail": "[[255,24,0,255],[0,216,0,255]]"
+    },
+    {
+      "name": "the second part, moved, still starts at its place in the source",
+      "pass": true,
+      "detail": "[0,216,0,255]"
+    },
+    {
+      "name": "a picture is drawn where it is placed, at its size, over the video",
+      "pass": true,
+      "detail": "[[254,0,253,255],[255,24,0,255]]"
+    },
+    {
+      "name": "opacity mixes the picture with the video",
+      "pass": true,
+      "detail": "[254,12,127,255]"
+    },
+    {
+      "name": "a frame template shows the video through its window and draws over the rest",
+      "pass": true,
+      "detail": "{\"inside\":[0,15,255,255],\"outside\":[240,233,219,255],\"win\":{\"x\":200,\"y\":110,\"w\":620,\"h\":880}}"
+    },
+    {
+      "name": "a number template draws on transparency (the rest stays transparent)",
+      "pass": true,
+      "detail": "43355 of 129600 pixels"
+    },
+    {
+      "name": "the text is measured in IBM Plex Sans Arabic, not a fallback",
+      "pass": true,
+      "detail": "1044.4 against 922.0"
+    },
+    {
+      "name": "Arabic text is drawn in the middle of the frame",
+      "pass": true,
+      "detail": "1930 white pixels"
+    },
+    {
+      "name": "a text fading in is barely visible at its first frames",
+      "pass": true,
+      "detail": "0 bright pixels at 0.05 s"
+    },
+    {
+      "name": "a brand mark is tinted in its colour",
+      "pass": true,
+      "detail": "149258 red pixels"
+    },
+    {
+      "name": "a second open reads the copy from the device: no new request",
+      "pass": true,
+      "detail": "1 then 1"
+    },
+    {
+      "name": "a partial copy resumes from its last byte and ends identical to the original",
+      "pass": true,
+      "detail": "65592 of 65592 bytes; /api/media/00000000-0000-4000-8000-0000000000a2/content?v=1 range=bytes=50000-16827215"
+    },
+    {
+      "name": "the ten-day sweep removes old copies and leaves the one in use",
+      "pass": true,
+      "detail": "{\"removed\":1,\"bytes\":65592}"
+    },
+    {
+      "name": "a file from this device is kept under its fingerprint and read back",
+      "pass": true,
+      "detail": "b360adfd0921bc5f7566584b0a1e5beee18d71a6c1a6899090c86342549a4873"
+    },
+    {
+      "name": "«حذف ملفات المعاينة المؤقتة» removes the library copies not in use, keeps the one in use and the device files",
+      "pass": true,
+      "detail": "{\"removed\":1,\"bytes\":65592}"
+    },
+    {
+      "name": "a draft is kept in IndexedDB and read back whole",
+      "pass": true,
+      "detail": "3"
+    },
+    {
+      "name": "paused, the preview shows the exact frame from the decoder",
+      "pass": true,
+      "detail": "[0,216,0,255]"
+    },
+    {
+      "name": "playing advances the playhead in real time and pause stops it",
+      "pass": true,
+      "detail": "3.69 s"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "log": [
+    "requests: 4"
+  ],
+  "total": 25,
+  "passed": 25,
+  "failed": 0
+}

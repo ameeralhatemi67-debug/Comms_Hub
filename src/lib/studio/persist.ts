@@ -314,13 +314,14 @@ export class Saver {
       }
       return r;
     }
+    // the draft on the device keeps unsaved changes; with none, there is nothing to keep
     if (r.code === 'NO_LEASE' || r.code === 'STALE_REVISION' || r.code === 'ARCHIVED' || r.code === 'FORBIDDEN') {
       this.leased = false;
       this.set({ kind: 'readonly', code: r.code, error: r.error });
-      await this.writeDraft();
+      if (this.dirty) await this.writeDraft();
     } else {
       this.set({ kind: 'error', code: r.code, error: r.error });
-      await this.writeDraft();
+      if (this.dirty) await this.writeDraft();
       if (r.code === 'NETWORK') this.cancelSave = this.timer(() => void this.save(explicit, note), RETRY_MS);
     }
     return r;
@@ -333,9 +334,10 @@ export class Saver {
   }
 }
 
-/** Whether a device draft is worth offering back: newer than what the server gave, on the same base. */
-export function draftIsNewer(draft: Draft | null, opened: Pick<OpenedDoc, 'revision' | 'saved_at'>): boolean {
+/** Whether a device draft is worth offering back: newer than what the server gave, on the same base, and different. */
+export function draftIsNewer(draft: Draft | null, opened: Pick<OpenedDoc, 'revision' | 'saved_at'> & { doc?: unknown }): boolean {
   if (!draft) return false;
+  if (opened.doc !== undefined && JSON.stringify(draft.doc) === JSON.stringify(opened.doc)) return false;
   return draft.base === opened.revision && draft.at > Date.parse(opened.saved_at);
 }
 
