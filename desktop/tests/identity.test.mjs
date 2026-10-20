@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import { APP_ID, dataFolderName, PRODUCT_NAME, userAgentFor, windowsAppId } from '../src/identity.ts';
+import { APP_ID, dataFolderName, PRODUCT_NAME, productNameFor, userAgentFor, windowsAppId } from '../src/identity.ts';
 import { REFUSED_ALWAYS, REFUSED_IN_RELEASE, refusedSwitch } from '../src/switches.ts';
 import { safeFileName, saveDialogFor, SAVE_TITLE } from '../src/downloads.ts';
 
@@ -13,7 +13,16 @@ test('the fixed id is reverse-DNS, and names the data folder', () => {
   assert.equal(dataFolderName(false), APP_ID);
   assert.equal(dataFolderName(true), `${APP_ID}.dev`, 'a development build never touches the real profile');
   assert.equal(windowsAppId(false), APP_ID);
+  assert.equal(dataFolderName(false, true), `${APP_ID}.qa`, 'the update check\'s package keeps its own too');
+  assert.equal(windowsAppId(false, true), `${APP_ID}.qa`);
   assert.equal(PRODUCT_NAME, 'مركز الاتصال المؤسسي');
+});
+
+test('the development build and the update check\'s package run under names of their own, so their Start menu shortcut never replaces the real one', () => {
+  assert.equal(productNameFor(false), PRODUCT_NAME);
+  assert.notEqual(productNameFor(true), PRODUCT_NAME);
+  assert.notEqual(productNameFor(false, true), PRODUCT_NAME);
+  assert.notEqual(productNameFor(true), productNameFor(false, true));
 });
 
 const electronAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) مركز الاتصال المؤسسي/0.1.0 Chrome/152.0.7977.130 Electron/44.5.1 Safari/537.36';

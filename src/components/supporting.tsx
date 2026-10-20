@@ -22,6 +22,7 @@ import { BackupsTab } from './settings/backups';
 import { PlatformsTab } from './settings/platforms';
 import { ConnectionsTab } from './settings/connections';
 import { FeedbackTab } from './feedback';
+import { DesktopAppPanel } from './native/desktop-app';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
@@ -125,6 +126,9 @@ export function Supporting({ page }: { page: string }) {
         </Panel>
         <Panel title="المظهر">
           <AppearancePanel />
+        </Panel>
+        <Panel title="تطبيق سطح المكتب">
+          <DesktopAppPanel />
         </Panel>
         <Panel title="صلاحياتي" className="pm-minepanel">
           <MyPermissions />

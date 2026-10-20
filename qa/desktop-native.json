@@ -1,22 +1,22 @@
 {
   "script": "qa/desktop-native.cjs",
-  "run": "2026-10-20T20:34:06.705Z",
-  "version": "0.2.0",
+  "run": "2026-10-20T21:02:33.145Z",
+  "version": "0.3.0",
   "checks": [
     {
-      "name": "the bridge is version 1: who the application is, then info, power, life and notify",
+      "name": "the bridge is version 2: who the application is, then info, power, life, notify and update",
       "pass": true,
-      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.2.0\",\"bridge\":1},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"]},\"frozen\":true,\"fns\":true}"
+      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.3.0\",\"bridge\":2},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"]},\"frozen\":true,\"fns\":true}"
     },
     {
       "name": "the bridge and each of its groups cannot be changed by the page",
       "pass": true,
-      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.2.0\",\"bridge\":1},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"]},\"frozen\":true,\"fns\":true}"
+      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.3.0\",\"bridge\":2},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"]},\"frozen\":true,\"fns\":true}"
     },
     {
       "name": "info names the version, processor, memory, free disk and the chip in use, and no path",
       "pass": true,
-      "detail": "{\"version\":\"0.2.0\",\"bridge\":1,\"os\":\"win32\",\"osVersion\":\"10.0.26300\",\"arch\":\"x64\",\"cores\":12,\"cpu\":\"AMD Ryzen 5 6600H with Radeon Graphics\",\"memory\":16310259712,\"freeDisk\":43533328384,\"gpu\":{\"chips\":[{\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"vendor\":\"NVIDIA\",\"active\":true},{\"name\":\"AMD Radeon(TM) Graphics\",\"vendor\":\"AMD\",\"active\":false}],\"active\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"software\":false}}"
+      "detail": "{\"version\":\"0.3.0\",\"bridge\":2,\"os\":\"win32\",\"osVersion\":\"10.0.26300\",\"arch\":\"x64\",\"cores\":12,\"cpu\":\"AMD Ryzen 5 6600H with Radeon Graphics\",\"memory\":16310259712,\"freeDisk\":43193323520,\"gpu\":{\"chips\":[{\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"vendor\":\"NVIDIA\",\"active\":true},{\"name\":\"AMD Radeon(TM) Graphics\",\"vendor\":\"AMD\",\"active\":false}],\"active\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"software\":false}}"
     },
     {
       "name": "keepAwake starts the system's blocker that keeps the laptop from sleeping (screen may sleep)",
@@ -166,7 +166,7 @@
     {
       "name": "nothing attached: an idle minimised window is hidden and slowed like a browser tab (timers about once a second)",
       "pass": true,
-      "detail": "{\"ticks\":4,\"visibility\":\"hidden\"}"
+      "detail": "{\"ticks\":3,\"visibility\":\"hidden\"}"
     },
     {
       "name": "nothing attached: a busy minimised window stays visible to its page and keeps time (an export goes on at full speed)",
@@ -189,17 +189,19 @@
       "detail": "{\"added\":\"2\",\"seconds\":56,\"heard\":\"load:hidden:2\"}"
     }
   ],
-  "notes": [],
+  "notes": [
+    "Removed Start menu shortcuts Electron had written for this worktree's packages: مركز الاتصال المؤسسي، نسخة التطوير.lnk."
+  ],
   "device": {
-    "version": "0.2.0",
-    "bridge": 1,
+    "version": "0.3.0",
+    "bridge": 2,
     "os": "win32",
     "osVersion": "10.0.26300",
     "arch": "x64",
     "cores": 12,
     "cpu": "AMD Ryzen 5 6600H with Radeon Graphics",
     "memory": 16310259712,
-    "freeDisk": 43533328384,
+    "freeDisk": 43193323520,
     "gpu": {
       "chips": [
         {
@@ -219,7 +221,7 @@
   },
   "background": {
     "idle": {
-      "ticks": 4,
+      "ticks": 3,
       "visibility": "hidden"
     },
     "busy": {

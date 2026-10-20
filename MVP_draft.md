@@ -2663,7 +2663,7 @@ On «المراجعة» (`/approvals/<id>`), for files of video:
 
 # 63. The desktop application «مركز الاتصال المؤسسي», Windows, 2026-10-20
 
-Owner decisions of 2026-10-20: `Desktop_App_Plan.md`, accepted with the answers of its section 11.1 and recorded in `progress.md`. An application for Windows that opens the live site in its own window. It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a browser remains a full client. This section describes phase D1; 63.1 adds phase D2, and the later phases are in the plan.
+Owner decisions of 2026-10-20: `Desktop_App_Plan.md`, accepted with the answers of its section 11.1 and recorded in `progress.md`. An application for Windows that opens the live site in its own window. It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a browser remains a full client. This section describes phase D1; 63.1 adds phase D2 and 63.2 phase D3, and the later phases are in the plan.
 
 **Who and where.** The pilot is the Admin's and the director's laptops, Windows x64 only for now (Windows arm64 and Mac come later). The application is installed per user, without administrator rights, with a Start menu shortcut and a desktop shortcut. Windows shows its name, «مركز الاتصال المؤسسي», in the Start menu, on the shortcuts, in the taskbar, in the installer and in the file's details. The pilot build is not signed, so Windows SmartScreen asks once: "More info", then "Run anyway" («مزيد من المعلومات» ثم «تشغيل على أي حال» on an Arabic Windows). The application opens `https://comms-hub-three.vercel.app` and nothing else.
 
@@ -2700,7 +2700,7 @@ The camera, location, USB, serial and HID devices, Bluetooth, MIDI and everythin
 **Removing it.** Uninstalling from Windows' settings removes the program, both shortcuts and the application's data on this laptop, the session included. An update (D3) keeps the data.
 
 **Not there yet.**
-- With D3: automatic updates, signing, and the download page inside the site. Until then a new version is installed by hand over the old one.
+- Signing (decision D-7, a certificate before rollout). Updates and the download page arrived with D3 (63.2).
 - Later (D4, D5): files from «هذا الجهاز» used where they are, the cache folder, and media tools for heavy or unsupported footage.
 
 **Boundaries.** The application holds no secret, no stored password and no sign-in bypass. It decides nothing about who may see or do what: the site and the database do, as in a browser, and the studio still opens only for the Admin and the director. It approves nothing and publishes nothing, and nothing is scheduled in the site because of it.
@@ -2725,3 +2725,23 @@ Hovering over the icon shows «مركز الاتصال المؤسسي», with «
 **«معلومات الجهاز».** On the studio's home, below «ما يقدر عليه هذا المتصفح», and in «مساعدة» of both editors. It lists «يعمل في», «المعالج», «الذاكرة», «المساحة الحرة» (on the disk of the application's data), «بطاقة الرسوميات المستعملة», «بطاقات أخرى في الجهاز» and «ترميز الفيديو بالعتاد» (on the graphics chip, or not). When a laptop has a stronger graphics chip sitting idle, it adds: «لتشغيل التطبيق على بطاقة الرسوميات الأقوى: افتح «الإعدادات» في Windows، ثم «النظام»، ثم «العرض»، ثم «الرسومات»، واختر «مركز الاتصال المؤسسي»، ثم «أداء عالٍ»، ثم أعد تشغيل التطبيق.» In a browser the same panel shows what the browser tells (cores, a rounded memory figure, the chip WebGL names, the encoder) and adds «في تطبيق سطح المكتب تظهر هنا بطاقة الرسوميات المستعملة والمساحة الحرة، ويستمر التصدير والنافذة مصغّرة.» It names no file, folder or person.
 
 **Boundaries, unchanged.** The application still approves nothing and publishes nothing. A notice is only a pointer to the page; the page and the database decide. Nothing new is scheduled in the site: the minute's reading is the page's own, as before, now also while hidden.
+
+## 63.2 Updates and the download page (D3), 2026-10-20
+
+Phase D3 of `Desktop_App_Plan.md`, without signing: the pilot stays unsigned (decision D-7).
+
+**The application keeps itself up to date.** It looks for a newer version when it starts and every four hours while it is open, downloads it in the background, and checks that the file is exactly the one the release names. The update is installed when the person quits the application, or at once with «إعادة التشغيل للتحديث». That item appears in the tray's menu once an update is ready, and on «الحساب». When an update is ready and the window is not in front, a notice says «تحديث جاهز»: «الإصدار … جاهز، ويُثبَّت عند إنهاء التطبيق. للتثبيت الآن اختر «إعادة التشغيل للتحديث».»; clicking it opens «الحساب». It never restarts during an export: «إعادة التشغيل للتحديث» then says «التحديث ينتظر»: «لا يُعاد تشغيل التطبيق أثناء العمل. يُثبَّت التحديث عند إنهاء التطبيق بعد انتهائه.». An update keeps the session and the application's data.
+
+**«تطبيق سطح المكتب» on «الحساب».** Every signed-in person sees it.
+- **In a browser:** «تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.», then «تنزيل التطبيق» with the version and its size, and: «يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».». Before the first release is published: «لم يُنشر إصدار للتنزيل بعد.».
+- **Inside the application:** «تعمل الآن في تطبيق سطح المكتب، الإصدار …», then where its update stands:
+  - «جارٍ البحث عن تحديث…»;
+  - «هذا أحدث إصدار.»;
+  - «جارٍ تنزيل الإصدار … (…٪)…»;
+  - «الإصدار … جاهز، ويُثبَّت عند إنهاء التطبيق.» with «إعادة التشغيل للتحديث»;
+  - «تعذّر البحث عن تحديث الآن، ويُعاد البحث لاحقاً.»;
+  - «يبحث التطبيق عن تحديث عند بدئه وكل أربع ساعات.».
+
+**An application older than the site needs.** Each page then carries a line at its top: «إصدار تطبيق سطح المكتب أقدم مما يحتاجه المركز الآن. حدّثه من «الحساب».», and «الحساب» adds «هذا الإصدار أقدم مما يحتاجه المركز الآن، فحدّثه ليعمل كل شيء كما ينبغي.». The site sets the oldest version it works with fully (0.2.0 now) and raises it only when a change of the site needs a newer application.
+
+**Releases** are published by the owner to a public bucket of the `comms-hub` project. Nothing is published from the site or by an agent. Until the owner publishes the first one, the download line says so and the application's own check fails quietly («تعذّر البحث عن تحديث الآن، ويُعاد البحث لاحقاً.»).

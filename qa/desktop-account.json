@@ -1,0 +1,51 @@
+{
+  "script": "qa/desktop-account.cjs",
+  "run": "2026-10-20T23:43:22.271Z",
+  "version": "0.3.0",
+  "checks": [
+    {
+      "name": "in a browser, with a release in the feed: «تنزيل التطبيق» to the installer in the bucket",
+      "pass": true,
+      "detail": "https://hrghmioxvgkjpnydrxrk.supabase.co/storage/v1/object/public/desktop-releases/windows-x64/CommsHub-Setup-0.3.0-x64.exe"
+    },
+    {
+      "name": "the version, its size and what SmartScreen asks are said",
+      "pass": true,
+      "detail": "تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.\n\nتنزيل التطبيق\n\nالإصدار 0.3.0، نحو 112 م.ب. يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال»."
+    },
+    {
+      "name": "no banner in a browser",
+      "pass": true,
+      "detail": "تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.\n\nتنزيل التطبيق\n\nالإصدار 0.3.0، نحو 112 م.ب. يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال»."
+    },
+    {
+      "name": "with no release (the bucket not there yet): «لم يُنشر إصدار للتنزيل بعد.», and no link",
+      "pass": true,
+      "detail": "تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.\n\nلم يُنشر إصدار للتنزيل بعد."
+    },
+    {
+      "name": "an application older than the site needs (0.1.0, the D1 bridge) gets the banner and the panel's warning",
+      "pass": true,
+      "detail": "إصدار تطبيق سطح المكتب أقدم مما يحتاجه المركز الآن. حدّثه من «الحساب».\n\nتعمل الآن في تطبيق سطح المكتب، الإصدار 0.1.0.\n\nهذا الإصدار أقدم مما يحتاجه المركز الآن، فحدّثه ليعمل كل شيء كما ينبغي."
+    },
+    {
+      "name": "inside the application: «تعمل الآن في تطبيق سطح المكتب، الإصدار 0.3.0» and its update state (a development build: idle)",
+      "pass": true,
+      "detail": "تعمل الآن في تطبيق سطح المكتب، الإصدار 0.3.0.\n\nيبحث التطبيق عن تحديث عند بدئه وكل أربع ساعات."
+    },
+    {
+      "name": "a development build never asks the feed: still idle after the first ten seconds, and no restart offered",
+      "pass": true,
+      "detail": "تعمل الآن في تطبيق سطح المكتب، الإصدار 0.3.0.\n\nيبحث التطبيق عن تحديث عند بدئه وكل أربع ساعات."
+    },
+    {
+      "name": "no banner inside a current application",
+      "pass": true,
+      "detail": "تعمل الآن في تطبيق سطح المكتب، الإصدار 0.3.0.\n\nيبحث التطبيق عن تحديث عند بدئه وكل أربع ساعات."
+    }
+  ],
+  "notes": [],
+  "total": 8,
+  "passed": 8,
+  "failed": 0
+}

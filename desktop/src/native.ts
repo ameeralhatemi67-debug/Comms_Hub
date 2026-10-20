@@ -11,11 +11,13 @@ import { badgeBitmap, withDot } from './badge.ts';
 import { badgeOf, holdIdOf, noticeOf, reasonOf, type NoticeRequest, type Reason } from './bridge.ts';
 import { deviceInfo, freeBytes } from './device.ts';
 import { PRODUCT_NAME } from './identity.ts';
-import { CHANNEL } from './ipc.ts';
+import { BRIDGE_VERSION, CHANNEL } from './ipc.ts';
 import { closeAction, quitAction, Registry, shouldNotify } from './life.ts';
 import { guard } from './sender.ts';
 import { parseSettings, type Settings } from './settings.ts';
-import { decisionsLine, HIDDEN_BUSY, HIDDEN_KEPT, QUIT_QUESTION, TRAY_KEEP, TRAY_OPEN, TRAY_QUIT, trayTooltip } from './words.ts';
+import { feedAllowed, START } from './update.ts';
+import { startUpdates, type Updates } from './updater.ts';
+import { decisionsLine, HIDDEN_BUSY, HIDDEN_KEPT, QUIT_QUESTION, TRAY_KEEP, TRAY_OPEN, TRAY_QUIT, TRAY_RESTART, trayTooltip, UPDATE_WAITS, updateReady } from './words.ts';
 
 export type NativeOptions = {
   allowed: readonly string[];
@@ -25,6 +27,11 @@ export type NativeOptions = {
   version: string;
   /** The brand mark as a PNG, for the tray and the notices. */
   iconPath: string;
+  /** The compiled update feed (update.ts), and whether this is the update check's own package. */
+  feed: string;
+  qa: boolean;
+  /** A development build never updates itself: it is the working copy, and it would share the real updater's folder. */
+  dev: boolean;
 };
 
 export type Native = {
@@ -34,7 +41,6 @@ export type Native = {
   reveal(win: BrowserWindow): void;
 };
 
-const BRIDGE = 1;
 // Notices Windows has not shown or dismissed yet are kept referenced, or their click would be lost.
 const LIVE_NOTICES = 20;
 
@@ -50,6 +56,8 @@ export function startNative(o: NativeOptions): Native {
   const hiddenForWork = new Set<BrowserWindow>();
   const told = new Set<number>();
   const live = new Set<Notification>();
+  /** Set once the tray exists (updates, D3); the tray's menu reads it. */
+  let updates: Updates | null = null;
 
   function readSettings(): Settings {
     try {
@@ -93,6 +101,7 @@ export function startNative(o: NativeOptions): Native {
     tray.setContextMenu(
       Menu.buildFromTemplate([
         { label: TRAY_OPEN, click: () => revealAll() },
+        ...(updates?.status().state === 'ready' ? [{ label: TRAY_RESTART, click: () => restartForUpdate() }] : []),
         {
           label: TRAY_KEEP,
           type: 'checkbox',
@@ -188,6 +197,28 @@ export function startNative(o: NativeOptions): Native {
     if (isMain && decisions > 0) win.setOverlayIcon(overlay(decisions), decisionsLine(decisions));
   }
 
+  // --- updates (D3) ------------------------------------------------------------------------------
+  // A feed this build may not carry is never asked (update.ts feedAllowed), and a development build asks none.
+  if (!o.dev && feedAllowed(o.feed, o.qa)) updates = startUpdates({
+    feed: o.feed,
+    busy: () => registry.busyReason() !== null,
+    beforeRestart: () => {
+      quitting = true;
+    },
+    onChange: (s, was) => {
+      refreshTray();
+      if (s.state !== 'ready' || was.state === 'ready' || !s.version) return;
+      const main = o.mainWindow();
+      const state = main ? { focused: main.isFocused(), visible: main.isVisible(), minimized: main.isMinimized() } : null;
+      if (shouldNotify(state)) raise(main, { ...updateReady(s.version), go: '/account' });
+    },
+  });
+  function restartForUpdate() {
+    const action = updates ? updates.restart() : 'nothing';
+    if (action === 'busy') raise(o.mainWindow(), { ...UPDATE_WAITS, go: null });
+    return action;
+  }
+
   // --- quitting ------------------------------------------------------------------------------------
   async function askBeforeQuit(reason: Reason) {
     if (asking) return;
@@ -237,7 +268,7 @@ export function startNative(o: NativeOptions): Native {
     } catch {
       freeDisk = null;
     }
-    return deviceInfo({ version: o.version, bridge: BRIDGE, os: process.platform, osVersion: os.release(), arch: process.arch, cpus: os.cpus(), memory: os.totalmem(), freeDisk, gpu });
+    return deviceInfo({ version: o.version, bridge: BRIDGE_VERSION, os: process.platform, osVersion: os.release(), arch: process.arch, cpus: os.cpus(), memory: os.totalmem(), freeDisk, gpu });
   });
 
   handle(CHANNEL.keepAwake, (event, reason: unknown) => {
@@ -289,6 +320,9 @@ export function startNative(o: NativeOptions): Native {
     }
     return true;
   });
+
+  handle(CHANNEL.updateStatus, () => ({ ...(updates ? updates.status() : START) }));
+  handle(CHANNEL.updateRestart, () => restartForUpdate());
 
   return { attachWindow, reveal };
 }

@@ -206,7 +206,7 @@ async function partOne() {
     return { fields: { platform: n.platform, shell: n.shell, version: n.version, bridge: n.bridge }, keys: Object.keys(n), frozen: Object.isFrozen(n) };
   });
   // From D2 the bridge also carries the methods of version 1; qa/desktop-native.cjs checks them.
-  check('the bridge exists on an allowed page: who the application is, then the groups of version 1', JSON.stringify(bridge.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: pkg.version, bridge: 1 }) && JSON.stringify(bridge.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify']), bridge);
+  check('the bridge exists on an allowed page: who the application is, then the groups of version 1', JSON.stringify(bridge.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: pkg.version, bridge: 2 }) && JSON.stringify(bridge.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify', 'update']), bridge);
   check('the bridge object cannot be changed by the page', bridge.frozen, String(bridge.frozen));
   await until(() => win.frames().length >= 3, 10000);
   const frameOf = (prefix) => win.frames().find((f) => f.url().startsWith(prefix));
@@ -665,11 +665,14 @@ async function partTwo() {
   // Uninstall, silently: the program, the shortcuts, the entry and the data are gone (D-11).
   const uninstaller = fs.readdirSync(installDir).find((n) => /^Uninstall .*\.exe$/i.test(n));
   spawnSync(path.join(installDir, uninstaller), ['/S'], { timeout: 120000 });
-  const gone = await until(() => !fs.existsSync(path.join(installDir, 'CommsHub.exe')) && !fs.existsSync(dataDir), 90000, 500);
+  // The uninstaller hands its work to a copy of itself and returns at once: wait for everything to go.
+  const updaterDir = path.join(process.env.LOCALAPPDATA, 'sa.commshub.desktop-updater');
+  const gone = await until(() => !fs.existsSync(path.join(installDir, 'CommsHub.exe')) && !fs.existsSync(dataDir) && !fs.existsSync(startLink) && !fs.existsSync(desktopLink) && !fs.existsSync(updaterDir), 90000, 500);
   await sleep(1500);
-  const left = { program: fs.existsSync(path.join(installDir, 'CommsHub.exe')), installDir: fs.existsSync(installDir), data: fs.existsSync(dataDir), startLink: fs.existsSync(startLink), desktopLink: fs.existsSync(desktopLink), entry: uninstallEntry() };
+  const left = { program: fs.existsSync(path.join(installDir, 'CommsHub.exe')), installDir: fs.existsSync(installDir), data: fs.existsSync(dataDir), startLink: fs.existsSync(startLink), desktopLink: fs.existsSync(desktopLink), updater: fs.existsSync(updaterDir), entry: uninstallEntry() };
   check('uninstalling removes the program, both shortcuts and the Windows entry', gone && !left.program && !left.startLink && !left.desktopLink && left.entry === '', left);
   check('uninstalling removes the application\'s data, the session included (D-11)', !left.data, left);
+  check('uninstalling removes the installer\'s own copy and the updater\'s folder too (D3, resources/installer.nsh)', !left.updater, left);
 }
 
 (async () => {
@@ -682,6 +685,8 @@ async function partTwo() {
       await closeAll();
     }
   }
+  const stray = require('./desktop-helpers.cjs').removeTestShortcuts();
+  if (stray.length) note(`Removed Start menu shortcuts Electron had written for this worktree's packages: ${stray.join(', ')}.`);
   const failed = result.checks.filter((c) => !c.pass);
   result.total = result.checks.length;
   result.passed = result.total - failed.length;

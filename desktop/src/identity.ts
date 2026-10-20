@@ -8,11 +8,23 @@ export const APP_ID = 'sa.commshub.desktop';
 /** What Windows shows in the Start menu, the taskbar, the installer and the file details. */
 export const PRODUCT_NAME = 'مركز الاتصال المؤسسي';
 
-/** The profile's folder under %APPDATA%. A development build keeps its own, apart from the real one. */
-export const dataFolderName = (dev: boolean) => (dev ? `${APP_ID}.dev` : APP_ID);
+/**
+ * The name the running application gives itself. Windows keeps a Start menu shortcut under this name for
+ * the application's notices, and Electron writes one when it is missing, so the development build and
+ * the update check's package are named apart: run on a laptop with the application installed, they never
+ * replace its shortcut.
+ */
+export const productNameFor = (dev: boolean, qa = false) => (dev ? `${PRODUCT_NAME}، نسخة التطوير` : qa ? `${PRODUCT_NAME}، فحص التحديث` : PRODUCT_NAME);
 
-/** The Windows application id; a development build is grouped apart on the taskbar. */
-export const windowsAppId = (dev: boolean) => (dev ? `${APP_ID}.dev` : APP_ID);
+/**
+ * The profile's folder under %APPDATA%. A development build and the update check's package each keep
+ * their own, apart from the real one, so neither ever touches it (and uninstalling the check's package
+ * removes only its own).
+ */
+export const dataFolderName = (dev: boolean, qa = false) => (dev ? `${APP_ID}.dev` : qa ? `${APP_ID}.qa` : APP_ID);
+
+/** The Windows application id; the other builds are grouped apart on the taskbar. */
+export const windowsAppId = (dev: boolean, qa = false) => dataFolderName(dev, qa);
 
 /**
  * Chromium's user agent with Electron's own tokens taken out and ` CommsHubDesktop/<version>` at

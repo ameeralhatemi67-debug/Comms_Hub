@@ -1,7 +1,7 @@
-// The message channels between the bridge (preload.ts) and the main process (native.ts), bridge
-// version 1 of Desktop_App_Plan.md 5.2: info, power, life and notify (D2). Every channel the page can
-// call is answered by a handler registered through sender.ts's guard(); `open` goes the other way,
-// from the main process to the page, when a native notice is clicked. Pure.
+// The message channels between the bridge (preload.ts) and the main process (native.ts), the groups of
+// Desktop_App_Plan.md 5.2: info, power, life and notify (version 1, D2), update (version 2, D3). Every
+// channel the page can call is answered by a handler registered through sender.ts's guard(); `open`
+// goes the other way, from the main process to the page, when a native notice is clicked. Pure.
 
 export const CHANNEL = Object.freeze({
   info: 'commshub:info',
@@ -12,7 +12,12 @@ export const CHANNEL = Object.freeze({
   notify: 'commshub:notify.show',
   badge: 'commshub:notify.badge',
   open: 'commshub:notify.open',
+  updateStatus: 'commshub:update.status',
+  updateRestart: 'commshub:update.restart',
 });
 
 /** The channels the page may call; `open` is sent by the main process only. */
-export const CALLABLE = Object.freeze([CHANNEL.info, CHANNEL.keepAwake, CHANNEL.release, CHANNEL.busy, CHANNEL.idle, CHANNEL.notify, CHANNEL.badge]);
+export const CALLABLE = Object.freeze([CHANNEL.info, CHANNEL.keepAwake, CHANNEL.release, CHANNEL.busy, CHANNEL.idle, CHANNEL.notify, CHANNEL.badge, CHANNEL.updateStatus, CHANNEL.updateRestart]);
+
+/** The bridge's version: 1 for info, power, life and notify (D2); 2 adds update (D3). */
+export const BRIDGE_VERSION = 2;

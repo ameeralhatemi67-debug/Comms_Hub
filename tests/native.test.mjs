@@ -172,7 +172,55 @@ test('the studio says when it runs in the application, and says nothing new in a
 
 test('no emoji in any new interface text', async () => {
   const fs = await import('node:fs');
-  for (const f of ['src/lib/native/index.ts', 'src/lib/native/notices.ts', 'src/lib/native/device.ts', 'src/components/native/device-info.tsx']) {
+  for (const f of ['src/lib/native/index.ts', 'src/lib/native/notices.ts', 'src/lib/native/device.ts', 'src/lib/native/releases.ts', 'src/components/native/device-info.tsx', 'src/components/native/desktop-app.tsx']) {
     assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
   }
+});
+
+// D3: the releases the site offers, and the application's update (src/lib/native/releases.ts).
+const latestYml = `version: 0.3.0
+files:
+  - url: CommsHub-Setup-0.3.0-x64.exe
+    sha512: abc123==
+    size: 111527803
+path: CommsHub-Setup-0.3.0-x64.exe
+sha512: abc123==
+releaseDate: '2026-10-21T08:00:00.000Z'
+`;
+
+test('D3: latest.yml as electron-builder writes it, and nothing else', async () => {
+  const { parseLatest, downloadUrl, DESKTOP_FEED } = await import('../src/lib/native/releases.ts');
+  const r = parseLatest(latestYml);
+  assert.deepEqual(r, { version: '0.3.0', file: 'CommsHub-Setup-0.3.0-x64.exe', size: 111527803, date: '2026-10-21T08:00:00.000Z' });
+  assert.equal(downloadUrl(r), `${DESKTOP_FEED}/CommsHub-Setup-0.3.0-x64.exe`);
+  for (const bad of ['', 'not yaml', latestYml.replace('0.3.0', 'latest'), latestYml.replaceAll('CommsHub-Setup-0.3.0-x64.exe', '../evil.exe'), latestYml.replaceAll('CommsHub-Setup-0.3.0-x64.exe', 'https://example.com/x.exe'), 'x'.repeat(30000)]) {
+    assert.equal(parseLatest(bad), null, bad.slice(0, 40));
+  }
+});
+
+test('D3: the site\'s feed is the application\'s feed', async () => {
+  const fs = await import('node:fs');
+  const { DESKTOP_FEED } = await import('../src/lib/native/releases.ts');
+  const app = fs.readFileSync('desktop/src/update.ts', 'utf8');
+  assert.ok(app.includes(`export const PRODUCTION_FEED = '${DESKTOP_FEED}';`));
+});
+
+test('D3: an application older than the site needs, a newer release, and the update said in Arabic', async () => {
+  const { tooOld, newer, updateLine, MINIMUM_DESKTOP } = await import('../src/lib/native/releases.ts');
+  assert.equal(MINIMUM_DESKTOP, '0.2.0');
+  assert.equal(tooOld('0.1.0'), true, 'the D1 application');
+  assert.equal(tooOld('0.2.0'), false);
+  assert.equal(tooOld(null), false, 'a browser');
+  assert.equal(newer({ version: '0.3.1', file: 'a.exe', size: null, date: null }, '0.3.0'), true);
+  assert.equal(newer({ version: '0.3.0', file: 'a.exe', size: null, date: null }, '0.3.0'), false);
+  assert.equal(newer(null, '0.3.0'), false);
+  assert.equal(updateLine({ state: 'downloading', version: '0.3.1', percent: 40 }), 'جارٍ تنزيل الإصدار 0.3.1 (40٪)…');
+  assert.equal(updateLine({ state: 'ready', version: '0.3.1', percent: 100 }), 'الإصدار 0.3.1 جاهز، ويُثبَّت عند إنهاء التطبيق.');
+  for (const state of ['idle', 'checking', 'none', 'error']) assert.match(updateLine({ state, version: null, percent: null }), /[\u0600-\u06ff]/);
+});
+
+test('D3: update is detected by its two methods; D2 has none', () => {
+  const app = d2();
+  assert.equal(nativeOf(app.bridge).has('update'), false);
+  assert.equal(nativeOf({ ...app.bridge, bridge: 2, update: { status: async () => ({}), restart: async () => 'nothing' } }).has('update'), true);
 });

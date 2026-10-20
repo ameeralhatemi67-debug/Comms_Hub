@@ -2,13 +2,15 @@
 // the address list, developer tools on F12), unpacked only, never installed or handed out. It differs
 // from the release package in one fuse: the Node.js inspector stays on, because Playwright's Electron
 // support attaches through it (qa/desktop-shell.cjs drives this package). Its profile is its own
-// folder, apart from the release one.
+// folder, apart from the release one, and so is its name: Electron names the Start menu shortcut it
+// writes for notices after the package, which must never replace the real application's.
 // Usage: npm run pack:dev   (writes dist/dev/)
 const release = require('./electron-builder.release.cjs');
 
 /** @type {import('electron-builder').Configuration} */
 module.exports = {
   ...release,
+  productName: 'مركز الاتصال المؤسسي، نسخة التطوير',
   directories: { ...release.directories, output: 'dist/dev' },
   electronFuses: { ...release.electronFuses, enableNodeCliInspectArguments: true },
   win: { ...release.win, target: [{ target: 'dir', arch: ['x64'] }] },

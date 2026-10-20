@@ -2,15 +2,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
 import { createRequire } from 'node:module';
-import { APP_ID, PRODUCT_NAME } from '../src/identity.ts';
+import { APP_ID, PRODUCT_NAME, productNameFor } from '../src/identity.ts';
+import { PRODUCTION_FEED } from '../src/update.ts';
 
 const require = createRequire(import.meta.url);
 const release = require('../electron-builder.release.cjs');
 const dev = require('../electron-builder.dev.cjs');
 const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
-test('the release package is the fixed id under the Arabic name, Windows x64 only, unsigned and unpublished', () => {
+test('the release package is the fixed id under the Arabic name, Windows x64 only, unsigned, publishing nothing itself', () => {
   assert.equal(release.appId, APP_ID);
   assert.equal(release.productName, PRODUCT_NAME);
   assert.deepEqual(release.win.target, [{ target: 'nsis', arch: ['x64'] }]);
@@ -18,7 +20,10 @@ test('the release package is the fixed id under the Arabic name, Windows x64 onl
   assert.equal(release.win.requestedExecutionLevel, 'asInvoker');
   assert.ok(fs.existsSync(release.win.icon), 'the icon is public/brand/comms-hub-logo-512.png');
   assert.match(release.win.icon.replace(/\\/g, '/'), /public\/brand\/comms-hub-logo-512\.png$/);
-  assert.equal(release.publish, null);
+  // The feed names where releases go (D3); nothing is uploaded from here (--publish never).
+  assert.deepEqual(release.publish, [{ provider: 'generic', url: PRODUCTION_FEED }]);
+  assert.match(pkg.scripts.pack, /--publish never$/);
+  assert.match(pkg.scripts['pack:dev'], /--publish never$/);
   assert.equal(release.mac, undefined);
   assert.equal(release.linux, undefined);
   assert.deepEqual(release.files, ['build/**/*', 'package.json']);
@@ -51,16 +56,17 @@ test('the installer is per user, Arabic, with both shortcuts, and removes the da
   assert.equal(pkg.name, APP_ID);
 });
 
-test('the development package differs only in its folder, its unpacked form and the inspector fuse', () => {
+test('the development package differs only in its folder, its unpacked form, its name and the inspector fuse', () => {
   assert.equal(dev.directories.output, 'dist/dev');
   assert.deepEqual(dev.win.target, [{ target: 'dir', arch: ['x64'] }]);
   assert.deepEqual(dev.electronFuses, { ...release.electronFuses, enableNodeCliInspectArguments: true });
   const same = (key) => assert.deepEqual(dev[key], release[key], key);
-  for (const key of ['appId', 'productName', 'files', 'asar', 'nsis', 'publish']) same(key);
+  for (const key of ['appId', 'files', 'asar', 'nsis', 'publish']) same(key);
+  assert.equal(dev.productName, productNameFor(true), 'the name the development build gives itself');
 });
 
 test('every tool is pinned exactly and the application ships no dependency', () => {
-  assert.equal(pkg.version, '0.2.0');
+  assert.equal(pkg.version, '0.3.0');
   assert.equal(pkg.dependencies, undefined, 'esbuild bundles everything into build/');
   assert.equal(pkg.devDependencies.electron, '44.5.1');
   for (const [name, version] of Object.entries(pkg.devDependencies)) {
@@ -68,4 +74,32 @@ test('every tool is pinned exactly and the application ships no dependency', () 
   }
   const lock = JSON.parse(fs.readFileSync(new URL('../package-lock.json', import.meta.url), 'utf8'));
   assert.equal(lock.packages['node_modules/electron'].version, '44.5.1');
+});
+
+test('the update check\'s package: its own id, name, data folder, version and feed, and nothing else changed', () => {
+  assert.throws(() => require('../electron-builder.qa.cjs'), /COMMS_HUB_QA_VERSION/, 'not built without a version and a local feed');
+  process.env.COMMS_HUB_QA_VERSION = '9.9.9';
+  process.env.COMMS_HUB_QA_FEED = 'http://127.0.0.1:4555/feed';
+  try {
+    delete require.cache[require.resolve('../electron-builder.qa.cjs')];
+    const qa = require('../electron-builder.qa.cjs');
+    assert.equal(qa.appId, `${APP_ID}.qa`);
+    assert.deepEqual(qa.extraMetadata, { name: `${APP_ID}.qa`, version: '9.9.9' });
+    assert.equal(qa.productName, productNameFor(false, true), 'the name it gives itself when it runs');
+    assert.equal(qa.nsis.createDesktopShortcut, false);
+    assert.deepEqual(qa.publish, [{ provider: 'generic', url: 'http://127.0.0.1:4555/feed' }]);
+    for (const key of ['electronFuses', 'files', 'asar', 'win']) assert.deepEqual(qa[key], release[key], key);
+    assert.equal(qa.nsis.deleteAppDataOnUninstall, true);
+  } finally {
+    delete process.env.COMMS_HUB_QA_VERSION;
+    delete process.env.COMMS_HUB_QA_FEED;
+  }
+});
+
+test('the uninstaller also removes the installer\'s own copy and the updater\'s folder, never during an update', () => {
+  assert.match(release.nsis.include.split(path.sep).join('/'), /resources\/installer\.nsh$/);
+  const nsh = fs.readFileSync(release.nsis.include, 'utf8');
+  assert.match(nsh, /!macro customUnInstall/);
+  assert.ok(nsh.includes('${ifNot} ${isUpdated}\n    RMDir /r "$LOCALAPPDATA\\${COMMS_HUB_UPDATER_DIR}"'), 'removed only outside an update');
+  assert.ok(nsh.includes('!searchreplace COMMS_HUB_UPDATER_DIR "${APP_INSTALLER_STORE_FILE}" "\\installer.exe" ""'), 'the folder the installer copies itself to');
 });

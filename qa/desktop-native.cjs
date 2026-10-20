@@ -96,16 +96,16 @@ async function partOne(state) {
     return {
       keys: Object.keys(n),
       fields: { platform: n.platform, shell: n.shell, version: n.version, bridge: n.bridge },
-      groups: { power: Object.keys(n.power), life: Object.keys(n.life), notify: Object.keys(n.notify) },
-      frozen: [n, n.power, n.life, n.notify].every((o) => Object.isFrozen(o)),
+      groups: { power: Object.keys(n.power), life: Object.keys(n.life), notify: Object.keys(n.notify), update: Object.keys(n.update) },
+      frozen: [n, n.power, n.life, n.notify, n.update].every((o) => Object.isFrozen(o)),
       fns: [n.info, n.power.keepAwake, n.power.release, n.life.busy, n.life.idle, n.notify.show, n.notify.badge, n.notify.onOpen].every((f) => typeof f === 'function'),
     };
   });
   check(
-    'the bridge is version 1: who the application is, then info, power, life and notify',
-    JSON.stringify(shape.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify']) &&
-      JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: 1 }) &&
-      JSON.stringify(shape.groups) === JSON.stringify({ power: ['keepAwake', 'release'], life: ['busy', 'idle'], notify: ['show', 'badge', 'onOpen'] }) &&
+    'the bridge is version 2: who the application is, then info, power, life, notify and update',
+    JSON.stringify(shape.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify', 'update']) &&
+      JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: 2 }) &&
+      JSON.stringify(shape.groups) === JSON.stringify({ power: ['keepAwake', 'release'], life: ['busy', 'idle'], notify: ['show', 'badge', 'onOpen'], update: ['status', 'restart'] }) &&
       shape.fns,
     shape,
   );

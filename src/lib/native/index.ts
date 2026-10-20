@@ -7,8 +7,8 @@
 
 export type Platform = 'web' | 'desktop' | 'android' | 'ios';
 
-/** What a shell may offer. Version 1 of the desktop bridge (D2) offers the first five. */
-export type Feature = 'info' | 'keepAwake' | 'busy' | 'notify' | 'badge';
+/** What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3). */
+export type Feature = 'info' | 'keepAwake' | 'busy' | 'notify' | 'badge' | 'update';
 
 export type Reason = 'export' | 'upload';
 export type NativeNotice = { title: string; body?: string; go?: string | null };
@@ -22,6 +22,7 @@ type Bridge = {
   power?: { keepAwake?: (reason: Reason) => Promise<number>; release?: (id: number) => Promise<boolean> };
   life?: { busy?: (reason: Reason) => Promise<boolean>; idle?: () => Promise<boolean> };
   notify?: { show?: (n: NativeNotice) => Promise<boolean>; badge?: (n: number) => Promise<boolean>; onOpen?: (fn: ((go: string) => void) | null) => void };
+  update?: { status?: () => Promise<unknown>; restart?: () => Promise<'restart' | 'busy' | 'nothing'> };
 };
 
 export type Native = {
@@ -41,6 +42,7 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   busy: ['life.busy', 'life.idle'],
   notify: ['notify.show'],
   badge: ['notify.badge'],
+  update: ['update.status', 'update.restart'],
 });
 
 const SHELLS = ['desktop', 'android', 'ios'];

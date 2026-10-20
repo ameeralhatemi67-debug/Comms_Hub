@@ -18,20 +18,25 @@ test.after(() => fs.rmSync(out, { recursive: true, force: true }));
 test('a release build has no way to the local site, no test variables and no developer tools', () => {
   for (const name of ['main.js', 'preload.js']) {
     const code = read(release, name);
-    for (const banned of ['127.0.0.1', 'COMMS_HUB_START', 'COMMS_HUB_DEV_DATA', 'toggleDevTools', 'openDevTools']) {
+    // The local site's address itself (127.0.0.1 alone also names the updater library's own loopback).
+    for (const banned of ['http://127.0.0.1:3000', '127.0.0.1:3000', 'COMMS_HUB_START', 'COMMS_HUB_DEV_DATA', 'toggleDevTools', 'openDevTools']) {
       assert.equal(code.includes(banned), false, `${name} holds ${banned}`);
     }
     assert.ok(code.includes('https://comms-hub-three.vercel.app'), name);
   }
   assert.match(read(release, 'main.js'), /DEV = !1/);
+  assert.match(read(release, 'main.js'), /QA = !1/);
+  assert.match(read(release, 'main.js'), /!o\.dev && feedAllowed\(o\.feed, o\.qa\)/, 'a development build never runs the updater');
+  assert.ok(read(release, 'main.js').includes('https://hrghmioxvgkjpnydrxrk.supabase.co/storage/v1/object/public/desktop-releases/windows-x64'), 'the production feed');
   assert.ok(read(dev, 'main.js').includes('127.0.0.1') && read(dev, 'preload.js').includes('127.0.0.1'), 'the development build does open the local site');
 });
 
-test('the bridge carries who the application is and the four groups of version 1, and only messages', () => {
+test('the bridge carries who the application is and the groups of version 2, and only messages', () => {
   const preload = read(release, 'preload.js');
   assert.match(preload, /exposeInMainWorld\(\s*"commsHubNative",\s*Object\.freeze\(\{/, 'the bridge is exposed in one place, frozen');
-  assert.match(preload, /platform: "desktop",\s*shell: "electron",\s*version: VERSION,\s*bridge: 1,\s*info:/);
-  for (const group of ['power: Object.freeze', 'life: Object.freeze', 'notify: Object.freeze']) assert.ok(preload.includes(group), group);
+  assert.match(preload, /platform: "desktop",\s*shell: "electron",\s*version: VERSION,\s*bridge: (BRIDGE_VERSION|2),\s*info:/);
+  assert.match(preload, /BRIDGE_VERSION = 2/);
+  for (const group of ['power: Object.freeze', 'life: Object.freeze', 'notify: Object.freeze', 'update: Object.freeze']) assert.ok(preload.includes(group), group);
   assert.ok(preload.includes(`VERSION = "${version}"`));
   assert.match(preload, /window\.top === window && isAllowed\(window\.location\.href, ALLOWED\)/, 'top-level page on the list only');
   assert.equal(/require\("(?!electron")/.test(preload), false, 'no other module');
@@ -63,4 +68,17 @@ test('the pages are copied beside the code with the brand mark filled in', () =>
     assert.equal(html.includes('<!-- logo -->'), false);
     if (page === 'offline.html') assert.match(html, /<svg[^>]*viewBox="0 0 512 512"/);
   }
+});
+
+test('the update check\'s package is built only with a version and a feed on this laptop, which only it carries', async () => {
+  await assert.rejects(buildApp('qa', path.join(out, 'qa-none')), /version and a feed/);
+  await assert.rejects(buildApp('qa', path.join(out, 'qa-bad'), { version: '1.0.0', feed: 'https://example.com/feed' }), /version and a feed/);
+  const qa = path.join(out, 'qa');
+  await buildApp('qa', qa, { version: '9.9.9', feed: 'http://127.0.0.1:4555/feed' });
+  const main = read(qa, 'main.js');
+  assert.ok(main.includes('http://127.0.0.1:4555/feed'));
+  assert.match(main, /QA = !0/);
+  assert.match(main, /DEV = !1/, 'a release build in every other way');
+  assert.ok(read(qa, 'preload.js').includes('VERSION = "9.9.9"'));
+  for (const name of ['main.js', 'preload.js']) assert.equal(read(release, name).includes('4555'), false);
 });

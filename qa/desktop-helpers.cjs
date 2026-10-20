@@ -27,6 +27,8 @@ function record(script) {
     console.log(`${entry.pass ? 'pass' : 'FAIL'}  ${name}${entry.pass ? '' : ` | ${entry.detail}`}`);
   };
   const finish = (file) => {
+    const stray = removeTestShortcuts();
+    if (stray.length) result.notes.push(`Removed Start menu shortcuts Electron had written for this worktree's packages: ${stray.join(', ')}.`);
     const failed = result.checks.filter((c) => !c.pass);
     result.total = result.checks.length;
     result.passed = result.total - failed.length;
@@ -36,6 +38,28 @@ function record(script) {
     return failed.length;
   };
   return { result, check, note: (text) => result.notes.push(text), finish };
+}
+
+/**
+ * Windows shows an application's notices only with a Start menu shortcut, and Electron writes one when a
+ * notice is made and none exists. A check's packages are never installed, so any shortcut that points into
+ * this worktree's dist/ was written during a check, and is removed when the check ends.
+ */
+function removeTestShortcuts() {
+  const dir = path.join(process.env.APPDATA || '', 'Microsoft', 'Windows', 'Start Menu', 'Programs');
+  const marker = path.join(desktop, 'dist');
+  const removed = [];
+  if (!fs.existsSync(dir)) return removed;
+  for (const name of fs.readdirSync(dir)) {
+    if (!name.toLowerCase().endsWith('.lnk')) continue;
+    const file = path.join(dir, name);
+    const bytes = fs.readFileSync(file);
+    if (bytes.toString('latin1').includes(marker) || bytes.toString('utf16le').includes(marker)) {
+      fs.rmSync(file, { force: true });
+      removed.push(name);
+    }
+  }
+  return removed;
 }
 
 async function until(fn, ms = 10000, step = 150) {
@@ -278,4 +302,4 @@ const recorded = (app) =>
     };
   });
 
-module.exports = { root, desktop, pkg, devExe, sleep, record, until, listen, portAnswers, pages, launchDev, instrument, recorded, closeAll, scratch, running, ps, commandChannel, commandLoop, launchPlain };
+module.exports = { removeTestShortcuts, root, desktop, pkg, devExe, sleep, record, until, listen, portAnswers, pages, launchDev, instrument, recorded, closeAll, scratch, running, ps, commandChannel, commandLoop, launchPlain };

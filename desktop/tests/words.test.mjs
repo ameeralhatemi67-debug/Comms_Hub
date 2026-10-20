@@ -2,9 +2,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { REASONS } from '../src/bridge.ts';
-import { decisionsLine, HIDDEN_BUSY, HIDDEN_KEPT, QUIT_QUESTION, TRAY_KEEP, TRAY_OPEN, TRAY_QUIT, trayTooltip } from '../src/words.ts';
+import { decisionsLine, HIDDEN_BUSY, HIDDEN_KEPT, QUIT_QUESTION, TRAY_KEEP, TRAY_OPEN, TRAY_QUIT, TRAY_RESTART, trayTooltip, UPDATE_WAITS, updateReady } from '../src/words.ts';
 
-const all = () => [TRAY_OPEN, TRAY_KEEP, TRAY_QUIT, HIDDEN_KEPT.title, HIDDEN_KEPT.body, ...Object.values(HIDDEN_BUSY).flatMap((x) => [x.title, x.body]), ...Object.values(QUIT_QUESTION).flatMap((x) => Object.values(x)), trayTooltip('export', 3)];
+const all = () => [TRAY_OPEN, TRAY_KEEP, TRAY_QUIT, TRAY_RESTART, updateReady('0.3.1').title, updateReady('0.3.1').body, UPDATE_WAITS.title, UPDATE_WAITS.body, HIDDEN_KEPT.title, HIDDEN_KEPT.body, ...Object.values(HIDDEN_BUSY).flatMap((x) => [x.title, x.body]), ...Object.values(QUIT_QUESTION).flatMap((x) => Object.values(x)), trayTooltip('export', 3)];
 
 test('the tray says the decision D-10 named, word for word', () => {
   assert.equal(TRAY_KEEP, 'إبقاء التطبيق في شريط المهام');
@@ -32,4 +32,11 @@ test('Arabic, and no emoji anywhere', () => {
     assert.match(text, /[؀-ۿ]/, text);
     assert.equal(/\p{Extended_Pictographic}/u.test(text), false, text);
   }
+});
+
+test('the update\'s words (D3)', () => {
+  assert.equal(TRAY_RESTART, 'إعادة التشغيل للتحديث');
+  assert.equal(updateReady('0.3.1').title, 'تحديث جاهز');
+  assert.match(updateReady('0.3.1').body, /0\.3\.1/);
+  assert.match(updateReady('0.3.1').body, /«إعادة التشغيل للتحديث»/);
 });

@@ -7,6 +7,15 @@ import { PRODUCT_NAME } from './identity.ts';
 export const TRAY_OPEN = `فتح ${PRODUCT_NAME}`;
 export const TRAY_KEEP = 'إبقاء التطبيق في شريط المهام';
 export const TRAY_QUIT = 'إنهاء';
+export const TRAY_RESTART = 'إعادة التشغيل للتحديث';
+
+/** The notice when an update has been downloaded (D3). */
+export function updateReady(version: string): { title: string; body: string } {
+  return { title: 'تحديث جاهز', body: `الإصدار ${version} جاهز، ويُثبَّت عند إنهاء التطبيق. للتثبيت الآن اختر «${TRAY_RESTART}».` };
+}
+
+/** «إعادة التشغيل للتحديث» while a window works: refused, and said why. */
+export const UPDATE_WAITS = { title: 'التحديث ينتظر', body: 'لا يُعاد تشغيل التطبيق أثناء العمل. يُثبَّت التحديث عند إنهاء التطبيق بعد انتهائه.' };
 
 const WORKING: Record<Reason, string> = { export: 'جارٍ التصدير', upload: 'جارٍ رفع ملف' };
 

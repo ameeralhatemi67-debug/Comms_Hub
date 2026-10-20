@@ -9,9 +9,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { app, BrowserWindow, Menu, nativeTheme, screen, session, shell } from 'electron';
 import type { WebContents, WebPreferences } from 'electron';
-import { ALLOWED, DEV, VERSION } from './compiled.ts';
+import { ALLOWED, DEV, QA, UPDATE_FEED, VERSION } from './compiled.ts';
 import { saveDialogFor } from './downloads.ts';
-import { dataFolderName, PRODUCT_NAME, userAgentFor, windowsAppId } from './identity.ts';
+import { dataFolderName, PRODUCT_NAME, productNameFor, userAgentFor, windowsAppId } from './identity.ts';
 import { keyAction, nextZoom, type KeyAction } from './keys.ts';
 import { startNative, type Native } from './native.ts';
 import { decideNavigation, loadFailure, type Decision } from './navigation.ts';
@@ -35,9 +35,9 @@ if (refused) {
 // 2. The profile lives in a folder named by the fixed id, whatever name Windows shows. A development
 // build may be pointed at a throwaway folder by the checks in qa/desktop-shell.cjs.
 const devData = __COMMS_HUB_DEV__ ? process.env.COMMS_HUB_DEV_DATA : undefined;
-app.setPath('userData', devData && path.isAbsolute(devData) ? devData : path.join(app.getPath('appData'), dataFolderName(DEV)));
-app.setName(PRODUCT_NAME);
-if (process.platform === 'win32') app.setAppUserModelId(windowsAppId(DEV));
+app.setPath('userData', devData && path.isAbsolute(devData) ? devData : path.join(app.getPath('appData'), dataFolderName(DEV, QA)));
+app.setName(productNameFor(DEV, QA));
+if (process.platform === 'win32') app.setAppUserModelId(windowsAppId(DEV, QA));
 
 const lock = app.requestSingleInstanceLock();
 if (!lock) app.quit();
@@ -303,7 +303,7 @@ if (lock && !refused) {
     // No native menu bar (11.1): the site and the studio keep their own menus and keys.
     Menu.setApplicationMenu(null);
     prepareSession();
-    native = startNative({ allowed: ALLOWED, windows: () => siteWindows, mainWindow: () => main, version: VERSION, iconPath: pagePath('icon.png') });
+    native = startNative({ allowed: ALLOWED, windows: () => siteWindows, mainWindow: () => main, version: VERSION, iconPath: pagePath('icon.png'), feed: UPDATE_FEED, qa: QA, dev: DEV });
     createMainWindow();
   });
 }

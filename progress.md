@@ -1334,3 +1334,62 @@ When recording future implementation outcomes, follow this standardized template
   3. Turn on «إبقاء التطبيق في شريط المهام», close the window, and reopen it from the tray.
   4. Have someone send you a work for a decision while the window is minimised: the notice and the taskbar number appear.
   5. Open «معلومات الجهاز» in the studio: it should name the graphics chip in use.
+
+### 2026-10-21: the desktop application, D3: updates and the download page (signing waits)
+
+- **Scope.** D3 of `Desktop_App_Plan.md` without signing, which waits for a certificate (decision D-7), and without a build workflow, which waits for macOS (11.1). By the owner's answer of 2026-10-20, the release bucket is a migration file only, not applied, and no release is published.
+- **What changed, in the application** (`desktop/`, version 0.3.0; `MVP_draft.md` 63.2):
+  - **Updates** (`src/update.ts`, `src/updater.ts`):
+    - electron-updater **6.8.10**, pinned by the fourteen-day rule (published 2026-09-26), and bundled. Only its Windows updater is imported: its index would bring the macOS updater into the bundle.
+    - The generic feed is compiled in: `https://hrghmioxvgkjpnydrxrk.supabase.co/storage/v1/object/public/desktop-releases/windows-x64`, the public bucket of decision D-6.
+    - It looks ten seconds after start and every four hours, downloads in the background, checks the SHA-512 against `latest.yml`, and installs on quit or with «إعادة التشغيل للتحديث». That is refused while a window is busy («التحديث ينتظر»).
+    - When an update is ready and the window is not in front: a notice «تحديث جاهز», and the item in the tray's menu.
+    - `feedAllowed` refuses every feed but the production one, except in the update check's own package. A development build never runs the updater.
+    - The updater's log is off.
+  - **Bridge version 2** adds `update` (`status`, `restart`), registered through `guard()` like the others.
+  - **Three kinds of build** (`scripts/build.mjs`):
+    - release;
+    - development;
+    - `qa`, the update check's package: the release build under its own id, name and data folder, `sa.commshub.desktop.qa`, «مركز الاتصال المؤسسي، فحص التحديث», with a version and a feed on this laptop (`electron-builder.qa.cjs`). It can be built only with both, and the release bundle never carries its feed.
+  - **The release package** names the generic feed, so electron-builder writes `latest.yml`, the blockmap and `app-update.yml`. `--publish never` keeps anything from being uploaded.
+  - **The uninstaller** (`resources/installer.nsh`, a `customUnInstall` step) now also removes `%LOCALAPPDATA%\sa.commshub.desktop-updater`, but never during an update. electron-builder's installer copies itself there (about 110 MB) and its own uninstaller left it behind. The checks of D1 and D2 had left it on this laptop that way.
+  - **Names apart.** Electron writes a Start menu shortcut for an application's notices, named after the package. The development package is now «مركز الاتصال المؤسسي، نسخة التطوير» and the update check's «مركز الاتصال المؤسسي، فحص التحديث», so neither can replace the real application's shortcut. Every check also removes, when it ends, any shortcut pointing into this worktree (`qa/desktop-helpers.cjs`, `removeTestShortcuts`).
+- **What changed, in the site:**
+  - `src/lib/native/releases.ts`: the same feed, held equal by a test; `latest.yml` read strictly (a version, an `.exe` name with no path, a size); `MINIMUM_DESKTOP` 0.2.0; and the update state in Arabic.
+  - `src/components/native/desktop-app.tsx`:
+    - «تطبيق سطح المكتب» on «الحساب» (`supporting.tsx`): in a browser, the download, the version, the size and what SmartScreen asks; inside the application, the version and the update state with «إعادة التشغيل للتحديث»;
+    - the banner for an application older than the site needs (`shell.tsx`). It works from D1's bridge on, because it reads only the version.
+  - `src/lib/native/index.ts`: the feature `update`.
+  - `use-native.ts`: `useNativeVersion`.
+- **The bucket.** `supabase/migrations/20261021090000_desktop_releases.sql`, **written, not applied**: a public bucket `desktop-releases`, 300 MB per file, a few types, and no write policy for anyone. `desktop/README.md` says how the owner publishes a release: raise the project's upload limit, apply the migration, upload the installer, the blockmap and `latest.yml` last.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **86 of 86**, in 16 files (new: `update`; D2's tests updated for bridge version 2, the build kinds, the names and the uninstall step), `npm run typecheck` clean.
+  - **The site:** `npm run typecheck` clean, `npm test` **518 of 518**, `npm run build` passes (compiled in 7.4 s).
+  - **`node qa/desktop-update.cjs`: 10 of 10** (`qa/desktop-update.json`). On this laptop, with the update check's own package and a local feed:
+    - two packages built, 0.3.0 and 0.3.1; `latest.yml` names 0.3.1 with its size and SHA-512;
+    - DT-09: the package names no publisher, so electron-updater checks the SHA-512 only. Signing is not applicable to an unsigned pilot; signtool and the other tools were not run;
+    - 0.3.0 installed silently for this user. Started plainly, it asked the feed and downloaded 0.3.1 in the background (it asked for 0.3.0's blockmap first, which the feed did not have, then took the whole installer);
+    - closing its window quit it, and 0.3.1 was installed on quit. The data folder stayed, and the program on disk is 0.3.1;
+    - DT-09: a replaced installer (version 0.3.2 named with 0.3.1's checksum, one byte changed) was downloaded and refused, and nothing was installed;
+    - a silent uninstall removed the program, its Start menu shortcut, its Windows entry, its data and the updater's folder.
+  - **`node qa/desktop-account.cjs`: 8 of 8** (`qa/desktop-account.json`). Two runs had timed out on the application window's last screenshot, a picture rather than a check; pictures are now tried twice and a miss is noted:
+    - in Edge, «تنزيل التطبيق» to the bucket's installer, the version, about 112 MB, and SmartScreen's two steps;
+    - no release: «لم يُنشر إصدار للتنزيل بعد.»;
+    - with D1's bridge (0.1.0): the banner and the panel's warning;
+    - inside the development package: «… الإصدار 0.3.0» and the idle line, with nothing asked of the feed.
+  - **`node qa/desktop-native.cjs`: 37 of 37** against bridge version 2. Its notes record the Start menu shortcut Electron wrote for the development package during the run, now named «مركز الاتصال المؤسسي، نسخة التطوير.lnk», and removed at the end.
+  - **`node qa/desktop-shell.cjs`: 81 of 81** against the 0.3.0 release package, now also checking that uninstalling removes the updater's folder. Installer **111,615,091 bytes (106.4 MB)**; installed **336,748,035 bytes (321.1 MB), 22 files**, in 13.5 s. Nothing was left on this laptop: no program, updater folder or shortcut.
+  - **Not re-run:** `qa/desktop-studio-parity.cjs`. D3 changes no studio code; its D2 result stands.
+- **Found on the way, fixed.**
+  - Uninstalling left `%LOCALAPPDATA%\sa.commshub.desktop-updater` (above). The copies left by D1's and D2's checks on this laptop were removed.
+  - Electron wrote «مركز الاتصال المؤسسي.lnk» in the Start menu during a check, pointing to the development package. On a laptop with the application installed, that would have replaced its shortcut. It was removed, and the names are now apart (above).
+  - The update check's first run had two faults of its own:
+    - the updater, holding the genuine 0.3.1 file, took it as the 0.3.2 download because the manifest named its checksum, so the replaced file was never fetched. The check now clears the updater's downloads first, as on a laptop that never fetched the genuine one;
+    - NSIS's uninstaller returns before it has finished, and a silent update was still running. The check now waits for every process of the package and for every trace to go. The package that the race had left installed was removed.
+  - The release bundle grew from about 35 KB to about 531 KB with electron-updater and its libraries (YAML, semver, file utilities).
+  - `npm audit` reports a moderate finding in sprintf-js, reached through electron-builder's download of Electron at build time. Nothing of it ships in the application. The fix offered is a downgrade of electron-builder, not taken.
+- **Not verified, said plainly.**
+  - **No real release was published or fetched,** and the bucket does not exist; the application's check against it fails quietly until the owner publishes.
+  - **SmartScreen and the installer's Arabic pages** were not seen: every install was silent and built on this laptop.
+  - **Updating over a version that has the older uninstaller:** electron-builder runs the *installed* version's uninstaller during an update. The pilot's 0.1.0 and 0.2.0 do not remove the updater's folder, so it stays until a version from 0.3.0 on is uninstalled.
+- **Owner steps, when the first release is wanted** (desktop/README.md): raise the upload limit, apply the migration, `npm run pack`, upload the three files. Then, in a browser, «الحساب» shows «تنزيل التطبيق», and an installed application finds the update within four hours.

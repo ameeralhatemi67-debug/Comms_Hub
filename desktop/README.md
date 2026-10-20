@@ -88,6 +88,34 @@ It writes `qa/desktop-shell.json`. It installs the release package silently, run
 again, but only when this laptop has no installation or profile of the application. Otherwise it skips
 that part and touches nothing.
 
+## Updates and publishing a release
+
+The application updates itself (D3) from the public bucket `desktop-releases` of the `comms-hub` Supabase
+project, folder `windows-x64/`. It reads `latest.yml` there when it starts and every four hours, downloads a
+newer installer in the background, checks its SHA-512, and installs it when the person quits (or at once with
+«إعادة التشغيل للتحديث»). «تطبيق سطح المكتب» on «الحساب» links to the same installer.
+
+Publishing is the owner's alone; nothing is uploaded by the site or by an agent. The first time:
+
+1. In the Supabase dashboard of `comms-hub`, Storage, Settings: raise the upload size limit above 300 MB
+   (an installer is about 110 MB).
+2. Apply `supabase/migrations/20261021090000_desktop_releases.sql`. It creates the public bucket, which no
+   visitor or signed-in person can write to.
+
+Each release:
+
+1. Raise `version` in `package.json` (and the lockfile's two copies of it), then `npm run pack`.
+2. Upload these three files from `dist/release/` to `desktop-releases/windows-x64/`, the installer first and
+   `latest.yml` last, so no application sees a manifest before its file:
+   - `CommsHub-Setup-<version>-x64.exe`;
+   - `CommsHub-Setup-<version>-x64.exe.blockmap`;
+   - `latest.yml`, replacing the old one.
+
+An application that is open looks within four hours; one that starts looks at once. The update check,
+`node qa/desktop-update.cjs`, proves the same path on this laptop with its own package
+(`electron-builder.qa.cjs`, id `sa.commshub.desktop.qa`) and a local feed, and never touches a real
+installation.
+
 ## Installing the pilot build
 
 1. Copy `CommsHub-Setup-0.1.0-x64.exe` to the laptop and open it.
@@ -95,6 +123,6 @@ that part and touches nothing.
 3. It installs for this user only, without administrator rights, and adds a Start menu and a desktop
    shortcut named «مركز الاتصال المؤسسي».
 
-To install a newer pilot build, run its installer over the old one; the session is kept. Uninstalling from
+A newer version arrives by itself once releases are published; until then, run its installer over the old one. The session is kept either way. Uninstalling from
 Windows' settings removes the program and the application's data on this laptop, the session included
 (decision D-11).

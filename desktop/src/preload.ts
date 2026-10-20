@@ -2,11 +2,12 @@
 // side of the native contract the site reads through src/lib/native/. It is exposed only when this
 // document is the top-level page and its address is on the compiled list; frames, foreign pages and the
 // application's own Arabic screens get nothing. Version 1 (D2) adds `info`, `power`, `life` and
-// `notify`. Each method only sends a message; its main-process handler checks the sender again
-// (sender.ts) and every argument (bridge.ts). No method takes a file path, a command or another address.
+// `notify`; version 2 (D3) adds `update`. Each method only sends a message; its main-process handler
+// checks the sender again (sender.ts) and every argument (bridge.ts). No method takes a file path, a
+// command or another address.
 import { contextBridge, ipcRenderer } from 'electron';
 import { ALLOWED, VERSION } from './compiled.ts';
-import { CHANNEL } from './ipc.ts';
+import { BRIDGE_VERSION, CHANNEL } from './ipc.ts';
 import { isAllowed } from './origins.ts';
 
 if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
@@ -24,7 +25,7 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
       platform: 'desktop',
       shell: 'electron',
       version: VERSION,
-      bridge: 1,
+      bridge: BRIDGE_VERSION,
       info: () => call(CHANNEL.info),
       power: Object.freeze({ keepAwake: (reason: unknown) => call(CHANNEL.keepAwake, reason), release: (id: unknown) => call(CHANNEL.release, id) }),
       life: Object.freeze({ busy: (reason: unknown) => call(CHANNEL.busy, reason), idle: () => call(CHANNEL.idle) }),
@@ -35,6 +36,7 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
           opener = typeof fn === 'function' ? (fn as (go: string) => void) : null;
         },
       }),
+      update: Object.freeze({ status: () => call(CHANNEL.updateStatus), restart: () => call(CHANNEL.updateRestart) }),
     }),
   );
 }
