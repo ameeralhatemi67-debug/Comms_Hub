@@ -14,7 +14,8 @@
 // The marks flow (MVP_draft.md 62.8): markers, chapters, a covered area.
 // The sound flow (MVP_draft.md 62.9): a waveform, a recording, a speech track, music lowered under it.
 // The export2 flow (MVP_draft.md 62.10): shapes, checks, SRT, the mark, a frame to a photo project.
-// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time|marks|sound|export2]   (writes qa/studio-ui.json)
+// The kit flow (MVP_draft.md 62.11): the brand, a template, a project from it, a pinned title.
+// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time|marks|sound|export2|kit]   (writes qa/studio-ui.json)
 const fs = require('node:fs');
 const path = require('node:path');
 const { dependency, launchOptions } = require('./runtime.cjs');
@@ -812,6 +813,84 @@ async function export2Flow(browser, base, errors) {
   await ctx.close();
 }
 
+// Templates and «هوية الاستوديو» (MVP_draft.md 62.11): the brand is saved on the studio home; a project
+// is saved as a template from «ملف»; the home shows it under «القوالب»; «مشروع من القالب» starts a new
+// project with its clips; a new title takes the brand's title font, colour choices offer the brand's
+// colours; a pinned clip is not removed by Delete.
+async function kitFlow(browser, base, errors) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const tab = await ctx.newPage();
+  tab.on('pageerror', (e) => errors.push(e.message));
+  tab.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  tab.on('response', (q) => q.status() >= 400 && errors.push(`HTTP ${q.status()}: ${q.url()}`));
+  await tab.goto(base + '/motion/studio');
+  await tab.evaluate(() => window.__db.reset());
+  await tab.reload();
+
+  // the brand
+  await tab.locator('.st-brand summary').click();
+  await tab.getByRole('button', { name: 'لون', exact: true }).click();
+  await tab.getByLabel('اسم اللون 1').fill('ذهبي الهوية');
+  await tab.getByLabel('قيمة اللون 1').fill('#c9ac70');
+  await tab.locator('.st-brand-fonts > div').first().locator('.st-font-btn').click();
+  await tab.locator('.st-font-list [role="option"]', { hasText: 'كايرو' }).first().click();
+  await tab.getByRole('button', { name: 'حفظ الهوية' }).click();
+  await tab.getByText('حُفظت هوية الاستوديو').waitFor({ timeout: 5000 });
+  const brand = await tab.evaluate(() => window.__db.brand);
+  check('kit: «هوية الاستوديو» saves a named colour and a title font', brand?.colors?.[0]?.hex === '#c9ac70' && brand.colors[0].name === 'ذهبي الهوية' && brand.title_font === 'Cairo', JSON.stringify(brand));
+
+  // a project with a pinned title, saved as a template
+  await tab.getByRole('button', { name: 'مشروع فيديو جديد' }).click();
+  await tab.getByLabel('اسم المشروع').fill('قالب الأخبار');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).click();
+  await tab.locator('.st-editor').waitFor({ timeout: 15000 });
+  await tab.locator('.st-ws-tab[data-panel="graphics"]').click();
+  await tab.getByRole('button', { name: 'عنوان كبير' }).click();
+  await tab.locator('.st-ws-tab[data-panel="inspector"]').click();
+  const font = await tab.locator('.st-insp .st-font-btn').first().textContent();
+  const swatch = await tab.locator('.st-insp .ms-swatch[aria-label="ذهبي الهوية"]').count();
+  check('kit: a new title takes the brand\'s title font, and colour choices offer the brand\'s colour', /كايرو/.test(font) && swatch >= 1, `${font} / ${swatch} swatches`);
+  await tab.locator('.st-insp').getByRole('button', { name: 'تثبيت' }).click();
+  await tab.locator('.st-clip[data-kind="text"]').click();
+  await tab.locator('body').press('Delete');
+  const kept = await tab.locator('.st-clip[data-kind="text"]').count();
+  check('kit: a title pinned in the template is not removed by Delete, and shows its pin', kept === 1 && (await tab.locator('.st-clip-pin').count()) === 1, kept);
+  await tab.getByRole('button', { name: 'حفظ نسخة' }).click();
+  await tab.getByRole('button', { name: 'حفظ النسخة' }).click();
+  await tab.waitForFunction(() => /النسخة 2/.test(document.querySelector('.st-title small').textContent));
+  await tab.locator('.st-menu-btn', { hasText: 'ملف' }).click();
+  await tab.locator('.st-menu [role="menuitemcheckbox"], .st-menu [role="menuitem"]', { hasText: 'حفظ قالباً' }).first().click();
+  await tab.waitForTimeout(300);
+
+  // the home shows it as a template, and a new project starts from it
+  await tab.evaluate(() => window.__nav('/motion/studio'));
+  await tab.locator('.st-templates').waitFor({ timeout: 10000 });
+  const tpl = await tab.locator('.st-templates .st-card b').allTextContents();
+  const listed = await tab.locator('.st-home > .st-cards .st-card b').allTextContents();
+  check('kit: the home lists the project under «القوالب», not among the projects', tpl.includes('قالب الأخبار') && !listed.includes('قالب الأخبار'), `${tpl.join(',')} | ${listed.join(',')}`);
+  await tab.getByRole('button', { name: 'مشروع من القالب' }).click();
+  await tab.getByLabel('اسم المشروع').fill('أخبار الأحد');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).click();
+  await tab.locator('.st-editor').waitFor({ timeout: 15000 });
+  const title = await tab.locator('.st-title b').textContent();
+  const texts = await tab.locator('.st-clip[data-kind="text"]').count();
+  check('kit: «مشروع من القالب» opens a new project with the template\'s pinned title', title === 'أخبار الأحد' && texts === 1 && (await tab.locator('.st-clip-pin').count()) === 1, `${title} ${texts}`);
+  // the title is drawn in the brand's font once the font has loaded (at 1 s: a new title fades in from 0)
+  await tab.waitForFunction(() => document.fonts.check('700 48px "Cairo"', 'عنوان'), null, { timeout: 8000 }).catch(() => undefined);
+  await tab.locator('body').press('Shift+ArrowRight');
+  await tab.waitForTimeout(600);
+  const lit = await tab.evaluate(() => {
+    const c = document.querySelector('.st-canvas');
+    const d = c.getContext('2d').getImageData(0, Math.floor(c.height * 0.3), c.width, Math.floor(c.height * 0.25)).data;
+    let n = 0;
+    for (let i = 0; i < d.length; i += 4) if (d[i] > 200 && d[i + 1] > 200 && d[i + 2] > 200) n++;
+    return n;
+  });
+  check('kit: the new project draws the template\'s title on the preview', lit > 50, `${lit} white pixels`);
+  await tab.screenshot({ path: path.join(out, 'kit-1440.png') });
+  await ctx.close();
+}
+
 async function photoFlow(browser, base, errors) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const tab = await ctx.newPage();
@@ -944,6 +1023,7 @@ async function phoneFlow(browser, base, errors) {
     if (!only || only === 'marks') await marksFlow(browser, base, errors);
     if (!only || only === 'sound') await soundFlow(browser, base, errors);
     if (!only || only === 'export2') await export2Flow(browser, base, errors);
+    if (!only || only === 'kit') await kitFlow(browser, base, errors);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));
   } finally {

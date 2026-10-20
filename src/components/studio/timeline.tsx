@@ -8,9 +8,7 @@
 // time pointed to; a transition or a movement is dropped onto a clip near its start or its end. Ctrl and
 // the wheel zoom about the pointer; a right click opens the clip's menu.
 import { useCallback, useEffect, useRef, useState, type DragEvent, type PointerEvent as RPointerEvent, type ReactNode } from 'react';
-import {
-  Eye, EyeOff, Lock, Unlock, Volume2, VolumeX, Plus, MousePointer2, Scissors, Hand, Magnet, Undo2, Redo2, Trash2, ZoomIn, Maximize, Film, Image as ImageIcon, Music, Sparkles, Type, Stamp, Copy, ClipboardPaste, ArrowLeftToLine, Blend, Mic,
-} from 'lucide-react';
+import { Eye, EyeOff, Lock, Unlock, Volume2, VolumeX, Plus, MousePointer2, Scissors, Hand, Magnet, Undo2, Redo2, Trash2, ZoomIn, Maximize, Film, Image as ImageIcon, Music, Sparkles, Type, Stamp, Copy, ClipboardPaste, ArrowLeftToLine, Blend, Mic, Pin } from 'lucide-react';
 import { TRACK_LABELS, TRACK_LIMITS, US, durationOf, type Clip, type Micros, type ProjectDoc, type Track, type TrackKind } from '@/lib/studio/schema';
 import { legalStart, snapPoints, snapTo, sourceOf } from '@/lib/studio/timeline';
 import { shortTime } from '@/lib/studio/time';
@@ -551,6 +549,7 @@ export function Timeline(p: TimelineProps) {
                       <span className="st-clip-name" dir="auto">{clipLabel(doc, c)}</span>
                       {w > 110 && <small className="st-clip-len" dir="ltr">{shortTime(c.length)}</small>}
                       {retimeLabel(c) && w > 60 && <small className="st-clip-speed">{retimeLabel(c)}</small>}
+                      {c.pinned && <Pin className="st-clip-pin" aria-label="مثبّت في القالب" />}
                       {p.selected === c.id &&
                         keyTimes(c.keys).map((kt) => (
                           <i
@@ -570,7 +569,7 @@ export function Timeline(p: TimelineProps) {
                       {(c.animOut || (c.fadeOut ?? 0) > 0) && <i className="st-clip-anim out" style={{ width: Math.min(w / 2, px(c.animOut?.length ?? c.fadeOut ?? 0)) }} aria-hidden="true" />}
                       {src?.kind === 'loading' && <em className="st-clip-load" style={{ width: `${src.total ? Math.round((src.done / src.total) * 100) : 5}%` }} />}
                       {razorAt?.id === c.id && <i className="st-clip-razor" style={{ left: razorAt.x }} aria-hidden="true" />}
-                      {!p.readOnly && !t.locked && tool === 'select' && (
+                      {!p.readOnly && !t.locked && !c.pinned && tool === 'select' && (
                         <>
                           <b className="st-clip-edge start" onPointerDown={(e) => startDrag(e, c, t, 'start')} aria-hidden="true" />
                           <b className="st-clip-edge end" onPointerDown={(e) => startDrag(e, c, t, 'end')} aria-hidden="true" />

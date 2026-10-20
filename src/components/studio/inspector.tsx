@@ -6,7 +6,7 @@
 // the template tab's catalog, with its controls), a brand mark's colour. The project's shape, frame rate
 // and background are the window «المشروع» (ProjectSettings).
 import type { ReactNode } from 'react';
-import { Copy, Scissors, Trash2, ArrowLeftToLine, Frame, RotateCcw, MousePointerClick, Blend, Diamond, ChevronLeft, ChevronRight, Snowflake, KeyRound } from 'lucide-react';
+import { Copy, Scissors, Trash2, ArrowLeftToLine, Frame, RotateCcw, MousePointerClick, Blend, Diamond, ChevronLeft, ChevronRight, Snowflake, KeyRound, Pin } from 'lucide-react';
 import {
   FPS_CHOICES, RATIOS, STICKERS, STICKER_LABELS, US, canvasOf, durationOf,
   type Clip, type Cover, type Crop, type Layer, type ProjectDoc, type Ratio, type TextStyle, type Track, type Transform,
@@ -18,6 +18,7 @@ import { changedParams, graphicById, motionParams, naturalLength, holdKey } from
 import { DUCK_MAX, roleOf, setFormat, sourceOf } from '@/lib/studio/timeline';
 import { shortTime } from '@/lib/studio/time';
 import { transformOf } from '@/lib/studio/compose';
+import { HOLD } from '@/lib/kit/hold-reasons';
 import { EASES, KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAt, keyTimes, transformWithKeys, writeTransform as writeTransformKeys, type Ease, type KeyProp, type Keys, type MotionProp } from '@/lib/studio/keys';
 import { SPEED_MAX, SPEED_MIN, isHold, retimed, speedAt } from '@/lib/studio/speed';
 import { COVER_MODES, COVER_SHAPES } from '@/lib/studio/cover';
@@ -411,10 +412,15 @@ export function Inspector({
         <small dir="auto">{clip.text?.content.split('\n')[0] ?? (clip.motion ? graphicById(clip.motion.template)?.name : src?.name) ?? ''}</small>
         {sourceNote && <p className="st-hint st-warn">{sourceNote}</p>}
         <div className="st-insp-acts">
-          <button type="button" onClick={actions.split} disabled={readOnly} title={withKeys('قص عند رأس التشغيل', 'split')}><Scissors aria-hidden="true" />قص</button>
+          {clip.pinned ? (
+            <button type="button" className="st-pin" data-on="yes" disabled={readOnly} data-hold={HOLD.studioUnpin} onClick={() => onClip((c) => { const n = { ...c }; delete n.pinned; return n; }, 'إلغاء التثبيت')}><Pin aria-hidden="true" />مثبّت في القالب</button>
+          ) : (
+            <button type="button" className="st-pin" data-on="no" disabled={readOnly} onClick={() => onClip({ pinned: true }, 'تثبيت في القالب')} title="لا يُنقل ولا يُقص ولا يُحذف خطأً حتى يُلغى تثبيته بضغطة مطولة"><Pin aria-hidden="true" />تثبيت</button>
+          )}
+          <button type="button" onClick={actions.split} disabled={readOnly || !!clip.pinned} title={withKeys('قص عند رأس التشغيل', 'split')}><Scissors aria-hidden="true" />قص</button>
           <button type="button" onClick={actions.duplicate} disabled={readOnly} title={withKeys('تكرار', 'duplicate')}><Copy aria-hidden="true" />تكرار</button>
-          <button type="button" onClick={actions.remove} disabled={readOnly} title={withKeys('حذف', 'delete')}><Trash2 aria-hidden="true" />حذف</button>
-          <button type="button" onClick={actions.ripple} disabled={readOnly} title={withKeys('حذف مع سد الفراغ', 'ripple-delete')}><ArrowLeftToLine aria-hidden="true" />حذف وسد الفراغ</button>
+          <button type="button" onClick={actions.remove} disabled={readOnly || !!clip.pinned} title={withKeys('حذف', 'delete')}><Trash2 aria-hidden="true" />حذف</button>
+          <button type="button" onClick={actions.ripple} disabled={readOnly || !!clip.pinned} title={withKeys('حذف مع سد الفراغ', 'ripple-delete')}><ArrowLeftToLine aria-hidden="true" />حذف وسد الفراغ</button>
         </div>
       </div>
       <Section title="التوقيت">

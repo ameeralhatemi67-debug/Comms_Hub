@@ -10,7 +10,7 @@ import { BACKUP_EXCLUDED, BACKUP_KIND_AR, BACKUP_STATE_AR, EVENT_AR, ageAr, back
 
 const sql = readFileSync(new URL('../supabase/migrations/20261015150000_backups.sql', import.meta.url), 'utf8');
 // The studio (Studio_Build_Plan.md Phase 2) redefines the list and the plan: the latest definition is in force.
-const later = [readFileSync(new URL('../supabase/migrations/20261019130000_studio_projects.sql', import.meta.url), 'utf8')];
+const later = [readFileSync(new URL('../supabase/migrations/20261020140000_studio_kit.sql', import.meta.url), 'utf8'), readFileSync(new URL('../supabase/migrations/20261019130000_studio_projects.sql', import.meta.url), 'utf8')];
 const find = (text, name) => text.match(new RegExp(`create (?:or replace )?function public\\.${name}\\([^)]*\\)[\\s\\S]*?\\n\\$\\$;`))?.[0];
 const body = (name) => later.map((t) => find(t, name)).find(Boolean) ?? find(sql, name) ?? '';
 
@@ -127,6 +127,7 @@ test('the studio\'s records are in the database export, without the editing leas
   for (const t of ['studio_projects', 'studio_revisions', 'studio_sources', 'studio_exports']) assert.match(list, new RegExp(`'table','${t}'`), t);
   assert.match(list, /'table','studio_projects', 'drop', jsonb_build_array\('lease_holder','lease_until'\)/);
   assert.match(list, /'table','studio_revisions', 'page', 25/);
+  assert.match(list, /'table','studio_brand'\)\)\s*else/, '«هوية الاستوديو» is configuration');
   assert.match(body('backup_export_plan'), /jsonb_strip_nulls\(jsonb_build_object\('table', e->>'table', 'rows', n, 'page', e->'page'\)\)/);
   const calls = [];
   const rows = Array.from({ length: 60 }, (_, i) => ({ project_id: 'p', revision: i }));

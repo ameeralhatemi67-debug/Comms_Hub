@@ -7,8 +7,9 @@
 import { checkDoc } from '../../src/lib/studio/schema.ts';
 
 type Rev = { revision: number; base: number; doc: unknown; saved_by: string; saved_at: string; note: string | null };
-type Project = { id: string; title: string; kind: string; owner: string; created_at: string; updated_at: string; updated_by: string; revision: number; autosaved_at: string | null; work_ref: string | null; archived_at: string | null; lease_holder: string | null; lease_until: number; revs: Rev[]; exports: { asset: string; version: number; revision: number }[] };
-type Db = { projects: Project[]; files: Record<string, unknown>[]; uploads: number; notes?: Record<string, unknown>[]; workLinks?: { work: string; asset: string }[] };
+type Project = { id: string; title: string; kind: string; owner: string; created_at: string; updated_at: string; updated_by: string; revision: number; autosaved_at: string | null; work_ref: string | null; archived_at: string | null; lease_holder: string | null; lease_until: number; revs: Rev[]; exports: { asset: string; version: number; revision: number; shape?: string | null }[]; template?: boolean };
+type Brand = { colors: { name: string; hex: string }[]; title_font: string | null; body_font: string | null };
+type Db = { projects: Project[]; files: Record<string, unknown>[]; uploads: number; notes?: Record<string, unknown>[]; workLinks?: { work: string; asset: string }[]; brand?: Brand };
 
 export const ME = 'dir@t.test';
 const NAMES: Record<string, string> = { 'dir@t.test': 'مدير الاختبار', 'other@t.test': 'زميل آخر' };
@@ -49,7 +50,7 @@ const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; erro
           id: p.id, title: p.title, kind: p.kind, owner: p.owner, owner_name: NAMES[p.owner], created_at: p.created_at, updated_at: p.updated_at, updated_by: p.updated_by,
           updated_by_name: NAMES[p.updated_by], revision: p.revision, autosaved_at: p.autosaved_at, work_ref: p.work_ref, archived_at: p.archived_at,
           editing: p.lease_until > Date.now() ? p.lease_holder : null, editing_name: p.lease_until > Date.now() && p.lease_holder ? NAMES[p.lease_holder] : null,
-          exports: p.exports.length, thumb: null,
+          exports: p.exports.length, thumb: null, template: !!p.template,
         })),
     ),
   studio_project_create: (a) => {
@@ -140,7 +141,7 @@ const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; erro
   studio_export_record: (a) => {
     const p = project(String(a.p_project));
     if (!p) return err('NOT_FOUND');
-    p.exports.push({ asset: String(a.p_asset), version: Number(a.p_version), revision: Number(a.p_revision) });
+    p.exports.push({ asset: String(a.p_asset), version: Number(a.p_version), revision: Number(a.p_revision), shape: (a.p_shape as string) ?? null });
     save();
     return ok(crypto.randomUUID());
   },
@@ -148,6 +149,33 @@ const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; erro
     const p = project(String(a.p_project));
     if (!p) return err('NOT_FOUND');
     p.work_ref = (a.p_work as string) ?? null;
+    save();
+    return ok(null);
+  },
+  // templates and «هوية الاستوديو» (supabase/migrations/20261020140000_studio_kit.sql)
+  studio_project_set_template: (a) => {
+    const p = project(String(a.p_project));
+    if (!p) return err('NOT_FOUND');
+    p.template = !!a.p_on;
+    save();
+    return ok(null);
+  },
+  studio_project_copy: (a) => {
+    const src = project(String(a.p_from));
+    const title = String(a.p_title ?? '').trim();
+    if (!src) return err('NOT_FOUND');
+    if (!title || title.length > 120) return err('TITLE_INVALID');
+    const rev = src.revs.find((r) => r.revision === (a.p_revision ?? src.revision));
+    if (!rev) return err('NOT_FOUND');
+    const id = crypto.randomUUID();
+    db.projects.push({ id, title, kind: src.kind, owner: me, created_at: now(), updated_at: now(), updated_by: me, revision: 1, autosaved_at: null, work_ref: null, archived_at: null, lease_holder: me, lease_until: Date.now() + 90_000, revs: [{ revision: 1, base: 0, doc: structuredClone(rev.doc), saved_by: me, saved_at: now(), note: `من «${src.title}»` }], exports: [] });
+    save();
+    return ok(id);
+  },
+  studio_brand_save: (a) => {
+    const colors = a.p_colors as { name: string; hex: string }[];
+    if (!Array.isArray(colors) || colors.length > 12 || colors.some((c) => !/^#[0-9a-fA-F]{6}$/.test(c.hex) || !c.name?.trim())) return err('BRAND_INVALID');
+    db.brand = { colors, title_font: (a.p_title_font as string) ?? null, body_font: (a.p_body_font as string) ?? null };
     save();
     return ok(null);
   },
@@ -178,7 +206,8 @@ function query(table: string) {
   let rows: Record<string, unknown>[] =
     table === 'media_files' ? [...db.files]
     : table === 'works' ? [{ id: 'CH-101', title: 'حملة اليوم الوطني', status: 'IN_PRODUCTION', closed_at: null, updated_at: '2026-10-19' }]
-    : table === 'studio_projects' ? db.projects.map((p) => ({ id: p.id, work_ref: p.work_ref }))
+    : table === 'studio_projects' ? db.projects.map((p) => ({ id: p.id, work_ref: p.work_ref, template: !!p.template }))
+    : table === 'studio_brand' ? [db.brand ?? { colors: [], title_font: null, body_font: null }]
     : table === 'media_notes' ? [...(db.notes ?? [])]
     : table === 'studio_exports' ? db.projects.flatMap((p) => p.exports.map((e, i) => ({ project_id: p.id, asset_id: e.asset, version: e.version, revision: e.revision, created_at: String(i).padStart(4, '0') }))).reverse()
     : [];
@@ -226,6 +255,9 @@ export function supabase() {
 (window as unknown as { __db: unknown }).__db = {
   get projects() {
     return db.projects;
+  },
+  get brand() {
+    return db.brand;
   },
   takeLease(id: string, who = 'other@t.test') {
     const p = project(id)!;

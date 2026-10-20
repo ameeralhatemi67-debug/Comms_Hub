@@ -1,0 +1,44 @@
+{
+  "script": "qa/studio-ui.cjs",
+  "run": "2026-10-20T10:57:20.359Z",
+  "checks": [
+    {
+      "name": "kit: «هوية الاستوديو» saves a named colour and a title font",
+      "pass": true,
+      "detail": "{\"colors\":[{\"name\":\"ذهبي الهوية\",\"hex\":\"#c9ac70\"}],\"title_font\":\"Cairo\",\"body_font\":null}"
+    },
+    {
+      "name": "kit: a new title takes the brand's title font, and colour choices offer the brand's colour",
+      "pass": true,
+      "detail": "كايروعربي · حديث / 2 swatches"
+    },
+    {
+      "name": "kit: a title pinned in the template is not removed by Delete, and shows its pin",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "kit: the home lists the project under «القوالب», not among the projects",
+      "pass": true,
+      "detail": "قالب الأخبار | "
+    },
+    {
+      "name": "kit: «مشروع من القالب» opens a new project with the template's pinned title",
+      "pass": true,
+      "detail": "أخبار الأحد 1"
+    },
+    {
+      "name": "kit: the new project draws the template's title on the preview",
+      "pass": true,
+      "detail": "318 white pixels"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "total": 7,
+  "passed": 7,
+  "failed": 0
+}

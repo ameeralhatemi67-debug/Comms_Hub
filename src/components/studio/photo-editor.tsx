@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ArrowDown, ArrowUp, Copy, Eye, EyeOff, Lock, Trash2, Unlock, AlignCenter, AlignLeft, AlignRight, ArrowRight, ClipboardPaste, FileOutput, Moon, MousePointer2, Pencil, Redo2, Save, Scissors, Type as TypeIcon, Undo2, XCircle, ChevronsUp, ChevronsDown, MousePointerClick,
+  ArrowDown, ArrowUp, Copy, Eye, EyeOff, Lock, Trash2, Unlock, AlignCenter, AlignLeft, AlignRight, ArrowRight, ClipboardPaste, FileOutput, Moon, MousePointer2, Pencil, Redo2, Save, Scissors, Type as TypeIcon, Undo2, XCircle, ChevronsUp, ChevronsDown, MousePointerClick, Pin, LayoutTemplate,
 } from 'lucide-react';
 import { canOpen } from '@/lib/access';
 import { useAccount } from '@/lib/account-context';
@@ -24,7 +24,7 @@ import { addLayer, adjustImage, adjusts, alignLayer, duplicateLayer, moveLayer, 
 import { redoLabel, undoLabel } from '@/lib/studio/history';
 import { dragHandle, handleAt, snapCentre, type Handle } from '@/lib/studio/handles';
 import { keysOf, matchShortcut, typingTarget } from '@/lib/studio/shortcuts';
-import { ColorInput, Segmented, Slider, Switch } from '../motion-controls';
+import { ColorInput, Segmented, Slider, Switch, SwatchContext } from '../motion-controls';
 import { ADD_MIME, Bin, GraphicsPane, MediaPane, TemplatesPane, type AddDrop, type LibraryItem } from './bin';
 import { CachePanel } from './cache-panel';
 import { DesktopOnly, PanelTabs, useCompact, type Panel } from './compact';
@@ -37,6 +37,9 @@ import type { EditorProps } from './project-shell';
 import { drawOutline, readAddDrop } from './stage';
 import { UploadDialog, sourceNote, studioClipboard, useDocHistory, useExactSources, useStudioAssets, useStudioFonts, useStudioMedia } from './editor';
 import { HistoryPanel } from './history-panel';
+import { useStudioBrand, useTemplateFlag } from './brand';
+import { brandText } from '@/lib/studio/brand';
+import { HOLD } from '@/lib/kit/hold-reasons';
 import { VersionsPanel } from './versions-panel';
 import { plainLabel } from '@/lib/studio/diff';
 import { EditorFrame, panelSpecs, useEditorFrame } from './editor-frame';
@@ -93,6 +96,8 @@ export function PhotoEditor(p: EditorProps) {
   const [panel, setPanel] = useState<Panel>('timeline');
   const pw = useProjectWork(p.projectId, p.api);
   const frame = useEditorFrame('photo');
+  const { brand } = useStudioBrand();
+  const template = useTemplateFlag(p.projectId, p.api);
   // pictures with their adjustment applied (by the worker), by layer
   const [adjusted, setAdjusted] = useState<Map<string, { key: string; canvas: HTMLCanvasElement }>>(new Map());
   const layers = doc.photo?.layers ?? [];
@@ -208,7 +213,7 @@ export function PhotoEditor(p: EditorProps) {
   };
   const addMotion = (g: Graphic, at?: At) => put(h.get(), { motion: { template: g.id, params: {} } }, 'إضافة قالب حركة', at);
   const addText = (kind: 'title' | 'body' | 'caption', at?: At) =>
-    put(h.get(), { text: kind === 'title' ? { ...defaultText('عنوان'), size: Math.round(W / 10), weight: 700, enter: 'none', exit: 'none' } : { ...defaultText('نص'), size: Math.round(W / 18), weight: 500, enter: 'none', exit: 'none' } }, 'إضافة نص', at);
+    put(h.get(), { text: brandText(kind === 'title' ? { ...defaultText('عنوان'), size: Math.round(W / 10), weight: 700, enter: 'none', exit: 'none' } : { ...defaultText('نص'), size: Math.round(W / 18), weight: 500, enter: 'none', exit: 'none' }, brand, kind === 'title' ? 'title' : 'body') }, 'إضافة نص', at);
   const addMark = (key: StickerKey, color: string, at?: At) => put(h.get(), { sticker: { key, color }, transform: { x: at?.x ?? W * 0.78, y: at?.y ?? H * 0.12, scale: 0.6, rotation: 0, opacity: 1 } }, 'إضافة علامة الهوية');
   const addShape = (type: Shape['type'], at?: At) =>
     put(h.get(), { shape: { type, w: type === 'line' ? W * 0.5 : W * 0.4, h: type === 'line' ? 8 : W * 0.25, fill: type === 'line' ? null : '#17634b', stroke: type === 'line' ? '#c9ac70' : null, strokeWidth: type === 'line' ? 8 : 0, radius: 24 } }, 'إضافة شكل', at);
@@ -229,7 +234,7 @@ export function PhotoEditor(p: EditorProps) {
   // ------------------------------------------------------------- editing
   const patch = (pt: Partial<Layer> | ((l: Layer) => Layer), label: string, key?: string) => selected && h.apply(updateLayer(h.get(), selected, pt), label, key ? `${key}-${selected}` : null);
   const remove = () => {
-    if (!selected || sel?.locked) return;
+    if (!selected || sel?.locked || sel?.pinned) return;
     h.apply(removeLayer(doc, selected), 'حذف الطبقة');
     setSelected(null);
   };
@@ -319,6 +324,8 @@ export function PhotoEditor(p: EditorProps) {
     setSelected(id);
     if (!id || p.readOnly) return;
     const l = layers.find((x) => x.id === id)!;
+    // a layer pinned in a template is selected but not dragged (MVP_draft.md 62.11)
+    if (l.pinned) return;
     const tr = transformOf(l, W, H);
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = { id, mode: 'move', x0: pt.x, y0: pt.y, cx: tr.x, cy: tr.y, tr, key: `place-${id}-${Date.now()}` };
@@ -546,8 +553,13 @@ export function PhotoEditor(p: EditorProps) {
             <b dir="auto">{layerLabel(doc, sel)}</b>
             {sel.source && sourceNote(pool?.state(sel.source)) && <p className="st-hint st-warn">{sourceNote(pool?.state(sel.source))}</p>}
             <div className="st-insp-acts">
+              {sel.pinned ? (
+                <button type="button" className="st-pin" data-on="yes" disabled={ro} data-hold={HOLD.studioUnpin} onClick={() => patch((l) => { const n = { ...l }; delete n.pinned; return n; }, 'إلغاء التثبيت')}><Pin aria-hidden="true" />مثبّت في القالب</button>
+              ) : (
+                <button type="button" className="st-pin" data-on="no" disabled={ro} onClick={() => patch({ pinned: true }, 'تثبيت في القالب')} title="لا تُسحب ولا تُحذف خطأً حتى يُلغى تثبيتها بضغطة مطولة"><Pin aria-hidden="true" />تثبيت</button>
+              )}
               <button type="button" onClick={duplicate} disabled={ro} title={`تكرار (${keysOf('duplicate')})`}><Copy aria-hidden="true" />تكرار</button>
-              <button type="button" onClick={remove} disabled={ro || sel.locked} title="حذف (Delete)"><Trash2 aria-hidden="true" />حذف</button>
+              <button type="button" onClick={remove} disabled={ro || sel.locked || !!sel.pinned} title="حذف (Delete)"><Trash2 aria-hidden="true" />حذف</button>
               {!compact && (
                 <>
                   <button type="button" onClick={() => align('start')} disabled={ro} aria-label="محاذاة إلى اليمين" title="محاذاة إلى اليمين"><AlignRight aria-hidden="true" /></button>
@@ -697,6 +709,7 @@ export function PhotoEditor(p: EditorProps) {
         { label: 'حفظ نسخة مرقّمة…', icon: <Save aria-hidden="true" />, keys: keysOf('save-version'), disabled: ro || !p.onRequestVersion, onSelect: () => p.onRequestVersion?.() },
         { label: 'إعادة تسمية المشروع…', icon: <Pencil aria-hidden="true" />, keys: keysOf('rename'), disabled: ro || !p.onRequestRename, onSelect: () => p.onRequestRename?.() },
         { label: 'التصدير…', icon: <FileOutput aria-hidden="true" />, keys: keysOf('export'), onSelect: () => run('export') },
+        { label: template.on ? 'إلغاء كونه قالباً' : 'حفظ قالباً', icon: <LayoutTemplate aria-hidden="true" />, checked: template.on, disabled: ro, hint: 'يظهر القالب في «القوالب» في صفحة الاستوديو، ويُبدأ منه مشروع جديد.', onSelect: async () => { const e = await template.set(!template.on); if (e) setError(e); } },
         { kind: 'sep' },
         { label: 'العودة إلى المشاريع', icon: <ArrowRight aria-hidden="true" />, onSelect: () => router.push('/motion/studio') },
       ],
@@ -762,11 +775,13 @@ export function PhotoEditor(p: EditorProps) {
   });
 
   return (
-    <div className="st-editor st-photo" data-readonly={ro ? 'yes' : 'no'} data-compact="no" data-chrome={chrome} data-full={full ? 'yes' : 'no'}>
-      {errorEl}
-      <EditorFrame frame={frame} menus={menus} panels={panels} full={full} onFull={() => setFull(!full)} chrome={chrome} onChrome={() => setChrome(chrome === 'dark' ? 'light' : 'dark')}>
-        {uploadEl}
-      </EditorFrame>
-    </div>
+    <SwatchContext.Provider value={brand.colors}>
+      <div className="st-editor st-photo" data-readonly={ro ? 'yes' : 'no'} data-compact="no" data-chrome={chrome} data-full={full ? 'yes' : 'no'}>
+        {errorEl}
+        <EditorFrame frame={frame} menus={menus} panels={panels} full={full} onFull={() => setFull(!full)} chrome={chrome} onChrome={() => setChrome(chrome === 'dark' ? 'light' : 'dark')}>
+          {uploadEl}
+        </EditorFrame>
+      </div>
+    </SwatchContext.Provider>
   );
 }

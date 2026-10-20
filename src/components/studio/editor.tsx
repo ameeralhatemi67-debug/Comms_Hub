@@ -9,7 +9,7 @@
 // template tab's renderers and files; the fonts are bundled (studio-fonts.ts) and loaded when used.
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind, Bookmark, Mic, ImagePlus } from 'lucide-react';
+import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind, Bookmark, Mic, ImagePlus, LayoutTemplate } from 'lucide-react';
 import { canOpen } from '@/lib/access';
 import { useAccount } from '@/lib/account-context';
 import { loadAssets } from '@/lib/motion/renderers.js';
@@ -55,6 +55,9 @@ import { EffectsPanel } from './effects-panel';
 import { HistoryPanel } from './history-panel';
 import { MarkersPanel } from './markers-panel';
 import { RecordDialog } from './recorder';
+import { useStudioBrand, useTemplateFlag } from './brand';
+import { brandText } from '@/lib/studio/brand';
+import { SwatchContext } from '../motion-controls';
 import { VersionsPanel } from './versions-panel';
 import { EditorFrame, panelSpecs, useEditorFrame } from './editor-frame';
 import type { Menu } from './menubar';
@@ -250,6 +253,8 @@ export function VideoEditor(p: EditorProps) {
   const compact = useCompact();
   const [panel, setPanel] = useState<Panel>('timeline');
   const pw = useProjectWork(p.projectId, p.api);
+  const { brand } = useStudioBrand();
+  const template = useTemplateFlag(p.projectId, p.api);
   const frame = useEditorFrame('video');
   // another shape shown in the preview (MVP_draft.md 62.10): the project as it is exported in that shape
   const [viewShape, setViewShape] = useState<Ratio | null>(null);
@@ -337,7 +342,8 @@ export function VideoEditor(p: EditorProps) {
   };
   const addMotion = (g: Graphic, w: Where = {}) => place(h.get(), { ...motionClip(g, doc.video?.ratio ?? '9:16', w.at ?? at) }, 'إضافة قالب حركة', w);
   const addText = (kind: 'title' | 'body' | 'caption', w: Where = {}, pos?: { x: number; y: number }) => {
-    const style = kind === 'caption' ? captionStyle('تعليق أسفل الشاشة') : kind === 'title' ? { ...defaultText('عنوان'), size: 110, weight: 700 } : { ...defaultText('نص'), size: 64, weight: 500 };
+    const plain = kind === 'caption' ? captionStyle('تعليق أسفل الشاشة') : kind === 'title' ? { ...defaultText('عنوان'), size: 110, weight: 700 } : { ...defaultText('نص'), size: 64, weight: 500 };
+    const style = brandText(plain, brand, kind === 'title' ? 'title' : 'body');
     const y = pos?.y ?? (kind === 'caption' ? H * 0.84 : kind === 'title' ? H * 0.42 : H * 0.5);
     place(h.get(), { start: w.at ?? at, length: 3 * US, text: style, transform: { x: pos?.x ?? W / 2, y, scale: 1, rotation: 0, opacity: 1 } }, 'إضافة نص', w);
   };
@@ -874,6 +880,7 @@ export function VideoEditor(p: EditorProps) {
         { label: 'إعادة تسمية المشروع…', icon: <Pencil aria-hidden="true" />, keys: keysOf('rename'), disabled: ro || !p.onRequestRename, onSelect: () => p.onRequestRename?.() },
         { label: 'التصدير…', icon: <FileOutput aria-hidden="true" />, keys: keysOf('export'), onSelect: () => run('export') },
         { label: 'إطار إلى مشروع صورة', icon: <ImagePlus aria-hidden="true" />, hint: 'مشروع صورة جديد صورته الإطار عند رأس التشغيل، للغلاف والصورة المصغرة.', onSelect: () => void frameToPhoto() },
+        { label: template.on ? 'إلغاء كونه قالباً' : 'حفظ قالباً', icon: <LayoutTemplate aria-hidden="true" />, checked: template.on, disabled: ro, hint: 'يظهر القالب في «القوالب» في صفحة الاستوديو، ويُبدأ منه مشروع جديد.', onSelect: async () => { const e = await template.set(!template.on); if (e) setError(e); } },
         { kind: 'sep' },
         { label: 'العودة إلى المشاريع', icon: <ArrowRight aria-hidden="true" />, onSelect: () => router.push('/motion/studio') },
       ],
@@ -973,6 +980,7 @@ export function VideoEditor(p: EditorProps) {
   });
 
   return (
+    <SwatchContext.Provider value={brand.colors}>
     <div className="st-editor" data-readonly={p.readOnly ? 'yes' : 'no'} data-compact="no" data-chrome={chrome} data-full={full ? 'yes' : 'no'} data-tool={tool}>
       {errorEl}
       <EditorFrame frame={frame} menus={menus} panels={panels} full={full} onFull={() => setFull(!full)} chrome={chrome} onChrome={() => setChrome(chrome === 'dark' ? 'light' : 'dark')}>
@@ -980,6 +988,7 @@ export function VideoEditor(p: EditorProps) {
         {recordEl}
       </EditorFrame>
     </div>
+    </SwatchContext.Provider>
   );
 }
 

@@ -64,6 +64,8 @@ export const HOLD = {
   studioNewVersion: 'الإصدار الجديد يعيد الملف إلى «قيد المراجعة»، ويبقى الإصدار المعتمد قبله مسجلاً.',
   /** «الاستوديو»، «النسخ»: make an older numbered version the current state (MVP_draft.md 62.6). */
   studioRestore: 'تصير هذه النسخة هي الحال الحالية. تُحفظ الحال الحالية نسخةً قبلها، ولا تُحذف أي نسخة.',
+  /** «الاستوديو»: release an item pinned in a template (MVP_draft.md 62.11). */
+  studioUnpin: 'يصير المقطع قابلاً للنقل والقص والحذف كأي مقطع آخر.',
 } as const;
 
 export const HOLD_MS = 900;

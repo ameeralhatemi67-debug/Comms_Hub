@@ -158,6 +158,8 @@ export type ClipFields = Content & {
   reverse?: boolean;
   /** A still: the source frame at this source time for the whole clip. */
   hold?: Micros;
+  /** «مثبّت في القالب»: not moved, trimmed, cut or removed until released (MVP_draft.md 62.11). A guide, not a lock. */
+  pinned?: boolean;
 };
 export type Clip = ClipFields & { id: string; [extra: string]: unknown };
 /** A clip about to be added: its id is made if missing. */
@@ -189,6 +191,8 @@ export type Layer = Content & {
   name?: string;
   /** A picture layer of a video source: the source time of its frame («إطار إلى مشروع صورة», MVP_draft.md 62.10). */
   at?: Micros;
+  /** «مثبّت في القالب» (MVP_draft.md 62.11). */
+  pinned?: boolean;
   hidden?: boolean;
   locked?: boolean;
   transform: Transform;

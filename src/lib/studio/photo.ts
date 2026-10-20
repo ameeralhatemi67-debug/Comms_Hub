@@ -27,7 +27,7 @@ export function updateLayer(doc: ProjectDoc, id: string, patch: Partial<Layer> |
 
 export function removeLayer(doc: ProjectDoc, id: string): ProjectDoc {
   const l = body(doc).layers.find((x) => x.id === id);
-  if (!l || l.locked) return doc;
+  if (!l || l.locked || l.pinned) return doc;
   return withLayers(doc, body(doc).layers.filter((x) => x.id !== id));
 }
 

@@ -31,6 +31,8 @@ export type ProjectRow = {
   editing_name: string | null;
   exports: number;
   thumb: string | null;
+  /** A template (MVP_draft.md 62.11). */
+  template?: boolean;
 };
 
 export type OpenedDoc = {
@@ -75,6 +77,7 @@ export const STUDIO_ERRORS: Record<string, string> = {
   IN_USE: 'يحرر شخص آخر هذا المشروع الآن، فلا يمكن أرشفته.',
   EXPORT_NOT_YOURS: 'لا يُسجَّل التصدير إلا لإصدار رفعته أنت.',
   WORK_DENIED: 'هذا العمل غير متاح لك.',
+  BRAND_INVALID: 'في الهوية لون أو خط غير صالح: حتى 12 لوناً باسم وقيمة مثل #17634b.',
   NETWORK: 'تعذّر الاتصال بالخادم. تغييراتك محفوظة على هذا الجهاز، وسيُعاد الحفظ.',
 };
 
@@ -119,6 +122,10 @@ export function studioApi(call: Caller) {
       run<string>('studio_export_record', { p_project: id, p_revision: revision, p_asset: asset, p_version: version, p_kind: kind, p_shape: shape }),
     linkWork: (id: string, work: string | null) => run<null>('studio_project_link_work', { p_project: id, p_work: work }),
     revisions: (id: string) => run<RevisionRow[]>('studio_revisions_list', { p_project: id }),
+    setTemplate: (id: string, on: boolean) => run<null>('studio_project_set_template', { p_project: id, p_on: on }),
+    copy: (from: string, title: string, revision: number | null = null) => run<string>('studio_project_copy', { p_from: from, p_revision: revision, p_title: title }),
+    brandSave: (colors: { name: string; hex: string }[], titleFont: string | null, bodyFont: string | null) =>
+      run<null>('studio_brand_save', { p_colors: colors, p_title_font: titleFont, p_body_font: bodyFont }),
   };
 }
 export type StudioApi = ReturnType<typeof studioApi>;

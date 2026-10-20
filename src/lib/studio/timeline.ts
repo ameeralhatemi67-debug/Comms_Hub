@@ -166,7 +166,7 @@ export function updateClip(doc: ProjectDoc, id: string, patch: Partial<Clip> | (
 /** Move a clip to a start time (and another track of its kind). Unchanged when it does not fit there. */
 export function moveClip(doc: ProjectDoc, id: string, start: Micros, trackId?: string): ProjectDoc {
   const at = locate(doc, id);
-  if (!at || at.track.locked) return doc;
+  if (!at || at.track.locked || at.clip.pinned) return doc;
   const dest = trackId ? body(doc).tracks.find((t) => t.id === trackId) : at.track;
   if (!dest || dest.kind !== at.track.kind || dest.locked) return doc;
   const moved = { ...at.clip, start: Math.max(0, Math.round(start)) };
@@ -189,7 +189,7 @@ export function moveClip(doc: ProjectDoc, id: string, start: Micros, trackId?: s
  */
 export function trimStart(doc: ProjectDoc, id: string, newStart: Micros): ProjectDoc {
   const at = locate(doc, id);
-  if (!at || at.track.locked) return doc;
+  if (!at || at.track.locked || at.clip.pinned) return doc;
   const c = at.clip;
   const min = minLength(doc);
   const s = sourceOf(doc, c.source);
@@ -234,7 +234,7 @@ function lengthAtBack(c: Clip, amount: number): Micros {
 /** Move a clip's end edge. A motion clip's showcase follows its length (see motion-adapter). */
 export function trimEnd(doc: ProjectDoc, id: string, newEnd: Micros): ProjectDoc {
   const at = locate(doc, id);
-  if (!at || at.track.locked) return doc;
+  if (!at || at.track.locked || at.clip.pinned) return doc;
   const c = at.clip;
   const length = Math.min(Math.max(minLength(doc), Math.round(newEnd) - c.start), maxLengthOf(doc, c));
   let next: Clip = { ...c, length };
@@ -250,7 +250,7 @@ export function trimEnd(doc: ProjectDoc, id: string, newEnd: Micros): ProjectDoc
 /** Cut a clip in two at a time inside it; the second part continues where the first stopped. */
 export function splitClip(doc: ProjectDoc, id: string, t: Micros): { doc: ProjectDoc; secondId: string | null } {
   const at = locate(doc, id);
-  if (!at || at.track.locked) return { doc, secondId: null };
+  if (!at || at.track.locked || at.clip.pinned) return { doc, secondId: null };
   const c = at.clip;
   const min = minLength(doc);
   const cut = Math.round(t);
@@ -276,7 +276,7 @@ export function splitClip(doc: ProjectDoc, id: string, t: Micros): { doc: Projec
 /** Delete a clip; with `ripple`, the clips after it on its track move back to close the gap. */
 export function removeClip(doc: ProjectDoc, id: string, ripple = false): ProjectDoc {
   const at = locate(doc, id);
-  if (!at || at.track.locked) return doc;
+  if (!at || at.track.locked || at.clip.pinned) return doc;
   const gone = at.clip;
   const tracks = body(doc).tracks.map((t, i) => {
     if (i !== at.ti) return t;

@@ -5,13 +5,14 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { Archive, ArchiveRestore, Film, Image as ImageIcon, Pencil, Plus, UserRound } from 'lucide-react';
+import { Archive, ArchiveRestore, Film, Image as ImageIcon, Pencil, Plus, UserRound, LayoutTemplate } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { FPS_CHOICES, KIND_LABELS, PHOTO_MAX_SIDE, PHOTO_PRESETS, RATIOS, newPhotoDoc, newVideoDoc, type Fps, type Ratio } from '@/lib/studio/schema';
 import type { ProjectRow } from '@/lib/studio/persist';
 import { Modal } from '../ui';
 import { Segmented } from '../motion-controls';
 import { useStudioApi } from './use-project';
+import { BrandPanel } from './brand';
 
 export const when = (iso: string, now = Date.now()) => {
   const min = Math.round((now - Date.parse(iso)) / 60_000);
@@ -30,6 +31,9 @@ export function ProjectList() {
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState<null | 'video' | 'photo'>(null);
   const [renaming, setRenaming] = useState<ProjectRow | null>(null);
+  const [copying, setCopying] = useState<ProjectRow | null>(null);
+  const templates = archived ? [] : (rows ?? []).filter((p) => p.template);
+  const projects = (rows ?? []).filter((p) => archived || !p.template);
 
   const reload = useCallback(async () => {
     const r = await api.list(archived);
@@ -71,13 +75,38 @@ export function ProjectList() {
         </label>
       </div>
       {error && <p className="warning" role="alert">{error}</p>}
+      {templates.length > 0 && (
+        <section className="st-templates" aria-label="القوالب">
+          <h2>القوالب</h2>
+          <ul className="st-cards">
+            {templates.map((p) => (
+              <li key={p.id} className="st-card" data-template="yes">
+                <Link href={`/motion/studio/${p.id}`} className="st-card-open">
+                  <span className="st-card-kind" data-kind={p.kind}>
+                    <LayoutTemplate aria-hidden="true" />
+                    قالب {KIND_LABELS[p.kind]}
+                  </span>
+                  <b>{p.title}</b>
+                  <small>النسخة {p.revision} · {p.owner_name ?? p.owner}</small>
+                </Link>
+                <div className="st-card-acts">
+                  <button type="button" className="primary" onClick={() => setCopying(p)}>
+                    <Plus aria-hidden="true" />
+                    مشروع من القالب
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {!rows ? (
         <div className="st-cards" aria-busy="true">
           {[0, 1, 2].map((i) => (
             <div key={i} className="skeleton st-card-skel" />
           ))}
         </div>
-      ) : rows.length === 0 ? (
+      ) : projects.length === 0 ? (
         <div className="panel st-empty">
           <h2>{archived ? 'لا مشاريع في الأرشيف' : 'لا مشاريع بعد'}</h2>
           <p>
@@ -88,7 +117,7 @@ export function ProjectList() {
         </div>
       ) : (
         <ul className="st-cards">
-          {rows.map((p) => (
+          {projects.map((p) => (
             <li key={p.id} className="st-card">
               <Link href={`/motion/studio/${p.id}`} className="st-card-open">
                 <span className="st-card-kind" data-kind={p.kind}>
@@ -144,6 +173,18 @@ export function ProjectList() {
           }}
         />
       )}
+      {copying && (
+        <CopyDialog
+          from={copying}
+          onClose={() => setCopying(null)}
+          onCopy={async (title) => {
+            const r = await api.copy(copying.id, title);
+            if (r.ok) router.push(`/motion/studio/${r.data}`);
+            return r.ok ? null : r.error;
+          }}
+        />
+      )}
+      {!archived && <BrandPanel api={api} />}
       {renaming && (
         <RenameDialog
           title={renaming.title}
@@ -229,6 +270,36 @@ function CreateDialog({ kind, onClose, onCreate }: { kind: 'video' | 'photo'; on
           <button type="button" onClick={onClose}>
             إلغاء
           </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+function CopyDialog({ from, onClose, onCopy }: { from: ProjectRow; onClose: () => void; onCopy: (title: string) => Promise<string | null> }) {
+  const [title, setTitle] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <Modal title={`مشروع من «${from.title}»`} onClose={onClose}>
+      <form
+        className="st-form"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setBusy(true);
+          setError(await onCopy(title.trim()));
+          setBusy(false);
+        }}
+      >
+        <p>يبدأ المشروع الجديد من آخر نسخة مرقّمة للقالب، بكل ما فيها، ويبقى القالب كما هو.</p>
+        <label>
+          اسم المشروع
+          <input value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} required autoFocus />
+        </label>
+        {error && <p className="warning" role="alert">{error}</p>}
+        <div className="actions">
+          <button type="submit" className="primary" disabled={busy || !title.trim()}>{busy ? 'جارٍ الإنشاء…' : 'إنشاء وفتح'}</button>
+          <button type="button" onClick={onClose}>إلغاء</button>
         </div>
       </form>
     </Modal>

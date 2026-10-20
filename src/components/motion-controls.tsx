@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ReactNode, createContext, useContext } from 'react';
 
 /* Small form controls used by the motion studio. All of them carry a real label and a visible focus state. */
 
@@ -34,11 +34,18 @@ export function TextInput({ label, value, onChange, max, ltr, placeholder, hint,
   </div>;
 }
 
+/** Named colours offered first in every colour choice inside a provider (the studio's «هوية الاستوديو»). */
+export const SwatchContext = createContext<{ name: string; hex: string }[]>([]);
+
 export function ColorInput({ label, value, onChange, disabled }: { label: string; value: string; onChange: (value: string) => void; disabled?: boolean }) {
   const id = useId();
+  const swatches = useContext(SwatchContext);
   return <div className="ms-color">
     <input id={id} type="color" value={value} disabled={disabled} onChange={e => onChange(e.target.value)} />
     <label htmlFor={id}><span>{label}</span><bdi dir="ltr">{value.toUpperCase()}</bdi></label>
+    {swatches.length > 0 && <div className="ms-swatches" role="group" aria-label={`ألوان الهوية: ${label}`}>
+      {swatches.map(s => <button key={s.hex + s.name} type="button" className="ms-swatch" disabled={disabled} title={s.name} aria-label={s.name} aria-pressed={s.hex.toLowerCase() === value.toLowerCase()} style={{ background: s.hex }} onClick={() => onChange(s.hex)} />)}
+    </div>}
   </div>;
 }
 

@@ -1,0 +1,81 @@
+{
+  "run": "2026-10-20",
+  "what": "Database rule run for the studio third round, Phase 6 (MVP_draft.md 62.11): templates and the studio brand",
+  "migration": "20261020140000_studio_kit.sql (studio_projects.template, studio_brand, studio_project_set_template, studio_project_copy, studio_brand_save, studio_list with the template flag, backup_table_list with studio_brand in config), run inside the same rolled-back transaction before it was applied; then applied to comms-hub",
+  "how": "supabase/tests/studio_kit_rules.sql with the migration placed after begin: one transaction, rolled back. Three throwaway accounts (@t.test: director, Admin, writer), a file in a restricted folder, acting through row level security. Two earlier attempts stopped on the test setup (an Admin account must be protected; the library guard needs an acting person for a file row), not on the rules.",
+  "result": "TOTAL row: 18 checks, 18 passed",
+  "checks": [
+    {
+      "k": "01 the Admin builds a project on a restricted file",
+      "pass": true
+    },
+    {
+      "k": "02 and marks it a template",
+      "pass": true
+    },
+    {
+      "k": "03 the studio home shows it as a template",
+      "pass": true
+    },
+    {
+      "k": "04 the director cannot see the restricted file",
+      "pass": true
+    },
+    {
+      "k": "05 yet makes a project from the template, its file carried",
+      "pass": true
+    },
+    {
+      "k": "06 the new project is the director's, version 1, with the template's document and a note",
+      "pass": true
+    },
+    {
+      "k": "07 and records the carried file",
+      "pass": true
+    },
+    {
+      "k": "08 the new project is not a template",
+      "pass": true
+    },
+    {
+      "k": "09 a copy from the new project carries the file again (recorded for it)",
+      "pass": true
+    },
+    {
+      "k": "10 the brand is saved: named colours and two fonts",
+      "pass": true
+    },
+    {
+      "k": "11 and read back by those who may open the studio",
+      "pass": true
+    },
+    {
+      "k": "12 a colour that is not #rrggbb is refused",
+      "pass": true
+    },
+    {
+      "k": "13 thirteen colours are refused",
+      "pass": true
+    },
+    {
+      "k": "14 the writer reads no brand",
+      "pass": true
+    },
+    {
+      "k": "15 nor saves one",
+      "pass": true
+    },
+    {
+      "k": "16 nor copies a template",
+      "pass": true
+    },
+    {
+      "k": "17 nor marks one",
+      "pass": true
+    },
+    {
+      "k": "18 the brand is in the configuration backup",
+      "pass": true
+    }
+  ]
+}
