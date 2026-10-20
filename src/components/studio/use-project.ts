@@ -35,7 +35,11 @@ export type ProjectState =
       draft: Draft | null;
     };
 
-export function useStudioProject(id: string) {
+/**
+ * One project, for editing; or, with `view`, one of its numbered revisions for reading only («عرض» in
+ * «النسخ», MVP_draft.md 62.6): no lease is taken, nothing is saved and no device draft is offered.
+ */
+export function useStudioProject(id: string, view: number | null = null) {
   const api = useStudioApi();
   const drafts = useMemo(() => browserDrafts(), []);
   const [state, setState] = useState<ProjectState>({ status: 'loading' });
@@ -44,6 +48,20 @@ export function useStudioProject(id: string) {
 
   const load = useCallback(
     async (take: boolean) => {
+      if (view !== null) {
+        const opened = await api.open(id, view);
+        if (!opened.ok) return setState({ status: 'error', error: opened.error });
+        let doc: ProjectDoc;
+        try {
+          doc = openDoc(opened.data.doc);
+        } catch {
+          return setState({ status: 'error', error: STUDIO_ERRORS.DOC_INVALID });
+        }
+        mine.current = false;
+        saver.current?.dispose();
+        saver.current = null;
+        return setState({ status: 'ready', opened: opened.data, doc, lease: null, save: { kind: 'readonly', code: 'VIEW', error: `النسخة ${view} للقراءة فقط.` }, draft: null });
+      }
       const lease = await api.lease(id, take);
       const opened = await api.open(id);
       if (!opened.ok) return setState({ status: 'error', error: opened.error });
@@ -77,7 +95,7 @@ export function useStudioProject(id: string) {
       });
       if (!lease.ok && lease.code === 'ARCHIVED') setState((st) => (st.status === 'ready' ? { ...st, save: { kind: 'readonly', code: 'ARCHIVED', error: STUDIO_ERRORS.ARCHIVED } } : st));
     },
-    [api, drafts, id],
+    [api, drafts, id, view],
   );
 
   useEffect(() => {
@@ -115,6 +133,7 @@ export function useStudioProject(id: string) {
   }, []);
 
   const change = useCallback((doc: ProjectDoc) => {
+    if (!saver.current) return;
     setState((st) => (st.status === 'ready' ? { ...st, doc } : st));
     saver.current?.change(doc);
   }, []);
@@ -149,5 +168,5 @@ export function useStudioProject(id: string) {
     [api, id],
   );
 
-  return { state, change, saveVersion, takeOver, applyDraft, discardDraft, rename, api, revision: () => saver.current?.revision ?? 0, saveNow: () => saver.current?.save(false) };
+  return { state, change, saveVersion, takeOver, applyDraft, discardDraft, rename, api, view, revision: () => saver.current?.revision ?? (state.status === 'ready' ? state.opened.revision : 0), saveNow: () => saver.current?.save(false) };
 }

@@ -23,13 +23,13 @@ function App() {
     };
     window.onpopstate = () => setPath(location.pathname);
   }, []);
-  const m = /^\/motion\/studio\/([^/]+)/.exec(path);
+  const m = /^\/motion\/studio\/([^/?]+)/.exec(path);
   return (
     <AccountProvider account={account}>
       <main>
         {m ? (
           <div className="st st-open">
-            <ProjectShell key={m[1]} id={m[1]} editor={(p) => (p.doc.kind === 'video' ? <VideoEditor {...p} /> : <PhotoEditor {...p} />)} />
+            <ProjectShell key={path} id={m[1]} editor={(p) => (p.doc.kind === 'video' ? <VideoEditor {...p} /> : <PhotoEditor {...p} />)} />
           </div>
         ) : (
           <div className="st">

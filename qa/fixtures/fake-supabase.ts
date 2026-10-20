@@ -151,6 +151,20 @@ const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; erro
     save();
     return ok(null);
   },
+  // «النسخ» (supabase/migrations/20261020120000_studio_versions.sql): numbered versions, newest first
+  studio_revisions_list: (a) => {
+    const p = project(String(a.p_project));
+    if (!p) return err('NOT_FOUND');
+    return ok(
+      p.revs
+        .filter((r) => r.revision >= 1)
+        .sort((x, y) => y.revision - x.revision)
+        .map((r) => ({
+          revision: r.revision, saved_at: r.saved_at, saved_by: r.saved_by, saved_by_name: NAMES[r.saved_by], note: r.note, bytes: JSON.stringify(r.doc).length,
+          exports: p.exports.filter((e) => e.revision === r.revision).map((e) => ({ asset: e.asset, version: e.version, kind: 'video', name: (db.files.find((f) => f.id === e.asset)?.name as string) ?? null })),
+        })),
+    );
+  },
   work_asset_link: (a) => {
     db.workLinks = [...(db.workLinks ?? []), { work: String(a.p_work), asset: String(a.p_asset) }];
     save();

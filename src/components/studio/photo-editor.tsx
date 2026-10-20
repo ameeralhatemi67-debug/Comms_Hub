@@ -36,6 +36,8 @@ import type { EditorProps } from './project-shell';
 import { drawOutline, readAddDrop } from './stage';
 import { UploadDialog, sourceNote, studioClipboard, useDocHistory, useExactSources, useStudioAssets, useStudioFonts, useStudioMedia } from './editor';
 import { HistoryPanel } from './history-panel';
+import { VersionsPanel } from './versions-panel';
+import { plainLabel } from '@/lib/studio/diff';
 import { EditorFrame, panelSpecs, useEditorFrame } from './editor-frame';
 import type { Menu } from './menubar';
 import { usePref } from './prefs';
@@ -718,6 +720,7 @@ export function PhotoEditor(p: EditorProps) {
     export: exportEl,
     review: <aside className="st-insp st-review-pane">{reviewEl}</aside>,
     history: <HistoryPanel hist={h.hist} onGo={h.go} readOnly={ro} />,
+    versions: <VersionsPanel projectId={p.projectId} api={p.api} readOnly={ro} doc={doc} revision={p.revision} saveVersion={p.saveVersion} onApply={(d, label) => h.apply(d, label)} label={(d, item) => (item as Layer).name || plainLabel(d, item)} refreshKey={p.revision()} />,
   });
 
   return (

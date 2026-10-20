@@ -1,0 +1,57 @@
+{
+  "run": "2026-10-20",
+  "what": "Database rule run for the studio third round, Phase 1 (MVP_draft.md 62.6): the list of numbered versions",
+  "migration": "20261020120000_studio_versions.sql (studio_revisions_list), run inside the same rolled-back transaction before it was applied; then applied to comms-hub as version 20261020093821",
+  "how": "supabase/tests/studio_versions_rules.sql with the migration placed after begin: one transaction against the Supabase project comms-hub, rolled back at the end. Two throwaway accounts (@t.test: director, writer), a file in the unfiled folder and a file in a restricted folder with no grant, acting through row level security.",
+  "result": "TOTAL row: 12 checks, 12 passed; no check differed from its expectation",
+  "checks": [
+    {
+      "k": "01 the director makes a project (version 1)",
+      "pass": true
+    },
+    {
+      "k": "02 saves version 2 with a note",
+      "pass": true
+    },
+    {
+      "k": "03 and an autosave on top",
+      "pass": true
+    },
+    {
+      "k": "04 an export of version 1 is recorded",
+      "pass": true
+    },
+    {
+      "k": "05 the list holds the numbered versions only, newest first",
+      "pass": true
+    },
+    {
+      "k": "06 with the note and the saver's name",
+      "pass": true
+    },
+    {
+      "k": "07 and the file exported from version 1, by name",
+      "pass": true
+    },
+    {
+      "k": "08 an old version still opens as it was",
+      "pass": true
+    },
+    {
+      "k": "09 a file is named only for someone who may see it",
+      "pass": true
+    },
+    {
+      "k": "09b the restricted file is hidden from the director here",
+      "pass": true
+    },
+    {
+      "k": "10 the writer cannot read the versions",
+      "pass": true
+    },
+    {
+      "k": "11 an unknown project is said as such",
+      "pass": true
+    }
+  ]
+}

@@ -4,6 +4,7 @@
 // save state, «حفظ نسخة»), the reading-only banner with who is editing and the take-over by long
 // press, and the offer of a newer draft from this device. The editor itself is chosen by kind.
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { ArrowRight, CircleAlert, History, Lock, Save } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
@@ -29,8 +30,15 @@ export type EditorProps = {
   onRequestRename?: () => void;
 };
 
+/** A numbered version asked for by the address (`?v=N`, «عرض» in «النسخ»), or null for the project itself. */
+function viewOf(raw: string | null): number | null {
+  const n = Number(raw);
+  return raw && Number.isInteger(n) && n >= 1 ? n : null;
+}
+
 export function ProjectShell({ id, editor }: { id: string; editor: (p: EditorProps) => ReactNode }) {
-  const p = useStudioProject(id);
+  const view = viewOf(useSearchParams()?.get('v') ?? null);
+  const p = useStudioProject(id, view);
   const { state } = p;
   const [now, setNow] = useState(() => Date.now());
   const [versioning, setVersioning] = useState(false);
@@ -60,7 +68,7 @@ export function ProjectShell({ id, editor }: { id: string; editor: (p: EditorPro
         </Link>
         <button type="button" className="st-title" onClick={() => !readOnly && setRenaming(true)} disabled={readOnly} title="إعادة تسمية">
           <b>{state.opened.title}</b>
-          <small>{KIND_LABELS[state.opened.kind]} · النسخة {state.opened.revision}</small>
+          <small>{KIND_LABELS[state.opened.kind]} · النسخة {view ?? state.opened.revision}</small>
         </button>
         <span className={`st-save st-save-${state.save.kind}`} role="status" aria-live="polite">
           {state.save.kind === 'error' && <CircleAlert aria-hidden="true" />}
@@ -72,7 +80,16 @@ export function ProjectShell({ id, editor }: { id: string; editor: (p: EditorPro
           حفظ نسخة
         </button>
       </div>
-      {ro && (
+      {ro?.code === 'VIEW' && (
+        <div className="st-banner st-banner-view" role="note">
+          <Lock aria-hidden="true" />
+          <span>تعرض النسخة {view} من «{state.opened.title}» للقراءة فقط. لا يُحفظ فيها شيء.</span>
+          <Link href={`/motion/studio/${id}`} className="button">
+            فتح الحال الحالية
+          </Link>
+        </div>
+      )}
+      {ro && ro.code !== 'VIEW' && (
         <div className="st-banner" role="note">
           <Lock aria-hidden="true" />
           <span>

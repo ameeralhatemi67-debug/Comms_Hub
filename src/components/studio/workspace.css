@@ -251,6 +251,21 @@ body.st-ws-resize-y,body.st-ws-resize-y *{cursor:row-resize!important;user-selec
 .st-hist li button svg{width:14px;height:14px}
 .st-hist .st-hint svg{width:16px;height:16px}
 
+/* ---------- versions (MVP_draft.md 62.6) ---------- */
+.st-versions{padding:8px 10px;display:grid;gap:8px;align-content:start}
+.st-versions-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.st-versions-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.st-versions-list>li{display:grid;gap:5px;padding:8px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line)}
+.st-versions-list>li[data-latest="yes"]{box-shadow:inset 3px 0 0 var(--ws-accent)}
+.st-versions-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.st-versions-row small{color:var(--muted);font-size:11.5px}
+.st-chip{font-size:11px;padding:1px 7px;border-radius:999px;background:var(--soft);color:var(--ink-2)}
+.st-versions-note{margin:0;font-size:12.5px;color:var(--ink-2)}
+.st-versions-exports{list-style:none;margin:0;padding:0;font-size:12px;display:grid;gap:2px}
+.st-versions-acts{display:flex;gap:6px;flex-wrap:wrap}
+.st-versions-acts .st-mini{min-height:28px;padding:3px 9px;font-size:12px}
+.st-versions-diff{margin:0;padding:6px 18px 6px 6px;font-size:12px;display:grid;gap:3px;background:var(--surface);border-radius:6px}
+
 /* ---------- the shortcuts sheet ---------- */
 .st-keysheet{display:grid;gap:12px}
 .st-keysheet section h3{font-size:13px;margin-bottom:6px;color:var(--ink-2)}

@@ -48,6 +48,17 @@ export type OpenedDoc = {
 };
 
 export type Lease = { mine: boolean; holder: string; holder_name?: string | null; until: string; taken_from?: string | null };
+/** A numbered revision in «النسخ» (MVP_draft.md 62.6), with the library files exported from it. */
+export type RevisionRow = {
+  revision: number;
+  saved_at: string;
+  saved_by: string;
+  saved_by_name: string | null;
+  note: string | null;
+  bytes: number;
+  /** `name` is null when the file is not visible to this person. */
+  exports: { asset: string; version: number; kind: 'video' | 'image'; name: string | null }[];
+};
 export type Saved = { revision: number; explicit: boolean; saved_at: string };
 
 /** The Arabic sentence for each refusal the studio's database functions give. */
@@ -107,6 +118,7 @@ export function studioApi(call: Caller) {
     exportRecord: (id: string, revision: number, asset: string, version: number, kind: 'video' | 'image') =>
       run<string>('studio_export_record', { p_project: id, p_revision: revision, p_asset: asset, p_version: version, p_kind: kind }),
     linkWork: (id: string, work: string | null) => run<null>('studio_project_link_work', { p_project: id, p_work: work }),
+    revisions: (id: string) => run<RevisionRow[]>('studio_revisions_list', { p_project: id }),
   };
 }
 export type StudioApi = ReturnType<typeof studioApi>;

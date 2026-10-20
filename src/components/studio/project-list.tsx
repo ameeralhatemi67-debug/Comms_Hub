@@ -13,7 +13,7 @@ import { Modal } from '../ui';
 import { Segmented } from '../motion-controls';
 import { useStudioApi } from './use-project';
 
-const when = (iso: string, now = Date.now()) => {
+export const when = (iso: string, now = Date.now()) => {
   const min = Math.round((now - Date.parse(iso)) / 60_000);
   if (min < 1) return 'الآن';
   if (min < 60) return `قبل ${min} دقيقة`;

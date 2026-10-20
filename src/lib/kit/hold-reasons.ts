@@ -62,6 +62,8 @@ export const HOLD = {
   studioRemoveLocal: 'هذا الملف على هذا الجهاز فقط: المشاريع التي تستعمله لن تجده هنا بعد الحذف.',
   /** «الاستوديو»: save an export as a new version of a library file that was already reviewed. */
   studioNewVersion: 'الإصدار الجديد يعيد الملف إلى «قيد المراجعة»، ويبقى الإصدار المعتمد قبله مسجلاً.',
+  /** «الاستوديو»، «النسخ»: make an older numbered version the current state (MVP_draft.md 62.6). */
+  studioRestore: 'تصير هذه النسخة هي الحال الحالية. تُحفظ الحال الحالية نسخةً قبلها، ولا تُحذف أي نسخة.',
 } as const;
 
 export const HOLD_MS = 900;

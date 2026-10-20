@@ -40,9 +40,10 @@ import { Inspector, ProjectSettings } from './inspector';
 import { librarySource, uploadToLibrary } from './library';
 import type { EditorProps } from './project-shell';
 import { Stage, drawOutline, drawSafeZones, type Resolution, type Tool } from './stage';
-import { Timeline, TimelineBar } from './timeline';
+import { Timeline, TimelineBar, clipLabel } from './timeline';
 import { EffectsPanel } from './effects-panel';
 import { HistoryPanel } from './history-panel';
+import { VersionsPanel } from './versions-panel';
 import { EditorFrame, panelSpecs, useEditorFrame } from './editor-frame';
 import type { Menu } from './menubar';
 import { usePref } from './prefs';
@@ -770,6 +771,7 @@ export function VideoEditor(p: EditorProps) {
     export: exportEl,
     review: <aside className="st-insp st-review-pane">{reviewEl}</aside>,
     history: <HistoryPanel hist={h.hist} onGo={h.go} readOnly={p.readOnly} />,
+    versions: <VersionsPanel projectId={p.projectId} api={p.api} readOnly={p.readOnly} doc={doc} revision={p.revision} saveVersion={p.saveVersion} onApply={(d, label) => h.apply(d, label)} label={(d, item) => clipLabel(d, item as Clip)} refreshKey={p.revision()} />,
   });
 
   return (

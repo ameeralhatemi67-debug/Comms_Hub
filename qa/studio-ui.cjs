@@ -9,7 +9,8 @@
 // The workspace flow (MVP_draft.md 62.1 to 62.5): windows merged, split, floated, closed, reopened, maximised
 // and resized; menus and keys; preview resolution; a transition, a movement, a font; copy, paste, razor,
 // the clip menu, scaling by a corner, the history, filling the window and the light chrome.
-// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone]   (writes qa/studio-ui.json)
+// The versions flow (MVP_draft.md 62.6): listed, compared, restored, and one opened for reading.
+// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions]   (writes qa/studio-ui.json)
 const fs = require('node:fs');
 const path = require('node:path');
 const { dependency, launchOptions } = require('./runtime.cjs');
@@ -469,6 +470,75 @@ async function workspaceFlow(browser, base, errors) {
   await ctx.close();
 }
 
+// «النسخ» (MVP_draft.md 62.6): the numbered versions listed, compared with the state on screen, an old
+// one restored (the state on screen kept first, the restore one undoable step), and one opened for
+// reading at ?v=N with no lease taken.
+async function versionsFlow(browser, base, errors) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const tab = await ctx.newPage();
+  tab.on('pageerror', (e) => errors.push(e.message));
+  tab.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  tab.on('response', (q) => q.status() >= 400 && errors.push(`HTTP ${q.status()}: ${q.url()}`));
+  await tab.goto(base + '/motion/studio');
+  await tab.evaluate(() => window.__db.reset());
+  await tab.reload();
+  await tab.getByRole('button', { name: 'مشروع فيديو جديد' }).click();
+  await tab.getByLabel('اسم المشروع').fill('مقطع النسخ');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).click();
+  await tab.locator('.st-editor').waitFor({ timeout: 15000 });
+  const id = await tab.evaluate(() => location.pathname.split('/').pop());
+  await tab.locator('.st-lib button', { hasText: 'ألوان الحملة' }).click();
+  await tab.locator('.st-clip[data-kind="video"]').waitFor();
+  await tab.locator('.st-ws-tab[data-panel="graphics"]').click();
+  await tab.getByRole('button', { name: 'عنوان كبير' }).click();
+  await tab.getByRole('button', { name: 'حفظ نسخة' }).click();
+  await tab.getByLabel('ملاحظة (اختيارية)').fill('بالعنوان');
+  await tab.getByRole('button', { name: 'حفظ النسخة' }).click();
+  await tab.waitForFunction(() => /النسخة 2/.test(document.querySelector('.st-title small').textContent));
+  // the title removed: the state on screen now differs from version 2
+  await tab.locator('.st-clip[data-kind="text"]').click();
+  await tab.locator('body').press('Delete');
+  const texts = () => tab.locator('.st-clip[data-kind="text"]').count();
+  const noTitle = await texts();
+
+  await tab.locator('.st-ws-tab[data-panel="versions"]').click();
+  await tab.locator('.st-versions-list > li').nth(1).waitFor({ timeout: 8000 });
+  const rows = await tab.locator('.st-versions-row b').allTextContents();
+  const latest = await tab.locator('.st-versions-list > li[data-latest="yes"] .st-versions-row b').textContent();
+  const note = await tab.locator('.st-versions-list > li').first().locator('.st-versions-note').textContent();
+  check('versions: «النسخ» lists the numbered versions newest first, the latest marked, with its note', rows.join(',') === 'النسخة 2,النسخة 1' && latest === 'النسخة 2' && note === 'بالعنوان', `${rows.join(',')} ${latest} ${note}`);
+
+  const v2 = tab.locator('.st-versions-list > li').first();
+  await v2.getByRole('button', { name: 'مقارنة بالحالية' }).click();
+  await v2.locator('.st-versions-diff li').first().waitFor();
+  const diff = await v2.locator('.st-versions-diff').textContent();
+  check('versions: «مقارنة بالحالية» says in words that the title was removed since version 2', /حُذف «اكتب/.test(diff) || /حُذف «/.test(diff), diff);
+
+  await v2.getByRole('button', { name: 'استعادة' }).click();
+  await tab.locator('.st-versions .st-done').waitFor({ timeout: 10000 });
+  const restored = await texts();
+  const revs = await tab.evaluate((pid) => window.__db.projects.find((x) => x.id === pid).revs.filter((r) => r.revision > 0).map((r) => `${r.revision}:${r.note ?? ''}`).join(' | '), id);
+  check('versions: «استعادة» keeps the state on screen as version 3, then brings version 2 back as version 4', noTitle === 0 && restored === 1 && revs === '1: | 2:بالعنوان | 3:قبل استعادة النسخة 2 | 4:استعادة النسخة 2', `${noTitle} then ${restored}; ${revs}`);
+  await tab.locator('.st-tl-ruler').click({ position: { x: 5, y: 5 } });
+  await tab.locator('body').press('Control+z');
+  const undone = await texts();
+  await tab.locator('body').press('Control+Shift+z');
+  check('versions: the restore is one step of the history: Ctrl+Z undoes it, Ctrl+Shift+Z redoes it', undone === 0 && (await texts()) === 1, `${undone} then ${await texts()}`);
+
+  await tab.locator('.st-versions-list > li').last().getByRole('link', { name: 'عرض' }).click();
+  await tab.locator('.st-banner-view').waitFor({ timeout: 10000 });
+  const ro = await tab.locator('.st-editor').getAttribute('data-readonly');
+  const small = await tab.locator('.st-title small').textContent();
+  const clips = await tab.locator('.st-clip').count();
+  const lease = await tab.evaluate((pid) => window.__db.projects.find((x) => x.id === pid).lease_holder, id);
+  check('versions: «عرض» opens version 1 at ?v=1 for reading only, as it was, taking no lease', ro === 'yes' && /النسخة 1/.test(small) && clips === 0 && lease === null && /v=1/.test(await tab.evaluate(() => location.search)), `${ro} ${small} ${clips} clips, lease ${lease}`);
+  await tab.getByRole('link', { name: 'فتح الحال الحالية' }).click();
+  await tab.waitForFunction(() => document.querySelector('.st-editor')?.getAttribute('data-readonly') === 'no', null, { timeout: 10000 });
+  check('versions: «فتح الحال الحالية» returns to the project for editing, with the restored title', (await texts()) === 1, await texts());
+  await tab.screenshot({ path: path.join(out, 'versions-1440.png') });
+  await ctx.close();
+}
+
 async function photoFlow(browser, base, errors) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const tab = await ctx.newPage();
@@ -595,6 +665,7 @@ async function phoneFlow(browser, base, errors) {
     if (!only || only === 'workspace') await workspaceFlow(browser, base, errors);
     if (!only || only === 'photo') await photoFlow(browser, base, errors);
     if (!only || only === 'phone') await phoneFlow(browser, base, errors);
+    if (!only || only === 'versions') await versionsFlow(browser, base, errors);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));
   } finally {

@@ -53,6 +53,7 @@
 .st-banner svg{width:18px;height:18px}
 .st-banner button{min-height:36px}
 .st-banner-draft{background:var(--soft);color:var(--ink)}
+.st-banner-view{background:var(--soft);color:var(--ink)}
 
 @media(max-width:699px){
   .st-bar{flex-wrap:wrap}
