@@ -259,6 +259,20 @@ English, SIL Open Font License) are served by the site from `@fontsource`, never
 Its rules are held by `supabase/tests/studio_*_rules.sql`, `tests/studio-*.test.mjs` and the fixture checks
 `qa/studio-*.cjs`.
 
+The desktop application is real too, by owner directive of 2026-10-20 (`Desktop_App_Plan.md`, accepted
+with the answers of its section 11.1; `MVP_draft.md` section 63; recorded in `progress.md`). It is an
+Electron application in `desktop/`, with its own `package.json` and lockfile like `bridge/whatsapp/`,
+outside the site's typecheck and build, and for now built for Windows x64 only. It opens the live site,
+`https://comms-hub-three.vercel.app`, from an address list compiled in (a development build adds
+`http://127.0.0.1:3000`); a release build has no setting, switch or variable that widens it. It holds no
+secret: signing in is the site's own form, and the session is the site's cookie in the application's own
+profile. Its native layer is `window.commsHubNative`, which the preload exposes only when the top-level
+page is on the compiled list, never in frames. Every main-process handler checks its sender's frame
+address through `desktop/src/sender.ts`. There is no sign-in bypass, stub session or stored password in
+it or in its checks. It decides nothing about people: every page, rule and check stays the website's.
+Nothing is scheduled in the site because of it. Its rules are plain functions in `desktop/src/`, held by
+`desktop/tests` and by `qa/desktop-shell.cjs`, which drives the packaged application.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted

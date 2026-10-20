@@ -1127,3 +1127,33 @@ When recording future implementation outcomes, follow this standardized template
 - **Code.** New: `src/lib/studio/slot.ts`, `src/components/studio/slot-panel.tsx`. Changed: `schema.ts` (`Slot`), `compose.ts`, `timeline.ts` (`kindFor`), `diff.ts`, `checks.ts`, `timeline.tsx`, `inspector.tsx`, `bin.tsx`, `editor.tsx`, `export-panel.tsx`, `send-review.tsx`, `persist.ts` (`flush`), `use-project.ts`, the styles. No migration.
 - **Verified, numbers.** `npm run typecheck` clean; `npm run build` passes; `npm test` **501 of 501**. New `tests/studio-slot.test.mjs`, 5: tracks, names, task note, the export warning, filling at the version with the box fit, one source for one file, task_create's fields and no direct write. `tests/studio-schema.test.mjs` gains the flush test (saved without waiting, once, nothing for no change, only the draft without the lease). Engine `qa/studio-engine.cjs` **41 of 41**: the place's stripes inside, the red video outside unchanged. Interface `qa/studio-ui.cjs --only=work` **21 of 21**: edits kept after leaving for the work page; a box named «شعار الشريك» with a design task for CH-101 to the designer, its note and an attached PNG frame; the export warning; the task done and a picture linked to the work listed under «سُلّمت»; the place turned into that picture. All flows **122 of 122**.
 - **Not verified, said plainly.** `task_create` itself was not run again in SQL (it is the work cycle's, tested there); the task was driven in the fixture database. The person who receives the task works on «المهام» as before.
+
+### 2026-10-20: the desktop application, D0: the owner's decisions and the specification
+
+- **The owner's decisions.** The owner accepted `Desktop_App_Plan.md` on 2026-10-20: every recommendation of its section 11, with the answers of 11.1.
+  - Electron, not Tauri (D-1), carrying the whole site (D-2).
+  - A pilot of the Admin and the director (D-3), whose laptops are both Windows x64 (D-4). Windows x64 first, and only, until it is fully running; Windows arm64 and macOS come after, and Apple membership waits with macOS (D-8).
+  - The Vercel address is kept for now, `https://comms-hub-three.vercel.app` (D-5). A development build also opens `http://127.0.0.1:3000`.
+  - Installers and updates will go to a public bucket of the `comms-hub` Supabase project when D3 comes (D-6).
+  - Unsigned for the pilot, a certificate before rollout (D-7).
+  - FFmpeg in D5 under the LGPL with the system's own encoders (D-9).
+  - Closing the window quits, except during an export or with «إبقاء التطبيق في شريط المهام» (D-10, from D2).
+  - Disk encryption where library copies are kept; «مسح بيانات هذا الجهاز» removes the session, cache, tokens and proxies (D-11).
+  - Windows shows the site's own name, «مركز الاتصال المؤسسي».
+  - No native menu bar: the application takes only zoom, F11 and F5.
+  - D1 now; D2 after the studio's third round, which is being built in the main checkout at the same time.
+- **Settled while building, for the owner to see** (each can be changed):
+  - **The fixed internal id is `sa.commshub.desktop`**: reverse DNS, with `sa` for the organisation's country. It names the Windows application id, the uninstall entry and the data folder, `%APPDATA%\sa.commshub.desktop`, and it never changes. It names no host and is never looked up. `desktop/package.json` carries the same name, because electron-builder's uninstaller removes `%APPDATA%\<package name>`. A development build keeps its profile apart, in `sa.commshub.desktop.dev`.
+  - **Pins**, by the rule of the newest release at least fourteen days old, counted by the clock (2026-10-20T15:13Z, so published by 2026-10-06T15:13Z):
+    - Electron **44.5.1**, published 2026-09-30, carrying Chromium 152.0.7977.130 and Node.js 24.21.0. 44.6.0 was published 2026-10-06T22:39Z, about seven hours short of fourteen days, so it waits.
+    - electron-builder 26.17.0, @electron/fuses 2.1.3, esbuild 0.28.2 (the site's own) and TypeScript 7.0.2, each pinned exactly.
+  - **window.open of a page on the list opens a second window of the application**, with every rule of the first, rather than replacing the page in the window. The site opens such pages in a new window on purpose: a library file's content (`asset-page.tsx`) and «فتح هذه النسخة للقراءة في نافذة جديدة» (`versions-panel.tsx`). The application also has no back button. This is how the brief's "stay in the window" was read; the owner can ask for the other reading.
+  - **The note comes first.** An outside connection shows its note with «متابعة في المتصفح» and «إلغاء» before the browser opens, so it is read before the person leaves the application.
+  - **Permissions follow the brief exactly.** So the screen wake lock and persistent storage, which a browser gives without asking, are refused too. The studio already carries on without both: `export-panel.tsx` and `cache.ts` catch the refusal. D2's own keep-awake replaces the wake lock.
+  - The new Arabic strings (the connection screen, the note, «حفظ الملف») are listed in `MVP_draft.md` 63.
+- **Records.**
+  - `MVP_draft.md` section 63 describes what the person sees.
+  - `AGENTS.md` has a new paragraph in "Prototype boundary".
+  - `Roadmap.md` (a new scope addition at the end of Version 0) and `Status.md` (a new section at the top) have one line each.
+  - Each addition is its own new section or paragraph, so the merge with the studio round stays simple.
+- **Baseline.** The three plan files (`Desktop_App_Plan.md`, `Mobile_Apps_Plan.md`, `Desktop_Build_Prompt.md`) were committed on `main` first, as `09757c2`. The commit was owner-authorised and used `git commit --only`, so none of the studio session's files went in. The work went on in a worktree on branch `desktop-app`.
