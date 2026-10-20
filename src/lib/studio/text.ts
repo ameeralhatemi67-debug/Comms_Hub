@@ -265,4 +265,22 @@ export function parseSrt(text: string): { start: Micros; end: Micros; text: stri
 }
 
 /** A caption style: smaller text on a dark box near the bottom. */
+/** An SRT time: 00:01:02,345. */
+function srtTimeOf(us: Micros): string {
+  const ms = Math.max(0, Math.round(us / 1000));
+  const p = (n: number, w = 2) => String(n).padStart(w, '0');
+  return `${p(Math.floor(ms / 3_600_000))}:${p(Math.floor(ms / 60_000) % 60)}:${p(Math.floor(ms / 1000) % 60)},${p(ms % 1000, 3)}`;
+}
+
+/** The texts of one text track as SRT captions, in order of time (MVP_draft.md 62.10). */
+export function toSrt(doc: ProjectDoc, trackId: string): string {
+  const track = doc.video?.tracks.find((t) => t.id === trackId);
+  if (!track) return '';
+  return [...track.clips]
+    .filter((c) => c.text && c.text.content.trim())
+    .sort((a, b) => a.start - b.start)
+    .map((c, i) => [String(i + 1), `${srtTimeOf(c.start)} --> ${srtTimeOf(c.start + c.length)}`, c.text!.content.trim(), ''].join('\n'))
+    .join('\n');
+}
+
 export const captionStyle = (content: string): TextStyle => ({ ...defaultText(content), size: 54, weight: 500, box: { color: '#000000', opacity: 0.6, padding: 18, radius: 12 }, shadow: null, enter: 'none', exit: 'none' });

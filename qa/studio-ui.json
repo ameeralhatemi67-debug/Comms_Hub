@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-ui.cjs",
-  "run": "2026-10-20T10:24:26.070Z",
+  "run": "2026-10-20T10:43:01.237Z",
   "checks": [
     {
       "name": "the empty home says there are no projects yet and offers both kinds",
@@ -10,7 +10,7 @@
     {
       "name": "a new video project is created and opened in the editor",
       "pass": true,
-      "detail": "aeb0c9f0-75ca-4f49-a0f4-8fd5a93cce84"
+      "detail": "51c00f4e-f471-441c-8875-5ed3cda9a8d0"
     },
     {
       "name": "the bar names the project and its first numbered version",
@@ -80,7 +80,7 @@
     {
       "name": "«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it",
       "pass": true,
-      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"c59dac48-ee04-44a9-8d39-5ff4f03dd98a\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
+      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"3d29fb05-03b2-49f4-b5ab-519888e8549a\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
     },
     {
       "name": "the result says it is in the library and that its uploader does not approve it",
@@ -90,12 +90,12 @@
     {
       "name": "the saved file is linked to the work through the work cycle (work_asset_link)",
       "pass": true,
-      "detail": "[{\"work\":\"CH-101\",\"asset\":\"c59dac48-ee04-44a9-8d39-5ff4f03dd98a\"}]"
+      "detail": "[{\"work\":\"CH-101\",\"asset\":\"3d29fb05-03b2-49f4-b5ab-519888e8549a\"}]"
     },
     {
       "name": "«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4",
       "pass": true,
-      "detail": "[{\"asset\":\"c59dac48-ee04-44a9-8d39-5ff4f03dd98a\",\"version\":1,\"revision\":3},{\"asset\":\"c59dac48-ee04-44a9-8d39-5ff4f03dd98a\",\"version\":2,\"revision\":4}]"
+      "detail": "[{\"asset\":\"3d29fb05-03b2-49f4-b5ab-519888e8549a\",\"version\":1,\"revision\":3},{\"asset\":\"3d29fb05-03b2-49f4-b5ab-519888e8549a\",\"version\":2,\"revision\":4}]"
     },
     {
       "name": "a timed review note of the exported file shows in the studio, and its time moves the playhead",
@@ -235,7 +235,7 @@
     {
       "name": "ws: dragging a corner of the selected title on the preview scales it",
       "pass": true,
-      "detail": "100 to 143"
+      "detail": "100 to 152"
     },
     {
       "name": "ws: «السجل» lists the steps, goes back to the project as it was opened and forward to the last step",
@@ -280,7 +280,7 @@
     {
       "name": "dragging a layer on the canvas moves it",
       "pass": true,
-      "detail": "540 to 628"
+      "detail": "540 to 650"
     },
     {
       "name": "the PNG export is the full 1080x1080 picture with the rectangle in the middle",
@@ -435,17 +435,47 @@
     {
       "name": "sound: «تسجيل صوت» records after the count and puts the recording on a sound track that becomes speech, with its waveform",
       "pass": true,
-      "detail": "تسجيل صوت 2026-10-20 13-25-51.webm voice"
+      "detail": "تسجيل صوت 2026-10-20 13-44-23.webm voice"
     },
     {
       "name": "sound: the recording is kept as a file on this device («على هذا الجهاز فقط»), about two seconds long",
       "pass": true,
-      "detail": "{\"kind\":\"local\",\"mime\":\"audio/webm\",\"length\":2220000}"
+      "detail": "{\"kind\":\"local\",\"mime\":\"audio/webm\",\"length\":2280000}"
     },
     {
       "name": "sound: a sound track switched to music offers its lowering under speech",
       "pass": true,
       "detail": "music"
+    },
+    {
+      "name": "export2: a square shape is added from «المشروع» and shown in the preview as a square",
+      "pass": true,
+      "detail": "361x361"
+    },
+    {
+      "name": "export2: dragging the title in the square leaves its place in the project's own shape as it was",
+      "pass": true,
+      "detail": "540 / 540 / 540"
+    },
+    {
+      "name": "export2: one export with two shapes ticked makes two files, named with their shapes",
+      "pass": true,
+      "detail": "مقطع الأشكال (9x16).mp4 | مقطع الأشكال (1x1).mp4"
+    },
+    {
+      "name": "export2: a picture for YouTube is stopped by the checks, which say why",
+      "pass": true,
+      "detail": "يوتيوب يقبل الفيديو وحده، والتصدير صورة."
+    },
+    {
+      "name": "export2: «تنزيل ملف SRT» writes the title track as SRT captions",
+      "pass": true,
+      "detail": "\"1\\n00:00:00,000 --> 00:00:03,000\\nعنوان\\n\""
+    },
+    {
+      "name": "export2: «إطار إلى مشروع صورة» opens a photo project whose layer is the frame at the playhead (red at 0 s)",
+      "pass": true,
+      "detail": "إطار 0:00 [255,24,0]"
     },
     {
       "name": "no page errors",
@@ -454,8 +484,8 @@
     }
   ],
   "debugTime": "00:02.00 / 00:07.24",
-  "projectId": "aeb0c9f0-75ca-4f49-a0f4-8fd5a93cce84",
-  "total": 90,
-  "passed": 90,
+  "projectId": "51c00f4e-f471-441c-8875-5ed3cda9a8d0",
+  "total": 96,
+  "passed": 96,
   "failed": 0
 }

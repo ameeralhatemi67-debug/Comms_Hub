@@ -21,6 +21,7 @@ import { transformOf } from '@/lib/studio/compose';
 import { EASES, KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAt, keyTimes, transformWithKeys, writeTransform as writeTransformKeys, type Ease, type KeyProp, type Keys, type MotionProp } from '@/lib/studio/keys';
 import { SPEED_MAX, SPEED_MIN, isHold, retimed, speedAt } from '@/lib/studio/speed';
 import { COVER_MODES, COVER_SHAPES } from '@/lib/studio/cover';
+import { EXTRA_SHAPES_MAX, setShapes, shapesOf } from '@/lib/studio/reframe';
 import { ColorInput, Segmented, Slider, Switch, TextInput } from '../motion-controls';
 import { DesktopOnly } from './compact';
 import { FontPicker } from './font-picker';
@@ -261,6 +262,23 @@ export function ProjectSettings({ doc, onDoc, readOnly, cachePanel }: { doc: Pro
         <Segmented label="الإطارات في الثانية" size="sm" value={doc.video?.fps ?? 30} disabled={readOnly} onChange={(v) => onDoc(setFormat(doc, { fps: v }), 'الإطارات في الثانية')} options={FPS_CHOICES.map((f) => ({ value: f, label: String(f) }))} />
         <ColorInput label="لون الخلفية" value={doc.video?.background ?? '#000000'} disabled={readOnly} onChange={(v) => onDoc(setFormat(doc, { background: v }), 'لون الخلفية', 'bg')} />
         <p className="st-hint">المدة {shortTime(durationOf(doc))} · <bdi dir="ltr">{W}×{H}</bdi></p>
+      </Section>
+      <Section title="أشكال أخرى للتصدير">
+        <div className="st-shape-picks">
+          {(Object.keys(RATIOS) as Ratio[])
+            .filter((r) => r !== ratio)
+            .map((r) => {
+              const on = shapesOf(doc).includes(r);
+              const full = !on && shapesOf(doc).length >= EXTRA_SHAPES_MAX;
+              return (
+                <label key={r} className="st-switch-row">
+                  <input type="checkbox" checked={on} disabled={readOnly || full} onChange={(e) => onDoc(setShapes(doc, e.target.checked ? [...shapesOf(doc), r] : shapesOf(doc).filter((x) => x !== r)), e.target.checked ? 'إضافة شكل' : 'إزالة شكل')} />
+                  {RATIOS[r].label}
+                </label>
+              );
+            })}
+        </div>
+        <p className="st-hint">يُصدَّر المقطع نفسه في كل شكل مختار ملفاً مستقلاً. اعرض الشكل من «المعاينة»، واسحب المقاطع فيه لتضبط مكانها في ذلك الشكل وحده.</p>
       </Section>
       {cachePanel}
     </aside>

@@ -187,6 +187,8 @@ export type VideoBody = { ratio: Ratio; fps: Fps; background: string; tracks: Tr
 export type Layer = Content & {
   id: string;
   name?: string;
+  /** A picture layer of a video source: the source time of its frame («إطار إلى مشروع صورة», MVP_draft.md 62.10). */
+  at?: Micros;
   hidden?: boolean;
   locked?: boolean;
   transform: Transform;

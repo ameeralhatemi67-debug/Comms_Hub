@@ -12,6 +12,7 @@ import * as media from '../../src/lib/studio/media.ts';
 import * as preview from '../../src/lib/studio/preview.ts';
 import * as persist from '../../src/lib/studio/persist.ts';
 import * as speed from '../../src/lib/studio/speed.ts';
+import * as photoLib from '../../src/lib/studio/photo.ts';
 import { loadAssets } from '../../src/lib/motion/renderers.js';
 
 type Check = { name: string; pass: boolean; detail: string };
@@ -79,7 +80,7 @@ export async function run(): Promise<{ checks: Check[]; log: string[] }> {
   canvas.height = H * scale;
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
   const mr = new motion.MotionRenderer();
-  const draw = async (d: schema.ProjectDoc, t: number, opts: { transparent?: boolean } = {}) => {
+  const draw = async (d: schema.ProjectDoc, t: number, opts: { transparent?: boolean; watermark?: string | null } = {}) => {
     const frames = new Map<string, CanvasImageSource | null>();
     for (const { clip } of timeline.visibleAt(d, t)) {
       const s = d.sources.find((x) => x.id === clip.source);
@@ -168,6 +169,28 @@ export async function run(): Promise<{ checks: Check[]; log: string[] }> {
   const changed = (m: string) => dist(coverResults[m][0], plain[0]) > 30;
   const unchanged = (m: string) => dist(coverResults[m][1], plain[1]) <= 3 && dist(coverResults[m][2], plain[2]) <= 3;
   check('a covered area (blur, and squares) changes the pixels inside it and leaves the picture and the video outside it as they were', changed('blur') && changed('blocks') && unchanged('blur') && unchanged('blocks'), JSON.stringify({ plain, ...coverResults }));
+
+  // the «مسودة» mark (MVP_draft.md 62.10): part of the picture changes, most of it shows through
+  await draw(doc, 1 * US);
+  const plainPx = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  await draw(doc, 1 * US, { watermark: 'مسودة' });
+  const markedPx = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  let differ = 0;
+  for (let i = 0; i < plainPx.length; i += 4) if (Math.abs(plainPx[i] - markedPx[i]) + Math.abs(plainPx[i + 1] - markedPx[i + 1]) + Math.abs(plainPx[i + 2] - markedPx[i + 2]) > 24) differ++;
+  const share = differ / (plainPx.length / 4);
+  check('the «مسودة» mark is written across the picture, which shows through it (between 2 and 60 percent of pixels touched)', share > 0.02 && share < 0.6, `${(share * 100).toFixed(1)}%`);
+  // a frame of the video as a photo layer («إطار إلى مشروع صورة»), read from the same file
+  let ph = schema.newPhotoDoc(640, 360);
+  const phs = timeline.addSource(ph, { kind: 'library', asset: RGB, version: 1, name: 'ألوان.mp4', media: 'video', duration: 6 * US });
+  ph = photoLib.addLayer(phs.doc, { source: phs.id, at: 3 * US }).doc;
+  const layerFrame = await pool.frameAt(vid, 3 * US);
+  const phCanvas = document.createElement('canvas');
+  phCanvas.width = 640;
+  phCanvas.height = 360;
+  const phCtx = phCanvas.getContext('2d', { willReadFrequently: true })!;
+  const layerId = ph.photo!.layers[0].id;
+  compose.composePhoto(phCtx, ph, { motion: mr, image: () => null, videoFrame: (_s, at, id) => (id === layerId && at === 3 * US ? layerFrame : null) }, { scale: 1 });
+  check('a photo layer that is a frame of a video shows the frame at its source time (green at 3 s)', near(px(phCtx, 320, 180), [0, 255, 0]), JSON.stringify(px(phCtx, 320, 180)));
 
   // a picture above the video, placed and scaled
   const b = timeline.addClip(doc, { source: img, start: 0, length: 6 * US, transform: { x: W * 0.25, y: H * 0.5, scale: 0.3, rotation: 0, opacity: 1 } });

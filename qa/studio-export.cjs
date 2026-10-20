@@ -108,6 +108,8 @@ function syncTimes(file) {
     const fff = save('f', 'mp4');
     const fg = save('g', 'mp4');
     const fh = save('h', 'mp4');
+    const fi = save('i', 'mp4');
+    const fj = save('j', 'png');
     result.timing = { exportMs: r.a.ms, bytes: r.a.bytes, estimate: r.a.estimate };
 
     const pa = probe(fa);
@@ -154,6 +156,15 @@ function syncTimes(file) {
     check('the studio\'s BS.1770 meter agrees with ffmpeg\'s EBU R128 meter within 0.5 LU on the plain export', Math.abs(refA - r.h.measured) < 0.5, `studio ${r.h.measured.toFixed(2)}, ffmpeg ${refA}`);
     const refH = lufs(fh);
     check('«توحيد مستوى الصوت» brings the file to -14 LUFS within 1 LU (ffmpeg)', Math.abs(refH - -14) <= 1, `${refH} LUFS after +${r.h.gainDb.toFixed(2)} dB`);
+    // other shapes and a frame as a photo (MVP_draft.md 62.10)
+    const pi = probe(fi).streams.find((x) => x.codec_type === 'video');
+    const ci = frameColours(fi, [30]);
+    // the 16:9 picture fits inside the square with bars above and below, so the frame's average is a darker red
+    const barred = ci[0] && ci[0][0] > 100 && ci[0][0] < 230 && ci[0][1] < 40 && ci[0][2] < 40;
+    check('the same cut in a square shape is a 720x720 file of its own, 210 frames, red at 1 s with bars above and below', pi?.width === 720 && pi?.height === 720 && Number(pi?.nb_read_frames) === 210 && barred, JSON.stringify({ w: pi?.width, h: pi?.height, n: pi?.nb_read_frames, ci }));
+    const pj = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_name,width,height', '-of', 'csv=p=0', fj]).stdout.toString().trim();
+    const midj = spawnSync('ffmpeg', ['-v', 'error', '-i', fj, '-vf', 'crop=4:4:318:178,scale=1:1', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-']).stdout;
+    check('a photo whose layer is the frame at 5 s of the video exports as a 640x360 PNG of that frame (blue)', pj === 'png,640,360' && near([midj[0], midj[1], midj[2]], [0, 0, 255]), `${pj} ${[...midj].join(',')}`);
     check('a still is a PNG of the project size showing the frame at 5 s (blue)', r.d.type === 'image/png' && sp === 'png,1920,1080' && near([still[0], still[1], still[2]], [0, 0, 255]), `${sp} ${[...still].join(',')}`);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));

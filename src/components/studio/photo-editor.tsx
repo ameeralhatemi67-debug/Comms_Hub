@@ -116,17 +116,42 @@ export function PhotoEditor(p: EditorProps) {
     };
   }, [layers, pool, tick]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // a layer that is a frame of a video («إطار إلى مشروع صورة»): the decoder's frame, copied, by layer
+  const [frames, setFrames] = useState<Map<string, { key: string; canvas: HTMLCanvasElement }>>(new Map());
+  useEffect(() => {
+    if (!pool) return;
+    let live = true;
+    for (const l of layers) {
+      if (!l.source || doc.sources.find((s) => s.id === l.source)?.media !== 'video' || pool.state(l.source)?.kind !== 'ready') continue;
+      const key = `${l.source}|${l.at ?? 0}`;
+      if (frames.get(l.id)?.key === key) continue;
+      void pool.frameAt(l.source, l.at ?? 0).then((f) => {
+        if (!live || !f) return;
+        const c = document.createElement('canvas');
+        const fw = (f as HTMLCanvasElement).width;
+        const fh = (f as HTMLCanvasElement).height;
+        c.width = fw;
+        c.height = fh;
+        c.getContext('2d')!.drawImage(f, 0, 0);
+        setFrames((m) => new Map(m).set(l.id, { key, canvas: c }));
+      });
+    }
+    return () => {
+      live = false;
+    };
+  }, [layers, pool, tick]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const resolver = useMemo<Resolver>(
     () => ({
       motion,
       image: (id) => pool?.image(id) ?? null,
-      videoFrame: () => null,
+      videoFrame: (_s, _at, layerId) => (layerId ? (frames.get(layerId)?.canvas ?? null) : null),
       adjusted: (item) => {
         const a = adjusted.get(item.id);
         return a && a.key === `${item.source}|${JSON.stringify(item.adjust)}` ? a.canvas : null;
       },
     }),
-    [motion, pool, adjusted],
+    [motion, pool, adjusted, frames],
   );
 
   // the canvas fits its window with the photo's proportions

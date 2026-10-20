@@ -5,12 +5,19 @@
 // folder the person may create in, or as a new version of a file (long press when the file has been in
 // review; refused when it is published). Saving to the library first saves a numbered version of the
 // project and records which version produced which library version (studio_export_record). The export
-// runs in this page, with the screen kept awake; the page asks to stay visible.
+// runs in this page, with the screen kept awake; the page asks to stay visible. A video project exports in
+// each shape ticked (MVP_draft.md 62.10), one file each; the platforms it is meant for are checked first;
+// a download may carry the «مسودة» mark (never a library file: what is approved there is what is
+// published); a text track can be written out as SRT captions.
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Download, Film, Image as ImageIcon, Library, X } from 'lucide-react';
+import { Download, Film, Image as ImageIcon, Library, Subtitles, X } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
-import { durationOf, type Micros, type ProjectDoc } from '@/lib/studio/schema';
+import { RATIOS, US, canvasOf, durationOf, type Micros, type ProjectDoc, type Ratio } from '@/lib/studio/schema';
+import { allShapes, docForShape } from '@/lib/studio/reframe';
+import { exportChecks, hasStop } from '@/lib/studio/checks';
+import { toSrt } from '@/lib/studio/text';
+import { factsOf, usePlatforms } from './platforms';
 import { EXPORT_ERRORS, ExportError, SHORT_LABELS, estimateBytes, exportStill, exportVideo, fileName, measureLoudness, outputSize, type ExportProgress, type Short, type VideoFormat } from '@/lib/studio/export';
 import { LOUDNESS_TARGET, lufsText, normalizeGain } from '@/lib/studio/loudness';
 import { hasSound } from '@/lib/studio/audio';
@@ -27,6 +34,8 @@ import { linkFileToWork } from './work-links';
 
 type Dest = 'device' | 'new' | 'version';
 type Done = { kind: 'device'; name: string; bytes: number; url: string } | { kind: 'library'; name: string; asset: string; version: number };
+export const DRAFT_MARK = 'مسودة';
+const shapeName = (r: Ratio) => r.replace(':', 'x');
 
 export function ExportPanel({
   doc, pool, t, projectId, title, readOnly, canLibrary, api, saveVersion, revision, photo, adjusted, workRef = null, onSaved,
@@ -59,7 +68,18 @@ export function ExportPanel({
   const [targets, setTargets] = useState<AssetRow[]>([]);
   const [targetId, setTargetId] = useState('');
   const [progress, setProgress] = useState<{ label: string; f: number } | null>(null);
-  const [done, setDone] = useState<Done | null>(null);
+  const [done, setDone] = useState<Done[] | null>(null);
+  const main = doc.video?.ratio ?? '9:16';
+  const shapes: Ratio[] = photo ? [] : allShapes(doc);
+  const [picked, setPicked] = useState<Ratio[]>([main]);
+  const chosenShapes = photo ? [] : picked.filter((r) => shapes.includes(r));
+  const [mark, setMark] = useState(false);
+  const [ack, setAck] = useState(false);
+  const [chosen, setChosen] = useState<string[] | null>(null);
+  const [srtTrack, setSrtTrack] = useState('');
+  const [srtNote, setSrtNote] = useState<string | null>(null);
+  const plat = usePlatforms(workRef);
+  const platformKeys = chosen ?? plat.workKeys;
   const [error, setError] = useState<string | null>(null);
   const [hidden, setHidden] = useState(false);
   const [linkWork, setLinkWork] = useState(true);
@@ -67,8 +87,12 @@ export function ExportPanel({
   const [normalize, setNormalize] = useState(false);
   const [level, setLevel] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
-  const lastUrl = useRef<string | null>(null);
+  const lastUrls = useRef<string[]>([]);
 
+  // the project's own shape changed: it is the one ticked
+  useEffect(() => {
+    if (!photo && !picked.some((r) => shapes.includes(r))) setPicked([main]);
+  }, [main]); // eslint-disable-line react-hooks/exhaustive-deps
   // MP4 where the browser makes it, WebM otherwise
   useEffect(() => {
     void probeSupport().then((s) => setFormat(s.mp4 || !s.webm ? 'mp4' : 'webm'));
@@ -95,7 +119,7 @@ export function ExportPanel({
     };
   }, [dest, projectId]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => {
-    if (lastUrl.current) URL.revokeObjectURL(lastUrl.current);
+    for (const u of lastUrls.current) URL.revokeObjectURL(u);
   }, []);
   useEffect(() => {
     if (!progress) return;
@@ -117,6 +141,12 @@ export function ExportPanel({
   const toLibrary = dest !== 'device';
   const ext = what === 'still' ? stillType.split('/')[1].replace('jpeg', 'jpg') : format;
 
+  // what the export is checked against: the work's platforms, or those picked here
+  const { w: CW, h: CH } = canvasOf(doc);
+  const ratios = photo ? [CW / CH] : chosenShapes.map((r) => RATIOS[r].w / RATIOS[r].h);
+  const checks = exportChecks({ kind: photo ? 'still' : what, ratios, seconds: durationOf(doc) / US }, platformKeys.map(factsOf));
+  const warned = checks.some((c) => c.level === 'warn');
+
   const run = async () => {
     if (!pool) return;
     setError(null);
@@ -133,8 +163,7 @@ export function ExportPanel({
         if (!saved.ok) throw new Error(saved.error ?? 'تعذّر حفظ نسخة من المشروع.');
         rev = revision();
       }
-      const name = fileName(title, ext);
-      // «توحيد مستوى الصوت»: measured first, then one gain for the whole sound
+      // «توحيد مستوى الصوت»: measured first, then one gain for the whole sound (the same in every shape)
       let gain = 1;
       if (what === 'video' && normalize && hasSound(doc)) {
         const m = await measureLoudness(doc, pool, { signal: ctl.signal, onProgress: (f) => setProgress({ label: `جارٍ قياس مستوى الصوت ${Math.round(f * 100)}٪`, f }) });
@@ -142,45 +171,59 @@ export function ExportPanel({
         const after = m.integrated + 20 * Math.log10(gain);
         setLevel(`كان الصوت ${lufsText(m.integrated)}، وصار في الملف نحو ${lufsText(after)}${after < LOUDNESS_TARGET - 0.5 ? ' (أوقفته القمم عند -1 ديسيبل)' : ''}.`);
       }
-      let file: File;
-      if (what === 'still') {
-        setProgress({ label: 'جارٍ إنشاء الصورة…', f: 0.5 });
-        file = await exportStill(doc, pool, { t, name, type: stillType, short: photo ? undefined : short, adjusted });
-      } else {
-        const r = await exportVideo(doc, pool, {
-          short,
-          format,
-          name,
-          gain,
-          signal: ctl.signal,
-          onProgress: (p: ExportProgress) => setProgress({ label: p.phase === 'prepare' ? 'جارٍ التجهيز…' : p.phase === 'finish' ? 'جارٍ إنهاء الملف…' : `جارٍ التصدير ${Math.round((p.done / p.total) * 100)}٪`, f: p.done / Math.max(1, p.total) }),
-        });
-        file = r.file;
-      }
-      if (!toLibrary) {
-        if (lastUrl.current) URL.revokeObjectURL(lastUrl.current);
-        lastUrl.current = download(file);
-        setDone({ kind: 'device', name: file.name, bytes: file.size, url: lastUrl.current });
-      } else {
+      const watermark = dest === 'device' && mark ? DRAFT_MARK : null;
+      const list: (Ratio | null)[] = photo ? [null] : chosenShapes;
+      const results: Done[] = [];
+      let linked: string | null = null;
+      for (let i = 0; i < list.length; i++) {
+        const shape = list[i];
+        const d = shape ? docForShape(doc, shape) : doc;
+        const tag = list.length > 1 || (shape && shape !== main) ? ` (${shapeName(shape!)})` : '';
+        const name = fileName(`${title}${tag}`, ext);
+        const of = list.length > 1 ? ` ${i + 1} من ${list.length}` : '';
+        let file: File;
+        if (what === 'still') {
+          setProgress({ label: `جارٍ إنشاء الصورة${of}…`, f: 0.5 });
+          file = await exportStill(d, pool, { t, name, type: stillType, short: photo ? undefined : short, adjusted, watermark });
+        } else {
+          const r = await exportVideo(d, pool, {
+            short,
+            format,
+            name,
+            gain,
+            watermark,
+            signal: ctl.signal,
+            onProgress: (p: ExportProgress) => setProgress({ label: p.phase === 'prepare' ? `جارٍ التجهيز${of}…` : p.phase === 'finish' ? `جارٍ إنهاء الملف${of}…` : `جارٍ التصدير${of} ${Math.round((p.done / p.total) * 100)}٪`, f: p.done / Math.max(1, p.total) }),
+          });
+          file = r.file;
+        }
+        if (!toLibrary) {
+          const url = download(file);
+          lastUrls.current.push(url);
+          results.push({ kind: 'device', name: file.name, bytes: file.size, url });
+          continue;
+        }
         let asset: string;
         let version: number;
         if (dest === 'new') {
-          const row = await uploadToLibrary(file, folder, (f) => setProgress({ label: `جارٍ رفع الملف ${Math.round(f * 100)}٪`, f }));
+          const row = await uploadToLibrary(file, folder, (f) => setProgress({ label: `جارٍ رفع الملف${of} ${Math.round(f * 100)}٪`, f }));
           asset = row.id;
           version = row.current_version;
         } else {
           asset = targetId;
           version = await uploadVersion(targetId, file, `من الاستوديو: ${title} (النسخة ${rev})`.slice(0, 200), (f) => setProgress({ label: `جارٍ رفع الإصدار ${Math.round(f * 100)}٪`, f }));
         }
-        const rec = await api.exportRecord(projectId, rev, asset, version, what === 'still' ? 'image' : 'video');
+        const rec = await api.exportRecord(projectId, rev, asset, version, what === 'still' ? 'image' : 'video', shape);
         if (!rec.ok) throw new Error(rec.error);
         if (workRef && linkWork) {
           const err = await linkFileToWork(workRef, asset);
-          setLinkNote(err ?? `رُبط الملف بالعمل ${workRef}.`);
-        } else setLinkNote(null);
-        setDone({ kind: 'library', name: file.name, asset, version });
-        onSaved?.();
+          linked = err ?? `رُبط ${list.length > 1 ? 'كل ملف' : 'الملف'} بالعمل ${workRef}.`;
+        }
+        results.push({ kind: 'library', name: file.name, asset, version });
       }
+      setLinkNote(linked);
+      setDone(results);
+      if (toLibrary) onSaved?.();
     } catch (e) {
       const code = e instanceof ExportError ? e.code : (e as Error).message;
       setError(EXPORT_ERRORS[code] ?? ((e as Error).message || 'تعذّر التصدير.'));
@@ -192,8 +235,27 @@ export function ExportPanel({
     }
   };
 
+  // captions out: a text track as SRT, downloaded or saved to the library as a text file
+  const textTracks = (doc.video?.tracks ?? []).filter((x) => x.kind === 'text' && x.clips.some((c) => c.text?.content.trim()));
+  const srtOf = () => {
+    const id = srtTrack || textTracks[0]?.id;
+    return id ? toSrt(doc, id) : '';
+  };
+  const srtFile = () => new File([srtOf()], fileName(title, 'srt'), { type: 'text/plain' });
+  const saveSrt = async () => {
+    setSrtNote(null);
+    try {
+      const row = await uploadToLibrary(srtFile(), folder, () => undefined);
+      setSrtNote(`حُفظت الترجمة في المكتبة: ${row.name}.`);
+    } catch (e) {
+      setSrtNote((e as Error).message || 'تعذّر حفظ الترجمة.');
+    }
+  };
+
   const busy = !!progress;
-  const blocked = empty || !pool || (toLibrary && (readOnly || !canLibrary || (dest === 'new' && !folder) || (dest === 'version' && (!targetId || published))));
+  const blocked =
+    empty || !pool || (!photo && !chosenShapes.length) || hasStop(checks) || (warned && !ack) ||
+    (toLibrary && (readOnly || !canLibrary || (dest === 'new' && !folder) || (dest === 'version' && (!targetId || published || (!photo && chosenShapes.length !== 1)))));
   return (
     <section className="st-export" aria-label="التصدير">
       <h2>التصدير</h2>
@@ -213,6 +275,19 @@ export function ExportPanel({
       {(what === 'video' || !photo) && (
         <Segmented label="المقاس" size="sm" value={short} disabled={busy} onChange={setShort} options={([720, 1080, 2160] as Short[]).map((s) => ({ value: s, label: SHORT_LABELS[s], hint: `${outputSize(doc, s).w}×${outputSize(doc, s).h}` }))} />
       )}
+      {!photo && shapes.length > 1 && (
+        <fieldset className="st-shapes">
+          <legend>الأشكال</legend>
+          {shapes.map((r) => (
+            <label key={r} className="st-switch-row">
+              <input type="checkbox" checked={picked.includes(r)} disabled={busy} onChange={(e) => setPicked((x) => (e.target.checked ? [...x, r] : x.filter((y) => y !== r)))} />
+              {RATIOS[r].label}
+              {r === main ? ' (شكل المشروع)' : ''}
+            </label>
+          ))}
+          <p className="st-hint">ملف لكل شكل، بالاسم نفسه ومعه الشكل.</p>
+        </fieldset>
+      )}
       {what === 'still' && (
         <Segmented label="صيغة الصورة" size="sm" value={stillType} disabled={busy} onChange={setStillType} options={[{ value: 'image/png', label: 'PNG' }, { value: 'image/jpeg', label: 'JPEG' }, { value: 'image/webp', label: 'WebP' }]} />
       )}
@@ -228,6 +303,14 @@ export function ExportPanel({
           { value: 'version', label: 'إصدار جديد من ملف' },
         ]}
       />
+      {dest === 'device' && (
+        <label className="st-switch-row">
+          <input type="checkbox" checked={mark} onChange={(e) => setMark(e.target.checked)} disabled={busy} />
+          علامة «{DRAFT_MARK}» على الصورة
+        </label>
+      )}
+      {dest !== 'device' && <p className="st-hint">لا تُكتب علامة «{DRAFT_MARK}» على ملف المكتبة: ما يُعتمد فيها هو الملف الذي يُنشر نفسه.</p>}
+      {dest === 'version' && !photo && chosenShapes.length > 1 && <p className="st-hint st-warn">الإصدار الجديد لملف واحد: اختر شكلاً واحداً.</p>}
       {toLibrary && !canLibrary && <p className="st-hint st-warn">الحفظ في المكتبة يحتاج صفحة «مكتبة الوسائط»، وهي غير مفتوحة لحسابك.</p>}
       {toLibrary && readOnly && <p className="st-hint st-warn">الحفظ في المكتبة يحفظ نسخة من المشروع أولاً، والتحرير الآن ليس لك.</p>}
       {dest === 'new' && canLibrary && <FolderSelect value={folder} onChange={setFolder} disabled={busy} />}
@@ -285,6 +368,32 @@ export function ExportPanel({
           {level && <p className="st-hint" role="status">{level}</p>}
         </div>
       )}
+      <fieldset className="st-checks">
+        <legend>المنصات</legend>
+        {plat.workKeys.length > 0 && chosen === null && <p className="st-hint">منصات العمل {workRef}.</p>}
+        <div className="st-check-plats">
+          {plat.social.map((x) => (
+            <label key={x.key} className="st-switch-row">
+              <input type="checkbox" checked={platformKeys.includes(x.key)} disabled={busy} onChange={(e) => setChosen(e.target.checked ? [...platformKeys, x.key] : platformKeys.filter((k) => k !== x.key))} />
+              {x.label_ar}
+            </label>
+          ))}
+        </div>
+        {platformKeys.length > 0 && !checks.length && <p className="st-hint">لا ملاحظات على هذا التصدير للمنصات المختارة.</p>}
+        {checks.length > 0 && (
+          <ul className="st-check-list">
+            {checks.map((c) => (
+              <li key={c.text} data-level={c.level}>{c.text}</li>
+            ))}
+          </ul>
+        )}
+        {warned && (
+          <label className="st-switch-row">
+            <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} disabled={busy} />
+            قرأت التنبيهات أعلاه
+          </label>
+        )}
+      </fieldset>
       {what === 'video' && <p className="st-hint">يجري التصدير في هذا المتصفح: أبقِ الصفحة ظاهرة حتى ينتهي.</p>}
       {hidden && <p className="st-hint st-warn" role="alert">الصفحة مخفية الآن، فيتباطأ التصدير. أعدها إلى الواجهة.</p>}
       {progress ? (
@@ -313,22 +422,56 @@ export function ExportPanel({
       )}
       {empty && <p className="st-hint">أضف مقطعاً قبل التصدير.</p>}
       {error && <p className="warning" role="alert">{error}</p>}
-      {done?.kind === 'device' && (
-        <p className="st-done" role="status">
-          جاهز: {done.name} ({formatBytes(done.bytes)}).{' '}
-          <a href={done.url} download={done.name}>
-            تنزيل مرة أخرى
-          </a>
-        </p>
-      )}
-      {done?.kind === 'library' && (
-        <div className="st-done" role="status">
-          <p>
-            حُفظ في المكتبة: {done.name}، الإصدار {done.version}. <Link href={`/media/${done.asset}`}>فتحه في المكتبة</Link>
+      {done?.map((d) =>
+        d.kind === 'device' ? (
+          <p key={d.url} className="st-done" role="status">
+            جاهز: {d.name} ({formatBytes(d.bytes)}).{' '}
+            <a href={d.url} download={d.name}>
+              تنزيل مرة أخرى
+            </a>
           </p>
+        ) : null,
+      )}
+      {done?.some((d) => d.kind === 'library') && (
+        <div className="st-done" role="status">
+          {done.map((d) =>
+            d.kind === 'library' ? (
+              <p key={`${d.asset}:${d.version}`}>
+                حُفظ في المكتبة: {d.name}، الإصدار {d.version}. <Link href={`/media/${d.asset}`}>فتحه في المكتبة</Link>
+              </p>
+            ) : null,
+          )}
           {linkNote && <p className="st-hint">{linkNote}</p>}
           <p className="st-hint">لا يعتمد أحد ما رفعه بنفسه: يعتمد هذا الإصدار مراجع غيرك. والنشر ما يزال محاكاة.</p>
         </div>
+      )}
+      {!photo && textTracks.length > 0 && (
+        <fieldset className="st-srt">
+          <legend>الترجمة</legend>
+          {textTracks.length > 1 && (
+            <label>
+              مسار النص
+              <select value={srtTrack || textTracks[0].id} onChange={(e) => setSrtTrack(e.target.value)}>
+                {textTracks.map((x, i) => (
+                  <option key={x.id} value={x.id}>مسار النص {i + 1}</option>
+                ))}
+              </select>
+            </label>
+          )}
+          <div className="actions">
+            <button type="button" className="st-mini" onClick={() => setDone([{ kind: 'device', name: srtFile().name, bytes: srtFile().size, url: download(srtFile()) }])}>
+              <Subtitles aria-hidden="true" />
+              تنزيل ملف SRT
+            </button>
+            {canLibrary && dest === 'new' && folder && (
+              <button type="button" className="st-mini" disabled={readOnly} onClick={() => void saveSrt()}>
+                حفظ الترجمة في المكتبة
+              </button>
+            )}
+          </div>
+          {canLibrary && !(dest === 'new' && folder) && <p className="st-hint">للحفظ في المكتبة اختر «ملف جديد في المكتبة» ومجلداً أعلاه.</p>}
+          {srtNote && <p className="st-hint" role="status">{srtNote}</p>}
+        </fieldset>
       )}
     </section>
   );

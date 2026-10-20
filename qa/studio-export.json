@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-export.cjs",
-  "run": "2026-10-20T10:22:47.460Z",
+  "run": "2026-10-20T10:38:49.410Z",
   "checks": [
     {
       "name": "the export is H.264 at 1280x720 with AAC sound at 48 kHz stereo",
@@ -25,7 +25,7 @@
     {
       "name": "the file was written through the browser's private storage, not memory",
       "pass": true,
-      "detail": "device موحد.mp4"
+      "detail": "device مربع.mp4"
     },
     {
       "name": "frames on each side of the split and the gap are exact: 59 red, 60 and 89 black, 90 green",
@@ -73,6 +73,16 @@
       "detail": "-14 LUFS after +4.29 dB"
     },
     {
+      "name": "the same cut in a square shape is a 720x720 file of its own, 210 frames, red at 1 s with bars above and below",
+      "pass": true,
+      "detail": "{\"w\":720,\"h\":720,\"n\":\"210\",\"ci\":[[175,13,0]]}"
+    },
+    {
+      "name": "a photo whose layer is the frame at 5 s of the video exports as a 640x360 PNG of that frame (blue)",
+      "pass": true,
+      "detail": "png,640,360 0,15,255"
+    },
+    {
       "name": "a still is a PNG of the project size showing the frame at 5 s (blue)",
       "pass": true,
       "detail": "png,1920,1080 0,15,255"
@@ -84,11 +94,11 @@
     }
   ],
   "timing": {
-    "exportMs": 3179,
+    "exportMs": 2960,
     "bytes": 181002,
     "estimate": 4543000
   },
-  "total": 16,
-  "passed": 16,
+  "total": 18,
+  "passed": 18,
   "failed": 0
 }

@@ -104,11 +104,12 @@ function applyGain(b: AudioBuffer, gain: number): AudioBuffer {
 export async function exportVideo(
   doc: ProjectDoc,
   pool: MediaPool,
-  opts: { short: Short; format: VideoFormat; name: string; onProgress?: (p: ExportProgress) => void; signal?: AbortSignal; /** One gain for the whole sound (loudness.ts normalizeGain). */ gain?: number },
+  opts: { short: Short; format: VideoFormat; name: string; onProgress?: (p: ExportProgress) => void; signal?: AbortSignal; /** One gain for the whole sound (loudness.ts normalizeGain). */ gain?: number; /** «مسودة» across the picture (downloads only). */ watermark?: string | null },
 ): Promise<ExportResult> {
   const mb = await import('mediabunny');
   // every font a text uses is ready before the first frame is drawn (fonts.ts: loaded only when used)
   await loadFonts(usedFonts(doc));
+  if (opts.watermark) await loadFonts([{ font: 'IBM Plex Sans Arabic', weight: 700 }]);
   const fps = doc.video?.fps ?? 30;
   const duration = durationOf(doc);
   if (duration <= 0) throw new ExportError('EMPTY');
@@ -181,7 +182,7 @@ export async function exportVideo(
       const frames = new Map<string, CanvasImageSource | null>();
       for (const { clip } of visibleAt(doc, t)) if (sourceOf(doc, clip.source)?.media === 'video') frames.set(clip.id, await frameFor(clip, t));
       const res: Resolver = { motion, image: (id) => pool.image(id), videoFrame: (_s, _a, cid) => (cid ? (frames.get(cid) ?? null) : null) };
-      composeFrame(ctx, doc, t, res, { scale });
+      composeFrame(ctx, doc, t, res, { scale, watermark: opts.watermark });
       await video.add(t / US, frameUs(fps) / US);
       if (n % 5 === 0 || n === total - 1) opts.onProgress?.({ phase: 'encode', done: n + 1, total });
     }
@@ -200,8 +201,9 @@ export async function exportVideo(
 }
 
 /** One frame (a video project at time t, or a photo) as a PNG, JPEG or WebP file at `short` (or full size). */
-export async function exportStill(doc: ProjectDoc, pool: MediaPool, opts: { t?: Micros; short?: number; type?: 'image/png' | 'image/jpeg' | 'image/webp'; name: string; quality?: number; adjusted?: Resolver['adjusted'] }): Promise<File> {
+export async function exportStill(doc: ProjectDoc, pool: MediaPool, opts: { t?: Micros; short?: number; type?: 'image/png' | 'image/jpeg' | 'image/webp'; name: string; quality?: number; adjusted?: Resolver['adjusted']; watermark?: string | null }): Promise<File> {
   await loadFonts(usedFonts(doc));
+  if (opts.watermark) await loadFonts([{ font: 'IBM Plex Sans Arabic', weight: 700 }]);
   const { w: W, h: H } = canvasOf(doc);
   const size = opts.short ? outputSize(doc, opts.short) : { w: W, h: H };
   const canvas = document.createElement('canvas');
@@ -211,7 +213,14 @@ export async function exportStill(doc: ProjectDoc, pool: MediaPool, opts: { t?: 
   const motion = new MotionRenderer();
   const type = opts.type ?? 'image/png';
   if (doc.kind === 'photo') {
-    composePhoto(ctx, doc, { motion, image: (id) => pool.image(id), videoFrame: () => null, adjusted: opts.adjusted }, { scale: size.w / W, transparent: type === 'image/png' && doc.photo?.background === null });
+    // a layer that is a frame of a video is read from the decoder first (copied: its canvas is reused)
+    const frames = new Map<string, CanvasImageSource | null>();
+    for (const l of doc.photo?.layers ?? []) {
+      if (l.hidden || sourceOf(doc, l.source)?.media !== 'video') continue;
+      const f = await pool.frameAt(l.source!, l.at ?? 0);
+      frames.set(l.id, f ? copyFrame(f) : null);
+    }
+    composePhoto(ctx, doc, { motion, image: (id) => pool.image(id), videoFrame: (_s, _a, id) => (id ? (frames.get(id) ?? null) : null), adjusted: opts.adjusted }, { scale: size.w / W, transparent: type === 'image/png' && doc.photo?.background === null, watermark: opts.watermark });
   } else {
     const t = opts.t ?? 0;
     const frames = new Map<string, CanvasImageSource | null>();
@@ -220,7 +229,7 @@ export async function exportStill(doc: ProjectDoc, pool: MediaPool, opts: { t?: 
       const f = await pool.frameAt(clip.source!, sourceTime(clip, t));
       frames.set(clip.id, f ? copyFrame(f) : null);
     }
-    composeFrame(ctx, doc, t, { motion, image: (id) => pool.image(id), videoFrame: (_s, _a, cid) => (cid ? (frames.get(cid) ?? null) : null) }, { scale: size.w / W });
+    composeFrame(ctx, doc, t, { motion, image: (id) => pool.image(id), videoFrame: (_s, _a, cid) => (cid ? (frames.get(cid) ?? null) : null) }, { scale: size.w / W, watermark: opts.watermark });
   }
   const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, type, opts.quality ?? 0.92));
   if (!blob) throw new Error('تعذّر إنشاء الصورة.');

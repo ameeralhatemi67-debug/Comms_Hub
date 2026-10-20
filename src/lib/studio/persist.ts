@@ -57,7 +57,7 @@ export type RevisionRow = {
   note: string | null;
   bytes: number;
   /** `name` is null when the file is not visible to this person. */
-  exports: { asset: string; version: number; kind: 'video' | 'image'; name: string | null }[];
+  exports: { asset: string; version: number; kind: 'video' | 'image'; name: string | null; shape?: string | null }[];
 };
 export type Saved = { revision: number; explicit: boolean; saved_at: string };
 
@@ -115,8 +115,8 @@ export function studioApi(call: Caller) {
     },
     rename: (id: string, title: string) => run<null>('studio_project_rename', { p_project: id, p_title: title }),
     archive: (id: string, archive: boolean) => run<null>('studio_project_archive', { p_project: id, p_archive: archive }),
-    exportRecord: (id: string, revision: number, asset: string, version: number, kind: 'video' | 'image') =>
-      run<string>('studio_export_record', { p_project: id, p_revision: revision, p_asset: asset, p_version: version, p_kind: kind }),
+    exportRecord: (id: string, revision: number, asset: string, version: number, kind: 'video' | 'image', shape: string | null = null) =>
+      run<string>('studio_export_record', { p_project: id, p_revision: revision, p_asset: asset, p_version: version, p_kind: kind, p_shape: shape }),
     linkWork: (id: string, work: string | null) => run<null>('studio_project_link_work', { p_project: id, p_work: work }),
     revisions: (id: string) => run<RevisionRow[]>('studio_revisions_list', { p_project: id }),
   };

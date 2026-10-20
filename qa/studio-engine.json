@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-engine.cjs",
-  "run": "2026-10-20T10:25:53.714Z",
+  "run": "2026-10-20T10:37:57.442Z",
   "checks": [
     {
       "name": "the shipped Arabic fonts load with Arabic sample text",
@@ -61,6 +61,16 @@
       "name": "a covered area (blur, and squares) changes the pixels inside it and leaves the picture and the video outside it as they were",
       "pass": true,
       "detail": "{\"plain\":[[254,0,253,255],[254,0,253,255],[255,24,0,255]],\"blur\":[[254,11,142,255],[254,0,253,255],[255,24,0,255]],\"blocks\":[[254,12,126,255],[254,0,253,255],[255,24,0,255]]}"
+    },
+    {
+      "name": "the «مسودة» mark is written across the picture, which shows through it (between 2 and 60 percent of pixels touched)",
+      "pass": true,
+      "detail": "6.0%"
+    },
+    {
+      "name": "a photo layer that is a frame of a video shows the frame at its source time (green at 3 s)",
+      "pass": true,
+      "detail": "[0,216,0,255]"
     },
     {
       "name": "a picture is drawn where it is placed, at its size, over the video",
@@ -140,7 +150,7 @@
     {
       "name": "added fonts load from the site (Cairo, Bebas Neue, Amiri) and are used for drawing",
       "pass": true,
-      "detail": "true Cairo 1250 / Plex 1128; Bebas 702 / serif 1177"
+      "detail": "true Cairo 1250 / Plex 1065; Bebas 702 / serif 1177"
     },
     {
       "name": "a brand mark is tinted in its colour",
@@ -196,7 +206,7 @@
   "log": [
     "requests: 4"
   ],
-  "total": 38,
-  "passed": 38,
+  "total": 40,
+  "passed": 40,
   "failed": 0
 }

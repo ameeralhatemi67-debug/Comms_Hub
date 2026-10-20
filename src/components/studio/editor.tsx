@@ -9,7 +9,7 @@
 // template tab's renderers and files; the fonts are bundled (studio-fonts.ts) and loaded when used.
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind, Bookmark, Mic } from 'lucide-react';
+import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind, Bookmark, Mic, ImagePlus } from 'lucide-react';
 import { canOpen } from '@/lib/access';
 import { useAccount } from '@/lib/account-context';
 import { loadAssets } from '@/lib/motion/renderers.js';
@@ -24,6 +24,11 @@ import { KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAllMotion, keyAt, keyTimes, mo
 import { clampSpeed, isHold, speedAt } from '@/lib/studio/speed';
 import { newCover } from '@/lib/studio/cover';
 import { addMarker, removeMarker, updateMarker } from '@/lib/studio/markers';
+import { allShapes, docForShape, reframeFromPlace, setReframe } from '@/lib/studio/reframe';
+import { addLayer } from '@/lib/studio/photo';
+import { sourceTime } from '@/lib/studio/speed';
+import { shortTime } from '@/lib/studio/time';
+import { newPhotoDoc, type Ratio } from '@/lib/studio/schema';
 import { MotionRenderer, graphicById, loadSticker, motionClip } from '@/lib/studio/motion-adapter';
 import { captionStyle, defaultText, loadFonts, parseSrt, usedFonts } from '@/lib/studio/text';
 import { fillWindow, transformAt, transformOf } from '@/lib/studio/compose';
@@ -246,8 +251,13 @@ export function VideoEditor(p: EditorProps) {
   const [panel, setPanel] = useState<Panel>('timeline');
   const pw = useProjectWork(p.projectId, p.api);
   const frame = useEditorFrame('video');
-  const live = useRef({ doc, selected, safe });
-  live.current = { doc, selected, safe };
+  // another shape shown in the preview (MVP_draft.md 62.10): the project as it is exported in that shape
+  const [viewShape, setViewShape] = useState<Ratio | null>(null);
+  const shapeList = allShapes(doc);
+  const showing = viewShape && viewShape !== shapeList[0] && shapeList.includes(viewShape) ? viewShape : null;
+  const shown = useMemo(() => (showing ? docForShape(doc, showing) : doc), [doc, showing]);
+  const live = useRef({ doc, selected, safe, shown });
+  live.current = { doc, selected, safe, shown };
 
   useEffect(() => {
     if (!pool || !canvasRef.current) return;
@@ -255,14 +265,14 @@ export function VideoEditor(p: EditorProps) {
       canvas: canvasRef.current,
       pool,
       motion,
-      getDoc: () => live.current.doc,
-      scale: () => (canvasRef.current?.width ?? W) / canvasOf(live.current.doc).w,
+      getDoc: () => live.current.shown,
+      scale: () => (canvasRef.current?.width ?? W) / canvasOf(live.current.shown).w,
       onTime: (tt, pp) => {
         setT(tt);
         setPlaying(pp);
       },
       overlay: (ctx, scale) => {
-        const d = live.current.doc;
+        const d = live.current.shown;
         if (live.current.safe) drawSafeZones(ctx, { width: ctx.canvas.width, ratio: d.video?.ratio ?? '' });
         const sel = live.current.selected ? locate(d, live.current.selected)?.clip ?? null : null;
         if (sel && !pl.playing) drawOutline(ctx, d, sel, pl.resolver(), scale, pl.t);
@@ -274,7 +284,7 @@ export function VideoEditor(p: EditorProps) {
 
   useEffect(() => {
     if (player && !player.playing) player.draw();
-  }, [player, doc, selected, tick, assetsReady, safe, fontTick]);
+  }, [player, shown, selected, tick, assetsReady, safe, fontTick]);
 
   const seek = useCallback((tt: Micros) => player?.seek(tt) ?? setT(tt), [player]);
   const at = player?.t ?? t;
@@ -512,6 +522,21 @@ export function VideoEditor(p: EditorProps) {
     h.apply(r.doc, 'تجميد الإطار');
     setSelected(r.holdId);
   };
+  /** «إطار إلى مشروع صورة»: a photo project whose picture is the frame at the playhead, from the same file. */
+  const frameToPhoto = async () => {
+    const d = h.get();
+    const top = [...visibleAt(d, at)].reverse().map((v) => v.clip).find((c) => d.sources.find((s) => s.id === c.source)?.media === 'video');
+    if (!top) return setError('ضع رأس التشغيل على مقطع فيديو لتصنع من إطاره صورة.');
+    const src = d.sources.find((s) => s.id === top.source)!;
+    const { id: _old, ...rest } = src;
+    void _old;
+    let photoDoc = newPhotoDoc(W, H);
+    const r = addSource(photoDoc, rest as Parameters<typeof addSource>[1]);
+    photoDoc = addLayer(r.doc, { source: r.id, at: sourceTime(top, at), transform: transformAt(top, at, W, H), ...(top.fit ? { fit: top.fit } : {}), ...(top.crop ? { crop: top.crop } : {}), name: `إطار ${shortTime(at)}` }).doc;
+    const made = await p.api.create(`${p.title} · إطار ${shortTime(at)}`.slice(0, 120), photoDoc);
+    if (!made.ok) return setError(made.error);
+    router.push(`/motion/studio/${made.data}`);
+  };
   const keyActions: KeyActions = {
     toggle: toggleKeyOf,
     seek: seekKey,
@@ -633,7 +658,9 @@ export function VideoEditor(p: EditorProps) {
 
   const stageEl = (
     <Stage
-      doc={doc}
+      doc={shown}
+      shapes={{ list: shapeList, shown: showing ?? shapeList[0] }}
+      onShape={(r) => setViewShape(r === shapeList[0] ? null : r)}
       player={player}
       canvasRef={canvasRef}
       t={t}
@@ -643,8 +670,18 @@ export function VideoEditor(p: EditorProps) {
       selected={selected}
       readOnly={p.readOnly}
       onSelect={setSelected}
-      onPlace={(id, x, y, key) => h.apply(updateClip(h.get(), id, (c) => writeClipTransform(c, tauOf(c), { x, y }, W, H)), 'نقل على الإطار', key)}
-      onTransform={(id, tr, key) => h.apply(updateClip(h.get(), id, (c) => writeClipTransform(c, tauOf(c), changedOf(c, tr), W, H)), 'الحجم والدوران', key)}
+      onPlace={(id, x, y, key) => {
+        const d = h.get();
+        const c = locate(d, id)?.clip;
+        if (showing && c) return h.apply(setReframe(d, showing, id, reframeFromPlace(d, showing, c, at, { x, y })), `المكان في الشكل ${showing}`, key);
+        h.apply(updateClip(d, id, (x2) => writeClipTransform(x2, tauOf(x2), { x, y }, W, H)), 'نقل على الإطار', key);
+      }}
+      onTransform={(id, tr, key) => {
+        const d = h.get();
+        const c = locate(d, id)?.clip;
+        if (showing && c) return h.apply(setReframe(d, showing, id, reframeFromPlace(d, showing, c, at, { x: tr.x, y: tr.y, scale: tr.scale })), `الحجم في الشكل ${showing}`, key);
+        h.apply(updateClip(d, id, (x2) => writeClipTransform(x2, tauOf(x2), changedOf(x2, tr), W, H)), 'الحجم والدوران', key);
+      }}
       ready={assetsReady && !!pool}
       note={missing ? `${missing} من ملفات المشروع غير متاح هنا، ويبقى في المشروع.` : null}
       resolution={resolution}
@@ -836,6 +873,7 @@ export function VideoEditor(p: EditorProps) {
         { label: 'حفظ نسخة مرقّمة…', icon: <Save aria-hidden="true" />, keys: keysOf('save-version'), disabled: ro || !p.onRequestVersion, onSelect: () => p.onRequestVersion?.() },
         { label: 'إعادة تسمية المشروع…', icon: <Pencil aria-hidden="true" />, keys: keysOf('rename'), disabled: ro || !p.onRequestRename, onSelect: () => p.onRequestRename?.() },
         { label: 'التصدير…', icon: <FileOutput aria-hidden="true" />, keys: keysOf('export'), onSelect: () => run('export') },
+        { label: 'إطار إلى مشروع صورة', icon: <ImagePlus aria-hidden="true" />, hint: 'مشروع صورة جديد صورته الإطار عند رأس التشغيل، للغلاف والصورة المصغرة.', onSelect: () => void frameToPhoto() },
         { kind: 'sep' },
         { label: 'العودة إلى المشاريع', icon: <ArrowRight aria-hidden="true" />, onSelect: () => router.push('/motion/studio') },
       ],

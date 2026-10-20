@@ -13,7 +13,8 @@
 // The time flow (MVP_draft.md 62.7): speed, keys, P, [, a still, reverse.
 // The marks flow (MVP_draft.md 62.8): markers, chapters, a covered area.
 // The sound flow (MVP_draft.md 62.9): a waveform, a recording, a speech track, music lowered under it.
-// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time|marks|sound]   (writes qa/studio-ui.json)
+// The export2 flow (MVP_draft.md 62.10): shapes, checks, SRT, the mark, a frame to a photo project.
+// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time|marks|sound|export2]   (writes qa/studio-ui.json)
 const fs = require('node:fs');
 const path = require('node:path');
 const { dependency, launchOptions } = require('./runtime.cjs');
@@ -722,6 +723,95 @@ async function soundFlow(browser, base, errors) {
   await ctx.close();
 }
 
+// Export, second round (MVP_draft.md 62.10): a square shape added and shown, a title placed for the square
+// only; two files from one export, with the «مسودة» mark on the download; a picture for YouTube stopped by
+// the checks; SRT captions downloaded; a frame turned into a photo project.
+async function export2Flow(browser, base, errors) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
+  const tab = await ctx.newPage();
+  tab.on('pageerror', (e) => errors.push(e.message));
+  tab.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  tab.on('response', (q) => q.status() >= 400 && errors.push(`HTTP ${q.status()}: ${q.url()}`));
+  await tab.goto(base + '/motion/studio');
+  await tab.evaluate(() => window.__db.reset());
+  await tab.reload();
+  await tab.getByRole('button', { name: 'مشروع فيديو جديد' }).click();
+  await tab.getByLabel('اسم المشروع').fill('مقطع الأشكال');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).click();
+  await tab.locator('.st-editor').waitFor({ timeout: 15000 });
+  await tab.locator('.st-lib button', { hasText: 'ألوان الحملة' }).click();
+  await tab.locator('.st-clip[data-kind="video"]').waitFor();
+  await tab.waitForFunction(() => !document.querySelector('.st-clip-load'), null, { timeout: 15000 });
+  await tab.locator('.st-ws-tab[data-panel="graphics"]').click();
+  await tab.getByRole('button', { name: 'عنوان كبير' }).click();
+
+  // a square beside the project's own 9:16, shown in the preview
+  await tab.locator('.st-ws-tab[data-panel="project"]').click();
+  await tab.locator('.st-shape-picks label', { hasText: 'مربع 1:1' }).click();
+  await tab.getByLabel('الشكل المعروض').selectOption('1:1');
+  await tab.waitForTimeout(300);
+  const box = await tab.locator('.st-canvas').boundingBox();
+  check('export2: a square shape is added from «المشروع» and shown in the preview as a square', Math.abs(box.width - box.height) <= 2 && (await tab.locator('.st-shape-tip').count()) === 1, `${Math.round(box.width)}x${Math.round(box.height)}`);
+
+  // the title dragged in the square moves there only
+  await tab.locator('.st-clip[data-kind="text"]').click();
+  await tab.locator('.st-ws-tab[data-panel="inspector"]').click();
+  const xBox = tab.getByLabel('الموضع أفقياً، قيمة دقيقة');
+  const xMain = await xBox.inputValue();
+  const cb = await tab.locator('.st-canvas').boundingBox();
+  await tab.mouse.move(cb.x + cb.width / 2, cb.y + cb.height * 0.42);
+  await tab.mouse.down();
+  await tab.mouse.move(cb.x + cb.width / 2 + 60, cb.y + cb.height * 0.42 + 40, { steps: 6 });
+  await tab.mouse.up();
+  const xAfter = await xBox.inputValue();
+  await tab.getByLabel('الشكل المعروض').selectOption('9:16');
+  const xBack = await xBox.inputValue();
+  const reframed = (await tab.locator('.st-shape-tip').count()) === 0;
+  check('export2: dragging the title in the square leaves its place in the project\'s own shape as it was', xAfter === xMain && xBack === xMain && reframed, `${xMain} / ${xAfter} / ${xBack}`);
+
+  // one export, two files, the mark on the download
+  await tab.locator('.st-ws-tab[data-panel="export"]').click();
+  await tab.locator('.st-export').getByRole('radio', { name: '720p' }).click();
+  await tab.locator('.st-shapes label', { hasText: 'مربع 1:1' }).click();
+  await tab.locator('.st-export label.st-switch-row', { hasText: 'مسودة' }).click();
+  const downloads = [];
+  tab.on('download', (d) => downloads.push(d.suggestedFilename()));
+  await tab.getByRole('button', { name: 'تصدير وتنزيل' }).click();
+  await tab.waitForFunction(() => document.querySelectorAll('.st-export .st-done').length >= 2, null, { timeout: 120000 });
+  await tab.waitForTimeout(500);
+  check('export2: one export with two shapes ticked makes two files, named with their shapes', downloads.length === 2 && downloads.some((n) => n.includes('(9x16)')) && downloads.some((n) => n.includes('(1x1)')), downloads.join(' | '));
+
+  // a picture meant for YouTube is stopped
+  await tab.locator('.st-export').getByRole('radio', { name: /صورة من الإطار الحالي/ }).click();
+  await tab.locator('.st-check-plats label', { hasText: 'يوتيوب' }).click();
+  const stop = await tab.locator('.st-check-list li[data-level="stop"]').textContent();
+  const off = await tab.getByRole('button', { name: 'تصدير وتنزيل' }).isDisabled();
+  check('export2: a picture for YouTube is stopped by the checks, which say why', /يوتيوب يقبل الفيديو وحده/.test(stop) && off, stop);
+
+  // captions out
+  const [srt] = await Promise.all([tab.waitForEvent('download'), tab.getByRole('button', { name: 'تنزيل ملف SRT' }).click()]);
+  const srtPath = path.join(out, 'captions.srt');
+  await srt.saveAs(srtPath);
+  const srtText = fs.readFileSync(srtPath, 'utf8');
+  check('export2: «تنزيل ملف SRT» writes the title track as SRT captions', /^1\n00:00:00,000 --> 00:00:03,000\nعنوان\n/.test(srtText), JSON.stringify(srtText.slice(0, 80)));
+
+  // a frame turned into a photo project
+  await tab.locator('body').press('Home');
+  await tab.locator('.st-menu-btn', { hasText: 'ملف' }).click();
+  await tab.locator('.st-menu [role="menuitem"]', { hasText: 'إطار إلى مشروع صورة' }).click();
+  await tab.locator('.st-photo').waitFor({ timeout: 15000 });
+  const layer = await tab.locator('.st-layers .st-layer-name').first().textContent();
+  await tab.waitForTimeout(1200);
+  const centreColour = await tab.evaluate(() => {
+    const c = document.querySelector('.st-canvas');
+    const d = c.getContext('2d').getImageData(c.width >> 1, c.height >> 1, 1, 1).data;
+    return [d[0], d[1], d[2]];
+  });
+  check('export2: «إطار إلى مشروع صورة» opens a photo project whose layer is the frame at the playhead (red at 0 s)', /^إطار 0?0:00/.test(layer) && near(centreColour, [255, 0, 0]), `${layer} ${JSON.stringify(centreColour)}`);
+  await tab.screenshot({ path: path.join(out, 'export2-1440.png') });
+  await ctx.close();
+}
+
 async function photoFlow(browser, base, errors) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const tab = await ctx.newPage();
@@ -853,6 +943,7 @@ async function phoneFlow(browser, base, errors) {
     if (!only || only === 'time') await timeFlow(browser, base, errors);
     if (!only || only === 'marks') await marksFlow(browser, base, errors);
     if (!only || only === 'sound') await soundFlow(browser, base, errors);
+    if (!only || only === 'export2') await export2Flow(browser, base, errors);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));
   } finally {

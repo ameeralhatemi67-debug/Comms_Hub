@@ -1,0 +1,44 @@
+{
+  "script": "qa/studio-ui.cjs",
+  "run": "2026-10-20T10:40:25.249Z",
+  "checks": [
+    {
+      "name": "export2: a square shape is added from «المشروع» and shown in the preview as a square",
+      "pass": true,
+      "detail": "361x361"
+    },
+    {
+      "name": "export2: dragging the title in the square leaves its place in the project's own shape as it was",
+      "pass": true,
+      "detail": "540 / 540 / 540"
+    },
+    {
+      "name": "export2: one export with two shapes ticked makes two files, named with their shapes",
+      "pass": true,
+      "detail": "مقطع الأشكال (9x16).mp4 | مقطع الأشكال (1x1).mp4"
+    },
+    {
+      "name": "export2: a picture for YouTube is stopped by the checks, which say why",
+      "pass": true,
+      "detail": "يوتيوب يقبل الفيديو وحده، والتصدير صورة."
+    },
+    {
+      "name": "export2: «تنزيل ملف SRT» writes the title track as SRT captions",
+      "pass": true,
+      "detail": "\"1\\n00:00:00,000 --> 00:00:03,000\\nعنوان\\n\""
+    },
+    {
+      "name": "export2: «إطار إلى مشروع صورة» opens a photo project whose layer is the frame at the playhead (red at 0 s)",
+      "pass": true,
+      "detail": "إطار 0:00 [255,24,0]"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "total": 7,
+  "passed": 7,
+  "failed": 0
+}

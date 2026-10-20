@@ -1,0 +1,41 @@
+{
+  "run": "2026-10-20",
+  "what": "Database rule run for the studio third round, Phase 5 (MVP_draft.md 62.10): an export keeps its shape",
+  "migration": "20261020130000_studio_shapes.sql (studio_exports.shape, studio_export_record with p_shape, studio_revisions_list with the shape), run inside the same rolled-back transaction before it was applied; then applied to comms-hub",
+  "how": "supabase/tests/studio_shapes_rules.sql with the migration placed after begin: one transaction, rolled back. Two throwaway accounts (@t.test: director, writer) and two test files, acting through row level security.",
+  "result": "TOTAL row: 8 checks, 8 passed",
+  "checks": [
+    {
+      "k": "01 a project",
+      "pass": true
+    },
+    {
+      "k": "02 an export in the square shape is recorded with it",
+      "pass": true
+    },
+    {
+      "k": "03 the record keeps the shape",
+      "pass": true
+    },
+    {
+      "k": "04 an older call without a shape still works",
+      "pass": true
+    },
+    {
+      "k": "05 and records no shape",
+      "pass": true
+    },
+    {
+      "k": "06 an unknown shape is refused",
+      "pass": true
+    },
+    {
+      "k": "07 the version list names the shape of each file",
+      "pass": true
+    },
+    {
+      "k": "08 the writer records nothing",
+      "pass": true
+    }
+  ]
+}

@@ -7,7 +7,7 @@
 // a text there); things dragged from the other windows are dropped here at the playhead.
 import { useEffect, useRef, useState, type DragEvent, type PointerEvent as RPointerEvent } from 'react';
 import { ChevronsLeft, ChevronsRight, Gauge, Pause, Play, ScanLine, SkipBack, SkipForward, StepBack, StepForward } from 'lucide-react';
-import { canvasOf, durationOf, type Clip, type Layer, type Micros, type ProjectDoc, type Transform } from '@/lib/studio/schema';
+import { RATIOS, canvasOf, durationOf, type Clip, type Layer, type Micros, type ProjectDoc, type Ratio, type Transform } from '@/lib/studio/schema';
 import { boxOf, pick, transformAt, type Resolver } from '@/lib/studio/compose';
 import { canvasWidth, dragHandle, handleAt, resolutionLabel, RESOLUTIONS, snapCentre, ROTATE_GAP_PX, HANDLE_PX, type Handle } from '@/lib/studio/handles';
 import { withKeys } from '@/lib/studio/shortcuts';
@@ -121,7 +121,7 @@ export function ResolutionMenu({ value, onChange, photo }: { value: Resolution; 
 }
 
 export function Stage({
-  doc, player, canvasRef, t, playing, safe, onSafe, selected, readOnly, onSelect, onPlace, onTransform, ready, note, resolution, onResolution, tool, onTextAt, onDropAdd, onDropEffect,
+  doc, player, canvasRef, t, playing, safe, onSafe, selected, readOnly, onSelect, onPlace, onTransform, ready, note, resolution, onResolution, tool, onTextAt, onDropAdd, onDropEffect, shapes, onShape,
 }: {
   doc: ProjectDoc;
   player: Player | null;
@@ -145,6 +145,9 @@ export function Stage({
   onTextAt: (x: number, y: number) => void;
   onDropAdd: (d: AddDrop) => void;
   onDropEffect?: () => void;
+  /** The project's shapes (its own first) and the one shown (MVP_draft.md 62.10). */
+  shapes?: { list: Ratio[]; shown: Ratio };
+  onShape?: (r: Ratio) => void;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const { w: W, h: H } = canvasOf(doc);
@@ -252,6 +255,19 @@ export function Stage({
             <span>المناطق الآمنة</span>
           </button>
         )}
+        {shapes && shapes.list.length > 1 && onShape && (
+          <label className="st-shape-view">
+            <span>الشكل المعروض</span>
+            <select value={shapes.shown} onChange={(e) => onShape(e.target.value as Ratio)} aria-label="الشكل المعروض">
+              {shapes.list.map((r, i) => (
+                <option key={r} value={r}>
+                  {RATIOS[r].label}
+                  {i === 0 ? ' (شكل المشروع)' : ''}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <ResolutionMenu value={resolution} onChange={onResolution} />
       </div>
       <div
@@ -290,6 +306,7 @@ export function Stage({
         {!ready && <div className="st-stage-wait" role="status">جارٍ تجهيز القوالب والخطوط…</div>}
         {note && <div className="st-stage-note" role="status">{note}</div>}
         {tool === 'text' && !readOnly && <div className="st-stage-tip">أداة النص: انقر حيث تريد العنوان.</div>}
+        {shapes && shapes.shown !== shapes.list[0] && <div className="st-stage-tip st-shape-tip">يُعرض الشكل {RATIOS[shapes.shown].label}: سحب مقطع هنا يضبط مكانه وحجمه في هذا الشكل وحده.</div>}
       </div>
       <div className="st-transport" dir="ltr">
         <button type="button" onClick={() => player?.seek(0)} aria-label="إلى البداية" title={withKeys('إلى البداية', 'home')}>

@@ -7,6 +7,8 @@ import * as media from '../../src/lib/studio/media.ts';
 import * as cache from '../../src/lib/studio/cache.ts';
 import { exportVideo, exportStill, estimateBytes, outputSize, measureLoudness } from '../../src/lib/studio/export.ts';
 import { normalizeGain } from '../../src/lib/studio/loudness.ts';
+import { setShapes, docForShape } from '../../src/lib/studio/reframe.ts';
+import * as photoLib from '../../src/lib/studio/photo.ts';
 import { loadAssets } from '../../src/lib/motion/renderers.js';
 
 const US = schema.US;
@@ -90,6 +92,19 @@ export async function run() {
   const gain = normalizeGain(ma);
   const rh = await exportVideo(a, pool, { short: 720, format: 'mp4', name: 'موحد.mp4', gain });
   out.h = { b64: await b64(rh.file), measured: ma.integrated, peak: ma.peakDb, gainDb: 20 * Math.log10(gain) };
+
+  // I (MVP_draft.md 62.10): A in its own shape and in a square, one file each
+  const shaped = setShapes(a, ['1:1']);
+  const ri = await exportVideo(docForShape(shaped, '1:1'), pool, { short: 720, format: 'mp4', name: 'مربع.mp4' });
+  out.i = { b64: await b64(ri.file) };
+  // J: a photo project whose layer is the frame at 5 s of the video, exported as a PNG
+  let ph = schema.newPhotoDoc(640, 360);
+  const phs = timeline.addSource(ph, { kind: 'library', asset: RGB, version: 1, name: 'ألوان.mp4', media: 'video', duration: 6 * US, w: 640, h: 360 });
+  ph = photoLib.addLayer(phs.doc, { source: phs.id, at: 5 * US }).doc;
+  pool.ensure(ph);
+  await ready(pool, [phs.id]);
+  const pj = await exportStill(ph, pool, { name: 'إطار.png' });
+  out.j = { b64: await b64(pj) };
 
   // the export was written through the browser's private storage
   const dir = await root.getDirectoryHandle('studio-exports');

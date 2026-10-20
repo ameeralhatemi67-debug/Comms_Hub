@@ -99,7 +99,7 @@ function contentOf(doc: ProjectDoc, item: Clip | Layer, t: Micros | null, res: R
       const natural = sizeOf(pre) ?? (s.w && s.h ? { w: s.w, h: s.h } : null);
       return natural ? { img: pre, natural, fitInCanvas: true, preAdjusted: true } : null;
     }
-    const img = s.media === 'video' ? res.videoFrame(s.id, t === null ? Math.max(0, (item as Clip).in ?? 0) : sourceTime(item as Clip, t), item.id) : s.media === 'image' ? res.image(s.id) : null;
+    const img = s.media === 'video' ? res.videoFrame(s.id, t === null ? Math.max(0, (item as Layer).at ?? (item as Clip).in ?? 0) : sourceTime(item as Clip, t), item.id) : s.media === 'image' ? res.image(s.id) : null;
     const natural = sizeOf(img) ?? (s.w && s.h ? { w: s.w, h: s.h } : null);
     if (!natural) return null;
     return { img, natural, fitInCanvas: true };
@@ -272,7 +272,38 @@ export type FrameOptions = {
   scale: number;
   /** Leave the background transparent (a still of graphics only). */
   transparent?: boolean;
+  /** A word written across the picture: «مسودة» on a download (MVP_draft.md 62.10). */
+  watermark?: string | null;
 };
+
+/** «مسودة» across the whole picture, repeated on a slant, light enough to see through. */
+export function drawWatermark(ctx: CanvasRenderingContext2D, text: string, w: number, h: number) {
+  const size = Math.max(14, Math.round(Math.min(w, h) * 0.085));
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.filter = 'none';
+  ctx.translate(w / 2, h / 2);
+  ctx.rotate(-Math.PI / 7);
+  ctx.font = `700 ${size}px "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.direction = 'rtl';
+  const stepX = size * 6;
+  const stepY = size * 3;
+  const reach = Math.hypot(w, h) / 2 + stepX;
+  for (let y = -reach, row = 0; y <= reach; y += stepY, row++) {
+    for (let x = -reach + (row % 2 ? stepX / 2 : 0); x <= reach; x += stepX) {
+      ctx.lineWidth = Math.max(1, size / 18);
+      ctx.strokeStyle = 'rgba(0,0,0,0.22)';
+      ctx.strokeText(text, x, y);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.fillText(text, x, y);
+    }
+  }
+  ctx.restore();
+}
 
 /** A video project's frame at time t, onto a context whose canvas is the project's size times `scale`. */
 export function composeFrame(ctx: CanvasRenderingContext2D, doc: ProjectDoc, t: Micros, res: Resolver, opts: FrameOptions) {
@@ -305,6 +336,7 @@ export function composeFrame(ctx: CanvasRenderingContext2D, doc: ProjectDoc, t: 
       ctx.restore();
     }
   }
+  if (opts.watermark) drawWatermark(ctx, opts.watermark, W * opts.scale, H * opts.scale);
   ctx.restore();
   return keep;
 }
@@ -327,6 +359,7 @@ export function composePhoto(ctx: CanvasRenderingContext2D, doc: ProjectDoc, res
     if (layer.cover) drawCover(ctx, layer.cover, transformOf(layer, W, H), opts.scale);
     else drawItem(ctx, doc, layer, null, res, opts.scale);
   }
+  if (opts.watermark) drawWatermark(ctx, opts.watermark, W * opts.scale, H * opts.scale);
   ctx.restore();
 }
 

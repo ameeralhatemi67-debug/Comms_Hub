@@ -306,6 +306,19 @@ body.st-ws-resize-y,body.st-ws-resize-y *{cursor:row-resize!important;user-selec
 .st-rec-live{display:flex;align-items:center;gap:8px;color:#e0565b;font-weight:600}
 .st-level{display:grid;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
 
+/* ---------- export, second round (MVP_draft.md 62.10) ---------- */
+.st-shapes,.st-checks,.st-srt{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:4px 0;display:grid;gap:4px}
+.st-shapes legend,.st-checks legend,.st-srt legend{font-size:12.5px;padding:0 4px;color:var(--ink-2)}
+.st-check-plats{display:flex;flex-wrap:wrap;gap:2px 12px}
+.st-check-list{margin:0;padding-inline-start:18px;display:grid;gap:3px;font-size:12.5px}
+.st-check-list li[data-level="stop"]{color:var(--danger)}
+.st-check-list li[data-level="warn"]{color:var(--warning-fg)}
+.st-check-list li[data-level="note"]{color:var(--muted)}
+.st-shape-view{display:flex;align-items:center;gap:6px;margin:0;font-size:12px}
+.st-shape-view select{margin:0;padding:3px 6px;min-height:28px;width:auto;font-size:12px}
+.st-shape-picks{display:flex;flex-wrap:wrap;gap:2px 12px}
+.st-shape-tip{inset-block-start:8px;inset-block-end:auto}
+
 /* ---------- the shortcuts sheet ---------- */
 .st-keysheet{display:grid;gap:12px}
 .st-keysheet section h3{font-size:13px;margin-bottom:6px;color:var(--ink-2)}
