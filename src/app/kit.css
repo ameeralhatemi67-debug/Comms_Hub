@@ -8,6 +8,10 @@
 [data-hold]::after{content:"";width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;opacity:.75;flex:0 0 auto;margin-inline-start:2px}
 [data-hold].holding{box-shadow:0 0 0 3px color-mix(in srgb,currentColor 22%,transparent)}
 @media (prefers-reduced-motion:reduce){[data-hold].holding::before{transition-duration:var(--hold-ms,900ms)}}
+[data-keyhold]{position:relative;isolation:isolate;overflow:hidden}
+[data-keyhold]::before{content:"";position:absolute;inset:0;z-index:-1;background:color-mix(in srgb,currentColor 24%,transparent);transform:scaleX(0);transform-origin:right center;pointer-events:none}
+[data-keyhold].holding::before{transform:scaleX(1);transition:transform var(--hold-ms,900ms) linear}
+[data-keyhold].holding{box-shadow:0 0 0 3px color-mix(in srgb,currentColor 22%,transparent)}
 
 /* ---------- top bar: undo and help ---------- */
 .undo-button,.help-q{border:0;padding:7px;position:relative;background:transparent;color:inherit;min-height:38px}

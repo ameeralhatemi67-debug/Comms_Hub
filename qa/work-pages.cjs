@@ -36,12 +36,15 @@ const sources = [
   // Readiness audit steps 5 and 6: the preview, the send step's checks, the connection lines
   'components/work/post-preview.tsx', 'components/work/connect.tsx',
   'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts',
+  // The studio's third round, Phase 9: the review player, its keys, the queue, notes, the key hold
+  'components/work/review-player.tsx', 'lib/work/queue.ts', 'lib/work/review-keys.ts', 'lib/studio/shortcuts.ts',
+  'lib/media/notes.ts', 'lib/kit/hold.ts', 'lib/kit/layer.ts', 'lib/motion/preview.js',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
   const depth = m.split('/').length - 1;
   const up = '../'.repeat(depth);
-  let js = ts.transpileModule(src, {
+  let js = m.endsWith('.js') ? src : ts.transpileModule(src, {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX, verbatimModuleSyntax: false },
   }).outputText;
   js = js
@@ -52,10 +55,15 @@ for (const m of sources) {
     .replace(/from '\.\/work\/data'/g, `from '${up}mocks/data.js'`)
     .replace(/from '\.\/home-perms'/g, `from '${up}mocks/home-perms.js'`)
     .replace(/from '\.\.\/perm-requests'/g, `from '${up}mocks/perm-requests.js'`)
+    // the studio's links on the work page («فتح في الاستوديو») have their own check (qa/studio-ui.cjs --only=work)
+    .replace(/from '\.\.\/studio\/work-links'/g, `from '${up}mocks/studio-links.js'`)
+    // the channels page's setup guide has its own check (tests/setup-guides.test.mjs)
+    .replace(/from '\.\.\/setup-guide'/g, `from '${up}mocks/setup-guide.js'`)
+    .replace(/from '@\/lib\/([^']+)\.js'/g, `from '${up}lib/$1.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
-    .replace(/from '(\.\/(?:work\/)?(?:plan|parts|list|item|create|publish|approvals|review|channels|calendar|projects|requests|day-dialogs|post-preview|connect))'/g, "from '$1.js'");
-  const dest = path.join(build, m.replace(/\.tsx?$/, '.js'));
+    .replace(/from '(\.\/(?:work\/)?(?:plan|parts|list|item|create|publish|approvals|review|channels|calendar|projects|requests|day-dialogs|post-preview|connect|review-player))'/g, "from '$1.js'");
+  const dest = path.join(build, m.replace(/\.(tsx?|js)$/, '.js'));
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, js);
 }
@@ -66,6 +74,10 @@ export default function Link({ href, children, ...rest }) { return createElement
 fs.writeFileSync(path.join(build, 'mocks', 'navigation.js'), `export const useRouter = () => ({ push() {}, replace() {}, refresh() {} });
 export const usePathname = () => '/approvals';
 export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search || '');`);
+fs.writeFileSync(path.join(build, 'mocks', 'setup-guide.js'), 'export const SetupGuide = () => null;');
+fs.writeFileSync(path.join(build, 'mocks', 'studio-links.js'), `export const StudioOpenLink = () => null;
+export const WorkStudioButton = () => null;
+export const useStudioOrigins = () => new Map();`);
 // Home's permissions part has its own check (qa/permissions-pages.cjs).
 fs.writeFileSync(path.join(build, 'mocks', 'home-perms.js'), 'export const HomePermissions = () => null;');
 // The permissions tab of «الطلبات» has its own check (qa/permissions-pages.cjs).
@@ -442,14 +454,14 @@ window.__ready = true;
       'approvals-director': ['الموافقات والنشر', 'بانتظار قراري', 'فيديو قصص الملتقى', 'أرسلها أحمد', 'مراجعة', 'في المراجعة ولا تقرر فيها', 'بيان الشراكة للمراجعة'],
       'approvals-writer': ['بانتظار القرار', 'أرسلتها أنا'],
       'approvals-publish': ['النشر في هذه المرحلة محاكاة', 'جاهز للنشر', 'مجدول', 'نشر جزئي أو فشل', 'منشور', 'مواعيد معرضة للخطر', 'جدولة', 'إعادة المحاولة للفاشلة', 'تغيير الموعد', 'بتأكيد قبل النشر', 'اعتمده محمد', 'إعادة الربط'],
-      'approvals-publish-lead': ['الجدولة والنشر لمسؤول النشر', 'إدارة الحسابات المرتبطة'],
+      'approvals-publish-lead': ['الجدولة والنشر لمسؤول النشر', 'إدارة حسابات المنصات'],
       'review-director': ['أنت تراجع', 'الدورة 1', 'جاهز للمراجعة', 'ما تغيّر منذ الإصدار المعتمد', 'تغيّر بعد اعتماده', 'اعتماد هذا الجزء', 'طلب تعديل عليه', 'فيديو الملتقى', 'v2', 'موعد النشر', 'المنصات والحسابات', 'اعتماد الأجزاء المعلّقة (4)', 'رفض العمل', 'لا يُنشر تلقائياً', 'معتمد ولم يتغيّر'],
       'review-writer': ['عرض للمراجعة', 'القرار لمدير الاتصال ومساعده'],
       'review-self': ['لا تعتمد ما أرسلته أو رفعته بنفسك'],
       'review-package': ['الحزمة كاملة', 'اعتماد الحزمة كاملة', 'يُعتمد حزمة كاملة'],
-      'channels-director': ['الحسابات المرتبطة', 'إضافة حساب', 'يوتيوب', 'يقبل الفيديو فقط', 'صندوق القسم', 'تعديل', 'إيقاف', 'حذف', 'التفويض منتهٍ'],
+      'channels-director': ['حسابات المنصات', 'إضافة حساب', 'يوتيوب', 'يقبل الفيديو فقط', 'صندوق القسم', 'تعديل', 'إيقاف', 'حذف', 'التفويض منتهٍ'],
       'channels-publisher': ['إعادة الربط', 'لك إعادة ربط الحسابات'],
-      'channels-writer': ['الحسابات المرتبطة لمن يديرها وينشر عليها'],
+      'channels-writer': ['حسابات المنصات لمن يديرها وينشر عليها'],
       'item-publisher': ['جدولة الإرسال', 'إرسال الآن من البريد'],
       'notices': ['الإشعارات', 'يحتاج قرارك', 'يحتاج انتباهك', 'للعلم', 'تعليم الكل كمقروء', 'لا تُنجز العمل'],
       'dialog-schedule': ['تغيير الموعد', 'الموعد المعتمد', 'التفويض ينتهي قبل الموعد', 'اسألني قبل النشر'],

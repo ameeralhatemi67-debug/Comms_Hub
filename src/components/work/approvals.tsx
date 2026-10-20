@@ -40,6 +40,7 @@ import {
   typeLabels,
   type WorkRow,
 } from '@/lib/work/rules';
+import { queueOrder, reviewQueue } from '@/lib/work/queue';
 import { useDecisions, useWork, useWorkList, type ListItem } from './data';
 import { Av, Empty, Hint, Ic, PrioChip, StatusChip, Wid } from './parts';
 import { PublishNowDialog, ScheduleDialog, isMailWork, publishOp } from './publish';
@@ -121,17 +122,13 @@ function ApprovalsTab({ items, dec }: { items: ListItem[]; dec: Dec }) {
   const keep = (x: ListItem) => (proj === 'all' || x.projects.includes(proj)) && (prio === 'all' || x.w.priority === prio);
   const block = (x: ListItem) => decideBlock(x.w, sentBy(dec, x.w)?.sent_by ?? null, w.me, w.role);
   const inReview = vis.filter((x) => x.w.status === 'IN_REVIEW');
-  const mine = inReview.filter((x) => (lead ? !block(x) : true));
+  // the queue of the review screen's ] and [ (queue.ts): what waits for this person, urgent first, then the oldest sent
+  const waiting = new Set(reviewQueue(vis.map((x) => x.w), dec.cycles, w.me, w.role).map((x) => x.id));
+  const mine = inReview.filter((x) => waiting.has(x.w.id));
+  const order = queueOrder(dec.cycles);
   const sent = vis.filter((x) => lastCycle(dec, x.w.id)?.sent_by === w.me && ['IN_REVIEW', 'CHANGES_REQUESTED', 'REJECTED', 'APPROVED'].includes(x.w.status));
   const blocked = lead ? inReview.filter((x) => block(x) && keep(x)) : [];
-  const list = (sub === 'sent' ? sent : mine)
-    .filter(keep)
-    .sort((a, b) => {
-      const ua = a.w.priority === 'urgent' ? 0 : 1;
-      const ub = b.w.priority === 'urgent' ? 0 : 1;
-      if (ua !== ub) return ua - ub;
-      return (sentBy(dec, a.w)?.sent_at ?? '') < (sentBy(dec, b.w)?.sent_at ?? '') ? -1 : 1;
-    });
+  const list = (sub === 'sent' ? sent : mine).filter(keep).sort((a, b) => order(a.w, b.w));
   const byId = (id: string) => items.find((x) => x.w.id === id);
   const log = dec.decisions.filter((d) => {
     const x = byId(d.work_id);

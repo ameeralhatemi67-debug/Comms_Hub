@@ -20,6 +20,8 @@ export const HOLD = {
   closeWork: 'الإغلاق يخرج العمل من القوائم النشطة ومن حمل صاحبه.',
   /** Review screen: approve the pending parts or the whole package. */
   approveAll: 'الاعتماد قرار يُسجَّل باسمك ويجعل العمل جاهزاً للنشر.',
+  /** Review screen: the key A held approves the file shown at its version (a key hold, data-keyhold). */
+  approvePart: 'الاعتماد قرار يُسجَّل باسمك على هذا الإصدار بعينه.',
   /** Review screen: confirm a rejection. */
   rejectWork: 'الرفض يوقف العمل عن غرضه، وقد يغلقه.',
   /** Publishing: publish now, and confirm an ask-first publication when its time comes. */

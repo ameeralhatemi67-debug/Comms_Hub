@@ -5,8 +5,13 @@
 // proposed time), then approve a part or all of them, request changes on chosen parts, or
 // reject. The database decides every rule again (work_decide): no approving what you sent
 // or a file version you uploaded, the whole package for press releases, mail and
-// announcements, and approval never publishes.
+// announcements, and approval never publishes. A video or sound file plays in the review
+// player (review-player.tsx, MVP_draft.md 62.13). The page's keys: R «طلب تعديل» with this
+// version's notes, Shift+A held «اعتماد الكل», ] and [ the next and previous work waiting
+// (queue.ts, the order of «الموافقات والنشر»), ? the keys; after a decision it offers «التالي».
+// An address with ?t= (and &v=, &a=) opens a player at that moment.
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
@@ -14,6 +19,9 @@ import {
   Clock,
   Eye,
   FileText,
+  Keyboard,
+  ChevronLeft,
+  ChevronRight,
   Image as ImageIcon,
   Lock,
   Plus,
@@ -25,6 +33,12 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
+import { keyHoldEnd, keyHoldStart } from '@/lib/kit/hold';
+import { noteMs, noteTime } from '@/lib/media/notes';
+import { typingTarget } from '@/lib/studio/shortcuts';
+import { around, reviewQueue } from '@/lib/work/queue';
+import { REVIEW_GROUPS, REVIEW_KEYS, matchReviewKey, reviewKeyLabel, reviewStart } from '@/lib/work/review-keys';
+import { comboLabel } from '@/lib/studio/shortcuts';
 import { supabase } from '@/lib/supabase/client';
 import {
   accountName,
@@ -38,20 +52,32 @@ import {
   statusLabels,
   typeLabels,
 } from '@/lib/work/rules';
-import { addFileNote, fileNotes, useWork, useWorkDetail, type FileNote, type PartRow, type WorkDetail } from './data';
+import { fileNotes, useDecisions, useWork, useWorkDetail, useWorkList, type FileNote, type PartRow, type WorkDetail } from './data';
+import { ReviewPlayer, type PlayerStart } from './review-player';
 import { Av, Empty, Hint, Ic, Modal } from './parts';
 import { CopyStrip, PreviewOfWork } from './post-preview';
 
 const KIND_ICON: Record<string, LucideIcon> = { text: FileText, copy: Send, asset: ImageIcon, dest: Users, date: Clock };
-const tcSeconds = (tc: string) => {
-  const [m, s] = tc.split(':').map(Number);
-  return m * 60 + s;
-};
-const secondsTc = (t: number) => `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+/** The version number of a file part («v3» to 3). */
+const verOf = (p: PartRow) => Number(p.ver.slice(1)) || 1;
 
 export function ReviewPage({ id }: { id: string }) {
   const w = useWork();
+  const router = useRouter();
+  const start = reviewStart(useSearchParams() ?? new URLSearchParams());
   const { detail: d, status, reload } = useWorkDetail(id);
+  const list = useWorkList();
+  const dec = useDecisions();
+  const [activeAsset, setActiveAsset] = useState<string | null>(null);
+  const [keysOpen, setKeysOpen] = useState(false);
+  const [decided, setDecided] = useState(false);
+  const [say, setSay] = useState<string | null>(null);
+  // the works waiting for this person, in the order of «الموافقات والنشر»; once this one is decided, its neighbours as they were
+  const queue = useMemo(() => reviewQueue(list.items.map((x) => x.w), dec.cycles, w.me, w.role).map((x) => x.id), [list.items, dec.cycles, w.me, w.role]);
+  const nb = useRef<{ next: string | null; prev: string | null }>({ next: null, prev: null });
+  if (queue.includes(id)) nb.current = around(queue, id);
+  const { next, prev } = queue.includes(id) ? nb.current : { next: nb.current.next ?? around(queue, id).next, prev: nb.current.prev };
+  const titleOf = (wid: string | null) => list.items.find((x) => x.w.id === wid)?.w.title ?? '';
   const [notes, setNotes] = useState<FileNote[]>([]);
   const [mineUploads, setMineUploads] = useState<string[]>([]);
   const [dlg, setDlg] = useState<{ t: 'changes'; part?: string } | { t: 'reject' } | null>(null);
@@ -83,9 +109,47 @@ export function ReviewPage({ id }: { id: string }) {
     }
     const st = r.data?.status;
     w.say(r.data?.finished ? `${ok} اكتمل الاعتماد وصار العمل «${statusLabels[(st ?? 'APPROVED') as keyof typeof statusLabels]}»، ويظهر لمسؤول النشر. لا يُنشر تلقائياً.` : ok);
-    await Promise.all([reload(), w.reloadBase()]);
+    setDecided(true);
+    await Promise.all([reload(), w.reloadBase(), list.reload(), dec.reload()]);
     return true;
   };
+
+  // the page's keys; the player's own keys are in review-player.tsx
+  const pageKeys = useRef({ changes: () => {}, next: null as string | null, prev: null as string | null, blocked: false });
+  useEffect(() => {
+    let holding = false;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      if (typingTarget(target) || target?.closest?.('dialog')) return;
+      const k = matchReviewKey(e);
+      const pk = pageKeys.current;
+      if (k === 'keys') setKeysOpen(true);
+      else if (k === 'next' || k === 'prev') {
+        const to = k === 'next' ? pk.next : pk.prev;
+        if (to) router.push(`/approvals/${to}`);
+        else setSay(k === 'next' ? 'لا عمل بعده ينتظر قرارك.' : 'لا عمل قبله ينتظر قرارك.');
+      } else if (k === 'changes') pk.changes();
+      else if (k === 'approve-all') {
+        if (e.repeat) return;
+        if (keyHoldStart(document.querySelector<HTMLButtonElement>('[data-approve-all]'))) holding = true;
+        else setSay('الاعتماد غير متاح لك في هذا العمل الآن.');
+      } else return;
+      e.preventDefault();
+    };
+    const onUp = (e: KeyboardEvent) => {
+      if (e.code === 'KeyA' && holding) {
+        holding = false;
+        keyHoldEnd();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('keyup', onUp);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keyup', onUp);
+    };
+  }, [router]);
 
   if (status === 'loading' || w.status === 'loading')
     return (
@@ -116,6 +180,19 @@ export function ReviewPage({ id }: { id: string }) {
   const pend = isWhole(x.type) ? d.parts : d.parts.filter((p) => pendKeys.has(p.key));
   const okp = isWhole(x.type) ? [] : d.parts.filter((p) => !pendKeys.has(p.key));
   const uploadBlock = pend.some((p) => p.kind === 'asset' && mineUploads.includes(p.key.slice(2)));
+  // the player the keys act on: the one last used, the one the address names, or the first
+  const avParts = pend.filter((p) => p.kind === 'asset' && ['video', 'audio'].includes(d.assets.find((y) => y.asset_id === p.key.slice(2))?.file?.kind ?? ''));
+  const keyAsset = activeAsset ?? (start?.a && avParts.some((p) => p.key === `a:${start.a}`) ? start.a : (avParts[0]?.key.slice(2) ?? null));
+  pageKeys.current = {
+    next,
+    prev,
+    blocked: !can,
+    changes: () => {
+      if (!can || busy || uploadBlock) return setSay(!can ? 'طلب التعديل لمن يقرر في هذا العمل وهو قيد المراجعة.' : 'رفعتَ إصدار ملف من هذه الأجزاء بنفسك، فلا تطلب تعديله.');
+      const part = keyAsset && !isWhole(x.type) && pend.some((p) => p.key === `a:${keyAsset}`) ? `a:${keyAsset}` : undefined;
+      setDlg({ t: 'changes', part });
+    },
+  };
 
   return (
     <div className="wk">
@@ -130,6 +207,26 @@ export function ReviewPage({ id }: { id: string }) {
           <span className="cur">{x.id}</span>
         </div>
       </div>
+      {(next || prev) && (
+        <nav className="wk-rq" aria-label="الأعمال المنتظرة">
+          {prev && (
+            <Link className="wk-btn sm quiet" href={`/approvals/${prev}`} title={`${titleOf(prev)} (${reviewKeyLabel('prev')})`}>
+              <Ic i={ChevronRight} />
+              السابق
+            </Link>
+          )}
+          {next && (
+            <Link className="wk-btn sm quiet" href={`/approvals/${next}`} title={`${titleOf(next)} (${reviewKeyLabel('next')})`}>
+              التالي
+              <Ic i={ChevronLeft} />
+            </Link>
+          )}
+          <button type="button" className="wk-btn sm quiet" onClick={() => setKeysOpen(true)} title={`قائمة المفاتيح (${reviewKeyLabel('keys')})`}>
+            <Ic i={Keyboard} />
+            المفاتيح
+          </button>
+        </nav>
+      )}
       <section className="wk-rhead">
         <p className="eyebrow">
           {can ? 'أنت تراجع' : 'عرض للمراجعة'} · الدورة {cyc?.n ?? 1}
@@ -166,6 +263,25 @@ export function ReviewPage({ id }: { id: string }) {
       )}
       {!lead && <Hint i={Eye}>القرار لمدير الاتصال ومساعده. تشاهد المراجعة فقط.</Hint>}
       {!inReview && <Hint i={Check}>القرار في هذا العمل اتُّخذ: {statusLabels[x.status]}.</Hint>}
+      {decided && !inReview && (
+        <Hint i={Check}>
+          {next ? (
+            <>
+              سُجّل القرار. التالي في الانتظار:{' '}
+              <Link className="wk-lk wk-rq-next" href={`/approvals/${next}`}>
+                {next} · {titleOf(next)}
+              </Link>
+            </>
+          ) : (
+            'سُجّل القرار، ولا عمل آخر ينتظر قرارك.'
+          )}
+        </Hint>
+      )}
+      {say && (
+        <p className="wk-why" role="status">
+          {say}
+        </p>
+      )}
       {can && uploadBlock && <Hint warn>رفعتَ إصدار ملف من هذه الأجزاء بنفسك، فلا تعتمده ولا تطلب تعديله. يقرر فيه {w.role === 'director' ? 'مساعد المدير' : 'مدير الاتصال'}.</Hint>}
 
       {inReview && (
@@ -188,6 +304,9 @@ export function ReviewPage({ id }: { id: string }) {
                 onApprove={() => void act('work_decide', { p_work: x.id, p_op: 'approve', p_parts: [p.key], p_note: null, p_close: false }, `اعتُمد «${p.label}».`)}
                 onChanges={() => setDlg({ t: 'changes', part: p.key })}
                 canNote={can}
+                active={p.kind === 'asset' && keyAsset === p.key.slice(2)}
+                onActivate={() => setActiveAsset(p.key.slice(2))}
+                start={start && p.kind === 'asset' && keyAsset === p.key.slice(2) && (!start.a || start.a === p.key.slice(2)) ? { t: start.t, v: start.v } : null}
               />
             ))}
           </div>
@@ -291,6 +410,7 @@ export function ReviewPage({ id }: { id: string }) {
             className="wk-btn gold"
             disabled={busy || uploadBlock}
             data-hold={HOLD.approveAll}
+            data-approve-all
             onClick={() =>
               void act(
                 'work_decide',
@@ -308,7 +428,32 @@ export function ReviewPage({ id }: { id: string }) {
         <ChangesDialog d={d} pend={isWhole(x.type) ? [] : pend.filter((p) => !(p.kind === 'asset' && mineUploads.includes(p.key.slice(2))))} first={dlg.part} notes={notes} onClose={() => setDlg(null)} act={act} />
       )}
       {dlg?.t === 'reject' && <RejectDialog d={d} onClose={() => setDlg(null)} act={act} />}
+      {keysOpen && <KeysSheet onClose={() => setKeysOpen(false)} />}
     </div>
+  );
+}
+
+/** «المفاتيح» of the review screen (?). */
+function KeysSheet({ onClose }: { onClose: () => void }) {
+  return (
+    <Modal title="مفاتيح المراجعة" onClose={onClose}>
+      <div className="wk-keys">
+        {(Object.keys(REVIEW_GROUPS) as (keyof typeof REVIEW_GROUPS)[]).map((g) => (
+          <section key={g}>
+            <b>{REVIEW_GROUPS[g]}</b>
+            <dl>
+              {REVIEW_KEYS.filter((k) => k.group === g).map((k) => (
+                <div key={k.id}>
+                  <dt dir="ltr">{k.combos.map(comboLabel).join(' / ')}</dt>
+                  <dd>{k.label}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ))}
+        <small className="wk-why">مفاتيح المشغّل تعمل على آخر ملف استعملته. مفتاحا الاعتماد يُضغطان مطولاً كزر الاعتماد، ولا يعملان حيث لا يعمل الزر.</small>
+      </div>
+    </Modal>
   );
 }
 
@@ -323,6 +468,9 @@ function PartRowView({
   onApprove,
   onChanges,
   canNote,
+  active = false,
+  onActivate,
+  start = null,
 }: {
   d: WorkDetail;
   p: PartRow;
@@ -334,6 +482,9 @@ function PartRowView({
   onApprove: () => void;
   onChanges: () => void;
   canNote: boolean;
+  active?: boolean;
+  onActivate?: () => void;
+  start?: PlayerStart | null;
 }) {
   const w = useWork();
   const a = d.approvals.find((x) => x.part === p.key);
@@ -405,7 +556,7 @@ function PartRowView({
           })()}
         </>
       )}
-      {p.kind === 'asset' && <AssetReview d={d} p={p} prev={f?.ver ?? a?.ver ?? null} notes={notes} onNote={onNote} canNote={canNote} />}
+      {p.kind === 'asset' && <AssetReview d={d} p={p} prev={f?.ver ?? a?.ver ?? null} notes={notes} onNote={onNote} canNote={canNote} active={active} onActivate={onActivate} start={start} />}
       {p.kind === 'dest' && (
         <>
           <div className="wk-chanlist">
@@ -452,7 +603,14 @@ function PartRowView({
             <span className="wk-chip gatec">رفعتَ هذا الإصدار بنفسك، فلا تقرر فيه</span>
           ) : (
             <>
-              <button type="button" className="wk-btn sm primary" disabled={busy} onClick={onApprove}>
+              <button
+                type="button"
+                className="wk-btn sm primary"
+                disabled={busy}
+                onClick={onApprove}
+                data-keyhold={HOLD.approvePart}
+                data-approve-part={p.key}
+              >
                 <Ic i={Check} />
                 اعتماد هذا الجزء
               </button>
@@ -467,21 +625,44 @@ function PartRowView({
   );
 }
 
-function AssetReview({ d, p, prev, notes, onNote, canNote }: { d: WorkDetail; p: PartRow; prev: string | null; notes: FileNote[]; onNote: () => Promise<void>; canNote: boolean }) {
+function AssetReview({ d, p, prev, notes, onNote, canNote, active = false, onActivate, start = null }: { d: WorkDetail; p: PartRow; prev: string | null; notes: FileNote[]; onNote: () => Promise<void>; canNote: boolean; active?: boolean; onActivate?: () => void; start?: PlayerStart | null }) {
   const w = useWork();
   const id = p.key.slice(2);
   const file = d.assets.find((x) => x.asset_id === id)?.file;
-  const video = useRef<HTMLVideoElement>(null);
-  const [tc, setTc] = useState('');
-  const [text, setText] = useState('');
-  const [err, setErr] = useState('');
   const av = file && (file.kind === 'video' || file.kind === 'audio');
-  const seek = (t: string) => {
-    if (video.current) {
-      video.current.currentTime = tcSeconds(t);
-      void video.current.play().catch(() => {});
-    }
-  };
+  const meta = (
+    <div className="wk-rmeta">
+      <b>{p.label}</b>
+      <small>{prev && prev !== p.ver ? `${prev} ← ${p.ver}` : `الإصدار ${p.ver.slice(1)}`}</small>
+      {file && !av && (
+        <Link className="wk-btn sm quiet" href={`/media/${id}`}>
+          <Ic i={Eye} />
+          صفحة الملف في المكتبة
+        </Link>
+      )}
+    </div>
+  );
+  if (file && av)
+    return (
+      <>
+        {meta}
+        <ReviewPlayer
+          assetId={id}
+          version={verOf(p)}
+          name={file.name}
+          kind={file.kind as 'video' | 'audio'}
+          notes={notes}
+          canNote={canNote}
+          nameOf={(e) => w.nameOf(e ?? null)}
+          onNotesChanged={onNote}
+          active={active}
+          onActivate={() => onActivate?.()}
+          start={start}
+          partKey={p.key}
+        />
+      </>
+    );
+  const top = notes.filter((n) => !n.parent_id);
   return (
     <>
       <div className="wk-rprev">
@@ -491,73 +672,27 @@ function AssetReview({ d, p, prev, notes, onNote, canNote }: { d: WorkDetail; p:
           ) : file.kind === 'image' ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={`/api/media/${id}/content?v=${file.current_version}`} alt={file.name} />
-          ) : av ? (
-            <video ref={video} controls preload="metadata" src={`/api/media/${id}/content?v=${file.current_version}`} />
           ) : (
             <span>{file.name}</span>
           )}
         </div>
-        <div className="wk-rmeta">
-          <b>{p.label}</b>
-          <small>{prev && prev !== p.ver ? `${prev} ← ${p.ver}` : `الإصدار ${p.ver.slice(1)}`}</small>
-          {file && (
-            <Link className="wk-btn sm quiet" href={`/media/${id}`}>
-              <Ic i={Eye} />
-              صفحة الملف في المكتبة
-            </Link>
-          )}
-        </div>
+        {meta}
       </div>
-      {(av || notes.length > 0) && (
+      {top.length > 0 && (
         <div className="wk-lab">
-          {file?.kind === 'video' ? 'ملاحظات زمنية' : 'ملاحظات المراجعة'}
-          {!notes.length && <small>لا ملاحظات بعد</small>}
+          ملاحظات المراجعة
           <div className="wk-vnl">
-            {notes.map((n) => (
-              <div className="wk-vn" key={n.id}>
-                {n.timecode ? (
-                  <button type="button" className="wk-tcb" onClick={() => seek(n.timecode!)} aria-label={`انتقل إلى ${n.timecode}`}>
-                    {n.timecode}
-                  </button>
-                ) : (
-                  <span className="wk-chip plain">عام</span>
-                )}
+            {top.map((n) => (
+              <div className="wk-vn" key={n.id} data-open={n.done_at ? 'no' : 'yes'}>
+                {noteMs(n) !== null ? <span className="wk-tcb">{noteTime(noteMs(n)!)}</span> : <span className="wk-chip plain">{n.version ? `الإصدار ${n.version}` : 'عام'}</span>}
                 <span>
                   <b>{w.nameOf(n.author)}</b> · {n.body}
+                  {n.done_at ? ' · تمت' : ''}
                 </span>
               </div>
             ))}
           </div>
         </div>
-      )}
-      {canNote && av && (
-        <>
-          <div className="wk-vnadd">
-            <input className="wk-inp ltr" style={{ width: 90 }} value={tc} placeholder="00:32" aria-label="الوقت دقيقة:ثانية" onChange={(e) => setTc(e.target.value)} />
-            <button type="button" className="wk-btn sm quiet" onClick={() => setTc(secondsTc(video.current?.currentTime ?? 0))}>
-              <Ic i={Clock} />
-              الوقت الحالي
-            </button>
-            <input className="wk-inp" style={{ flex: '1 1 200px' }} value={text} maxLength={500} placeholder="ملاحظة عند هذا الوقت" aria-label="الملاحظة" onChange={(e) => setText(e.target.value)} />
-            <button
-              type="button"
-              className="wk-btn sm"
-              onClick={async () => {
-                if (!text.trim()) return setErr('اكتب الملاحظة.');
-                const e = await addFileNote(id, w.me, text.trim(), tc.trim());
-                if (e) return setErr(e);
-                setErr('');
-                setText('');
-                await onNote();
-              }}
-            >
-              <Ic i={Plus} />
-              إضافة
-            </button>
-          </div>
-          {err && <p className="wk-err">{err}</p>}
-          <small className="wk-why">اضغط وقت ملاحظة لتنتقل إليه. الملاحظات تُحفظ مع الملف في المكتبة.</small>
-        </>
       )}
     </>
   );
@@ -568,14 +703,16 @@ export function ChangesDialog({ d, pend, first, notes, onClose, act }: { d: Work
   const w = useWork();
   const [parts, setParts] = useState<string[]>(first ? [first] : pend.map((p) => p.key));
   const [note, setNote] = useState('');
-  const timed = notes.filter((n) => n.timecode);
+  // the open notes with a time on the version under review of each file (older notes without a version too)
+  const verOfAsset = (asset: string) => Number(d.parts.find((p) => p.key === `a:${asset}`)?.ver.slice(1)) || null;
+  const timed = notes.filter((n) => !n.parent_id && !n.done_at && noteMs(n) !== null && ((n.version ?? null) === null || n.version === verOfAsset(n.asset_id)));
   const [pick, setPick] = useState<string[]>(timed.map((n) => n.id));
   const [err, setErr] = useState('');
   const whole = isWhole(d.w.type);
   const send = () => {
     if (!whole && !parts.length) return setErr('اختر جزءاً واحداً على الأقل.');
     if (!note.trim()) return setErr('اكتب ما يجب تعديله.');
-    const attached = timed.filter((n) => pick.includes(n.id)).map((n) => `${n.timecode} ${n.body}`);
+    const attached = timed.filter((n) => pick.includes(n.id)).map((n) => `${noteTime(noteMs(n)!)} ${n.body}`);
     const full = attached.length ? `${note.trim()}\nملاحظات زمنية: ${attached.join('؛ ')}` : note.trim();
     void act('work_decide', { p_work: d.w.id, p_op: 'changes', p_parts: whole ? null : parts, p_note: full.slice(0, 1000), p_close: false }, `أُرسل طلب التعديل إلى ${w.nameOf(d.w.assignee)}.`).then((ok) => ok && onClose());
   };
@@ -607,7 +744,7 @@ export function ChangesDialog({ d, pend, first, notes, onClose, act }: { d: Work
               <label key={n.id}>
                 <input type="checkbox" checked={pick.includes(n.id)} onChange={(e) => setPick(e.target.checked ? [...pick, n.id] : pick.filter((k) => k !== n.id))} />
                 <span>
-                  <b className="ltr">{n.timecode}</b> {n.body}
+                  <b className="ltr">{noteTime(noteMs(n)!)}</b> {n.body}
                   <small>{w.nameOf(n.author)}</small>
                 </span>
               </label>

@@ -46,7 +46,7 @@ function cancel() {
   S.el = null;
 }
 
-function start(el: HTMLElement, kb: boolean) {
+function start(el: HTMLElement, kb: boolean, swallow = true) {
   cancel();
   S.el = el;
   S.kb = kb;
@@ -61,9 +61,33 @@ function start(el: HTMLElement, kb: boolean) {
     S.swallowUntil = 0;
     el.click();
     S.pass = null;
-    S.held = true;
-    S.swallowUntil = Date.now() + 60000;
+    // a pointer, Enter or Space released after a hold sends one more click, which is swallowed; a letter key does not
+    S.held = swallow;
+    S.swallowUntil = swallow ? Date.now() + 60000 : 0;
   }, HOLD_MS);
+}
+
+/** The reason a button gives for its long press: its own, or the one its key hold carries. */
+const reasonOf = (el: Element) => el.getAttribute('data-hold') ?? el.getAttribute('data-keyhold') ?? '';
+
+/**
+ * A shortcut key standing for a button (the review screen's A and Shift+A, MVP_draft.md 62.13): held down, it
+ * fills the button as a long press does and presses it after the same time; let go early, it explains
+ * instead. Nothing happens where the button is off. Returns whether a hold began.
+ */
+export function keyHoldStart(el: HTMLButtonElement | null): boolean {
+  if (!el || el.disabled || S.t) return false;
+  start(el, true, false);
+  return true;
+}
+
+/** The key of a key hold was let go: early, the reason is said; after the hold, nothing more. */
+export function keyHoldEnd(): void {
+  if (S.t && S.kb) {
+    const b = S.el;
+    cancel();
+    if (b) holdTip(b, reasonOf(b));
+  }
 }
 
 /** The press that completed a hold ends here: only the click that follows this release is swallowed. */

@@ -485,6 +485,52 @@
 .wk .wk-dbar .l{margin-inline-end:auto;font-size:12.5px;color:var(--w-ink2);max-width:60ch}
 @media (max-width:860px){ .wk .wk-rprev{grid-template-columns:minmax(0,1fr)} }
 
+/* the review player (MVP_draft.md 62.13) */
+.wk .wk-rp{display:grid;gap:10px;min-width:0;border-radius:var(--w-r);outline:2px solid transparent;outline-offset:4px}
+.wk .wk-rp[data-active="yes"]{outline-color:color-mix(in srgb,var(--w-brand-text) 28%,transparent)}
+.wk .wk-rp-views{display:grid;gap:10px}
+.wk .wk-rp-views[data-compare="side"]{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.wk .wk-rp-views[data-compare="wipe"]{grid-template-columns:minmax(0,1fr)}
+.wk .wk-rp-views[data-compare="wipe"] .wk-rp-stage{grid-area:1/1}
+.wk .wk-rp-views[data-compare="wipe"] .wk-rp-prev{z-index:2;pointer-events:none}
+.wk .wk-rp-stage{position:relative;border-radius:var(--w-r);overflow:hidden;background:#0b1512;aspect-ratio:16/9;min-width:0}
+.wk .wk-rp-stage video{width:100%;height:100%;object-fit:contain;display:block}
+.wk .wk-rp-over{position:absolute;pointer-events:none}
+.wk .wk-rp-over[data-marking="yes"]{pointer-events:auto;cursor:crosshair;touch-action:none}
+.wk .wk-rp-tag{position:absolute;top:8px;inset-inline-start:8px;z-index:3;background:rgba(0,0,0,.6);color:#fff;font-size:12px;border-radius:6px;padding:2px 8px}
+.wk .wk-rp-wipe{display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--w-ink2)}
+.wk .wk-rp-wipe input{flex:1}
+.wk .wk-rp-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.wk .wk-rp-bar svg,.wk .wk-rp-notes svg{width:15px;height:15px}
+.wk .wk-rp-bar .wk-btn[aria-pressed="true"]{background:var(--soft);border-color:var(--w-brand-text);color:var(--w-brand-text)}
+.wk .wk-rp-time{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;color:var(--w-ink2);margin-inline-end:auto}
+.wk .wk-rp-marks{position:relative;height:16px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);direction:ltr}
+.wk .wk-rp-mark{position:absolute;top:2px;width:10px;height:10px;margin-left:-5px;padding:0;min-height:0;border:2px solid var(--surface);border-radius:50%;background:#e2554a;cursor:pointer}
+.wk .wk-rp-mark[data-open="no"]{background:#6f8a78;opacity:.6}
+.wk .wk-rp-mark[data-on="yes"]{box-shadow:0 0 0 3px color-mix(in srgb,#e2554a 35%,transparent)}
+.wk .wk-rp-head{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--w-brand-text);pointer-events:none}
+.wk .wk-rp-compose,.wk .wk-rp-answerform{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.wk .wk-rp-compose .wk-inp,.wk .wk-rp-answerform .wk-inp{flex:1 1 220px;min-height:34px;width:auto}
+.wk .wk-rp-compose .wk-why{flex-basis:100%}
+.wk .wk-rp-hint{margin:0;font-size:12.5px;color:var(--w-ink2)}
+.wk .wk-rp-notes{display:grid;gap:8px}
+.wk .wk-rp-nhead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.wk .wk-rp-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.wk .wk-rp-list>li{display:grid;gap:4px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--w-r);font-size:13px;line-height:1.6}
+.wk .wk-rp-list>li[data-on="yes"]{border-color:color-mix(in srgb,#e2554a 55%,var(--line))}
+.wk .wk-rp-list>li[data-open="no"]{opacity:.72}
+.wk .wk-rp-nrow{display:flex;flex-wrap:wrap;gap:8px;align-items:start}
+.wk .wk-rp-nrow>span:not(.wk-chip){flex:1 1 180px}
+.wk .wk-rp-answer{display:flex;gap:6px;align-items:start;padding-inline-start:12px;color:var(--w-ink2)}
+.wk .wk-rp-nacts{display:flex;gap:14px}
+.wk .wk-rq{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.wk .wk-keys{display:grid;gap:14px}
+.wk .wk-keys dl{margin:6px 0 0;display:grid;gap:4px}
+.wk .wk-keys dl div{display:grid;grid-template-columns:150px 1fr;gap:10px;font-size:13px}
+.wk .wk-keys dt{font-family:ui-monospace,Consolas,monospace;color:var(--w-brand-text)}
+.wk .wk-keys dd{margin:0}
+@media (max-width:860px){ .wk .wk-rp-views[data-compare="side"]{grid-template-columns:minmax(0,1fr)} }
+
 /* «حسابات المنصات» */
 .wk .wk-accgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
 .wk .wk-acccard{display:grid;gap:8px;align-content:start;padding:14px 16px;border-radius:var(--w-rl);background:var(--surface);border:1px solid var(--line);box-shadow:var(--w-e1)}

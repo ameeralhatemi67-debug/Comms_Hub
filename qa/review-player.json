@@ -1,0 +1,79 @@
+{
+  "script": "qa/review-player.cjs",
+  "run": "2026-10-20T11:54:23.166Z",
+  "checks": [
+    {
+      "name": "Space plays the player last used and K pauses it",
+      "pass": true,
+      "detail": "0.31"
+    },
+    {
+      "name": "L moves a second on and J a second back",
+      "pass": true,
+      "detail": "3.000 2.000"
+    },
+    {
+      "name": "the arrows move one frame (1/30 s of this 30 fps file) each way, and the time is shown",
+      "pass": true,
+      "detail": "2.0333 2.0000 00:02.0 / 00:06.0"
+    },
+    {
+      "name": "N writes a note at the current frame on the version shown, with the area dragged on the paused picture (media_note_add)",
+      "pass": true,
+      "detail": "00:02.0 {\"id\":\"939cc012-0f41-4800-9a69-e736732d8371\",\"asset_id\":\"00000000-0000-4000-8000-0000000000a1\",\"author\":\"dir@t.test\",\"body\":\"الشعار يغطي الوجه\",\"timecode\":null,\"created_at\":\"2026-10-20T11:54:27.985Z\",\"version\":2,\"at_ms\":2000,\"area\":{\"x\":0.2,\"y\":0.2,\"w\":0.3,\"h\":0.4},\"parent_id\":null,\"done_at\":null,\"done_by\":null}"
+    },
+    {
+      "name": "the note is a mark under the player, and its area is drawn over the picture",
+      "pass": true,
+      "detail": "{\"best\":255,\"outside\":0}"
+    },
+    {
+      "name": "«هذا الإصدار» shows the notes on version 2 only, «كل الإصدارات» adds version 1's, and a note's time moves the player there",
+      "pass": true,
+      "detail": "1 2 4.00"
+    },
+    {
+      "name": "an answer keeps its note's version, and «تم» closes the note in the list and on its mark",
+      "pass": true,
+      "detail": "{\"ans\":[\"نقلته إلى الزاوية\",2],\"done\":\"2026-10-20T11:54:28.665Z\",\"markOpen\":1}"
+    },
+    {
+      "name": "«جنباً إلى جنب» plays version 1 beside version 2 on one clock, playing and pausing together",
+      "pass": true,
+      "detail": "{\"asked\":3,\"both\":[1.351863,1.358914,false],\"still\":[1.359137,1.374556,true,true]}"
+    },
+    {
+      "name": "«بالفاصل» lays version 1 over version 2 cut at the divider, which moves",
+      "pass": true,
+      "detail": "inset(0px 50% 0px 0px) | inset(0px 70% 0px 0px)"
+    },
+    {
+      "name": "A held as long as a long press fills the button's ring and presses «اعتماد هذا الجزء» once; a short press explains instead",
+      "pass": true,
+      "detail": "true wide wide | اضغط مطولاً للتأكيدالاعتماد قرار يُسجَّل باسمك على هذا الإصدار بعينه.أبقِ الضغط نحو ثانية حتى يمتلئ الزر. وبلوحة المفاتيح: أبقِ Enter أو المسافة مضغوطاً."
+    },
+    {
+      "name": "the keys follow the player last used: L moves the 9:16 video, not the other; Shift+G shows its Reels safe zones, which a wide video does not offer",
+      "pass": true,
+      "detail": "{\"act\":\"no,yes\",\"t1\":1,\"w0\":1.359137,\"w1\":1.359137,\"safeOn\":\"true\",\"tint\":41,\"wideOff\":true}"
+    },
+    {
+      "name": "A does nothing where the file's button is off (as for a file the reviewer uploaded), and says so",
+      "pass": true,
+      "detail": "wide | اعتماد هذا الملف غير متاح لك هنا الآن."
+    },
+    {
+      "name": "an address with ?t=3.2&v=1 opens the player at 3.2 s, says which version it meant, and shows version 1 beside it",
+      "pass": true,
+      "detail": "الرابط يشير إلى الإصدار 1 عند 00:03.2؛ المعروض للمراجعة الإصدار 2، والإصدار المطلوب بجانبه للمقارنة. | /api/media/00000000-0000-4000-8000-0000000000a1/content?v=1"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "total": 14,
+  "passed": 14,
+  "failed": 0
+}

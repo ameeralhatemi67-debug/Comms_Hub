@@ -20,7 +20,7 @@ import {
   type WorkType,
 } from '@/lib/work/rules';
 import type { EventItem, HeldMail, ReminderItem, RequestRow, TaskItem } from '@/lib/work/planning';
-import { addNote, msOfTimecode } from '@/lib/media/notes';
+import { addNote, msOfTimecode, NOTE_COLUMNS, type Note } from '@/lib/media/notes';
 
 export type Person = { email: string; display_name: string; role: Role };
 export type Load = {
@@ -315,12 +315,13 @@ export function useDecisions() {
   return { cycles, decisions, reload };
 }
 
-/** The library's notes on these files, oldest first; a timecode marks a moment of a video. */
-export type FileNote = { id: string; asset_id: string; author: string; body: string; timecode: string | null; created_at: string };
+/** The library's notes on these files, oldest first: the version each was written on, its exact time, an area,
+ *  answers and «تم» (MVP_draft.md 62.13; older notes have only minutes and seconds). */
+export type FileNote = Note;
 export async function fileNotes(ids: string[]): Promise<FileNote[]> {
   if (!ids.length) return [];
-  const { data } = await supabase().from('media_notes').select('id,asset_id,author,body,timecode,created_at').in('asset_id', ids).order('created_at');
-  return (data ?? []) as FileNote[];
+  const { data } = await supabase().from('media_notes').select(NOTE_COLUMNS).in('asset_id', ids).order('created_at');
+  return ((data ?? []) as Partial<Note>[]).map((n) => ({ version: null, at_ms: null, area: null, parent_id: null, done_at: null, done_by: null, ...n }) as Note);
 }
 export async function addFileNote(assetId: string, author: string, body: string, timecode: string): Promise<string | null> {
   // through media_note_add (supabase/migrations/20261020150000_studio_connections.sql); `author` is the caller

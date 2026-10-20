@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-14T21:34:16.240Z",
+  "run": "2026-10-20T11:59:13.259Z",
   "checks": [
     {
       "name": "list-director: renders",
@@ -1622,7 +1622,7 @@
       "detail": ""
     },
     {
-      "name": "approvals-publish-lead: shows «إدارة الحسابات المرتبطة»",
+      "name": "approvals-publish-lead: shows «إدارة حسابات المنصات»",
       "pass": true,
       "detail": ""
     },
@@ -1932,7 +1932,7 @@
       "detail": "overflow 0px"
     },
     {
-      "name": "channels-director: shows «الحسابات المرتبطة»",
+      "name": "channels-director: shows «حسابات المنصات»",
       "pass": true,
       "detail": ""
     },
@@ -2067,7 +2067,7 @@
       "detail": "overflow 0px"
     },
     {
-      "name": "channels-writer: shows «الحسابات المرتبطة لمن يديرها وينشر عليها»",
+      "name": "channels-writer: shows «حسابات المنصات لمن يديرها وينشر عليها»",
       "pass": true,
       "detail": ""
     },

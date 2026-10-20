@@ -2647,6 +2647,7 @@ On «المراجعة» (`/approvals/<id>`), for files of video:
 - R opens «طلب تعديل» with this version's notes. A, held as long as a long press, approves the file shown at its version; Shift+A, held, is «اعتماد الكل». A key works only where its button works: nobody approves what they uploaded or sent.
 - ] and [ open the next and previous work waiting for a decision, in the order of «الموافقات والنشر»; after a decision the screen offers «التالي».
 - An address with `?t=` (seconds) and `&v=` (version) opens the player at that moment.
+- Settled while building (2026-10-20): the player's keys act on the player last used (the first video when none was). «هذا الإصدار» shows the notes written on the version shown; notes from before versions were recorded appear under «كل الإصدارات». The safe zones are offered for a 9:16 video only. With three versions or more, the version compared can be chosen. A, held, presses that file's «اعتماد هذا الجزء», which stays a plain click with the mouse; a short press of A explains instead. R opens «طلب تعديل» on the file last used, with the open notes that have a time on the version under review. «التالي» goes to the work that came after this one when the page opened, even after it was decided.
 
 ## 62.14 The studio elsewhere in the site, 2026-10-20
 

@@ -94,7 +94,7 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   item: ['src/components/work/item.tsx', 'src/components/work/plan.tsx', 'src/components/work/publish.tsx', 'src/components/work/parts.tsx'],
   create: ['src/components/work/create.tsx', 'src/components/work/plan.tsx', 'src/components/work/parts.tsx'],
   approvals: ['src/components/work/approvals.tsx', 'src/components/work/publish.tsx', 'src/components/work/parts.tsx'],
-  review: ['src/components/work/review.tsx', 'src/components/work/parts.tsx'],
+  review: ['src/components/work/review.tsx', 'src/components/work/review-player.tsx', 'src/components/work/parts.tsx'],
   channels: ['src/components/work/channels.tsx', 'src/components/work/parts.tsx'],
   calendar: ['src/components/work/calendar.tsx', 'src/components/work/day-dialogs.tsx', 'src/components/work/parts.tsx'],
   projects: ['src/components/work/projects.tsx', 'src/components/work/parts.tsx'],

@@ -103,10 +103,11 @@ test('hold to confirm: the reference\'s reasons, each used by a button, about a 
   assert.equal(HOLD.roleDefaultOff, 'التغيير يمسّ كل من يحمل هذا الدور.');
   assert.equal(HOLD.roleDown, 'ينقص هذا التغيير ما يستطيع الشخص فعله فوراً.');
   assert.equal(HOLD_MS, Number(reference.match(/var HOLD_MS = (\d+);/)[1]));
-  const comps = ['src/components/media/dialogs.tsx', 'src/components/media/library.tsx', 'src/components/media/asset-page.tsx', 'src/components/mail/thread.tsx', 'src/components/chat/chat-tab.tsx', 'src/components/work/item.tsx', 'src/components/work/review.tsx', 'src/components/work/publish.tsx', 'src/components/work/channels.tsx',
+  const comps = ['src/components/media/dialogs.tsx', 'src/components/media/library.tsx', 'src/components/media/asset-page.tsx', 'src/components/mail/thread.tsx', 'src/components/chat/chat-tab.tsx', 'src/components/work/item.tsx', 'src/components/work/review.tsx', 'src/components/work/review-player.tsx', 'src/components/work/publish.tsx', 'src/components/work/channels.tsx',
     'src/components/accounts/members.tsx', 'src/components/accounts/card.tsx', 'src/components/accounts/roles.tsx', 'src/components/settings/general.tsx', 'src/components/settings/platforms.tsx', 'src/components/settings/storage-provider.tsx', 'src/components/settings/storage-move.tsx', 'src/components/settings/backups.tsx',
     'src/components/studio/project-list.tsx', 'src/components/studio/project-shell.tsx', 'src/components/studio/cache-panel.tsx', 'src/components/studio/export-panel.tsx', 'src/components/studio/versions-panel.tsx', 'src/components/studio/inspector.tsx', 'src/components/studio/photo-editor.tsx'].map(read).join('\n');
-  for (const k of Object.keys(HOLD)) assert.match(comps, new RegExp(`data-hold=\\{HOLD\\.${k}\\}`), k);
+  // a key hold (the review screen's A, MVP_draft.md 62.13) carries its reason as data-keyhold
+  for (const k of Object.keys(HOLD)) assert.match(comps, new RegExp(`data-(?:key)?hold=\\{HOLD\\.${k}\\}`), k);
 });
 
 test('an explanation window sits beside its target and away from an open dialog', () => {
