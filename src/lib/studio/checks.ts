@@ -8,7 +8,7 @@ export type PlatformFacts = { key: string; label: string; videoOnly: boolean; ma
 export type Check = { level: 'stop' | 'warn' | 'note'; text: string };
 
 /** What an export would be: a video or a picture, the width / height of each file, and its length in seconds. */
-export type Planned = { kind: 'video' | 'still'; ratios: number[]; seconds: number };
+export type Planned = { kind: 'video' | 'still'; ratios: number[]; seconds: number; /** Reserved places still empty (slot.ts). */ slots?: number };
 
 const ratioLabel = (r: number) => {
   const known = (Object.keys(RATIOS) as Ratio[]).find((k) => Math.abs(RATIOS[k].w / RATIOS[k].h - r) / r < 0.02);
@@ -17,6 +17,7 @@ const ratioLabel = (r: number) => {
 
 export function exportChecks(planned: Planned, platforms: PlatformFacts[]): Check[] {
   const out: Check[] = [];
+  if (planned.slots) out.push({ level: 'warn', text: planned.slots === 1 ? 'في المشروع مكان محجوز لم يُملأ بعد، ويظهر في الملف مخططاً.' : `في المشروع ${planned.slots} أماكن محجوزة لم تُملأ بعد، وتظهر في الملف مخططة.` });
   for (const p of platforms) {
     if (planned.kind === 'still' && p.videoOnly) out.push({ level: 'stop', text: `${p.label} يقبل الفيديو وحده، والتصدير صورة.` });
     if (planned.kind === 'video' && p.maxSeconds && planned.seconds > p.maxSeconds) out.push({ level: 'warn', text: `${p.label}: مدة المقطع ${Math.round(planned.seconds)} ثانية، والحد المسجل في «المنصات» ${p.maxSeconds} ثانية.` });

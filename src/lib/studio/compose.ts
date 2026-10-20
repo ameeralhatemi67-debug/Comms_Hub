@@ -11,6 +11,7 @@ import { NO_FX, clipAnimFx, clipTransitionFx, combine, type Fx } from './transit
 import { transformWithKeys } from './keys.ts';
 import { sourceTime } from './speed.ts';
 import { drawCover } from './cover.ts';
+import { drawSlot } from './slot.ts';
 
 export type Resolver = {
   /** The frame of a video source shown at `at` (source time) for a clip, or null while it is not ready. */
@@ -158,6 +159,10 @@ function contentOf(doc: ProjectDoc, item: Clip | Layer, t: Micros | null, res: R
         }
       },
     };
+  }
+  if (item.slot) {
+    const sl = item.slot;
+    return { img: null, natural: { w: sl.w, h: sl.h }, fitInCanvas: false, draw: (ctx, w, h, s) => drawSlot(ctx, sl, w, h, s) };
   }
   if (item.cover) {
     // drawn as a pass over the pixels below it (drawCover); the size here is for picking and handles

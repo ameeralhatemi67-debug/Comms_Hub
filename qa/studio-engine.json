@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-engine.cjs",
-  "run": "2026-10-20T10:37:57.442Z",
+  "run": "2026-10-20T12:11:31.790Z",
   "checks": [
     {
       "name": "the shipped Arabic fonts load with Arabic sample text",
@@ -63,9 +63,14 @@
       "detail": "{\"plain\":[[254,0,253,255],[254,0,253,255],[255,24,0,255]],\"blur\":[[254,11,142,255],[254,0,253,255],[255,24,0,255]],\"blocks\":[[254,12,126,255],[254,0,253,255],[255,24,0,255]]}"
     },
     {
+      "name": "a reserved place is drawn as a striped box over the picture, and the video outside it shows as it was",
+      "pass": true,
+      "detail": "{\"inSlot\":[[43,58,52,255],[52,70,63,255]],\"outSlot\":[255,24,0,255]}"
+    },
+    {
       "name": "the «مسودة» mark is written across the picture, which shows through it (between 2 and 60 percent of pixels touched)",
       "pass": true,
-      "detail": "6.0%"
+      "detail": "6.3%"
     },
     {
       "name": "a photo layer that is a frame of a video shows the frame at its source time (green at 3 s)",
@@ -206,7 +211,7 @@
   "log": [
     "requests: 4"
   ],
-  "total": 40,
-  "passed": 40,
+  "total": 41,
+  "passed": 41,
   "failed": 0
 }

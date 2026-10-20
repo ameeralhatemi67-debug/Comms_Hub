@@ -12,6 +12,7 @@ export const plainLabel: DiffLabel = (doc, item) => {
   if (item.motion) return 'قالب حركة';
   if (item.sticker) return 'علامة الهوية';
   if (item.shape) return 'شكل';
+  if (item.slot) return `مكان محجوز: ${item.slot.what}`;
   if (item.cover) return item.cover.mode === 'blocks' ? 'إخفاء بالمربعات' : 'تمويه منطقة';
   return doc.sources.find((s) => s.id === item.source)?.name ?? 'ملف';
 };
@@ -64,6 +65,10 @@ export function diffDocs(from: ProjectDoc, to: ProjectDoc, label: DiffLabel = pl
       const name = label(to, clip);
       if (!o) {
         lines.push(`أُضيف «${name}» عند ${shortTime(clip.start)}.`);
+        continue;
+      }
+      if (o.clip.slot && !clip.slot) {
+        lines.push(`وُضع «${name}» مكان «${label(from, o.clip)}» عند ${shortTime(clip.start)}.`);
         continue;
       }
       if (o.clip.start !== clip.start || o.track !== track) lines.push(`نُقل «${name}» من ${shortTime(o.clip.start)} إلى ${shortTime(clip.start)}.`);

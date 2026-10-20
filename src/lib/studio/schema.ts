@@ -121,6 +121,12 @@ export type Cover = { mode: 'blur' | 'blocks'; amount: number; shape: 'rect' | '
 /** A marker on the time ruler (MVP_draft.md 62.8); in order of time, they are YouTube's chapters. */
 export type Marker = { id: string; t: Micros; label: string; color: string };
 
+/**
+ * «مكان محجوز» (MVP_draft.md 62.12, slot.ts): a picture or a video still to come, `what` it waits for, full
+ * frame or a box over the rest (`over`, w by h canvas pixels), and the work task made for it.
+ */
+export type Slot = { what: string; media: 'video' | 'image'; over: boolean; w: number; h: number; task?: string; taskAt?: string; taskVersion?: number };
+
 /** What a visual item shows. Exactly one of these is set. */
 export type Content = {
   source?: string;
@@ -129,6 +135,7 @@ export type Content = {
   sticker?: { key: StickerKey; color: string };
   shape?: Shape;
   cover?: Cover;
+  slot?: Slot;
 };
 
 /** A clip's named fields; a stored clip also has its id and may carry fields from newer clients. */

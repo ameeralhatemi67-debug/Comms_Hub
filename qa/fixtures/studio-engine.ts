@@ -170,6 +170,14 @@ export async function run(): Promise<{ checks: Check[]; log: string[] }> {
   const unchanged = (m: string) => dist(coverResults[m][1], plain[1]) <= 3 && dist(coverResults[m][2], plain[2]) <= 3;
   check('a covered area (blur, and squares) changes the pixels inside it and leaves the picture and the video outside it as they were', changed('blur') && changed('blocks') && unchanged('blur') && unchanged('blocks'), JSON.stringify({ plain, ...coverResults }));
 
+  // a reserved place (MVP_draft.md 62.12): a striped box over the red video, the video outside it unchanged
+  const slotted = timeline.addClip(doc, { start: 0, length: 6 * US, slot: { what: 'شعار الشريك', media: 'image', over: true, w: W * 0.4, h: H * 0.4 }, transform: { x: W * 0.5, y: H * 0.5, scale: 1, rotation: 0, opacity: 1 } }).doc;
+  await draw(slotted, 1 * US);
+  const inSlot = [px(ctx, (W * 0.5 - W * 0.17) * scale, (H * 0.5 - H * 0.17) * scale), px(ctx, (W * 0.5 + W * 0.16) * scale, (H * 0.5 + H * 0.16) * scale)];
+  const outSlot = px(ctx, W * 0.1 * scale, H * 0.5 * scale);
+  const stripe = (p: number[]) => near(p, [43, 58, 52], 25) || near(p, [61, 82, 73], 25);
+  check('a reserved place is drawn as a striped box over the picture, and the video outside it shows as it was', inSlot.every(stripe) && near(outSlot, [255, 0, 0]), JSON.stringify({ inSlot, outSlot }));
+
   // the «مسودة» mark (MVP_draft.md 62.10): part of the picture changes, most of it shows through
   await draw(doc, 1 * US);
   const plainPx = ctx.getImageData(0, 0, canvas.width, canvas.height).data;

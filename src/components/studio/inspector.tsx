@@ -372,7 +372,7 @@ export type KeyActions = {
 };
 
 export function Inspector({
-  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, onLength, compact = false, t = 0, keyActions, track, onTrackSound, workText,
+  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, onLength, compact = false, t = 0, keyActions, track, onTrackSound, workText, slotPanel,
 }: {
   doc: ProjectDoc;
   clip: Clip | null;
@@ -399,6 +399,8 @@ export function Inspector({
   compact?: boolean;
   /** A text taken from the linked work: where from, and a newer version when there is one (MVP_draft.md 62.12). */
   workText?: WorkTextNote | null;
+  /** The settings of «مكان محجوز»: its task and what came for it (slot-panel.tsx). */
+  slotPanel?: ReactNode;
 }) {
   const { w: W, h: H } = canvasOf(doc);
   const ratio = doc.video?.ratio ?? '9:16';
@@ -419,7 +421,7 @@ export function Inspector({
   const media = src?.media;
   const audible = media === 'video' || media === 'audio';
   const visual = media !== 'audio';
-  const label = clip.text ? 'نص' : clip.motion ? 'قالب حركة' : clip.sticker ? 'علامة الهوية' : clip.cover ? 'منطقة مخفية' : media === 'image' ? 'صورة' : media === 'audio' ? 'صوت' : 'فيديو';
+  const label = clip.text ? 'نص' : clip.motion ? 'قالب حركة' : clip.sticker ? 'علامة الهوية' : clip.cover ? 'منطقة مخفية' : clip.slot ? 'مكان محجوز' : media === 'image' ? 'صورة' : media === 'audio' ? 'صوت' : 'فيديو';
   const tau = Math.max(0, Math.min(clip.length, t - clip.start));
   // keyframes on a computer: phones keep the plain values (and never remove keys)
   const keying: Keying | undefined = keyActions && !compact ? { tau, keys: clip.keys, onToggle: keyActions.toggle } : undefined;
@@ -459,6 +461,7 @@ export function Inspector({
           )}
         </Section>
       )}
+      {clip.slot && slotPanel && <Section title="المكان المحجوز">{slotPanel}</Section>}
       {clip.cover && (
         <Section title="المنطقة المخفية">
           <CoverControls cover={clip.cover} W={W} H={H} disabled={readOnly} onChange={(c, l, k) => onClip({ cover: c }, l, k)} />

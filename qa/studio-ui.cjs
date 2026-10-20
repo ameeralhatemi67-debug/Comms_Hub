@@ -1187,6 +1187,49 @@ async function workFlow(browser, base, errors) {
   await send();
   const s3 = await tab.evaluate(() => ({ w: window.__db.works.find((x) => x.id === 'CH-102'), sub: window.__db.submits.filter((x) => x.p_work === 'CH-102'), p: window.__db.projects.find((x) => x.work_ref === 'CH-102') }));
   check('work: a photo project sends its picture the same way: a library file, recorded, and the work sent to review with its account', s3.w.status === 'IN_REVIEW' && s3.sub.length === 1 && JSON.stringify(s3.sub[0].p_channels) === '["acc-ig"]' && s3.p.exports.length === 1 && s3.p.exports[0].shape === null, JSON.stringify({ status: s3.w.status, sub: s3.sub, exports: s3.p.exports }));
+
+  // a reserved place (MVP_draft.md 62.12): a box for a picture, a task for it with the frame attached, the
+  // export warned, the task done and a file linked to the work, and the file put in its place
+  await dlg.getByRole('button', { name: 'تم', exact: true }).click();
+  await tab.evaluate((pid) => window.__nav(`/motion/studio/${pid}`), made.id);
+  await tab.locator('.st-editor').waitFor({ timeout: 15000 });
+  await tab.locator('.st-tl-marker').first().waitFor({ timeout: 8000 }).catch(() => undefined);
+  const kept = { markers: await tab.locator('.st-tl-marker').count(), drafts: await tab.locator('.st-banner-draft').count() };
+  check('work: leaving the editor for the work page right after editing keeps the edits (saved on leaving, not left to a device draft)', kept.markers === 3 && kept.drafts === 0, JSON.stringify(kept));
+  await tab.locator('.st-ws-tab[data-panel="graphics"]').click();
+  await tab.getByRole('button', { name: 'مكان لصورة فوق اللقطة' }).click();
+  await tab.locator('.st-clip[data-kind="slot"]').waitFor({ timeout: 5000 });
+  await tab.locator('.st-ws-tab[data-panel="inspector"]').click();
+  await tab.locator('.st-slot').getByLabel('المطلوب', { exact: true }).fill('شعار الشريك');
+  const slotName = await tab.locator('.st-clip[data-kind="slot"]').textContent();
+  await tab.locator('.st-slot').getByRole('button', { name: 'إسناد مهمة…' }).click();
+  const asg = tab.locator('dialog', { hasText: 'إسناد مهمة للمكان المحجوز' });
+  await asg.waitFor();
+  await asg.locator('select').first().selectOption('des@t.test');
+  await asg.locator('.st-form select').nth(1).waitFor();
+  await asg.getByRole('button', { name: 'إسناد', exact: true }).click();
+  await asg.waitFor({ state: 'detached', timeout: 30000 });
+  await tab.locator('.st-slot-task', { hasText: 'مُسندة إلى مصممة الاختبار' }).waitFor({ timeout: 5000 });
+  const task = await tab.evaluate(async () => ({ t: window.__db.tasks[0], n: window.__db.tasks.length, up: await (await fetch('/__uploads')).json() }));
+  const frameUp = task.up.find((u) => u.id === task.t.asset_id);
+  check('work: «مكان لصورة فوق اللقطة» adds a striped place on a graphics track named by what it waits for, and «إسناد مهمة» makes a design task for the work through task_create with its place, length and size and the frame attached', /مكان محجوز: شعار الشريك/.test(slotName) && task.n === 1 && task.t.what === 'شعار الشريك' && task.t.kind === 'design' && task.t.assignee === 'des@t.test' && task.t.work_id === 'CH-101' && /صورة عند 0:00 لمدة 4 ث، بمقاس 648×653 فوق اللقطة/.test(task.t.note) && !!frameUp && /\.png$/.test(frameUp.name), JSON.stringify({ slotName, t: task.t, frame: frameUp && frameUp.name }));
+  await tab.locator('.st-ws-tab[data-panel="export"]').click();
+  const warnSlot = await tab.locator('.st-export .st-check-list').textContent();
+  check('work: the export says a place is still empty, as a warning', /مكان محجوز لم يُملأ/.test(warnSlot), warnSlot);
+  await tab.evaluate((id) => {
+    window.__db.finishTask(id);
+    window.__db.linkFile('CH-101', '00000000-0000-4000-8000-0000000000b1');
+    window.dispatchEvent(new Event('focus'));
+  }, task.t.id);
+  await tab.locator('.st-clip[data-kind="slot"]').click();
+  await tab.locator('.st-ws-tab[data-panel="inspector"]').click();
+  await tab.locator('.st-slot-task[data-state="done"]').waitFor({ timeout: 8000 });
+  const deliveredText = await tab.locator('.st-slot-files').textContent();
+  await tab.locator('.st-slot-files li', { hasText: 'بطاقة.png' }).getByRole('button', { name: 'وضعه مكان المحجوز' }).click();
+  await tab.locator('.st-clip[data-kind="image"]').waitFor({ timeout: 5000 });
+  const filled = { slots: await tab.locator('.st-clip[data-kind="slot"]').count(), image: await tab.locator('.st-clip[data-kind="image"]').textContent() };
+  check('work: once the task is done the place says «سُلّمت» and lists the file linked to the work since, and «وضعه مكان المحجوز» turns the place into that file', /بطاقة\.png/.test(deliveredText) && filled.slots === 0 && /بطاقة\.png/.test(filled.image), JSON.stringify({ deliveredText, filled }));
+  await tab.screenshot({ path: path.join(out, 'work-slot-1440.png') });
   await ctx.close();
 }
 

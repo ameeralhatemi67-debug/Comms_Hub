@@ -16,11 +16,12 @@ type Work = { id: string; title: string; type: string; status: string; due: stri
 type Row = Record<string, unknown>;
 type Db = {
   projects: Project[]; files: Record<string, unknown>[]; uploads: number; notes?: Record<string, unknown>[]; workLinks?: { work: string; asset: string }[]; brand?: Brand;
-  works?: Work[]; stages?: Row[]; decisions?: Row[]; texts?: Row[]; variants?: Row[]; submits?: Row[];
+  works?: Work[]; stages?: Row[]; decisions?: Row[]; texts?: Row[]; variants?: Row[]; submits?: Row[]; tasks?: Row[];
 };
 
 export const ME = 'dir@t.test';
-const NAMES: Record<string, string> = { 'dir@t.test': 'مدير الاختبار', 'other@t.test': 'زميل آخر' };
+const NAMES: Record<string, string> = { 'dir@t.test': 'مدير الاختبار', 'other@t.test': 'زميل آخر', 'des@t.test': 'مصممة الاختبار' };
+const ROLES: Record<string, string> = { 'dir@t.test': 'director', 'other@t.test': 'assistant', 'des@t.test': 'designer' };
 const KEY = 'studio-fixture-db';
 
 const seedFiles = () => [
@@ -284,8 +285,22 @@ const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; erro
     return ok(null);
   },
   my_capabilities: () => ok({ caps: [{ k: 'motion.studio', ok: true, src: 'role', until: null, uses: null, id: null }, { k: 'page.motion', ok: true, src: 'role', until: null, uses: null, id: null }], grants: [] }),
+  // a work task (supabase/migrations/20261013120000_work_cycle_planning.sql task_create)
+  task_create: (a) => {
+    const p = (a.p ?? {}) as Record<string, string>;
+    const what = String(p.what ?? '').trim();
+    if (!what || what.length > 140) return err('TEXT_REQUIRED');
+    const to = p.assignee || me;
+    if (!NAMES[to]) return err('PERSON_INVALID');
+    if (!p.due) return err('DUE_REQUIRED');
+    if (p.work && !work(p.work)) return err('FORBIDDEN');
+    const id = crypto.randomUUID();
+    db.tasks = [...(db.tasks ?? []), { id, what, kind: ['copy', 'design', 'edit', 'review', 'publish', 'other'].includes(p.kind) ? p.kind : 'other', assignee: to, assigned_by: me, due: p.due, note: p.note || null, status: 'open', created_at: now(), done_at: null, asset_id: p.asset || null, work_id: p.work || null, priority: p.priority === 'urgent' ? 'urgent' : 'normal' }];
+    save();
+    return ok(id);
+  },
   work_asset_link: (a) => {
-    db.workLinks = [...(db.workLinks ?? []), { work: String(a.p_work), asset: String(a.p_asset) }];
+    db.workLinks = [...(db.workLinks ?? []), { work: String(a.p_work), asset: String(a.p_asset), at: now() } as { work: string; asset: string }];
     save();
     return ok(null);
   },
@@ -301,9 +316,10 @@ function query(table: string) {
     : table === 'work_decisions' ? [...db.decisions!]
     : table === 'work_texts' ? [...db.texts!].sort((x, y) => Number(y.n) - Number(x.n))
     : table === 'work_variants' ? [...db.variants!]
-    : table === 'work_assets' ? (db.workLinks ?? []).map((l) => ({ work_id: l.work, asset_id: l.asset }))
+    : table === 'work_assets' ? (db.workLinks ?? []).map((l) => ({ work_id: l.work, asset_id: l.asset, added_at: (l as { at?: string }).at ?? '2026-01-01T00:00:00.000Z' }))
+    : table === 'media_tasks' ? [...(db.tasks ?? [])]
     : table === 'platform_accounts' ? ACCOUNTS.map((x) => ({ ...x }))
-    : table === 'accounts' ? Object.entries(NAMES).map(([email, display_name]) => ({ email, display_name }))
+    : table === 'accounts' ? Object.entries(NAMES).map(([email, display_name]) => ({ email, display_name, role: ROLES[email] }))
     : table === 'studio_projects' ? db.projects.map((p) => ({ id: p.id, work_ref: p.work_ref, template: !!p.template, archived_at: p.archived_at, updated_at: p.updated_at }))
     : table === 'studio_brand' ? [db.brand ?? { colors: [], title_font: null, body_font: null }]
     : table === 'media_notes' ? [...(db.notes ?? [])]
@@ -387,6 +403,21 @@ export function supabase() {
   },
   get notes() {
     return db.notes ?? [];
+  },
+  get tasks() {
+    return db.tasks ?? [];
+  },
+  /** The person the task went to marks it done (on «المهام»). */
+  finishTask(id: string) {
+    const t = (db.tasks ?? []).find((x) => x.id === id)!;
+    t.status = 'done';
+    t.done_at = now();
+    save();
+  },
+  /** A file linked to a work on its page (work_asset_link), now. */
+  linkFile(work: string, asset: string) {
+    db.workLinks = [...(db.workLinks ?? []), { work, asset, at: now() } as { work: string; asset: string }];
+    save();
   },
   /** A review note as the review screen writes it (media_note_add), from the assistant. */
   note(asset: string, body: string, atMs: number | null, version: number | null, done = false) {

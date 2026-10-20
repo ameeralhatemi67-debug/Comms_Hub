@@ -116,6 +116,7 @@
 .st-clip[data-kind="motion"]{background:#a07c34}
 .st-clip[data-kind="mark"]{background:#7d6a3a}
 .st-clip[data-kind="text"]{background:#465a52}
+.st-clip[data-kind="slot"]{background:repeating-linear-gradient(45deg,#2b3a34 0 8px,#3d5249 8px 16px);box-shadow:inset 0 0 0 1.5px #e8c46c}
 .st-clip[data-selected="yes"]{box-shadow:0 0 0 2px #c9ac70,inset 0 0 0 1px rgba(0,0,0,.2);z-index:2}
 .st-clip[data-missing="yes"]{background:repeating-linear-gradient(45deg,#7a3d3d 0 8px,#5e2f2f 8px 16px)}
 .st-clip-edge{position:absolute;top:0;bottom:0;width:9px;cursor:ew-resize;background:rgba(255,255,255,.18)}
@@ -218,3 +219,14 @@
 .st-send p{margin:0}
 .st-tc{min-height:28px;padding:2px 8px;font-variant-numeric:tabular-nums;font-size:12px}
 .st-sub svg{width:14px;height:14px;vertical-align:-2px}
+
+/* «مكان محجوز» (MVP_draft.md 62.12) */
+.st-slot{display:grid;gap:8px}
+.st-slot label{display:grid;gap:4px;font-size:12.5px}
+.st-slot .st-hint svg,.st-slot-task svg{width:14px;height:14px;vertical-align:-2px}
+.st-slot-task{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:12.5px}
+.st-slot-task p{margin:0}
+.st-slot-task[data-state="done"]{border-color:color-mix(in srgb,var(--green-text) 50%,var(--line))}
+.st-slot-files ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.st-slot-files li{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px}
+.st-slot-files li span{flex:1 1 120px;min-width:0;overflow:hidden;text-overflow:ellipsis}

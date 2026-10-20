@@ -14,6 +14,7 @@ import { useAccount } from '@/lib/account-context';
 import { RATIOS, US, canvasOf, durationOf, type ProjectDoc } from '@/lib/studio/schema';
 import { EXPORT_ERRORS, ExportError, exportStill, exportVideo, fileName } from '@/lib/studio/export';
 import { exportChecks, hasStop } from '@/lib/studio/checks';
+import { openSlots } from '@/lib/studio/slot';
 import { decidesNext, sendBlock, sendNeeds } from '@/lib/studio/worklink';
 import { probeSupport } from '@/lib/studio/support';
 import type { MediaPool } from '@/lib/studio/media';
@@ -72,7 +73,7 @@ export function SendReviewDialog(p: {
 
   const { w: W, h: H } = canvasOf(p.doc);
   const ratio = p.photo ? W / H : RATIOS[p.doc.video?.ratio ?? '9:16'].w / RATIOS[p.doc.video?.ratio ?? '9:16'].h;
-  const checks = exportChecks({ kind: p.photo ? 'still' : 'video', ratios: [ratio], seconds: durationOf(p.doc) / US }, plat.workKeys.map(factsOf));
+  const checks = exportChecks({ kind: p.photo ? 'still' : 'video', ratios: [ratio], seconds: durationOf(p.doc) / US, slots: openSlots(p.doc).length }, plat.workKeys.map(factsOf));
   const warned = checks.some((c) => c.level === 'warn');
   const reviewed = !!target && REVIEWED_STAGES.includes(target.stage);
   const published = target?.stage === 'published';

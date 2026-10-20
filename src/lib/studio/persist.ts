@@ -346,6 +346,19 @@ export class Saver {
     return r;
   }
 
+  /**
+   * Leaving the editor inside the site (a link, the work bar, the work page): what was changed is kept, not
+   * dropped. The device draft is written at once and, holding the lease, the autosave slot is saved now
+   * rather than when its timer would have run. The caller releases the lease after this.
+   */
+  async flush(): Promise<void> {
+    if (this.disposed || !this.dirty) return;
+    this.cancelDraft?.();
+    this.cancelDraft = null;
+    await this.writeDraft();
+    if (this.leased && this.state.kind !== 'readonly') await this.save(false);
+  }
+
   dispose() {
     this.disposed = true;
     this.cancelSave?.();

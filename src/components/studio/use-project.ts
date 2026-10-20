@@ -101,10 +101,16 @@ export function useStudioProject(id: string, view: number | null = null) {
   useEffect(() => {
     void load(false);
     return () => {
-      saver.current?.dispose();
+      // leaving inside the site keeps the changes: saved to the autosave slot, then the lease is let go
+      const s = saver.current;
+      const held = mine.current;
       saver.current = null;
-      if (mine.current) void api.release(id);
       mine.current = false;
+      void (async () => {
+        await s?.flush().catch(() => undefined);
+        s?.dispose();
+        if (held) await api.release(id);
+      })();
     };
   }, [api, id, load]);
 

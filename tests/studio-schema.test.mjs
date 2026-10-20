@@ -4,6 +4,7 @@
 // editor to reading and keeps the draft, a network failure retries).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   checkDoc, openDoc, newVideoDoc, newPhotoDoc, librarySources, localSources, canvasOf, durationOf, danglingSources, unusedSources,
   DOC_MAX_BYTES, RATIOS, US,
@@ -144,6 +145,33 @@ test('a change is autosaved 15 seconds later, not before, and the draft is writt
   assert.equal(s.state.kind, 'saved');
   assert.equal(await drafts.get('p'), null, 'a saved draft is cleared');
   assert.deepEqual(states, ['dirty', 'saving', 'saved']);
+});
+
+test('leaving the editor inside the site saves what was changed at once; dispose alone keeps only the draft', async () => {
+  const c = clock();
+  const { db, api } = fakeDb();
+  const drafts = memoryDrafts();
+  const s = new Saver({ api, project: 'p', doc: newVideoDoc(), base: 1, leased: true, drafts, timer: c.timer, now: c.now });
+  s.change(edit(s.current, 'قبل المغادرة'));
+  await c.advance(100);
+  await s.flush();
+  assert.equal(db.autosave.note, 'قبل المغادرة', 'saved without waiting for the timer');
+  assert.equal(s.state.kind, 'saved');
+  s.dispose();
+  await c.advance(AUTOSAVE_MS * 2);
+  assert.equal(db.calls.filter((x) => x === 'studio_save').length, 1, 'once');
+  // nothing changed: nothing is sent
+  const quiet = new Saver({ api, project: 'q', doc: newVideoDoc(), base: 1, leased: true, drafts, timer: c.timer, now: c.now });
+  await quiet.flush();
+  assert.equal(db.calls.filter((x) => x === 'studio_save').length, 1);
+  // without the lease the draft is kept on the device and nothing is sent
+  const ro = new Saver({ api, project: 'r', doc: newVideoDoc(), base: 1, leased: false, drafts, timer: c.timer, now: c.now });
+  ro.change(edit(ro.current, 'للقراءة'));
+  await ro.flush();
+  assert.equal((await drafts.get('r')).doc.note, 'للقراءة');
+  assert.equal(db.calls.filter((x) => x === 'studio_save').length, 1);
+  const src = readFileSync('src/components/studio/use-project.ts', 'utf8');
+  assert.match(src, /await s\?\.flush\(\)\.catch\(\(\) => undefined\);\s*s\?\.dispose\(\);\s*if \(held\) await api\.release\(id\);/);
 });
 
 test('changes keep postponing the autosave, and «حفظ نسخة» makes a numbered revision at once', async () => {

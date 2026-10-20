@@ -16,6 +16,7 @@ import { HOLD } from '@/lib/kit/hold-reasons';
 import { RATIOS, US, canvasOf, durationOf, type Micros, type ProjectDoc, type Ratio } from '@/lib/studio/schema';
 import { allShapes, docForShape } from '@/lib/studio/reframe';
 import { exportChecks, hasStop } from '@/lib/studio/checks';
+import { openSlots } from '@/lib/studio/slot';
 import { toSrt } from '@/lib/studio/text';
 import { factsOf, usePlatforms } from './platforms';
 import { EXPORT_ERRORS, ExportError, SHORT_LABELS, estimateBytes, exportStill, exportVideo, fileName, measureLoudness, outputSize, type ExportProgress, type Short, type VideoFormat } from '@/lib/studio/export';
@@ -147,7 +148,7 @@ export function ExportPanel({
   // what the export is checked against: the work's platforms, or those picked here
   const { w: CW, h: CH } = canvasOf(doc);
   const ratios = photo ? [CW / CH] : chosenShapes.map((r) => RATIOS[r].w / RATIOS[r].h);
-  const checks = exportChecks({ kind: photo ? 'still' : what, ratios, seconds: durationOf(doc) / US }, platformKeys.map(factsOf));
+  const checks = exportChecks({ kind: photo ? 'still' : what, ratios, seconds: durationOf(doc) / US, slots: openSlots(doc).length }, platformKeys.map(factsOf));
   const warned = checks.some((c) => c.level === 'warn');
 
   const run = async () => {

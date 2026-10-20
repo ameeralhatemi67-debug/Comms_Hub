@@ -7,7 +7,7 @@
 // On a computer each is its own window (62.1) and anything in them can be dragged onto the timeline or
 // the preview; on a phone they are the tabs of one panel.
 import { useEffect, useRef, useState, type DragEvent } from 'react';
-import { Circle, FileUp, Film, Minus, Music, Search, Square, Subtitles, Type, Upload, EyeOff, Grid3x3 } from 'lucide-react';
+import { Circle, FileUp, Film, Minus, Music, Search, Square, Subtitles, Type, Upload, EyeOff, Grid3x3, SquareDashed } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { STICKERS, STICKER_LABELS, type StickerKey } from '@/lib/studio/schema';
 import { motionCatalog, motionParams, motionDims, settledSec, STICKER_SRC } from '@/lib/studio/motion-adapter';
@@ -26,7 +26,8 @@ export type AddDrop =
   | { type: 'text'; kind: 'title' | 'body' | 'caption' }
   | { type: 'mark'; key: StickerKey; color: string }
   | { type: 'shape'; shape: 'rect' | 'ellipse' | 'line' }
-  | { type: 'cover'; mode: 'blur' | 'blocks' };
+  | { type: 'cover'; mode: 'blur' | 'blocks' }
+  | { type: 'slot'; media: 'video' | 'image'; over: boolean };
 
 const dragAdd = (payload: AddDrop) => (e: DragEvent) => {
   e.dataTransfer.setData(ADD_MIME, JSON.stringify(payload));
@@ -86,6 +87,8 @@ export type BinProps = {
   onShape?: (type: 'rect' | 'ellipse' | 'line') => void;
   /** A covered area: blur or squares (MVP_draft.md 62.8). */
   onCover?: (mode: 'blur' | 'blocks') => void;
+  /** «مكان محجوز» for a picture or video still to come (MVP_draft.md 62.12). */
+  onSlot?: (media: 'video' | 'image', over: boolean) => void;
   assetsReady: boolean;
   /** A phone: SRT import is kept for the computer. */
   compact?: boolean;
@@ -237,7 +240,7 @@ export function TemplatesPane(p: Pick<BinProps, 'ratio' | 'readOnly' | 'photo' |
   );
 }
 
-export function GraphicsPane(p: Pick<BinProps, 'readOnly' | 'photo' | 'onText' | 'onSrt' | 'onMark' | 'onShape' | 'onCover' | 'compact'> & { marks?: boolean; texts?: boolean }) {
+export function GraphicsPane(p: Pick<BinProps, 'readOnly' | 'photo' | 'onText' | 'onSrt' | 'onMark' | 'onShape' | 'onCover' | 'onSlot' | 'compact'> & { marks?: boolean; texts?: boolean }) {
   const [markColor, setMarkColor] = useState('#ffffff');
   const srtInput = useRef<HTMLInputElement>(null);
   const texts = p.texts !== false;
@@ -288,6 +291,19 @@ export function GraphicsPane(p: Pick<BinProps, 'readOnly' | 'photo' | 'onText' |
               <button type="button" disabled={p.readOnly} onClick={() => p.onCover!('blocks')} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'cover', mode: 'blocks' })} title="يحوّل ما تحته إلى مربعات كبيرة">
                 <Grid3x3 aria-hidden="true" />
                 إخفاء بالمربعات
+              </button>
+            </>
+          )}
+          {p.onSlot && (
+            <>
+              <b className="st-sub">مكان محجوز</b>
+              <button type="button" disabled={p.readOnly} onClick={() => p.onSlot!('video', false)} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'slot', media: 'video', over: false })} title="لقطة لم تصل بعد، ملء الإطار. يُسند إلى من يحضرها مهمة من إعداداته">
+                <SquareDashed aria-hidden="true" />
+                مكان للقطة
+              </button>
+              <button type="button" disabled={p.readOnly} onClick={() => p.onSlot!('image', true)} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'slot', media: 'image', over: true })} title="صورة أو تصميم لم يصل بعد، في مربع فوق اللقطة">
+                <SquareDashed aria-hidden="true" />
+                مكان لصورة فوق اللقطة
               </button>
             </>
           )}

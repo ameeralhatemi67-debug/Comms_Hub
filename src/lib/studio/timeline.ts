@@ -53,8 +53,9 @@ const baseValues = (c: Clip): Partial<Record<KeyProp, number>> => ({
 });
 
 /** The track kind a clip belongs on. */
-export function kindFor(doc: ProjectDoc, c: Pick<Clip, 'source' | 'motion' | 'text' | 'sticker' | 'shape' | 'cover'>): TrackKind {
+export function kindFor(doc: ProjectDoc, c: Pick<Clip, 'source' | 'motion' | 'text' | 'sticker' | 'shape' | 'cover' | 'slot'>): TrackKind {
   if (c.text) return 'text';
+  if (c.slot) return c.slot.over ? 'graphics' : 'video';
   if (c.motion || c.sticker || c.shape || c.cover) return 'graphics';
   const s = sourceOf(doc, c.source);
   return s?.media === 'audio' ? 'audio' : 'video';

@@ -23,6 +23,8 @@ import {
 import { KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAllMotion, keyAt, keyTimes, moveKeyTime, setEaseAt, setKey, tidyKeys, toggleKey, type Ease, type KeyProp } from '@/lib/studio/keys';
 import { clampSpeed, isHold, speedAt } from '@/lib/studio/speed';
 import { newCover } from '@/lib/studio/cover';
+import { fillSlot, newSlot } from '@/lib/studio/slot';
+import { SlotPanel } from './slot-panel';
 import { addMarker, chapterIssues, chapters, removeMarker, updateMarker } from '@/lib/studio/markers';
 import { platformLabels } from '@/lib/work/rules';
 import { allShapes, docForShape, reframeFromPlace, setReframe } from '@/lib/studio/reframe';
@@ -378,6 +380,9 @@ export function VideoEditor(p: EditorProps) {
     const to = dir > 0 ? open.find((x) => x > at + eps) : [...open].reverse().find((x) => x < at - eps);
     if (to !== undefined) seek(to);
   };
+  /** «مكان محجوز»: four seconds at the playhead, full frame on a video track or a box over it (slot.ts). */
+  const addSlot = (media: 'video' | 'image', over: boolean, w: Where = {}) =>
+    place(h.get(), { start: w.at ?? at, length: 4 * US, slot: newSlot(media, over, W, H), transform: { x: W / 2, y: over ? H * 0.3 : H / 2, scale: 1, rotation: 0, opacity: 1 } }, 'مكان محجوز', w);
   const putMarker = () => {
     if (p.readOnly) return;
     const r = addMarker(h.get(), at);
@@ -393,6 +398,7 @@ export function VideoEditor(p: EditorProps) {
     } else if (d.type === 'text') addText(d.kind, w);
     else if (d.type === 'mark') addMark(d.key, d.color, w);
     else if (d.type === 'cover') addCover(d.mode, w);
+    else if (d.type === 'slot') addSlot(d.media, d.over, w);
   };
 
   // ------------------------------------------------------------- editing the selection
@@ -679,6 +685,7 @@ export function VideoEditor(p: EditorProps) {
     onSrt: addSrt,
     onMark: (k: StickerKey, c: string) => addMark(k, c),
     onCover: (m: 'blur' | 'blocks') => addCover(m),
+    onSlot: (m: 'video' | 'image', over: boolean) => addSlot(m, over),
     assetsReady,
     suggest: suggestOf(doc),
     compact,
@@ -764,6 +771,20 @@ export function VideoEditor(p: EditorProps) {
       track={sel?.track}
       onTrackSound={(pt) => sel && h.apply(setTrackSound(h.get(), sel.track.id, pt), pt.role ? 'المسار في المزج' : 'خفض الموسيقى تحت الكلام', `track-sound-${sel.track.id}`)}
       workText={workTextNote}
+      slotPanel={
+        sel?.clip.slot ? (
+          <SlotPanel
+            doc={doc}
+            clip={sel.clip}
+            title={p.title}
+            workRef={pw.workRef}
+            readOnly={p.readOnly}
+            pool={pool}
+            onSlot={(s, label, key) => h.apply(updateClip(h.get(), sel.clip.id, (c) => ({ ...c, slot: s })), label, key ?? null)}
+            onFill={(row) => h.apply(fillSlot(h.get(), sel.clip.id, librarySource(row)), `وضع «${row.name}» مكان المحجوز`)}
+          />
+        ) : null
+      }
       actions={{
         split,
         duplicate,

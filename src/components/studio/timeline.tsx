@@ -8,7 +8,7 @@
 // time pointed to; a transition or a movement is dropped onto a clip near its start or its end. Ctrl and
 // the wheel zoom about the pointer; a right click opens the clip's menu.
 import { useCallback, useEffect, useRef, useState, type DragEvent, type PointerEvent as RPointerEvent, type ReactNode } from 'react';
-import { Eye, EyeOff, Lock, Unlock, Volume2, VolumeX, Plus, MousePointer2, Scissors, Hand, Magnet, Undo2, Redo2, Trash2, ZoomIn, Maximize, Film, Image as ImageIcon, Music, Sparkles, Type, Stamp, Copy, ClipboardPaste, ArrowLeftToLine, Blend, Mic, Pin } from 'lucide-react';
+import { Eye, EyeOff, Lock, Unlock, Volume2, VolumeX, Plus, MousePointer2, Scissors, Hand, Magnet, Undo2, Redo2, Trash2, ZoomIn, Maximize, Film, Image as ImageIcon, Music, Sparkles, Type, Stamp, Copy, ClipboardPaste, ArrowLeftToLine, Blend, Mic, Pin, SquareDashed } from 'lucide-react';
 import { TRACK_LABELS, TRACK_LIMITS, US, durationOf, type Clip, type Micros, type ProjectDoc, type Track, type TrackKind } from '@/lib/studio/schema';
 import { legalStart, snapPoints, snapTo, sourceOf } from '@/lib/studio/timeline';
 import { shortTime } from '@/lib/studio/time';
@@ -17,6 +17,7 @@ import { KEY_TOLERANCE, keyTimes } from '@/lib/studio/keys';
 import { isHold, retimed, speedAt } from '@/lib/studio/speed';
 import { coverLabel } from '@/lib/studio/cover';
 import { markerHex, markersOf } from '@/lib/studio/markers';
+import { slotLabel } from '@/lib/studio/slot';
 import { peakIn } from '@/lib/studio/peaks';
 import { roleOf } from '@/lib/studio/timeline';
 import { withKeys } from '@/lib/studio/shortcuts';
@@ -103,11 +104,12 @@ export function clipLabel(doc: ProjectDoc, c: Clip): string {
   if (c.sticker) return 'علامة الهوية';
   if (c.shape) return 'شكل';
   if (c.cover) return coverLabel(c.cover);
+  if (c.slot) return slotLabel(c.slot);
   return sourceOf(doc, c.source)?.name ?? 'ملف';
 }
 
-const kindClass = (doc: ProjectDoc, c: Clip) => (c.text ? 'text' : c.motion ? 'motion' : c.cover ? 'cover' : c.sticker || c.shape ? 'mark' : sourceOf(doc, c.source)?.media ?? 'video');
-const KIND_ICON: Record<string, ReactNode> = { video: <Film aria-hidden="true" />, image: <ImageIcon aria-hidden="true" />, audio: <Music aria-hidden="true" />, motion: <Sparkles aria-hidden="true" />, text: <Type aria-hidden="true" />, mark: <Stamp aria-hidden="true" />, cover: <EyeOff aria-hidden="true" /> };
+const kindClass = (doc: ProjectDoc, c: Clip) => (c.text ? 'text' : c.motion ? 'motion' : c.cover ? 'cover' : c.slot ? 'slot' : c.sticker || c.shape ? 'mark' : sourceOf(doc, c.source)?.media ?? 'video');
+const KIND_ICON: Record<string, ReactNode> = { video: <Film aria-hidden="true" />, image: <ImageIcon aria-hidden="true" />, audio: <Music aria-hidden="true" />, motion: <Sparkles aria-hidden="true" />, text: <Type aria-hidden="true" />, mark: <Stamp aria-hidden="true" />, cover: <EyeOff aria-hidden="true" />, slot: <SquareDashed aria-hidden="true" /> };
 const TRACK_ICON: Record<TrackKind, ReactNode> = { video: <Film aria-hidden="true" />, graphics: <Sparkles aria-hidden="true" />, text: <Type aria-hidden="true" />, audio: <Music aria-hidden="true" /> };
 
 type Drag = { id: string; mode: 'move' | 'start' | 'end'; x0: number; y0: number; start0: number; len0: number; track0: string; key: string };
