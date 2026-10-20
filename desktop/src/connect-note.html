@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- The note before an outside connection opens in the system browser (Desktop_App_Plan.md 5.1). The
+     sentence is the plan's, verbatim, and tests/pages.test.mjs holds it equal to CONNECT_NOTE. A local
+     page with no bridge: «متابعة في المتصفح» is a plain link to the connection's address, which the
+     main process opens in the browser before closing this window. -->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مركز الاتصال المؤسسي</title>
+<style>
+  :root { color-scheme: light dark; --bg:#f4f6f2; --ink:#203e35; --line:#dfe6e0; --green:#17634b; --green-hover:#114c38; --focus:#b48e45; --soft:#eaf2ea; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#07130e; --ink:#e8f1ea; --line:#1f3a2e; --soft:#132a21; } }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; justify-content: center; gap: 22px; padding: 24px 28px; background: var(--bg); color: var(--ink); font: 16px/1.8 "Segoe UI", Tahoma, Arial, sans-serif; }
+  p { margin: 0; }
+  .actions { display: flex; gap: 10px; }
+  a, button { font: inherit; font-weight: 600; border-radius: 10px; padding: 8px 20px; cursor: pointer; text-decoration: none; }
+  a { color: #ffffff; background: var(--green); }
+  a:hover { background: var(--green-hover); }
+  button { color: var(--ink); background: var(--soft); border: 1px solid var(--line); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <p id="note">يكتمل الربط في المتصفح. سجّل الدخول إلى المركز هناك إن طُلب منك، ثم ارجع إلى التطبيق.</p>
+  <div class="actions">
+    <a id="go" href="#">متابعة في المتصفح</a>
+    <button id="cancel" type="button">إلغاء</button>
+  </div>
+<script>
+  const go = new URLSearchParams(location.search).get('go') || '';
+  const link = document.getElementById('go');
+  if (/^https?:\/\//.test(go)) link.href = go;
+  else link.removeAttribute('href');
+  document.getElementById('cancel').addEventListener('click', () => window.close());
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') window.close();
+  });
+  link.focus();
+</script>
+</body>
+</html>

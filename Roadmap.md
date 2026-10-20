@@ -530,6 +530,10 @@ amended where the interface changes; Arabic strings follow the established terms
 
 **If declined.** Keep Direction A and the token clean-up from 0.3.1.1. Record the decision and reason in `progress.md`; the proposal's interface ideas stay in `Ideas_Backlog.md` (I-021 to I-023). **If adjusted.** Record the requested changes, revise the proposal artifact, and ask again before 0.3.2.
 
+### Requested scope addition, 2026-10-20: the desktop application
+
+- [/] **The desktop application, Windows x64** (`Desktop_App_Plan.md`, accepted by the owner on 2026-10-20 with its section 11.1; `MVP_draft.md` section 63). D0 and D1 built on branch `desktop-app`, a local commit not yet merged; the owner's signed-in walkthrough is pending, then D2 after the studio's third round, then D3 to D8 as the plan orders them.
+
 ---
 
 ## Version 1: Production Foundation

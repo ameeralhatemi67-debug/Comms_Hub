@@ -26,6 +26,10 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The desktop application, D0 and D1, 2026-10-20
+
+The Windows x64 shell of `Desktop_App_Plan.md` is built on branch `desktop-app` (local commits, not merged, not pushed): an unsigned per-user installer, `desktop/dist/release/CommsHub-Setup-0.1.0-x64.exe`, of the application «مركز الاتصال المؤسسي» that opens the live site; its evidence is in `progress.md` and `qa/desktop-shell.json`, and the next action is the owner's signed-in walkthrough on the two pilot laptops, then the merge after the studio's third round, then D2.
+
 ## The studio, second round, 2026-10-20
 
 The owner's notes on the first version are built (`Studio_Build_Plan.md` section 9, `MVP_draft.md` 62.1 to 62.5).

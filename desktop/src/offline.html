@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- The connection screen (Desktop_App_Plan.md 5.1): shown when the site cannot be reached, or when
+     its certificate is not accepted. A local page with no bridge; «إعادة المحاولة» loads the address
+     that failed, and the main process checks it against the list again. The logo is filled in by
+     scripts/build.mjs from public/brand/comms-hub-logo.svg. -->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تعذّر الوصول إلى المركز</title>
+<style>
+  :root { color-scheme: light dark; --bg:#f4f6f2; --surface:#ffffff; --ink:#203e35; --muted:#64766b; --line:#dfe6e0; --green:#17634b; --green-hover:#114c38; --focus:#b48e45; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#07130e; --surface:#0e1f18; --ink:#e8f1ea; --muted:#8fa99b; --line:#1f3a2e; } }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { display: grid; place-items: center; padding: 24px; background: var(--bg); color: var(--ink); font: 16px/1.7 "Segoe UI", Tahoma, Arial, sans-serif; }
+  main { width: min(460px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 32px 28px; text-align: center; }
+  .mark svg { width: 64px; height: 64px; display: block; margin: 0 auto; }
+  h1 { font-size: 1.35rem; margin: 18px 0 8px; }
+  p { margin: 0 0 24px; color: var(--muted); }
+  button { font: inherit; font-weight: 600; color: #ffffff; background: var(--green); border: 0; border-radius: 10px; padding: 10px 28px; cursor: pointer; }
+  button:hover { background: var(--green-hover); }
+  button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="mark" aria-hidden="true"><!-- logo --></div>
+  <h1 id="title">تعذّر الوصول إلى المركز</h1>
+  <p id="body">تحقّق من اتصالك بالإنترنت، ثم أعد المحاولة.</p>
+  <button id="retry" type="button">إعادة المحاولة</button>
+</main>
+<script>
+  const params = new URLSearchParams(location.search);
+  if (params.get('kind') === 'certificate') {
+    document.title = 'تعذّر التحقق من أمان الاتصال';
+    document.getElementById('title').textContent = 'تعذّر التحقق من أمان الاتصال';
+    document.getElementById('body').textContent = 'لم يُفتح المركز لأن شهادة الأمان لم تُقبل. أعد المحاولة لاحقاً.';
+  }
+  const retry = params.get('retry') || '';
+  const button = document.getElementById('retry');
+  button.addEventListener('click', () => {
+    if (/^https?:\/\//.test(retry)) location.href = retry;
+  });
+  button.focus();
+</script>
+</body>
+</html>

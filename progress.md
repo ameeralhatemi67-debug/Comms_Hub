@@ -1157,3 +1157,112 @@ When recording future implementation outcomes, follow this standardized template
   - `Roadmap.md` (a new scope addition at the end of Version 0) and `Status.md` (a new section at the top) have one line each.
   - Each addition is its own new section or paragraph, so the merge with the studio round stays simple.
 - **Baseline.** The three plan files (`Desktop_App_Plan.md`, `Mobile_Apps_Plan.md`, `Desktop_Build_Prompt.md`) were committed on `main` first, as `09757c2`. The commit was owner-authorised and used `git commit --only`, so none of the studio session's files went in. The work went on in a worktree on branch `desktop-app`.
+
+### 2026-10-20: the desktop application, D1: the Windows shell
+
+- **What changed.** `desktop/` holds an Electron application for Windows x64 that opens the live site in its own window (`Desktop_App_Plan.md` sections 5, 8 and 9; `MVP_draft.md` 63). It has its own `package.json` and lockfile, like `bridge/whatsapp/`, and stays outside the site's typecheck and build. `.vercelignore` keeps Vercel from uploading it. The TypeScript source is compiled by esbuild into one main file and one preload file.
+  - **The window.** One window on the persistent profile `persist:comms-hub`. `contextIsolation` and `sandbox` are on, `nodeIntegration` is off (also in frames and workers), there is no `webview` and no native menu bar, and the developer tools exist in a development build only. Size, position and maximised state are remembered, and a second launch brings the open window forward.
+  - **The user agent** is Chromium's own with Electron's tokens taken out and ` CommsHubDesktop/0.1.0` at the end. It stays plain ASCII, because a header cannot carry the Arabic name.
+  - **The address list** is compiled in: the production address alone in a release build, plus `http://127.0.0.1:3000` in a development build. esbuild drops the development address and every development branch from a release build; a test reads the release bundle to prove it.
+  - **One rule for links, forms, redirects and window.open** (`navigation.ts`):
+    - on the list, the address stays; a new window opens as a second application window;
+    - `/api/drive/connect`, `/api/onedrive/connect` and `/api/platforms/connect/*` open in the system browser after the Arabic note;
+    - other http, https and mailto addresses go to the system;
+    - anything else is refused.
+  - **Permissions** (`permissions.ts`): the microphone (sound only), notifications, the clipboard, full screen and file access, to the list only. Everything else is refused. USB, serial and HID devices are never offered, and every device chooser is cancelled.
+  - **Downloads** open the save dialog «حفظ الملف» in Downloads.
+  - **Failed loads.** Any failed load of the page shows the Arabic connection screen (`offline.html`), with its own message when a certificate is not accepted. Certificate errors are never ignored: there is no handler and no verify procedure, and `--ignore-certificate-errors` is refused at start.
+  - **Keys** (`keys.ts`): Ctrl with + - 0, F11, F5 (with Ctrl or Shift, without the cache), and F12 in a development build only.
+  - **The bridge** (`preload.ts`) is `window.commsHubNative = { platform: 'desktop', shell: 'electron', version: '0.1.0', bridge: 1 }`, frozen, and only when the top-level page is on the list. `sender.ts` holds the check every D2 handler must pass (`trustedSender`, `guard()`). D1 registers no handler.
+  - **Refused switches** at start (`switches.ts`): certificate, web-security, sandbox and site-isolation switches in every build, and remote debugging in a release build.
+  - **The release package** (`electron-builder.release.cjs`):
+    - NSIS one-click, x64, per user, with no administrator rights;
+    - Arabic: `ar_SA`, LCID 1025 (electron-builder carries Arabic installer messages);
+    - Start menu and desktop shortcuts named «مركز الاتصال المؤسسي»;
+    - `CommsHub.exe`, with the Arabic name in the file's details (description, product, company);
+    - the icon from `public/brand/comms-hub-logo-512.png`, version 0.1.0;
+    - unsigned and unpublished, with Electron's locales trimmed to Arabic and English;
+    - the application's data removed on uninstall but not on an update (D-11);
+    - fuses flipped at packaging.
+  - **The development package** (`electron-builder.dev.cjs`) is unpacked only and never handed out. It differs from the release package in its compiled list, the developer tools and one fuse: `EnableNodeCliInspectArguments` stays on. Playwright's Electron support attaches through the Node.js inspector (`_electron.launch` waits for "Debugger listening on", read in playwright-core 1.62.1). That is also why the release package cannot be driven by Playwright: part 2 of the check proves it from outside.
+- **Code.**
+  - Sources, in `desktop/src/`: `main.ts`, `preload.ts`, `compiled.ts`, `origins.ts`, `navigation.ts`, `permissions.ts`, `keys.ts`, `window-state.ts`, `sender.ts`, `switches.ts`, `downloads.ts`, `identity.ts`, `globals.d.ts`, `offline.html`, `connect-note.html`.
+  - Build, packaging and docs, in `desktop/`: `scripts/build.mjs`, `electron-builder.release.cjs`, `electron-builder.dev.cjs`, `tsconfig.json`, `README.md`.
+  - Tests: `desktop/tests/` (10 files). The application check: `qa/desktop-shell.cjs` and `qa/desktop-shell.json`. Also `.vercelignore`.
+  - No site source changed.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **52 of 52**, in ten files. They cover the address list, navigation and the connection routes, permissions, and the keys, held apart from every studio shortcut and review-screen key read from the site itself. They also cover the window's place, the sender check, the id, the user agent, refused switches and downloads, the two pages, the compiled bundles, and the packaging with its pins. `npm run typecheck` (TypeScript 7.0.2) is clean.
+  - **Fuses**, read back with `@electron/fuses` 2.1.3 from `dist/release/win-unpacked/CommsHub.exe`:
+    - RunAsNode Disabled;
+    - EnableCookieEncryption Enabled;
+    - EnableNodeOptionsEnvironmentVariable Disabled;
+    - EnableNodeCliInspectArguments Disabled;
+    - EnableEmbeddedAsarIntegrityValidation Enabled;
+    - OnlyLoadAppFromAsar Enabled.
+
+    The three fuses outside the plan stay at Electron's defaults: LoadBrowserProcessSpecificV8Snapshot Disabled, GrantFileProtocolExtraPrivileges Enabled, WasmTrapHandlers Enabled.
+  - **Sizes.** The installer, `desktop/dist/release/CommsHub-Setup-0.1.0-x64.exe`, is 111,513,992 bytes (106.3 MB). Installed, the application takes 336,222,753 bytes (320.6 MB) in 21 files, in `%LOCALAPPDATA%\Programs\sa.commshub.desktop`. The silent installation took 17.1 s.
+  - **`node qa/desktop-shell.cjs`: 80 of 80** (`qa/desktop-shell.json`, run 2026-10-20T15:59Z).
+    - **Part 1, the development package, in Playwright:**
+      - The connection screen appears when nothing answers. It is Arabic and right to left, has no bridge, and «إعادة المحاولة» loads the site once it answers.
+      - The bridge is on the allowed fixture with exactly its four fields, frozen. It is absent in a frame on the same address, in a frame from another port, and on a foreign top-level page.
+      - A foreign link, `window.open` of a foreign address, a mail link and a redirect out of the list go to the stubbed `shell.openExternal`, and the window stays where it was. `ms-settings:` and `file:` open nothing, and no foreign page was ever loaded inside.
+      - A link on the list stays in the window. `window.open` on the list opens an application window with the bridge and the same session.
+      - `/api/drive/connect`, `/api/onedrive/connect` and `/api/platforms/connect/facebook` show the note verbatim, modal over the window and with no bridge. «متابعة في المتصفح» opens the address in the browser, and «إلغاء» opens nothing. No `/api/` address was ever loaded inside.
+      - On the allowed page: microphone granted; camera refused, even together with the microphone; notifications granted; clipboard granted (by query); location, MIDI, persistent storage and the screen wake lock refused. HID offered no device, serial, USB and Bluetooth were cancelled, and full screen was granted. A foreign page got neither the microphone nor notifications.
+      - Window settings, the persistent `persist:comms-hub` profile, no menu, and the user agent `... Chrome/152.0.7977.130 Safari/537.36 CommsHubDesktop/0.1.0`.
+      - Keys: Ctrl+Z, Ctrl+Shift+Z, Ctrl+K and S reach the page, with Ctrl+Z not held back by the application. Ctrl with + - 0 gave 1.1, 0.9 and 1 and were held back from the page. F11 went into and out of full screen. F12 opened the developer tools, and F5 reloaded the page.
+      - A download's dialog in `C:\Users\User\Downloads\comms-hub-check.txt`, titled «حفظ الملف», and the download completed.
+      - A second launch exited 0, the first window got `second-instance` once, and there was still one window.
+      - The place came back exactly: 1100 by 720 at a display scale of 1.25. The maximised state came back too.
+      - The production sign-in page loaded signed out: right to left, «تسجيل الدخول», a password field, and the bridge present. It was never signed in.
+      - A self-signed certificate for the production name was refused with «تعذّر التحقق من أمان الاتصال», and its server received no request.
+    - **Part 2, the release package:**
+      - The six fuses, and the development package differing in the inspector fuse alone.
+      - A silent installation as this user, exit 0. Shortcuts in the Start menu and on the desktop carry the Arabic name. Windows lists «مركز الاتصال المؤسسي» 0.1.0 under the key `dc656aed-13ec-55ab-a2e3-19f784d0109c`.
+      - At run time:
+        - `--remote-debugging-port` exits with code 2, and the port never answered;
+        - `--ignore-certificate-errors` exits with code 2;
+        - `--inspect` opens no port while the application runs;
+        - `ELECTRON_RUN_AS_NODE=1` and `NODE_OPTIONS=--require` ran no code.
+      - The window took the site's title, and its profile, `%APPDATA%\sa.commshub.desktop\Partitions\comms-hub`, holds the production site.
+      - A silent uninstall removed the program, both shortcuts, the Windows entry and `%APPDATA%\sa.commshub.desktop`.
+  - **The site, in the worktree:**
+    - `npm run typecheck` is clean, and `npm test` gives **501 of 501**.
+    - `npm run build` passes (compiled in 21.0 s, 36 static pages) with no environment file: the worktree has only `.env.example`, and no secret was copied into it.
+    - No tracked file changed during the build.
+- **Found on the way, fixed.**
+  - At a display scale of 125%, Windows widened a new window by 4 pixels (1100 to 1104), though the stored place was exact. The main process now sets the stored bounds once more after creating the window, and the check holds the result to the stored value within 1 pixel.
+  - `path.win32.basename` read `a:` in a suggested download name as a drive. The name is now split on slashes.
+  - The release bundle still carried an unreachable developer-tools call behind a constant. It now sits behind the compiled flag and is gone from the bundle.
+  - A first run of the check stopped when a part failed with an application still open. The check now closes every application it started before it writes its result.
+- **How the checks were driven, said plainly.**
+  - **Keys** were sent through `webContents.sendInputEvent`, the browser-side path a real key takes past Electron's `before-input-event`. Playwright's own key presses enter below that point: in a probe the page received Ctrl+Equal and the zoom stayed at 1, so they would prove nothing. Keys sent in the first second after a load reached neither the page nor the application, so the check first waits until a neutral F24 reaches the page.
+  - **Links** after a refused navigation are clicked through the page, and device buttons with the low-level mouse. Playwright's own actions keep waiting for a navigation that never comes.
+  - **No browser opened**: `shell.openExternal` was replaced inside the main process for the check.
+  - **The microphone** was Chromium's fake device.
+  - **The certificate case** pointed the production name at a local server with a self-signed certificate (`--host-resolver-rules`, development package).
+  - **Part 2 used this laptop's real per-user locations.** It installed silently and removed the application again, and would have skipped all of that had an installation or a profile existed. The desktop shortcut was on the owner's desktop for about a minute.
+- **Not verified, said plainly.**
+  - **Nothing was seen signed in.** By rule no agent signs in; the owner's walkthrough below is pending.
+  - **File access** (`showSaveFilePicker`) was not driven, because it opens Windows' own dialog; the rule is unit-tested only. The clipboard was checked by a permission query only, to leave this laptop's clipboard untouched.
+  - **The installer's Arabic pages were not seen**, because the one-click installer ran silently.
+  - **SmartScreen was not seen**: a file built on this laptop carries no download mark. The first installation from a copied file will show it.
+  - **Only this laptop was tried** (Windows 11 Home 10.0.26300, display at 125%). The director's laptop was not, and its Smart App Control is still the owner's to check (plan 11.1).
+  - A real keyboard, the mouse's back button and a second screen were not tried.
+- **Owner walkthrough (pending).**
+  1. Install with `CommsHub-Setup-0.1.0-x64.exe`: "More info", then "Run anyway".
+  2. Sign in, and move between pages.
+  3. Open «استوديو الحركة» and «الاستوديو» as the Admin.
+  4. Record a voice note in «المراسلة» to check the microphone. The application grants it itself, so no browser prompt appears; Windows may ask once whether desktop applications may use the microphone.
+  5. Start a Drive connection from «الإعدادات»: the note appears, then the browser.
+  6. Close and reopen the application; it should still be signed in.
+  7. Uninstall; the data should be gone, so a new installation starts at the sign-in page.
+- **Waits for D2**, after the studio's third round:
+  - `backgroundThrottling: false`;
+  - the bridge methods `info`, `power`, `life` and `notify`, each behind `guard()`;
+  - the tray and native notices;
+  - in the site, `src/lib/native/`, the export panel, `support.ts` and `notices.tsx`;
+  - «معلومات الجهاز»;
+  - the parity check DT-05.
+- **Branch.** `desktop-app`, as local commits: not merged into `main` and not pushed.
