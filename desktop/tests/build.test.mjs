@@ -27,15 +27,21 @@ test('a release build has no way to the local site, no test variables and no dev
   assert.ok(read(dev, 'main.js').includes('127.0.0.1') && read(dev, 'preload.js').includes('127.0.0.1'), 'the development build does open the local site');
 });
 
-test('the bridge carries the four fields of D1 and nothing more', () => {
+test('the bridge carries who the application is and the four groups of version 1, and only messages', () => {
   const preload = read(release, 'preload.js');
-  const exposed = /exposeInMainWorld\("commsHubNative", Object\.freeze\(\{([^}]*)\}\)\)/.exec(preload);
-  assert.ok(exposed, 'the bridge is exposed in one place');
-  assert.deepEqual(exposed[1].split(',').map((field) => field.split(':')[0].trim()), ['platform', 'shell', 'version', 'bridge']);
-  assert.match(exposed[1], /platform: "desktop", shell: "electron", version: VERSION, bridge: 1/);
+  assert.match(preload, /exposeInMainWorld\(\s*"commsHubNative",\s*Object\.freeze\(\{/, 'the bridge is exposed in one place, frozen');
+  assert.match(preload, /platform: "desktop",\s*shell: "electron",\s*version: VERSION,\s*bridge: 1,\s*info:/);
+  for (const group of ['power: Object.freeze', 'life: Object.freeze', 'notify: Object.freeze']) assert.ok(preload.includes(group), group);
   assert.ok(preload.includes(`VERSION = "${version}"`));
   assert.match(preload, /window\.top === window && isAllowed\(window\.location\.href, ALLOWED\)/, 'top-level page on the list only');
-  assert.equal(/ipcRenderer|require\("(?!electron")/.test(preload), false, 'no message channel and no other module in D1');
+  assert.equal(/require\("(?!electron")/.test(preload), false, 'no other module');
+  const uses = [...preload.matchAll(/ipcRenderer\.(\w+)/g)].map((m) => m[1]);
+  assert.deepEqual([...new Set(uses)].sort(), ['invoke', 'on'], 'the page can only ask, and hear a clicked notice');
+  assert.equal(/sendSync|postMessage|exposeInIsolatedWorld/.test(preload), false);
+});
+
+test('the brand mark for the tray and the notices is copied beside the code', () => {
+  assert.ok(fs.statSync(path.join(release, 'icon.png')).size > 1000);
 });
 
 test('the window is isolated and sandboxed, on its own persistent profile, and certificates are never overridden', () => {

@@ -1,6 +1,6 @@
 // Compiles the application with esbuild (Desktop_App_Plan.md 7.1): src/main.ts and src/preload.ts into
-// one file each, with the build's kind and version compiled in, and the two Arabic pages beside them
-// with the brand mark filled in. A release build holds the production address only; esbuild drops the
+// one file each, with the build's kind and version compiled in, the two Arabic pages beside them with the
+// brand mark filled in, and the brand mark as a picture for the tray and the notices (D2). A release build holds the production address only; esbuild drops the
 // development address and every development branch from it.
 // Usage: node scripts/build.mjs release|dev   (writes build/)
 import fs from 'node:fs';
@@ -36,7 +36,8 @@ export async function buildApp(flavour, outdir = path.join(desktop, 'build')) {
     const html = fs.readFileSync(path.join(desktop, 'src', page), 'utf8').replace('<!-- logo -->', logo);
     fs.writeFileSync(path.join(outdir, page), html);
   }
-  return ['main.js', 'preload.js', ...PAGES].map((name) => path.join(outdir, name));
+  fs.copyFileSync(path.join(site, 'public', 'brand', 'comms-hub-logo-120.png'), path.join(outdir, 'icon.png'));
+  return ['main.js', 'preload.js', ...PAGES, 'icon.png'].map((name) => path.join(outdir, name));
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

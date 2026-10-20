@@ -1,9 +1,10 @@
-// The application's main process (Desktop_App_Plan.md sections 5 and 9, phase D1). It opens the live
-// site in one window on its own private profile and keeps a small, locked layer around it: the
+// The application's main process (Desktop_App_Plan.md sections 5 and 9, phases D1 and D2). It opens the
+// live site in one window on its own private profile and keeps a small, locked layer around it: the
 // compiled address list, links and outside connections to the system browser, the permission policy,
 // downloads through the save dialog, one instance, the window's place, the Arabic connection screen
-// and the few keys of 11.1. It holds no secret and decides nothing about people: every page, rule and
-// check stays the website's. The rules themselves are the plain functions beside this file.
+// and the few keys of 11.1. From D2 the bridge's handlers, the tray, native notices and the laptop kept
+// awake during an export live in native.ts. It holds no secret and decides nothing about people: every
+// page, rule and check stays the website's. The rules themselves are the plain functions beside this file.
 import fs from 'node:fs';
 import path from 'node:path';
 import { app, BrowserWindow, Menu, nativeTheme, screen, session, shell } from 'electron';
@@ -12,6 +13,7 @@ import { ALLOWED, DEV, VERSION } from './compiled.ts';
 import { saveDialogFor } from './downloads.ts';
 import { dataFolderName, PRODUCT_NAME, userAgentFor, windowsAppId } from './identity.ts';
 import { keyAction, nextZoom, type KeyAction } from './keys.ts';
+import { startNative, type Native } from './native.ts';
 import { decideNavigation, loadFailure, type Decision } from './navigation.ts';
 import { DEVELOPMENT_ORIGIN, isAllowed, PRODUCTION_ORIGIN } from './origins.ts';
 import { permissionGranted } from './permissions.ts';
@@ -41,6 +43,7 @@ const lock = app.requestSingleInstanceLock();
 if (!lock) app.quit();
 
 let main: BrowserWindow | null = null;
+let native: Native | null = null;
 /** Windows that show the site and may carry the bridge: the main one and those the site opened. */
 const siteWindows = new Set<number>();
 /** The site address to load again from the connection screen, per window. */
@@ -185,10 +188,11 @@ function perform(action: KeyAction, contents: WebContents, owner: BrowserWindow)
   }
 }
 
-function attachSiteRules(owner: BrowserWindow) {
+function attachSiteRules(owner: BrowserWindow, isMain = false) {
   const contents = owner.webContents;
   siteWindows.add(contents.id);
   contents.once('destroyed', () => siteWindows.delete(contents.id));
+  native?.attachWindow(owner, isMain);
 
   contents.on('will-navigate', (event) => {
     const decision = decideNavigation(event.url, ALLOWED);
@@ -274,7 +278,7 @@ function createMainWindow() {
   // stored bounds once more puts it exactly where it was (qa/desktop-shell.cjs measured 1100 to 1104 at 125%).
   if (place.x !== undefined && place.y !== undefined) win.setBounds({ x: place.x, y: place.y, width: place.width, height: place.height });
   main = win;
-  attachSiteRules(win);
+  attachSiteRules(win, true);
   win.on('close', () => writeState(win));
   win.on('closed', () => {
     if (main === win) main = null;
@@ -285,10 +289,7 @@ function createMainWindow() {
 }
 
 app.on('second-instance', () => {
-  if (!main) return;
-  if (main.isMinimized()) main.restore();
-  main.show();
-  main.focus();
+  if (main) native?.reveal(main);
 });
 
 app.on('web-contents-created', (_event, contents) => {
@@ -302,6 +303,7 @@ if (lock && !refused) {
     // No native menu bar (11.1): the site and the studio keep their own menus and keys.
     Menu.setApplicationMenu(null);
     prepareSession();
+    native = startNative({ allowed: ALLOWED, windows: () => siteWindows, mainWindow: () => main, version: VERSION, iconPath: pagePath('icon.png') });
     createMainWindow();
   });
 }

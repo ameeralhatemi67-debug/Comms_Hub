@@ -201,8 +201,12 @@ async function partOne() {
   check('«إعادة المحاولة» loads the site once it answers', win.url() === 'http://127.0.0.1:3000/', win.url());
 
   // 3. The bridge: on the allowed top-level page only.
-  const bridge = await win.evaluate(() => ({ value: window.commsHubNative, keys: Object.keys(window.commsHubNative || {}), frozen: Object.isFrozen(window.commsHubNative) }));
-  check('the bridge exists on an allowed page, with exactly platform, shell, version and bridge', JSON.stringify(bridge.value) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: pkg.version, bridge: 1 }) && bridge.keys.length === 4, bridge);
+  const bridge = await win.evaluate(() => {
+    const n = window.commsHubNative || {};
+    return { fields: { platform: n.platform, shell: n.shell, version: n.version, bridge: n.bridge }, keys: Object.keys(n), frozen: Object.isFrozen(n) };
+  });
+  // From D2 the bridge also carries the methods of version 1; qa/desktop-native.cjs checks them.
+  check('the bridge exists on an allowed page: who the application is, then the groups of version 1', JSON.stringify(bridge.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: pkg.version, bridge: 1 }) && JSON.stringify(bridge.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify']), bridge);
   check('the bridge object cannot be changed by the page', bridge.frozen, String(bridge.frozen));
   await until(() => win.frames().length >= 3, 10000);
   const frameOf = (prefix) => win.frames().find((f) => f.url().startsWith(prefix));

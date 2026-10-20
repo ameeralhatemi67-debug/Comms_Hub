@@ -9,6 +9,7 @@ import { ProjectShell } from './project-shell';
 import { VideoEditor } from './editor';
 import { PhotoEditor } from './photo-editor';
 import { probeSupport, supportLines, type StudioSupport } from '@/lib/studio/support';
+import { DeviceInfoPanel } from '../native/device-info';
 import './studio.css';
 
 /**
@@ -29,6 +30,7 @@ export default function StudioPage({ projectId }: { projectId?: string }) {
       </Title>
       <ProjectList />
       <SupportPanel />
+      <DeviceInfoPanel />
     </div>
   );
 }

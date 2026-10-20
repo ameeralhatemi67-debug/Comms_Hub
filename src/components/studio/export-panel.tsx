@@ -5,7 +5,9 @@
 // folder the person may create in, or as a new version of a file (long press when the file has been in
 // review; refused when it is published). Saving to the library first saves a numbered version of the
 // project and records which version produced which library version (studio_export_record). The export
-// runs in this page, with the screen kept awake; the page asks to stay visible. A video project exports in
+// runs in this page, with the screen kept awake; the page asks to stay visible. In the desktop application
+// (MVP_draft.md 63) the laptop is kept awake instead, the window may be minimised, and a native notice
+// says when the export ends. A video project exports in
 // each shape ticked (MVP_draft.md 62.10), one file each; the platforms it is meant for are checked first;
 // a download may carry the «مسودة» mark (never a library file: what is approved there is what is
 // published); a text track can be written out as SRT captions.
@@ -26,6 +28,8 @@ import { download } from '@/lib/studio/target';
 import { formatBytes, probeSupport } from '@/lib/studio/support';
 import { shortTime } from '@/lib/studio/time';
 import { withKeys } from '@/lib/studio/shortcuts';
+import { keepAwake, markBusy, notifyNative } from '@/lib/native';
+import { useNativeFeature } from '../native/use-native';
 import type { MediaPool } from '@/lib/studio/media';
 import type { Resolver } from '@/lib/studio/compose';
 import type { StudioApi } from '@/lib/studio/persist';
@@ -92,6 +96,7 @@ export function ExportPanel({
   const [level, setLevel] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
   const lastUrls = useRef<string[]>([]);
+  const inApp = useNativeFeature('busy');
 
   // the project's own shape changed: it is the one ticked
   useEffect(() => {
@@ -157,9 +162,11 @@ export function ExportPanel({
     setDone(null);
     const ctl = new AbortController();
     abort.current = ctl;
-    let lock: { release(): Promise<void> } | null = null;
+    let awake: (() => Promise<void>) | null = null;
+    let idle: (() => Promise<void>) | null = null;
     try {
-      lock = (await (navigator as Navigator & { wakeLock?: { request(t: 'screen'): Promise<{ release(): Promise<void> }> } }).wakeLock?.request('screen').catch(() => null)) ?? null;
+      awake = await keepAwake('export');
+      idle = await markBusy('export');
       let rev = revision();
       if (toLibrary) {
         setProgress({ label: 'جارٍ حفظ نسخة من المشروع…', f: 0 });
@@ -228,11 +235,15 @@ export function ExportPanel({
       setLinkNote(linked);
       setDone(results);
       if (toLibrary) onSaved?.();
+      void notifyNative({ title: 'انتهى التصدير', body: results.map((r) => r.name).join('، ') });
     } catch (e) {
       const code = e instanceof ExportError ? e.code : (e as Error).message;
-      setError(EXPORT_ERRORS[code] ?? ((e as Error).message || 'تعذّر التصدير.'));
+      const text = EXPORT_ERRORS[code] ?? ((e as Error).message || 'تعذّر التصدير.');
+      setError(text);
+      if (code !== 'ABORTED') void notifyNative({ title: 'تعذّر التصدير', body: text });
     } finally {
-      await lock?.release().catch(() => undefined);
+      await awake?.();
+      await idle?.();
       abort.current = null;
       setProgress(null);
       setHidden(false);
@@ -407,7 +418,7 @@ export function ExportPanel({
           </label>
         )}
       </fieldset>
-      {what === 'video' && <p className="st-hint">يجري التصدير في هذا المتصفح: أبقِ الصفحة ظاهرة حتى ينتهي.</p>}
+      {what === 'video' && <p className="st-hint">{inApp ? 'يمكنك تصغير النافذة أثناء التصدير.' : 'يجري التصدير في هذا المتصفح: أبقِ الصفحة ظاهرة حتى ينتهي.'}</p>}
       {hidden && <p className="st-hint st-warn" role="alert">الصفحة مخفية الآن، فيتباطأ التصدير. أعدها إلى الواجهة.</p>}
       {progress ? (
         <div className="st-export-run">

@@ -4,27 +4,44 @@
 // about their work, «للعلم» is for information. Each person reads their own only (row
 // level security, administrators included). Reading a notice does not do or approve the
 // work; it opens where the work is. There is no background worker, so the list reloads
-// when the page changes, when the window comes back, and once a minute.
+// when the page changes, when the window comes back, and once a minute. In the desktop
+// application (MVP_draft.md 63) it also reloads while the window is hidden, new «يحتاج قرارك»
+// items become native notices, the taskbar counts those unread, and a clicked notice opens
+// where the work is (src/lib/native/notices.ts).
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { noticeHref, riyadhStamp, tierLabels, type Tier } from '@/lib/work/rules';
+import { native, notifyNative, onNoticeOpen, setBadge } from '@/lib/native';
+import { decisionCount, freshDecisions, noticesFor } from '@/lib/native/notices';
 
 export type Notice = { id: string; tier: Tier; body: string; go: { page?: string; id?: string; tab?: string } | null; created_at: string; read_at: string | null };
 
 export function useNotices() {
   const [list, setList] = useState<Notice[]>([]);
   const path = usePathname();
+  const router = useRouter();
+  const seen = useRef<Set<string> | null>(null);
   const load = useCallback(async () => {
     const { data } = await supabase().from('notifications').select('id,tier,body,go,created_at,read_at').order('created_at', { ascending: false }).limit(100);
-    if (data) setList(data as Notice[]);
+    if (!data) return;
+    const rows = data as Notice[];
+    setList(rows);
+    if (!native().has('notify')) return;
+    const fresh = freshDecisions(seen.current, rows);
+    seen.current = fresh.seen;
+    for (const n of noticesFor(fresh.raise, (x) => noticeHref(x.go))) void notifyNative(n);
+    void setBadge(decisionCount(rows));
   }, []);
   useEffect(() => {
     void load();
   }, [load, path]);
+  useEffect(() => onNoticeOpen((go) => router.push(go)), [router]);
   useEffect(() => {
-    const t = setInterval(() => document.visibilityState === 'visible' && void load(), 60_000);
+    // Inside the desktop application the tray needs the list while the window is hidden.
+    const shown = () => document.visibilityState === 'visible' || native().has('notify');
+    const t = setInterval(() => shown() && void load(), 60_000);
     const again = () => document.visibilityState === 'visible' && void load();
     document.addEventListener('visibilitychange', again);
     return () => {

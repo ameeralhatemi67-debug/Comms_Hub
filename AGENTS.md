@@ -271,7 +271,15 @@ page is on the compiled list, never in frames. Every main-process handler checks
 address through `desktop/src/sender.ts`. There is no sign-in bypass, stub session or stored password in
 it or in its checks. It decides nothing about people: every page, rule and check stays the website's.
 Nothing is scheduled in the site because of it. Its rules are plain functions in `desktop/src/`, held by
-`desktop/tests` and by `qa/desktop-shell.cjs`, which drives the packaged application.
+`desktop/tests` and by `qa/desktop-shell.cjs`, which drives the packaged application. Bridge version 1
+(D2, `MVP_draft.md` 63.1) has `info`, `power`, `life` and `notify`: every handler is registered in
+`desktop/src/native.ts` through `guard()`, and every argument is checked by `desktop/src/bridge.ts` (a
+fixed list of reasons, short plain text, links only to paths on the page's own address); no method takes
+a file path or a command. The site reaches a shell only through `src/lib/native/` (shared with the phone
+applications, `Mobile_Apps_Plan.md` 5.2), and detects each feature before use, so a browser and an older
+application keep working. Only «يحتاج قرارك» items become native notices. What a minimised window really
+does is measured with nothing attached (`qa/desktop-helpers.cjs`, `launchPlain`), because Playwright keeps
+every page visible.
 
 ## Writing markdown from a shell
 

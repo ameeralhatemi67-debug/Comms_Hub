@@ -38,8 +38,18 @@ test('guard() runs the handler for a trusted sender only, and reads the windows 
   assert.deepEqual(calls, [[2, 3]]);
 });
 
-test('D1 registers no main-process handler at all', async () => {
+test('every main-process handler is registered in native.ts, through guard(), one per callable channel', async () => {
   const fs = await import('node:fs');
-  const source = fs.readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8');
-  assert.equal(/ipcMain/.test(source), false);
+  const { CALLABLE, CHANNEL } = await import('../src/ipc.ts');
+  const dir = new URL('../src/', import.meta.url);
+  for (const name of fs.readdirSync(dir).filter((f) => f.endsWith('.ts') && f !== 'native.ts')) {
+    assert.equal(/ipcMain/.test(fs.readFileSync(new URL(name, dir), 'utf8')), false, `${name} uses ipcMain`);
+  }
+  const source = fs.readFileSync(new URL('native.ts', dir), 'utf8');
+  assert.equal((source.match(/ipcMain\.handle\(/g) ?? []).length, 1, 'one registration helper');
+  assert.match(source, /ipcMain\.handle\(channel, guard\(o\.allowed, o\.windows, handler\)\)/, 'and it wraps every handler in guard()');
+  assert.equal(/ipcMain\.(on|once|addListener|handleOnce)\(/.test(source), false, 'no other way in');
+  const handled = [...source.matchAll(/handle\(CHANNEL\.(\w+)/g)].map((m) => CHANNEL[m[1]]);
+  assert.deepEqual([...handled].sort(), [...CALLABLE].sort(), 'each callable channel once');
+  assert.equal(handled.includes(CHANNEL.open), false, 'the page cannot call the click channel');
 });

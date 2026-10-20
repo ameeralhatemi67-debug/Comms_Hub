@@ -2663,11 +2663,11 @@ On «المراجعة» (`/approvals/<id>`), for files of video:
 
 # 63. The desktop application «مركز الاتصال المؤسسي», Windows, 2026-10-20
 
-Owner decisions of 2026-10-20: `Desktop_App_Plan.md`, accepted with the answers of its section 11.1 and recorded in `progress.md`. An application for Windows that opens the live site in its own window. It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a browser remains a full client. This section describes phase D1; the later phases are in the plan.
+Owner decisions of 2026-10-20: `Desktop_App_Plan.md`, accepted with the answers of its section 11.1 and recorded in `progress.md`. An application for Windows that opens the live site in its own window. It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a browser remains a full client. This section describes phase D1; 63.1 adds phase D2, and the later phases are in the plan.
 
 **Who and where.** The pilot is the Admin's and the director's laptops, Windows x64 only for now (Windows arm64 and Mac come later). The application is installed per user, without administrator rights, with a Start menu shortcut and a desktop shortcut. Windows shows its name, «مركز الاتصال المؤسسي», in the Start menu, on the shortcuts, in the taskbar, in the installer and in the file's details. The pilot build is not signed, so Windows SmartScreen asks once: "More info", then "Run anyway" («مزيد من المعلومات» ثم «تشغيل على أي حال» on an Arabic Windows). The application opens `https://comms-hub-three.vercel.app` and nothing else.
 
-**The window.** One window, with no menu bar of its own: the site's header and menus, and the studio's menu bar and keys, are the same as in a browser. Signed out it shows the site's sign-in page, and signing in is the site's own form. The session is kept in the application's own profile on this laptop, encrypted by Windows and apart from every browser. The window opens where it was left: size, position, screen, and whether it was maximised. Starting the application again while it is open brings the open window forward. Closing the window closes the application.
+**The window.** One window, with no menu bar of its own: the site's header and menus, and the studio's menu bar and keys, are the same as in a browser. Signed out it shows the site's sign-in page, and signing in is the site's own form. The session is kept in the application's own profile on this laptop, encrypted by Windows and apart from every browser. The window opens where it was left: size, position, screen, and whether it was maximised. Starting the application again while it is open brings the open window forward. Closing the window closes the application, except during an export or with «إبقاء التطبيق في شريط المهام» on (63.1).
 
 **Keys.** The application takes only these keys:
 - Ctrl with + or - zooms in or out, and Ctrl with 0 returns to 100%.
@@ -2693,18 +2693,35 @@ Every other key belongs to the page. Ctrl+Z, the studio's shortcuts and the revi
 - full screen;
 - saving to a file the person chooses.
 
-The camera, location, USB, serial and HID devices, Bluetooth, MIDI and everything else are refused. That includes keeping the screen awake during an export, which the studio does without; D2 replaces it with the application's own. No other site gets any permission inside the application.
+The camera, location, USB, serial and HID devices, Bluetooth, MIDI and everything else are refused. That includes the browser's own screen wake lock: the application keeps the laptop awake during an export itself (63.1). No other site gets any permission inside the application.
 
 **Downloads.** A download, such as a library file or a studio export to the device, opens Windows' save dialog, titled «حفظ الملف», in the Downloads folder.
 
 **Removing it.** Uninstalling from Windows' settings removes the program, both shortcuts and the application's data on this laptop, the session included. An update (D3) keeps the data.
 
 **Not there yet.**
-- With D2, after the studio's third round:
-  - an export that keeps its speed with the window minimised or covered, with the laptop kept awake and a notice when it ends;
-  - the tray, with native notices and a badge;
-  - «معلومات الجهاز».
 - With D3: automatic updates, signing, and the download page inside the site. Until then a new version is installed by hand over the old one.
 - Later (D4, D5): files from «هذا الجهاز» used where they are, the cache folder, and media tools for heavy or unsupported footage.
 
 **Boundaries.** The application holds no secret, no stored password and no sign-in bypass. It decides nothing about who may see or do what: the site and the database do, as in a browser, and the studio still opens only for the Admin and the director. It approves nothing and publishes nothing, and nothing is scheduled in the site because of it.
+
+## 63.1 The studio at full strength, the tray and notices (D2), 2026-10-20
+
+Phase D2 of `Desktop_App_Plan.md`. Everything here exists only inside the application; in a browser the site behaves as before.
+
+**Exporting.** In the studio's export window the line «يجري التصدير في هذا المتصفح: أبقِ الصفحة ظاهرة حتى ينتهي.» becomes «يمكنك تصغير النافذة أثناء التصدير.». While an export runs, the laptop does not go to sleep (the screen may turn off), and the window is never slowed, minimised or covered. When the export ends and the window is not in front, a Windows notice says «انتهى التصدير» with the file's name; if it fails, «تعذّر التصدير» with the reason. A cancelled export says nothing. «تصدير وإرسال للمراجعة» does the same, ending with «أُرسل العمل للمراجعة» or «تعذّر الإرسال». The studio's home says, under «ما يقدر عليه هذا المتصفح»: «يعمل الاستوديو في تطبيق سطح المكتب (الإصدار …): يستمر التصدير والنافذة مصغّرة، ولا ينام الحاسوب أثناءه.»
+
+**Closing and quitting during an export.** Closing the window while it exports hides it instead, and a notice says «التصدير مستمر»: «أُغلقت النافذة وما يزال التصدير يعمل. يصلك إشعار عند انتهائه، وتفتح النافذة من أيقونة المركز في شريط المهام.» Quitting while it exports asks first: «يجري تصدير الآن.», «إن أنهيت التطبيق يتوقف التصدير ولا يُحفظ الملف.», with «متابعة التصدير» (the default) and «إنهاء وإيقاف التصدير». When the export ends, the window stays where the person put it; a download to the device still opens «حفظ الملف».
+
+**The tray.** While the application runs, its icon is in the notification area at the end of the taskbar. A click opens the window. Its menu has:
+- «فتح مركز الاتصال المؤسسي»;
+- «إبقاء التطبيق في شريط المهام», a tick, off at first (decision D-10). When it is on, closing the window hides it instead of quitting, and the first time a notice says «ما يزال التطبيق يعمل في شريط المهام. تفتحه من أيقونته، وتوقف ذلك من قائمتها.»;
+- «إنهاء».
+
+Hovering over the icon shows «مركز الاتصال المؤسسي», with «: جارٍ التصدير» during an export, and «إشعارات تحتاج قرارك: …» on a second line when decisions wait. The setting stays on this laptop only.
+
+**Notices.** The notifications list keeps reading itself once a minute even while the window is minimised or hidden. Each new «يحتاج قرارك» item becomes a Windows notice titled «يحتاج قرارك» with the item's text, but only when the window is not in front, since the page already shows it. More than three at once become one notice: «إشعارات جديدة تحتاج قرارك: …». «يحتاج انتباهك» and «للعلم» items raise no notice. Clicking a notice brings the window back and opens where the work is, as the drawer does. The items already there when the application opens raise nothing. The taskbar button carries the number of unread «يحتاج قرارك» items, a red disc with the figure (9+ above nine), and the tray icon a red dot; screen readers hear «إشعارات تحتاج قرارك: …». Reading the items clears it. Reading a notice approves nothing.
+
+**«معلومات الجهاز».** On the studio's home, below «ما يقدر عليه هذا المتصفح», and in «مساعدة» of both editors. It lists «يعمل في», «المعالج», «الذاكرة», «المساحة الحرة» (on the disk of the application's data), «بطاقة الرسوميات المستعملة», «بطاقات أخرى في الجهاز» and «ترميز الفيديو بالعتاد» (on the graphics chip, or not). When a laptop has a stronger graphics chip sitting idle, it adds: «لتشغيل التطبيق على بطاقة الرسوميات الأقوى: افتح «الإعدادات» في Windows، ثم «النظام»، ثم «العرض»، ثم «الرسومات»، واختر «مركز الاتصال المؤسسي»، ثم «أداء عالٍ»، ثم أعد تشغيل التطبيق.» In a browser the same panel shows what the browser tells (cores, a rounded memory figure, the chip WebGL names, the encoder) and adds «في تطبيق سطح المكتب تظهر هنا بطاقة الرسوميات المستعملة والمساحة الحرة، ويستمر التصدير والنافذة مصغّرة.» It names no file, folder or person.
+
+**Boundaries, unchanged.** The application still approves nothing and publishes nothing. A notice is only a pointer to the page; the page and the database decide. Nothing new is scheduled in the site: the minute's reading is the page's own, as before, now also while hidden.

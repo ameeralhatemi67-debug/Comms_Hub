@@ -1266,3 +1266,71 @@ When recording future implementation outcomes, follow this standardized template
   - «معلومات الجهاز»;
   - the parity check DT-05.
 - **Branch.** `desktop-app`, as local commits: not merged into `main` and not pushed.
+
+### 2026-10-20: the desktop application, D2: the studio at full strength, the tray and notices
+
+- **The owner's word.** On 2026-10-20 the owner asked for the desktop application to be finished: D2 to D6, on branch `desktop-app`, while the studio's third round is still open on `main` (Phases 11 to 14 remain). D7 and D8 stay gated on hardware and decisions, as the plan says. The download of an LGPL FFmpeg build for D5 was allowed, and D3's bucket is to be a migration file only, not applied. D2 therefore touches studio files (`export-panel.tsx`, `send-review.tsx`, `support.ts`, `studio-page.tsx`, `editor-frame.tsx`) and `notices.tsx` in the worktree only; `main` and the studio session's files there were not touched. Each site change is small and additive, and new code sits in new files, so the merge after the studio round stays simple.
+- **What changed, in the application** (`desktop/`, version 0.2.0; `MVP_draft.md` 63.1):
+  - **Bridge version 1.** `window.commsHubNative` gains `info`, `power` (`keepAwake`, `release`), `life` (`busy`, `idle`) and `notify` (`show`, `badge`, `onOpen`). Each method only sends a message (`src/ipc.ts`). Every handler is registered once, in `src/native.ts`, through `sender.ts`'s `guard()`, and every argument is checked by `src/bridge.ts`: a reason from a fixed list (export, upload), a hold number the window itself took, a whole count up to 9999, and a notice of plain text (title up to 120 characters, text up to 400) whose link must be a path on the asking page's own allowed address. A notice with a bad link is refused whole. No method takes a file path, a command or another address.
+  - **Busy.** While a window is busy, its background throttling is off, so an export keeps its speed minimised or hidden. When it is idle again, throttling is back on, so an idle minimised window costs no more than a browser tab. This turns throttling off only during an export, instead of for the whole window as the plan's D2 line reads; the reason is a laptop's battery, and the effect for an export is the same. Closing a busy window hides it, with a notice «التصدير مستمر»; quitting asks first («يجري تصدير الآن.», «متابعة التصدير» by default). A window's holds and busy state end when it closes, crashes or loads another document (`src/life.ts`).
+  - **Awake.** `keepAwake` starts the system's `prevent-app-suspension` blocker: the laptop does not sleep, the screen may turn off.
+  - **The tray** (`native.ts`, `words.ts`): the icon while the application runs, with «فتح مركز الاتصال المؤسسي», «إبقاء التطبيق في شريط المهام» (off at first, D-10, kept in the profile's `settings.json`) and «إنهاء». Its tooltip names an export and the decisions waiting.
+  - **Notices and the badge.** A native notice is shown only when its window is not in front. A click brings the window back and hands the page the path. Windows has no number badge, so `src/badge.ts` draws one: a red disc with white figures (1 to 9, then 9+) at 16 and 32 pixels, set as the taskbar overlay with a description for screen readers. The tray icon gets a red dot.
+  - **«معلومات الجهاز»'s facts** (`src/device.ts`): version, processor, memory, free disk at the profile, and the graphics chips with the one in use, from `app.getGPUInfo('complete')`. On the owner's laptop it named the NVIDIA GeForce RTX 3050 Laptop GPU as active and the AMD Radeon as idle. Windows' software renderer is not listed as a chip. No path of any kind.
+- **What changed, in the site:**
+  - `src/lib/native/` is new: the native contract shared with the phone applications (`Mobile_Apps_Plan.md` 5.2). `native()` reads a well-formed shell object and detects each feature by its methods, so the D1 application offers none, and a browser is `web`. Helpers: `keepAwake` (the bridge, or the browser's screen wake lock as before), `markBusy`, `notifyNative`, `setBadge`, `onNoticeOpen`, `compareVersions`. `notices.ts` decides what reaches the tray: only new, unread «يحتاج قرارك» items, none on the first read, more than three as one. `device.ts` builds «معلومات الجهاز»'s lines and the guide to the stronger graphics chip.
+  - `export-panel.tsx` and `send-review.tsx`: the laptop kept awake, the window marked busy, and a native notice at the end or on failure (not on cancel). In the application the export line reads «يمكنك تصغير النافذة أثناء التصدير.». In a browser the export panel is unchanged; `send-review.tsx` now also holds the screen awake, as the export panel always did.
+  - `notices.tsx`: inside the application the list keeps reading itself once a minute while hidden, raises native notices, sets the badge, and opens a clicked notice through the site's router. In a browser nothing changes.
+  - `support.ts`: the support report gains `desktop`, and the studio's home says when it runs in the application.
+  - «معلومات الجهاز» (`src/components/native/device-info.tsx`): on the studio's home below «ما يقدر عليه هذا المتصفح», and in «مساعدة» of both editors. The hardware encoder is measured with `VideoEncoder.isConfigSupported` and `prefer-hardware`; in a browser the chip comes from WebGL.
+  - `tests/native.test.mjs` is new and on the test list.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **76 of 76**, in 15 files (new: `bridge`, `life`, `badge`, `device`, `words`). The D1 tests whose expectations D2 changes on purpose were updated: the bridge's shape, every handler through `guard()` in `native.ts` with one registration per callable channel, and the version. `npm run typecheck` is clean.
+  - **The site:** `npm run typecheck` is clean, `npm test` gives **514 of 514** (501 before, plus 13 in `tests/native.test.mjs`), and `npm run build` passes with no environment file (compiled in 4.5 s; every page is rendered per request, only `/_not-found` is prerendered).
+  - **`node qa/desktop-native.cjs`: 37 of 37** (`qa/desktop-native.json`). It drives the development package in three parts:
+    - **Part 1, the bridge:**
+      - its shape, frozen at every level;
+      - `info` names the processor, memory, free disk and the chip in use, with no path;
+      - `keepAwake` starts a real `prevent-app-suspension` blocker and `release` stops it once; another window cannot release it, and loading the page again ends it;
+      - eight kinds of bad request are refused, starting nothing and showing nothing;
+      - busy turns throttling off and idle back on;
+      - closing a busy window hides it, with one notice, and the tray icon brings it back;
+      - quitting during an export asks in Arabic, and the first answer keeps it;
+      - a notice for a window in front is not shown; one for a minimised window is, and its click restores the window and hands the page the path (or moves the page itself when it said nothing);
+      - the badge at 16 and 32 pixels with its description, 9+ above nine, cleared at zero, and the tray's dot and tooltip;
+      - closing quits when nothing runs; with «إبقاء التطبيق في شريط المهام» on, closing hides, says so once, and quitting from the tray asks nothing.
+    - **Part 2, DT-07, the site's real `useNotices`** on a fixture page with a stand-in list (`qa/fixtures/desktop-notices.tsx`, `fake-notices.ts`): the first read raises nothing and the taskbar counts one decision; with the window minimised a new «يحتاج قرارك» item raises a native notice and the count, while an «يحتاج انتباهك» item does not; a click restores the window and opens `/approvals/CH-202` through the router; reading clears the count.
+    - **Part 3, with nothing attached.** Playwright's attachment keeps every page visible and unthrottled. In a probe, a minimised and even a hidden window still said "visible" and kept its timers; Playwright's loader also adds Chromium's `--disable-background-timer-throttling` and two like it. Started plainly and minimised through Windows' own `ShowWindow` (`qa/desktop-helpers.cjs`, `launchPlain`), the application gave:
+      - idle and minimised: hidden, **3** timer ticks in 3 s;
+      - busy and minimised: visible, **30** ticks;
+      - idle again: hidden, **3** ticks;
+      - and the notifications hook, minimised and hidden, read its list again on its own **56 s** after a new decision arrived.
+  - **`node qa/desktop-studio-parity.cjs`: 12 of 12** (`qa/desktop-studio-parity.json`).
+    - **DT-05.** The studio's own checks ran unchanged in Edge and inside the application at the same moment (`qa/desktop-parity-hook.cjs` swaps Playwright's browser for the development package; both results go to `qa/artifacts`, never over `qa/studio-*.json`): `qa/studio-engine.cjs` **41 of 41** in both, `qa/studio-export.cjs` **18 of 18** in both, the same check names. The application ran Electron 44.5.1, Chromium 152.0.7977.130.
+    - **DT-06.** A ten-minute 1080p source made by ffmpeg (testsrc2 and a 440 Hz tone, 306,844,658 bytes) was exported whole at 1080p by the studio's own modules (`qa/fixtures/desktop-long-export.ts`), once in Edge and once in the application:
+      - **in the application,** started plainly with nothing attached and minimised through Windows the whole time, the export completed: **18,000 frames in 158.2 s**, its page reporting "visible" in all 19 progress reports;
+      - **in Edge,** the reference, the same export took **241.5 s**. Edge ran headless, so the two times are not like for like;
+      - **ffprobe reads both files the same:** H.264 High, 1920x1080, yuv420p, 30/1, 18,000 frames, AAC 48 kHz stereo, 600.0 s (572,743,220 and 588,921,876 bytes);
+      - **at 1, 150, 300.5, 450 and 599 s** the application's frame matches Edge's within 1 level of 255, and the source's within 1.
+      - **For contrast,** a one-minute piece, minimised: marked busy, it stayed visible and took 15.8 s. Not marked busy, its page was hidden, and it still took 16.1 s. On this laptop, hiding the window did not slow the encoder itself, which runs on promises and the graphics chip rather than timers. What "busy" changes is visibility, timers and the process's priority. The plan's premise that a hidden export slows was not reproduced here for a one-minute piece, and a hidden ten-minute export without "busy" was not measured. In a browser, tab discarding and long-hidden throttling are a separate matter.
+  - **`node qa/desktop-shell.cjs` (D1's check) against D2: 80 of 80** (`qa/desktop-shell.json`). Its bridge check now expects version 1's groups. The release package 0.2.0: installer **111,527,803 bytes (106.4 MB)**; installed **336,251,542 bytes (320.7 MB), 21 files**, in 12.7 s; fuses as in D1; installed silently on this laptop and removed again (no installation of the application was present).
+  - **The D2 package was proven to be this commit.** D3's first edits had started in the same files before this commit. They were undone, and the bundled `main.js`, `preload.js`, both pages and the icon built from this commit are byte for byte the ones inside the development package that passed the checks above.
+- **Found on the way, fixed.**
+  - A regular expression in `bridge.ts` held real line-separator characters, which end a JavaScript regular expression literal. It now uses escapes.
+  - Python on Windows wrote edited files with CRLF. The repository's `.gitattributes` stores LF, so commits were never affected; the working files were normalised.
+  - The check's command channel handed a command to a long poll left over from a closed application. It now drops a poll whose connection closed.
+  - The check's own wait for a report re-armed itself on every look, so waiters doubled every cycle. During a long export the check's Node process reached its 4 GB heap and stopped, and it had pressed this laptop's memory while it ran. A wait now has one timer and one listener, both removed at its end. Every result above comes from runs after the fix.
+  - In the application, a studio check's navigation could be interrupted by the application's own first page (its connection screen, since nothing answers at its address during the check). The hook now waits for that first page to settle.
+  - The Edge reference of DT-06 first ran in a plain Playwright context, whose storage lives in memory under a small quota: «exceed its storage quota». It now uses a profile on disk, like a person's Edge.
+- **Not verified, said plainly.**
+  - **Nothing was seen signed in.** The real notifications, the studio and the export panel inside the application were driven through fixtures, never the signed-in site.
+  - **No native notice reached the screen.** In the checks they were recorded inside the main process, so nothing appeared on the owner's screen. Windows shows an application's notices only once it is installed with its Start menu shortcut, which the release package has.
+  - **The tray menu was not clicked by a person.** Its items were driven through the main process.
+  - **The export panel's and send-review's own buttons were not pressed in the application.** The same helpers ran in the long-export fixture.
+  - **The graphics-chip guide** was written from Windows 11's settings, not walked on the director's laptop.
+- **Owner walkthrough, added for D2.**
+  1. Export a long video, minimise the window, and wait for «انتهى التصدير».
+  2. Close the window during an export: it goes to the tray. Then quit from the tray during an export: the question appears.
+  3. Turn on «إبقاء التطبيق في شريط المهام», close the window, and reopen it from the tray.
+  4. Have someone send you a work for a decision while the window is minimised: the notice and the taskbar number appear.
+  5. Open «معلومات الجهاز» in the studio: it should name the graphics chip in use.
