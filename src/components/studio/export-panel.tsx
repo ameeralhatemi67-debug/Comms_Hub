@@ -11,7 +11,7 @@
 // published); a text track can be written out as SRT captions.
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Download, Film, Image as ImageIcon, Library, Subtitles, X } from 'lucide-react';
+import { Download, Film, Image as ImageIcon, Library, Send, Subtitles, X } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { RATIOS, US, canvasOf, durationOf, type Micros, type ProjectDoc, type Ratio } from '@/lib/studio/schema';
 import { allShapes, docForShape } from '@/lib/studio/reframe';
@@ -24,6 +24,7 @@ import { hasSound } from '@/lib/studio/audio';
 import { download } from '@/lib/studio/target';
 import { formatBytes, probeSupport } from '@/lib/studio/support';
 import { shortTime } from '@/lib/studio/time';
+import { withKeys } from '@/lib/studio/shortcuts';
 import type { MediaPool } from '@/lib/studio/media';
 import type { Resolver } from '@/lib/studio/compose';
 import type { StudioApi } from '@/lib/studio/persist';
@@ -38,7 +39,7 @@ export const DRAFT_MARK = 'مسودة';
 const shapeName = (r: Ratio) => r.replace(':', 'x');
 
 export function ExportPanel({
-  doc, pool, t, projectId, title, readOnly, canLibrary, api, saveVersion, revision, photo, adjusted, workRef = null, onSaved,
+  doc, pool, t, projectId, title, readOnly, canLibrary, api, saveVersion, revision, photo, adjusted, workRef = null, onSaved, onSend,
 }: {
   doc: ProjectDoc;
   pool: MediaPool | null;
@@ -58,6 +59,8 @@ export function ExportPanel({
   workRef?: string | null;
   /** A file was saved to the library (the review window reads again). */
   onSaved?: () => void;
+  /** Opens «تصدير وإرسال للمراجعة» for the linked work (MVP_draft.md 62.12). */
+  onSend?: () => void;
 }) {
   const [what, setWhat] = useState<'video' | 'still'>(photo ? 'still' : 'video');
   const [short, setShort] = useState<Short>(1080);
@@ -259,6 +262,15 @@ export function ExportPanel({
   return (
     <section className="st-export" aria-label="التصدير">
       <h2>التصدير</h2>
+      {onSend && (
+        <div className="st-export-send">
+          <p className="st-hint">المشروع مرتبط بعمل: يُصدَّر ويُحفظ في المكتبة ويُرسل العمل للمراجعة بخطوة واحدة.</p>
+          <button type="button" className="st-mini" disabled={busy} onClick={onSend} title={withKeys('تصدير وإرسال للمراجعة', 'send-review')}>
+            <Send aria-hidden="true" />
+            تصدير وإرسال للمراجعة
+          </button>
+        </div>
+      )}
       {!photo && (
         <Segmented
           label="ما يُصدَّر"

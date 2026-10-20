@@ -1,18 +1,21 @@
 'use client';
 
 // An open project (MVP_draft.md 62): the bar above the editor (back to the projects, the name, the
-// save state, «حفظ نسخة»), the reading-only banner with who is editing and the take-over by long
-// press, and the offer of a newer draft from this device. The editor itself is chosen by kind.
+// save state, «حفظ نسخة»), the linked work under it with «تصدير وإرسال للمراجعة» (62.12), the
+// reading-only banner with who is editing and the take-over by long press, and the offer of a newer
+// draft from this device. The editor itself is chosen by kind.
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { ArrowRight, CircleAlert, History, Lock, Save } from 'lucide-react';
+import { ArrowRight, CircleAlert, History, Lock, Save, Send } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { KIND_LABELS, type ProjectDoc } from '@/lib/studio/schema';
 import { saveStateText, type StudioApi } from '@/lib/studio/persist';
+import { withKeys } from '@/lib/studio/shortcuts';
 import { Modal } from '../ui';
 import { RenameDialog } from './project-list';
 import { useStudioProject } from './use-project';
+import { WorkBar, useLinkedWork, type LinkedWork } from './work-bar';
 
 export type EditorProps = {
   projectId: string;
@@ -28,6 +31,12 @@ export type EditorProps = {
   onRequestVersion?: () => void;
   /** Opens the renaming of the project (F2). */
   onRequestRename?: () => void;
+  /** The linked work as the bar above shows it, or null (MVP_draft.md 62.12). */
+  linked: LinkedWork | null;
+  /** «تصدير وإرسال للمراجعة» is open: from the work bar, «ملف», the export window or Ctrl+Shift+M. */
+  sending: boolean;
+  /** Opens or closes it; absent while the project is read only or has no work. */
+  onSending?: (open: boolean) => void;
 };
 
 /** A numbered version asked for by the address (`?v=N`, «عرض» in «النسخ»), or null for the project itself. */
@@ -43,6 +52,8 @@ export function ProjectShell({ id, editor }: { id: string; editor: (p: EditorPro
   const [now, setNow] = useState(() => Date.now());
   const [versioning, setVersioning] = useState(false);
   const [renaming, setRenaming] = useState(false);
+  const [sending, setSending] = useState(false);
+  const work = useLinkedWork(id);
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 10_000);
     return () => clearInterval(t);
@@ -80,6 +91,17 @@ export function ProjectShell({ id, editor }: { id: string; editor: (p: EditorPro
           حفظ نسخة
         </button>
       </div>
+      {work.linked && (
+        <WorkBar
+          linked={work.linked}
+          actions={
+            <button type="button" className="st-mini st-send-open" disabled={readOnly} onClick={() => setSending(true)} title={withKeys('تصدير وإرسال للمراجعة', 'send-review')}>
+              <Send aria-hidden="true" />
+              تصدير وإرسال للمراجعة
+            </button>
+          }
+        />
+      )}
       {ro?.code === 'VIEW' && (
         <div className="st-banner st-banner-view" role="note">
           <Lock aria-hidden="true" />
@@ -127,6 +149,9 @@ export function ProjectShell({ id, editor }: { id: string; editor: (p: EditorPro
         api: p.api,
         onRequestVersion: readOnly || state.save.kind === 'saving' ? undefined : () => setVersioning(true),
         onRequestRename: readOnly ? undefined : () => setRenaming(true),
+        linked: work.linked,
+        sending: sending && !readOnly && !!work.linked,
+        onSending: readOnly || !work.linked ? undefined : setSending,
       })}
       {versioning && <VersionDialog onClose={() => setVersioning(false)} onSave={async (note) => {
         const r = await p.saveVersion(note);

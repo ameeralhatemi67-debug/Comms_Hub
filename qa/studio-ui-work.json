@@ -1,0 +1,94 @@
+{
+  "script": "qa/studio-ui.cjs",
+  "run": "2026-10-20T11:38:30.165Z",
+  "checks": [
+    {
+      "name": "work: «فتح في الاستوديو» on a video work for Instagram and YouTube makes a 9:16 video project linked to it, and opens it",
+      "pass": true,
+      "detail": "{\"n\":1,\"id\":\"db13aaff-a43e-41f6-a35b-603a01773416\",\"work\":\"CH-101\",\"kind\":\"video\",\"ratio\":\"9:16\",\"cats\":\"frames,repine\",\"path\":\"/motion/studio/db13aaff-a43e-41f6-a35b-603a01773416\"}"
+    },
+    {
+      "name": "work: the bar above the editor names the work, its status, the current stage's date and the delivery in plain words",
+      "pass": true,
+      "detail": "CH-101 · حملة اليوم الوطنيقيد الإنتاجالمونتاج: بعد يومينالتسليم: بعد 5 أيامتصدير وإرسال للمراجعة"
+    },
+    {
+      "name": "work: the template groups suggested for a video work come first, the first one open",
+      "pass": true,
+      "detail": "إطارات الفيديو, تصاميم ريبين, الأرقام"
+    },
+    {
+      "name": "work: «إدراج نص العمل» puts the work's text on the timeline at its version; a newer text is said, and «تحديث» brings it",
+      "pass": true,
+      "detail": "من نص العمل (الإصدار 1). | تغيّر نص العمل: الإصدار 2 أحدث من الإصدار 1 الذي في المقطع. تحديث | اليوم الوطني: معاً نبني ونحتفل0:05"
+    },
+    {
+      "name": "work: Ctrl+Shift+M saves a numbered version, exports, saves a new library file linked to the work, and sends the work through work_submit with its own accounts",
+      "pass": true,
+      "detail": "{\"status\":\"IN_REVIEW\",\"sub\":[{\"p_work\":\"CH-101\",\"p_note\":\"من الاستوديو: النسخة 2\",\"p_channels\":[\"acc-ig\",\"acc-yt\"],\"p_proposed\":null,\"by\":\"dir@t.test\"}],\"links\":[{\"work\":\"CH-101\",\"asset\":\"d53b9384-4e61-4ef0-91a0-7a26f75673f5\"}],\"exports\":[{\"asset\":\"d53b9384-4e61-4ef0-91a0-7a26f75673f5\",\"version\":1,\"revision\":2,\"shape\":\"9:16\"}]}"
+    },
+    {
+      "name": "work: the result names who decides next (the director's export goes to the assistant), and that nobody approves what they sent",
+      "pass": true,
+      "detail": "حُفظ الإصدار 1 من «حملة اليوم الوطني.mp4» وأُرسل العمل CH-101 للمراجعة. يقرره مساعد مدير الاتصال المؤسسي، ولا يعتمد أحد ما أرسله."
+    },
+    {
+      "name": "work: the bar turns to «قيد المراجعة», and a work in review is not sent again from the studio, with the reason said",
+      "pass": true,
+      "detail": "العمل قيد المراجعة الآن: ينتظر القرار قبل إرسال جديد."
+    },
+    {
+      "name": "work: a request for changes shows in the bar with its note",
+      "pass": true,
+      "detail": "بحاجة إلى تعديل: عدّل البداية. الملاحظات على الوقت في نافذة «المراجعة»."
+    },
+    {
+      "name": "work: notes show under the file version they were written on, with the project version that made it, and as marks on the ruler, open and done",
+      "pass": true,
+      "detail": "الإصدار 1 · من النسخة 2 | no,yes"
+    },
+    {
+      "name": "work: N goes to the next open note, and passes over a done one",
+      "pass": true,
+      "detail": "00:01.15 then 00:01.15"
+    },
+    {
+      "name": "work: an answer and «تم» go through the database functions, and the mark on the ruler turns done",
+      "pass": true,
+      "detail": "[[\"ارفع الشعار قليلاً\",1,false,true],[\"اللون صار أوضح\",1,false,true],[\"رُفع الشعار\",1,true,false]]"
+    },
+    {
+      "name": "work: after changes were asked, a second send makes version 2 of the same file, links nothing new, and sends the work to review again",
+      "pass": true,
+      "detail": "{\"status\":\"IN_REVIEW\",\"subs\":2,\"up\":[2],\"exports\":[{\"asset\":\"d53b9384-4e61-4ef0-91a0-7a26f75673f5\",\"version\":1,\"revision\":2,\"shape\":\"9:16\"},{\"asset\":\"d53b9384-4e61-4ef0-91a0-7a26f75673f5\",\"version\":2,\"revision\":3,\"shape\":\"9:16\"}]}"
+    },
+    {
+      "name": "work: the chapters are shown in the copy before saving, and while the work is in review its copy is not changed (the work cycle refuses)",
+      "pass": true,
+      "detail": "وصف الحلقة على القناة /  / 00:00 البداية / 00:12 الحديث / 00:24 الختام | لا يمكن هذا الإجراء في حالة العمل الآن. | 1"
+    },
+    {
+      "name": "work: on an approved work the chapters become version 2 of its YouTube copy, which sends it back to review, as the work cycle does",
+      "pass": true,
+      "detail": "2 | حُفظت نسخة يوتيوب في العمل، الإصدار 2، وعاد العمل إلى المراجعة لأنه كان معتمداً."
+    },
+    {
+      "name": "work: the work's page then opens its project, and a post for Instagram opens a 1080x1350 photo project whose bar says the delivery is late",
+      "pass": true,
+      "detail": "{\"href\":\"/motion/studio/db13aaff-a43e-41f6-a35b-603a01773416\",\"photo\":{\"kind\":\"photo\",\"w\":1080,\"h\":1350,\"n\":2},\"late\":\"التسليم: متأخر يوماً\"}"
+    },
+    {
+      "name": "work: a photo project sends its picture the same way: a library file, recorded, and the work sent to review with its account",
+      "pass": true,
+      "detail": "{\"status\":\"IN_REVIEW\",\"sub\":[{\"p_work\":\"CH-102\",\"p_note\":\"من الاستوديو: النسخة 2\",\"p_channels\":[\"acc-ig\"],\"p_proposed\":null,\"by\":\"dir@t.test\"}],\"exports\":[{\"asset\":\"602df7f7-4559-48f7-bb66-20cd854bf706\",\"version\":1,\"revision\":2,\"shape\":null}]}"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "total": 17,
+  "passed": 17,
+  "failed": 0
+}

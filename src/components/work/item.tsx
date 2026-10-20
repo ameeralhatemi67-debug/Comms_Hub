@@ -38,7 +38,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { roles } from '@/lib/domain';
-import { StudioOpenLink, useStudioOrigins } from '../studio/work-links';
+import { StudioOpenLink, WorkStudioButton, useStudioOrigins } from '../studio/work-links';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import {
   PLATFORM_ORDER,
@@ -257,6 +257,7 @@ export function WorkItemPage({ id }: { id: string }) {
             <PrioChip p={x.priority} />
             {x.restricted && <RestrictedChip />}
             {isRequest(x) && <span className="wk-chip info">طلب جديد</span>}
+            {!x.closed_at && <WorkStudioButton work={x.id} title={x.title} type={x.type} platforms={x.channels.map((c) => w.accounts.find((a) => a.id === c)?.platform).filter((p): p is NonNullable<typeof p> => !!p)} />}
           </div>
           <h2>{x.title}</h2>
           <div className="wk-facts">

@@ -1,0 +1,57 @@
+{
+  "run": "2026-10-20",
+  "what": "Database rule run for the studio third round, Phase 8 (MVP_draft.md 62.12): what the studio and the work rely on in the database: a project made for a work keeps its suggested template groups and a text clip linked to the work text; sending only from the statuses, accounts and times work_submit allows; the chapters only into a copy of a platform the work publishes to; a writer sees no studio project",
+  "migration": "none (Phase 8 adds no migration; it uses studio_project_for_work, studio_save, work_submit, work_start and work_text_save as they are)",
+  "how": "supabase/tests/studio_worklink_rules.sql through the Supabase tool against comms-hub: one transaction, rolled back, the work-number sequence restored with setval. Two throwaway accounts (@t.test: director, writer) and one throwaway Instagram account, acting through row level security. Afterwards a count of the throwaway rows returned 0 for each.",
+  "result": "TOTAL row: 12 checks, 12 passed",
+  "checks": [
+    {
+      "k": "01 the director opens a video work for themself",
+      "pass": true
+    },
+    {
+      "k": "02 «فتح في الاستوديو»: a project made for it, with its suggested template groups and the work's text on a clip",
+      "pass": true
+    },
+    {
+      "k": "03 the project is linked, and its first version keeps the groups and the text's version",
+      "pass": true
+    },
+    {
+      "k": "04 «تحديث» to the work's newer text autosaves",
+      "pass": true
+    },
+    {
+      "k": "05 the autosave slot holds the newer version",
+      "pass": true
+    },
+    {
+      "k": "06 a draft work is not sent to review (the studio offers sending only from production or changes requested)",
+      "pass": true
+    },
+    {
+      "k": "07 the work starts",
+      "pass": true
+    },
+    {
+      "k": "08 a publishable work with no accounts is not sent (the studio says to choose them on the work's page first)",
+      "pass": true
+    },
+    {
+      "k": "09 a past proposed time is refused (the studio says to change it on the work's page)",
+      "pass": true
+    },
+    {
+      "k": "10 the chapters go only into the copy of a platform the work publishes to",
+      "pass": true
+    },
+    {
+      "k": "11 a writer does not even see that the work has a studio project",
+      "pass": true
+    },
+    {
+      "k": "12 nor can make one for it",
+      "pass": true
+    }
+  ]
+}

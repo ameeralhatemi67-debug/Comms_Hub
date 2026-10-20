@@ -13,6 +13,7 @@ import { STICKERS, STICKER_LABELS, type StickerKey } from '@/lib/studio/schema';
 import { motionCatalog, motionParams, motionDims, settledSec, STICKER_SRC } from '@/lib/studio/motion-adapter';
 import { renderFrame } from '@/lib/motion/renderers.js';
 import type { Category, Graphic } from '@/lib/motion/types';
+import { suggestedFirst } from '@/lib/studio/worklink';
 import { DesktopOnly } from './compact';
 
 export type LibraryItem = { id: string; name: string; kind: 'video' | 'image' | 'audio'; current_version: number; mime_type: string; dims: string | null; duration: string | null };
@@ -88,6 +89,8 @@ export type BinProps = {
   assetsReady: boolean;
   /** A phone: SRT import is kept for the computer. */
   compact?: boolean;
+  /** Template groups shown first, for a project made for a work (MVP_draft.md 62.12, I-023). */
+  suggest?: string[];
 };
 
 function MotionTile({ g, ratio, onPick, ready, disabled }: { g: Graphic; ratio: string; onPick: () => void; ready: boolean; disabled: boolean }) {
@@ -209,17 +212,20 @@ export function MediaPane(p: BinProps) {
   );
 }
 
-export function TemplatesPane(p: Pick<BinProps, 'ratio' | 'readOnly' | 'photo' | 'onMotion' | 'assetsReady'>) {
-  const [group, setGroup] = useState<Category>('repine');
+export function TemplatesPane(p: Pick<BinProps, 'ratio' | 'readOnly' | 'photo' | 'onMotion' | 'assetsReady' | 'suggest'>) {
+  const suggested = new Set((p.suggest ?? []).filter((x) => GROUPS.some((g) => g.id === x)));
+  const order = suggested.size ? suggestedFirst(GROUPS, p.suggest ?? []) : GROUPS;
+  const [group, setGroup] = useState<Category>(suggested.size ? order[0].id : 'repine');
   return (
     <div className="st-bin-body st-pane" aria-label="قوالب الحركة">
       <div className="st-seg-mini" role="group" aria-label="فئة القوالب">
-        {GROUPS.map((g) => (
-          <button key={g.id} type="button" aria-pressed={group === g.id} className={group === g.id ? 'on' : ''} onClick={() => setGroup(g.id)}>
+        {order.map((g) => (
+          <button key={g.id} type="button" aria-pressed={group === g.id} className={group === g.id ? 'on' : ''} onClick={() => setGroup(g.id)} data-suggested={suggested.has(g.id) ? 'yes' : undefined} title={suggested.has(g.id) ? 'مقترحة لنوع العمل' : undefined}>
             {g.label}
           </button>
         ))}
       </div>
+      {suggested.size > 0 && <p className="st-hint">الفئات الأولى مقترحة لنوع العمل المرتبط.</p>}
       {group === 'frames' && !p.photo && <p className="st-hint">إطارات الفيديو تأخذ شكل المشروع، وتظهر مقاطع المسارات التي تحتها من نافذتها.</p>}
       <div className="st-tiles">
         {motionCatalog.filter((g) => g.category === group).map((g) => (

@@ -160,7 +160,10 @@ export type ClipFields = Content & {
   hold?: Micros;
   /** «مثبّت في القالب»: not moved, trimmed, cut or removed until released (MVP_draft.md 62.11). A guide, not a lock. */
   pinned?: boolean;
+  /** A text taken from the linked work: its main text («text») or a platform's copy («v:youtube»), at version n (MVP_draft.md 62.12). */
+  fromWork?: WorkTextRef;
 };
+export type WorkTextRef = { work: string; part: string; n: number };
 export type Clip = ClipFields & { id: string; [extra: string]: unknown };
 /** A clip about to be added: its id is made if missing. */
 export type NewClip = ClipFields & { id?: string };
@@ -193,6 +196,8 @@ export type Layer = Content & {
   at?: Micros;
   /** «مثبّت في القالب» (MVP_draft.md 62.11). */
   pinned?: boolean;
+  /** A text taken from the linked work (MVP_draft.md 62.12). */
+  fromWork?: WorkTextRef;
   hidden?: boolean;
   locked?: boolean;
   transform: Transform;
@@ -212,6 +217,8 @@ export type ProjectDoc = {
   sources: Source[];
   video?: VideoBody;
   photo?: PhotoBody;
+  /** For a project made for a work: the template groups shown first (worklink.ts `suggestFor`). */
+  suggest?: { categories: string[] };
   [extra: string]: unknown;
 };
 

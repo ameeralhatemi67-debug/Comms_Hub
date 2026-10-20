@@ -15,7 +15,7 @@
 // The sound flow (MVP_draft.md 62.9): a waveform, a recording, a speech track, music lowered under it.
 // The export2 flow (MVP_draft.md 62.10): shapes, checks, SRT, the mark, a frame to a photo project.
 // The kit flow (MVP_draft.md 62.11): the brand, a template, a project from it, a pinned title.
-// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time|marks|sound|export2|kit]   (writes qa/studio-ui.json)
+// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time|marks|sound|export2|kit|work]   (writes qa/studio-ui.json)
 const fs = require('node:fs');
 const path = require('node:path');
 const { dependency, launchOptions } = require('./runtime.cjs');
@@ -1007,9 +1007,192 @@ async function phoneFlow(browser, base, errors) {
   await ctx.close();
 }
 
+// The studio and the work (MVP_draft.md 62.12): «فتح في الاستوديو» on a work makes a project linked to it, its
+// shape and first template groups from the work; the work bar; the work's text on the timeline, said to be
+// older when the work's text changes and brought up to date; «تصدير وإرسال للمراجعة» (Ctrl+Shift+M) saves a
+// version, exports, saves to the library, links the file and sends the work through work_submit; a work in
+// review is not sent again; notes by version, marks on the ruler, N to the next open one, an answer and «تم»;
+// changes requested in the bar; a second send is a new version of the same file; the chapters into the YouTube
+// copy (refused while in review, then reopening an approved work); a photo work opens a 4:5 photo project.
+async function workFlow(browser, base, errors) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const tab = await ctx.newPage();
+  tab.on('pageerror', (e) => errors.push(e.message));
+  tab.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  tab.on('response', (q) => q.status() >= 400 && errors.push(`HTTP ${q.status()}: ${q.url()}`));
+  await tab.goto(base + '/motion/studio');
+  await tab.evaluate(() => window.__db.reset());
+  await tab.goto(base + '/work/CH-101');
+  await tab.getByRole('button', { name: 'فتح في الاستوديو' }).click();
+  await tab.locator('.st-editor').waitFor({ timeout: 15000 });
+  const made = await tab.evaluate(() => {
+    const p = window.__db.projects[0];
+    const d = p.revs[0].doc;
+    return { n: window.__db.projects.length, id: p.id, work: p.work_ref, kind: p.kind, ratio: d.video && d.video.ratio, cats: d.suggest && d.suggest.categories.join(','), path: location.pathname };
+  });
+  check('work: «فتح في الاستوديو» on a video work for Instagram and YouTube makes a 9:16 video project linked to it, and opens it', made.n === 1 && made.work === 'CH-101' && made.kind === 'video' && made.ratio === '9:16' && made.cats === 'frames,repine' && made.path === `/motion/studio/${made.id}`, JSON.stringify(made));
+
+  const bar = tab.locator('.st-workbar');
+  await bar.waitFor({ timeout: 8000 });
+  const barText = await bar.textContent();
+  check('work: the bar above the editor names the work, its status, the current stage\'s date and the delivery in plain words', /CH-101/.test(barText) && /حملة اليوم الوطني/.test(barText) && /قيد الإنتاج/.test(barText) && /المونتاج: بعد يومين/.test(barText) && /التسليم: بعد 5 أيام/.test(barText), barText);
+
+  await tab.locator('.st-ws-tab[data-panel="templates"]').click();
+  const groups = await tab.locator('.st-seg-mini[aria-label="فئة القوالب"] button').allTextContents();
+  const openGroup = await tab.locator('.st-seg-mini[aria-label="فئة القوالب"] button.on').textContent();
+  check('work: the template groups suggested for a video work come first, the first one open', groups[0] === 'إطارات الفيديو' && groups[1] === 'تصاميم ريبين' && openGroup === 'إطارات الفيديو', groups.join(', '));
+
+  // the work's text on the timeline, then a newer text on the work's page
+  await tab.locator('.st-ws-tab[data-panel="media"]').click();
+  await tab.locator('.st-lib button', { hasText: 'ألوان الحملة' }).click();
+  await tab.locator('.st-clip[data-kind="video"]').waitFor();
+  await tab.waitForFunction(() => !document.querySelector('.st-clip-load'), null, { timeout: 15000 });
+  await tab.locator('body').press('Home');
+  await tab.locator('.st-ws-tab[data-panel="review"]').click();
+  await tab.getByRole('button', { name: 'إدراج نص العمل (الإصدار 1)' }).click();
+  await tab.locator('.st-clip[data-kind="text"]').waitFor({ timeout: 5000 });
+  await tab.locator('.st-ws-tab[data-panel="inspector"]').click();
+  const from1 = await tab.locator('.st-worktext').textContent();
+  await tab.evaluate(() => {
+    window.__db.newText('CH-101', 'اليوم الوطني: معاً نبني ونحتفل');
+    window.dispatchEvent(new Event('focus'));
+  });
+  await tab.locator('.st-worktext-stale').waitFor({ timeout: 5000 });
+  const stale = await tab.locator('.st-worktext-stale').textContent();
+  await tab.locator('.st-worktext-stale').getByRole('button', { name: 'تحديث' }).click();
+  await tab.locator('.st-worktext', { hasText: 'الإصدار 2' }).waitFor({ timeout: 5000 });
+  const textName = await tab.locator('.st-clip[data-kind="text"]').textContent();
+  check('work: «إدراج نص العمل» puts the work\'s text on the timeline at its version; a newer text is said, and «تحديث» brings it', /من نص العمل \(الإصدار 1\)/.test(from1) && /الإصدار 2 أحدث من الإصدار 1/.test(stale) && /ونحتفل/.test(textName), `${from1} | ${stale} | ${textName}`);
+
+  // «تصدير وإرسال للمراجعة» by its key
+  const dlg = tab.locator('dialog', { hasText: 'تصدير وإرسال للمراجعة' });
+  const send = async () => {
+    const ack = dlg.getByLabel('قرأت التنبيهات أعلاه');
+    if (await ack.count()) await ack.check();
+    await dlg.getByRole('button', { name: 'تصدير وإرسال' }).click();
+    await dlg.locator('.st-done').waitFor({ timeout: 120000 });
+    return dlg.locator('.st-done').textContent();
+  };
+  const state = (pid) => tab.evaluate(async (id) => ({ w: window.__db.works.find((x) => x.id === 'CH-101'), sub: window.__db.submits, links: window.__db.workLinks, p: window.__db.projects.find((x) => x.id === id), up: await (await fetch('/__uploads')).json() }), pid);
+  await tab.locator('body').press('Control+Shift+KeyM');
+  await dlg.waitFor();
+  await dlg.getByText('لا ملف من هذا المشروع في العمل بعد').waitFor({ timeout: 8000 });
+  const done1 = await send();
+  const s1 = await state(made.id);
+  check('work: Ctrl+Shift+M saves a numbered version, exports, saves a new library file linked to the work, and sends the work through work_submit with its own accounts', s1.w.status === 'IN_REVIEW' && s1.sub.length === 1 && /^من الاستوديو: النسخة 2/.test(s1.sub[0].p_note) && JSON.stringify(s1.sub[0].p_channels) === '["acc-ig","acc-yt"]' && s1.links.length === 1 && s1.p.exports.length === 1 && s1.links[0].asset === s1.p.exports[0].asset && s1.up.some((u) => u.id === s1.p.exports[0].asset) && s1.p.exports[0].revision === 2 && s1.p.exports[0].shape === '9:16', JSON.stringify({ status: s1.w.status, sub: s1.sub, links: s1.links, exports: s1.p.exports }));
+  check('work: the result names who decides next (the director\'s export goes to the assistant), and that nobody approves what they sent', /يقرره مساعد مدير الاتصال المؤسسي/.test(done1) && /لا يعتمد أحد ما أرسله/.test(done1), done1);
+  await dlg.getByRole('button', { name: 'تم', exact: true }).click();
+  await tab.locator('.st-workbar .chip', { hasText: 'قيد المراجعة' }).waitFor({ timeout: 5000 });
+  await tab.locator('body').press('Control+Shift+KeyM');
+  await dlg.waitFor();
+  const blockText = await dlg.locator('.warning').first().textContent();
+  const sendOff = await dlg.getByRole('button', { name: 'تصدير وإرسال' }).isDisabled();
+  check('work: the bar turns to «قيد المراجعة», and a work in review is not sent again from the studio, with the reason said', sendOff && /قيد المراجعة الآن/.test(blockText), blockText);
+  await dlg.getByRole('button', { name: 'إلغاء' }).click();
+
+  // the assistant's notes on version 1 (one already done) and a request for changes
+  const asset = s1.p.exports[0].asset;
+  await tab.evaluate((a) => {
+    window.__db.note(a, 'ارفع الشعار قليلاً', 1500, 1);
+    window.__db.note(a, 'اللون صار أوضح', 4000, 1, true);
+    window.__db.decide('CH-101', 'CHANGES_REQUESTED', 'عدّل البداية');
+    window.dispatchEvent(new Event('focus'));
+  }, asset);
+  await tab.locator('.st-workbar-note[data-kind="changes"]').waitFor({ timeout: 5000 });
+  const changes = await tab.locator('.st-workbar-note[data-kind="changes"]').textContent();
+  check('work: a request for changes shows in the bar with its note', /بحاجة إلى تعديل: عدّل البداية/.test(changes), changes);
+  await tab.locator('.st-ws-tab[data-panel="review"]').click();
+  await tab.locator('.st-review-refresh').click();
+  await tab.waitForFunction(() => document.querySelectorAll('.st-notes > li').length === 2, null, { timeout: 8000 });
+  const vlabel = await tab.locator('.st-notes-vlabel').first().textContent();
+  const marks = await tab.evaluate(() => [...document.querySelectorAll('.st-tl-note')].map((b) => b.getAttribute('data-open')).sort().join(','));
+  check('work: notes show under the file version they were written on, with the project version that made it, and as marks on the ruler, open and done', /الإصدار 1/.test(vlabel) && /من النسخة 2/.test(vlabel) && marks === 'no,yes', `${vlabel} | ${marks}`);
+  await tab.locator('body').press('Home');
+  await tab.locator('body').press('n');
+  const atNote = await tab.locator('.st-mon-time').textContent();
+  await tab.locator('body').press('n');
+  const stillAt = await tab.locator('.st-mon-time').textContent();
+  check('work: N goes to the next open note, and passes over a done one', atNote === '00:01.15' && stillAt === atNote, `${atNote} then ${stillAt}`);
+  const openLi = tab.locator('.st-notes > li[data-open="yes"]').first();
+  await openLi.getByRole('button', { name: 'رد' }).click();
+  await tab.getByLabel('الرد').fill('رُفع الشعار');
+  await tab.locator('.st-note-answer').getByRole('button', { name: 'إرسال' }).click();
+  await tab.locator('.st-note-answers li').waitFor({ timeout: 5000 });
+  await tab.locator('.st-notes > li[data-open="yes"]').first().getByRole('button', { name: 'تم', exact: true }).click();
+  await tab.waitForFunction(() => document.querySelectorAll('.st-notes > li[data-open="yes"]').length === 0 && [...document.querySelectorAll('.st-tl-note')].every((b) => b.getAttribute('data-open') === 'no'), null, { timeout: 5000 });
+  const notes = await tab.evaluate(() => window.__db.notes);
+  check('work: an answer and «تم» go through the database functions, and the mark on the ruler turns done', notes.length === 3 && notes.some((x) => x.parent_id && x.body === 'رُفع الشعار' && x.version === 1 && x.author === 'dir@t.test') && notes.filter((x) => !x.parent_id).every((x) => x.done_at), JSON.stringify(notes.map((x) => [x.body, x.version, !!x.parent_id, !!x.done_at])));
+
+  // a second send after the changes: a new version of the same file
+  await tab.locator('body').press('Control+Shift+KeyM');
+  await dlg.waitFor();
+  await dlg.getByText(/يُحفظ إصداراً جديداً من/).waitFor({ timeout: 8000 });
+  await send();
+  const s2 = await state(made.id);
+  check('work: after changes were asked, a second send makes version 2 of the same file, links nothing new, and sends the work to review again', s2.w.status === 'IN_REVIEW' && s2.sub.length === 2 && s2.up.length === s1.up.length && s2.up.find((u) => u.id === asset)?.current_version === 2 && s2.links.length === 1 && s2.p.exports[1].asset === asset && s2.p.exports.length === 2 && s2.p.exports[1].version === 2 && s2.p.exports[1].revision === 3, JSON.stringify({ status: s2.w.status, subs: s2.sub.length, up: s2.up.map((u) => u.current_version), exports: s2.p.exports }));
+  await dlg.getByRole('button', { name: 'تم', exact: true }).click();
+
+  // the chapters into the work's YouTube copy: a 36-second title, three named markers 12 s apart
+  await tab.locator('.st-clip[data-kind="text"]').click();
+  await tab.locator('.st-ws-tab[data-panel="inspector"]').click();
+  const lenBox = tab.getByLabel('المدة، قيمة دقيقة');
+  await lenBox.fill('36');
+  await lenBox.press('Enter');
+  await tab.locator('body').press('Home');
+  for (let i = 0; i < 3; i++) {
+    await tab.locator('body').press('m');
+    for (let k = 0; k < 12; k++) await tab.locator('body').press('Shift+ArrowRight');
+  }
+  await tab.locator('.st-ws-tab[data-panel="markers"]').click();
+  const names = ['البداية', 'الحديث', 'الختام'];
+  for (let i = 0; i < 3; i++) await tab.locator('.st-marker-list li').nth(i).getByLabel('اسم العلامة').fill(names[i]);
+  const add = tab.getByRole('button', { name: 'إضافة الفصول إلى نسخة يوتيوب' });
+  const chapDlg = tab.locator('dialog', { hasText: 'يُحفظ إصدار جديد من نسخة يوتيوب' });
+  await add.click();
+  await chapDlg.waitFor();
+  const shown = await chapDlg.getByLabel('نسخة يوتيوب بعد الإضافة').inputValue();
+  await chapDlg.getByRole('button', { name: 'حفظ إصدار جديد' }).click();
+  await chapDlg.locator('.warning').waitFor({ timeout: 5000 });
+  const refused = await chapDlg.locator('.warning').textContent();
+  const v0 = await tab.evaluate(() => window.__db.variants.filter((x) => x.platform === 'youtube').length);
+  check('work: the chapters are shown in the copy before saving, and while the work is in review its copy is not changed (the work cycle refuses)', shown === 'وصف الحلقة على القناة\n\n00:00 البداية\n00:12 الحديث\n00:24 الختام' && /حالة العمل/.test(refused) && v0 === 1, `${shown.replace(/\n/g, ' / ')} | ${refused} | ${v0}`);
+  await tab.evaluate(() => window.__db.decide('CH-101', 'APPROVED', null));
+  await chapDlg.getByRole('button', { name: 'حفظ إصدار جديد' }).click();
+  await tab.locator('.st-markers [role="status"]', { hasText: 'حُفظت نسخة يوتيوب' }).waitFor({ timeout: 5000 });
+  const savedMsg = await tab.locator('.st-markers [role="status"]', { hasText: 'حُفظت نسخة يوتيوب' }).textContent();
+  const yt = await tab.evaluate(() => window.__db.variants.filter((x) => x.platform === 'youtube').sort((a, b) => b.n - a.n)[0]);
+  await tab.locator('.st-workbar .chip', { hasText: 'قيد المراجعة' }).waitFor({ timeout: 5000 });
+  check('work: on an approved work the chapters become version 2 of its YouTube copy, which sends it back to review, as the work cycle does', yt.n === 2 && yt.body === shown && /الإصدار 2/.test(savedMsg) && /عاد العمل إلى المراجعة/.test(savedMsg), `${yt.n} | ${savedMsg}`);
+  await tab.screenshot({ path: path.join(out, 'work-1440.png') });
+
+  // the work's page now opens that project; a photo work opens a 4:5 photo project
+  await tab.evaluate(() => window.__nav('/work/CH-101'));
+  const again = tab.locator('a.st-work-open');
+  await again.waitFor({ timeout: 5000 });
+  const href = await again.getAttribute('href');
+  await tab.evaluate(() => window.__nav('/work/CH-102'));
+  await tab.getByRole('button', { name: 'فتح في الاستوديو' }).click();
+  await tab.locator('.st-photo').waitFor({ timeout: 15000 });
+  const photo = await tab.evaluate(() => {
+    const p = window.__db.projects.find((x) => x.work_ref === 'CH-102');
+    const d = p.revs[0].doc;
+    return { kind: p.kind, w: d.photo.w, h: d.photo.h, n: window.__db.projects.length };
+  });
+  await tab.locator('.st-workbar').waitFor({ timeout: 8000 });
+  const late = await tab.locator('.st-workbar-date[data-late="yes"]').textContent();
+  check('work: the work\'s page then opens its project, and a post for Instagram opens a 1080x1350 photo project whose bar says the delivery is late', href === `/motion/studio/${made.id}` && photo.kind === 'photo' && photo.w === 1080 && photo.h === 1350 && photo.n === 2 && /التسليم: متأخر يوماً/.test(late), JSON.stringify({ href, photo, late }));
+  await tab.locator('body').press('Control+Shift+KeyM');
+  await dlg.waitFor();
+  await dlg.getByText('لا ملف من هذا المشروع في العمل بعد').waitFor({ timeout: 8000 });
+  await send();
+  const s3 = await tab.evaluate(() => ({ w: window.__db.works.find((x) => x.id === 'CH-102'), sub: window.__db.submits.filter((x) => x.p_work === 'CH-102'), p: window.__db.projects.find((x) => x.work_ref === 'CH-102') }));
+  check('work: a photo project sends its picture the same way: a library file, recorded, and the work sent to review with its account', s3.w.status === 'IN_REVIEW' && s3.sub.length === 1 && JSON.stringify(s3.sub[0].p_channels) === '["acc-ig"]' && s3.p.exports.length === 1 && s3.p.exports[0].shape === null, JSON.stringify({ status: s3.w.status, sub: s3.sub, exports: s3.p.exports }));
+  await ctx.close();
+}
+
 (async () => {
   await build();
-  const { server, base } = await serve(out, (p) => (p.startsWith('/motion/studio') ? page : undefined));
+  const { server, base } = await serve(out, (p) => (p.startsWith('/motion/studio') || p.startsWith('/work/') ? page : undefined));
   // a fake microphone (a tone) and its permission granted, for «تسجيل صوت»
   const browser = await chromium.launch({ ...launchOptions, args: [...(launchOptions.args || []), '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
   const errors = [];
@@ -1024,6 +1207,7 @@ async function phoneFlow(browser, base, errors) {
     if (!only || only === 'sound') await soundFlow(browser, base, errors);
     if (!only || only === 'export2') await export2Flow(browser, base, errors);
     if (!only || only === 'kit') await kitFlow(browser, base, errors);
+    if (!only || only === 'work') await workFlow(browser, base, errors);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));
   } finally {

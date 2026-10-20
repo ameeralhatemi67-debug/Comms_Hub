@@ -2636,6 +2636,7 @@ Owner request of 2026-10-20 (the third round, `Studio_Build_Plan.md` section 10)
 - Reserved places: «مكان محجوز» is a clip of a set length, drawn striped with its description, standing for a picture, video or sound still to come. «إسناد مهمة» on it makes a task for a person (the work, the kind, the person, the due date, and a note with its time, length and size), with the frame attached when wanted. When the task is done the place shows «سُلّمت» and the files added to the work since the task began; «وضعه مكان المحجوز» puts the chosen file there at its exact version.
 - From the title row: «طلب تمديد» for the owner of the current stage, and «تذكير», a private reminder on the calendar.
 - A source marked «لا تملك صلاحية هذا الملف» offers «طلب الوصول», which asks for its folder without showing the folder.
+- Settled while building (2026-10-20): a project made for a work starts at 30 frames a second, 9:16 or 16:9 for video (16:9 only when every platform is YouTube, X or LinkedIn) and 4:5, 16:9 or square for a picture. Sending uses the work's own accounts and proposed time and never changes them, so a publishable work without accounts, or with a proposed time already past, is not sent from the studio: the dialog says to settle it on the work's page first, before anything is exported. The banner of a work that needs changes shows the request; its notes are in «المراجعة», where each one is answered and closed.
 
 ## 62.13 The review screen, 2026-10-20
 

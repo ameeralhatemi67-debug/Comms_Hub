@@ -64,6 +64,8 @@ export type TimelineProps = {
   onTrackRole?: (id: string, role: 'voice' | 'music') => void;
   /** A key diamond of the selected clip dragged from one clip time to another (`key` joins the steps). */
   onMoveKey?: (id: string, from: Micros, to: Micros, key: string) => void;
+  /** Review notes with a time, on the ruler (MVP_draft.md 62.12): open ones stand out, done ones are faint. */
+  notes?: { id: string; t: Micros; open: boolean; label: string }[];
 };
 
 /** A clip's waveform: one bar every two pixels, the loudest moment of its stretch of source. */
@@ -475,6 +477,22 @@ export function Timeline(p: TimelineProps) {
                 onClick={(e) => {
                   e.stopPropagation();
                   p.onSeek(m.t);
+                }}
+              />
+            ))}
+            {(p.notes ?? []).map((n) => (
+              <button
+                key={n.id}
+                type="button"
+                className="st-tl-note"
+                data-open={n.open ? 'yes' : 'no'}
+                style={{ left: px(n.t) }}
+                title={`ملاحظة مراجعة${n.open ? '' : ' (تمت)'} · ${shortTime(n.t)}: ${n.label}`}
+                aria-label={`ملاحظة مراجعة${n.open ? '' : ' تمت'} عند ${shortTime(n.t)}`}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  p.onSeek(n.t);
                 }}
               />
             ))}

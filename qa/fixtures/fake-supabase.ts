@@ -3,13 +3,21 @@
 // the same rules as supabase/migrations/20261019130000_studio_projects.sql: the editing lease, the
 // latest numbered revision as the base of a save, the autosave slot replaced, numbered revisions kept.
 // Those rules themselves are run against the real database in supabase/tests/studio_rules.sql; this
-// only lets the real interface be driven without signing in.
+// only lets the real interface be driven without signing in. For the studio and the work (MVP_draft.md
+// 62.12) it also keeps two works with their stages, decisions, texts and copies, and answers work_submit,
+// work_text_save, media_note_add, media_note_done and studio_project_for_work by the rules of their
+// migrations (the statuses a work may be sent from, a copy only for the work's platforms).
 import { checkDoc } from '../../src/lib/studio/schema.ts';
 
 type Rev = { revision: number; base: number; doc: unknown; saved_by: string; saved_at: string; note: string | null };
 type Project = { id: string; title: string; kind: string; owner: string; created_at: string; updated_at: string; updated_by: string; revision: number; autosaved_at: string | null; work_ref: string | null; archived_at: string | null; lease_holder: string | null; lease_until: number; revs: Rev[]; exports: { asset: string; version: number; revision: number; shape?: string | null }[]; template?: boolean };
 type Brand = { colors: { name: string; hex: string }[]; title_font: string | null; body_font: string | null };
-type Db = { projects: Project[]; files: Record<string, unknown>[]; uploads: number; notes?: Record<string, unknown>[]; workLinks?: { work: string; asset: string }[]; brand?: Brand };
+type Work = { id: string; title: string; type: string; status: string; due: string | null; proposed_at: string | null; sched_at: string | null; channels: string[]; assignee: string | null; closed_at: string | null; updated_at: string };
+type Row = Record<string, unknown>;
+type Db = {
+  projects: Project[]; files: Record<string, unknown>[]; uploads: number; notes?: Record<string, unknown>[]; workLinks?: { work: string; asset: string }[]; brand?: Brand;
+  works?: Work[]; stages?: Row[]; decisions?: Row[]; texts?: Row[]; variants?: Row[]; submits?: Row[];
+};
 
 export const ME = 'dir@t.test';
 const NAMES: Record<string, string> = { 'dir@t.test': 'مدير الاختبار', 'other@t.test': 'زميل آخر' };
@@ -20,6 +28,24 @@ const seedFiles = () => [
   { id: '00000000-0000-4000-8000-0000000000b1', name: 'بطاقة.png', kind: 'image', current_version: 1, mime_type: 'image/png', dims: '400 × 400 px', duration: null, stage: 'draft', approved_version: null, folder_id: 'f1' },
 ];
 
+/** A day from today in Riyadh (UTC+3), as «YYYY-MM-DD». */
+const day = (n: number) => new Date(Date.now() + 3 * 3600_000 + n * 86_400_000).toISOString().slice(0, 10);
+const seedWork = () => ({
+  works: [
+    { id: 'CH-101', title: 'حملة اليوم الوطني', type: 'video', status: 'IN_PRODUCTION', due: day(5), proposed_at: null, sched_at: null, channels: ['acc-ig', 'acc-yt'], assignee: ME, closed_at: null, updated_at: '2026-10-19' },
+    { id: 'CH-102', title: 'بطاقة التهنئة', type: 'post', status: 'IN_PRODUCTION', due: day(-1), proposed_at: null, sched_at: null, channels: ['acc-ig'], assignee: ME, closed_at: null, updated_at: '2026-10-18' },
+  ] as Work[],
+  stages: [
+    { id: 's1', work_id: 'CH-101', pos: 1, name: 'الكتابة', who: ME, due_on: day(-3), started_at: day(-4), done_at: day(-3), gate: false, gate_at: null },
+    { id: 's2', work_id: 'CH-101', pos: 2, name: 'المونتاج', who: ME, due_on: day(2), started_at: day(-3), done_at: null, gate: true, gate_at: null },
+  ] as Row[],
+  decisions: [] as Row[],
+  texts: [{ work_id: 'CH-101', n: 1, body: 'اليوم الوطني: معاً نبني', note: null, author: ME, created_at: new Date().toISOString() }] as Row[],
+  variants: [{ work_id: 'CH-101', platform: 'youtube', n: 1, body: 'وصف الحلقة على القناة', base: 1, author: ME, created_at: new Date().toISOString() }] as Row[],
+  submits: [] as Row[],
+});
+const ACCOUNTS = [{ id: 'acc-ig', platform: 'instagram', label: 'إنستغرام القسم' }, { id: 'acc-yt', platform: 'youtube', label: 'قناة القسم' }];
+
 function load(): Db {
   try {
     const raw = sessionStorage.getItem(KEY);
@@ -27,9 +53,10 @@ function load(): Db {
   } catch {
     // fresh
   }
-  return { projects: [], files: seedFiles(), uploads: 0 };
+  return { projects: [], files: seedFiles(), uploads: 0, ...seedWork() };
 }
 let db = load();
+if (!db.works) Object.assign(db, seedWork());
 const save = () => sessionStorage.setItem(KEY, JSON.stringify(db));
 const now = () => new Date().toISOString();
 const err = (message: string) => ({ data: null, error: { message } });
@@ -39,6 +66,7 @@ let me = ME;
 function project(id: string) {
   return db.projects.find((p) => p.id === id);
 }
+const work = (id: unknown) => db.works!.find((w) => w.id === id);
 
 const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; error: { message: string } | null }> = {
   studio_list: (a) =>
@@ -193,6 +221,69 @@ const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; erro
         })),
     );
   },
+  // the studio and the work (supabase/migrations/20261020150000_studio_connections.sql and the work cycle)
+  studio_project_for_work: (a) => {
+    const w = work(a.p_work);
+    if (!w) return err('WORK_DENIED');
+    const title = String(a.p_title ?? '').trim();
+    if (!title || title.length > 120) return err('TITLE_INVALID');
+    if (checkDoc(a.p_doc, a.p_kind as 'video')) return err('DOC_INVALID');
+    const id = crypto.randomUUID();
+    db.projects.push({ id, title, kind: String(a.p_kind), owner: me, created_at: now(), updated_at: now(), updated_by: me, revision: 1, autosaved_at: null, work_ref: w.id, archived_at: null, lease_holder: me, lease_until: Date.now() + 90_000, revs: [{ revision: 1, base: 0, doc: a.p_doc, saved_by: me, saved_at: now(), note: `للعمل ${w.id}` }], exports: [] });
+    save();
+    return ok(id);
+  },
+  work_submit: (a) => {
+    const w = work(a.p_work);
+    if (!w) return err('NOT_FOUND');
+    if (!['IN_PRODUCTION', 'CHANGES_REQUESTED'].includes(w.status)) return err('STATUS_DENIED');
+    w.status = 'IN_REVIEW';
+    w.updated_at = now();
+    db.submits!.push({ ...a, by: me });
+    save();
+    return ok(null);
+  },
+  work_text_save: (a) => {
+    const w = work(a.p_work);
+    if (!w || w.closed_at) return err('FORBIDDEN');
+    if (!['DRAFT', 'IN_PRODUCTION', 'CHANGES_REQUESTED', 'REJECTED', 'APPROVED', 'SCHEDULED'].includes(w.status)) return err('STATUS_DENIED');
+    const body = String(a.p_body ?? '').trim();
+    if (a.p_target === 'main') {
+      const n = Math.max(0, ...db.texts!.filter((t) => t.work_id === w.id).map((t) => Number(t.n))) + 1;
+      db.texts!.push({ work_id: w.id, n, body, note: a.p_note ?? null, author: me, created_at: now() });
+      save();
+      return ok({ n, reopened: false });
+    }
+    if (!w.channels.some((c) => ACCOUNTS.find((x) => x.id === c)?.platform === a.p_target)) return err('PLATFORM_NOT_CHOSEN');
+    const mine = db.variants!.filter((t) => t.work_id === w.id && t.platform === a.p_target);
+    const last = mine.sort((x, y) => Number(y.n) - Number(x.n))[0];
+    if (last && last.body === body) return err('NO_CHANGE');
+    const n = (last ? Number(last.n) : 0) + 1;
+    db.variants!.push({ work_id: w.id, platform: a.p_target, n, body, base: 1, author: me, created_at: now() });
+    const reopened = ['APPROVED', 'SCHEDULED'].includes(w.status);
+    if (reopened) w.status = 'IN_REVIEW';
+    save();
+    return ok({ n, reopened });
+  },
+  media_note_add: (a) => {
+    const body = String(a.p_body ?? '').trim();
+    if (!body || body.length > 500) return err('NOTE_INVALID');
+    const parent = a.p_parent ? (db.notes ?? []).find((n) => n.id === a.p_parent) : null;
+    if (a.p_parent && (!parent || parent.parent_id)) return err('NOTE_INVALID');
+    const id = crypto.randomUUID();
+    db.notes = [...(db.notes ?? []), { id, asset_id: a.p_asset, author: me, body, timecode: null, created_at: now(), version: parent ? parent.version : (a.p_version ?? null), at_ms: parent ? null : (a.p_at_ms ?? null), area: a.p_area ?? null, parent_id: a.p_parent ?? null, done_at: null, done_by: null }];
+    save();
+    return ok(id);
+  },
+  media_note_done: (a) => {
+    const n = (db.notes ?? []).find((x) => x.id === a.p_note);
+    if (!n) return err('NOT_FOUND');
+    n.done_at = a.p_done ? now() : null;
+    n.done_by = a.p_done ? me : null;
+    save();
+    return ok(null);
+  },
+  my_capabilities: () => ok({ caps: [{ k: 'motion.studio', ok: true, src: 'role', until: null, uses: null, id: null }, { k: 'page.motion', ok: true, src: 'role', until: null, uses: null, id: null }], grants: [] }),
   work_asset_link: (a) => {
     db.workLinks = [...(db.workLinks ?? []), { work: String(a.p_work), asset: String(a.p_asset) }];
     save();
@@ -205,8 +296,15 @@ const rpcs: Record<string, (a: Record<string, unknown>) => { data: unknown; erro
 function query(table: string) {
   let rows: Record<string, unknown>[] =
     table === 'media_files' ? [...db.files]
-    : table === 'works' ? [{ id: 'CH-101', title: 'حملة اليوم الوطني', status: 'IN_PRODUCTION', closed_at: null, updated_at: '2026-10-19' }]
-    : table === 'studio_projects' ? db.projects.map((p) => ({ id: p.id, work_ref: p.work_ref, template: !!p.template }))
+    : table === 'works' ? db.works!.map((w) => ({ ...w }))
+    : table === 'work_stages' ? [...db.stages!]
+    : table === 'work_decisions' ? [...db.decisions!]
+    : table === 'work_texts' ? [...db.texts!].sort((x, y) => Number(y.n) - Number(x.n))
+    : table === 'work_variants' ? [...db.variants!]
+    : table === 'work_assets' ? (db.workLinks ?? []).map((l) => ({ work_id: l.work, asset_id: l.asset }))
+    : table === 'platform_accounts' ? ACCOUNTS.map((x) => ({ ...x }))
+    : table === 'accounts' ? Object.entries(NAMES).map(([email, display_name]) => ({ email, display_name }))
+    : table === 'studio_projects' ? db.projects.map((p) => ({ id: p.id, work_ref: p.work_ref, template: !!p.template, archived_at: p.archived_at, updated_at: p.updated_at }))
     : table === 'studio_brand' ? [db.brand ?? { colors: [], title_font: null, body_font: null }]
     : table === 'media_notes' ? [...(db.notes ?? [])]
     : table === 'studio_exports' ? db.projects.flatMap((p) => p.exports.map((e, i) => ({ project_id: p.id, asset_id: e.asset, version: e.version, revision: e.revision, created_at: String(i).padStart(4, '0') }))).reverse()
@@ -243,7 +341,10 @@ function query(table: string) {
 const client = {
   rpc: async (fn: string, args: Record<string, unknown>) => (rpcs[fn] ? rpcs[fn](args ?? {}) : err(`fixture: no ${fn}`)),
   from: (table: string) => query(table),
-  channel: () => ({ on: () => ({ subscribe: () => ({}) }), subscribe: () => ({}) }),
+  channel: () => {
+    const ch = { on: () => ch, subscribe: () => ch };
+    return ch;
+  },
   removeChannel: () => undefined,
 };
 
@@ -275,12 +376,42 @@ export function supabase() {
   get workLinks() {
     return db.workLinks ?? [];
   },
+  get works() {
+    return db.works;
+  },
+  get submits() {
+    return db.submits;
+  },
+  get variants() {
+    return db.variants;
+  },
+  get notes() {
+    return db.notes ?? [];
+  },
+  /** A review note as the review screen writes it (media_note_add), from the assistant. */
+  note(asset: string, body: string, atMs: number | null, version: number | null, done = false) {
+    db.notes = [...(db.notes ?? []), { id: crypto.randomUUID(), asset_id: asset, author: 'other@t.test', body, timecode: null, created_at: now(), version, at_ms: atMs, area: null, parent_id: null, done_at: done ? now() : null, done_by: done ? 'other@t.test' : null }];
+    save();
+  },
+  /** A decision on a work: «طلب تعديل» with its note, or another status. */
+  decide(id: string, status: string, note: string | null) {
+    const w = work(id)!;
+    w.status = status;
+    if (status === 'CHANGES_REQUESTED') db.decisions!.push({ work_id: id, op: 'changes', note, decided_at: now() });
+    save();
+  },
+  /** The work's text written again on its page: a new version. */
+  newText(id: string, body: string) {
+    const n = Math.max(0, ...db.texts!.filter((t) => t.work_id === id).map((t) => Number(t.n))) + 1;
+    db.texts!.push({ work_id: id, n, body, note: null, author: 'other@t.test', created_at: now() });
+    save();
+  },
   addFile(row: Record<string, unknown>) {
     db.files.unshift(row);
     save();
   },
   reset() {
-    db = { projects: [], files: seedFiles(), uploads: 0 };
+    db = { projects: [], files: seedFiles(), uploads: 0, ...seedWork() };
     save();
   },
 };

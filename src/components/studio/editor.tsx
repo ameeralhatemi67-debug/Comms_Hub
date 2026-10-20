@@ -9,7 +9,7 @@
 // template tab's renderers and files; the fonts are bundled (studio-fonts.ts) and loaded when used.
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind, Bookmark, Mic, ImagePlus, LayoutTemplate } from 'lucide-react';
+import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Send, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind, Bookmark, Mic, ImagePlus, LayoutTemplate } from 'lucide-react';
 import { canOpen } from '@/lib/access';
 import { useAccount } from '@/lib/account-context';
 import { loadAssets } from '@/lib/motion/renderers.js';
@@ -23,7 +23,8 @@ import {
 import { KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAllMotion, keyAt, keyTimes, moveKeyTime, setEaseAt, setKey, tidyKeys, toggleKey, type Ease, type KeyProp } from '@/lib/studio/keys';
 import { clampSpeed, isHold, speedAt } from '@/lib/studio/speed';
 import { newCover } from '@/lib/studio/cover';
-import { addMarker, removeMarker, updateMarker } from '@/lib/studio/markers';
+import { addMarker, chapterIssues, chapters, removeMarker, updateMarker } from '@/lib/studio/markers';
+import { platformLabels } from '@/lib/work/rules';
 import { allShapes, docForShape, reframeFromPlace, setReframe } from '@/lib/studio/reframe';
 import { addLayer } from '@/lib/studio/photo';
 import { sourceTime } from '@/lib/studio/speed';
@@ -43,7 +44,9 @@ import { Modal } from '../ui';
 import { Bin, GraphicsPane, MediaPane, TemplatesPane, type AddDrop, type LibraryItem } from './bin';
 import { CachePanel } from './cache-panel';
 import { PanelTabs, useCompact, type Panel } from './compact';
-import { ReviewPanel, useProjectWork } from './work-links';
+import { ChaptersToWork, ReviewPanel, newerText, useProjectWork, useWorkTexts, type NoteMark, type TextFrom } from './work-links';
+import { SendReviewDialog } from './send-review';
+import { suggestOf } from '@/lib/studio/worklink';
 import { ExportPanel } from './export-panel';
 import { FolderSelect } from './folder-picker';
 import { Inspector, ProjectSettings, writeClipTransform, type KeyActions } from './inspector';
@@ -253,6 +256,8 @@ export function VideoEditor(p: EditorProps) {
   const compact = useCompact();
   const [panel, setPanel] = useState<Panel>('timeline');
   const pw = useProjectWork(p.projectId, p.api);
+  const workTexts = useWorkTexts(pw.workRef);
+  const [noteMarks, setNoteMarks] = useState<NoteMark[]>([]);
   const { brand } = useStudioBrand();
   const template = useTemplateFlag(p.projectId, p.api);
   const frame = useEditorFrame('video');
@@ -360,6 +365,19 @@ export function VideoEditor(p: EditorProps) {
     place(h.get(), { start: w.at ?? at, length: 4 * US, sticker: { key, color }, transform: { x: W * 0.78, y: H * 0.1, scale: 0.6, rotation: 0, opacity: 1 } }, 'إضافة علامة الهوية', w);
   const addCover = (mode: 'blur' | 'blocks', w: Where = {}) =>
     place(h.get(), { start: w.at ?? at, length: 3 * US, cover: newCover(mode, W, H), transform: { x: W / 2, y: H / 2, scale: 1, rotation: 0, opacity: 1 } }, mode === 'blur' ? 'تمويه منطقة' : 'إخفاء بالمربعات', w);
+  /** A text clip from the work's text or a platform's copy, which remembers its version (MVP_draft.md 62.12). */
+  const insertWorkText = (body: string, from: TextFrom) => {
+    if (p.readOnly) return;
+    const style = brandText({ ...defaultText(body), size: 56, weight: 500 }, brand, 'body');
+    place(h.get(), { start: at, length: 5 * US, text: style, fromWork: from, transform: { x: W / 2, y: H * 0.5, scale: 1, rotation: 0, opacity: 1 } }, from.part === 'text' ? 'إدراج نص العمل' : 'إدراج نسخة منصة');
+  };
+  /** The next or previous open review note with a time, from the playhead. */
+  const seekNote = (dir: 1 | -1) => {
+    const open = noteMarks.filter((n) => n.open).map((n) => n.t).sort((a, b) => a - b);
+    const eps = frameUs(fps) / 2;
+    const to = dir > 0 ? open.find((x) => x > at + eps) : [...open].reverse().find((x) => x < at - eps);
+    if (to !== undefined) seek(to);
+  };
   const putMarker = () => {
     if (p.readOnly) return;
     const r = addMarker(h.get(), at);
@@ -620,6 +638,9 @@ export function VideoEditor(p: EditorProps) {
       case 'key-all': keyAll(); break;
       case 'key-prev': seekKey(-1); break;
       case 'key-next': seekKey(1); break;
+      case 'note-next': seekNote(1); break;
+      case 'note-prev': seekNote(-1); break;
+      case 'send-review': p.onSending?.(true); break;
       default:
         if (id.startsWith('window-')) frame.byDigit(Number(id.slice(7)));
         else return false;
@@ -634,7 +655,7 @@ export function VideoEditor(p: EditorProps) {
       const id = matchShortcut(e, 'video');
       if (!id) return;
       // keys typed into a field are the field's, except saving, exporting and leaving it
-      if (typingTarget(target) && !['save-version', 'export', 'full-window'].includes(id)) {
+      if (typingTarget(target) && !['save-version', 'export', 'send-review', 'full-window'].includes(id)) {
         if (id === 'deselect') target?.blur();
         return;
       }
@@ -659,6 +680,7 @@ export function VideoEditor(p: EditorProps) {
     onMark: (k: StickerKey, c: string) => addMark(k, c),
     onCover: (m: 'blur' | 'blocks') => addCover(m),
     assetsReady,
+    suggest: suggestOf(doc),
     compact,
   };
 
@@ -700,9 +722,30 @@ export function VideoEditor(p: EditorProps) {
       onDropAdd={(d) => addDrop(d, null, at)}
     />
   );
-  const exportEl = <ExportPanel doc={doc} pool={pool} t={at} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} workRef={pw.workRef} onSaved={() => setReviewKey((x) => x + 1)} />;
+  const exportEl = <ExportPanel doc={doc} pool={pool} t={at} projectId={p.projectId} title={p.title} readOnly={p.readOnly} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} workRef={pw.workRef} onSaved={() => setReviewKey((x) => x + 1)} onSend={p.onSending ? () => p.onSending?.(true) : undefined} />;
   const cacheEl = <CachePanel cache={cache} inUse={pool ? pool.inUse(doc) : new Set()} onChanged={() => player?.draw()} />;
-  const reviewEl = <ReviewPanel projectId={p.projectId} api={p.api} readOnly={p.readOnly} onSeek={seek} pw={pw} refreshKey={reviewKey} />;
+  const reviewEl = <ReviewPanel projectId={p.projectId} api={p.api} readOnly={p.readOnly} onSeek={seek} pw={pw} refreshKey={reviewKey} revision={p.revision()} onNotes={setNoteMarks} onInsertText={insertWorkText} texts={workTexts} />;
+  const fromWork = sel?.clip.fromWork;
+  const workTextNote = fromWork && fromWork.work === pw.workRef
+    ? { label: fromWork.part === 'text' ? 'نص العمل' : `نسخة ${platformLabels[fromWork.part.replace(/^v:/, '')] ?? fromWork.part}`, n: fromWork.n, newer: newerText(fromWork, workTexts) }
+    : null;
+  const sendEl = p.sending && p.linked && (
+    <SendReviewDialog
+      projectId={p.projectId}
+      title={p.title}
+      doc={doc}
+      pool={pool}
+      api={p.api}
+      saveVersion={p.saveVersion}
+      revision={p.revision}
+      linked={p.linked}
+      canLibrary={canLibrary}
+      onClose={() => {
+        p.onSending?.(false);
+        setReviewKey((x) => x + 1);
+      }}
+    />
+  );
   const projectEl = <ProjectSettings doc={doc} onDoc={(d, label, key) => h.apply(d, label, key ?? null)} readOnly={p.readOnly} cachePanel={cacheEl} />;
   const inspEl = (
     <Inspector
@@ -720,6 +763,7 @@ export function VideoEditor(p: EditorProps) {
       keyActions={keyActions}
       track={sel?.track}
       onTrackSound={(pt) => sel && h.apply(setTrackSound(h.get(), sel.track.id, pt), pt.role ? 'المسار في المزج' : 'خفض الموسيقى تحت الكلام', `track-sound-${sel.track.id}`)}
+      workText={workTextNote}
       actions={{
         split,
         duplicate,
@@ -783,6 +827,7 @@ export function VideoEditor(p: EditorProps) {
       onDropAdd={addDrop}
       onDropEffect={(fx, clipId, where) => (fx.type === 'transition' ? applyTransition(fx.kind, where, clipId) : applyAnim(fx.kind, where === 'start' ? 'in' : 'out', clipId))}
       peaksOf={(id) => pool?.peaks(id) ?? null}
+      notes={noteMarks}
       onTrackRole={(id, role) => h.apply(setTrackSound(h.get(), id, { role }), role === 'voice' ? 'مسار كلام' : 'مسار موسيقى')}
       onMoveKey={(id, from, to, key) => {
         const d = updateClip(h.get(), id, (c) => ({ ...c, keys: moveKeyTime(c.keys, from, to) }));
@@ -866,6 +911,7 @@ export function VideoEditor(p: EditorProps) {
         {panel === 'settings' && (sel ? inspEl : <>{projectEl}<aside className="st-insp">{reviewEl}</aside></>)}
         {panel === 'export' && exportEl}
         {uploadEl}
+        {sendEl}
       </div>
     );
 
@@ -879,6 +925,7 @@ export function VideoEditor(p: EditorProps) {
         { label: 'حفظ نسخة مرقّمة…', icon: <Save aria-hidden="true" />, keys: keysOf('save-version'), disabled: ro || !p.onRequestVersion, onSelect: () => p.onRequestVersion?.() },
         { label: 'إعادة تسمية المشروع…', icon: <Pencil aria-hidden="true" />, keys: keysOf('rename'), disabled: ro || !p.onRequestRename, onSelect: () => p.onRequestRename?.() },
         { label: 'التصدير…', icon: <FileOutput aria-hidden="true" />, keys: keysOf('export'), onSelect: () => run('export') },
+        { label: 'تصدير وإرسال للمراجعة…', icon: <Send aria-hidden="true" />, keys: keysOf('send-review'), disabled: !p.onSending, hint: p.linked ? undefined : 'يحتاج المشروع عملاً مرتبطاً: اربطه من نافذة «المراجعة».', onSelect: () => p.onSending?.(true) },
         { label: 'إطار إلى مشروع صورة', icon: <ImagePlus aria-hidden="true" />, hint: 'مشروع صورة جديد صورته الإطار عند رأس التشغيل، للغلاف والصورة المصغرة.', onSelect: () => void frameToPhoto() },
         { label: template.on ? 'إلغاء كونه قالباً' : 'حفظ قالباً', icon: <LayoutTemplate aria-hidden="true" />, checked: template.on, disabled: ro, hint: 'يظهر القالب في «القوالب» في صفحة الاستوديو، ويُبدأ منه مشروع جديد.', onSelect: async () => { const e = await template.set(!template.on); if (e) setError(e); } },
         { kind: 'sep' },
@@ -974,6 +1021,7 @@ export function VideoEditor(p: EditorProps) {
         onUpdate={(id, pt) => h.apply(updateMarker(h.get(), id, pt), pt.label !== undefined ? 'اسم العلامة' : 'لون العلامة', `marker-${id}-${pt.label !== undefined ? 'label' : 'color'}`)}
         onRemove={(id) => h.apply(removeMarker(h.get(), id), 'حذف علامة')}
         onSeek={seek}
+        extra={pw.workRef ? <ChaptersToWork workRef={pw.workRef} lines={chapters(doc)} ready={!chapterIssues(doc, durationOf(doc)).length} current={workTexts.variants.youtube ?? null} readOnly={p.readOnly} /> : undefined}
       />
     ),
     versions: <VersionsPanel projectId={p.projectId} api={p.api} readOnly={p.readOnly} doc={doc} revision={p.revision} saveVersion={p.saveVersion} onApply={(d, label) => h.apply(d, label)} label={(d, item) => clipLabel(d, item as Clip)} refreshKey={p.revision()} />,
@@ -986,6 +1034,7 @@ export function VideoEditor(p: EditorProps) {
       <EditorFrame frame={frame} menus={menus} panels={panels} full={full} onFull={() => setFull(!full)} chrome={chrome} onChrome={() => setChrome(chrome === 'dark' ? 'light' : 'dark')}>
         {uploadEl}
         {recordEl}
+        {sendEl}
       </EditorFrame>
     </div>
     </SwatchContext.Provider>

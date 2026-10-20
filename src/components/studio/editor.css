@@ -187,7 +187,34 @@
 .st-linkish{border:0;background:transparent;padding:0;min-height:0;color:var(--green-text);text-decoration:underline;font-size:inherit}
 .st-files,.st-notes{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:12.5px}
 .st-files a{color:var(--green-text)}
-.st-notes li{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:start;padding:6px 8px;border:1px solid var(--line);border-radius:7px}
-.st-notes li small{grid-column:2}
+.st-notes>li{display:grid;gap:4px;padding:6px 8px;border:1px solid var(--line);border-radius:7px}
+.st-notes>li[data-open="no"]{opacity:.7}
+.st-notes>li[data-open="no"] .st-note-row span{text-decoration:line-through;text-decoration-color:var(--muted)}
+.st-note-row{display:flex;gap:8px;align-items:start;flex-wrap:wrap}
+.st-note-row span{flex:1 1 140px}
+.st-note-by{color:var(--muted)}
+.st-note-acts{display:flex;gap:12px}
+.st-note-answers{list-style:none;margin:0;padding:0 10px 0 0;border-inline-start:2px solid var(--line);display:grid;gap:3px}
+.st-note-answer{display:flex;gap:6px}
+.st-note-answer input{flex:1;min-width:0;margin:0;padding:4px 7px;min-height:30px}
+.st-notes-file{display:grid;gap:6px}
+.st-notes-version{display:grid;gap:4px}
+.st-notes-vlabel{color:var(--muted)}
+.st-worktexts{display:grid;gap:4px}
+.st-chip{font-size:11px;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+
+/* the linked work above the editor (MVP_draft.md 62.12) */
+.st-workbar{display:grid;gap:4px;padding:6px 12px;border-bottom:1px solid var(--line);background:var(--surface,#fff);font-size:12.5px}
+.st-workbar-row{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.st-workbar-row>svg{width:16px;height:16px;color:var(--muted)}
+.st-workbar-title{font-weight:600;color:inherit}
+.st-workbar-date{display:inline-flex;gap:4px;align-items:center;color:var(--muted)}
+.st-workbar-date svg{width:14px;height:14px}
+.st-workbar-date[data-late="yes"]{color:var(--danger)}
+.st-workbar-acts{margin-inline-start:auto;display:flex;gap:6px;flex-wrap:wrap}
+.st-workbar-note{margin:0;display:flex;gap:6px;align-items:start;color:var(--muted)}
+.st-workbar-note[data-kind="changes"]{color:var(--warning-fg)}
+.st-workbar-note svg{width:15px;height:15px;flex:none;margin-top:2px}
+.st-send p{margin:0}
 .st-tc{min-height:28px;padding:2px 8px;font-variant-numeric:tabular-nums;font-size:12px}
 .st-sub svg{width:14px;height:14px;vertical-align:-2px}

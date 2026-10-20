@@ -9,8 +9,9 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ArrowDown, ArrowUp, Copy, Eye, EyeOff, Lock, Trash2, Unlock, AlignCenter, AlignLeft, AlignRight, ArrowRight, ClipboardPaste, FileOutput, Moon, MousePointer2, Pencil, Redo2, Save, Scissors, Type as TypeIcon, Undo2, XCircle, ChevronsUp, ChevronsDown, MousePointerClick, Pin, LayoutTemplate,
+  ArrowDown, ArrowUp, Copy, Eye, EyeOff, Lock, Trash2, Unlock, AlignCenter, AlignLeft, AlignRight, ArrowRight, ClipboardPaste, FileOutput, Moon, MousePointer2, Pencil, Redo2, Save, Scissors, Type as TypeIcon, Undo2, XCircle, ChevronsUp, ChevronsDown, MousePointerClick, Pin, LayoutTemplate, Send,
 } from 'lucide-react';
+import { platformLabels } from '@/lib/work/rules';
 import { canOpen } from '@/lib/access';
 import { useAccount } from '@/lib/account-context';
 import type { Graphic } from '@/lib/motion/types';
@@ -28,9 +29,11 @@ import { ColorInput, Segmented, Slider, Switch, SwatchContext } from '../motion-
 import { ADD_MIME, Bin, GraphicsPane, MediaPane, TemplatesPane, type AddDrop, type LibraryItem } from './bin';
 import { CachePanel } from './cache-panel';
 import { DesktopOnly, PanelTabs, useCompact, type Panel } from './compact';
-import { ReviewPanel, useProjectWork } from './work-links';
+import { ReviewPanel, newerText, useProjectWork, useWorkTexts, type TextFrom } from './work-links';
+import { SendReviewDialog } from './send-review';
+import { suggestOf } from '@/lib/studio/worklink';
 import { ExportPanel } from './export-panel';
-import { CoverControls, CropControls, MotionControls, TextControls, TransformControls } from './inspector';
+import { CoverControls, CropControls, MotionControls, TextControls, TransformControls, WorkTextLine } from './inspector';
 import { newCover } from '@/lib/studio/cover';
 import { librarySource } from './library';
 import type { EditorProps } from './project-shell';
@@ -95,6 +98,7 @@ export function PhotoEditor(p: EditorProps) {
   const compact = useCompact();
   const [panel, setPanel] = useState<Panel>('timeline');
   const pw = useProjectWork(p.projectId, p.api);
+  const workTexts = useWorkTexts(pw.workRef);
   const frame = useEditorFrame('photo');
   const { brand } = useStudioBrand();
   const template = useTemplateFlag(p.projectId, p.api);
@@ -214,6 +218,11 @@ export function PhotoEditor(p: EditorProps) {
   const addMotion = (g: Graphic, at?: At) => put(h.get(), { motion: { template: g.id, params: {} } }, 'إضافة قالب حركة', at);
   const addText = (kind: 'title' | 'body' | 'caption', at?: At) =>
     put(h.get(), { text: brandText(kind === 'title' ? { ...defaultText('عنوان'), size: Math.round(W / 10), weight: 700, enter: 'none', exit: 'none' } : { ...defaultText('نص'), size: Math.round(W / 18), weight: 500, enter: 'none', exit: 'none' }, brand, kind === 'title' ? 'title' : 'body') }, 'إضافة نص', at);
+  /** A text layer from the work's text or a platform's copy, which remembers its version (MVP_draft.md 62.12). */
+  const insertWorkText = (body: string, from: TextFrom) => {
+    if (p.readOnly) return;
+    put(h.get(), { text: brandText({ ...defaultText(body), size: Math.round(W / 22), weight: 500, enter: 'none', exit: 'none' }, brand, 'body'), fromWork: from }, from.part === 'text' ? 'إدراج نص العمل' : 'إدراج نسخة منصة');
+  };
   const addMark = (key: StickerKey, color: string, at?: At) => put(h.get(), { sticker: { key, color }, transform: { x: at?.x ?? W * 0.78, y: at?.y ?? H * 0.12, scale: 0.6, rotation: 0, opacity: 1 } }, 'إضافة علامة الهوية');
   const addShape = (type: Shape['type'], at?: At) =>
     put(h.get(), { shape: { type, w: type === 'line' ? W * 0.5 : W * 0.4, h: type === 'line' ? 8 : W * 0.25, fill: type === 'line' ? null : '#17634b', stroke: type === 'line' ? '#c9ac70' : null, strokeWidth: type === 'line' ? 8 : 0, radius: 24 } }, 'إضافة شكل', at);
@@ -374,6 +383,7 @@ export function PhotoEditor(p: EditorProps) {
       case 'shortcuts': frame.setKeys(true); break;
       case 'save-version': p.onRequestVersion?.(); break;
       case 'export': frame.ws.open('export'); frame.setFocused('export'); break;
+      case 'send-review': p.onSending?.(true); break;
       case 'rename': p.onRequestRename?.(); break;
       default:
         if (id.startsWith('window-')) frame.byDigit(Number(id.slice(7)));
@@ -388,7 +398,7 @@ export function PhotoEditor(p: EditorProps) {
       if (target?.closest?.('dialog')) return;
       const id = matchShortcut(e, 'photo');
       if (!id) return;
-      if (typingTarget(target) && !['save-version', 'export', 'full-window'].includes(id)) {
+      if (typingTarget(target) && !['save-version', 'export', 'send-review', 'full-window'].includes(id)) {
         if (id === 'deselect') target?.blur();
         return;
       }
@@ -417,6 +427,7 @@ export function PhotoEditor(p: EditorProps) {
     onShape: (t: Shape['type']) => addShape(t),
     onCover: (m: 'blur' | 'blocks') => addCover(m),
     assetsReady,
+    suggest: suggestOf(doc),
     compact,
   };
   const stageEl = (
@@ -514,8 +525,31 @@ export function PhotoEditor(p: EditorProps) {
       )}
     </section>
   );
-  const exportEl = <ExportPanel doc={doc} pool={pool} t={0} projectId={p.projectId} title={p.title} readOnly={ro} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} photo adjusted={resolver.adjusted} workRef={pw.workRef} onSaved={() => setReviewKey((x) => x + 1)} />;
-  const reviewEl = <ReviewPanel projectId={p.projectId} api={p.api} readOnly={ro} pw={pw} refreshKey={reviewKey} />;
+  const exportEl = <ExportPanel doc={doc} pool={pool} t={0} projectId={p.projectId} title={p.title} readOnly={ro} canLibrary={canLibrary} api={p.api} saveVersion={p.saveVersion} revision={p.revision} photo adjusted={resolver.adjusted} workRef={pw.workRef} onSaved={() => setReviewKey((x) => x + 1)} onSend={p.onSending ? () => p.onSending?.(true) : undefined} />;
+  const reviewEl = <ReviewPanel projectId={p.projectId} api={p.api} readOnly={ro} pw={pw} refreshKey={reviewKey} revision={p.revision()} onInsertText={insertWorkText} texts={workTexts} />;
+  const fromWork = sel?.fromWork;
+  const workTextNote = fromWork && fromWork.work === pw.workRef
+    ? { label: fromWork.part === 'text' ? 'نص العمل' : `نسخة ${platformLabels[fromWork.part.replace(/^v:/, '')] ?? fromWork.part}`, n: fromWork.n, newer: newerText(fromWork, workTexts) }
+    : null;
+  const sendEl = p.sending && p.linked && (
+    <SendReviewDialog
+      projectId={p.projectId}
+      title={p.title}
+      doc={doc}
+      pool={pool}
+      api={p.api}
+      saveVersion={p.saveVersion}
+      revision={p.revision}
+      linked={p.linked}
+      canLibrary={canLibrary}
+      photo
+      adjusted={resolver.adjusted}
+      onClose={() => {
+        p.onSending?.(false);
+        setReviewKey((x) => x + 1);
+      }}
+    />
+  );
   const cacheEl = <CachePanel cache={cache} inUse={pool ? pool.inUse(doc) : new Set()} onChanged={() => undefined} />;
   const projectEl = (
     <aside className="st-insp st-project-pane" aria-label="الصورة">
@@ -574,6 +608,7 @@ export function PhotoEditor(p: EditorProps) {
             <details className="st-sec" open>
               <summary>النص</summary>
               <div className="st-sec-body">
+                {workTextNote && <WorkTextLine note={workTextNote} readOnly={ro || !!sel.locked} onUpdate={(n) => patch((l) => ({ ...l, text: { ...l.text!, content: n.body }, fromWork: { ...l.fromWork!, n: n.n } }), 'تحديث نص العمل')} />}
                 <TextControls style={sel.text} timed={false} disabled={ro || !!sel.locked} onChange={(s, l, k2) => patch({ text: s }, l, k2)} />
               </div>
             </details>
@@ -698,6 +733,7 @@ export function PhotoEditor(p: EditorProps) {
         {panel === 'settings' && (sel ? inspEl : <>{projectEl}<aside className="st-insp">{reviewEl}</aside></>)}
         {panel === 'export' && exportEl}
         {uploadEl}
+        {sendEl}
       </div>
     );
 
@@ -709,6 +745,7 @@ export function PhotoEditor(p: EditorProps) {
         { label: 'حفظ نسخة مرقّمة…', icon: <Save aria-hidden="true" />, keys: keysOf('save-version'), disabled: ro || !p.onRequestVersion, onSelect: () => p.onRequestVersion?.() },
         { label: 'إعادة تسمية المشروع…', icon: <Pencil aria-hidden="true" />, keys: keysOf('rename'), disabled: ro || !p.onRequestRename, onSelect: () => p.onRequestRename?.() },
         { label: 'التصدير…', icon: <FileOutput aria-hidden="true" />, keys: keysOf('export'), onSelect: () => run('export') },
+        { label: 'تصدير وإرسال للمراجعة…', icon: <Send aria-hidden="true" />, keys: keysOf('send-review'), disabled: !p.onSending, hint: p.linked ? undefined : 'يحتاج المشروع عملاً مرتبطاً: اربطه من نافذة «المراجعة».', onSelect: () => p.onSending?.(true) },
         { label: template.on ? 'إلغاء كونه قالباً' : 'حفظ قالباً', icon: <LayoutTemplate aria-hidden="true" />, checked: template.on, disabled: ro, hint: 'يظهر القالب في «القوالب» في صفحة الاستوديو، ويُبدأ منه مشروع جديد.', onSelect: async () => { const e = await template.set(!template.on); if (e) setError(e); } },
         { kind: 'sep' },
         { label: 'العودة إلى المشاريع', icon: <ArrowRight aria-hidden="true" />, onSelect: () => router.push('/motion/studio') },
@@ -780,6 +817,7 @@ export function PhotoEditor(p: EditorProps) {
         {errorEl}
         <EditorFrame frame={frame} menus={menus} panels={panels} full={full} onFull={() => setFull(!full)} chrome={chrome} onChrome={() => setChrome(chrome === 'dark' ? 'light' : 'dark')}>
           {uploadEl}
+          {sendEl}
         </EditorFrame>
       </div>
     </SwatchContext.Provider>

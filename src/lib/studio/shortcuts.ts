@@ -45,6 +45,8 @@ export const SHORTCUTS: Shortcut[] = [
   { id: 'marker', combos: ['KeyM'], label: 'علامة عند رأس التشغيل', group: 'التحرير', scopes: video },
   { id: 'key-prev', combos: ['BracketLeft'], label: 'المفتاح السابق', group: 'التشغيل', scopes: video },
   { id: 'key-next', combos: ['BracketRight'], label: 'المفتاح التالي', group: 'التشغيل', scopes: video },
+  { id: 'note-next', combos: ['KeyN'], label: 'ملاحظة المراجعة المفتوحة التالية', group: 'التشغيل', scopes: video },
+  { id: 'note-prev', combos: ['Shift+KeyN'], label: 'ملاحظة المراجعة المفتوحة السابقة', group: 'التشغيل', scopes: video },
   { id: 'nudge-left', combos: ['ArrowLeft'], label: 'تحريك بكسل يساراً', group: 'التحرير', scopes: photo },
   { id: 'nudge-right', combos: ['ArrowRight'], label: 'تحريك بكسل يميناً', group: 'التحرير', scopes: photo },
   { id: 'nudge-up', combos: ['ArrowUp'], label: 'تحريك بكسل إلى الأعلى', group: 'التحرير', scopes: photo },
@@ -75,6 +77,7 @@ export const SHORTCUTS: Shortcut[] = [
   // file
   { id: 'save-version', combos: ['Ctrl+KeyS'], label: 'حفظ نسخة مرقّمة', group: 'الملف', scopes: both },
   { id: 'export', combos: ['Ctrl+KeyM'], label: 'نافذة التصدير', group: 'الملف', scopes: both },
+  { id: 'send-review', combos: ['Ctrl+Shift+KeyM'], label: 'تصدير وإرسال للمراجعة', group: 'الملف', scopes: both },
   { id: 'rename', combos: ['F2'], label: 'إعادة تسمية المشروع', group: 'الملف', scopes: both },
 ];
 

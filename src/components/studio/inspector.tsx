@@ -168,6 +168,22 @@ export function CoverControls({ cover, onChange, disabled, W, H }: { cover: Cove
 
 const ALIGN_LABELS = { start: 'بداية السطر', center: 'وسط', end: 'نهاية السطر' } as const;
 
+export type WorkTextNote = { label: string; n: number; newer: { n: number; body: string } | null };
+
+/** «من نص العمل»: the version a text was taken at, and «تغيّر نص العمل» with «تحديث» when the work has a newer one. */
+export function WorkTextLine({ note, readOnly, onUpdate }: { note: WorkTextNote; readOnly: boolean; onUpdate: (n: { n: number; body: string }) => void }) {
+  return note.newer ? (
+    <div className="st-hint st-warn st-worktext-stale" role="note">
+      تغيّر {note.label}: الإصدار {note.newer.n} أحدث من الإصدار {note.n} الذي في المقطع.{' '}
+      <button type="button" className="st-linkish" disabled={readOnly} onClick={() => onUpdate(note.newer!)}>
+        تحديث
+      </button>
+    </div>
+  ) : (
+    <p className="st-hint st-worktext">من {note.label} (الإصدار {note.n}).</p>
+  );
+}
+
 /** A text's content and style. A timed text's entry and exit are the clip's («الدخول والخروج»). */
 export function TextControls({ style, onChange, disabled }: { style: TextStyle; onChange: (s: TextStyle, label: string, key: string) => void; disabled: boolean; timed?: boolean }) {
   const set = <K extends keyof TextStyle>(k: K, v: TextStyle[K], label = 'تنسيق النص') => onChange({ ...style, [k]: v }, label, `text-${String(k)}`);
@@ -356,7 +372,7 @@ export type KeyActions = {
 };
 
 export function Inspector({
-  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, onLength, compact = false, t = 0, keyActions, track, onTrackSound,
+  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, onLength, compact = false, t = 0, keyActions, track, onTrackSound, workText,
 }: {
   doc: ProjectDoc;
   clip: Clip | null;
@@ -381,6 +397,8 @@ export function Inspector({
   onLength: (us: number) => void;
   /** A phone: transitions, crop and colours are kept for the computer. */
   compact?: boolean;
+  /** A text taken from the linked work: where from, and a newer version when there is one (MVP_draft.md 62.12). */
+  workText?: WorkTextNote | null;
 }) {
   const { w: W, h: H } = canvasOf(doc);
   const ratio = doc.video?.ratio ?? '9:16';
@@ -453,6 +471,7 @@ export function Inspector({
       )}
       {clip.text && (
         <Section title="النص">
+          {workText && <WorkTextLine note={workText} readOnly={readOnly} onUpdate={(n) => onClip((c) => ({ ...c, text: { ...c.text!, content: n.body }, fromWork: { ...c.fromWork!, n: n.n } }), 'تحديث نص العمل')} />}
           <TextControls style={clip.text} timed disabled={readOnly} onChange={(s, l, k) => onClip({ text: s }, l, k)} />
         </Section>
       )}
