@@ -17,6 +17,8 @@ import { shortTime } from '@/lib/studio/time';
 import { animLabel, transitionLabel } from '@/lib/studio/transitions';
 import { KEY_TOLERANCE, keyTimes } from '@/lib/studio/keys';
 import { isHold, retimed, speedAt } from '@/lib/studio/speed';
+import { coverLabel } from '@/lib/studio/cover';
+import { markerHex, markersOf } from '@/lib/studio/markers';
 import { withKeys } from '@/lib/studio/shortcuts';
 import type { SourceState } from '@/lib/studio/media';
 import { graphicById } from '@/lib/studio/motion-adapter';
@@ -76,11 +78,12 @@ export function clipLabel(doc: ProjectDoc, c: Clip): string {
   if (c.motion) return graphicById(c.motion.template)?.name ?? 'قالب حركة';
   if (c.sticker) return 'علامة الهوية';
   if (c.shape) return 'شكل';
+  if (c.cover) return coverLabel(c.cover);
   return sourceOf(doc, c.source)?.name ?? 'ملف';
 }
 
-const kindClass = (doc: ProjectDoc, c: Clip) => (c.text ? 'text' : c.motion ? 'motion' : c.sticker || c.shape ? 'mark' : sourceOf(doc, c.source)?.media ?? 'video');
-const KIND_ICON: Record<string, ReactNode> = { video: <Film aria-hidden="true" />, image: <ImageIcon aria-hidden="true" />, audio: <Music aria-hidden="true" />, motion: <Sparkles aria-hidden="true" />, text: <Type aria-hidden="true" />, mark: <Stamp aria-hidden="true" /> };
+const kindClass = (doc: ProjectDoc, c: Clip) => (c.text ? 'text' : c.motion ? 'motion' : c.cover ? 'cover' : c.sticker || c.shape ? 'mark' : sourceOf(doc, c.source)?.media ?? 'video');
+const KIND_ICON: Record<string, ReactNode> = { video: <Film aria-hidden="true" />, image: <ImageIcon aria-hidden="true" />, audio: <Music aria-hidden="true" />, motion: <Sparkles aria-hidden="true" />, text: <Type aria-hidden="true" />, mark: <Stamp aria-hidden="true" />, cover: <EyeOff aria-hidden="true" /> };
 const TRACK_ICON: Record<TrackKind, ReactNode> = { video: <Film aria-hidden="true" />, graphics: <Sparkles aria-hidden="true" />, text: <Type aria-hidden="true" />, audio: <Music aria-hidden="true" /> };
 
 type Drag = { id: string; mode: 'move' | 'start' | 'end'; x0: number; y0: number; start0: number; len0: number; track0: string; key: string };
@@ -425,6 +428,21 @@ export function Timeline(p: TimelineProps) {
               <span key={s} style={{ left: px(s * US) }} data-minor={Number.isInteger(s) ? 'no' : 'yes'}>
                 {Number.isInteger(s) ? shortTime(s * US) : ''}
               </span>
+            ))}
+            {markersOf(doc).map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                className="st-tl-marker"
+                style={{ left: px(m.t), ['--mk' as string]: markerHex(m.color) }}
+                title={`${m.label} · ${shortTime(m.t)}`}
+                aria-label={`العلامة ${m.label} عند ${shortTime(m.t)}`}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  p.onSeek(m.t);
+                }}
+              />
             ))}
             <i className="st-tl-head-mark" style={{ left: px(p.t) }} aria-hidden="true" />
           </div>

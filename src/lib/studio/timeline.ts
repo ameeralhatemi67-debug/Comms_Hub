@@ -53,9 +53,9 @@ const baseValues = (c: Clip): Partial<Record<KeyProp, number>> => ({
 });
 
 /** The track kind a clip belongs on. */
-export function kindFor(doc: ProjectDoc, c: Pick<Clip, 'source' | 'motion' | 'text' | 'sticker' | 'shape'>): TrackKind {
+export function kindFor(doc: ProjectDoc, c: Pick<Clip, 'source' | 'motion' | 'text' | 'sticker' | 'shape' | 'cover'>): TrackKind {
   if (c.text) return 'text';
-  if (c.motion || c.sticker || c.shape) return 'graphics';
+  if (c.motion || c.sticker || c.shape || c.cover) return 'graphics';
   const s = sourceOf(doc, c.source);
   return s?.media === 'audio' ? 'audio' : 'video';
 }
@@ -358,10 +358,11 @@ export function nextAdjacent(doc: ProjectDoc, id: string): Clip | null {
   return next && prevAdjacent(doc, next.id)?.id === id ? next : null;
 }
 
-/** Times a moving edge snaps to: 0, every clip edge (but the moving clip's), and extra points (the playhead). */
+/** Times a moving edge snaps to: 0, every clip edge (but the moving clip's), the markers, and extra points (the playhead). */
 export function snapPoints(doc: ProjectDoc, exclude: string | null, extra: Micros[] = []): Micros[] {
   const pts = new Set<number>([0, ...extra]);
   for (const t of body(doc).tracks) for (const c of t.clips) if (c.id !== exclude) pts.add(c.start).add(end(c));
+  for (const m of body(doc).markers ?? []) if (m && Number.isFinite(m.t)) pts.add(m.t);
   return [...pts].sort((a, b) => a - b);
 }
 

@@ -7,7 +7,7 @@
 // On a computer each is its own window (62.1) and anything in them can be dragged onto the timeline or
 // the preview; on a phone they are the tabs of one panel.
 import { useEffect, useRef, useState, type DragEvent } from 'react';
-import { Circle, FileUp, Film, Minus, Music, Search, Square, Subtitles, Type, Upload } from 'lucide-react';
+import { Circle, FileUp, Film, Minus, Music, Search, Square, Subtitles, Type, Upload, EyeOff, Grid3x3 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { STICKERS, STICKER_LABELS, type StickerKey } from '@/lib/studio/schema';
 import { motionCatalog, motionParams, motionDims, settledSec, STICKER_SRC } from '@/lib/studio/motion-adapter';
@@ -24,7 +24,8 @@ export type AddDrop =
   | { type: 'motion'; id: string }
   | { type: 'text'; kind: 'title' | 'body' | 'caption' }
   | { type: 'mark'; key: StickerKey; color: string }
-  | { type: 'shape'; shape: 'rect' | 'ellipse' | 'line' };
+  | { type: 'shape'; shape: 'rect' | 'ellipse' | 'line' }
+  | { type: 'cover'; mode: 'blur' | 'blocks' };
 
 const dragAdd = (payload: AddDrop) => (e: DragEvent) => {
   e.dataTransfer.setData(ADD_MIME, JSON.stringify(payload));
@@ -82,6 +83,8 @@ export type BinProps = {
   onMark: (key: StickerKey, color: string) => void;
   /** Photos: a rectangle, an ellipse or a line. */
   onShape?: (type: 'rect' | 'ellipse' | 'line') => void;
+  /** A covered area: blur or squares (MVP_draft.md 62.8). */
+  onCover?: (mode: 'blur' | 'blocks') => void;
   assetsReady: boolean;
   /** A phone: SRT import is kept for the computer. */
   compact?: boolean;
@@ -228,7 +231,7 @@ export function TemplatesPane(p: Pick<BinProps, 'ratio' | 'readOnly' | 'photo' |
   );
 }
 
-export function GraphicsPane(p: Pick<BinProps, 'readOnly' | 'photo' | 'onText' | 'onSrt' | 'onMark' | 'onShape' | 'compact'> & { marks?: boolean; texts?: boolean }) {
+export function GraphicsPane(p: Pick<BinProps, 'readOnly' | 'photo' | 'onText' | 'onSrt' | 'onMark' | 'onShape' | 'onCover' | 'compact'> & { marks?: boolean; texts?: boolean }) {
   const [markColor, setMarkColor] = useState('#ffffff');
   const srtInput = useRef<HTMLInputElement>(null);
   const texts = p.texts !== false;
@@ -266,6 +269,19 @@ export function GraphicsPane(p: Pick<BinProps, 'readOnly' | 'photo' | 'onText' |
               <button type="button" disabled={p.readOnly} onClick={() => p.onShape!('line')} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'shape', shape: 'line' })}>
                 <Minus aria-hidden="true" />
                 خط
+              </button>
+            </>
+          )}
+          {p.onCover && (
+            <>
+              <b className="st-sub">إخفاء جزء من الصورة</b>
+              <button type="button" disabled={p.readOnly} onClick={() => p.onCover!('blur')} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'cover', mode: 'blur' })} title="لوجه أو لوحة سيارة أو ورقة: يموّه ما تحته">
+                <EyeOff aria-hidden="true" />
+                تمويه منطقة
+              </button>
+              <button type="button" disabled={p.readOnly} onClick={() => p.onCover!('blocks')} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'cover', mode: 'blocks' })} title="يحوّل ما تحته إلى مربعات كبيرة">
+                <Grid3x3 aria-hidden="true" />
+                إخفاء بالمربعات
               </button>
             </>
           )}

@@ -12,6 +12,7 @@ export const plainLabel: DiffLabel = (doc, item) => {
   if (item.motion) return 'قالب حركة';
   if (item.sticker) return 'علامة الهوية';
   if (item.shape) return 'شكل';
+  if (item.cover) return item.cover.mode === 'blocks' ? 'إخفاء بالمربعات' : 'تمويه منطقة';
   return doc.sources.find((s) => s.id === item.source)?.name ?? 'ملف';
 };
 

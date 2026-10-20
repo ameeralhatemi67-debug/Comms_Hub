@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-engine.cjs",
-  "run": "2026-10-20T09:58:18.670Z",
+  "run": "2026-10-20T10:09:32.341Z",
   "checks": [
     {
       "name": "the shipped Arabic fonts load with Arabic sample text",
@@ -56,6 +56,11 @@
       "name": "a picture keyed from a quarter to three quarters of the width is at the quarter at 0 s, the middle at 1 s, three quarters at 2 s",
       "pass": true,
       "detail": "[[true,false,false],[false,true,false],[false,false,true]]"
+    },
+    {
+      "name": "a covered area (blur, and squares) changes the pixels inside it and leaves the picture and the video outside it as they were",
+      "pass": true,
+      "detail": "{\"plain\":[[254,0,253,255],[254,0,253,255],[255,24,0,255]],\"blur\":[[254,11,142,255],[254,0,253,255],[255,24,0,255]],\"blocks\":[[254,12,126,255],[254,0,253,255],[255,24,0,255]]}"
     },
     {
       "name": "a picture is drawn where it is placed, at its size, over the video",
@@ -180,7 +185,7 @@
     {
       "name": "playing advances the playhead in real time and pause stops it",
       "pass": true,
-      "detail": "3.69 s"
+      "detail": "3.68 s"
     },
     {
       "name": "no page errors",
@@ -191,7 +196,7 @@
   "log": [
     "requests: 4"
   ],
-  "total": 37,
-  "passed": 37,
+  "total": 38,
+  "passed": 38,
   "failed": 0
 }

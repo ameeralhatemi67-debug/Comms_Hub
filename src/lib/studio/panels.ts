@@ -21,6 +21,7 @@ export const PANELS: PanelMeta[] = [
   { id: 'project', title: 'المشروع', icon: 'settings', kinds: ['video', 'photo'], hint: 'شكل المشروع وخلفيته والتخزين على الجهاز.' },
   { id: 'review', title: 'المراجعة', icon: 'review', kinds: ['video', 'photo'], hint: 'العمل المرتبط وملاحظات المراجعة.' },
   { id: 'versions', title: 'النسخ', icon: 'versions', kinds: ['video', 'photo'], hint: 'النسخ المرقّمة: عرضها ومقارنتها واستعادتها.' },
+  { id: 'markers', title: 'العلامات', icon: 'markers', kinds: ['video'], hint: 'العلامات على مسطرة الوقت، وفصول يوتيوب منها.' },
 ];
 
 export const panelIds = (kind: EditorKind) => PANELS.filter((p) => p.kinds.includes(kind)).map((p) => p.id);
@@ -41,6 +42,7 @@ export const PANEL_HOMES: Record<string, { near: string[]; edge: Edge }> = {
   review: { near: ['inspector', 'project', 'export'], edge: 'left' },
   history: { near: ['layers', 'inspector', 'project'], edge: 'left' },
   versions: { near: ['history', 'review', 'project'], edge: 'left' },
+  markers: { near: ['history', 'versions', 'review'], edge: 'left' },
 };
 
 export type Preset = { id: string; label: string; hint: string; build: () => Layout };
@@ -57,7 +59,7 @@ export const PRESETS: Record<EditorKind, Preset[]> = {
         layoutOf(
           col(
             [0.6, row([0.26, group(['inspector', 'project', 'export', 'review'])], [0.46, group(['program'])], [0.28, group(['media', 'templates', 'graphics', 'effects'])])],
-            [0.4, row([0.82, group(['timeline'])], [0.18, group(['history', 'versions'])])],
+            [0.4, row([0.82, group(['timeline'])], [0.18, group(['history', 'markers', 'versions'])])],
           ),
         ),
     },

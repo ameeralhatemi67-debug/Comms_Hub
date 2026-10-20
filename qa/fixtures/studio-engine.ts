@@ -151,6 +151,24 @@ export async function run(): Promise<{ checks: Check[]; log: string[] }> {
   const k2 = await picAt(2 * US);
   check('a picture keyed from a quarter to three quarters of the width is at the quarter at 0 s, the middle at 1 s, three quarters at 2 s', k0.join() === 'true,false,false' && k1.join() === 'false,true,false' && k2.join() === 'false,false,true', JSON.stringify([k0, k1, k2]));
 
+  // covered areas (MVP_draft.md 62.8): over the edge of a magenta picture on the red video, blur and
+  // squares change the pixels inside the area and leave those outside it as they were
+  const under = timeline.addClip(doc, { source: img, start: 0, length: 6 * US, transform: { x: W * 0.25, y: H * 0.5, scale: 0.3, rotation: 0, opacity: 1 } }).doc;
+  const edgeX = W * 0.25 + (H * 0.3) / 2;
+  const probe = () => [px(ctx, (edgeX - 12) * scale, H * 0.5 * scale), px(ctx, W * 0.25 * scale, H * 0.5 * scale), px(ctx, W * 0.75 * scale, H * 0.5 * scale)];
+  const dist = (p1: number[], p2: number[]) => Math.max(...p1.slice(0, 3).map((v, i) => Math.abs(v - p2[i])));
+  await draw(under, 1 * US);
+  const plain = probe();
+  const coverResults: Record<string, number[][]> = {};
+  for (const mode of ['blur', 'blocks'] as const) {
+    const covered = timeline.addClip(under, { start: 0, length: 6 * US, cover: { mode, amount: 100, shape: 'rect', w: 220, h: 220 }, transform: { x: edgeX, y: H * 0.5, scale: 1, rotation: 0, opacity: 1 } }).doc;
+    await draw(covered, 1 * US);
+    coverResults[mode] = probe();
+  }
+  const changed = (m: string) => dist(coverResults[m][0], plain[0]) > 30;
+  const unchanged = (m: string) => dist(coverResults[m][1], plain[1]) <= 3 && dist(coverResults[m][2], plain[2]) <= 3;
+  check('a covered area (blur, and squares) changes the pixels inside it and leaves the picture and the video outside it as they were', changed('blur') && changed('blocks') && unchanged('blur') && unchanged('blocks'), JSON.stringify({ plain, ...coverResults }));
+
   // a picture above the video, placed and scaled
   const b = timeline.addClip(doc, { source: img, start: 0, length: 6 * US, transform: { x: W * 0.25, y: H * 0.5, scale: 0.3, rotation: 0, opacity: 1 } });
   await draw(b.doc, 1 * US);
@@ -326,9 +344,13 @@ export async function run(): Promise<{ checks: Check[]; log: string[] }> {
   document.body.append(view);
   const pl = new preview.Player({ canvas: view, pool, motion: mr, getDoc: () => doc, scale: () => 480 / W, onTime: () => undefined });
   pl.seek(3 * US);
-  await sleep(400);
-  pl.draw();
-  const paused = px(view.getContext('2d')!, 240, 135);
+  // the decoder answers when it is ready (onChange); wait for the frame rather than a fixed time
+  let paused = [0, 0, 0, 0];
+  for (let i = 0; i < 60 && !near(paused, [0, 255, 0]); i++) {
+    await sleep(50);
+    pl.draw();
+    paused = px(view.getContext('2d')!, 240, 135);
+  }
   check('paused, the preview shows the exact frame from the decoder', near(paused, [0, 255, 0]), JSON.stringify(paused));
   pl.play();
   await sleep(700);

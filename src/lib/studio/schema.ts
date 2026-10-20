@@ -115,6 +115,12 @@ export type TextStyle = {
 
 export type Shape = { type: 'rect' | 'ellipse' | 'line'; w: number; h: number; fill: string | null; stroke: string | null; strokeWidth: number; radius: number };
 
+/** A covered area (MVP_draft.md 62.8): what is under it is blurred or turned into large squares. Sizes in canvas pixels; amount 1 to 100. */
+export type Cover = { mode: 'blur' | 'blocks'; amount: number; shape: 'rect' | 'ellipse'; w: number; h: number };
+
+/** A marker on the time ruler (MVP_draft.md 62.8); in order of time, they are YouTube's chapters. */
+export type Marker = { id: string; t: Micros; label: string; color: string };
+
 /** What a visual item shows. Exactly one of these is set. */
 export type Content = {
   source?: string;
@@ -122,6 +128,7 @@ export type Content = {
   text?: TextStyle;
   sticker?: { key: StickerKey; color: string };
   shape?: Shape;
+  cover?: Cover;
 };
 
 /** A clip's named fields; a stored clip also has its id and may carry fields from newer clients. */
@@ -163,7 +170,7 @@ export const TRACK_LABELS: Record<TrackKind, string> = { video: 'فيديو وص
 
 export type Track = { id: string; kind: TrackKind; muted?: boolean; hidden?: boolean; locked?: boolean; clips: Clip[]; [extra: string]: unknown };
 
-export type VideoBody = { ratio: Ratio; fps: Fps; background: string; tracks: Track[]; [extra: string]: unknown };
+export type VideoBody = { ratio: Ratio; fps: Fps; background: string; tracks: Track[]; markers?: Marker[]; [extra: string]: unknown };
 
 export type Layer = Content & {
   id: string;

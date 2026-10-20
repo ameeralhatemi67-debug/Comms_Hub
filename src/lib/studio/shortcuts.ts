@@ -42,6 +42,7 @@ export const SHORTCUTS: Shortcut[] = [
   { id: 'snap', combos: ['Shift+KeyS'], label: 'تشغيل الالتقاط وإيقافه', group: 'التحرير', scopes: video },
   { id: 'freeze', combos: ['Shift+KeyF'], label: 'تجميد الإطار عند رأس التشغيل', group: 'التحرير', scopes: video },
   { id: 'key-all', combos: ['KeyP'], label: 'مفاتيح الحركة عند رأس التشغيل', group: 'التحرير', scopes: video },
+  { id: 'marker', combos: ['KeyM'], label: 'علامة عند رأس التشغيل', group: 'التحرير', scopes: video },
   { id: 'key-prev', combos: ['BracketLeft'], label: 'المفتاح السابق', group: 'التشغيل', scopes: video },
   { id: 'key-next', combos: ['BracketRight'], label: 'المفتاح التالي', group: 'التشغيل', scopes: video },
   { id: 'nudge-left', combos: ['ArrowLeft'], label: 'تحريك بكسل يساراً', group: 'التحرير', scopes: photo },

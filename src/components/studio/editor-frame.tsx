@@ -6,7 +6,7 @@
 // window list (panels.ts) and the shortcuts (shortcuts.ts).
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import {
-  FolderOpen, Sparkles, Rows3, MonitorPlay, SlidersHorizontal, Type, WandSparkles, FileOutput, History, Settings2, MessageSquareText, Layers, Keyboard, BookOpen, RotateCcw, Maximize2, LayoutDashboard, Files,
+  FolderOpen, Sparkles, Rows3, MonitorPlay, SlidersHorizontal, Type, WandSparkles, FileOutput, History, Settings2, MessageSquareText, Layers, Keyboard, BookOpen, RotateCcw, Maximize2, LayoutDashboard, Files, Bookmark,
 } from 'lucide-react';
 import { PANELS, panelIds, type EditorKind } from '@/lib/studio/panels';
 import { isOpen, toggleMax, whereIs } from '@/lib/studio/workspace';
@@ -29,6 +29,7 @@ export const PANEL_ICON: Record<string, ReactNode> = {
   review: <MessageSquareText aria-hidden="true" />,
   layers: <Layers aria-hidden="true" />,
   versions: <Files aria-hidden="true" />,
+  markers: <Bookmark aria-hidden="true" />,
 };
 
 /** The windows of an editor, with their titles, icons and shortcuts, around the content given for each. */

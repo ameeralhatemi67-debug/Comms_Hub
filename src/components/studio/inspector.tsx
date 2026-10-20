@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import { Copy, Scissors, Trash2, ArrowLeftToLine, Frame, RotateCcw, MousePointerClick, Blend, Diamond, ChevronLeft, ChevronRight, Snowflake, KeyRound } from 'lucide-react';
 import {
   FPS_CHOICES, RATIOS, STICKERS, STICKER_LABELS, US, canvasOf, durationOf,
-  type Clip, type Crop, type Layer, type ProjectDoc, type Ratio, type TextStyle, type Transform,
+  type Clip, type Cover, type Crop, type Layer, type ProjectDoc, type Ratio, type TextStyle, type Transform,
 } from '@/lib/studio/schema';
 import { WEIGHT_LABELS, fontDef, nearestWeight } from '@/lib/studio/fonts';
 import { ANIMATIONS, DEFAULT_ANIM_LENGTH, DEFAULT_TRANSITION, ENTER_NONE, TRANSITIONS, entryOf, entryPatch, type EnterValue, type TransitionKind } from '@/lib/studio/transitions';
@@ -20,6 +20,7 @@ import { shortTime } from '@/lib/studio/time';
 import { transformOf } from '@/lib/studio/compose';
 import { EASES, KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAt, keyTimes, transformWithKeys, writeTransform as writeTransformKeys, type Ease, type KeyProp, type Keys, type MotionProp } from '@/lib/studio/keys';
 import { SPEED_MAX, SPEED_MIN, isHold, retimed, speedAt } from '@/lib/studio/speed';
+import { COVER_MODES, COVER_SHAPES } from '@/lib/studio/cover';
 import { ColorInput, Segmented, Slider, Switch, TextInput } from '../motion-controls';
 import { DesktopOnly } from './compact';
 import { FontPicker } from './font-picker';
@@ -144,6 +145,21 @@ export function CropControls({ crop, onChange, disabled }: { crop: Crop | undefi
       <Slider label="قص من اليسار" value={Math.round(c.l * 100)} min={0} max={45} step={1} unit="٪" onChange={(v) => set('l', v)} disabled={disabled} />
       <Slider label="قص من الأعلى" value={Math.round(c.t * 100)} min={0} max={45} step={1} unit="٪" onChange={(v) => set('t', v)} disabled={disabled} />
       <Slider label="قص من الأسفل" value={Math.round(c.b * 100)} min={0} max={45} step={1} unit="٪" onChange={(v) => set('b', v)} disabled={disabled} />
+    </>
+  );
+}
+
+/** A covered area: blur or squares, its shape, strength and size (MVP_draft.md 62.8). */
+export function CoverControls({ cover, onChange, disabled, W, H }: { cover: Cover; onChange: (c: Cover, label: string, key: string) => void; disabled: boolean; W: number; H: number }) {
+  const set = <K extends keyof Cover>(k: K, v: Cover[K], label: string) => onChange({ ...cover, [k]: v }, label, `cover-${String(k)}`);
+  return (
+    <>
+      <Segmented label="الطريقة" size="sm" value={cover.mode} disabled={disabled} onChange={(v) => set('mode', v, 'طريقة الإخفاء')} options={COVER_MODES} />
+      <Segmented label="الشكل" size="sm" value={cover.shape} disabled={disabled} onChange={(v) => set('shape', v, 'شكل المنطقة')} options={COVER_SHAPES} />
+      <Slider label="القوة" value={Math.round(cover.amount)} min={1} max={100} step={1} unit="٪" disabled={disabled} onChange={(v) => set('amount', v, 'قوة الإخفاء')} />
+      <Slider label="العرض" value={Math.round(cover.w)} min={8} max={Math.max(W, H) * 2} step={1} unit="px" box disabled={disabled} onChange={(v) => set('w', v, 'عرض المنطقة')} />
+      <Slider label="الارتفاع" value={Math.round(cover.h)} min={8} max={Math.max(W, H) * 2} step={1} unit="px" box disabled={disabled} onChange={(v) => set('h', v, 'ارتفاع المنطقة')} />
+      <p className="st-hint">يُخفي ما تحت المنطقة من الطبقات والمسارات الأدنى. مع مفاتيح الحركة تتبع المنطقة الوجه أو اللوحة إن تحركت.</p>
     </>
   );
 }
@@ -363,7 +379,7 @@ export function Inspector({
   const media = src?.media;
   const audible = media === 'video' || media === 'audio';
   const visual = media !== 'audio';
-  const label = clip.text ? 'نص' : clip.motion ? 'قالب حركة' : clip.sticker ? 'علامة الهوية' : media === 'image' ? 'صورة' : media === 'audio' ? 'صوت' : 'فيديو';
+  const label = clip.text ? 'نص' : clip.motion ? 'قالب حركة' : clip.sticker ? 'علامة الهوية' : clip.cover ? 'منطقة مخفية' : media === 'image' ? 'صورة' : media === 'audio' ? 'صوت' : 'فيديو';
   const tau = Math.max(0, Math.min(clip.length, t - clip.start));
   // keyframes on a computer: phones keep the plain values (and never remove keys)
   const keying: Keying | undefined = keyActions && !compact ? { tau, keys: clip.keys, onToggle: keyActions.toggle } : undefined;
@@ -398,7 +414,12 @@ export function Inspector({
           )}
         </Section>
       )}
-      {visual && (
+      {clip.cover && (
+        <Section title="المنطقة المخفية">
+          <CoverControls cover={clip.cover} W={W} H={H} disabled={readOnly} onChange={(c, l, k) => onClip({ cover: c }, l, k)} />
+        </Section>
+      )}
+      {visual && !clip.cover && (
         <Section title="الدخول والخروج">
           <EntryControls clip={clip} onClip={onClip} readOnly={readOnly} />
         </Section>

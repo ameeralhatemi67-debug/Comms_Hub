@@ -10,6 +10,7 @@ import { drawText, layoutText, textMotion } from './text.ts';
 import { NO_FX, clipAnimFx, clipTransitionFx, combine, type Fx } from './transitions.ts';
 import { transformWithKeys } from './keys.ts';
 import { sourceTime } from './speed.ts';
+import { drawCover } from './cover.ts';
 
 export type Resolver = {
   /** The frame of a video source shown at `at` (source time) for a clip, or null while it is not ready. */
@@ -158,6 +159,10 @@ function contentOf(doc: ProjectDoc, item: Clip | Layer, t: Micros | null, res: R
       },
     };
   }
+  if (item.cover) {
+    // drawn as a pass over the pixels below it (drawCover); the size here is for picking and handles
+    return { img: null, natural: { w: item.cover.w, h: item.cover.h }, fitInCanvas: false, draw: () => undefined };
+  }
   if (item.text) {
     // drawn by drawItem with drawText; the size here is for the outline before layout
     return { img: null, natural: { w: item.text.width * W, h: item.text.size * item.text.lineHeight }, fitInCanvas: false };
@@ -284,6 +289,10 @@ export function composeFrame(ctx: CanvasRenderingContext2D, doc: ProjectDoc, t: 
   const keep = new Set<string>();
   for (const { track, clip } of visibleAt(doc, t)) {
     if (clip.motion) keep.add(clip.id);
+    if (clip.cover) {
+      drawCover(ctx, clip.cover, transformAt(clip, t, W, H), opts.scale, clipAlpha(clip, t));
+      continue;
+    }
     const tr = clipTransitionFx(track, clip, t, W, H);
     const fx = combine(tr.fx, clipAnimFx(clip, t, W, H));
     drawItem(ctx, doc, clip, t, res, opts.scale, clipAlpha(clip, t), fx);
@@ -313,7 +322,11 @@ export function composePhoto(ctx: CanvasRenderingContext2D, doc: ProjectDoc, res
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W * opts.scale, H * opts.scale);
   }
-  for (const layer of doc.photo?.layers ?? []) if (!layer.hidden && layer.id !== opts.skip) drawItem(ctx, doc, layer, null, res, opts.scale);
+  for (const layer of doc.photo?.layers ?? []) {
+    if (layer.hidden || layer.id === opts.skip) continue;
+    if (layer.cover) drawCover(ctx, layer.cover, transformOf(layer, W, H), opts.scale);
+    else drawItem(ctx, doc, layer, null, res, opts.scale);
+  }
   ctx.restore();
 }
 

@@ -30,7 +30,8 @@ import { CachePanel } from './cache-panel';
 import { DesktopOnly, PanelTabs, useCompact, type Panel } from './compact';
 import { ReviewPanel, useProjectWork } from './work-links';
 import { ExportPanel } from './export-panel';
-import { CropControls, MotionControls, TextControls, TransformControls } from './inspector';
+import { CoverControls, CropControls, MotionControls, TextControls, TransformControls } from './inspector';
+import { newCover } from '@/lib/studio/cover';
 import { librarySource } from './library';
 import type { EditorProps } from './project-shell';
 import { drawOutline, readAddDrop } from './stage';
@@ -52,6 +53,7 @@ export function layerLabel(doc: ProjectDoc, l: Layer): string {
   if (l.motion) return graphicById(l.motion.template)?.name ?? 'قالب حركة';
   if (l.sticker) return STICKER_LABELS[l.sticker.key];
   if (l.shape) return l.shape.type === 'ellipse' ? 'دائرة' : l.shape.type === 'line' ? 'خط' : 'مستطيل';
+  if (l.cover) return l.cover.mode === 'blocks' ? 'إخفاء بالمربعات' : 'تمويه منطقة';
   return doc.sources.find((s) => s.id === l.source)?.name ?? 'صورة';
 }
 
@@ -185,6 +187,7 @@ export function PhotoEditor(p: EditorProps) {
   const addMark = (key: StickerKey, color: string, at?: At) => put(h.get(), { sticker: { key, color }, transform: { x: at?.x ?? W * 0.78, y: at?.y ?? H * 0.12, scale: 0.6, rotation: 0, opacity: 1 } }, 'إضافة علامة الهوية');
   const addShape = (type: Shape['type'], at?: At) =>
     put(h.get(), { shape: { type, w: type === 'line' ? W * 0.5 : W * 0.4, h: type === 'line' ? 8 : W * 0.25, fill: type === 'line' ? null : '#17634b', stroke: type === 'line' ? '#c9ac70' : null, strokeWidth: type === 'line' ? 8 : 0, radius: 24 } }, 'إضافة شكل', at);
+  const addCover = (mode: 'blur' | 'blocks', at?: At) => put(h.get(), { cover: newCover(mode, W, H) }, mode === 'blur' ? 'تمويه منطقة' : 'إخفاء بالمربعات', at);
   const addDrop = (d: AddDrop, at: At) => {
     if (d.type === 'library') {
       if (d.item.kind === 'image') addLibrary(d.item, at);
@@ -195,6 +198,7 @@ export function PhotoEditor(p: EditorProps) {
     } else if (d.type === 'text') addText(d.kind, at);
     else if (d.type === 'mark') addMark(d.key, d.color, at);
     else if (d.type === 'shape') addShape(d.shape, at);
+    else if (d.type === 'cover') addCover(d.mode, at);
   };
 
   // ------------------------------------------------------------- editing
@@ -379,6 +383,7 @@ export function PhotoEditor(p: EditorProps) {
     onText: (k: 'title' | 'body' | 'caption') => addText(k),
     onMark: (k: StickerKey, c: string) => addMark(k, c),
     onShape: (t: Shape['type']) => addShape(t),
+    onCover: (m: 'blur' | 'blocks') => addCover(m),
     assetsReady,
     compact,
   };
@@ -550,6 +555,14 @@ export function PhotoEditor(p: EditorProps) {
               <div className="st-sec-body">
                 <Segmented label="العلامة" size="sm" value={sel.sticker.key} disabled={ro} onChange={(v) => patch({ sticker: { ...sel.sticker!, key: v } }, 'العلامة')} options={STICKERS.map((k2) => ({ value: k2, label: STICKER_LABELS[k2] }))} />
                 <ColorInput label="اللون" value={sel.sticker.color} disabled={ro} onChange={(v) => patch({ sticker: { ...sel.sticker!, color: v } }, 'لون العلامة', 'sticker')} />
+              </div>
+            </details>
+          )}
+          {sel.cover && (
+            <details className="st-sec" open>
+              <summary>المنطقة المخفية</summary>
+              <div className="st-sec-body">
+                <CoverControls cover={sel.cover} W={W} H={H} disabled={ro} onChange={(c, l, k2) => patch({ cover: c }, l, k2)} />
               </div>
             </details>
           )}

@@ -11,7 +11,8 @@
 // the clip menu, scaling by a corner, the history, filling the window and the light chrome.
 // The versions flow (MVP_draft.md 62.6): listed, compared, restored, and one opened for reading.
 // The time flow (MVP_draft.md 62.7): speed, keys, P, [, a still, reverse.
-// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time]   (writes qa/studio-ui.json)
+// The marks flow (MVP_draft.md 62.8): markers, chapters, a covered area.
+// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time|marks]   (writes qa/studio-ui.json)
 const fs = require('node:fs');
 const path = require('node:path');
 const { dependency, launchOptions } = require('./runtime.cjs');
@@ -611,6 +612,56 @@ async function timeFlow(browser, base, errors) {
   await ctx.close();
 }
 
+// Markers and covered areas (MVP_draft.md 62.8): M puts markers on the ruler and opens «العلامات»; a
+// marker is renamed; YouTube's rules are said until they hold, then the chapters are offered; a covered
+// area is added from «النصوص والعلامات», lands on a graphics track and is switched to squares.
+async function marksFlow(browser, base, errors) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const tab = await ctx.newPage();
+  tab.on('pageerror', (e) => errors.push(e.message));
+  tab.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  tab.on('response', (q) => q.status() >= 400 && errors.push(`HTTP ${q.status()}: ${q.url()}`));
+  await tab.goto(base + '/motion/studio');
+  await tab.evaluate(() => window.__db.reset());
+  await tab.reload();
+  await tab.getByRole('button', { name: 'مشروع فيديو جديد' }).click();
+  await tab.getByLabel('اسم المشروع').fill('مقطع العلامات');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).click();
+  await tab.locator('.st-editor').waitFor({ timeout: 15000 });
+  await tab.locator('.st-lib button', { hasText: 'ألوان الحملة' }).click();
+  await tab.locator('.st-clip[data-kind="video"]').waitFor();
+  await tab.locator('body').press('Home');
+  await tab.locator('body').press('m');
+  for (let i = 0; i < 60; i++) await tab.locator('body').press('ArrowRight');
+  const placedAt = await tab.locator('.st-mon-time').textContent();
+  await tab.locator('body').press('m');
+  const onRuler = await tab.locator('.st-tl-marker').count();
+  const listed = await tab.locator('.st-marker-list li').count();
+  check('marks: M puts a marker at the playhead on the ruler, and «العلامات» lists them', onRuler === 2 && listed === 2, `${onRuler} on the ruler, ${listed} listed`);
+  const name = tab.locator('.st-marker-list li').first().getByLabel('اسم العلامة');
+  await name.fill('المقدمة');
+  const issues = await tab.locator('.st-chapter-issues li').allTextContents();
+  const copyOff = await tab.getByRole('button', { name: 'نسخ الفصول' }).isDisabled();
+  const lines = await tab.locator('.st-chapters').inputValue();
+  check('marks: a marker is renamed; with two markers and a short video YouTube\'s rules are said and copying waits', lines.startsWith('00:00 المقدمة') && issues.some((x) => x.includes('3 علامات')) && copyOff, `${lines.replace(/\n/g, ' / ')} | ${issues.join(' | ')}`);
+  await tab.locator('body').press('Home');
+  await tab.locator('.st-tl-marker').last().click();
+  const at = await tab.locator('.st-mon-time').textContent();
+  check('marks: a marker on the ruler moves the playhead to it', at === placedAt && !/^00:00:00|^00:00\.00/.test(at), `${at} (placed at ${placedAt})`);
+
+  await tab.locator('.st-ws-tab[data-panel="graphics"]').click();
+  await tab.getByRole('button', { name: 'تمويه منطقة' }).click();
+  const cover = tab.locator('.st-clip[data-kind="cover"]');
+  await cover.waitFor({ timeout: 5000 });
+  const onGraphics = await tab.evaluate(() => document.querySelector('.st-clip[data-kind="cover"]')?.closest('.st-tl-lane')?.getAttribute('data-kind'));
+  await tab.locator('.st-ws-tab[data-panel="inspector"]').click();
+  await tab.locator('.st-insp').getByRole('radio', { name: 'مربعات' }).click();
+  const label = await cover.locator('.st-clip-name').textContent();
+  check('marks: «تمويه منطقة» adds a covered area on a graphics track, and «مربعات» turns it into «إخفاء بالمربعات»', onGraphics === 'graphics' && label === 'إخفاء بالمربعات', `${onGraphics} ${label}`);
+  await tab.screenshot({ path: path.join(out, 'marks-1440.png') });
+  await ctx.close();
+}
+
 async function photoFlow(browser, base, errors) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const tab = await ctx.newPage();
@@ -739,6 +790,7 @@ async function phoneFlow(browser, base, errors) {
     if (!only || only === 'phone') await phoneFlow(browser, base, errors);
     if (!only || only === 'versions') await versionsFlow(browser, base, errors);
     if (!only || only === 'time') await timeFlow(browser, base, errors);
+    if (!only || only === 'marks') await marksFlow(browser, base, errors);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));
   } finally {

@@ -1,0 +1,34 @@
+{
+  "script": "qa/studio-ui.cjs",
+  "run": "2026-10-20T10:10:58.792Z",
+  "checks": [
+    {
+      "name": "marks: M puts a marker at the playhead on the ruler, and «العلامات» lists them",
+      "pass": true,
+      "detail": "2 on the ruler, 2 listed"
+    },
+    {
+      "name": "marks: a marker is renamed; with two markers and a short video YouTube's rules are said and copying waits",
+      "pass": true,
+      "detail": "00:00 المقدمة / 00:01 علامة 2 | يحتاج يوتيوب 3 علامات على الأقل؛ في المشروع 2. | الفصل «المقدمة» أقصر من عشر ثوانٍ. | الفصل «علامة 2» أقصر من عشر ثوانٍ."
+    },
+    {
+      "name": "marks: a marker on the ruler moves the playhead to it",
+      "pass": true,
+      "detail": "00:01.29 (placed at 00:01.29)"
+    },
+    {
+      "name": "marks: «تمويه منطقة» adds a covered area on a graphics track, and «مربعات» turns it into «إخفاء بالمربعات»",
+      "pass": true,
+      "detail": "graphics إخفاء بالمربعات"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "total": 5,
+  "passed": 5,
+  "failed": 0
+}

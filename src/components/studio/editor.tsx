@@ -9,7 +9,7 @@
 // template tab's renderers and files; the fonts are bundled (studio-fonts.ts) and loaded when used.
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind } from 'lucide-react';
+import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind, Bookmark } from 'lucide-react';
 import { canOpen } from '@/lib/access';
 import { useAccount } from '@/lib/account-context';
 import { loadAssets } from '@/lib/motion/renderers.js';
@@ -22,6 +22,8 @@ import {
 } from '@/lib/studio/timeline';
 import { KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAllMotion, keyAt, keyTimes, moveKeyTime, setEaseAt, setKey, tidyKeys, toggleKey, type Ease, type KeyProp } from '@/lib/studio/keys';
 import { clampSpeed, isHold, speedAt } from '@/lib/studio/speed';
+import { newCover } from '@/lib/studio/cover';
+import { addMarker, removeMarker, updateMarker } from '@/lib/studio/markers';
 import { MotionRenderer, graphicById, loadSticker, motionClip } from '@/lib/studio/motion-adapter';
 import { captionStyle, defaultText, loadFonts, parseSrt, usedFonts } from '@/lib/studio/text';
 import { fillWindow, transformAt, transformOf } from '@/lib/studio/compose';
@@ -46,6 +48,7 @@ import { Stage, drawOutline, drawSafeZones, type Resolution, type Tool } from '.
 import { Timeline, TimelineBar, clipLabel } from './timeline';
 import { EffectsPanel } from './effects-panel';
 import { HistoryPanel } from './history-panel';
+import { MarkersPanel } from './markers-panel';
 import { VersionsPanel } from './versions-panel';
 import { EditorFrame, panelSpecs, useEditorFrame } from './editor-frame';
 import type { Menu } from './menubar';
@@ -319,6 +322,14 @@ export function VideoEditor(p: EditorProps) {
   };
   const addMark = (key: StickerKey, color: string, w: Where = {}) =>
     place(h.get(), { start: w.at ?? at, length: 4 * US, sticker: { key, color }, transform: { x: W * 0.78, y: H * 0.1, scale: 0.6, rotation: 0, opacity: 1 } }, 'إضافة علامة الهوية', w);
+  const addCover = (mode: 'blur' | 'blocks', w: Where = {}) =>
+    place(h.get(), { start: w.at ?? at, length: 3 * US, cover: newCover(mode, W, H), transform: { x: W / 2, y: H / 2, scale: 1, rotation: 0, opacity: 1 } }, mode === 'blur' ? 'تمويه منطقة' : 'إخفاء بالمربعات', w);
+  const putMarker = () => {
+    if (p.readOnly) return;
+    const r = addMarker(h.get(), at);
+    if (r.doc !== h.get()) h.apply(r.doc, 'علامة على الخط الزمني');
+    frame.ws.open('markers');
+  };
   const addDrop = (d: AddDrop, trackId: string | null, atT: Micros) => {
     const w: Where = { at: atT, trackId };
     if (d.type === 'library') addLibrary(d.item, w);
@@ -327,6 +338,7 @@ export function VideoEditor(p: EditorProps) {
       if (g) addMotion(g, w);
     } else if (d.type === 'text') addText(d.kind, w);
     else if (d.type === 'mark') addMark(d.key, d.color, w);
+    else if (d.type === 'cover') addCover(d.mode, w);
   };
 
   // ------------------------------------------------------------- editing the selection
@@ -553,6 +565,7 @@ export function VideoEditor(p: EditorProps) {
       case 'export': frame.ws.open('export'); frame.setFocused('export'); break;
       case 'rename': p.onRequestRename?.(); break;
       case 'freeze': freeze(); break;
+      case 'marker': putMarker(); break;
       case 'key-all': keyAll(); break;
       case 'key-prev': seekKey(-1); break;
       case 'key-next': seekKey(1); break;
@@ -593,6 +606,7 @@ export function VideoEditor(p: EditorProps) {
     onText: (k: 'title' | 'body' | 'caption') => addText(k),
     onSrt: addSrt,
     onMark: (k: StickerKey, c: string) => addMark(k, c),
+    onCover: (m: 'blur' | 'blocks') => addCover(m),
     assetsReady,
     compact,
   };
@@ -815,6 +829,7 @@ export function VideoEditor(p: EditorProps) {
         { label: 'تجميد الإطار عند رأس التشغيل', icon: <Snowflake aria-hidden="true" />, keys: keysOf('freeze'), disabled: ro, onSelect: freeze },
         { label: sel?.clip.reverse ? 'تشغيل أمامي' : 'تشغيل عكسي', icon: <Rewind aria-hidden="true" />, disabled: ro || !videoSel || (!!sel && isHold(sel.clip)), onSelect: () => keyActions.setReverse(!sel?.clip.reverse) },
         { label: 'مفاتيح الحركة عند رأس التشغيل', icon: <Diamond aria-hidden="true" />, keys: keysOf('key-all'), disabled: ro || !selected, onSelect: keyAll },
+        { label: 'علامة عند رأس التشغيل', icon: <Bookmark aria-hidden="true" />, keys: keysOf('marker'), disabled: ro, onSelect: putMarker },
         { kind: 'sep' },
         { label: 'إضافة مسار', icon: <Plus aria-hidden="true" />, disabled: ro || !kinds.length, items: kinds.map((k) => ({ label: TRACK_LABELS[k], onSelect: () => h.apply(addTrack(h.get(), k), 'إضافة مسار') })) },
         {
@@ -865,6 +880,16 @@ export function VideoEditor(p: EditorProps) {
     export: exportEl,
     review: <aside className="st-insp st-review-pane">{reviewEl}</aside>,
     history: <HistoryPanel hist={h.hist} onGo={h.go} readOnly={p.readOnly} />,
+    markers: (
+      <MarkersPanel
+        doc={doc}
+        readOnly={p.readOnly}
+        onAdd={putMarker}
+        onUpdate={(id, pt) => h.apply(updateMarker(h.get(), id, pt), pt.label !== undefined ? 'اسم العلامة' : 'لون العلامة', `marker-${id}-${pt.label !== undefined ? 'label' : 'color'}`)}
+        onRemove={(id) => h.apply(removeMarker(h.get(), id), 'حذف علامة')}
+        onSeek={seek}
+      />
+    ),
     versions: <VersionsPanel projectId={p.projectId} api={p.api} readOnly={p.readOnly} doc={doc} revision={p.revision} saveVersion={p.saveVersion} onApply={(d, label) => h.apply(d, label)} label={(d, item) => clipLabel(d, item as Clip)} refreshKey={p.revision()} />,
   });
 
