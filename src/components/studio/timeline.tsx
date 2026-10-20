@@ -9,7 +9,7 @@
 // the wheel zoom about the pointer; a right click opens the clip's menu.
 import { useCallback, useEffect, useRef, useState, type DragEvent, type PointerEvent as RPointerEvent, type ReactNode } from 'react';
 import {
-  Eye, EyeOff, Lock, Unlock, Volume2, VolumeX, Plus, MousePointer2, Scissors, Hand, Magnet, Undo2, Redo2, Trash2, ZoomIn, Maximize, Film, Image as ImageIcon, Music, Sparkles, Type, Stamp, Copy, ClipboardPaste, ArrowLeftToLine, Blend,
+  Eye, EyeOff, Lock, Unlock, Volume2, VolumeX, Plus, MousePointer2, Scissors, Hand, Magnet, Undo2, Redo2, Trash2, ZoomIn, Maximize, Film, Image as ImageIcon, Music, Sparkles, Type, Stamp, Copy, ClipboardPaste, ArrowLeftToLine, Blend, Mic,
 } from 'lucide-react';
 import { TRACK_LABELS, TRACK_LIMITS, US, durationOf, type Clip, type Micros, type ProjectDoc, type Track, type TrackKind } from '@/lib/studio/schema';
 import { legalStart, snapPoints, snapTo, sourceOf } from '@/lib/studio/timeline';
@@ -19,6 +19,8 @@ import { KEY_TOLERANCE, keyTimes } from '@/lib/studio/keys';
 import { isHold, retimed, speedAt } from '@/lib/studio/speed';
 import { coverLabel } from '@/lib/studio/cover';
 import { markerHex, markersOf } from '@/lib/studio/markers';
+import { peakIn } from '@/lib/studio/peaks';
+import { roleOf } from '@/lib/studio/timeline';
 import { withKeys } from '@/lib/studio/shortcuts';
 import type { SourceState } from '@/lib/studio/media';
 import { graphicById } from '@/lib/studio/motion-adapter';
@@ -58,9 +60,31 @@ export type TimelineProps = {
   onDropAdd?: (d: AddDrop, trackId: string | null, at: Micros) => void;
   onDropEffect?: (e: EffectDrop, clipId: string, where: 'start' | 'end') => void;
   clipMenu?: (id: string) => ClipMenu;
+  /** A source's waveform (MVP_draft.md 62.9), or null while it is worked out or when it has no sound. */
+  peaksOf?: (sourceId: string) => Float32Array | null;
+  /** A sound track's part in the mix switched between speech and music. */
+  onTrackRole?: (id: string, role: 'voice' | 'music') => void;
   /** A key diamond of the selected clip dragged from one clip time to another (`key` joins the steps). */
   onMoveKey?: (id: string, from: Micros, to: Micros, key: string) => void;
 };
+
+/** A clip's waveform: one bar every two pixels, the loudest moment of its stretch of source. */
+function ClipWave({ peaks, clip, zoom, width, height }: { peaks: Float32Array; clip: Clip; zoom: number; width: number; height: number }) {
+  const step = 2;
+  const half = height / 2;
+  let d = '';
+  for (let x = 0; x < width; x += step) {
+    const from = ((clip.in ?? 0) / US) + x / zoom;
+    const v = peakIn(peaks, from, from + step / zoom);
+    const h = Math.max(0.5, v * half);
+    d += `M${x + 0.5} ${(half - h).toFixed(1)}V${(half + h).toFixed(1)}`;
+  }
+  return (
+    <svg className="st-clip-wave" width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true" preserveAspectRatio="none">
+      <path d={d} />
+    </svg>
+  );
+}
 
 /** A short word on a re-timed clip: its speed, «متدرج» for a ramp, «معكوس», or «ثابت» for a still. */
 export function retimeLabel(c: Clip): string | null {
@@ -90,7 +114,7 @@ type Drag = { id: string; mode: 'move' | 'start' | 'end'; x0: number; y0: number
 
 /** The bar above the timeline: tools, undo, cut, delete, snapping, zoom. */
 export function TimelineBar({
-  tool, onTool, snap, onSnap, zoom, onZoom, onFit, undo, redo, canUndo, canRedo, undoTitle, redoTitle, split, remove, hasSelection, readOnly, compact,
+  tool, onTool, snap, onSnap, zoom, onZoom, onFit, undo, redo, canUndo, canRedo, undoTitle, redoTitle, split, remove, hasSelection, readOnly, compact, onRecord,
 }: {
   tool: Tool;
   onTool: (t: Tool) => void;
@@ -110,6 +134,8 @@ export function TimelineBar({
   hasSelection: boolean;
   readOnly: boolean;
   compact?: boolean;
+  /** «تسجيل صوت» (a computer only). */
+  onRecord?: () => void;
 }) {
   const tools: { id: Tool; icon: ReactNode; label: string; key: string }[] = [
     { id: 'select', icon: <MousePointer2 aria-hidden="true" />, label: 'أداة التحديد', key: 'tool-select' },
@@ -129,6 +155,11 @@ export function TimelineBar({
         </div>
       )}
       <span className="st-tl-sep" aria-hidden="true" />
+      {onRecord && !compact && (
+        <button type="button" className="st-rec-btn" onClick={onRecord} disabled={readOnly} title="تسجيل صوت من الميكروفون عند رأس التشغيل" aria-label="تسجيل صوت">
+          <Mic aria-hidden="true" />
+        </button>
+      )}
       <button type="button" onClick={undo} disabled={readOnly || !canUndo} title={`${undoTitle} (Ctrl+Z)`} aria-label={undoTitle}>
         <Undo2 aria-hidden="true" />
       </button>
@@ -409,6 +440,11 @@ export function Timeline(p: TimelineProps) {
                   {t.hidden ? <EyeOff /> : <Eye />}
                 </button>
               )}
+              {t.kind === 'audio' && p.onTrackRole && (
+                <button type="button" className="st-tl-role" data-role={roleOf(t)} aria-label={roleOf(t) === 'voice' ? 'مسار كلام: انقر ليصير موسيقى' : 'مسار موسيقى: انقر ليصير كلاماً'} title={roleOf(t) === 'voice' ? 'كلام (يخفض الموسيقى تحته)' : `موسيقى${t.duck ? `، تنخفض ${t.duck} ديسيبل تحت الكلام` : ''}`} onClick={() => p.onTrackRole!(t.id, roleOf(t) === 'voice' ? 'music' : 'voice')}>
+                  {roleOf(t) === 'voice' ? <Mic /> : <Music />}
+                </button>
+              )}
               {(t.kind === 'audio' || t.kind === 'video') && (
                 <button type="button" aria-pressed={!!t.muted} aria-label={t.muted ? 'تشغيل صوت المسار' : 'كتم صوت المسار'} title={t.muted ? 'تشغيل صوت المسار' : 'كتم صوت المسار'} onClick={() => p.onTrack(t.id, { muted: !t.muted })}>
                   {t.muted ? <VolumeX /> : <Volume2 />}
@@ -510,6 +546,7 @@ export function Timeline(p: TimelineProps) {
                           {px(c.transition.length) > 22 && <Blend />}
                         </i>
                       )}
+                      {c.source && !retimed(c) && !c.mute && p.peaksOf?.(c.source) && <ClipWave peaks={p.peaksOf(c.source)!} clip={c} zoom={zoom} width={Math.round(w)} height={Math.max(12, rowH - 12)} />}
                       {w > 40 && <span className="st-clip-ico">{KIND_ICON[kc]}</span>}
                       <span className="st-clip-name" dir="auto">{clipLabel(doc, c)}</span>
                       {w > 110 && <small className="st-clip-len" dir="ltr">{shortTime(c.length)}</small>}

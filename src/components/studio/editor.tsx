@@ -9,7 +9,7 @@
 // template tab's renderers and files; the fonts are bundled (studio-fonts.ts) and loaded when used.
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind, Bookmark } from 'lucide-react';
+import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind, Bookmark, Mic } from 'lucide-react';
 import { canOpen } from '@/lib/access';
 import { useAccount } from '@/lib/account-context';
 import { loadAssets } from '@/lib/motion/renderers.js';
@@ -18,7 +18,7 @@ import { STICKERS, TRACK_LABELS, TRACK_LIMITS, US, canvasOf, durationOf, type Cl
 import { historyOf, record, undo, redo, undoLabel, redoLabel, type History } from '@/lib/studio/history';
 import {
   addClip, addSource, addTrack, duplicateClip, locate, moveClip, nextAdjacent, prevAdjacent, removeClip, setTrack, setTransition, snapPoints, splitClip, trimEnd, trimStart, updateClip, visibleAt, maxLengthOf,
-  insertHold, setReverse, setSpeed, setSpeedKeys,
+  insertHold, setReverse, setSpeed, setSpeedKeys, setTrackSound,
 } from '@/lib/studio/timeline';
 import { KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAllMotion, keyAt, keyTimes, moveKeyTime, setEaseAt, setKey, tidyKeys, toggleKey, type Ease, type KeyProp } from '@/lib/studio/keys';
 import { clampSpeed, isHold, speedAt } from '@/lib/studio/speed';
@@ -49,6 +49,7 @@ import { Timeline, TimelineBar, clipLabel } from './timeline';
 import { EffectsPanel } from './effects-panel';
 import { HistoryPanel } from './history-panel';
 import { MarkersPanel } from './markers-panel';
+import { RecordDialog } from './recorder';
 import { VersionsPanel } from './versions-panel';
 import { EditorFrame, panelSpecs, useEditorFrame } from './editor-frame';
 import type { Menu } from './menubar';
@@ -238,6 +239,7 @@ export function VideoEditor(p: EditorProps) {
   const [fxNote, setFxNote] = useState<string | null>(null);
   const [reviewKey, setReviewKey] = useState(0);
   const [uploading, setUploading] = useState<File | null>(null);
+  const [recording, setRecording] = useState<Micros | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [, bumpClip] = useReducer((x: number) => x + 1, 0);
   const compact = useCompact();
@@ -303,6 +305,24 @@ export function VideoEditor(p: EditorProps) {
       place(r.doc, { source: r.id, start: at, length, in: 0 }, 'إضافة ملف من هذا الجهاز');
     } catch (e) {
       setError((e as Error).message || 'تعذّر قراءة الملف.');
+    }
+  };
+  /** A voice-over from «تسجيل صوت»: a file on this device, on a free sound track, which becomes a speech track. */
+  const addRecording = async (file: File, startAt: Micros) => {
+    if (!cache) return setError('هذا المتصفح لا يحفظ الملفات على الجهاز، فلا يُحفظ التسجيل فيه. جرّب Chrome أو Edge على حاسوب.');
+    try {
+      const info = await probeFile(file);
+      if (!info) return setError('تعذّر قراءة التسجيل.');
+      const { key } = await cache.putLocal(file);
+      const r = addSource(live.current.doc, { kind: 'local', key, name: file.name, media: 'audio', mime: file.type, size: file.size, duration: info.duration });
+      const added = addClip(r.doc, { source: r.id, start: startAt, length: info.duration ?? US, in: 0 });
+      let d = added.doc;
+      const tr = d.video?.tracks.find((x) => x.id === added.trackId);
+      if (tr && tr.clips.length === 1 && !tr.role) d = setTrackSound(d, tr.id, { role: 'voice' });
+      h.apply(d, 'تسجيل صوت');
+      setSelected(added.clipId);
+    } catch (e) {
+      setError((e as Error).message || 'تعذّر حفظ التسجيل.');
     }
   };
   const addMotion = (g: Graphic, w: Where = {}) => place(h.get(), { ...motionClip(g, doc.video?.ratio ?? '9:16', w.at ?? at) }, 'إضافة قالب حركة', w);
@@ -655,6 +675,8 @@ export function VideoEditor(p: EditorProps) {
       onLength={(us) => selected && h.apply(trimEnd(doc, selected, (sel?.clip.start ?? 0) + us), 'طول القالب')}
       t={at}
       keyActions={keyActions}
+      track={sel?.track}
+      onTrackSound={(pt) => sel && h.apply(setTrackSound(h.get(), sel.track.id, pt), pt.role ? 'المسار في المزج' : 'خفض الموسيقى تحت الكلام', `track-sound-${sel.track.id}`)}
       actions={{
         split,
         duplicate,
@@ -692,6 +714,7 @@ export function VideoEditor(p: EditorProps) {
       hasSelection={!!selected}
       readOnly={p.readOnly}
       compact={compact}
+      onRecord={cache ? () => setRecording(at) : undefined}
     />
   );
   const tlEl = (
@@ -716,6 +739,8 @@ export function VideoEditor(p: EditorProps) {
       onSplitAt={splitAt}
       onDropAdd={addDrop}
       onDropEffect={(fx, clipId, where) => (fx.type === 'transition' ? applyTransition(fx.kind, where, clipId) : applyAnim(fx.kind, where === 'start' ? 'in' : 'out', clipId))}
+      peaksOf={(id) => pool?.peaks(id) ?? null}
+      onTrackRole={(id, role) => h.apply(setTrackSound(h.get(), id, { role }), role === 'voice' ? 'مسار كلام' : 'مسار موسيقى')}
       onMoveKey={(id, from, to, key) => {
         const d = updateClip(h.get(), id, (c) => ({ ...c, keys: moveKeyTime(c.keys, from, to) }));
         h.apply(setSpeedKeys(d, id, locate(d, id)?.clip.keys), 'نقل مفتاح', key);
@@ -748,6 +773,21 @@ export function VideoEditor(p: EditorProps) {
       onTransition={(k, w) => applyTransition(k, w)}
       onAnim={(k, w) => applyAnim(k, w)}
       note={fxNote}
+    />
+  );
+  const recordEl = recording !== null && (
+    <RecordDialog
+      at={recording}
+      onClose={() => setRecording(null)}
+      onDone={addRecording}
+      onRun={(on) => {
+        if (!player) return;
+        player.muted = on;
+        if (on) {
+          player.seek(recording);
+          player.play();
+        } else if (player.playing) player.pause();
+      }}
     />
   );
   const uploadEl = uploading && (
@@ -830,6 +870,7 @@ export function VideoEditor(p: EditorProps) {
         { label: sel?.clip.reverse ? 'تشغيل أمامي' : 'تشغيل عكسي', icon: <Rewind aria-hidden="true" />, disabled: ro || !videoSel || (!!sel && isHold(sel.clip)), onSelect: () => keyActions.setReverse(!sel?.clip.reverse) },
         { label: 'مفاتيح الحركة عند رأس التشغيل', icon: <Diamond aria-hidden="true" />, keys: keysOf('key-all'), disabled: ro || !selected, onSelect: keyAll },
         { label: 'علامة عند رأس التشغيل', icon: <Bookmark aria-hidden="true" />, keys: keysOf('marker'), disabled: ro, onSelect: putMarker },
+        { label: 'تسجيل صوت…', icon: <Mic aria-hidden="true" />, disabled: ro || !cache, onSelect: () => setRecording(at) },
         { kind: 'sep' },
         { label: 'إضافة مسار', icon: <Plus aria-hidden="true" />, disabled: ro || !kinds.length, items: kinds.map((k) => ({ label: TRACK_LABELS[k], onSelect: () => h.apply(addTrack(h.get(), k), 'إضافة مسار') })) },
         {
@@ -898,6 +939,7 @@ export function VideoEditor(p: EditorProps) {
       {errorEl}
       <EditorFrame frame={frame} menus={menus} panels={panels} full={full} onFull={() => setFull(!full)} chrome={chrome} onChrome={() => setChrome(chrome === 'dark' ? 'light' : 'dark')}>
         {uploadEl}
+        {recordEl}
       </EditorFrame>
     </div>
   );

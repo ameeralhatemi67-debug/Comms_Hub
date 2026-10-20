@@ -12,7 +12,8 @@
 // The versions flow (MVP_draft.md 62.6): listed, compared, restored, and one opened for reading.
 // The time flow (MVP_draft.md 62.7): speed, keys, P, [, a still, reverse.
 // The marks flow (MVP_draft.md 62.8): markers, chapters, a covered area.
-// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time|marks]   (writes qa/studio-ui.json)
+// The sound flow (MVP_draft.md 62.9): a waveform, a recording, a speech track, music lowered under it.
+// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time|marks|sound]   (writes qa/studio-ui.json)
 const fs = require('node:fs');
 const path = require('node:path');
 const { dependency, launchOptions } = require('./runtime.cjs');
@@ -662,6 +663,65 @@ async function marksFlow(browser, base, errors) {
   await ctx.close();
 }
 
+// Sound (MVP_draft.md 62.9): a library video with sound shows its waveform; «تسجيل صوت» records from the
+// (fake) microphone after a count, and the recording lands on a sound track that becomes speech, with
+// its own waveform, as a file kept on this device; a sound track switched to music offers its lowering.
+async function soundFlow(browser, base, errors) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, permissions: ['microphone'] });
+  const tab = await ctx.newPage();
+  tab.on('pageerror', (e) => errors.push(e.message));
+  tab.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  tab.on('response', (q) => q.status() >= 400 && errors.push(`HTTP ${q.status()}: ${q.url()}`));
+  await tab.goto(base + '/motion/studio');
+  await tab.evaluate(() => window.__db.reset());
+  await tab.reload();
+  await tab.getByRole('button', { name: 'مشروع فيديو جديد' }).click();
+  await tab.getByLabel('اسم المشروع').fill('مقطع الصوت');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).click();
+  await tab.locator('.st-editor').waitFor({ timeout: 15000 });
+  const id = await tab.evaluate(() => location.pathname.split('/').pop());
+  await tab.locator('.st-lib button', { hasText: 'ألوان الحملة' }).click();
+  await tab.locator('.st-clip[data-kind="video"] .st-clip-wave').waitFor({ timeout: 20000 });
+  check('sound: a video with sound shows its waveform in its clip', (await tab.locator('.st-clip[data-kind="video"] .st-clip-wave').count()) === 1);
+
+  await tab.locator('body').press('Home');
+  await tab.locator('.st-rec-btn').click();
+  await tab.getByRole('button', { name: 'ابدأ التسجيل' }).click();
+  await tab.locator('.st-rec-live').waitFor({ timeout: 8000 });
+  await tab.waitForTimeout(2200);
+  await tab.getByRole('button', { name: 'إيقاف وحفظ' }).click();
+  const rec = tab.locator('.st-clip[data-kind="audio"]');
+  await rec.waitFor({ timeout: 15000 });
+  const name = await rec.locator('.st-clip-name').textContent();
+  const role = await tab.locator('.st-tl-head[data-kind="audio"] .st-tl-role').first().getAttribute('data-role');
+  await rec.locator('.st-clip-wave').waitFor({ timeout: 15000 });
+  check('sound: «تسجيل صوت» records after the count and puts the recording on a sound track that becomes speech, with its waveform', /^تسجيل صوت \d{4}-\d{2}-\d{2}/.test(name) && role === 'voice', `${name} ${role}`);
+
+  // saved as a numbered version: the recording is a file of this device, about two seconds long
+  await tab.getByRole('button', { name: 'حفظ نسخة' }).click();
+  await tab.getByRole('button', { name: 'حفظ النسخة' }).click();
+  await tab.waitForFunction(() => /النسخة 2/.test(document.querySelector('.st-title small').textContent));
+  const src = await tab.evaluate((pid) => {
+    const p = window.__db.projects.find((x) => x.id === pid);
+    const doc = p.revs.find((r) => r.revision === 2).doc;
+    const s = doc.sources.find((x) => x.media === 'audio');
+    const c = doc.video.tracks.flatMap((t) => t.clips).find((x) => x.source === s?.id);
+    return s ? { kind: s.kind, mime: s.mime, length: c?.length ?? 0 } : null;
+  }, id);
+  check('sound: the recording is kept as a file on this device («على هذا الجهاز فقط»), about two seconds long', !!src && src.kind === 'local' && /^audio\//.test(src.mime) && src.length > 1_500_000 && src.length < 4_000_000, JSON.stringify(src));
+
+  // a sound track switched to music offers its lowering under speech
+  await rec.click();
+  await tab.locator('.st-ws-tab[data-panel="inspector"]').click();
+  await tab.locator('.st-insp').getByRole('radio', { name: 'موسيقى' }).click();
+  const duck = tab.locator('.st-insp').getByLabel('خفض الموسيقى تحت الكلام');
+  await duck.waitFor({ timeout: 3000 });
+  const roleNow = await tab.locator('.st-tl-head[data-kind="audio"] .st-tl-role').first().getAttribute('data-role');
+  check('sound: a sound track switched to music offers its lowering under speech', roleNow === 'music' && (await duck.count()) === 1, roleNow);
+  await tab.screenshot({ path: path.join(out, 'sound-1440.png') });
+  await ctx.close();
+}
+
 async function photoFlow(browser, base, errors) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const tab = await ctx.newPage();
@@ -781,7 +841,8 @@ async function phoneFlow(browser, base, errors) {
 (async () => {
   await build();
   const { server, base } = await serve(out, (p) => (p.startsWith('/motion/studio') ? page : undefined));
-  const browser = await chromium.launch(launchOptions);
+  // a fake microphone (a tone) and its permission granted, for «تسجيل صوت»
+  const browser = await chromium.launch({ ...launchOptions, args: [...(launchOptions.args || []), '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
   const errors = [];
   try {
     if (!only || only === 'video') await videoFlow(browser, base, errors);
@@ -791,6 +852,7 @@ async function phoneFlow(browser, base, errors) {
     if (!only || only === 'versions') await versionsFlow(browser, base, errors);
     if (!only || only === 'time') await timeFlow(browser, base, errors);
     if (!only || only === 'marks') await marksFlow(browser, base, errors);
+    if (!only || only === 'sound') await soundFlow(browser, base, errors);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));
   } finally {

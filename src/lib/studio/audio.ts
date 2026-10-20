@@ -5,7 +5,7 @@
 // cross-fades (clipGain, equal power), so the exported level is the previewed one. Windows are
 // contiguous and silent where nothing plays, as the encoder places each buffer after the last.
 import { US, durationOf, type Clip, type Micros, type ProjectDoc, type Track } from './schema.ts';
-import { clipGain, sourceOf } from './timeline.ts';
+import { mixGain, sourceOf } from './timeline.ts';
 import { retimed } from './speed.ts';
 
 export const SAMPLE_RATE = 48_000;
@@ -35,13 +35,16 @@ export function audibleIn(doc: ProjectDoc, from: Micros, to: Micros): { track: T
   return out;
 }
 
-/** A clip's gain sampled every GAIN_STEP over [from, to) of timeline time (for setValueCurveAtTime). */
-export function gainCurve(track: Track, clip: Clip, from: Micros, to: Micros, step: Micros = GAIN_STEP): Float32Array {
+/**
+ * A clip's gain sampled every GAIN_STEP over [from, to) of timeline time (for setValueCurveAtTime): its
+ * own gain and, on a music track, its lowering under speech (timeline.ts mixGain).
+ */
+export function gainCurve(doc: ProjectDoc, track: Track, clip: Clip, from: Micros, to: Micros, step: Micros = GAIN_STEP): Float32Array {
   const n = Math.max(2, Math.ceil((to - from) / step) + 1);
   const out = new Float32Array(n);
   for (let i = 0; i < n; i++) {
     const t = Math.min(to, from + i * step);
-    out[i] = t >= clip.start && t < clip.start + clip.length ? clipGain(track, clip, t) : 0;
+    out[i] = t >= clip.start && t < clip.start + clip.length ? mixGain(doc, track, clip, t) : 0;
   }
   return out;
 }
@@ -69,7 +72,7 @@ export async function mixWindow(doc: ProjectDoc, win: { from: Micros; to: Micros
     gain.gain.value = 0;
     const at = (from - win.from) / US;
     const end = (to - win.from) / US;
-    gain.gain.setValueCurveAtTime(gainCurve(track, clip, from, to), at, Math.max(1e-3, end - at));
+    gain.gain.setValueCurveAtTime(gainCurve(doc, track, clip, from, to), at, Math.max(1e-3, end - at));
     for await (const b of it) {
       // where this buffer falls on the window's clock; only the part inside the clip is played
       const bStart = b.timestamp - srcFrom + at;

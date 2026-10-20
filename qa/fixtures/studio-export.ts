@@ -5,7 +5,8 @@ import * as schema from '../../src/lib/studio/schema.ts';
 import * as timeline from '../../src/lib/studio/timeline.ts';
 import * as media from '../../src/lib/studio/media.ts';
 import * as cache from '../../src/lib/studio/cache.ts';
-import { exportVideo, exportStill, estimateBytes, outputSize } from '../../src/lib/studio/export.ts';
+import { exportVideo, exportStill, estimateBytes, outputSize, measureLoudness } from '../../src/lib/studio/export.ts';
+import { normalizeGain } from '../../src/lib/studio/loudness.ts';
 import { loadAssets } from '../../src/lib/motion/renderers.js';
 
 const US = schema.US;
@@ -83,6 +84,12 @@ export async function run() {
   const g = lone({ length: 6 * US, reverse: true });
   const rg = await exportVideo(g.doc, pool, { short: 720, format: 'mp4', name: 'معكوس.mp4' });
   out.g = { b64: await b64(rg.file), frames: rg.frames };
+
+  // H (MVP_draft.md 62.9): A measured by the studio's BS.1770 meter, then exported with «توحيد مستوى الصوت»
+  const ma = await measureLoudness(a, pool);
+  const gain = normalizeGain(ma);
+  const rh = await exportVideo(a, pool, { short: 720, format: 'mp4', name: 'موحد.mp4', gain });
+  out.h = { b64: await b64(rh.file), measured: ma.integrated, peak: ma.peakDb, gainDb: 20 * Math.log10(gain) };
 
   // the export was written through the browser's private storage
   const dir = await root.getDirectoryHandle('studio-exports');

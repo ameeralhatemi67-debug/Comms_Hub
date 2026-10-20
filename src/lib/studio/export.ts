@@ -15,6 +15,7 @@ import { openTarget, type Target } from './target.ts';
 import type { MediaPool } from './media.ts';
 import { loadFonts, usedFonts } from './text.ts';
 import { isHold, sourceTime } from './speed.ts';
+import { LoudnessMeter, type LoudnessResult } from './loudness.ts';
 
 export type Short = 720 | 1080 | 2160;
 export type VideoFormat = 'mp4' | 'webm';
@@ -72,10 +73,38 @@ function audioReader(pool: MediaPool, mb: typeof import('mediabunny')): AudioSou
   };
 }
 
+/**
+ * The loudness of the project's sound (MVP_draft.md 62.9): the same windows the export mixes, measured by
+ * BS.1770 (loudness.ts). «قياس المستوى», and the first pass of «توحيد مستوى الصوت».
+ */
+export async function measureLoudness(doc: ProjectDoc, pool: MediaPool, opts: { onProgress?: (f: number) => void; signal?: AbortSignal } = {}): Promise<LoudnessResult> {
+  const mb = await import('mediabunny');
+  const read = audioReader(pool, mb);
+  const meter = new LoudnessMeter();
+  const wins = windows(durationOf(doc));
+  for (let i = 0; i < wins.length; i++) {
+    if (opts.signal?.aborted) throw new ExportError('ABORTED');
+    const b = await mixWindow(doc, wins[i], read);
+    meter.push([b.getChannelData(0), b.getChannelData(1)]);
+    opts.onProgress?.((i + 1) / wins.length);
+  }
+  return meter.result();
+}
+
+/** Every sample of a mixed window times one gain (the export's «توحيد مستوى الصوت»). */
+function applyGain(b: AudioBuffer, gain: number): AudioBuffer {
+  if (gain === 1) return b;
+  for (let c = 0; c < b.numberOfChannels; c++) {
+    const d = b.getChannelData(c);
+    for (let i = 0; i < d.length; i++) d[i] *= gain;
+  }
+  return b;
+}
+
 export async function exportVideo(
   doc: ProjectDoc,
   pool: MediaPool,
-  opts: { short: Short; format: VideoFormat; name: string; onProgress?: (p: ExportProgress) => void; signal?: AbortSignal },
+  opts: { short: Short; format: VideoFormat; name: string; onProgress?: (p: ExportProgress) => void; signal?: AbortSignal; /** One gain for the whole sound (loudness.ts normalizeGain). */ gain?: number },
 ): Promise<ExportResult> {
   const mb = await import('mediabunny');
   // every font a text uses is ready before the first frame is drawn (fonts.ts: loaded only when used)
@@ -148,7 +177,7 @@ export async function exportVideo(
       if (opts.signal?.aborted) throw new ExportError('ABORTED');
       const t = frameStart(n, fps);
       // the sound stays one window ahead of the pictures
-      while (audio && wi < wins.length && wins[wi].from <= t) await audio.add(await mixWindow(doc, wins[wi++], read));
+      while (audio && wi < wins.length && wins[wi].from <= t) await audio.add(applyGain(await mixWindow(doc, wins[wi++], read), opts.gain ?? 1));
       const frames = new Map<string, CanvasImageSource | null>();
       for (const { clip } of visibleAt(doc, t)) if (sourceOf(doc, clip.source)?.media === 'video') frames.set(clip.id, await frameFor(clip, t));
       const res: Resolver = { motion, image: (id) => pool.image(id), videoFrame: (_s, _a, cid) => (cid ? (frames.get(cid) ?? null) : null) };
@@ -156,7 +185,7 @@ export async function exportVideo(
       await video.add(t / US, frameUs(fps) / US);
       if (n % 5 === 0 || n === total - 1) opts.onProgress?.({ phase: 'encode', done: n + 1, total });
     }
-    while (audio && wi < wins.length) await audio.add(await mixWindow(doc, wins[wi++], read));
+    while (audio && wi < wins.length) await audio.add(applyGain(await mixWindow(doc, wins[wi++], read), opts.gain ?? 1));
     opts.onProgress?.({ phase: 'finish', done: total, total });
     await output.finalize();
   } catch (e) {

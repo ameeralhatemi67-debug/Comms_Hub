@@ -48,7 +48,7 @@ test('a clip\'s gain over time: its volume, fade in and fade out, zero outside t
   let { doc, snd } = project();
   const r = addClip(doc, { source: snd, start: US, length: 4 * US, volume: 0.5, fadeIn: US, fadeOut: US });
   const { track, clip } = locate(r.doc, r.clipId);
-  const curve = gainCurve(track, clip, 0, 6 * US);
+  const curve = gainCurve(r.doc, track, clip, 0, 6 * US);
   const at = (t) => curve[Math.round(t / GAIN_STEP)];
   assert.equal(at(0.5 * US), 0, 'before the clip');
   assert.ok(Math.abs(at(1.5 * US) - 0.25) < 1e-6, 'half way through the fade in, at half volume');
@@ -64,8 +64,8 @@ test('a cross-fade mixes the two clips at equal power', () => {
   doc = setTransition(b.doc, b.clipId, US);
   const A1 = locate(doc, a.clipId);
   const B1 = locate(doc, b.clipId);
-  const ca = gainCurve(A1.track, A1.clip, 2 * US, 3 * US);
-  const cb = gainCurve(B1.track, B1.clip, 2 * US, 3 * US);
+  const ca = gainCurve(doc, A1.track, A1.clip, 2 * US, 3 * US);
+  const cb = gainCurve(doc, B1.track, B1.clip, 2 * US, 3 * US);
   for (let i = 0; i < ca.length - 1; i++) assert.ok(Math.abs(ca[i] ** 2 + cb[i] ** 2 - 1) < 1e-5, `sample ${i}`);
 });
 

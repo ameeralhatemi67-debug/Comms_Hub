@@ -168,7 +168,19 @@ export type TrackKind = 'video' | 'graphics' | 'text' | 'audio';
 export const TRACK_LIMITS: Record<TrackKind, number> = { video: 3, graphics: 2, text: 2, audio: 3 };
 export const TRACK_LABELS: Record<TrackKind, string> = { video: 'فيديو وصور', graphics: 'رسوم الحركة', text: 'نص', audio: 'صوت' };
 
-export type Track = { id: string; kind: TrackKind; muted?: boolean; hidden?: boolean; locked?: boolean; clips: Clip[]; [extra: string]: unknown };
+export type Track = {
+  id: string;
+  kind: TrackKind;
+  muted?: boolean;
+  hidden?: boolean;
+  locked?: boolean;
+  /** In the mix (MVP_draft.md 62.9): speech or music. Video tracks speak and sound tracks are music unless set. */
+  role?: 'voice' | 'music';
+  /** A music track lowered by this many decibels while speech is heard (0 or absent: not lowered). */
+  duck?: number;
+  clips: Clip[];
+  [extra: string]: unknown;
+};
 
 export type VideoBody = { ratio: Ratio; fps: Fps; background: string; tracks: Track[]; markers?: Marker[]; [extra: string]: unknown };
 

@@ -8,6 +8,7 @@
 import type { CanvasSink, Input, WrappedCanvas } from 'mediabunny';
 import { US, type Micros, type ProjectDoc, type Source } from './schema.ts';
 import { DeviceCache } from './cache.ts';
+import { PEAKS_PER_SECOND, peaksKey, reduceInto } from './peaks.ts';
 
 export type SourceState =
   | { kind: 'loading'; done: number; total: number }
@@ -222,6 +223,46 @@ export class MediaPool {
     return this.loaded.get(id)?.input ?? null;
   }
 
+  private peaksMap = new Map<string, Float32Array | 'working' | 'none'>();
+  /**
+   * The waveform of a source with sound (peaks.ts), or null while it is being worked out (onChange is
+   * called when it is ready). Worked out once per file and kept on this device in IndexedDB.
+   */
+  peaks(id: string): Float32Array | null {
+    const got = this.peaksMap.get(id);
+    if (got instanceof Float32Array) return got;
+    if (got) return null;
+    const l = this.loaded.get(id);
+    if (!l || !l.hasAudio || !l.input) return null;
+    this.peaksMap.set(id, 'working');
+    void (async () => {
+      try {
+        const key = peaksKey(l.source as { kind: string; asset?: string; version?: number; key?: string });
+        let p = await peakStore.get(key);
+        if (!p) {
+          const mb = await mediabunny();
+          const track = await l.input!.getPrimaryAudioTrack();
+          if (!track || !(await track.canDecode())) throw new Error('none');
+          const duration = (l.duration ?? 0) / US;
+          p = new Float32Array(Math.max(1, Math.ceil(duration * PEAKS_PER_SECOND)));
+          const sink = new mb.AudioBufferSink(track);
+          for await (const { buffer, timestamp } of sink.buffers(0, duration)) {
+            if (this.disposed) return;
+            const channels: Float32Array[] = [];
+            for (let c = 0; c < buffer.numberOfChannels; c++) channels.push(buffer.getChannelData(c));
+            reduceInto(p, { timestamp, channels, sampleRate: buffer.sampleRate });
+          }
+          await peakStore.put(key, p);
+        }
+        this.peaksMap.set(id, p);
+        if (!this.disposed) this.opts.onChange();
+      } catch {
+        this.peaksMap.set(id, 'none');
+      }
+    })();
+    return null;
+  }
+
   /** A media element for one playing clip, playing its source from its own place. */
   element(clipId: string, sourceId: string): HTMLMediaElement | null {
     const l = this.loaded.get(sourceId);
@@ -260,3 +301,47 @@ export class MediaPool {
     this.loaded.clear();
   }
 }
+
+/** Waveforms kept on this device («comms-hub-studio-peaks»), by file and version or device fingerprint. */
+const peakStore = (() => {
+  let db: Promise<IDBDatabase | null> | null = null;
+  const open = () =>
+    (db ??= new Promise<IDBDatabase | null>((resolve) => {
+      try {
+        const req = indexedDB.open('comms-hub-studio-peaks', 1);
+        req.onupgradeneeded = () => req.result.createObjectStore('peaks');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => resolve(null);
+      } catch {
+        resolve(null);
+      }
+    }));
+  return {
+    async get(key: string): Promise<Float32Array | null> {
+      const d = await open();
+      if (!d) return null;
+      return new Promise((resolve) => {
+        try {
+          const r = d.transaction('peaks', 'readonly').objectStore('peaks').get(key);
+          r.onsuccess = () => resolve(r.result instanceof ArrayBuffer ? new Float32Array(r.result) : null);
+          r.onerror = () => resolve(null);
+        } catch {
+          resolve(null);
+        }
+      });
+    },
+    async put(key: string, p: Float32Array): Promise<void> {
+      const d = await open();
+      if (!d) return;
+      await new Promise<void>((resolve) => {
+        try {
+          const r = d.transaction('peaks', 'readwrite').objectStore('peaks').put(p.buffer.slice(0), key);
+          r.onsuccess = () => resolve();
+          r.onerror = () => resolve();
+        } catch {
+          resolve();
+        }
+      });
+    },
+  };
+})();

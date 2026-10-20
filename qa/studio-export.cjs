@@ -107,6 +107,7 @@ function syncTimes(file) {
     const fe = save('e', 'mp4');
     const fff = save('f', 'mp4');
     const fg = save('g', 'mp4');
+    const fh = save('h', 'mp4');
     result.timing = { exportMs: r.a.ms, bytes: r.a.bytes, estimate: r.a.estimate };
 
     const pa = probe(fa);
@@ -143,6 +144,16 @@ function syncTimes(file) {
     const pg = probe(fg);
     const cg = frameColours(fg, [15, 90, 165]);
     check('reversed: 180 frames from the source\'s end to its start (blue, green, red)', Number(pg.streams.find((x) => x.codec_type === 'video')?.nb_read_frames) === 180 && near(cg[0], [0, 0, 255]) && near(cg[1], [0, 255, 0]) && near(cg[2], [255, 0, 0]), JSON.stringify(cg));
+    // loudness (MVP_draft.md 62.9): ffmpeg's EBU R128 meter as the reference
+    const lufs = (file) => {
+      const err = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', file, '-af', 'ebur128', '-f', 'null', '-']).stderr.toString();
+      const m = [...err.matchAll(/I:\s+(-?[\d.]+) LUFS/g)].pop();
+      return m ? Number(m[1]) : NaN;
+    };
+    const refA = lufs(fa);
+    check('the studio\'s BS.1770 meter agrees with ffmpeg\'s EBU R128 meter within 0.5 LU on the plain export', Math.abs(refA - r.h.measured) < 0.5, `studio ${r.h.measured.toFixed(2)}, ffmpeg ${refA}`);
+    const refH = lufs(fh);
+    check('«توحيد مستوى الصوت» brings the file to -14 LUFS within 1 LU (ffmpeg)', Math.abs(refH - -14) <= 1, `${refH} LUFS after +${r.h.gainDb.toFixed(2)} dB`);
     check('a still is a PNG of the project size showing the frame at 5 s (blue)', r.d.type === 'image/png' && sp === 'png,1920,1080' && near([still[0], still[1], still[2]], [0, 0, 255]), `${sp} ${[...still].join(',')}`);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));

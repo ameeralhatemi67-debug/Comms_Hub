@@ -5,7 +5,7 @@
 // plays its element at that rate (a ramp changes the rate every frame), silently; a reversed clip and a
 // still draw from the decoder while playing too (an element cannot play backwards). Browser only.
 import { durationOf, type Micros, type ProjectDoc } from './schema.ts';
-import { audibleAt, clipGain, visibleAt } from './timeline.ts';
+import { audibleAt, mixGain, visibleAt } from './timeline.ts';
 import { isHold, retimed, sourceTime, speedAt } from './speed.ts';
 import { composeFrame, type Resolver } from './compose.ts';
 import type { MediaPool } from './media.ts';
@@ -31,6 +31,8 @@ export class Player {
   private raf = 0;
   private startPerf = 0;
   private startT = 0;
+  /** Every sound off (while a voice-over is recorded, so the microphone does not hear the project). */
+  muted = false;
   /** The clips drawn from their media element while playing. */
   private live = new Set<string>();
   private readonly o: PlayerOptions;
@@ -121,7 +123,7 @@ export class Player {
     const doc = this.o.getDoc();
     const keep = new Set<string>();
     const heard = new Map<string, number>();
-    for (const { track, clip } of audibleAt(doc, this.t)) heard.set(clip.id, Math.max(0, Math.min(1, clipGain(track, clip, this.t))));
+    for (const { track, clip } of audibleAt(doc, this.t)) heard.set(clip.id, this.muted ? 0 : Math.max(0, Math.min(1, mixGain(doc, track, clip, this.t))));
     // reversed clips and stills are drawn from the decoder (frameNear), not from an element
     const seen = visibleAt(doc, this.t).filter(({ clip }) => clip.source && !clip.reverse && !isHold(clip) && doc.sources.find((s) => s.id === clip.source)?.media === 'video');
     const clips = new Map<string, (typeof seen)[number]['clip']>();

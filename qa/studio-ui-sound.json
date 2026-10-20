@@ -1,0 +1,34 @@
+{
+  "script": "qa/studio-ui.cjs",
+  "run": "2026-10-20T10:22:32.124Z",
+  "checks": [
+    {
+      "name": "sound: a video with sound shows its waveform in its clip",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sound: «تسجيل صوت» records after the count and puts the recording on a sound track that becomes speech, with its waveform",
+      "pass": true,
+      "detail": "تسجيل صوت 2026-10-20 13-22-45.webm voice"
+    },
+    {
+      "name": "sound: the recording is kept as a file on this device («على هذا الجهاز فقط»), about two seconds long",
+      "pass": true,
+      "detail": "{\"kind\":\"local\",\"mime\":\"audio/webm\",\"length\":2460000}"
+    },
+    {
+      "name": "sound: a sound track switched to music offers its lowering under speech",
+      "pass": true,
+      "detail": "music"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "total": 5,
+  "passed": 5,
+  "failed": 0
+}

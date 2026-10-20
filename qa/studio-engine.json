@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-engine.cjs",
-  "run": "2026-10-20T10:09:32.341Z",
+  "run": "2026-10-20T10:25:53.714Z",
   "checks": [
     {
       "name": "the shipped Arabic fonts load with Arabic sample text",
@@ -185,7 +185,7 @@
     {
       "name": "playing advances the playhead in real time and pause stops it",
       "pass": true,
-      "detail": "3.68 s"
+      "detail": "3.69 s"
     },
     {
       "name": "no page errors",

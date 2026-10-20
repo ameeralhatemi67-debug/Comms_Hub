@@ -293,6 +293,19 @@ body.st-ws-resize-y,body.st-ws-resize-y *{cursor:row-resize!important;user-selec
 .st-chapter-issues{margin:0;padding-inline-start:18px;font-size:12px;color:var(--warning-fg);display:grid;gap:2px}
 .st-chapters{font-size:12.5px;margin:0;resize:vertical}
 
+/* ---------- sound (MVP_draft.md 62.9) ---------- */
+.st-clip-wave{position:absolute;inset:6px 0 auto 0;pointer-events:none;opacity:.45}
+.st-clip-wave path{stroke:#fff;stroke-width:1.2;fill:none}
+.st-tl-role{min-height:0;width:24px;height:24px;padding:0;border:0;background:transparent;color:var(--ink-2)}
+.st-tl-role svg{width:14px;height:14px}
+.st-tl-role[data-role="voice"]{color:var(--ws-accent)}
+.st-rec-btn{color:#e0565b}
+.st-rec-meter{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.st-rec-meter i{display:block;height:100%;background:linear-gradient(90deg,#3fae7a,#d9ad4f 70%,#e0565b);transition:width .08s}
+.st-rec-count{font-size:44px;font-weight:700;text-align:center;color:var(--ink)}
+.st-rec-live{display:flex;align-items:center;gap:8px;color:#e0565b;font-weight:600}
+.st-level{display:grid;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
+
 /* ---------- the shortcuts sheet ---------- */
 .st-keysheet{display:grid;gap:12px}
 .st-keysheet section h3{font-size:13px;margin-bottom:6px;color:var(--ink-2)}

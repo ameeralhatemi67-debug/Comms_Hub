@@ -438,6 +438,62 @@ export function clipGain(track: Track, c: Clip, t: Micros): number {
   return v * g;
 }
 
+// ---------------------------------------------------------------------------
+// Music lowered under speech (MVP_draft.md 62.9)
+// ---------------------------------------------------------------------------
+
+/** How long music takes to go down before speech and back up after it. */
+export const DUCK_RAMP = 250_000;
+export const DUCK_MAX = 24;
+
+/** A track's part in the mix: video tracks speak and sound tracks are music, unless set. */
+export const roleOf = (t: Pick<Track, 'kind' | 'role'>): 'voice' | 'music' => (t.role === 'voice' || t.role === 'music' ? t.role : t.kind === 'video' ? 'voice' : 'music');
+
+/** How much speech is heard at t, 0 to 1: 1 inside a speech clip, falling to 0 over DUCK_RAMP around it. */
+export function speechAt(doc: ProjectDoc, t: Micros): number {
+  let v = 0;
+  for (const track of body(doc).tracks) {
+    if (track.muted || (track.kind !== 'audio' && track.kind !== 'video') || roleOf(track) !== 'voice') continue;
+    for (const c of track.clips) {
+      if (c.mute || retimed(c)) continue;
+      const s = sourceOf(doc, c.source);
+      if (!s || s.media === 'image') continue;
+      const out = t < c.start ? c.start - t : t > end(c) ? t - end(c) : 0;
+      const here = out === 0 ? 1 : Math.max(0, 1 - out / DUCK_RAMP);
+      if (here > v) v = here;
+      if (v >= 1) return 1;
+    }
+  }
+  return v;
+}
+
+/** The factor a music track is lowered by at t (1 when it is not). */
+export function duckGain(doc: ProjectDoc, track: Track, t: Micros): number {
+  const db = Math.max(0, Math.min(DUCK_MAX, track.duck ?? 0));
+  if (!db || roleOf(track) !== 'music') return 1;
+  const v = speechAt(doc, t);
+  return v ? Math.pow(10, (-db * v) / 20) : 1;
+}
+
+/** A clip's gain at t in the mix: its own (clipGain) times its track's lowering under speech. */
+export const mixGain = (doc: ProjectDoc, track: Track, clip: Clip, t: Micros) => clipGain(track, clip, t) * duckGain(doc, track, t);
+
+export function setTrackSound(doc: ProjectDoc, id: string, patch: { role?: 'voice' | 'music'; duck?: number }): ProjectDoc {
+  return withTracks(
+    doc,
+    body(doc).tracks.map((t) => {
+      if (t.id !== id) return t;
+      const next: Track = { ...t, ...patch };
+      if (patch.duck !== undefined) {
+        const d = Math.round(Math.max(0, Math.min(DUCK_MAX, patch.duck)));
+        if (d) next.duck = d;
+        else delete next.duck;
+      }
+      return next;
+    }),
+  );
+}
+
 /** A source added once: a library file at a version, or a device file by its key. Returns its id. */
 export function addSource(doc: ProjectDoc, src: NewSource): { doc: ProjectDoc; id: string } {
   const same = doc.sources.find((s) =>

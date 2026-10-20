@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-ui.cjs",
-  "run": "2026-10-20T10:12:27.753Z",
+  "run": "2026-10-20T10:24:26.070Z",
   "checks": [
     {
       "name": "the empty home says there are no projects yet and offers both kinds",
@@ -10,7 +10,7 @@
     {
       "name": "a new video project is created and opened in the editor",
       "pass": true,
-      "detail": "4b69741d-a7bd-4590-a62e-f06e6db971cc"
+      "detail": "aeb0c9f0-75ca-4f49-a0f4-8fd5a93cce84"
     },
     {
       "name": "the bar names the project and its first numbered version",
@@ -80,7 +80,7 @@
     {
       "name": "«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it",
       "pass": true,
-      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"f24180bb-d46f-4b13-85f5-14c7a35511a0\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
+      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"c59dac48-ee04-44a9-8d39-5ff4f03dd98a\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
     },
     {
       "name": "the result says it is in the library and that its uploader does not approve it",
@@ -90,12 +90,12 @@
     {
       "name": "the saved file is linked to the work through the work cycle (work_asset_link)",
       "pass": true,
-      "detail": "[{\"work\":\"CH-101\",\"asset\":\"f24180bb-d46f-4b13-85f5-14c7a35511a0\"}]"
+      "detail": "[{\"work\":\"CH-101\",\"asset\":\"c59dac48-ee04-44a9-8d39-5ff4f03dd98a\"}]"
     },
     {
       "name": "«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4",
       "pass": true,
-      "detail": "[{\"asset\":\"f24180bb-d46f-4b13-85f5-14c7a35511a0\",\"version\":1,\"revision\":3},{\"asset\":\"f24180bb-d46f-4b13-85f5-14c7a35511a0\",\"version\":2,\"revision\":4}]"
+      "detail": "[{\"asset\":\"c59dac48-ee04-44a9-8d39-5ff4f03dd98a\",\"version\":1,\"revision\":3},{\"asset\":\"c59dac48-ee04-44a9-8d39-5ff4f03dd98a\",\"version\":2,\"revision\":4}]"
     },
     {
       "name": "a timed review note of the exported file shows in the studio, and its time moves the playhead",
@@ -120,7 +120,7 @@
     {
       "name": "the space bar plays and pauses, and the time runs",
       "pass": true,
-      "detail": "00:00.03 / 00:06.00 to 00:01.01 / 00:06.00"
+      "detail": "00:00.03 / 00:06.00 to 00:01.02 / 00:06.00"
     },
     {
       "name": "ws: the video editor opens as windows in tab groups, every window of the editor present",
@@ -235,7 +235,7 @@
     {
       "name": "ws: dragging a corner of the selected title on the preview scales it",
       "pass": true,
-      "detail": "100 to 152"
+      "detail": "100 to 143"
     },
     {
       "name": "ws: «السجل» lists the steps, goes back to the project as it was opened and forward to the last step",
@@ -428,14 +428,34 @@
       "detail": "graphics إخفاء بالمربعات"
     },
     {
+      "name": "sound: a video with sound shows its waveform in its clip",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sound: «تسجيل صوت» records after the count and puts the recording on a sound track that becomes speech, with its waveform",
+      "pass": true,
+      "detail": "تسجيل صوت 2026-10-20 13-25-51.webm voice"
+    },
+    {
+      "name": "sound: the recording is kept as a file on this device («على هذا الجهاز فقط»), about two seconds long",
+      "pass": true,
+      "detail": "{\"kind\":\"local\",\"mime\":\"audio/webm\",\"length\":2220000}"
+    },
+    {
+      "name": "sound: a sound track switched to music offers its lowering under speech",
+      "pass": true,
+      "detail": "music"
+    },
+    {
       "name": "no page errors",
       "pass": true,
       "detail": ""
     }
   ],
   "debugTime": "00:02.00 / 00:07.24",
-  "projectId": "4b69741d-a7bd-4590-a62e-f06e6db971cc",
-  "total": 86,
-  "passed": 86,
+  "projectId": "aeb0c9f0-75ca-4f49-a0f4-8fd5a93cce84",
+  "total": 90,
+  "passed": 90,
   "failed": 0
 }

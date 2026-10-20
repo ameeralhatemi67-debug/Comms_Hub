@@ -9,13 +9,13 @@ import type { ReactNode } from 'react';
 import { Copy, Scissors, Trash2, ArrowLeftToLine, Frame, RotateCcw, MousePointerClick, Blend, Diamond, ChevronLeft, ChevronRight, Snowflake, KeyRound } from 'lucide-react';
 import {
   FPS_CHOICES, RATIOS, STICKERS, STICKER_LABELS, US, canvasOf, durationOf,
-  type Clip, type Cover, type Crop, type Layer, type ProjectDoc, type Ratio, type TextStyle, type Transform,
+  type Clip, type Cover, type Crop, type Layer, type ProjectDoc, type Ratio, type TextStyle, type Track, type Transform,
 } from '@/lib/studio/schema';
 import { WEIGHT_LABELS, fontDef, nearestWeight } from '@/lib/studio/fonts';
 import { ANIMATIONS, DEFAULT_ANIM_LENGTH, DEFAULT_TRANSITION, ENTER_NONE, TRANSITIONS, entryOf, entryPatch, type EnterValue, type TransitionKind } from '@/lib/studio/transitions';
 import { withKeys } from '@/lib/studio/shortcuts';
 import { changedParams, graphicById, motionParams, naturalLength, holdKey } from '@/lib/studio/motion-adapter';
-import { setFormat, sourceOf } from '@/lib/studio/timeline';
+import { DUCK_MAX, roleOf, setFormat, sourceOf } from '@/lib/studio/timeline';
 import { shortTime } from '@/lib/studio/time';
 import { transformOf } from '@/lib/studio/compose';
 import { EASES, KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAt, keyTimes, transformWithKeys, writeTransform as writeTransformKeys, type Ease, type KeyProp, type Keys, type MotionProp } from '@/lib/studio/keys';
@@ -337,13 +337,16 @@ export type KeyActions = {
 };
 
 export function Inspector({
-  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, onLength, compact = false, t = 0, keyActions,
+  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, onLength, compact = false, t = 0, keyActions, track, onTrackSound,
 }: {
   doc: ProjectDoc;
   clip: Clip | null;
   /** The playhead (keyframes and speed are read and set there). */
   t?: number;
   keyActions?: KeyActions;
+  /** The selected clip's track, and its part in the mix (MVP_draft.md 62.9). */
+  track?: Track;
+  onTrackSound?: (patch: { role?: 'voice' | 'music'; duck?: number }) => void;
   onClip: Patch;
   onDoc?: (doc: ProjectDoc, label: string, key?: string) => void;
   readOnly: boolean;
@@ -498,6 +501,14 @@ export function Inspector({
         <Section title="الصوت">
           <Slider label="مستوى الصوت" value={Math.round((clip.volume ?? 1) * 100)} min={0} max={200} step={1} unit="٪" disabled={readOnly || !!clip.mute} onChange={(v) => onClip({ volume: v / 100 }, 'مستوى الصوت', 'volume')} hint={(clip.volume ?? 1) > 1 ? 'ما فوق 100٪ يُسمع في الملف المصدَّر، والمعاينة تقف عند 100٪.' : undefined} />
           <Switch label="كتم صوت هذا المقطع" checked={!!clip.mute} onChange={(v) => onClip({ mute: v }, 'كتم الصوت')} disabled={readOnly} />
+          {media === 'audio' && track && onTrackSound && (
+            <>
+              <Segmented label="المسار في المزج" size="sm" value={roleOf(track)} disabled={readOnly} onChange={(v) => onTrackSound({ role: v })} options={[{ value: 'voice', label: 'كلام' }, { value: 'music', label: 'موسيقى' }]} />
+              {roleOf(track) === 'music' && (
+                <Slider label="خفض الموسيقى تحت الكلام" value={track.duck ?? 0} min={0} max={DUCK_MAX} step={1} unit="ديسيبل" disabled={readOnly} onChange={(v) => onTrackSound({ duck: v })} hint={track.duck ? 'تنخفض الموسيقى بهذا القدر كلما سُمع كلام، بانتقال ناعم.' : 'صفر: لا تنخفض.'} />
+              )}
+            </>
+          )}
           {media === 'audio' && (
             <>
               <Slider label="ظهور تدريجي للصوت" value={sec(clip.fadeIn ?? 0)} min={0} max={5} step={0.05} decimals={2} unit="ث" disabled={readOnly} onChange={(v) => onClip({ fadeIn: usOf(v) }, 'ظهور تدريجي', 'fadeIn')} />

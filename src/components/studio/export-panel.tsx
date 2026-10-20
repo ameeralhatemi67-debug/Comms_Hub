@@ -11,7 +11,9 @@ import Link from 'next/link';
 import { Download, Film, Image as ImageIcon, Library, X } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { durationOf, type Micros, type ProjectDoc } from '@/lib/studio/schema';
-import { EXPORT_ERRORS, ExportError, SHORT_LABELS, estimateBytes, exportStill, exportVideo, fileName, outputSize, type ExportProgress, type Short, type VideoFormat } from '@/lib/studio/export';
+import { EXPORT_ERRORS, ExportError, SHORT_LABELS, estimateBytes, exportStill, exportVideo, fileName, measureLoudness, outputSize, type ExportProgress, type Short, type VideoFormat } from '@/lib/studio/export';
+import { LOUDNESS_TARGET, lufsText, normalizeGain } from '@/lib/studio/loudness';
+import { hasSound } from '@/lib/studio/audio';
 import { download } from '@/lib/studio/target';
 import { formatBytes, probeSupport } from '@/lib/studio/support';
 import { shortTime } from '@/lib/studio/time';
@@ -62,6 +64,8 @@ export function ExportPanel({
   const [hidden, setHidden] = useState(false);
   const [linkWork, setLinkWork] = useState(true);
   const [linkNote, setLinkNote] = useState<string | null>(null);
+  const [normalize, setNormalize] = useState(false);
+  const [level, setLevel] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
   const lastUrl = useRef<string | null>(null);
 
@@ -130,6 +134,14 @@ export function ExportPanel({
         rev = revision();
       }
       const name = fileName(title, ext);
+      // «توحيد مستوى الصوت»: measured first, then one gain for the whole sound
+      let gain = 1;
+      if (what === 'video' && normalize && hasSound(doc)) {
+        const m = await measureLoudness(doc, pool, { signal: ctl.signal, onProgress: (f) => setProgress({ label: `جارٍ قياس مستوى الصوت ${Math.round(f * 100)}٪`, f }) });
+        gain = normalizeGain(m);
+        const after = m.integrated + 20 * Math.log10(gain);
+        setLevel(`كان الصوت ${lufsText(m.integrated)}، وصار في الملف نحو ${lufsText(after)}${after < LOUDNESS_TARGET - 0.5 ? ' (أوقفته القمم عند -1 ديسيبل)' : ''}.`);
+      }
       let file: File;
       if (what === 'still') {
         setProgress({ label: 'جارٍ إنشاء الصورة…', f: 0.5 });
@@ -139,6 +151,7 @@ export function ExportPanel({
           short,
           format,
           name,
+          gain,
           signal: ctl.signal,
           onProgress: (p: ExportProgress) => setProgress({ label: p.phase === 'prepare' ? 'جارٍ التجهيز…' : p.phase === 'finish' ? 'جارٍ إنهاء الملف…' : `جارٍ التصدير ${Math.round((p.done / p.total) * 100)}٪`, f: p.done / Math.max(1, p.total) }),
         });
@@ -246,6 +259,32 @@ export function ExportPanel({
       <p className="st-hint">
         {what === 'video' ? <>المدة {shortTime(durationOf(doc))} · <bdi dir="ltr">{size.w}×{size.h}</bdi> · نحو {formatBytes(estimateBytes(doc, short))} (تقدير)</> : <><bdi dir="ltr">{size.w}×{size.h}</bdi></>}
       </p>
+      {what === 'video' && hasSound(doc) && (
+        <div className="st-level">
+          <label className="st-switch-row">
+            <input type="checkbox" checked={normalize} onChange={(e) => setNormalize(e.target.checked)} disabled={busy} />
+            توحيد مستوى الصوت ({LOUDNESS_TARGET} LUFS، والقمم دون -1 ديسيبل)
+          </label>
+          <button
+            type="button"
+            className="st-mini"
+            disabled={busy || !pool}
+            onClick={async () => {
+              if (!pool) return;
+              setLevel('جارٍ القياس…');
+              try {
+                const m = await measureLoudness(doc, pool);
+                setLevel(`مستوى صوت المشروع ${lufsText(m.integrated)}، وأعلى قمة ${Number.isFinite(m.peakDb) ? `${m.peakDb.toFixed(1)} ديسيبل` : 'لا شيء'}.`);
+              } catch {
+                setLevel('تعذّر القياس.');
+              }
+            }}
+          >
+            قياس المستوى
+          </button>
+          {level && <p className="st-hint" role="status">{level}</p>}
+        </div>
+      )}
       {what === 'video' && <p className="st-hint">يجري التصدير في هذا المتصفح: أبقِ الصفحة ظاهرة حتى ينتهي.</p>}
       {hidden && <p className="st-hint st-warn" role="alert">الصفحة مخفية الآن، فيتباطأ التصدير. أعدها إلى الواجهة.</p>}
       {progress ? (
