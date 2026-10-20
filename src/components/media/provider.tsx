@@ -18,6 +18,7 @@ import {
 } from '@/lib/media/rules';
 import { uploadNewAsset, uploadNewVersion } from '@/lib/media/upload';
 import { useKitMaybe } from '../kit';
+import { msOfTimecode } from '@/lib/media/notes';
 
 export type FolderRow = {
   id: string;
@@ -313,9 +314,8 @@ export function MediaProvider({ children }: { children: ReactNode }) {
         return done(error);
       },
       async addNote(assetId, body, timecode) {
-        const { error } = await db()
-          .from('media_notes')
-          .insert({ asset_id: assetId, author: account.email, body, timecode: timecode || null });
+        // through media_note_add (supabase/migrations/20261020150000_studio_connections.sql)
+        const { error } = await db().rpc('media_note_add', { p_asset: assetId, p_body: body, p_at_ms: msOfTimecode(timecode), p_version: null, p_area: null, p_parent: null });
         return done(error);
       },
       async record(type, assetId) {

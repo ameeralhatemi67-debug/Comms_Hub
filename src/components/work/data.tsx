@@ -20,6 +20,7 @@ import {
   type WorkType,
 } from '@/lib/work/rules';
 import type { EventItem, HeldMail, ReminderItem, RequestRow, TaskItem } from '@/lib/work/planning';
+import { addNote, msOfTimecode } from '@/lib/media/notes';
 
 export type Person = { email: string; display_name: string; role: Role };
 export type Load = {
@@ -322,8 +323,11 @@ export async function fileNotes(ids: string[]): Promise<FileNote[]> {
   return (data ?? []) as FileNote[];
 }
 export async function addFileNote(assetId: string, author: string, body: string, timecode: string): Promise<string | null> {
-  const { error } = await supabase().from('media_notes').insert({ asset_id: assetId, author, body, timecode: timecode || null });
-  return error ? 'تعذّر حفظ الملاحظة. الوقت بصيغة دقيقة:ثانية، مثل 00:32.' : null;
+  // through media_note_add (supabase/migrations/20261020150000_studio_connections.sql); `author` is the caller
+  void author;
+  if (timecode && msOfTimecode(timecode) === null) return 'الوقت بصيغة دقيقة:ثانية، مثل 00:32.';
+  const r = await addNote((fn, args) => supabase().rpc(fn, args), { asset: assetId, body, atMs: msOfTimecode(timecode) });
+  return 'error' in r ? r.error : null;
 }
 
 // ---------------------------------------------------------------------------

@@ -924,6 +924,9 @@ export function noticeHref(go: { page?: string; id?: string; tab?: string } | nu
       return g.id ? `/mail?thread=${g.id}` : '/mail';
     case 'chat':
       return g.id ? `/mail/chat?room=${g.id}` : '/mail/chat';
+    // the studio (MVP_draft.md 62.14): notes on its files, a take-over of its editing
+    case 'studio':
+      return g.id ? `/motion/studio/${g.id}` : '/motion/studio';
     // Permissions (Permissions_Plan.md): a person's own permissions are on their account
     // page; the people, roles, requests and log are on «الحسابات».
     case 'profile':

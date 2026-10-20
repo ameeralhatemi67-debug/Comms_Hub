@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-ui.cjs",
-  "run": "2026-10-19T19:00:59.161Z",
+  "run": "2026-10-20T11:07:40.236Z",
   "checks": [
     {
       "name": "the empty home says there are no projects yet and offers both kinds",
@@ -10,7 +10,7 @@
     {
       "name": "a new video project is created and opened in the editor",
       "pass": true,
-      "detail": "9774fec0-b86d-4946-8044-bde2509bc822"
+      "detail": "22b3df83-0667-4bda-8017-bb341263350e"
     },
     {
       "name": "the bar names the project and its first numbered version",
@@ -45,7 +45,7 @@
     {
       "name": "dragging a clip moves it along the timeline",
       "pass": true,
-      "detail": "17 to 137"
+      "detail": "21 to 141"
     },
     {
       "name": "the inspector edits the title's words",
@@ -80,7 +80,7 @@
     {
       "name": "«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it",
       "pass": true,
-      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"c4d405b4-5c64-416e-aa8c-4df9af6bd23a\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
+      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"2e46794b-b356-4188-a308-e4b2aefd9e6f\",\"version\":1,\"revision\":3,\"shape\":\"16:9\"}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
     },
     {
       "name": "the result says it is in the library and that its uploader does not approve it",
@@ -90,12 +90,12 @@
     {
       "name": "the saved file is linked to the work through the work cycle (work_asset_link)",
       "pass": true,
-      "detail": "[{\"work\":\"CH-101\",\"asset\":\"c4d405b4-5c64-416e-aa8c-4df9af6bd23a\"}]"
+      "detail": "[{\"work\":\"CH-101\",\"asset\":\"2e46794b-b356-4188-a308-e4b2aefd9e6f\"}]"
     },
     {
       "name": "«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4",
       "pass": true,
-      "detail": "[{\"asset\":\"c4d405b4-5c64-416e-aa8c-4df9af6bd23a\",\"version\":1,\"revision\":3},{\"asset\":\"c4d405b4-5c64-416e-aa8c-4df9af6bd23a\",\"version\":2,\"revision\":4}]"
+      "detail": "[{\"asset\":\"2e46794b-b356-4188-a308-e4b2aefd9e6f\",\"version\":1,\"revision\":3,\"shape\":\"16:9\"},{\"asset\":\"2e46794b-b356-4188-a308-e4b2aefd9e6f\",\"version\":2,\"revision\":4,\"shape\":\"16:9\"}]"
     },
     {
       "name": "a timed review note of the exported file shows in the studio, and its time moves the playhead",
@@ -129,7 +129,7 @@
     }
   ],
   "debugTime": "00:02.00 / 00:07.24",
-  "projectId": "9774fec0-b86d-4946-8044-bde2509bc822",
+  "projectId": "22b3df83-0667-4bda-8017-bb341263350e",
   "total": 25,
   "passed": 25,
   "failed": 0

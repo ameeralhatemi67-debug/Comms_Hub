@@ -1,0 +1,117 @@
+{
+  "run": "2026-10-20",
+  "what": "Database rule run for the studio third round, Phase 7 (MVP_draft.md 62.12 to 62.14): versioned and area notes, answers and done, studio notices, a project for a work, a request for a folder",
+  "migration": "20261020150000_studio_connections.sql, run inside the same rolled-back transaction before it was applied; then applied to comms-hub",
+  "how": "supabase/tests/studio_connections_rules.sql with the migration placed after begin: one transaction, rolled back, the work-number sequence restored with setval. Four throwaway accounts (@t.test: director, assistant, Admin, writer), a file in the unfiled folder and one in a restricted folder, acting through row level security.",
+  "result": "TOTAL row: 27 checks, 27 passed",
+  "checks": [
+    {
+      "k": "00a the director's project",
+      "pass": true
+    },
+    {
+      "k": "00b exports the file",
+      "pass": true
+    },
+    {
+      "k": "01 the assistant notes a moment of version 1 with an area of the frame",
+      "pass": true
+    },
+    {
+      "k": "02 the note keeps its exact time, its minutes and seconds, its version and its area",
+      "pass": true
+    },
+    {
+      "k": "03 an area outside the frame is refused",
+      "pass": true
+    },
+    {
+      "k": "04 a version the file does not have is refused",
+      "pass": true
+    },
+    {
+      "k": "05 the director, owner of the studio project, is told, and the notice opens the studio",
+      "pass": true
+    },
+    {
+      "k": "06 the director answers the note",
+      "pass": true
+    },
+    {
+      "k": "07 the answer belongs to the note and its version",
+      "pass": true
+    },
+    {
+      "k": "08 an answer to an answer is refused (one level)",
+      "pass": true
+    },
+    {
+      "k": "09 the writer, who sees the file, reads the notes",
+      "pass": true
+    },
+    {
+      "k": "10 but cannot mark the assistant's note done",
+      "pass": true
+    },
+    {
+      "k": "11 the director, a leader, marks it done",
+      "pass": true
+    },
+    {
+      "k": "12 done, by the director",
+      "pass": true
+    },
+    {
+      "k": "13 its author opens it again",
+      "pass": true
+    },
+    {
+      "k": "14 open again",
+      "pass": true
+    },
+    {
+      "k": "15 the director opens a work",
+      "pass": true
+    },
+    {
+      "k": "16 and a studio project made for it",
+      "pass": true
+    },
+    {
+      "k": "17 the project is linked to the work",
+      "pass": true
+    },
+    {
+      "k": "18 the writer cannot make one",
+      "pass": true
+    },
+    {
+      "k": "19 the Admin takes the editing of the director's project",
+      "pass": true
+    },
+    {
+      "k": "20 the Admin builds a project on the private file",
+      "pass": true
+    },
+    {
+      "k": "21 the director is told the editing was taken",
+      "pass": true
+    },
+    {
+      "k": "22 the director asks for the private file's folder from the project",
+      "pass": true
+    },
+    {
+      "k": "23 a folder-access request is pending, for the director",
+      "pass": true
+    },
+    {
+      "k": "24 a file the director already sees needs no request",
+      "pass": true
+    },
+    {
+      "k": "25 the older direct insert of a note still works",
+      "pass": true
+    }
+  ]
+}
