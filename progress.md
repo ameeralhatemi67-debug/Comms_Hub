@@ -1047,3 +1047,11 @@ When recording future implementation outcomes, follow this standardized template
   - The look of the dark chrome was judged from screenshots, not by the owner.
   - Performance at 1/32 against full on a slow computer was not measured; only that the canvas is drawn at the chosen size.
 - **Deployed.** On the owner's request `main` was pushed (`8258a13..294b8cc`, with the earlier record commit `72ce966`). Vercel deployment `dpl_7vPfQGLbnHSTAVDJm5XWZ492bbu6` was serving within about 40 seconds: the live pages name it. Signed out, `/health` answers 200, and `/motion`, `/motion/studio`, a project address and `/login` each show the sign-in form. Vercel reported no runtime errors in the first ten minutes.
+
+### 2026-10-20: the studio, third round, Phase 0: plan and specification
+
+- **What the owner asked.** To plan and build two lists from the review of the studio: tools inside it (versions, speed and keyframes, markers, covered areas, sound, more shapes, platform checks, captions out, templates and a brand kit) and the studio joined to the rest of the site (the work, the review screen, tasks, the calendar, mail, messaging, requests, the library, notifications, projects and Home).
+- **Owner answers, same day.** Keyframes and speed ramps are built now; automatic captions and background removal stay out (Version 0 has no AI); `media_notes` records a note's file version and, when wanted, an area of the frame; on the review screen approval has a key that must be held, and stays bound to the exact version.
+- **Decisions of the plan.** No «مسودة» mark on a library file (what is approved there is what is published), so the mark is for downloads only; a re-timed clip is silent; approval stays outside the studio; no Realtime publication is added.
+- **Documents.** `MVP_draft.md` 62.6 to 62.14; `Studio_Build_Plan.md` section 10 (answers, decisions, fourteen phases) and section 7 updated; `Ideas_Backlog.md` I-023 in build.
+- **Verified.** Documents only; no code changed in this step.

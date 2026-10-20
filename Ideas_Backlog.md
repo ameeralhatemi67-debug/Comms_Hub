@@ -75,7 +75,7 @@ needs production infrastructure (storage, workers, integrations) from Version 2 
 | I-020 | Member status page: next step, deadlines and notes in one place | R01 F-R01-16, Severity 4 | S | After O-005 settles the Member role | Parked |
 | I-021 | Command palette, Ctrl K, with Arabic-normalised search | Identity proposal | S | Checkpoint 0.3.3 if approved, else here | Parked |
 | I-022 | Dark mode | Identity proposal | S | Checkpoint 0.3.4 if approved, else here | Parked |
-| I-023 | Open Motion Studio from a work item with suggested templates | Identity proposal | S | Checkpoint 0.3.4 if approved, else here | Parked |
+| I-023 | Open Motion Studio from a work item with suggested templates | Identity proposal | S | Studio third round, Phase 8 (`Studio_Build_Plan.md` section 10) | In build |
 | I-024 | Timed retries for outside deliveries (WhatsApp, later others) by a cron or edge function | Owner, 2026-10-13 | S | Only if the "no background worker" boundary is lifted | Parked |
 
 ## 3. Owner ideas
@@ -252,3 +252,4 @@ Not repeated here; see the owner input log.
 |---|---|
 | 2026-10-10 | File created. I-001 and I-002 from the owner; I-003 to I-017 agent suggestions; I-018 to I-020 from response R01; I-021 to I-023 from the identity proposal |
 | 2026-10-13 | I-024 added from the owner: timed retries for outside deliveries |
+| 2026-10-20 | I-023 taken into the studio third round (the owner asked to plan and build the studio's links to the work cycle); I-007 face blurring partly met there by covered areas in video and photos |

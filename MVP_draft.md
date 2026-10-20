@@ -2582,3 +2582,77 @@ Owner request of 2026-10-20 (the layout of a desktop video editor). On a compute
 
 - The preview can be drawn at a share of its size on screen, separately while playing and while paused: كاملة، 1/2، 1/3، 1/4، 1/8، 1/16، 1/32, from «المعاينة» or «عرض». A lowered resolution is marked on the preview. The export is always drawn at its full size.
 - The selected clip or layer has handles on the preview: its body moves it (snapping to the middle lines), a corner scales it about its centre, and the round handle above it turns it (Shift in steps of 15 degrees). The handles keep their size on screen.
+
+## 62.6 Versions of a project, 2026-10-20
+
+Owner request of 2026-10-20 (the third round, `Studio_Build_Plan.md` section 10). A window «النسخ» lists the numbered versions of the project, newest first: number, date, who saved it, its note, and the library files exported from it.
+- «عرض» opens that version for reading only (`/motion/studio/<id>?v=N`), with a banner; no lease is taken.
+- «استعادة» (long press) makes that version the current state. When the project has changes not yet kept in a numbered version, they are first saved as «قبل استعادة النسخة N»; the restored state is then saved as «استعادة النسخة N». No version is ever removed.
+- «مقارنة بالحالية» lists in words what differs: clips added, removed, moved, trimmed or changed, files changed, shape or frame rate changed.
+
+## 62.7 Speed, ramps, reverse, freeze and keyframes, 2026-10-20
+
+- A clip of video has a speed from 0.1 to 8 times; a ramp is a list of speed points inside the clip, joined in straight lines, so the speed changes smoothly. «عكس» plays the clip backwards. «تجميد الإطار» (Shift+F) cuts at the playhead and puts in a two-second still of that frame, moving the rest of the track forward; a still is a clip like any other and can be lengthened.
+- A clip whose speed is not 1, that has a ramp, plays backwards or is a still is silent; the settings say so. A reversed clip takes longer to export, and the settings say that too.
+- Keyframes: position, size, turn and opacity of any visual clip can change over time. Beside each of these settings a key button sets a key at the playhead; once a setting has keys, changing it (in the settings or with the handles on the preview) sets or moves the key at the playhead. P sets keys for all four at the playhead. Keys are shown as small diamonds on the selected clip in the timeline and dragged there; [ and ] go to the previous and next key. Each key has a curve: straight, ease in, ease out, ease both, or hold.
+- Cutting a clip keeps its movement on both sides; trimming its start keeps every key where it was in time.
+- The preview and the export use the same calculation; the paused frame is the exported frame.
+
+## 62.8 Markers, chapters and covered areas, 2026-10-20
+
+- Markers: M puts a marker at the playhead; markers sit on the time ruler, edges snap to them, and the window «العلامات» lists them with their names and colours, renames them, removes them and moves the playhead to them.
+- Chapters: «نسخ الفصول» copies the markers as YouTube chapter lines (time and name), after checking YouTube's own rules for chapters; a broken rule is said in words.
+- Covered areas: «تمويه منطقة» and «إخفاء بالمربعات» in «النصوص والعلامات» add a box or an oval that blurs, or turns into large squares, whatever is under it, on a video (as a clip) or a photo (as a layer). Its strength is set in the settings. With keyframes it follows a moving face or plate. The preview and the export cover the same pixels.
+
+## 62.9 Sound, 2026-10-20
+
+- Waveforms are drawn inside sound clips and inside video clips that have sound. They are worked out once per file and kept on this device.
+- «تسجيل صوت» records from the microphone after a three-second count and puts the recording on a free sound track at the playhead. The recording is a file on this device («على هذا الجهاز فقط») until it is uploaded to the library. On a phone the tool is shown disabled with its reason.
+- A sound track is «كلام» or «موسيقى». A music track can be lowered under speech by a set number of decibels, smoothly, whenever a speech clip is heard. The preview and the export lower it alike.
+- «توحيد مستوى الصوت» in the export makes the file's loudness reach a target (-14 LUFS by default) without its peaks passing -1 dB. «قياس المستوى» shows the project's loudness before exporting.
+
+## 62.10 Export, second round, 2026-10-20
+
+- Other shapes: a video project can add up to three more shapes (9:16, 16:9, 1:1, 4:5) beside its own. «الشكل المعروض» in the preview shows one; while another shape is shown, a change to a clip's place, size or turn applies to that shape only. The export ticks the shapes wanted and makes one file for each, named with its shape.
+- Checks: for the platforms of the linked work (or ones chosen) the export lists what does not fit, such as a shape a platform does not take or a length above its limit. The list is shown before the export starts and is confirmed; only what the site itself refuses stops it.
+- «تصدير الترجمة SRT» writes the texts of a text track as an SRT file, downloaded or saved to the library.
+- «علامة مسودة» writes the word «مسودة» across a downloaded video or picture. It is never offered for a file saved to the library: what is approved there is the exact file that is published.
+- «إطار إلى مشروع صورة» starts a photo project whose picture is the frame at the playhead, read from the same library file, for covers and thumbnails.
+
+## 62.11 Templates and the brand kit, 2026-10-20
+
+- «حفظ قالباً» marks a project as a template; the studio home shows «القوالب», and «مشروع من قالب» starts a new project from a template's latest numbered version. A template is still a project and can be edited.
+- In a template a clip or layer can be «مثبّت في القالب»: it is not moved, trimmed or removed by mistake until it is released by a long press. This is a guide, not a lock on anyone.
+- «هوية الاستوديو» keeps up to twelve named colours and a font for titles and one for text, shared by everyone who may open the studio. Colour choices show these colours first, and a new text takes these fonts.
+
+## 62.12 The studio and the work, 2026-10-20
+
+- Every work page offers «فتح في الاستوديو» to those who may open the studio. If a project of that work exists it opens; otherwise a new project linked to the work is made, its shape and frame rate taken from the work's platforms, with templates suited to the work's type shown first.
+- A linked project shows the work in its title row: number and title, status, the date of the current stage, the delivery date and the publish time. It is read again when the page comes back into view, every minute, and after an export. When the work is approved or scheduled it says that a new version sends it back to review.
+- «تصدير وإرسال للمراجعة» (Ctrl+Shift+M) shows the checks of 62.10, saves a numbered version, exports, saves the file to the library (a new version of the work's file from this project, or a new file linked to the work), then sends the work to review with the note «من الاستوديو: النسخة N», and says who decides next. It is offered while the work is in production or needs changes; otherwise it says why. The studio still approves nothing: the director's own export is decided by the assistant.
+- «المراجعة» shows the notes of every file the project exported, by version. Each note can be answered and marked «تم». Notes with a time are marks on the time ruler at their place in the export of their version; when the project changed since that export the window says so. N and Shift+N go to the next and previous open note. When the work needs changes, a banner shows the request and its notes.
+- «إدراج نص العمل» and «إدراج نسخة منصة» put the work's latest text or a platform's copy on the timeline as a text clip. When the work's text changes later, the clip says «تغير نص العمل» and offers «تحديث».
+- «إضافة الفصول إلى نسخة يوتيوب» writes the chapter lines into a new version of the work's YouTube copy, after saying that it is a new version.
+- Reserved places: «مكان محجوز» is a clip of a set length, drawn striped with its description, standing for a picture, video or sound still to come. «إسناد مهمة» on it makes a task for a person (the work, the kind, the person, the due date, and a note with its time, length and size), with the frame attached when wanted. When the task is done the place shows «سُلّمت» and the files added to the work since the task began; «وضعه مكان المحجوز» puts the chosen file there at its exact version.
+- From the title row: «طلب تمديد» for the owner of the current stage, and «تذكير», a private reminder on the calendar.
+- A source marked «لا تملك صلاحية هذا الملف» offers «طلب الوصول», which asks for its folder without showing the folder.
+
+## 62.13 The review screen, 2026-10-20
+
+On «المراجعة» (`/approvals/<id>`), for files of video:
+- Keys: Space and K play and pause; J and L move a second; the arrows move a frame; Shift+G shows the Reels safe zones; ? shows the keys.
+- N writes a note at the current frame, bound to the version shown. Dragging on the paused picture marks an area for the note; a selected note shows its area. Notes are marks under the player, for «هذا الإصدار» or «كل الإصدارات». Notes can be answered and marked «تم».
+- «مقارنة بالإصدار السابق» shows the previous version beside the current one, or under a wipe, both moving together.
+- R opens «طلب تعديل» with this version's notes. A, held as long as a long press, approves the file shown at its version; Shift+A, held, is «اعتماد الكل». A key works only where its button works: nobody approves what they uploaded or sent.
+- ] and [ open the next and previous work waiting for a decision, in the order of «الموافقات والنشر»; after a decision the screen offers «التالي».
+- An address with `?t=` (seconds) and `&v=` (version) opens the player at that moment.
+
+## 62.14 The studio elsewhere in the site, 2026-10-20
+
+- Mail: after saving to the library, «إرسال بالبريد» opens the mail composer with the file attached and, while the file is in review, an approval card. The person sends it.
+- Messaging: «مشاركة في المراسلة» sends the file to a chosen room with its title, a time and a link to the review screen at that time; «طلب الاعتماد في غرفة الفريق» sends an approval card while the file is in review.
+- The library: a clip whose file has a newer version shows «إصدار أحدث» and «تحديث إلى الإصدار n»; nothing changes until then. «المعتمد فقط» narrows the media window. A file's page tells those who may open the studio how many studio projects use it.
+- Notifications: a note on a file exported from the studio tells the project's owner and last editor; taking over editing tells the person who was editing. Both open the studio.
+- The calendar marks works that have a studio project and opens them in the studio; an event offers «تحضير محتوى لهذه المناسبة», which makes a video work for the event and its studio project.
+- A project page lists the studio projects of its works; Home has a «الاستوديو» section with the projects being edited, the open notes on studio files and the nearest dates of linked works.
+- All of these are shown only to those who may open the studio.

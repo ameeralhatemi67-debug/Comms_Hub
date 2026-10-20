@@ -209,8 +209,11 @@ owner's review; the page guide; a studio paragraph in `AGENTS.md`; `Status.md`, 
 | Shared temporary storage with a ten-day remote cleanup | The same, and an owner decision on a scratch storage role. |
 | Desktop application (Tauri) | Phases 1 to 6 accepted; signing and update accounts. |
 | Phone applications (Capacitor) | Phone web accepted; Apple and Google developer accounts. |
-| Review notes bound to a version, or to an area of a picture | An owner decision on changing `media_notes`. |
-| Editing together at the same time, speed ramps, keyframes, RAW, PSD, HDR | A stated need. |
+| Review notes bound to a version, or to an area of a picture | Decided by the owner on 2026-10-20: built in the third round (section 10). |
+| Speed ramps and keyframes | Asked for by the owner on 2026-10-20: built in the third round (section 10). |
+| Editing together at the same time, RAW, PSD, HDR | A stated need. |
+| Automatic captions, background removal | They need AI, which Version 0 does not have (owner answer of 2026-10-20). An owner decision and the agent computer. |
+| Sound kept at its pitch when a clip's speed changes | A stated need (third round decision: a re-timed clip is silent). |
 
 ## 8. Verification
 
@@ -242,3 +245,47 @@ in `MVP_draft.md` 62.1 to 62.5:
 | A lower preview quality for smooth playback (1/2 to 1/32) | Separate playing and paused resolutions: full, 1/2, 1/3, 1/4, 1/8, 1/16, 1/32; the export stays full. |
 | Ten English and twelve Arabic fonts | `fonts.ts` and `studio-fonts.ts`, pinned `@fontsource` packages, loaded only when used; a font list with previews. |
 | Better interface and handling | Handles to scale and turn on the canvas, drag and drop from every window to the timeline and the preview, a clip menu, copy and paste, the razor, Ctrl and wheel zoom, a snap line, the history window, the editor filling the browser window. |
+
+## 10. Third round, the owner's request of 2026-10-20
+
+The owner asked for two lists from the review of the studio: tools inside the studio, and the studio
+joined to the rest of the site (the work cycle, the review screen, tasks, the calendar, mail,
+messaging, requests, the library, notifications, projects and Home). Specified in `MVP_draft.md` 62.6
+to 62.14.
+
+**Owner answers of 2026-10-20.**
+- Keyframes and speed ramps are built now.
+- Automatic captions and background removal stay out: Version 0 has no AI.
+- `media_notes` records the file version a note was written on and, when wanted, an area of the frame.
+- On the review screen approval has a key, held as long as a long press; changes and notes are plain
+  keys; approval stays bound to the exact version.
+
+**Decisions of the plan.**
+- No «مسودة» mark on a file saved to the library: approval binds the exact file that is published.
+  The mark is offered on downloads only.
+- A clip whose speed is not 1, that has a ramp, plays backwards or is a still has no sound.
+- Approval never happens inside the studio; the studio delivers a version to review, and every
+  approval key is on the review screen.
+- No Realtime publication is added: the studio's work bar reads again on focus, every minute and
+  after an export, as the notifications do.
+
+**Phases.** Each ends with typecheck, build and tests passing, its own checks under `qa/`, a local
+commit and a `progress.md` entry.
+
+| Phase | What |
+|---|---|
+| 0 | This section and `MVP_draft.md` 62.6 to 62.14. |
+| 1 | «النسخ»: open, restore and compare numbered versions. |
+| 2 | Speed, ramps, reverse, freeze and keyframes on one source-time function. |
+| 3 | Markers and YouTube chapters; covered areas (blur, squares). |
+| 4 | Waveforms, recording, lowering music under speech, loudness. |
+| 5 | Several shapes, platform checks, SRT out, the download mark, frame to photo project. |
+| 6 | Templates and «هوية الاستوديو». |
+| 7 | The database for the connections: versioned and area notes, replies, «تم», notices, a project from a work, access requests. |
+| 8 | The studio and the work: open from any work, the work bar, «تصدير وإرسال للمراجعة», notes on the time ruler, the work's texts, chapters to the YouTube copy. |
+| 9 | The review screen: keys, notes at a frame with an area, comparing versions, keys for decisions, the next work. |
+| 10 | Reserved places and their tasks. |
+| 11 | The calendar, extension requests and reminders. |
+| 12 | Mail and messaging. |
+| 13 | The library, notifications, projects and Home. |
+| 14 | Guides and records; the owner's signed-in walkthrough. |
