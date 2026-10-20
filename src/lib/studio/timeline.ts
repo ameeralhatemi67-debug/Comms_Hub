@@ -13,6 +13,8 @@ import {
 } from './schema.ts';
 import { frameUs } from './time.ts';
 import type { TransitionKind } from './transitions.ts';
+import { MOTION_PROPS, shiftKeys, splitKeys, tidyKeys, valueAt as valueAtKeys, type KeyProp } from './keys.ts';
+import { area, clampSpeed, isHold, lengthForSpan, maxLengthFor, retimed, sourceSpan, sourceTime, speedAt } from './speed.ts';
 
 export type Located = { track: Track; clip: Clip; ti: number; ci: number };
 
@@ -38,12 +40,17 @@ export function locate(doc: ProjectDoc, id: string): Located | null {
 
 export const sourceOf = (doc: ProjectDoc, id: string | undefined): Source | undefined => (id ? doc.sources.find((s) => s.id === id) : undefined);
 
-/** How long a clip may be cut from its source: the source's duration less where it starts. */
+/** How long a clip may be cut from its source: until its source runs out, at its speed (speed.ts). */
 export function maxLengthOf(doc: ProjectDoc, c: Clip): Micros {
   const s = sourceOf(doc, c.source);
   if (!s || s.media === 'image' || !s.duration) return Number.POSITIVE_INFINITY;
-  return Math.max(0, s.duration - (c.in ?? 0));
+  return maxLengthFor(c, s.duration);
 }
+
+/** The plain values of a clip's keyed settings (what a key added at a cut starts from). */
+const baseValues = (c: Clip): Partial<Record<KeyProp, number>> => ({
+  x: c.transform?.x ?? 0, y: c.transform?.y ?? 0, scale: c.transform?.scale ?? 1, rotation: c.transform?.rotation ?? 0, opacity: c.transform?.opacity ?? 1, speed: c.speed ?? 1,
+});
 
 /** The track kind a clip belongs on. */
 export function kindFor(doc: ProjectDoc, c: Pick<Clip, 'source' | 'motion' | 'text' | 'sticker' | 'shape'>): TrackKind {
@@ -175,7 +182,11 @@ export function moveClip(doc: ProjectDoc, id: string, start: Micros, trackId?: s
   );
 }
 
-/** Move a clip's start edge (its end stays). Video and sound cannot reach before their source's start. */
+/**
+ * Move a clip's start edge (its end stays). Video and sound cannot reach before their source's start (or,
+ * reversed, past its end); keys stay where they were in time; a re-timed clip moves through its source at
+ * its own speed (speed.ts).
+ */
 export function trimStart(doc: ProjectDoc, id: string, newStart: Micros): ProjectDoc {
   const at = locate(doc, id);
   if (!at || at.track.locked) return doc;
@@ -186,11 +197,38 @@ export function trimStart(doc: ProjectDoc, id: string, newStart: Micros): Projec
   let start = Math.round(newStart);
   start = Math.min(start, end(c) - min);
   start = Math.max(start, 0);
-  if (timed || c.motion) start = Math.max(start, c.start - (c.in ?? 0));
-  const delta = start - c.start;
-  const next: Clip = { ...c, start, length: c.length - delta, ...(timed || c.motion ? { in: (c.in ?? 0) + delta } : {}) };
+  let next: Clip;
+  if (timed && !isHold(c) && retimed(c)) {
+    const from = c.in ?? 0;
+    if (c.reverse) {
+      // the stretch's start (in) stays; its end may not pass the source's end
+      const room = (s.duration ?? Number.POSITIVE_INFINITY) - (from + sourceSpan(c));
+      const earliest = room === Number.POSITIVE_INFINITY ? -Infinity : c.start - (lengthAtBack(c, room));
+      start = Math.max(start, earliest);
+      const delta = start - c.start;
+      next = { ...c, start, length: c.length - delta, keys: shiftKeys(c.keys, -delta) };
+    } else {
+      const earliest = c.start - lengthAtBack(c, from);
+      start = Math.max(start, earliest);
+      const delta = start - c.start;
+      next = { ...c, start, length: c.length - delta, in: Math.max(0, Math.round(from + area(c, 0, delta))), keys: shiftKeys(c.keys, -delta) };
+    }
+  } else {
+    if ((timed && !isHold(c)) || c.motion) start = Math.max(start, c.start - (c.in ?? 0));
+    const delta = start - c.start;
+    next = { ...c, start, length: c.length - delta, ...((timed && !isHold(c)) || c.motion ? { in: (c.in ?? 0) + delta } : {}), keys: shiftKeys(c.keys, -delta) };
+  }
+  if (!next.keys) delete next.keys;
   if (!fits(at.track, next)) return doc;
-  return updateClip(doc, id, next);
+  // replaced whole: a field removed here stays removed
+  return updateClip(doc, id, () => next);
+}
+
+/** How far before its start a re-timed clip may reach to cover `amount` of source. */
+function lengthAtBack(c: Clip, amount: number): Micros {
+  if (amount <= 0) return 0;
+  // the speed before the clip's start is that of its first moment
+  return Math.round(amount / clampSpeed(speedAt(c, 0)));
 }
 
 /** Move a clip's end edge. A motion clip's showcase follows its length (see motion-adapter). */
@@ -199,7 +237,12 @@ export function trimEnd(doc: ProjectDoc, id: string, newEnd: Micros): ProjectDoc
   if (!at || at.track.locked) return doc;
   const c = at.clip;
   const length = Math.min(Math.max(minLength(doc), Math.round(newEnd) - c.start), maxLengthOf(doc, c));
-  const next = { ...c, length };
+  let next: Clip = { ...c, length };
+  // reversed, the end shows the stretch's start: it moves through the source while the start stays
+  if (c.reverse && !isHold(c) && sourceOf(doc, c.source)?.media === 'video') {
+    const hi = (c.in ?? 0) + sourceSpan(c);
+    next = { ...next, in: Math.max(0, Math.round(hi - area(c, 0, length))) };
+  }
   if (!fits(at.track, next)) return doc;
   return updateClip(doc, id, next);
 }
@@ -212,8 +255,20 @@ export function splitClip(doc: ProjectDoc, id: string, t: Micros): { doc: Projec
   const min = minLength(doc);
   const cut = Math.round(t);
   if (cut < c.start + min || cut > end(c) - min) return { doc, secondId: null };
-  const first: Clip = { ...c, length: cut - c.start, fadeOut: 0 };
-  const second: Clip = { ...structuredClone(c), id: uid('c'), start: cut, length: end(c) - cut, in: (c.in ?? 0) + (cut - c.start), fadeIn: 0, transition: null };
+  const d = cut - c.start;
+  const [ka, kb] = splitKeys(c.keys, d, baseValues(c));
+  const first: Clip = { ...c, length: d, fadeOut: 0, keys: ka };
+  const second: Clip = { ...structuredClone(c), id: uid('c'), start: cut, length: end(c) - cut, in: (c.in ?? 0) + d, fadeIn: 0, transition: null, keys: kb };
+  if (isHold(c)) second.in = c.in;
+  else if (retimed(c) && c.source) {
+    // forwards the second part starts where the source reached; reversed the first part ends there
+    const from = c.in ?? 0;
+    if (c.reverse) {
+      first.in = Math.round(from + area(c, d, c.length));
+      second.in = from;
+    } else second.in = Math.round(from + area(c, 0, d));
+  }
+  for (const x of [first, second]) if (!x.keys) delete x.keys;
   const tracks = body(doc).tracks.map((tr, i) => (i === at.ti ? { ...tr, clips: [...tr.clips.filter((x) => x.id !== id), first, second].sort(byStart) } : tr));
   return { doc: withTracks(doc, tracks), secondId: second.id };
 }
@@ -341,7 +396,7 @@ export function audibleAt(doc: ProjectDoc, t: Micros): { track: Track; clip: Cli
   for (const track of body(doc).tracks) {
     if (track.muted || (track.kind !== 'audio' && track.kind !== 'video')) continue;
     for (const clip of track.clips) {
-      if (clip.mute || !(clip.start <= t && t < end(clip))) continue;
+      if (clip.mute || retimed(clip) || !(clip.start <= t && t < end(clip))) continue;
       const s = sourceOf(doc, clip.source);
       if (s && s.media !== 'image') out.push({ track, clip });
     }
@@ -417,4 +472,104 @@ export function setFormat(doc: ProjectDoc, patch: { ratio?: Ratio; fps?: Fps; ba
     ? v.tracks.map((t) => ({ ...t, clips: t.clips.map((c) => (c.transform ? { ...c, transform: { ...c.transform, x: c.transform.x * kx, y: c.transform.y * ky } } : c)) }))
     : v.tracks;
   return { ...doc, video: { ...v, ...patch, tracks } };
+}
+
+// ---------------------------------------------------------------------------
+// Speed, reverse and stills (MVP_draft.md 62.7, speed.ts)
+// ---------------------------------------------------------------------------
+
+/** Where the next clip on the clip's track starts (the room a longer clip has), or Infinity. */
+function roomAfter(track: Track, c: Clip): Micros {
+  const later = track.clips.filter((o) => o.id !== c.id && o.start >= end(c) - (o.transition?.length ?? 0) - 1);
+  return later.length ? Math.min(...later.map((o) => o.start + (o.transition?.length ?? 0))) - c.start : Number.POSITIVE_INFINITY;
+}
+
+/**
+ * A new constant speed for a video clip. It keeps showing the same stretch of its source, so its length
+ * changes (twice as fast, half as long), within the room before the next clip on its track and the end of
+ * its source. A clip with a ramp keeps its ramp: the ramp's points are its speed.
+ */
+export function setSpeed(doc: ProjectDoc, id: string, speed: number): ProjectDoc {
+  const at = locate(doc, id);
+  if (!at || at.track.locked || isHold(at.clip)) return doc;
+  const c = at.clip;
+  const v = clampSpeed(speed);
+  const span = sourceSpan(c);
+  const next: Clip = { ...c, speed: v === 1 ? undefined : v };
+  if (next.speed === undefined) delete next.speed;
+  if (!c.keys?.speed?.length) next.length = lengthForSpan(next, span);
+  next.length = Math.max(minLength(doc), Math.min(next.length, roomAfter(at.track, c), maxLengthOf(doc, next)));
+  return fits(at.track, next) ? updateClip(doc, id, () => next) : doc;
+}
+
+/** New speed keys (a ramp) for a clip; its length is cut back if the ramp now runs past its source. */
+export function setSpeedKeys(doc: ProjectDoc, id: string, keys: Clip['keys']): ProjectDoc {
+  const at = locate(doc, id);
+  if (!at || at.track.locked || isHold(at.clip)) return doc;
+  const next: Clip = { ...at.clip, keys: tidyKeys(keys) };
+  if (!next.keys) delete next.keys;
+  next.length = Math.max(minLength(doc), Math.min(next.length, maxLengthOf(doc, next)));
+  return updateClip(doc, id, () => next);
+}
+
+/** Plays the clip's stretch of its source backwards, or forwards again. */
+export function setReverse(doc: ProjectDoc, id: string, reverse: boolean): ProjectDoc {
+  const at = locate(doc, id);
+  if (!at || at.track.locked || isHold(at.clip) || sourceOf(doc, at.clip.source)?.media !== 'video') return doc;
+  const next: Clip = { ...at.clip, reverse: reverse || undefined };
+  if (!next.reverse) delete next.reverse;
+  return updateClip(doc, id, () => next);
+}
+
+export const HOLD_LENGTH = 2 * 1_000_000;
+
+/**
+ * «تجميد الإطار»: the clip is cut at t and a still of the frame shown at t is put in between, `length`
+ * long; the rest of the track moves forward by that length. The still keeps the clip's place, size,
+ * crop and colours as they are at t, and is silent. Returns the still's id, or null when t is not inside
+ * a video clip.
+ */
+export function insertHold(doc: ProjectDoc, id: string, t: Micros, length: Micros = HOLD_LENGTH): { doc: ProjectDoc; holdId: string | null } {
+  const at = locate(doc, id);
+  if (!at || at.track.locked || sourceOf(doc, at.clip.source)?.media !== 'video') return { doc, holdId: null };
+  const c = at.clip;
+  const cut = Math.round(t);
+  if (cut < c.start || cut >= end(c)) return { doc, holdId: null };
+  const shown = sourceTime(c, cut);
+  const tau = cut - c.start;
+  const base = { x: c.transform?.x, y: c.transform?.y, scale: c.transform?.scale ?? 1, rotation: c.transform?.rotation ?? 0, opacity: c.transform?.opacity ?? 1 };
+  const frozen: Record<string, number | undefined> = { ...base };
+  if (c.keys) for (const p of MOTION_PROPS) if (c.keys[p]?.length) frozen[p] = valueOfKeys(c, p, tau, base[p] ?? 0);
+  let d = doc;
+  const min = minLength(doc);
+  // too near an edge to cut: the still goes after the clip (or before it, at its very start)
+  let ins = cut;
+  if (cut > c.start + min && cut < end(c) - min) d = splitClip(d, id, cut).doc;
+  else if (cut > c.start) ins = end(c);
+  const len = Math.max(min, Math.round(length));
+  // the rest of the track moves forward to make room; a clip that faded in from here now meets the still
+  const moves = (x: Clip) => x.start >= ins || (x.id !== c.id && !!x.transition && x.start > c.start && x.start < ins && x.start + x.transition.length >= ins);
+  d = withTracks(d, body(d).tracks.map((tr) => (tr.id !== at.track.id ? tr : { ...tr, clips: tr.clips.map((x) => (moves(x) ? { ...x, start: (x.start < ins ? ins : x.start) + len, ...(x.start < ins ? { transition: null } : {}) } : x)).sort(byStart) })));
+  const holdId = uid('c');
+  const still: Clip = {
+    id: holdId,
+    source: c.source,
+    start: ins,
+    length: len,
+    hold: shown,
+    mute: true,
+    ...(c.transform ? { transform: { x: frozen.x ?? c.transform.x, y: frozen.y ?? c.transform.y, scale: frozen.scale ?? 1, rotation: frozen.rotation ?? 0, opacity: frozen.opacity ?? 1 } } : {}),
+    ...(c.fit ? { fit: c.fit } : {}),
+    ...(c.crop ? { crop: { ...c.crop } } : {}),
+    ...(c.adjust ? { adjust: { ...c.adjust } } : {}),
+  };
+  d = withTracks(d, body(d).tracks.map((tr) => (tr.id === at.track.id ? { ...tr, clips: [...tr.clips, still].sort(byStart) } : tr)));
+  return { doc: d, holdId };
+}
+
+function valueOfKeys(c: Clip, p: KeyProp, tau: Micros, base: number): number {
+  const ks = c.keys?.[p] ?? [];
+  if (!ks.length) return base;
+  // the same straight-or-eased reading the compositor uses
+  return valueAtKeys(ks, tau, base);
 }

@@ -1,9 +1,12 @@
 // The studio's preview player (MVP_draft.md 62). While playing, each visible or audible media clip has
 // its own media element, kept in step with the timeline clock (re-seeked when it drifts by more than
 // 0.12 s) and drawn onto the canvas; its sound plays at the clip's gain. While paused, frames come from
-// Mediabunny, the decoder the export uses, so a paused frame is the exported frame. Browser only.
+// Mediabunny, the decoder the export uses, so a paused frame is the exported frame. A clip at another speed
+// plays its element at that rate (a ramp changes the rate every frame), silently; a reversed clip and a
+// still draw from the decoder while playing too (an element cannot play backwards). Browser only.
 import { durationOf, type Micros, type ProjectDoc } from './schema.ts';
 import { audibleAt, clipGain, visibleAt } from './timeline.ts';
+import { isHold, retimed, sourceTime, speedAt } from './speed.ts';
 import { composeFrame, type Resolver } from './compose.ts';
 import type { MediaPool } from './media.ts';
 import type { MotionRenderer } from './motion-adapter.ts';
@@ -28,6 +31,8 @@ export class Player {
   private raf = 0;
   private startPerf = 0;
   private startT = 0;
+  /** The clips drawn from their media element while playing. */
+  private live = new Set<string>();
   private readonly o: PlayerOptions;
 
   constructor(o: PlayerOptions) {
@@ -39,7 +44,7 @@ export class Player {
       motion: this.o.motion,
       image: (id) => this.o.pool.image(id),
       videoFrame: (id, at, clipId) => {
-        if (this.playing && clipId) {
+        if (this.playing && clipId && this.live.has(clipId)) {
           const el = this.o.pool.element(clipId, id) as HTMLVideoElement | null;
           if (el && el.readyState >= 2 && el.videoWidth) return el;
         }
@@ -72,6 +77,7 @@ export class Player {
 
   pause() {
     this.playing = false;
+    this.live = new Set();
     cancelAnimationFrame(this.raf);
     this.o.pool.pauseExcept(new Set());
     this.draw();
@@ -116,7 +122,8 @@ export class Player {
     const keep = new Set<string>();
     const heard = new Map<string, number>();
     for (const { track, clip } of audibleAt(doc, this.t)) heard.set(clip.id, Math.max(0, Math.min(1, clipGain(track, clip, this.t))));
-    const seen = visibleAt(doc, this.t).filter(({ clip }) => clip.source && doc.sources.find((s) => s.id === clip.source)?.media === 'video');
+    // reversed clips and stills are drawn from the decoder (frameNear), not from an element
+    const seen = visibleAt(doc, this.t).filter(({ clip }) => clip.source && !clip.reverse && !isHold(clip) && doc.sources.find((s) => s.id === clip.source)?.media === 'video');
     const clips = new Map<string, (typeof seen)[number]['clip']>();
     for (const v of seen) clips.set(v.clip.id, v.clip);
     for (const { clip } of audibleAt(doc, this.t)) clips.set(clip.id, clip);
@@ -124,7 +131,15 @@ export class Player {
       const el = this.o.pool.element(clip.id, clip.source!);
       if (!el) continue;
       keep.add(clip.id);
-      const want = ((clip.in ?? 0) + (this.t - clip.start)) / 1e6;
+      const want = sourceTime(clip, this.t) / 1e6;
+      const rate = retimed(clip) ? speedAt(clip, this.t - clip.start) : 1;
+      if (Math.abs(el.playbackRate - rate) > 1e-3) {
+        try {
+          el.playbackRate = rate;
+        } catch {
+          // a rate the browser refuses: the drift check keeps the picture in step
+        }
+      }
       if (force || Math.abs(el.currentTime - want) > DRIFT) {
         try {
           el.currentTime = want;
@@ -138,6 +153,7 @@ export class Player {
       if (el.paused) void el.play().catch(() => undefined);
     }
     this.o.pool.pauseExcept(keep);
+    this.live = keep;
   }
 
   dispose() {

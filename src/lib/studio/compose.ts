@@ -8,6 +8,8 @@ import { clipAlpha, sourceOf, visibleAt } from './timeline.ts';
 import { MotionRenderer, fitToLength, graphicById, motionDims, motionParams, settledSec, sticker, templateTime } from './motion-adapter.ts';
 import { drawText, layoutText, textMotion } from './text.ts';
 import { NO_FX, clipAnimFx, clipTransitionFx, combine, type Fx } from './transitions.ts';
+import { transformWithKeys } from './keys.ts';
+import { sourceTime } from './speed.ts';
 
 export type Resolver = {
   /** The frame of a video source shown at `at` (source time) for a clip, or null while it is not ready. */
@@ -27,6 +29,17 @@ export const IDENTITY: Transform = { x: 0, y: 0, scale: 1, rotation: 0, opacity:
 export function transformOf(item: { transform?: Transform }, W: number, H: number): Transform {
   const t = item.transform;
   return { x: t?.x ?? W / 2, y: t?.y ?? H / 2, scale: t?.scale ?? 1, rotation: t?.rotation ?? 0, opacity: t?.opacity ?? 1 };
+}
+
+/**
+ * A clip's transform at timeline time t, with its keyframes (keys.ts) applied; a photo layer, or no time,
+ * gives the plain transform.
+ */
+export function transformAt(item: Clip | Layer, t: Micros | null, W: number, H: number): Transform {
+  const base = transformOf(item, W, H);
+  const c = item as Clip;
+  if (t === null || !c.keys || typeof c.start !== 'number') return base;
+  return transformWithKeys(base, c.keys, t - c.start);
 }
 
 /** The size a content of natural size (w, h) takes in a W x H canvas before its own scale. */
@@ -85,7 +98,7 @@ function contentOf(doc: ProjectDoc, item: Clip | Layer, t: Micros | null, res: R
       const natural = sizeOf(pre) ?? (s.w && s.h ? { w: s.w, h: s.h } : null);
       return natural ? { img: pre, natural, fitInCanvas: true, preAdjusted: true } : null;
     }
-    const img = s.media === 'video' ? res.videoFrame(s.id, Math.max(0, ((item as Clip).in ?? 0) + (t === null ? 0 : t - ((item as Clip).start ?? 0))), item.id) : s.media === 'image' ? res.image(s.id) : null;
+    const img = s.media === 'video' ? res.videoFrame(s.id, t === null ? Math.max(0, (item as Clip).in ?? 0) : sourceTime(item as Clip, t), item.id) : s.media === 'image' ? res.image(s.id) : null;
     const natural = sizeOf(img) ?? (s.w && s.h ? { w: s.w, h: s.h } : null);
     if (!natural) return null;
     return { img, natural, fitInCanvas: true };
@@ -153,9 +166,9 @@ function contentOf(doc: ProjectDoc, item: Clip | Layer, t: Micros | null, res: R
 }
 
 /** Where an item sits on the canvas (canvas pixels), for drawing, picking and the selection outline. */
-export function boxOf(doc: ProjectDoc, item: Clip | Layer, res: Resolver, ctx: CanvasRenderingContext2D | null = null): Box | null {
+export function boxOf(doc: ProjectDoc, item: Clip | Layer, res: Resolver, ctx: CanvasRenderingContext2D | null = null, t: Micros | null = null): Box | null {
   const { w: W, h: H } = canvasOf(doc);
-  const tr = transformOf(item, W, H);
+  const tr = transformAt(item, t, W, H);
   if (item.text) {
     if (!ctx) return { cx: tr.x, cy: tr.y, w: item.text.width * W * tr.scale, h: item.text.size * item.text.lineHeight * tr.scale, rotation: tr.rotation };
     const L = layoutText(ctx, item.text, W, 1);
@@ -176,7 +189,7 @@ export function boxOf(doc: ProjectDoc, item: Clip | Layer, res: Resolver, ctx: C
  */
 export function drawItem(ctx: CanvasRenderingContext2D, doc: ProjectDoc, item: Clip | Layer, t: Micros | null, res: Resolver, scale: number, alpha = 1, fx: Fx = NO_FX) {
   const { w: W, h: H } = canvasOf(doc);
-  const tr = transformOf(item, W, H);
+  const tr = transformAt(item, t, W, H);
   let a = alpha * tr.opacity * fx.alpha;
   let dx = fx.dx;
   let dy = fx.dy;
@@ -308,7 +321,7 @@ export function composePhoto(ctx: CanvasRenderingContext2D, doc: ProjectDoc, res
 export function pick(doc: ProjectDoc, x: number, y: number, t: Micros | null, res: Resolver, ctx: CanvasRenderingContext2D | null): string | null {
   const items: (Clip | Layer)[] = doc.kind === 'photo' ? (doc.photo?.layers ?? []).filter((l) => !l.hidden && !l.locked) : visibleAt(doc, t ?? 0).filter((v) => !v.track.locked).map((v) => v.clip);
   for (let i = items.length - 1; i >= 0; i--) {
-    const b = boxOf(doc, items[i], res, ctx);
+    const b = boxOf(doc, items[i], res, ctx, doc.kind === 'photo' ? null : (t ?? 0));
     if (!b) continue;
     const r = (-b.rotation * Math.PI) / 180;
     const px = (x - b.cx) * Math.cos(r) - (y - b.cy) * Math.sin(r);

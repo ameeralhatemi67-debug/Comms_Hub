@@ -195,6 +195,20 @@ body.st-ws-resize-y,body.st-ws-resize-y *{cursor:row-resize!important;user-selec
 .st-clip-xfade{display:grid;place-items:center;color:#fff}
 .st-clip-xfade svg{width:13px;height:13px;opacity:.9}
 .st-clip-anim{position:absolute;bottom:0;height:4px;background:rgba(242,211,138,.85);pointer-events:none}
+/* ---------- keyframes and speed (MVP_draft.md 62.7) ---------- */
+.st-clip-speed{font-size:10px;padding:0 5px;border-radius:4px;background:rgba(0,0,0,.28);color:#fff;white-space:nowrap;position:relative}
+.st-clip-key{position:absolute;top:50%;width:11px;height:11px;margin:-6px 0 0 -6px;background:#f2d38a;border:1.5px solid #6b4e12;transform:rotate(45deg);border-radius:2px;cursor:ew-resize;z-index:3}
+.st-clip-key:hover{background:#fff}
+.st-keyrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:end}
+.st-keybtn{min-height:30px;width:30px;padding:0;border-radius:6px;margin-bottom:6px;color:var(--muted);background:transparent}
+.st-keybtn svg{width:15px;height:15px}
+.st-keybtn[data-keyed="yes"]{color:var(--ws-accent)}
+.st-keybtn[data-on="yes"]{color:#1b1407;background:var(--ws-accent);border-color:var(--ws-accent)}
+.st-keybtn[data-on="yes"] svg{fill:currentColor}
+.st-keytools{display:grid;gap:8px}
+.st-keynav{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.st-keynav .st-mini{min-height:28px;padding:3px 9px;font-size:12px}
+
 .st-clip-anim.in{left:0;border-radius:0 2px 0 0}
 .st-clip-anim.out{right:0;border-radius:2px 0 0 0}
 .st-clip[data-drop="start"]{box-shadow:inset 6px 0 0 #f2d38a,0 0 0 2px #f2d38a}

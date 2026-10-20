@@ -11,6 +11,7 @@ import * as cache from '../../src/lib/studio/cache.ts';
 import * as media from '../../src/lib/studio/media.ts';
 import * as preview from '../../src/lib/studio/preview.ts';
 import * as persist from '../../src/lib/studio/persist.ts';
+import * as speed from '../../src/lib/studio/speed.ts';
 import { loadAssets } from '../../src/lib/motion/renderers.js';
 
 type Check = { name: string; pass: boolean; detail: string };
@@ -83,7 +84,7 @@ export async function run(): Promise<{ checks: Check[]; log: string[] }> {
     for (const { clip } of timeline.visibleAt(d, t)) {
       const s = d.sources.find((x) => x.id === clip.source);
       if (s?.media === 'video') {
-        const f = await pool.frameAt(s.id, (clip.in ?? 0) + (t - clip.start));
+        const f = await pool.frameAt(s.id, speed.sourceTime(clip, t));
         // copy: the decoder's canvases are reused
         if (f) {
           const c = document.createElement('canvas');
@@ -116,6 +117,39 @@ export async function run(): Promise<{ checks: Check[]; log: string[] }> {
   const moved = timeline.moveClip(sp.doc, sp.secondId!, 2.5 * US);
   await draw(moved, 2.5 * US);
   check('the second part, moved, still starts at its place in the source', near(px(ctx, canvas.width / 2, canvas.height / 2), [0, 255, 0]), JSON.stringify(px(ctx, canvas.width / 2, canvas.height / 2)));
+
+  // ---------------------------------------------------------------- speed, ramps, reverse, stills, keys (MVP_draft.md 62.7)
+  const centre = () => px(ctx, canvas.width / 2, canvas.height / 2);
+  // the same sources with no clips, and one clip of the coloured video
+  const empty: schema.ProjectDoc = { ...doc, video: { ...doc.video!, tracks: doc.video!.tracks.map((tr) => ({ ...tr, clips: [] })) } };
+  const one = (over: Partial<schema.Clip>) => timeline.addClip(empty, { source: vid, start: 0, length: 3 * US, in: 0, ...over });
+  const fast = one({ speed: 2 });
+  await draw(fast.doc, 1.5 * US);
+  const atFast = centre();
+  const ramp = one({ length: 3 * US, keys: { speed: [{ t: 0, v: 1 }, { t: 2 * US, v: 3 }] } });
+  await draw(ramp.doc, 1 * US);
+  const ramp1 = centre();
+  await draw(ramp.doc, 2.5 * US);
+  const ramp25 = centre();
+  check('at 2x the frame at 1.5 s is the source at 3 s (green); a ramp from 1x to 3x is at 1.5 s of source after 1 s (red) and 5.5 s after 2.5 s (blue)', near(atFast, [0, 255, 0]) && near(ramp1, [255, 0, 0]) && near(ramp25, [0, 0, 255]), JSON.stringify([atFast, ramp1, ramp25]));
+  const rev = one({ length: 6 * US, reverse: true });
+  await draw(rev.doc, 0.5 * US);
+  const rev05 = centre();
+  await draw(rev.doc, 5.5 * US);
+  const rev55 = centre();
+  const still = one({ length: 2 * US, hold: 3 * US });
+  await draw(still.doc, 1.9 * US);
+  const held = centre();
+  check('reversed, the clip starts on the source\'s end (blue) and ends on its start (red); a still shows its one frame (green)', near(rev05, [0, 0, 255]) && near(rev55, [255, 0, 0]) && near(held, [0, 255, 0]), JSON.stringify([rev05, rev55, held]));
+  const keyed = timeline.addClip(doc, { source: img, start: 0, length: 6 * US, transform: { x: W * 0.25, y: H * 0.5, scale: 0.2, rotation: 0, opacity: 1 }, keys: { x: [{ t: 0, v: W * 0.25 }, { t: 2 * US, v: W * 0.75 }] } });
+  const picAt = async (t: number) => {
+    await draw(keyed.doc, t);
+    return [W * 0.25, W * 0.5, W * 0.75].map((x) => near(px(ctx, x * scale, H * 0.5 * scale), [255, 0, 255]));
+  };
+  const k0 = await picAt(0);
+  const k1 = await picAt(1 * US);
+  const k2 = await picAt(2 * US);
+  check('a picture keyed from a quarter to three quarters of the width is at the quarter at 0 s, the middle at 1 s, three quarters at 2 s', k0.join() === 'true,false,false' && k1.join() === 'false,true,false' && k2.join() === 'false,false,true', JSON.stringify([k0, k1, k2]));
 
   // a picture above the video, placed and scaled
   const b = timeline.addClip(doc, { source: img, start: 0, length: 6 * US, transform: { x: W * 0.25, y: H * 0.5, scale: 0.3, rotation: 0, opacity: 1 } });

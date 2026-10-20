@@ -1,0 +1,44 @@
+{
+  "script": "qa/studio-ui.cjs",
+  "run": "2026-10-20T10:00:28.444Z",
+  "checks": [
+    {
+      "name": "time: «السرعة» 2x halves the clip (it shows the same stretch), marks it «2×» and says it is silent",
+      "pass": true,
+      "detail": "6 to 3, 2×, 1"
+    },
+    {
+      "name": "time: a key switch at 0 s and a new position at 1 s make two keys, the switch lit at 1 s",
+      "pass": true,
+      "detail": "2 diamonds, lit 1"
+    },
+    {
+      "name": "time: [ goes back to the key at 0 s, where the position is the first key's",
+      "pass": true,
+      "detail": "00:00.00 x=540"
+    },
+    {
+      "name": "time: P keys every motion setting at the playhead",
+      "pass": true,
+      "detail": "5"
+    },
+    {
+      "name": "time: Shift+F cuts the clip and puts a still between the parts",
+      "pass": true,
+      "detail": "1 to 3 clips, 1 still"
+    },
+    {
+      "name": "time: «تشغيل عكسي» marks the clip «معكوس», and Ctrl+Z takes it back",
+      "pass": true,
+      "detail": "2× معكوس then 2×"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "total": 7,
+  "passed": 7,
+  "failed": 0
+}

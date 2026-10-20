@@ -9,7 +9,7 @@
 // template tab's renderers and files; the fonts are bundled (studio-fonts.ts) and loaded when used.
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus } from 'lucide-react';
+import { ArrowRight, Blend, ClipboardPaste, Copy, FileOutput, Hand, Magnet, Maximize, Moon, MousePointer2, Pencil, Redo2, Save, ScanLine, Scissors, Trash2, Type as TypeIcon, Undo2, VolumeX, ZoomIn, ZoomOut, ArrowLeftToLine, XCircle, Plus, Snowflake, Diamond, Rewind } from 'lucide-react';
 import { canOpen } from '@/lib/access';
 import { useAccount } from '@/lib/account-context';
 import { loadAssets } from '@/lib/motion/renderers.js';
@@ -18,10 +18,13 @@ import { STICKERS, TRACK_LABELS, TRACK_LIMITS, US, canvasOf, durationOf, type Cl
 import { historyOf, record, undo, redo, undoLabel, redoLabel, type History } from '@/lib/studio/history';
 import {
   addClip, addSource, addTrack, duplicateClip, locate, moveClip, nextAdjacent, prevAdjacent, removeClip, setTrack, setTransition, snapPoints, splitClip, trimEnd, trimStart, updateClip, visibleAt, maxLengthOf,
+  insertHold, setReverse, setSpeed, setSpeedKeys,
 } from '@/lib/studio/timeline';
+import { KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAllMotion, keyAt, keyTimes, moveKeyTime, setEaseAt, setKey, tidyKeys, toggleKey, type Ease, type KeyProp } from '@/lib/studio/keys';
+import { clampSpeed, isHold, speedAt } from '@/lib/studio/speed';
 import { MotionRenderer, graphicById, loadSticker, motionClip } from '@/lib/studio/motion-adapter';
 import { captionStyle, defaultText, loadFonts, parseSrt, usedFonts } from '@/lib/studio/text';
-import { fillWindow } from '@/lib/studio/compose';
+import { fillWindow, transformAt, transformOf } from '@/lib/studio/compose';
 import { DeviceCache } from '@/lib/studio/cache';
 import { MediaPool, probeFile, type SourceState } from '@/lib/studio/media';
 import { Player } from '@/lib/studio/preview';
@@ -36,7 +39,7 @@ import { PanelTabs, useCompact, type Panel } from './compact';
 import { ReviewPanel, useProjectWork } from './work-links';
 import { ExportPanel } from './export-panel';
 import { FolderSelect } from './folder-picker';
-import { Inspector, ProjectSettings } from './inspector';
+import { Inspector, ProjectSettings, writeClipTransform, type KeyActions } from './inspector';
 import { librarySource, uploadToLibrary } from './library';
 import type { EditorProps } from './project-shell';
 import { Stage, drawOutline, drawSafeZones, type Resolution, type Tool } from './stage';
@@ -257,7 +260,7 @@ export function VideoEditor(p: EditorProps) {
         const d = live.current.doc;
         if (live.current.safe) drawSafeZones(ctx, { width: ctx.canvas.width, ratio: d.video?.ratio ?? '' });
         const sel = live.current.selected ? locate(d, live.current.selected)?.clip ?? null : null;
-        if (sel && !pl.playing) drawOutline(ctx, d, sel, pl.resolver(), scale);
+        if (sel && !pl.playing) drawOutline(ctx, d, sel, pl.resolver(), scale, pl.t);
       },
     });
     setPlayer(pl);
@@ -430,6 +433,83 @@ export function VideoEditor(p: EditorProps) {
   const nextClip = selected ? nextAdjacent(doc, selected) : null;
   const zoomBy = (k: number) => setZoom((z) => Math.max(4, Math.min(320, Math.round(z * k))));
   const audibleSel = !!sel?.clip.source && doc.sources.find((s) => s.id === sel.clip.source)?.media !== 'image';
+  const videoSel = !!sel?.clip.source && doc.sources.find((s) => s.id === sel.clip.source)?.media === 'video';
+
+  // ------------------------------------------------------------- keyframes, speed, stills (MVP_draft.md 62.7)
+  const tauOf = (c: Clip) => Math.max(0, Math.min(c.length, at - c.start));
+  const toggleKeyOf = (prop: KeyProp) => {
+    const c = sel?.clip;
+    if (!c) return;
+    const tau = tauOf(c);
+    const now = prop === 'speed' ? speedAt(c, tau) : transformAt(c, at, W, H)[prop];
+    const had = !!keyAt(c.keys?.[prop], tau);
+    const next: Clip = { ...c, keys: toggleKey(c.keys, prop, tau, now) };
+    // the last key gone: the setting keeps the value it had here, as its plain value
+    if (!hasKeys(next.keys, prop)) {
+      if (prop === 'speed') next.speed = clampSpeed(now) === 1 ? undefined : clampSpeed(now);
+      else next.transform = { ...transformOf(c, W, H), [prop]: now };
+    }
+    if (!next.keys) delete next.keys;
+    if (next.speed === undefined) delete next.speed;
+    const d = updateClip(h.get(), c.id, () => next);
+    h.apply(prop === 'speed' ? setSpeedKeys(d, c.id, next.keys) : d, had ? 'إزالة مفتاح' : 'مفتاح عند رأس التشغيل');
+  };
+  const seekKey = (dir: -1 | 1) => {
+    const c = sel?.clip;
+    if (!c) return;
+    const tau = tauOf(c);
+    const times = keyTimes(c.keys);
+    const target = dir > 0 ? times.find((x) => x > tau + KEY_TOLERANCE) : [...times].reverse().find((x) => x < tau - KEY_TOLERANCE);
+    if (target !== undefined) seek(c.start + Math.max(0, Math.min(c.length, target)));
+  };
+  const keyAll = () => {
+    const c = sel?.clip;
+    if (!c || p.readOnly) return;
+    if (c.source && doc.sources.find((s) => s.id === c.source)?.media === 'audio') return;
+    h.apply(updateClip(h.get(), c.id, (x) => ({ ...x, keys: keyAllMotion(transformOf(x, W, H), x.keys, tauOf(x)) })), 'مفاتيح الحركة عند رأس التشغيل');
+  };
+  const freeze = () => {
+    if (p.readOnly) return;
+    const d = h.get();
+    // the selected video clip if the playhead is on it, else the topmost video clip there
+    const onIt = (c: Clip) => c.start <= at && at < c.start + c.length && d.sources.find((s) => s.id === c.source)?.media === 'video' && !isHold(c);
+    const target = sel && onIt(sel.clip) ? sel.clip : [...visibleAt(d, at)].reverse().map((v) => v.clip).find(onIt);
+    if (!target) return setError('ضع رأس التشغيل على مقطع فيديو لتجميد إطاره.');
+    const r = insertHold(d, target.id, at);
+    if (!r.holdId) return setError('تعذّر تجميد الإطار هنا.');
+    h.apply(r.doc, 'تجميد الإطار');
+    setSelected(r.holdId);
+  };
+  const keyActions: KeyActions = {
+    toggle: toggleKeyOf,
+    seek: seekKey,
+    ease: (e: Ease) => sel && patch((c) => ({ ...c, keys: setEaseAt(c.keys, tauOf(c), e) }), 'منحنى المفتاح'),
+    clear: () =>
+      sel &&
+      patch((c) => {
+        const now = transformAt(c, at, W, H);
+        const keys = { ...(c.keys ?? {}) };
+        for (const k of MOTION_PROPS) delete keys[k];
+        const next: Clip = { ...c, transform: now, keys: tidyKeys(keys) };
+        if (!next.keys) delete next.keys;
+        return next;
+      }, 'إزالة مفاتيح الحركة'),
+    setSpeed: (v: number) => {
+      const c = sel?.clip;
+      if (!c) return;
+      if (hasKeys(c.keys, 'speed')) h.apply(setSpeedKeys(h.get(), c.id, { ...c.keys, speed: setKey(c.keys!.speed, tauOf(c), clampSpeed(v)) }), 'نقطة السرعة', `speedkey-${c.id}`);
+      else h.apply(setSpeed(h.get(), c.id, v), 'السرعة', `speed-${c.id}`);
+    },
+    setReverse: (on: boolean) => selected && h.apply(setReverse(h.get(), selected, on), on ? 'تشغيل عكسي' : 'تشغيل أمامي'),
+    freeze,
+  };
+  /** Only the settings that a drag on the preview changed (a keyed one gets its key at the playhead). */
+  const changedOf = (c: Clip, tr: { x: number; y: number; scale: number; rotation: number; opacity: number }) => {
+    const now = transformAt(c, at, W, H);
+    const out: Record<string, number> = {};
+    for (const k of MOTION_PROPS) if (Math.abs(now[k] - tr[k]) > 1e-6) out[k] = tr[k];
+    return out;
+  };
 
   // ------------------------------------------------------------- keys
   const run = (id: string): boolean => {
@@ -472,6 +552,10 @@ export function VideoEditor(p: EditorProps) {
       case 'save-version': p.onRequestVersion?.(); break;
       case 'export': frame.ws.open('export'); frame.setFocused('export'); break;
       case 'rename': p.onRequestRename?.(); break;
+      case 'freeze': freeze(); break;
+      case 'key-all': keyAll(); break;
+      case 'key-prev': seekKey(-1); break;
+      case 'key-next': seekKey(1); break;
       default:
         if (id.startsWith('window-')) frame.byDigit(Number(id.slice(7)));
         else return false;
@@ -525,8 +609,8 @@ export function VideoEditor(p: EditorProps) {
       selected={selected}
       readOnly={p.readOnly}
       onSelect={setSelected}
-      onPlace={(id, x, y, key) => h.apply(updateClip(h.get(), id, (c) => ({ ...c, transform: { x, y, scale: c.transform?.scale ?? 1, rotation: c.transform?.rotation ?? 0, opacity: c.transform?.opacity ?? 1 } })), 'نقل على الإطار', key)}
-      onTransform={(id, tr, key) => h.apply(updateClip(h.get(), id, { transform: tr }), 'الحجم والدوران', key)}
+      onPlace={(id, x, y, key) => h.apply(updateClip(h.get(), id, (c) => writeClipTransform(c, tauOf(c), { x, y }, W, H)), 'نقل على الإطار', key)}
+      onTransform={(id, tr, key) => h.apply(updateClip(h.get(), id, (c) => writeClipTransform(c, tauOf(c), changedOf(c, tr), W, H)), 'الحجم والدوران', key)}
       ready={assetsReady && !!pool}
       note={missing ? `${missing} من ملفات المشروع غير متاح هنا، ويبقى في المشروع.` : null}
       resolution={resolution}
@@ -555,6 +639,8 @@ export function VideoEditor(p: EditorProps) {
       hasNextFree={!!nextClip && !nextClip.transition}
       sourceNote={sel?.clip.source ? sourceNote(pool?.state(sel.clip.source)) : null}
       onLength={(us) => selected && h.apply(trimEnd(doc, selected, (sel?.clip.start ?? 0) + us), 'طول القالب')}
+      t={at}
+      keyActions={keyActions}
       actions={{
         split,
         duplicate,
@@ -616,6 +702,10 @@ export function VideoEditor(p: EditorProps) {
       onSplitAt={splitAt}
       onDropAdd={addDrop}
       onDropEffect={(fx, clipId, where) => (fx.type === 'transition' ? applyTransition(fx.kind, where, clipId) : applyAnim(fx.kind, where === 'start' ? 'in' : 'out', clipId))}
+      onMoveKey={(id, from, to, key) => {
+        const d = updateClip(h.get(), id, (c) => ({ ...c, keys: moveKeyTime(c.keys, from, to) }));
+        h.apply(setSpeedKeys(d, id, locate(d, id)?.clip.keys), 'نقل مفتاح', key);
+      }}
       clipMenu={(id) => {
         const c = locate(doc, id)?.clip;
         const audible = !!c?.source && doc.sources.find((s) => s.id === c.source)?.media !== 'image';
@@ -721,6 +811,10 @@ export function VideoEditor(p: EditorProps) {
         { label: 'قص كل المسارات عند رأس التشغيل', icon: <Scissors aria-hidden="true" />, keys: keysOf('split-all'), disabled: ro, onSelect: splitAll },
         { label: 'انتقال افتراضي', icon: <Blend aria-hidden="true" />, keys: keysOf('default-transition'), disabled: ro || !selected, onSelect: defaultTransition },
         { label: sel?.clip.mute ? 'تشغيل صوت المقطع' : 'كتم صوت المقطع', icon: <VolumeX aria-hidden="true" />, disabled: ro || !audibleSel, onSelect: () => patch({ mute: !sel?.clip.mute }, 'كتم الصوت') },
+        { kind: 'sep' },
+        { label: 'تجميد الإطار عند رأس التشغيل', icon: <Snowflake aria-hidden="true" />, keys: keysOf('freeze'), disabled: ro, onSelect: freeze },
+        { label: sel?.clip.reverse ? 'تشغيل أمامي' : 'تشغيل عكسي', icon: <Rewind aria-hidden="true" />, disabled: ro || !videoSel || (!!sel && isHold(sel.clip)), onSelect: () => keyActions.setReverse(!sel?.clip.reverse) },
+        { label: 'مفاتيح الحركة عند رأس التشغيل', icon: <Diamond aria-hidden="true" />, keys: keysOf('key-all'), disabled: ro || !selected, onSelect: keyAll },
         { kind: 'sep' },
         { label: 'إضافة مسار', icon: <Plus aria-hidden="true" />, disabled: ro || !kinds.length, items: kinds.map((k) => ({ label: TRACK_LABELS[k], onSelect: () => h.apply(addTrack(h.get(), k), 'إضافة مسار') })) },
         {

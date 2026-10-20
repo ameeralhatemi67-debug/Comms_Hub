@@ -15,6 +15,8 @@ import { TRACK_LABELS, TRACK_LIMITS, US, durationOf, type Clip, type Micros, typ
 import { legalStart, snapPoints, snapTo, sourceOf } from '@/lib/studio/timeline';
 import { shortTime } from '@/lib/studio/time';
 import { animLabel, transitionLabel } from '@/lib/studio/transitions';
+import { KEY_TOLERANCE, keyTimes } from '@/lib/studio/keys';
+import { isHold, retimed, speedAt } from '@/lib/studio/speed';
 import { withKeys } from '@/lib/studio/shortcuts';
 import type { SourceState } from '@/lib/studio/media';
 import { graphicById } from '@/lib/studio/motion-adapter';
@@ -54,7 +56,20 @@ export type TimelineProps = {
   onDropAdd?: (d: AddDrop, trackId: string | null, at: Micros) => void;
   onDropEffect?: (e: EffectDrop, clipId: string, where: 'start' | 'end') => void;
   clipMenu?: (id: string) => ClipMenu;
+  /** A key diamond of the selected clip dragged from one clip time to another (`key` joins the steps). */
+  onMoveKey?: (id: string, from: Micros, to: Micros, key: string) => void;
 };
+
+/** A short word on a re-timed clip: its speed, «متدرج» for a ramp, «معكوس», or «ثابت» for a still. */
+export function retimeLabel(c: Clip): string | null {
+  if (!retimed(c)) return null;
+  if (isHold(c)) return 'ثابت';
+  const parts: string[] = [];
+  if (c.keys?.speed?.length) parts.push('متدرج');
+  else if ((c.speed ?? 1) !== 1) parts.push(`${Math.round(speedAt(c, 0) * 100) / 100}×`);
+  if (c.reverse) parts.push('معكوس');
+  return parts.join(' ');
+}
 
 export function clipLabel(doc: ProjectDoc, c: Clip): string {
   if (c.text) return c.text.content.split('\n')[0] || 'نص';
@@ -336,6 +351,28 @@ export function Timeline(p: TimelineProps) {
 
   const ctxMenu = menu && p.clipMenu ? p.clipMenu(menu.id) : null;
 
+  // a key diamond dragged along its clip (the selected one)
+  const startKeyDrag = (e: RPointerEvent, c: Clip, from: Micros) => {
+    if (e.button !== 0 || p.readOnly || !p.onMoveKey) return;
+    e.stopPropagation();
+    e.preventDefault();
+    const x0 = e.clientX;
+    let cur = from;
+    const key = `key-${c.id}-${Date.now()}`;
+    const move = (ev: PointerEvent) => {
+      const to = Math.max(0, Math.min(c.length, from + us(ev.clientX - x0)));
+      if (Math.abs(to - cur) <= KEY_TOLERANCE) return;
+      p.onMoveKey!(c.id, cur, to, key);
+      cur = to;
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
   return (
     <div className="st-tl" aria-label="الخط الزمني" data-compact={p.compact ? 'yes' : 'no'} data-tool={tool}>
       <div className="st-tl-heads">
@@ -458,6 +495,22 @@ export function Timeline(p: TimelineProps) {
                       {w > 40 && <span className="st-clip-ico">{KIND_ICON[kc]}</span>}
                       <span className="st-clip-name" dir="auto">{clipLabel(doc, c)}</span>
                       {w > 110 && <small className="st-clip-len" dir="ltr">{shortTime(c.length)}</small>}
+                      {retimeLabel(c) && w > 60 && <small className="st-clip-speed">{retimeLabel(c)}</small>}
+                      {p.selected === c.id &&
+                        keyTimes(c.keys).map((kt) => (
+                          <i
+                            key={kt}
+                            className="st-clip-key"
+                            style={{ left: Math.max(0, Math.min(w, px(kt))) }}
+                            onPointerDown={(e) => startKeyDrag(e, c, kt)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              p.onSeek(c.start + kt);
+                            }}
+                            title={`مفتاح عند ${shortTime(c.start + kt)}: اسحبه لتنقله، وانقره لتذهب إليه`}
+                            aria-hidden="true"
+                          />
+                        ))}
                       {(c.animIn || (c.fadeIn ?? 0) > 0) && <i className="st-clip-anim in" style={{ width: Math.min(w / 2, px(c.animIn?.length ?? c.fadeIn ?? 0)) }} aria-hidden="true" />}
                       {(c.animOut || (c.fadeOut ?? 0) > 0) && <i className="st-clip-anim out" style={{ width: Math.min(w / 2, px(c.animOut?.length ?? c.fadeOut ?? 0)) }} aria-hidden="true" />}
                       {src?.kind === 'loading' && <em className="st-clip-load" style={{ width: `${src.total ? Math.round((src.done / src.total) * 100) : 5}%` }} />}

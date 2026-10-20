@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-ui.cjs",
-  "run": "2026-10-20T09:41:25.976Z",
+  "run": "2026-10-20T10:01:50.346Z",
   "checks": [
     {
       "name": "the empty home says there are no projects yet and offers both kinds",
@@ -10,7 +10,7 @@
     {
       "name": "a new video project is created and opened in the editor",
       "pass": true,
-      "detail": "b6391e3b-1cda-4853-be90-f17b173e3551"
+      "detail": "4ed208bb-fbbc-4090-a261-325a93db3885"
     },
     {
       "name": "the bar names the project and its first numbered version",
@@ -80,7 +80,7 @@
     {
       "name": "«ملف جديد في المكتبة» saves a numbered version, uploads through the library resumable upload, and records which version made it",
       "pass": true,
-      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"56e5db09-ebcb-4640-9b5d-f6c232623765\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
+      "detail": "{\"rev\":3,\"exports\":[{\"asset\":\"92295936-40e3-42c5-b051-e6b2356f08b6\",\"version\":1,\"revision\":3}],\"up\":[[\"مقطع الاختبار.mp4\",\"f1\",1]]}"
     },
     {
       "name": "the result says it is in the library and that its uploader does not approve it",
@@ -90,12 +90,12 @@
     {
       "name": "the saved file is linked to the work through the work cycle (work_asset_link)",
       "pass": true,
-      "detail": "[{\"work\":\"CH-101\",\"asset\":\"56e5db09-ebcb-4640-9b5d-f6c232623765\"}]"
+      "detail": "[{\"work\":\"CH-101\",\"asset\":\"92295936-40e3-42c5-b051-e6b2356f08b6\"}]"
     },
     {
       "name": "«إصدار جديد من ملف» adds version 2 to that file and records it against numbered revision 4",
       "pass": true,
-      "detail": "[{\"asset\":\"56e5db09-ebcb-4640-9b5d-f6c232623765\",\"version\":1,\"revision\":3},{\"asset\":\"56e5db09-ebcb-4640-9b5d-f6c232623765\",\"version\":2,\"revision\":4}]"
+      "detail": "[{\"asset\":\"92295936-40e3-42c5-b051-e6b2356f08b6\",\"version\":1,\"revision\":3},{\"asset\":\"92295936-40e3-42c5-b051-e6b2356f08b6\",\"version\":2,\"revision\":4}]"
     },
     {
       "name": "a timed review note of the exported file shows in the studio, and its time moves the playhead",
@@ -120,7 +120,7 @@
     {
       "name": "the space bar plays and pauses, and the time runs",
       "pass": true,
-      "detail": "00:00.03 / 00:06.00 to 00:01.00 / 00:06.00"
+      "detail": "00:00.03 / 00:06.00 to 00:01.01 / 00:06.00"
     },
     {
       "name": "ws: the video editor opens as windows in tab groups, every window of the editor present",
@@ -190,7 +190,7 @@
     {
       "name": "ws: «?» opens the shortcuts sheet with every key of the editor",
       "pass": true,
-      "detail": "48"
+      "detail": "52"
     },
     {
       "name": "ws: the preview resolution 1/4 draws the paused frame at a quarter of its pixels, and «كاملة» from the menu restores it",
@@ -280,7 +280,7 @@
     {
       "name": "dragging a layer on the canvas moves it",
       "pass": true,
-      "detail": "540 to 650"
+      "detail": "540 to 628"
     },
     {
       "name": "the PNG export is the full 1080x1080 picture with the rectangle in the middle",
@@ -330,7 +330,7 @@
     {
       "name": "390: crop and colours are kept for the computer, said in place of their controls",
       "pass": true,
-      "detail": "الانتقال بين المقطعين · متاح على الحاسوب: يبقى في المشروع كما هو. | القص والألوان · متاح على الحاسوب: يبقى في المشروع كما هو."
+      "detail": "الانتقال بين المقطعين · متاح على الحاسوب: يبقى في المشروع كما هو. | السرعة والعكس والتجميد · متاح على الحاسوب: يبقى في المشروع كما هو. | القص والألوان · متاح على الحاسوب: يبقى في المشروع كما هو."
     },
     {
       "name": "390: the settings panel fits the screen",
@@ -378,14 +378,44 @@
       "detail": "1"
     },
     {
+      "name": "time: «السرعة» 2x halves the clip (it shows the same stretch), marks it «2×» and says it is silent",
+      "pass": true,
+      "detail": "6 to 3, 2×, 1"
+    },
+    {
+      "name": "time: a key switch at 0 s and a new position at 1 s make two keys, the switch lit at 1 s",
+      "pass": true,
+      "detail": "2 diamonds, lit 1"
+    },
+    {
+      "name": "time: [ goes back to the key at 0 s, where the position is the first key's",
+      "pass": true,
+      "detail": "00:00.00 x=540"
+    },
+    {
+      "name": "time: P keys every motion setting at the playhead",
+      "pass": true,
+      "detail": "5"
+    },
+    {
+      "name": "time: Shift+F cuts the clip and puts a still between the parts",
+      "pass": true,
+      "detail": "1 to 3 clips, 1 still"
+    },
+    {
+      "name": "time: «تشغيل عكسي» marks the clip «معكوس», and Ctrl+Z takes it back",
+      "pass": true,
+      "detail": "2× معكوس then 2×"
+    },
+    {
       "name": "no page errors",
       "pass": true,
       "detail": ""
     }
   ],
   "debugTime": "00:02.00 / 00:07.24",
-  "projectId": "b6391e3b-1cda-4853-be90-f17b173e3551",
-  "total": 76,
-  "passed": 76,
+  "projectId": "4ed208bb-fbbc-4090-a261-325a93db3885",
+  "total": 82,
+  "passed": 82,
   "failed": 0
 }

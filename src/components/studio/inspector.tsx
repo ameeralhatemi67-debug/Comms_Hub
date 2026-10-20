@@ -6,7 +6,7 @@
 // the template tab's catalog, with its controls), a brand mark's colour. The project's shape, frame rate
 // and background are the window «المشروع» (ProjectSettings).
 import type { ReactNode } from 'react';
-import { Copy, Scissors, Trash2, ArrowLeftToLine, Frame, RotateCcw, MousePointerClick, Blend } from 'lucide-react';
+import { Copy, Scissors, Trash2, ArrowLeftToLine, Frame, RotateCcw, MousePointerClick, Blend, Diamond, ChevronLeft, ChevronRight, Snowflake, KeyRound } from 'lucide-react';
 import {
   FPS_CHOICES, RATIOS, STICKERS, STICKER_LABELS, US, canvasOf, durationOf,
   type Clip, type Crop, type Layer, type ProjectDoc, type Ratio, type TextStyle, type Transform,
@@ -18,11 +18,21 @@ import { changedParams, graphicById, motionParams, naturalLength, holdKey } from
 import { setFormat, sourceOf } from '@/lib/studio/timeline';
 import { shortTime } from '@/lib/studio/time';
 import { transformOf } from '@/lib/studio/compose';
+import { EASES, KEY_TOLERANCE, MOTION_PROPS, hasKeys, keyAt, keyTimes, transformWithKeys, writeTransform as writeTransformKeys, type Ease, type KeyProp, type Keys, type MotionProp } from '@/lib/studio/keys';
+import { SPEED_MAX, SPEED_MIN, isHold, retimed, speedAt } from '@/lib/studio/speed';
 import { ColorInput, Segmented, Slider, Switch, TextInput } from '../motion-controls';
 import { DesktopOnly } from './compact';
 import { FontPicker } from './font-picker';
 
 export type Patch = (patch: Partial<Clip> | ((c: Clip) => Clip), label: string, key?: string) => void;
+
+/** A clip's place, size, turn or opacity changed at clip time tau: keyed settings get their key there. */
+export function writeClipTransform(c: Clip, tau: number, changed: Partial<Transform>, W: number, H: number): Clip {
+  const r = writeTransformKeys(transformOf(c, W, H), c.keys, tau, changed);
+  const next: Clip = { ...c, transform: r.transform, keys: r.keys };
+  if (!next.keys) delete next.keys;
+  return next;
+}
 
 const sec = (us: number) => Math.round((us / US) * 100) / 100;
 const usOf = (s: number) => Math.round(s * US);
@@ -36,22 +46,92 @@ function Section({ title, children, open = true }: { title: string; children: Re
   );
 }
 
-/** Place, size, turn and opacity of a clip or layer. */
-export function TransformControls({ item, W, H, onChange, disabled }: { item: Clip | Layer; W: number; H: number; onChange: (t: Transform, key: string) => void; disabled: boolean }) {
-  const tr = transformOf(item, W, H);
-  const set = (k: keyof Transform, v: number) => onChange({ ...tr, [k]: v }, `transform-${k}-${item.id}`);
+/** Keyframes of a timed clip, for its settings: where the playhead is in the clip, and the switch. */
+export type Keying = {
+  /** The playhead's time inside the clip. */
+  tau: number;
+  keys: Keys | undefined;
+  onToggle: (prop: KeyProp) => void;
+};
+
+/** The key switch beside a setting: filled when a key is at the playhead. */
+function KeyButton({ prop, keying, disabled }: { prop: KeyProp; keying?: Keying; disabled: boolean }) {
+  if (!keying) return null;
+  const on = !!keyAt(keying.keys?.[prop], keying.tau);
+  const keyed = hasKeys(keying.keys, prop);
+  const label = on ? 'إزالة المفتاح عند رأس التشغيل' : 'مفتاح عند رأس التشغيل';
+  return (
+    <button type="button" className="st-keybtn" data-on={on ? 'yes' : 'no'} data-keyed={keyed ? 'yes' : 'no'} aria-pressed={on} disabled={disabled} onClick={() => keying.onToggle(prop)} title={label} aria-label={label}>
+      <Diamond aria-hidden="true" />
+    </button>
+  );
+}
+
+/**
+ * Place, size, turn and opacity of a clip or layer. With `keying` (a timed clip), the values shown are those
+ * at the playhead and each setting has its key switch; a change to a keyed setting sets its key there.
+ */
+export function TransformControls({ item, W, H, onChange, disabled, keying }: { item: Clip | Layer; W: number; H: number; onChange: (t: Transform, key: string, changed: Partial<Transform>) => void; disabled: boolean; keying?: Keying }) {
+  const base = transformOf(item, W, H);
+  const tr = keying ? transformWithKeys(base, keying.keys, keying.tau) : base;
+  const set = (k: keyof Transform, v: number) => onChange({ ...tr, [k]: v }, `transform-${k}-${item.id}`, { [k]: v });
+  const row = (prop: MotionProp, el: ReactNode) =>
+    keying ? (
+      <div className="st-keyrow" data-prop={prop}>
+        {el}
+        <KeyButton prop={prop} keying={keying} disabled={disabled} />
+      </div>
+    ) : (
+      el
+    );
   return (
     <>
-      <Slider label="الموضع أفقياً" value={Math.round(tr.x)} min={-W / 2} max={W * 1.5} step={1} unit="px" onChange={(v) => set('x', v)} disabled={disabled} box />
-      <Slider label="الموضع عمودياً" value={Math.round(tr.y)} min={-H / 2} max={H * 1.5} step={1} unit="px" onChange={(v) => set('y', v)} disabled={disabled} box />
-      <Slider label="الحجم" value={Math.round(tr.scale * 100)} min={5} max={400} step={1} unit="٪" onChange={(v) => set('scale', v / 100)} disabled={disabled} box />
-      <Slider label="الدوران" value={Math.round(tr.rotation)} min={-180} max={180} step={1} unit="°" onChange={(v) => set('rotation', v)} disabled={disabled} />
-      <Slider label="الشفافية" value={Math.round(tr.opacity * 100)} min={0} max={100} step={1} unit="٪" onChange={(v) => set('opacity', v / 100)} disabled={disabled} />
-      <button type="button" className="st-mini" disabled={disabled} onClick={() => onChange({ x: W / 2, y: H / 2, scale: 1, rotation: 0, opacity: tr.opacity }, `transform-reset-${item.id}`)}>
+      {row('x', <Slider label="الموضع أفقياً" value={Math.round(tr.x)} min={-W / 2} max={W * 1.5} step={1} unit="px" onChange={(v) => set('x', v)} disabled={disabled} box />)}
+      {row('y', <Slider label="الموضع عمودياً" value={Math.round(tr.y)} min={-H / 2} max={H * 1.5} step={1} unit="px" onChange={(v) => set('y', v)} disabled={disabled} box />)}
+      {row('scale', <Slider label="الحجم" value={Math.round(tr.scale * 100)} min={5} max={400} step={1} unit="٪" onChange={(v) => set('scale', v / 100)} disabled={disabled} box />)}
+      {row('rotation', <Slider label="الدوران" value={Math.round(tr.rotation)} min={-180} max={180} step={1} unit="°" onChange={(v) => set('rotation', v)} disabled={disabled} />)}
+      {row('opacity', <Slider label="الشفافية" value={Math.round(tr.opacity * 100)} min={0} max={100} step={1} unit="٪" onChange={(v) => set('opacity', v / 100)} disabled={disabled} />)}
+      <button type="button" className="st-mini" disabled={disabled} onClick={() => onChange({ x: W / 2, y: H / 2, scale: 1, rotation: 0, opacity: tr.opacity }, `transform-reset-${item.id}`, { x: W / 2, y: H / 2, scale: 1, rotation: 0 })}>
         <RotateCcw aria-hidden="true" />
         إلى المنتصف وبالحجم الأصلي
       </button>
     </>
+  );
+}
+
+/** The keys of a clip at a glance: the previous and next key, the curve of the key here, removing them all. */
+function KeyControls({ keying, onSeekKey, onEase, onClear, disabled }: { keying: Keying; onSeekKey: (dir: -1 | 1) => void; onEase: (e: Ease) => void; onClear: () => void; disabled: boolean }) {
+  const times = keyTimes(keying.keys, MOTION_PROPS);
+  if (!times.length) return <p className="st-hint">زر المعين بجانب أي إعداد يضع مفتاحاً عند رأس التشغيل. حرّك رأس التشغيل وغيّر القيمة، فيتحرك المقطع بين المفاتيح.</p>;
+  const here = MOTION_PROPS.map((p) => keyAt(keying.keys?.[p], keying.tau)).find(Boolean);
+  return (
+    <div className="st-keytools">
+      <div className="st-keynav">
+        <button type="button" className="st-mini" onClick={() => onSeekKey(-1)} disabled={!times.some((x) => x < keying.tau - KEY_TOLERANCE)} title={withKeys('المفتاح السابق', 'key-prev')}>
+          <ChevronRight aria-hidden="true" />
+          السابق
+        </button>
+        <span className="st-chip">{times.length === 1 ? 'مفتاح واحد' : `${times.length} مفاتيح`}</span>
+        <button type="button" className="st-mini" onClick={() => onSeekKey(1)} disabled={!times.some((x) => x > keying.tau + KEY_TOLERANCE)} title={withKeys('المفتاح التالي', 'key-next')}>
+          التالي
+          <ChevronLeft aria-hidden="true" />
+        </button>
+      </div>
+      {here && (
+        <label>
+          منحنى المفتاح عند رأس التشغيل
+          <select value={here.ease ?? 'linear'} disabled={disabled} onChange={(e) => onEase(e.target.value as Ease)}>
+            {EASES.map((x) => (
+              <option key={x.value} value={x.value}>{x.label}</option>
+            ))}
+          </select>
+        </label>
+      )}
+      <button type="button" className="st-mini" disabled={disabled} onClick={onClear}>
+        <KeyRound aria-hidden="true" />
+        إزالة مفاتيح الحركة كلها
+      </button>
+    </div>
   );
 }
 
@@ -230,11 +310,24 @@ function TransitionControls({ clip, readOnly, compact, onSet, nextFree, onNext }
   );
 }
 
+export type KeyActions = {
+  toggle: (prop: KeyProp) => void;
+  seek: (dir: -1 | 1) => void;
+  ease: (e: Ease) => void;
+  clear: () => void;
+  setSpeed: (v: number) => void;
+  setReverse: (on: boolean) => void;
+  freeze: () => void;
+};
+
 export function Inspector({
-  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, onLength, compact = false,
+  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, onLength, compact = false, t = 0, keyActions,
 }: {
   doc: ProjectDoc;
   clip: Clip | null;
+  /** The playhead (keyframes and speed are read and set there). */
+  t?: number;
+  keyActions?: KeyActions;
   onClip: Patch;
   onDoc?: (doc: ProjectDoc, label: string, key?: string) => void;
   readOnly: boolean;
@@ -271,6 +364,9 @@ export function Inspector({
   const audible = media === 'video' || media === 'audio';
   const visual = media !== 'audio';
   const label = clip.text ? 'نص' : clip.motion ? 'قالب حركة' : clip.sticker ? 'علامة الهوية' : media === 'image' ? 'صورة' : media === 'audio' ? 'صوت' : 'فيديو';
+  const tau = Math.max(0, Math.min(clip.length, t - clip.start));
+  // keyframes on a computer: phones keep the plain values (and never remove keys)
+  const keying: Keying | undefined = keyActions && !compact ? { tau, keys: clip.keys, onToggle: keyActions.toggle } : undefined;
   return (
     <aside className="st-insp" aria-label="إعدادات المقطع">
       <div className="st-insp-head">
@@ -323,9 +419,36 @@ export function Inspector({
           <ColorInput label="اللون" value={clip.sticker.color} disabled={readOnly} onChange={(v) => onClip({ sticker: { ...clip.sticker!, color: v } }, 'لون العلامة', 'sticker-color')} />
         </Section>
       )}
+      {media === 'video' && keyActions && (
+        <Section title="السرعة">
+          {compact ? (
+            <DesktopOnly what="السرعة والعكس والتجميد" />
+          ) : isHold(clip) ? (
+            <p className="st-hint">إطار ثابت من المصدر عند {shortTime(clip.hold!)}. غيّر مدته من «التوقيت».</p>
+          ) : (
+            <>
+              <div className="st-keyrow" data-prop="speed">
+                <Slider label="السرعة" value={Math.round(speedAt(clip, tau) * 100) / 100} min={SPEED_MIN} max={SPEED_MAX} step={0.05} decimals={2} unit="×" disabled={readOnly} onChange={(v) => keyActions.setSpeed(v)} box boxMax={SPEED_MAX} />
+                <KeyButton prop="speed" keying={keying} disabled={readOnly} />
+              </div>
+              <p className="st-hint">{hasKeys(clip.keys, 'speed') ? 'للسرعة نقاط تتدرج بينها على طول المقطع: حرّك رأس التشغيل إلى نقطة وغيّر قيمتها.' : 'السرعة الثابتة تُبقي المقطع على الجزء نفسه من المصدر، فيقصر أو يطول. زر المعين يضع نقطة سرعة لتتدرج.'}</p>
+              <Switch label="تشغيل عكسي" checked={!!clip.reverse} onChange={(v) => keyActions.setReverse(v)} disabled={readOnly} />
+              {clip.reverse && <p className="st-hint">يستغرق تصدير المقطع المعكوس وقتاً أطول، وتعرضه المعاينة إطاراً إطاراً.</p>}
+            </>
+          )}
+          {!compact && (
+            <button type="button" className="st-mini" disabled={readOnly} onClick={keyActions.freeze} title={withKeys('تجميد الإطار عند رأس التشغيل', 'freeze')}>
+              <Snowflake aria-hidden="true" />
+              تجميد الإطار عند رأس التشغيل
+            </button>
+          )}
+          {retimed(clip) && <p className="st-hint st-warn">لا يُسمع صوت هذا المقطع ما دامت سرعته غير 1× أو كان معكوساً أو إطاراً ثابتاً.</p>}
+        </Section>
+      )}
       {visual && (
         <Section title="الموضع والحجم">
-          <TransformControls item={clip} W={W} H={H} disabled={readOnly} onChange={(tr, key) => onClip({ transform: tr }, 'الموضع والحجم', key)} />
+          <TransformControls item={clip} W={W} H={H} disabled={readOnly} keying={keying} onChange={(tr, key, changed) => (keying ? onClip((c) => writeClipTransform(c, keying.tau, changed, W, H), 'الموضع والحجم', key) : onClip({ transform: tr }, 'الموضع والحجم', key))} />
+          {keying && keyActions && <KeyControls keying={keying} disabled={readOnly} onSeekKey={keyActions.seek} onEase={keyActions.ease} onClear={keyActions.clear} />}
           {(media === 'video' || media === 'image' || clip.motion) && (
             <Segmented label="داخل الإطار" size="sm" value={clip.fit ?? 'contain'} disabled={readOnly} onChange={(v) => onClip({ fit: v }, 'الاحتواء')} options={[{ value: 'contain', label: 'احتواء كامل' }, { value: 'cover', label: 'ملء الإطار' }]} />
           )}

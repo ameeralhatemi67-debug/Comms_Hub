@@ -11,6 +11,7 @@
 
 import type { FontFamily } from './fonts.ts';
 import type { Anim, TransitionKind } from './transitions.ts';
+import type { Keys } from './keys.ts';
 
 export const DOC_SCHEMA = 1;
 /** The database refuses a document above 1 MiB as Postgres prints it; the client keeps a margin. */
@@ -142,6 +143,14 @@ export type ClipFields = Content & {
   /** Entry and exit movements (transitions.ts). Absent: a text's own older enter and exit apply. */
   animIn?: Anim | null;
   animOut?: Anim | null;
+  /** Keyframes of place, size, turn, opacity and speed (keys.ts, MVP_draft.md 62.7). */
+  keys?: Keys;
+  /** Rate of a video clip, 0.1 to 8 (speed.ts); a ramp is `keys.speed`. */
+  speed?: number;
+  /** Plays its stretch of the source backwards. */
+  reverse?: boolean;
+  /** A still: the source frame at this source time for the whole clip. */
+  hold?: Micros;
 };
 export type Clip = ClipFields & { id: string; [extra: string]: unknown };
 /** A clip about to be added: its id is made if missing. */

@@ -10,7 +10,8 @@
 // and resized; menus and keys; preview resolution; a transition, a movement, a font; copy, paste, razor,
 // the clip menu, scaling by a corner, the history, filling the window and the light chrome.
 // The versions flow (MVP_draft.md 62.6): listed, compared, restored, and one opened for reading.
-// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions]   (writes qa/studio-ui.json)
+// The time flow (MVP_draft.md 62.7): speed, keys, P, [, a still, reverse.
+// Usage: node qa/studio-ui.cjs [--only=video|workspace|photo|phone|versions|time]   (writes qa/studio-ui.json)
 const fs = require('node:fs');
 const path = require('node:path');
 const { dependency, launchOptions } = require('./runtime.cjs');
@@ -539,6 +540,77 @@ async function versionsFlow(browser, base, errors) {
   await ctx.close();
 }
 
+// Speed, keyframes, freeze and reverse in the editor (MVP_draft.md 62.7): the inspector sets a speed and
+// the clip's length follows; key switches and a change at another moment make diamonds; [ goes back to
+// a key; P keys every setting; Shift+F puts in a still; «تشغيل عكسي» marks the clip; Ctrl+Z undoes it.
+async function timeFlow(browser, base, errors) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const tab = await ctx.newPage();
+  tab.on('pageerror', (e) => errors.push(e.message));
+  tab.on('console', (m) => m.type() === 'error' && !/^Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  tab.on('response', (q) => q.status() >= 400 && errors.push(`HTTP ${q.status()}: ${q.url()}`));
+  await tab.goto(base + '/motion/studio');
+  await tab.evaluate(() => window.__db.reset());
+  await tab.reload();
+  await tab.getByRole('button', { name: 'مشروع فيديو جديد' }).click();
+  await tab.getByLabel('اسم المشروع').fill('مقطع السرعة');
+  await tab.getByRole('button', { name: 'إنشاء وفتح' }).click();
+  await tab.locator('.st-editor').waitFor({ timeout: 15000 });
+  await tab.locator('.st-lib button', { hasText: 'ألوان الحملة' }).click();
+  const video = tab.locator('.st-clip[data-kind="video"]');
+  await video.waitFor();
+  await tab.waitForFunction(() => !document.querySelector('.st-clip-load'), null, { timeout: 15000 });
+  await video.click();
+  await tab.locator('.st-ws-tab[data-panel="inspector"]').click();
+  const lenBox = tab.getByLabel('المدة، قيمة دقيقة');
+  const len0 = Number(await lenBox.inputValue());
+  const speed = tab.getByLabel('السرعة، قيمة دقيقة');
+  await speed.fill('2');
+  await speed.press('Enter');
+  await tab.locator('.st-clip-speed').first().waitFor({ timeout: 5000 });
+  const badge = await tab.locator('.st-clip-speed').first().textContent();
+  const len1 = Number(await lenBox.inputValue());
+  const silent = await tab.locator('.st-insp .st-warn', { hasText: 'لا يُسمع صوت' }).count();
+  check('time: «السرعة» 2x halves the clip (it shows the same stretch), marks it «2×» and says it is silent', Math.abs(len1 - len0 / 2) < 0.02 && badge === '2×' && silent === 1, `${len0} to ${len1}, ${badge}, ${silent}`);
+
+  // keys: x keyed at 0, changed at 1 s
+  await tab.locator('body').press('Home');
+  await tab.locator('.st-keyrow[data-prop="x"] .st-keybtn').click();
+  for (let i = 0; i < 30; i++) await tab.locator('body').press('ArrowRight');
+  const xBox = tab.getByLabel('الموضع أفقياً، قيمة دقيقة');
+  await xBox.fill('200');
+  await xBox.press('Enter');
+  const diamonds = await tab.locator('.st-clip[data-selected="yes"] .st-clip-key').count();
+  const keyedOn = await tab.locator('.st-keyrow[data-prop="x"] .st-keybtn[data-on="yes"]').count();
+  check('time: a key switch at 0 s and a new position at 1 s make two keys, the switch lit at 1 s', diamonds === 2 && keyedOn === 1, `${diamonds} diamonds, lit ${keyedOn}`);
+  await tab.locator('body').press('BracketLeft');
+  const back = await tab.locator('.st-mon-time').textContent();
+  const xAt0 = await xBox.inputValue();
+  check('time: [ goes back to the key at 0 s, where the position is the first key\'s', back.startsWith('00:00:00') || back.startsWith('00:00.00') || /^0?0:00[:.]00/.test(back), `${back} x=${xAt0}`);
+  await tab.locator('body').press('p');
+  const keyedAll = await tab.locator('.st-keyrow .st-keybtn[data-on="yes"]').count();
+  check('time: P keys every motion setting at the playhead', keyedAll >= 5, keyedAll);
+
+  // a still at 0.5 s
+  for (let i = 0; i < 15; i++) await tab.locator('body').press('ArrowRight');
+  const before = await video.count();
+  await tab.locator('body').press('Shift+KeyF');
+  await tab.waitForTimeout(300);
+  const after = await video.count();
+  const stills = await tab.locator('.st-clip-speed', { hasText: 'ثابت' }).count();
+  check('time: Shift+F cuts the clip and puts a still between the parts', after === before + 2 && stills === 1, `${before} to ${after} clips, ${stills} still`);
+
+  // reverse the last part, then undo
+  await video.last().click();
+  await tab.locator('.st-insp label.ms-switch', { hasText: 'تشغيل عكسي' }).click();
+  const rev = await tab.locator('.st-clip[data-selected="yes"] .st-clip-speed').textContent();
+  await tab.locator('body').press('Control+z');
+  const undone = await tab.locator('.st-clip[data-selected="yes"] .st-clip-speed').textContent();
+  check('time: «تشغيل عكسي» marks the clip «معكوس», and Ctrl+Z takes it back', /معكوس/.test(rev) && !/معكوس/.test(undone), `${rev} then ${undone}`);
+  await tab.screenshot({ path: path.join(out, 'time-1440.png') });
+  await ctx.close();
+}
+
 async function photoFlow(browser, base, errors) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const tab = await ctx.newPage();
@@ -666,6 +738,7 @@ async function phoneFlow(browser, base, errors) {
     if (!only || only === 'photo') await photoFlow(browser, base, errors);
     if (!only || only === 'phone') await phoneFlow(browser, base, errors);
     if (!only || only === 'versions') await versionsFlow(browser, base, errors);
+    if (!only || only === 'time') await timeFlow(browser, base, errors);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));
   } finally {

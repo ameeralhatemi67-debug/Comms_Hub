@@ -14,6 +14,7 @@ import { ensureAac } from './support.ts';
 import { openTarget, type Target } from './target.ts';
 import type { MediaPool } from './media.ts';
 import { loadFonts, usedFonts } from './text.ts';
+import { isHold, sourceTime } from './speed.ts';
 
 export type Short = 720 | 1080 | 2160;
 export type VideoFormat = 'mp4' | 'webm';
@@ -109,11 +110,24 @@ export async function exportVideo(
   let wi = 0;
   const scale = w / canvasOf(doc).w;
 
+  // stills read their one frame once; reversed clips read each frame where it is (the decoder seeks);
+  // every other clip, at any speed or ramp, is decoded in one forward pass over the stretch it shows
+  const stills = new Map<string, CanvasImageSource | null>();
   const frameFor = async (clip: Clip, t: Micros): Promise<CanvasImageSource | null> => {
-    const at = ((clip.in ?? 0) + (t - clip.start)) / US;
+    if (isHold(clip)) {
+      if (!stills.has(clip.id)) {
+        const f = await pool.frameAt(clip.source!, sourceTime(clip, t));
+        stills.set(clip.id, f ? copyFrame(f) : null);
+      }
+      return stills.get(clip.id) ?? null;
+    }
+    if (clip.reverse) return pool.frameAt(clip.source!, sourceTime(clip, t));
+    const at = sourceTime(clip, t) / US;
     let f = iters.get(clip.id);
     if (!f) {
-      const gen = pool.frames(clip.source!, (clip.in ?? 0) / US, ((clip.in ?? 0) + clip.length) / US + 0.5);
+      const from = sourceTime(clip, clip.start) / US;
+      const to = sourceTime(clip, clip.start + clip.length) / US;
+      const gen = pool.frames(clip.source!, from, to + 0.5);
       if (!gen) return null;
       const first = await gen.next();
       const second = first.done ? { done: true, value: undefined } : await gen.next();
@@ -174,14 +188,27 @@ export async function exportStill(doc: ProjectDoc, pool: MediaPool, opts: { t?: 
     const frames = new Map<string, CanvasImageSource | null>();
     for (const { clip } of visibleAt(doc, t)) {
       if (sourceOf(doc, clip.source)?.media !== 'video') continue;
-      const f = await pool.frameAt(clip.source!, (clip.in ?? 0) + (t - clip.start));
-      frames.set(clip.id, f);
+      const f = await pool.frameAt(clip.source!, sourceTime(clip, t));
+      frames.set(clip.id, f ? copyFrame(f) : null);
     }
     composeFrame(ctx, doc, t, { motion, image: (id) => pool.image(id), videoFrame: (_s, _a, cid) => (cid ? (frames.get(cid) ?? null) : null) }, { scale: size.w / W });
   }
   const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, type, opts.quality ?? 0.92));
   if (!blob) throw new Error('تعذّر إنشاء الصورة.');
   return new File([blob], opts.name, { type });
+}
+
+/** A decoded frame copied to a canvas of its own (the decoder may reuse the one it gave). */
+function copyFrame(src: CanvasImageSource): CanvasImageSource {
+  const s = src as { width?: number; height?: number };
+  const w = typeof s.width === 'number' ? s.width : 0;
+  const h = typeof s.height === 'number' ? s.height : 0;
+  if (!w || !h || typeof document === 'undefined') return src;
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  c.getContext('2d')!.drawImage(src, 0, 0);
+  return c;
 }
 
 /** A file name from a project title: Arabic kept, characters files cannot hold removed. */

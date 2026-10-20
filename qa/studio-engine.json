@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-engine.cjs",
-  "run": "2026-10-19T21:58:06.199Z",
+  "run": "2026-10-20T09:58:18.670Z",
   "checks": [
     {
       "name": "the shipped Arabic fonts load with Arabic sample text",
@@ -41,6 +41,21 @@
       "name": "the second part, moved, still starts at its place in the source",
       "pass": true,
       "detail": "[0,216,0,255]"
+    },
+    {
+      "name": "at 2x the frame at 1.5 s is the source at 3 s (green); a ramp from 1x to 3x is at 1.5 s of source after 1 s (red) and 5.5 s after 2.5 s (blue)",
+      "pass": true,
+      "detail": "[[0,216,0,255],[255,24,0,255],[0,15,255,255]]"
+    },
+    {
+      "name": "reversed, the clip starts on the source's end (blue) and ends on its start (red); a still shows its one frame (green)",
+      "pass": true,
+      "detail": "[[0,15,255,255],[255,24,0,255],[0,216,0,255]]"
+    },
+    {
+      "name": "a picture keyed from a quarter to three quarters of the width is at the quarter at 0 s, the middle at 1 s, three quarters at 2 s",
+      "pass": true,
+      "detail": "[[true,false,false],[false,true,false],[false,false,true]]"
     },
     {
       "name": "a picture is drawn where it is placed, at its size, over the video",
@@ -165,7 +180,7 @@
     {
       "name": "playing advances the playhead in real time and pause stops it",
       "pass": true,
-      "detail": "3.68 s"
+      "detail": "3.69 s"
     },
     {
       "name": "no page errors",
@@ -176,7 +191,7 @@
   "log": [
     "requests: 4"
   ],
-  "total": 34,
-  "passed": 34,
+  "total": 37,
+  "passed": 37,
   "failed": 0
 }

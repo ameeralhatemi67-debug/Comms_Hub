@@ -6,6 +6,7 @@
 // contiguous and silent where nothing plays, as the encoder places each buffer after the last.
 import { US, durationOf, type Clip, type Micros, type ProjectDoc, type Track } from './schema.ts';
 import { clipGain, sourceOf } from './timeline.ts';
+import { retimed } from './speed.ts';
 
 export const SAMPLE_RATE = 48_000;
 export const WINDOW = 10 * US;
@@ -25,7 +26,8 @@ export function audibleIn(doc: ProjectDoc, from: Micros, to: Micros): { track: T
   for (const track of doc.video?.tracks ?? []) {
     if (track.muted || (track.kind !== 'audio' && track.kind !== 'video')) continue;
     for (const clip of track.clips) {
-      if (clip.mute || clip.start >= to || clip.start + clip.length <= from) continue;
+      // a clip at another speed, reversed or still is silent (MVP_draft.md 62.7)
+      if (clip.mute || retimed(clip) || clip.start >= to || clip.start + clip.length <= from) continue;
       const s = sourceOf(doc, clip.source);
       if (s && s.media !== 'image') out.push({ track, clip });
     }

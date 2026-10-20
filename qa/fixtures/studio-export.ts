@@ -71,6 +71,19 @@ export async function run() {
   const still = await exportStill(a, pool, { t: 5 * US, name: 'لقطة.png' });
   out.d = { b64: await b64(still), type: still.type };
 
+  // E, F, G (MVP_draft.md 62.7): the colours at 2x, on a ramp from 1x to 3x, and reversed; all silent
+  const lone = (over: Partial<schema.Clip>) => timeline.addClip({ ...a, video: { ...a.video!, tracks: a.video!.tracks.map((tr) => ({ ...tr, clips: [] })) } }, { source: vid, start: 0, length: 3 * US, in: 0, ...over });
+  const e = lone({ speed: 2 });
+  const re = await exportVideo(e.doc, pool, { short: 720, format: 'mp4', name: 'سريع.mp4' });
+  out.e = { b64: await b64(re.file), frames: re.frames, audio: re.audio };
+  const f0 = lone({ length: 3 * US });
+  const f = timeline.setSpeedKeys(f0.doc, f0.clipId, { speed: [{ t: 0, v: 1 }, { t: 2 * US, v: 3 }] });
+  const rf = await exportVideo(f, pool, { short: 720, format: 'mp4', name: 'متدرج.mp4' });
+  out.f = { b64: await b64(rf.file), frames: rf.frames, length: timeline.locate(f, f0.clipId)!.clip.length };
+  const g = lone({ length: 6 * US, reverse: true });
+  const rg = await exportVideo(g.doc, pool, { short: 720, format: 'mp4', name: 'معكوس.mp4' });
+  out.g = { b64: await b64(rg.file), frames: rg.frames };
+
   // the export was written through the browser's private storage
   const dir = await root.getDirectoryHandle('studio-exports');
   const names: string[] = [];

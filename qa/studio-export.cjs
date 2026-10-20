@@ -104,6 +104,9 @@ function syncTimes(file) {
     const fc = save('c', 'mp4');
     const fb = save('b', 'mp4');
     const fd = save('d', 'png');
+    const fe = save('e', 'mp4');
+    const fff = save('f', 'mp4');
+    const fg = save('g', 'mp4');
     result.timing = { exportMs: r.a.ms, bytes: r.a.bytes, estimate: r.a.estimate };
 
     const pa = probe(fa);
@@ -130,6 +133,16 @@ function syncTimes(file) {
     check('picture and sound stay in step: flashes and beeps at 1 s and 3 s within 45 ms', inStep && Math.abs(flashes[0] - 1) < 0.04 && Math.abs(flashes[1] - 3) < 0.04, JSON.stringify(st));
     const still = spawnSync('ffmpeg', ['-v', 'error', '-i', fd, '-vf', 'scale=1:1', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-']).stdout;
     const sp = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_name,width,height', '-of', 'csv=p=0', fd]).stdout.toString().trim();
+    // speed, ramp and reverse (MVP_draft.md 62.7)
+    const pe = probe(fe);
+    const ce = frameColours(fe, [15, 45, 75]);
+    check('2x: 3 s of picture (90 frames) showing the source at 1 s, 3 s and 5 s (red, green, blue), with no sound', Number(pe.streams.find((x) => x.codec_type === 'video')?.nb_read_frames) === 90 && !pe.streams.some((x) => x.codec_type === 'audio') && near(ce[0], [255, 0, 0]) && near(ce[1], [0, 255, 0]) && near(ce[2], [0, 0, 255]), JSON.stringify({ ce, streams: pe.streams.map((x) => x.codec_type) }));
+    const pf = probe(fff);
+    const cf = frameColours(fff, [30, 54, 75]);
+    check('a ramp from 1x to 3x over 2 s is cut back to the source (2.667 s, 80 frames) and reaches 1.5 s, 3.42 s and 5.5 s of source (red, green, blue)', Math.abs(r.f.length - 2666666) <= 1 && Number(pf.streams.find((x) => x.codec_type === 'video')?.nb_read_frames) === 80 && near(cf[0], [255, 0, 0]) && near(cf[1], [0, 255, 0]) && near(cf[2], [0, 0, 255]), JSON.stringify({ length: r.f.length, frames: pf.streams[0]?.nb_read_frames, cf }));
+    const pg = probe(fg);
+    const cg = frameColours(fg, [15, 90, 165]);
+    check('reversed: 180 frames from the source\'s end to its start (blue, green, red)', Number(pg.streams.find((x) => x.codec_type === 'video')?.nb_read_frames) === 180 && near(cg[0], [0, 0, 255]) && near(cg[1], [0, 255, 0]) && near(cg[2], [255, 0, 0]), JSON.stringify(cg));
     check('a still is a PNG of the project size showing the frame at 5 s (blue)', r.d.type === 'image/png' && sp === 'png,1920,1080' && near([still[0], still[1], still[2]], [0, 0, 255]), `${sp} ${[...still].join(',')}`);
   } catch (e) {
     check('the fixture ran to its end', false, String((e && e.stack) || e));

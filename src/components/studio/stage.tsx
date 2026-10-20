@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState, type DragEvent, type PointerEvent as RPointerEvent } from 'react';
 import { ChevronsLeft, ChevronsRight, Gauge, Pause, Play, ScanLine, SkipBack, SkipForward, StepBack, StepForward } from 'lucide-react';
 import { canvasOf, durationOf, type Clip, type Layer, type Micros, type ProjectDoc, type Transform } from '@/lib/studio/schema';
-import { boxOf, pick, transformOf, type Resolver } from '@/lib/studio/compose';
+import { boxOf, pick, transformAt, type Resolver } from '@/lib/studio/compose';
 import { canvasWidth, dragHandle, handleAt, resolutionLabel, RESOLUTIONS, snapCentre, ROTATE_GAP_PX, HANDLE_PX, type Handle } from '@/lib/studio/handles';
 import { withKeys } from '@/lib/studio/shortcuts';
 import { frameUs, timecode } from '@/lib/studio/time';
@@ -20,10 +20,10 @@ import { EFFECT_MIME } from './effects-panel';
 export type Resolution = { play: number; pause: number };
 export type Tool = 'select' | 'razor' | 'hand' | 'text';
 
-/** The selected item's outline: corners to scale it, a round handle above to turn it. */
-export function drawOutline(ctx: CanvasRenderingContext2D, doc: ProjectDoc, item: Clip | Layer | null, res: Resolver, scale: number) {
+/** The selected item's outline at time t (a keyframed clip moves): corners to scale it, a round handle to turn it. */
+export function drawOutline(ctx: CanvasRenderingContext2D, doc: ProjectDoc, item: Clip | Layer | null, res: Resolver, scale: number, t: Micros | null = null) {
   if (!item) return;
-  const b = boxOf(doc, item, res, ctx);
+  const b = boxOf(doc, item, res, ctx, t);
   if (!b) return;
   // handles keep their size on screen whatever the canvas resolution
   const css = ctx.canvas.clientWidth || ctx.canvas.width;
@@ -194,7 +194,7 @@ export function Stage({
   const handleUnder = (pt: { x: number; y: number }): Handle => {
     const item = itemOf(selected);
     if (!item || !player || readOnly || playing) return null;
-    const b = boxOf(doc, item, player.resolver(), canvasRef.current?.getContext('2d') ?? null);
+    const b = boxOf(doc, item, player.resolver(), canvasRef.current?.getContext('2d') ?? null, t);
     return b ? handleAt(b, pt, k()) : null;
   };
 
@@ -206,7 +206,7 @@ export function Stage({
     if (h && selected) {
       const item = itemOf(selected)!;
       e.currentTarget.setPointerCapture(e.pointerId);
-      drag.current = { id: selected, mode: h, x0: pt.x, y0: pt.y, cx: 0, cy: 0, tr: transformOf(item, W, H), key: `${h}-${selected}-${Date.now()}` };
+      drag.current = { id: selected, mode: h, x0: pt.x, y0: pt.y, cx: 0, cy: 0, tr: transformAt(item, t, W, H), key: `${h}-${selected}-${Date.now()}` };
       return;
     }
     const id = pick(doc, pt.x, pt.y, t, player.resolver(), canvasRef.current!.getContext('2d'));
@@ -214,7 +214,7 @@ export function Stage({
     if (!id || readOnly) return;
     const item = itemOf(id);
     if (!item) return;
-    const tr = transformOf(item, W, H);
+    const tr = transformAt(item, t, W, H);
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = { id, mode: 'move', x0: pt.x, y0: pt.y, cx: tr.x, cy: tr.y, tr, key: `place-${id}-${Date.now()}` };
   };
@@ -228,7 +228,7 @@ export function Stage({
     }
     const item = itemOf(d.id);
     if (!item || !player) return;
-    const b = boxOf(doc, { ...item, transform: d.tr }, player.resolver(), canvasRef.current?.getContext('2d') ?? null);
+    const b = boxOf(doc, { ...item, transform: d.tr, keys: undefined }, player.resolver(), canvasRef.current?.getContext('2d') ?? null);
     if (b) onTransform(d.id, dragHandle(d.mode, d.tr, b, { x: d.x0, y: d.y0 }, pt, e.shiftKey), d.key);
   };
   const up = () => {
