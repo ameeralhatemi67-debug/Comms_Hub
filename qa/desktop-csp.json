@@ -1,0 +1,88 @@
+{
+  "script": "qa/desktop-csp.cjs",
+  "run": "2026-10-21T00:02:44.941Z",
+  "version": "0.4.0",
+  "checks": [
+    {
+      "name": "Edge: the page carries the policy, scripts only with the nonce or the theme script's hash, no inline script or eval",
+      "pass": true,
+      "detail": "default-src 'self'; script-src 'self' 'nonce-Oaq1rxhHCYd/9FvZiJ0mTg==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    },
+    {
+      "name": "Edge: every script Next.js wrote carries this request's nonce; the only other one is the theme's",
+      "pass": true,
+      "detail": "{\"scripts\":19,\"unmarked\":[]}"
+    },
+    {
+      "name": "Edge: a fresh nonce on every request",
+      "pass": true,
+      "detail": "{\"nonce\":\"Oaq1rxhHCYd/9FvZiJ0mTg==\",\"nonce2\":\"DLOqvsSp5EFr1h9rsz1TGQ==\"}"
+    },
+    {
+      "name": "Edge: the page loads with no violation, renders, and the theme script ran",
+      "pass": true,
+      "detail": "{\"violations\":[],\"state\":{\"theme\":\"light\",\"text\":\"الاتصال بالحسابات غير مضبوط\\n\\nلم تُضبط متغيرات Supabase لهذا التشغيل، ولذلك لا يُ\",\"buttons\":0}}"
+    },
+    {
+      "name": "Edge: an inline event handler slipped into the page does not run, and the browser reports it",
+      "pass": true,
+      "detail": "{\"pwned\":0,\"blocked\":[{\"directive\":\"script-src-attr\",\"blocked\":\"inline\",\"sample\":\"\"}]}"
+    },
+    {
+      "name": "an API route does not get the pages' policy (the file routes set their own)",
+      "pass": true,
+      "detail": "{\"status\":401,\"apiPolicy\":\"\"}"
+    },
+    {
+      "name": "Edge: no policy message in the console while the pages load",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "in the application: the page carries the policy, scripts only with the nonce or the theme script's hash, no inline script or eval",
+      "pass": true,
+      "detail": "default-src 'self'; script-src 'self' 'nonce-LjxEIK3Ws7HMIdAvPu+nMw==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    },
+    {
+      "name": "in the application: every script Next.js wrote carries this request's nonce; the only other one is the theme's",
+      "pass": true,
+      "detail": "{\"scripts\":19,\"unmarked\":[]}"
+    },
+    {
+      "name": "in the application: a fresh nonce on every request",
+      "pass": true,
+      "detail": "{\"nonce\":\"LjxEIK3Ws7HMIdAvPu+nMw==\",\"nonce2\":\"0UrzLVP7VcuMcV4+S8QFwA==\"}"
+    },
+    {
+      "name": "in the application: the page loads with no violation, renders, and the theme script ran",
+      "pass": true,
+      "detail": "{\"violations\":[],\"state\":{\"theme\":\"light\",\"text\":\"الاتصال بالحسابات غير مضبوط\\n\\nلم تُضبط متغيرات Supabase لهذا التشغيل، ولذلك لا يُ\",\"buttons\":0}}"
+    },
+    {
+      "name": "in the application: an inline event handler slipped into the page does not run, and the browser reports it",
+      "pass": true,
+      "detail": "{\"pwned\":0,\"blocked\":[{\"directive\":\"script-src-attr\",\"blocked\":\"inline\",\"sample\":\"\"}]}"
+    },
+    {
+      "name": "in the application: the bridge is there, and its own address is allowed by the policy (answered 404 for an unknown token, not blocked)",
+      "pass": true,
+      "detail": "{\"bridge\":\"object\",\"version\":3,\"status\":404,\"violations\":[]}"
+    }
+  ],
+  "notes": [],
+  "restoreThemeLength": 162,
+  "edge": {
+    "policy": "default-src 'self'; script-src 'self' 'nonce-Oaq1rxhHCYd/9FvZiJ0mTg==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+    "scripts": 19
+  },
+  "edgeConsole": [
+    "Executing inline event handler violates the following Content Security Policy directive 'script-src 'self' 'nonce-DLOqvsSp5EFr1h9rsz1TGQ==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval''. Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+  ],
+  "app": {
+    "policy": "default-src 'self'; script-src 'self' 'nonce-LjxEIK3Ws7HMIdAvPu+nMw==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+    "scripts": 19
+  },
+  "total": 13,
+  "passed": 13,
+  "failed": 0
+}

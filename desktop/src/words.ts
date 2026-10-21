@@ -9,6 +9,10 @@ export const TRAY_KEEP = 'إبقاء التطبيق في شريط المهام';
 export const TRAY_QUIT = 'إنهاء';
 export const TRAY_RESTART = 'إعادة التشغيل للتحديث';
 
+/** The system dialogs the page may open (D4). */
+export const PICK_TITLE = 'اختيار ملفات من هذا الجهاز';
+export const FOLDER_TITLE = 'اختيار مجلد التخزين المؤقت للاستوديو';
+
 /** The notice when an update has been downloaded (D3). */
 export function updateReady(version: string): { title: string; body: string } {
   return { title: 'تحديث جاهز', body: `الإصدار ${version} جاهز، ويُثبَّت عند إنهاء التطبيق. للتثبيت الآن اختر «${TRAY_RESTART}».` };

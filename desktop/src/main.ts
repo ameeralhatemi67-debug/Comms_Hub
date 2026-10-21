@@ -7,13 +7,16 @@
 // page, rule and check stays the website's. The rules themselves are the plain functions beside this file.
 import fs from 'node:fs';
 import path from 'node:path';
-import { app, BrowserWindow, Menu, nativeTheme, screen, session, shell } from 'electron';
+import { app, BrowserWindow, Menu, nativeTheme, protocol, screen, session, shell } from 'electron';
 import type { WebContents, WebPreferences } from 'electron';
 import { ALLOWED, DEV, QA, UPDATE_FEED, VERSION } from './compiled.ts';
 import { saveDialogFor } from './downloads.ts';
 import { dataFolderName, PRODUCT_NAME, productNameFor, userAgentFor, windowsAppId } from './identity.ts';
 import { keyAction, nextZoom, type KeyAction } from './keys.ts';
 import { startNative, type Native } from './native.ts';
+import { startFiles } from './native-files.ts';
+import { SCHEME } from './files.ts';
+import { PRIVILEGES } from './protocol.ts';
 import { decideNavigation, loadFailure, type Decision } from './navigation.ts';
 import { DEVELOPMENT_ORIGIN, isAllowed, PRODUCTION_ORIGIN } from './origins.ts';
 import { permissionGranted } from './permissions.ts';
@@ -38,6 +41,10 @@ const devData = __COMMS_HUB_DEV__ ? process.env.COMMS_HUB_DEV_DATA : undefined;
 app.setPath('userData', devData && path.isAbsolute(devData) ? devData : path.join(app.getPath('appData'), dataFolderName(DEV, QA)));
 app.setName(productNameFor(DEV, QA));
 if (process.platform === 'win32') app.setAppUserModelId(windowsAppId(DEV, QA));
+
+// The application's own read-only addresses for files used in place and the cache folder (D4); they must be
+// declared before the application is ready, and are answered on the site's profile only (native-files.ts).
+protocol.registerSchemesAsPrivileged([{ scheme: SCHEME, privileges: { ...PRIVILEGES } }]);
 
 const lock = app.requestSingleInstanceLock();
 if (!lock) app.quit();
@@ -304,6 +311,15 @@ if (lock && !refused) {
     Menu.setApplicationMenu(null);
     prepareSession();
     native = startNative({ allowed: ALLOWED, windows: () => siteWindows, mainWindow: () => main, version: VERSION, iconPath: pagePath('icon.png'), feed: UPDATE_FEED, qa: QA, dev: DEV });
+    startFiles({
+      handle: native.handle,
+      site: session.fromPartition(PARTITION),
+      allowed: ALLOWED,
+      // «مسح بيانات هذا الجهاز»: every window of the site starts again, signed out.
+      reload: () => {
+        for (const w of BrowserWindow.getAllWindows()) if (siteWindows.has(w.webContents.id)) void w.webContents.loadURL(startAddress());
+      },
+    });
     createMainWindow();
   });
 }

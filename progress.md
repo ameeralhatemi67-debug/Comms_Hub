@@ -1393,3 +1393,70 @@ When recording future implementation outcomes, follow this standardized template
   - **SmartScreen and the installer's Arabic pages** were not seen: every install was silent and built on this laptop.
   - **Updating over a version that has the older uninstaller:** electron-builder runs the *installed* version's uninstaller during an update. The pilot's 0.1.0 and 0.2.0 do not remove the updater's folder, so it stays until a version from 0.3.0 on is uninstalled.
 - **Owner steps, when the first release is wanted** (desktop/README.md): raise the upload limit, apply the migration, `npm run pack`, upload the three files. Then, in a browser, «الحساب» shows «تنزيل التطبيق», and an installed application finds the update within four hours.
+
+### 2026-10-21: the desktop application, D4: files used in place, the cache folder and the pages' security policy
+
+- **What changed, in the site, for everyone:** the pages' Content-Security-Policy (`Desktop_App_Plan.md` 3 and 9, "before D4"). `src/proxy.ts` gives every page request a fresh nonce, which Next.js 16.3 puts on its own scripts, following `node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md`, and sends the policy (`src/lib/csp.ts`):
+  - `script-src` takes the nonce, the theme script's SHA-256 (the layout's one inline script, moved to `csp.ts` as `RESTORE_THEME` so the hash and the page share one text), `'strict-dynamic'` and `'wasm-unsafe-eval'` (the AAC encoder). It allows no `'unsafe-inline'`, and `'unsafe-eval'` only under `next dev`;
+  - the other directives stay broad, so nothing the site does today is refused: `connect-src` https and wss (Drive, OneDrive and S3 uploads go straight to their own hosts), blobs for workers and media, `object-src 'none'`, `frame-ancestors 'none'`, `base-uri` and `form-action` to the site;
+  - `commshub-file:` is allowed for media and reads; a browser never has such an address;
+  - the API routes keep their own headers.
+
+  Every page was already rendered per request (only `/_not-found` is prerendered), so the nonce costs nothing new.
+- **What changed, in the application** (`desktop/`, version 0.4.0, bridge version 3; `MVP_draft.md` 63.3):
+  - **Files used in place** (`src/files.ts`, `src/file-store.ts`). A chosen file becomes a token (32 random bytes), recorded in the profile's `files.json` with its path, size, modification time and a SHA-256 of its size and first and last 4 MB. The page sees name, size, type and date only. The same unchanged file keeps its token. A file changed, moved or removed is no longer served.
+    - `files.fromDropped(file)` reads, in the preload alone, the path Chromium attached to a File the person chose or dropped (webUtils). The main process accepts only an absolute path to a regular file of a kind the studio takes.
+    - Said plainly: a renderer taken over by an attacker could name a media file by path on this channel. The preload is the only caller in normal use, and the page itself has no way to send one.
+    - `files.pick` opens the system's own dialog. `files.check` and `files.forget` complete the group.
+  - **`commshub-file://`** (`src/protocol.ts`, `src/range.ts`), registered as privileged (standard, secure, fetch, CORS, stream) and answered on the site's profile only:
+    - read-only (GET, HEAD, and the CORS question), in single byte ranges (206, or 416 past the end);
+    - an address names exactly one token (`local/`) or one cache name (`cache/`, `asset-`, `proxy-` or `convert-` names the main process gives), never a path;
+    - a request carrying an Origin must come from the list; CORS headers go only to it.
+  - **The cache folder** (`src/cache-store.ts`):
+    - library versions are copied in resumable 16 MB parts from the site's own file route, `/api/media/<asset>/content?v=<n>` on the asking page's address. The main process uses the window's session with `credentials: 'include'`, so the site still decides who may read a file;
+    - the folder is `StudioCache` in the profile by default, or «CommsHub Studio Cache» inside a folder the person chooses. Changing folders removes only its own copies;
+    - the ten-day rule is the site's; the size limits are none, 10, 25, 50, 100 or 250 GB, the oldest used going first and what is in use never.
+  - **«مسح بيانات هذا الجهاز»** (`data.clear`, decision D-11) forgets every token, removes the folder's copies, clears the profile's storage and cache (the session cookie included), and starts every window again.
+  - The bridge's new handlers live in `src/native-files.ts`, registered through the same `guard()` (`native.ts` passes its `handle`). The sender test now reads both files.
+- **What changed, in the site's studio** (only inside the application):
+  - `cache.ts` gains a native backend: `libraryPlace` and `localPlace` return a File in a browser and an application address in the application. A device file is used where it is (an entry with its token, no copy). `removeLocal` forgets the token and never touches the file. The sweep, «حذف ملفات المعاينة المؤقتة» and the usage also cover the folder;
+  - `media.ts` asks for places, so a source read from an address goes through Mediabunny's URL source and the media element, as a library file without a cache always did;
+  - `target.ts` and `export.ts` can write straight to a file handle. In the application, `export-panel.tsx` asks with the system's save dialog before a video for the device, and says «حُفظ: … (…)، في المكان الذي اخترته.»;
+  - `cache-panel.tsx` shows the folder, the free space, «اختيار مجلد آخر», «العودة إلى المجلد الافتراضي», «الحد الأعلى للتخزين» and «· من مكانه»;
+  - `desktop-app.tsx` offers «مسح بيانات هذا الجهاز», held down;
+  - two long-press reasons were added (`studioForgetInPlace`, `desktopClearData`), and `tests/kit.test.mjs` now also reads `desktop-app.tsx`.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **105 of 105**, in 21 files (new: `files`, `file-store`, `cache-store`, `protocol`). `npm run typecheck` is clean.
+  - **The site:** `npm run typecheck` is clean, `npm test` **524 of 524** (new: `tests/csp.test.mjs` and D4's contract tests in `tests/native.test.mjs`), and `npm run build` passes (compiled in 9.6 s; the proxy is listed).
+  - **`node qa/desktop-csp.cjs`: 13 of 13** (`qa/desktop-csp.json`). The site's own production build (`next start`, no environment file, so the signed-out gate) was checked in Edge and inside the development package:
+    - every page carries the policy with a fresh nonce on each request;
+    - every script Next.js wrote carries that nonce, and the only other script is the theme's;
+    - pages load with no violation and the theme script ran;
+    - an inline event handler slipped into the page does not run, and the browser reports it;
+    - an API route does not get the pages' policy;
+    - inside the application, its own address is allowed: an unknown token answered 404, not blocked.
+  - **`node qa/desktop-files.cjs`: 16 of 16** (`qa/desktop-files.json`). DT-10 and DT-11 inside the development package, with the studio's own modules:
+    - a **4,503,664,011-byte** H.264 video, made by ffmpeg on this disk, was chosen in the page's file field and given a token, not copied;
+    - the frame at 291 s, past 4 GB into the file, matched ffmpeg's decode of the same moment within 12 levels;
+    - five seconds from there exported to 1280x720, 150 frames, in 3.4 s;
+    - **the private storage grew by 2,864,643 bytes, the export's own file (2,864,294) and the manifest; the whole profile on disk by 7.8 MB**;
+    - the same project on a fresh profile: the file missing on this device, and the editor's «على هذا الجهاز فقط» line;
+    - a file changed after it was chosen: 410; let go of: 404, still on the disk;
+    - a library version copied into the folder with the page's own cookie and read from there; refused when the route answered 401;
+    - the limit kept, and clearing spared what was in use;
+    - an export written straight to a file handle with no temporary copy;
+    - «مسح بيانات هذا الجهاز»: the cookie, the private storage, the folder's copies and the token all gone.
+  - **Against bridge version 3:**
+    - `qa/desktop-native.cjs` **37 of 37**;
+    - `qa/desktop-account.cjs` **8 of 8**;
+    - `qa/desktop-shell.cjs` **81 of 81** on the 0.4.0 release package: installer **111,621,449 bytes**, installed silently and removed, nothing left behind.
+  - **`qa/desktop-studio-parity.cjs --parity-only`: DT-05 again, 6 of 6.** The studio's engine (41 checks) and export (18 checks) pass in Edge and inside the application with the same names, after `cache.ts` and `media.ts` changed. The ten-minute export (DT-06) was not re-run; its D2 result stands, and the folder path is covered by `qa/desktop-files.cjs`.
+- **Found on the way, fixed.**
+  - A copy the site refused (401) left an empty, incomplete entry and an empty file in the folder, which «حذف ملفات المعاينة المؤقتة» then counted. A refused copy, or one that failed before its first byte, now leaves nothing; a partial copy stays, to be resumed (unit-tested, and the check found it).
+  - The URL parser resolves `../` before the address is read, so `commshub-file://cache/../manifest.json` arrived as `manifest.json`. Cache names now carry the main process's own prefixes, and the folder's record is kept in the profile, not in the folder.
+  - A byte range starting past the end was ignored instead of refused (416).
+- **Not verified, said plainly.**
+  - **The system's file and folder dialogs** (`files.pick`, «اختيار مجلد آخر») and the save dialog of an export were not driven: they are Windows' own windows. The paths behind them are unit-tested, the save path through a file handle.
+  - **Drag and drop** was not driven; a file field was, which gives the same kind of File.
+  - **The pages' policy was checked on the signed-out gate only.** Signed-in pages load more (the database's live connection, uploads to Drive, OneDrive and S3), which the policy's directives allow by design, but no signed-in page was seen under it. This is the D4 change most worth the owner's attention in the walkthrough: any page that misbehaves should be reported, with the browser console's «Content Security Policy» lines.
+  - The studio's own interface checks (`qa/studio-ui.cjs`) were not run. The cache panel's new controls were not seen rendered; they use the existing classes.

@@ -2663,7 +2663,7 @@ On «المراجعة» (`/approvals/<id>`), for files of video:
 
 # 63. The desktop application «مركز الاتصال المؤسسي», Windows, 2026-10-20
 
-Owner decisions of 2026-10-20: `Desktop_App_Plan.md`, accepted with the answers of its section 11.1 and recorded in `progress.md`. An application for Windows that opens the live site in its own window. It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a browser remains a full client. This section describes phase D1; 63.1 adds phase D2 and 63.2 phase D3, and the later phases are in the plan.
+Owner decisions of 2026-10-20: `Desktop_App_Plan.md`, accepted with the answers of its section 11.1 and recorded in `progress.md`. An application for Windows that opens the live site in its own window. It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a browser remains a full client. This section describes phase D1; 63.1 adds phase D2, 63.2 phase D3 and 63.3 phase D4, and the later phases are in the plan.
 
 **Who and where.** The pilot is the Admin's and the director's laptops, Windows x64 only for now (Windows arm64 and Mac come later). The application is installed per user, without administrator rights, with a Start menu shortcut and a desktop shortcut. Windows shows its name, «مركز الاتصال المؤسسي», in the Start menu, on the shortcuts, in the taskbar, in the installer and in the file's details. The pilot build is not signed, so Windows SmartScreen asks once: "More info", then "Run anyway" («مزيد من المعلومات» ثم «تشغيل على أي حال» on an Arabic Windows). The application opens `https://comms-hub-three.vercel.app` and nothing else.
 
@@ -2701,7 +2701,7 @@ The camera, location, USB, serial and HID devices, Bluetooth, MIDI and everythin
 
 **Not there yet.**
 - Signing (decision D-7, a certificate before rollout). Updates and the download page arrived with D3 (63.2).
-- Later (D4, D5): files from «هذا الجهاز» used where they are, the cache folder, and media tools for heavy or unsupported footage.
+- Later (D5, D6): media tools for heavy or unsupported footage, and the preview on a second screen. Files used where they are and the cache folder arrived with D4 (63.3).
 
 **Boundaries.** The application holds no secret, no stored password and no sign-in bypass. It decides nothing about who may see or do what: the site and the database do, as in a browser, and the studio still opens only for the Admin and the director. It approves nothing and publishes nothing, and nothing is scheduled in the site because of it.
 
@@ -2745,3 +2745,23 @@ Phase D3 of `Desktop_App_Plan.md`, without signing: the pilot stays unsigned (de
 **An application older than the site needs.** Each page then carries a line at its top: «إصدار تطبيق سطح المكتب أقدم مما يحتاجه المركز الآن. حدّثه من «الحساب».», and «الحساب» adds «هذا الإصدار أقدم مما يحتاجه المركز الآن، فحدّثه ليعمل كل شيء كما ينبغي.». The site sets the oldest version it works with fully (0.2.0 now) and raises it only when a change of the site needs a newer application.
 
 **Releases** are published by the owner to a public bucket of the `comms-hub` project. Nothing is published from the site or by an agent. Until the owner publishes the first one, the download line says so and the application's own check fails quietly («تعذّر البحث عن تحديث الآن، ويُعاد البحث لاحقاً.»).
+
+## 63.3 Files used in place, the cache folder and the pages' security (D4), 2026-10-21
+
+Phase D4 of `Desktop_App_Plan.md`. Everything here exists only inside the application, except the pages' security policy, which every browser gets too and which changes nothing anyone sees.
+
+**Files from «هذا الجهاز» are used where they are.** Adding a video, a sound or a picture from the laptop, with the button or by dragging it in, no longer copies it: the studio remembers where it is and reads it from there, however large. A 20 GB camera file costs no extra 20 GB and no copying time. A recording made in the studio has no file on the laptop yet, so it is kept as before. In «التخزين على هذا الجهاز» such a file shows «· من مكانه» beside its size. Its removal, held down («يبقى الملف في مكانه على الجهاز، لكن المشاريع التي تستعمله لن تجده في الاستوديو بعد الإزالة.»), only lets the studio forget it: the file stays where it is. If the file is changed, moved or deleted, the studio no longer finds it and says so as for any file not on this device: «هذا الملف على جهاز آخر («على هذا الجهاز فقط» حيث أُضيف)، فلا يُعرض هنا.». A project opened on another device shows the same.
+
+**The library's copies live in a folder.** In a browser they live in the browser's private storage, which the browser may clear; in the application they are files in a folder on the laptop. «التخزين على هذا الجهاز» then also shows:
+- «مجلد التخزين المؤقت: …», with «المساحة الحرة» on its disk;
+- «اختيار مجلد آخر» (another disk if wanted) and «العودة إلى المجلد الافتراضي»;
+- «الحد الأعلى للتخزين»: «بلا حد», 10, 25, 50, 100 or 250 GB;
+- «عند تغيير المجلد تُحذف النسخ من المجلد السابق وتُنسخ في الجديد عند الحاجة، ولا يُمس غيرها. وإذا تجاوزت النسخ الحد حُذف أقدمها استعمالاً.».
+
+The ten-day rule and «حذف ملفات المعاينة المؤقتة» work as before, in the folder; what the open project uses is never removed. A copy is made with the person's own session, so a file the library does not open to them is not copied either.
+
+**Exporting to the device.** For a video to the device, the application first asks where to save it («تختار أولاً أين يُحفظ الفيديو، فيُكتب هناك مباشرة.») and writes it there as it is made: no second copy and no download afterwards. When it ends: «حُفظ: … (…)، في المكان الذي اخترته.». A picture and the SRT captions download as before.
+
+**«مسح بيانات هذا الجهاز»**, on «الحساب» in «تطبيق سطح المكتب», held down («يُمسح من هذا الجهاز الدخول وملفات الاستوديو المؤقتة، ويعود التطبيق إلى صفحة الدخول.»): «مسح بيانات هذا الجهاز» يمسح من هذا الحاسوب الدخول، ونسخ ملفات المكتبة المؤقتة، وما يتذكره الاستوديو من ملفات «هذا الجهاز» (تبقى الملفات نفسها في أماكنها)، ثم يعود التطبيق إلى صفحة الدخول. لا يُمس شيء في المركز نفسه. (Decision D-11.)
+
+**The pages' security policy.** Every page now tells the browser which scripts it may run. A script slipped into a page is refused, so it cannot reach the application's files. Nothing changes for anyone using the site.

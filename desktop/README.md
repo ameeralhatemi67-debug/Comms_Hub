@@ -17,9 +17,13 @@ copy of the site: every page, rule and check stays the website's.
 - **Holds no secret.** Signing in is the site's form. The session is the site's cookie in the
   application's own profile, `%APPDATA%\sa.commshub.desktop`, encrypted by Windows. There is no sign-in
   bypass, stored password or service key, in the application or in its checks.
-- **Bridge.** `window.commsHubNative` is `{ platform: 'desktop', shell: 'electron', version, bridge: 1 }`,
-  exposed only on a top-level page on the list. D1 has no method and no main-process handler. D2 adds
-  methods, each one registered through `src/sender.ts`'s `guard()`.
+- **Bridge.** `window.commsHubNative`, exposed only on a top-level page on the list: who the application is
+  (`platform`, `shell`, `version`, `bridge`), then `info`, `power`, `life` and `notify` (version 1, D2),
+  `update` (2, D3), and `files`, `cache` and `data` (3, D4). Every handler is registered through
+  `src/sender.ts`'s `guard()` (`src/native.ts`, `src/native-files.ts`).
+- **Files in place and the cache folder** (D4). A chosen file becomes a token (`src/file-store.ts`), never a
+  path in the page; the page reads it, and the library copies in the cache folder (`src/cache-store.ts`),
+  at `commshub-file://` (`src/protocol.ts`), read-only and in byte ranges.
 - **Keys.** It takes only Ctrl with + - 0 (zoom), F11 (full screen) and F5 (reload); F12 opens the
   developer tools in a development build only. Every other key is the page's.
 

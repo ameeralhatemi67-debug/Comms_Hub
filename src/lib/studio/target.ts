@@ -2,7 +2,9 @@
 //   - a private file of the browser (OPFS, folder studio-exports), written as a stream; its File is
 //     read from disk to download it or upload it to the library;
 //   - where the browser has no private storage, memory, refused above the 1.6 GB the template tab
-//     already uses as its ceiling (MAX_BYTES in src/lib/motion/export.js).
+//     already uses as its ceiling (MAX_BYTES in src/lib/motion/export.js);
+//   - in the desktop application (MVP_draft.md 63.3), a file the person chose with the system's save
+//     dialog, written as a stream where it will stay: no second copy and no download afterwards.
 // Browser only.
 import type { BufferTarget, StreamTarget } from 'mediabunny';
 
@@ -18,8 +20,18 @@ export type Target = {
   discard: () => Promise<void>;
 };
 
-export async function openTarget(name: string, type: string, expectedBytes: number): Promise<Target> {
+export async function openTarget(name: string, type: string, expectedBytes: number, saveTo?: FileSystemFileHandle): Promise<Target> {
   const mb = await import('mediabunny');
+  if (saveTo) {
+    const writable = await saveTo.createWritable();
+    return {
+      kind: 'device',
+      target: new mb.StreamTarget(writable, { chunked: true }),
+      result: async () => new File([await saveTo.getFile()], name, { type }),
+      // an unfinished stream is thrown away by the browser: the chosen file keeps what it had
+      discard: async () => void (await writable.abort?.().catch(() => undefined)),
+    };
+  }
   try {
     if (navigator.storage?.getDirectory) {
       const root = await navigator.storage.getDirectory();

@@ -1,12 +1,12 @@
 {
   "script": "qa/desktop-shell.cjs",
-  "run": "2026-10-20T23:44:48.796Z",
-  "version": "0.3.0",
+  "run": "2026-10-21T00:06:58.104Z",
+  "version": "0.4.0",
   "packages": {
-    "installer": "desktop/dist/release/CommsHub-Setup-0.3.0-x64.exe",
-    "installerBytes": 111615091,
-    "installerSize": "106.4 MB",
-    "unpackedBytes": 336583741,
+    "installer": "desktop/dist/release/CommsHub-Setup-0.4.0-x64.exe",
+    "installerBytes": 111621449,
+    "installerSize": "106.5 MB",
+    "unpackedBytes": 336610880,
     "unpackedSize": "321.0 MB"
   },
   "fuses": {
@@ -36,9 +36,9 @@
   },
   "install": {
     "installDir": "C:\\Users\\User\\AppData\\Local\\Programs\\sa.commshub.desktop",
-    "seconds": 13.5,
-    "installedBytes": 336748035,
-    "installedSize": "321.1 MB",
+    "seconds": 12.4,
+    "installedBytes": 336775174,
+    "installedSize": "321.2 MB",
     "files": 22
   },
   "checks": [
@@ -70,7 +70,7 @@
     {
       "name": "the bridge exists on an allowed page: who the application is, then the groups of version 1",
       "pass": true,
-      "detail": "{\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.3.0\",\"bridge\":2},\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\"],\"frozen\":true}"
+      "detail": "{\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.4.0\",\"bridge\":3},\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\"],\"frozen\":true}"
     },
     {
       "name": "the bridge object cannot be changed by the page",
@@ -90,7 +90,7 @@
     {
       "name": "a foreign link opens in the system browser",
       "pass": true,
-      "detail": "[\"http://127.0.0.1:65087/landing\"]"
+      "detail": "[\"http://127.0.0.1:52299/landing\"]"
     },
     {
       "name": "a foreign link leaves the window where it was",
@@ -100,22 +100,22 @@
     {
       "name": "window.open of a foreign address opens in the system browser and makes no window",
       "pass": true,
-      "detail": "{\"opened\":[\"http://127.0.0.1:65087/landing\",\"http://127.0.0.1:65087/popup\"],\"windows\":1}"
+      "detail": "{\"opened\":[\"http://127.0.0.1:52299/landing\",\"http://127.0.0.1:52299/popup\"],\"windows\":1}"
     },
     {
       "name": "a mail link goes to the system",
       "pass": true,
-      "detail": "[\"http://127.0.0.1:65087/landing\",\"http://127.0.0.1:65087/popup\",\"mailto:team@example.com?subject=qa\"]"
+      "detail": "[\"http://127.0.0.1:52299/landing\",\"http://127.0.0.1:52299/popup\",\"mailto:team@example.com?subject=qa\"]"
     },
     {
       "name": "a redirect out of the list goes to the system browser, the window stays",
       "pass": true,
-      "detail": "{\"opened\":[\"http://127.0.0.1:65087/landing\",\"http://127.0.0.1:65087/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:65087/redirected\"],\"url\":\"http://127.0.0.1:3000/\"}"
+      "detail": "{\"opened\":[\"http://127.0.0.1:52299/landing\",\"http://127.0.0.1:52299/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:52299/redirected\"],\"url\":\"http://127.0.0.1:3000/\"}"
     },
     {
       "name": "any other kind of address (ms-settings:, file:) is refused: nothing opens, the window stays",
       "pass": true,
-      "detail": "{\"opened\":[\"http://127.0.0.1:65087/landing\",\"http://127.0.0.1:65087/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:65087/redirected\"],\"url\":\"http://127.0.0.1:3000/\"}"
+      "detail": "{\"opened\":[\"http://127.0.0.1:52299/landing\",\"http://127.0.0.1:52299/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:52299/redirected\"],\"url\":\"http://127.0.0.1:3000/\"}"
     },
     {
       "name": "the foreign pages were never loaded inside the application",
@@ -150,17 +150,17 @@
     {
       "name": "«متابعة في المتصفح» opens /api/drive/connect in the system browser and closes the note",
       "pass": true,
-      "detail": "[\"http://127.0.0.1:65087/landing\",\"http://127.0.0.1:65087/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:65087/redirected\",\"http://127.0.0.1:3000/api/drive/connect\"]"
+      "detail": "[\"http://127.0.0.1:52299/landing\",\"http://127.0.0.1:52299/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:52299/redirected\",\"http://127.0.0.1:3000/api/drive/connect\"]"
     },
     {
       "name": "«إلغاء» closes the note and opens nothing (a platform connection started by the page)",
       "pass": true,
-      "detail": "[\"http://127.0.0.1:65087/landing\",\"http://127.0.0.1:65087/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:65087/redirected\",\"http://127.0.0.1:3000/api/drive/connect\"]"
+      "detail": "[\"http://127.0.0.1:52299/landing\",\"http://127.0.0.1:52299/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:52299/redirected\",\"http://127.0.0.1:3000/api/drive/connect\"]"
     },
     {
       "name": "/api/onedrive/connect goes to the system browser the same way",
       "pass": true,
-      "detail": "[\"http://127.0.0.1:65087/landing\",\"http://127.0.0.1:65087/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:65087/redirected\",\"http://127.0.0.1:3000/api/drive/connect\",\"http://127.0.0.1:3000/api/onedrive/connect\"]"
+      "detail": "[\"http://127.0.0.1:52299/landing\",\"http://127.0.0.1:52299/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:52299/redirected\",\"http://127.0.0.1:3000/api/drive/connect\",\"http://127.0.0.1:3000/api/onedrive/connect\"]"
     },
     {
       "name": "no connection route was ever loaded inside the application",
@@ -240,7 +240,7 @@
     {
       "name": "a foreign top-level page gets no bridge",
       "pass": true,
-      "detail": "{\"url\":\"http://127.0.0.1:65087/foreign\",\"bridge\":\"undefined\",\"mic\":\"refused:NotAllowedError\",\"notifications\":\"denied\"}"
+      "detail": "{\"url\":\"http://127.0.0.1:52299/foreign\",\"bridge\":\"undefined\",\"mic\":\"refused:NotAllowedError\",\"notifications\":\"denied\"}"
     },
     {
       "name": "a foreign page gets no permission (microphone, notifications)",
@@ -250,12 +250,12 @@
     {
       "name": "the window runs isolated and sandboxed, without Node.js and without webview",
       "pass": true,
-      "detail": "{\"contextIsolation\":true,\"sandbox\":true,\"nodeIntegration\":false,\"nodeIntegrationInSubFrames\":false,\"webviewTag\":false,\"menu\":null,\"persistent\":true,\"storage\":\"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\comms-hub-desktop-qa-ngvFWj\\\\dev-profile\\\\Partitions\\\\comms-hub\"}"
+      "detail": "{\"contextIsolation\":true,\"sandbox\":true,\"nodeIntegration\":false,\"nodeIntegrationInSubFrames\":false,\"webviewTag\":false,\"menu\":null,\"persistent\":true,\"storage\":\"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\comms-hub-desktop-qa-gW9cvg\\\\dev-profile\\\\Partitions\\\\comms-hub\"}"
     },
     {
       "name": "the site lives in the persistent profile persist:comms-hub",
       "pass": true,
-      "detail": "C:\\Users\\User\\AppData\\Local\\Temp\\comms-hub-desktop-qa-ngvFWj\\dev-profile\\Partitions\\comms-hub"
+      "detail": "C:\\Users\\User\\AppData\\Local\\Temp\\comms-hub-desktop-qa-gW9cvg\\dev-profile\\Partitions\\comms-hub"
     },
     {
       "name": "there is no native menu bar",
@@ -265,7 +265,7 @@
     {
       "name": "the user agent ends with CommsHubDesktop/<version> and carries no Electron token",
       "pass": true,
-      "detail": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.130 Safari/537.36 CommsHubDesktop/0.3.0"
+      "detail": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.130 Safari/537.36 CommsHubDesktop/0.4.0"
     },
     {
       "name": "keys reach the page once the window has settled (a neutral F24)",
@@ -385,7 +385,7 @@
     {
       "name": "the installer runs as this user, without administrator rights, and installs",
       "pass": true,
-      "detail": "{\"exit\":0,\"installDir\":\"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Programs\\\\sa.commshub.desktop\",\"seconds\":\"13.5\"}"
+      "detail": "{\"exit\":0,\"installDir\":\"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Programs\\\\sa.commshub.desktop\",\"seconds\":\"12.4\"}"
     },
     {
       "name": "Start menu and desktop shortcuts carry the Arabic name",
@@ -395,7 +395,7 @@
     {
       "name": "Windows lists it under «مركز الاتصال المؤسسي», version 0.1.0, for this user",
       "pass": true,
-      "detail": "{\"PSChildName\":\"dc656aed-13ec-55ab-a2e3-19f784d0109c\",\"DisplayName\":\"مركز الاتصال المؤسسي\",\"DisplayVersion\":\"0.3.0\",\"Publisher\":\"مركز الاتصال المؤسسي\",\"InstallLocation\":null}"
+      "detail": "{\"PSChildName\":\"dc656aed-13ec-55ab-a2e3-19f784d0109c\",\"DisplayName\":\"مركز الاتصال المؤسسي\",\"DisplayVersion\":\"0.4.0\",\"Publisher\":\"مركز الاتصال المؤسسي\",\"InstallLocation\":null}"
     },
     {
       "name": "a release build refuses to start with remote debugging, and the port never opens",

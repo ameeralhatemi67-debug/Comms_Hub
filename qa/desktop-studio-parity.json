@@ -1,7 +1,7 @@
 {
   "script": "qa/desktop-studio-parity.cjs",
-  "run": "2026-10-20T20:22:48.896Z",
-  "version": "0.2.0",
+  "run": "2026-10-21T00:09:11.888Z",
+  "version": "0.4.0",
   "checks": [
     {
       "name": "DT-05: qa/studio-engine.cjs has the same checks in Edge and in the application",
@@ -64,16 +64,14 @@
       "detail": "{\"busy\":{\"readyMs\":345,\"exportMs\":15803,\"frames\":1800,\"bytes\":57217373,\"target\":\"device\",\"audio\":true,\"uploaded\":200,\"visibilityAtEnd\":\"visible\",\"progressSeen\":1,\"visibility\":[\"visible\"]},\"idle\":{\"readyMs\":497,\"exportMs\":16078,\"frames\":1800,\"bytes\":57217373,\"target\":\"device\",\"audio\":true,\"uploaded\":200,\"visibilityAtEnd\":\"hidden\",\"progressSeen\":1,\"visibility\":[\"hidden\"]}}"
     }
   ],
-  "notes": [
-    "Timing, milliseconds of export: Edge ten minutes 241521, application minimised 158227; one minute: Edge 21763, application minimised and busy 15803, minimised without busy 16078."
-  ],
+  "notes": [],
   "parity": {
     "qa/studio-engine.cjs": {
       "edge": {
         "passed": 41,
         "total": 41,
         "failed": [],
-        "seconds": 8,
+        "seconds": 7,
         "timing": null
       },
       "desktop": {
@@ -93,9 +91,9 @@
         "passed": 18,
         "total": 18,
         "failed": [],
-        "seconds": 28,
+        "seconds": 24,
         "timing": {
-          "exportMs": 3245,
+          "exportMs": 2885,
           "bytes": 181002,
           "estimate": 4543000
         }
@@ -104,9 +102,9 @@
         "passed": 18,
         "total": 18,
         "failed": [],
-        "seconds": 21,
+        "seconds": 20,
         "timing": {
-          "exportMs": 2931,
+          "exportMs": 2934,
           "bytes": 182621,
           "estimate": 4543000
         },
@@ -116,6 +114,10 @@
         }
       }
     }
+  },
+  "runs": {
+    "parity": "2026-10-21T00:09:11.888Z",
+    "long": "2026-10-20T20:22:48.896Z"
   },
   "timing": {
     "edge600": 241521,
@@ -328,10 +330,6 @@
         ]
       }
     ]
-  },
-  "runs": {
-    "parity": "2026-10-20T20:22:48.896Z",
-    "long": "2026-10-20T20:22:48.896Z"
   },
   "total": 12,
   "passed": 12,

@@ -287,6 +287,18 @@ and nothing is ever uploaded through the site or by an agent: the owner publishe
 dashboard (`desktop/README.md`). The updater checks every installer's SHA-512 against `latest.yml`, and
 the publisher's signature too once releases are signed. The update check (`qa/desktop-update.cjs`)
 installs, updates and removes its own package, `sa.commshub.desktop.qa`, never a real installation.
+Files and the cache folder (D4, `MVP_draft.md` 63.3): bridge version 3 adds `files`, `cache` and `data`.
+A file from «هذا الجهاز» becomes a token (32 random bytes) in `desktop/src/file-store.ts`; the page reads it
+at `commshub-file://local/<token>`, and a library copy in the application's folder at
+`commshub-file://cache/<name>` (`desktop/src/protocol.ts`): read-only, in byte ranges, an address naming a
+token or a cache name and never a path, answered on the site's own profile only, and refused to any other
+origin. The page never sends a path: the preload alone reads the path Chromium attached to a File the
+person chose (webUtils), and the main process accepts only a regular file of a kind the studio takes. A
+library copy is fetched by the main process from the site's own file route with the window's session, so
+the site still decides who may read it. Every page carries a Content-Security-Policy (`src/proxy.ts`,
+`src/lib/csp.ts`): scripts need the request's nonce, the theme script is allowed by its hash, and nothing
+inline or from elsewhere runs; keep it that way when adding a script. «مسح بيانات هذا الجهاز» (D-11) removes
+the session, the folder's copies and every token.
 
 ## Writing markdown from a shell
 

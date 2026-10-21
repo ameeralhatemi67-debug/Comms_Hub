@@ -34,11 +34,15 @@ export type NativeOptions = {
   dev: boolean;
 };
 
+export type Handle = <A extends unknown[]>(channel: string, handler: (event: IpcMainInvokeEvent, ...args: A) => unknown) => void;
+
 export type Native = {
   /** Every site window passes through here once: closing it may hide it, and its holds end with it. */
   attachWindow(win: BrowserWindow, isMain: boolean): void;
   /** Brings a window forward, out of the tray if it was hidden. */
   reveal(win: BrowserWindow): void;
+  /** Registers a bridge handler through guard(), for the other groups (native-files.ts). */
+  handle: Handle;
 };
 
 // Notices Windows has not shown or dismissed yet are kept referenced, or their click would be lost.
@@ -251,8 +255,7 @@ export function startNative(o: NativeOptions): Native {
   });
 
   // --- the bridge's handlers -----------------------------------------------------------------------
-  const handle = <A extends unknown[]>(channel: string, handler: (event: IpcMainInvokeEvent, ...args: A) => unknown) =>
-    ipcMain.handle(channel, guard(o.allowed, o.windows, handler));
+  const handle: Handle = (channel, handler) => ipcMain.handle(channel, guard(o.allowed, o.windows, handler));
   const refused = () => new Error('refused');
 
   handle(CHANNEL.info, async () => {
@@ -324,5 +327,5 @@ export function startNative(o: NativeOptions): Native {
   handle(CHANNEL.updateStatus, () => ({ ...(updates ? updates.status() : START) }));
   handle(CHANNEL.updateRestart, () => restartForUpdate());
 
-  return { attachWindow, reveal };
+  return { attachWindow, reveal, handle };
 }

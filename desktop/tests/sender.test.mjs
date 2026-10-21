@@ -38,7 +38,7 @@ test('guard() runs the handler for a trusted sender only, and reads the windows 
   assert.deepEqual(calls, [[2, 3]]);
 });
 
-test('every main-process handler is registered in native.ts, through guard(), one per callable channel', async () => {
+test('every main-process handler is registered through native.ts\'s guard(), one per callable channel', async () => {
   const fs = await import('node:fs');
   const { CALLABLE, CHANNEL } = await import('../src/ipc.ts');
   const dir = new URL('../src/', import.meta.url);
@@ -49,7 +49,8 @@ test('every main-process handler is registered in native.ts, through guard(), on
   assert.equal((source.match(/ipcMain\.handle\(/g) ?? []).length, 1, 'one registration helper');
   assert.match(source, /ipcMain\.handle\(channel, guard\(o\.allowed, o\.windows, handler\)\)/, 'and it wraps every handler in guard()');
   assert.equal(/ipcMain\.(on|once|addListener|handleOnce)\(/.test(source), false, 'no other way in');
-  const handled = [...source.matchAll(/handle\(CHANNEL\.(\w+)/g)].map((m) => CHANNEL[m[1]]);
+  const files = fs.readFileSync(new URL('native-files.ts', dir), 'utf8');
+  const handled = [...`${source}\n${files}`.matchAll(/handle\(CHANNEL\.(\w+)/g)].map((m) => CHANNEL[m[1]]);
   assert.deepEqual([...handled].sort(), [...CALLABLE].sort(), 'each callable channel once');
   assert.equal(handled.includes(CHANNEL.open), false, 'the page cannot call the click channel');
 });

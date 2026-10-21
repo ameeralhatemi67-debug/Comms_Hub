@@ -3,11 +3,13 @@
 // offers the newest release of the Windows application from the public bucket, with what SmartScreen will
 // ask while the pilot is unsigned. Inside the application it says which version runs, how its own update
 // stands, and offers «إعادة التشغيل للتحديث» once one is ready (refused during an export). The banner asks
-// an application older than the site needs to update. Every signed-in person sees it; it reads nothing
-// about anyone.
+// an application older than the site needs to update. Inside the application it also offers «مسح بيانات
+// هذا الجهاز» (decision D-11, 63.3), held down like every action that cannot be undone. Every signed-in
+// person sees it; it reads nothing about anyone.
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Download, MonitorDown, RotateCw } from 'lucide-react';
+import { Download, Eraser, MonitorDown, RotateCw } from 'lucide-react';
+import { HOLD } from '@/lib/kit/hold-reasons';
 import { native } from '@/lib/native';
 import { downloadUrl, newer, parseLatest, tooOld, updateLine, DESKTOP_FEED, type Release, type UpdateView } from '@/lib/native/releases';
 import { formatBytes } from '@/lib/studio/support';
@@ -74,6 +76,19 @@ export function DesktopAppPanel() {
           </div>
         )}
         {note && <p className="muted" role="status">{note}</p>}
+        {native().has('clearData') && (
+          <div className="dv-clear">
+            <p className="muted">
+              «مسح بيانات هذا الجهاز» يمسح من هذا الحاسوب الدخول، ونسخ ملفات المكتبة المؤقتة، وما يتذكره الاستوديو من ملفات «هذا الجهاز» (تبقى الملفات نفسها في أماكنها)، ثم يعود التطبيق إلى صفحة الدخول. لا يُمس شيء في المركز نفسه.
+            </p>
+            <div className="actions">
+              <button type="button" data-hold={HOLD.desktopClearData} onClick={() => void native().raw!.data!.clear!().catch(() => setNote('تعذّر المسح الآن.'))}>
+                <Eraser aria-hidden="true" />
+                مسح بيانات هذا الجهاز
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

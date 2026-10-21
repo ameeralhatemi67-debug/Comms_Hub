@@ -105,7 +105,7 @@ export class MediaPool {
       if (s.kind === 'library') {
         const u = (this.opts.url ?? contentUrl)(s.asset, s.version);
         if (cache) {
-          file = await cache.libraryFile(s.asset, s.version, u, {
+          const place = await cache.libraryPlace(s.asset, s.version, u, {
             label: s.name,
             onProgress: (done, total) => this.set(s.id, { kind: 'loading', done, total }),
             fetcher: async (x, init) => {
@@ -115,10 +115,15 @@ export class MediaPool {
               return r;
             },
           });
+          file = place.file ?? null;
+          url = place.url ?? '';
         } else url = u;
       } else {
-        file = cache ? await cache.localFile(s.key) : null;
-        if (!file) return this.set(s.id, { kind: 'missing', why: 'device' });
+        // a File from the browser's storage, or, in the desktop application, the file where it is
+        const place = cache ? await cache.localPlace(s.key) : null;
+        if (!place) return this.set(s.id, { kind: 'missing', why: 'device' });
+        file = place.file ?? null;
+        url = place.url ?? '';
       }
       if (this.disposed) return;
       if (file) {

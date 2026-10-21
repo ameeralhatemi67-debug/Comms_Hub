@@ -7,8 +7,13 @@
 
 export type Platform = 'web' | 'desktop' | 'android' | 'ios';
 
-/** What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3). */
-export type Feature = 'info' | 'keepAwake' | 'busy' | 'notify' | 'badge' | 'update';
+/** What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3), files, cache and clearData from 3 (D4). */
+export type Feature = 'info' | 'keepAwake' | 'busy' | 'notify' | 'badge' | 'update' | 'files' | 'cache' | 'clearData';
+
+/** A file from «هذا الجهاز» as the desktop application names it: never its path. */
+export type NativeFile = { token: string; name: string; size: number; type: string; media: 'video' | 'audio' | 'image'; modified: number };
+export type NativeCacheEntry = { name: string; kind: 'library' | 'proxy' | 'convert'; bytes: number; complete: boolean; lastUsed: number; label: string | null };
+export type NativeCacheUsage = { library: number; proxy: number; files: number; limit: number; limits: number[]; free: number | null; folder: string; isDefault: boolean; entries: NativeCacheEntry[] };
 
 export type Reason = 'export' | 'upload';
 export type NativeNotice = { title: string; body?: string; go?: string | null };
@@ -23,6 +28,25 @@ type Bridge = {
   life?: { busy?: (reason: Reason) => Promise<boolean>; idle?: () => Promise<boolean> };
   notify?: { show?: (n: NativeNotice) => Promise<boolean>; badge?: (n: number) => Promise<boolean>; onOpen?: (fn: ((go: string) => void) | null) => void };
   update?: { status?: () => Promise<unknown>; restart?: () => Promise<'restart' | 'busy' | 'nothing'> };
+  files?: {
+    pick?: (kinds: string[]) => Promise<NativeFile[]>;
+    fromDropped?: (file: File) => Promise<NativeFile | null>;
+    check?: (token: string) => Promise<{ ok: boolean; url?: string; why?: string }>;
+    forget?: (token: string) => Promise<boolean>;
+  };
+  cache?: {
+    library?: (ask: { asset: string; version: number; label?: string; inUse?: string[] }) => Promise<{ name: string; url: string; bytes: number }>;
+    cancel?: (name: string) => Promise<boolean>;
+    has?: (ask: { asset: string; version: number }) => Promise<string | null>;
+    usage?: () => Promise<NativeCacheUsage>;
+    choose?: () => Promise<NativeCacheUsage>;
+    useDefault?: () => Promise<NativeCacheUsage>;
+    limit?: (bytes: number, inUse: string[]) => Promise<NativeCacheUsage>;
+    sweep?: (inUse: string[]) => Promise<{ removed: number; bytes: number }>;
+    clear?: (inUse: string[]) => Promise<{ removed: number; bytes: number }>;
+    onProgress?: (fn: ((p: { name: string; done: number; total: number }) => void) | null) => void;
+  };
+  data?: { clear?: () => Promise<{ files: number; cache: number }> };
 };
 
 export type Native = {
@@ -43,6 +67,9 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   notify: ['notify.show'],
   badge: ['notify.badge'],
   update: ['update.status', 'update.restart'],
+  files: ['files.fromDropped', 'files.check', 'files.forget'],
+  cache: ['cache.library', 'cache.usage', 'cache.sweep', 'cache.clear', 'cache.onProgress'],
+  clearData: ['data.clear'],
 });
 
 const SHELLS = ['desktop', 'android', 'ios'];

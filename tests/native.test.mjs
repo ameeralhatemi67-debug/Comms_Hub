@@ -224,3 +224,26 @@ test('D3: update is detected by its two methods; D2 has none', () => {
   assert.equal(nativeOf(app.bridge).has('update'), false);
   assert.equal(nativeOf({ ...app.bridge, bridge: 2, update: { status: async () => ({}), restart: async () => 'nothing' } }).has('update'), true);
 });
+
+// D4: files used in place, the cache folder and «مسح بيانات هذا الجهاز» (bridge version 3).
+test('D4: files, cache and clearData are detected by their methods', () => {
+  const v3 = {
+    ...d2().bridge,
+    bridge: 3,
+    files: { fromDropped: async () => null, check: async () => ({ ok: false }), forget: async () => true, pick: async () => [] },
+    cache: { library: async () => ({}), usage: async () => ({}), sweep: async () => ({}), clear: async () => ({}), onProgress: () => undefined },
+    data: { clear: async () => ({}) },
+  };
+  const n = nativeOf(v3);
+  for (const f of ['files', 'cache', 'clearData']) assert.equal(n.has(f), true, f);
+  assert.equal(nativeOf({ ...v3, cache: { ...v3.cache, onProgress: undefined } }).has('cache'), false, 'every method of a feature');
+  for (const f of ['files', 'cache', 'clearData']) assert.equal(nativeOf(d2().bridge).has(f), false, `D2 has no ${f}`);
+});
+
+test('D4: the studio names a library copy in the application\'s folder as the application does', async () => {
+  const { folderName, libraryName } = await import('../src/lib/studio/cache.ts');
+  const asset = '0a1b2c3d-0000-4000-8000-00000000abcd';
+  assert.equal(folderName(libraryName(asset, 3)), `asset-${asset}-v3.bin`);
+  const fs = await import('node:fs');
+  assert.match(fs.readFileSync('desktop/src/cache-store.ts', 'utf8'), /return `asset-\$\{asset\}-v\$\{version\}\.bin`;/);
+});

@@ -7,7 +7,8 @@ import { CapsProvider } from '@/components/caps';
 import { AccountProvider } from '@/lib/account-context';
 import { canSwitchRole } from '@/lib/access';
 import { getSession } from '@/lib/supabase/session';
-import { IDENTITY_NEW, THEME_KEY } from '@/lib/identity';
+import { IDENTITY_NEW } from '@/lib/identity';
+import { RESTORE_THEME } from '@/lib/csp';
 // Fonts of the design, served from the app rather than Google Fonts.
 import '@fontsource/ibm-plex-sans-arabic/400.css';
 import '@fontsource/ibm-plex-sans-arabic/500.css';
@@ -31,11 +32,9 @@ export const metadata: Metadata = {
   description: 'نموذج تجربة المستخدم لمركز الاتصال المؤسسي، MVP 0.1',
 };
 
-// Applies a saved theme choice before the first paint, so a reload never flashes the
-// other theme. Light is the default: data-theme is "light" unless a person chose dark.
-// The device's colour preference is not read.
+// The saved theme is applied before the first paint (RESTORE_THEME, src/lib/csp.ts), so a reload never
+// flashes the other theme. The pages' Content-Security-Policy allows exactly that text by its hash.
 // See node_modules/next/dist/docs/01-app/02-guides/preventing-flash-before-hydration.md.
-const restoreTheme = `(function(){var r=document.documentElement,t="light";try{if(localStorage.getItem(${JSON.stringify(THEME_KEY)})==="dark")t="dark"}catch(e){}r.setAttribute("data-theme",t)})()`;
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   // Nothing of the product is rendered for a visitor without an approved account.
@@ -43,7 +42,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   return (
     <html lang="ar" dir="rtl" data-identity={IDENTITY_NEW} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: restoreTheme }} />
+        <script dangerouslySetInnerHTML={{ __html: RESTORE_THEME }} />
       </head>
       <body>
         {session.status === 'ready' ? (
