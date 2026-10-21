@@ -50,7 +50,9 @@ test('every main-process handler is registered through native.ts\'s guard(), one
   assert.match(source, /ipcMain\.handle\(channel, guard\(o\.allowed, o\.windows, handler\)\)/, 'and it wraps every handler in guard()');
   assert.equal(/ipcMain\.(on|once|addListener|handleOnce)\(/.test(source), false, 'no other way in');
   const files = fs.readFileSync(new URL('native-files.ts', dir), 'utf8');
-  const handled = [...`${source}\n${files}`.matchAll(/handle\(CHANNEL\.(\w+)/g)].map((m) => CHANNEL[m[1]]);
+  const media = fs.readFileSync(new URL('native-media.ts', dir), 'utf8');
+  const handled = [...`${source}\n${files}\n${media}`.matchAll(/handle\(CHANNEL\.(\w+)/g)].map((m) => CHANNEL[m[1]]);
   assert.deepEqual([...handled].sort(), [...CALLABLE].sort(), 'each callable channel once');
   assert.equal(handled.includes(CHANNEL.open), false, 'the page cannot call the click channel');
+  assert.equal(handled.includes(CHANNEL.mediaProgress), false, 'nor the progress channel');
 });

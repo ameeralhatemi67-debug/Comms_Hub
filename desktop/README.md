@@ -19,11 +19,16 @@ copy of the site: every page, rule and check stays the website's.
   bypass, stored password or service key, in the application or in its checks.
 - **Bridge.** `window.commsHubNative`, exposed only on a top-level page on the list: who the application is
   (`platform`, `shell`, `version`, `bridge`), then `info`, `power`, `life` and `notify` (version 1, D2),
-  `update` (2, D3), and `files`, `cache` and `data` (3, D4). Every handler is registered through
-  `src/sender.ts`'s `guard()` (`src/native.ts`, `src/native-files.ts`).
+  `update` (2, D3), `files`, `cache` and `data` (3, D4), and `media` (4, D5). Every handler is registered
+  through `src/sender.ts`'s `guard()` (`src/native.ts`, `src/native-files.ts`, `src/native-media.ts`).
 - **Files in place and the cache folder** (D4). A chosen file becomes a token (`src/file-store.ts`), never a
   path in the page; the page reads it, and the library copies in the cache folder (`src/cache-store.ts`),
   at `commshub-file://` (`src/protocol.ts`), read-only and in byte ranges.
+- **Light and editable copies** (D5). FFmpeg runs in a utility process (`src/media-worker.ts`) with the fixed
+  jobs of `src/media-jobs.ts` only: a probe, a 720p or 1080p light copy for the preview, and an editable
+  H.264 copy of what the browser cannot decode, written into the cache folder. The jobs name Windows' own
+  encoders (`h264_mf`, `aac_mf`). The build is LGPL v3, pinned by hash in `ffmpeg.lock.json`
+  (`THIRD_PARTY_NOTICES.md` at the repository root).
 - **Keys.** It takes only Ctrl with + - 0 (zoom), F11 (full screen) and F5 (reload); F12 opens the
   developer tools in a development build only. Every other key is the page's.
 
@@ -48,15 +53,21 @@ entry and the data folder, and it never changes. It names no host and is never l
 | `src/identity.ts` | The fixed id, the name, the data folder, the user agent. |
 | `src/offline.html` | The Arabic connection screen. |
 | `src/connect-note.html` | The Arabic note before an outside connection. |
-| `scripts/build.mjs` | esbuild: `src/` into `build/`. |
+| `src/files.ts`, `src/file-store.ts`, `src/cache-store.ts`, `src/protocol.ts`, `src/range.ts`, `src/native-files.ts` | Files used in place, the cache folder and `commshub-file://` (D4). |
+| `src/media-jobs.ts`, `src/media-worker.ts`, `src/native-media.ts` | FFmpeg's fixed jobs, the utility process that runs them, and the bridge's `media` group (D5). |
+| `ffmpeg.lock.json`, `scripts/fetch-ffmpeg.mjs` | The pinned FFmpeg build, and its download into `vendor/ffmpeg` with the size and SHA-256 checked before it is opened. |
+| `scripts/build.mjs` | esbuild: `src/` into `build/`, with `THIRD_PARTY_LICENSES.txt` for the bundled packages. |
 | `electron-builder.release.cjs` | The release package: NSIS, x64, per user, Arabic, fuses. |
 | `electron-builder.dev.cjs` | The development package, unpacked only, for the checks. |
 | `tests/*.test.mjs` | Unit tests of every rule, the bundles, the pages and the packaging. |
 
 ## Build and check
 
-Run these in this folder, on Windows. `node_modules/`, `build/` and `dist/` are ignored by git, and
-Vercel never uploads this folder (`.vercelignore`).
+Run these in this folder, on Windows. `node_modules/`, `build/`, `dist/` and `vendor/` are ignored by git,
+and Vercel never uploads this folder (`.vercelignore`). Both `pack` scripts first run `npm run ffmpeg`, which
+downloads the pinned FFmpeg build once (about 77 MB, from the BtbN/FFmpeg-Builds release named in
+`ffmpeg.lock.json`) and refuses any file whose size or SHA-256 differs; a `vendor/ffmpeg` already matching
+the pin is kept.
 
 ```bash
 npm ci
@@ -81,6 +92,10 @@ package's fuses back:
 ```bash
 npm run fuses
 ```
+
+`npm test` also runs the jobs' recipes against `vendor/ffmpeg` once it has been fetched (`tests/media-jobs.test.mjs`).
+`node qa/desktop-media.cjs` checks the media tools inside the development package. It needs a local ffmpeg
+with libx264, libx265, prores_ks, dnxhd, mpeg2video and ac3, used only to make its test files.
 
 The application check drives both packages. Build both first, then run it from the repository root:
 

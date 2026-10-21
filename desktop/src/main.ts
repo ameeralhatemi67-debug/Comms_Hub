@@ -9,12 +9,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { app, BrowserWindow, Menu, nativeTheme, protocol, screen, session, shell } from 'electron';
 import type { WebContents, WebPreferences } from 'electron';
-import { ALLOWED, DEV, QA, UPDATE_FEED, VERSION } from './compiled.ts';
+import { ALLOWED, DEV, FFMPEG_TAG, QA, UPDATE_FEED, VERSION } from './compiled.ts';
 import { saveDialogFor } from './downloads.ts';
 import { dataFolderName, PRODUCT_NAME, productNameFor, userAgentFor, windowsAppId } from './identity.ts';
 import { keyAction, nextZoom, type KeyAction } from './keys.ts';
 import { startNative, type Native } from './native.ts';
 import { startFiles } from './native-files.ts';
+import { startMedia } from './native-media.ts';
 import { SCHEME } from './files.ts';
 import { PRIVILEGES } from './protocol.ts';
 import { decideNavigation, loadFailure, type Decision } from './navigation.ts';
@@ -311,7 +312,7 @@ if (lock && !refused) {
     Menu.setApplicationMenu(null);
     prepareSession();
     native = startNative({ allowed: ALLOWED, windows: () => siteWindows, mainWindow: () => main, version: VERSION, iconPath: pagePath('icon.png'), feed: UPDATE_FEED, qa: QA, dev: DEV });
-    startFiles({
+    const stores = startFiles({
       handle: native.handle,
       site: session.fromPartition(PARTITION),
       allowed: ALLOWED,
@@ -320,6 +321,9 @@ if (lock && !refused) {
         for (const w of BrowserWindow.getAllWindows()) if (siteWindows.has(w.webContents.id)) void w.webContents.loadURL(startAddress());
       },
     });
+    // FFmpeg is packaged beside the application (resources/ffmpeg); unpacked, it is the fetched copy in vendor/.
+    const tools = app.isPackaged ? path.join(process.resourcesPath, 'ffmpeg') : path.join(__dirname, '..', 'vendor', 'ffmpeg');
+    startMedia({ handle: native.handle, ...stores, tools: { ffmpeg: path.join(tools, 'ffmpeg.exe'), ffprobe: path.join(tools, 'ffprobe.exe'), tag: FFMPEG_TAG }, worker: pagePath('media-worker.js') });
     createMainWindow();
   });
 }

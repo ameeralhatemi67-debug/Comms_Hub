@@ -9,4 +9,6 @@ export const DEV: boolean = __COMMS_HUB_DEV__;
 export const QA: boolean = __COMMS_HUB_QA__;
 export const VERSION: string = __APP_VERSION__;
 export const UPDATE_FEED: string = __UPDATE_FEED__ ?? PRODUCTION_FEED;
+/** The pinned FFmpeg's short tag (ffmpeg.lock.json), part of every light or converted copy's name (D5). */
+export const FFMPEG_TAG: string = __FFMPEG_TAG__;
 export const ALLOWED: readonly string[] = __COMMS_HUB_DEV__ ? originsFor(true) : Object.freeze([PRODUCTION_ORIGIN]);

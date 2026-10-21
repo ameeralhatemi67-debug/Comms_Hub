@@ -31,18 +31,35 @@ test('a release build has no way to the local site, no test variables and no dev
   assert.ok(read(dev, 'main.js').includes('127.0.0.1') && read(dev, 'preload.js').includes('127.0.0.1'), 'the development build does open the local site');
 });
 
-test('the bridge carries who the application is and the groups of version 3, and only messages', () => {
+test('the bridge carries who the application is and the groups of version 4, and only messages', () => {
   const preload = read(release, 'preload.js');
   assert.match(preload, /exposeInMainWorld\(\s*"commsHubNative",\s*Object\.freeze\(\{/, 'the bridge is exposed in one place, frozen');
-  assert.match(preload, /platform: "desktop",\s*shell: "electron",\s*version: VERSION,\s*bridge: (BRIDGE_VERSION|3),\s*info:/);
-  assert.match(preload, /BRIDGE_VERSION = 3/);
-  for (const group of ['power: Object.freeze', 'life: Object.freeze', 'notify: Object.freeze', 'update: Object.freeze', 'files: Object.freeze', 'cache: Object.freeze', 'data: Object.freeze']) assert.ok(preload.includes(group), group);
+  assert.match(preload, /platform: "desktop",\s*shell: "electron",\s*version: VERSION,\s*bridge: (BRIDGE_VERSION|4),\s*info:/);
+  assert.match(preload, /BRIDGE_VERSION = 4/);
+  for (const group of ['power: Object.freeze', 'life: Object.freeze', 'notify: Object.freeze', 'update: Object.freeze', 'files: Object.freeze', 'cache: Object.freeze', 'data: Object.freeze', 'media: Object.freeze']) assert.ok(preload.includes(group), group);
   assert.ok(preload.includes(`VERSION = "${version}"`));
   assert.match(preload, /window\.top === window && isAllowed\(window\.location\.href, ALLOWED\)/, 'top-level page on the list only');
   assert.equal(/require\("(?!electron")/.test(preload), false, 'no other module');
   const uses = [...preload.matchAll(/ipcRenderer\.(\w+)/g)].map((m) => m[1]);
   assert.deepEqual([...new Set(uses)].sort(), ['invoke', 'on'], 'the page can only ask, and hear a clicked notice');
   assert.equal(/sendSync|postMessage|exposeInIsolatedWorld/.test(preload), false);
+});
+
+test('the media jobs\' utility process is built beside the code: Node.js only, FFmpeg\'s tag compiled in', () => {
+  const worker = read(release, 'media-worker.js');
+  assert.equal(/require\("electron"\)/.test(worker), false, 'no Electron module in the utility process');
+  assert.ok(worker.includes('parentPort'), 'it hears the main process only');
+  const main = read(release, 'main.js');
+  const lock = JSON.parse(fs.readFileSync(new URL('../ffmpeg.lock.json', import.meta.url), 'utf8'));
+  assert.ok(main.includes(`FFMPEG_TAG = "${lock.tag}"`), 'the pinned FFmpeg\'s tag');
+  assert.match(main, /utilityProcess\.fork\(/);
+  assert.ok(main.includes('"h264_mf"') && main.includes('"aac_mf"'));
+});
+
+test('the licence of every package bundled into the code is written beside it, since the bundle drops their comments', () => {
+  const text = read(release, 'THIRD_PARTY_LICENSES.txt');
+  for (const name of ['electron-updater', 'builder-util-runtime', 'js-yaml', 'lazy-val', 'sax']) assert.match(text, new RegExp(`^${name} \\d+\\.\\d+\\.\\d+ \\(`, 'm'), name);
+  assert.ok(text.includes('Permission is hereby granted'), 'the licence texts themselves');
 });
 
 test('the brand mark for the tray and the notices is copied beside the code', () => {

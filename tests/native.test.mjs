@@ -247,3 +247,40 @@ test('D4: the studio names a library copy in the application\'s folder as the ap
   const fs = await import('node:fs');
   assert.match(fs.readFileSync('desktop/src/cache-store.ts', 'utf8'), /return `asset-\$\{asset\}-v\$\{version\}\.bin`;/);
 });
+
+// D5: light copies for the preview and editable copies (bridge version 4).
+test('D5: media is detected by its six methods; D4 has none', () => {
+  const v4 = {
+    ...d2().bridge,
+    bridge: 4,
+    media: { probe: async () => ({}), copies: async () => ({}), proxy: async () => ({}), convert: async () => ({}), cancel: async () => true, onProgress: () => undefined },
+  };
+  assert.equal(nativeOf(v4).has('media'), true);
+  assert.equal(nativeOf({ ...v4, media: { ...v4.media, cancel: undefined } }).has('media'), false, 'every method of the feature');
+  assert.equal(nativeOf(d2().bridge).has('media'), false);
+});
+
+test('D5: a light or converted copy keeps its own name in the folder, so the sweep spares it while it is in use', async () => {
+  const { folderName, libraryName } = await import('../src/lib/studio/cache.ts');
+  const asset = '0a1b2c3d-0000-4000-8000-00000000abcd';
+  assert.equal(folderName(libraryName(asset, 3)), `asset-${asset}-v3.bin`);
+  assert.equal(folderName(`proxy-${asset}-v3-720-r1-ff902.mp4`), `proxy-${asset}-v3-720-r1-ff902.mp4`);
+  assert.equal(folderName(`asset-${asset}-v3.bin`), `asset-${asset}-v3.bin`, 'never named twice');
+});
+
+test('D5: every word the application gives for a failed copy is read by the site and said in Arabic', async () => {
+  const fs = await import('node:fs');
+  const site = fs.readFileSync('src/lib/studio/cache.ts', 'utf8');
+  const kept = /\/\((space\|[a-z|]+)\)\\s\*\$\//.exec(site);
+  assert.ok(kept, 'the site keeps the application\'s own word');
+  const words = kept[1].split('|');
+  const app = ['desktop/src/media-jobs.ts', 'desktop/src/media-worker.ts', 'desktop/src/native-media.ts'].map((f) => fs.readFileSync(f, 'utf8')).join('\n');
+  for (const w of ['space', 'decode', 'encode', 'cancelled', 'missing', 'unavailable']) {
+    assert.ok(words.includes(w), `the site reads ${w}`);
+    assert.ok(app.includes(`'${w}'`), `the application says ${w}`);
+  }
+  const ui = fs.readFileSync('src/components/studio/source-tools.tsx', 'utf8');
+  for (const w of ['space', 'decode', 'encode', 'missing', 'cancelled']) assert.match(ui, new RegExp(`case '${w}':\\s*return '[\\u0600-\\u06ff]`), `${w} in Arabic`);
+  assert.ok(ui.includes('إنشاء نسخة خفيفة للمعاينة'), 'the plan\'s own words');
+  assert.equal(/'(space|decode|encode|failed)'\s*}/.test(ui), false, 'no raw word shown');
+});

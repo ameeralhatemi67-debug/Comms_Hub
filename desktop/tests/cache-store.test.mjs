@@ -103,3 +103,37 @@ test('another folder: its own subfolder, the old copies removed, only offered li
   store.setFolder(null);
   assert.equal(store.isDefault(), true);
 });
+
+test('a light copy (D5): written as a .part never served, held while it is made, recorded, then under the limit', async () => {
+  const store = new CacheStore(path.join(dir, 'c3.json'), path.join(dir, 'default3'));
+  fs.mkdirSync(store.folder(), { recursive: true });
+  const name = `proxy-${asset}-v3-720-r1-ff902.mp4`;
+  assert.equal(store.partOf(name), path.join(store.folder(), `${name}.part`));
+  assert.throws(() => store.partOf('../x.mp4'));
+  let finish;
+  const work = new Promise((r) => (finish = r));
+  const held = store.hold(name, work);
+  fs.writeFileSync(store.partOf(name), Buffer.alloc(1000));
+  assert.equal(store.isRunning(name), true);
+  assert.equal(store.cleanParts(), 0, 'a copy being made is left alone');
+  fs.renameSync(store.partOf(name), store.pathOf(name));
+  store.record(name, '720p · a.mov');
+  assert.equal(store.clear().removed, 0, 'nor is it cleared while it is held');
+  finish();
+  await held;
+  assert.equal(store.isRunning(name), false);
+  assert.deepEqual(store.complete(name), { file: store.pathOf(name), size: 1000 });
+  assert.equal(store.entries()[0].kind, 'proxy');
+  assert.equal(store.usage().proxy, 1000);
+  // an interrupted copy leaves a .part behind; it goes at the next start, and nothing else does
+  fs.writeFileSync(store.partOf(`convert-${asset}-v3-r1-ff902.mp4`), 'x');
+  fs.writeFileSync(path.join(store.folder(), 'other.part'), 'x');
+  assert.equal(store.cleanParts(), 1);
+  assert.equal(fs.existsSync(path.join(store.folder(), 'other.part')), true);
+  // a recorded copy is kept under the limit: the oldest copy not in use goes first
+  const older = `proxy-${asset}-v4-720-r1-ff902.mp4`;
+  fs.writeFileSync(store.pathOf(older), Buffer.alloc(10));
+  store.record(older);
+  store.setLimit(10e9);
+  assert.equal(store.entries().length, 2);
+});

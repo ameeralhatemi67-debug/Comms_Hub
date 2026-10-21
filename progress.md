@@ -1460,3 +1460,86 @@ When recording future implementation outcomes, follow this standardized template
   - **Drag and drop** was not driven; a file field was, which gives the same kind of File.
   - **The pages' policy was checked on the signed-out gate only.** Signed-in pages load more (the database's live connection, uploads to Drive, OneDrive and S3), which the policy's directives allow by design, but no signed-in page was seen under it. This is the D4 change most worth the owner's attention in the walkthrough: any page that misbehaves should be reported, with the browser console's «Content Security Policy» lines.
   - The studio's own interface checks (`qa/studio-ui.cjs`) were not run. The cache panel's new controls were not seen rendered; they use the existing classes.
+
+### 2026-10-21: the desktop application, D5: light copies for the preview and editable copies (FFmpeg)
+
+- **What changed, in the application** (`desktop/`, version 0.5.0, bridge version 4; `MVP_draft.md` 63.4; decision D-9):
+  - **FFmpeg, LGPL v3.** The owner allowed this download on 2026-10-20: `ffmpeg-n9.0.2-17-g2a571b6068-win64-lgpl-shared-9.0.zip`, BtbN/FFmpeg-Builds release `autobuild-2026-09-30-13-08`, pinned by size and SHA-256 in `desktop/ffmpeg.lock.json`.
+    - `desktop/scripts/fetch-ffmpeg.mjs` downloads it into a new empty folder and checks it before opening anything. It unpacks with Windows' own `tar.exe` into another new folder, and copies only the two programs, their libraries and the licence into `desktop/vendor/ffmpeg`, which git ignores. Both `pack` scripts run it first.
+    - The package carries them in `resources/ffmpeg`.
+  - **Fixed jobs only** (`src/media-jobs.ts`): `probe`; `proxy`, a 720p or 1080p light copy; and `convert`, an editable H.264 and AAC copy at full size, even dimensions, 8-bit.
+    - They name Windows' own encoders only (`h264_mf`, `aac_mf`) and keep every frame at its time (`-fps_mode passthrough`).
+    - They keep the original's timestamps (`-copyts`) whenever the browser can read the original's container. A camera's MPEG-TS starts at about 1.48 s, and so do its copies. Anything else starts at zero.
+  - **Naming.** Each copy is named by its source (a device file's fingerprint, or a library file and version), the recipe (`r1`) and FFmpeg's tag (`ff902`).
+  - **Where the jobs run.** In a utility process (`src/media-worker.ts`): one encoding at a time, below normal priority, and a probe at once.
+  - **The bridge's `media` group** (`src/native-media.ts`): probe, copies, proxy, convert, cancel and progress.
+    - The page names a source by its token or its library version only, never by a path, a program or an argument.
+    - A copy is written as a `.part` file that is never served, and recorded only once FFmpeg has finished it. The size limit then applies to it like any copy.
+    - Its free disk space is checked against an estimate first.
+    - FFmpeg's error lines never leave the main process: the page is told one word.
+  - **Cancelling and quitting.** Cancelling, «مسح بيانات هذا الجهاز» and quitting end FFmpeg too: the main process ends its processes by their ids. The next start removes any `.part` left behind (`CacheStore.cleanParts`).
+  - **Licences, D3 to D4 fixed here.** Since D3 the bundle dropped the licence comments of electron-updater and the 14 packages it brings. `scripts/build.mjs` now writes each bundled package's name, version and licence text into `THIRD_PARTY_LICENSES.txt`, shipped in `resources`. `THIRD_PARTY_NOTICES.md` gains a section for the desktop application covering:
+    - Electron and Chromium;
+    - the bundled packages;
+    - FFmpeg, with its exact configure line, where its source is and the patent note.
+- **What changed, in the site's studio** (only inside the application; a browser behaves as before):
+  - `src/lib/native/` gains the `media` feature and its types.
+  - `cache.ts` asks the application for a source's copies, makes one, cancels one, and reads a file the browser cannot (`probeInApp`).
+  - `folderName` leaves a copy's own name as it is, so the sweep spares copies in use.
+  - `media.ts`:
+    - a ready video source loads its light copy if it has one, and the paused preview and the playing element read it. Its frames are matched to the original's by their first timestamps, as a safety net;
+    - the export, a still and the photo editor read the original, or the converted copy when there is one;
+    - a source the browser cannot decode becomes «convertible», and so does one whose sound it cannot decode;
+    - `inUse` covers the copies.
+  - `source-tools.tsx`, under the clip's line in the inspector: «إنشاء نسخة خفيفة للمعاينة», the heavy-source line, progress with «إلغاء», «تحويل إلى نسخة قابلة للتحرير», and the failures in Arabic.
+  - `editor.tsx`: adding a file the browser cannot read asks the application.
+  - `bin.tsx`: in the application the picker also lists `.mxf`, `.mts` and `.m2ts`.
+  - In a browser, a file the studio's reader refused used to raise the reader's own message. It now raises «نوع هذا الملف غير مدعوم في الاستوديو.».
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **116 of 116**, in 21 files (new: `media-jobs`, which also runs the recipes on the pinned build: a ProRes source of odd width, and an MPEG-TS whose light copy starts with it). `npm run typecheck` is clean. Correction: D4's entry said 105 tests in 21 files; they were in 20.
+  - **The site:** `npm run typecheck` is clean, `npm test` **527 of 527** (D5's contract tests in `tests/native.test.mjs`), and `npm run build` passes.
+  - **`node qa/desktop-media.cjs`: **52 of 52**** (`qa/desktop-media.json`), inside the development package.
+    - **The corpus**, made by the local (GPL) ffmpeg as fixtures only, 8 s each, each frame carrying its number as a 12-bit gray code:
+      - ProRes 422 and HEVC 10-bit at 3840x2160;
+      - DNxHR HQ 1080p;
+      - two MTS files: H.264 with AAC sound, and H.264 with AC-3 sound;
+      - an MXF with MPEG-2 4:2:2;
+      - an H.264 4K file.
+    - **How each opened:**
+      - The browser decodes the H.264, HEVC 10-bit (through this laptop's graphics chip) and the MTS with AAC sound as they are.
+      - It cannot decode ProRes, DNxHR or MXF, nor the AC-3 sound. Those four were converted, every frame kept in order: ProRes 4K in 5.6 s, DNxHR in 1.7 s, the AC-3 MTS in 2.0 s and the MXF in 1.5 s.
+      - The MXF and both MTS files came in through the application's reading, as the editor now adds them. On this laptop Chromium gives `.mts` the type `text/plain` and `.mxf` none, so the studio's reader never looked at them.
+    - **The frame at each time.** At every time tried, the frame read is the frame that time names, from the source's first frame (1.48 s for the MTS).
+    - **DT-12.** On three sources (the H.264 4K, the converted ProRes 4K and the MTS starting at 1.48 s):
+      - «إنشاء نسخة خفيفة للمعاينة» made a 720p copy;
+      - **at 48 times each, frame middles and both edges included, the preview's frame from the light copy was the export's frame from the original**;
+      - the playing element played the light copy;
+      - the export took its frames from the original's decoder (or the converted copy's) and never from the light copy's;
+      - the export passed ffprobe: 1280x720, 100 frames, 4 s, its frames the source's own in order.
+    - **Speed, measured on a busy picture** (`testsrc2`, ProRes 422 3840x2160, 10 s, 205.5 MB): converted in 7.7 s (1.3 times real time), and a 720p light copy of the original in 2.9 s (3.47 times). The corpus itself is black with white boxes and costs FFmpeg almost nothing, so its times say little.
+    - **Cancelling and quitting.** A light copy cancelled midway left no file and no entry. Quitting midway left no FFmpeg of the application running, and the next start removed the `.part`.
+    - **DT-13.** The package carries the pinned build:
+      - `--enable-version3`, no `--enable-gpl` and no `--enable-nonfree`;
+      - the LGPL v3 text;
+      - `h264_mf` and `aac_mf` present;
+      - only the two programs, their libraries, the licence and the pin.
+  - **Re-run after the bridge changed:**
+    - `qa/desktop-native.cjs` **37 of 37** (the bridge checked as version 4);
+    - `qa/desktop-files.cjs` **16 of 16**;
+    - `qa/desktop-shell.cjs` **81 of 81** (it installs and removes the 0.5.0 release, FFmpeg included);
+    - DT-05, `qa/desktop-studio-parity.cjs --parity-only`, **12 of 12**: engine and export, in Edge and the application.
+  - **Size.** The installer grows from 111.6 MB (0.4.0) to 161.3 MB (0.5.0). The unpacked application is 493.6 MB.
+  - **The studio's own interface check, `qa/studio-ui.cjs`: 122 of 122 in Edge** with D5's changes. It ran through `qa/desktop-parity-hook.cjs` with `DESKTOP_PARITY_SHELL=edge`, so the studio's own record `qa/studio-ui.json` was not touched. In a browser the new line in the inspector shows nothing.
+- **Found on the way, fixed.**
+  - **Times.** Mediabunny reads an MPEG-TS from its first timestamp (1.48 s), while FFmpeg's output starts near zero. A converted MTS would have moved every cut already placed on it by 1.48 s. Copies of readable containers now keep the original's times (`-copyts`, tested at both ends).
+  - **Adding a file.** The editor refused MXF and MTS outright, before anything could convert them.
+  - **The plan was wrong about NVENC.** In FFmpeg 9, NVENC does not need the "nonfree" switch, and the pinned LGPL build carries it, with AMD's and Intel's encoders, OpenH264 and others. The application never names them. `THIRD_PARTY_NOTICES.md` says so.
+  - Three faults in the check itself, before its record:
+    - hooking `window.fetch` sees nothing of Mediabunny, which keeps its own reference, so decoder calls are counted instead;
+    - a light copy of the tiny corpus finished before a cancel could reach it, so cancelling is tested on a three-minute busy file;
+    - `ffprobe` prints an MPEG-TS stream twice (under its program too).
+- **Not verified, said plainly.**
+  - **The new line in the inspector was not seen rendered in the application**, and no signed-in page was opened. Its states come from the media pool, which the check drives; the owner's walkthrough is the place to see it.
+  - **Real camera files were not tried.** The corpus is made by ffmpeg, not by a camera. Interlaced footage, variable frame rates, timecode tracks and audio layouts beyond stereo are untested. A converted copy keeps the first sound track only, mixed to stereo.
+  - A library video's light copy is made from its copy in the folder; it is the same path as a device file's, but no library source was converted or given a light copy in the check.
+  - The sound of a playing light copy was not compared with the original's; the light copy carries the first sound track at 160 kbit/s.

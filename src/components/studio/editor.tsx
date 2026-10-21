@@ -64,6 +64,7 @@ import { useStudioBrand, useTemplateFlag } from './brand';
 import { brandText } from '@/lib/studio/brand';
 import { SwatchContext } from '../motion-controls';
 import { VersionsPanel } from './versions-panel';
+import { SourceTools } from './source-tools';
 import { EditorFrame, panelSpecs, useEditorFrame } from './editor-frame';
 import type { Menu } from './menubar';
 import { usePref } from './prefs';
@@ -319,7 +320,8 @@ export function VideoEditor(p: EditorProps) {
     if (upload) return setUploading(file);
     if (!cache) return setError('هذا المتصفح لا يحفظ الملفات على الجهاز. ارفع الملف إلى المكتبة.');
     try {
-      const info = await probeFile(file);
+      // in the desktop application a video the browser cannot read is read by the application (D5), then converted
+      const info = (await probeFile(file).catch(() => null)) ?? (await cache.probeInApp(file));
       if (!info) return setError('نوع هذا الملف غير مدعوم في الاستوديو.');
       const { key } = await cache.putLocal(file);
       const r = addSource(live.current.doc, { kind: 'local', key, name: file.name, media: info.media, mime: file.type, size: file.size, w: info.w, h: info.h, duration: info.duration });
@@ -765,6 +767,7 @@ export function VideoEditor(p: EditorProps) {
       hasPrevAdjacent={hasPrevAdjacent}
       hasNextFree={!!nextClip && !nextClip.transition}
       sourceNote={sel?.clip.source ? sourceNote(pool?.state(sel.clip.source)) : null}
+      sourceTools={sel?.clip.source ? <SourceTools pool={pool} sourceId={sel.clip.source} /> : null}
       onLength={(us) => selected && h.apply(trimEnd(doc, selected, (sel?.clip.start ?? 0) + us), 'طول القالب')}
       t={at}
       keyActions={keyActions}

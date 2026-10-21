@@ -1,8 +1,8 @@
 // The message channels between the bridge (preload.ts) and the main process (native.ts, native-files.ts), the
 // groups of Desktop_App_Plan.md 5.2: info, power, life and notify (version 1, D2), update (version 2, D3),
-// files, cache and data (version 3, D4). Every channel the page can call is answered by a handler
-// registered through sender.ts's guard(); `open` and `cacheProgress` go the other way, from the main
-// process to the page. Pure.
+// files, cache and data (version 3, D4), media (version 4, D5). Every channel the page can call is answered
+// by a handler registered through sender.ts's guard(); `open`, `cacheProgress` and `mediaProgress` go the
+// other way, from the main process to the page. Pure.
 
 export const CHANNEL = Object.freeze({
   info: 'commshub:info',
@@ -30,6 +30,12 @@ export const CHANNEL = Object.freeze({
   cacheClear: 'commshub:cache.clear',
   cacheProgress: 'commshub:cache.progress',
   dataClear: 'commshub:data.clear',
+  mediaProbe: 'commshub:media.probe',
+  mediaCopies: 'commshub:media.copies',
+  mediaProxy: 'commshub:media.proxy',
+  mediaConvert: 'commshub:media.convert',
+  mediaCancel: 'commshub:media.cancel',
+  mediaProgress: 'commshub:media.progress',
 });
 
 /** The channels the page may call; `open` is sent by the main process only. */
@@ -38,7 +44,8 @@ export const CALLABLE = Object.freeze([
   CHANNEL.filesPick, CHANNEL.filesAdd, CHANNEL.filesCheck, CHANNEL.filesForget,
   CHANNEL.cacheLibrary, CHANNEL.cacheCancel, CHANNEL.cacheHas, CHANNEL.cacheUsage, CHANNEL.cacheChoose, CHANNEL.cacheDefault, CHANNEL.cacheLimit, CHANNEL.cacheSweep, CHANNEL.cacheClear,
   CHANNEL.dataClear,
+  CHANNEL.mediaProbe, CHANNEL.mediaCopies, CHANNEL.mediaProxy, CHANNEL.mediaConvert, CHANNEL.mediaCancel,
 ]);
 
-/** The bridge's version: 1 for info, power, life and notify (D2); 2 adds update (D3); 3 adds files, cache and data (D4). */
-export const BRIDGE_VERSION = 3;
+/** The bridge's version: 1 for info, power, life and notify (D2); 2 adds update (D3); 3 adds files, cache and data (D4); 4 adds media (D5). */
+export const BRIDGE_VERSION = 4;

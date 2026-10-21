@@ -1,7 +1,7 @@
 {
   "script": "qa/desktop-files.cjs",
-  "run": "2026-10-21T00:03:06.591Z",
-  "version": "0.4.0",
+  "run": "2026-10-21T00:47:26.594Z",
+  "version": "0.5.0",
   "checks": [
     {
       "name": "DT-11: the file is over 4 GB",
@@ -11,7 +11,7 @@
     {
       "name": "DT-11: chosen in the page, it is given a token (43 characters), not copied",
       "pass": true,
-      "detail": "{\"token\":true,\"place\":\"commshub-file://local/m6xPWRVkLRoTLT_yfdEMay7pHNsOK4440G3rbOSqXKQ\"}"
+      "detail": "{\"token\":true,\"place\":\"commshub-file://local/NfqSTY-UwnLF2qDnuMYJwa4M5o22cyKAzchiDarVmSM\"}"
     },
     {
       "name": "DT-11: the media pool reads it where it is and is ready",
@@ -31,7 +31,7 @@
     {
       "name": "DT-11: no copy was made: the private storage grew by the export's own file only, and the profile on disk far less than the source",
       "pass": true,
-      "detail": "{\"opfsBefore\":0,\"opfsAfter\":2864643,\"exportBytes\":2864294,\"diskBefore\":3292671,\"diskAfter\":11051306,\"source\":4503664011}"
+      "detail": "{\"opfsBefore\":0,\"opfsAfter\":2864643,\"exportBytes\":2864294,\"diskBefore\":3295223,\"diskAfter\":11053860,\"source\":4503664011}"
     },
     {
       "name": "a file changed after it was chosen is no longer served (410), the studio sees it as gone from this device",
@@ -85,7 +85,7 @@
     }
   ],
   "notes": [
-    "DT-11: profile on disk 3292671 bytes before, 11051306 after, for a 4503664011-byte source; the export took 3386 ms."
+    "DT-11: profile on disk 3295223 bytes before, 11053860 after, for a 4503664011-byte source; the export took 3164 ms."
   ],
   "media": {
     "big": 4503664011,
@@ -99,14 +99,14 @@
     "state": {
       "kind": "ready"
     },
-    "place": "commshub-file://local/m6xPWRVkLRoTLT_yfdEMay7pHNsOK4440G3rbOSqXKQ",
+    "place": "commshub-file://local/NfqSTY-UwnLF2qDnuMYJwa4M5o22cyKAzchiDarVmSM",
     "frame": [
       127,
       127,
       127
     ],
     "frames": 150,
-    "exportMs": 3386,
+    "exportMs": 3164,
     "uploaded": 200,
     "opfsBefore": 0,
     "opfsAfter": 2864643,
@@ -117,8 +117,8 @@
       "inPlace": 4503664011,
       "files": 1
     },
-    "diskBefore": 3292671,
-    "diskAfter": 11051306,
+    "diskBefore": 3295223,
+    "diskAfter": 11053860,
     "reference": [
       124,
       132,

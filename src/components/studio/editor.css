@@ -65,6 +65,11 @@
 .st-insp-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .st-insp-acts button{min-height:32px;padding:4px 10px;font-size:12px}
 .st-insp-acts svg{width:14px;height:14px}
+.st-src-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
+.st-src-tools .st-hint{flex-basis:100%;margin:0}
+.st-src-tools button{min-height:32px;padding:4px 10px;font-size:12px}
+.st-src-tools button svg{width:14px;height:14px}
+.st-src-tools button[data-heavy="yes"]{border-color:var(--green);color:var(--green-text)}
 .st-sec{border-bottom:1px solid var(--line)}
 .st-sec>summary{cursor:pointer;padding:10px 12px;font-weight:600;font-size:13px;list-style-position:inside}
 .st-sec-body{padding:0 12px 12px;display:grid;gap:10px}
@@ -169,7 +174,7 @@
 .st-editor[data-compact="yes"] .st-time{min-width:0;width:100%;order:9}
 .st-editor[data-compact="yes"] .st-bin-tabs button,.st-editor[data-compact="yes"] .st-seg-mini button{min-height:44px}
 .st-editor[data-compact="yes"] .ms-seg-row button{min-height:44px}
-.st-editor[data-compact="yes"] .st-insp-acts button,.st-editor[data-compact="yes"] .st-mini{min-height:44px}
+.st-editor[data-compact="yes"] .st-insp-acts button,.st-editor[data-compact="yes"] .st-src-tools button,.st-editor[data-compact="yes"] .st-mini{min-height:44px}
 .st-editor[data-compact="yes"] .st-layer-acts button{min-height:44px;width:40px}
 .st-editor[data-compact="yes"] .st-layer-name{min-height:44px}
 .st-editor[data-compact="yes"] .st-zoom{min-width:0;flex:1}

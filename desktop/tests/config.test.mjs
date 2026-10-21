@@ -30,6 +30,28 @@ test('the release package is the fixed id under the Arabic name, Windows x64 onl
   assert.equal(release.asar, true);
 });
 
+test('the pinned LGPL FFmpeg goes beside the application with its licence, fetched and checked before every package', async () => {
+  assert.deepEqual(release.extraResources, [
+    { from: 'vendor/ffmpeg', to: 'ffmpeg', filter: ['ffmpeg.exe', 'ffprobe.exe', '*.dll', 'LICENSE.txt', 'PINNED.json'] },
+    { from: 'build/THIRD_PARTY_LICENSES.txt', to: 'THIRD_PARTY_LICENSES.txt' },
+  ]);
+  assert.match(pkg.scripts.pack, /^npm run ffmpeg && /);
+  assert.match(pkg.scripts['pack:dev'], /^npm run ffmpeg && /);
+  assert.equal(pkg.scripts.ffmpeg, 'node scripts/fetch-ffmpeg.mjs');
+  const lock = JSON.parse(fs.readFileSync(new URL('../ffmpeg.lock.json', import.meta.url), 'utf8'));
+  assert.match(lock.file, /^ffmpeg-n[\d.]+-\d+-g[0-9a-f]+-win64-lgpl-shared-[\d.]+\.zip$/, 'the LGPL shared build, never the GPL one');
+  assert.equal(lock.url, `https://github.com/BtbN/FFmpeg-Builds/releases/download/${lock.release}/${lock.file}`);
+  assert.match(lock.sha256, /^[0-9a-f]{64}$/);
+  assert.ok(Number.isSafeInteger(lock.size) && lock.size > 1e6);
+  assert.match(lock.tag, /^[a-z0-9]{1,16}$/);
+  // what the archive holds and what the application ships: the two programs, their libraries, the licence
+  const { SHIPPED } = await import('../scripts/fetch-ffmpeg.mjs');
+  for (const name of ['ffmpeg.exe', 'ffprobe.exe', 'avcodec-63.dll', 'LICENSE.txt']) assert.match(name, SHIPPED, name);
+  for (const name of ['ffplay.exe', 'avcodec.lib', 'README.txt', '../x.dll', 'doc']) assert.equal(SHIPPED.test(name), false, name);
+  const gitignore = fs.readFileSync(new URL('../.gitignore', import.meta.url), 'utf8');
+  assert.match(gitignore, /^vendor\/$/m, 'never committed');
+});
+
 test('the six fuses are flipped as the plan says', () => {
   assert.deepEqual(release.electronFuses, {
     runAsNode: false,
@@ -66,7 +88,7 @@ test('the development package differs only in its folder, its unpacked form, its
 });
 
 test('every tool is pinned exactly and the application ships no dependency', () => {
-  assert.equal(pkg.version, '0.4.0');
+  assert.equal(pkg.version, '0.5.0');
   assert.equal(pkg.dependencies, undefined, 'esbuild bundles everything into build/');
   assert.equal(pkg.devDependencies.electron, '44.5.1');
   for (const [name, version] of Object.entries(pkg.devDependencies)) {

@@ -64,7 +64,8 @@ export class CacheStore {
   private state: State;
   private readonly stateFile: string;
   private readonly defaultFolder: string;
-  private running = new Map<string, Promise<CacheEntry>>();
+  /** Copies being written now (a library copy, or a light or converted copy, D5): never removed meanwhile. */
+  private running = new Map<string, Promise<unknown>>();
 
   constructor(stateFile: string, defaultFolder: string) {
     this.stateFile = stateFile;
@@ -141,7 +142,7 @@ export class CacheStore {
    */
   library(name: string, url: string, fetch: Fetch, opts: { label?: string; onProgress?: (done: number, total: number) => void; signal?: AbortSignal; inUse?: ReadonlySet<string> } = {}): Promise<CacheEntry> {
     const running = this.running.get(name);
-    if (running) return running;
+    if (running) return running as Promise<CacheEntry>;
     const p = this.copy(name, url, fetch, opts).finally(() => this.running.delete(name));
     this.running.set(name, p);
     return p;
@@ -221,11 +222,47 @@ export class CacheStore {
     return { ...e };
   }
 
-  /** Records a file the main process wrote itself (a light or converted copy, D5). */
-  record(name: string, label?: string) {
+  /** Where a light or converted copy is written before it is complete: never a cache name, so never served. */
+  partOf(name: string): string {
+    return `${this.pathOf(name)}.part`;
+  }
+
+  /** Marks a copy as being written until `work` settles, so no sweep, limit or clearing removes it. */
+  hold<T>(name: string, work: Promise<T>): Promise<T> {
+    if (!CACHE_NAME.test(name)) throw new Error('not a cache name');
+    const p = work.finally(() => this.running.delete(name));
+    this.running.set(name, p);
+    return p;
+  }
+
+  isRunning(name: string): boolean {
+    return this.running.has(name);
+  }
+
+  /** Records a file the main process wrote itself (a light or converted copy, D5), then keeps the limit. */
+  record(name: string, label?: string, inUse: ReadonlySet<string> = new Set()) {
     const st = fs.statSync(this.pathOf(name));
     this.state.entries[name] = { name, kind: kindOfName(name), bytes: st.size, total: st.size, complete: true, lastUsed: Date.now(), label };
     this.save();
+    this.enforceLimit(new Set([...inUse, name]));
+  }
+
+  /** Removes what an interrupted light or converted copy left behind (its .part file), unless it is being written. */
+  cleanParts(): number {
+    let removed = 0;
+    let names: string[] = [];
+    try {
+      names = fs.readdirSync(this.folder());
+    } catch {
+      return 0;
+    }
+    for (const file of names) {
+      const name = file.endsWith('.part') ? file.slice(0, -5) : '';
+      if (!CACHE_NAME.test(name) || this.running.has(name)) continue;
+      fs.rmSync(path.join(this.folder(), file), { force: true });
+      removed++;
+    }
+    return removed;
   }
 
   private removeNames(names: string[]): { removed: number; bytes: number } {

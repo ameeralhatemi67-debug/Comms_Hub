@@ -7,13 +7,26 @@
 
 export type Platform = 'web' | 'desktop' | 'android' | 'ios';
 
-/** What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3), files, cache and clearData from 3 (D4). */
-export type Feature = 'info' | 'keepAwake' | 'busy' | 'notify' | 'badge' | 'update' | 'files' | 'cache' | 'clearData';
+/** What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3), files, cache and clearData from 3 (D4), media from 4 (D5). */
+export type Feature = 'info' | 'keepAwake' | 'busy' | 'notify' | 'badge' | 'update' | 'files' | 'cache' | 'clearData' | 'media';
 
 /** A file from «هذا الجهاز» as the desktop application names it: never its path. */
 export type NativeFile = { token: string; name: string; size: number; type: string; media: 'video' | 'audio' | 'image'; modified: number };
 export type NativeCacheEntry = { name: string; kind: 'library' | 'proxy' | 'convert'; bytes: number; complete: boolean; lastUsed: number; label: string | null };
 export type NativeCacheUsage = { library: number; proxy: number; files: number; limit: number; limits: number[]; free: number | null; folder: string; isDefault: boolean; entries: NativeCacheEntry[] };
+/** How the desktop application's media tools name a source: a device file's token, or a library version already in its folder. Never a path. */
+export type NativeMediaRef = { token: string } | { asset: string; version: number };
+export type NativeCopy = { name: string; url: string; bytes: number };
+/** The light and converted copies a source has on this device, and the names they would be made under. */
+export type NativeCopies = { proxy: (NativeCopy & { height: number }) | null; convert: NativeCopy | null; names: { proxy: Record<string, string>; convert: string } };
+export type NativeProbe = {
+  duration: number | null;
+  bitRate: number | null;
+  container: string;
+  video: { codec: string; profile: string | null; width: number; height: number; fps: number | null; bitDepth: number } | null;
+  audio: { codec: string; rate: number; channels: number } | null;
+  heavy: boolean;
+};
 
 export type Reason = 'export' | 'upload';
 export type NativeNotice = { title: string; body?: string; go?: string | null };
@@ -47,6 +60,14 @@ type Bridge = {
     onProgress?: (fn: ((p: { name: string; done: number; total: number }) => void) | null) => void;
   };
   data?: { clear?: () => Promise<{ files: number; cache: number }> };
+  media?: {
+    probe?: (source: NativeMediaRef) => Promise<NativeProbe>;
+    copies?: (source: NativeMediaRef) => Promise<NativeCopies>;
+    proxy?: (source: NativeMediaRef, height: number, inUse: string[]) => Promise<NativeCopy>;
+    convert?: (source: NativeMediaRef, inUse: string[]) => Promise<NativeCopy>;
+    cancel?: (name: string) => Promise<boolean>;
+    onProgress?: (fn: ((p: { name: string; done: number; total: number }) => void) | null) => void;
+  };
 };
 
 export type Native = {
@@ -70,6 +91,7 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   files: ['files.fromDropped', 'files.check', 'files.forget'],
   cache: ['cache.library', 'cache.usage', 'cache.sweep', 'cache.clear', 'cache.onProgress'],
   clearData: ['data.clear'],
+  media: ['media.probe', 'media.copies', 'media.proxy', 'media.convert', 'media.cancel', 'media.onProgress'],
 });
 
 const SHELLS = ['desktop', 'android', 'ios'];

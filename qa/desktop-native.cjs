@@ -96,16 +96,16 @@ async function partOne(state) {
     return {
       keys: Object.keys(n),
       fields: { platform: n.platform, shell: n.shell, version: n.version, bridge: n.bridge },
-      groups: { power: Object.keys(n.power), life: Object.keys(n.life), notify: Object.keys(n.notify), update: Object.keys(n.update), files: Object.keys(n.files), cache: Object.keys(n.cache), data: Object.keys(n.data) },
-      frozen: [n, n.power, n.life, n.notify, n.update, n.files, n.cache, n.data].every((o) => Object.isFrozen(o)),
+      groups: { power: Object.keys(n.power), life: Object.keys(n.life), notify: Object.keys(n.notify), update: Object.keys(n.update), files: Object.keys(n.files), cache: Object.keys(n.cache), data: Object.keys(n.data), media: Object.keys(n.media) },
+      frozen: [n, n.power, n.life, n.notify, n.update, n.files, n.cache, n.data, n.media].every((o) => Object.isFrozen(o)),
       fns: [n.info, n.power.keepAwake, n.power.release, n.life.busy, n.life.idle, n.notify.show, n.notify.badge, n.notify.onOpen].every((f) => typeof f === 'function'),
     };
   });
   check(
-    'the bridge is version 3: who the application is, then info, power, life, notify, update, files, cache and data',
-    JSON.stringify(shape.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify', 'update', 'files', 'cache', 'data']) &&
-      JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: 3 }) &&
-      JSON.stringify(shape.groups) === JSON.stringify({ power: ['keepAwake', 'release'], life: ['busy', 'idle'], notify: ['show', 'badge', 'onOpen'], update: ['status', 'restart'], files: ['pick', 'fromDropped', 'check', 'forget'], cache: ['library', 'cancel', 'has', 'usage', 'choose', 'useDefault', 'limit', 'sweep', 'clear', 'onProgress'], data: ['clear'] }) &&
+    'the bridge is version 4: who the application is, then info, power, life, notify, update, files, cache, data and media',
+    JSON.stringify(shape.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify', 'update', 'files', 'cache', 'data', 'media']) &&
+      JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: 4 }) &&
+      JSON.stringify(shape.groups) === JSON.stringify({ power: ['keepAwake', 'release'], life: ['busy', 'idle'], notify: ['show', 'badge', 'onOpen'], update: ['status', 'restart'], files: ['pick', 'fromDropped', 'check', 'forget'], cache: ['library', 'cancel', 'has', 'usage', 'choose', 'useDefault', 'limit', 'sweep', 'clear', 'onProgress'], data: ['clear'], media: ['probe', 'copies', 'proxy', 'convert', 'cancel', 'onProgress'] }) &&
       shape.fns,
     shape,
   );

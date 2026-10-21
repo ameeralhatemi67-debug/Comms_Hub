@@ -15,6 +15,7 @@ import { renderFrame } from '@/lib/motion/renderers.js';
 import type { Category, Graphic } from '@/lib/motion/types';
 import { suggestedFirst } from '@/lib/studio/worklink';
 import { DesktopOnly } from './compact';
+import { useNativeFeature } from '../native/use-native';
 
 export type LibraryItem = { id: string; name: string; kind: 'video' | 'image' | 'audio'; current_version: number; mime_type: string; dims: string | null; duration: string | null };
 
@@ -169,12 +170,14 @@ export function LibraryPane(p: Pick<BinProps, 'canLibrary' | 'readOnly' | 'photo
 
 export function DevicePane(p: Pick<BinProps, 'canLibrary' | 'canDevice' | 'readOnly' | 'photo' | 'onDevice'>) {
   const [picked, setPicked] = useState<File | null>(null);
+  // the desktop application also opens a camera's and a broadcaster's files, by converting them (D5)
+  const converts = useNativeFeature('media');
   return (
     <div className="st-device">
       <label className="button st-file">
         <FileUp aria-hidden="true" />
         اختر ملفاً من هذا الجهاز
-        <input type="file" accept={p.photo ? 'image/*' : 'video/*,image/*,audio/*'} disabled={p.readOnly} onChange={(e) => setPicked(e.target.files?.[0] ?? null)} hidden />
+        <input type="file" accept={p.photo ? 'image/*' : `video/*,image/*,audio/*${converts ? ',.mxf,.mts,.m2ts' : ''}`} disabled={p.readOnly} onChange={(e) => setPicked(e.target.files?.[0] ?? null)} hidden />
       </label>
       {picked && (
         <div className="st-picked">

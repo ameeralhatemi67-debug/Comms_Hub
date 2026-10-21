@@ -1,22 +1,22 @@
 {
   "script": "qa/desktop-native.cjs",
-  "run": "2026-10-21T00:04:14.605Z",
-  "version": "0.4.0",
+  "run": "2026-10-21T00:45:51.217Z",
+  "version": "0.5.0",
   "checks": [
     {
-      "name": "the bridge is version 3: who the application is, then info, power, life, notify, update, files, cache and data",
+      "name": "the bridge is version 4: who the application is, then info, power, life, notify, update, files, cache, data and media",
       "pass": true,
-      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.4.0\",\"bridge\":3},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"],\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\"],\"cache\":[\"library\",\"cancel\",\"has\",\"usage\",\"choose\",\"useDefault\",\"limit\",\"sweep\",\"clear\",\"onProgress\"],\"data\":[\"clear\"]},\"frozen\":true,\"fns\":true}"
+      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"media\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.5.0\",\"bridge\":4},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"],\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\"],\"cache\":[\"library\",\"cancel\",\"has\",\"usage\",\"choose\",\"useDefault\",\"limit\",\"sweep\",\"clear\",\"onProgress\"],\"data\":[\"clear\"],\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\"]},\"frozen\":true,\"fns\":true}"
     },
     {
       "name": "the bridge and each of its groups cannot be changed by the page",
       "pass": true,
-      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.4.0\",\"bridge\":3},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"],\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\"],\"cache\":[\"library\",\"cancel\",\"has\",\"usage\",\"choose\",\"useDefault\",\"limit\",\"sweep\",\"clear\",\"onProgress\"],\"data\":[\"clear\"]},\"frozen\":true,\"fns\":true}"
+      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"media\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.5.0\",\"bridge\":4},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"],\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\"],\"cache\":[\"library\",\"cancel\",\"has\",\"usage\",\"choose\",\"useDefault\",\"limit\",\"sweep\",\"clear\",\"onProgress\"],\"data\":[\"clear\"],\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\"]},\"frozen\":true,\"fns\":true}"
     },
     {
       "name": "info names the version, processor, memory, free disk and the chip in use, and no path",
       "pass": true,
-      "detail": "{\"version\":\"0.4.0\",\"bridge\":3,\"os\":\"win32\",\"osVersion\":\"10.0.26300\",\"arch\":\"x64\",\"cores\":12,\"cpu\":\"AMD Ryzen 5 6600H with Radeon Graphics\",\"memory\":16310259712,\"freeDisk\":46792622080,\"gpu\":{\"chips\":[{\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"vendor\":\"NVIDIA\",\"active\":true},{\"name\":\"AMD Radeon(TM) Graphics\",\"vendor\":\"AMD\",\"active\":false}],\"active\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"software\":false}}"
+      "detail": "{\"version\":\"0.5.0\",\"bridge\":4,\"os\":\"win32\",\"osVersion\":\"10.0.26300\",\"arch\":\"x64\",\"cores\":12,\"cpu\":\"AMD Ryzen 5 6600H with Radeon Graphics\",\"memory\":16310259712,\"freeDisk\":46555607040,\"gpu\":{\"chips\":[{\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"vendor\":\"NVIDIA\",\"active\":true},{\"name\":\"AMD Radeon(TM) Graphics\",\"vendor\":\"AMD\",\"active\":false}],\"active\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"software\":false}}"
     },
     {
       "name": "keepAwake starts the system's blocker that keeps the laptop from sleeping (screen may sleep)",
@@ -186,22 +186,22 @@
     {
       "name": "DT-07, nothing attached: minimised and hidden, the hook reads its list again on its own within the minute, so a new decision reaches the tray",
       "pass": true,
-      "detail": "{\"added\":\"2\",\"seconds\":56,\"heard\":\"load:hidden:2\"}"
+      "detail": "{\"added\":\"2\",\"seconds\":57,\"heard\":\"load:hidden:2\"}"
     }
   ],
   "notes": [
     "Removed Start menu shortcuts Electron had written for this worktree's packages: مركز الاتصال المؤسسي، نسخة التطوير.lnk."
   ],
   "device": {
-    "version": "0.4.0",
-    "bridge": 3,
+    "version": "0.5.0",
+    "bridge": 4,
     "os": "win32",
     "osVersion": "10.0.26300",
     "arch": "x64",
     "cores": 12,
     "cpu": "AMD Ryzen 5 6600H with Radeon Graphics",
     "memory": 16310259712,
-    "freeDisk": 46792622080,
+    "freeDisk": 46555607040,
     "gpu": {
       "chips": [
         {
@@ -233,7 +233,7 @@
       "visibility": "hidden"
     }
   },
-  "timerSeconds": 56,
+  "timerSeconds": 57,
   "total": 37,
   "passed": 37,
   "failed": 0

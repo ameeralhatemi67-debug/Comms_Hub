@@ -133,7 +133,8 @@ export class Player {
       const el = this.o.pool.element(clip.id, clip.source!);
       if (!el) continue;
       keep.add(clip.id);
-      const want = sourceTime(clip, this.t) / 1e6;
+      // a light copy may start at another time than its original (media.ts elementOffset)
+      const want = sourceTime(clip, this.t) / 1e6 - this.o.pool.elementOffset(clip.source!);
       const rate = retimed(clip) ? speedAt(clip, this.t - clip.start) : 1;
       if (Math.abs(el.playbackRate - rate) > 1e-3) {
         try {

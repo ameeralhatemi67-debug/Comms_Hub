@@ -131,8 +131,11 @@ export function startFiles(o: { handle: Handle; site: Session; allowed: readonly
   o.handle(CHANNEL.cacheClear, (_event, inUse: unknown) => cache.clear(inUseOf(inUse ?? [])));
 
   // --- «مسح بيانات هذا الجهاز» (D-11) ----------------------------------------------------------------
+  /** What else stops before the data goes: the media jobs (native-media.ts). */
+  const stops: (() => void)[] = [];
   o.handle(CHANNEL.dataClear, async () => {
     for (const ctl of running.values()) ctl.abort();
+    for (const stop of stops) stop();
     const removed = { files: files.clear(), cache: cache.clear().removed };
     await o.site.clearStorageData();
     await o.site.clearCache();
@@ -141,5 +144,5 @@ export function startFiles(o: { handle: Handle; site: Session; allowed: readonly
     return removed;
   });
 
-  return { files, cache };
+  return { files, cache, onClear: (stop: () => void) => void stops.push(stop) };
 }

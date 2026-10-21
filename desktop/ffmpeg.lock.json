@@ -1,0 +1,12 @@
+{
+  "about": "FFmpeg for the desktop application's media jobs (Desktop_App_Plan.md D5, decision D-9): an LGPL build, shared libraries, Windows x64. Pinned by the fourteen-day rule: the newest build at least fourteen days old on 2026-10-20. The owner allowed this download on 2026-10-20. Fetched and checked by scripts/fetch-ffmpeg.mjs; never committed.",
+  "source": "https://github.com/BtbN/FFmpeg-Builds",
+  "release": "autobuild-2026-09-30-13-08",
+  "published": "2026-09-30T13:09:24Z",
+  "file": "ffmpeg-n9.0.2-17-g2a571b6068-win64-lgpl-shared-9.0.zip",
+  "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-09-30-13-08/ffmpeg-n9.0.2-17-g2a571b6068-win64-lgpl-shared-9.0.zip",
+  "size": 76972461,
+  "sha256": "7157177b8a6cb2174c1650ba8c71b363f2c78cba5330f88c4c02cf5b2b880646",
+  "version": "n9.0.2-17-g2a571b6068",
+  "tag": "ff902"
+}

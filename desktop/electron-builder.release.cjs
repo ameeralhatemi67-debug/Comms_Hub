@@ -4,7 +4,8 @@
 // flipped here, at packaging, and read back by qa/desktop-shell.cjs. The generic feed (D3, decision D-6)
 // makes electron-builder write latest.yml and the blockmap beside the installer, the files a release
 // uploads to the bucket; nothing is published from here (--publish never). The application reads the
-// same feed from its compiled copy (src/update.ts).
+// same feed from its compiled copy (src/update.ts). The pinned LGPL FFmpeg (D5, decision D-9), fetched and
+// checked by scripts/fetch-ffmpeg.mjs, goes beside the application in resources/ffmpeg, with its licence.
 // Usage: npm run pack   (writes dist/release/)
 const path = require('node:path');
 
@@ -18,6 +19,11 @@ module.exports = {
   copyright: 'مركز الاتصال المؤسسي',
   directories: { output: 'dist/release', buildResources: 'resources' },
   files: ['build/**/*', 'package.json'],
+  // FFmpeg, and the licences of the packages bundled into the code (scripts/build.mjs), beside the application
+  extraResources: [
+    { from: 'vendor/ffmpeg', to: 'ffmpeg', filter: ['ffmpeg.exe', 'ffprobe.exe', '*.dll', 'LICENSE.txt', 'PINNED.json'] },
+    { from: 'build/THIRD_PARTY_LICENSES.txt', to: 'THIRD_PARTY_LICENSES.txt' },
+  ],
   asar: true,
   npmRebuild: false,
   electronLanguages: ['ar', 'en-US'],

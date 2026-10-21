@@ -13,7 +13,10 @@
 // folder of the application's instead, with a size limit and the same ten-day rule, and a file from «هذا
 // الجهاز» is used where it is, through a token: nothing is copied. The page then reads them at the
 // application's own addresses; a "place" is a File in a browser and such an address in the application.
-import { native, type NativeCacheUsage } from '../native/index.ts';
+// The application also makes light copies for the preview and editable copies of what the browser cannot
+// decode (D5, MVP_draft.md 63.4), in the same folder; the media pool (media.ts) asks for them through here.
+import { native, type NativeCacheUsage, type NativeCopies, type NativeCopy, type NativeMediaRef, type NativeProbe } from '../native/index.ts';
+import type { Source } from './schema.ts';
 
 export const CACHE_DIR = 'studio-cache';
 export const LOCAL_DIR = 'studio-local';
@@ -35,8 +38,8 @@ export type Entry = {
 /** Where a source is read from: a File in a browser, one of the application's own addresses in the desktop application. */
 export type Place = { file: File; url?: undefined } | { url: string; file?: undefined };
 
-/** The application's name for a library copy (desktop/src/cache-store.ts libraryName). */
-export const folderName = (name: string) => `${name}.bin`;
+/** The application's name for a library copy (desktop/src/cache-store.ts libraryName); a light or converted copy already has its name. */
+export const folderName = (name: string) => (/\.(bin|mp4)$/.test(name) ? name : `${name}.bin`);
 export type Manifest = { v: 1; entries: Record<string, Entry> };
 
 export const emptyManifest = (): Manifest => ({ v: 1, entries: {} });
@@ -91,6 +94,9 @@ export class DeviceCache {
   private folderCache: Bridge['cache'] | null = null;
   private folderState: NativeCacheUsage | null = null;
   private progress = new Map<string, (done: number, total: number) => void>();
+  /** The application's media tools (D5), when it offers them. */
+  private mediaTools: Bridge['media'] | null = null;
+  private mediaProgress = new Map<string, (done: number, total: number) => void>();
 
   /** The cache, or null where the browser has no private storage (some private windows, older Safari). */
   static async open(): Promise<DeviceCache | null> {
@@ -114,6 +120,10 @@ export class DeviceCache {
         c.folderCache = n.raw!.cache!;
         c.folderCache.onProgress!((p) => c.progress.get(p.name)?.(p.done, p.total));
         await c.refreshFolder();
+      }
+      if (n.has('media')) {
+        c.mediaTools = n.raw!.media!;
+        c.mediaTools.onProgress!((p) => c.mediaProgress.get(p.name)?.(p.done, p.total));
       }
       return c;
     } catch {
@@ -293,6 +303,70 @@ export class DeviceCache {
     this.manifest.entries[name] = { name, kind: 'local', bytes: file.size, total: file.size, complete: true, lastUsed: Date.now(), label: file.name };
     await this.save();
     return { key, file: await handle.getFile() };
+  }
+
+  /** The application can make light and editable copies (D5). */
+  get hasMedia(): boolean {
+    return !!this.mediaTools;
+  }
+
+  /** How the application names a source to its media tools: its token, or its library version (already in the folder). */
+  mediaRef(s: Source): NativeMediaRef | null {
+    if (!this.mediaTools) return null;
+    if (s.kind === 'library') return { asset: s.asset, version: s.version };
+    const token = this.manifest.entries[`local-${s.key}`]?.token;
+    return token ? { token } : null;
+  }
+
+  async copies(ref: NativeMediaRef): Promise<NativeCopies | null> {
+    return this.mediaTools ? this.mediaTools.copies!(ref).catch(() => null) : null;
+  }
+
+  async probe(ref: NativeMediaRef): Promise<NativeProbe | null> {
+    return this.mediaTools ? this.mediaTools.probe!(ref).catch(() => null) : null;
+  }
+
+  /**
+   * A video file from «هذا الجهاز» the browser cannot read at all (MXF, say), as the application reads it:
+   * its size and length for a new source, or null (and nothing kept) when the application cannot read it
+   * either. Null in a browser, where such a file stays «غير مدعوم».
+   */
+  async probeInApp(file: File): Promise<{ media: 'video'; w: number; h: number; duration?: number } | null> {
+    if (!this.mediaTools || !this.files) return null;
+    const { key } = await this.putLocal(file);
+    const token = this.manifest.entries[`local-${key}`]?.token;
+    const p = token ? await this.probe({ token }) : null;
+    if (!p?.video) {
+      await this.removeLocal(key);
+      return null;
+    }
+    return { media: 'video', w: p.video.width, h: p.video.height, ...(p.duration ? { duration: Math.round(p.duration * 1e6) } : {}) };
+  }
+
+  /**
+   * Makes a light copy (`height`) or an editable one (no height) under `name`, the one copies() gave, with
+   * progress in seconds of the source. Rejects with the application's word for why: space, decode, encode,
+   * failed, cancelled or missing.
+   */
+  async makeCopy(ref: NativeMediaRef, name: string, o: { height?: number; inUse: Set<string>; onProgress?: (done: number, total: number) => void }): Promise<NativeCopy> {
+    if (!this.mediaTools) throw new Error('unavailable');
+    if (o.onProgress) this.mediaProgress.set(name, o.onProgress);
+    const inUse = [...o.inUse].map(folderName);
+    try {
+      const r = o.height ? await this.mediaTools.proxy!(ref, o.height, inUse) : await this.mediaTools.convert!(ref, inUse);
+      void this.refreshFolder();
+      return r;
+    } catch (e) {
+      // Electron prefixes a handler's error; only the application's own word is kept
+      const m = /(space|decode|encode|cancelled|missing|unavailable|refused)\s*$/.exec((e as Error).message ?? '');
+      throw new Error(m ? m[1] : 'failed');
+    } finally {
+      this.mediaProgress.delete(name);
+    }
+  }
+
+  async cancelCopy(name: string): Promise<void> {
+    await this.mediaTools?.cancel?.(name).catch(() => false);
   }
 
   /** Where a device file is read from, or null when it is not on this device (or no longer where it was). */

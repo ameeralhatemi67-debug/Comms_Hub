@@ -299,6 +299,24 @@ the site still decides who may read it. Every page carries a Content-Security-Po
 `src/lib/csp.ts`): scripts need the request's nonce, the theme script is allowed by its hash, and nothing
 inline or from elsewhere runs; keep it that way when adding a script. «مسح بيانات هذا الجهاز» (D-11) removes
 the session, the folder's copies and every token.
+Media tools (D5, `MVP_draft.md` 63.4, decision D-9): bridge version 4 adds `media`. FFmpeg is the LGPL v3
+shared build pinned by hash in `desktop/ffmpeg.lock.json`, fetched and checked by
+`desktop/scripts/fetch-ffmpeg.mjs` into `desktop/vendor/ffmpeg` (never committed), and packaged in
+`resources/ffmpeg`. Never ship a GPL or nonfree build. It runs only in the utility process
+(`desktop/src/media-worker.ts`), and only with the fixed jobs of `desktop/src/media-jobs.ts`:
+- `probe`;
+- `proxy`, a 720p or 1080p light copy for the preview;
+- `convert`, an editable H.264 copy of what the browser cannot decode.
+
+The jobs name only Windows' own encoders (`h264_mf`, `aac_mf`). The page names a source by its token or
+its library version, never by a path, program or argument. Copies are written as `.part` files, are never
+served until complete, and are named by source, recipe and FFmpeg version. Change `RECIPE` when an
+argument changes. A copy keeps the original's timestamps (`-copyts`) whenever the browser can read the
+original's container (`keepsTimes`), so cuts stay on their frames; keep that when changing a recipe. In the studio (`src/lib/studio/media.ts`), the preview reads a light copy while the
+export and stills read the original or the converted copy. `qa/desktop-media.cjs` proves the same frame at
+every cut with gray-coded fixtures. FFmpeg's output never leaves the main process; the page gets one word
+for a failure. The licences of everything the package carries are in `THIRD_PARTY_NOTICES.md` and the
+generated `THIRD_PARTY_LICENSES.txt`.
 
 ## Writing markdown from a shell
 

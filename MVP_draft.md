@@ -2701,7 +2701,7 @@ The camera, location, USB, serial and HID devices, Bluetooth, MIDI and everythin
 
 **Not there yet.**
 - Signing (decision D-7, a certificate before rollout). Updates and the download page arrived with D3 (63.2).
-- Later (D5, D6): media tools for heavy or unsupported footage, and the preview on a second screen. Files used where they are and the cache folder arrived with D4 (63.3).
+- Later (D6): the preview on a second screen. Files used where they are and the cache folder arrived with D4 (63.3), and the media tools for heavy or unsupported footage with D5 (63.4).
 
 **Boundaries.** The application holds no secret, no stored password and no sign-in bypass. It decides nothing about who may see or do what: the site and the database do, as in a browser, and the studio still opens only for the Admin and the director. It approves nothing and publishes nothing, and nothing is scheduled in the site because of it.
 
@@ -2765,3 +2765,44 @@ The ten-day rule and «حذف ملفات المعاينة المؤقتة» work 
 **«مسح بيانات هذا الجهاز»**, on «الحساب» in «تطبيق سطح المكتب», held down («يُمسح من هذا الجهاز الدخول وملفات الاستوديو المؤقتة، ويعود التطبيق إلى صفحة الدخول.»): «مسح بيانات هذا الجهاز» يمسح من هذا الحاسوب الدخول، ونسخ ملفات المكتبة المؤقتة، وما يتذكره الاستوديو من ملفات «هذا الجهاز» (تبقى الملفات نفسها في أماكنها)، ثم يعود التطبيق إلى صفحة الدخول. لا يُمس شيء في المركز نفسه. (Decision D-11.)
 
 **The pages' security policy.** Every page now tells the browser which scripts it may run. A script slipped into a page is refused, so it cannot reach the application's files. Nothing changes for anyone using the site.
+
+## 63.4 Light copies and editable copies (D5), 2026-10-21
+
+Phase D5 of `Desktop_App_Plan.md`, from version 0.5.0. Everything here exists only inside the application; in a browser the studio behaves as before.
+
+**A light copy for the preview.** When a video clip is selected, its settings offer «إنشاء نسخة خفيفة للمعاينة».
+- For a heavy source, the offer comes first, with «ملف ثقيل على المعاينة: النسخة الخفيفة تجعلها أسلس، والتصدير يبقى من الأصل.». A source is heavy above 1080p, above 50 Mbit/s, or in ProRes, DNxHR or CineForm.
+- The application makes a 720p copy once on this laptop. While it works: «جارٍ إنشاء النسخة الخفيفة (…٪)…», with «إلغاء».
+- Afterwards: «المعاينة من نسخة خفيفة (720p)، والتصدير من الأصل.». The preview reads the light copy, paused and playing. The export, a still and the photo editor read the original.
+- A cut lands on the same frame in both.
+
+**Files the browser cannot decode.** Examples: ProRes, DNxHR and MXF, or a camera's MTS whose AC-3 sound the browser cannot decode. These are no longer a dead end.
+- In the application, «اختر ملفاً من هذا الجهاز» also lists MXF, MTS and M2TS files.
+- A file the browser cannot read at all, such as MXF, is read by the application so it can be added. In a browser it stays «نوع هذا الملف غير مدعوم في الاستوديو.»
+- The clip's settings say «هذا المتصفح لا يفك ترميز هذا الفيديو.», or for the sound «لا يفك هذا المتصفح ترميز صوت هذا الملف، فلا يُسمع ولا يُصدَّر.».
+- Then: «يحوّله التطبيق إلى نسخة قابلة للتحرير على هذا الجهاز، ويبقى الأصل كما هو.», with «تحويل إلى نسخة قابلة للتحرير».
+- While it works: «جارٍ التحويل إلى نسخة قابلة للتحرير (…٪)…», with «إلغاء».
+- Afterwards everything reads the converted copy, and the settings say «يُعرض ويُصدَّر من نسخة محوّلة على هذا الجهاز (H.264)، والأصل كما هو.». The copy is H.264 at full size with AAC sound, and every frame is kept at its time.
+- The copy is 8-bit, as the studio's output always was. A 10-bit source the browser decodes, such as HEVC 10-bit on a laptop whose graphics chip reads it, is used as it is.
+- A copy keeps the original's times when the browser can read the original's container: a camera's MTS starts at about 1.4 s, and so do its copies. Cuts already placed on a source stay on the same frames after it is converted. A copy of a file the browser cannot read at all starts at zero, because the studio first meets it through that copy.
+
+**Where they live.** Both copies go in the cache folder (63.3), beside the library copies.
+- They count under «التخزين على هذا الجهاز».
+- They follow the same ten-day rule, «حذف ملفات المعاينة المؤقتة» and the size limit, never while the open project uses them.
+- Each copy is named by its source, its recipe and the FFmpeg version. The source is the file's fingerprint or the library version, so a changed source gets a new copy.
+- A project opened on another laptop makes its own copies there.
+
+**When it cannot.**
+- «لا تتسع مساحة القرص لهذه النسخة.»
+- «تعذّر على التطبيق قراءة هذا الملف.»
+- «تعذّر الترميز بمرمّز النظام على هذا الجهاز.»
+- «لم يعد الملف في مكانه على هذا الجهاز.»
+- «تعذّر إكمال النسخة.»
+
+Cancelling leaves nothing. Quitting the application in the middle stops the work, and the next start removes what was half made.
+
+**Boundaries.**
+- A copy never leaves the laptop, never goes to the library and is never sent for review.
+- The original is never changed.
+- The work runs in a process of its own: FFmpeg, LGPL (`THIRD_PARTY_NOTICES.md`), with fixed jobs only and Windows' own encoders.
+- A copy changes nothing in a project, so it is offered in a project open for reading too.
