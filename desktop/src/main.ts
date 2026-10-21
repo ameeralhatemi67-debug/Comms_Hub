@@ -16,6 +16,7 @@ import { keyAction, nextZoom, type KeyAction } from './keys.ts';
 import { startNative, type Native } from './native.ts';
 import { startFiles } from './native-files.ts';
 import { startMedia } from './native-media.ts';
+import { startWindows } from './native-windows.ts';
 import { SCHEME } from './files.ts';
 import { PRIVILEGES } from './protocol.ts';
 import { decideNavigation, loadFailure, type Decision } from './navigation.ts';
@@ -324,6 +325,17 @@ if (lock && !refused) {
     // FFmpeg is packaged beside the application (resources/ffmpeg); unpacked, it is the fetched copy in vendor/.
     const tools = app.isPackaged ? path.join(process.resourcesPath, 'ffmpeg') : path.join(__dirname, '..', 'vendor', 'ffmpeg');
     startMedia({ handle: native.handle, ...stores, tools: { ffmpeg: path.join(tools, 'ffmpeg.exe'), ffprobe: path.join(tools, 'ffprobe.exe'), tag: FFMPEG_TAG }, worker: pagePath('media-worker.js') });
+    // A studio panel in a window of its own (D6): every rule of the site's windows, black behind the picture.
+    startWindows({
+      handle: native.handle,
+      allowed: ALLOWED,
+      open: (url, bounds) => {
+        const win = new BrowserWindow({ ...bounds, minWidth: 320, minHeight: 180, show: false, title: PRODUCT_NAME, backgroundColor: '#000000', webPreferences: sitePreferences() });
+        attachSiteRules(win);
+        void win.loadURL(url);
+        return win;
+      },
+    });
     createMainWindow();
   });
 }

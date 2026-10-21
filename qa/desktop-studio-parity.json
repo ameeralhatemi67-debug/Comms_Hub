@@ -1,7 +1,7 @@
 {
   "script": "qa/desktop-studio-parity.cjs",
-  "run": "2026-10-21T00:51:57.726Z",
-  "version": "0.5.0",
+  "run": "2026-10-21T01:32:58.601Z",
+  "version": "0.6.0",
   "checks": [
     {
       "name": "DT-05: qa/studio-engine.cjs has the same checks in Edge and in the application",
@@ -71,7 +71,7 @@
         "passed": 41,
         "total": 41,
         "failed": [],
-        "seconds": 8,
+        "seconds": 7,
         "timing": null
       },
       "desktop": {
@@ -93,7 +93,7 @@
         "failed": [],
         "seconds": 24,
         "timing": {
-          "exportMs": 2661,
+          "exportMs": 2765,
           "bytes": 181002,
           "estimate": 4543000
         }
@@ -104,7 +104,7 @@
         "failed": [],
         "seconds": 20,
         "timing": {
-          "exportMs": 2911,
+          "exportMs": 2820,
           "bytes": 182621,
           "estimate": 4543000
         },
@@ -116,7 +116,7 @@
     }
   },
   "runs": {
-    "parity": "2026-10-21T00:51:57.726Z",
+    "parity": "2026-10-21T01:32:58.601Z",
     "long": "2026-10-20T20:22:48.896Z"
   },
   "timing": {

@@ -19,8 +19,9 @@ copy of the site: every page, rule and check stays the website's.
   bypass, stored password or service key, in the application or in its checks.
 - **Bridge.** `window.commsHubNative`, exposed only on a top-level page on the list: who the application is
   (`platform`, `shell`, `version`, `bridge`), then `info`, `power`, `life` and `notify` (version 1, D2),
-  `update` (2, D3), `files`, `cache` and `data` (3, D4), and `media` (4, D5). Every handler is registered
-  through `src/sender.ts`'s `guard()` (`src/native.ts`, `src/native-files.ts`, `src/native-media.ts`).
+  `update` (2, D3), `files`, `cache` and `data` (3, D4), `media` (4, D5), and `windows` (5, D6). Every
+  handler is registered through `src/sender.ts`'s `guard()` (`src/native.ts`, `src/native-files.ts`,
+  `src/native-media.ts`, `src/native-windows.ts`).
 - **Files in place and the cache folder** (D4). A chosen file becomes a token (`src/file-store.ts`), never a
   path in the page; the page reads it, and the library copies in the cache folder (`src/cache-store.ts`),
   at `commshub-file://` (`src/protocol.ts`), read-only and in byte ranges.
@@ -55,6 +56,7 @@ entry and the data folder, and it never changes. It names no host and is never l
 | `src/connect-note.html` | The Arabic note before an outside connection. |
 | `src/files.ts`, `src/file-store.ts`, `src/cache-store.ts`, `src/protocol.ts`, `src/range.ts`, `src/native-files.ts` | Files used in place, the cache folder and `commshub-file://` (D4). |
 | `src/media-jobs.ts`, `src/media-worker.ts`, `src/native-media.ts` | FFmpeg's fixed jobs, the utility process that runs them, and the bridge's `media` group (D5). |
+| `src/windows.ts`, `src/native-windows.ts` | The screens, and a studio panel's own window on one of them (D6). |
 | `ffmpeg.lock.json`, `scripts/fetch-ffmpeg.mjs` | The pinned FFmpeg build, and its download into `vendor/ffmpeg` with the size and SHA-256 checked before it is opened. |
 | `scripts/build.mjs` | esbuild: `src/` into `build/`, with `THIRD_PARTY_LICENSES.txt` for the bundled packages. |
 | `electron-builder.release.cjs` | The release package: NSIS, x64, per user, Arabic, fuses. |

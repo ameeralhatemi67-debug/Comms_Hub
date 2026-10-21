@@ -1,0 +1,199 @@
+{
+  "script": "qa/desktop-windows.cjs",
+  "run": "2026-10-21T01:26:20.526Z",
+  "version": "0.6.0",
+  "checks": [
+    {
+      "name": "the editor's page has its project ready (a 20 s source with its frame numbers)",
+      "pass": true,
+      "detail": "{\"state\":{\"kind\":\"ready\"},\"duration\":20000000}"
+    },
+    {
+      "name": "the bridge is version 5, with windows: screens, popOut and close",
+      "pass": true,
+      "detail": "{\"bridge\":5,\"keys\":[\"screens\",\"popOut\",\"close\"],\"screens\":[{\"id\":1847327205,\"label\":\"\",\"primary\":true,\"current\":true,\"bounds\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":864},\"workArea\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":816},\"scaleFactor\":1.25}],\"timeline\":\"refused\",\"badProject\":\"refused\"}"
+    },
+    {
+      "name": "the screens: at least one, exactly one holding the editor, each with its bounds and scale",
+      "pass": true,
+      "detail": "[{\"id\":1847327205,\"label\":\"\",\"primary\":true,\"current\":true,\"bounds\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":864},\"workArea\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":816},\"scaleFactor\":1.25}]"
+    },
+    {
+      "name": "another panel, or a project that is not one, is refused",
+      "pass": true,
+      "detail": "{\"bridge\":5,\"keys\":[\"screens\",\"popOut\",\"close\"],\"screens\":[{\"id\":1847327205,\"label\":\"\",\"primary\":true,\"current\":true,\"bounds\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":864},\"workArea\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":816},\"scaleFactor\":1.25}],\"timeline\":\"refused\",\"badProject\":\"refused\"}"
+    },
+    {
+      "name": "«فتح المعاينة في نافذة مستقلة» opens a second window on the project's own address, and the two find each other",
+      "pass": true,
+      "detail": "{\"url\":\"http://127.0.0.1:3000/motion/studio/0a1b2c3d-0000-4000-8000-0000000000d6/preview\",\"popped\":{\"screen\":1847327205,\"full\":false},\"placed\":{\"bounds\":{\"x\":128,\"y\":48,\"width\":1280,\"height\":720},\"full\":false,\"visible\":true}}"
+    },
+    {
+      "name": "DT-14, standing still: the preview window shows the editor's frame (219 at 7.3 s)",
+      "pass": true,
+      "detail": "{\"editor\":{\"frame\":219,\"t\":7300000},\"preview\":{\"frame\":219,\"t\":7300000},\"expected\":219}"
+    },
+    {
+      "name": "DT-14, playing 8 s: at each of the preview window's 480 drawn frames its playhead is within one frame (33.3 ms) of the editor's: mean 1.65 ms, p95 2.7 ms, max 12.5 ms",
+      "pass": true,
+      "detail": "{\"count\":473,\"mean\":1.65,\"p95\":2.7,\"max\":12.5,\"editorFrames\":475,\"previewFrames\":480}"
+    },
+    {
+      "name": "paused, both stop on the same frame",
+      "pass": true,
+      "detail": "{\"editor\":{\"frame\":459,\"t\":15311800},\"preview\":{\"frame\":459,\"t\":15311800}}"
+    },
+    {
+      "name": "a jump to 15 s while playing is followed in 0.4 ms, and the two stay within one frame on both sides of it (max 11.4 ms)",
+      "pass": true,
+      "detail": "{\"count\":179,\"mean\":1.31,\"p95\":3.3,\"max\":11.4,\"followedInMs\":0.4}"
+    },
+    {
+      "name": "space in the preview window plays the editor, and again pauses it",
+      "pass": true,
+      "detail": "{\"afterSpace\":{\"present\":true,\"leaderHere\":false,\"keys\":1,\"docs\":0,\"t\":16501300,\"playing\":true,\"hasPlayer\":true},\"afterSecond\":{\"present\":true,\"leaderHere\":false,\"keys\":2,\"docs\":0,\"t\":16501300,\"playing\":false,\"hasPlayer\":true}}"
+    },
+    {
+      "name": "full screen on the screen asked for, then back to a window; asking again moves the same window, never a second one",
+      "pass": true,
+      "detail": "{\"full\":{\"full\":true,\"display\":1847327205,\"windows\":2},\"windowed\":{\"full\":false,\"bounds\":{\"x\":128,\"y\":48,\"width\":1280,\"height\":720}}}"
+    },
+    {
+      "name": "the editor reloaded: the preview window hears it leave, then finds the new one and gets the project again",
+      "pass": true,
+      "detail": "{\"gone\":{\"present\":false,\"leaderHere\":false,\"keys\":0,\"docs\":1,\"t\":16501300,\"playing\":false,\"hasPlayer\":true},\"back\":{\"editor\":{\"present\":true,\"leaderHere\":false,\"keys\":0,\"docs\":0,\"t\":0,\"playing\":false,\"hasPlayer\":true},\"preview\":{\"present\":false,\"leaderHere\":true,\"keys\":0,\"docs\":2,\"t\":0,\"playing\":false,\"hasPlayer\":true}},\"docsBefore\":1}"
+    },
+    {
+      "name": "the editor leaving closes the preview window",
+      "pass": true,
+      "detail": "{\"didClose\":true,\"left\":1}"
+    }
+  ],
+  "notes": [
+    "Screens on this laptop: 1 (unnamed 1536x864 at 1.25). A second screen was not connected."
+  ],
+  "screens": [
+    {
+      "id": 1847327205,
+      "label": "",
+      "primary": true,
+      "current": true,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 1536,
+        "height": 864
+      },
+      "workArea": {
+        "x": 0,
+        "y": 0,
+        "width": 1536,
+        "height": 816
+      },
+      "scaleFactor": 1.25
+    }
+  ],
+  "opened": {
+    "popped": {
+      "screen": 1847327205,
+      "full": false
+    },
+    "placed": {
+      "bounds": {
+        "x": 128,
+        "y": 48,
+        "width": 1280,
+        "height": 720
+      },
+      "full": false,
+      "visible": true
+    }
+  },
+  "still": {
+    "editor": {
+      "frame": 219,
+      "t": 7300000
+    },
+    "preview": {
+      "frame": 219,
+      "t": 7300000
+    },
+    "expected": 219
+  },
+  "playing": {
+    "count": 473,
+    "mean": 1.65,
+    "p95": 2.7,
+    "max": 12.5,
+    "editorFrames": 475,
+    "previewFrames": 480
+  },
+  "stopped": {
+    "editor": {
+      "frame": 459,
+      "t": 15311800
+    },
+    "preview": {
+      "frame": 459,
+      "t": 15311800
+    }
+  },
+  "jump": {
+    "count": 179,
+    "mean": 1.31,
+    "p95": 3.3,
+    "max": 11.4,
+    "followedInMs": 0.4
+  },
+  "fullScreen": {
+    "full": {
+      "full": true,
+      "display": 1847327205,
+      "windows": 2
+    },
+    "windowed": {
+      "full": false,
+      "bounds": {
+        "x": 128,
+        "y": 48,
+        "width": 1280,
+        "height": 720
+      }
+    }
+  },
+  "reload": {
+    "gone": {
+      "present": false,
+      "leaderHere": false,
+      "keys": 0,
+      "docs": 1,
+      "t": 16501300,
+      "playing": false,
+      "hasPlayer": true
+    },
+    "back": {
+      "editor": {
+        "present": true,
+        "leaderHere": false,
+        "keys": 0,
+        "docs": 0,
+        "t": 0,
+        "playing": false,
+        "hasPlayer": true
+      },
+      "preview": {
+        "present": false,
+        "leaderHere": true,
+        "keys": 0,
+        "docs": 2,
+        "t": 0,
+        "playing": false,
+        "hasPlayer": true
+      }
+    },
+    "docsBefore": 1
+  },
+  "total": 13,
+  "passed": 13,
+  "failed": 0
+}

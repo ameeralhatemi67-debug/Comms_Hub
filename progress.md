@@ -1543,3 +1543,51 @@ When recording future implementation outcomes, follow this standardized template
   - **Real camera files were not tried.** The corpus is made by ffmpeg, not by a camera. Interlaced footage, variable frame rates, timecode tracks and audio layouts beyond stereo are untested. A converted copy keeps the first sound track only, mixed to stereo.
   - A library video's light copy is made from its copy in the folder; it is the same path as a device file's, but no library source was converted or given a light copy in the check.
   - The sound of a playing light copy was not compared with the original's; the light copy carries the first sound track at 160 kbit/s.
+
+### 2026-10-21: the desktop application, D6: the preview on a second screen
+
+- **What changed, in the application** (`desktop/`, version 0.6.0, bridge version 5; `MVP_draft.md` 63.5):
+  - **The bridge's `windows` group** (`src/native-windows.ts`, rules in `src/windows.ts`):
+    - `screens()` lists the screens: the system's own name for each, its bounds, its scale, which is the main one and which holds the asking window;
+    - `popOut({ panel, project, screen, full })` opens the studio's preview in a window of its own, or moves the one already open. It goes on the screen asked for (by default another than the editor's), in the middle of it, or full screen there;
+    - `close(panel)` closes it.
+  - **One address.** The page names the panel (`preview` only) and the project (a UUID). The main process builds `/motion/studio/<project>/preview` on the asking page's own origin, so it never takes an address from the page. The window gets every rule of the site's windows: the address list, navigation, keys and permissions.
+  - **Lifetime.** A panel's window closes when the window that opened it does.
+  - **Packaging.** `package-lock.json` carries the version again: the D5 commit had left it at 0.4.0, and `tests/config.test.mjs` now holds the two equal.
+- **What changed, in the site** (only inside the application; a browser behaves as before):
+  - **`src/lib/studio/preview-link.ts`.** The editor and its preview window are two pages of the same address in the same profile, so they speak over a `BroadcastChannel` named after the project. Nothing of the project passes through the application or the server.
+    - The editor sends what its preview shows, in the chosen shape, and its clock: where the playhead started, whether it plays, and the moment it did, on `performance.timeOrigin + performance.now()`, which both windows share.
+    - The preview window runs the studio's own player from that moment, so there is no message per frame.
+    - A window opened before the editor, or an editor reloaded, finds the other again: a new editor announces itself, and a window answers with hello.
+    - Only well-formed messages are heard.
+  - **`src/lib/studio/preview.ts`:** the player tells its clock when it starts, stops or jumps (`onClock`, `clock()`).
+  - **`src/components/studio/preview-window.tsx`:**
+    - `usePreviewLink` in the video editor;
+    - «فتح المعاينة في نافذة مستقلة» in «عرض», one entry per screen when there are several, and «إغلاق نافذة المعاينة المستقلة»;
+    - `PreviewWindow`: the picture alone on black, silent, space sending play or pause to the editor, and the two Arabic lines for waiting and for an editor gone.
+  - `studio-page.tsx` shows it for `/motion/studio/<project>/preview`. `hub-page.tsx` is unchanged, as the studio's own route test pins it.
+  - `Shell` leaves its frame out of that address (`isPanelWindow`). Otherwise the preview window, rarely the focused one, would have read notices every minute and raised «يحتاج قرارك» while the person worked in the editor.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **120 of 120** in 22 files (new: `windows`). `npm run typecheck` is clean.
+  - **The site:** `npm run typecheck` is clean, `npm test` **533 of 533** (D6's contract tests in `tests/native.test.mjs`: the feature, the clock, the messages, the handshake both ways with a channel that delivers as a real one does, and the panel address). `npm run build` passes.
+  - **`node qa/desktop-windows.cjs`: **13 of 13**** (`qa/desktop-windows.json`), inside the development package, with the studio's player, media pool and link on both sides and a 20 s source carrying its frame numbers:
+    - the bridge: version 5; the screens; another panel and a malformed project refused; the window opened on the project's own address, and the two finding each other;
+    - **DT-14, playing 8 s: at each of the 473 frames the preview window drew while playing, its playhead was within one frame (33.3 ms) of the editor's at the same moment: mean 1.65 ms, p95 2.7 ms, max 12.5 ms**;
+    - standing still at 7.3 s, both show frame 219, read from the picture; paused after playing, both stop on the same frame;
+    - **a jump to 15 s while playing is followed in 0.4 ms, and the two stay within one frame on both sides of it (mean 1.31 ms, max 11.4 ms)**;
+    - space in the preview window plays and pauses the editor;
+    - full screen on the screen asked for, then back to a window, the same window each time;
+    - the editor reloaded is found again; the editor leaving closes the window.
+  - **Re-run with bridge version 5:** `qa/desktop-media.cjs` **52 of 52** (the light copy still played, now asked with CORS); `qa/desktop-native.cjs` **37 of 37**; `qa/desktop-files.cjs` **16 of 16**; `qa/desktop-shell.cjs` **81 of 81** (it installs and removes the 0.6.0 release); DT-05 `--parity-only` **12 of 12**; and the studio's own `qa/studio-ui.cjs` **122 of 122** in Edge, through `qa/desktop-parity-hook.cjs` so the studio's record was not touched.
+- **Found on the way, fixed.**
+  - **A tainted preview canvas (D4).** A playing video element read from `commshub-file://` was not asked with CORS, so a canvas that drew it could no longer be read. The protocol already answered CORS for the site, so `media.ts` now sets `crossOrigin = 'anonymous'` on those elements.
+  - **A preview window raising notices**, before it was written: the site's frame is left out of it.
+  - **An editor reloaded runs no cleanup**, so the preview window never heard it leave. The editor now also says goodbye on `pagehide`, and a window always greets a newly announced editor.
+  - Three faults in the check itself, before its record:
+    - `window.status` is the browser's own status-line property, so the fixture's function of that name never existed, and early waits on it timed out quietly;
+    - frames the preview window drew while standing still were compared as if the editor were still playing;
+    - the window count was read a moment before the closed window left it.
+- **Not verified, said plainly.**
+  - **A second screen.** This laptop had one screen (1536x864 at 125%) during the check. Full screen was checked on the screen the editor was on; placing the window on another screen is the same call with another screen's id, unit-tested for which screen and where, but not seen.
+  - **The menu entry was not seen rendered**, and no signed-in page was opened: the owner's walkthrough is the place.
+  - **The deviation from the plan.** "Kept in step through the bridge" became two pages speaking directly, with the bridge only opening and placing the window: there is less to secure, and nothing of a project in the main process.

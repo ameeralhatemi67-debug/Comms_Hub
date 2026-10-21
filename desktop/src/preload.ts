@@ -3,7 +3,8 @@
 // document is the top-level page and its address is on the compiled list; frames, foreign pages and the
 // application's own Arabic screens get nothing. Version 1 (D2) adds `info`, `power`, `life` and
 // `notify`; version 2 (D3) adds `update`; version 3 (D4) adds `files`, `cache` and `data`; version 4 (D5)
-// adds `media`, which names a source by its token or library version, never by a path. Each method only
+// adds `media`, which names a source by its token or library version, never by a path; version 5 (D6) adds
+// `windows`, which names a panel and its project, never an address. Each method only
 // sends a message; its main-process handler checks the sender again (sender.ts) and every argument. No
 // method takes a file path, a command or another address: `files.fromDropped` takes a File the person
 // chose, and only here, in the preload, is the path Chromium attached to it read (webUtils).
@@ -72,6 +73,11 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
         },
       }),
       data: Object.freeze({ clear: () => call(CHANNEL.dataClear) }),
+      windows: Object.freeze({
+        screens: () => call(CHANNEL.windowsScreens),
+        popOut: (ask: unknown) => call(CHANNEL.windowsPopOut, ask),
+        close: (panel: unknown) => call(CHANNEL.windowsClose, panel),
+      }),
       media: Object.freeze({
         probe: (source: unknown) => call(CHANNEL.mediaProbe, source),
         copies: (source: unknown) => call(CHANNEL.mediaCopies, source),

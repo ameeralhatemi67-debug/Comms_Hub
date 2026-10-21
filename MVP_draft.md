@@ -2701,7 +2701,7 @@ The camera, location, USB, serial and HID devices, Bluetooth, MIDI and everythin
 
 **Not there yet.**
 - Signing (decision D-7, a certificate before rollout). Updates and the download page arrived with D3 (63.2).
-- Later (D6): the preview on a second screen. Files used where they are and the cache folder arrived with D4 (63.3), and the media tools for heavy or unsupported footage with D5 (63.4).
+- Files used where they are and the cache folder arrived with D4 (63.3), the media tools for heavy or unsupported footage with D5 (63.4), and the preview on a second screen with D6 (63.5).
 
 **Boundaries.** The application holds no secret, no stored password and no sign-in bypass. It decides nothing about who may see or do what: the site and the database do, as in a browser, and the studio still opens only for the Admin and the director. It approves nothing and publishes nothing, and nothing is scheduled in the site because of it.
 
@@ -2806,3 +2806,32 @@ Cancelling leaves nothing. Quitting the application in the middle stops the work
 - The original is never changed.
 - The work runs in a process of its own: FFmpeg, LGPL (`THIRD_PARTY_NOTICES.md`), with fixed jobs only and Windows' own encoders.
 - A copy changes nothing in a project, so it is offered in a project open for reading too.
+
+## 63.5 The preview on a second screen (D6), 2026-10-21
+
+Phase D6 of `Desktop_App_Plan.md`, from version 0.6.0. Everything here exists only inside the application; in a browser the editor is as before.
+
+**Opening it.** The video editor's «عرض» menu has «فتح المعاينة في نافذة مستقلة».
+- With more than one screen, it lists them:
+  - «ملء الشاشة الرئيسية», or «ملء الشاشة 2 (…)» with the screen's own name, opens the preview full screen on that screen;
+  - «في نافذة على هذه الشاشة» opens it as a window beside the editor.
+- With one screen, it opens a window on it.
+- Asking again moves the same window: there is never a second one.
+- «إغلاق نافذة المعاينة المستقلة» closes it. F11 in it switches full screen, as anywhere in the application.
+
+**What it shows.**
+- The project as the editor's preview shows it, in the shape chosen there, as large as the window allows, on black, with nothing else of the site around it: no menu, no notices.
+- It plays, pauses and jumps with the editor, its playhead within a frame of the editor's.
+- It has no sound: the editor's window plays it.
+- Space in it plays and pauses the editor.
+- It edits nothing, holds no editing lease and saves nothing. Light copies (63.4) are used as in the editor's preview.
+
+**When the editor goes.**
+- Leaving the editor closes it.
+- If the editor's page reloads, it says «أُغلق المحرر، فتوقفت المعاينة هنا. تعود عند فتح المشروع في الاستوديو.», and takes the project up again once the editor is back.
+- Opened on its own, it says «تنتظر المحرر: افتح المشروع في الاستوديو في النافذة الرئيسية.».
+
+**Boundaries.**
+- The window is the site's own address, `/motion/studio/<project>/preview`, which the server checks like the studio's. The application opens it on the page's own origin, with every rule of its windows.
+- Nothing of the project passes through the application or the server: it goes only between the two pages on this laptop.
+- The photo editor has no such window.

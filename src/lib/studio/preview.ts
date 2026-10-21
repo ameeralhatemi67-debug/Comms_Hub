@@ -10,6 +10,7 @@ import { isHold, retimed, sourceTime, speedAt } from './speed.ts';
 import { composeFrame, type Resolver } from './compose.ts';
 import type { MediaPool } from './media.ts';
 import type { MotionRenderer } from './motion-adapter.ts';
+import { wallNow, type Clock } from './preview-link.ts';
 
 export const DRIFT = 0.12;
 
@@ -35,6 +36,8 @@ export class Player {
   muted = false;
   /** The clips drawn from their media element while playing. */
   private live = new Set<string>();
+  /** Told whenever the playhead starts, stops or jumps, with the moment it did: a preview window keeps in step (preview-link.ts). */
+  onClock: ((c: Clock) => void) | null = null;
   private readonly o: PlayerOptions;
 
   constructor(o: PlayerOptions) {
@@ -64,6 +67,11 @@ export class Player {
     this.o.overlay?.(ctx, scale);
   }
 
+  /** Where the playhead is: from when and where it started playing, or where it stands. */
+  clock(): Clock {
+    return this.playing ? { t: this.startT, playing: true, wall: performance.timeOrigin + this.startPerf } : { t: this.t, playing: false, wall: wallNow() };
+  }
+
   play() {
     const end = durationOf(this.o.getDoc());
     if (end <= 0) return;
@@ -75,6 +83,7 @@ export class Player {
     cancelAnimationFrame(this.raf);
     this.raf = requestAnimationFrame(this.loop);
     this.o.onTime(this.t, true);
+    this.onClock?.(this.clock());
   }
 
   pause() {
@@ -84,6 +93,7 @@ export class Player {
     this.o.pool.pauseExcept(new Set());
     this.draw();
     this.o.onTime(this.t, false);
+    this.onClock?.(this.clock());
   }
 
   toggle() {
@@ -101,6 +111,7 @@ export class Player {
     }
     this.draw();
     this.o.onTime(this.t, this.playing);
+    this.onClock?.(this.clock());
   }
 
   private loop = (now: number) => {

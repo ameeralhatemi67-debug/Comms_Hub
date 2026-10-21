@@ -284,3 +284,89 @@ test('D5: every word the application gives for a failed copy is read by the site
   assert.ok(ui.includes('إنشاء نسخة خفيفة للمعاينة'), 'the plan\'s own words');
   assert.equal(/'(space|decode|encode|failed)'\s*}/.test(ui), false, 'no raw word shown');
 });
+
+// D6: the preview in a window of its own (bridge version 5).
+test('D6: windows is detected by its three methods; D5 has none', () => {
+  const v5 = { ...d2().bridge, bridge: 5, windows: { screens: async () => [], popOut: async () => ({}), close: async () => true } };
+  assert.equal(nativeOf(v5).has('windows'), true);
+  assert.equal(nativeOf({ ...v5, windows: { ...v5.windows, close: undefined } }).has('windows'), false);
+  assert.equal(nativeOf(d2().bridge).has('windows'), false);
+});
+
+test('D6: where the editor playhead is, from its last clock', async () => {
+  const { timeAt } = await import('../src/lib/studio/preview-link.ts');
+  assert.equal(timeAt({ t: 2_000_000, playing: false, wall: 1000 }, 9000), 2_000_000, 'standing still');
+  assert.equal(timeAt({ t: 2_000_000, playing: true, wall: 1000 }, 1500), 2_500_000, 'half a second later');
+  assert.equal(timeAt({ t: 2_000_000, playing: true, wall: 1000 }, 99_000, 5_000_000), 5_000_000, 'never past the end');
+  assert.equal(timeAt({ t: 0, playing: true, wall: 1000 }, 900), 0, 'never before the start');
+});
+
+test('D6: only well-formed messages are heard on the channel', async () => {
+  const { readMessage } = await import('../src/lib/studio/preview-link.ts');
+  assert.deepEqual(readMessage({ type: 'clock', clock: { t: 1, playing: true, wall: 2, extra: 1 } }), { type: 'clock', clock: { t: 1, playing: true, wall: 2 } });
+  assert.deepEqual(readMessage({ type: 'key', key: 'toggle' }), { type: 'key', key: 'toggle' });
+  for (const bad of [null, 'hello', { type: 'clock', clock: { t: 'x', playing: true, wall: 2 } }, { type: 'clock', clock: { t: 1, playing: 'yes', wall: 2 } }, { type: 'doc', doc: {} }, { type: 'key', key: 'delete' }, { type: 'bye', from: 'someone' }, { type: 'run' }]) {
+    assert.equal(readMessage(bad), null, JSON.stringify(bad));
+  }
+});
+
+/** Two ends of one channel, as two windows of the same address have. */
+function pair() {
+  // as a real channel: a message reaches only an end already listening when it was sent
+  const a = { onmessage: null, posted: [], postMessage(m) { this.posted.push(m); const to = b.onmessage; queueMicrotask(() => to?.({ data: structuredClone(m) })); }, close() {} };
+  const b = { onmessage: null, posted: [], postMessage(m) { this.posted.push(m); const to = a.onmessage; queueMicrotask(() => to?.({ data: structuredClone(m) })); }, close() {} };
+  return [a, b];
+}
+const settle = () => new Promise((r) => setTimeout(r, 10));
+
+test('D6: a preview window opened after the editor gets the project and the clock, and follows them', async () => {
+  const { PreviewLeader, PreviewFollower } = await import('../src/lib/studio/preview-link.ts');
+  const [lc, fc] = pair();
+  const presence = [];
+  const keys = [];
+  const doc = { sources: [], video: { fps: 30 } };
+  const leader = new PreviewLeader('p', { now: () => ({ t: 5, playing: false, wall: 1 }), onPresence: (p) => presence.push(p), onKey: (k) => keys.push(k) }, lc);
+  leader.show(doc);
+  assert.equal(lc.posted.filter((m) => m.type === 'doc').length, 0, 'nothing is copied while no window listens');
+  const got = { docs: [], clocks: [], leader: [] };
+  const follower = new PreviewFollower('p', { onDoc: (d) => got.docs.push(d), onClock: (c) => got.clocks.push(c), onLeader: (p) => got.leader.push(p) }, fc);
+  await settle();
+  assert.deepEqual(presence, [true]);
+  assert.equal(got.docs.length, 1);
+  assert.deepEqual(got.clocks.at(-1), { t: 5, playing: false, wall: 1 });
+  leader.clock({ t: 7, playing: true, wall: 2 });
+  follower.key('toggle');
+  await settle();
+  assert.deepEqual(got.clocks.at(-1), { t: 7, playing: true, wall: 2 });
+  assert.deepEqual(keys, ['toggle']);
+  follower.dispose();
+  await settle();
+  assert.deepEqual(presence, [true, false]);
+  leader.dispose();
+});
+
+test('D6: a preview window opened before the editor is answered once the editor opens, and told when it closes', async () => {
+  const { PreviewLeader, PreviewFollower } = await import('../src/lib/studio/preview-link.ts');
+  const [lc, fc] = pair();
+  const got = { docs: 0, leader: [] };
+  new PreviewFollower('p', { onDoc: () => got.docs++, onClock: () => undefined, onLeader: (p) => got.leader.push(p) }, fc);
+  await settle();
+  const leader = new PreviewLeader('p', { now: () => ({ t: 0, playing: false, wall: 1 }) }, lc);
+  leader.show({ sources: [] });
+  await settle();
+  assert.equal(got.docs, 1, 'the project, once');
+  assert.equal(fc.posted.filter((m) => m.type === 'hello').length, 2, 'once on opening, once for the editor: no endless greeting');
+  leader.dispose();
+  await settle();
+  assert.equal(got.leader.at(-1), false);
+});
+
+test('D6: a studio panel window is its own address, and only that address leaves out the site frame', async () => {
+  const { isPanelWindow } = await import('../src/lib/studio/preview-link.ts');
+  const id = '0a1b2c3d-0000-4000-8000-00000000abcd';
+  assert.equal(isPanelWindow(`/motion/studio/${id}/preview`), true);
+  for (const p of [`/motion/studio/${id}`, '/motion/studio', `/motion/studio/${id}/preview/x`, `/motion/studio/not-an-id/preview`, '/', null]) assert.equal(isPanelWindow(p), false, String(p));
+  const fs = await import('node:fs');
+  const app = fs.readFileSync('desktop/src/windows.ts', 'utf8');
+  assert.ok(app.includes('return `${origin}/motion/studio/${project}/${panel}`;'), 'the application opens exactly that address');
+});

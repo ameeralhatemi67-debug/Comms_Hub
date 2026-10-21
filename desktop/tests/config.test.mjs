@@ -88,7 +88,7 @@ test('the development package differs only in its folder, its unpacked form, its
 });
 
 test('every tool is pinned exactly and the application ships no dependency', () => {
-  assert.equal(pkg.version, '0.5.0');
+  assert.equal(pkg.version, '0.6.0');
   assert.equal(pkg.dependencies, undefined, 'esbuild bundles everything into build/');
   assert.equal(pkg.devDependencies.electron, '44.5.1');
   for (const [name, version] of Object.entries(pkg.devDependencies)) {
@@ -96,6 +96,8 @@ test('every tool is pinned exactly and the application ships no dependency', () 
   }
   const lock = JSON.parse(fs.readFileSync(new URL('../package-lock.json', import.meta.url), 'utf8'));
   assert.equal(lock.packages['node_modules/electron'].version, '44.5.1');
+  assert.equal(lock.version, pkg.version, 'the lockfile carries the same version');
+  assert.equal(lock.packages[''].version, pkg.version);
 });
 
 test('the update check\'s package: its own id, name, data folder, version and feed, and nothing else changed', () => {

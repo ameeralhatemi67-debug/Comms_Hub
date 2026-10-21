@@ -7,8 +7,8 @@
 
 export type Platform = 'web' | 'desktop' | 'android' | 'ios';
 
-/** What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3), files, cache and clearData from 3 (D4), media from 4 (D5). */
-export type Feature = 'info' | 'keepAwake' | 'busy' | 'notify' | 'badge' | 'update' | 'files' | 'cache' | 'clearData' | 'media';
+/** What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3), files, cache and clearData from 3 (D4), media from 4 (D5), windows from 5 (D6). */
+export type Feature = 'info' | 'keepAwake' | 'busy' | 'notify' | 'badge' | 'update' | 'files' | 'cache' | 'clearData' | 'media' | 'windows';
 
 /** A file from «هذا الجهاز» as the desktop application names it: never its path. */
 export type NativeFile = { token: string; name: string; size: number; type: string; media: 'video' | 'audio' | 'image'; modified: number };
@@ -19,6 +19,8 @@ export type NativeMediaRef = { token: string } | { asset: string; version: numbe
 export type NativeCopy = { name: string; url: string; bytes: number };
 /** The light and converted copies a source has on this device, and the names they would be made under. */
 export type NativeCopies = { proxy: (NativeCopy & { height: number }) | null; convert: NativeCopy | null; names: { proxy: Record<string, string>; convert: string } };
+/** A screen as the desktop application describes it (D6): the system's own name for it, never what is on it. */
+export type NativeScreen = { id: number; label: string; primary: boolean; current: boolean; bounds: { x: number; y: number; width: number; height: number }; scaleFactor: number };
 export type NativeProbe = {
   duration: number | null;
   bitRate: number | null;
@@ -60,6 +62,11 @@ type Bridge = {
     onProgress?: (fn: ((p: { name: string; done: number; total: number }) => void) | null) => void;
   };
   data?: { clear?: () => Promise<{ files: number; cache: number }> };
+  windows?: {
+    screens?: () => Promise<NativeScreen[]>;
+    popOut?: (ask: { panel: 'preview'; project: string; screen?: number; full?: boolean }) => Promise<{ screen: number; full: boolean }>;
+    close?: (panel: 'preview') => Promise<boolean>;
+  };
   media?: {
     probe?: (source: NativeMediaRef) => Promise<NativeProbe>;
     copies?: (source: NativeMediaRef) => Promise<NativeCopies>;
@@ -92,6 +99,7 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   cache: ['cache.library', 'cache.usage', 'cache.sweep', 'cache.clear', 'cache.onProgress'],
   clearData: ['data.clear'],
   media: ['media.probe', 'media.copies', 'media.proxy', 'media.convert', 'media.cancel', 'media.onProgress'],
+  windows: ['windows.screens', 'windows.popOut', 'windows.close'],
 });
 
 const SHELLS = ['desktop', 'android', 'ios'];

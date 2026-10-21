@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { CircleCheck, CircleAlert } from 'lucide-react';
 import { Title } from '../ui';
 import { MotionTabs } from './motion-tabs';
@@ -10,6 +11,8 @@ import { VideoEditor } from './editor';
 import { PhotoEditor } from './photo-editor';
 import { probeSupport, supportLines, type StudioSupport } from '@/lib/studio/support';
 import { DeviceInfoPanel } from '../native/device-info';
+import { PreviewWindow } from './preview-window';
+import { isPanelWindow } from '@/lib/studio/preview-link';
 import './studio.css';
 
 /**
@@ -17,6 +20,9 @@ import './studio.css';
  * canOpenRoute; the database checks studio_can() on every studio record and function.
  */
 export default function StudioPage({ projectId }: { projectId?: string }) {
+  // the preview in a window of its own (desktop application, MVP_draft.md 63.5): it only shows what the editor sends
+  const path = usePathname();
+  if (projectId && isPanelWindow(path)) return <PreviewWindow projectId={projectId} />;
   if (projectId)
     return (
       <div className="st st-open">

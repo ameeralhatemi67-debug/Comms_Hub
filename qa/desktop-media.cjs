@@ -134,7 +134,7 @@ const ffmpegLeft = () => h.ps(`@(Get-Process ffmpeg,ffprobe -ErrorAction Silentl
     await win.waitForLoadState('load');
     await win.waitForFunction(() => typeof window.openCorpus === 'function');
     const bridge = await win.evaluate(() => ({ bridge: window.commsHubNative.bridge, media: Object.keys(window.commsHubNative.media || {}) }));
-    check('the bridge is version 4, with the media group', bridge.bridge === 4 && ['probe', 'copies', 'proxy', 'convert', 'cancel', 'onProgress'].every((m) => bridge.media.includes(m)), bridge);
+    check('the bridge is version 4 or later, with the media group', bridge.bridge >= 4 && ['probe', 'copies', 'proxy', 'convert', 'cancel', 'onProgress'].every((m) => bridge.media.includes(m)), bridge);
     await win.setInputFiles('#corpus', CORPUS.map((c) => path.join(out, c.name)));
     const opened = await win.evaluate(() => window.openCorpus());
     result.opened = opened;

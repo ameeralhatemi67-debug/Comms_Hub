@@ -458,7 +458,11 @@ export class MediaPool {
       el.preload = 'auto';
       (el as HTMLVideoElement).playsInline = true;
       el.dataset.source = sourceId;
-      el.src = l.preview?.url ?? l.url;
+      const src = l.preview?.url ?? l.url;
+      // the application's own addresses are another origin: asked with CORS, which the application answers
+      // for the site, so a canvas that draws the playing video can still be read (a frame, the other window)
+      if (src.startsWith('commshub-file:')) el.crossOrigin = 'anonymous';
+      el.src = src;
       this.elements.set(clipId, el);
     }
     return el;

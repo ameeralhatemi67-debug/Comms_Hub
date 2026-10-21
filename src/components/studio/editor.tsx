@@ -65,6 +65,7 @@ import { brandText } from '@/lib/studio/brand';
 import { SwatchContext } from '../motion-controls';
 import { VersionsPanel } from './versions-panel';
 import { SourceTools } from './source-tools';
+import { previewWindowItems, usePreviewLink } from './preview-window';
 import { EditorFrame, panelSpecs, useEditorFrame } from './editor-frame';
 import type { Menu } from './menubar';
 import { usePref } from './prefs';
@@ -300,6 +301,8 @@ export function VideoEditor(p: EditorProps) {
   }, [player, shown, selected, tick, assetsReady, safe, fontTick]);
 
   const seek = useCallback((tt: Micros) => player?.seek(tt) ?? setT(tt), [player]);
+  // the preview in a window of its own, on another screen, in the desktop application (MVP_draft.md 63.5)
+  const previewLink = usePreviewLink(p.projectId, player, shown);
   const at = player?.t ?? t;
 
   // ------------------------------------------------------------- adding
@@ -1016,6 +1019,7 @@ export function VideoEditor(p: EditorProps) {
         { kind: 'sep' },
         { label: 'ملء نافذة المتصفح', keys: keysOf('full-window'), checked: full, onSelect: () => setFull(!full) },
         { label: 'محرر داكن', icon: <Moon aria-hidden="true" />, checked: chrome === 'dark', onSelect: () => setChrome(chrome === 'dark' ? 'light' : 'dark') },
+        ...previewWindowItems(previewLink),
       ],
     },
   ];

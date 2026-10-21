@@ -317,6 +317,15 @@ export and stills read the original or the converted copy. `qa/desktop-media.cjs
 every cut with gray-coded fixtures. FFmpeg's output never leaves the main process; the page gets one word
 for a failure. The licences of everything the package carries are in `THIRD_PARTY_NOTICES.md` and the
 generated `THIRD_PARTY_LICENSES.txt`.
+The preview on a second screen (D6, `MVP_draft.md` 63.5): bridge version 5 adds `windows`.
+- The bridge only lists the screens and opens or places a panel's window. It opens one address only,
+  `/motion/studio/<project>/preview`, built in `desktop/src/windows.ts` on the asking page's own origin.
+- The two pages keep in step over a `BroadcastChannel` (`src/lib/studio/preview-link.ts`), so nothing of a
+  project passes through the application. The editor sends what it shows, and its clock on the shared
+  `performance.timeOrigin`.
+- The preview window only shows: no lease, no saving, no sound. The site's frame (`Shell`) stays out of it
+  (`isPanelWindow`), so notices are never raised from it.
+- `qa/desktop-windows.cjs` holds the playhead within one frame.
 
 ## Writing markdown from a shell
 
