@@ -1,0 +1,94 @@
+{
+  "script": "qa/sim03-quick-fixes.cjs",
+  "run": "2026-10-22T06:24:49.621Z",
+  "checks": [
+    {
+      "name": "Admin top bar fits a 320 px phone",
+      "pass": true,
+      "detail": "page 320 px in 320 px, bar 0..320"
+    },
+    {
+      "name": "Admin top bar fits a 360 px phone",
+      "pass": true,
+      "detail": "page 360 px in 360 px, bar 0..360"
+    },
+    {
+      "name": "Admin top bar fits a 375 px phone",
+      "pass": true,
+      "detail": "page 375 px in 375 px, bar 0..375"
+    },
+    {
+      "name": "Admin top bar fits a 390 px phone",
+      "pass": true,
+      "detail": "page 390 px in 390 px, bar 0..390"
+    },
+    {
+      "name": "the fixture reproduces RESP-001 with the old rule: the Admin page is wider than 320 px",
+      "pass": true,
+      "detail": "page 392 px"
+    },
+    {
+      "name": "a member (no role switch) fitted before and fits now",
+      "pass": true,
+      "detail": "page 320 px"
+    },
+    {
+      "name": "«ربط عبر LinkedIn» stays on a 390 px screen",
+      "pass": true,
+      "detail": "button 67..211, page 390 px"
+    },
+    {
+      "name": "«ربط عبر LinkedIn» stays on a 393 px screen",
+      "pass": true,
+      "detail": "button 70..214, page 393 px"
+    },
+    {
+      "name": "«ربط عبر LinkedIn» stays on a 412 px screen",
+      "pass": true,
+      "detail": "button 89..233, page 412 px"
+    },
+    {
+      "name": "«ربط عبر LinkedIn» stays on a 430 px screen",
+      "pass": true,
+      "detail": "button 107..251, page 430 px"
+    },
+    {
+      "name": "the fixture reproduces the channels overflow with the old rule",
+      "pass": true,
+      "detail": "button -40..103, page 430 px"
+    },
+    {
+      "name": "the create buttons sit above the phone bottom bar while scrolling",
+      "pass": true,
+      "detail": "buttons end 751, bar starts 775"
+    },
+    {
+      "name": "the create bar is still stuck on screen (not left at the end of the form)",
+      "pass": true,
+      "detail": "bar 669..764"
+    },
+    {
+      "name": "the fixture reproduces the covered buttons with the old rule",
+      "pass": true,
+      "detail": "buttons end 819, bar starts 775"
+    },
+    {
+      "name": "the video length no longer covers the stage chip",
+      "pass": true,
+      "detail": "chip {\"l\":1143.25,\"t\":120.703125,\"r\":1255,\"b\":146.5} length {\"l\":1219.90625,\"t\":51,\"r\":1255,\"b\":70.546875}"
+    },
+    {
+      "name": "the video length does not cover the version pill",
+      "pass": true,
+      "detail": "version {\"l\":1225.28125,\"t\":25,\"r\":1255,\"b\":44.546875}"
+    },
+    {
+      "name": "the fixture reproduces the covered chip with the old rule",
+      "pass": true,
+      "detail": "overlap 686 px²"
+    }
+  ],
+  "pass": true,
+  "passed": 17,
+  "total": 17
+}

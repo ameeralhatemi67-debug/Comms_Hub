@@ -128,6 +128,20 @@ test('an explanation window sits beside its target and away from an open dialog'
   assert.equal(overlap({ l: n.x, t: n.y, r: n.x + n.width, b: n.y + 100 }, wide), 0);
 });
 
+test('on a phone the explanation window leaves the guide bar in reach (HELP-001)', () => {
+  // 390 x 844, the bar across the top, a tall target filling the page below it: every spot
+  // touches the target, and the window used to take the top one, over «دليل الصفحة».
+  const view = { w: 390, h: 844 };
+  const size = { w: 370, h: 260 };
+  const bar = { l: 12, t: 10, r: 378, b: 110 };
+  const target = { l: 10, t: 120, r: 380, b: 800 };
+  const R = (q) => ({ l: q.x, t: q.y, r: q.x + (q.width ?? size.w), b: q.y + size.h });
+  assert.ok(overlap(R(place(size, view, target, [])), bar) > 0, 'without the bar the window sits on it');
+  assert.equal(overlap(R(place(size, view, target, [], [bar])), bar), 0, 'with the bar it stays clear');
+  // The bar does not narrow the window the way a wide dialog does.
+  assert.equal(place(size, view, target, [], [bar]).width, undefined);
+});
+
 test('undo: the reasons it is refused, the button title, and when Ctrl+Z belongs to it', () => {
   assert.match(undoErrorText('ERROR: UNDO_CHANGED'), /تغيّر شيء آخر/);
   assert.match(undoErrorText('UNDO_GONE'), /ساعة/);

@@ -19,6 +19,7 @@ import {
   levelLabels,
   pipeline,
   platformSpecs,
+  reviewerRoles,
   riyadhStamp,
   stageLabels,
   stagePosition,
@@ -102,7 +103,8 @@ export function AssetPage({ id }: { id: string }) {
   const canEdit = m.canEdit(asset.folder_id);
   const locked = isAssetLocked(asset);
   const folderLocked = m.lockedIn(asset.folder_id);
-  const acts = actionsFor(asset);
+  const mineNow = versions.find((v) => v.version === asset.current_version)?.uploaded_by === m.email;
+  const acts = actionsFor(asset, mineNow);
   const ownedElsewhere = [...new Set(allActionIds.filter((a) => !acts.some((x) => x.id === a)).map((a) => actionOwners[a]))].filter((o) => o !== 'الجميع');
   const pos = stagePosition(asset.stage);
   const side = isSideStage(asset.stage);
@@ -491,6 +493,9 @@ export function AssetPage({ id }: { id: string }) {
                 ))
               ) : (
                 <p className="mx-hint">لا توجد إجراءات متاحة لدورك على هذا الأصل.</p>
+              )}
+              {mineNow && asset.stage === 'review' && reviewerRoles.includes(m.role) && (
+                <p className="mx-more">رفعت الإصدار v{asset.current_version} بنفسك، فيقرر فيه غيرك من القيادة.</p>
               )}
               {ownedElsewhere.length > 0 && <p className="mx-more">إجراءات أخرى لهذا الأصل متاحة لـ: {ownedElsewhere.join('، ')}.</p>}
             </div>

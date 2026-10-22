@@ -6,15 +6,17 @@
 // people never get the same one. Opened from mail as /create?mail=<thread>, it links
 // the work to that conversation; /create?type=<type> opens on that type.
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, ChartGantt, FileText, Film, Flag, Image as ImageIcon, Lock, Mail, Play, Plus, Send, Users, WandSparkles, X } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import { supabase } from '@/lib/supabase/client';
 import {
+  ACTIVE,
   PUBLISHABLE_TYPES,
   TYPE_PLANS,
   autoPick,
   backSchedule,
+  countOf,
   isLead,
   planIssues,
   planPayload,
@@ -148,6 +150,15 @@ export function CreatePage() {
     // Once, on arrival.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // From the project page: the projects may load after the first render, so the project is added
+  // once it appears (only once, so unticking it afterwards stays unticked).
+  const projectAdded = useRef(false);
+  useEffect(() => {
+    if (projectAdded.current || !preProject || !w.projects.some((p) => p.id === preProject)) return;
+    projectAdded.current = true;
+    setD((x) => (x.projects.includes(preProject) ? x : { ...x, projects: [...x.projects, preProject] }));
+  }, [w.projects, preProject]);
 
   // The plan follows the type and the due date until it is edited by hand.
   useEffect(() => {
@@ -310,7 +321,10 @@ export function CreatePage() {
           ))}
         </div>
       ) : (
-        <Hint warn>لا توجد حسابات مرتبطة بعد. تُضاف من «حسابات المنصات» حين تُبنى؛ وحتى ذلك يُحفظ العمل بلا حسابات{type === 'post' ? '، والمنشور الاجتماعي يحتاج حساباً واحداً على الأقل' : ''}.</Hint>
+        <Hint warn>
+          لا توجد حسابات مرتبطة بعد. يضيفها مدير الاتصال أو مساعده أو المسؤول عن النظام من «حسابات المنصات»
+          {type === 'post' ? '؛ والمنشور الاجتماعي لا يُحفظ حتى يُربط حساب واحد على الأقل.' : '؛ وحتى ذلك يُحفظ العمل بلا حسابات.'}
+        </Hint>
       )}
     </div>
   );
@@ -487,7 +501,7 @@ export function CreatePage() {
                     const l = w.load.find((r) => r.email === p.email);
                     return (
                       <option key={p.email} value={p.email}>
-                        {p.display_name} · {roles[p.role].name} · {l?.active_works ?? 0} نشطة{l?.late_works ? ` · ${l.late_works} متأخر` : ''}
+                        {p.display_name} · {roles[p.role].name} · {countOf(l?.active_works ?? 0, ACTIVE)}{l?.late_works ? ` · ${l.late_works} متأخر` : ''}
                       </option>
                     );
                   })}
@@ -685,7 +699,7 @@ export function CreatePage() {
                         <small>{roles[l.role].name}</small>
                       </span>
                       <span className="cnt">
-                        {l.active_works} نشطة{l.late_works ? <span className="late"> · {l.late_works} متأخر</span> : null}
+                        {countOf(l.active_works, ACTIVE)}{l.late_works ? <span className="late"> · {l.late_works} متأخر</span> : null}
                       </span>
                     </div>
                   ))}

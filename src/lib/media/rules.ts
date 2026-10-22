@@ -129,6 +129,8 @@ export type ActionContext = {
   currentVersion: number;
   hasChannels: boolean;
   isVideo: boolean;
+  /** This person uploaded the current version: the database refuses their decision on it (SELF_APPROVAL). */
+  uploadedByMe?: boolean;
 };
 
 /** Who owns each action, for the "other actions belong to…" line on the asset page. */
@@ -158,11 +160,13 @@ export function quickActions(c: ActionContext): ActionDef[] {
   const add = (id: ActionId, label: string, hint: string, icon: string, next = false) =>
     out.push({ id, label, hint, icon, next });
 
-  if (view && isReviewer && stage === 'review') {
+  // A decision on a version you uploaded is someone else's (approve, changes and reject alike).
+  const decide = view && stage === 'review' && !c.uploadedByMe;
+  if (decide && isReviewer) {
     add('approve', `اعتماد الإصدار v${c.currentVersion}`, 'يقفل الإصدار ويجعله جاهزاً للنشر', 'check', true);
     add('changes', 'طلب تعديل', c.isVideo ? 'ملاحظة، وبوقت محدد للفيديو' : 'ملاحظة تعود إلى المنشئ', 'pencil');
   }
-  if (view && role === 'director' && stage === 'review') add('reject', 'رفض', 'يعيد الأصل مع السبب', 'x');
+  if (decide && role === 'director') add('reject', 'رفض', 'يعيد الأصل مع السبب', 'x');
 
   if (view && role === 'publisher' && (stage === 'ready' || stage === 'scheduled')) {
     add('schedule', stage === 'scheduled' ? 'تعديل موعد النشر' : 'جدولة النشر', 'التاريخ والوقت والمنصات والنص', 'cal', stage === 'ready');

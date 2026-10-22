@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-19
+updated: 2026-10-22
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -25,6 +25,15 @@ related:
 ---
 
 # Communication Department Hub — Current Status
+
+## Fixes from the role simulation, 2026-10-22
+
+The archive of role simulation sim-20261015-03 (`D:/Agents/testingh/sim-20261015-03`) was reviewed against the current code. The quick fixes are in; details and numbers in `progress.md`, 2026-10-22.
+
+- **Fixed.** Linked mail on the work page (a query that always failed), the project kept when creating from a project, the help window kept off the guide bar, the Admin top bar and the platform headings on phones, the create bar above the phone's bottom bar, the video length off the stage chip, Arabic counts, the no-accounts wording, and no decision offered on a library version you uploaded.
+- **Evidence.** `npm test` 505 of 505; typecheck and build clean; `qa/sim03-quick-fixes.cjs` 17 of 17.
+- **Open.** APPROVAL-001: library approval is not bound to the version shown (a stale dialog, or a board drag to «جاهز للنشر», approves whatever is current). REQ-001: work lists refresh only on opening or on returning to the tab. Neither is fixed. Nothing was seen signed in.
+- **Not committed.** The changes are in the working tree beside the earlier uncommitted studio and calendar files.
 
 ## The studio, second round, 2026-10-20
 

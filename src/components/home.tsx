@@ -8,8 +8,14 @@ import { useMemo } from 'react';
 import { BriefcaseBusiness, CalendarDays, Inbox, Plus, Shield, TriangleAlert, Users } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import {
+  ACTIVE,
   OUTSTANDING,
+  PROJECTS,
+  STAGES,
+  TASKS,
+  WORKS,
   atRisk,
+  countOf,
   accountName,
   dayAdd,
   dueNote,
@@ -152,7 +158,7 @@ export function HomePage() {
           <div className="wk-home">
             <section className="wk-pn" data-gd="focus">
               <h3>
-                {focusTitle} <small>{focus.length ? `${focus.length} أعمال` : ''}</small>
+                {focusTitle} <small>{focus.length ? countOf(focus.length, WORKS) : ''}</small>
               </h3>
               {focus.length ? (
                 <div className="wk-qlist">
@@ -226,7 +232,7 @@ export function HomePage() {
                         <span className="grow">
                           <b>{l.display_name}</b>
                           <small>
-                            {l.active_works} نشطة · {l.open_stages} مراحل · {l.open_tasks} مهام{l.late_works + l.late_stages ? <span className="late"> · {l.late_works + l.late_stages} متأخرة</span> : null}
+                            {countOf(l.active_works, ACTIVE)} · {countOf(l.open_stages, STAGES)} · {countOf(l.open_tasks, TASKS)}{l.late_works + l.late_stages ? <span className="late"> · {l.late_works + l.late_stages} متأخرة</span> : null}
                           </small>
                           <span className={`wk-load ${l.late_works ? 'late' : ''}`} aria-hidden="true">
                             <i style={{ width: `${Math.round((l.active_works / most) * 100)}%` }} />
@@ -257,7 +263,7 @@ export function HomePage() {
                       <b>
                         <Ic i={BriefcaseBusiness} /> المشاريع
                       </b>
-                      <small>{w.projects.length ? `${w.projects.length} مشاريع` : 'لا مشاريع بعد'}</small>
+                      <small>{w.projects.length ? countOf(w.projects.length, PROJECTS) : 'لا مشاريع بعد'}</small>
                     </span>
                   </Link>
                   {w.isAdmin && (

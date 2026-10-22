@@ -23,9 +23,11 @@ import {
 } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import {
+  STAGES,
   STAGE_LIBRARY,
   TYPE_PLANS,
   autoPick,
+  countOf,
   dayAdd,
   dayDiff,
   fdate,
@@ -388,7 +390,7 @@ export function PlanEditor({
     if (!src.length) return;
     const next = planCalc(autoFill(keyed(planWithTemplate(rows, src)), w.load), due ? 'back' : 'fwd', w.today, due || undefined);
     const label = tpl.startsWith('type:') ? `قالب ${typeLabels[tpl.slice(5) as WorkType]} الأساسي` : saved?.name;
-    change(next, `طُبّق «${label}»: ${src.length} مراحل مُسندة تلقائياً ومواعيدها محسوبة${rows.some((s) => s.done) ? '، والمراحل المنتهية كما هي' : ''}.`);
+    change(next, `طُبّق «${label}»: ${countOf(src.length, STAGES)} مُسندة تلقائياً ومواعيدها محسوبة${rows.some((s) => s.done) ? '، والمراحل المنتهية كما هي' : ''}.`);
   };
   const saveTemplate = async () => {
     if (!tplName.trim()) return setNotice('اكتب اسماً للقالب.');

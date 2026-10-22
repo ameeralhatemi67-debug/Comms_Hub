@@ -11,7 +11,9 @@ import { Bell, BriefcaseBusiness, CalendarDays, Check, Clock, Flag, ListChecks, 
 import { roles } from '@/lib/domain';
 import {
   KIND_ROLE,
+  TASKS,
   accountName,
+  countOf,
   authOk,
   autoPick,
   canAssignTasksToOthers,
@@ -200,7 +202,7 @@ export function TaskDialog({ date, project, tasks, onClose, done }: { date: stri
     }
     setBusy(false);
     const names = [...new Set(rows.map((r) => x.nameOf(r.assignee as string)))];
-    await done(rows.length > 1 ? `أُنشئت ${rows.length} مهام لأيام محددة: ${names.join('، ')}.` : `أُسندت المهمة إلى ${names[0]}${after.length ? '، وتبدأ بعد ما تنتظره' : ''}${auto && others ? ' (اختيار تلقائي)' : ''}.`);
+    await done(rows.length > 1 ? `أُنشئت ${countOf(rows.length, TASKS)} لأيام محددة: ${names.join('، ')}.` : `أُسندت المهمة إلى ${names[0]}${after.length ? '، وتبدأ بعد ما تنتظره' : ''}${auto && others ? ' (اختيار تلقائي)' : ''}.`);
     onClose();
   };
   return (
@@ -593,7 +595,7 @@ export function AddDayDialog({ date, ready, onPick, onClose }: { date: string; r
             <Ic i={Upload} />
             <span className="grow">
               <b>جدولة عمل جاهز للنشر</b>
-              <small>{ready.length} أعمال معتمدة بانتظار الجدولة</small>
+              <small>{countOf(ready.length, ['عمل واحد معتمد', 'عملان معتمدان', 'أعمال معتمدة', 'عملاً معتمداً'])} بانتظار الجدولة</small>
             </span>
           </button>
         )}

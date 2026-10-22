@@ -9,8 +9,10 @@ import { useMedia, type AssetRow } from './provider';
 export function useAssetActions() {
   const m = useMedia();
 
+  // `uploadedByMe` is known where the versions are loaded (the asset page); elsewhere the
+  // approval dialog checks it itself.
   const actionsFor = useCallback(
-    (a: AssetRow): ActionDef[] =>
+    (a: AssetRow, uploadedByMe = false): ActionDef[] =>
       quickActions({
         role: m.role,
         level: m.levelOf(a.folder_id),
@@ -20,6 +22,7 @@ export function useAssetActions() {
         currentVersion: a.current_version,
         hasChannels: a.channels.length > 0,
         isVideo: a.kind === 'video' || a.kind === 'audio',
+        uploadedByMe,
       }),
     [m],
   );

@@ -18,13 +18,17 @@ export type Placement = { x: number; y: number; cost: number; width?: number };
  * there is one, away from `layers`. Candidates are the four sides and the corners of the
  * target, then the corners of the screen. If nothing beside a wide dialog is free, the
  * window narrows into the widest free side (down to 210 pixels) rather than cover it.
+ * `avoid` must stay in reach even more than the target stays visible, and does not narrow
+ * the window: the guide bar, whose «دليل الصفحة» and exit a phone-wide window would
+ * otherwise cover (HELP-001 of sim-20261015-03).
  */
-export function place(size: Size, view: Size, target: Box | null, layers: Box[], margin = 10, gap = 14): Placement {
+export function place(size: Size, view: Size, target: Box | null, layers: Box[], avoid: Box[] = [], margin = 10, gap = 14): Placement {
   const pick = (w: number, h: number): Placement => {
     const cost = (x: number, y: number, corner: boolean) => {
       const R = { l: x, t: y, r: x + w, b: y + h };
       let c = 0;
       for (const a of layers) c += overlap(R, a) * 3;
+      for (const a of avoid) c += overlap(R, a) * 10;
       if (target) {
         c += overlap(R, target) * 8;
         const dx = Math.max(0, target.l - R.r, R.l - target.r);

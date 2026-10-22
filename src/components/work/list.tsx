@@ -9,8 +9,13 @@ import { useMemo, useState } from 'react';
 import { BriefcaseBusiness, CalendarDays, Columns3, Flag, List, Plus, Search } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import {
+  ACTIVE,
+  ACTIVE_WORKS,
   BOARD,
+  STAGES,
+  TASKS,
   attentionCounts,
+  countOf,
   dueNote,
   fdate,
   inTab,
@@ -437,16 +442,16 @@ function Team({ items, onTab, open }: { items: ListItem[]; onTab: (t: WorkTab) =
                   </span>
                 </div>
                 <div className="pc-n">
-                  <span>{x.active} نشطة</span>
-                  {x.steps > 0 && <span>{x.steps} مراحل</span>}
-                  {x.tasks > 0 && <span>{x.tasks} مهام{x.lateTasks ? ` · ${x.lateTasks} متأخرة` : ''}</span>}
+                  <span>{countOf(x.active, ACTIVE)}</span>
+                  {x.steps > 0 && <span>{countOf(x.steps, STAGES)}</span>}
+                  {x.tasks > 0 && <span>{countOf(x.tasks, TASKS)}{x.lateTasks ? ` · ${x.lateTasks} متأخرة` : ''}</span>}
                   {x.late > 0 && <span className="late">{x.late} متأخر</span>}
                   {x.soon > 0 && <span className="soon">{x.soon} قريب الموعد</span>}
                   {x.review > 0 && <span className="rev">{x.review} بانتظار المراجعة</span>}
                   {x.lateSteps > 0 && <span className="late">{lateN(x.lateSteps)}</span>}
                   {x.part.length > 0 && <span>يشارك في {x.part.length}</span>}
                 </div>
-                <div className={`wk-load ${x.late ? 'late' : ''}`} role="img" aria-label={`الحمل: ${x.active} أعمال نشطة`}>
+                <div className={`wk-load ${x.late ? 'late' : ''}`} role="img" aria-label={`الحمل: ${countOf(x.active, ACTIVE_WORKS)}`}>
                   <i style={{ width: `${Math.round((x.active / max) * 100)}%` }} />
                 </div>
                 <div className="pc-items">

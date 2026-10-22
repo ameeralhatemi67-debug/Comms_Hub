@@ -570,6 +570,24 @@ export function lateN(n: number): string {
   return n === 1 ? 'مرحلة متأخرة' : n === 2 ? 'مرحلتان متأخرتان' : `${n} مراحل متأخرة`;
 }
 
+/** The four forms of a counted noun: one, two, 3 to 10 (and zero), 11 and up. */
+export type CountForms = readonly [one: string, two: string, few: string, many: string];
+/** A count with its noun in Arabic: «عمل واحد»، «عملان»، «3 أعمال»، «12 عملاً»، «0 أعمال». */
+export function countOf(n: number, [one, two, few, many]: CountForms): string {
+  if (n === 1) return one;
+  if (n === 2) return two;
+  const r = n % 100;
+  return `${n} ${n === 0 || (r >= 3 && r <= 10) ? few : many}`;
+}
+export const WORKS: CountForms = ['عمل واحد', 'عملان', 'أعمال', 'عملاً'];
+export const STAGES: CountForms = ['مرحلة واحدة', 'مرحلتان', 'مراحل', 'مرحلة'];
+export const PARTS: CountForms = ['جزء واحد', 'جزءان', 'أجزاء', 'جزءاً'];
+export const PROJECTS: CountForms = ['مشروع واحد', 'مشروعان', 'مشاريع', 'مشروعاً'];
+export const TASKS: CountForms = ['مهمة واحدة', 'مهمتان', 'مهام', 'مهمة'];
+/** A person's load in a short line: «عمل نشط»، «عملان نشطان»، «4 نشطة». */
+export const ACTIVE: CountForms = ['عمل نشط', 'عملان نشطان', 'نشطة', 'نشطة'];
+export const ACTIVE_WORKS: CountForms = ['عمل نشط واحد', 'عملان نشطان', 'أعمال نشطة', 'عملاً نشطاً'];
+
 // ---------------------------------------------------------------------------
 // «العمل»: what is late, what each row says, tabs and order
 // ---------------------------------------------------------------------------
@@ -749,11 +767,11 @@ export function workActions(x: ActionInput): WorkAction[] {
       });
       const left = stages.filter((s) => !s.done_at).length;
       if (w.status === 'IN_PRODUCTION' && boss)
-        add('submit', 'إرسال للمراجعة', `إلى مدير الاتصال ومساعده${left ? `، وتبقى ${left} مراحل` : ''}`, !left);
+        add('submit', 'إرسال للمراجعة', `إلى مدير الاتصال ومساعده${left ? `، وتبقى ${countOf(left, STAGES)}` : ''}`, !left);
     }
     if ((lead || w.assignee === me) && OUTSTANDING.includes(w.status)) add('plan', 'خطة المراحل', 'من يعمل على ماذا ومتى، وما ينتظر ماذا');
     if (w.status === 'IN_REVIEW' && lead)
-      add('review', x.decideBlock ? 'عرض المراجعة' : 'مراجعة واعتماد', x.decideBlock || `ينتظر قرارك: ${x.pending} من ${x.total} أجزاء`, !x.decideBlock);
+      add('review', x.decideBlock ? 'عرض المراجعة' : 'مراجعة واعتماد', x.decideBlock || `ينتظر قرارك: ${countOf(x.pending, PARTS)} من ${x.total}`, !x.decideBlock);
     if (boss && textEditable(w)) {
       const after = ['APPROVED', 'SCHEDULED'].includes(w.status);
       add('edittext', `${x.hasText ? 'تعديل' : 'كتابة'} ${textLabels[w.type]}`,

@@ -315,6 +315,8 @@
 .wk .wk-csum ul{margin:0;padding-inline-start:18px;display:grid;gap:6px;font-size:12.5px;color:var(--w-ink2)}
 .wk .wk-cbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;padding:12px 16px;border-radius:var(--w-rl);background:var(--surface);border:1px solid var(--line);box-shadow:var(--w-e2);position:sticky;bottom:12px;z-index:3}
 .wk .wk-cbar .l{margin-inline-end:auto;font-size:12.5px;color:var(--muted)}
+/* Below 700 pixels the shell's bottom bar (.mobile-nav) is sticky at the foot and drawn over this bar. */
+@media (max-width:699px){ .wk .wk-cbar{bottom:80px} }
 .wk .wk-sdates{display:grid;gap:6px}
 .wk .wk-sdates .r{display:grid;grid-template-columns:28px minmax(0,1fr) 170px;gap:10px;align-items:center;font-size:13px}
 .wk .wk-sdates .r i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--muted);border:1px solid var(--w-line2)}
@@ -442,7 +444,7 @@
 .wk .wk-acct.warn .dot{background:var(--st-warn-fg)}
 .wk .wk-acct.bad .dot{background:var(--st-danger-fg)}
 .wk .wk-psec{display:grid;gap:10px}
-.wk .wk-psec>h3{margin:6px 0 0;font-family:var(--w-display);font-size:17px;font-weight:600;display:flex;gap:10px;align-items:center}
+.wk .wk-psec>h3{margin:6px 0 0;font-family:var(--w-display);font-size:17px;font-weight:600;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .wk .wk-psec>h3 .n{font-family:inherit;font-size:12px;font-weight:700;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:0 9px}
 .wk .wk-chres{display:flex;flex-wrap:wrap;gap:6px}
 .wk .wk-cr{display:inline-flex;gap:6px;align-items:center;padding:2px 10px;border-radius:999px;font-size:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--w-ink2)}

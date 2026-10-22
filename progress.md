@@ -6,7 +6,7 @@ tags:
   - document/progress
   - knowledge/dated
 created: 2026-08-18
-updated: 2026-10-10
+updated: 2026-10-22
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -1127,3 +1127,22 @@ When recording future implementation outcomes, follow this standardized template
 - **Code.** New: `src/lib/studio/slot.ts`, `src/components/studio/slot-panel.tsx`. Changed: `schema.ts` (`Slot`), `compose.ts`, `timeline.ts` (`kindFor`), `diff.ts`, `checks.ts`, `timeline.tsx`, `inspector.tsx`, `bin.tsx`, `editor.tsx`, `export-panel.tsx`, `send-review.tsx`, `persist.ts` (`flush`), `use-project.ts`, the styles. No migration.
 - **Verified, numbers.** `npm run typecheck` clean; `npm run build` passes; `npm test` **501 of 501**. New `tests/studio-slot.test.mjs`, 5: tracks, names, task note, the export warning, filling at the version with the box fit, one source for one file, task_create's fields and no direct write. `tests/studio-schema.test.mjs` gains the flush test (saved without waiting, once, nothing for no change, only the draft without the lease). Engine `qa/studio-engine.cjs` **41 of 41**: the place's stripes inside, the red video outside unchanged. Interface `qa/studio-ui.cjs --only=work` **21 of 21**: edits kept after leaving for the work page; a box named «شعار الشريك» with a design task for CH-101 to the designer, its note and an attached PNG frame; the export warning; the task done and a picture linked to the work listed under «سُلّمت»; the place turned into that picture. All flows **122 of 122**.
 - **Not verified, said plainly.** `task_create` itself was not run again in SQL (it is the work cycle's, tested there); the task was driven in the fixture database. The person who receives the task works on «المهام» as before.
+
+
+### 2026-10-22: fixes from role simulation sim-20261015-03, the quick ones
+
+- **Source.** The run's archive at `D:/Agents/testingh/sim-20261015-03`, which tested main `e8386cc` of 2026-10-15. Its reports, journals and 3,518 page diagnostics were read again; about 690 of its screenshots and 556 frames of its films were reviewed; every finding was checked against the current code before a change. APPROVAL-001 (approval through a stale dialog, and a board drag to «جاهز للنشر» that approves without a dialog) and REQ-001 (lists that refresh only on opening or on returning to the tab) are not part of this entry and stay open.
+- **What changed.**
+  - Work page «مرتبط به»: the linked-mail query passed an array to `.contains()`, which postgrest-js writes as `cs.{[object Object]}`. Every work and approval page got a 400 (241 in the run) and linked mail never showed. It is now a JSON string (`src/components/work/data.tsx`). Found in the run's diagnostics, not in its findings.
+  - PROJECT-001: «عمل في المشروع» opens «إنشاء» with `?project=`. The form read it once, at first render, before the projects had loaded, and dropped it. It is now added when the projects arrive, once (`src/components/work/create.tsx`).
+  - HELP-001: the explanation window was placed without regard to the guide bar and is drawn above it, so on a phone it covered «دليل الصفحة» and «إنهاء وضع الإرشاد». The bar is now kept clear, weighted above covering the explained element (`src/lib/kit/place.ts` `avoid`, `src/lib/kit/guide.ts`).
+  - RESP-001: on a phone the Admin's «عرض بصفة» select kept 192 px in a top-bar row that could not wrap, so the page was 392 px wide. The row wraps and the select is `min(192px, 44vw)` (`src/app/globals.css`).
+  - «حسابات المنصات»: a platform heading could not wrap and «ربط عبر …» left the screen at 390 to 430 px (`src/app/work.css`).
+  - «إنشاء»: its bar was sticky 12 px from the foot, under the phone's bottom bar. Below 700 px it sits 80 px up (`src/app/work.css`).
+  - Library card: the video length sat on the stage chip («بحاجة إلى تعديل» read «احة إلى تعديل»). It now sits under the version (`src/app/media.css`).
+  - Arabic counts: «1 أعمال»، «1 مراحل»، «1 أجزاء»، «1 مشاريع»، «1 نشطة» and the like. `countOf` gives the forms for one, two, 3 to 10 and 11 up (`src/lib/work/rules.ts`), used on home, projects, the plan, the list, channels, create, the day dialogs and the work page.
+  - Wording: «حين تُبنى» is gone from the no-accounts hints (the accounts page exists). The create hint says who adds accounts and that a social post is not saved until one is linked; the database refuses it (`CHANNEL_REQUIRED`).
+  - Self-approval in the library: the uploader of the current version no longer sees «اعتماد», «طلب تعديل» or «رفض» on the asset page and is told why; the approval dialog checks the version's uploader itself and disables «اعتماد وقفل» (`src/lib/media/rules.ts` `uploadedByMe`, `src/components/media/actions.ts`, `asset-page.tsx`, `dialogs.tsx`). The database already refused it (SELF_APPROVAL).
+  - Checked and left as it is: «Google Drive» in the upload, folder and rename messages is correct, since new uploads go to Google Drive by design. The run's mismatch came from its test-only storage path.
+- **Verified, numbers.** `npm run typecheck` clean; `npm run build` passes (36 static pages); `npm test` **505 of 505**. Four tests are new: the guide bar kept clear on a phone, no decision offered on your own version, the linked-mail filter as postgrest-js writes it, Arabic counts. One existing assertion was corrected from «تبقى 2 مراحل» to «وتبقى مرحلتان». Browser fixture `qa/sim03-quick-fixes.cjs` **17 of 17** in headless Edge with the real stylesheets: the Admin top bar fits 320, 360, 375 and 390 px, and the old rule reproduces the run's 392 px at 320; «ربط عبر LinkedIn» stays on screen at 390 to 430 px; the create buttons stay above the bottom bar while scrolling; the video length clears the stage chip. Each fix is also shown failing with the old rule.
+- **Not verified, said plainly.** Nothing was seen signed in. The fixtures copy the markup, not the pages. The project prefill, the linked-mail list and the self-approval note were not seen in a running page.

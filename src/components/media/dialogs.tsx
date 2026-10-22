@@ -756,6 +756,17 @@ function Approve({ asset, onClose }: AP) {
   const m = useMedia();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // The database refuses a decision on a version you uploaded; say so before the press, not after.
+  const [mine, setMine] = useState(false);
+  useEffect(() => {
+    void supabase()
+      .from('media_versions')
+      .select('uploaded_by')
+      .eq('asset_id', asset.id)
+      .eq('version', asset.current_version)
+      .maybeSingle()
+      .then(({ data }) => setMine((data as { uploaded_by: string } | null)?.uploaded_by === m.email));
+  }, [asset.id, asset.current_version, m.email]);
   return (
     <Modal title={`اعتماد الإصدار v${asset.current_version}`} onClose={onClose}>
       <div className="mx-form">
@@ -767,14 +778,14 @@ function Approve({ asset, onClose }: AP) {
           <li>أي تعديل لاحق يكون بإصدار جديد يحتاج اعتماداً جديداً.</li>
           <li>يصبح الأصل «جاهز للنشر» ويظهر لمسؤول النشر.</li>
         </ul>
-        <ErrorLine text={error} />
+        <ErrorLine text={error || (mine ? `رفعت الإصدار v${asset.current_version} بنفسك، فيقرر فيه غيرك من القيادة.` : '')} />
         <div className="mx-row">
           <button className="secondary" onClick={onClose}>
             إلغاء
           </button>
           <button
             className="primary"
-            disabled={busy}
+            disabled={busy || mine}
             data-hold={HOLD.approveLock}
             onClick={async () => {
               setBusy(true);

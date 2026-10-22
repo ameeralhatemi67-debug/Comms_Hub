@@ -80,6 +80,15 @@ test('quick actions follow the role, the stage and the folder', () => {
   assert.deepEqual(ids({ role: 'publisher', level: LEVELS.view, stage: 'failed' }).slice(0, 1), ['publish']);
 });
 
+test('no decision is offered on a version you uploaded yourself (the database refuses SELF_APPROVAL)', () => {
+  for (const role of ['director', 'assistant']) {
+    const got = ids({ role, stage: 'review', uploadedByMe: true });
+    for (const x of ['approve', 'changes', 'reject']) assert.equal(got.includes(x), false, `${role} ${x}`);
+    assert.ok(got.includes('note'), 'a note is still possible');
+  }
+  assert.ok(ids({ role: 'director', stage: 'review', uploadedByMe: false }).includes('approve'));
+});
+
 test('a locked folder removes every action that changes the asset', () => {
   const got = ids({ role: 'writer', folderLocked: true });
   for (const x of ['startprod', 'submit', 'newver']) assert.equal(got.includes(x), false, x);

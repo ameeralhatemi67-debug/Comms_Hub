@@ -249,7 +249,8 @@ export function useWorkDetail(id: string) {
       db.rpc('work_view_parts', { p_work: id }),
       db.rpc('work_view_pending', { p_work: id }),
       db.rpc('work_decide_block', { p_work: id }),
-      db.from('mail_threads').select('id,subject,kind,req_no').contains('links', [{ type: 'work', id }]),
+      // A JSON string, not an array: an array is written as a Postgres array literal ({[object Object]}) and fails on jsonb.
+      db.from('mail_threads').select('id,subject,kind,req_no').contains('links', JSON.stringify([{ type: 'work', id }])),
       db.from('chat_rooms').select('id,name').eq('link->>id', id),
     ]);
     const stages = (st.data ?? []) as StageRow[];

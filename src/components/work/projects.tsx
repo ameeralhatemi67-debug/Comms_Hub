@@ -12,8 +12,11 @@ import { useState } from 'react';
 import { ArrowRight, BriefcaseBusiness, CalendarDays, Clock, Flag, FolderKanban, ListChecks, Pencil, Plus, Users, X } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import {
+  TASKS,
   TYPE_PLANS,
+  WORKS,
   canCreateWork,
+  countOf,
   dayAdd,
   dayDiff,
   fdate,
@@ -147,7 +150,7 @@ export function ProjectsPage() {
                   <i style={{ width: `${pr}%` }} />
                 </div>
                 <small>
-                  {pr}٪ من المراحل والمهام منجزة · {ws.length} أعمال{late ? <span className="late"> · {late} متأخرة</span> : null}
+                  {pr}٪ من المراحل والمهام منجزة · {countOf(ws.length, WORKS)}{late ? <span className="late"> · {late} متأخرة</span> : null}
                 </small>
                 {nx && (
                   <small>
@@ -249,8 +252,8 @@ export function ProjectPage({ id }: { id: string }) {
               <Ic i={Users} />
               المسؤول {w.nameOf(P.owner)}
             </span>
-            <span>{ws.length} أعمال</span>
-            <span>{ts.length} مهام</span>
+            <span>{countOf(ws.length, WORKS)}</span>
+            <span>{countOf(ts.length, TASKS)}</span>
             <span>{pr}٪ منجز</span>
           </div>
           {P.description && <p className="wk-pdesc">{P.description}</p>}
@@ -652,7 +655,7 @@ export function ProjectDialog({ project, onClose, onSaved }: { project?: Project
     if (!r.ok) return setErr(r.error);
     await w.reloadBase();
     const n = r.data.works.length;
-    w.say(`أُنشئ المشروع${n ? ` و${n} أعمال (${r.data.works.join('، ')})، مراحلها مُسندة تلقائياً ومواعيدها محسوبة. راجع «من يعمل على ماذا».` : '.'}`);
+    w.say(`أُنشئ المشروع${n ? ` و${countOf(n, WORKS)} (${r.data.works.join('، ')})، مراحلها مُسندة تلقائياً ومواعيدها محسوبة. راجع «من يعمل على ماذا».` : '.'}`);
     return onSaved(r.data.id, n);
   };
   return (

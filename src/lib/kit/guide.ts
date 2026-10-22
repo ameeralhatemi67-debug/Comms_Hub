@@ -81,24 +81,25 @@ export function installGuide(host: GuideHost): GuideApi {
     const r = el.getBoundingClientRect();
     return { l: r.left, t: r.top, r: r.right, b: r.bottom };
   };
-  const openLayers = () =>
-    (Array.from(document.querySelectorAll(OPEN_LAYERS)) as Element[])
-      .filter((x) => !x.closest('.gdl'))
-      .map(box)
-      .filter((b) => b.r - b.l > 0 && b.b - b.t > 0);
+  const boxes = (els: Element[]) => els.map(box).filter((b) => b.r - b.l > 0 && b.b - b.t > 0);
+  const openLayers = () => boxes((Array.from(document.querySelectorAll(OPEN_LAYERS)) as Element[]).filter((x) => !x.closest('.gdl')));
+  // The guide bar is drawn under the window (z-index 90 against 92): kept clear, or on a
+  // phone the window covers «دليل الصفحة» and «إنهاء وضع الإرشاد».
+  const guideBar = () => boxes(Array.from(document.querySelectorAll('.gdl > .gd-bar')));
   function placePop(pop: HTMLElement, target: Box | null, keepIfClear: boolean) {
     const vw = document.documentElement.clientWidth;
     const vh = window.innerHeight;
     pop.style.maxHeight = `${vh - 20}px`;
     const layers = openLayers();
+    const bar = guideBar();
     if (keepIfClear && pop.style.left) {
       const x0 = parseFloat(pop.style.left);
       const y0 = parseFloat(pop.style.top);
       const R0 = { l: x0, t: y0, r: x0 + pop.offsetWidth, b: y0 + pop.offsetHeight };
-      if (layers.every((a) => !overlap(R0, a)) && (!target || !overlap(R0, target)) && x0 >= 0 && y0 >= 0 && R0.r <= vw && R0.b <= vh) return;
+      if ([...layers, ...bar].every((a) => !overlap(R0, a)) && (!target || !overlap(R0, target)) && x0 >= 0 && y0 >= 0 && R0.r <= vw && R0.b <= vh) return;
     }
     pop.style.width = '';
-    const p = place({ w: pop.offsetWidth, h: pop.offsetHeight }, { w: vw, h: vh }, target, layers);
+    const p = place({ w: pop.offsetWidth, h: pop.offsetHeight }, { w: vw, h: vh }, target, layers, bar);
     if (p.width) pop.style.width = `${p.width}px`;
     pop.style.left = `${p.x}px`;
     pop.style.top = `${p.y}px`;

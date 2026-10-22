@@ -342,7 +342,7 @@ test('the work page offers each role only what the database would let it do', ()
   const writer = workActions({ ...base, w: W(), me: 'w@x.sa', role: 'writer' });
   assert.deepEqual(writer.map((a) => a.id), ['stepdone:0', 'submit', 'plan', 'edittext', 'lib', 'chat']);
   assert.equal(writer[0].next, true);
-  assert.match(writer.find((a) => a.id === 'submit').hint, /تبقى 2 مراحل/);
+  assert.match(writer.find((a) => a.id === 'submit').hint, /وتبقى مرحلتان/);
   // The designer waits for the text and is told for whom.
   const designer = workActions({ ...base, w: W(), me: 'd@x.sa', role: 'designer' });
   assert.deepEqual(designer.map((a) => a.id), ['wait:1', 'lib', 'chat']);
@@ -486,4 +486,34 @@ test('the work page: the leader opens the review, the publisher schedules, confi
 test('the work pages, their styles and the drag engine have no emoji', () => {
   const files = [...readdirSync('src/components/work').map((f) => `src/components/work/${f}`), 'src/app/work.css', 'src/lib/work/drag.ts', 'src/components/notices.tsx', 'tests/work.test.mjs', 'supabase/tests/approval_rules.sql', 'supabase/migrations/20261012180000_approval_uploader.sql'];
   for (const f of files) assert.doesNotMatch(readFileSync(f, 'utf8'), /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u, f);
+});
+
+import { PostgrestClient } from '@supabase/postgrest-js';
+import { countOf, WORKS, STAGES, PARTS, PROJECTS, TASKS, ACTIVE } from '../src/lib/work/rules.ts';
+
+test('the work page asks for its linked mail with a JSON filter, which jsonb accepts (sim-20261015-03: 400 on every work page)', () => {
+  const q = (v) => decodeURIComponent(new PostgrestClient('http://x').from('mail_threads').select('id').contains('links', v).url.search);
+  // An array is written as a Postgres array literal, which a jsonb column refuses.
+  assert.match(q([{ type: 'work', id: 'CH-1' }]), /links=cs\.\{\[object\+Object\]\}/);
+  assert.match(q(JSON.stringify([{ type: 'work', id: 'CH-1' }])), /links=cs\.\[\{"type":"work","id":"CH-1"\}\]/);
+  const src = readFileSync('src/components/work/data.tsx', 'utf8');
+  assert.doesNotMatch(src, /\.contains\('links',\s*\[/);
+  assert.match(src, /\.contains\('links',\s*JSON\.stringify\(\[\{ type: 'work', id \}\]\)\)/);
+});
+
+test('counts read as Arabic: one and two in words, 3 to 10 plural, 11 and up singular', () => {
+  assert.equal(countOf(1, WORKS), 'عمل واحد');
+  assert.equal(countOf(2, WORKS), 'عملان');
+  assert.equal(countOf(3, WORKS), '3 أعمال');
+  assert.equal(countOf(10, STAGES), '10 مراحل');
+  assert.equal(countOf(11, WORKS), '11 عملاً');
+  assert.equal(countOf(25, STAGES), '25 مرحلة');
+  assert.equal(countOf(0, TASKS), '0 مهام');
+  assert.equal(countOf(103, PARTS), '103 أجزاء');
+  assert.equal(countOf(1, PROJECTS), 'مشروع واحد');
+  assert.equal(countOf(1, ACTIVE), 'عمل نشط');
+  assert.equal(countOf(4, ACTIVE), '4 نشطة');
+  // No interface line writes a bare number before these plurals any more.
+  const files = ['src/components/home.tsx', ...readdirSync('src/components/work').map((f) => `src/components/work/${f}`)];
+  for (const f of files) assert.doesNotMatch(readFileSync(f, 'utf8'), /\}\s?(أعمال|مراحل|أجزاء|مشاريع|نشطة|مهام)(?![\u0600-\u06FF])/u, f);
 });

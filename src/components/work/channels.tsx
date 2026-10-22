@@ -12,7 +12,7 @@ import { SetupGuide } from '../setup-guide';
 import { Film, Link2, Lock, Mail, Pencil, Plus, RefreshCw, Send, Trash2, TriangleAlert, Unplug, Users } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import { HOLD } from '@/lib/kit/hold-reasons';
-import { accountName, accountState, isLead, canPublish, platformLabels, statusLabels, VIDEO_ONLY, type AccountRow, type Platform } from '@/lib/work/rules';
+import { accountName, accountState, countOf, isLead, canPublish, platformLabels, statusLabels, VIDEO_ONLY, WORKS, type AccountRow, type Platform } from '@/lib/work/rules';
 import { MODE_AR, READINESS_AR, connErrorAr } from '@/lib/platforms/info';
 import { CONN_PROVIDERS, PROVIDER_NAME, providerOf, type ConnProvider } from '@/lib/platforms/provider';
 import { useWork, useWorkList, type ListItem } from './data';
@@ -218,7 +218,7 @@ export function ChannelsPage() {
                           <dt>عند الموعد</dt>
                           <dd>{a.mode === 'ask' ? 'اسأل قبل النشر' : 'نشر تلقائي'}</dd>
                           <dt>يستخدمه</dt>
-                          <dd>{use.length ? `${use.length} أعمال: ${use.slice(0, 3).map((x) => x.w.id).join('، ')}${use.length > 3 ? '…' : ''}` : 'لا أعمال حالية'}</dd>
+                          <dd>{use.length ? `${countOf(use.length, WORKS)}: ${use.slice(0, 3).map((x) => x.w.id).join('، ')}${use.length > 3 ? '…' : ''}` : 'لا أعمال حالية'}</dd>
                         </dl>
                         <div className="acts">
                           {(mgr || pub) && a.platform !== 'mail' && a.conn_kind !== 'oauth' && (
@@ -407,7 +407,7 @@ export function DeleteDialog({ a, use, onClose, act }: { a: AccountRow; use: Lis
         </>
       ) : (
         <>
-          <Hint i={Trash2}>يُفصل الحساب عن المركز وتُحذف مفاتيحه من الخادم. {use.length ? `يُزال من ${use.length} أعمال لم تُرسل للمراجعة بعد.` : 'لا يستخدمه أي عمل.'}</Hint>
+          <Hint i={Trash2}>يُفصل الحساب عن المركز وتُحذف مفاتيحه من الخادم. {use.length ? `يُزال من الأعمال التي لم تُرسل للمراجعة بعد (${use.length}).` : 'لا يستخدمه أي عمل.'}</Hint>
           <div className="wk-row-acts">
             <button type="button" className="wk-btn quiet" onClick={onClose}>
               تراجع

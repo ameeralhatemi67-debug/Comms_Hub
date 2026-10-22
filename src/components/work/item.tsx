@@ -41,9 +41,13 @@ import { roles } from '@/lib/domain';
 import { StudioOpenLink, WorkStudioButton, useStudioOrigins } from '../studio/work-links';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import {
+  ACTIVE,
+  PARTS,
   PLATFORM_ORDER,
   PUBLISHABLE_TYPES,
+  STAGES,
   actionOwners,
+  countOf,
   authOk,
   cleared,
   dayAdd,
@@ -451,7 +455,7 @@ export function WorkItemPage({ id }: { id: string }) {
                       </span>
                       {l && (
                         <span className="cnt">
-                          {l.active_works} نشطة{l.late_works ? <span className="late"> · {l.late_works} متأخر</span> : null}
+                          {countOf(l.active_works, ACTIVE)}{l.late_works ? <span className="late"> · {l.late_works} متأخر</span> : null}
                         </span>
                       )}
                     </div>
@@ -545,7 +549,7 @@ function StagesPanel({ d, late, busy, act, onExt, onPlan }: { d: WorkDetail; lat
       <h3>
         المراحل
         <small>
-          {S.length} مراحل{late ? <span className="late"> · {lateN(late)}</span> : null}
+          {countOf(S.length, STAGES)}{late ? <span className="late"> · {lateN(late)}</span> : null}
         </small>
       </h3>
       <div className="wk-srange">
@@ -1105,7 +1109,7 @@ export function AssignDialog({ d, onClose, act }: { d: Pick<WorkDetail, 'w'>; on
                 </span>
                 {l && (
                   <small>
-                    {l.active_works} نشطة{l.late_works ? <span className="late"> · {l.late_works} متأخر</span> : null}
+                    {countOf(l.active_works, ACTIVE)}{l.late_works ? <span className="late"> · {l.late_works} متأخر</span> : null}
                   </small>
                 )}
               </button>
@@ -1199,7 +1203,7 @@ export function SubmitDialog({ d, onClose, act }: { d: WorkDetail; onClose: () =
                 ))}
               </div>
             ) : (
-              <Hint warn>لا توجد حسابات مرتبطة بعد. يضيفها مدير الاتصال أو مساعده من «حسابات المنصات» حين تُبنى، وحتى ذلك لا يُرسل هذا النوع للمراجعة.</Hint>
+              <Hint warn>لا توجد حسابات مرتبطة بعد. يضيفها مدير الاتصال أو مساعده أو المسؤول عن النظام من «حسابات المنصات»، وحتى ذلك لا يُرسل هذا النوع للمراجعة.</Hint>
             )}
           </div>
           <label className="l">
@@ -1217,7 +1221,7 @@ export function SubmitDialog({ d, onClose, act }: { d: WorkDetail; onClose: () =
           <div className="l">
             ما سيُراجع
             <div className="wk-parts">
-              {isWhole(x.type) ? <span>الحزمة كاملة ({pend.length} أجزاء)</span> : pend.map((p) => <span key={p.key}>{p.label}</span>)}
+              {isWhole(x.type) ? <span>الحزمة كاملة ({countOf(pend.length, PARTS)})</span> : pend.map((p) => <span key={p.key}>{p.label}</span>)}
               {!pend.length && <small>لا جزء تغيّر</small>}
             </div>
           </div>
