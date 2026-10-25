@@ -26,6 +26,14 @@ related:
 
 # Communication Department Hub — Current Status
 
+## HyperFrames research for the studio, 2026-10-25
+
+At the owner's request, HeyGen HyperFrames (an open-source HTML-to-video framework) was researched for what «الاستوديو» can learn from it, across the web, desktop and phone releases. The result is `HyperFrames_Studio_Learnings.md`: 23 learnings (H-01 to H-23), a table by client, what not to take, a suggested order and seven owner decisions (O-H1 to O-H7).
+
+- **Nothing is built.** `MVP_draft.md` section 62 is unchanged until the owner picks items.
+- **Next action.** The owner's answers to O-H1 to O-H7; the proposal is rounds 1 and 2 of its section 8, starting with written determinism rules and parity tests (H-04) and «فحص المشروع» (H-01).
+- **Committed locally** as a documents-only commit; the earlier uncommitted studio, calendar and simulation files were left as they were.
+
 ## Fixes from the role simulation, 2026-10-22
 
 The archive of role simulation sim-20261015-03 (`D:/Agents/testingh/sim-20261015-03`) was reviewed against the current code. The quick fixes are in; details and numbers in `progress.md`, 2026-10-22.
