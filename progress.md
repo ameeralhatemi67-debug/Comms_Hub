@@ -1623,3 +1623,35 @@ When recording future implementation outcomes, follow this standardized template
 
   The first build attempt ran beside the test run and stopped with exit code 127 and no message. Run again on its own, the build passed.
 - **Not done, said plainly.** Nothing is pushed. Until a push, which deploys, production has none of the desktop's site code: `src/lib/native/`, «تطبيق سطح المكتب» on «الحساب», the old-application banner, or the pages' Content-Security-Policy. The `desktop-releases` migration is still not applied, no release is published, the application is unsigned, and nothing was seen signed in.
+
+### 2026-10-26: the Android application, A0: the owner's decisions and the specification
+
+- **The owner's decisions.** On 2026-10-26 the owner answered the questions raised that day about phones:
+  - A sideloaded APK is the pre-launch Android download while the Google Play developer account is verified.
+  - The app id is `sa.commshub.app`, matching `sa.commshub.desktop`.
+  - The release key is held by the owner outside the repository, and Google Play later uses the same key (Play App Signing with our own key), so an installed APK updates from Play without being removed.
+  - The download sits on «الحساب» for every signed-in person, from a public bucket.
+- **The plan.** The owner then approved `Android_Build_Plan.md`: everything of `Mobile_Apps_Plan.md` for Android except the studio, in phases:
+  - A1: site preparation;
+  - A2: the Capacitor shell, with written pass criteria and the thin native shell as fallback;
+  - A3: the download page and the update window;
+  - A4: files;
+  - A5: «أجهزتي» and push through Firebase Cloud Messaging;
+  - A6: app links and the lock;
+  - A7: camera, share-in and background upload;
+  - A8: Play readiness.
+
+  Where the owner gave no new answer, the accepted recommendations of `Mobile_Apps_Plan.md` stand:
+  - M-1: Capacitor opening the live site;
+  - M-3: pushes started by the writer's page and the bridge computer, nothing scheduled;
+  - M-4 and M-5: what is pushed and what a lock screen shows;
+  - M-12: the lock off by default;
+  - M-13: a person sees only their own devices.
+- **What changed.**
+  - `Android_Build_Plan.md` (new).
+  - `MVP_draft.md` section 64: the window, links, outside connections, links sent from the sign-in page, no connection, permissions, downloads, the studio left out, and what waits.
+  - The Android paragraph of `AGENTS.md`.
+  - A scope-addition line in `Roadmap.md`.
+  - A dated pointer at the top of `Mobile_Apps_Plan.md`.
+- **One choice made while specifying.** Links sent by email from the sign-in page («أول دخول», «نسيت كلمة المرور») use PKCE, so they must come back to the cookie store that asked for them. Until the application receives its own links (A6), the application points the person to the browser for those two instead of sending a link that would fail.
+- **Verified.** Documents only; no code changed, so no tests were run for this entry.

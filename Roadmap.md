@@ -532,7 +532,11 @@ amended where the interface changes; Arabic strings follow the established terms
 
 ### Requested scope addition, 2026-10-20: the desktop application
 
-- [/] **The desktop application, Windows x64** (`Desktop_App_Plan.md`, accepted by the owner on 2026-10-20 with its section 11.1; `MVP_draft.md` section 63). D0 to D6 built on branch `desktop-app`, local commits not yet merged (D2 to D6 by the owner's request of 2026-10-20, before the studio's third round ends; D3 without signing, and with its release bucket written but not applied; D5 with the LGPL FFmpeg the owner allowed); the owner's signed-in walkthrough is pending; D7 and D8 stay gated on hardware and decisions.
+- [/] **The desktop application, Windows x64** (`Desktop_App_Plan.md`, accepted by the owner on 2026-10-20 with its section 11.1; `MVP_draft.md` section 63). D0 to D6 built on branch `desktop-app` and merged into main on 2026-10-26 at the owner's request (local, not pushed; D2 to D6 by the owner's request of 2026-10-20, before the studio's third round ends; D3 without signing, and with its release bucket written but not applied; D5 with the LGPL FFmpeg the owner allowed); the owner's signed-in walkthrough is pending; D7 and D8 stay gated on hardware and decisions.
+
+### Requested scope addition, 2026-10-26: the Android application
+
+- [ ] **The Android application, `sa.commshub.app`, without the studio** (`Android_Build_Plan.md`, accepted by the owner on 2026-10-26; `MVP_draft.md` section 64). A sideloaded APK from «الحساب» is the pilot channel until the Google Play account is verified; the same release key serves Play later. Phases A0 (record) to A8 (Play readiness): A1 site preparation, A2 the shell and its gate, A3 the update window, A4 files, A5 devices and push, A6 app links and the lock, A7 camera, share-in and background upload. The studio and «استوديو الحركة» stay out (`Mobile_Apps_Plan.md` M5).
 
 ---
 

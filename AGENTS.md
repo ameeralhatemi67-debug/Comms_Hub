@@ -327,6 +327,28 @@ The preview on a second screen (D6, `MVP_draft.md` 63.5): bridge version 5 adds 
   (`isPanelWindow`), so notices are never raised from it.
 - `qa/desktop-windows.cjs` holds the playhead within one frame.
 
+The Android application is being built, by owner directive of 2026-10-26 (`Android_Build_Plan.md`,
+`MVP_draft.md` section 64, recorded in `progress.md`). It is a Capacitor 8 application in `mobile/`, with its
+own `package.json` and lockfile like `desktop/`, outside the site's typecheck and build, id `sa.commshub.app`.
+- **What it opens.** The live site from a compiled address list, as the desktop does. A development or check
+  build adds the emulator's `http://10.0.2.2:3000`, and only those builds allow cleartext.
+- **Distribution.** Until the Google Play account is verified, a signed APK from the public bucket
+  `android-releases` is the only channel.
+- **The release key.** The owner holds it outside the repository and builds the release. No agent creates,
+  reads or uses it. Play takes the same key later.
+- **The native layer** is `window.commsHubNative` with `platform: 'android'`.
+  - A document-start script defines it in the top frame of a compiled address only.
+  - Every native method checks the main frame's address again and checks its arguments by the desktop's
+    rules.
+  - The site reaches it only through `src/lib/native/`.
+- **File bytes never cross the bridge.** Native code fetches the site's own file routes with the WebView's
+  cookies.
+- **Checks** use the emulator and the check package `sa.commshub.app.qa`, never a real installation, and
+  signed-out pages only.
+- **What stays the same as everywhere:** no sign-in bypass, stub session or stored password; nothing about
+  people is decided in it; nothing is scheduled in the site because of it.
+- **The studio and «استوديو الحركة»** are not part of this application yet.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted

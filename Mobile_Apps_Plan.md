@@ -4,6 +4,10 @@ Research and plan of 2026-10-20, from the owner's request of the same day: "do t
 but for the Android and iPhone plans; with this research we would have web, desktop, and phone
 versions that are all connected."
 
+**Update of 2026-10-26.** For Android this plan is narrowed by `Android_Build_Plan.md`, accepted by the
+owner on 2026-10-26. A sideloaded APK is the pilot channel until the Play account is verified, the app id is
+`sa.commshub.app`, and the studio is left out. The iPhone and the installed web app (M1) are unchanged here.
+
 Status: **proposal for the owner's decision.** Nothing is built, installed, bought, registered or
 deployed by this document. It pairs with `Desktop_App_Plan.md` (same day). Section 5 describes
 how the website, the desktop application and the phone applications form one connected system,

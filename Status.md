@@ -26,6 +26,17 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The Android application, 2026-10-26
+
+The owner chose a sideloaded APK as the pre-launch Android download while the Google Play account is verified, and approved `Android_Build_Plan.md` (id `sa.commshub.app`, without the studio; `MVP_draft.md` section 64).
+
+- **Done.** A0: decisions recorded, plan and specification written.
+- **Next.** A1, site preparation: the native features, platform-aware panels, safe areas, and the sign-in links inside the application.
+- **Owner steps waiting.**
+  - Make the release keystore, using the command in `mobile/README.md` (written in A2).
+  - Create a Firebase project for A5.
+  - Push to deploy the site parts when a release is due.
+
 ## The desktop application merged into main, 2026-10-26
 
 The owner asked for the merge before the Android application is planned. `desktop-app` (D0 to D6, version 0.6.0) is now part of `main` as a local merge commit.

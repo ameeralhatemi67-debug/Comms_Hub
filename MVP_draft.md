@@ -2835,3 +2835,45 @@ Phase D6 of `Desktop_App_Plan.md`, from version 0.6.0. Everything here exists on
 - The window is the site's own address, `/motion/studio/<project>/preview`, which the server checks like the studio's. The application opens it on the page's own origin, with every rule of its windows.
 - Nothing of the project passes through the application or the server: it goes only between the two pages on this laptop.
 - The photo editor has no such window.
+
+# 64. The Android application «مركز الاتصال المؤسسي», 2026-10-26
+
+Owner decisions of 2026-10-26: `Android_Build_Plan.md`, accepted and recorded in `progress.md`. An application for Android phones that opens the live site in its own window, as the desktop application does on Windows (63). It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a phone browser remains a full client. The studio is left out of this application for now (below). This section describes phases A1 and A2; the later phases add 64.1 onward.
+
+**Who and where.** Every member may install it. Until the Google Play account is verified, it is downloaded from «الحساب» (64.1) and installed directly, which Android allows after the person agrees to install from that source; Android's Play Protect may warn about a new developer. The same application, signed with the same key, moves to Google Play later, so an installed copy then updates from Play without being removed. Its name on the phone is «مركز الاتصال المؤسسي». It opens `https://comms-hub-three.vercel.app` and nothing else.
+
+**The window.** The whole screen, with the site's phone layout: the top bar, the pages and «.mobile-nav» at the bottom. The site's content clears the phone's status bar and its gesture or button bar, so nothing pinned to the top or the bottom (the bottom bar, the decision sheet, the create bar, the upload tray, messages at the foot) sits under them. Signed out it shows the site's sign-in page, and signing in is the site's own form. The session is kept in the application's own storage on this phone, apart from every browser, and survives closing the application and restarting the phone.
+
+**The back key** goes back through the site's pages, then leaves the application.
+
+**Links.**
+- A link to a page of the site stays in the application.
+- A link to any other site opens in the phone's browser, and the application stays where it was.
+- Review links for outside people (`/r/…`) and the answer pages for outside parties (`/m/…`) open in the browser, as they do for the people they are meant for.
+- Other kinds of address are not opened.
+
+**Outside connections.** Connecting Google Drive, OneDrive or a platform account first shows the desktop's note (63): «يكتمل الربط في المتصفح. سجّل الدخول إلى المركز هناك إن طُلب منك، ثم ارجع إلى التطبيق.», with «متابعة في المتصفح» and «إلغاء».
+
+**Links sent by email from the sign-in page.** «أول دخول» and «نسيت كلمة المرور» send a link that must come back to where they were asked for. Until the application can receive its own links (64.4), the application says instead of sending: «يكتمل هذا من المتصفح: افتح المركز في متصفح الهاتف وأكمله هناك، ثم ارجع إلى التطبيق وسجّل الدخول.». After that, a link asked for inside the application opens the application.
+
+**No connection.** As on the desktop: «تعذّر الوصول إلى المركز» and «تحقّق من اتصالك بالإنترنت، ثم أعد المحاولة.», with «إعادة المحاولة». The application keeps no copy of the site to use without a connection.
+
+**Permissions.** Each is asked by Android the first time it is needed:
+- the microphone, for voice notes in «المراسلة»;
+- notices (64.3), the camera (64.5), and installing its own updates (64.1), when those phases arrive.
+
+Location and everything else are never asked.
+
+**Downloads.** A file of the site (a library file, a mail attachment, a file in «المراسلة») is saved to the phone's Downloads folder, with Android's own progress notice: «بدأ التنزيل إلى مجلد التنزيلات.». A file made inside the page (the backup export of «الإعدادات», and exports of «استوديو الحركة») cannot be saved from the application yet: «لا يُحفظ هذا الملف على الهاتف من التطبيق بعد. احفظه من الحاسوب أو من المتصفح.».
+
+**The studio.** «استوديو الحركة» and «الاستوديو» open as they do in a phone browser, for those who may open them, and are not yet qualified inside the application. Their phone work is a later phase (`Mobile_Apps_Plan.md` M5).
+
+**Not there yet.** Each arrives with its phase of `Android_Build_Plan.md`:
+- the download page and the update window (A3, 64.1);
+- opening, saving and sharing files (A4, 64.2);
+- «أجهزتي» and notices on the lock screen (A5, 64.3);
+- links that open the application, and the application lock (A6, 64.4);
+- the camera, sharing files in, and uploading with the screen locked (A7, 64.5);
+- Google Play (A8).
+
+**Boundaries.** The application holds no secret, no stored password and no sign-in bypass. It decides nothing about who may see or do what: the site and the database do, as in a browser. It approves nothing and publishes nothing, and nothing is scheduled in the site because of it.
