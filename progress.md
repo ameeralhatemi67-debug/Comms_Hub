@@ -1746,3 +1746,40 @@ When recording future implementation outcomes, follow this standardized template
   - Nothing was seen signed in, so the real session surviving a restart is the owner's check on a real phone.
   - The Arabic toasts (download started, file made in the page) are not readable by UI Automator.
   - No real phone was used, no signed release was built (the key is the owner's), and nothing was pushed or published.
+
+### 2026-10-26: the Android application, A3: «تطبيق الهاتف» and the update window
+
+- **What was built.**
+  - **Native, the APK channel only** (`AppUpdate.java`, `InstallReceiver.java`, `Releases.java`, `CommsHubShell.java`, `src/direct/AndroidManifest.xml`):
+    - The application reads `latest.json` from its compiled feed (the public bucket `android-releases`, folder `android`, held equal to `ANDROID_FEED`). It reads it when it opens and, at most every four hours, when it comes back to the front, and hands the text to the page.
+    - On «تحديث الآن» it builds the APK's address itself and fetches it. Before Android is asked, it checks the size, the SHA-256, the application's own id, a newer version, and the application's own signing key. It then installs through a `PackageInstaller` session, and Android asks the person.
+    - The first time, it opens Android's «install unknown apps» setting.
+    - Google Play's copy (`play`) has neither the permission nor the update.
+    - Bridge version 2: `window.commsHubNative.appUpdate` (`status`, `start`), mapped by the identity script to the plugin through Capacitor, which hears only the main frame. The plugin also checks that the page in front is on the list.
+  - **Site** (`src/lib/native/app-update.ts`, `src/components/native/phone-app.tsx`):
+    - The update window on every page and on the sign-in screen: a newer release with «تحديث الآن» and «لاحقاً» (a day); «يجب تحديث التطبيق» below the site's floor or the release's `minimum`, which cannot be put off; «ما الجديد في الإصدار …» once after an update, never at the first opening.
+    - «تطبيق الهاتف» on «الحساب»: in a browser the APK from the bucket and how to install it, inside the application its version and update.
+    - Every reason the application gives for stopping is said in Arabic.
+  - **Release mechanics.** The migration `20261026120000_android_releases.sql` is written and not applied. `mobile/README.md` has "Publishing a release" (the key, the order of uploads, `latest.json`).
+  - **Also.** The back key now asks the page's open window first, as Escape does: the site's dialogs close on it, and the required update stays.
+- **Found while checking, recorded.**
+  - **Google Play Protect.** After Android's «Update», Play Protect shows "App scan recommended" for an application it has not seen. A pilot phone will see it on the first installation and on every update until Google knows `sa.commshub.app` (developer verification or Play). The texts on «الحساب», in the update window, in `MVP_draft.md` 64.1 and in the README say to choose the scan and then go on.
+  - **The check sends nothing to Google.** It takes «More details» then «Install without scanning».
+  - **The check's two versions.** The check package is built at two versions with `-PcheckVersion` (check package only). The application reads its version from Android at run time, so the page always sees the version installed.
+- **Verified, numbers.**
+  - **Tests.** `npm test` **550 of 550**, with four new A3 tests: the report's shape, which window, the Arabic words for every reason the application gives, and the feed equal to the build and the bucket read-only. `mobile` `npm test` **11 of 11**. JVM **15 of 15**, adding the release rules and bridge 2. Typecheck and build clean.
+  - **`qa/android-update.cjs`: 12 of 12** on the `Pixel_9_Pro` emulator, Android 16:
+    - 0.1.0 installed; 0.1.1 offered on the sign-in screen with its notes;
+    - «لاحقاً» held on the next page;
+    - «تحديث الآن» first opening Android's own setting;
+    - a file with a wrong SHA-256 refused, and an APK re-signed with a throwaway key refused, nothing installed in either case;
+    - a `minimum` above 0.1.0 giving the window that the back key does not close;
+    - Android's «Update this app?» with the rosette and «مركز الاتصال المؤسسي», then Play Protect, then 0.1.1 installed;
+    - the site's cookie kept, the page seeing version 0.1.1, «ما الجديد في الإصدار 0.1.1» with its two lines, said once.
+
+    The throwaway key and the APKs were deleted, and the check package uninstalled.
+  - **`qa/android-shell.cjs` again: 28 of 28**, adding the back key closing a window of the page.
+- **Not verified, said plainly.**
+  - Nothing was seen signed in, so «الحساب»'s panel was not seen rendered.
+  - The bucket is not applied, so the browser's download link was not seen working against a real release.
+  - No real phone, no signed release (the key is the owner's), nothing pushed or published.

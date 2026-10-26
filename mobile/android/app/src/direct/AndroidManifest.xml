@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The APK channel only (A3): the application installs its own updates, each confirmed by the person in
+     Android's own dialog. Google Play's copy (the play channel) has neither; Play updates it. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <receiver
+            android:name=".InstallReceiver"
+            android:exported="false" />
+    </application>
+
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+</manifest>

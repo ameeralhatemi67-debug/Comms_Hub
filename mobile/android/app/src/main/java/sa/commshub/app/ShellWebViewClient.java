@@ -77,6 +77,19 @@ final class ShellWebViewClient extends BridgeWebViewClient {
     }
 
     @Override
+    public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+        Shell.setCurrent(url);
+        super.onPageStarted(view, url, favicon);
+    }
+
+    @Override
+    public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
+        // The site moves between its pages without loading them again; the address in front follows.
+        Shell.setCurrent(url);
+        super.doUpdateVisitedHistory(view, url, isReload);
+    }
+
+    @Override
     public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
         // The site's own error pages (a link that expired, a page not found) are shown as the site wrote them.
     }

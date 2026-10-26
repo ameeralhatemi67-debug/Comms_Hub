@@ -32,10 +32,17 @@ import com.getcapacitor.BridgeActivity;
  */
 public class MainActivity extends BridgeActivity {
 
+    /** The topmost open <dialog> of the page gets the cancel the Escape key would send; true when there was one. */
+    static final String CANCEL_DIALOG =
+        "(function () { var all = document.querySelectorAll('dialog[open]'); var d = all[all.length - 1]; if (!d) return false;"
+            + " var e = new Event('cancel', { cancelable: true }); d.dispatchEvent(e); if (!e.defaultPrevented) d.close(); return true; })()";
+
     private Downloads downloads;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // The application's own methods behind window.commsHubNative, before Capacitor builds its bridge.
+        registerPlugin(CommsHubShell.class);
         super.onCreate(savedInstanceState);
         if (bridge == null) return;
         WebView web = bridge.getWebView();
@@ -47,14 +54,19 @@ public class MainActivity extends BridgeActivity {
             @Override
             public void handleOnBackPressed() {
                 WebView w = bridge.getWebView();
-                if (w.canGoBack()) {
-                    w.goBack();
-                } else {
-                    // The first page: leave, as Android does for any application.
-                    setEnabled(false);
-                    getOnBackPressedDispatcher().onBackPressed();
-                    setEnabled(true);
-                }
+                // An open window of the page is asked first, as the Escape key would: it closes, or stays when
+                // it may not be put off (the update that must be installed). Only then does the page go back.
+                w.evaluateJavascript(CANCEL_DIALOG, (handled) -> {
+                    if ("true".equals(handled)) return;
+                    if (w.canGoBack()) {
+                        w.goBack();
+                    } else {
+                        // The first page: leave, as Android does for any application.
+                        setEnabled(false);
+                        getOnBackPressedDispatcher().onBackPressed();
+                        setEnabled(true);
+                    }
+                });
             }
         });
     }
@@ -66,6 +78,13 @@ public class MainActivity extends BridgeActivity {
         if (web != null) Shell.identify(web);
         super.load();
         if (bridge != null) bridge.getWebView().setWebChromeClient(new ShellChromeClient(bridge));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // The update's feed when due, and Android's confirmation of an update if it is still waiting (A3).
+        if (AppUpdate.offered()) AppUpdate.get(this).resumed(this);
     }
 
     @Override

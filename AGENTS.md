@@ -354,6 +354,15 @@ own `package.json` and lockfile like `desktop/`, outside the site's typecheck an
   - Android's backups copy nothing of the application.
   - The window pads itself by the system bars and the keyboard, so the site's styles carry no safe areas
     for it.
+- **Updates (A3, `MVP_draft.md` 64.1).** The APK channel updates itself from the public bucket
+  `android-releases` (`supabase/migrations/20261026120000_android_releases.sql`, written and not applied until the
+  owner publishes the first release). Its feed address is compiled in, held equal to `src/lib/native/releases.ts`.
+  - The page only names a release from `latest.json`; the application builds the address itself.
+  - Before Android asks the person to install, the application checks the APK's size and SHA-256, its id, a
+    newer version, and its own signing key (`AppUpdate.java`). Nothing installs silently.
+  - Google Play's copy (`play`) has no `REQUEST_INSTALL_PACKAGES` and no update of its own.
+  - `qa/android-update.cjs` builds its own versions of the check package and signs one with a throwaway key
+    made and deleted in the run.
 - **Checks** use the emulator started read-only and the check package `sa.commshub.app.qa`, never a real
   installation, and signed-out pages only (`qa/android-*.cjs`, `qa/android-helpers.cjs`).
 - **What stays the same as everywhere:** no sign-in bypass, stub session or stored password; nothing about

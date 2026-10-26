@@ -24,6 +24,7 @@ import { ConnectionsTab } from './settings/connections';
 import { FeedbackTab } from './feedback';
 import { DesktopAppPanel } from './native/desktop-app';
 import { useNativePlatform } from './native/use-native';
+import { PhoneAppPanel } from './native/phone-app';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
@@ -132,6 +133,11 @@ export function Supporting({ page }: { page: string }) {
         {platform !== 'android' && (
           <Panel title="تطبيق سطح المكتب">
             <DesktopAppPanel />
+          </Panel>
+        )}
+        {platform !== 'desktop' && (
+          <Panel title="تطبيق الهاتف" className="phone-app-panel">
+            <PhoneAppPanel />
           </Panel>
         )}
         <Panel title="صلاحياتي" className="pm-minepanel">

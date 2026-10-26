@@ -7,6 +7,10 @@ def parts = pkg.version.tokenize('.').collect { it as int }
 def productionOrigin = 'https://comms-hub-three.vercel.app'
 // The local site seen from the phone through adb reverse: a loopback address, so the page is a secure context.
 def localOrigin = 'http://127.0.0.1:3000'
+// The application's own releases (A3): the public bucket of the comms-hub project, as src/lib/native/releases.ts
+// names it; the check package reads a feed the update check serves on this computer.
+def productionFeed = 'https://hrghmioxvgkjpnydrxrk.supabase.co/storage/v1/object/public/android-releases/android'
+def checkFeed = 'http://127.0.0.1:3002/android'
 
 // The owner's release key: a properties file outside the repository, named by an environment variable
 // (mobile/README.md). No agent and no file of this repository holds it. Without it a release is unsigned.
@@ -26,6 +30,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         // The compiled address list of a release: the production address alone.
         buildConfigField "String", "ALLOWED_ORIGINS", "\"${productionOrigin}\""
+        buildConfigField "String", "UPDATE_FEED", "\"${productionFeed}\""
         aaptOptions {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
@@ -46,9 +51,15 @@ android {
     flavorDimensions = ['channel']
     productFlavors {
         // The APK from «الحساب», until Google Play (A3 adds its own updates).
-        direct { dimension 'channel' }
+        direct {
+            dimension 'channel'
+            buildConfigField 'String', 'CHANNEL', '"direct"'
+        }
         // Google Play (A8): the same key, Play's own updates.
-        play { dimension 'channel' }
+        play {
+            dimension 'channel'
+            buildConfigField 'String', 'CHANNEL', '"play"'
+        }
     }
     buildTypes {
         debug {
@@ -60,6 +71,7 @@ android {
             initWith debug
             applicationIdSuffix '.qa'
             matchingFallbacks = ['debug']
+            buildConfigField "String", "UPDATE_FEED", "\"${checkFeed}\""
             buildConfigField "String", "ALLOWED_ORIGINS", "\"${productionOrigin},${localOrigin}\""
         }
         release {
@@ -70,6 +82,21 @@ android {
     }
     testOptions {
         unitTests.returnDefaultValues = true
+    }
+}
+
+// The update check (qa/android-update.cjs) builds the check package at two versions, -PcheckVersion=x.y.z,
+// without touching package.json. Only the check package takes it.
+androidComponents {
+    onVariants(selector().withBuildType('qa')) { variant ->
+        if (project.hasProperty('checkVersion')) {
+            def v = project.property('checkVersion').toString()
+            def p = v.tokenize('.').collect { it as int }
+            variant.outputs.each { output ->
+                output.versionName.set(v)
+                output.versionCode.set(p[0] * 10000 + p[1] * 100 + p[2])
+            }
+        }
     }
 }
 

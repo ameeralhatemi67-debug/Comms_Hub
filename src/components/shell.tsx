@@ -38,6 +38,7 @@ import { isPanelWindow } from '@/lib/studio/preview-link';
 import { useCaps } from './caps';
 import { MaintenanceBanner } from './settings/maintenance-banner';
 import { DesktopUpdateBanner } from './native/desktop-app';
+import { AppUpdateWindow } from './native/phone-app';
 import { FeedbackButton, useErrorReporter } from './feedback';
 
 /** The icon of each menu entry; the entries themselves (and who sees them) are in src/lib/access.ts. */
@@ -234,6 +235,7 @@ function FullShell({ children }: { children: ReactNode }) {
         <main id="main">
           <MaintenanceBanner />
           <DesktopUpdateBanner />
+          <AppUpdateWindow />
           {/* The page guide opens here, in place of the page (src/lib/kit/guide.ts). */}
           <div id="guide-view" hidden />
           {children}

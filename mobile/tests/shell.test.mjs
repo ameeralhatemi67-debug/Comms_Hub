@@ -77,6 +77,36 @@ test('permissions: the site and the microphone, nothing else; no backup; clearte
   assert.match(chrome, /callback\.invoke\(origin, false, false\)/, 'location refused');
 });
 
+test('A3: only the APK channel installs its own updates; the feed is the site\'s; the check package reads its own', () => {
+  const direct = read(app, 'src', 'direct', 'AndroidManifest.xml');
+  assert.deepEqual([...direct.matchAll(/<uses-permission android:name="([^"]+)"/g)].map((x) => x[1]), ['android.permission.REQUEST_INSTALL_PACKAGES']);
+  assert.match(direct, /<receiver\s+android:name="\.InstallReceiver"\s+android:exported="false" \/>/);
+  assert.equal(fs.existsSync(path.join(app, 'src', 'play', 'AndroidManifest.xml')), false, 'Google Play\'s copy may not install packages');
+  const g = read(app, 'build.gradle');
+  const site = /export const ANDROID_FEED = '([^']+)';/.exec(read(root, 'src', 'lib', 'native', 'releases.ts'))[1];
+  assert.match(g, new RegExp(`def productionFeed = '${site}'`));
+  assert.match(g, /def checkFeed = 'http:\/\/127\.0\.0\.1:3002\/android'/);
+  assert.match(g, /defaultConfig \{[\s\S]*?buildConfigField "String", "UPDATE_FEED", "\\"\$\{productionFeed\}\\""/);
+  assert.equal((g.match(/\$\{checkFeed\}/g) ?? []).length, 1, 'the check package only');
+  assert.match(g, /onVariants\(selector\(\)\.withBuildType\('qa'\)\)/, 'a version given to a build only for the check package');
+  const update = java('AppUpdate');
+  for (const step of ['MessageDigest.getInstance("SHA-256")', 'GET_SIGNING_CERTIFICATES', 'getApkContentsSigners()', 'theirs.getLongVersionCode() <= mine.getLongVersionCode()', 'canRequestPackageInstalls()', 'PackageInstaller.SessionParams.MODE_FULL_INSTALL']) {
+    assert.ok(update.includes(step), step);
+  }
+  assert.match(update, /new URL\(BuildConfig\.UPDATE_FEED \+ "\/" \+ URLEncoder\.encode\(file, "UTF-8"\)\)/, 'the address is built from the compiled feed, never taken from the page');
+  assert.match(java('CommsHubShell'), /Navigation\.isAllowed\(Shell\.currentUrl\(\), Shell\.ALLOWED\)/);
+});
+
+test('the back key asks the page\'s open window first, as Escape does', () => {
+  const main = java('MainActivity');
+  assert.match(main, /document\.querySelectorAll\('dialog\[open\]'\)/);
+  assert.match(main, /new Event\('cancel', \{ cancelable: true \}\)/);
+  assert.match(main, /if \(!e\.defaultPrevented\) d\.close\(\)/, 'a window that refuses to be put off stays');
+  assert.match(main, /if \("true"\.equals\(handled\)\) return;\s*if \(w\.canGoBack\(\)\)/);
+  const site = read(root, 'src', 'components', 'native', 'phone-app.tsx');
+  assert.match(site, /onCancel=\{\(e\) => \{\s*e\.preventDefault\(\);\s*if \(closable\) onClose\(\);/, 'the required window refuses its cancel');
+});
+
 test('the desktop\'s connection routes and note, word for word', () => {
   const desk = read(root, 'desktop', 'src', 'navigation.ts');
   const nav = java('Navigation');

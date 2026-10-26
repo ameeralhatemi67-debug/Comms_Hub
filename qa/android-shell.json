@@ -1,6 +1,6 @@
 {
   "script": "qa/android-shell.cjs",
-  "run": "2026-10-26T10:29:16.918Z",
+  "run": "2026-10-26T11:25:02.850Z",
   "checks": [
     {
       "name": "the release APK opens the production address alone, over https, uninspectable",
@@ -23,14 +23,14 @@
       "detail": "http://127.0.0.1:3000/"
     },
     {
-      "name": "the page sees window.commsHubNative: platform android, shell capacitor, version 0.1.0, bridge 1",
+      "name": "the page sees window.commsHubNative: platform android, shell capacitor, the installed version and its bridge",
       "pass": true,
-      "detail": "{\"n\":{\"platform\":\"android\",\"shell\":\"capacitor\",\"version\":\"0.1.0\",\"bridge\":1},\"frozen\":true,\"replaced\":false,\"capacitor\":\"object\"}"
+      "detail": "{\"n\":{\"platform\":\"android\",\"shell\":\"capacitor\",\"version\":\"0.1.0\",\"bridge\":2,\"appUpdate\":{}},\"frozen\":true,\"replaced\":false,\"capacitor\":\"object\"}"
     },
     {
       "name": "the bridge is frozen and cannot be replaced by the page",
       "pass": true,
-      "detail": "{\"n\":{\"platform\":\"android\",\"shell\":\"capacitor\",\"version\":\"0.1.0\",\"bridge\":1},\"frozen\":true,\"replaced\":false,\"capacitor\":\"object\"}"
+      "detail": "{\"n\":{\"platform\":\"android\",\"shell\":\"capacitor\",\"version\":\"0.1.0\",\"bridge\":2,\"appUpdate\":{}},\"frozen\":true,\"replaced\":false,\"capacitor\":\"object\"}"
     },
     {
       "name": "a frame of the same address has no bridge",
@@ -75,12 +75,12 @@
     {
       "name": "another site opens in the phone's browser",
       "pass": true,
-      "detail": "com.android.chrome/com.google.android.apps.chrome.IntentDispatcher"
+      "detail": "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
     },
     {
       "name": "a review link for outside people opens in the browser",
       "pass": true,
-      "detail": "com.android.chrome/com.google.android.apps.chrome.IntentDispatcher"
+      "detail": "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
     },
     {
       "name": "an outside connection shows the note first, with «متابعة في المتصفح» and «إلغاء»",
@@ -95,12 +95,17 @@
     {
       "name": "«متابعة في المتصفح» opens the connection in the browser",
       "pass": true,
-      "detail": "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
+      "detail": "com.android.chrome/com.google.android.apps.chrome.IntentDispatcher"
     },
     {
       "name": "the back key goes back through the site's pages",
       "pass": true,
       "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "the back key first closes an open window of the page, as Escape does, and the page stays",
+      "pass": true,
+      "detail": "{\"dialogClosed\":true,\"url\":\"http://127.0.0.1:3000/\"}"
     },
     {
       "name": "a file of the site is saved to Downloads under the name in its address, with the same bytes",
@@ -147,7 +152,7 @@
       "bytes": 7587293
     },
     "qa": {
-      "bytes": 9319658
+      "bytes": 9308155
     }
   },
   "device": {
@@ -156,7 +161,7 @@
     "sdk": "37",
     "webview": "Current WebView package (name, version): (com.google.android.webview, 152.0.7977.88)"
   },
-  "total": 27,
-  "passed": 27,
+  "total": 28,
+  "passed": 28,
   "failed": 0
 }

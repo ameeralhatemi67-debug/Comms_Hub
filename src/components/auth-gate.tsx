@@ -9,6 +9,7 @@ import { linkProblem } from '@/lib/entry';
 import { native } from '@/lib/native';
 import { BROWSER_ONLY, mailReturn, type MailReturn } from '@/lib/native/entry';
 import { LogoLoader } from './ui';
+import { AppUpdateWindow } from './native/phone-app';
 
 type View = 'signin' | 'first' | 'request' | 'forgot' | 'recovery' | 'expired';
 type Note = { kind: 'error' | 'ok'; text: string } | null;
@@ -441,5 +442,11 @@ export function AuthGate({
 }
 
 function Screen({ children }: { children: ReactNode }) {
-  return <main className="auth-screen">{children}</main>;
+  return (
+    <main className="auth-screen">
+      {children}
+      {/* An Android application older than the site needs updates before signing in (MVP_draft.md 64.1). */}
+      <AppUpdateWindow />
+    </main>
+  );
 }

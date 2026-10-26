@@ -105,8 +105,68 @@ key"). An installed APK then updates from Play without being removed.
 
 ## Publishing a release
 
-This part arrives with A3: the public bucket `android-releases`, `latest.json` and the update window. Until
-then, a signed APK can be installed by hand on a pilot phone.
+Releases go to the public bucket `android-releases` of the `comms-hub` project, in the folder `android/`. The
+application reads `android/latest.json` there, and «تطبيق الهاتف» on «الحساب» links to the APK beside it. Only
+the owner publishes, from the Supabase dashboard; nothing is uploaded through the site or by an agent.
+
+**The first time:** apply `supabase/migrations/20261026120000_android_releases.sql`. It makes the bucket public
+for reading, with no write policy, and limits files to 150 MB.
+
+**Each release:**
+
+1. Raise `version` in `package.json`, and in `package-lock.json`'s two copies (`npm install` writes them).
+   Android's whole number follows: `x.y.z` gives `x*10000 + y*100 + z`, so neither `y` nor `z` may pass 99.
+2. Build it signed with your key (`COMMSHUB_KEYSTORE_PROPERTIES`, above):
+
+   ```bash
+   npm run pack:release
+   ```
+
+   The last lines print the APK's path, size and SHA-256.
+3. Rename the APK to `CommsHub-<version>.apk` and upload it to `android-releases/android/`.
+4. Write `latest.json` with the figures from step 2, and upload it last, so the application never reads a
+   release that is not there yet:
+
+   ```json
+   {
+     "version": "0.1.1",
+     "code": 101,
+     "file": "CommsHub-0.1.1.apk",
+     "size": 7590000,
+     "sha256": "<the 64 lowercase hex characters printed>",
+     "minimum": null,
+     "notes": ["سطر قصير لكل تغيير يراه الناس."],
+     "date": "2026-11-01T08:00:00.000Z"
+   }
+   ```
+
+   - `minimum`: the oldest version allowed to keep running without updating. Leave it `null` unless an older
+     application must not be used any more. The site has its own floor too (`MINIMUM_ANDROID` in
+     `src/lib/native/releases.ts`), raised only when a change of the site needs a newer application.
+   - `notes`: up to eight short Arabic lines. They appear in the update window and, after the update,
+     in «ما الجديد».
+
+**What the application checks** before Android asks the person: the size and the SHA-256 against `latest.json`;
+the application's own id; a newer version; and the application's own signing key. A release signed with any
+other key is refused. That is why the key must never change (above).
+
+A site change that needs a newer application must be pushed (which deploys it) only after the release is
+published.
+
+**Google Play Protect.** Until Google knows the application, through developer verification of
+`sa.commshub.app` or Google Play, Play Protect shows "App scan recommended" on the first installation and on
+each update, with «Scan app» and «Don't install app».
+- «Scan app» sends the APK to Google for a scan, then the installation goes on. The site's text recommends it.
+- «More details» then «Install without scanning» installs without sending it.
+
+The update check takes that second path, so it sends nothing to Google.
+
+## The update check
+
+`qa/android-update.cjs` builds the check package at 0.1.0 and 0.1.1 (`COMMSHUB_CHECK_VERSION`, check package
+only), and a copy of 0.1.1 re-signed with a throwaway key made for the run and deleted after it. It serves its
+own feed at `http://127.0.0.1:3002/android`, which is the check package's compiled feed, and drives the whole
+path on the emulator.
 
 ## Where the rules are
 

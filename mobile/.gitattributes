@@ -1,0 +1,3 @@
+# Batch files keep the line endings Windows needs; the Unix wrapper keeps its own.
+*.bat text eol=crlf
+gradlew text eol=lf

@@ -39,7 +39,9 @@ for (const type of ['debug', 'qa']) {
 }
 
 const task = `assemble${channel[0].toUpperCase()}${channel.slice(1)}${kind[0].toUpperCase()}${kind.slice(1)}`;
-run(path.join(android, process.platform === 'win32' ? 'gradlew.bat' : 'gradlew'), [task, '--console=plain'], android);
+// The update check builds the check package at a version of its own (android/app/build.gradle, checkVersion).
+const checkVersion = kind === 'qa' && process.env.COMMSHUB_CHECK_VERSION ? [`-PcheckVersion=${process.env.COMMSHUB_CHECK_VERSION}`] : [];
+run(path.join(android, process.platform === 'win32' ? 'gradlew.bat' : 'gradlew'), [task, ...checkVersion, '--console=plain'], android);
 
 const outDir = path.join(android, 'app', 'build', 'outputs', 'apk', channel, kind);
 const apk = fs.readdirSync(outDir).find((f) => f.endsWith('.apk'));

@@ -2846,7 +2846,7 @@ Owner decisions of 2026-10-26: `Android_Build_Plan.md`, accepted and recorded in
 
 **The window.** The whole screen, with the site's phone layout: the top bar, the pages and «.mobile-nav» at the bottom. The site's content clears the phone's status bar and its gesture or button bar, so nothing pinned to the top or the bottom (the bottom bar, the decision sheet, the create bar, the upload tray, messages at the foot) sits under them. Signed out it shows the site's sign-in page, and signing in is the site's own form. The session is kept in the application's own storage on this phone, apart from every browser, and survives closing the application and restarting the phone.
 
-**The back key** goes back through the site's pages, then leaves the application.
+**The back key** first closes an open window of the page, as Escape does on a computer (a window that may not be put off, such as «يجب تحديث التطبيق», stays). Otherwise it goes back through the site's pages, then leaves the application.
 
 **Links.**
 - A link to a page of the site stays in the application.
@@ -2879,3 +2879,42 @@ Location and everything else are never asked.
 - Google Play (A8).
 
 **Boundaries.** The application holds no secret, no stored password and no sign-in bypass. It decides nothing about who may see or do what: the site and the database do, as in a browser. It approves nothing and publishes nothing, and nothing is scheduled in the site because of it.
+
+## 64.1 The download page and the update window (A3), 2026-10-26
+
+Phase A3 of `Android_Build_Plan.md`. Releases are published by the owner to the public bucket `android-releases` of the `comms-hub` project; nothing is published from the site or by an agent.
+
+**«تطبيق الهاتف» on «الحساب».** Every signed-in person sees it, in a browser and inside the application. It is not shown inside the desktop application.
+- **In a browser:** «تطبيق «مركز الاتصال المؤسسي» لهواتف Android: يفتح المركز في نافذته على الهاتف، ويحفظ ملفاته في مجلد التنزيلات، ويحدّث نفسه.», then «تنزيل التطبيق» with the version and its size, and: «… ويحتاج Android 10 أو أحدث. افتح الملف بعد تنزيله على الهاتف واختر التثبيت، وإن سألك Android فاسمح للمتصفح بتثبيت التطبيقات. وقد يقترح Google Play Protect فحص التطبيق لأنه لم يره من قبل، فاختر الفحص ثم أكمل التثبيت.». Before the first release: «لم يُنشر إصدار للتنزيل بعد.».
+- **Inside the application:** «تعمل الآن في تطبيق الهاتف، الإصدار …», then «يتوفر الإصدار …» with «تحديث الآن», or «هذا أحدث إصدار.», or «يبحث التطبيق عن تحديث عند فتحه، وعند عودتك إليه بعد أربع ساعات أو أكثر.».
+
+**The application looks for a newer release** when it opens and, at most every four hours, when the person comes back to it. Nothing is downloaded until the person asks.
+
+**The update window** shows over any page, and over the sign-in screen, inside the application only. It takes one of three forms:
+- **A newer release:** «يتوفر إصدار جديد من التطبيق», «الإصدار … جاهز، نحو …», the release's notes as the owner wrote them, «تحديث الآن» and «لاحقاً». «لاحقاً» puts it off for a day; it is offered again then, and at once for a still newer release.
+- **An update that cannot wait:** when the application is older than the site needs, or older than the floor the newest release sets: «يجب تحديث التطبيق» and «هذا الإصدار من التطبيق أقدم مما يحتاجه المركز الآن، فحدّثه ليعمل كل شيء كما ينبغي.», with «تحديث الآن» only. The back key does not close it. Without a connection to the release: «تعذّر الوصول إلى التحديث الآن. تحقّق من اتصالك ثم افتح التطبيق مرة أخرى.».
+- **After an update:** «ما الجديد في الإصدار …» with the notes (or «حُدِّث التطبيق إلى هذا الإصدار.»), and «حسناً». It is said once, and never at the first opening after installing.
+
+**«تحديث الآن».**
+- The first time, Android must allow the application to install its updates. Android's own setting opens, and the window says: «فُتحت إعدادات Android: فعّل «السماح من هذا المصدر» لهذا التطبيق، ثم ارجع واضغط «تحديث الآن» مرة أخرى.».
+- Then «جارٍ تنزيل الإصدار … (…٪)…», «جارٍ التحقق من الملف…», and «يطلب Android تأكيد التثبيت: اختر «تحديث» أو «تثبيت». وقد يقترح Google Play Protect فحص التطبيق لأنه لم يره من قبل، فاختر الفحص ثم أكمل التثبيت.».
+- **Android asks the person**, in its own dialog; nothing is installed without it.
+- **Google Play Protect.** Until Google knows the application (developer verification, or Google Play), Play Protect also proposes to scan it, on the first installation and on each update.
+- The update keeps the session and everything the application holds.
+- **What the application checks before Android is asked:**
+  - the file is the one the release names, by size and SHA-256;
+  - it is this application, newer than the one installed;
+  - it is signed with this application's own key.
+
+  Otherwise it stops and says why:
+  - «الملف الذي نُزِّل لا يطابق الإصدار المعلن، فلم يُثبَّت.»
+  - «الملف ليس من هذا التطبيق أو ليس موقّعاً بمفتاحه، فلم يُثبَّت.»
+  - «الملف ليس أحدث من الإصدار المثبّت، فلم يُثبَّت.»
+  - «تعذّر تنزيل التحديث. تحقّق من اتصالك ثم أعد المحاولة.»
+  - «لا توجد مساحة كافية في الهاتف لتنزيل التحديث.»
+  - «أُلغي التثبيت. يمكنك المحاولة من جديد.»
+  - «تعذّر تثبيت التحديث. حاول مرة أخرى.»
+
+**Remembered on this phone only:** «لاحقاً», and the version whose notes were already said.
+
+**Google Play's copy** (A8) has no update window of its own: Play updates it.

@@ -493,9 +493,71 @@ test('A1: «معلومات الجهاز» names the Android application as its o
   assert.equal(deviceLines({ ...factsFromApp(laptopInfo) })[0].value, 'تطبيق سطح المكتب، الإصدار 0.2.0', 'the desktop unchanged');
 });
 
+// A3: the Android application's update as the site shows it (src/lib/native/app-update.ts).
+const status = (over = {}) => ({ state: 'idle', percent: null, version: null, why: null, current: '0.1.0', feed: JSON.stringify(apk), installAllowed: true, ...over });
+
+test('A3: the application\'s report is read only in its shape', async () => {
+  const { readApkStatus } = await import('../src/lib/native/app-update.ts');
+  assert.deepEqual(readApkStatus(status()), status());
+  assert.equal(readApkStatus(status({ percent: 140 })).percent, 100);
+  assert.equal(readApkStatus(status({ why: 'Some <b>raw</b> text' })).why, null, 'a reason is one of the application\'s words');
+  assert.equal(readApkStatus(status({ feed: 'x'.repeat(30000) })).feed, null);
+  for (const bad of [null, 'idle', status({ state: 'done' }), status({ current: 'latest' })]) assert.equal(readApkStatus(bad), null, JSON.stringify(bad));
+});
+
+test('A3: which window: required first, then what changed, then a newer release once a day after «لاحقاً»', async () => {
+  const { apkWindow, LATER_MS } = await import('../src/lib/native/app-update.ts');
+  const now = Date.parse('2026-11-02T08:00:00Z');
+  const newer = status();
+  assert.equal(apkWindow({ status: null, now, later: null, seen: '0.1.0' }).kind, 'none', 'a browser');
+  assert.equal(apkWindow({ status: newer, now, later: null, seen: '0.1.0' }).kind, 'optional');
+  assert.equal(apkWindow({ status: newer, now, later: { version: '0.2.0', until: now + 1000 }, seen: '0.1.0' }).kind, 'none', 'put off');
+  assert.equal(apkWindow({ status: newer, now: now + LATER_MS, later: { version: '0.2.0', until: now + 1000 }, seen: '0.1.0' }).kind, 'optional', 'a day later');
+  assert.equal(apkWindow({ status: newer, now, later: { version: '0.1.9', until: now + 1000 }, seen: '0.1.0' }).kind, 'optional', '«لاحقاً» was for another release');
+  const floor = status({ feed: JSON.stringify({ ...apk, minimum: '0.1.5' }) });
+  const req = apkWindow({ status: floor, now, later: { version: '0.2.0', until: now + 1000 }, seen: '0.1.0' });
+  assert.equal(req.kind, 'required', 'the floor overrides «لاحقاً»');
+  assert.equal(req.release.version, '0.2.0');
+  assert.deepEqual(apkWindow({ status: status({ current: '0.0.9', feed: null }), now, later: null, seen: '0.0.9' }), { kind: 'required', release: null }, 'too old for the site, feed or not');
+  const after = status({ current: '0.2.0' });
+  assert.deepEqual(apkWindow({ status: after, now, later: null, seen: '0.1.0' }), { kind: 'whatsNew', version: '0.2.0', notes: ['إشعارات «يحتاج قرارك» على شاشة القفل.'] });
+  assert.equal(apkWindow({ status: after, now, later: null, seen: '0.2.0' }).kind, 'none', 'said once');
+  assert.equal(apkWindow({ status: after, now, later: null, seen: null }).kind, 'none', 'never at the first opening after installing');
+  assert.equal(apkWindow({ status: status({ feed: 'broken' }), now, later: null, seen: '0.1.0' }).kind, 'none');
+});
+
+test('A3: the update said in Arabic, and every word the application gives for a stop is read', async () => {
+  const { apkLine, apkWhy, apkStartAnswer } = await import('../src/lib/native/app-update.ts');
+  assert.equal(apkLine(status({ state: 'downloading', version: '0.2.0', percent: 40 })), 'جارٍ تنزيل الإصدار 0.2.0 (40٪)…');
+  assert.equal(apkLine(status()), null);
+  for (const s of ['verifying', 'installing']) assert.match(apkLine(status({ state: s })), /[؀-ۿ]/);
+  const fs = await import('node:fs');
+  const app = fs.readFileSync('mobile/android/app/src/main/java/sa/commshub/app/AppUpdate.java', 'utf8');
+  const words = [...app.matchAll(/fail\("([a-z]+)"\)/g)].map((m) => m[1]);
+  assert.ok(words.length >= 5);
+  const fallback = apkWhy('anything');
+  for (const w of new Set([...words, 'cancelled', 'install'])) {
+    assert.match(apkWhy(w), /[؀-ۿ]/, w);
+    if (w !== 'install') assert.notEqual(apkWhy(w), fallback, `${w} has its own sentence`);
+  }
+  assert.equal(apkStartAnswer('started'), null);
+  for (const r of ['permission', 'busy', 'refused', 'odd']) assert.match(apkStartAnswer(r), /[؀-ۿ]/);
+});
+
+test('A3: the site\'s feed is the application\'s, and the bucket is public, read-only and small', async () => {
+  const fs = await import('node:fs');
+  const { ANDROID_FEED } = await import('../src/lib/native/releases.ts');
+  assert.ok(fs.readFileSync('mobile/android/app/build.gradle', 'utf8').includes(`def productionFeed = '${ANDROID_FEED}'`));
+  const sql = fs.readFileSync('supabase/migrations/20261026120000_android_releases.sql', 'utf8');
+  assert.match(sql, /'android-releases',\s*'android-releases',\s*true,/);
+  assert.match(sql, /157286400/);
+  assert.doesNotMatch(sql, /create policy/i, 'nobody writes through the site');
+  assert.ok(ANDROID_FEED.endsWith('/android-releases/android'));
+});
+
 test('A1: no emoji in the new files', async () => {
   const fs = await import('node:fs');
-  for (const f of ['src/lib/native/entry.ts', 'src/app/app/return/route.ts', 'src/components/auth-gate.tsx', 'src/components/native/use-native.ts']) {
+  for (const f of ['src/lib/native/entry.ts', 'src/app/app/return/route.ts', 'src/components/auth-gate.tsx', 'src/components/native/use-native.ts', 'src/lib/native/app-update.ts', 'src/components/native/phone-app.tsx']) {
     assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
   }
 });

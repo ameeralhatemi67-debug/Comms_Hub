@@ -1,5 +1,6 @@
 package sa.commshub.app;
 
+import android.content.Context;
 import android.webkit.WebView;
 import androidx.webkit.WebViewCompat;
 import androidx.webkit.WebViewFeature;
@@ -17,7 +18,28 @@ final class Shell {
 
     static final List<String> ALLOWED = Collections.unmodifiableList(Arrays.asList(BuildConfig.ALLOWED_ORIGINS.split(",")));
 
+    /** The address of the page in front, as the web view last reported it; read by the native methods, which run off the web view's thread. */
+    private static volatile String current;
+
     private Shell() {}
+
+    /** The version installed, as Android knows it. */
+    static String version(Context context) {
+        try {
+            String v = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+            return v != null ? v : BuildConfig.VERSION_NAME;
+        } catch (Exception e) {
+            return BuildConfig.VERSION_NAME;
+        }
+    }
+
+    static void setCurrent(String url) {
+        current = url;
+    }
+
+    static String currentUrl() {
+        return current;
+    }
 
     /**
      * Gives the pages of the compiled addresses `window.commsHubNative`. A WebView too old for scripts at
@@ -25,6 +47,6 @@ final class Shell {
      */
     static void identify(WebView web) {
         if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) return;
-        WebViewCompat.addDocumentStartJavaScript(web, Identity.script(BuildConfig.VERSION_NAME), new HashSet<>(ALLOWED));
+        WebViewCompat.addDocumentStartJavaScript(web, Identity.script(version(web.getContext()), AppUpdate.offered()), new HashSet<>(ALLOWED));
     }
 }

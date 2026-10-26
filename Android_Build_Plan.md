@@ -232,6 +232,12 @@ and simulation files are never staged.
 
 ### A3. «تطبيق الهاتف» and the update window (M)
 
+> **Done 2026-10-26**, 12 of 12 (`qa/android-update.cjs`).
+> - The application reads its own feed and the site draws the window from its report.
+> - Google Play Protect proposes a scan on every installation until Google knows the application; the texts
+>   say so.
+> - The back key closes the page's open window first.
+
 - **The bucket:** migration `*android_releases*`, a public bucket `android-releases` (APK and JSON types,
   about 150 MB, no write policies). Written, not applied: the owner applies it with the first release.
 - **The feed:** `android/latest.json` with versionName, versionCode, file, size, sha256, minimum, Arabic notes

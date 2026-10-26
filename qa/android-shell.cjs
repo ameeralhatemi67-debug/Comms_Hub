@@ -96,7 +96,13 @@ async function backToApp(device) {
   h.shell(`am start -W -n ${h.ACTIVITY}`, { allowFail: true });
   await h.until(() => ours(), 15000, 300);
   await h.sleep(800);
-  const page = await webPage(device);
+  // The web view's handle is taken again; once more if it does not come back at once.
+  const page = await webPage(device, 20000).catch(async () => {
+    h.shell(`am start -W -n ${h.ACTIVITY}`, { allowFail: true });
+    await h.sleep(1500);
+    const [again] = await _android.devices({ omitDriverInstall: true });
+    return webPage(again);
+  });
   await page.waitForLoadState('domcontentloaded').catch(() => undefined);
   return page;
 }
@@ -153,7 +159,7 @@ async function backToApp(device) {
       }
       return { n: n ? { ...n } : null, frozen: Object.isFrozen(n), replaced, capacitor: typeof window.Capacitor };
     });
-    check('the page sees window.commsHubNative: platform android, shell capacitor, version 0.1.0, bridge 1', id.n?.platform === 'android' && id.n?.shell === 'capacitor' && /^\d+\.\d+\.\d+$/.test(id.n?.version ?? '') && id.n?.bridge === 1, id);
+    check('the page sees window.commsHubNative: platform android, shell capacitor, the installed version and its bridge', id.n?.platform === 'android' && id.n?.shell === 'capacitor' && /^\d+\.\d+\.\d+$/.test(id.n?.version ?? '') && Number.isInteger(id.n?.bridge) && id.n.bridge >= 1, id);
     check('the bridge is frozen and cannot be replaced by the page', id.frozen && !id.replaced, id);
     const frame = await page.evaluate(
       () =>
@@ -279,6 +285,19 @@ async function backToApp(device) {
     h.shell('input keyevent 4');
     await h.until(() => !page.url().includes('qa=back'), 10000, 300);
     check('the back key goes back through the site\'s pages', !page.url().includes('qa=back') && ours(), page.url());
+    await page.evaluate(() => {
+      const d = document.createElement('dialog');
+      d.id = 'qa-dialog';
+      d.textContent = 'qa';
+      document.body.appendChild(d);
+      d.showModal();
+    });
+    const where = page.url();
+    h.shell('input keyevent 4');
+    await h.sleep(1000);
+    const dialogClosed = await page.evaluate(() => !document.getElementById('qa-dialog').open);
+    check('the back key first closes an open window of the page, as Escape does, and the page stays', dialogClosed && ours() && page.url() === where, { dialogClosed, url: page.url() });
+    await page.evaluate(() => document.getElementById('qa-dialog')?.remove());
 
     // 6. downloads
     const brand = fs.readFileSync(path.join(h.root, 'public', 'brand', 'comms-hub-logo-512.png'));

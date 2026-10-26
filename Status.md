@@ -33,8 +33,10 @@ The owner chose a sideloaded APK as the pre-launch Android download while the Go
 - **Done.**
   - A0: decisions recorded, plan and specification written.
   - A1: the native contract for Android, platform-aware panels, and the sign-in links inside an application (which also fixes the desktop's). Evidence: `npm test` 546 of 546, `qa/android-site.cjs` 12 of 12.
-  - A2: the Capacitor shell in `mobile/`, its gate passed on the emulator. Evidence: `qa/android-shell.cjs` 27 of 27, JVM tests 12 of 12, `mobile` tests 9 of 9.
-- **Next.** A3: «تطبيق الهاتف» on «الحساب», the `android-releases` bucket and the update window.
+  - A2: the Capacitor shell in `mobile/`, its gate passed on the emulator. Evidence: `qa/android-shell.cjs` 28 of 28, JVM tests 15 of 15, `mobile` tests 11 of 11.
+  - A3: «تطبيق الهاتف» on «الحساب», the update window, and the application's own checked updates. Evidence: `qa/android-update.cjs` 12 of 12, `npm test` 550 of 550.
+- **Found.** Google Play Protect proposes to scan the application on the first installation and on every update until Google knows it (developer verification or Play). The texts say to choose the scan.
+- **Next.** A4 to A8, as `Android_Handoff.md` sets out: A4 (files) and A5's server half can run side by side.
 - **Owner steps waiting.**
   - Make the release keystore, using the command in `mobile/README.md` (written in A2).
   - Create a Firebase project for A5.

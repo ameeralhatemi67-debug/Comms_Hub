@@ -108,7 +108,7 @@ type Bridge = {
     onProgress?: (fn: ((p: { name: string; done: number; total: number }) => void) | null) => void;
   };
   // --- the Android application (Android_Build_Plan.md) ---
-  appUpdate?: { status?: () => Promise<unknown>; start?: (release: NativeApkRelease) => Promise<'started' | 'busy' | 'refused'> };
+  appUpdate?: { status?: () => Promise<unknown>; start?: (release: NativeApkRelease) => Promise<'started' | 'busy' | 'permission' | 'refused'> };
   download?: { save?: (file: NativeSiteFile) => Promise<boolean>; open?: (file: NativeSiteFile) => Promise<boolean> };
   share?: { file?: (file: NativeSiteFile) => Promise<boolean> };
   push?: {
