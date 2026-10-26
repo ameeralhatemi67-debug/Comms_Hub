@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مركز الاتصال المؤسسي</title>
+<style>
+  :root { color-scheme: light dark; --bg: #f4f6f2; --card: #ffffff; --ink: #203e35; --muted: #64766b; --line: #dfe6e0; --green: #17634b; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0b1712; --card: #0e1f18; --ink: #e4ece6; --muted: #a3b3a8; --line: #22362c; --green: #3f9a78; } }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.9 Tahoma, Arial, sans-serif; display: flex; align-items: center; justify-content: center; padding: 24px 16px; box-sizing: border-box; }
+  main { max-width: 420px; width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 28px 22px; }
+  h1 { font-size: 21px; margin: 0 0 8px; }
+  p { margin: 0 0 20px; color: var(--muted); }
+  .again { display: inline-flex; align-items: center; font: inherit; background: var(--green); color: #fff; text-decoration: none; border-radius: 10px; padding: 10px 22px; min-height: 44px; box-sizing: border-box; }
+  [hidden] { display: none; }
+</style>
+</head>
+<body>
+<!-- The connection screen of MVP_draft.md 63 and 64, served by the application itself: it keeps no copy of the site. -->
+<main>
+  <section id="offline">
+    <h1>تعذّر الوصول إلى المركز</h1>
+    <p>تحقّق من اتصالك بالإنترنت، ثم أعد المحاولة.</p>
+  </section>
+  <section id="certificate" hidden>
+    <h1>تعذّر التحقق من أمان الاتصال</h1>
+    <p>لم يُفتح المركز لأن شهادة الأمان لم تُقبل. أعد المحاولة لاحقاً.</p>
+  </section>
+  <!-- The application opens the site again when this address is asked for (ShellWebViewClient). -->
+  <a class="again" id="again" href="/again">إعادة المحاولة</a>
+</main>
+<script>
+  if (location.hash === '#certificate') {
+    document.getElementById('offline').hidden = true;
+    document.getElementById('certificate').hidden = false;
+  }
+</script>
+</body>
+</html>

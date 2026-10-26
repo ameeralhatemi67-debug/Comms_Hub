@@ -75,4 +75,72 @@ async function startSite() {
   };
 }
 
-module.exports = { root, sleep, record, until, portAnswers, startSite };
+// --- the emulator (A2 on) -----------------------------------------------------------------------------
+// The checks run on an emulator started read-only (`emulator -avd Pixel_9_Pro -read-only -no-snapshot`), so
+// nothing they install or change is kept, and only the check package sa.commshub.app.qa is installed.
+
+const { spawnSync } = require('node:child_process');
+const SDK = process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT || '';
+const adbPath = path.join(SDK, 'platform-tools', process.platform === 'win32' ? 'adb.exe' : 'adb');
+const APP = 'sa.commshub.app.qa';
+const ACTIVITY = `${APP}/sa.commshub.app.MainActivity`;
+const apkOf = (kind, channel = 'direct') => {
+  const dir = path.join(root, 'mobile', 'android', 'app', 'build', 'outputs', 'apk', channel, kind);
+  const file = fs.existsSync(dir) ? fs.readdirSync(dir).find((f) => f.endsWith('.apk')) : null;
+  return file ? path.join(dir, file) : null;
+};
+
+/** adb with its output as text; throws when adb fails. */
+function adb(args, { allowFail = false } = {}) {
+  const r = spawnSync(adbPath, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  if (!allowFail && r.status !== 0) throw new Error(`adb ${args.join(' ')}: ${(r.stderr || r.stdout || '').trim()}`);
+  return (r.stdout || '').trim();
+}
+const shell = (cmd, opts) => adb(['shell', cmd], opts);
+
+async function emulatorReady(ms = 240000) {
+  return until(() => adb(['devices'], { allowFail: true }).split('\n').some((l) => /^emulator-\d+\s+device$/.test(l.trim())) && shell('getprop sys.boot_completed', { allowFail: true }) === '1', ms, 2000);
+}
+
+/** The package and activity in front, as Android reports it. */
+function resumed() {
+  const out = shell('dumpsys activity activities', { allowFail: true });
+  const m = /(?:topResumedActivity|mResumedActivity|ResumedActivity)[^\n]*?\{[^}]*?\s([\w.]+)\/([\w.$]+)/.exec(out);
+  return m ? `${m[1]}/${m[2]}` : null;
+}
+
+/** The nodes of the screen as UI Automator reads them: text, description and centre. */
+function screenNodes() {
+  shell('uiautomator dump /sdcard/qa-ui.xml', { allowFail: true });
+  const xml = shell('cat /sdcard/qa-ui.xml', { allowFail: true });
+  shell('rm -f /sdcard/qa-ui.xml', { allowFail: true });
+  return [...xml.matchAll(/<node [^>]*?text="([^"]*)"[^>]*?resource-id="([^"]*)"[^>]*?class="([^"]*)"[^>]*?package="([^"]*)"[^>]*?content-desc="([^"]*)"[^>]*?bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"/g)].map((m) => ({
+    text: m[1],
+    id: m[2],
+    cls: m[3],
+    pkg: m[4],
+    desc: m[5],
+    bounds: [Number(m[6]), Number(m[7]), Number(m[8]), Number(m[9])],
+    x: Math.round((Number(m[6]) + Number(m[8])) / 2),
+    y: Math.round((Number(m[7]) + Number(m[9])) / 2),
+  }));
+}
+
+function tap(x, y) {
+  shell(`input tap ${x} ${y}`);
+}
+
+function screenshot(file) {
+  const r = spawnSync(adbPath, ['exec-out', 'screencap', '-p'], { maxBuffer: 64 * 1024 * 1024 });
+  if (r.status === 0 && r.stdout && r.stdout.length) fs.writeFileSync(file, r.stdout);
+}
+
+/** One file of an APK, read with the system's own zip reader. */
+function apkEntry(apk, entry) {
+  const tar = process.platform === 'win32' ? path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'tar.exe') : 'unzip';
+  const args = process.platform === 'win32' ? ['-xOf', apk, entry] : ['-p', apk, entry];
+  const r = spawnSync(tar, args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+  return r.status === 0 ? r.stdout : null;
+}
+
+module.exports = { root, sleep, record, until, portAnswers, startSite, adb, shell, adbPath, APP, ACTIVITY, apkOf, emulatorReady, resumed, screenNodes, tap, screenshot, apkEntry };

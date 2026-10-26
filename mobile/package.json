@@ -1,0 +1,21 @@
+{
+  "name": "sa.commshub.app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "مركز الاتصال المؤسسي",
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\"",
+    "test:jvm": "cd android && gradlew testDirectReleaseUnitTest",
+    "sync": "cap sync android",
+    "build:debug": "node scripts/build.mjs debug",
+    "build:qa": "node scripts/build.mjs qa",
+    "pack:release": "node scripts/build.mjs release"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/core": "8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3"
+  }
+}

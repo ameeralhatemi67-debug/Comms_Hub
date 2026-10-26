@@ -1,0 +1,162 @@
+{
+  "script": "qa/android-shell.cjs",
+  "run": "2026-10-26T10:29:16.918Z",
+  "checks": [
+    {
+      "name": "the release APK opens the production address alone, over https, uninspectable",
+      "pass": true,
+      "detail": "{\"url\":\"https://comms-hub-three.vercel.app\",\"errorPath\":\"offline.html\",\"androidScheme\":\"https\"}"
+    },
+    {
+      "name": "the check APK opens the local site through the emulator",
+      "pass": true,
+      "detail": "{\"url\":\"http://127.0.0.1:3000\",\"errorPath\":\"offline.html\",\"androidScheme\":\"https\",\"cleartext\":true}"
+    },
+    {
+      "name": "the check package is installed under its own id, apart from a real installation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the application opens the site's sign-in page",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "the page sees window.commsHubNative: platform android, shell capacitor, version 0.1.0, bridge 1",
+      "pass": true,
+      "detail": "{\"n\":{\"platform\":\"android\",\"shell\":\"capacitor\",\"version\":\"0.1.0\",\"bridge\":1},\"frozen\":true,\"replaced\":false,\"capacitor\":\"object\"}"
+    },
+    {
+      "name": "the bridge is frozen and cannot be replaced by the page",
+      "pass": true,
+      "detail": "{\"n\":{\"platform\":\"android\",\"shell\":\"capacitor\",\"version\":\"0.1.0\",\"bridge\":1},\"frozen\":true,\"replaced\":false,\"capacitor\":\"object\"}"
+    },
+    {
+      "name": "a frame of the same address has no bridge",
+      "pass": true,
+      "detail": "{\"native\":\"undefined\",\"same\":true}"
+    },
+    {
+      "name": "Capacitor's routes to files on the phone answer 404",
+      "pass": true,
+      "detail": "{\"a\":404,\"b\":404}"
+    },
+    {
+      "name": "no Content-Security-Policy violation with the bridge there",
+      "pass": true,
+      "detail": "{\"violations\":[],\"native\":true,\"capacitor\":\"object\"}"
+    },
+    {
+      "name": "another address has neither the bridge nor Capacitor",
+      "pass": true,
+      "detail": "{\"native\":\"undefined\",\"capacitor\":\"undefined\",\"text\":\"another site\"}"
+    },
+    {
+      "name": "a page of the site that answers with an error is shown as the site wrote it, not as the connection screen",
+      "pass": true,
+      "detail": "{\"text\":\"الرابط غير صالح أو انتهت صلاحيته\\n\\nروابط رسائل واتساب صالحة أربعة عشر يوماً. افتح «المراسلة» في المركز لترى المحادثة.\\n\\nفتح المراسلة\",\"url\":\"http://127.0.0.1:3000/w/not-a-token\"}"
+    },
+    {
+      "name": "the file chooser opens Android's picker",
+      "pass": true,
+      "detail": "com.google.android.documentsui/com.android.documentsui.picker.PickActivity"
+    },
+    {
+      "name": "the microphone is asked of the person by Android, then works",
+      "pass": true,
+      "detail": "{\"asked\":\"While using the app\",\"micResult\":{\"ok\":true,\"tracks\":1}}"
+    },
+    {
+      "name": "the camera through the page and location are refused",
+      "pass": true,
+      "detail": "{\"video\":\"NotAllowedError\",\"geo\":\"code 1\"}"
+    },
+    {
+      "name": "another site opens in the phone's browser",
+      "pass": true,
+      "detail": "com.android.chrome/com.google.android.apps.chrome.IntentDispatcher"
+    },
+    {
+      "name": "a review link for outside people opens in the browser",
+      "pass": true,
+      "detail": "com.android.chrome/com.google.android.apps.chrome.IntentDispatcher"
+    },
+    {
+      "name": "an outside connection shows the note first, with «متابعة في المتصفح» and «إلغاء»",
+      "pass": true,
+      "detail": "[\"يكتمل الربط في المتصفح. سجّل الدخول إلى المركز هناك إن طُلب منك، ثم ارجع إلى التطبيق.\",\"إلغاء\",\"متابعة في المتصفح\"]"
+    },
+    {
+      "name": "«إلغاء» keeps the page where it was",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "«متابعة في المتصفح» opens the connection in the browser",
+      "pass": true,
+      "detail": "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
+    },
+    {
+      "name": "the back key goes back through the site's pages",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "a file of the site is saved to Downloads under the name in its address, with the same bytes",
+      "pass": true,
+      "detail": "{\"saved\":\"77e88ab69b413554861c85555d621952ca6747bdd25ba83aa4b9a299ff34c53c\",\"want\":\"77e88ab69b413554861c85555d621952ca6747bdd25ba83aa4b9a299ff34c53c\"}"
+    },
+    {
+      "name": "a file made inside the page is not saved, and the window stays",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the window keeps clear of the status bar and the gesture bar",
+      "pass": true,
+      "detail": "{\"web\":[0,156,1280,2784],\"screen\":[1280,2856]}"
+    },
+    {
+      "name": "with the keyboard open the page shrinks above it, and a field at its foot stays in view",
+      "pass": true,
+      "detail": "{\"keyboard\":true,\"before\":876,\"field\":{\"bottom\":554,\"inner\":564,\"focused\":\"qa-low\"}}"
+    },
+    {
+      "name": "when the site cannot be reached the Arabic connection screen shows",
+      "pass": true,
+      "detail": "تعذّر الوصول إلى المركز\n\nتحقّق من اتصالك بالإنترنت، ثم أعد المحاولة.\n\nإعادة المحاولة"
+    },
+    {
+      "name": "«إعادة المحاولة» opens the site again once connected",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "a cookie of the site survives the application being closed and stopped",
+      "pass": true,
+      "detail": "qa_a2=kept"
+    }
+  ],
+  "notes": [
+    "The Arabic message for a file made inside the page is an Android toast, which UI Automator cannot read; it was not read by this check.",
+    "After the check: the check package is uninstalled."
+  ],
+  "apk": {
+    "release": {
+      "bytes": 7587293
+    },
+    "qa": {
+      "bytes": 9319658
+    }
+  },
+  "device": {
+    "model": "sdk_gphone16k_x86_64",
+    "android": "17",
+    "sdk": "37",
+    "webview": "Current WebView package (name, version): (com.google.android.webview, 152.0.7977.88)"
+  },
+  "total": 27,
+  "passed": 27,
+  "failed": 0
+}

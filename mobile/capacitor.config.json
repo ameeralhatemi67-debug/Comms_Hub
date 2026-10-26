@@ -1,0 +1,21 @@
+{
+  "appId": "sa.commshub.app",
+  "appName": "مركز الاتصال المؤسسي",
+  "webDir": "www",
+  "loggingBehavior": "none",
+  "zoomEnabled": false,
+  "server": {
+    "url": "https://comms-hub-three.vercel.app",
+    "errorPath": "offline.html",
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": false,
+    "webContentsDebuggingEnabled": false,
+    "useLegacyBridge": false
+  },
+  "plugins": {
+    "SystemBars": { "insetsHandling": "disable" }
+  }
+}

@@ -1687,3 +1687,62 @@ When recording future implementation outcomes, follow this standardized template
     - `/app/return` answers 303 and lands on the sign-in screen with the query kept.
     - The mail requests were answered inside the browser and never reached Supabase.
 - **Not verified, said plainly.** Nothing was seen signed in: the account page's panels and the banner were not rendered in a running page. The bridges were stand-ins; the real Android shell comes in A2.
+
+### 2026-10-26: the Android application, A2: the shell, and its gate passed
+
+- **What was built.** `mobile/`: Capacitor 8.5.3 (`@capacitor/core`, `@capacitor/android`, `@capacitor/cli`, pinned, 2026-10-07), id `sa.commshub.app`, with its own `package.json` and lockfile outside the site's build. Vercel ignores it.
+  - **The window** (`MainActivity.java`) opens the compiled address. It pads the web view by the status bar, the gesture or button bar, the display cut-out and the keyboard. The back key goes back through the site, then leaves. Cookies are written to disk when the application goes to the background.
+  - **The page's view of the application** (`Identity.java`, `Shell.java`): a document-start script on the compiled addresses defines `window.commsHubNative` (platform `android`, shell `capacitor`, version, bridge 1) in the top frame only, frozen and not replaceable.
+  - **Where an address goes** (`Navigation.java`): the desktop's rules, plus pages for outside people (`/r/`, `/m/`), which go to the browser. The connection note is a native Arabic dialog.
+  - **Downloads** (`Downloads.java`, `FileNames.java`): fetched by the application with the web view's cookies, written to Downloads under the name the site gives (RFC 5987 Arabic names), or else the name in the address. A file made inside the page (blob, data) gets the Arabic message.
+  - **Narrowed** (`ShellWebViewClient.java`, `ShellChromeClient.java`):
+    - only the microphone, and only to a compiled address;
+    - Capacitor's file routes refused;
+    - the site's own error pages left as they are;
+    - certificate errors refused with their own screen.
+  - **The connection screen** `www/offline.html`, in the desktop's words.
+  - **The brand.** The launcher icon is a vector of the brand tile's rosette (adaptive and themed), and the opening screen is the tile's green.
+  - **Builds** (`android/app/build.gradle`, `scripts/build.mjs`, `scripts/config.mjs`):
+    - release `sa.commshub.app`, development `.dev`, and the check package `.qa`;
+    - the address list per build, from `BuildConfig`;
+    - the version from `package.json`;
+    - the owner's key only from a properties file named by `COMMSHUB_KEYSTORE_PROPERTIES`;
+    - channels `direct` and `play`;
+    - Android 10 (API 29) or newer, targeting API 36.
+  - **Not copied or kept.** Backups of the application are off (`allowBackup="false"`, `data_extraction_rules.xml`). `file_paths.xml` exposes only a `shared/` cache folder.
+  - **`mobile/README.md`**: builds, tests, the owner's key (the `keytool` command, the properties file, the fingerprint), and the JDK note.
+- **Found while building, fixed.**
+  - **Error status shown as offline.** Capacitor shows its offline page on any error status of the main page, so the site's own "link not valid" page (404) would have read «تعذّر الوصول إلى المركز». The shell now shows the site's page.
+  - **«إعادة المحاولة» reopened nothing.** Capacitor serves the offline page from its own local address (`https://localhost/offline.html`), so the button reloaded an empty local page. It now asks the application for the site (`/again`).
+  - **Files on the phone reachable from the page.** Capacitor's `/_capacitor_file_` route would have let a page of the site read the application's own files on the phone.
+  - **Permissions granted without a word.** Capacitor's chrome client grants any web permission that has no Android permission behind it (MIDI, protected media) without asking.
+- **Deviations from the plan, reasoned.**
+  - Java instead of Kotlin, as Capacitor's template is, so no Kotlin plugin is added.
+  - The application's own downloader instead of Android's `DownloadManager`, whose database would have kept the session cookie in the request's headers.
+  - The local site at `http://127.0.0.1:3000` through `adb reverse` instead of `10.0.2.2`. A loopback address is a secure context, as production is: on `10.0.2.2` the page has no `navigator.mediaDevices`.
+  - Android 10 as the floor (decision M-11 taken here). Scoped storage writes to Downloads without a storage permission.
+  - No `@capacitor/app`: the back key is native.
+- **Verified, numbers.**
+  - **Unit tests.** `mobile` `npm test` **9 of 9**: the address equal to the desktop's and the site's, the builds, the permissions, the desktop's routes, note and connection screen word for word, the retry, and no emoji. JVM tests **12 of 12**: where an address goes (5), file names (5), the identity script (2).
+  - **Builds.** The check APK is 9.29 MB, and the unsigned release APK 7.59 MB, with Android's release lint passing.
+  - **The gate**, `qa/android-shell.cjs`: **27 of 27**. It ran on the `Pixel_9_Pro` emulator, Android 16, started read-only, against the site's production build at `http://127.0.0.1:3000`, on signed-out pages:
+    - the release APK opens production alone with inspection off;
+    - the bridge's shape, frozen; absent in a same-address frame and on another address; Capacitor's file routes answer 404;
+    - no Content-Security-Policy violation with the bridge;
+    - the site's 404 page shown as itself;
+    - the file chooser opens Android's picker;
+    - the microphone is asked by Android ("While using the app"), then gives one audio track; the camera through the page and location are refused;
+    - another site, a review link and «متابعة في المتصفح» open the browser; the connection note in Arabic, with «إلغاء» keeping the page;
+    - the back key;
+    - a file of the site saved to Downloads with the same SHA-256; a file made in the page not saved;
+    - the web view clear of the status and gesture bars;
+    - with the keyboard open the page shrinks (876 to 477 CSS pixels) and a field at its foot stays in view;
+    - with the local site stopped, the Arabic connection screen, and «إعادة المحاولة» back to the site;
+    - a cookie surviving the application being closed and stopped.
+
+    The check package was uninstalled at the end.
+  - The site's typecheck stays clean; `mobile/` is outside it.
+- **Not verified, said plainly.**
+  - Nothing was seen signed in, so the real session surviving a restart is the owner's check on a real phone.
+  - The Arabic toasts (download started, file made in the page) are not readable by UI Automator.
+  - No real phone was used, no signed release was built (the key is the owner's), and nothing was pushed or published.

@@ -178,6 +178,15 @@ and simulation files are never staged.
 
 ### A2. The shell (the Android part of M2), the gate for everything after (M)
 
+> **Done 2026-10-26; the gate passed**, 27 of 27 (`qa/android-shell.cjs`). Changed while building (recorded in
+> `progress.md`):
+> - Java instead of Kotlin, as Capacitor's template is.
+> - The application's own downloader instead of `DownloadManager`, which would have kept the cookie in its
+>   database.
+> - The local site at `http://127.0.0.1:3000` through `adb reverse` instead of `10.0.2.2`, so the page is a
+>   secure context.
+> - Android 10 as the floor.
+
 - **Layout:** `mobile/` with its own `package.json` and lockfile, like `desktop/`, outside the site's
   typecheck and build.
 - **Pinned packages:** `@capacitor/core`, `@capacitor/cli` and `@capacitor/android` 8.5.3, and `@capacitor/app`.

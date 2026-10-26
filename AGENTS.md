@@ -330,8 +330,10 @@ The preview on a second screen (D6, `MVP_draft.md` 63.5): bridge version 5 adds 
 The Android application is being built, by owner directive of 2026-10-26 (`Android_Build_Plan.md`,
 `MVP_draft.md` section 64, recorded in `progress.md`). It is a Capacitor 8 application in `mobile/`, with its
 own `package.json` and lockfile like `desktop/`, outside the site's typecheck and build, id `sa.commshub.app`.
-- **What it opens.** The live site from a compiled address list, as the desktop does. A development or check
-  build adds the emulator's `http://10.0.2.2:3000`, and only those builds allow cleartext.
+- **What it opens.** The live site from a compiled address list, as the desktop does (`mobile/capacitor.config.json`,
+  `android/app/build.gradle`). A development or check build adds `http://127.0.0.1:3000`, the desktop's development
+  address, which the phone reaches through `adb reverse`; only those builds allow cleartext, and only to it.
+  It needs Android 10 (API 29) or newer.
 - **Distribution.** Until the Google Play account is verified, a signed APK from the public bucket
   `android-releases` is the only channel.
 - **The release key.** The owner holds it outside the repository and builds the release. No agent creates,
@@ -342,9 +344,18 @@ own `package.json` and lockfile like `desktop/`, outside the site's typecheck an
     rules.
   - The site reaches it only through `src/lib/native/`.
 - **File bytes never cross the bridge.** Native code fetches the site's own file routes with the WebView's
-  cookies.
-- **Checks** use the emulator and the check package `sa.commshub.app.qa`, never a real installation, and
-  signed-out pages only.
+  cookies (`Downloads.java`), in the application's own process, never through the system's download service,
+  and follows a redirect away from the list without the cookie.
+- **The shell's rules** (A2, held by `mobile/tests` and the JVM tests in `mobile/android/app/src/test`):
+  - Where an address goes is `Navigation.java`, the desktop's rules ported and held equal. Pages for outside
+    people (`/r/`, `/m/`) also open in the browser.
+  - Capacitor's routes to files on the phone (`/_capacitor_file_`, `/_capacitor_content_`) are refused.
+  - The web view grants the microphone alone, and only to a compiled address (`ShellChromeClient.java`).
+  - Android's backups copy nothing of the application.
+  - The window pads itself by the system bars and the keyboard, so the site's styles carry no safe areas
+    for it.
+- **Checks** use the emulator started read-only and the check package `sa.commshub.app.qa`, never a real
+  installation, and signed-out pages only (`qa/android-*.cjs`, `qa/android-helpers.cjs`).
 - **What stays the same as everywhere:** no sign-in bypass, stub session or stored password; nothing about
   people is decided in it; nothing is scheduled in the site because of it.
 - **The studio and «استوديو الحركة»** are not part of this application yet.

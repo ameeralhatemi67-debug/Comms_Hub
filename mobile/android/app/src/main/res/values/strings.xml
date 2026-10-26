@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">مركز الاتصال المؤسسي</string>
+    <string name="title_activity_main">مركز الاتصال المؤسسي</string>
+    <string name="package_name">sa.commshub.app</string>
+    <string name="custom_url_scheme">sa.commshub.app</string>
+    <!-- The desktop's note before an outside connection (MVP_draft.md 63), verbatim. -->
+    <string name="connect_note">يكتمل الربط في المتصفح. سجّل الدخول إلى المركز هناك إن طُلب منك، ثم ارجع إلى التطبيق.</string>
+    <string name="connect_continue">متابعة في المتصفح</string>
+    <string name="connect_cancel">إلغاء</string>
+    <!-- Downloads (MVP_draft.md 64). -->
+    <string name="download_started">بدأ التنزيل إلى مجلد التنزيلات.</string>
+    <string name="download_done">اكتمل التنزيل: %1$s</string>
+    <string name="download_failed">تعذّر التنزيل. حاول مرة أخرى.</string>
+    <string name="download_in_page">لا يُحفظ هذا الملف على الهاتف من التطبيق بعد. احفظه من الحاسوب أو من المتصفح.</string>
+    <string name="download_fallback_name">ملف</string>
+    <string name="no_app">لا يوجد تطبيق يفتح هذا الرابط.</string>
+</resources>

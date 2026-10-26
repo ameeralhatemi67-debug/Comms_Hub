@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Behind the status bar and the gesture bar: the site's surface (identity.css), light. -->
+    <color name="bars">#FBFCF9</color>
+    <!-- The brand tile and the rosette (public/brand/comms-hub-logo.svg). -->
+    <color name="brand_deep">#0B3A2D</color>
+    <color name="brand_gold">#E8C46C</color>
+    <color name="colorPrimary">#17634B</color>
+    <color name="colorPrimaryDark">#0B3A2D</color>
+    <color name="colorAccent">#A78444</color>
+</resources>

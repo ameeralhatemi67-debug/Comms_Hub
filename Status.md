@@ -33,7 +33,8 @@ The owner chose a sideloaded APK as the pre-launch Android download while the Go
 - **Done.**
   - A0: decisions recorded, plan and specification written.
   - A1: the native contract for Android, platform-aware panels, and the sign-in links inside an application (which also fixes the desktop's). Evidence: `npm test` 546 of 546, `qa/android-site.cjs` 12 of 12.
-- **Next.** A2: the Capacitor shell in `mobile/` and its gate on the emulator.
+  - A2: the Capacitor shell in `mobile/`, its gate passed on the emulator. Evidence: `qa/android-shell.cjs` 27 of 27, JVM tests 12 of 12, `mobile` tests 9 of 9.
+- **Next.** A3: «تطبيق الهاتف» on «الحساب», the `android-releases` bucket and the update window.
 - **Owner steps waiting.**
   - Make the release keystore, using the command in `mobile/README.md` (written in A2).
   - Create a Firebase project for A5.
