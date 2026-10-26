@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { LogIn, KeyRound, UserPlus, LogOut, MailCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { linkProblem } from '@/lib/entry';
+import { native } from '@/lib/native';
+import { BROWSER_ONLY, mailReturn, type MailReturn } from '@/lib/native/entry';
 import { LogoLoader } from './ui';
 
 type View = 'signin' | 'first' | 'request' | 'forgot' | 'recovery' | 'expired';
@@ -46,6 +48,19 @@ export function AuthGate({
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<Note>(null);
   const [needsConfirm, setNeedsConfirm] = useState(false);
+  // Where a mailed link comes back; inside an application that cannot receive it, the browser is used
+  // instead (src/lib/native/entry.ts). Null until the page knows, which is the browser's answer.
+  const [mailBack, setMailBack] = useState<MailReturn | null>(null);
+
+  useEffect(() => {
+    const n = native();
+    const decide = (verified: boolean) => setMailBack(mailReturn(n.platform, verified, window.location.origin));
+    if (n.has('links')) n.raw!.links!.verified!().then((v) => decide(v === true), () => decide(false));
+    else decide(false);
+  }, []);
+
+  const browserOnly = !!mailBack && 'browser' in mailBack;
+  const returnTo = () => (mailBack && 'to' in mailBack ? mailBack.to : `${window.location.origin}/`);
 
   // The password-reset link signs the person in for a moment with a recovery
   // session; this is the screen that lets them choose the new password.
@@ -123,6 +138,7 @@ export function AuthGate({
   const firstTime = (e: FormEvent) => {
     e.preventDefault();
     void run(async () => {
+      if (browserOnly) return fail(BROWSER_ONLY);
       const address = email.trim().toLowerCase();
       if (password.length < MIN_PASSWORD) return fail(`كلمة المرور ${MIN_PASSWORD} أحرف على الأقل.`);
       if (password !== confirm) return fail('كلمتا المرور غير متطابقتين.');
@@ -131,7 +147,7 @@ export function AuthGate({
       const { data, error } = await supabase().auth.signUp({
         email: address,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/` },
+        options: { emailRedirectTo: returnTo() },
       });
       if (!error && data.session) {
         // Email confirmation is switched off on the project: signed in at once.
@@ -149,10 +165,11 @@ export function AuthGate({
 
   const resend = () =>
     void run(async () => {
+      if (browserOnly) return fail(BROWSER_ONLY);
       const { error } = await supabase().auth.resend({
         type: 'signup',
         email: email.trim().toLowerCase(),
-        options: { emailRedirectTo: `${window.location.origin}/` },
+        options: { emailRedirectTo: returnTo() },
       });
       if (error) return fail(arabicError(error.message));
       ok('أُعيد إرسال رابط التأكيد. افتح هذه الرسالة الأحدث فقط، فالرابط في الرسائل السابقة لم يعد يعمل.');
@@ -182,8 +199,9 @@ export function AuthGate({
   const forgot = (e: FormEvent) => {
     e.preventDefault();
     void run(async () => {
+      if (browserOnly) return fail(BROWSER_ONLY);
       const { error } = await supabase().auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: returnTo(),
       });
       if (error) return fail(arabicError(error.message));
       // Same answer whether or not the address has an account.
@@ -269,7 +287,7 @@ export function AuthGate({
             <button className="primary" disabled={busy}>
               {busy ? 'جارٍ الدخول…' : 'دخول'}
             </button>
-            {needsConfirm && (
+            {needsConfirm && !browserOnly && (
               <button type="button" className="secondary" onClick={resend} disabled={busy || !email}>
                 إعادة إرسال رابط التأكيد
               </button>
@@ -280,7 +298,21 @@ export function AuthGate({
           </form>
         )}
 
-        {view === 'first' && (
+        {browserOnly && (view === 'first' || view === 'forgot' || view === 'expired') && (
+          <div className="auth-form auth-browser">
+            <h1>{view === 'first' ? 'أول دخول' : view === 'forgot' ? 'نسيت كلمة المرور' : 'انتهت صلاحية الرابط'}</h1>
+            <div className="auth-note error" role="alert">
+              <span>{BROWSER_ONLY}</span>
+            </div>
+            {view !== 'first' && (
+              <button type="button" className="auth-link" onClick={() => go('signin')}>
+                العودة إلى تسجيل الدخول
+              </button>
+            )}
+          </div>
+        )}
+
+        {view === 'first' && !browserOnly && (
           <form onSubmit={firstTime} className="auth-form">
             <h1>أول دخول</h1>
             <p className="muted">
@@ -336,7 +368,7 @@ export function AuthGate({
           </form>
         )}
 
-        {view === 'forgot' && (
+        {view === 'forgot' && !browserOnly && (
           <form onSubmit={forgot} className="auth-form">
             <h1>نسيت كلمة المرور</h1>
             <p className="muted">اكتب بريدك المعتمد ليصلك رابط لتعيين كلمة مرور جديدة.</p>
@@ -353,7 +385,7 @@ export function AuthGate({
           </form>
         )}
 
-        {view === 'expired' && (
+        {view === 'expired' && !browserOnly && (
           <form onSubmit={forgot} className="auth-form">
             <h1>انتهت صلاحية الرابط</h1>
             <p className="muted">

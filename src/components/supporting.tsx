@@ -23,6 +23,7 @@ import { PlatformsTab } from './settings/platforms';
 import { ConnectionsTab } from './settings/connections';
 import { FeedbackTab } from './feedback';
 import { DesktopAppPanel } from './native/desktop-app';
+import { useNativePlatform } from './native/use-native';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
@@ -58,6 +59,7 @@ export function Supporting({ page }: { page: string }) {
   const router = useRouter();
   const actor = roles[state.role];
   const account = useAccount();
+  const platform = useNativePlatform();
   // «/settings?tab=general» opens a tab directly (the Drive connection returns there).
   const [settingsTab, setSettingsTab] = useState(() => {
     const t = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('tab');
@@ -127,9 +129,11 @@ export function Supporting({ page }: { page: string }) {
         <Panel title="المظهر">
           <AppearancePanel />
         </Panel>
-        <Panel title="تطبيق سطح المكتب">
-          <DesktopAppPanel />
-        </Panel>
+        {platform !== 'android' && (
+          <Panel title="تطبيق سطح المكتب">
+            <DesktopAppPanel />
+          </Panel>
+        )}
         <Panel title="صلاحياتي" className="pm-minepanel">
           <MyPermissions />
         </Panel>

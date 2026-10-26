@@ -1655,3 +1655,35 @@ When recording future implementation outcomes, follow this standardized template
   - A dated pointer at the top of `Mobile_Apps_Plan.md`.
 - **One choice made while specifying.** Links sent by email from the sign-in page («أول دخول», «نسيت كلمة المرور») use PKCE, so they must come back to the cookie store that asked for them. Until the application receives its own links (A6), the application points the person to the browser for those two instead of sending a link that would fail.
 - **Verified.** Documents only; no code changed, so no tests were run for this entry.
+
+### 2026-10-26: the Android application, A1: site preparation
+
+- **What changed.**
+  - **The native contract** (`src/lib/native/index.ts`) names the Android application's features: `appUpdate`, `download`, `share`, `push`, `links`, `lock`, `capture`, `incoming` and `upload`. Each is detected by all of its methods, like the desktop's, and the shapes they carry name files by a path on the page's own address or by a token, never by a full address or a path on the phone.
+  - **Releases** (`src/lib/native/releases.ts`):
+    - `ANDROID_FEED`, the public bucket `android-releases`, folder `android`;
+    - `MINIMUM_ANDROID` = 0.1.0;
+    - `parseAndroidLatest`, a strict reading of `latest.json`: an `.apk` name with no path, a size up to 300 MB, a lowercase SHA-256, a growing version code, an optional floor, and up to eight lines of Arabic notes;
+    - `apkMustUpdate`;
+    - `tooOld`, which now takes the platform and keeps the desktop's answer when none is named.
+  - **Panels that assumed any application is the desktop.**
+    - `DesktopAppPanel` speaks of the application only inside the desktop's.
+    - `DesktopUpdateBanner` shows only in the desktop's.
+    - «الحساب» leaves the desktop panel out inside the Android application.
+    - «معلومات الجهاز» names the Android application «تطبيق الهاتف».
+    - A new hook, `useNativePlatform`.
+  - **Links mailed from the sign-in screen** (`src/lib/native/entry.ts`, `auth-gate.tsx`). «أول دخول», «نسيت كلمة المرور» and «انتهت صلاحية الرابط» ask where the link returns:
+    - a browser: the root, as before;
+    - the Android application with verified links (A6): the new route `/app/return`, which forwards with the same query to the root;
+    - otherwise: the screens show «يكتمل هذا من المتصفح: افتح المركز في المتصفح وأكمله هناك، ثم ارجع إلى التطبيق وسجّل الدخول.» in place of their form, and nothing is mailed.
+- **Found on the way, fixed.** The desktop application had the same fault: a link mailed from its sign-in screen opens the system browser, where the PKCE code of the request does not exist, so the link could not work. It now points to the browser like the Android application (`MVP_draft.md` 63, amended).
+- **Deviation from the plan, reasoned.** Safe areas are not added to the site's CSS. The Android shell pads its web view by the system bars and the keyboard (A2), so nothing pinned can sit under them at any width, the site's styles stay as they are, and no `viewport-fit=cover` changes iPhone Safari today. The safe-area check moves to A2. The plan carries the note.
+- **Verified, numbers.**
+  - `npm run typecheck` clean; `npm run build` passes (the route `/app/return` listed).
+  - `npm test` **546 of 546**. Nine tests are new in `tests/native.test.mjs`: the Android shell and its features, the floors per platform, `latest.json` with fifteen refused shapes, the update floor, where a mailed link returns on each client, `/app/return` (303, the query and nothing else), every mailed link in `auth-gate.tsx` going through it, the device line, and no emoji.
+  - Browser check `qa/android-site.cjs` **12 of 12**, in headless Edge on the production build with the checkout's environment, at 390 px. Four clients were stood in for: a browser, the desktop application, and the Android application without and with verified links.
+    - A browser mails `redirect_to` the root, and the Android application with verified links mails it `/app/return`.
+    - The desktop application and the unverified Android application show the note, ask for no address or password, and mail nothing.
+    - `/app/return` answers 303 and lands on the sign-in screen with the query kept.
+    - The mail requests were answered inside the browser and never reached Supabase.
+- **Not verified, said plainly.** Nothing was seen signed in: the account page's panels and the banner were not rendered in a running page. The bridges were stand-ins; the real Android shell comes in A2.

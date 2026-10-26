@@ -1,0 +1,70 @@
+{
+  "script": "qa/android-site.cjs",
+  "run": "2026-10-26T09:41:29.832Z",
+  "checks": [
+    {
+      "name": "a browser: «نسيت كلمة المرور» mails a link back to /",
+      "pass": true,
+      "detail": "{\"mailed\":[\"https://hrghmioxvgkjpnydrxrk.supabase.co/auth/v1/recover?redirect_to=http%3A%2F%2F127.0.0.1%3A3000%2F\"]}"
+    },
+    {
+      "name": "a browser: the answer is the same as for any address",
+      "pass": true,
+      "detail": "إن كان لهذا البريد حساب فسيصله رابط لتعيين كلمة مرور جديدة."
+    },
+    {
+      "name": "the desktop application: «نسيت كلمة المرور» points to the browser and asks for nothing",
+      "pass": true,
+      "detail": "{\"note\":\"يكتمل هذا من المتصفح: افتح المركز في المتصفح وأكمله هناك، ثم ارجع إلى التطبيق وسجّل الدخول.\",\"fields\":0}"
+    },
+    {
+      "name": "the desktop application: «أول دخول» points to the browser and asks for no password",
+      "pass": true,
+      "detail": "{\"first\":\"يكتمل هذا من المتصفح: افتح المركز في المتصفح وأكمله هناك، ثم ارجع إلى التطبيق وسجّل الدخول.\",\"passwords\":0}"
+    },
+    {
+      "name": "the desktop application: nothing was mailed",
+      "pass": true,
+      "detail": "{\"mailed\":[]}"
+    },
+    {
+      "name": "the Android application before its links are verified: «نسيت كلمة المرور» points to the browser and asks for nothing",
+      "pass": true,
+      "detail": "{\"note\":\"يكتمل هذا من المتصفح: افتح المركز في المتصفح وأكمله هناك، ثم ارجع إلى التطبيق وسجّل الدخول.\",\"fields\":0}"
+    },
+    {
+      "name": "the Android application before its links are verified: «أول دخول» points to the browser and asks for no password",
+      "pass": true,
+      "detail": "{\"first\":\"يكتمل هذا من المتصفح: افتح المركز في المتصفح وأكمله هناك، ثم ارجع إلى التطبيق وسجّل الدخول.\",\"passwords\":0}"
+    },
+    {
+      "name": "the Android application before its links are verified: nothing was mailed",
+      "pass": true,
+      "detail": "{\"mailed\":[]}"
+    },
+    {
+      "name": "the Android application with verified links: «نسيت كلمة المرور» mails a link back to /app/return",
+      "pass": true,
+      "detail": "{\"mailed\":[\"https://hrghmioxvgkjpnydrxrk.supabase.co/auth/v1/recover?redirect_to=http%3A%2F%2F127.0.0.1%3A3000%2Fapp%2Freturn\"]}"
+    },
+    {
+      "name": "the Android application with verified links: the answer is the same as for any address",
+      "pass": true,
+      "detail": "إن كان لهذا البريد حساب فسيصله رابط لتعيين كلمة مرور جديدة."
+    },
+    {
+      "name": "/app/return answers 303 to the root with the same query",
+      "pass": true,
+      "detail": "{\"status\":303,\"location\":\"/?qa=a1&x=1\"}"
+    },
+    {
+      "name": "/app/return lands on the sign-in screen at the root, the query kept",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/?qa=a1"
+    }
+  ],
+  "notes": [],
+  "total": 12,
+  "passed": 12,
+  "failed": 0
+}

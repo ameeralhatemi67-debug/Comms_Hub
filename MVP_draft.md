@@ -2684,6 +2684,8 @@ Every other key belongs to the page. Ctrl+Z, the studio's shortcuts and the revi
 
 **Outside connections.** Connecting Google Drive, OneDrive or a platform account (from «الإعدادات», the library or «حسابات المنصات») first shows a small note over the window: «يكتمل الربط في المتصفح. سجّل الدخول إلى المركز هناك إن طُلب منك، ثم ارجع إلى التطبيق.» It has two buttons, «متابعة في المتصفح» and «إلغاء». «متابعة في المتصفح» opens the connection in the laptop's browser, where it finishes. Google refuses sign-in inside applications, and a connection must finish in the browser where it started. The person then comes back to the application, and the page shows the connection as it would in any browser.
 
+**Links sent by email from the sign-in page, amended 2026-10-26.** A link mailed by «أول دخول» or «نسيت كلمة المرور» opens the laptop's browser, which holds no part of the request, so it could not work. Inside the application those screens, and «انتهت صلاحية الرابط», show instead of their form: «يكتمل هذا من المتصفح: افتح المركز في المتصفح وأكمله هناك، ثم ارجع إلى التطبيق وسجّل الدخول.», and nothing is mailed.
+
 **No connection.** When the site cannot be reached, the window shows «تعذّر الوصول إلى المركز» and «تحقّق من اتصالك بالإنترنت، ثم أعد المحاولة.», with «إعادة المحاولة». When the site's security certificate is not accepted, it shows «تعذّر التحقق من أمان الاتصال» and «لم يُفتح المركز لأن شهادة الأمان لم تُقبل. أعد المحاولة لاحقاً.»; such a page is never opened. F5 on this screen tries again too. The application keeps no copy of the site to use without a connection.
 
 **Permissions.** The site may use:
@@ -2854,7 +2856,7 @@ Owner decisions of 2026-10-26: `Android_Build_Plan.md`, accepted and recorded in
 
 **Outside connections.** Connecting Google Drive, OneDrive or a platform account first shows the desktop's note (63): «يكتمل الربط في المتصفح. سجّل الدخول إلى المركز هناك إن طُلب منك، ثم ارجع إلى التطبيق.», with «متابعة في المتصفح» and «إلغاء».
 
-**Links sent by email from the sign-in page.** «أول دخول» and «نسيت كلمة المرور» send a link that must come back to where they were asked for. Until the application can receive its own links (64.4), the application says instead of sending: «يكتمل هذا من المتصفح: افتح المركز في متصفح الهاتف وأكمله هناك، ثم ارجع إلى التطبيق وسجّل الدخول.». After that, a link asked for inside the application opens the application.
+**Links sent by email from the sign-in page.** «أول دخول» and «نسيت كلمة المرور» send a link that must come back to where they were asked for. Until the application can receive its own links (64.4), those screens, and «انتهت صلاحية الرابط», show instead of their form: «يكتمل هذا من المتصفح: افتح المركز في المتصفح وأكمله هناك، ثم ارجع إلى التطبيق وسجّل الدخول.», and nothing is mailed. After that, a link asked for inside the application returns to it through `/app/return`, which opens the sign-in page with the link's code.
 
 **No connection.** As on the desktop: «تعذّر الوصول إلى المركز» and «تحقّق من اتصالك بالإنترنت، ثم أعد المحاولة.», with «إعادة المحاولة». The application keeps no copy of the site to use without a connection.
 

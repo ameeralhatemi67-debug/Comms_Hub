@@ -34,7 +34,9 @@ export async function gatherFacts(): Promise<DeviceFacts> {
   let facts = n.has('info') ? factsFromApp(await n.raw!.info!().catch(() => null)) : null;
   if (!facts) {
     const gb = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
-    facts = { app: null, cores: navigator.hardwareConcurrency || null, cpu: null, memory: gb ? gb * 1e9 : null, memoryAtLeast: !!gb && gb >= 8, freeDisk: null, gpu: chipFromRenderer(webglRenderer()), chips: [], software: false, hardwareEncoder: null };
+    // The Android application offers no `info`: the browser's facts, named as its own.
+    const android = n.platform === 'android';
+    facts = { app: android ? n.version : null, appKind: android ? 'android' : undefined, cores: navigator.hardwareConcurrency || null, cpu: null, memory: gb ? gb * 1e9 : null, memoryAtLeast: !!gb && gb >= 8, freeDisk: null, gpu: chipFromRenderer(webglRenderer()), chips: [], software: false, hardwareEncoder: null };
   }
   return { ...facts, hardwareEncoder: await hardwareEncoder() };
 }

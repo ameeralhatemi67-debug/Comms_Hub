@@ -148,6 +148,13 @@ and simulation files are never staged.
 
 ### A1. Site preparation, no app needed (S to M)
 
+> **Changed while building, 2026-10-26** (recorded in `progress.md`):
+> - Safe areas are handled by the shell, not by the site's CSS. In A2 the shell pads its web view by the
+>   system bars and the keyboard, so the site's styles are unchanged and no `viewport-fit=cover` is added
+>   (that would change iPhone Safari today).
+> - The safe-area check moves to A2's emulator check.
+> - The sign-in links fix covers the desktop application too, which had the same fault.
+
 - **`src/lib/native/index.ts`:** new features in `Feature`/`FEATURES`: `push`, `appUpdate`, `download`,
   `share`, `incoming`, `upload`, `capture` and `lock`, with tests in `tests/native.test.mjs`.
 - **Platform-aware native interface**

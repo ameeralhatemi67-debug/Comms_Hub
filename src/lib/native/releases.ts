@@ -1,9 +1,11 @@
-// The desktop application's releases, as the site sees them (Desktop_App_Plan.md 6 and 7.4, phase D3;
-// decision D-6). The application updates itself from the same public bucket; the site reads its
-// latest.yml only to offer the download on «الحساب» and to say when a newer version exists. The oldest
-// application the site still works with is fixed here, with the site: when a change of the site needs a
-// newer bridge, this is raised and an older application is asked to update. Pure.
-import { compareVersions } from './index.ts';
+// The applications' releases, as the site sees them. The desktop application (Desktop_App_Plan.md 6 and
+// 7.4, phase D3; decision D-6) updates itself from its public bucket; the site reads its latest.yml only to
+// offer the download on «الحساب» and to say when a newer version exists. The Android application
+// (Android_Build_Plan.md A3) reads latest.json from its own public bucket, and the site shows the update
+// window from the same file. The oldest application of each kind the site still works with is fixed here,
+// with the site: when a change of the site needs a newer bridge, it is raised and an older application is
+// asked to update. Pure.
+import { compareVersions, type Platform } from './index.ts';
 
 /** The same address as PRODUCTION_FEED in desktop/src/update.ts (tests/native.test.mjs holds them equal). */
 export const DESKTOP_FEED = 'https://hrghmioxvgkjpnydrxrk.supabase.co/storage/v1/object/public/desktop-releases/windows-x64';
@@ -29,8 +31,78 @@ export function parseLatest(text: string): Release | null {
 
 export const downloadUrl = (r: Release) => `${DESKTOP_FEED}/${encodeURIComponent(r.file)}`;
 
-/** An application older than the site needs. */
-export const tooOld = (version: string | null) => !!version && compareVersions(version, MINIMUM_DESKTOP) < 0;
+/** An application older than the site needs: the desktop's unless another platform is named. */
+export const tooOld = (version: string | null, platform: Platform = 'desktop') => {
+  const minimum = platform === 'desktop' ? MINIMUM_DESKTOP : platform === 'android' ? MINIMUM_ANDROID : null;
+  return !!version && !!minimum && compareVersions(version, minimum) < 0;
+};
+
+// --- the Android application (Android_Build_Plan.md A3) ---------------------------------------------
+
+/** The same address as the feed compiled into mobile/ (tests/native.test.mjs holds them equal). */
+export const ANDROID_FEED = 'https://hrghmioxvgkjpnydrxrk.supabase.co/storage/v1/object/public/android-releases/android';
+
+/** The oldest Android application the site works with fully. */
+export const MINIMUM_ANDROID = '0.1.0';
+
+export type AndroidRelease = {
+  version: string;
+  /** Android's own whole number for the version, which only grows. */
+  code: number;
+  file: string;
+  size: number;
+  sha256: string;
+  /** The oldest version this release still lets run without updating, or null for no such floor. */
+  minimum: string | null;
+  /** Short lines of «ما الجديد», in Arabic, as the owner wrote them. */
+  notes: string[];
+  date: string | null;
+};
+
+const SEMVER = /^\d+\.\d+\.\d+$/;
+
+/** latest.json as mobile/README.md tells the owner to write it, the fields the page needs; null for anything else. */
+export function parseAndroidLatest(text: string): AndroidRelease | null {
+  if (typeof text !== 'string' || text.length > 20_000) return null;
+  let v: Record<string, unknown>;
+  try {
+    const parsed: unknown = JSON.parse(text);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    v = parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  const { version, code, file, size, sha256, minimum, notes, date } = v;
+  if (typeof version !== 'string' || !SEMVER.test(version)) return null;
+  if (typeof code !== 'number' || !Number.isSafeInteger(code) || code < 1) return null;
+  if (typeof file !== 'string' || !/^[\w.-]+\.apk$/.test(file) || file.startsWith('.')) return null;
+  if (typeof size !== 'number' || !Number.isSafeInteger(size) || size < 1 || size > 300_000_000) return null;
+  if (typeof sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(sha256)) return null;
+  if (minimum !== undefined && minimum !== null && (typeof minimum !== 'string' || !SEMVER.test(minimum))) return null;
+  const lines = Array.isArray(notes) ? notes.filter((n): n is string => typeof n === 'string').map((n) => n.trim().slice(0, 200)).filter(Boolean).slice(0, 8) : [];
+  return {
+    version,
+    code,
+    file,
+    size,
+    sha256,
+    minimum: typeof minimum === 'string' ? minimum : null,
+    notes: lines,
+    date: typeof date === 'string' && !Number.isNaN(Date.parse(date)) ? date : null,
+  };
+}
+
+export const apkDownloadUrl = (r: AndroidRelease) => `${ANDROID_FEED}/${encodeURIComponent(r.file)}`;
+
+/**
+ * Whether an Android application must update before going on: older than the site needs, or older than
+ * the floor the newest release sets. Optional otherwise.
+ */
+export function apkMustUpdate(version: string | null, latest: AndroidRelease | null): boolean {
+  if (!version) return false;
+  if (tooOld(version, 'android')) return true;
+  return !!latest?.minimum && compareVersions(version, latest.minimum) < 0;
+}
 
 /** A newer release than the one running. */
 export const newer = (r: Release | null, version: string | null) => !!r && !!version && compareVersions(r.version, version) > 0;

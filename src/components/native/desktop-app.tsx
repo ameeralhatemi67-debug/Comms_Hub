@@ -13,7 +13,7 @@ import { HOLD } from '@/lib/kit/hold-reasons';
 import { native } from '@/lib/native';
 import { downloadUrl, newer, parseLatest, tooOld, updateLine, DESKTOP_FEED, type Release, type UpdateView } from '@/lib/native/releases';
 import { formatBytes } from '@/lib/studio/support';
-import { useNativeFeature, useNativeVersion } from './use-native';
+import { useNativeFeature, useNativePlatform, useNativeVersion } from './use-native';
 
 function useLatest(): Release | null | undefined {
   const [latest, setLatest] = useState<Release | null | undefined>(undefined);
@@ -32,7 +32,8 @@ function useLatest(): Release | null | undefined {
 
 export function DesktopAppPanel() {
   const version = useNativeVersion();
-  const inApp = version !== null;
+  // Only the desktop application speaks of itself here; the Android application has its own panel.
+  const inApp = useNativePlatform() === 'desktop' && version !== null;
   const canUpdate = useNativeFeature('update');
   const latest = useLatest();
   const [update, setUpdate] = useState<UpdateView | null>(null);
@@ -118,7 +119,8 @@ export function DesktopAppPanel() {
 /** Across the top of every page, only inside an application older than the site needs. */
 export function DesktopUpdateBanner() {
   const version = useNativeVersion();
-  if (!tooOld(version)) return null;
+  const platform = useNativePlatform();
+  if (platform !== 'desktop' || !tooOld(version, 'desktop')) return null;
   return (
     <div className="warning dv-banner" role="status">
       <MonitorDown aria-hidden="true" />

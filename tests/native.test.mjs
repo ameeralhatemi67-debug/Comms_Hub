@@ -370,3 +370,132 @@ test('D6: a studio panel window is its own address, and only that address leaves
   const app = fs.readFileSync('desktop/src/windows.ts', 'utf8');
   assert.ok(app.includes('return `${origin}/motion/studio/${project}/${panel}`;'), 'the application opens exactly that address');
 });
+
+// A1: the Android application as the site sees it (Android_Build_Plan.md A1; MVP_draft.md 64).
+const a1 = Object.freeze({ platform: 'android', shell: 'capacitor', version: '0.1.0', bridge: 1 });
+
+test('A1: the Android shell is read, and offers nothing until its methods are there', () => {
+  const n = nativeOf(a1);
+  assert.equal(n.platform, 'android');
+  assert.equal(n.version, '0.1.0');
+  for (const f of Object.keys(FEATURES)) assert.equal(n.has(f), false, `bare Android shell has no ${f}`);
+  const full = {
+    ...a1,
+    appUpdate: { status: async () => ({}), start: async () => 'started' },
+    download: { save: async () => true, open: async () => true },
+    share: { file: async () => true },
+    push: { state: async () => 'prompt', request: async () => 'granted', token: async () => null, onOpen: () => undefined, onReceive: () => undefined },
+    links: { verified: async () => true },
+    lock: { state: async () => ({ available: true, on: false }), set: async () => true },
+    capture: { take: async () => null },
+    incoming: { take: async () => [] },
+    upload: { start: async () => 'u1', status: async () => ({}), cancel: async () => true },
+  };
+  const all = nativeOf(full);
+  for (const f of ['appUpdate', 'download', 'share', 'push', 'links', 'lock', 'capture', 'incoming', 'upload']) assert.equal(all.has(f), true, f);
+  for (const f of ['notify', 'update', 'files', 'media', 'windows']) assert.equal(all.has(f), false, `the desktop feature ${f} is not the phone's`);
+  assert.equal(nativeOf({ ...full, push: { ...full.push, onReceive: undefined } }).has('push'), false, 'every method of a feature');
+  assert.equal(nativeOf(d2().bridge).has('appUpdate'), false, 'the desktop offers none of them');
+});
+
+test('A1: each application has its own floor, and a browser none', async () => {
+  const { tooOld, MINIMUM_DESKTOP, MINIMUM_ANDROID } = await import('../src/lib/native/releases.ts');
+  assert.equal(MINIMUM_ANDROID, '0.1.0');
+  assert.equal(tooOld('0.1.0'), true, 'the desktop when no platform is named, as before');
+  assert.equal(tooOld('0.1.0', 'android'), false, 'the first Android release is enough');
+  assert.equal(tooOld('0.0.9', 'android'), true);
+  assert.equal(tooOld(MINIMUM_DESKTOP, 'desktop'), false);
+  assert.equal(tooOld('0.0.1', 'web'), false);
+  assert.equal(tooOld('0.0.1', 'ios'), false, 'no iPhone application yet');
+});
+
+const apk = {
+  version: '0.2.0',
+  code: 200,
+  file: 'CommsHub-0.2.0.apk',
+  size: 9_876_543,
+  sha256: 'a'.repeat(64),
+  minimum: '0.1.0',
+  notes: ['إشعارات «يحتاج قرارك» على شاشة القفل.', '  '],
+  date: '2026-11-01T08:00:00.000Z',
+};
+
+test('A1: latest.json of the Android application, and nothing else', async () => {
+  const { parseAndroidLatest, apkDownloadUrl, ANDROID_FEED } = await import('../src/lib/native/releases.ts');
+  const r = parseAndroidLatest(JSON.stringify(apk));
+  assert.deepEqual(r, { ...apk, notes: ['إشعارات «يحتاج قرارك» على شاشة القفل.'] });
+  assert.equal(apkDownloadUrl(r), `${ANDROID_FEED}/CommsHub-0.2.0.apk`);
+  assert.equal(parseAndroidLatest(JSON.stringify({ ...apk, minimum: undefined, notes: undefined, date: 'soon' })).minimum, null);
+  const bad = [
+    '',
+    'not json',
+    '[]',
+    JSON.stringify({ ...apk, version: 'latest' }),
+    JSON.stringify({ ...apk, code: 0 }),
+    JSON.stringify({ ...apk, code: 1.5 }),
+    JSON.stringify({ ...apk, file: '../evil.apk' }),
+    JSON.stringify({ ...apk, file: 'https://example.com/x.apk' }),
+    JSON.stringify({ ...apk, file: 'CommsHub.exe' }),
+    JSON.stringify({ ...apk, size: 0 }),
+    JSON.stringify({ ...apk, size: 400_000_000 }),
+    JSON.stringify({ ...apk, sha256: 'A'.repeat(64) }),
+    JSON.stringify({ ...apk, sha256: 'abc' }),
+    JSON.stringify({ ...apk, minimum: 'any' }),
+    'x'.repeat(30000),
+  ];
+  for (const b of bad) assert.equal(parseAndroidLatest(b), null, b.slice(0, 60));
+  assert.equal(parseAndroidLatest(JSON.stringify({ ...apk, notes: Array(12).fill('سطر') })).notes.length, 8, 'at most eight lines');
+});
+
+test('A1: an Android application must update when older than the site needs or than the floor of the newest release', async () => {
+  const { apkMustUpdate, parseAndroidLatest } = await import('../src/lib/native/releases.ts');
+  const r = parseAndroidLatest(JSON.stringify({ ...apk, minimum: '0.1.5' }));
+  assert.equal(apkMustUpdate('0.1.4', r), true, 'below the floor of the newest release');
+  assert.equal(apkMustUpdate('0.1.5', r), false);
+  assert.equal(apkMustUpdate('0.0.9', null), true, 'below the floor of the site itself, feed or not');
+  assert.equal(apkMustUpdate(null, r), false, 'a browser');
+});
+
+test('A1 and the desktop: a link mailed from the sign-in screen comes back only where it can be used', async () => {
+  const { mailReturn, BROWSER_ONLY } = await import('../src/lib/native/entry.ts');
+  const o = 'https://comms-hub-three.vercel.app';
+  assert.deepEqual(mailReturn('web', false, o), { to: `${o}/` }, 'a browser: as before');
+  assert.deepEqual(mailReturn('desktop', false, o), { browser: true }, 'the desktop sends it to the system browser, which has no part of the request');
+  assert.deepEqual(mailReturn('android', false, o), { browser: true }, 'before its links are verified');
+  assert.deepEqual(mailReturn('android', true, o), { to: `${o}/app/return` });
+  assert.deepEqual(mailReturn('ios', true, o), { browser: true });
+  assert.match(BROWSER_ONLY, /^يكتمل هذا من المتصفح/);
+});
+
+test('A1: /app/return forwards to the root with the same query, and nowhere else', async () => {
+  const { GET } = await import('../src/app/app/return/route.ts');
+  const at = (url) => GET(new Request(url));
+  const one = at('https://comms-hub-three.vercel.app/app/return?code=abc&type=recovery');
+  assert.equal(one.status, 303);
+  assert.equal(one.headers.get('location'), '/?code=abc&type=recovery');
+  assert.equal(at('https://comms-hub-three.vercel.app/app/return').headers.get('location'), '/');
+  assert.equal(at('https://comms-hub-three.vercel.app/app/return?next=//evil.example').headers.get('location'), '/?next=//evil.example', 'a query, never a place to go');
+  assert.equal(one.headers.get('cache-control'), 'no-store');
+});
+
+test('A1: the sign-in screen asks where a mailed link returns, for every link it mails', async () => {
+  const fs = await import('node:fs');
+  const gate = fs.readFileSync('src/components/auth-gate.tsx', 'utf8');
+  assert.equal(gate.includes('`${window.location.origin}/`,'), false, 'no fixed return address left in a request');
+  assert.equal((gate.match(/emailRedirectTo: returnTo\(\)/g) ?? []).length, 2, 'first sign-in and the confirmation sent again');
+  assert.equal((gate.match(/\bredirectTo: returnTo\(\)/g) ?? []).length, 1, 'and the password reset');
+  assert.equal((gate.match(/if \(browserOnly\) return fail\(BROWSER_ONLY\);/g) ?? []).length, 3, 'nothing is mailed from an application that cannot receive it');
+});
+
+test('A1: «معلومات الجهاز» names the Android application as its own', () => {
+  const lines = deviceLines({ app: '0.1.0', appKind: 'android', cores: 8, cpu: null, memory: null, memoryAtLeast: false, freeDisk: null, gpu: null, chips: [], software: false, hardwareEncoder: null });
+  assert.equal(lines[0].value, 'تطبيق الهاتف، الإصدار 0.1.0');
+  assert.equal(deviceLines({ ...factsFromApp(laptopInfo) })[0].value, 'تطبيق سطح المكتب، الإصدار 0.2.0', 'the desktop unchanged');
+});
+
+test('A1: no emoji in the new files', async () => {
+  const fs = await import('node:fs');
+  for (const f of ['src/lib/native/entry.ts', 'src/app/app/return/route.ts', 'src/components/auth-gate.tsx', 'src/components/native/use-native.ts']) {
+    assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
+  }
+});

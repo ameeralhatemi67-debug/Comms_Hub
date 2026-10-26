@@ -30,8 +30,10 @@ related:
 
 The owner chose a sideloaded APK as the pre-launch Android download while the Google Play account is verified, and approved `Android_Build_Plan.md` (id `sa.commshub.app`, without the studio; `MVP_draft.md` section 64).
 
-- **Done.** A0: decisions recorded, plan and specification written.
-- **Next.** A1, site preparation: the native features, platform-aware panels, safe areas, and the sign-in links inside the application.
+- **Done.**
+  - A0: decisions recorded, plan and specification written.
+  - A1: the native contract for Android, platform-aware panels, and the sign-in links inside an application (which also fixes the desktop's). Evidence: `npm test` 546 of 546, `qa/android-site.cjs` 12 of 12.
+- **Next.** A2: the Capacitor shell in `mobile/` and its gate on the emulator.
 - **Owner steps waiting.**
   - Make the release keystore, using the command in `mobile/README.md` (written in A2).
   - Create a Firebase project for A5.

@@ -10,6 +10,8 @@ export type GpuChip = { name: string; vendor: string; active: boolean };
 export type DeviceFacts = {
   /** The application's version, or null in a browser. */
   app: string | null;
+  /** Which application that version belongs to; the desktop's when not said. */
+  appKind?: 'desktop' | 'android';
   cores: number | null;
   cpu: string | null;
   /** Bytes; a browser rounds it and stops at 8 GB. */
@@ -67,7 +69,8 @@ export function needsChipGuide(f: DeviceFacts): boolean {
 }
 
 export function deviceLines(f: DeviceFacts): DeviceLine[] {
-  const lines: DeviceLine[] = [{ label: 'يعمل في', value: f.app ? `تطبيق سطح المكتب، الإصدار ${f.app}` : 'المتصفح' }];
+  const where = f.appKind === 'android' ? 'تطبيق الهاتف' : 'تطبيق سطح المكتب';
+  const lines: DeviceLine[] = [{ label: 'يعمل في', value: f.app ? `${where}، الإصدار ${f.app}` : 'المتصفح' }];
   if (f.cpu || f.cores) lines.push({ label: 'المعالج', value: [f.cpu, f.cores ? `${f.cores} نواة` : null].filter(Boolean).join('، ') });
   if (f.memory) lines.push({ label: 'الذاكرة', value: `${f.memoryAtLeast ? 'نحو ' : ''}${formatBytes(f.memory)}${f.memoryAtLeast ? ' أو أكثر' : ''}` });
   if (f.freeDisk !== null) lines.push({ label: 'المساحة الحرة', value: `${formatBytes(f.freeDisk)} على قرص بيانات التطبيق`, ok: f.freeDisk >= 20e9 });

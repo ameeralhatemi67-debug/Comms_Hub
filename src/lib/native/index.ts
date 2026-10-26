@@ -1,14 +1,46 @@
 // The native contract shared by every shell around the site (Mobile_Apps_Plan.md 5.2; Desktop_App_Plan.md
-// 5.2). The site asks here what the shell it runs in can do, and never talks to a shell any other way.
-// The desktop application exposes window.commsHubNative on the site's own address only; in a browser
-// there is none, and every answer is the browser's. Each feature is detected before use, so an older
-// application keeps working against a newer site, and a browser does exactly what it did before.
-// Plain TypeScript; the detection is tested in tests/native.test.mjs.
+// 5.2; Android_Build_Plan.md). The site asks here what the shell it runs in can do, and never talks to a
+// shell any other way. The desktop and Android applications expose window.commsHubNative on the site's
+// own address only; in a browser there is none, and every answer is the browser's. Each feature is
+// detected before use, so an older application keeps working against a newer site, and a browser does
+// exactly what it did before. Plain TypeScript; the detection is tested in tests/native.test.mjs.
 
 export type Platform = 'web' | 'desktop' | 'android' | 'ios';
 
-/** What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3), files, cache and clearData from 3 (D4), media from 4 (D5), windows from 5 (D6). */
-export type Feature = 'info' | 'keepAwake' | 'busy' | 'notify' | 'badge' | 'update' | 'files' | 'cache' | 'clearData' | 'media' | 'windows';
+/**
+ * What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3),
+ * files, cache and clearData from 3 (D4), media from 4 (D5), windows from 5 (D6). The Android application
+ * offers its own: appUpdate (A3), download and share (A4), push (A5), links and lock (A6), capture,
+ * incoming and upload (A7).
+ */
+export type Feature =
+  | 'info'
+  | 'keepAwake'
+  | 'busy'
+  | 'notify'
+  | 'badge'
+  | 'update'
+  | 'files'
+  | 'cache'
+  | 'clearData'
+  | 'media'
+  | 'windows'
+  | 'appUpdate'
+  | 'download'
+  | 'share'
+  | 'push'
+  | 'links'
+  | 'lock'
+  | 'capture'
+  | 'incoming'
+  | 'upload';
+
+/** A release of the Android application as its update asks for it: the shell builds the address itself, from its compiled feed. */
+export type NativeApkRelease = { version: string; file: string; size: number; sha256: string };
+/** A file of the site the Android application saves, opens or shares: a path on the page's own address, never a full address. */
+export type NativeSiteFile = { path: string; name: string };
+/** A file the Android application holds for the page (from the camera or shared in): a token, never a path. */
+export type NativeHeldFile = { token: string; name: string; size: number; type: string };
 
 /** A file from «هذا الجهاز» as the desktop application names it: never its path. */
 export type NativeFile = { token: string; name: string; size: number; type: string; media: 'video' | 'audio' | 'image'; modified: number };
@@ -75,6 +107,22 @@ type Bridge = {
     cancel?: (name: string) => Promise<boolean>;
     onProgress?: (fn: ((p: { name: string; done: number; total: number }) => void) | null) => void;
   };
+  // --- the Android application (Android_Build_Plan.md) ---
+  appUpdate?: { status?: () => Promise<unknown>; start?: (release: NativeApkRelease) => Promise<'started' | 'busy' | 'refused'> };
+  download?: { save?: (file: NativeSiteFile) => Promise<boolean>; open?: (file: NativeSiteFile) => Promise<boolean> };
+  share?: { file?: (file: NativeSiteFile) => Promise<boolean> };
+  push?: {
+    state?: () => Promise<'granted' | 'denied' | 'prompt'>;
+    request?: () => Promise<'granted' | 'denied' | 'prompt'>;
+    token?: () => Promise<string | null>;
+    onOpen?: (fn: ((go: string) => void) | null) => void;
+    onReceive?: (fn: (() => void) | null) => void;
+  };
+  links?: { verified?: () => Promise<boolean> };
+  lock?: { state?: () => Promise<{ available: boolean; on: boolean }>; set?: (on: boolean) => Promise<boolean> };
+  capture?: { take?: (kind: 'photo' | 'video') => Promise<NativeHeldFile | null> };
+  incoming?: { take?: () => Promise<NativeHeldFile[]> };
+  upload?: { start?: (ask: { token: string; session: string }) => Promise<string>; status?: () => Promise<unknown>; cancel?: (id: string) => Promise<boolean> };
 };
 
 export type Native = {
@@ -100,6 +148,15 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   clearData: ['data.clear'],
   media: ['media.probe', 'media.copies', 'media.proxy', 'media.convert', 'media.cancel', 'media.onProgress'],
   windows: ['windows.screens', 'windows.popOut', 'windows.close'],
+  appUpdate: ['appUpdate.status', 'appUpdate.start'],
+  download: ['download.save', 'download.open'],
+  share: ['share.file'],
+  push: ['push.state', 'push.request', 'push.token', 'push.onOpen', 'push.onReceive'],
+  links: ['links.verified'],
+  lock: ['lock.state', 'lock.set'],
+  capture: ['capture.take'],
+  incoming: ['incoming.take'],
+  upload: ['upload.start', 'upload.status', 'upload.cancel'],
 });
 
 const SHELLS = ['desktop', 'android', 'ios'];
