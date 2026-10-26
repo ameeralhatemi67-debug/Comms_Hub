@@ -104,7 +104,7 @@ function applyGain(b: AudioBuffer, gain: number): AudioBuffer {
 export async function exportVideo(
   doc: ProjectDoc,
   pool: MediaPool,
-  opts: { short: Short; format: VideoFormat; name: string; onProgress?: (p: ExportProgress) => void; signal?: AbortSignal; /** One gain for the whole sound (loudness.ts normalizeGain). */ gain?: number; /** «مسودة» across the picture (downloads only). */ watermark?: string | null },
+  opts: { short: Short; format: VideoFormat; name: string; onProgress?: (p: ExportProgress) => void; signal?: AbortSignal; /** One gain for the whole sound (loudness.ts normalizeGain). */ gain?: number; /** «مسودة» across the picture (downloads only). */ watermark?: string | null; /** A file the person chose (desktop application): written there directly. */ saveTo?: FileSystemFileHandle },
 ): Promise<ExportResult> {
   const mb = await import('mediabunny');
   // every font a text uses is ready before the first frame is drawn (fonts.ts: loaded only when used)
@@ -123,7 +123,7 @@ export async function exportVideo(
   if (sound && acodec === 'opus') sound = await mb.canEncodeAudio('opus');
   const mime = opts.format === 'mp4' ? 'video/mp4' : 'video/webm';
   opts.onProgress?.({ phase: 'prepare', done: 0, total });
-  const target = await openTarget(opts.name, mime, estimateBytes(doc, opts.short));
+  const target = await openTarget(opts.name, mime, estimateBytes(doc, opts.short), opts.saveTo);
   const output = new mb.Output({ format: opts.format === 'mp4' ? new mb.Mp4OutputFormat({ fastStart: false }) : new mb.WebMOutputFormat(), target: target.target });
   const canvas = document.createElement('canvas');
   canvas.width = w;

@@ -1,0 +1,462 @@
+{
+  "script": "qa/desktop-shell.cjs",
+  "run": "2026-10-21T01:30:52.434Z",
+  "version": "0.6.0",
+  "packages": {
+    "installer": "desktop/dist/release/CommsHub-Setup-0.6.0-x64.exe",
+    "installerBytes": 161347124,
+    "installerSize": "153.9 MB",
+    "unpackedBytes": 493625137,
+    "unpackedSize": "470.8 MB"
+  },
+  "fuses": {
+    "release": {
+      "RunAsNode": false,
+      "EnableCookieEncryption": true,
+      "EnableNodeOptionsEnvironmentVariable": false,
+      "EnableNodeCliInspectArguments": false,
+      "EnableEmbeddedAsarIntegrityValidation": true,
+      "OnlyLoadAppFromAsar": true,
+      "LoadBrowserProcessSpecificV8Snapshot": false,
+      "GrantFileProtocolExtraPrivileges": true,
+      "WasmTrapHandlers": true
+    },
+    "dev": {
+      "RunAsNode": false,
+      "EnableCookieEncryption": true,
+      "EnableNodeOptionsEnvironmentVariable": false,
+      "EnableNodeCliInspectArguments": true,
+      "EnableEmbeddedAsarIntegrityValidation": true,
+      "OnlyLoadAppFromAsar": true,
+      "LoadBrowserProcessSpecificV8Snapshot": false,
+      "GrantFileProtocolExtraPrivileges": true,
+      "WasmTrapHandlers": true
+    },
+    "releaseRaw": "Analyzing app: CommsHub.exe\nFuse Version: v1\n  RunAsNode is Disabled\n  EnableCookieEncryption is Enabled\n  EnableNodeOptionsEnvironmentVariable is Disabled\n  EnableNodeCliInspectArguments is Disabled\n  EnableEmbeddedAsarIntegrityValidation is Enabled\n  OnlyLoadAppFromAsar is Enabled\n  LoadBrowserProcessSpecificV8Snapshot is Disabled\n  GrantFileProtocolExtraPrivileges is Enabled\n  WasmTrapHandlers is Enabled"
+  },
+  "install": {
+    "installDir": "C:\\Users\\User\\AppData\\Local\\Programs\\sa.commshub.desktop",
+    "seconds": 14.5,
+    "installedBytes": 493789430,
+    "installedSize": "470.9 MB",
+    "files": 34
+  },
+  "checks": [
+    {
+      "name": "port 3000 is free for the allowed fixture",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the connection screen appears when the address cannot be reached",
+      "pass": true,
+      "detail": "{\"dir\":\"rtl\",\"lang\":\"ar\",\"h1\":\"تعذّر الوصول إلى المركز\",\"button\":\"إعادة المحاولة\",\"bridge\":\"undefined\",\"title\":\"تعذّر الوصول إلى المركز\"}"
+    },
+    {
+      "name": "the connection screen is Arabic, right to left, with «إعادة المحاولة»",
+      "pass": true,
+      "detail": "{\"dir\":\"rtl\",\"lang\":\"ar\",\"h1\":\"تعذّر الوصول إلى المركز\",\"button\":\"إعادة المحاولة\",\"bridge\":\"undefined\",\"title\":\"تعذّر الوصول إلى المركز\"}"
+    },
+    {
+      "name": "the connection screen gets no bridge",
+      "pass": true,
+      "detail": "undefined"
+    },
+    {
+      "name": "«إعادة المحاولة» loads the site once it answers",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "the bridge exists on an allowed page: who the application is, then the groups of version 1",
+      "pass": true,
+      "detail": "{\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.6.0\",\"bridge\":5},\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"windows\",\"media\"],\"frozen\":true}"
+    },
+    {
+      "name": "the bridge object cannot be changed by the page",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "a frame on the same address gets no bridge",
+      "pass": true,
+      "detail": "undefined"
+    },
+    {
+      "name": "a frame from a foreign address gets no bridge",
+      "pass": true,
+      "detail": "undefined"
+    },
+    {
+      "name": "a foreign link opens in the system browser",
+      "pass": true,
+      "detail": "[\"http://127.0.0.1:61897/landing\"]"
+    },
+    {
+      "name": "a foreign link leaves the window where it was",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "window.open of a foreign address opens in the system browser and makes no window",
+      "pass": true,
+      "detail": "{\"opened\":[\"http://127.0.0.1:61897/landing\",\"http://127.0.0.1:61897/popup\"],\"windows\":1}"
+    },
+    {
+      "name": "a mail link goes to the system",
+      "pass": true,
+      "detail": "[\"http://127.0.0.1:61897/landing\",\"http://127.0.0.1:61897/popup\",\"mailto:team@example.com?subject=qa\"]"
+    },
+    {
+      "name": "a redirect out of the list goes to the system browser, the window stays",
+      "pass": true,
+      "detail": "{\"opened\":[\"http://127.0.0.1:61897/landing\",\"http://127.0.0.1:61897/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:61897/redirected\"],\"url\":\"http://127.0.0.1:3000/\"}"
+    },
+    {
+      "name": "any other kind of address (ms-settings:, file:) is refused: nothing opens, the window stays",
+      "pass": true,
+      "detail": "{\"opened\":[\"http://127.0.0.1:61897/landing\",\"http://127.0.0.1:61897/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:61897/redirected\"],\"url\":\"http://127.0.0.1:3000/\"}"
+    },
+    {
+      "name": "the foreign pages were never loaded inside the application",
+      "pass": true,
+      "detail": "[\"/frame\"]"
+    },
+    {
+      "name": "a link on the list stays in the window",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/second"
+    },
+    {
+      "name": "window.open on the list opens a window of the application, with the bridge and the same session",
+      "pass": true,
+      "detail": "{\"url\":\"http://127.0.0.1:3000/second\",\"bridge\":\"object\",\"cookie\":\"qa=1\",\"h1\":\"الصفحة الثانية\"}"
+    },
+    {
+      "name": "the first window stays where it was",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "an outside connection first shows the Arabic note, verbatim, over the window",
+      "pass": true,
+      "detail": "{\"text\":\"يكتمل الربط في المتصفح. سجّل الدخول إلى المركز هناك إن طُلب منك، ثم ارجع إلى التطبيق.\",\"dir\":\"rtl\",\"bridge\":\"undefined\",\"modal\":[1]}"
+    },
+    {
+      "name": "the note gets no bridge",
+      "pass": true,
+      "detail": "undefined"
+    },
+    {
+      "name": "«متابعة في المتصفح» opens /api/drive/connect in the system browser and closes the note",
+      "pass": true,
+      "detail": "[\"http://127.0.0.1:61897/landing\",\"http://127.0.0.1:61897/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:61897/redirected\",\"http://127.0.0.1:3000/api/drive/connect\"]"
+    },
+    {
+      "name": "«إلغاء» closes the note and opens nothing (a platform connection started by the page)",
+      "pass": true,
+      "detail": "[\"http://127.0.0.1:61897/landing\",\"http://127.0.0.1:61897/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:61897/redirected\",\"http://127.0.0.1:3000/api/drive/connect\"]"
+    },
+    {
+      "name": "/api/onedrive/connect goes to the system browser the same way",
+      "pass": true,
+      "detail": "[\"http://127.0.0.1:61897/landing\",\"http://127.0.0.1:61897/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:61897/redirected\",\"http://127.0.0.1:3000/api/drive/connect\",\"http://127.0.0.1:3000/api/onedrive/connect\"]"
+    },
+    {
+      "name": "no connection route was ever loaded inside the application",
+      "pass": true,
+      "detail": "[\"/\",\"/frame\",\"/redirect-out\",\"/second\",\"/second\"]"
+    },
+    {
+      "name": "after the connections the window is still where it was",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "the microphone is granted (Chromium's fake device)",
+      "pass": true,
+      "detail": "granted:audio"
+    },
+    {
+      "name": "the camera is refused",
+      "pass": true,
+      "detail": "refused:NotAllowedError"
+    },
+    {
+      "name": "the camera is refused even asked for together with the microphone",
+      "pass": true,
+      "detail": "refused:NotAllowedError"
+    },
+    {
+      "name": "notifications are granted",
+      "pass": true,
+      "detail": "granted"
+    },
+    {
+      "name": "the clipboard is granted (read, by query, so nothing on this laptop's clipboard is touched)",
+      "pass": true,
+      "detail": "granted"
+    },
+    {
+      "name": "location is refused",
+      "pass": true,
+      "detail": "refused:1"
+    },
+    {
+      "name": "MIDI is refused",
+      "pass": true,
+      "detail": "refused:NotAllowedError"
+    },
+    {
+      "name": "permissions not on the list are refused too (persistent storage, the screen wake lock)",
+      "pass": true,
+      "detail": "{\"persist\":false,\"wake\":\"refused:NotAllowedError\"}"
+    },
+    {
+      "name": "HID offers no device",
+      "pass": true,
+      "detail": "{\"hid\":\"devices:0\",\"serial\":\"refused:NotFoundError\",\"usb\":\"refused:NotFoundError\",\"bt\":\"refused:NotFoundError\",\"full\":\"granted\"}"
+    },
+    {
+      "name": "serial is refused",
+      "pass": true,
+      "detail": "{\"hid\":\"devices:0\",\"serial\":\"refused:NotFoundError\",\"usb\":\"refused:NotFoundError\",\"bt\":\"refused:NotFoundError\",\"full\":\"granted\"}"
+    },
+    {
+      "name": "USB is refused",
+      "pass": true,
+      "detail": "{\"hid\":\"devices:0\",\"serial\":\"refused:NotFoundError\",\"usb\":\"refused:NotFoundError\",\"bt\":\"refused:NotFoundError\",\"full\":\"granted\"}"
+    },
+    {
+      "name": "Bluetooth is refused",
+      "pass": true,
+      "detail": "{\"hid\":\"devices:0\",\"serial\":\"refused:NotFoundError\",\"usb\":\"refused:NotFoundError\",\"bt\":\"refused:NotFoundError\",\"full\":\"granted\"}"
+    },
+    {
+      "name": "full screen is granted to the page",
+      "pass": true,
+      "detail": "{\"hid\":\"devices:0\",\"serial\":\"refused:NotFoundError\",\"usb\":\"refused:NotFoundError\",\"bt\":\"refused:NotFoundError\",\"full\":\"granted\"}"
+    },
+    {
+      "name": "a foreign top-level page gets no bridge",
+      "pass": true,
+      "detail": "{\"url\":\"http://127.0.0.1:61897/foreign\",\"bridge\":\"undefined\",\"mic\":\"refused:NotAllowedError\",\"notifications\":\"denied\"}"
+    },
+    {
+      "name": "a foreign page gets no permission (microphone, notifications)",
+      "pass": true,
+      "detail": "{\"bridge\":\"undefined\",\"mic\":\"refused:NotAllowedError\",\"notifications\":\"denied\"}"
+    },
+    {
+      "name": "the window runs isolated and sandboxed, without Node.js and without webview",
+      "pass": true,
+      "detail": "{\"contextIsolation\":true,\"sandbox\":true,\"nodeIntegration\":false,\"nodeIntegrationInSubFrames\":false,\"webviewTag\":false,\"menu\":null,\"persistent\":true,\"storage\":\"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\comms-hub-desktop-qa-AlnYWJ\\\\dev-profile\\\\Partitions\\\\comms-hub\"}"
+    },
+    {
+      "name": "the site lives in the persistent profile persist:comms-hub",
+      "pass": true,
+      "detail": "C:\\Users\\User\\AppData\\Local\\Temp\\comms-hub-desktop-qa-AlnYWJ\\dev-profile\\Partitions\\comms-hub"
+    },
+    {
+      "name": "there is no native menu bar",
+      "pass": true,
+      "detail": "null"
+    },
+    {
+      "name": "the user agent ends with CommsHubDesktop/<version> and carries no Electron token",
+      "pass": true,
+      "detail": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.130 Safari/537.36 CommsHubDesktop/0.6.0"
+    },
+    {
+      "name": "keys reach the page once the window has settled (a neutral F24)",
+      "pass": true,
+      "detail": "[\"F24\"]"
+    },
+    {
+      "name": "Ctrl+Z reaches the page; the application does not hold it back",
+      "pass": true,
+      "detail": "{\"page\":[\"F24\",\"Ctrl+KeyZ\",\"Ctrl+Shift+KeyZ\",\"Ctrl+KeyK\",\"KeyS\"],\"app\":{\"code\":\"KeyZ\",\"ctrl\":true,\"prevented\":false}}"
+    },
+    {
+      "name": "the studio's keys reach the page (Ctrl+Shift+Z, Ctrl+K, S)",
+      "pass": true,
+      "detail": "[\"F24\",\"Ctrl+KeyZ\",\"Ctrl+Shift+KeyZ\",\"Ctrl+KeyK\",\"KeyS\"]"
+    },
+    {
+      "name": "Ctrl with plus, minus and zero zoom in, out and back",
+      "pass": true,
+      "detail": "{\"zoomIn\":1.1,\"zoomOut\":0.9,\"zoomReset\":1}"
+    },
+    {
+      "name": "the zoom keys are the application's: held back from the page",
+      "pass": true,
+      "detail": "[{\"code\":\"Equal\",\"ctrl\":true,\"prevented\":true},{\"code\":\"Minus\",\"ctrl\":true,\"prevented\":true},{\"code\":\"Minus\",\"ctrl\":true,\"prevented\":true},{\"code\":\"Digit0\",\"ctrl\":true,\"prevented\":true}]"
+    },
+    {
+      "name": "F11 puts the window in full screen and takes it out",
+      "pass": true,
+      "detail": "{\"fullOn\":true,\"fullOff\":true}"
+    },
+    {
+      "name": "F12 opens the developer tools in a development build",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "F5 reloads the page",
+      "pass": true,
+      "detail": "1 new load(s)"
+    },
+    {
+      "name": "a download opens the save dialog in Downloads under its own name, titled «حفظ الملف»",
+      "pass": true,
+      "detail": "{\"options\":{\"window\":null,\"title\":\"حفظ الملف\",\"message\":\"\",\"buttonLabel\":\"\",\"nameFieldLabel\":\"\",\"defaultPath\":\"C:\\\\Users\\\\User\\\\Downloads\\\\comms-hub-check.txt\",\"filters\":[],\"showsTagField\":false,\"securityScopedBookmarks\":false},\"downloads\":\"C:\\\\Users\\\\User\\\\Downloads\",\"name\":\"comms-hub-check.txt\",\"state\":\"completed\"}"
+    },
+    {
+      "name": "the download completes and the window stays where it was",
+      "pass": true,
+      "detail": "{\"state\":\"completed\",\"url\":\"http://127.0.0.1:3000/\"}"
+    },
+    {
+      "name": "a second launch leaves at once and the open window is brought forward",
+      "pass": true,
+      "detail": "{\"exit\":0,\"secondInstance\":1,\"windows\":1}"
+    },
+    {
+      "name": "size and position come back at the next launch, as stored",
+      "pass": true,
+      "detail": "{\"asked\":{\"x\":140,\"y\":100,\"width\":1100,\"height\":720},\"scaleFactor\":1.25,\"applied\":{\"x\":140,\"y\":100,\"width\":1100,\"height\":720},\"stored\":{\"x\":140,\"y\":100,\"width\":1100,\"height\":720},\"back\":{\"x\":140,\"y\":100,\"width\":1100,\"height\":720}}"
+    },
+    {
+      "name": "the maximised state comes back too",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "the production sign-in page loads right to left, signed out",
+      "pass": true,
+      "detail": "{\"url\":\"https://comms-hub-three.vercel.app/\",\"dir\":\"rtl\",\"lang\":\"ar\",\"h1\":\"تسجيل الدخول\",\"password\":true,\"bridge\":\"desktop\",\"title\":\"مركز الاتصال المؤسسي\"}"
+    },
+    {
+      "name": "the production page carries the bridge (it is on the list)",
+      "pass": true,
+      "detail": "desktop"
+    },
+    {
+      "name": "a certificate the system does not trust is never accepted: the page is not shown and the screen says why",
+      "pass": true,
+      "detail": "{\"h1\":\"تعذّر التحقق من أمان الاتصال\",\"kind\":\"certificate\",\"bridge\":\"undefined\",\"served\":[]}"
+    },
+    {
+      "name": "release fuse RunAsNode is off, read back from the packaged application",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "release fuse EnableNodeOptionsEnvironmentVariable is off, read back from the packaged application",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "release fuse EnableNodeCliInspectArguments is off, read back from the packaged application",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "release fuse EnableCookieEncryption is on, read back from the packaged application",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "release fuse EnableEmbeddedAsarIntegrityValidation is on, read back from the packaged application",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "release fuse OnlyLoadAppFromAsar is on, read back from the packaged application",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "the development package differs from the release package in the inspector fuse only",
+      "pass": true,
+      "detail": "[\"EnableNodeCliInspectArguments\"]"
+    },
+    {
+      "name": "the installer runs as this user, without administrator rights, and installs",
+      "pass": true,
+      "detail": "{\"exit\":0,\"installDir\":\"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Programs\\\\sa.commshub.desktop\",\"seconds\":\"14.5\"}"
+    },
+    {
+      "name": "Start menu and desktop shortcuts carry the Arabic name",
+      "pass": true,
+      "detail": "{\"startLink\":\"C:\\\\Users\\\\User\\\\AppData\\\\Roaming\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\مركز الاتصال المؤسسي.lnk\",\"desktopLink\":\"C:\\\\Users\\\\User\\\\Desktop\\\\مركز الاتصال المؤسسي.lnk\"}"
+    },
+    {
+      "name": "Windows lists it under «مركز الاتصال المؤسسي», version 0.1.0, for this user",
+      "pass": true,
+      "detail": "{\"PSChildName\":\"dc656aed-13ec-55ab-a2e3-19f784d0109c\",\"DisplayName\":\"مركز الاتصال المؤسسي\",\"DisplayVersion\":\"0.6.0\",\"Publisher\":\"مركز الاتصال المؤسسي\",\"InstallLocation\":null}"
+    },
+    {
+      "name": "a release build refuses to start with remote debugging, and the port never opens",
+      "pass": true,
+      "detail": "{\"exited\":true,\"code\":2,\"answered\":false,\"out\":\"refused to start with --remote-debugging-port\"}"
+    },
+    {
+      "name": "every build refuses to start with --ignore-certificate-errors",
+      "pass": true,
+      "detail": "{\"code\":2,\"out\":\"refused to start with --ignore-certificate-errors\"}"
+    },
+    {
+      "name": "the Node.js inspector cannot be opened (EnableNodeCliInspectArguments off)",
+      "pass": true,
+      "detail": "{\"port\":false,\"running\":true}"
+    },
+    {
+      "name": "ELECTRON_RUN_AS_NODE does not turn it into Node.js (RunAsNode off)",
+      "pass": true,
+      "detail": "{\"marker\":false,\"startedAsApplication\":true}"
+    },
+    {
+      "name": "NODE_OPTIONS cannot load code into it (EnableNodeOptionsEnvironmentVariable off)",
+      "pass": true,
+      "detail": "{\"marker\":false,\"startedAsApplication\":true}"
+    },
+    {
+      "name": "the release application opens the production address: the site's title, and its profile holds the production site",
+      "pass": true,
+      "detail": "{\"firstTitle\":\"مركز الاتصال المؤسسي\",\"title\":\"مركز الاتصال المؤسسي\",\"partition\":\"C:\\\\Users\\\\User\\\\AppData\\\\Roaming\\\\sa.commshub.desktop\\\\Partitions\\\\comms-hub\",\"fromProduction\":true}"
+    },
+    {
+      "name": "its data folder is %APPDATA%\\sa.commshub.desktop, with the persist:comms-hub profile",
+      "pass": true,
+      "detail": "C:\\Users\\User\\AppData\\Roaming\\sa.commshub.desktop\\Partitions\\comms-hub"
+    },
+    {
+      "name": "uninstalling removes the program, both shortcuts and the Windows entry",
+      "pass": true,
+      "detail": "{\"program\":false,\"installDir\":false,\"data\":false,\"startLink\":false,\"desktopLink\":false,\"updater\":false,\"entry\":\"\"}"
+    },
+    {
+      "name": "uninstalling removes the application's data, the session included (D-11)",
+      "pass": true,
+      "detail": "{\"program\":false,\"installDir\":false,\"data\":false,\"startLink\":false,\"desktopLink\":false,\"updater\":false,\"entry\":\"\"}"
+    },
+    {
+      "name": "uninstalling removes the installer's own copy and the updater's folder too (D3, resources/installer.nsh)",
+      "pass": true,
+      "detail": "{\"program\":false,\"installDir\":false,\"data\":false,\"startLink\":false,\"desktopLink\":false,\"updater\":false,\"entry\":\"\"}"
+    }
+  ],
+  "notes": [
+    "The production sign-in page was opened signed out and left untouched; no account was used."
+  ],
+  "electron": {
+    "electron": "44.5.1",
+    "chrome": "152.0.7977.130",
+    "node": "24.21.0"
+  },
+  "total": 81,
+  "passed": 81,
+  "failed": 0
+}

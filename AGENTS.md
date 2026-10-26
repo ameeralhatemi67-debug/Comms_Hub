@@ -259,6 +259,74 @@ English, SIL Open Font License) are served by the site from `@fontsource`, never
 Its rules are held by `supabase/tests/studio_*_rules.sql`, `tests/studio-*.test.mjs` and the fixture checks
 `qa/studio-*.cjs`.
 
+The desktop application is real too, by owner directive of 2026-10-20 (`Desktop_App_Plan.md`, accepted
+with the answers of its section 11.1; `MVP_draft.md` section 63; recorded in `progress.md`). It is an
+Electron application in `desktop/`, with its own `package.json` and lockfile like `bridge/whatsapp/`,
+outside the site's typecheck and build, and for now built for Windows x64 only. It opens the live site,
+`https://comms-hub-three.vercel.app`, from an address list compiled in (a development build adds
+`http://127.0.0.1:3000`); a release build has no setting, switch or variable that widens it. It holds no
+secret: signing in is the site's own form, and the session is the site's cookie in the application's own
+profile. Its native layer is `window.commsHubNative`, which the preload exposes only when the top-level
+page is on the compiled list, never in frames. Every main-process handler checks its sender's frame
+address through `desktop/src/sender.ts`. There is no sign-in bypass, stub session or stored password in
+it or in its checks. It decides nothing about people: every page, rule and check stays the website's.
+Nothing is scheduled in the site because of it. Its rules are plain functions in `desktop/src/`, held by
+`desktop/tests` and by `qa/desktop-shell.cjs`, which drives the packaged application. Bridge version 1
+(D2, `MVP_draft.md` 63.1) has `info`, `power`, `life` and `notify`: every handler is registered in
+`desktop/src/native.ts` through `guard()`, and every argument is checked by `desktop/src/bridge.ts` (a
+fixed list of reasons, short plain text, links only to paths on the page's own address); no method takes
+a file path or a command. The site reaches a shell only through `src/lib/native/` (shared with the phone
+applications, `Mobile_Apps_Plan.md` 5.2), and detects each feature before use, so a browser and an older
+application keep working. Only «يحتاج قرارك» items become native notices. What a minimised window really
+does is measured with nothing attached (`qa/desktop-helpers.cjs`, `launchPlain`), because Playwright keeps
+every page visible. Updates (D3, `MVP_draft.md` 63.2) come from the public bucket `desktop-releases` of the
+`comms-hub` project (`supabase/migrations/20261021090000_desktop_releases.sql`, written and not applied
+until the owner publishes the first release). Its address is compiled in (`desktop/src/update.ts`, held
+equal to `src/lib/native/releases.ts`), no build may carry another except the update check's own package,
+and nothing is ever uploaded through the site or by an agent: the owner publishes a release from the
+dashboard (`desktop/README.md`). The updater checks every installer's SHA-512 against `latest.yml`, and
+the publisher's signature too once releases are signed. The update check (`qa/desktop-update.cjs`)
+installs, updates and removes its own package, `sa.commshub.desktop.qa`, never a real installation.
+Files and the cache folder (D4, `MVP_draft.md` 63.3): bridge version 3 adds `files`, `cache` and `data`.
+A file from «هذا الجهاز» becomes a token (32 random bytes) in `desktop/src/file-store.ts`; the page reads it
+at `commshub-file://local/<token>`, and a library copy in the application's folder at
+`commshub-file://cache/<name>` (`desktop/src/protocol.ts`): read-only, in byte ranges, an address naming a
+token or a cache name and never a path, answered on the site's own profile only, and refused to any other
+origin. The page never sends a path: the preload alone reads the path Chromium attached to a File the
+person chose (webUtils), and the main process accepts only a regular file of a kind the studio takes. A
+library copy is fetched by the main process from the site's own file route with the window's session, so
+the site still decides who may read it. Every page carries a Content-Security-Policy (`src/proxy.ts`,
+`src/lib/csp.ts`): scripts need the request's nonce, the theme script is allowed by its hash, and nothing
+inline or from elsewhere runs; keep it that way when adding a script. «مسح بيانات هذا الجهاز» (D-11) removes
+the session, the folder's copies and every token.
+Media tools (D5, `MVP_draft.md` 63.4, decision D-9): bridge version 4 adds `media`. FFmpeg is the LGPL v3
+shared build pinned by hash in `desktop/ffmpeg.lock.json`, fetched and checked by
+`desktop/scripts/fetch-ffmpeg.mjs` into `desktop/vendor/ffmpeg` (never committed), and packaged in
+`resources/ffmpeg`. Never ship a GPL or nonfree build. It runs only in the utility process
+(`desktop/src/media-worker.ts`), and only with the fixed jobs of `desktop/src/media-jobs.ts`:
+- `probe`;
+- `proxy`, a 720p or 1080p light copy for the preview;
+- `convert`, an editable H.264 copy of what the browser cannot decode.
+
+The jobs name only Windows' own encoders (`h264_mf`, `aac_mf`). The page names a source by its token or
+its library version, never by a path, program or argument. Copies are written as `.part` files, are never
+served until complete, and are named by source, recipe and FFmpeg version. Change `RECIPE` when an
+argument changes. A copy keeps the original's timestamps (`-copyts`) whenever the browser can read the
+original's container (`keepsTimes`), so cuts stay on their frames; keep that when changing a recipe. In the studio (`src/lib/studio/media.ts`), the preview reads a light copy while the
+export and stills read the original or the converted copy. `qa/desktop-media.cjs` proves the same frame at
+every cut with gray-coded fixtures. FFmpeg's output never leaves the main process; the page gets one word
+for a failure. The licences of everything the package carries are in `THIRD_PARTY_NOTICES.md` and the
+generated `THIRD_PARTY_LICENSES.txt`.
+The preview on a second screen (D6, `MVP_draft.md` 63.5): bridge version 5 adds `windows`.
+- The bridge only lists the screens and opens or places a panel's window. It opens one address only,
+  `/motion/studio/<project>/preview`, built in `desktop/src/windows.ts` on the asking page's own origin.
+- The two pages keep in step over a `BroadcastChannel` (`src/lib/studio/preview-link.ts`), so nothing of a
+  project passes through the application. The editor sends what it shows, and its clock on the shared
+  `performance.timeOrigin`.
+- The preview window only shows: no lease, no saving, no sound. The site's frame (`Shell`) stays out of it
+  (`isPanelWindow`), so notices are never raised from it.
+- `qa/desktop-windows.cjs` holds the playhead within one frame.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted

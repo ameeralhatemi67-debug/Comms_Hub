@@ -1,0 +1,337 @@
+{
+  "script": "qa/desktop-studio-parity.cjs",
+  "run": "2026-10-21T01:32:58.601Z",
+  "version": "0.6.0",
+  "checks": [
+    {
+      "name": "DT-05: qa/studio-engine.cjs has the same checks in Edge and in the application",
+      "pass": true,
+      "detail": "{\"edge\":41,\"desktop\":41}"
+    },
+    {
+      "name": "DT-05: qa/studio-engine.cjs passes every check in Edge (the reference, run at the same moment)",
+      "pass": true,
+      "detail": "{\"failed\":[],\"tail\":\"41 of 41 passed | \"}"
+    },
+    {
+      "name": "DT-05: qa/studio-engine.cjs passes every check inside the application",
+      "pass": true,
+      "detail": "{\"failed\":[],\"tail\":\"41 of 41 passed | \",\"engine\":{\"electron\":\"44.5.1\",\"chrome\":\"152.0.7977.130\"}}"
+    },
+    {
+      "name": "DT-05: qa/studio-export.cjs has the same checks in Edge and in the application",
+      "pass": true,
+      "detail": "{\"edge\":18,\"desktop\":18}"
+    },
+    {
+      "name": "DT-05: qa/studio-export.cjs passes every check in Edge (the reference, run at the same moment)",
+      "pass": true,
+      "detail": "{\"failed\":[],\"tail\":\"18 of 18 passed | \"}"
+    },
+    {
+      "name": "DT-05: qa/studio-export.cjs passes every check inside the application",
+      "pass": true,
+      "detail": "{\"failed\":[],\"tail\":\"18 of 18 passed | \",\"engine\":{\"electron\":\"44.5.1\",\"chrome\":\"152.0.7977.130\"}}"
+    },
+    {
+      "name": "DT-06: the application started plainly, with nothing attached, and its page answers",
+      "pass": true,
+      "detail": "ready=\"visible\""
+    },
+    {
+      "name": "DT-06: the ten-minute 1080p export completes in the application with its window minimised throughout",
+      "pass": true,
+      "detail": "{\"readyMs\":44662,\"exportMs\":158227,\"frames\":18000,\"bytes\":572743220,\"target\":\"device\",\"audio\":true,\"uploaded\":200,\"visibilityAtEnd\":\"visible\",\"progressSeen\":19,\"visibility\":[\"visible\"]}"
+    },
+    {
+      "name": "DT-06: minimised and busy, the page stayed visible to itself the whole export (never slowed)",
+      "pass": true,
+      "detail": "{\"progressSeen\":19,\"visibility\":[\"visible\"]}"
+    },
+    {
+      "name": "DT-06: ffprobe reads both exports the same: H.264 1920x1080 at 30 frames, 18000 frames, AAC 48 kHz stereo, ten minutes",
+      "pass": true,
+      "detail": "{\"edge\":{\"video\":{\"codec\":\"h264\",\"profile\":\"High\",\"width\":1920,\"height\":1080,\"pix_fmt\":\"yuv420p\",\"rate\":\"30/1\",\"packets\":18000},\"audio\":{\"codec\":\"aac\",\"rate\":\"48000\",\"channels\":2,\"packets\":28125},\"duration\":600,\"bytes\":588921876},\"app\":{\"video\":{\"codec\":\"h264\",\"profile\":\"High\",\"width\":1920,\"height\":1080,\"pix_fmt\":\"yuv420p\",\"rate\":\"30/1\",\"packets\":18000},\"audio\":{\"codec\":\"aac\",\"rate\":\"48000\",\"channels\":2,\"packets\":28125},\"duration\":600,\"bytes\":572743220}}"
+    },
+    {
+      "name": "DT-06: the application's frames match Edge's and the source's at five moments across the ten minutes",
+      "pass": true,
+      "detail": "[{\"t\":1,\"source\":[123,132,126],\"edge\":[124,131,126],\"app\":[123,131,126]},{\"t\":150,\"source\":[125,131,125],\"edge\":[125,130,124],\"app\":[125,130,124]},{\"t\":300.5,\"source\":[124,132,126],\"edge\":[124,131,126],\"app\":[124,131,126]},{\"t\":450,\"source\":[125,131,125],\"edge\":[125,130,124],\"app\":[125,130,124]},{\"t\":599,\"source\":[124,132,125],\"edge\":[124,131,125],\"app\":[124,131,125]}]"
+    },
+    {
+      "name": "for contrast: a one-minute export minimised and busy stayed visible; without busy the page was hidden, as a browser tab would be",
+      "pass": true,
+      "detail": "{\"busy\":{\"readyMs\":345,\"exportMs\":15803,\"frames\":1800,\"bytes\":57217373,\"target\":\"device\",\"audio\":true,\"uploaded\":200,\"visibilityAtEnd\":\"visible\",\"progressSeen\":1,\"visibility\":[\"visible\"]},\"idle\":{\"readyMs\":497,\"exportMs\":16078,\"frames\":1800,\"bytes\":57217373,\"target\":\"device\",\"audio\":true,\"uploaded\":200,\"visibilityAtEnd\":\"hidden\",\"progressSeen\":1,\"visibility\":[\"hidden\"]}}"
+    }
+  ],
+  "notes": [],
+  "parity": {
+    "qa/studio-engine.cjs": {
+      "edge": {
+        "passed": 41,
+        "total": 41,
+        "failed": [],
+        "seconds": 7,
+        "timing": null
+      },
+      "desktop": {
+        "passed": 41,
+        "total": 41,
+        "failed": [],
+        "seconds": 8,
+        "timing": null,
+        "engine": {
+          "electron": "44.5.1",
+          "chrome": "152.0.7977.130"
+        }
+      }
+    },
+    "qa/studio-export.cjs": {
+      "edge": {
+        "passed": 18,
+        "total": 18,
+        "failed": [],
+        "seconds": 24,
+        "timing": {
+          "exportMs": 2765,
+          "bytes": 181002,
+          "estimate": 4543000
+        }
+      },
+      "desktop": {
+        "passed": 18,
+        "total": 18,
+        "failed": [],
+        "seconds": 20,
+        "timing": {
+          "exportMs": 2820,
+          "bytes": 182621,
+          "estimate": 4543000
+        },
+        "engine": {
+          "electron": "44.5.1",
+          "chrome": "152.0.7977.130"
+        }
+      }
+    }
+  },
+  "runs": {
+    "parity": "2026-10-21T01:32:58.601Z",
+    "long": "2026-10-20T20:22:48.896Z"
+  },
+  "timing": {
+    "edge600": 241521,
+    "edge60": 21763,
+    "app600Minimised": 158227,
+    "app60BusyMinimised": 15803,
+    "app60IdleMinimised": 16078
+  },
+  "long": {
+    "source": {
+      "video": {
+        "codec": "h264",
+        "profile": "High",
+        "width": 1920,
+        "height": 1080,
+        "pix_fmt": "yuv420p",
+        "rate": "30/1",
+        "packets": 18000
+      },
+      "audio": {
+        "codec": "aac",
+        "rate": "48000",
+        "channels": 1,
+        "packets": 28126
+      },
+      "duration": 600,
+      "bytes": 306844658
+    },
+    "edge600": {
+      "readyMs": 50,
+      "exportMs": 241521,
+      "frames": 18000,
+      "bytes": 588921876,
+      "target": "device",
+      "audio": true,
+      "uploaded": 200,
+      "visibilityAtEnd": "visible"
+    },
+    "app600": {
+      "readyMs": 44662,
+      "exportMs": 158227,
+      "frames": 18000,
+      "bytes": 572743220,
+      "target": "device",
+      "audio": true,
+      "uploaded": 200,
+      "visibilityAtEnd": "visible",
+      "progressSeen": 19,
+      "visibility": [
+        "visible"
+      ]
+    },
+    "app60busy": {
+      "readyMs": 345,
+      "exportMs": 15803,
+      "frames": 1800,
+      "bytes": 57217373,
+      "target": "device",
+      "audio": true,
+      "uploaded": 200,
+      "visibilityAtEnd": "visible",
+      "progressSeen": 1,
+      "visibility": [
+        "visible"
+      ]
+    },
+    "app60idle": {
+      "readyMs": 497,
+      "exportMs": 16078,
+      "frames": 1800,
+      "bytes": 57217373,
+      "target": "device",
+      "audio": true,
+      "uploaded": 200,
+      "visibilityAtEnd": "hidden",
+      "progressSeen": 1,
+      "visibility": [
+        "hidden"
+      ]
+    },
+    "probe": {
+      "edge": {
+        "video": {
+          "codec": "h264",
+          "profile": "High",
+          "width": 1920,
+          "height": 1080,
+          "pix_fmt": "yuv420p",
+          "rate": "30/1",
+          "packets": 18000
+        },
+        "audio": {
+          "codec": "aac",
+          "rate": "48000",
+          "channels": 2,
+          "packets": 28125
+        },
+        "duration": 600,
+        "bytes": 588921876
+      },
+      "app": {
+        "video": {
+          "codec": "h264",
+          "profile": "High",
+          "width": 1920,
+          "height": 1080,
+          "pix_fmt": "yuv420p",
+          "rate": "30/1",
+          "packets": 18000
+        },
+        "audio": {
+          "codec": "aac",
+          "rate": "48000",
+          "channels": 2,
+          "packets": 28125
+        },
+        "duration": 600,
+        "bytes": 572743220
+      }
+    },
+    "frames": [
+      {
+        "t": 1,
+        "source": [
+          123,
+          132,
+          126
+        ],
+        "edge": [
+          124,
+          131,
+          126
+        ],
+        "app": [
+          123,
+          131,
+          126
+        ]
+      },
+      {
+        "t": 150,
+        "source": [
+          125,
+          131,
+          125
+        ],
+        "edge": [
+          125,
+          130,
+          124
+        ],
+        "app": [
+          125,
+          130,
+          124
+        ]
+      },
+      {
+        "t": 300.5,
+        "source": [
+          124,
+          132,
+          126
+        ],
+        "edge": [
+          124,
+          131,
+          126
+        ],
+        "app": [
+          124,
+          131,
+          126
+        ]
+      },
+      {
+        "t": 450,
+        "source": [
+          125,
+          131,
+          125
+        ],
+        "edge": [
+          125,
+          130,
+          124
+        ],
+        "app": [
+          125,
+          130,
+          124
+        ]
+      },
+      {
+        "t": 599,
+        "source": [
+          124,
+          132,
+          125
+        ],
+        "edge": [
+          124,
+          131,
+          125
+        ],
+        "app": [
+          124,
+          131,
+          125
+        ]
+      }
+    ]
+  },
+  "total": 12,
+  "passed": 12,
+  "failed": 0
+}

@@ -5,7 +5,10 @@
 // folder the person may create in, or as a new version of a file (long press when the file has been in
 // review; refused when it is published). Saving to the library first saves a numbered version of the
 // project and records which version produced which library version (studio_export_record). The export
-// runs in this page, with the screen kept awake; the page asks to stay visible. A video project exports in
+// runs in this page, with the screen kept awake; the page asks to stay visible. In the desktop application
+// (MVP_draft.md 63) the laptop is kept awake instead, the window may be minimised, and a native notice
+// says when the export ends; a video for the device is written straight to the file the person chooses
+// (63.3), with no second copy. A video project exports in
 // each shape ticked (MVP_draft.md 62.10), one file each; the platforms it is meant for are checked first;
 // a download may carry the «مسودة» mark (never a library file: what is approved there is what is
 // published); a text track can be written out as SRT captions.
@@ -26,6 +29,8 @@ import { download } from '@/lib/studio/target';
 import { formatBytes, probeSupport } from '@/lib/studio/support';
 import { shortTime } from '@/lib/studio/time';
 import { withKeys } from '@/lib/studio/shortcuts';
+import { keepAwake, markBusy, notifyNative } from '@/lib/native';
+import { useNativeFeature } from '../native/use-native';
 import type { MediaPool } from '@/lib/studio/media';
 import type { Resolver } from '@/lib/studio/compose';
 import type { StudioApi } from '@/lib/studio/persist';
@@ -35,7 +40,18 @@ import { REVIEWED_STAGES, assetRow, projectExports, uploadToLibrary, uploadVersi
 import { linkFileToWork } from './work-links';
 
 type Dest = 'device' | 'new' | 'version';
-type Done = { kind: 'device'; name: string; bytes: number; url: string } | { kind: 'library'; name: string; asset: string; version: number };
+type Done = { kind: 'device'; name: string; bytes: number; url: string; saved?: boolean } | { kind: 'library'; name: string; asset: string; version: number };
+type SavePicker = (o: { suggestedName: string; startIn?: string; types: { description: string; accept: Record<string, string[]> }[] }) => Promise<FileSystemFileHandle>;
+
+/** The system's save dialog for one video (desktop application); a cancel stops the export. */
+async function chooseSaveFile(name: string, format: VideoFormat): Promise<FileSystemFileHandle> {
+  const mime = format === 'mp4' ? 'video/mp4' : 'video/webm';
+  try {
+    return await (window as unknown as { showSaveFilePicker: SavePicker }).showSaveFilePicker({ suggestedName: name, startIn: 'videos', types: [{ description: format === 'mp4' ? 'فيديو MP4' : 'فيديو WebM', accept: { [mime]: [`.${format}`] } }] });
+  } catch {
+    throw new ExportError('ABORTED');
+  }
+}
 export const DRAFT_MARK = 'مسودة';
 const shapeName = (r: Ratio) => r.replace(':', 'x');
 
@@ -92,6 +108,9 @@ export function ExportPanel({
   const [level, setLevel] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
   const lastUrls = useRef<string[]>([]);
+  const inApp = useNativeFeature('busy');
+  // In the application a video for the device goes straight to a file the person chooses.
+  const saveInPlace = useNativeFeature('files') && typeof window !== 'undefined' && 'showSaveFilePicker' in window;
 
   // the project's own shape changed: it is the one ticked
   useEffect(() => {
@@ -157,9 +176,11 @@ export function ExportPanel({
     setDone(null);
     const ctl = new AbortController();
     abort.current = ctl;
-    let lock: { release(): Promise<void> } | null = null;
+    let awake: (() => Promise<void>) | null = null;
+    let idle: (() => Promise<void>) | null = null;
     try {
-      lock = (await (navigator as Navigator & { wakeLock?: { request(t: 'screen'): Promise<{ release(): Promise<void> }> } }).wakeLock?.request('screen').catch(() => null)) ?? null;
+      awake = await keepAwake('export');
+      idle = await markBusy('export');
       let rev = revision();
       if (toLibrary) {
         setProgress({ label: 'جارٍ حفظ نسخة من المشروع…', f: 0 });
@@ -190,16 +211,22 @@ export function ExportPanel({
           setProgress({ label: `جارٍ إنشاء الصورة${of}…`, f: 0.5 });
           file = await exportStill(d, pool, { t, name, type: stillType, short: photo ? undefined : short, adjusted, watermark });
         } else {
+          const saveTo = !toLibrary && saveInPlace ? await chooseSaveFile(name, format) : undefined;
           const r = await exportVideo(d, pool, {
             short,
             format,
             name,
             gain,
             watermark,
+            saveTo,
             signal: ctl.signal,
             onProgress: (p: ExportProgress) => setProgress({ label: p.phase === 'prepare' ? `جارٍ التجهيز${of}…` : p.phase === 'finish' ? `جارٍ إنهاء الملف${of}…` : `جارٍ التصدير${of} ${Math.round((p.done / p.total) * 100)}٪`, f: p.done / Math.max(1, p.total) }),
           });
           file = r.file;
+          if (saveTo) {
+            results.push({ kind: 'device', name: file.name, bytes: file.size, url: '', saved: true });
+            continue;
+          }
         }
         if (!toLibrary) {
           const url = download(file);
@@ -228,11 +255,15 @@ export function ExportPanel({
       setLinkNote(linked);
       setDone(results);
       if (toLibrary) onSaved?.();
+      void notifyNative({ title: 'انتهى التصدير', body: results.map((r) => r.name).join('، ') });
     } catch (e) {
       const code = e instanceof ExportError ? e.code : (e as Error).message;
-      setError(EXPORT_ERRORS[code] ?? ((e as Error).message || 'تعذّر التصدير.'));
+      const text = EXPORT_ERRORS[code] ?? ((e as Error).message || 'تعذّر التصدير.');
+      setError(text);
+      if (code !== 'ABORTED') void notifyNative({ title: 'تعذّر التصدير', body: text });
     } finally {
-      await lock?.release().catch(() => undefined);
+      await awake?.();
+      await idle?.();
       abort.current = null;
       setProgress(null);
       setHidden(false);
@@ -407,7 +438,8 @@ export function ExportPanel({
           </label>
         )}
       </fieldset>
-      {what === 'video' && <p className="st-hint">يجري التصدير في هذا المتصفح: أبقِ الصفحة ظاهرة حتى ينتهي.</p>}
+      {what === 'video' && <p className="st-hint">{inApp ? 'يمكنك تصغير النافذة أثناء التصدير.' : 'يجري التصدير في هذا المتصفح: أبقِ الصفحة ظاهرة حتى ينتهي.'}</p>}
+      {what === 'video' && dest === 'device' && saveInPlace && <p className="st-hint">تختار أولاً أين يُحفظ الفيديو، فيُكتب هناك مباشرة.</p>}
       {hidden && <p className="st-hint st-warn" role="alert">الصفحة مخفية الآن، فيتباطأ التصدير. أعدها إلى الواجهة.</p>}
       {progress ? (
         <div className="st-export-run">
@@ -436,7 +468,11 @@ export function ExportPanel({
       {empty && <p className="st-hint">أضف مقطعاً قبل التصدير.</p>}
       {error && <p className="warning" role="alert">{error}</p>}
       {done?.map((d) =>
-        d.kind === 'device' ? (
+        d.kind === 'device' && d.saved ? (
+          <p key={`saved:${d.name}`} className="st-done" role="status">
+            حُفظ: {d.name} ({formatBytes(d.bytes)})، في المكان الذي اخترته.
+          </p>
+        ) : d.kind === 'device' ? (
           <p key={d.url} className="st-done" role="status">
             جاهز: {d.name} ({formatBytes(d.bytes)}).{' '}
             <a href={d.url} download={d.name}>

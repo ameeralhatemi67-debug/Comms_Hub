@@ -1,0 +1,26 @@
+{
+  "name": "sa.commshub.desktop",
+  "version": "0.6.0",
+  "private": true,
+  "description": "مركز الاتصال المؤسسي",
+  "author": "مركز الاتصال المؤسسي",
+  "main": "build/main.js",
+  "scripts": {
+    "build": "node scripts/build.mjs release",
+    "build:dev": "node scripts/build.mjs dev",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --experimental-strip-types --test \"tests/*.test.mjs\"",
+    "ffmpeg": "node scripts/fetch-ffmpeg.mjs",
+    "pack": "npm run ffmpeg && npm run build && electron-builder --config electron-builder.release.cjs --win --x64 --publish never",
+    "pack:dev": "npm run ffmpeg && npm run build:dev && electron-builder --config electron-builder.dev.cjs --win --x64 --publish never",
+    "fuses": "electron-fuses read --app dist/release/win-unpacked/CommsHub.exe"
+  },
+  "devDependencies": {
+    "@electron/fuses": "2.1.3",
+    "electron": "44.5.1",
+    "electron-builder": "26.17.0",
+    "electron-updater": "6.8.10",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}

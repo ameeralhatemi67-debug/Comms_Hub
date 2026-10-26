@@ -1,0 +1,173 @@
+{
+  "script": "qa/desktop-files.cjs",
+  "run": "2026-10-21T01:30:42.431Z",
+  "version": "0.6.0",
+  "checks": [
+    {
+      "name": "DT-11: the file is over 4 GB",
+      "pass": true,
+      "detail": "4503664011"
+    },
+    {
+      "name": "DT-11: chosen in the page, it is given a token (43 characters), not copied",
+      "pass": true,
+      "detail": "{\"token\":true,\"place\":\"commshub-file://local/GaPFpwa2u7sTQ0aNZ2A0Qq0DDi9pEUTezun1WstkKpU\"}"
+    },
+    {
+      "name": "DT-11: the media pool reads it where it is and is ready",
+      "pass": true,
+      "detail": "{\"kind\":\"ready\"}"
+    },
+    {
+      "name": "DT-11: the frame at 291 s, past 4 GB into the file, matches ffmpeg's decode of the same moment",
+      "pass": true,
+      "detail": "{\"app\":[127,127,127],\"ffmpeg\":[124,132,126]}"
+    },
+    {
+      "name": "DT-11: five seconds from there export to a 1280x720 file of 150 frames",
+      "pass": true,
+      "detail": "{\"frames\":150,\"probe\":{\"programs\":[],\"stream_groups\":[],\"streams\":[{\"codec_type\":\"video\",\"width\":1280,\"height\":720,\"nb_read_packets\":\"150\"},{\"codec_type\":\"audio\",\"nb_read_packets\":\"235\"}],\"format\":{\"duration\":\"5.013333\"}}}"
+    },
+    {
+      "name": "DT-11: no copy was made: the private storage grew by the export's own file only, and the profile on disk far less than the source",
+      "pass": true,
+      "detail": "{\"opfsBefore\":0,\"opfsAfter\":2864643,\"exportBytes\":2864294,\"diskBefore\":3296509,\"diskAfter\":11055142,\"source\":4503664011}"
+    },
+    {
+      "name": "a file changed after it was chosen is no longer served (410), the studio sees it as gone from this device",
+      "pass": true,
+      "detail": "{\"first\":\"url\",\"changed\":null,\"afterChange\":410,\"forgotten\":404,\"stillOnDisk\":true}"
+    },
+    {
+      "name": "a file let go of is no longer served (404), and stays where it was on the disk",
+      "pass": true,
+      "detail": "{\"forgotten\":404,\"onDisk\":true}"
+    },
+    {
+      "name": "the same project on another device: the file is «على هذا الجهاز فقط» (the pool says missing on this device, and the editor says so)",
+      "pass": true,
+      "detail": "{\"state\":{\"kind\":\"missing\",\"why\":\"device\"}}"
+    },
+    {
+      "name": "a library version is copied into the application's folder and read from there",
+      "pass": true,
+      "detail": "{\"place\":\"commshub-file://cache/asset-0a1b2c3d-0000-4000-8000-00000000abcd-v1.bin\",\"progress\":1,\"state\":{\"kind\":\"ready\"},\"frame\":[0,15,255],\"folder\":{\"library\":54381,\"files\":1,\"isDefault\":true,\"limit\":0},\"denied\":\"denied\"}"
+    },
+    {
+      "name": "the copy is fetched with the page's own session cookie, as the page would fetch it",
+      "pass": true,
+      "detail": "[\"sb=session1\",\"sb=session1\"]"
+    },
+    {
+      "name": "when the site refuses (401) the copy is refused too, and the studio says the file is not open to this person",
+      "pass": true,
+      "detail": "denied"
+    },
+    {
+      "name": "the folder is counted: one copy, the default folder, no limit yet",
+      "pass": true,
+      "detail": "{\"library\":54381,\"files\":1,\"isDefault\":true,\"limit\":0}"
+    },
+    {
+      "name": "the size limit is kept, and clearing spares what the open project uses, then clears the rest",
+      "pass": true,
+      "detail": "{\"limit\":10000000000,\"keptInUse\":1,\"clearedNotInUse\":0,\"clearedAll\":1,\"filesAfter\":0}"
+    },
+    {
+      "name": "an export is written straight to the chosen file, with no temporary copy",
+      "pass": true,
+      "detail": "{\"frames\":90,\"bytes\":78330,\"written\":78330,\"tempCopy\":false}"
+    },
+    {
+      "name": "«مسح بيانات هذا الجهاز»: the session cookie, the private storage, the folder's copies and every token are gone, and the window is back at its start",
+      "pass": true,
+      "detail": "{\"before\":{\"cookie\":\"sb=session1\",\"files\":1},\"cleared\":{\"files\":1,\"cache\":1},\"after\":{\"cookie\":\"\",\"files\":0,\"opfsEntries\":0},\"tokenAfter\":{\"ok\":false,\"why\":\"unknown\"}}"
+    }
+  ],
+  "notes": [
+    "DT-11: profile on disk 3296509 bytes before, 11055142 after, for a 4503664011-byte source; the export took 3118 ms."
+  ],
+  "media": {
+    "big": 4503664011,
+    "seconds": 0
+  },
+  "inPlace": {
+    "key": "65583c2879e49c10f5dc6187a98768ae9b493aa42cec040360e28f9a147a9e79",
+    "size": 4503664011,
+    "token": true,
+    "tokenLength": 43,
+    "state": {
+      "kind": "ready"
+    },
+    "place": "commshub-file://local/GaPFpwa2u7sTQ0aNZ2A0Qq0DDi9pEUTezun1WstkKpU",
+    "frame": [
+      127,
+      127,
+      127
+    ],
+    "frames": 150,
+    "exportMs": 3118,
+    "uploaded": 200,
+    "opfsBefore": 0,
+    "opfsAfter": 2864643,
+    "exportBytes": 2864294,
+    "usage": {
+      "library": 0,
+      "local": 0,
+      "inPlace": 4503664011,
+      "files": 1
+    },
+    "diskBefore": 3296509,
+    "diskAfter": 11055142,
+    "reference": [
+      124,
+      132,
+      126
+    ]
+  },
+  "library": {
+    "place": "commshub-file://cache/asset-0a1b2c3d-0000-4000-8000-00000000abcd-v1.bin",
+    "progress": 1,
+    "state": {
+      "kind": "ready"
+    },
+    "frame": [
+      0,
+      15,
+      255
+    ],
+    "folder": {
+      "library": 54381,
+      "files": 1,
+      "isDefault": true,
+      "limit": 0
+    },
+    "denied": "denied",
+    "cookies": [
+      "sb=session1",
+      "sb=session1"
+    ]
+  },
+  "clear": {
+    "before": {
+      "cookie": "sb=session1",
+      "files": 1
+    },
+    "cleared": {
+      "files": 1,
+      "cache": 1
+    },
+    "after": {
+      "cookie": "",
+      "files": 0,
+      "opfsEntries": 0
+    },
+    "tokenAfter": {
+      "ok": false,
+      "why": "unknown"
+    }
+  },
+  "total": 16,
+  "passed": 16,
+  "failed": 0
+}

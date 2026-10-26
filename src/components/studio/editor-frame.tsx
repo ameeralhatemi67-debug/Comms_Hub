@@ -3,10 +3,10 @@
 // The frame both studio editors share on a computer (MVP_draft.md 62.1, 62.2): the menu bar, the windows,
 // filling the browser window, the editor's dark or light chrome and the shortcuts sheet. The menus of
 // «ملف», «تحرير», «المقطع» and «عرض» are the editor's own; «النوافذ» and «مساعدة» are built here from the
-// window list (panels.ts) and the shortcuts (shortcuts.ts).
+// window list (panels.ts) and the shortcuts (shortcuts.ts). «مساعدة» also opens «معلومات الجهاز» (MVP_draft.md 63).
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import {
-  FolderOpen, Sparkles, Rows3, MonitorPlay, SlidersHorizontal, Type, WandSparkles, FileOutput, History, Settings2, MessageSquareText, Layers, Keyboard, BookOpen, RotateCcw, Maximize2, LayoutDashboard, Files, Bookmark,
+  FolderOpen, Sparkles, Rows3, MonitorPlay, SlidersHorizontal, Type, WandSparkles, FileOutput, History, Settings2, MessageSquareText, Layers, Keyboard, BookOpen, RotateCcw, Maximize2, LayoutDashboard, Files, Bookmark, Cpu,
 } from 'lucide-react';
 import { PANELS, panelIds, type EditorKind } from '@/lib/studio/panels';
 import { isOpen, toggleMax, whereIs } from '@/lib/studio/workspace';
@@ -14,6 +14,7 @@ import { comboLabel, keysOf, type Scope } from '@/lib/studio/shortcuts';
 import { MenuBar, ShortcutsSheet, type Menu, type MenuItem } from './menubar';
 import { Workspace, useWorkspaceLayout, type PanelSpec } from './workspace';
 import { useFillHeight } from './prefs';
+import { DeviceInfoDialog } from '../native/device-info';
 
 export const PANEL_ICON: Record<string, ReactNode> = {
   folder: <FolderOpen aria-hidden="true" />,
@@ -78,6 +79,7 @@ export function EditorFrame({
   children?: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [device, setDevice] = useState(false);
   const height = useFillHeight(ref, !full);
   const { ws, kind } = frame;
   const scope: Scope = kind;
@@ -104,6 +106,7 @@ export function EditorFrame({
   const help: MenuItem[] = [
     { label: 'اختصارات لوحة المفاتيح', icon: <Keyboard aria-hidden="true" />, keys: '?', onSelect: () => frame.setKeys(true) },
     { label: 'دليل هذه الصفحة', icon: <BookOpen aria-hidden="true" />, onSelect: () => document.querySelector<HTMLButtonElement>('.help-q')?.click() },
+    { label: 'معلومات الجهاز', icon: <Cpu aria-hidden="true" />, hint: 'المعالج والذاكرة وبطاقة الرسوميات وترميز الفيديو بالعتاد.', onSelect: () => setDevice(true) },
   ];
   const all: Menu[] = [...menus, { id: 'windows', label: 'النوافذ', items: windows }, { id: 'help', label: 'مساعدة', items: help }];
 
@@ -124,6 +127,7 @@ export function EditorFrame({
       <Workspace panels={panels} layout={ws.layout} onLayout={ws.setLayout} focused={frame.focused} onFocus={frame.setFocused} chromeLabel={kind === 'video' ? 'نوافذ محرر الفيديو' : 'نوافذ محرر الصورة'} />
       {children}
       {frame.keys && <ShortcutsSheet scope={scope} onClose={() => frame.setKeys(false)} windowNames={windowNames} />}
+      {device && <DeviceInfoDialog onClose={() => setDevice(false)} />}
     </div>
   );
 }

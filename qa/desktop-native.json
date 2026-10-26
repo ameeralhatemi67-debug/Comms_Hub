@@ -1,0 +1,240 @@
+{
+  "script": "qa/desktop-native.cjs",
+  "run": "2026-10-21T01:29:07.103Z",
+  "version": "0.6.0",
+  "checks": [
+    {
+      "name": "the bridge is version 5: who the application is, then info, power, life, notify, update, files, cache, data, windows and media",
+      "pass": true,
+      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"windows\",\"media\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.6.0\",\"bridge\":5},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"],\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\"],\"cache\":[\"library\",\"cancel\",\"has\",\"usage\",\"choose\",\"useDefault\",\"limit\",\"sweep\",\"clear\",\"onProgress\"],\"data\":[\"clear\"],\"windows\":[\"screens\",\"popOut\",\"close\"],\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\"]},\"frozen\":true,\"fns\":true}"
+    },
+    {
+      "name": "the bridge and each of its groups cannot be changed by the page",
+      "pass": true,
+      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"windows\",\"media\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.6.0\",\"bridge\":5},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"],\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\"],\"cache\":[\"library\",\"cancel\",\"has\",\"usage\",\"choose\",\"useDefault\",\"limit\",\"sweep\",\"clear\",\"onProgress\"],\"data\":[\"clear\"],\"windows\":[\"screens\",\"popOut\",\"close\"],\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\"]},\"frozen\":true,\"fns\":true}"
+    },
+    {
+      "name": "info names the version, processor, memory, free disk and the chip in use, and no path",
+      "pass": true,
+      "detail": "{\"version\":\"0.6.0\",\"bridge\":5,\"os\":\"win32\",\"osVersion\":\"10.0.26300\",\"arch\":\"x64\",\"cores\":12,\"cpu\":\"AMD Ryzen 5 6600H with Radeon Graphics\",\"memory\":16310259712,\"freeDisk\":46097432576,\"gpu\":{\"chips\":[{\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"vendor\":\"NVIDIA\",\"active\":true},{\"name\":\"AMD Radeon(TM) Graphics\",\"vendor\":\"AMD\",\"active\":false}],\"active\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"software\":false}}"
+    },
+    {
+      "name": "keepAwake starts the system's blocker that keeps the laptop from sleeping (screen may sleep)",
+      "pass": true,
+      "detail": "{\"hold\":{\"ok\":1},\"blocker\":{\"id\":0,\"type\":\"prevent-app-suspension\",\"stopped\":false},\"started\":true}"
+    },
+    {
+      "name": "another window cannot release a hold it did not take",
+      "pass": true,
+      "detail": "{\"foreignRelease\":{\"ok\":false},\"stillOn\":true}"
+    },
+    {
+      "name": "release lets the laptop sleep again, once",
+      "pass": true,
+      "detail": "{\"released\":{\"ok\":true},\"again\":{\"ok\":false},\"stopped\":false}"
+    },
+    {
+      "name": "a hold ends with its document: loading the page again lets the laptop sleep",
+      "pass": true,
+      "detail": "{\"hold2\":{\"ok\":2},\"b2\":{\"id\":1,\"type\":\"prevent-app-suspension\",\"stopped\":false}}"
+    },
+    {
+      "name": "a request outside the rules is refused by the main process (reason, hold, link, length, count)",
+      "pass": true,
+      "detail": "{\"reason\":{\"error\":\"Error invoking remote method 'commshub:power.keepAwake': Error: refused\"},\"id\":{\"error\":\"Error invoking remote method 'commshub:power.release': Error: refused\"},\"busy\":{\"error\":\"Error invoking remote method 'commshub:life.busy': Error: refused\"},\"foreignLink\":{\"error\":\"Error invoking remote method 'commshub:notify.show': Error: refused\"},\"schemeLink\":{\"error\":\"Error invoking remote method 'commshub:notify.show': Error: refused\"},\"long\":{\"error\":\"Error invoking remote method 'commshub:notify.show': Error: refused\"},\"noTitle\":{\"error\":\"Error invoking remote method 'commshub:notify.show': Error: refused\"},\"badge\":{\"error\":\"Error invoking remote method 'commshub:notify.badge': Error: refused\"}}"
+    },
+    {
+      "name": "a refused request starts nothing and shows nothing",
+      "pass": true,
+      "detail": "{\"blockers\":[{\"id\":0,\"type\":\"prevent-app-suspension\",\"stopped\":true},{\"id\":1,\"type\":\"prevent-app-suspension\",\"stopped\":true}],\"notes\":[],\"overlays\":[],\"tips\":[\"مركز الاتصال المؤسسي\"],\"images\":0,\"dialogs\":[],\"opened\":[]}"
+    },
+    {
+      "name": "busy turns the window's background throttling off",
+      "pass": true,
+      "detail": "{\"busy\":{\"ok\":true},\"throttlingBusy\":false}"
+    },
+    {
+      "name": "the tray says what runs",
+      "pass": true,
+      "detail": "[\"مركز الاتصال المؤسسي\",\"مركز الاتصال المؤسسي: جارٍ التصدير\"]"
+    },
+    {
+      "name": "closing the window during an export hides it, and the work goes on",
+      "pass": true,
+      "detail": "{\"exists\":true,\"visible\":false}"
+    },
+    {
+      "name": "a notice says the export goes on (once)",
+      "pass": true,
+      "detail": "[{\"title\":\"التصدير مستمر\",\"body\":\"أُغلقت النافذة وما يزال التصدير يعمل. يصلك إشعار عند انتهائه، وتفتح النافذة من أيقونة المركز في شريط المهام.\"}]"
+    },
+    {
+      "name": "the tray icon brings the window back",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "quitting during an export asks first, in Arabic, and the first answer keeps working",
+      "pass": true,
+      "detail": "{\"q\":{\"message\":\"يجري تصدير الآن.\",\"detail\":\"إن أنهيت التطبيق يتوقف التصدير ولا يُحفظ الملف.\",\"buttons\":[\"متابعة التصدير\",\"إنهاء وإيقاف التصدير\"],\"defaultId\":0,\"cancelId\":0},\"alive\":true}"
+    },
+    {
+      "name": "idle gives the window back its ordinary pace",
+      "pass": true,
+      "detail": "{\"idle\":{\"ok\":true},\"throttlingIdle\":true}"
+    },
+    {
+      "name": "a notice for a window in front is not shown (the page already says it)",
+      "pass": true,
+      "detail": "{\"ok\":false}"
+    },
+    {
+      "name": "a notice for a minimised window is shown, with its title and text",
+      "pass": true,
+      "detail": "{\"shown\":{\"ok\":true},\"last\":{\"title\":\"يحتاج قرارك\",\"body\":\"اعتماد CH-101\"}}"
+    },
+    {
+      "name": "clicking the notice brings the window back and hands the page where to go",
+      "pass": true,
+      "detail": "{\"visible\":true,\"minimized\":false,\"went\":[\"/work/CH-101?tab=review\"]}"
+    },
+    {
+      "name": "a page that said nothing is moved to the notice's address itself",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/second"
+    },
+    {
+      "name": "the taskbar shows the count (16 and 32 pixels), says it for screen readers, and clears at zero",
+      "pass": true,
+      "detail": "[{\"empty\":false,\"factors\":[1,2],\"bytes\":[1024,4096],\"description\":\"إشعارات تحتاج قرارك: 3\"},{\"empty\":false,\"factors\":[1,2],\"bytes\":[1024,4096],\"description\":\"إشعارات تحتاج قرارك: 12\"},{\"empty\":true,\"factors\":null,\"bytes\":null,\"description\":\"\"}]"
+    },
+    {
+      "name": "the tray marks it too (a dot and the tooltip)",
+      "pass": true,
+      "detail": "{\"images\":3,\"tips\":[\"مركز الاتصال المؤسسي\\nإشعارات تحتاج قرارك: 3\",\"مركز الاتصال المؤسسي\\nإشعارات تحتاج قرارك: 12\",\"مركز الاتصال المؤسسي\"]}"
+    },
+    {
+      "name": "closing the window quits when nothing runs and the tray is not kept (D-10)",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "with «إبقاء التطبيق في شريط المهام» on, closing hides the window instead of quitting",
+      "pass": true,
+      "detail": "{\"exists\":true,\"visible\":false}"
+    },
+    {
+      "name": "and says so once",
+      "pass": true,
+      "detail": "[{\"title\":\"مركز الاتصال المؤسسي\",\"body\":\"ما يزال التطبيق يعمل في شريط المهام. تفتحه من أيقونته، وتوقف ذلك من قائمتها.\"}]"
+    },
+    {
+      "name": "quitting from the tray with nothing running asks nothing and quits",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "DT-07: the first read raises nothing, and the taskbar counts the one decision waiting",
+      "pass": true,
+      "detail": "{\"notes\":[],\"overlays\":[{\"empty\":false,\"factors\":[1,2],\"bytes\":[1024,4096],\"description\":\"إشعارات تحتاج قرارك: 1\"}]}"
+    },
+    {
+      "name": "DT-07: a new «يحتاج قرارك» item raises a native notice while the window is minimised; other tiers do not",
+      "pass": true,
+      "detail": "[{\"title\":\"يحتاج قرارك\",\"body\":\"اعتماد العمل CH-202\"}]"
+    },
+    {
+      "name": "DT-07: and the count rises",
+      "pass": true,
+      "detail": "[{\"empty\":false,\"factors\":[1,2],\"bytes\":[1024,4096],\"description\":\"إشعارات تحتاج قرارك: 1\"},{\"empty\":false,\"factors\":[1,2],\"bytes\":[1024,4096],\"description\":\"إشعارات تحتاج قرارك: 2\"}]"
+    },
+    {
+      "name": "DT-07: clicking it brings the window back and opens the work through the site's own router",
+      "pass": true,
+      "detail": "[\"/approvals/CH-202\"]"
+    },
+    {
+      "name": "DT-07: reading them clears the count",
+      "pass": true,
+      "detail": "[{\"empty\":true,\"factors\":null,\"bytes\":null,\"description\":\"\"}]"
+    },
+    {
+      "name": "nothing attached: the application started plainly and its page answers",
+      "pass": true,
+      "detail": "ready=\"visible\""
+    },
+    {
+      "name": "nothing attached: an idle minimised window is hidden and slowed like a browser tab (timers about once a second)",
+      "pass": true,
+      "detail": "{\"ticks\":3,\"visibility\":\"hidden\"}"
+    },
+    {
+      "name": "nothing attached: a busy minimised window stays visible to its page and keeps time (an export goes on at full speed)",
+      "pass": true,
+      "detail": "{\"busy\":\"true\",\"working\":{\"ticks\":30,\"visibility\":\"visible\"}}"
+    },
+    {
+      "name": "nothing attached: once idle, the minimised window is slowed again",
+      "pass": true,
+      "detail": "{\"ticks\":3,\"visibility\":\"hidden\"}"
+    },
+    {
+      "name": "nothing attached: the notifications page read its list",
+      "pass": true,
+      "detail": "load:visible:1"
+    },
+    {
+      "name": "DT-07, nothing attached: minimised and hidden, the hook reads its list again on its own within the minute, so a new decision reaches the tray",
+      "pass": true,
+      "detail": "{\"added\":\"2\",\"seconds\":56,\"heard\":\"load:hidden:2\"}"
+    }
+  ],
+  "notes": [
+    "Removed Start menu shortcuts Electron had written for this worktree's packages: مركز الاتصال المؤسسي، نسخة التطوير.lnk."
+  ],
+  "device": {
+    "version": "0.6.0",
+    "bridge": 5,
+    "os": "win32",
+    "osVersion": "10.0.26300",
+    "arch": "x64",
+    "cores": 12,
+    "cpu": "AMD Ryzen 5 6600H with Radeon Graphics",
+    "memory": 16310259712,
+    "freeDisk": 46097432576,
+    "gpu": {
+      "chips": [
+        {
+          "name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+          "vendor": "NVIDIA",
+          "active": true
+        },
+        {
+          "name": "AMD Radeon(TM) Graphics",
+          "vendor": "AMD",
+          "active": false
+        }
+      ],
+      "active": "NVIDIA GeForce RTX 3050 Laptop GPU",
+      "software": false
+    }
+  },
+  "background": {
+    "idle": {
+      "ticks": 3,
+      "visibility": "hidden"
+    },
+    "busy": {
+      "ticks": 30,
+      "visibility": "visible"
+    },
+    "afterIdle": {
+      "ticks": 3,
+      "visibility": "hidden"
+    }
+  },
+  "timerSeconds": 56,
+  "total": 37,
+  "passed": 37,
+  "failed": 0
+}

@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-22
+updated: 2026-10-26
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -26,6 +26,18 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The desktop application merged into main, 2026-10-26
+
+The owner asked for the merge before the Android application is planned. `desktop-app` (D0 to D6, version 0.6.0) is now part of `main` as a local merge commit.
+
+- **Evidence.** Typecheck and build clean; `npm test` 537 of 537; desktop tests 120 of 120; `qa/sim03-quick-fixes.cjs` 17 of 17; `qa/desktop-csp.cjs` 13 of 13.
+- **Not done.**
+  - Not pushed. A push deploys the desktop's site part, including a Content-Security-Policy on every page.
+  - The `desktop-releases` migration is not applied, no release is published, and the application is unsigned.
+  - The owner's signed-in walkthrough is still to do.
+- **Left as it was.** Main's uncommitted studio, calendar and simulation files are untouched and still uncommitted.
+- **Next.** The Android application plan (no studio features), at the owner's request.
+
 ## HyperFrames research for the studio, 2026-10-25
 
 At the owner's request, HeyGen HyperFrames (an open-source HTML-to-video framework) was researched for what «الاستوديو» can learn from it, across the web, desktop and phone releases. The result is `HyperFrames_Studio_Learnings.md`: 23 learnings (H-01 to H-23), a table by client, what not to take, a suggested order and seven owner decisions (O-H1 to O-H7).
@@ -42,6 +54,10 @@ The archive of role simulation sim-20261015-03 (`D:/Agents/testingh/sim-20261015
 - **Evidence.** `npm test` 505 of 505; typecheck and build clean; `qa/sim03-quick-fixes.cjs` 17 of 17.
 - **Open.** APPROVAL-001: library approval is not bound to the version shown (a stale dialog, or a board drag to «جاهز للنشر», approves whatever is current). REQ-001: work lists refresh only on opening or on returning to the tab. Neither is fixed. Nothing was seen signed in.
 - **Not committed.** The changes are in the working tree beside the earlier uncommitted studio and calendar files.
+
+## The desktop application, D0 to D6, 2026-10-21
+
+The Windows x64 application «مركز الاتصال المؤسسي» of `Desktop_App_Plan.md` is built on branch `desktop-app` (local commits, not merged, not pushed). D1 is the shell that opens the live site; D2, asked for by the owner on 2026-10-20 while the studio's third round is still open, adds the studio at full strength (exports minimised, the laptop kept awake), the tray, native notices with the taskbar count, and «معلومات الجهاز»; D3 adds updates from a public bucket and «تطبيق سطح المكتب» on «الحساب»; D4 uses files from «هذا الجهاز» where they are, keeps the studio's cache in a folder with a limit, adds «مسح بيانات هذا الجهاز», and gives every page of the site a Content-Security-Policy; D5 adds FFmpeg (LGPL v3, pinned by hash) for light copies that the preview reads and editable copies of what the browser cannot decode; D6 opens the studio's preview in a window of its own, full screen on another screen, kept in step with the editor (`MVP_draft.md` 63 to 63.5). The bucket's migration is written and not applied, and no release is published: both wait for the owner (`desktop/README.md`). Signing waits for a certificate. Evidence is in `progress.md` and `qa/desktop-*.json`. Next: the owner's signed-in walkthrough on the two pilot laptops; the merge after the studio's third round.
 
 ## The studio, second round, 2026-10-20
 

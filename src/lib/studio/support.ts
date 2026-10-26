@@ -1,7 +1,9 @@
 // What this browser can do for the studio (MVP_draft.md 62), measured rather than guessed from the
 // screen: encoding MP4 (H.264) or WebM (VP9), encoding AAC natively or through the AAC extension,
 // and the browser's private storage (OPFS) used for the device cache and for exports. The studio's
-// tools and messages follow these answers (Studio_Build_Plan.md section 4). Browser only.
+// tools and messages follow these answers (Studio_Build_Plan.md section 4). Inside the desktop
+// application (MVP_draft.md 63) it also says so, from the bridge (src/lib/native). Browser only.
+import { native } from '../native/index.ts';
 
 export type AacPath = 'native' | 'extension' | 'none';
 
@@ -21,6 +23,8 @@ export type StudioSupport = {
   /** Bytes the browser lets this site keep, and bytes already used (null when it does not say). */
   quota: number | null;
   usage: number | null;
+  /** The desktop application this page runs in, or null in a browser. */
+  desktop: { version: string; background: boolean } | null;
 };
 
 const FULL_HD = { width: 1920, height: 1080 };
@@ -53,7 +57,9 @@ export async function probeSupport(): Promise<StudioSupport> {
   } catch {
     // Some private windows refuse the question itself; the answers stay unknown.
   }
-  return { webcodecs, mp4, webm, aac, opfs, persisted, quota, usage };
+  const n = native();
+  const desktop = n.platform === 'desktop' && n.version ? { version: n.version, background: n.has('busy') && n.has('keepAwake') } : null;
+  return { webcodecs, mp4, webm, aac, opfs, persisted, quota, usage, desktop };
 }
 
 /** Registers the AAC extension when the browser cannot encode AAC itself. Safe to call more than once. */
@@ -79,7 +85,11 @@ export function formatBytes(n: number): string {
 
 /** One line per ability, in Arabic, for the studio home: what works here and what does not. */
 export function supportLines(s: StudioSupport): { ok: boolean; text: string }[] {
+  const app = s.desktop
+    ? [{ ok: true, text: s.desktop.background ? `يعمل الاستوديو في تطبيق سطح المكتب (الإصدار ${s.desktop.version}): يستمر التصدير والنافذة مصغّرة، ولا ينام الحاسوب أثناءه.` : `يعمل الاستوديو في تطبيق سطح المكتب (الإصدار ${s.desktop.version}).` }]
+    : [];
   return [
+    ...app,
     {
       ok: s.mp4,
       text: s.mp4 ? 'تصدير الفيديو بصيغة MP4 متاح في هذا المتصفح.' : s.webm ? 'هذا المتصفح لا يصنع MP4، فيُصدَّر الفيديو بصيغة WebM.' : 'هذا المتصفح لا يصدّر الفيديو. استعمل Chrome أو Edge على حاسوب.',

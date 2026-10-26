@@ -372,7 +372,7 @@ export type KeyActions = {
 };
 
 export function Inspector({
-  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, onLength, compact = false, t = 0, keyActions, track, onTrackSound, workText, slotPanel,
+  doc, clip, onClip, readOnly, actions, canFillWindow, hasPrevAdjacent, hasNextFree, reviewPanel, sourceNote, sourceTools, onLength, compact = false, t = 0, keyActions, track, onTrackSound, workText, slotPanel,
 }: {
   doc: ProjectDoc;
   clip: Clip | null;
@@ -394,6 +394,8 @@ export function Inspector({
   /** The work and the review notes (phones show them here; computers in the window «المراجعة»). */
   reviewPanel?: ReactNode;
   sourceNote: string | null;
+  /** The desktop application's light and converted copies of the clip's video (source-tools.tsx); nothing in a browser. */
+  sourceTools?: ReactNode;
   onLength: (us: number) => void;
   /** A phone: transitions, crop and colours are kept for the computer. */
   compact?: boolean;
@@ -431,6 +433,7 @@ export function Inspector({
         <b>{label}</b>
         <small dir="auto">{clip.text?.content.split('\n')[0] ?? (clip.motion ? graphicById(clip.motion.template)?.name : src?.name) ?? ''}</small>
         {sourceNote && <p className="st-hint st-warn">{sourceNote}</p>}
+        {sourceTools}
         <div className="st-insp-acts">
           {clip.pinned ? (
             <button type="button" className="st-pin" data-on="yes" disabled={readOnly} data-hold={HOLD.studioUnpin} onClick={() => onClip((c) => { const n = { ...c }; delete n.pinned; return n; }, 'إلغاء التثبيت')}><Pin aria-hidden="true" />مثبّت في القالب</button>

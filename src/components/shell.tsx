@@ -34,8 +34,10 @@ import { supabase } from '@/lib/supabase/client';
 import { Modal, Empty, LogoLoader } from './ui';
 import { HelpButton, ToastUndo, UndoButton, useKit } from './kit';
 import { NoticeDrawer, useNotices } from './notices';
+import { isPanelWindow } from '@/lib/studio/preview-link';
 import { useCaps } from './caps';
 import { MaintenanceBanner } from './settings/maintenance-banner';
+import { DesktopUpdateBanner } from './native/desktop-app';
 import { FeedbackButton, useErrorReporter } from './feedback';
 
 /** The icon of each menu entry; the entries themselves (and who sees them) are in src/lib/access.ts. */
@@ -59,7 +61,14 @@ const menuIcons = {
   '/settings': Settings,
 } as const;
 
+/** The site's frame around every page, except a studio panel's own window, which shows its panel alone (MVP_draft.md 63.5). */
 export function Shell({ children }: { children: ReactNode }) {
+  const path = usePathname();
+  if (isPanelWindow(path)) return <>{children}</>;
+  return <FullShell>{children}</FullShell>;
+}
+
+function FullShell({ children }: { children: ReactNode }) {
   const { state, dispatch } = useHub();
   const account = useAccount();
   const router = useRouter();
@@ -224,6 +233,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </header>
         <main id="main">
           <MaintenanceBanner />
+          <DesktopUpdateBanner />
           {/* The page guide opens here, in place of the page (src/lib/kit/guide.ts). */}
           <div id="guide-view" hidden />
           {children}

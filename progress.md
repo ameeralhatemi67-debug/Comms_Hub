@@ -1128,6 +1128,469 @@ When recording future implementation outcomes, follow this standardized template
 - **Verified, numbers.** `npm run typecheck` clean; `npm run build` passes; `npm test` **501 of 501**. New `tests/studio-slot.test.mjs`, 5: tracks, names, task note, the export warning, filling at the version with the box fit, one source for one file, task_create's fields and no direct write. `tests/studio-schema.test.mjs` gains the flush test (saved without waiting, once, nothing for no change, only the draft without the lease). Engine `qa/studio-engine.cjs` **41 of 41**: the place's stripes inside, the red video outside unchanged. Interface `qa/studio-ui.cjs --only=work` **21 of 21**: edits kept after leaving for the work page; a box named «شعار الشريك» with a design task for CH-101 to the designer, its note and an attached PNG frame; the export warning; the task done and a picture linked to the work listed under «سُلّمت»; the place turned into that picture. All flows **122 of 122**.
 - **Not verified, said plainly.** `task_create` itself was not run again in SQL (it is the work cycle's, tested there); the task was driven in the fixture database. The person who receives the task works on «المهام» as before.
 
+### 2026-10-20: the desktop application, D0: the owner's decisions and the specification
+
+- **The owner's decisions.** The owner accepted `Desktop_App_Plan.md` on 2026-10-20: every recommendation of its section 11, with the answers of 11.1.
+  - Electron, not Tauri (D-1), carrying the whole site (D-2).
+  - A pilot of the Admin and the director (D-3), whose laptops are both Windows x64 (D-4). Windows x64 first, and only, until it is fully running; Windows arm64 and macOS come after, and Apple membership waits with macOS (D-8).
+  - The Vercel address is kept for now, `https://comms-hub-three.vercel.app` (D-5). A development build also opens `http://127.0.0.1:3000`.
+  - Installers and updates will go to a public bucket of the `comms-hub` Supabase project when D3 comes (D-6).
+  - Unsigned for the pilot, a certificate before rollout (D-7).
+  - FFmpeg in D5 under the LGPL with the system's own encoders (D-9).
+  - Closing the window quits, except during an export or with «إبقاء التطبيق في شريط المهام» (D-10, from D2).
+  - Disk encryption where library copies are kept; «مسح بيانات هذا الجهاز» removes the session, cache, tokens and proxies (D-11).
+  - Windows shows the site's own name, «مركز الاتصال المؤسسي».
+  - No native menu bar: the application takes only zoom, F11 and F5.
+  - D1 now; D2 after the studio's third round, which is being built in the main checkout at the same time.
+- **Settled while building, for the owner to see** (each can be changed):
+  - **The fixed internal id is `sa.commshub.desktop`**: reverse DNS, with `sa` for the organisation's country. It names the Windows application id, the uninstall entry and the data folder, `%APPDATA%\sa.commshub.desktop`, and it never changes. It names no host and is never looked up. `desktop/package.json` carries the same name, because electron-builder's uninstaller removes `%APPDATA%\<package name>`. A development build keeps its profile apart, in `sa.commshub.desktop.dev`.
+  - **Pins**, by the rule of the newest release at least fourteen days old, counted by the clock (2026-10-20T15:13Z, so published by 2026-10-06T15:13Z):
+    - Electron **44.5.1**, published 2026-09-30, carrying Chromium 152.0.7977.130 and Node.js 24.21.0. 44.6.0 was published 2026-10-06T22:39Z, about seven hours short of fourteen days, so it waits.
+    - electron-builder 26.17.0, @electron/fuses 2.1.3, esbuild 0.28.2 (the site's own) and TypeScript 7.0.2, each pinned exactly.
+  - **window.open of a page on the list opens a second window of the application**, with every rule of the first, rather than replacing the page in the window. The site opens such pages in a new window on purpose: a library file's content (`asset-page.tsx`) and «فتح هذه النسخة للقراءة في نافذة جديدة» (`versions-panel.tsx`). The application also has no back button. This is how the brief's "stay in the window" was read; the owner can ask for the other reading.
+  - **The note comes first.** An outside connection shows its note with «متابعة في المتصفح» and «إلغاء» before the browser opens, so it is read before the person leaves the application.
+  - **Permissions follow the brief exactly.** So the screen wake lock and persistent storage, which a browser gives without asking, are refused too. The studio already carries on without both: `export-panel.tsx` and `cache.ts` catch the refusal. D2's own keep-awake replaces the wake lock.
+  - The new Arabic strings (the connection screen, the note, «حفظ الملف») are listed in `MVP_draft.md` 63.
+- **Records.**
+  - `MVP_draft.md` section 63 describes what the person sees.
+  - `AGENTS.md` has a new paragraph in "Prototype boundary".
+  - `Roadmap.md` (a new scope addition at the end of Version 0) and `Status.md` (a new section at the top) have one line each.
+  - Each addition is its own new section or paragraph, so the merge with the studio round stays simple.
+- **Baseline.** The three plan files (`Desktop_App_Plan.md`, `Mobile_Apps_Plan.md`, `Desktop_Build_Prompt.md`) were committed on `main` first, as `09757c2`. The commit was owner-authorised and used `git commit --only`, so none of the studio session's files went in. The work went on in a worktree on branch `desktop-app`.
+
+### 2026-10-20: the desktop application, D1: the Windows shell
+
+- **What changed.** `desktop/` holds an Electron application for Windows x64 that opens the live site in its own window (`Desktop_App_Plan.md` sections 5, 8 and 9; `MVP_draft.md` 63). It has its own `package.json` and lockfile, like `bridge/whatsapp/`, and stays outside the site's typecheck and build. `.vercelignore` keeps Vercel from uploading it. The TypeScript source is compiled by esbuild into one main file and one preload file.
+  - **The window.** One window on the persistent profile `persist:comms-hub`. `contextIsolation` and `sandbox` are on, `nodeIntegration` is off (also in frames and workers), there is no `webview` and no native menu bar, and the developer tools exist in a development build only. Size, position and maximised state are remembered, and a second launch brings the open window forward.
+  - **The user agent** is Chromium's own with Electron's tokens taken out and ` CommsHubDesktop/0.1.0` at the end. It stays plain ASCII, because a header cannot carry the Arabic name.
+  - **The address list** is compiled in: the production address alone in a release build, plus `http://127.0.0.1:3000` in a development build. esbuild drops the development address and every development branch from a release build; a test reads the release bundle to prove it.
+  - **One rule for links, forms, redirects and window.open** (`navigation.ts`):
+    - on the list, the address stays; a new window opens as a second application window;
+    - `/api/drive/connect`, `/api/onedrive/connect` and `/api/platforms/connect/*` open in the system browser after the Arabic note;
+    - other http, https and mailto addresses go to the system;
+    - anything else is refused.
+  - **Permissions** (`permissions.ts`): the microphone (sound only), notifications, the clipboard, full screen and file access, to the list only. Everything else is refused. USB, serial and HID devices are never offered, and every device chooser is cancelled.
+  - **Downloads** open the save dialog «حفظ الملف» in Downloads.
+  - **Failed loads.** Any failed load of the page shows the Arabic connection screen (`offline.html`), with its own message when a certificate is not accepted. Certificate errors are never ignored: there is no handler and no verify procedure, and `--ignore-certificate-errors` is refused at start.
+  - **Keys** (`keys.ts`): Ctrl with + - 0, F11, F5 (with Ctrl or Shift, without the cache), and F12 in a development build only.
+  - **The bridge** (`preload.ts`) is `window.commsHubNative = { platform: 'desktop', shell: 'electron', version: '0.1.0', bridge: 1 }`, frozen, and only when the top-level page is on the list. `sender.ts` holds the check every D2 handler must pass (`trustedSender`, `guard()`). D1 registers no handler.
+  - **Refused switches** at start (`switches.ts`): certificate, web-security, sandbox and site-isolation switches in every build, and remote debugging in a release build.
+  - **The release package** (`electron-builder.release.cjs`):
+    - NSIS one-click, x64, per user, with no administrator rights;
+    - Arabic: `ar_SA`, LCID 1025 (electron-builder carries Arabic installer messages);
+    - Start menu and desktop shortcuts named «مركز الاتصال المؤسسي»;
+    - `CommsHub.exe`, with the Arabic name in the file's details (description, product, company);
+    - the icon from `public/brand/comms-hub-logo-512.png`, version 0.1.0;
+    - unsigned and unpublished, with Electron's locales trimmed to Arabic and English;
+    - the application's data removed on uninstall but not on an update (D-11);
+    - fuses flipped at packaging.
+  - **The development package** (`electron-builder.dev.cjs`) is unpacked only and never handed out. It differs from the release package in its compiled list, the developer tools and one fuse: `EnableNodeCliInspectArguments` stays on. Playwright's Electron support attaches through the Node.js inspector (`_electron.launch` waits for "Debugger listening on", read in playwright-core 1.62.1). That is also why the release package cannot be driven by Playwright: part 2 of the check proves it from outside.
+- **Code.**
+  - Sources, in `desktop/src/`: `main.ts`, `preload.ts`, `compiled.ts`, `origins.ts`, `navigation.ts`, `permissions.ts`, `keys.ts`, `window-state.ts`, `sender.ts`, `switches.ts`, `downloads.ts`, `identity.ts`, `globals.d.ts`, `offline.html`, `connect-note.html`.
+  - Build, packaging and docs, in `desktop/`: `scripts/build.mjs`, `electron-builder.release.cjs`, `electron-builder.dev.cjs`, `tsconfig.json`, `README.md`.
+  - Tests: `desktop/tests/` (10 files). The application check: `qa/desktop-shell.cjs` and `qa/desktop-shell.json`. Also `.vercelignore`.
+  - No site source changed.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **52 of 52**, in ten files. They cover the address list, navigation and the connection routes, permissions, and the keys, held apart from every studio shortcut and review-screen key read from the site itself. They also cover the window's place, the sender check, the id, the user agent, refused switches and downloads, the two pages, the compiled bundles, and the packaging with its pins. `npm run typecheck` (TypeScript 7.0.2) is clean.
+  - **Fuses**, read back with `@electron/fuses` 2.1.3 from `dist/release/win-unpacked/CommsHub.exe`:
+    - RunAsNode Disabled;
+    - EnableCookieEncryption Enabled;
+    - EnableNodeOptionsEnvironmentVariable Disabled;
+    - EnableNodeCliInspectArguments Disabled;
+    - EnableEmbeddedAsarIntegrityValidation Enabled;
+    - OnlyLoadAppFromAsar Enabled.
+
+    The three fuses outside the plan stay at Electron's defaults: LoadBrowserProcessSpecificV8Snapshot Disabled, GrantFileProtocolExtraPrivileges Enabled, WasmTrapHandlers Enabled.
+  - **Sizes.** The installer, `desktop/dist/release/CommsHub-Setup-0.1.0-x64.exe`, is 111,513,992 bytes (106.3 MB). Installed, the application takes 336,222,753 bytes (320.6 MB) in 21 files, in `%LOCALAPPDATA%\Programs\sa.commshub.desktop`. The silent installation took 17.1 s.
+  - **`node qa/desktop-shell.cjs`: 80 of 80** (`qa/desktop-shell.json`, run 2026-10-20T15:59Z).
+    - **Part 1, the development package, in Playwright:**
+      - The connection screen appears when nothing answers. It is Arabic and right to left, has no bridge, and «إعادة المحاولة» loads the site once it answers.
+      - The bridge is on the allowed fixture with exactly its four fields, frozen. It is absent in a frame on the same address, in a frame from another port, and on a foreign top-level page.
+      - A foreign link, `window.open` of a foreign address, a mail link and a redirect out of the list go to the stubbed `shell.openExternal`, and the window stays where it was. `ms-settings:` and `file:` open nothing, and no foreign page was ever loaded inside.
+      - A link on the list stays in the window. `window.open` on the list opens an application window with the bridge and the same session.
+      - `/api/drive/connect`, `/api/onedrive/connect` and `/api/platforms/connect/facebook` show the note verbatim, modal over the window and with no bridge. «متابعة في المتصفح» opens the address in the browser, and «إلغاء» opens nothing. No `/api/` address was ever loaded inside.
+      - On the allowed page: microphone granted; camera refused, even together with the microphone; notifications granted; clipboard granted (by query); location, MIDI, persistent storage and the screen wake lock refused. HID offered no device, serial, USB and Bluetooth were cancelled, and full screen was granted. A foreign page got neither the microphone nor notifications.
+      - Window settings, the persistent `persist:comms-hub` profile, no menu, and the user agent `... Chrome/152.0.7977.130 Safari/537.36 CommsHubDesktop/0.1.0`.
+      - Keys: Ctrl+Z, Ctrl+Shift+Z, Ctrl+K and S reach the page, with Ctrl+Z not held back by the application. Ctrl with + - 0 gave 1.1, 0.9 and 1 and were held back from the page. F11 went into and out of full screen. F12 opened the developer tools, and F5 reloaded the page.
+      - A download's dialog in `C:\Users\User\Downloads\comms-hub-check.txt`, titled «حفظ الملف», and the download completed.
+      - A second launch exited 0, the first window got `second-instance` once, and there was still one window.
+      - The place came back exactly: 1100 by 720 at a display scale of 1.25. The maximised state came back too.
+      - The production sign-in page loaded signed out: right to left, «تسجيل الدخول», a password field, and the bridge present. It was never signed in.
+      - A self-signed certificate for the production name was refused with «تعذّر التحقق من أمان الاتصال», and its server received no request.
+    - **Part 2, the release package:**
+      - The six fuses, and the development package differing in the inspector fuse alone.
+      - A silent installation as this user, exit 0. Shortcuts in the Start menu and on the desktop carry the Arabic name. Windows lists «مركز الاتصال المؤسسي» 0.1.0 under the key `dc656aed-13ec-55ab-a2e3-19f784d0109c`.
+      - At run time:
+        - `--remote-debugging-port` exits with code 2, and the port never answered;
+        - `--ignore-certificate-errors` exits with code 2;
+        - `--inspect` opens no port while the application runs;
+        - `ELECTRON_RUN_AS_NODE=1` and `NODE_OPTIONS=--require` ran no code.
+      - The window took the site's title, and its profile, `%APPDATA%\sa.commshub.desktop\Partitions\comms-hub`, holds the production site.
+      - A silent uninstall removed the program, both shortcuts, the Windows entry and `%APPDATA%\sa.commshub.desktop`.
+  - **The site, in the worktree:**
+    - `npm run typecheck` is clean, and `npm test` gives **501 of 501**.
+    - `npm run build` passes (compiled in 21.0 s, 36 static pages) with no environment file: the worktree has only `.env.example`, and no secret was copied into it.
+    - No tracked file changed during the build.
+- **Found on the way, fixed.**
+  - At a display scale of 125%, Windows widened a new window by 4 pixels (1100 to 1104), though the stored place was exact. The main process now sets the stored bounds once more after creating the window, and the check holds the result to the stored value within 1 pixel.
+  - `path.win32.basename` read `a:` in a suggested download name as a drive. The name is now split on slashes.
+  - The release bundle still carried an unreachable developer-tools call behind a constant. It now sits behind the compiled flag and is gone from the bundle.
+  - A first run of the check stopped when a part failed with an application still open. The check now closes every application it started before it writes its result.
+- **How the checks were driven, said plainly.**
+  - **Keys** were sent through `webContents.sendInputEvent`, the browser-side path a real key takes past Electron's `before-input-event`. Playwright's own key presses enter below that point: in a probe the page received Ctrl+Equal and the zoom stayed at 1, so they would prove nothing. Keys sent in the first second after a load reached neither the page nor the application, so the check first waits until a neutral F24 reaches the page.
+  - **Links** after a refused navigation are clicked through the page, and device buttons with the low-level mouse. Playwright's own actions keep waiting for a navigation that never comes.
+  - **No browser opened**: `shell.openExternal` was replaced inside the main process for the check.
+  - **The microphone** was Chromium's fake device.
+  - **The certificate case** pointed the production name at a local server with a self-signed certificate (`--host-resolver-rules`, development package).
+  - **Part 2 used this laptop's real per-user locations.** It installed silently and removed the application again, and would have skipped all of that had an installation or a profile existed. The desktop shortcut was on the owner's desktop for about a minute.
+- **Not verified, said plainly.**
+  - **Nothing was seen signed in.** By rule no agent signs in; the owner's walkthrough below is pending.
+  - **File access** (`showSaveFilePicker`) was not driven, because it opens Windows' own dialog; the rule is unit-tested only. The clipboard was checked by a permission query only, to leave this laptop's clipboard untouched.
+  - **The installer's Arabic pages were not seen**, because the one-click installer ran silently.
+  - **SmartScreen was not seen**: a file built on this laptop carries no download mark. The first installation from a copied file will show it.
+  - **Only this laptop was tried** (Windows 11 Home 10.0.26300, display at 125%). The director's laptop was not, and its Smart App Control is still the owner's to check (plan 11.1).
+  - A real keyboard, the mouse's back button and a second screen were not tried.
+- **Owner walkthrough (pending).**
+  1. Install with `CommsHub-Setup-0.1.0-x64.exe`: "More info", then "Run anyway".
+  2. Sign in, and move between pages.
+  3. Open «استوديو الحركة» and «الاستوديو» as the Admin.
+  4. Record a voice note in «المراسلة» to check the microphone. The application grants it itself, so no browser prompt appears; Windows may ask once whether desktop applications may use the microphone.
+  5. Start a Drive connection from «الإعدادات»: the note appears, then the browser.
+  6. Close and reopen the application; it should still be signed in.
+  7. Uninstall; the data should be gone, so a new installation starts at the sign-in page.
+- **Waits for D2**, after the studio's third round:
+  - `backgroundThrottling: false`;
+  - the bridge methods `info`, `power`, `life` and `notify`, each behind `guard()`;
+  - the tray and native notices;
+  - in the site, `src/lib/native/`, the export panel, `support.ts` and `notices.tsx`;
+  - «معلومات الجهاز»;
+  - the parity check DT-05.
+- **Branch.** `desktop-app`, as local commits: not merged into `main` and not pushed.
+
+### 2026-10-20: the desktop application, D2: the studio at full strength, the tray and notices
+
+- **The owner's word.** On 2026-10-20 the owner asked for the desktop application to be finished: D2 to D6, on branch `desktop-app`, while the studio's third round is still open on `main` (Phases 11 to 14 remain). D7 and D8 stay gated on hardware and decisions, as the plan says. The download of an LGPL FFmpeg build for D5 was allowed, and D3's bucket is to be a migration file only, not applied. D2 therefore touches studio files (`export-panel.tsx`, `send-review.tsx`, `support.ts`, `studio-page.tsx`, `editor-frame.tsx`) and `notices.tsx` in the worktree only; `main` and the studio session's files there were not touched. Each site change is small and additive, and new code sits in new files, so the merge after the studio round stays simple.
+- **What changed, in the application** (`desktop/`, version 0.2.0; `MVP_draft.md` 63.1):
+  - **Bridge version 1.** `window.commsHubNative` gains `info`, `power` (`keepAwake`, `release`), `life` (`busy`, `idle`) and `notify` (`show`, `badge`, `onOpen`). Each method only sends a message (`src/ipc.ts`). Every handler is registered once, in `src/native.ts`, through `sender.ts`'s `guard()`, and every argument is checked by `src/bridge.ts`: a reason from a fixed list (export, upload), a hold number the window itself took, a whole count up to 9999, and a notice of plain text (title up to 120 characters, text up to 400) whose link must be a path on the asking page's own allowed address. A notice with a bad link is refused whole. No method takes a file path, a command or another address.
+  - **Busy.** While a window is busy, its background throttling is off, so an export keeps its speed minimised or hidden. When it is idle again, throttling is back on, so an idle minimised window costs no more than a browser tab. This turns throttling off only during an export, instead of for the whole window as the plan's D2 line reads; the reason is a laptop's battery, and the effect for an export is the same. Closing a busy window hides it, with a notice «التصدير مستمر»; quitting asks first («يجري تصدير الآن.», «متابعة التصدير» by default). A window's holds and busy state end when it closes, crashes or loads another document (`src/life.ts`).
+  - **Awake.** `keepAwake` starts the system's `prevent-app-suspension` blocker: the laptop does not sleep, the screen may turn off.
+  - **The tray** (`native.ts`, `words.ts`): the icon while the application runs, with «فتح مركز الاتصال المؤسسي», «إبقاء التطبيق في شريط المهام» (off at first, D-10, kept in the profile's `settings.json`) and «إنهاء». Its tooltip names an export and the decisions waiting.
+  - **Notices and the badge.** A native notice is shown only when its window is not in front. A click brings the window back and hands the page the path. Windows has no number badge, so `src/badge.ts` draws one: a red disc with white figures (1 to 9, then 9+) at 16 and 32 pixels, set as the taskbar overlay with a description for screen readers. The tray icon gets a red dot.
+  - **«معلومات الجهاز»'s facts** (`src/device.ts`): version, processor, memory, free disk at the profile, and the graphics chips with the one in use, from `app.getGPUInfo('complete')`. On the owner's laptop it named the NVIDIA GeForce RTX 3050 Laptop GPU as active and the AMD Radeon as idle. Windows' software renderer is not listed as a chip. No path of any kind.
+- **What changed, in the site:**
+  - `src/lib/native/` is new: the native contract shared with the phone applications (`Mobile_Apps_Plan.md` 5.2). `native()` reads a well-formed shell object and detects each feature by its methods, so the D1 application offers none, and a browser is `web`. Helpers: `keepAwake` (the bridge, or the browser's screen wake lock as before), `markBusy`, `notifyNative`, `setBadge`, `onNoticeOpen`, `compareVersions`. `notices.ts` decides what reaches the tray: only new, unread «يحتاج قرارك» items, none on the first read, more than three as one. `device.ts` builds «معلومات الجهاز»'s lines and the guide to the stronger graphics chip.
+  - `export-panel.tsx` and `send-review.tsx`: the laptop kept awake, the window marked busy, and a native notice at the end or on failure (not on cancel). In the application the export line reads «يمكنك تصغير النافذة أثناء التصدير.». In a browser the export panel is unchanged; `send-review.tsx` now also holds the screen awake, as the export panel always did.
+  - `notices.tsx`: inside the application the list keeps reading itself once a minute while hidden, raises native notices, sets the badge, and opens a clicked notice through the site's router. In a browser nothing changes.
+  - `support.ts`: the support report gains `desktop`, and the studio's home says when it runs in the application.
+  - «معلومات الجهاز» (`src/components/native/device-info.tsx`): on the studio's home below «ما يقدر عليه هذا المتصفح», and in «مساعدة» of both editors. The hardware encoder is measured with `VideoEncoder.isConfigSupported` and `prefer-hardware`; in a browser the chip comes from WebGL.
+  - `tests/native.test.mjs` is new and on the test list.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **76 of 76**, in 15 files (new: `bridge`, `life`, `badge`, `device`, `words`). The D1 tests whose expectations D2 changes on purpose were updated: the bridge's shape, every handler through `guard()` in `native.ts` with one registration per callable channel, and the version. `npm run typecheck` is clean.
+  - **The site:** `npm run typecheck` is clean, `npm test` gives **514 of 514** (501 before, plus 13 in `tests/native.test.mjs`), and `npm run build` passes with no environment file (compiled in 4.5 s; every page is rendered per request, only `/_not-found` is prerendered).
+  - **`node qa/desktop-native.cjs`: 37 of 37** (`qa/desktop-native.json`). It drives the development package in three parts:
+    - **Part 1, the bridge:**
+      - its shape, frozen at every level;
+      - `info` names the processor, memory, free disk and the chip in use, with no path;
+      - `keepAwake` starts a real `prevent-app-suspension` blocker and `release` stops it once; another window cannot release it, and loading the page again ends it;
+      - eight kinds of bad request are refused, starting nothing and showing nothing;
+      - busy turns throttling off and idle back on;
+      - closing a busy window hides it, with one notice, and the tray icon brings it back;
+      - quitting during an export asks in Arabic, and the first answer keeps it;
+      - a notice for a window in front is not shown; one for a minimised window is, and its click restores the window and hands the page the path (or moves the page itself when it said nothing);
+      - the badge at 16 and 32 pixels with its description, 9+ above nine, cleared at zero, and the tray's dot and tooltip;
+      - closing quits when nothing runs; with «إبقاء التطبيق في شريط المهام» on, closing hides, says so once, and quitting from the tray asks nothing.
+    - **Part 2, DT-07, the site's real `useNotices`** on a fixture page with a stand-in list (`qa/fixtures/desktop-notices.tsx`, `fake-notices.ts`): the first read raises nothing and the taskbar counts one decision; with the window minimised a new «يحتاج قرارك» item raises a native notice and the count, while an «يحتاج انتباهك» item does not; a click restores the window and opens `/approvals/CH-202` through the router; reading clears the count.
+    - **Part 3, with nothing attached.** Playwright's attachment keeps every page visible and unthrottled. In a probe, a minimised and even a hidden window still said "visible" and kept its timers; Playwright's loader also adds Chromium's `--disable-background-timer-throttling` and two like it. Started plainly and minimised through Windows' own `ShowWindow` (`qa/desktop-helpers.cjs`, `launchPlain`), the application gave:
+      - idle and minimised: hidden, **3** timer ticks in 3 s;
+      - busy and minimised: visible, **30** ticks;
+      - idle again: hidden, **3** ticks;
+      - and the notifications hook, minimised and hidden, read its list again on its own **56 s** after a new decision arrived.
+  - **`node qa/desktop-studio-parity.cjs`: 12 of 12** (`qa/desktop-studio-parity.json`).
+    - **DT-05.** The studio's own checks ran unchanged in Edge and inside the application at the same moment (`qa/desktop-parity-hook.cjs` swaps Playwright's browser for the development package; both results go to `qa/artifacts`, never over `qa/studio-*.json`): `qa/studio-engine.cjs` **41 of 41** in both, `qa/studio-export.cjs` **18 of 18** in both, the same check names. The application ran Electron 44.5.1, Chromium 152.0.7977.130.
+    - **DT-06.** A ten-minute 1080p source made by ffmpeg (testsrc2 and a 440 Hz tone, 306,844,658 bytes) was exported whole at 1080p by the studio's own modules (`qa/fixtures/desktop-long-export.ts`), once in Edge and once in the application:
+      - **in the application,** started plainly with nothing attached and minimised through Windows the whole time, the export completed: **18,000 frames in 158.2 s**, its page reporting "visible" in all 19 progress reports;
+      - **in Edge,** the reference, the same export took **241.5 s**. Edge ran headless, so the two times are not like for like;
+      - **ffprobe reads both files the same:** H.264 High, 1920x1080, yuv420p, 30/1, 18,000 frames, AAC 48 kHz stereo, 600.0 s (572,743,220 and 588,921,876 bytes);
+      - **at 1, 150, 300.5, 450 and 599 s** the application's frame matches Edge's within 1 level of 255, and the source's within 1.
+      - **For contrast,** a one-minute piece, minimised: marked busy, it stayed visible and took 15.8 s. Not marked busy, its page was hidden, and it still took 16.1 s. On this laptop, hiding the window did not slow the encoder itself, which runs on promises and the graphics chip rather than timers. What "busy" changes is visibility, timers and the process's priority. The plan's premise that a hidden export slows was not reproduced here for a one-minute piece, and a hidden ten-minute export without "busy" was not measured. In a browser, tab discarding and long-hidden throttling are a separate matter.
+  - **`node qa/desktop-shell.cjs` (D1's check) against D2: 80 of 80** (`qa/desktop-shell.json`). Its bridge check now expects version 1's groups. The release package 0.2.0: installer **111,527,803 bytes (106.4 MB)**; installed **336,251,542 bytes (320.7 MB), 21 files**, in 12.7 s; fuses as in D1; installed silently on this laptop and removed again (no installation of the application was present).
+  - **The D2 package was proven to be this commit.** D3's first edits had started in the same files before this commit. They were undone, and the bundled `main.js`, `preload.js`, both pages and the icon built from this commit are byte for byte the ones inside the development package that passed the checks above.
+- **Found on the way, fixed.**
+  - A regular expression in `bridge.ts` held real line-separator characters, which end a JavaScript regular expression literal. It now uses escapes.
+  - Python on Windows wrote edited files with CRLF. The repository's `.gitattributes` stores LF, so commits were never affected; the working files were normalised.
+  - The check's command channel handed a command to a long poll left over from a closed application. It now drops a poll whose connection closed.
+  - The check's own wait for a report re-armed itself on every look, so waiters doubled every cycle. During a long export the check's Node process reached its 4 GB heap and stopped, and it had pressed this laptop's memory while it ran. A wait now has one timer and one listener, both removed at its end. Every result above comes from runs after the fix.
+  - In the application, a studio check's navigation could be interrupted by the application's own first page (its connection screen, since nothing answers at its address during the check). The hook now waits for that first page to settle.
+  - The Edge reference of DT-06 first ran in a plain Playwright context, whose storage lives in memory under a small quota: «exceed its storage quota». It now uses a profile on disk, like a person's Edge.
+- **Not verified, said plainly.**
+  - **Nothing was seen signed in.** The real notifications, the studio and the export panel inside the application were driven through fixtures, never the signed-in site.
+  - **No native notice reached the screen.** In the checks they were recorded inside the main process, so nothing appeared on the owner's screen. Windows shows an application's notices only once it is installed with its Start menu shortcut, which the release package has.
+  - **The tray menu was not clicked by a person.** Its items were driven through the main process.
+  - **The export panel's and send-review's own buttons were not pressed in the application.** The same helpers ran in the long-export fixture.
+  - **The graphics-chip guide** was written from Windows 11's settings, not walked on the director's laptop.
+- **Owner walkthrough, added for D2.**
+  1. Export a long video, minimise the window, and wait for «انتهى التصدير».
+  2. Close the window during an export: it goes to the tray. Then quit from the tray during an export: the question appears.
+  3. Turn on «إبقاء التطبيق في شريط المهام», close the window, and reopen it from the tray.
+  4. Have someone send you a work for a decision while the window is minimised: the notice and the taskbar number appear.
+  5. Open «معلومات الجهاز» in the studio: it should name the graphics chip in use.
+
+### 2026-10-21: the desktop application, D3: updates and the download page (signing waits)
+
+- **Scope.** D3 of `Desktop_App_Plan.md` without signing, which waits for a certificate (decision D-7), and without a build workflow, which waits for macOS (11.1). By the owner's answer of 2026-10-20, the release bucket is a migration file only, not applied, and no release is published.
+- **What changed, in the application** (`desktop/`, version 0.3.0; `MVP_draft.md` 63.2):
+  - **Updates** (`src/update.ts`, `src/updater.ts`):
+    - electron-updater **6.8.10**, pinned by the fourteen-day rule (published 2026-09-26), and bundled. Only its Windows updater is imported: its index would bring the macOS updater into the bundle.
+    - The generic feed is compiled in: `https://hrghmioxvgkjpnydrxrk.supabase.co/storage/v1/object/public/desktop-releases/windows-x64`, the public bucket of decision D-6.
+    - It looks ten seconds after start and every four hours, downloads in the background, checks the SHA-512 against `latest.yml`, and installs on quit or with «إعادة التشغيل للتحديث». That is refused while a window is busy («التحديث ينتظر»).
+    - When an update is ready and the window is not in front: a notice «تحديث جاهز», and the item in the tray's menu.
+    - `feedAllowed` refuses every feed but the production one, except in the update check's own package. A development build never runs the updater.
+    - The updater's log is off.
+  - **Bridge version 2** adds `update` (`status`, `restart`), registered through `guard()` like the others.
+  - **Three kinds of build** (`scripts/build.mjs`):
+    - release;
+    - development;
+    - `qa`, the update check's package: the release build under its own id, name and data folder, `sa.commshub.desktop.qa`, «مركز الاتصال المؤسسي، فحص التحديث», with a version and a feed on this laptop (`electron-builder.qa.cjs`). It can be built only with both, and the release bundle never carries its feed.
+  - **The release package** names the generic feed, so electron-builder writes `latest.yml`, the blockmap and `app-update.yml`. `--publish never` keeps anything from being uploaded.
+  - **The uninstaller** (`resources/installer.nsh`, a `customUnInstall` step) now also removes `%LOCALAPPDATA%\sa.commshub.desktop-updater`, but never during an update. electron-builder's installer copies itself there (about 110 MB) and its own uninstaller left it behind. The checks of D1 and D2 had left it on this laptop that way.
+  - **Names apart.** Electron writes a Start menu shortcut for an application's notices, named after the package. The development package is now «مركز الاتصال المؤسسي، نسخة التطوير» and the update check's «مركز الاتصال المؤسسي، فحص التحديث», so neither can replace the real application's shortcut. Every check also removes, when it ends, any shortcut pointing into this worktree (`qa/desktop-helpers.cjs`, `removeTestShortcuts`).
+- **What changed, in the site:**
+  - `src/lib/native/releases.ts`: the same feed, held equal by a test; `latest.yml` read strictly (a version, an `.exe` name with no path, a size); `MINIMUM_DESKTOP` 0.2.0; and the update state in Arabic.
+  - `src/components/native/desktop-app.tsx`:
+    - «تطبيق سطح المكتب» on «الحساب» (`supporting.tsx`): in a browser, the download, the version, the size and what SmartScreen asks; inside the application, the version and the update state with «إعادة التشغيل للتحديث»;
+    - the banner for an application older than the site needs (`shell.tsx`). It works from D1's bridge on, because it reads only the version.
+  - `src/lib/native/index.ts`: the feature `update`.
+  - `use-native.ts`: `useNativeVersion`.
+- **The bucket.** `supabase/migrations/20261021090000_desktop_releases.sql`, **written, not applied**: a public bucket `desktop-releases`, 300 MB per file, a few types, and no write policy for anyone. `desktop/README.md` says how the owner publishes a release: raise the project's upload limit, apply the migration, upload the installer, the blockmap and `latest.yml` last.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **86 of 86**, in 16 files (new: `update`; D2's tests updated for bridge version 2, the build kinds, the names and the uninstall step), `npm run typecheck` clean.
+  - **The site:** `npm run typecheck` clean, `npm test` **518 of 518**, `npm run build` passes (compiled in 7.4 s).
+  - **`node qa/desktop-update.cjs`: 10 of 10** (`qa/desktop-update.json`). On this laptop, with the update check's own package and a local feed:
+    - two packages built, 0.3.0 and 0.3.1; `latest.yml` names 0.3.1 with its size and SHA-512;
+    - DT-09: the package names no publisher, so electron-updater checks the SHA-512 only. Signing is not applicable to an unsigned pilot; signtool and the other tools were not run;
+    - 0.3.0 installed silently for this user. Started plainly, it asked the feed and downloaded 0.3.1 in the background (it asked for 0.3.0's blockmap first, which the feed did not have, then took the whole installer);
+    - closing its window quit it, and 0.3.1 was installed on quit. The data folder stayed, and the program on disk is 0.3.1;
+    - DT-09: a replaced installer (version 0.3.2 named with 0.3.1's checksum, one byte changed) was downloaded and refused, and nothing was installed;
+    - a silent uninstall removed the program, its Start menu shortcut, its Windows entry, its data and the updater's folder.
+  - **`node qa/desktop-account.cjs`: 8 of 8** (`qa/desktop-account.json`). Two runs had timed out on the application window's last screenshot, a picture rather than a check; pictures are now tried twice and a miss is noted:
+    - in Edge, «تنزيل التطبيق» to the bucket's installer, the version, about 112 MB, and SmartScreen's two steps;
+    - no release: «لم يُنشر إصدار للتنزيل بعد.»;
+    - with D1's bridge (0.1.0): the banner and the panel's warning;
+    - inside the development package: «… الإصدار 0.3.0» and the idle line, with nothing asked of the feed.
+  - **`node qa/desktop-native.cjs`: 37 of 37** against bridge version 2. Its notes record the Start menu shortcut Electron wrote for the development package during the run, now named «مركز الاتصال المؤسسي، نسخة التطوير.lnk», and removed at the end.
+  - **`node qa/desktop-shell.cjs`: 81 of 81** against the 0.3.0 release package, now also checking that uninstalling removes the updater's folder. Installer **111,615,091 bytes (106.4 MB)**; installed **336,748,035 bytes (321.1 MB), 22 files**, in 13.5 s. Nothing was left on this laptop: no program, updater folder or shortcut.
+  - **Not re-run:** `qa/desktop-studio-parity.cjs`. D3 changes no studio code; its D2 result stands.
+- **Found on the way, fixed.**
+  - Uninstalling left `%LOCALAPPDATA%\sa.commshub.desktop-updater` (above). The copies left by D1's and D2's checks on this laptop were removed.
+  - Electron wrote «مركز الاتصال المؤسسي.lnk» in the Start menu during a check, pointing to the development package. On a laptop with the application installed, that would have replaced its shortcut. It was removed, and the names are now apart (above).
+  - The update check's first run had two faults of its own:
+    - the updater, holding the genuine 0.3.1 file, took it as the 0.3.2 download because the manifest named its checksum, so the replaced file was never fetched. The check now clears the updater's downloads first, as on a laptop that never fetched the genuine one;
+    - NSIS's uninstaller returns before it has finished, and a silent update was still running. The check now waits for every process of the package and for every trace to go. The package that the race had left installed was removed.
+  - The release bundle grew from about 35 KB to about 531 KB with electron-updater and its libraries (YAML, semver, file utilities).
+  - `npm audit` reports a moderate finding in sprintf-js, reached through electron-builder's download of Electron at build time. Nothing of it ships in the application. The fix offered is a downgrade of electron-builder, not taken.
+- **Not verified, said plainly.**
+  - **No real release was published or fetched,** and the bucket does not exist; the application's check against it fails quietly until the owner publishes.
+  - **SmartScreen and the installer's Arabic pages** were not seen: every install was silent and built on this laptop.
+  - **Updating over a version that has the older uninstaller:** electron-builder runs the *installed* version's uninstaller during an update. The pilot's 0.1.0 and 0.2.0 do not remove the updater's folder, so it stays until a version from 0.3.0 on is uninstalled.
+- **Owner steps, when the first release is wanted** (desktop/README.md): raise the upload limit, apply the migration, `npm run pack`, upload the three files. Then, in a browser, «الحساب» shows «تنزيل التطبيق», and an installed application finds the update within four hours.
+
+### 2026-10-21: the desktop application, D4: files used in place, the cache folder and the pages' security policy
+
+- **What changed, in the site, for everyone:** the pages' Content-Security-Policy (`Desktop_App_Plan.md` 3 and 9, "before D4"). `src/proxy.ts` gives every page request a fresh nonce, which Next.js 16.3 puts on its own scripts, following `node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md`, and sends the policy (`src/lib/csp.ts`):
+  - `script-src` takes the nonce, the theme script's SHA-256 (the layout's one inline script, moved to `csp.ts` as `RESTORE_THEME` so the hash and the page share one text), `'strict-dynamic'` and `'wasm-unsafe-eval'` (the AAC encoder). It allows no `'unsafe-inline'`, and `'unsafe-eval'` only under `next dev`;
+  - the other directives stay broad, so nothing the site does today is refused: `connect-src` https and wss (Drive, OneDrive and S3 uploads go straight to their own hosts), blobs for workers and media, `object-src 'none'`, `frame-ancestors 'none'`, `base-uri` and `form-action` to the site;
+  - `commshub-file:` is allowed for media and reads; a browser never has such an address;
+  - the API routes keep their own headers.
+
+  Every page was already rendered per request (only `/_not-found` is prerendered), so the nonce costs nothing new.
+- **What changed, in the application** (`desktop/`, version 0.4.0, bridge version 3; `MVP_draft.md` 63.3):
+  - **Files used in place** (`src/files.ts`, `src/file-store.ts`). A chosen file becomes a token (32 random bytes), recorded in the profile's `files.json` with its path, size, modification time and a SHA-256 of its size and first and last 4 MB. The page sees name, size, type and date only. The same unchanged file keeps its token. A file changed, moved or removed is no longer served.
+    - `files.fromDropped(file)` reads, in the preload alone, the path Chromium attached to a File the person chose or dropped (webUtils). The main process accepts only an absolute path to a regular file of a kind the studio takes.
+    - Said plainly: a renderer taken over by an attacker could name a media file by path on this channel. The preload is the only caller in normal use, and the page itself has no way to send one.
+    - `files.pick` opens the system's own dialog. `files.check` and `files.forget` complete the group.
+  - **`commshub-file://`** (`src/protocol.ts`, `src/range.ts`), registered as privileged (standard, secure, fetch, CORS, stream) and answered on the site's profile only:
+    - read-only (GET, HEAD, and the CORS question), in single byte ranges (206, or 416 past the end);
+    - an address names exactly one token (`local/`) or one cache name (`cache/`, `asset-`, `proxy-` or `convert-` names the main process gives), never a path;
+    - a request carrying an Origin must come from the list; CORS headers go only to it.
+  - **The cache folder** (`src/cache-store.ts`):
+    - library versions are copied in resumable 16 MB parts from the site's own file route, `/api/media/<asset>/content?v=<n>` on the asking page's address. The main process uses the window's session with `credentials: 'include'`, so the site still decides who may read a file;
+    - the folder is `StudioCache` in the profile by default, or «CommsHub Studio Cache» inside a folder the person chooses. Changing folders removes only its own copies;
+    - the ten-day rule is the site's; the size limits are none, 10, 25, 50, 100 or 250 GB, the oldest used going first and what is in use never.
+  - **«مسح بيانات هذا الجهاز»** (`data.clear`, decision D-11) forgets every token, removes the folder's copies, clears the profile's storage and cache (the session cookie included), and starts every window again.
+  - The bridge's new handlers live in `src/native-files.ts`, registered through the same `guard()` (`native.ts` passes its `handle`). The sender test now reads both files.
+- **What changed, in the site's studio** (only inside the application):
+  - `cache.ts` gains a native backend: `libraryPlace` and `localPlace` return a File in a browser and an application address in the application. A device file is used where it is (an entry with its token, no copy). `removeLocal` forgets the token and never touches the file. The sweep, «حذف ملفات المعاينة المؤقتة» and the usage also cover the folder;
+  - `media.ts` asks for places, so a source read from an address goes through Mediabunny's URL source and the media element, as a library file without a cache always did;
+  - `target.ts` and `export.ts` can write straight to a file handle. In the application, `export-panel.tsx` asks with the system's save dialog before a video for the device, and says «حُفظ: … (…)، في المكان الذي اخترته.»;
+  - `cache-panel.tsx` shows the folder, the free space, «اختيار مجلد آخر», «العودة إلى المجلد الافتراضي», «الحد الأعلى للتخزين» and «· من مكانه»;
+  - `desktop-app.tsx` offers «مسح بيانات هذا الجهاز», held down;
+  - two long-press reasons were added (`studioForgetInPlace`, `desktopClearData`), and `tests/kit.test.mjs` now also reads `desktop-app.tsx`.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **105 of 105**, in 21 files (new: `files`, `file-store`, `cache-store`, `protocol`). `npm run typecheck` is clean.
+  - **The site:** `npm run typecheck` is clean, `npm test` **524 of 524** (new: `tests/csp.test.mjs` and D4's contract tests in `tests/native.test.mjs`), and `npm run build` passes (compiled in 9.6 s; the proxy is listed).
+  - **`node qa/desktop-csp.cjs`: 13 of 13** (`qa/desktop-csp.json`). The site's own production build (`next start`, no environment file, so the signed-out gate) was checked in Edge and inside the development package:
+    - every page carries the policy with a fresh nonce on each request;
+    - every script Next.js wrote carries that nonce, and the only other script is the theme's;
+    - pages load with no violation and the theme script ran;
+    - an inline event handler slipped into the page does not run, and the browser reports it;
+    - an API route does not get the pages' policy;
+    - inside the application, its own address is allowed: an unknown token answered 404, not blocked.
+  - **`node qa/desktop-files.cjs`: 16 of 16** (`qa/desktop-files.json`). DT-10 and DT-11 inside the development package, with the studio's own modules:
+    - a **4,503,664,011-byte** H.264 video, made by ffmpeg on this disk, was chosen in the page's file field and given a token, not copied;
+    - the frame at 291 s, past 4 GB into the file, matched ffmpeg's decode of the same moment within 12 levels;
+    - five seconds from there exported to 1280x720, 150 frames, in 3.4 s;
+    - **the private storage grew by 2,864,643 bytes, the export's own file (2,864,294) and the manifest; the whole profile on disk by 7.8 MB**;
+    - the same project on a fresh profile: the file missing on this device, and the editor's «على هذا الجهاز فقط» line;
+    - a file changed after it was chosen: 410; let go of: 404, still on the disk;
+    - a library version copied into the folder with the page's own cookie and read from there; refused when the route answered 401;
+    - the limit kept, and clearing spared what was in use;
+    - an export written straight to a file handle with no temporary copy;
+    - «مسح بيانات هذا الجهاز»: the cookie, the private storage, the folder's copies and the token all gone.
+  - **Against bridge version 3:**
+    - `qa/desktop-native.cjs` **37 of 37**;
+    - `qa/desktop-account.cjs` **8 of 8**;
+    - `qa/desktop-shell.cjs` **81 of 81** on the 0.4.0 release package: installer **111,621,449 bytes**, installed silently and removed, nothing left behind.
+  - **`qa/desktop-studio-parity.cjs --parity-only`: DT-05 again, 6 of 6.** The studio's engine (41 checks) and export (18 checks) pass in Edge and inside the application with the same names, after `cache.ts` and `media.ts` changed. The ten-minute export (DT-06) was not re-run; its D2 result stands, and the folder path is covered by `qa/desktop-files.cjs`.
+- **Found on the way, fixed.**
+  - A copy the site refused (401) left an empty, incomplete entry and an empty file in the folder, which «حذف ملفات المعاينة المؤقتة» then counted. A refused copy, or one that failed before its first byte, now leaves nothing; a partial copy stays, to be resumed (unit-tested, and the check found it).
+  - The URL parser resolves `../` before the address is read, so `commshub-file://cache/../manifest.json` arrived as `manifest.json`. Cache names now carry the main process's own prefixes, and the folder's record is kept in the profile, not in the folder.
+  - A byte range starting past the end was ignored instead of refused (416).
+- **Not verified, said plainly.**
+  - **The system's file and folder dialogs** (`files.pick`, «اختيار مجلد آخر») and the save dialog of an export were not driven: they are Windows' own windows. The paths behind them are unit-tested, the save path through a file handle.
+  - **Drag and drop** was not driven; a file field was, which gives the same kind of File.
+  - **The pages' policy was checked on the signed-out gate only.** Signed-in pages load more (the database's live connection, uploads to Drive, OneDrive and S3), which the policy's directives allow by design, but no signed-in page was seen under it. This is the D4 change most worth the owner's attention in the walkthrough: any page that misbehaves should be reported, with the browser console's «Content Security Policy» lines.
+  - The studio's own interface checks (`qa/studio-ui.cjs`) were not run. The cache panel's new controls were not seen rendered; they use the existing classes.
+
+### 2026-10-21: the desktop application, D5: light copies for the preview and editable copies (FFmpeg)
+
+- **What changed, in the application** (`desktop/`, version 0.5.0, bridge version 4; `MVP_draft.md` 63.4; decision D-9):
+  - **FFmpeg, LGPL v3.** The owner allowed this download on 2026-10-20: `ffmpeg-n9.0.2-17-g2a571b6068-win64-lgpl-shared-9.0.zip`, BtbN/FFmpeg-Builds release `autobuild-2026-09-30-13-08`, pinned by size and SHA-256 in `desktop/ffmpeg.lock.json`.
+    - `desktop/scripts/fetch-ffmpeg.mjs` downloads it into a new empty folder and checks it before opening anything. It unpacks with Windows' own `tar.exe` into another new folder, and copies only the two programs, their libraries and the licence into `desktop/vendor/ffmpeg`, which git ignores. Both `pack` scripts run it first.
+    - The package carries them in `resources/ffmpeg`.
+  - **Fixed jobs only** (`src/media-jobs.ts`): `probe`; `proxy`, a 720p or 1080p light copy; and `convert`, an editable H.264 and AAC copy at full size, even dimensions, 8-bit.
+    - They name Windows' own encoders only (`h264_mf`, `aac_mf`) and keep every frame at its time (`-fps_mode passthrough`).
+    - They keep the original's timestamps (`-copyts`) whenever the browser can read the original's container. A camera's MPEG-TS starts at about 1.48 s, and so do its copies. Anything else starts at zero.
+  - **Naming.** Each copy is named by its source (a device file's fingerprint, or a library file and version), the recipe (`r1`) and FFmpeg's tag (`ff902`).
+  - **Where the jobs run.** In a utility process (`src/media-worker.ts`): one encoding at a time, below normal priority, and a probe at once.
+  - **The bridge's `media` group** (`src/native-media.ts`): probe, copies, proxy, convert, cancel and progress.
+    - The page names a source by its token or its library version only, never by a path, a program or an argument.
+    - A copy is written as a `.part` file that is never served, and recorded only once FFmpeg has finished it. The size limit then applies to it like any copy.
+    - Its free disk space is checked against an estimate first.
+    - FFmpeg's error lines never leave the main process: the page is told one word.
+  - **Cancelling and quitting.** Cancelling, «مسح بيانات هذا الجهاز» and quitting end FFmpeg too: the main process ends its processes by their ids. The next start removes any `.part` left behind (`CacheStore.cleanParts`).
+  - **Licences, D3 to D4 fixed here.** Since D3 the bundle dropped the licence comments of electron-updater and the 14 packages it brings. `scripts/build.mjs` now writes each bundled package's name, version and licence text into `THIRD_PARTY_LICENSES.txt`, shipped in `resources`. `THIRD_PARTY_NOTICES.md` gains a section for the desktop application covering:
+    - Electron and Chromium;
+    - the bundled packages;
+    - FFmpeg, with its exact configure line, where its source is and the patent note.
+- **What changed, in the site's studio** (only inside the application; a browser behaves as before):
+  - `src/lib/native/` gains the `media` feature and its types.
+  - `cache.ts` asks the application for a source's copies, makes one, cancels one, and reads a file the browser cannot (`probeInApp`).
+  - `folderName` leaves a copy's own name as it is, so the sweep spares copies in use.
+  - `media.ts`:
+    - a ready video source loads its light copy if it has one, and the paused preview and the playing element read it. Its frames are matched to the original's by their first timestamps, as a safety net;
+    - the export, a still and the photo editor read the original, or the converted copy when there is one;
+    - a source the browser cannot decode becomes «convertible», and so does one whose sound it cannot decode;
+    - `inUse` covers the copies.
+  - `source-tools.tsx`, under the clip's line in the inspector: «إنشاء نسخة خفيفة للمعاينة», the heavy-source line, progress with «إلغاء», «تحويل إلى نسخة قابلة للتحرير», and the failures in Arabic.
+  - `editor.tsx`: adding a file the browser cannot read asks the application.
+  - `bin.tsx`: in the application the picker also lists `.mxf`, `.mts` and `.m2ts`.
+  - In a browser, a file the studio's reader refused used to raise the reader's own message. It now raises «نوع هذا الملف غير مدعوم في الاستوديو.».
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **116 of 116**, in 21 files (new: `media-jobs`, which also runs the recipes on the pinned build: a ProRes source of odd width, and an MPEG-TS whose light copy starts with it). `npm run typecheck` is clean. Correction: D4's entry said 105 tests in 21 files; they were in 20.
+  - **The site:** `npm run typecheck` is clean, `npm test` **527 of 527** (D5's contract tests in `tests/native.test.mjs`), and `npm run build` passes.
+  - **`node qa/desktop-media.cjs`: **52 of 52**** (`qa/desktop-media.json`), inside the development package.
+    - **The corpus**, made by the local (GPL) ffmpeg as fixtures only, 8 s each, each frame carrying its number as a 12-bit gray code:
+      - ProRes 422 and HEVC 10-bit at 3840x2160;
+      - DNxHR HQ 1080p;
+      - two MTS files: H.264 with AAC sound, and H.264 with AC-3 sound;
+      - an MXF with MPEG-2 4:2:2;
+      - an H.264 4K file.
+    - **How each opened:**
+      - The browser decodes the H.264, HEVC 10-bit (through this laptop's graphics chip) and the MTS with AAC sound as they are.
+      - It cannot decode ProRes, DNxHR or MXF, nor the AC-3 sound. Those four were converted, every frame kept in order: ProRes 4K in 5.6 s, DNxHR in 1.7 s, the AC-3 MTS in 2.0 s and the MXF in 1.5 s.
+      - The MXF and both MTS files came in through the application's reading, as the editor now adds them. On this laptop Chromium gives `.mts` the type `text/plain` and `.mxf` none, so the studio's reader never looked at them.
+    - **The frame at each time.** At every time tried, the frame read is the frame that time names, from the source's first frame (1.48 s for the MTS).
+    - **DT-12.** On three sources (the H.264 4K, the converted ProRes 4K and the MTS starting at 1.48 s):
+      - «إنشاء نسخة خفيفة للمعاينة» made a 720p copy;
+      - **at 48 times each, frame middles and both edges included, the preview's frame from the light copy was the export's frame from the original**;
+      - the playing element played the light copy;
+      - the export took its frames from the original's decoder (or the converted copy's) and never from the light copy's;
+      - the export passed ffprobe: 1280x720, 100 frames, 4 s, its frames the source's own in order.
+    - **Speed, measured on a busy picture** (`testsrc2`, ProRes 422 3840x2160, 10 s, 205.5 MB): converted in 7.7 s (1.3 times real time), and a 720p light copy of the original in 2.9 s (3.47 times). The corpus itself is black with white boxes and costs FFmpeg almost nothing, so its times say little.
+    - **Cancelling and quitting.** A light copy cancelled midway left no file and no entry. Quitting midway left no FFmpeg of the application running, and the next start removed the `.part`.
+    - **DT-13.** The package carries the pinned build:
+      - `--enable-version3`, no `--enable-gpl` and no `--enable-nonfree`;
+      - the LGPL v3 text;
+      - `h264_mf` and `aac_mf` present;
+      - only the two programs, their libraries, the licence and the pin.
+  - **Re-run after the bridge changed:**
+    - `qa/desktop-native.cjs` **37 of 37** (the bridge checked as version 4);
+    - `qa/desktop-files.cjs` **16 of 16**;
+    - `qa/desktop-shell.cjs` **81 of 81** (it installs and removes the 0.5.0 release, FFmpeg included);
+    - DT-05, `qa/desktop-studio-parity.cjs --parity-only`, **12 of 12**: engine and export, in Edge and the application.
+  - **Size.** The installer grows from 111.6 MB (0.4.0) to 161.3 MB (0.5.0). The unpacked application is 493.6 MB.
+  - **The studio's own interface check, `qa/studio-ui.cjs`: 122 of 122 in Edge** with D5's changes. It ran through `qa/desktop-parity-hook.cjs` with `DESKTOP_PARITY_SHELL=edge`, so the studio's own record `qa/studio-ui.json` was not touched. In a browser the new line in the inspector shows nothing.
+- **Found on the way, fixed.**
+  - **Times.** Mediabunny reads an MPEG-TS from its first timestamp (1.48 s), while FFmpeg's output starts near zero. A converted MTS would have moved every cut already placed on it by 1.48 s. Copies of readable containers now keep the original's times (`-copyts`, tested at both ends).
+  - **Adding a file.** The editor refused MXF and MTS outright, before anything could convert them.
+  - **The plan was wrong about NVENC.** In FFmpeg 9, NVENC does not need the "nonfree" switch, and the pinned LGPL build carries it, with AMD's and Intel's encoders, OpenH264 and others. The application never names them. `THIRD_PARTY_NOTICES.md` says so.
+  - Three faults in the check itself, before its record:
+    - hooking `window.fetch` sees nothing of Mediabunny, which keeps its own reference, so decoder calls are counted instead;
+    - a light copy of the tiny corpus finished before a cancel could reach it, so cancelling is tested on a three-minute busy file;
+    - `ffprobe` prints an MPEG-TS stream twice (under its program too).
+- **Not verified, said plainly.**
+  - **The new line in the inspector was not seen rendered in the application**, and no signed-in page was opened. Its states come from the media pool, which the check drives; the owner's walkthrough is the place to see it.
+  - **Real camera files were not tried.** The corpus is made by ffmpeg, not by a camera. Interlaced footage, variable frame rates, timecode tracks and audio layouts beyond stereo are untested. A converted copy keeps the first sound track only, mixed to stereo.
+  - A library video's light copy is made from its copy in the folder; it is the same path as a device file's, but no library source was converted or given a light copy in the check.
+  - The sound of a playing light copy was not compared with the original's; the light copy carries the first sound track at 160 kbit/s.
+
+### 2026-10-21: the desktop application, D6: the preview on a second screen
+
+- **What changed, in the application** (`desktop/`, version 0.6.0, bridge version 5; `MVP_draft.md` 63.5):
+  - **The bridge's `windows` group** (`src/native-windows.ts`, rules in `src/windows.ts`):
+    - `screens()` lists the screens: the system's own name for each, its bounds, its scale, which is the main one and which holds the asking window;
+    - `popOut({ panel, project, screen, full })` opens the studio's preview in a window of its own, or moves the one already open. It goes on the screen asked for (by default another than the editor's), in the middle of it, or full screen there;
+    - `close(panel)` closes it.
+  - **One address.** The page names the panel (`preview` only) and the project (a UUID). The main process builds `/motion/studio/<project>/preview` on the asking page's own origin, so it never takes an address from the page. The window gets every rule of the site's windows: the address list, navigation, keys and permissions.
+  - **Lifetime.** A panel's window closes when the window that opened it does.
+  - **Packaging.** `package-lock.json` carries the version again: the D5 commit had left it at 0.4.0, and `tests/config.test.mjs` now holds the two equal.
+- **What changed, in the site** (only inside the application; a browser behaves as before):
+  - **`src/lib/studio/preview-link.ts`.** The editor and its preview window are two pages of the same address in the same profile, so they speak over a `BroadcastChannel` named after the project. Nothing of the project passes through the application or the server.
+    - The editor sends what its preview shows, in the chosen shape, and its clock: where the playhead started, whether it plays, and the moment it did, on `performance.timeOrigin + performance.now()`, which both windows share.
+    - The preview window runs the studio's own player from that moment, so there is no message per frame.
+    - A window opened before the editor, or an editor reloaded, finds the other again: a new editor announces itself, and a window answers with hello.
+    - Only well-formed messages are heard.
+  - **`src/lib/studio/preview.ts`:** the player tells its clock when it starts, stops or jumps (`onClock`, `clock()`).
+  - **`src/components/studio/preview-window.tsx`:**
+    - `usePreviewLink` in the video editor;
+    - «فتح المعاينة في نافذة مستقلة» in «عرض», one entry per screen when there are several, and «إغلاق نافذة المعاينة المستقلة»;
+    - `PreviewWindow`: the picture alone on black, silent, space sending play or pause to the editor, and the two Arabic lines for waiting and for an editor gone.
+  - `studio-page.tsx` shows it for `/motion/studio/<project>/preview`. `hub-page.tsx` is unchanged, as the studio's own route test pins it.
+  - `Shell` leaves its frame out of that address (`isPanelWindow`). Otherwise the preview window, rarely the focused one, would have read notices every minute and raised «يحتاج قرارك» while the person worked in the editor.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm test` **120 of 120** in 22 files (new: `windows`). `npm run typecheck` is clean.
+  - **The site:** `npm run typecheck` is clean, `npm test` **533 of 533** (D6's contract tests in `tests/native.test.mjs`: the feature, the clock, the messages, the handshake both ways with a channel that delivers as a real one does, and the panel address). `npm run build` passes.
+  - **`node qa/desktop-windows.cjs`: **13 of 13**** (`qa/desktop-windows.json`), inside the development package, with the studio's player, media pool and link on both sides and a 20 s source carrying its frame numbers:
+    - the bridge: version 5; the screens; another panel and a malformed project refused; the window opened on the project's own address, and the two finding each other;
+    - **DT-14, playing 8 s: at each of the 473 frames the preview window drew while playing, its playhead was within one frame (33.3 ms) of the editor's at the same moment: mean 1.65 ms, p95 2.7 ms, max 12.5 ms**;
+    - standing still at 7.3 s, both show frame 219, read from the picture; paused after playing, both stop on the same frame;
+    - **a jump to 15 s while playing is followed in 0.4 ms, and the two stay within one frame on both sides of it (mean 1.31 ms, max 11.4 ms)**;
+    - space in the preview window plays and pauses the editor;
+    - full screen on the screen asked for, then back to a window, the same window each time;
+    - the editor reloaded is found again; the editor leaving closes the window.
+  - **Re-run with bridge version 5:** `qa/desktop-media.cjs` **52 of 52** (the light copy still played, now asked with CORS); `qa/desktop-native.cjs` **37 of 37**; `qa/desktop-files.cjs` **16 of 16**; `qa/desktop-shell.cjs` **81 of 81** (it installs and removes the 0.6.0 release); DT-05 `--parity-only` **12 of 12**; and the studio's own `qa/studio-ui.cjs` **122 of 122** in Edge, through `qa/desktop-parity-hook.cjs` so the studio's record was not touched.
+- **Found on the way, fixed.**
+  - **A tainted preview canvas (D4).** A playing video element read from `commshub-file://` was not asked with CORS, so a canvas that drew it could no longer be read. The protocol already answered CORS for the site, so `media.ts` now sets `crossOrigin = 'anonymous'` on those elements.
+  - **A preview window raising notices**, before it was written: the site's frame is left out of it.
+  - **An editor reloaded runs no cleanup**, so the preview window never heard it leave. The editor now also says goodbye on `pagehide`, and a window always greets a newly announced editor.
+  - Three faults in the check itself, before its record:
+    - `window.status` is the browser's own status-line property, so the fixture's function of that name never existed, and early waits on it timed out quietly;
+    - frames the preview window drew while standing still were compared as if the editor were still playing;
+    - the window count was read a moment before the closed window left it.
+- **Not verified, said plainly.**
+  - **A second screen.** This laptop had one screen (1536x864 at 125%) during the check. Full screen was checked on the screen the editor was on; placing the window on another screen is the same call with another screen's id, unit-tested for which screen and where, but not seen.
+  - **The menu entry was not seen rendered**, and no signed-in page was opened: the owner's walkthrough is the place.
+  - **The deviation from the plan.** "Kept in step through the bridge" became two pages speaking directly, with the bridge only opening and placing the window: there is less to secure, and nothing of a project in the main process.
 
 ### 2026-10-22: fixes from role simulation sim-20261015-03, the quick ones
 
@@ -1146,3 +1609,17 @@ When recording future implementation outcomes, follow this standardized template
   - Checked and left as it is: «Google Drive» in the upload, folder and rename messages is correct, since new uploads go to Google Drive by design. The run's mismatch came from its test-only storage path.
 - **Verified, numbers.** `npm run typecheck` clean; `npm run build` passes (36 static pages); `npm test` **505 of 505**. Four tests are new: the guide bar kept clear on a phone, no decision offered on your own version, the linked-mail filter as postgrest-js writes it, Arabic counts. One existing assertion was corrected from «تبقى 2 مراحل» to «وتبقى مرحلتان». Browser fixture `qa/sim03-quick-fixes.cjs` **17 of 17** in headless Edge with the real stylesheets: the Admin top bar fits 320, 360, 375 and 390 px, and the old rule reproduces the run's 392 px at 320; «ربط عبر LinkedIn» stays on screen at 390 to 430 px; the create buttons stay above the bottom bar while scrolling; the video length clears the stage chip. Each fix is also shown failing with the old rule.
 - **Not verified, said plainly.** Nothing was seen signed in. The fixtures copy the markup, not the pages. The project prefill, the linked-mail list and the self-approval note were not seen in a running page.
+
+### 2026-10-26: the desktop application merged into main
+
+- **The owner's request.** On 2026-10-26 the owner asked for the desktop application to be merged first, before the Android application is planned. This replaces the earlier intention to merge after the studio's third round.
+- **How it was done.** `desktop-app` (D0 to D6, `4df8776`, version 0.6.0) was merged into `main` (`330b9fd`) on a side branch in the desktop worktree. The merge was checked there, and then main moved to the merge commit by fast-forward. Main's uncommitted files (the studio and calendar changes, `validation/recheck-R01.md`, the role-simulation documents, `qa/simulations/`, `videos/`) share no path with the merge, were not touched, and are still uncommitted. Only `Status.md` and `progress.md` conflicted. Both sides were kept, in date order, and the front matter kept main's newer `updated:` dates.
+- **Verified, numbers.** All of these ran on the merged tree:
+  - `npm run typecheck` clean, and `npm run build` passes.
+  - `npm test` **537 of 537**: the desktop branch's 533 plus the four of 2026-10-22.
+  - Desktop `npm test` **120 of 120**, with its typecheck clean.
+  - `qa/sim03-quick-fixes.cjs` **17 of 17**: main's phone layout fixes with the desktop's styles.
+  - `qa/desktop-csp.cjs` **13 of 13**: every page's Content-Security-Policy in Edge and in the development package, now including main's newer pages.
+
+  The first build attempt ran beside the test run and stopped with exit code 127 and no message. Run again on its own, the build passed.
+- **Not done, said plainly.** Nothing is pushed. Until a push, which deploys, production has none of the desktop's site code: `src/lib/native/`, «تطبيق سطح المكتب» on «الحساب», the old-application banner, or the pages' Content-Security-Policy. The `desktop-releases` migration is still not applied, no release is published, the application is unsigned, and nothing was seen signed in.

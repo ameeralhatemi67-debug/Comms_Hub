@@ -62,6 +62,10 @@ export const HOLD = {
   studioClearCache: 'تُحذف نسخ ملفات المكتبة من هذا الجهاز فقط. لا يُحذف أي أصل ولا أي مشروع، وتُنسخ الملفات من جديد عند الحاجة.',
   /** «الاستوديو»: remove a file kept on this device only. */
   studioRemoveLocal: 'هذا الملف على هذا الجهاز فقط: المشاريع التي تستعمله لن تجده هنا بعد الحذف.',
+  /** Studio, desktop application: let go of a device file used where it is (the file itself stays). */
+  studioForgetInPlace: 'يبقى الملف في مكانه على الجهاز، لكن المشاريع التي تستعمله لن تجده في الاستوديو بعد الإزالة.',
+  /** Account, desktop application: «مسح بيانات هذا الجهاز». */
+  desktopClearData: 'يُمسح من هذا الجهاز الدخول وملفات الاستوديو المؤقتة، ويعود التطبيق إلى صفحة الدخول.',
   /** «الاستوديو»: save an export as a new version of a library file that was already reviewed. */
   studioNewVersion: 'الإصدار الجديد يعيد الملف إلى «قيد المراجعة»، ويبقى الإصدار المعتمد قبله مسجلاً.',
   /** «الاستوديو»، «النسخ»: make an older numbered version the current state (MVP_draft.md 62.6). */

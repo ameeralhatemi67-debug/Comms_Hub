@@ -2660,3 +2660,178 @@ On «المراجعة» (`/approvals/<id>`), for files of video:
 - The calendar marks works that have a studio project and opens them in the studio; an event offers «تحضير محتوى لهذه المناسبة», which makes a video work for the event and its studio project.
 - A project page lists the studio projects of its works; Home has a «الاستوديو» section with the projects being edited, the open notes on studio files and the nearest dates of linked works.
 - All of these are shown only to those who may open the studio.
+
+# 63. The desktop application «مركز الاتصال المؤسسي», Windows, 2026-10-20
+
+Owner decisions of 2026-10-20: `Desktop_App_Plan.md`, accepted with the answers of its section 11.1 and recorded in `progress.md`. An application for Windows that opens the live site in its own window. It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a browser remains a full client. This section describes phase D1; 63.1 adds phase D2, 63.2 phase D3 and 63.3 phase D4, and the later phases are in the plan.
+
+**Who and where.** The pilot is the Admin's and the director's laptops, Windows x64 only for now (Windows arm64 and Mac come later). The application is installed per user, without administrator rights, with a Start menu shortcut and a desktop shortcut. Windows shows its name, «مركز الاتصال المؤسسي», in the Start menu, on the shortcuts, in the taskbar, in the installer and in the file's details. The pilot build is not signed, so Windows SmartScreen asks once: "More info", then "Run anyway" («مزيد من المعلومات» ثم «تشغيل على أي حال» on an Arabic Windows). The application opens `https://comms-hub-three.vercel.app` and nothing else.
+
+**The window.** One window, with no menu bar of its own: the site's header and menus, and the studio's menu bar and keys, are the same as in a browser. Signed out it shows the site's sign-in page, and signing in is the site's own form. The session is kept in the application's own profile on this laptop, encrypted by Windows and apart from every browser. The window opens where it was left: size, position, screen, and whether it was maximised. Starting the application again while it is open brings the open window forward. Closing the window closes the application, except during an export or with «إبقاء التطبيق في شريط المهام» on (63.1).
+
+**Keys.** The application takes only these keys:
+- Ctrl with + or - zooms in or out, and Ctrl with 0 returns to 100%.
+- F11 puts the window in full screen and takes it out.
+- F5 loads the page again; Ctrl+F5 does so without the stored copy.
+
+Every other key belongs to the page. Ctrl+Z, the studio's shortcuts and the review screen's keys work exactly as in a browser.
+
+**Links.**
+- A link to a page of the site stays in the application.
+- A page the site opens in a new window, such as a library file or «فتح هذه النسخة للقراءة في نافذة جديدة», opens in a second window of the application.
+- A link to any other site opens in the laptop's browser, and a mail link in its mail program. The window stays where it was.
+- Other kinds of address, such as files on the laptop or system settings, are not opened.
+
+**Outside connections.** Connecting Google Drive, OneDrive or a platform account (from «الإعدادات», the library or «حسابات المنصات») first shows a small note over the window: «يكتمل الربط في المتصفح. سجّل الدخول إلى المركز هناك إن طُلب منك، ثم ارجع إلى التطبيق.» It has two buttons, «متابعة في المتصفح» and «إلغاء». «متابعة في المتصفح» opens the connection in the laptop's browser, where it finishes. Google refuses sign-in inside applications, and a connection must finish in the browser where it started. The person then comes back to the application, and the page shows the connection as it would in any browser.
+
+**No connection.** When the site cannot be reached, the window shows «تعذّر الوصول إلى المركز» and «تحقّق من اتصالك بالإنترنت، ثم أعد المحاولة.», with «إعادة المحاولة». When the site's security certificate is not accepted, it shows «تعذّر التحقق من أمان الاتصال» and «لم يُفتح المركز لأن شهادة الأمان لم تُقبل. أعد المحاولة لاحقاً.»; such a page is never opened. F5 on this screen tries again too. The application keeps no copy of the site to use without a connection.
+
+**Permissions.** The site may use:
+- the microphone, for voice-over in the studio and voice notes in «المراسلة»;
+- notifications;
+- the clipboard;
+- full screen;
+- saving to a file the person chooses.
+
+The camera, location, USB, serial and HID devices, Bluetooth, MIDI and everything else are refused. That includes the browser's own screen wake lock: the application keeps the laptop awake during an export itself (63.1). No other site gets any permission inside the application.
+
+**Downloads.** A download, such as a library file or a studio export to the device, opens Windows' save dialog, titled «حفظ الملف», in the Downloads folder.
+
+**Removing it.** Uninstalling from Windows' settings removes the program, both shortcuts and the application's data on this laptop, the session included. An update (D3) keeps the data.
+
+**Not there yet.**
+- Signing (decision D-7, a certificate before rollout). Updates and the download page arrived with D3 (63.2).
+- Files used where they are and the cache folder arrived with D4 (63.3), the media tools for heavy or unsupported footage with D5 (63.4), and the preview on a second screen with D6 (63.5).
+
+**Boundaries.** The application holds no secret, no stored password and no sign-in bypass. It decides nothing about who may see or do what: the site and the database do, as in a browser, and the studio still opens only for the Admin and the director. It approves nothing and publishes nothing, and nothing is scheduled in the site because of it.
+
+## 63.1 The studio at full strength, the tray and notices (D2), 2026-10-20
+
+Phase D2 of `Desktop_App_Plan.md`. Everything here exists only inside the application; in a browser the site behaves as before.
+
+**Exporting.** In the studio's export window the line «يجري التصدير في هذا المتصفح: أبقِ الصفحة ظاهرة حتى ينتهي.» becomes «يمكنك تصغير النافذة أثناء التصدير.». While an export runs, the laptop does not go to sleep (the screen may turn off), and the window is never slowed, minimised or covered. When the export ends and the window is not in front, a Windows notice says «انتهى التصدير» with the file's name; if it fails, «تعذّر التصدير» with the reason. A cancelled export says nothing. «تصدير وإرسال للمراجعة» does the same, ending with «أُرسل العمل للمراجعة» or «تعذّر الإرسال». The studio's home says, under «ما يقدر عليه هذا المتصفح»: «يعمل الاستوديو في تطبيق سطح المكتب (الإصدار …): يستمر التصدير والنافذة مصغّرة، ولا ينام الحاسوب أثناءه.»
+
+**Closing and quitting during an export.** Closing the window while it exports hides it instead, and a notice says «التصدير مستمر»: «أُغلقت النافذة وما يزال التصدير يعمل. يصلك إشعار عند انتهائه، وتفتح النافذة من أيقونة المركز في شريط المهام.» Quitting while it exports asks first: «يجري تصدير الآن.», «إن أنهيت التطبيق يتوقف التصدير ولا يُحفظ الملف.», with «متابعة التصدير» (the default) and «إنهاء وإيقاف التصدير». When the export ends, the window stays where the person put it; a download to the device still opens «حفظ الملف».
+
+**The tray.** While the application runs, its icon is in the notification area at the end of the taskbar. A click opens the window. Its menu has:
+- «فتح مركز الاتصال المؤسسي»;
+- «إبقاء التطبيق في شريط المهام», a tick, off at first (decision D-10). When it is on, closing the window hides it instead of quitting, and the first time a notice says «ما يزال التطبيق يعمل في شريط المهام. تفتحه من أيقونته، وتوقف ذلك من قائمتها.»;
+- «إنهاء».
+
+Hovering over the icon shows «مركز الاتصال المؤسسي», with «: جارٍ التصدير» during an export, and «إشعارات تحتاج قرارك: …» on a second line when decisions wait. The setting stays on this laptop only.
+
+**Notices.** The notifications list keeps reading itself once a minute even while the window is minimised or hidden. Each new «يحتاج قرارك» item becomes a Windows notice titled «يحتاج قرارك» with the item's text, but only when the window is not in front, since the page already shows it. More than three at once become one notice: «إشعارات جديدة تحتاج قرارك: …». «يحتاج انتباهك» and «للعلم» items raise no notice. Clicking a notice brings the window back and opens where the work is, as the drawer does. The items already there when the application opens raise nothing. The taskbar button carries the number of unread «يحتاج قرارك» items, a red disc with the figure (9+ above nine), and the tray icon a red dot; screen readers hear «إشعارات تحتاج قرارك: …». Reading the items clears it. Reading a notice approves nothing.
+
+**«معلومات الجهاز».** On the studio's home, below «ما يقدر عليه هذا المتصفح», and in «مساعدة» of both editors. It lists «يعمل في», «المعالج», «الذاكرة», «المساحة الحرة» (on the disk of the application's data), «بطاقة الرسوميات المستعملة», «بطاقات أخرى في الجهاز» and «ترميز الفيديو بالعتاد» (on the graphics chip, or not). When a laptop has a stronger graphics chip sitting idle, it adds: «لتشغيل التطبيق على بطاقة الرسوميات الأقوى: افتح «الإعدادات» في Windows، ثم «النظام»، ثم «العرض»، ثم «الرسومات»، واختر «مركز الاتصال المؤسسي»، ثم «أداء عالٍ»، ثم أعد تشغيل التطبيق.» In a browser the same panel shows what the browser tells (cores, a rounded memory figure, the chip WebGL names, the encoder) and adds «في تطبيق سطح المكتب تظهر هنا بطاقة الرسوميات المستعملة والمساحة الحرة، ويستمر التصدير والنافذة مصغّرة.» It names no file, folder or person.
+
+**Boundaries, unchanged.** The application still approves nothing and publishes nothing. A notice is only a pointer to the page; the page and the database decide. Nothing new is scheduled in the site: the minute's reading is the page's own, as before, now also while hidden.
+
+## 63.2 Updates and the download page (D3), 2026-10-20
+
+Phase D3 of `Desktop_App_Plan.md`, without signing: the pilot stays unsigned (decision D-7).
+
+**The application keeps itself up to date.** It looks for a newer version when it starts and every four hours while it is open, downloads it in the background, and checks that the file is exactly the one the release names. The update is installed when the person quits the application, or at once with «إعادة التشغيل للتحديث». That item appears in the tray's menu once an update is ready, and on «الحساب». When an update is ready and the window is not in front, a notice says «تحديث جاهز»: «الإصدار … جاهز، ويُثبَّت عند إنهاء التطبيق. للتثبيت الآن اختر «إعادة التشغيل للتحديث».»; clicking it opens «الحساب». It never restarts during an export: «إعادة التشغيل للتحديث» then says «التحديث ينتظر»: «لا يُعاد تشغيل التطبيق أثناء العمل. يُثبَّت التحديث عند إنهاء التطبيق بعد انتهائه.». An update keeps the session and the application's data.
+
+**«تطبيق سطح المكتب» on «الحساب».** Every signed-in person sees it.
+- **In a browser:** «تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.», then «تنزيل التطبيق» with the version and its size, and: «يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».». Before the first release is published: «لم يُنشر إصدار للتنزيل بعد.».
+- **Inside the application:** «تعمل الآن في تطبيق سطح المكتب، الإصدار …», then where its update stands:
+  - «جارٍ البحث عن تحديث…»;
+  - «هذا أحدث إصدار.»;
+  - «جارٍ تنزيل الإصدار … (…٪)…»;
+  - «الإصدار … جاهز، ويُثبَّت عند إنهاء التطبيق.» with «إعادة التشغيل للتحديث»;
+  - «تعذّر البحث عن تحديث الآن، ويُعاد البحث لاحقاً.»;
+  - «يبحث التطبيق عن تحديث عند بدئه وكل أربع ساعات.».
+
+**An application older than the site needs.** Each page then carries a line at its top: «إصدار تطبيق سطح المكتب أقدم مما يحتاجه المركز الآن. حدّثه من «الحساب».», and «الحساب» adds «هذا الإصدار أقدم مما يحتاجه المركز الآن، فحدّثه ليعمل كل شيء كما ينبغي.». The site sets the oldest version it works with fully (0.2.0 now) and raises it only when a change of the site needs a newer application.
+
+**Releases** are published by the owner to a public bucket of the `comms-hub` project. Nothing is published from the site or by an agent. Until the owner publishes the first one, the download line says so and the application's own check fails quietly («تعذّر البحث عن تحديث الآن، ويُعاد البحث لاحقاً.»).
+
+## 63.3 Files used in place, the cache folder and the pages' security (D4), 2026-10-21
+
+Phase D4 of `Desktop_App_Plan.md`. Everything here exists only inside the application, except the pages' security policy, which every browser gets too and which changes nothing anyone sees.
+
+**Files from «هذا الجهاز» are used where they are.** Adding a video, a sound or a picture from the laptop, with the button or by dragging it in, no longer copies it: the studio remembers where it is and reads it from there, however large. A 20 GB camera file costs no extra 20 GB and no copying time. A recording made in the studio has no file on the laptop yet, so it is kept as before. In «التخزين على هذا الجهاز» such a file shows «· من مكانه» beside its size. Its removal, held down («يبقى الملف في مكانه على الجهاز، لكن المشاريع التي تستعمله لن تجده في الاستوديو بعد الإزالة.»), only lets the studio forget it: the file stays where it is. If the file is changed, moved or deleted, the studio no longer finds it and says so as for any file not on this device: «هذا الملف على جهاز آخر («على هذا الجهاز فقط» حيث أُضيف)، فلا يُعرض هنا.». A project opened on another device shows the same.
+
+**The library's copies live in a folder.** In a browser they live in the browser's private storage, which the browser may clear; in the application they are files in a folder on the laptop. «التخزين على هذا الجهاز» then also shows:
+- «مجلد التخزين المؤقت: …», with «المساحة الحرة» on its disk;
+- «اختيار مجلد آخر» (another disk if wanted) and «العودة إلى المجلد الافتراضي»;
+- «الحد الأعلى للتخزين»: «بلا حد», 10, 25, 50, 100 or 250 GB;
+- «عند تغيير المجلد تُحذف النسخ من المجلد السابق وتُنسخ في الجديد عند الحاجة، ولا يُمس غيرها. وإذا تجاوزت النسخ الحد حُذف أقدمها استعمالاً.».
+
+The ten-day rule and «حذف ملفات المعاينة المؤقتة» work as before, in the folder; what the open project uses is never removed. A copy is made with the person's own session, so a file the library does not open to them is not copied either.
+
+**Exporting to the device.** For a video to the device, the application first asks where to save it («تختار أولاً أين يُحفظ الفيديو، فيُكتب هناك مباشرة.») and writes it there as it is made: no second copy and no download afterwards. When it ends: «حُفظ: … (…)، في المكان الذي اخترته.». A picture and the SRT captions download as before.
+
+**«مسح بيانات هذا الجهاز»**, on «الحساب» in «تطبيق سطح المكتب», held down («يُمسح من هذا الجهاز الدخول وملفات الاستوديو المؤقتة، ويعود التطبيق إلى صفحة الدخول.»): «مسح بيانات هذا الجهاز» يمسح من هذا الحاسوب الدخول، ونسخ ملفات المكتبة المؤقتة، وما يتذكره الاستوديو من ملفات «هذا الجهاز» (تبقى الملفات نفسها في أماكنها)، ثم يعود التطبيق إلى صفحة الدخول. لا يُمس شيء في المركز نفسه. (Decision D-11.)
+
+**The pages' security policy.** Every page now tells the browser which scripts it may run. A script slipped into a page is refused, so it cannot reach the application's files. Nothing changes for anyone using the site.
+
+## 63.4 Light copies and editable copies (D5), 2026-10-21
+
+Phase D5 of `Desktop_App_Plan.md`, from version 0.5.0. Everything here exists only inside the application; in a browser the studio behaves as before.
+
+**A light copy for the preview.** When a video clip is selected, its settings offer «إنشاء نسخة خفيفة للمعاينة».
+- For a heavy source, the offer comes first, with «ملف ثقيل على المعاينة: النسخة الخفيفة تجعلها أسلس، والتصدير يبقى من الأصل.». A source is heavy above 1080p, above 50 Mbit/s, or in ProRes, DNxHR or CineForm.
+- The application makes a 720p copy once on this laptop. While it works: «جارٍ إنشاء النسخة الخفيفة (…٪)…», with «إلغاء».
+- Afterwards: «المعاينة من نسخة خفيفة (720p)، والتصدير من الأصل.». The preview reads the light copy, paused and playing. The export, a still and the photo editor read the original.
+- A cut lands on the same frame in both.
+
+**Files the browser cannot decode.** Examples: ProRes, DNxHR and MXF, or a camera's MTS whose AC-3 sound the browser cannot decode. These are no longer a dead end.
+- In the application, «اختر ملفاً من هذا الجهاز» also lists MXF, MTS and M2TS files.
+- A file the browser cannot read at all, such as MXF, is read by the application so it can be added. In a browser it stays «نوع هذا الملف غير مدعوم في الاستوديو.»
+- The clip's settings say «هذا المتصفح لا يفك ترميز هذا الفيديو.», or for the sound «لا يفك هذا المتصفح ترميز صوت هذا الملف، فلا يُسمع ولا يُصدَّر.».
+- Then: «يحوّله التطبيق إلى نسخة قابلة للتحرير على هذا الجهاز، ويبقى الأصل كما هو.», with «تحويل إلى نسخة قابلة للتحرير».
+- While it works: «جارٍ التحويل إلى نسخة قابلة للتحرير (…٪)…», with «إلغاء».
+- Afterwards everything reads the converted copy, and the settings say «يُعرض ويُصدَّر من نسخة محوّلة على هذا الجهاز (H.264)، والأصل كما هو.». The copy is H.264 at full size with AAC sound, and every frame is kept at its time.
+- The copy is 8-bit, as the studio's output always was. A 10-bit source the browser decodes, such as HEVC 10-bit on a laptop whose graphics chip reads it, is used as it is.
+- A copy keeps the original's times when the browser can read the original's container: a camera's MTS starts at about 1.4 s, and so do its copies. Cuts already placed on a source stay on the same frames after it is converted. A copy of a file the browser cannot read at all starts at zero, because the studio first meets it through that copy.
+
+**Where they live.** Both copies go in the cache folder (63.3), beside the library copies.
+- They count under «التخزين على هذا الجهاز».
+- They follow the same ten-day rule, «حذف ملفات المعاينة المؤقتة» and the size limit, never while the open project uses them.
+- Each copy is named by its source, its recipe and the FFmpeg version. The source is the file's fingerprint or the library version, so a changed source gets a new copy.
+- A project opened on another laptop makes its own copies there.
+
+**When it cannot.**
+- «لا تتسع مساحة القرص لهذه النسخة.»
+- «تعذّر على التطبيق قراءة هذا الملف.»
+- «تعذّر الترميز بمرمّز النظام على هذا الجهاز.»
+- «لم يعد الملف في مكانه على هذا الجهاز.»
+- «تعذّر إكمال النسخة.»
+
+Cancelling leaves nothing. Quitting the application in the middle stops the work, and the next start removes what was half made.
+
+**Boundaries.**
+- A copy never leaves the laptop, never goes to the library and is never sent for review.
+- The original is never changed.
+- The work runs in a process of its own: FFmpeg, LGPL (`THIRD_PARTY_NOTICES.md`), with fixed jobs only and Windows' own encoders.
+- A copy changes nothing in a project, so it is offered in a project open for reading too.
+
+## 63.5 The preview on a second screen (D6), 2026-10-21
+
+Phase D6 of `Desktop_App_Plan.md`, from version 0.6.0. Everything here exists only inside the application; in a browser the editor is as before.
+
+**Opening it.** The video editor's «عرض» menu has «فتح المعاينة في نافذة مستقلة».
+- With more than one screen, it lists them:
+  - «ملء الشاشة الرئيسية», or «ملء الشاشة 2 (…)» with the screen's own name, opens the preview full screen on that screen;
+  - «في نافذة على هذه الشاشة» opens it as a window beside the editor.
+- With one screen, it opens a window on it.
+- Asking again moves the same window: there is never a second one.
+- «إغلاق نافذة المعاينة المستقلة» closes it. F11 in it switches full screen, as anywhere in the application.
+
+**What it shows.**
+- The project as the editor's preview shows it, in the shape chosen there, as large as the window allows, on black, with nothing else of the site around it: no menu, no notices.
+- It plays, pauses and jumps with the editor, its playhead within a frame of the editor's.
+- It has no sound: the editor's window plays it.
+- Space in it plays and pauses the editor.
+- It edits nothing, holds no editing lease and saves nothing. Light copies (63.4) are used as in the editor's preview.
+
+**When the editor goes.**
+- Leaving the editor closes it.
+- If the editor's page reloads, it says «أُغلق المحرر، فتوقفت المعاينة هنا. تعود عند فتح المشروع في الاستوديو.», and takes the project up again once the editor is back.
+- Opened on its own, it says «تنتظر المحرر: افتح المشروع في الاستوديو في النافذة الرئيسية.».
+
+**Boundaries.**
+- The window is the site's own address, `/motion/studio/<project>/preview`, which the server checks like the studio's. The application opens it on the page's own origin, with every rule of its windows.
+- Nothing of the project passes through the application or the server: it goes only between the two pages on this laptop.
+- The photo editor has no such window.

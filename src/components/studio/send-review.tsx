@@ -4,7 +4,9 @@
 // version of the project, the export, the file saved to the library (a new version of the work's file from
 // this project, or a new file linked to the work), the export recorded, then the work sent to review by the
 // work cycle's own work_submit with the work's accounts and proposed time, exactly as its page sends it.
-// The studio approves nothing: who decides next is said, and nobody approves what they sent.
+// The studio approves nothing: who decides next is said, and nobody approves what they sent. In the desktop
+// application (MVP_draft.md 63) the laptop stays awake, the window may be minimised, and a native notice
+// says when it is done.
 import { useEffect, useRef, useState } from 'react';
 import { Send, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
@@ -17,6 +19,7 @@ import { exportChecks, hasStop } from '@/lib/studio/checks';
 import { openSlots } from '@/lib/studio/slot';
 import { decidesNext, sendBlock, sendNeeds } from '@/lib/studio/worklink';
 import { probeSupport } from '@/lib/studio/support';
+import { keepAwake, markBusy, notifyNative } from '@/lib/native';
 import type { MediaPool } from '@/lib/studio/media';
 import type { Resolver } from '@/lib/studio/compose';
 import type { StudioApi } from '@/lib/studio/persist';
@@ -85,7 +88,11 @@ export function SendReviewDialog(p: {
     setError(null);
     const ctl = new AbortController();
     abort.current = ctl;
+    let awake: (() => Promise<void>) | null = null;
+    let idle: (() => Promise<void>) | null = null;
     try {
+      awake = await keepAwake('export');
+      idle = await markBusy('export');
       setStep({ label: 'جارٍ حفظ نسخة من المشروع…', f: 0 });
       const saved = await p.saveVersion('للمراجعة من الاستوديو');
       if (!saved.ok) throw new Error(saved.error ?? 'تعذّر حفظ نسخة من المشروع.');
@@ -132,11 +139,16 @@ export function SendReviewDialog(p: {
       if (e) throw new Error(workErrorText(e.message));
       workChanged();
       setDone(`حُفظ الإصدار ${version} من «${file.name}» وأُرسل العمل ${w.id} للمراجعة. يقرره ${decidesNext(account?.role ?? '')}، ولا يعتمد أحد ما أرسله.`);
+      void notifyNative({ title: 'أُرسل العمل للمراجعة', body: `${w.id} · ${file.name}` });
     } catch (err) {
       const code = err instanceof ExportError ? err.code : (err as Error).message;
-      setError(EXPORT_ERRORS[code] ?? ((err as Error).message || 'تعذّر الإرسال.'));
+      const text = EXPORT_ERRORS[code] ?? ((err as Error).message || 'تعذّر الإرسال.');
+      setError(text);
+      if (code !== 'ABORTED') void notifyNative({ title: 'تعذّر الإرسال', body: text });
       workChanged();
     } finally {
+      await awake?.();
+      await idle?.();
       abort.current = null;
       setStep(null);
     }

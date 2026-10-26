@@ -79,3 +79,9 @@
 .ms-swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
 .st-pin[data-on="yes"]{color:var(--accent,#c9ac70);border-color:currentColor}
 .st-clip-pin{width:12px;height:12px;flex-shrink:0;opacity:.9}
+/* the preview in a window of its own (desktop application, MVP_draft.md 63.5): the picture alone, on black */
+.st-pop{position:fixed;inset:0;z-index:2000;background:#000;color:#e6e6e6;display:grid;place-items:center}
+.st-pop-stage{position:absolute;inset:0;display:grid;place-items:center}
+.st-pop-canvas{display:block;background:#000}
+.st-pop-note{max-width:34rem;padding:24px;text-align:center;line-height:1.8}
+.st-pop-note p{color:#b8b8b8;margin:8px 0 0}

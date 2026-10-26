@@ -1,6 +1,6 @@
 {
   "script": "qa/sim03-quick-fixes.cjs",
-  "run": "2026-10-22T06:24:49.621Z",
+  "run": "2026-10-26T07:50:58.333Z",
   "checks": [
     {
       "name": "Admin top bar fits a 320 px phone",
