@@ -8,6 +8,7 @@ import { useAccount } from '@/lib/account-context';
 import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
 import { uploadAttachment } from '@/lib/mail/upload';
+import { kickPush } from '@/lib/push/kick';
 import {
   mailErrorText,
   type MemberRow,
@@ -173,6 +174,7 @@ export function MailProvider({ children }: { children: ReactNode }) {
     async (fn: string, args: Record<string, unknown>, ok?: string): Promise<Result> => {
       const { error } = await supabase().rpc(fn, args);
       if (error) return { ok: false, error: mailErrorText(error.message) };
+      kickPush();
       await load();
       if (ok) say(ok);
       return { ok: true };
@@ -206,6 +208,7 @@ export function MailProvider({ children }: { children: ReactNode }) {
         p.restore();
         return;
       }
+      kickPush();
       const st = (data as { state: string }).state;
       await load();
       if (st === 'held') say('أُرسلت للاعتماد. أُبلغ مدير الاتصال ومساعده.');

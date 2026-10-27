@@ -12,6 +12,7 @@ import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
 import { permError, type Grant, type Mode, type PermEvent } from '@/lib/permissions';
 import { isEntryState, type EntryState } from '@/lib/entry';
+import { kickPush } from '@/lib/push/kick';
 import { useCaps } from '../caps';
 
 export type Member = {
@@ -134,6 +135,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
   const call = useCallback(async <T,>(fn: string, args: Record<string, unknown>): Promise<Result<T>> => {
     const { data, error } = await supabase().rpc(fn, args);
     if (error) return { ok: false, error: permError(error.code === '23505' ? `${error.message} duplicate key` : error.message) };
+    kickPush();
     return { ok: true, data: data as T };
   }, []);
 

@@ -1,0 +1,214 @@
+{
+  "run": "2026-10-27T19:08:48.484Z",
+  "what": "The push sender against a local FCM stub, and the push routes of the built site",
+  "checks": [
+    {
+      "name": "no credential yet: nothing claimed, Google not asked, rows wait",
+      "pass": true,
+      "detail": "{\"state\":\"not-configured\",\"sent\":0,\"failed\":0,\"retry\":0,\"gone\":0,\"rounds\":0}"
+    },
+    {
+      "name": "a refused credential: nothing claimed, the health recorded as refused",
+      "pass": true,
+      "detail": "{\"state\":\"credential\",\"sent\":0,\"failed\":0,\"retry\":0,\"gone\":0,\"rounds\":0}"
+    },
+    {
+      "name": "the first flush: five sent, one invalid token, one to try again, one refused before sending",
+      "pass": true,
+      "detail": "{\"state\":\"done\",\"sent\":5,\"failed\":1,\"retry\":1,\"gone\":1,\"rounds\":1}"
+    },
+    {
+      "name": "the assertion was signed by the service account and verified with its public key",
+      "pass": true,
+      "detail": "tokens 1, bad 0"
+    },
+    {
+      "name": "every send carried the access token Google issued",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the stub received exactly the seven sendable items, the one with a query string never left",
+      "pass": true,
+      "detail": "m1,m2,a,b,gone,busy,c"
+    },
+    {
+      "name": "the message to m1 is exactly as specified (data-only)",
+      "pass": true,
+      "detail": "{\"token\":\"tok_m1_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"data\":{\"v\":\"1\",\"kind\":\"notice\",\"id\":\"00000000-0000-4000-8000-000000000901\",\"tier\":\"decide\",\"go\":\"/n/notice/00000000-0000-4000-8000-000000000901\",\"tag\":\"notice:00000000-0000-4000-8000-000000000901:decide\",\"title\":\"يحتاج قرارك\",\"body\":\"اعتمد المنشور «حملة الخريف».\"},\"android\":{\"priority\":\"HIGH\",\"ttl\":\"86400s\"}}"
+    },
+    {
+      "name": "the message to m2 is exactly as specified (data-only)",
+      "pass": true,
+      "detail": "{\"token\":\"tok_m2_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"data\":{\"v\":\"1\",\"kind\":\"notice\",\"id\":\"00000000-0000-4000-8000-000000000902\",\"tier\":\"decide\",\"go\":\"/n/notice/00000000-0000-4000-8000-000000000902\",\"tag\":\"notice:00000000-0000-4000-8000-000000000902:decide\",\"title\":\"يحتاج قرارك\",\"body\":\"لديك إشعار جديد في المركز.\"},\"android\":{\"priority\":\"HIGH\",\"ttl\":\"86400s\"}}"
+    },
+    {
+      "name": "the message to a is exactly as specified (data-only)",
+      "pass": true,
+      "detail": "{\"token\":\"tok_a_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"data\":{\"v\":\"1\",\"kind\":\"chat\",\"id\":\"\",\"tier\":\"attention\",\"go\":\"/n/chat/00000000-0000-4000-8000-000000000503\",\"tag\":\"chat:00000000-0000-4000-8000-000000000503:attention\",\"title\":\"المراسلة\",\"body\":\"رسالة جديدة من Dir\"},\"android\":{\"priority\":\"NORMAL\",\"ttl\":\"86400s\"}}"
+    },
+    {
+      "name": "the message to b is exactly as specified (data-only)",
+      "pass": true,
+      "detail": "{\"token\":\"tok_b_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"data\":{\"v\":\"1\",\"kind\":\"mail\",\"id\":\"\",\"tier\":\"decide\",\"go\":\"/n/mail/00000000-0000-4000-8000-000000000504\",\"tag\":\"mail:00000000-0000-4000-8000-000000000504:decide\",\"title\":\"البريد\",\"body\":\"رسالة جديدة من Asst\"},\"android\":{\"priority\":\"HIGH\",\"ttl\":\"86400s\"}}"
+    },
+    {
+      "name": "the message to c is exactly as specified (data-only)",
+      "pass": true,
+      "detail": "{\"token\":\"tok_c_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"data\":{\"v\":\"1\",\"kind\":\"chat\",\"id\":\"\",\"tier\":\"attention\",\"go\":\"/n/chat/00000000-0000-4000-8000-000000000507\",\"tag\":\"chat:00000000-0000-4000-8000-000000000507:attention\",\"title\":\"المراسلة\",\"body\":\"رسالة جديدة\"},\"android\":{\"priority\":\"NORMAL\",\"ttl\":\"86400s\"}}"
+    },
+    {
+      "name": "no message has a notification block: the application shows it itself",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no message carries a message's text, even when the database handed one over",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no destination has a query string or leaves the site",
+      "pass": true,
+      "detail": "/n/notice/00000000-0000-4000-8000-000000000901 /n/notice/00000000-0000-4000-8000-000000000902 /n/chat/00000000-0000-4000-8000-000000000503 /n/mail/00000000-0000-4000-8000-000000000504 /n/chat/00000000-0000-4000-8000-000000000505 /n/notice/00000000-0000-4000-8000-000000000906 /n/chat/00000000-0000-4000-8000-000000000507"
+    },
+    {
+      "name": "every data value is a string, under the 4096-byte limit",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the reports: sent, the invalid token, the row to try again, the refused row",
+      "pass": true,
+      "detail": "{\"00000000-0000-4000-8000-000000000001\":\"sent\",\"00000000-0000-4000-8000-000000000002\":\"sent\",\"00000000-0000-4000-8000-000000000003\":\"sent\",\"00000000-0000-4000-8000-000000000004\":\"sent\",\"00000000-0000-4000-8000-000000000005\":\"failed:TOKEN_GONE\",\"00000000-0000-4000-8000-000000000006\":\"queued:RETRY\",\"00000000-0000-4000-8000-000000000007\":\"sent\",\"00000000-0000-4000-8000-000000000008\":\"failed:BAD_PAYLO"
+    },
+    {
+      "name": "every database call carried the server key, and the turn was given back",
+      "pass": true,
+      "detail": "push_flush_begin,push_claim,push_report,push_flush_end"
+    },
+    {
+      "name": "the second flush sends the row that waited, once",
+      "pass": true,
+      "detail": "{\"state\":\"done\",\"sent\":1,\"failed\":0,\"retry\":0,\"gone\":0,\"rounds\":1}"
+    },
+    {
+      "name": "the access token was reused: one token request and one vault read for both flushes",
+      "pass": true,
+      "detail": "tokens 1, reads 1"
+    },
+    {
+      "name": "nothing waits: the third flush answers at once, one database call, nothing sent",
+      "pass": true,
+      "detail": "{\"state\":\"empty\",\"sent\":0,\"failed\":0,\"retry\":0,\"gone\":0,\"rounds\":0}"
+    },
+    {
+      "name": "a wrong server key is refused before anything is claimed",
+      "pass": true,
+      "detail": "{\"state\":\"refused\",\"sent\":0,\"failed\":0,\"retry\":0,\"gone\":0,\"rounds\":0}"
+    },
+    {
+      "name": "the built site starts on port 3101",
+      "pass": true,
+      "detail": "▲ Next.js 16.3.8\n- Local:         http://127.0.0.1:3101\n- Network:       http://127.0.0.1:3101\n✓ Ready in 594ms\n✓ Running next.config took 79ms\n"
+    },
+    {
+      "name": "flush: from outside the site, refused (403)",
+      "pass": true,
+      "detail": "403"
+    },
+    {
+      "name": "flush: from the site but signed out, refused (401)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "flush: a wrong bridge key, refused (401)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "flush: the bridge key opens it, and the database refuses a server key whose hash it does not hold",
+      "pass": true,
+      "detail": "502 {\"state\":\"refused\",\"sent\":0,\"failed\":0,\"retry\":0,\"gone\":0,\"rounds\":0}"
+    },
+    {
+      "name": "flush: the answer is counts only",
+      "pass": true,
+      "detail": "{\"state\":\"refused\",\"sent\":0,\"failed\":0,\"retry\":0,\"gone\":0,\"rounds\":0}"
+    },
+    {
+      "name": "flush: GET is not a door",
+      "pass": true,
+      "detail": "405"
+    },
+    {
+      "name": "credential: from outside the site, refused (403)",
+      "pass": true,
+      "detail": "403"
+    },
+    {
+      "name": "credential: signed out, refused (401)",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "a tapped chat notice opens the conversation",
+      "pass": true,
+      "detail": "303 /mail/chat?room=00000000-0000-4000-8000-000000000042"
+    },
+    {
+      "name": "a tapped mail notice opens the thread",
+      "pass": true,
+      "detail": "303 /mail?thread=00000000-0000-4000-8000-000000000043"
+    },
+    {
+      "name": "a notice, signed out, finds nothing and goes home",
+      "pass": true,
+      "detail": "303 /"
+    },
+    {
+      "name": "anything else goes home",
+      "pass": true,
+      "detail": "303 / 303 /"
+    },
+    {
+      "name": "the server printed no key, token or secret",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "errors": [],
+  "sender": {
+    "messages": 8,
+    "tokenRequests": 1,
+    "flushes": [
+      {
+        "state": "done",
+        "sent": 5,
+        "failed": 1,
+        "retry": 1,
+        "gone": 1,
+        "rounds": 1
+      },
+      {
+        "state": "done",
+        "sent": 1,
+        "failed": 0,
+        "retry": 0,
+        "gone": 0,
+        "rounds": 1
+      },
+      {
+        "state": "empty",
+        "sent": 0,
+        "failed": 0,
+        "retry": 0,
+        "gone": 0,
+        "rounds": 0
+      }
+    ]
+  },
+  "total": 35,
+  "passed": 35
+}

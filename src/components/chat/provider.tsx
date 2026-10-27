@@ -10,6 +10,7 @@ import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
 import { uploadAttachment, type UploadedFile } from '@/lib/mail/upload';
 import { chatErrorText, type ChatMessage, type MemberRow, type RoomRow, type Urgency } from '@/lib/chat/rules';
+import { kickPush } from '@/lib/push/kick';
 import type { OutboxRow } from '@/lib/whatsapp/rules';
 
 /** Who may receive a push from this reader: linked or not, never the number (D-12). */
@@ -220,12 +221,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           if (tmp) setPending((p) => p.filter((x) => x.id !== tmp.id));
           return { ok: false, error: chatErrorText(error.message) };
         }
+        kickPush();
         await load();
         return { ok: true, id: id as string };
       },
       async rpc(fn, args, ok) {
         const { data, error } = await supabase().rpc(fn, args);
         if (error) return { ok: false, error: chatErrorText(error.message) };
+        kickPush();
         await load();
         if (ok) say(ok);
         return { ok: true, id: typeof data === 'string' ? data : undefined };

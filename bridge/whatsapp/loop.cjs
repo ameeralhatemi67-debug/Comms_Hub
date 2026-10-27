@@ -4,14 +4,31 @@
 // guarded sender, and report. The timer is here, on the owner's computer, not in the site (D-7).
 // While the provider is not linked, it still says it is alive but claims nothing, so rows
 // wait in the queue and nothing is lost.
+// Each tick also asks the site to flush the push outbox (MVP_draft.md 64.3, starter S-2), one flush
+// at a time and beside the WhatsApp work, never in its way: a slow or refused flush delays nothing
+// here, and after a refusal the loop waits a minute before asking again.
 const {acceptBatch,guardedSender}=require('./policy.cjs');
 const {errorInfo,reasonAr}=require('./transport.cjs');
 
-function createLoop({dispatch,provider,batch=5,log=()=>{}}){
+const PUSH_PAUSE_MS=60000;
+
+function createLoop({dispatch,provider,batch=5,log=()=>{},push=null,now=()=>Date.now()}){
   let pending=[]; // reports not yet accepted by the site
   let failures=0;
+  let pushing=null,pushPauseUntil=0;
+  const pushStats={calls:0,sent:0,errors:0};
+
+  function kickPush(){
+    if(!push||pushing||now()<pushPauseUntil)return;
+    pushing=Promise.resolve()
+      .then(()=>push())
+      .then(r=>{pushStats.calls++;pushStats.sent+=Number(r&&r.sent)||0;},
+        error=>{pushStats.errors++;pushPauseUntil=now()+PUSH_PAUSE_MS;log('push',errorInfo(error,'push'));})
+      .finally(()=>{pushing=null;});
+  }
 
   async function tick(){
+    kickPush();
     const status=await provider.status().catch(()=>({ready:false,note:'status unavailable'}));
     let items=[];
     try{
@@ -49,7 +66,13 @@ function createLoop({dispatch,provider,batch=5,log=()=>{}}){
   /** Wait before the next tick: the interval, longer after site errors (up to a minute). */
   const delay=(intervalMs)=>failures?Math.min(60000,intervalMs*2**Math.min(failures,4)):intervalMs;
 
-  return {tick,delay,get pending(){return pending;}};
+  return {
+    tick,delay,
+    get pending(){return pending;},
+    get pushStats(){return {...pushStats};},
+    /** Resolves when the push flush in flight (if any) has finished. */
+    settle:()=>pushing||Promise.resolve(),
+  };
 }
 
-module.exports={createLoop};
+module.exports={createLoop,PUSH_PAUSE_MS};

@@ -17,6 +17,23 @@ function siteClient(fetcher,base,key,timeoutMs=30000){
   };
 }
 
+/**
+ * The second door (MVP_draft.md 64.3, starter S-2): POST /api/push/flush with the same key. The
+ * site flushes the push outbox with its own server key and answers with counts only; nothing of a
+ * notice, a token or a phone passes through this computer.
+ */
+function pushClient(fetcher,base,key,timeoutMs=60000){
+  const url=String(base||'').replace(/\/+$/,'')+'/api/push/flush';
+  if(!/^https?:\/\//.test(url))throw Object.assign(Error('Set COMMS_SITE_URL to the site address'),{code:'no_site'});
+  if(!key)throw Object.assign(Error('Set WHATSAPP_SERVER_KEY'),{code:'no_key'});
+  return async function flush(){
+    const response=await fetcher(url,{method:'POST',headers:{Authorization:'Bearer '+key},signal:AbortSignal.timeout(timeoutMs)});
+    if(!response.ok)throw Object.assign(Error('Site refused the request'),{code:'site_rejected',http_status:response.status});
+    const data=await response.json().catch(()=>({}));
+    return {state:typeof data?.state==='string'?data.state:'',sent:Number(data?.sent)||0};
+  };
+}
+
 /** A safe description of an error: a code and a stage, never content. */
 function errorInfo(error,stage){
   let code=error&&error.code;
@@ -44,4 +61,4 @@ const REASON_AR={
 };
 const reasonAr=(code)=>REASON_AR[code]||'تعذّر الإرسال.';
 
-module.exports={siteClient,errorInfo,reasonAr};
+module.exports={siteClient,pushClient,errorInfo,reasonAr};

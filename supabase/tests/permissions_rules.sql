@@ -253,8 +253,8 @@ select pg_temp.c('87 a member of rank 1 reads only their own grants', (select co
 select pg_temp.c('87b and only their own log', (select count(distinct coalesce(subject, '-')) from public.permission_events where coalesce(subject, '') like '%@t.test' or subject is null)::text, '1');
 select pg_temp.t('87c and cannot open someone else''s card', $q$ select public.perm_card('wri@t.test') $q$, 'ERR FORBIDDEN');
 select pg_temp.who('00000000-0000-0000-0000-0000000000b1');
-select pg_temp.c('88 the assistant reads rank 1 grants, not the director''s', (select count(*) from public.member_capabilities where email = 'wri@t.test')::text <> '0'
-  and (select count(*) from public.member_capabilities where email = 'dir@t.test') = 0, 'true');
+select pg_temp.c('88 the assistant reads rank 1 grants, not the director''s', ((select count(*) from public.member_capabilities where email = 'wri@t.test')::text <> '0'
+  and (select count(*) from public.member_capabilities where email = 'dir@t.test') = 0)::text, 'true');
 select pg_temp.who('00000000-0000-0000-0000-0000000000d1');
 select pg_temp.c('89 the director''s card of the writer shows sources', (select string_agg(e->>'k' || '=' || (e->>'src'), ',') from jsonb_array_elements(public.perm_card('wri@t.test')->'caps') e
   where e->>'k' in ('urgency.2','urgency.3','page.calendar','page.work','whatsapp.push')), 'page.work=page,page.calendar=timed,urgency.2=role,urgency.3=fixed,whatsapp.push=timed');

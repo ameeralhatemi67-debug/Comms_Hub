@@ -3,8 +3,8 @@
 // Offline: no WhatsApp, no internet. +999 numbers belong to no country.
 const test=require('node:test');const assert=require('node:assert/strict');const http=require('node:http');
 const {EventEmitter}=require('node:events');
-const {siteClient}=require('./transport.cjs');
-const {createLoop}=require('./loop.cjs');
+const {siteClient,pushClient}=require('./transport.cjs');
+const {createLoop,PUSH_PAUSE_MS}=require('./loop.cjs');
 const {createBridge,EVENTS}=require('./bridge.cjs');
 
 const KEY='k-fake-site-only';
@@ -16,6 +16,12 @@ function fakeSite(){
     let body='';req.on('data',d=>body+=d);req.on('end',()=>{
       s.calls++;
       const send=(code,obj)=>{res.writeHead(code,{'Content-Type':'application/json'});res.end(JSON.stringify(obj));};
+      // The push door (MVP_draft.md 64.3, S-2): the same key, no body, counts back.
+      if(req.method==='POST'&&req.url==='/api/push/flush'){
+        if(req.headers.authorization!=='Bearer '+KEY)return send(401,{error:'forbidden'});
+        s.flushes=(s.flushes||0)+1;s.flushBodies=[...(s.flushBodies||[]),body];
+        return send(200,{state:'done',sent:2,failed:0,retry:0,gone:0,rounds:1});
+      }
       if(req.method!=='POST'||req.url!=='/api/whatsapp/dispatch')return send(404,{});
       if(req.headers.authorization!=='Bearer '+KEY)return send(401,{error:'forbidden'});
       if(s.failNext>0){s.failNext--;return send(502,{error:'claim failed'});}
@@ -148,6 +154,54 @@ test('one way: the bridge listens to no incoming message, call or receipt, and a
   assert.equal(sendCalls,1);
   b.client.emit('disconnected');
   assert.equal((await b.provider.status()).ready,false);
+  await b.loop.settle();
+  assert.equal(site.flushes,1,'the bridge also asked the site to flush the push outbox');
   await b.stop();
   assert.equal(initialised,0,'the test never started a real session');
+});
+
+test('push (S-2): each tick asks the site to flush the push outbox with the key, beside the WhatsApp work',async t=>{
+  const site=await fakeSite();t.after(()=>site.server.close());
+  site.queue.push(row(1,'+99900000001'));
+  const provider=fakeProvider();
+  const loop=createLoop({dispatch:siteClient(fetch,site.base,KEY),provider,push:pushClient(fetch,site.base,KEY)});
+  assert.deepEqual(await loop.tick(),{sent:1,refused:0,failed:0},'WhatsApp works as before');
+  await loop.settle();
+  await loop.tick();await loop.settle();
+  assert.equal(site.flushes,2,'one flush a tick');
+  assert.deepEqual(site.flushBodies,['',''],'the flush sends nothing but the key');
+  assert.deepEqual(loop.pushStats,{calls:2,sent:4,errors:0});
+});
+
+test('push: one flush at a time; a refused flush delays nothing and waits a minute before the next',async t=>{
+  const site=await fakeSite();t.after(()=>site.server.close());
+  const provider=fakeProvider();
+  let clock=1000,calls=0,release;
+  const slow=()=>{calls++;return new Promise(r=>{release=()=>r({state:'done',sent:1});});};
+  const loop=createLoop({dispatch:siteClient(fetch,site.base,KEY),provider,push:slow,now:()=>clock});
+  await loop.tick();await loop.tick();
+  assert.equal(calls,1,'a second tick does not start a second flush while one runs');
+  release();await loop.settle();
+  const logs=[];
+  const refused=createLoop({dispatch:siteClient(fetch,site.base,KEY),provider,push:pushClient(fetch,site.base,'wrong-key'),now:()=>clock,log:(...a)=>logs.push(JSON.stringify(a))});
+  site.queue.push(row(2,'+99900000002'));
+  assert.deepEqual(await refused.tick(),{sent:1,refused:0,failed:0},'the WhatsApp row still goes');
+  await refused.settle();
+  assert.equal(refused.pushStats.errors,1);
+  await refused.tick();await refused.settle();
+  assert.equal(refused.pushStats.errors,1,'no second try within the pause');
+  clock+=PUSH_PAUSE_MS+1;
+  await refused.tick();await refused.settle();
+  assert.equal(refused.pushStats.errors,2,'tried again after the pause');
+  assert.ok(logs.length&&logs.every(l=>l.includes('site_rejected')&&!l.includes('wrong-key')&&!l.includes(KEY)),'logs carry a code, never a key');
+});
+
+test('pushClient needs the site address and the key, and posts no body',async()=>{
+  assert.throws(()=>pushClient(fetch,'',KEY),/COMMS_SITE_URL/);
+  assert.throws(()=>pushClient(fetch,'https://hub.example',''),/WHATSAPP_SERVER_KEY/);
+  let seen;
+  const f=async(url,init)=>{seen={url,init};return new Response(JSON.stringify({state:'empty',sent:0}),{status:200});};
+  assert.deepEqual(await pushClient(f,'https://hub.example/',KEY)(),{state:'empty',sent:0});
+  assert.equal(seen.url,'https://hub.example/api/push/flush');
+  assert.equal(seen.init.method,'POST');assert.equal(seen.init.headers.Authorization,'Bearer '+KEY);assert.equal(seen.init.body,undefined);
 });

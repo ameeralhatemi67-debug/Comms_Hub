@@ -25,6 +25,7 @@ import { FeedbackTab } from './feedback';
 import { DesktopAppPanel } from './native/desktop-app';
 import { useNativePlatform } from './native/use-native';
 import { PhoneAppPanel } from './native/phone-app';
+import { MyDevicesPanels } from './native/devices';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
@@ -61,6 +62,7 @@ export function Supporting({ page }: { page: string }) {
   const actor = roles[state.role];
   const account = useAccount();
   const platform = useNativePlatform();
+  const [sessionNote, setSessionNote] = useState('');
   // «/settings?tab=general» opens a tab directly (the Drive connection returns there).
   const [settingsTab, setSettingsTab] = useState(() => {
     const t = typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('tab');
@@ -140,6 +142,7 @@ export function Supporting({ page }: { page: string }) {
             <PhoneAppPanel />
           </Panel>
         )}
+        <MyDevicesPanels />
         <Panel title="صلاحياتي" className="pm-minepanel">
           <MyPermissions />
         </Panel>
@@ -189,11 +192,21 @@ export function Supporting({ page }: { page: string }) {
               <button
                 className="primary"
                 onClick={async () => {
-                  await supabase().auth.signOut();
+                  // This device only: supabase-js signs out everywhere when no scope is given.
+                  await supabase().auth.signOut({ scope: 'local' });
                   router.refresh();
                 }}
               >
                 تسجيل الخروج
+              </button>
+              <button
+                className="secondary ac-signout-others"
+                onClick={async () => {
+                  const { error } = await supabase().auth.signOut({ scope: 'others' });
+                  setSessionNote(error ? 'تعذّر الخروج من الأجهزة الأخرى. أعد المحاولة.' : 'خرج حسابك من كل جهاز ومتصفح آخر، وبقيت داخلاً هنا.');
+                }}
+              >
+                الخروج من الأجهزة الأخرى
               </button>
               <button
                 className="secondary"
@@ -205,6 +218,11 @@ export function Supporting({ page }: { page: string }) {
                 الخروج من كل الأجهزة
               </button>
             </div>
+            {sessionNote && (
+              <p className="ml-hint" role="status">
+                {sessionNote}
+              </p>
+            )}
             <p className="muted">
               {account.role === 'admin'
                 ? 'أنت مسؤول نظام: تفتح كل الصفحات، وتبدّل الدور من أعلى الصفحة لتختبر كل دور.'

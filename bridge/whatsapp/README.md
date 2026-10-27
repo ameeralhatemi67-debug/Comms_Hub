@@ -20,6 +20,10 @@ and reduced from `D:\Agents\main\projects\hida\bridge` (that project is not touc
 - **Nothing is lost while it is off.** Rows wait on the site, the sender sees «لم تُسلَّم بعد»,
   and they go out when the bridge is back. A row claimed and never reported waits again five
   minutes later.
+- **It also starts the phone pushes (S-2, `MVP_draft.md` 64.3).** Each tick it calls a second door,
+  `POST /api/push/flush`, with the same key and no body. The site sends what its push outbox holds with
+  its own server key and answers with counts only: no notice, token or phone passes through this
+  computer. One flush at a time; after a refusal it waits a minute. The WhatsApp work never waits for it.
 - **No secrets here.** `.env` (the site address and the key), the linked session (`.session`)
   and `node_modules` stay on this computer and are ignored by git. Logs carry row ids and
   reasons, never a number or a text.
@@ -32,9 +36,9 @@ volume low, and expect to link again occasionally (plan section 13).
 | File | Holds |
 |---|---|
 | `bridge.cjs` | Start-up, QR in the terminal, the link's life, the five-second loop. |
-| `loop.cjs` | One tick: report, heartbeat, claim, send through the guarded sender, report. |
+| `loop.cjs` | One tick: ask for a push flush, report, heartbeat, claim, send through the guarded sender, report. |
 | `policy.cjs` | Which rows may be sent, and the sender bound to one claimed batch. |
-| `transport.cjs` | The one door of the site, safe error descriptions, Arabic reasons. |
+| `transport.cjs` | The two doors of the site (dispatch and push flush), safe error descriptions, Arabic reasons. |
 | `provider.cjs` | `sendCode`, `sendMessage`, `status` over WhatsApp Web (the real `WhatsAppProvider`). |
 | `compat.cjs` | The Hedayah bridge's reviewed transform for whatsapp-web.js 1.34.7 message keys. |
 | `run-bridge.bat` | Installs the pinned packages once (without downloading a browser) and runs the bridge. |

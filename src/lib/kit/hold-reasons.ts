@@ -72,6 +72,8 @@ export const HOLD = {
   studioRestore: 'تصير هذه النسخة هي الحال الحالية. تُحفظ الحال الحالية نسخةً قبلها، ولا تُحذف أي نسخة.',
   /** «الاستوديو»: release an item pinned in a template (MVP_draft.md 62.11). */
   studioUnpin: 'يصير المقطع قابلاً للنقل والقص والحذف كأي مقطع آخر.',
+  /** «الحساب»، «أجهزتي»: remove a device (MVP_draft.md 64.3). */
+  deviceRemove: 'تتوقف تنبيهات هذا الجهاز فوراً، ويخرج التطبيق منه في المرة التالية التي يُفتح فيها.',
 } as const;
 
 export const HOLD_MS = 900;
