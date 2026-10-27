@@ -1818,6 +1818,102 @@ The owner asked on 2026-10-27 to build through A5 now. A4 was built here on `mai
   - The Android toasts (started, done, failed) cannot be read by UI Automator and were not read.
   - No real phone. Nothing pushed.
 
+### 2026-10-27: the Android application, A5 server: «أجهزتي» and the push core
+
+Lane 2 of `Android_Continue_Prompt.md`, in its own worktree, cut from `main` at `895f636`. The specification is
+`MVP_draft.md` 64.3; the project rule is the new "Push notices are real too" paragraph of `AGENTS.md`. The owner approved
+applying the migration on 2026-10-27 ("Yes, apply it").
+
+- **What was built.**
+  - **Migration `20261027120000_push.sql`, applied to comms-hub** as version `20261027184903 'push'`; the stored statement's
+    md5 `e82661a14d3861edd1482443f964d106` equals the file's.
+    - `devices`: the person, platform (`android`), version, name, the FCM token, tiers wanted, «إخفاء نص التنبيهات», seen,
+      removed. Pages get every column but the token (column grants) and read the view `my_devices`; nobody writes the table.
+    - `device_register(p_device, p_platform, p_version, p_name, p_token)` returns `{id, name, push}`: the same device again by
+      its id or by its token; a token that was on another row (someone else signed in on that phone) leaves it, and that row
+      is removed; a removed device is refused with `DEVICE_REMOVED`; twenty live devices a person; a new phone keeps the
+      person's latest choices. `device_seen(p_device, p_version)` answers `live`, `removed` or `unknown`. `device_rename`,
+      `device_remove` (token deleted, waiting rows gone), `device_prefs(p_device or null for all, p_attention, p_hide_text)`.
+    - `push_outbox`: ids only (device, kind, notice or chat or mail message), one row per device per reference, state,
+      attempts, an error code. Filled by a trigger on `notifications` (decide always, attention if wanted, never info, never
+      the actor, never a notice about messaging), by `push_route_chat` spliced into `chat_send` after `wa_route` (direct
+      messages, mentions, levels; level 3 passes a mute; never the author) and by `push_route_mail` spliced into `mail_send`
+      just before it answers (action cards to their addressees in internal mail; never muted threads, held or scheduled
+      mail). Both splices take the live definition and fail the migration if it is not as expected.
+    - `push_flush_begin`/`push_flush_end` (a lock and a two-second gate in `push_state`, at once `empty` when nothing waits),
+      `push_claim` (skip locked, five-minute stale release, five attempts; builds the words: a notice's text unless hidden,
+      «رسالة جديدة من …» for messaging and mail, `/n/<kind>/<id>`), `push_report` (`TOKEN_GONE` deletes the device's token,
+      `RETRY` requeues, anything else closes), all with `MAIL_SERVER_KEY`. `push_fcm_slot` makes the
+      `fcm_service_account` integration row for a holder of `integrations.secrets`.
+  - **The sender** (`src/lib/push/`): `payload.ts` (the rules, pure; data-only FCM messages at lane 1's request of the same
+    day, with `v, kind, id, tier, go, tag, title, body`; priority HIGH for decide, NORMAL for attention), `fcm.ts` (the
+    service account, an RS256 assertion with `node:crypto`, the access token kept 55 minutes and the vault read only then,
+    FCM HTTP v1, Google's refusals as codes; Google's addresses are fixed, never taken from the file), `flush.ts`,
+    `server.ts`, `target.ts`, `kick.ts`, `devices.ts`.
+  - **Routes.** `/api/push/flush` (POST: the bridge's key, or a signed-in page of this site; counts only in the answer).
+    `/api/push/credential` (the service account, checked with Google before `storeChecked` keeps it). `/n/[kind]/[id]`
+    (where a tapped push leads: a notice through the person's own session, a conversation or a thread by id; changes nothing).
+  - **Starters.** S-1: `kickPush()` after successful writes in `useWork().call`, chat send and the chat provider's other
+    writes, mail send and the mail provider's writes, the accounts provider and the permission requests. S-2: the WhatsApp
+    bridge calls `/api/push/flush` on each tick through a second client (`pushClient`), one flush at a time, a minute's
+    pause after a refusal, never in the way of the WhatsApp work.
+  - **Interface.** «الحساب»: «أجهزتي» (rename; «إزالة الجهاز» behind a long press, `HOLD.deviceRemove`), «إعدادات التنبيهات»,
+    and «الخروج من الأجهزة الأخرى». «الإعدادات» «الاتصالات»: «تنبيهات الهاتف (Firebase)». The account guide has three new
+    parts, a rule and a news step (version 3).
+- **Decided while building, recorded.**
+  - **Destinations without a query string.** `noticeHref` gives addresses with queries (`/mail/chat?room=…`,
+    `/accounts?person=<email>`), which `Mobile_Apps_Plan.md` 5.4 forbids in a payload. A push names `/n/<kind>/<id>` and the
+    site turns it into the page.
+  - **Urgent chat notices are pushed by the chat route,** because `chat_send` writes the message's first 80 characters
+    into those notices; pushing them as notices would send the text through Google.
+  - **Direct messages and mentions are «يحتاج انتباهك»,** so a person who turns that off gets only decisions; mail action
+    cards are «يحتاج قرارك». A task card also writes its task notice («يحتاج انتباهك»), so a person who keeps attention on
+    gets both; recorded in 64.3.
+  - **Data-only messages** (lane 1's request): the application shows each push itself, picks the channel (`decide`,
+    `attention`, `messages` for chat and mail) and handles the tap, which another application cannot forge.
+- **Found while building, fixed.**
+  - **«تسجيل الخروج» signed out of every device.** supabase-js signs out globally when no scope is given; the button now
+    passes `scope: 'local'`, beside the new «الخروج من الأجهزة الأخرى» and the existing «الخروج من كل الأجهزة».
+  - **`supabase/tests/permissions_rules.sql` check 88** passed a boolean to a helper that takes text, so the file stopped
+    there; the expression is now cast to text, its meaning unchanged.
+- **Verified, numbers.**
+  - **Rules before applying** (the migration and `push_rules.sql` in one rolled-back transaction): attempt 1 stopped at
+    check 08 (a Postgres regex bound above 255; fixed in the migration), attempt 2 stopped at check 49 (the rule file read
+    `devices` as anon; fixed in the file), attempt 3 **130 of 130**, including the two splices changing nothing else
+    (chat_send and mail_send without the new line equal their md5 from before). The run's md5 equals the combined text's.
+  - **After applying:** `push_rules.sql` **128 of 128**, run md5 `e1a1b2045d0cd2a67763a64ad6215ce6` equal to the file's;
+    afterwards 0 throwaway accounts, devices or outbox rows. `qa/push-rules.json`.
+  - **Existing runs after applying:** `chat_rules.sql` 22 of 22 as its header states; `urgency_rules.sql` 41 of 41;
+    `mail_rules.sql` 25 of 25 as its header states except the request number of 16b (187, not 184: a sequence advances even
+    in a rolled-back run); `permission_requests_rules.sql` 49 of 49. **`whatsapp_rules.sql` 96 of 98** and
+    **`permissions_rules.sql` parts 1 and 3, 135 of 137**: the four that differ (whatsapp 04 and 04b, permissions 02 and
+    114) expect the role defaults of 2026-10-13 and 14, before the owner's decisions of 2026-10-15 gave the director the
+    system number and the settings rights (`Action_Plan.md` B9); every routing, claim, report, mail and messaging check
+    passed. Part 2 of `permissions_rules.sql` calls neither replaced function and was not run.
+  - **Advisors after applying:** security, the push objects only as the intended callable definer functions (four
+    key-gated ones to anon, the five device functions, the slot and the four to authenticated; the three routes are not
+    callable); performance, two INFO unused-index notes on the new, empty `push_outbox`. Nothing else new.
+  - **`npm test` 572 of 572** (550 + `tests/push.test.mjs` 22); `npm run typecheck` and `npm run build` clean (the three new
+    routes listed). Bridge `node --test`: 16 passed (three new push tests), 1 skipped (the compat test needs
+    `whatsapp-web.js`, which is not installed in this worktree's bridge folder).
+  - **`qa/push-flush.cjs` 35 of 35** (`qa/push-flush.json`): the real flush against a local FCM stub that verifies the RS256
+    assertion with a key pair made in the run; the stub received exactly the seven sendable messages, data-only, each equal
+    to the specification, none with a message's text or a query string; an invalid token, a busy Google and a refused item
+    handled; the access token and the vault read once for two flushes; nothing claimed without a credential or with a
+    refused one. Then the built site on port 3101: the flush route refuses outsiders (403), the signed-out (401) and a wrong
+    bridge key (401), and with the right bridge key the database refuses a server key it does not know (502, counts only);
+    `/n/` leads to the conversation, the thread, or home. Attempt 1 was 33 of 35: the check sent `127.0.0.1` as Origin
+    while the server names itself `localhost`; the check was corrected, not the route.
+- **Not verified, said plainly.**
+  - **No real delivery.** There is no Firebase project yet: nothing reached a phone, and Google's real token and send
+    endpoints were not called. Real delivery waits for the owner's Firebase project, the service account entered in
+    «الإعدادات», and lane 1's A5 app.
+  - Nothing was seen signed in: «أجهزتي», «إعدادات التنبيهات», the session buttons and the Firebase card were not seen
+    rendered, and S-1 was not seen starting a flush from a real page.
+  - «الخروج من كل الأجهزة» does not clear device tokens: a phone signed out that way keeps its token until the application
+    registers again or the person removes it.
+  - Nothing pushed; `Status.md` is left to the coordinator.
+
 ### 2026-10-27: the Android application, A5, the application's half: push notices on the phone
 
 Built on `main` against the push migration of A5's server half (built at the same time in its own worktree, merged after). Delivery through Firebase waits for the owner's Firebase project.

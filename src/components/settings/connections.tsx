@@ -13,6 +13,7 @@ import { STATE_AR, STATE_TONE, type Integration } from '@/lib/integrations/rules
 import { useCaps } from '../caps';
 import { SetupGuide } from '../setup-guide';
 import { AppBlock } from './platforms';
+import { PushBlock } from './push';
 
 type Present = Record<string, boolean>;
 type DriveState = { state: 'connected' | 'needs-connection' | 'not-configured' | 'error' | 'loading'; account?: string | null; canConnect?: boolean };
@@ -65,6 +66,7 @@ export function ConnectionsTab({ initial }: { initial?: { rows: Integration[]; p
       <DriveBlock drive={drive} googleReady={Boolean(google?.has_secret) || Boolean(present.GOOGLE_CLIENT_ID && present.GOOGLE_CLIENT_SECRET)} canConnect={canDrive || Boolean(drive.canConnect)} tokenSource={driveToken} canAdopt={caps.has('integrations.secrets')} onAdopted={load} />
       <AppBlock provider="microsoft" app={microsoft} canSecrets={canGoogle} onSaved={load} lock={lock} />
       <OneDriveBlock accounts={onedrives} appReady={Boolean(microsoft?.has_secret)} canConnect={canDrive} onChecked={load} />
+      <PushBlock row={rows.find((r) => r.type === 'fcm_service_account')} canEdit={caps.has('integrations.secrets')} onSaved={load} lock={lock} />
     </div>
   );
 }

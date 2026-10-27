@@ -21,6 +21,7 @@ import {
 } from '@/lib/work/rules';
 import type { EventItem, HeldMail, ReminderItem, RequestRow, TaskItem } from '@/lib/work/planning';
 import { addNote, msOfTimecode, NOTE_COLUMNS, type Note } from '@/lib/media/notes';
+import { kickPush } from '@/lib/push/kick';
 
 export type Person = { email: string; display_name: string; role: Role };
 export type Load = {
@@ -122,6 +123,8 @@ export function WorkProvider({ children }: { children: ReactNode }) {
   const call = useCallback(async <T,>(fn: string, args: Record<string, unknown>): Promise<Result<T>> => {
     const { data, error } = await supabase().rpc(fn, args);
     if (error) return { ok: false, error: workErrorText(error.message) };
+    // A write may have queued push notices (MVP_draft.md 64.3, starter S-1).
+    kickPush();
     return { ok: true, data: data as T };
   }, []);
 

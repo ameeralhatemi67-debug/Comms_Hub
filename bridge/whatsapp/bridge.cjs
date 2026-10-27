@@ -6,7 +6,7 @@
 // receipt, and answers nothing. Secrets come from bridge/whatsapp/.env (never committed).
 const fs=require('node:fs');
 const path=require('node:path');
-const {siteClient,errorInfo}=require('./transport.cjs');
+const {siteClient,pushClient,errorInfo}=require('./transport.cjs');
 const {createLoop}=require('./loop.cjs');
 const {createProvider}=require('./provider.cjs');
 
@@ -39,7 +39,9 @@ function createBridge({Client,LocalAuth,QRCode,env,fetcher=fetch,out=console,int
     puppeteer:{headless:true,executablePath:chrome},takeoverOnConflict:false});
   const provider=createProvider(client);
   const log=(stage,info)=>out.error(new Date().toISOString(),stage,JSON.stringify(info));
-  const loop=createLoop({dispatch,provider,log});
+  // Push notices (MVP_draft.md 64.3, S-2): the same key, a second door, beside the WhatsApp work.
+  const push=pushClient(fetcher,env.COMMS_SITE_URL,env.WHATSAPP_SERVER_KEY);
+  const loop=createLoop({dispatch,provider,log,push});
   let timer=null,stopped=false;
 
   client.on('qr',async qr=>{

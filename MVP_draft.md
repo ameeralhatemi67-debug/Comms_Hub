@@ -2943,3 +2943,34 @@ Phase A4 of `Android_Build_Plan.md`. Inside the Android application a file of th
 - The application fetches the file itself with the site's own session, as it does for downloads (64), and follows a redirect to another address without it. No file passes between the page and the application: the page hears only whether it worked.
 - The site still decides who may read each file, exactly as in a browser.
 - The studio's exports and the backup export of «الإعدادات» are made inside the page, and still cannot be saved from the application (64).
+
+## 64.3 «أجهزتي» and push notices, the server half (A5 server), 2026-10-27
+
+Phase A5 of `Android_Build_Plan.md`, the site's half, after `Mobile_Apps_Plan.md` 5.3 to 5.5 and decisions M-3, M-4, M-5 and M-13. The application's half (permission, channels, token, the tap) is A5 app. Real delivery needs the owner's Firebase project and its service account; until then nothing is sent, and nothing is lost: a notice stays in the drawer as before.
+
+**What reaches a phone.**
+- **«يحتاج قرارك» (decide):** every notice of that tier, always, with sound.
+- **«يحتاج انتباهك» (attention):** every notice of that tier, silent, unless the person turns it off.
+- **«للعلم» (info):** never.
+- **Messaging:** a direct message, a mention of the person (`@name`), and a message of a level (level 3 as «يحتاج قرارك», levels 1 and 2 as «يحتاج انتباهك»). Never to its author. A muted conversation lets level 3 through only, as its notices do.
+- **Internal mail:** an action card addressed to the person, as «يحتاج قرارك»: a task card to its assignee, a date card to the colleague it asks, an approval card to the director and the assistant among its participants. Never to its author, never in a muted thread, never mail that nobody sees yet (held or scheduled). Plain mail is not pushed. A task card also writes its task notice, which follows the notice rules.
+- **Nothing about the person's own action**, and nothing already read on another device: a notice read, or a conversation or thread opened, before the push leaves is not pushed.
+
+**What a push says.** The words are built by the database when the push leaves, and checked again by the site:
+- a notice: its title is its tier («يحتاج قرارك» or «يحتاج انتباهك»), its text is the notice's own (at most 240 characters, on one line);
+- messaging: «المراسلة» and «رسالة جديدة من …» with the sender's name, never the message;
+- mail: «البريد» and «رسالة جديدة من …», never the mail;
+- with «إخفاء نص التنبيهات» on: «لديك إشعار جديد في المركز.» for a notice, «رسالة جديدة» without the name for messaging and mail.
+
+A push never carries a token, a secret, an address with a query string or a message's text. Its destination is an address of the site, `/n/<kind>/<id>`; the site turns it into the page (a notice through the person's own session, as the drawer does; a conversation or a thread by its id, whose page applies its own rules). Opening it changes nothing.
+
+**On «الحساب».**
+- **«أجهزتي»:** the phones the person signed in to with the application, theirs alone (nobody else sees their names). Each shows its name, «Android · الإصدار … · آخر فتح …», and «تصله التنبيهات» or «لا تصله التنبيهات». «تغيير الاسم», then «حفظ الاسم». «إزالة الجهاز» is a long press: «تتوقف تنبيهات هذا الجهاز فوراً، ويخرج التطبيق منه في المرة التالية التي يُفتح فيها.». With no device: «لا أجهزة بعد. ثبّت «تطبيق الهاتف» وسجّل الدخول فيه ليظهر هنا وتصله التنبيهات.».
+- **«إعدادات التنبيهات»:** «تنبيهات «يحتاج انتباهك» على الهاتف (بلا صوت)» and «إخفاء نص التنبيهات». A change applies to all the person's devices; a new phone starts with the person's latest choices.
+- **The session panel:** «تسجيل الخروج» (this device only), «الخروج من الأجهزة الأخرى» (every other device and browser; «خرج حسابك من كل جهاز ومتصفح آخر، وبقيت داخلاً هنا.»), and «الخروج من كل الأجهزة» as before. For a lost phone: «إزالة الجهاز» and «الخروج من الأجهزة الأخرى».
+
+**In «الإعدادات» «الاتصالات».** «تنبيهات الهاتف (Firebase)»: the service-account file from Firebase («حسابات الخدمة»، «إنشاء مفتاح خاص جديد»), pasted once by a holder of «إدخال أسرار التكاملات وتجديدها». The site asks Google for an access token with it before keeping it, then keeps it in the vault and never shows it again; the card shows the project and the last successful send. Refused: «رفضت Google هذا المفتاح. أنشئ مفتاحاً جديداً لحساب الخدمة من Firebase والصقه هنا.».
+
+**When pushes leave.** Nothing is scheduled in the site. A page that has just written something asks the site to send what it queued (S-1), and the WhatsApp bridge computer asks on each of its turns (S-2). When nothing waits, the site answers at once. A push that cannot leave now (Google busy) waits for the next ask, five tries in all; a token Google no longer knows is deleted from its device, which then shows «لا تصله التنبيهات».
+
+**The application's channels** (A5 app): «يحتاج قرارك» (high, sound), «للانتباه» (low, silent) and «الرسائل» (default, sound). Messaging and mail go to «الرسائل» whatever their tier; a notice goes by its tier. The application shows each push itself (data-only messages), so a tap cannot be forged by another application.

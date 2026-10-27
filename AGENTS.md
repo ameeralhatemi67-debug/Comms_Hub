@@ -393,6 +393,29 @@ own `package.json` and lockfile like `desktop/`, outside the site's typecheck an
   people is decided in it; nothing is scheduled in the site because of it.
 - **The studio and «استوديو الحركة»** are not part of this application yet.
 
+Push notices are real too, by owner directive of 2026-10-26 (`Android_Build_Plan.md` A5, `Mobile_Apps_Plan.md` 5.3 to
+5.5, `MVP_draft.md` 64.3, recorded in `progress.md`); this is the server half, and real delivery waits for the owner's
+Firebase project and the application's half. Devices and the push outbox live in Postgres
+(`supabase/migrations/*push*`), every write is a database function, and a person sees only their own devices (M-13).
+- **The token is never readable by a page:** `devices` grants every column but `fcm_token`, pages read the view
+  `my_devices`, and only `push_claim`, with `MAIL_SERVER_KEY`, hands a token to the site's server.
+- **The outbox holds ids only** (a device, a kind, a notice or message id), one row per device per reference. It is
+  filled by a trigger on `notifications` («يحتاج قرارك» always, «يحتاج انتباهك» if the device keeps it, «للعلم» never,
+  never the actor), by `push_route_chat` inside `chat_send` and by `push_route_mail` inside `mail_send`. Notices about
+  messaging are pushed by the chat route, because they quote the message.
+- **The words are built at claim time and checked again** by `src/lib/push/payload.ts`: a notice's own text unless the
+  device hides it, «رسالة جديدة من …» for messaging and mail and never their text, a destination `/n/<kind>/<id>` with no
+  query string (`src/app/n/`), data-only FCM messages. Never put a token, the service account, a provider's answer or a
+  message's text in a log, an event, a URL or a notice.
+- **Nothing is scheduled:** `/api/push/flush` runs when a page that just wrote calls `kickPush()` (S-1) or when the
+  WhatsApp bridge asks on its loop (S-2, `bridge/whatsapp/`); `push_flush_begin` is the lock and the gate. No
+  database-started call (M-3).
+- **The Firebase service account** is the integration `fcm_service_account` in Vault, entered in «الإعدادات»
+  «الاتصالات» by a holder of `integrations.secrets` and checked by getting an access token before it is kept. The site
+  signs its RS256 assertion with `node:crypto` (`src/lib/push/fcm.ts`) and keeps the access token 55 minutes; Google's
+  addresses are fixed in the code, never taken from the file. Its rules are held by `supabase/tests/push_rules.sql`,
+  `tests/push.test.mjs` and `qa/push-flush.cjs`.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted

@@ -10,6 +10,7 @@ import { Check, KeyRound, Undo2, X } from 'lucide-react';
 import { useHub } from '@/lib/store';
 import { useAccount } from '@/lib/account-context';
 import { supabase } from '@/lib/supabase/client';
+import { kickPush } from '@/lib/push/kick';
 import {
   MODE_AR,
   REQUEST_HOURS,
@@ -78,6 +79,7 @@ export function usePermRequests() {
 
 async function rpc<T = unknown>(fn: string, args: Record<string, unknown>): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
   const { data, error } = await supabase().rpc(fn, args);
+  if (!error) kickPush();
   return error ? { ok: false, error: permError(error.message) } : { ok: true, data: data as T };
 }
 

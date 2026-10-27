@@ -1,0 +1,44 @@
+{
+  "run": "2026-10-27",
+  "what": "Database rule run for push notices, the server half (Android_Build_Plan.md A5, MVP_draft.md 64.3): devices, the outbox, the notice trigger, the chat and mail routes spliced into chat_send and mail_send, the flush turn, claim and report, the Firebase slot in Vault",
+  "script": "supabase/tests/push_rules.sql",
+  "migration": {
+    "file": "supabase/migrations/20261027120000_push.sql",
+    "file_md5": "e82661a14d3861edd1482443f964d106",
+    "applied": "applied to comms-hub (hrghmioxvgkjpnydrxrk) with the owner's approval of 2026-10-27, as version 20261027184903 'push'; md5 of the stored statement e82661a14d3861edd1482443f964d106 equals the md5 of the file",
+    "not_applied": "20261021090000_desktop_releases.sql and 20261026120000_android_releases.sql were not touched"
+  },
+  "how": "Each run is one transaction against comms-hub, rolled back at the end. Eight throwaway accounts (@t.test) act through row level security; the flush route's calls are made as anon, as the route makes them. The server key is a throwaway whose hash exists only inside the transaction. Tokens are made-up strings in the shape of an FCM token. Every message and mail body carries the word «سرّي» so a leak into a payload can be searched for. The TOTAL row carries the md5 of the text the run executed (without the lines the database tool appends), matched below to the file.",
+  "runs": [
+    { "attempt": 1, "when": "before applying", "text": "the migration and push_rules.sql in one transaction", "result": "stopped at check 08: invalid regular expression: invalid repetition count(s). Postgres allows at most 255 in a {m,n} bound; the token pattern said {20,4096}. Fixed in the migration: the pattern without a bound and char_length between 20 and 4096." },
+    { "attempt": 2, "when": "before applying", "text": "the same, fixed", "result": "stopped at check 49: permission denied for table devices. The rule file's own helper read devices while the run was acting as anon. Fixed in the rule file: the row ids are looked up before switching role. The migration was not changed." },
+    { "attempt": 3, "when": "before applying", "checks": 130, "passed": 130, "failed": [], "run_md5": "d0de5d80bf4a7f14f71bbde07342e554", "note": "128 checks of the file plus two that need the definitions from before the migration: chat_send and mail_send with the new line removed have exactly their md5 from before (00, 00b). The run md5 equals the md5 of the combined text (begin, the capture, the migration, the file)." },
+    { "attempt": 4, "when": "after applying", "checks": 128, "passed": 128, "failed": [], "run_md5": "e1a1b2045d0cd2a67763a64ad6215ce6", "note": "the run md5 equals the md5 of supabase/tests/push_rules.sql. Afterwards: 0 throwaway accounts, 0 devices, 0 outbox rows, 0 fcm_service_account rows, push_state clean, mail_server_key unchanged (md5 of its hash ce3a4a4cb106f18eb3e1b31806500817)." }
+  ],
+  "rules_checked": [
+    "the two hooks: chat_send calls push_route_chat once, after wa_route; mail_send calls push_route_mail once, just before it answers; nothing else of either changed (attempt 3, 00 and 00b)",
+    "devices: anon cannot register or read the view; the platform, the version and the token are checked; the token is not selectable, not even by its owner, not with a star, not through the view; nobody writes the table directly",
+    "the same device again by its id or by its token alone; a token moving to another person removes the old row; a removed device is refused (DEVICE_REMOVED) and device_seen says removed; unknown for someone else's device; rename, prefs and removal only by the owner; a new device inherits the person's latest choices; twenty live devices a person; an account removed takes its devices",
+    "the notice trigger: decide to every live device, attention only where wanted, never info, never the actor, never a notice about messaging (it quotes the message), never a person without a device, never one already read; a removed device gets nothing and what waited for it is gone",
+    "the chat route: direct messages, mentions and the urgent levels; a muted group passes level 3 only; never the author; level 3 is decide, the rest attention; the notices chat_send writes for the levels are not pushed as notices",
+    "the mail route: a task card to its assignee as decide, even with attention off; never plain mail; never a muted thread; the task notice the card writes follows the notice rules",
+    "the outbox: no text and no token column; one row per device and reference; a kind names its own reference; never info; nobody writes it or calls a route; a person sees only the rows of their own devices and not the flush turn",
+    "the flush, as anon with the key: the turn needs the key; one flush at a time; claim returns exactly the rows still due; read rows are skipped and deleted messages fail; each item goes to its own device's token; no item carries a message's or a mail's text; messaging and mail say only «رسالة جديدة من …» or «رسالة جديدة» where hidden; a notice shows its text unless hidden; every destination is /n/<kind>/<uuid> with no query string; only a notice item names a notice; the tag; exactly the keys body, go, id, kind, notice, tag, tier, title, token",
+    "reports: sent, TOKEN_GONE (the token is deleted and «أجهزتي» says so), RETRY (back to the queue), words that are not a code become FAILED; a finished row does not change; a new notice then reaches only the other device",
+    "stale rows go back to the queue once claimed for five minutes; five attempts and no more (STALE); not again within two seconds of the last flush; the lock is given back; nothing waiting answers at once (empty)",
+    "turning «يحتاج انتباهك» off closes the waiting attention rows (TIER_OFF)",
+    "the Firebase slot: only a holder of integrations.secrets makes it, once; a pending messaging integration with no secret; the secret goes in pending, the server reads it back with its key, commits it; only a tail is shown; the secret is in no event and no row"
+  ],
+  "existing_rule_runs_after_the_migration": {
+    "chat_rules.sql": "22 of 22, every value as its header states (unchanged from its last recorded run)",
+    "urgency_rules.sql": "41 of 41 (unchanged)",
+    "mail_rules.sql": "25 of 25 as its header states, except the request number of 16b: 187 instead of 184. mail_req_seq is a sequence, which every run advances even when it rolls back; the assignee is as stated.",
+    "permission_requests_rules.sql": "49 of 49 (unchanged)",
+    "whatsapp_rules.sql": "96 of 98. The two that differ, 04 and 04b, expect the director not to manage the system number; the owner gave the director that right on 2026-10-15 (Action_Plan.md B9, migration whatsapp_bridge_from_site, role_capabilities row updated_by 'Action_Plan.md B9' at 2026-10-15 09:33), after this file's last recorded run (98 of 98, 2026-10-14), and whatsapp_bridge_from_site_rules.sql check 01 asserts it. Every routing, claim and report check, which the new line in chat_send could have touched, passed.",
+    "permissions_rules.sql": "as it stood the file stopped at check 88 (function pg_temp.c(unknown, boolean, unknown) does not exist): the check passed a boolean where the helper takes text, a defect in the file since Step P1. The expression was cast to text, its meaning unchanged. Parts 1 and 3 then: 135 of 137. The two that differ are the same owner decisions of 2026-10-15: 02 (the director now holds whatsapp.system.manage, which the 2026-10-13 comparison gives the administrator only) and 114 (14 role_default events without an actor for the director and the assistant: the 8 of Step P2 and 6 of 2026-10-15). The mail and messaging checks (55 to 56d, 92, 93) passed. Part 2 (one-time use under overlap) calls neither replaced function and was not run."
+  },
+  "advisors_after_applying": {
+    "security": "the push objects appear only as the intended callable security-definer functions: push_flush_begin, push_flush_end, push_claim and push_report (anon and authenticated, all refused without the server key), and device_register, device_seen, device_rename, device_remove, device_prefs and push_fcm_slot (authenticated). push_on_notice, push_route_chat and push_route_mail do not appear (not callable). No push table is listed under RLS without a policy; no security-definer view. The other findings were there before.",
+    "performance": "two INFO unused-index notes on the new, still empty push_outbox (push_outbox_message_idx, push_outbox_mail_idx); nothing else names a push object"
+  }
+}
