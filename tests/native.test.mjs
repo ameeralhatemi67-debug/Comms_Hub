@@ -786,3 +786,60 @@ test('A6: the account page has the lock, the shell offers it, and the site serve
   assert.doesNotMatch(proxy, /redirect/i, 'the proxy redirects nothing, so Android reads the file where it is');
   for (const f of ['src/lib/native/lock.ts', 'src/components/native/phone-lock.tsx']) assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
 });
+
+// --- A7: the camera, files shared in, uploads in the background (MVP_draft.md 64.5) -----------------------
+
+const TOK = 'a'.repeat(64);
+
+test('A7: a held file is a token, a plain name, a size and a kind, read at its reserved path', async () => {
+  const { HELD_PATH, heldUrl, readHeld } = await import('../src/lib/native/held.ts');
+  assert.equal(HELD_PATH, '/__app/file/');
+  assert.deepEqual(readHeld({ token: TOK, name: 'صورة-20261027-143005.jpg', size: 12, type: 'image/jpeg', path: '/data/x' }), { token: TOK, name: 'صورة-20261027-143005.jpg', size: 12, type: 'image/jpeg' });
+  assert.equal(heldUrl({ token: TOK }), `/__app/file/${TOK}`);
+  for (const bad of [null, {}, { token: 'x', name: 'a', size: 1, type: 'x' }, { token: TOK, name: '../a', size: 1, type: 'x' }, { token: TOK, name: 'a\nb', size: 1, type: 'x' }, { token: TOK, name: 'a', size: -1, type: 'x' }, { token: TOK.toUpperCase(), name: 'a', size: 1, type: 'x' }]) {
+    assert.equal(readHeld(bad), null, JSON.stringify(bad));
+  }
+});
+
+test('A7: the site never serves the path the application answers itself', async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  assert.equal(fs.existsSync('src/app/__app'), false);
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
+  const users = walk('src').filter((f) => /\.(ts|tsx)$/.test(f) && fs.readFileSync(f, 'utf8').includes('/__app/'));
+  assert.deepEqual(users.map((f) => f.split(path.sep).join('/')), ['src/lib/native/held.ts'], 'only the module that names it');
+  assert.match(fs.readFileSync('mobile/android/app/src/main/java/sa/commshub/app/Held.java', 'utf8'), /static final String PATH = "\/__app\/file\/";/);
+});
+
+test('A7: the application\'s uploads are read in their shape, never with the session\'s address', async () => {
+  const { readUploads, readMeta, uploadLine } = await import('../src/lib/native/held.ts');
+  const id = 'b'.repeat(32);
+  const u = readUploads([{ id, token: TOK, name: 'فيديو.mp4', size: 100, done: 40, state: 'sending', fileId: null, error: null, session: 'https://www.googleapis.com/upload/drive/x' }]);
+  assert.deepEqual(u, [{ id, token: TOK, name: 'فيديو.mp4', size: 100, done: 40, state: 'sending', fileId: null, error: null }]);
+  assert.deepEqual(readUploads([{ id: 'x', token: TOK, name: 'a', size: 1, done: 0, state: 'sending' }]), []);
+  assert.deepEqual(readUploads([{ id, token: TOK, name: 'a', size: 1, done: 0, state: 'done' }]), []);
+  assert.deepEqual(readUploads('nope'), []);
+  assert.equal(readUploads([{ id, token: TOK, name: 'a', size: 10, done: 50, state: 'sent', fileId: '1AbC_d-ef0123' }])[0].done, 10);
+  assert.equal(uploadLine({ ...u[0] }), 'جارٍ الرفع 40٪');
+  assert.equal(uploadLine({ ...u[0], state: 'sent' }), 'وصل الملف، جارٍ تسجيله في المكتبة…');
+  assert.equal(uploadLine({ ...u[0], state: 'failed', error: 'SESSION' }), 'انتهت جلسة الرفع. أعد الإرسال.');
+  assert.deepEqual(readMeta(JSON.stringify({ [id]: { folderId: 'f', name: 'n', dims: '1 × 1 px', work: 'CH-1' }, bad: { folderId: 'f', name: 'n' } })), { [id]: { folderId: 'f', name: 'n', dims: '1 × 1 px', duration: null, work: 'CH-1' } });
+  assert.deepEqual(readMeta('{'), {});
+});
+
+test('A7: «استلام ملفات» is every member\'s page, and its places keep their own rules', async () => {
+  const fs = await import('node:fs');
+  const { canOpen } = await import('../src/lib/access.ts');
+  assert.equal(canOpen({ role: 'member', pages: [], caps: [] }, 'share'), true);
+  assert.match(fs.readFileSync('src/components/hub-page.tsx', 'utf8'), /if \(page === 'share'\) return <SharePage \/>;/);
+  const page = fs.readFileSync('src/components/native/share-page.tsx', 'utf8');
+  assert.match(page, /const library = canOpen\(account, 'media'\);\s*const work = library && canOpen\(account, 'work'\);\s*const chat = canOpen\(account, 'mail'\);/);
+  assert.match(page, /\.filter\(\(f\) => !f\.ghost && m\.canCreate\(f\.id\)\)/, 'only folders where the person may add');
+  assert.match(page, /files\.filter\(\(x\) => x\.size <= MAIL_ATTACH_BYTES\)/, 'attachments up to 25 MB');
+  const ups = fs.readFileSync('src/components/native/phone-uploads.tsx', 'utf8');
+  assert.match(ups, /fetch\('\/api\/media\/upload-session'/, 'the session is the site\'s, which checks the folder');
+  assert.match(ups, /rpc\('work_asset_link', \{ p_work: meta\.work, p_asset: asset, p_add: true \}\)/);
+  assert.match(fs.readFileSync('src/components/shell.tsx', 'utf8'), /<PhoneLockOffer \/>\s*<PhoneUploads \/>/);
+  assert.match(fs.readFileSync('src/components/media/library.tsx', 'utf8'), /const h = await capture\(kind\);/);
+  for (const f of ['src/lib/native/held.ts', 'src/components/native/phone-uploads.tsx', 'src/components/native/share-page.tsx']) assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
+});

@@ -36,6 +36,12 @@ final class ShellWebViewClient extends BridgeWebViewClient {
         if (path != null && (path.startsWith("/_capacitor_file_") || path.startsWith("/_capacitor_content_"))) {
             return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, new ByteArrayInputStream(new byte[0]));
         }
+        // A file the application holds for the page (A7): answered here, on the site's own address only, never by the site.
+        if (path != null && path.startsWith(Held.PATH) && "GET".equals(request.getMethod()) && Navigation.isAllowed(request.getUrl().toString(), Shell.ALLOWED)) {
+            String range = null;
+            for (java.util.Map.Entry<String, String> h : request.getRequestHeaders().entrySet()) if ("range".equalsIgnoreCase(h.getKey())) range = h.getValue();
+            return Held.serve(activity, path.substring(Held.PATH.length()), range);
+        }
         return super.shouldInterceptRequest(view, request);
     }
 

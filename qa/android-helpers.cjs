@@ -22,6 +22,8 @@ function record(script) {
     result.total = result.checks.length;
     result.passed = result.total - failed.length;
     result.failed = failed.length;
+    // How often the emulator's System UI stopped responding and was answered with «Wait» (screenNodes).
+    if (module.exports.systemUiWaits) result.systemUiWaits = module.exports.systemUiWaits;
     fs.writeFileSync(file, JSON.stringify(result, null, 2) + '\n');
     console.log(`${result.passed} of ${result.total} passed`);
     return failed.length;
@@ -109,8 +111,22 @@ function resumed() {
   return m ? `${m[1]}/${m[2]}` : null;
 }
 
-/** The nodes of the screen as UI Automator reads them: text, description and centre. */
+/**
+ * The nodes of the screen as UI Automator reads them: text, description and centre. The software-drawn emulator's
+ * System UI sometimes stops responding for a while, and Android then covers the screen with «System UI isn't
+ * responding»; the dialog is answered with «Wait» and the screen read again (counted in `systemUiWaits`).
+ */
 function screenNodes() {
+  const nodes = readNodes();
+  const wait = nodes.find((n) => n.pkg === 'android' && /^(Wait|انتظار)$/.test(n.text));
+  if (!wait || !nodes.some((n) => n.pkg === 'android' && /responding|لا يستجيب/i.test(n.text))) return nodes;
+  module.exports.systemUiWaits++;
+  shell(`input tap ${wait.x} ${wait.y}`, { allowFail: true });
+  shell('sleep 2', { allowFail: true });
+  return readNodes();
+}
+
+function readNodes() {
   shell('uiautomator dump /sdcard/qa-ui.xml', { allowFail: true });
   const xml = shell('cat /sdcard/qa-ui.xml', { allowFail: true });
   shell('rm -f /sdcard/qa-ui.xml', { allowFail: true });
@@ -143,4 +159,4 @@ function apkEntry(apk, entry) {
   return r.status === 0 ? r.stdout : null;
 }
 
-module.exports = { root, sleep, record, until, portAnswers, startSite, adb, shell, adbPath, APP, ACTIVITY, apkOf, emulatorReady, resumed, screenNodes, tap, screenshot, apkEntry };
+module.exports = { root, sleep, record, until, portAnswers, startSite, adb, shell, adbPath, APP, ACTIVITY, apkOf, emulatorReady, resumed, screenNodes, tap, screenshot, apkEntry, systemUiWaits: 0 };

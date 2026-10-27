@@ -103,6 +103,16 @@ public class MainActivity extends BridgeActivity {
         super.onNewIntent(intent);
         openPushed(intent);
         openLink(intent);
+        Incoming.receive(this, intent);
+    }
+
+    /** «استلام ملفات» (A7), once the files shared in are held: the page on the address this build opens. */
+    void openSharePage() {
+        if (bridge == null) return;
+        String target = Navigation.originOf(Navigation.parse(bridge.getServerUrl())) + "/share";
+        if (!Navigation.isAllowed(target, Shell.ALLOWED)) return;
+        WebView w = bridge.getWebView();
+        w.post(() -> w.loadUrl(target));
     }
 
     /**

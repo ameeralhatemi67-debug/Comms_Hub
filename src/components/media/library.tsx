@@ -10,6 +10,9 @@ import { MediaDialogs, type Dialog } from './dialogs';
 import { useAssetActions } from './actions';
 import { Icon, KIND_AR, PipeDots, StageChip, Thumb } from './parts';
 import { useMedia, type AssetRow, type FolderRow } from './provider';
+import { capture, uploadForget, uploadLine } from '@/lib/native/held';
+import { startLibraryUpload, useNativeUploads } from '../native/phone-uploads';
+import { useNativeFeature } from '../native/use-native';
 
 // The page remembers where you were when you open an asset and come back.
 const memory = { folder: 'all', view: 'grid' as 'grid' | 'list' | 'board' };
@@ -39,6 +42,10 @@ export function MediaLibrary() {
   const [dialog, setDialog] = useState<Dialog | null>(null);
   const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const [renaming, setRenaming] = useState<{ type: 'asset' | 'folder'; id: string } | null>(null);
+  // The Android application's camera and its uploads in the background (A7); nothing in a browser.
+  const camera = useNativeFeature('capture');
+  const [shooting, setShooting] = useState(false);
+  const phoneUps = useNativeUploads();
   const [over, setOver] = useState<string | null>(null);
   const dragIds = useRef<string[] | null>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -124,6 +131,19 @@ export function MediaLibrary() {
   const startUpload = async (list: File[]) => {
     if (!uploadTarget || !canUp) return m.say('الرفع يحتاج صلاحية «إنشاء» في مجلد غير مقفل.');
     await m.upload(list, uploadTarget);
+  };
+  // «تصوير» inside the Android application: the phone's camera, then a background upload (MVP_draft.md 64.5).
+  const shoot = async (kind: 'photo' | 'video') => {
+    setShooting(false);
+    if (!uploadTarget || !canUp) return m.say('الرفع يحتاج صلاحية «إنشاء» في مجلد غير مقفل.');
+    const h = await capture(kind);
+    if (!h) return;
+    try {
+      await startLibraryUpload(h, uploadTarget);
+      m.say(`بدأ رفع «${h.name}» في الخلفية، ويكتمل ولو تركت التطبيق.`);
+    } catch (e) {
+      m.say(e instanceof Error ? e.message : 'تعذّر بدء الرفع.');
+    }
   };
   const commitRename = async (value: string) => {
     const r = renaming;
@@ -388,6 +408,24 @@ export function MediaLibrary() {
           <Icon name="upload" />
           رفع ملفات
         </button>
+        {camera && (
+          <span className="mx-shoot">
+            <button onClick={() => setShooting((v) => !v)} disabled={!canUp || drive.state !== 'connected'} aria-expanded={shooting} data-shoot="menu">
+              <Icon name="upload" />
+              تصوير
+            </button>
+            {shooting && (
+              <span className="mx-shoot-menu">
+                <button type="button" data-shoot="photo" onClick={() => void shoot('photo')}>
+                  صورة
+                </button>
+                <button type="button" data-shoot="video" onClick={() => void shoot('video')}>
+                  فيديو
+                </button>
+              </span>
+            )}
+          </span>
+        )}
         <input
           ref={input}
           type="file"
@@ -690,12 +728,29 @@ export function MediaLibrary() {
           );
         })()}
 
-      {m.transfers.length > 0 && (
+      {m.transfers.length + phoneUps.length > 0 && (
         <div className="mx-tray" role="status">
           <h5>
             <span>رفع إلى Google Drive</span>
-            <span>{m.transfers.length}</span>
+            <span>{m.transfers.length + phoneUps.length}</span>
           </h5>
+          {phoneUps.map((u) => (
+            <div className="u" key={u.id} data-upload={u.state}>
+              <div>
+                <span className="n">{u.name}</span>
+                <span>{uploadLine(u)}</span>
+              </div>
+              {u.state === 'failed' ? (
+                <button type="button" className="ml-btn sm" onClick={() => void uploadForget(u.id)}>
+                  إزالة
+                </button>
+              ) : (
+                <div className="mx-bar">
+                  <i style={{ width: `${u.size ? (u.done / u.size) * 100 : 0}%` }} />
+                </div>
+              )}
+            </div>
+          ))}
           {m.transfers.map((t) => (
             <div className="u" key={t.key}>
               <div>

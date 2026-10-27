@@ -115,6 +115,8 @@ final class AppUpdate {
     String start(Activity activity, String wanted, String file, long size, String sha) {
         if (!offered() || !Releases.acceptable(wanted, file, size, sha, Shell.version(context))) return "refused";
         if (state.equals("downloading") || state.equals("verifying") || state.equals("installing")) return "busy";
+        // Installing restarts the application: it waits while a file is being sent in the background (A7).
+        if (Uploads.busy(activity)) return "busy";
         if (!context.getPackageManager().canRequestPackageInstalls()) {
             activity.runOnUiThread(() -> {
                 try {

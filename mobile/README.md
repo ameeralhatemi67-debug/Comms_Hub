@@ -220,6 +220,13 @@ opens and shares them on the emulator and reads the bytes back from Downloads, t
 application's cache folder. It also checks that a redirect to another address goes without the cookie, that a
 page can name nothing but a file route, and that no Capacitor interface reaches a frame of another address.
 
+## The upload check
+
+`qa/android-upload.cjs` shares files into the check package from its own provider of made files (`src/qa/QaFiles.java`;
+Android does not let the shell grant another application's files), reads them back from the page, and has the
+application send a large one in the background to a stand-in of Google Drive's resumable protocol at
+`http://127.0.0.1:3004/upload/`, which drops the connection once. It also takes a photo with the emulator's camera.
+
 ## Where the rules are
 
 | File | Holds |
@@ -227,5 +234,5 @@ page can name nothing but a file route, and that no Capacitor interface reaches 
 | `capacitor.config.json` | the release's configuration: the production address, no cleartext, no inspection |
 | `scripts/config.mjs` | the debug and check builds' configuration, derived from it |
 | `android/app/build.gradle` | the version (from `package.json`), the address list per build, the check package, the key from outside |
-| `android/app/src/main/java/sa/commshub/app/` | the window (`MainActivity`), where an address goes (`Navigation`), the page's view of the application (`Identity`, `Shell`), downloads, saving, opening and sharing the site's files (`Downloads`, `FileNames`, `SiteFiles`), Capacitor's page interfaces and cookie handler taken off (`Shell.narrow`), links (`Links`), the lock (`AppLock`), push notices (`Push`, `PushService`, `ShellApp`; the check package's own `src/qa/QaPush.java`), the narrowed permissions (`ShellChromeClient`), the refused file routes and the connection screen (`ShellWebViewClient`) |
+| `android/app/src/main/java/sa/commshub/app/` | the window (`MainActivity`), where an address goes (`Navigation`), the page's view of the application (`Identity`, `Shell`), downloads, saving, opening and sharing the site's files (`Downloads`, `FileNames`, `SiteFiles`), Capacitor's page interfaces and cookie handler taken off (`Shell.narrow`), links (`Links`), the lock (`AppLock`), files held for the page, shared in and uploaded in the background (`Held`, `Incoming`, `Uploads`, `UploadWorker`; the check package's `src/qa/QaFiles.java`), push notices (`Push`, `PushService`, `ShellApp`; the check package's own `src/qa/QaPush.java`), the narrowed permissions (`ShellChromeClient`), the refused file routes and the connection screen (`ShellWebViewClient`) |
 | `www/offline.html` | the connection screen |

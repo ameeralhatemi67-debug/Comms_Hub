@@ -61,10 +61,10 @@ test('builds: the release list holds the production address alone; the check pac
   for (const p of ['*.jks', '*.keystore', 'keystore.properties', 'google-services.json']) assert.ok(ignore.split('\n').includes(p), p);
 });
 
-test('permissions: the site, the microphone and notices, nothing else; no backup; cleartext only to the emulator in debug and check builds', () => {
+test('permissions: the site, the microphone, notices and uploads in the background, nothing else; no backup; cleartext only to the emulator in debug and check builds', () => {
   const m = read(app, 'src', 'main', 'AndroidManifest.xml');
   const asked = [...m.matchAll(/<uses-permission android:name="([^"]+)"/g)].map((x) => x[1]).sort();
-  assert.deepEqual(asked, ['android.permission.INTERNET', 'android.permission.MODIFY_AUDIO_SETTINGS', 'android.permission.POST_NOTIFICATIONS', 'android.permission.RECORD_AUDIO']);
+  assert.deepEqual(asked, ['android.permission.FOREGROUND_SERVICE', 'android.permission.FOREGROUND_SERVICE_DATA_SYNC', 'android.permission.INTERNET', 'android.permission.MODIFY_AUDIO_SETTINGS', 'android.permission.POST_NOTIFICATIONS', 'android.permission.RECORD_AUDIO']);
   assert.match(m, /android:allowBackup="false"/);
   assert.match(m, /android:dataExtractionRules="@xml\/data_extraction_rules"/);
   assert.match(read(app, 'src', 'main', 'res', 'xml', 'network_security_config.xml'), /<base-config cleartextTrafficPermitted="false" \/>/);
@@ -204,6 +204,37 @@ test('A6: the lock is off by default, asks Android both ways, and covers the pag
   assert.match(read(mobile, 'android', 'variables.gradle'), /androidxBiometricVersion = '1\.1\.0'/);
   const strings = read(app, 'src', 'main', 'res', 'values', 'strings.xml');
   for (const n of ['lock_title', 'lock_body', 'lock_open', 'lock_prompt_title', 'lock_prompt_on', 'lock_prompt_off', 'lock_prompt_sub']) assert.match(strings, new RegExp(`<string name="${n}">[^<]*[\\u0600-\\u06ff][^<]*</string>`), n);
+});
+
+test('A7: files shared in come only from another application\'s provider, and held files are answered on the site\'s address only', () => {
+  const m = read(app, 'src', 'main', 'AndroidManifest.xml');
+  for (const a of ['SEND', 'SEND_MULTIPLE']) assert.match(m, new RegExp(`<action android:name="android\\.intent\\.action\\.${a}" />\\s*<category android:name="android\\.intent\\.category\\.DEFAULT" />\\s*<data android:mimeType="\\*/\\*" />`), a);
+  assert.match(java('Incoming'), /if \(!Held\.acceptable\(u\.getScheme\(\), u\.getAuthority\(\), own\)\) continue;/);
+  assert.match(java('Incoming'), /String own = a\.getPackageName\(\) \+ "\.fileprovider";/);
+  assert.match(java('ShellWebViewClient'), /path\.startsWith\(Held\.PATH\) && "GET"\.equals\(request\.getMethod\(\)\) && Navigation\.isAllowed\(request\.getUrl\(\)\.toString\(\), Shell\.ALLOWED\)/);
+  const paths = read(app, 'src', 'main', 'res', 'xml', 'file_paths.xml');
+  assert.match(paths, /<cache-path name="held" path="held\/" \/>/);
+  assert.doesNotMatch(paths, /<(files|external|root)-path/);
+});
+
+test('A7: a background upload goes to Google Drive only, as a data-sync task, and the update waits for it', () => {
+  const m = read(app, 'src', 'main', 'AndroidManifest.xml');
+  const asked = [...m.matchAll(/<uses-permission android:name="([^"]+)"/g)].map((x) => x[1]);
+  assert.ok(asked.includes('android.permission.FOREGROUND_SERVICE') && asked.includes('android.permission.FOREGROUND_SERVICE_DATA_SYNC'));
+  assert.ok(!asked.includes('android.permission.CAMERA'), 'the camera application takes the picture; this one never asks for the camera');
+  assert.match(m, /android:name="androidx\.work\.impl\.foreground\.SystemForegroundService"\s+android:foregroundServiceType="dataSync"\s+tools:node="merge"/);
+  const g = read(app, 'build.gradle');
+  assert.match(g, /defaultConfig \{[\s\S]*?buildConfigField "String", "UPLOAD_PREFIXES", "\\"https:\/\/www\.googleapis\.com\/upload\/drive\/\\""/);
+  assert.equal((g.match(/127\.0\.0\.1:3004\/upload\//g) ?? []).length, 1, 'the check\'s stand-in in the check package only');
+  assert.match(/qa \{[\s\S]*?\n {8}\}/.exec(g)[0], /127\.0\.0\.1:3004\/upload\//);
+  assert.match(read(mobile, 'android', 'variables.gradle'), /androidxWorkVersion = '2\.11\.2'/);
+  assert.match(java('Uploads'), /if \(item == null \|\| !allowedSession\(session, prefixes\(\)\)\) return null;/);
+  assert.match(java('Uploads'), /seen\.put\("id"[^;]*\)/, 'status lists what the page may see');
+  assert.doesNotMatch(/static synchronized JSONArray status[\s\S]*?\n {4}\}/.exec(java('Uploads'))[0], /"session"/, 'never the session\'s address');
+  assert.match(java('UploadWorker'), /ServiceInfo\.FOREGROUND_SERVICE_TYPE_DATA_SYNC/);
+  assert.match(java('AppUpdate'), /if \(Uploads\.busy\(activity\)\) return "busy";/);
+  const strings = read(app, 'src', 'main', 'res', 'values', 'strings.xml');
+  for (const n of ['capture_no_camera', 'share_in_started', 'share_in_files_only', 'share_in_failed', 'uploads_channel', 'uploads_title']) assert.match(strings, new RegExp(`<string name="${n}">[^<]*[\\u0600-\\u06ff][^<]*</string>`), n);
 });
 
 test('the back key asks the page\'s open window first, as Escape does', () => {

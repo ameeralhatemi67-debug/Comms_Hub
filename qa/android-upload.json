@@ -1,0 +1,77 @@
+{
+  "script": "qa/android-upload.cjs",
+  "run": "2026-10-27T20:59:20.393Z",
+  "checks": [
+    {
+      "name": "1. bridge version 6 with capture (take), incoming (take) and upload (start, status, cancel)",
+      "pass": true,
+      "detail": "{\"bridge\":6,\"capture\":\"function\",\"incoming\":\"function\",\"upload\":[\"function\",\"function\",\"function\"]}"
+    },
+    {
+      "name": "2a. files shared in from another application are held, «استلام ملفات» opens, and the page takes them once",
+      "pass": true,
+      "detail": "{\"atShare\":true,\"taken\":[{\"token\":\"6d68161d554ee5ebbc24cd8781b1261f2e8a8e65a79a44813f9957a600f9b3a4\",\"name\":\"qa-big.mp4\",\"size\":241172480,\"type\":\"video/mp4\"},{\"token\":\"15b31a3dce1e00f60eedd909a71b686e03ca4806f094f7c0d10fa78dda37130a\",\"name\":\"qa-small.txt\",\"size\":30,\"type\":\"text/plain\"}],\"again\":[]}"
+    },
+    {
+      "name": "2b. the held copies have the bytes that were shared",
+      "pass": true,
+      "detail": "{\"copies\":\"5d564f8cd7f93a65c086c55b5179a8bbe492b22bb5c16682a7899219f8ee7fed  cache/held/6d68161d554ee5ebbc24cd8781b1261f2e8a8e65a79a44813f9957a600f9b3a4/qa-big.mp4\\r\\nc7035ecc57fbce4b3a2ff262f7719c973c61690f808a45f0925a7b88ddeeba71  cache/held/15b31a3dce1e00f60eedd909a71b686e03ca4806f094f7c0d10fa78dda37130a/qa-small.txt\",\"bigSum\":\"5d564f8cd7f93a65c086c55b5179a8bbe492b22bb5c16682a7899219f8ee7fed\",\"smallSum\":\"c7035ecc57fbce4b3a2ff262f7719c973c61690f808a45f0925a7b88ddeeba71\"}"
+    },
+    {
+      "name": "2c. a file address naming the application's own storage is refused",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "3. the page reads a held file at /__app/file/<token>, whole and by a byte range, with the same bytes",
+      "pass": true,
+      "detail": "{\"whole\":{\"status\":200,\"type\":\"text/plain\",\"contentRange\":null,\"sha\":\"c7035ecc57fbce4b3a2ff262f7719c973c61690f808a45f0925a7b88ddeeba71\"},\"part\":{\"status\":206,\"type\":\"video/mp4\",\"contentRange\":\"bytes 0-1023/241172480\",\"sha\":\"d979c2f9a47aa4318a6d502b77c0f18cdafa3cff1ffd63bdfec4148954a71c00\"}}"
+    },
+    {
+      "name": "4a. the page opens the session through the site for the folder, and the application takes the upload",
+      "pass": true,
+      "detail": "{\"started\":{\"id\":\"de4a340d85b69bbfe5d82e810b74fe9f\"},\"session\":[{\"name\":\"qa-big.mp4\",\"mimeType\":\"video/mp4\",\"size\":241172480,\"folderId\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000f1\"}]}"
+    },
+    {
+      "name": "4b. with the application in the background, every byte arrives after one dropped connection, with the same SHA-256",
+      "pass": true,
+      "detail": "{\"sha\":\"5d564f8cd7f93a65c086c55b5179a8bbe492b22bb5c16682a7899219f8ee7fed\",\"want\":\"5d564f8cd7f93a65c086c55b5179a8bbe492b22bb5c16682a7899219f8ee7fed\",\"cuts\":1,\"pieces\":29}"
+    },
+    {
+      "name": "4c. the notice «جارٍ رفع الملفات» shows while it is sent",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "4d. the page registers it with the Drive file's id and links it to its work, and the application forgets it",
+      "pass": true,
+      "detail": "{\"complete\":[{\"fileId\":\"qa-drive-f5732c3b85d24cea\",\"folderId\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000f1\",\"dims\":null,\"duration\":null}],\"registered\":{\"left\":[],\"linked\":[{\"name\":\"work_asset_link\",\"args\":{\"p_work\":\"CH-7\",\"p_asset\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000a7\",\"p_add\":true}}]}}"
+    },
+    {
+      "name": "5. an upload to another address, or of a file the application does not hold, is refused",
+      "pass": true,
+      "detail": "[null,null,null]"
+    },
+    {
+      "name": "6. «تصوير»: the phone's camera application writes a photo into a held file the page reads",
+      "pass": true,
+      "detail": "{\"camera\":\"com.android.camera2/com.android.camera.CaptureActivity\",\"photo\":{\"token\":\"b0572d2784e1b83b7a11132f6a2f5571d6ebdac3bce35de86e27f07d5d8d48a5\",\"name\":\"صورة-20261028-000054.jpg\",\"size\":63669,\"type\":\"image/jpeg\"},\"shown\":{\"status\":200,\"type\":\"image/jpeg\",\"contentRange\":null,\"sha\":\"722262bdabb47e65f92ba055da82ee155cf29e09d5315421bae687eb3e95c265\"}}"
+    }
+  ],
+  "notes": [
+    "The large file was 230 MB, not the plan's 2 GB: the emulator had 589 MB free for the application's copy.",
+    "After the check: the check package is uninstalled"
+  ],
+  "device": {
+    "model": "sdk_gphone16k_x86_64",
+    "android": "17",
+    "sdk": "37"
+  },
+  "bigFile": {
+    "mb": 230,
+    "freeBefore": 617680896
+  },
+  "total": 11,
+  "passed": 11,
+  "failed": 0
+}

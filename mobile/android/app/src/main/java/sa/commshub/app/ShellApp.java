@@ -17,6 +17,8 @@ public class ShellApp extends Application {
     public void onCreate() {
         super.onCreate();
         PushService.channels(this);
+        // Held files older than two days go, except those an upload still reads (A7).
+        new Thread(() -> Held.sweep(this, Uploads.tokensInUse(this))).start();
         if (configured() && FirebaseApp.getApps(this).isEmpty()) {
             FirebaseApp.initializeApp(
                 this,

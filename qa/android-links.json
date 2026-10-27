@@ -1,6 +1,6 @@
 {
   "script": "qa/android-links.cjs",
-  "run": "2026-10-27T20:12:57.476Z",
+  "run": "2026-10-27T21:07:03.430Z",
   "checks": [
     {
       "name": "6a. with a screen PIN on the phone the lock can be used, and it is off",
@@ -58,9 +58,9 @@
       "detail": "{\"status\":200,\"type\":\"application/json; charset=UTF-8\"}"
     },
     {
-      "name": "2a. bridge version 5; before Android lets the application open the site's links, links.verified says no",
+      "name": "2a. bridge version 5 or later; before Android lets the application open the site's links, links.verified says no",
       "pass": true,
-      "detail": "{\"bridge\":{\"bridge\":5,\"verified\":false},\"declared\":\"sa.commshub.app.qa:\\r\\n    ID: 3170387f-ef77-4e3b-8668-385080512e15\\r\\n    Signatures: [EA:7B:7F:9F:33:3B:40:E7:3F:2D:FF:0E:76:A2:1B:D0:72:D3:A4:F3:75:BE:7C:2F:29:4A:A8:21:E8:1B:64:A7]\\r\\n    Domain verification state:\\r\\n      comms-hub-three.vercel.app: 1024\"}"
+      "detail": "{\"bridge\":{\"bridge\":6,\"verified\":false},\"declared\":\"sa.commshub.app.qa:\\r\\n    ID: 2cae9bea-6a3d-42d9-b511-7794b646c1d9\\r\\n    Signatures: [EA:7B:7F:9F:33:3B:40:E7:3F:2D:FF:0E:76:A2:1B:D0:72:D3:A4:F3:75:BE:7C:2F:29:4A:A8:21:E8:1B:64:A7]\\r\\n    Domain verification state:\\r\\n      comms-hub-three.vercel.app: 1024\"}"
     },
     {
       "name": "2b. once the person allows it in Android's settings, links.verified says yes",
@@ -109,7 +109,7 @@
     "sdk": "37"
   },
   "pin": "Pin set to '4826'",
-  "appLinks": "sa.commshub.app.qa:\r\n    ID: 3170387f-ef77-4e3b-8668-385080512e15\r\n    Signatures: [EA:7B:7F:9F:33:3B:40:E7:3F:2D:FF:0E:76:A2:1B:D0:72:D3:A4:F3:75:BE:7C:2F:29:4A:A8:21:E8:1B:64:A7]\r\n    Domain verification state:\r\n      comms-hub-three.vercel.app: 1024",
+  "appLinks": "sa.commshub.app.qa:\r\n    ID: 2cae9bea-6a3d-42d9-b511-7794b646c1d9\r\n    Signatures: [EA:7B:7F:9F:33:3B:40:E7:3F:2D:FF:0E:76:A2:1B:D0:72:D3:A4:F3:75:BE:7C:2F:29:4A:A8:21:E8:1B:64:A7]\r\n    Domain verification state:\r\n      comms-hub-three.vercel.app: 1024",
   "total": 19,
   "passed": 19,
   "failed": 0

@@ -24,6 +24,7 @@ import { AssetPage } from './media/asset-page';
 import { TasksPage } from './media/tasks-page';
 import { ActivityPage } from './media/activity-page';
 import { MailPage } from './mail/mail-page';
+import { SharePage } from './native/share-page';
 
 const MotionStudio = dynamic(() => import('./motion-studio'), {
   ssr: false,
@@ -100,6 +101,7 @@ export function HubPage({ route }: { route: string[] }) {
   if (page === 'motion') return id === 'studio' ? <StudioPage projectId={route[2]} /> : <MotionStudio />;
   if (page === 'accounts') return <AccountsPage />;
   if (page === 'ideas') return <IdeasPage />;
+  if (page === 'share') return <SharePage />;
   if (['settings', 'account'].includes(page))
     return <Supporting page={page} />;
 

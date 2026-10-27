@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-27
+updated: 2026-10-28
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -25,6 +25,23 @@ related:
 ---
 
 # Communication Department Hub — Current Status
+
+## The Android application, A6 and A7, 2026-10-28
+
+Built through A7 at the owner's request of 2026-10-27; local commits on `main`, nothing pushed.
+
+- **Done.**
+  - A6: links of the site open in the application (verified through `assetlinks.json`), and the application lock (off by default, fingerprint or screen lock, after five minutes away). Evidence: `qa/android-links.cjs` 19 of 19.
+  - A7: «تصوير» in the library, sharing files in («استلام ملفات», `/share`) to a library folder, a work or a conversation, and library uploads that go on in the background. Evidence: `qa/android-upload.cjs` 11 of 11.
+  - All earlier emulator checks pass on the A7 build. Totals: `npm test` 589 of 589, `mobile` 20 of 20, JVM 35 of 35, typecheck and build clean.
+- **Owner steps waiting.**
+  - Make the release key.
+  - Put its certificate's SHA-256 in `public/.well-known/assetlinks.json`; a signed release refuses until then.
+  - Add `/app/return` to Supabase's redirect addresses.
+  - The Firebase project, as before.
+  - Push to deploy the site parts.
+- **Not verified.** Nothing signed in, no real phone, no real Drive upload or share from another application, no 2 GB file (the emulator has about 600 MB free).
+- **Next.** A8: the `play` build (an AAB with Play's own updates), «طلب حذف حسابي», the privacy policy, and Play's declarations (the data-sync foreground task, notices). Then the closed test.
 
 ## The Android application, A4 and A5, 2026-10-27
 

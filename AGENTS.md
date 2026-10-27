@@ -396,6 +396,19 @@ own `package.json` and lockfile like `desktop/`, outside the site's typecheck an
     `OWNER_RELEASE_KEY_SHA256`, and `scripts/build.mjs` refuses a signed release whose certificate it does not name.
   - The lock (`AppLock.java`) is off by default and asks Android (fingerprint or screen lock) to turn it on or off,
     at opening, and after `LOCK_AFTER_MS` away: five minutes, five seconds in the check package only.
+- **The camera, sharing in, uploads (A7, `MVP_draft.md` 64.5).** Bridge version 6 adds `capture`, `incoming` and
+  `upload`.
+  - A held file (`Held.java`) is a token. The page reads it at `/__app/file/<token>`, answered by the application
+    (byte ranges, GET, the site's own address only) and never by the site; no route of the site may use `/__app/`
+    (tested).
+  - A file shared in is read only from another application's `content://` provider (`Held.acceptable`): never
+    `file://` and never the application's own FileProvider.
+  - A background upload (`Uploads.java`, `UploadWorker.java`, WorkManager 2.11.2, a data-sync foreground task) goes
+    only to `UPLOAD_PREFIXES`: Google Drive's upload address, plus the check's stand-in in the check package. The
+    session is opened by the site (`/api/media/upload-session`), and the page registers what arrived
+    (`src/components/native/phone-uploads.tsx`). The session's address is never shown back to the page.
+  - `«استلام ملفات»` (`/share`) is open to every member; each destination keeps its own rule.
+  - The check package alone has `QaFiles` (files to share in) beside `QaPush`.
 - **Checks** use the emulator started read-only and the check package `sa.commshub.app.qa`, never a real
   installation, and signed-out pages only (`qa/android-*.cjs`, `qa/android-helpers.cjs`).
 - **What stays the same as everywhere:** no sign-in bypass, stub session or stored password; nothing about

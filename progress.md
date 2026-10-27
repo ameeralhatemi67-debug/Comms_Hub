@@ -2015,3 +2015,44 @@ The owner asked on 2026-10-27 for A6 and A7. The release key does not exist yet,
   - Nothing signed in: «قفل التطبيق» on «الحساب» and the offer were seen on a fixture page only.
   - A fingerprint was not tried: the emulator has none enrolled, so the PIN stood for both.
   - No real phone. Nothing pushed.
+
+### 2026-10-28: the Android application, A7: the camera, sharing files in, and uploading in the background
+
+- **What was built.**
+  - **Held files** (`Held.java`, `ShellWebViewClient.java`): a photo or video from «تصوير», or a file shared in, is kept in `cache/held/<token>/<name>` and named by 32 random bytes. The page reads it at `/__app/file/<token>`, which the application answers itself, GET only, in byte ranges, on the site's own address only; the site never serves that path (tested). They are removed two days after they arrived, unless an upload still reads them.
+  - **«تصوير»** (`CommsHubShell.captureTake`): the phone's camera application writes straight into a held file through the FileProvider's new `held/` folder. The application never asks for the camera itself. In the library it sits beside «رفع ملفات» («صورة», «فيديو»), and what it takes goes to the folder in the background.
+  - **Sharing in** (`Incoming.java`, the manifest's `SEND` and `SEND_MULTIPLE`): up to twenty files are copied into held files at once, while Android's read permission lasts, and the window opens «استلام ملفات». Only another application's `content://` provider is read (`Held.acceptable`): never `file://`, never the application's own FileProvider.
+  - **Uploading in the background** (`Uploads.java`, `UploadWorker.java`; WorkManager 2.11.2, a foreground task of the data-sync kind with «جارٍ رفع الملفات»):
+    - The page opens the Drive session through `/api/media/upload-session` as a browser upload does, so the site still checks the folder's «إنشاء».
+    - The application sends 8 MB pieces with the same resume probe. If Android stops it, WorkManager starts it again.
+    - It accepts only Google Drive's upload address (`UPLOAD_PREFIXES`), and never shows the session's address back to the page.
+    - `PhoneUploads` in the shell registers what arrived (`/api/media/complete`), links it to its work (`work_asset_link`) when one was chosen, and has the application forget it, on any page or at the next opening.
+    - The application's own update answers «busy» while one runs.
+  - **«استلام ملفات»** (`/share`, open to every member): the files, then «مكتبة الوسائط» (folders with «إنشاء» only), «عمل» (open works the person takes part in, plus a folder) or «المراسلة» (attachments up to 25 MB). Each destination shows only if the person's pages allow it.
+  - **Bridge version 6:** `capture`, `incoming`, `upload`.
+  - **The check package alone** gains `QaFiles`, a provider of made files under its own authority, beside `QaPush`.
+  - **Documents.** `MVP_draft.md` 64.5, the A7 bullet of `AGENTS.md`, `mobile/README.md`.
+- **Verified, numbers.**
+  - **Tests.** `npm test` **589 of 589** (4 new: held files and their reserved path, nothing else of the site using `/__app/`, uploads read without the session, the page and its places). `mobile` **20 of 20**: shared-in sources, the held path and the provider folder, uploads to Drive only, the data-sync task, no camera permission, the update waiting. JVM **35 of 35** (`HeldTest` 5, `IdentityTest` one more). Typecheck clean; `npm run build` clean.
+  - **`qa/android-upload.cjs`: 11 of 11** on the `Pixel_9_Pro` emulator, Android 16:
+    - bridge 6;
+    - two files shared in, held with their bytes, «استلام ملفات» opened and taken once;
+    - a `file://` address of the application's own storage refused;
+    - the page reading a held file whole (200) and by range (206, `bytes 0-1023/…`), SHA-256 equal;
+    - a 238 MB file sent in the background with the application in the background: 30 pieces, one dropped connection, the stand-in's SHA-256 equal, «جارٍ رفع الملفات» showing;
+    - the page registering it with the Drive id and linking it to its work, then the application forgetting it;
+    - three refused uploads (another address, a look-alike host, an unknown file);
+    - a photo taken with the emulator's camera application (`com.android.camera2`) and read by the page.
+  - **How the check got there.**
+    - The plan named a 2 GB file, but the emulator has about 600 MB free: the size is now a share of the free space (238 MB).
+    - Android does not let the shell grant MediaStore files to another application (`SecurityException … has no access`), and `am` cannot put a list of addresses in an intent. So the check shares from `QaFiles`, as two `SEND` intents, and the application reads them through the same path as `SEND_MULTIPLE`.
+  - **Every earlier emulator check again on the A7 build:** `qa/android-files.cjs` **23 of 23**, `qa/android-links.cjs` **19 of 19**, `qa/android-shell.cjs` **28 of 28**, `qa/android-push.cjs` **20 of 20**, `qa/android-update.cjs` **12 of 12**.
+    - The links check now accepts bridge 5 or later.
+    - Push and update first failed for the emulator, not the application: Android's «System UI isn't responding» dialog covered the screen (seen three times this session), and once Playwright's connection was reset. After a fresh emulator, and with the shared screen reader (`qa/android-helpers.cjs`) now answering «Wait» and counting it (`systemUiWaits` in each result), both passed.
+- **Not verified, said plainly.**
+  - Nothing signed in: «استلام ملفات», «تصوير» in the library and the upload tray were not seen on the real pages, which need a session. The check drove the same functions on a fixture page.
+  - No real Google Drive upload: the stand-in speaks Drive's protocol. A real Drive upload from a phone is the owner's check.
+  - No real share from WhatsApp or Photos: the made-file provider stood for them.
+  - A 2 GB file was not sent.
+  - Play's declaration for the data-sync foreground task is A8's.
+  - No real phone. Nothing pushed.

@@ -7,5 +7,10 @@
         <receiver
             android:name=".QaPush"
             android:exported="true" />
+        <!-- Files to share into the application (QaFiles.java, qa/android-upload.cjs). -->
+        <provider
+            android:name=".QaFiles"
+            android:authorities="${applicationId}.qafiles"
+            android:exported="true" />
     </application>
 </manifest>

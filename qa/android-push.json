@@ -1,6 +1,6 @@
 {
   "script": "qa/android-push.cjs",
-  "run": "2026-10-27T20:31:42.677Z",
+  "run": "2026-10-27T21:24:59.057Z",
   "checks": [
     {
       "name": "in a browser: no explanation and no registration",
@@ -10,7 +10,7 @@
     {
       "name": "bridge version 4 or later with push (state, request, token, onOpen, onReceive), frozen, and notices still to be asked",
       "pass": true,
-      "detail": "{\"bridge\":5,\"methods\":[\"function\",\"function\",\"function\",\"function\",\"function\"],\"frozen\":true,\"state\":\"prompt\"}"
+      "detail": "{\"bridge\":6,\"methods\":[\"function\",\"function\",\"function\",\"function\",\"function\"],\"frozen\":true,\"state\":\"prompt\"}"
     },
     {
       "name": "the channels «يحتاج قرارك» (high, with sound), «للانتباه» (low, silent) and «الرسائل» (default), as Android's settings show them",
@@ -20,7 +20,7 @@
     {
       "name": "at its opening the phone is registered for the person: Android, the installed version, no token yet",
       "pass": true,
-      "detail": "{\"name\":\"device_register\",\"args\":{\"p_device\":null,\"p_platform\":\"android\",\"p_version\":\"0.1.0\",\"p_name\":null,\"p_token\":null}}"
+      "detail": "{\"name\":\"device_register\",\"args\":{\"p_device\":null,\"p_platform\":\"android\",\"p_version\":\"0.1.1\",\"p_name\":null,\"p_token\":null}}"
     },
     {
       "name": "the site says why before Android asks: «تنبيهات الهاتف», «السماح بالتنبيهات» and «ليس الآن»",
@@ -40,7 +40,7 @@
     {
       "name": "once allowed, the state is granted and the phone is registered again with its remembered id",
       "pass": true,
-      "detail": "{\"state\":\"granted\",\"after\":[{\"name\":\"device_register\",\"args\":{\"p_device\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\",\"p_platform\":\"android\",\"p_version\":\"0.1.0\",\"p_name\":null,\"p_token\":null}},{\"name\":\"device_register\",\"args\":{\"p_device\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\",\"p_platform\":\"android\",\"p_version\":\"0.1.0\",\"p_name\":null,\"p_token\":null}},{\"name\":\"device_register\",\"args\":{\"p_device\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\",\"p_platform\":\"android\",\"p_version\":\"0.1.0\",\"p_name\":null,\"p_token\":null}}]}"
+      "detail": "{\"state\":\"granted\",\"after\":[{\"name\":\"device_register\",\"args\":{\"p_device\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\",\"p_platform\":\"android\",\"p_version\":\"0.1.1\",\"p_name\":null,\"p_token\":null}},{\"name\":\"device_register\",\"args\":{\"p_device\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\",\"p_platform\":\"android\",\"p_version\":\"0.1.1\",\"p_name\":null,\"p_token\":null}},{\"name\":\"device_register\",\"args\":{\"p_device\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\",\"p_platform\":\"android\",\"p_version\":\"0.1.1\",\"p_name\":null,\"p_token\":null}},{\"name\":\"device_register\",\"args\":{\"p_device\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\",\"p_platform\":\"android\",\"p_version\":\"0.1.1\",\"p_name\":null,\"p_token\":null}}]}"
     },
     {
       "name": "this build has no Firebase project, so the token is null and nothing is made with Google",

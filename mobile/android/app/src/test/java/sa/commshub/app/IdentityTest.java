@@ -12,7 +12,7 @@ public class IdentityTest {
     public void topFrameOnlyFrozenAndTheShapeTheSiteReads() {
         String s = Identity.script("0.1.0", false);
         assertTrue(s.contains("if (window.top !== window || 'commsHubNative' in window) return;"));
-        assertTrue(s.contains("platform: 'android', shell: 'capacitor', version: '0.1.0', bridge: 5"));
+        assertTrue(s.contains("platform: 'android', shell: 'capacitor', version: '0.1.0', bridge: 6"));
         assertTrue(s.contains("value: Object.freeze(bridge), writable: false, configurable: false"));
         assertFalse(s.contains("appUpdate"));
     }
@@ -34,6 +34,16 @@ public class IdentityTest {
         assertTrue(s.contains("onOpen: listen('pushOpen', function (fn, x) { if (typeof x.go === 'string') fn(x.go); }),"));
         assertTrue(s.contains("onReceive: listen('pushReceive', function (fn) { fn(); })"));
         assertTrue(s.contains("held = cap.addListener('CommsHubShell', event,"));
+    }
+
+    @Test
+    public void heldFilesAreTokensAndAnUploadIsATokenAndASession() {
+        String s = Identity.script("0.1.0", false);
+        assertTrue(s.contains("var held = function (x) { return x && typeof x.token === 'string' ? { token: x.token, name: x.name, size: x.size, type: x.type } : null; };"));
+        assertTrue(s.contains("call('captureTake', { kind: kind === 'video' ? 'video' : 'photo' }).then(held)"));
+        assertTrue(s.contains("call('incomingTake').then(function (x) { return Array.isArray(x.files) ? x.files.map(held) : []; })"));
+        assertTrue(s.contains("call('uploadStart', { token: String(a.token), session: String(a.session) })"));
+        assertTrue(s.contains("call('uploadCancel', { id: String(id) })"));
     }
 
     @Test

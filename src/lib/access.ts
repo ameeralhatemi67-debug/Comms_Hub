@@ -31,7 +31,9 @@ export type GrantablePage = (typeof grantablePages)[number]['id'];
 const grantable = new Set<string>(grantablePages.map((p) => p.id));
 
 /** Open to every signed-in person. */
-const alwaysOpen = new Set(['', 'account']);
+// «استلام ملفات» (/share, the Android application's files shared in) is open to every member: each place it sends
+// to keeps its own rule (the library folder's «إنشاء», the work, the conversation).
+const alwaysOpen = new Set(['', 'account', 'share']);
 
 /** The roles that open «حسابات المنصات» (/channels), with the «الموافقات والنشر» page. */
 export const linkedAccountRoles: Role[] = ['director', 'assistant', 'publisher'];

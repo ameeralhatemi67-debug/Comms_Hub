@@ -44,4 +44,12 @@
     <string name="lock_prompt_on">تشغيل قفل التطبيق</string>
     <string name="lock_prompt_off">إيقاف قفل التطبيق</string>
     <string name="lock_prompt_sub">ببصمتك أو بقفل الشاشة</string>
+    <!-- The camera, files shared in, and uploads in the background (MVP_draft.md 64.5). -->
+    <string name="capture_no_camera">لا يوجد على الهاتف تطبيق للتصوير.</string>
+    <string name="share_in_started">جارٍ استلام الملفات…</string>
+    <string name="share_in_files_only">يستلم التطبيق الملفات فقط، لا النصوص والروابط.</string>
+    <string name="share_in_failed">تعذّر استلام الملفات. حاول مرة أخرى.</string>
+    <string name="uploads_channel">الرفع</string>
+    <string name="uploads_title">جارٍ رفع الملفات</string>
+    <string name="uploads_line">%1$s · %2$d٪</string>
 </resources>

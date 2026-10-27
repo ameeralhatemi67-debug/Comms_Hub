@@ -2998,3 +2998,30 @@ Phase A6 of `Android_Build_Plan.md`.
 - **When it asks.** When the application opens, and when the person comes back to it after five minutes or more away. Android asks for the fingerprint or the phone's PIN, pattern or password («فتح مركز الاتصال المؤسسي»). Until it is answered the page is covered by the application's own screen: the rosette, «المركز مقفل», «افتح القفل ببصمتك أو بقفل الشاشة.» and «فتح القفل».
 - **While it is on**, Android's list of recent applications shows no picture of the page (Android 13 and newer).
 - **What it is not.** It guards this phone's window only. It signs nobody out, and the site's session and every rule stay as they are.
+
+## 64.5 The camera, sharing files in, and uploading in the background (A7), 2026-10-27
+
+Phase A7 of `Android_Build_Plan.md`. Inside the Android application only; a browser sees none of it.
+
+**«تصوير» in «مكتبة الوسائط».** Beside «رفع ملفات», for a folder where the person may add files: «صورة» or «فيديو» opens the phone's own camera application. What it takes is sent to the folder in the background: «بدأ رفع «…» في الخلفية، ويكتمل ولو تركت التطبيق.». The application never asks for the camera itself.
+
+**Sharing files into the application.** From another application, «مشاركة» then «مركز الاتصال المؤسسي» brings files (up to twenty at once) into the application: «جارٍ استلام الملفات…». The application then opens «استلام ملفات» (`/share`). Text and links alone are not taken: «يستلم التطبيق الملفات فقط، لا النصوص والروابط.».
+
+**«استلام ملفات».** The files that arrived, with their names and sizes and a small picture for photos, and «أين ترسلها؟», offering only what the person's pages allow:
+- **«مكتبة الوسائط»:** a folder where the person may add files («المجلد»), then «رفع إلى المكتبة». They are sent in the background.
+- **«عمل»:** an open work the person takes part in («العمل») and a folder, then «رفع وربط بالعمل». Each file is uploaded to the folder, then linked to the work, and goes through review like any other file.
+- **«المراسلة»:** a conversation the person belongs to («المحادثة»), then «إرسال إلى المحادثة», as attachments of up to 25 MB. A larger file is named, with «المرفقات حتى 25 MB. أرسل الأكبر إلى المكتبة ثم شاركه منها».
+- With nothing waiting: «لا ملفات تنتظر. افتح ملفاً في تطبيق آخر، واختر «مشاركة» ثم «مركز الاتصال المؤسسي».». In a browser the page says where it works.
+
+**Uploading in the background.** A library upload from «تصوير» or «استلام ملفات» is sent by the application itself, to the same Google Drive session a browser upload opens through the site, so the site still decides whether the folder takes it.
+- It goes on with the screen locked or the application closed, under the quiet notice «جارٍ رفع الملفات» with the file and its share sent.
+- After a dropped connection it resumes where Drive says it stands. If Android stops it, it starts again by itself.
+- Once the file has arrived, the page registers it in the library, links it to its work if one was chosen, and the application forgets it. That happens on whichever page is open, or at the next opening.
+- In the library, «رفع إلى Google Drive» lists these uploads beside the browser's: «جارٍ الرفع …٪», «وصل الملف، جارٍ تسجيله في المكتبة…», or, when one stopped, «انتهت جلسة الرفع. أعد الإرسال.» or «توقف الرفع. أعد الإرسال.» with «إزالة».
+- The application's own update waits while a file is being sent.
+
+**Boundaries.**
+- No file's bytes pass between the page and the application. The page reads a held file at an address the application answers itself, and names it by a token, never a path.
+- A file shared in is read only from another application's provider, never from a file address and never from the application's own files.
+- An upload goes only to Google Drive's upload address.
+- Files kept for the page are removed two days after they arrived, unless an upload still reads them.

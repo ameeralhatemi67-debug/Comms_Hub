@@ -16,6 +16,17 @@ import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.verify.domain.DomainVerificationUserState;
 import androidx.fragment.app.FragmentActivity;
 import java.util.Map;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.Intent;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.widget.Toast;
+import androidx.activity.result.ActivityResult;
+import androidx.core.content.FileProvider;
+import com.getcapacitor.annotation.ActivityCallback;
+import java.util.Date;
 
 /**
  * The application's methods behind window.commsHubNative (Identity.java; src/lib/native/index.ts). Capacitor
@@ -251,5 +262,94 @@ public class CommsHubShell extends Plugin {
             out.put("ok", ok);
             call.resolve(out);
         }));
+    }
+
+    // --- capture, incoming and upload (A7) -------------------------------------------------------------
+
+    /** The place the camera writes to, while it is open. */
+    private Held.Place capturing;
+    private String capturingType;
+
+    /** «تصوير»: the phone's camera application writes the photo or video straight into a held file. */
+    @PluginMethod
+    public void captureTake(PluginCall call) {
+        if (!fromSite(call)) return;
+        String kind = call.getString("kind");
+        if (!"photo".equals(kind) && !"video".equals(kind)) {
+            call.reject("refused");
+            return;
+        }
+        boolean video = "video".equals(kind);
+        Held.Place p = Held.place(getContext(), Held.cameraName(video, new Date()));
+        Uri uri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", p.file);
+        Intent i = new Intent(video ? MediaStore.ACTION_VIDEO_CAPTURE : MediaStore.ACTION_IMAGE_CAPTURE)
+            .putExtra(MediaStore.EXTRA_OUTPUT, uri)
+            .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        i.setClipData(ClipData.newRawUri("", uri));
+        capturing = p;
+        capturingType = video ? "video/mp4" : "image/jpeg";
+        try {
+            startActivityForResult(call, i, "captured");
+        } catch (ActivityNotFoundException e) {
+            Held.forget(getContext(), p);
+            capturing = null;
+            Toast.makeText(getContext(), R.string.capture_no_camera, Toast.LENGTH_LONG).show();
+            call.resolve(new JSObject());
+        }
+    }
+
+    @ActivityCallback
+    private void captured(PluginCall call, ActivityResult result) {
+        Held.Place p = capturing;
+        capturing = null;
+        if (call == null) return;
+        if (p == null || result.getResultCode() != Activity.RESULT_OK || !p.file.isFile() || p.file.length() == 0) {
+            if (p != null) Held.forget(getContext(), p);
+            call.resolve(new JSObject());
+            return;
+        }
+        Held.Item item = Held.keep(getContext(), p, capturingType);
+        JSObject out = new JSObject();
+        out.put("token", item.token);
+        out.put("name", item.name);
+        out.put("size", item.size);
+        out.put("type", item.type);
+        call.resolve(out);
+    }
+
+    /** The files shared in, for «استلام ملفات»; handed over once. */
+    @PluginMethod
+    public void incomingTake(PluginCall call) {
+        if (!fromSite(call)) return;
+        JSObject out = new JSObject();
+        out.put("files", Incoming.take(getContext()));
+        call.resolve(out);
+    }
+
+    /** A held file sent to its Drive session in the background; answers the upload's id, or null when refused. */
+    @PluginMethod
+    public void uploadStart(PluginCall call) {
+        if (!fromSite(call)) return;
+        String id = Uploads.start(getContext(), call.getString("token"), call.getString("session"));
+        JSObject out = new JSObject();
+        out.put("id", id);
+        call.resolve(out);
+    }
+
+    @PluginMethod
+    public void uploadStatus(PluginCall call) {
+        if (!fromSite(call)) return;
+        JSObject out = new JSObject();
+        out.put("uploads", Uploads.status(getContext()));
+        call.resolve(out);
+    }
+
+    @PluginMethod
+    public void uploadCancel(PluginCall call) {
+        if (!fromSite(call)) return;
+        String id = call.getString("id");
+        JSObject out = new JSObject();
+        out.put("ok", id != null && id.matches("^[0-9a-f]{32}$") && Uploads.cancel(getContext(), id));
+        call.resolve(out);
     }
 }

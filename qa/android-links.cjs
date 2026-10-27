@@ -268,7 +268,7 @@ const lockPage = () =>
     const bridge = await inPage(async () => ({ bridge: window.commsHubNative.bridge, verified: await window.commsHubNative.links.verified() }));
     const declared = h.shell(`pm get-app-links ${h.APP}`, { allowFail: true });
     result.appLinks = declared;
-    check('2a. bridge version 5; before Android lets the application open the site\'s links, links.verified says no', bridge.bridge === 5 && bridge.verified === false && declared.includes('comms-hub-three.vercel.app'), { bridge, declared });
+    check('2a. bridge version 5 or later; before Android lets the application open the site\'s links, links.verified says no', bridge.bridge >= 5 && bridge.verified === false && declared.includes('comms-hub-three.vercel.app'), { bridge, declared });
     const sel = h.shell(`pm set-app-links-user-selection --user cur --package ${h.APP} true comms-hub-three.vercel.app`, { allowFail: true });
     const verified = await inPage(() => window.commsHubNative.links.verified());
     check('2b. once the person allows it in Android\'s settings, links.verified says yes', verified === true, { sel, verified });

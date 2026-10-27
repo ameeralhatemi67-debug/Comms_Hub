@@ -17,6 +17,7 @@ import {
   type TaskKind,
 } from '@/lib/media/rules';
 import { uploadNewAsset, uploadNewVersion } from '@/lib/media/upload';
+import { MEDIA_CHANGED } from '../native/phone-uploads';
 import { useKitMaybe } from '../kit';
 import { msOfTimecode } from '@/lib/media/notes';
 
@@ -194,6 +195,13 @@ export function MediaProvider({ children }: { children: ReactNode }) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+
+  // An upload sent by the Android application was registered (src/components/native/phone-uploads.tsx): read again.
+  useEffect(() => {
+    const again = () => void load();
+    window.addEventListener(MEDIA_CHANGED, again);
+    return () => window.removeEventListener(MEDIA_CHANGED, again);
+  }, [load]);
 
   const value = useMemo<Ctx>(() => {
     const db = () => supabase();
