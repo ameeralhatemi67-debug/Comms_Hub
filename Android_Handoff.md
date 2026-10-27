@@ -1,5 +1,9 @@
 # The Android application: handoff of 2026-10-26
 
+> **2026-10-27.** A4 and A5 (both halves) are done since this handoff: `fc09c97`, `c6a7ae0`, the server half `8359a7b`
+> merged as `d76311c`, and the join after it. The push migration is applied to comms-hub. Where things stand now, and the
+> next steps (the Play minimum of A8, then A6 and A7), are in `Status.md` and the 2026-10-27 entries of `progress.md`.
+
 The state of the Android build at the end of the session of 2026-10-26, for the next session. The plan is
 `Android_Build_Plan.md` (accepted 2026-10-26). The specification is `MVP_draft.md` section 64 and 64.1. The
 project rule is the Android paragraph of `AGENTS.md`. Evidence with numbers is in `progress.md`, in the four

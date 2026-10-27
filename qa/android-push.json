@@ -1,6 +1,6 @@
 {
   "script": "qa/android-push.cjs",
-  "run": "2026-10-27T18:59:43.302Z",
+  "run": "2026-10-27T19:25:42.336Z",
   "checks": [
     {
       "name": "in a browser: no explanation and no registration",
@@ -96,6 +96,11 @@
       "name": "a phone removed from «أجهزتي» signs out here at its next opening, forgets its id, and registers nothing",
       "pass": true,
       "detail": "{\"signOut\":[{\"scope\":\"local\"}],\"device\":null,\"calls\":[\"device_seen\"]}"
+    },
+    {
+      "name": "right after signing in, a phone removed while signed out starts over in «أجهزتي» instead of signing out again",
+      "pass": true,
+      "detail": "{\"signOut\":0,\"calls\":[[\"device_seen\",\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\"],[\"device_register\",null]],\"mark\":null}"
     }
   ],
   "notes": [
@@ -133,7 +138,7 @@
       "importance": 2
     }
   ],
-  "total": 19,
-  "passed": 19,
+  "total": 20,
+  "passed": 20,
   "failed": 0
 }

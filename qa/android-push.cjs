@@ -14,7 +14,8 @@
 //   7. a tap opens the push's page in the open page; a page that is not the site's is never opened;
 //   8. with the application closed, a tap opens it at the push's page;
 //   9. another application's intent with a page, with or without a wrong key, opens nothing;
-//  10. a phone removed from «أجهزتي» signs out at its next opening.
+//  10. a phone removed from «أجهزتي» signs out at its next opening;
+//  11. right after a sign-in, a phone removed while signed out starts over instead.
 // Usage: start the emulator read-only; build the check package (mobile: npm run build:qa); then
 // node qa/android-push.cjs (writes qa/android-push.json).
 const fs = require('node:fs');
@@ -304,6 +305,19 @@ const dialogShown = (page) => page.evaluate(() => !!document.querySelector('dial
       return r.signOut.length ? r : null;
     }, 15000, 400);
     check('a phone removed from «أجهزتي» signs out here at its next opening, forgets its id, and registers nothing', !!out2 && JSON.stringify(out2.signOut[0]) === '{"scope":"local"}' && out2.device === null && out2.calls.join(',') === 'device_seen', out2);
+
+    // 11. removed while signed out (by «الخروج من كل الأجهزة» elsewhere), then signed in again on this phone
+    await p.evaluate((id) => {
+      localStorage.setItem('commshub.device', id);
+      sessionStorage.setItem('commshub.signed-in', '1');
+    }, DEVICE);
+    await p.reload();
+    await p.waitForSelector('#where', { timeout: 30000 });
+    const again = await h.until(async () => {
+      const r = await p.evaluate(() => ({ signOut: window.__signOut.length, calls: window.__rpc.map((c) => [c.name, c.args.p_device ?? null]), mark: sessionStorage.getItem('commshub.signed-in') }));
+      return r.calls.some((c) => c[0] === 'device_register') ? r : null;
+    }, 15000, 400);
+    check('right after signing in, a phone removed while signed out starts over in «أجهزتي» instead of signing out again', !!again && again.signOut === 0 && JSON.stringify(again.calls) === JSON.stringify([['device_seen', DEVICE], ['device_register', null]]) && again.mark === null, again);
     note('Real delivery through Firebase, to a locked phone, waits for the owner\'s Firebase project: this build has none, so no token was made and nothing was sent to Google.');
   } catch (e) {
     check('the check ran to its end', false, String(e && e.stack ? e.stack : e));

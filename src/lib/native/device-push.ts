@@ -62,6 +62,53 @@ export async function signOutRemoved(): Promise<void> {
   await supabase().auth.signOut({ scope: 'local' });
 }
 
+const SIGNED_IN = 'commshub.signed-in';
+
+/**
+ * Called by the sign-in screen once a sign-in succeeded. A phone removed from «أجهزتي» while it was signed out
+ * (by «الخروج من كل الأجهزة» elsewhere) then starts over in the list instead of being signed out again.
+ */
+export function markSignedIn(): void {
+  try {
+    sessionStorage.setItem(SIGNED_IN, '1');
+  } catch {
+    // without it, a phone removed while signed out is signed out once more and starts over at the next sign-in
+  }
+}
+
+/** Whether this is the first check since a sign-in on this phone; asking clears it. */
+export function justSignedIn(): boolean {
+  try {
+    const v = sessionStorage.getItem(SIGNED_IN) === '1';
+    sessionStorage.removeItem(SIGNED_IN);
+    return v;
+  } catch {
+    return false;
+  }
+}
+
+/** This phone's remembered entry is forgotten, so the next registration finds or makes the right one. */
+export function forgetPhone(): void {
+  store(null);
+}
+
+/**
+ * Before «الخروج من الأجهزة الأخرى» or «الخروج من كل الأجهزة»: every other phone of the person leaves «أجهزتي», so
+ * its token goes with it and a signed-out phone receives nothing. This phone, when it is one, stays. Returns how
+ * many were removed.
+ */
+export async function removeOtherPhones(): Promise<number> {
+  const here = inApp() ? stored() : null;
+  const { data } = await supabase().from('my_devices').select('id');
+  let n = 0;
+  for (const d of (data ?? []) as { id: string }[]) {
+    if (d.id === here) continue;
+    const { error } = await supabase().rpc('device_remove', { p_device: d.id });
+    if (!error) n++;
+  }
+  return n;
+}
+
 /** Before any sign-out inside the application: the token is taken off so the phone receives nothing signed out. */
 export async function beforeSignOut(): Promise<void> {
   if (!inApp() || !stored()) return;

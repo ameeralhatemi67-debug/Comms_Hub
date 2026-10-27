@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-26
+updated: 2026-10-27
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -25,6 +25,26 @@ related:
 ---
 
 # Communication Department Hub — Current Status
+
+## The Android application, A4 and A5, 2026-10-27
+
+The owner's Google Play developer account is verified (2026-10-27). The owner asked to build through A5 now, and approved applying the push migration once its rules passed.
+
+- **Done.**
+  - A4: «فتح الملف», «حفظ في الهاتف» and «مشاركة» for library files, mail attachments and files in «المراسلة» (`MVP_draft.md` 64.2). Evidence: `qa/android-files.cjs` 23 of 23.
+  - Found and fixed in A4: Capacitor's cookie and HTTP interfaces reached every frame of every address, and its cookie handler added the web view's cookies to the application's own connections (`Shell.narrow`).
+  - A5 server: «أجهزتي», «إعدادات التنبيهات», the push outbox and the Firebase sender. The migration is applied to comms-hub (`20261027184903 push`). Evidence: `push_rules.sql` 128 of 128 after applying, `qa/push-flush.cjs` 35 of 35 against a local Firebase stand-in.
+  - A5 app: the notices permission after the site says why, three channels, data messages shown by the application, taps opening only the site's pages from the application's own notices. Evidence: `qa/android-push.cjs` 20 of 20.
+  - Integration: every «تسجيل الخروج» signs out this device only; signing out of other devices also removes the other phones from «أجهزتي».
+  - Totals: `npm test` 583 of 583, `mobile` 15 of 15, JVM 25 of 25, typecheck and build clean; `qa/android-shell.cjs` 28 of 28, `qa/android-update.cjs` 12 of 12.
+- **Not done.**
+  - Nothing is pushed: the live site is still the build of 2026-10-22. The `android-releases` bucket is not applied, and there is no release key.
+  - No real phone or signed-in walkthrough, and no real push delivery: there is no Firebase project yet.
+- **Owner steps waiting.**
+  - Make the release keystore (`mobile/README.md`, "The release key").
+  - Create the Firebase project with `sa.commshub.app`, keep `google-services.json` outside the repository, and name it with `COMMSHUB_GOOGLE_SERVICES` when building. Paste the service account in «الإعدادات» «الاتصالات» «تنبيهات الهاتف (Firebase)».
+  - Push to deploy the site parts.
+- **Next.** The Play minimum of A8 (the `play` AAB, «طلب حذف حسابي», the privacy policy) so the 14-day closed test can start; then A6 (links and the lock) and A7.
 
 ## The Android application, 2026-10-26
 

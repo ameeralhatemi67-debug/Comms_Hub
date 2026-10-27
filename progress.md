@@ -1951,3 +1951,24 @@ Built on `main` against the push migration of A5's server half (built at the sam
   - No Firebase project exists yet, so no token was made, nothing was sent through Firebase, and no phone was reached when locked. That is the owner's check once the project exists (`mobile/README.md`, "Push notices").
   - Nothing was seen signed in: the component ran on a fixture page with a stand-in for the database client. The functions themselves are held by `supabase/tests/push_rules.sql`.
   - No real phone. Nothing pushed.
+
+### 2026-10-27: the Android application, A5 joined: the server half merged, sign-out and devices together
+
+- **Merged.** The server half's branch (`8359a7b`) into `main` as `d76311c`. The only conflicts were the two appended documents: `MVP_draft.md` now runs 64.2 then 64.3, and these entries run A4, A5 server, A5 application. Before merging, the database was checked directly: `push` applied as `20261027184903`, its stored md5 `e82661a14d3861edd1482443f964d106` equal to the committed file's, no devices or outbox rows, and the two release buckets still not applied.
+- **Joined while merging.**
+  - **Sign-out.** supabase-js signs out everywhere when no scope is given. The server half fixed «تسجيل الخروج» on «الحساب»; the side menu's and the sign-in screen's now sign out this device only too. Each takes the phone's token off first.
+  - **Other devices.** «الخروج من الأجهزة الأخرى» and «الخروج من كل الأجهزة» did not clear device tokens (the server half's report said so). A signed-out phone would have kept receiving notice texts. Both now remove the person's other phones from «أجهزتي» first, through `device_remove` on each row of `my_devices`; this phone stays. The note says so when any were removed.
+  - **Signing in again.** A phone removed while it was signed out would otherwise be signed out once more at its next sign-in. A successful sign-in now marks the session, so the first check after it starts the phone over in «أجهزتي».
+  - `MVP_draft.md` 64.3 gains the application's half and the sign-out rules.
+- **Verified on the merged code, numbers.**
+  - `npm test` **583 of 583** (561 on lane 1 plus the server half's 22). `mobile` **15 of 15**. JVM **25 of 25**. Typecheck clean; `npm run build` clean.
+  - `qa/push-flush.cjs` **35 of 35** (the server half's check against a local Firebase stand-in).
+  - On the emulator, the check package rebuilt from this code:
+    - `qa/android-push.cjs` **20 of 20**, with a new step: right after signing in, a phone removed while signed out starts over.
+    - `qa/android-shell.cjs` **28 of 28**; `qa/android-update.cjs` **12 of 12**.
+    - `qa/android-files.cjs` **23 of 23**. The first run on this code was 22 of 23: the check still required bridge version 3 exactly, and A5 made it 4; it now accepts 3 or later. The next run stopped before its first file step: Playwright did not see the application's web view within 60 seconds, and the crash log showed nothing new. The run after that passed.
+  - The release APK, unsigned, is 10.6 MB; the check package is 12.9 MB.
+- **Not verified, said plainly.**
+  - Nothing signed in: «أجهزتي», «إعدادات التنبيهات», the session buttons and the Firebase card were not seen rendered.
+  - No real push: there is no Firebase project.
+  - No real phone. Nothing pushed; the live site is still the build of 2026-10-22.

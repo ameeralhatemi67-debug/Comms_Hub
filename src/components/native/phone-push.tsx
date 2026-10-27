@@ -6,7 +6,7 @@
 // What a push opens and what it refreshes is wired in src/components/notices.tsx.
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { phoneSeen, registerPhone, signOutRemoved } from '@/lib/native/device-push';
+import { forgetPhone, justSignedIn, phoneSeen, registerPhone, signOutRemoved } from '@/lib/native/device-push';
 import { EXPLAIN, pushState, requestPush, shouldExplain } from '@/lib/native/push';
 import { useNativePlatform, useNativeVersion } from './use-native';
 
@@ -42,8 +42,15 @@ export function PhonePush() {
       // At each opening, then at most every ten minutes when the person comes back to the application.
       if (Date.now() - last < 10 * 60 * 1000) return;
       last = Date.now();
+      // Right after a sign-in, a phone removed while it was signed out starts over instead of signing out again.
+      const fresh = justSignedIn();
       const seen = await phoneSeen();
-      const answer = seen === 'removed' ? 'removed' : await registerPhone();
+      if (seen === 'removed' && fresh) forgetPhone();
+      let answer = seen === 'removed' && !fresh ? 'removed' : await registerPhone();
+      if (answer === 'removed' && fresh) {
+        forgetPhone();
+        answer = await registerPhone();
+      }
       if (!live) return;
       if (answer === 'removed') {
         await signOutRemoved();

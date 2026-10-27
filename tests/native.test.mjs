@@ -685,9 +685,19 @@ test('A5: the phone registers and signs out through the push functions, and clea
   assert.match(dev, /rpc\('device_register', \{ p_device: stored\(\), p_platform: 'android', p_version: version, p_name: null, p_token: t \}\)/);
   assert.match(dev, /rpc\('device_seen', \{ p_device: id, p_version: native\(\)\.version \}\)/);
   assert.match(dev, /signOut\(\{ scope: 'local' \}\)/);
-  for (const f of ['src/components/shell.tsx', 'src/components/auth-gate.tsx']) {
-    assert.match(fs.readFileSync(f, 'utf8'), /await beforeSignOut\(\);\s*await supabase\(\)\.auth\.signOut\(/, f);
+  for (const f of ['src/components/shell.tsx', 'src/components/auth-gate.tsx', 'src/components/supporting.tsx']) {
+    assert.match(fs.readFileSync(f, 'utf8'), /await beforeSignOut\(\);\s*(\/\/[^\n]*\n\s*)?await supabase\(\)\.auth\.signOut\(\{ scope: 'local' \}\)/, `${f}: this device only, its token taken off first`);
   }
+  for (const f of ['src/components/shell.tsx', 'src/components/auth-gate.tsx', 'src/components/supporting.tsx']) {
+    assert.doesNotMatch(fs.readFileSync(f, 'utf8'), /auth\.signOut\(\)/, `${f}: no sign-out without a scope (supabase-js would sign out everywhere)`);
+  }
+  const account = fs.readFileSync('src/components/supporting.tsx', 'utf8');
+  assert.match(account, /const removed = await removeOtherPhones\(\)\.catch\(\(\) => 0\);\s*const \{ error \} = await supabase\(\)\.auth\.signOut\(\{ scope: 'others' \}\);/);
+  assert.match(account, /await removeOtherPhones\(\)\.catch\(\(\) => 0\);\s*await beforeSignOut\(\);\s*await supabase\(\)\.auth\.signOut\(\{ scope: 'global' \}\);/);
+  assert.match(dev, /if \(d\.id === here\) continue;\s*const \{ error \} = await supabase\(\)\.rpc\('device_remove', \{ p_device: d\.id \}\);/);
+  assert.match(fs.readFileSync('src/components/auth-gate.tsx', 'utf8'), /markSignedIn\(\);\s*await supabase\(\)\.rpc\('touch_account'\);/);
+  const pushUi = fs.readFileSync('src/components/native/phone-push.tsx', 'utf8');
+  assert.match(pushUi, /const fresh = justSignedIn\(\);[\s\S]*if \(seen === 'removed' && fresh\) forgetPhone\(\);/, 'a phone removed while signed out starts over at its next sign-in');
   assert.match(fs.readFileSync('src/components/shell.tsx', 'utf8'), /<AppUpdateWindow \/>\s*<PhonePush \/>/);
   const notices = fs.readFileSync('src/components/notices.tsx', 'utf8');
   assert.match(notices, /onPushOpen\(\(go\) => router\.push\(go\)\)/);

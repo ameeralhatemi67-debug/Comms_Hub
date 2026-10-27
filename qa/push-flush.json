@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-27T19:08:48.484Z",
+  "run": "2026-10-27T19:21:49.948Z",
   "what": "The push sender against a local FCM stub, and the push routes of the built site",
   "checks": [
     {
@@ -110,7 +110,7 @@
     {
       "name": "the built site starts on port 3101",
       "pass": true,
-      "detail": "▲ Next.js 16.3.8\n- Local:         http://127.0.0.1:3101\n- Network:       http://127.0.0.1:3101\n✓ Ready in 594ms\n✓ Running next.config took 79ms\n"
+      "detail": "▲ Next.js 16.3.8\n- Local:         http://127.0.0.1:3101\n- Network:       http://127.0.0.1:3101\n✓ Ready in 938ms\n✓ Running next.config took 172ms\n"
     },
     {
       "name": "flush: from outside the site, refused (403)",

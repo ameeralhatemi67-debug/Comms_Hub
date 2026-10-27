@@ -117,7 +117,8 @@ function FullShell({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await beforeSignOut();
-    await supabase().auth.signOut();
+    // This device only, as «تسجيل الخروج» on «الحساب»: supabase-js signs out everywhere when no scope is given.
+    await supabase().auth.signOut({ scope: 'local' });
     router.refresh();
   };
 

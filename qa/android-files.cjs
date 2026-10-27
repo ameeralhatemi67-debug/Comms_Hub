@@ -285,7 +285,7 @@ const sheet = (page) =>
       const n = window.commsHubNative;
       return { bridge: n?.bridge, save: typeof n?.download?.save, open: typeof n?.download?.open, share: typeof n?.share?.file, frozen: Object.isFrozen(n?.download) && Object.isFrozen(n?.share) };
     });
-    check('the application offers bridge version 3 with download (save, open) and share (file), frozen', bridge.bridge === 3 && bridge.save === 'function' && bridge.open === 'function' && bridge.share === 'function' && bridge.frozen, bridge);
+    check('the application offers bridge version 3 or later with download (save, open) and share (file), frozen', bridge.bridge >= 3 && bridge.save === 'function' && bridge.open === 'function' && bridge.share === 'function' && bridge.frozen, bridge);
     const docActions = await actionsIn(page, '#asset-doc');
     const imgActions = await actionsIn(page, '#asset-image');
     check('a document offers «فتح الملف», «حفظ في الهاتف» and «مشاركة», in that order, in place of «تنزيل»', JSON.stringify(docActions) === '["open","save","share"]' && !(await page.$('#browser-download')), docActions);

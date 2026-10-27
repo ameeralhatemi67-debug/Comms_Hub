@@ -26,6 +26,7 @@ import { DesktopAppPanel } from './native/desktop-app';
 import { useNativePlatform } from './native/use-native';
 import { PhoneAppPanel } from './native/phone-app';
 import { MyDevicesPanels } from './native/devices';
+import { beforeSignOut, removeOtherPhones } from '@/lib/native/device-push';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
@@ -193,6 +194,7 @@ export function Supporting({ page }: { page: string }) {
                 className="primary"
                 onClick={async () => {
                   // This device only: supabase-js signs out everywhere when no scope is given.
+                  await beforeSignOut();
                   await supabase().auth.signOut({ scope: 'local' });
                   router.refresh();
                 }}
@@ -202,8 +204,14 @@ export function Supporting({ page }: { page: string }) {
               <button
                 className="secondary ac-signout-others"
                 onClick={async () => {
+                  // The other phones leave «أجهزتي» too, so a signed-out phone receives no notices.
+                  const removed = await removeOtherPhones().catch(() => 0);
                   const { error } = await supabase().auth.signOut({ scope: 'others' });
-                  setSessionNote(error ? 'تعذّر الخروج من الأجهزة الأخرى. أعد المحاولة.' : 'خرج حسابك من كل جهاز ومتصفح آخر، وبقيت داخلاً هنا.');
+                  setSessionNote(
+                    error
+                      ? 'تعذّر الخروج من الأجهزة الأخرى. أعد المحاولة.'
+                      : `خرج حسابك من كل جهاز ومتصفح آخر، وبقيت داخلاً هنا.${removed ? ' وأُزيلت هواتفك الأخرى من «أجهزتي»، فلا تصلها التنبيهات.' : ''}`,
+                  );
                 }}
               >
                 الخروج من الأجهزة الأخرى
@@ -211,6 +219,8 @@ export function Supporting({ page }: { page: string }) {
               <button
                 className="secondary"
                 onClick={async () => {
+                  await removeOtherPhones().catch(() => 0);
+                  await beforeSignOut();
                   await supabase().auth.signOut({ scope: 'global' });
                   router.refresh();
                 }}
