@@ -13,4 +13,6 @@ ext {
     androidxJunitVersion = '1.3.0'
     androidxEspressoCoreVersion = '3.7.0'
     cordovaAndroidVersion = '14.0.1'
+    // Firebase BoM 34.19.0 (2026-09-09), past the project's 14-day rule; push only (A5).
+    firebaseMessagingVersion = '25.1.3'
 }

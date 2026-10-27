@@ -654,3 +654,88 @@ test('A4: the asset page, mail attachments and files in «المراسلة» off
   for (const f of ['src/lib/native/files.ts', 'src/components/native/phone-file.tsx']) assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
 });
 
+// --- A5, the application's half: push (MVP_draft.md 64.3) ----------------------------------------------------
+
+test('A5: a notice opens a page of the site only', async () => {
+  const { goPath } = await import('../src/lib/native/push.ts');
+  for (const [go, want] of [
+    ['/work/CH-101', '/work/CH-101'],
+    ['/approvals?tab=publish', '/approvals?tab=publish'],
+    ['/mail/chat?room=abc&msg=1', '/mail/chat?room=abc&msg=1'],
+    ['/mail', '/mail'],
+  ]) assert.equal(goPath(go), want, go);
+  for (const go of [null, 3, '', 'work', '/media/x/../api/y', '/./api', '/work#x', '/work x', '//evil.example/x', '/\\evil.example', 'https://evil.example/', 'javascript:alert(1)', '/api/media/x/content', '/_next/static/x.js', '/r/token', '/m/token', '/_capacitor_file_/x', '/work\n', `/${'a'.repeat(300)}`]) {
+    assert.equal(goPath(go), null, String(go));
+  }
+});
+
+test('A5: the rules of a pushed page are the application\'s, rule for rule', async () => {
+  const fs = await import('node:fs');
+  const { GO_RULES } = await import('../src/lib/native/push.ts');
+  const java = fs.readFileSync('mobile/android/app/src/main/java/sa/commshub/app/Push.java', 'utf8');
+  const block = /static final String\[\]\[\] GO_RULES = \{([\s\S]*?)\};/.exec(java)[1];
+  const rules = [...block.matchAll(/\{ "((?:[^"\\]|\\.)*)", "(true|false)" \}/g)].map((m) => ({ pattern: m[1].replace(/\\\\/g, '\\'), must: m[2] === 'true' }));
+  assert.deepEqual(rules, GO_RULES.map((r) => ({ ...r })));
+  assert.match(java, /if \(go\.charAt\(i\) < 0x20 \|\| go\.charAt\(i\) == 0x7f\) return null;/, 'no control character, as push.ts');
+});
+
+test('A5: the phone registers and signs out through the push functions, and clears its token before any sign-out', async () => {
+  const fs = await import('node:fs');
+  const dev = fs.readFileSync('src/lib/native/device-push.ts', 'utf8');
+  assert.match(dev, /rpc\('device_register', \{ p_device: stored\(\), p_platform: 'android', p_version: version, p_name: null, p_token: t \}\)/);
+  assert.match(dev, /rpc\('device_seen', \{ p_device: id, p_version: native\(\)\.version \}\)/);
+  assert.match(dev, /signOut\(\{ scope: 'local' \}\)/);
+  for (const f of ['src/components/shell.tsx', 'src/components/auth-gate.tsx']) {
+    assert.match(fs.readFileSync(f, 'utf8'), /await beforeSignOut\(\);\s*await supabase\(\)\.auth\.signOut\(/, f);
+  }
+  assert.match(fs.readFileSync('src/components/shell.tsx', 'utf8'), /<AppUpdateWindow \/>\s*<PhonePush \/>/);
+  const notices = fs.readFileSync('src/components/notices.tsx', 'utf8');
+  assert.match(notices, /onPushOpen\(\(go\) => router\.push\(go\)\)/);
+  assert.match(notices, /onPushReceive\(\(\) => void load\(\)\)/);
+  for (const f of ['src/lib/native/push.ts', 'src/lib/native/device-push.ts', 'src/components/native/phone-push.tsx']) assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
+});
+
+test('A5: the explanation comes before Android asks, once, and «ليس الآن» puts it off a week', async () => {
+  const { ASK_AGAIN_MS, EXPLAIN, shouldExplain } = await import('../src/lib/native/push.ts');
+  const now = Date.UTC(2026, 9, 27);
+  assert.equal(shouldExplain('prompt', null, now), true);
+  assert.equal(shouldExplain('prompt', now - ASK_AGAIN_MS + 1000, now), false);
+  assert.equal(shouldExplain('prompt', now - ASK_AGAIN_MS, now), true);
+  assert.equal(shouldExplain('granted', null, now), false);
+  assert.equal(shouldExplain('denied', null, now), false, 'Android will not ask again; the account page says where to turn it on');
+  assert.equal(shouldExplain(null, null, now), false, 'a browser');
+  assert.equal(ASK_AGAIN_MS, 7 * 24 * 60 * 60 * 1000);
+  for (const v of Object.values(EXPLAIN)) assert.match(v, /[\u0600-\u06ff]/);
+});
+
+test('A5: the page reads the application\'s answers in their shape only', async () => {
+  const { onPushOpen, onPushReceive, pushState, pushToken, requestPush } = await import('../src/lib/native/push.ts');
+  inWindow(undefined);
+  assert.equal(await pushState(), null);
+  assert.equal(await pushToken(), null);
+  let opener = null;
+  let receiver = null;
+  const push = { state: async () => 'prompt', request: async () => 'granted', token: async () => 'f'.repeat(30) + ':APA91b-x_y', onOpen: (fn) => (opener = fn), onReceive: (fn) => (receiver = fn) };
+  inWindow({ ...a1, bridge: 4, push });
+  assert.equal(await pushState(), 'prompt');
+  assert.equal(await requestPush(), 'granted');
+  assert.equal(await pushToken(), 'f'.repeat(30) + ':APA91b-x_y');
+  inWindow({ ...a1, bridge: 4, push: { ...push, state: async () => 'yes', token: async () => 'short' } });
+  assert.equal(await pushState(), null);
+  assert.equal(await pushToken(), null);
+  inWindow({ ...a1, bridge: 4, push });
+  const went = [];
+  const stop = onPushOpen((go) => went.push(go));
+  opener('/work/CH-7');
+  opener('https://evil.example/');
+  opener('/api/x');
+  assert.deepEqual(went, ['/work/CH-7']);
+  stop();
+  assert.equal(opener, null);
+  let n = 0;
+  const stopR = onPushReceive(() => n++);
+  receiver();
+  assert.equal(n, 1);
+  stopR();
+  assert.equal(receiver, null);
+});

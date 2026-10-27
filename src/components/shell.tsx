@@ -39,6 +39,8 @@ import { useCaps } from './caps';
 import { MaintenanceBanner } from './settings/maintenance-banner';
 import { DesktopUpdateBanner } from './native/desktop-app';
 import { AppUpdateWindow } from './native/phone-app';
+import { PhonePush } from './native/phone-push';
+import { beforeSignOut } from '@/lib/native/device-push';
 import { FeedbackButton, useErrorReporter } from './feedback';
 
 /** The icon of each menu entry; the entries themselves (and who sees them) are in src/lib/access.ts. */
@@ -114,6 +116,7 @@ function FullShell({ children }: { children: ReactNode }) {
   const allowed = (href: string) => visible.some((n) => n[0] === href);
 
   const signOut = async () => {
+    await beforeSignOut();
     await supabase().auth.signOut();
     router.refresh();
   };
@@ -236,6 +239,7 @@ function FullShell({ children }: { children: ReactNode }) {
           <MaintenanceBanner />
           <DesktopUpdateBanner />
           <AppUpdateWindow />
+          <PhonePush />
           {/* The page guide opens here, in place of the page (src/lib/kit/guide.ts). */}
           <div id="guide-view" hidden />
           {children}

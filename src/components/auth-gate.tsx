@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogIn, KeyRound, UserPlus, LogOut, MailCheck } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
+import { beforeSignOut } from '@/lib/native/device-push';
 import { linkProblem } from '@/lib/entry';
 import { native } from '@/lib/native';
 import { BROWSER_ONLY, mailReturn, type MailReturn } from '@/lib/native/entry';
@@ -224,6 +225,7 @@ export function AuthGate({
 
   const signOut = () =>
     void run(async () => {
+      await beforeSignOut();
       await supabase().auth.signOut();
       router.refresh();
     });

@@ -3,6 +3,7 @@
 
     <!-- The session lives in this application's own storage and is never copied by Android's backups. -->
     <application
+        android:name=".ShellApp"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -38,6 +39,19 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Pushes from the server (A5): data messages only, shown by the application itself (PushService). No token is
+             made before the person allows notices, and nothing is collected for Firebase's own use. -->
+        <service
+            android:name=".PushService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="false" />
+        <meta-data android:name="firebase_analytics_collection_enabled" android:value="false" />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="decide" />
     </application>
 
     <!-- MVP_draft.md 64, «الأذونات»: the site, the microphone for voice notes in «المراسلة», and notices (a download's

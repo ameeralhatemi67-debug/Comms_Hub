@@ -168,6 +168,34 @@ only), and a copy of 0.1.1 re-signed with a throwaway key made for the run and d
 own feed at `http://127.0.0.1:3002/android`, which is the check package's compiled feed, and drives the whole
 path on the emulator.
 
+## Push notices (the owner's Firebase project)
+
+Push notices go through Firebase Cloud Messaging. The application needs four public identifiers of the owner's
+Firebase project at build time, and the site needs the project's service account to send. Neither is in this
+repository.
+
+1. Create a Firebase project (free) and add an Android application with the package name `sa.commshub.app`. To
+   try push on a phone with a development build, add `sa.commshub.app.dev` as a second Android application of the
+   same project. Download `google-services.json` and keep it outside the repository, for example beside the
+   release key in `D:/keys/`.
+2. Name it when building, the same way as the key:
+
+   ```powershell
+   $env:COMMSHUB_GOOGLE_SERVICES = "D:/keys/google-services.json"
+   npm run pack:release
+   ```
+
+   The build takes only the identifiers of the client whose package name is the build's own id (`build.gradle`,
+   `firebaseFor`). Without the file, or without a client for that id, the application builds and offers no push:
+   «أجهزتي» still lists the phone, with no notices.
+3. In the Firebase console, "Project settings", "Service accounts", generate a private key for the Firebase Admin
+   SDK, and paste the JSON once in «الإعدادات» on the site (A5's server half). It is stored in Supabase Vault and
+   never read back.
+
+What the application asks: Android 13 and newer ask the person for notices after the site has said why
+(«تنبيهات الهاتف»). No token is made before then (`firebase_messaging_auto_init_enabled` is off): the application asks
+Firebase for one only once notices are allowed.
+
 ## The files check
 
 `qa/android-files.cjs` compiles the site's own file buttons (`src/components/native/phone-file.tsx`) into a
@@ -183,5 +211,5 @@ page can name nothing but a file route, and that no Capacitor interface reaches 
 | `capacitor.config.json` | the release's configuration: the production address, no cleartext, no inspection |
 | `scripts/config.mjs` | the debug and check builds' configuration, derived from it |
 | `android/app/build.gradle` | the version (from `package.json`), the address list per build, the check package, the key from outside |
-| `android/app/src/main/java/sa/commshub/app/` | the window (`MainActivity`), where an address goes (`Navigation`), the page's view of the application (`Identity`, `Shell`), downloads, saving, opening and sharing the site's files (`Downloads`, `FileNames`, `SiteFiles`), Capacitor's page interfaces and cookie handler taken off (`Shell.narrow`), the narrowed permissions (`ShellChromeClient`), the refused file routes and the connection screen (`ShellWebViewClient`) |
+| `android/app/src/main/java/sa/commshub/app/` | the window (`MainActivity`), where an address goes (`Navigation`), the page's view of the application (`Identity`, `Shell`), downloads, saving, opening and sharing the site's files (`Downloads`, `FileNames`, `SiteFiles`), Capacitor's page interfaces and cookie handler taken off (`Shell.narrow`), push notices (`Push`, `PushService`, `ShellApp`; the check package's own `src/qa/QaPush.java`), the narrowed permissions (`ShellChromeClient`), the refused file routes and the connection screen (`ShellWebViewClient`) |
 | `www/offline.html` | the connection screen |

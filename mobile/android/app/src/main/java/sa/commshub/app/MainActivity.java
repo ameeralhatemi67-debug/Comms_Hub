@@ -38,6 +38,12 @@ public class MainActivity extends BridgeActivity {
             + " var e = new Event('cancel', { cancelable: true }); d.dispatchEvent(e); if (!e.defaultPrevented) d.close(); return true; })()";
 
     private Downloads downloads;
+    /** Whether the window is in front: a push then refreshes the page instead of showing a notice (PushService). */
+    private static volatile boolean front;
+
+    static boolean inFront() {
+        return front;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +56,8 @@ public class MainActivity extends BridgeActivity {
         downloads = new Downloads(this, web.getSettings().getUserAgentString());
         web.setDownloadListener((url, userAgent, disposition, mime, length) -> downloads.start(url, userAgent, disposition, mime));
         clearOfSystemBars((View) web.getParent());
+        // Opened by a tapped push (PushService): its page instead of the first one.
+        openPushed(getIntent());
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -89,8 +97,25 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        openPushed(intent);
+    }
+
+    private void openPushed(Intent intent) {
+        String go = intent != null ? intent.getStringExtra(PushService.EXTRA_GO) : null;
+        if (go == null) return;
+        boolean ours = PushService.ours(this, intent);
+        intent.removeExtra(PushService.EXTRA_GO);
+        intent.removeExtra(PushService.EXTRA_KEY);
+        // Another application may start this window with any extra; only the application's own notice opens a page.
+        if (ours) CommsHubShell.open(go);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+        front = true;
         // The update's feed when due, and Android's confirmation of an update if it is still waiting (A3).
         if (AppUpdate.offered()) AppUpdate.get(this).resumed(this);
     }
@@ -98,6 +123,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onPause() {
         super.onPause();
+        front = false;
         // The session survives the application being closed from the recent list.
         CookieManager.getInstance().flush();
     }

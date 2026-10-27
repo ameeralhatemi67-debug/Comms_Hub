@@ -8,13 +8,14 @@ import java.util.regex.Pattern;
  * own scripts, and defines the object in the top frame only, frozen and not replaceable.
  *
  * Bridge version 1 (A2) was the identity alone. Version 2 (A3) adds `appUpdate` in the APK channel. Version 3
- * (A4) adds `download` (save, open) and `share` (file), each naming a file of the site by its path. Each
- * method calls the application's plugin (CommsHubShell) through Capacitor, which hears only the main frame,
- * and passes only the plain values the plugin checks. Pure.
+ * (A4) adds `download` (save, open) and `share` (file), each naming a file of the site by its path. Version 4
+ * (A5) adds `push` (state, request, token, onOpen, onReceive). Each method calls the application's plugin
+ * (CommsHubShell) through Capacitor, which hears only the main frame, and passes only the plain values the plugin
+ * checks. Pure.
  */
 final class Identity {
 
-    static final int BRIDGE = 3;
+    static final int BRIDGE = 4;
     private static final Pattern SEMVER = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
 
     private Identity() {}
@@ -38,6 +39,16 @@ final class Identity {
         s.append("  var file = function (method) { return function (f) { f = f || {}; return call(method, { path: String(f.path), name: String(f.name) }).then(function (x) { return x.ok === true; }); }; };\n");
         s.append("  bridge.download = Object.freeze({ save: file('downloadSave'), open: file('downloadOpen') });\n");
         s.append("  bridge.share = Object.freeze({ file: file('shareFile') });\n");
+        // One listener per event; giving another function replaces it, giving none removes it.
+        s.append("  var listen = function (event, give) { var held = null; return function (fn) { var cap = window.Capacitor; if (held) { held.remove(); held = null; } if (typeof fn === 'function' && cap && cap.addListener) held = cap.addListener('CommsHubShell', event, function (x) { give(fn, x || {}); }); }; };\n");
+        s.append("  var state = function (method) { return function () { return call(method).then(function (x) { return x.state; }); }; };\n");
+        s.append("  bridge.push = Object.freeze({\n");
+        s.append("    state: state('pushState'),\n");
+        s.append("    request: state('pushRequest'),\n");
+        s.append("    token: function () { return call('pushToken').then(function (x) { return typeof x.token === 'string' ? x.token : null; }); },\n");
+        s.append("    onOpen: listen('pushOpen', function (fn, x) { if (typeof x.go === 'string') fn(x.go); }),\n");
+        s.append("    onReceive: listen('pushReceive', function (fn) { fn(); })\n");
+        s.append("  });\n");
         s.append("  Object.defineProperty(window, 'commsHubNative', { value: Object.freeze(bridge), writable: false, configurable: false, enumerable: false });\n");
         s.append("})();\n");
         return s.toString();

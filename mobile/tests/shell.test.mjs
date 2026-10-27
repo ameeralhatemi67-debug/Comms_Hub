@@ -122,6 +122,41 @@ test('A4: Capacitor\'s cookie and HTTP interfaces and its cookie handler are tak
   }
 });
 
+test('A5: pushes are data messages shown by the application, and no token is made before notices are allowed', () => {
+  const m = read(app, 'src', 'main', 'AndroidManifest.xml');
+  assert.match(m, /android:name="\.ShellApp"/);
+  assert.match(m, /<service\s+android:name="\.PushService"\s+android:exported="false">\s*<intent-filter>\s*<action android:name="com\.google\.firebase\.MESSAGING_EVENT" \/>/);
+  assert.match(m, /firebase_messaging_auto_init_enabled" android:value="false"/);
+  assert.match(m, /firebase_analytics_collection_enabled" android:value="false"/);
+  const plugin = java('CommsHubShell');
+  assert.match(plugin, /@Permission\(alias = "notices", strings = \{ Manifest\.permission\.POST_NOTIFICATIONS \}\)/);
+  assert.match(plugin, /if \(!ShellApp\.configured\(\) \|\| !"granted"\.equals\(pushStateNow\(\)\)\) \{\s*call\.resolve\(none\);/, 'a token only once allowed');
+  const service = java('PushService');
+  assert.match(service, /if \(MainActivity\.inFront\(\)\) \{\s*CommsHubShell\.received\(\);\s*return;/, 'nothing shown in front');
+  assert.match(service, /putExtra\(EXTRA_GO, go\)\.putExtra\(EXTRA_KEY, key\(context\)\)/);
+  assert.match(service, /PendingIntent\.FLAG_IMMUTABLE/);
+  assert.match(java('MainActivity'), /boolean ours = PushService\.ours\(this, intent\);[\s\S]*if \(ours\) CommsHubShell\.open\(go\);/, 'another application\'s intent opens nothing');
+});
+
+test('A5: Firebase\'s identifiers come from outside at build time, per build id; no Google services plugin or file in the repository', () => {
+  const g = read(app, 'build.gradle');
+  assert.match(g, /def servicesFile = System\.getenv\('COMMSHUB_GOOGLE_SERVICES'\)/);
+  assert.match(g, /firebaseFields\(delegate, 'sa\.commshub\.app'\)/);
+  assert.match(g, /firebaseFields\(delegate, 'sa\.commshub\.app\.dev'\)/);
+  assert.match(g, /firebaseFields\(delegate, 'sa\.commshub\.app\.qa'\)/);
+  assert.doesNotMatch(g, /apply plugin: 'com\.google\.gms\.google-services'/);
+  assert.match(read(mobile, 'android', 'variables.gradle'), /firebaseMessagingVersion = '25\.1\.3'/);
+  const tracked = fs.readdirSync(app).concat(fs.readdirSync(path.join(app, 'src', 'main')));
+  assert.equal(tracked.includes('google-services.json'), false);
+  const qa = read(app, 'src', 'qa', 'AndroidManifest.xml');
+  assert.match(qa, /android:name="\.QaPush"/, 'the check\'s receiver is the check package\'s only');
+  assert.equal(fs.existsSync(path.join(app, 'src', 'main', 'java', 'sa', 'commshub', 'app', 'QaPush.java')), false);
+  const strings = read(app, 'src', 'main', 'res', 'values', 'strings.xml');
+  for (const [name, text] of [['push_decide', 'يحتاج قرارك'], ['push_attention', 'للانتباه'], ['push_messages', 'الرسائل']]) {
+    assert.match(strings, new RegExp(`<string name="${name}">${text}</string>`), name);
+  }
+});
+
 test('the back key asks the page\'s open window first, as Escape does', () => {
   const main = java('MainActivity');
   assert.match(main, /document\.querySelectorAll\('dialog\[open\]'\)/);

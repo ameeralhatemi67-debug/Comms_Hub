@@ -1817,3 +1817,41 @@ The owner asked on 2026-10-27 to build through A5 now. A4 was built here on `mai
   - Nothing was seen signed in: the asset page, mail and «المراسلة» were not seen with real files. The fixture page uses the same component.
   - The Android toasts (started, done, failed) cannot be read by UI Automator and were not read.
   - No real phone. Nothing pushed.
+
+### 2026-10-27: the Android application, A5, the application's half: push notices on the phone
+
+Built on `main` against the push migration of A5's server half (built at the same time in its own worktree, merged after). Delivery through Firebase waits for the owner's Firebase project.
+
+- **What was built.**
+  - **Native** (`Push.java`, `PushService.java`, `ShellApp.java`, `CommsHubShell.java`, `Identity.java`, `MainActivity.java`):
+    - Bridge version 4: `push.state`, `push.request`, `push.token`, `push.onOpen`, `push.onReceive`. The events use Capacitor's own listeners, which reach only the site's top frame.
+    - Android 13's notices permission, asked only from the page after the site has said why. The state is `granted`, `denied` or `prompt`, and notices turned off in Android's settings count as denied.
+    - Three channels, made when the process starts: «يحتاج قرارك» (high, with sound), «للانتباه» (low, silent) and «الرسائل» (default). Messaging and mail go to «الرسائل», a notice by its tier, `info` never.
+    - Firebase Messaging 25.1.3 (Firebase BoM 34.19.0 of 2026-09-09, past the 14-day rule). Its four public identifiers come at build time from the owner's `google-services.json`, named by `COMMSHUB_GOOGLE_SERVICES`, for the build's own application id only. There is no Google services plugin and no Firebase file in the repository. Without them the build has no push and `push.token` answers null.
+    - No token is made before notices are allowed: Firebase's automatic start of messaging and its analytics collection are off.
+    - Data messages only: the service shows the notice itself, and shows nothing while the application is in front, where the page reads its notices again.
+    - A tap opens the push's page: in the open page through `onOpen`, or by loading it when the application was closed. The page must be a page of the site (`Push.goPath`, held equal to `src/lib/native/push.ts`: plain ASCII, one leading slash, no dot segment, no API route, script, file route or outside page).
+    - The window is open to every application on the phone (it is the launcher's), so a page is opened from an intent only when the intent carries the application's own key, made once in its private storage and put on its own notices only.
+  - **Site** (`src/lib/native/push.ts`, `src/lib/native/device-push.ts`, `src/components/native/phone-push.tsx`, `src/components/notices.tsx`, `src/components/shell.tsx`, `src/components/auth-gate.tsx`):
+    - At each opening, and at most every ten minutes on returning to the application, the phone is registered for the person (`device_register`, with its token once notices are allowed) and asked about (`device_seen`).
+    - A phone removed from «أجهزتي» signs out on that phone only (`scope: 'local'`) and forgets its id.
+    - Before any sign-out inside the application the token is taken off, so a signed-out phone receives nothing.
+    - «تنبيهات الهاتف» explains before Android asks, never over another window of the page. «ليس الآن» puts it off a week.
+    - The notices drawer moves to a tapped push's page and reads the list again when a push arrives in front.
+  - **The check package only:** `src/qa/QaPush.java`, a receiver that hands a push to the same `PushService.handle` that Firebase's messages reach, so the check sees what is shown without a Firebase project.
+  - **Release size.** The check package grew from 9.3 MB to 12.9 MB with Firebase. Firebase adds three permissions to the merged manifest: network state, wake lock, and receiving FCM.
+- **Changed while building.** A5's server half first built notification messages, which Firebase displays itself; a tap would then reach the window as an intent any application can send. At lane 1's request it sends data messages, with the title and the body in `data`.
+- **Verified, numbers.**
+  - **Tests.** `npm test` **561 of 561** (556 at A4; 5 new A5 tests: the pushed-page rules, the same rules as Push.java, the explanation's timing, the shapes the page accepts, and the registration and sign-out wiring). `mobile` `npm test` **15 of 15** (2 new: the manifest, the service and the key; Firebase from outside per build id, the check's receiver only in the check package). JVM **25 of 25** (`PushTest` 3, `IdentityTest` one more). Typecheck clean.
+  - **`qa/android-push.cjs`: 19 of 19**, twice in a row on the final build, on the `Pixel_9_Pro` emulator, Android 16, check package. Two earlier runs failed in the check, not the application. The first was 17 of 19: five notices posted at once were bundled by Android into one group, and a tap on a line of the group opened the group; the check now taps one notice at a time. A later run was 11 of 13: the tap came while a «يحتاج قرارك» notice was still moving from its drop-down into the shade; the check now waits for it to settle and tries the tap once more if the application did not come to the front.
+    - In Edge as a browser: nothing asked, nothing registered.
+    - In the application: bridge 4; the three channels with their Arabic names and levels 4, 2 and 3; the phone registered at its opening with no token.
+    - The explanation first; «ليس الآن» held at the next opening; «السماح بالتنبيهات» bringing Android's own question; granted, then registered again with its remembered id; no token (no Firebase project in this build).
+    - In front: nothing shown and the page told. In the background: a decision in «يحتاج قرارك» with sound, attention in «للانتباه» silent, a message in «الرسائل», `info` never.
+    - A tap opening the push's page in the open page; a push naming another site opening nothing; with the application closed, a tap opening it at the push's page.
+    - Another application's intent naming a page, with no key or a wrong one, opening nothing.
+    - A removed phone signing out locally, forgetting its id, and registering nothing.
+- **Not verified, said plainly.**
+  - No Firebase project exists yet, so no token was made, nothing was sent through Firebase, and no phone was reached when locked. That is the owner's check once the project exists (`mobile/README.md`, "Push notices").
+  - Nothing was seen signed in: the component ran on a fixture page with a stand-in for the database client. The functions themselves are held by `supabase/tests/push_rules.sql`.
+  - No real phone. Nothing pushed.

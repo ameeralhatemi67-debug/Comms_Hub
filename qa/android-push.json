@@ -1,0 +1,139 @@
+{
+  "script": "qa/android-push.cjs",
+  "run": "2026-10-27T18:59:43.302Z",
+  "checks": [
+    {
+      "name": "in a browser: no explanation and no registration",
+      "pass": true,
+      "detail": "{\"rpc\":0,\"dialog\":false}"
+    },
+    {
+      "name": "bridge version 4 with push (state, request, token, onOpen, onReceive), frozen, and notices still to be asked",
+      "pass": true,
+      "detail": "{\"bridge\":4,\"methods\":[\"function\",\"function\",\"function\",\"function\",\"function\"],\"frozen\":true,\"state\":\"prompt\"}"
+    },
+    {
+      "name": "the channels «يحتاج قرارك» (high, with sound), «للانتباه» (low, silent) and «الرسائل» (default), as Android's settings show them",
+      "pass": true,
+      "detail": "{\"decide\":{\"name\":\"يحتاج قرارك\",\"importance\":4},\"messages\":{\"name\":\"الرسائل\",\"importance\":3},\"attention\":{\"name\":\"للانتباه\",\"importance\":2}}"
+    },
+    {
+      "name": "at its opening the phone is registered for the person: Android, the installed version, no token yet",
+      "pass": true,
+      "detail": "{\"name\":\"device_register\",\"args\":{\"p_device\":null,\"p_platform\":\"android\",\"p_version\":\"0.1.0\",\"p_name\":null,\"p_token\":null}}"
+    },
+    {
+      "name": "the site says why before Android asks: «تنبيهات الهاتف», «السماح بالتنبيهات» and «ليس الآن»",
+      "pass": true,
+      "detail": "تنبيهات الهاتف\n\nيرسل المركز إلى هذا الهاتف ما يحتاج قرارك، والرسائل المباشرة والإشارات إليك، وما تختار متابعته. ولا تظهر على شاشة القفل نصوص الرسائل والبريد. يمكنك تغيير ذلك من «الحساب».\n\nالسماح بالتنبيهات\nليس الآن"
+    },
+    {
+      "name": "«ليس الآن» puts it off: not asked again at the next opening",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«السماح بالتنبيهات» brings Android's own question",
+      "pass": true,
+      "detail": "{\"text\":\"Allow\",\"id\":\"com.android.permissioncontroller:id/permission_allow_button\",\"cls\":\"android.widget.Button\",\"pkg\":\"com.google.android.permissioncontroller\",\"desc\":\"\",\"bounds\":[152,1532,1128,1676],\"x\":640,\"y\":1604}"
+    },
+    {
+      "name": "once allowed, the state is granted and the phone is registered again with its remembered id",
+      "pass": true,
+      "detail": "{\"state\":\"granted\",\"after\":[{\"name\":\"device_register\",\"args\":{\"p_device\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\",\"p_platform\":\"android\",\"p_version\":\"0.1.0\",\"p_name\":null,\"p_token\":null}},{\"name\":\"device_register\",\"args\":{\"p_device\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\",\"p_platform\":\"android\",\"p_version\":\"0.1.0\",\"p_name\":null,\"p_token\":null}},{\"name\":\"device_register\",\"args\":{\"p_device\":\"0a4d4c6b-9e7f-4a2b-8c4d-0000000000d1\",\"p_platform\":\"android\",\"p_version\":\"0.1.0\",\"p_name\":null,\"p_token\":null}}]}"
+    },
+    {
+      "name": "this build has no Firebase project, so the token is null and nothing is made with Google",
+      "pass": true,
+      "detail": "{\"token\":null}"
+    },
+    {
+      "name": "a push while the application is in front shows nothing, and the page reads its notices again",
+      "pass": true,
+      "detail": "{\"events\":[[\"receive\"]],\"posted\":[]}"
+    },
+    {
+      "name": "a decision is shown in «يحتاج قرارك», with sound",
+      "pass": true,
+      "detail": "{\"title\":\"qa-decide\",\"channel\":\"decide\",\"importance\":4}"
+    },
+    {
+      "name": "a tap opens the push's page in the page that is open",
+      "pass": true,
+      "detail": "{\"tapped\":true,\"opened\":[\"open\",\"/opened-decide?n=1\"],\"events\":[[\"open\",\"/opened-decide?n=1\"]],\"where\":\"/\"}"
+    },
+    {
+      "name": "a push naming another site opens the application where it was, and no page of another site",
+      "pass": true,
+      "detail": "{\"tappedElsewhere\":true,\"events\":[],\"where\":\"/\"}"
+    },
+    {
+      "name": "an attention notice is shown in «للانتباه», silent",
+      "pass": true,
+      "detail": "{\"title\":\"qa-attention\",\"channel\":\"attention\",\"importance\":2}"
+    },
+    {
+      "name": "a message is shown in «الرسائل»",
+      "pass": true,
+      "detail": "{\"title\":\"qa-chat\",\"channel\":\"messages\",\"importance\":3}"
+    },
+    {
+      "name": "`info` is never shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "with the application closed, a push is shown, and a tap opens the application at its page",
+      "pass": true,
+      "detail": "{\"coldShown\":true,\"tappedCold\":true,\"where\":\"/opened-cold?n=2\"}"
+    },
+    {
+      "name": "an intent from outside naming a page, without the key or with a wrong one, opens nothing",
+      "pass": true,
+      "detail": "{\"before\":\"/opened-cold?n=2\",\"after\":\"/opened-cold?n=2\"}"
+    },
+    {
+      "name": "a phone removed from «أجهزتي» signs out here at its next opening, forgets its id, and registers nothing",
+      "pass": true,
+      "detail": "{\"signOut\":[{\"scope\":\"local\"}],\"device\":null,\"calls\":[\"device_seen\"]}"
+    }
+  ],
+  "notes": [
+    "Real delivery through Firebase, to a locked phone, waits for the owner's Firebase project: this build has none, so no token was made and nothing was sent to Google.",
+    "After the check: the check package is uninstalled."
+  ],
+  "device": {
+    "model": "sdk_gphone16k_x86_64",
+    "android": "17",
+    "sdk": "37"
+  },
+  "channels": {
+    "decide": {
+      "name": "يحتاج قرارك",
+      "importance": 4
+    },
+    "messages": {
+      "name": "الرسائل",
+      "importance": 3
+    },
+    "attention": {
+      "name": "للانتباه",
+      "importance": 2
+    }
+  },
+  "posted": [
+    {
+      "title": "qa-chat",
+      "channel": "messages",
+      "importance": 3
+    },
+    {
+      "title": "qa-attention",
+      "channel": "attention",
+      "importance": 2
+    }
+  ],
+  "total": 19,
+  "passed": 19,
+  "failed": 0
+}

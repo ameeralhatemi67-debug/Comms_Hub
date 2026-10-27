@@ -373,6 +373,20 @@ own `package.json` and lockfile like `desktop/`, outside the site's typecheck an
     address, and its cookie handler adds the web view's cookies to every Java connection by host. `Shell.narrow`
     takes all three off once Capacitor has loaded its plugins. Keep it when upgrading Capacitor (a mobile test
     reads Capacitor's sources).
+- **Push, the application's half (A5, `MVP_draft.md` 64.3).** Bridge version 4 adds `push` (`state`, `request`,
+  `token`, `onOpen`, `onReceive`).
+  - The site says why before Android asks for notices; no token is made before they are allowed
+    (`firebase_messaging_auto_init_enabled` off).
+  - Firebase's four public identifiers come at build time from the owner's `google-services.json`, named by
+    `COMMSHUB_GOOGLE_SERVICES`, for the build's own id only. No Google services plugin and no Firebase file in the
+    repository; without them a build has no push.
+  - The server sends data messages only. `PushService` shows them in «يحتاج قرارك», «للانتباه» or «الرسائل», and
+    shows nothing while the application is in front.
+  - A tapped push opens a page of the site only (`Push.goPath`, held equal to `src/lib/native/push.ts`), and only
+    when the intent carries the application's private key, since any application can start its window.
+  - The page registers the phone at each opening (`src/lib/native/device-push.ts`), signs out a phone removed
+    from «أجهزتي», and clears its token before any sign-out.
+  - `QaPush` exists in the check package alone.
 - **Checks** use the emulator started read-only and the check package `sa.commshub.app.qa`, never a real
   installation, and signed-out pages only (`qa/android-*.cjs`, `qa/android-helpers.cjs`).
 - **What stays the same as everywhere:** no sign-in bypass, stub session or stored password; nothing about

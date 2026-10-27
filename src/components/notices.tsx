@@ -15,6 +15,7 @@ import { supabase } from '@/lib/supabase/client';
 import { noticeHref, riyadhStamp, tierLabels, type Tier } from '@/lib/work/rules';
 import { native, notifyNative, onNoticeOpen, setBadge } from '@/lib/native';
 import { decisionCount, freshDecisions, noticesFor } from '@/lib/native/notices';
+import { onPushOpen, onPushReceive } from '@/lib/native/push';
 
 export type Notice = { id: string; tier: Tier; body: string; go: { page?: string; id?: string; tab?: string } | null; created_at: string; read_at: string | null };
 
@@ -38,6 +39,9 @@ export function useNotices() {
     void load();
   }, [load, path]);
   useEffect(() => onNoticeOpen((go) => router.push(go)), [router]);
+  // Inside the Android application: a tapped push opens its page, and one that arrives in front reads the list again.
+  useEffect(() => onPushOpen((go) => router.push(go)), [router]);
+  useEffect(() => onPushReceive(() => void load()), [load]);
   useEffect(() => {
     // Inside the desktop application the tray needs the list while the window is hidden.
     const shown = () => document.visibilityState === 'visible' || native().has('notify');

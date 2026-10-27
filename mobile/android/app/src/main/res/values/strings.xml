@@ -29,4 +29,11 @@
     <string name="downloads_channel">التنزيلات</string>
     <string name="downloads_channel_about">تقدّم تنزيل ملفات المركز إلى الهاتف.</string>
     <string name="downloads_progress">جارٍ التنزيل…</string>
+    <!-- Push notices and their channels (MVP_draft.md 64.3), as Android's settings show them. -->
+    <string name="push_decide">يحتاج قرارك</string>
+    <string name="push_decide_about">ما ينتظر قرارك في المركز، بصوت.</string>
+    <string name="push_attention">للانتباه</string>
+    <string name="push_attention_about">ما اخترت متابعته، دون صوت.</string>
+    <string name="push_messages">الرسائل</string>
+    <string name="push_messages_about">الرسائل المباشرة والإشارات إليك وبطاقات البريد، دون نصّها.</string>
 </resources>

@@ -18,6 +18,28 @@ def keyProps = new Properties()
 def keyFile = System.getenv('COMMSHUB_KEYSTORE_PROPERTIES')
 if (keyFile && new File(keyFile).exists()) new File(keyFile).withInputStream { keyProps.load(it) }
 
+// The owner's Firebase project for push (A5): google-services.json kept outside the repository and named by
+// COMMSHUB_GOOGLE_SERVICES (mobile/README.md). Only the four public identifiers of the client whose package is the
+// build's own id are compiled in (ShellApp.java starts Firebase with them); without the file or that client, the
+// build has no push. No Google services plugin and no Firebase file in the repository.
+def services = null
+def servicesFile = System.getenv('COMMSHUB_GOOGLE_SERVICES')
+if (servicesFile && new File(servicesFile).exists()) services = new groovy.json.JsonSlurper().parse(new File(servicesFile))
+def plain = { v -> v != null && (v.toString() ==~ /[A-Za-z0-9:._-]{1,200}/) ? v.toString() : '' }
+def firebaseFor = { String appId ->
+    def client = services?.client?.find { it?.client_info?.android_client_info?.package_name == appId }
+    def ids = [
+        FIREBASE_APP_ID: plain(client?.client_info?.mobilesdk_app_id),
+        FIREBASE_API_KEY: plain(client?.api_key?.find { it?.current_key }?.current_key),
+        FIREBASE_PROJECT_ID: plain(client ? services?.project_info?.project_id : null),
+        FIREBASE_SENDER_ID: plain(client ? services?.project_info?.project_number : null),
+    ]
+    ids.values().any { it.isEmpty() } ? ids.collectEntries { k, v -> [k, ''] } : ids
+}
+def firebaseFields = { target, String appId ->
+    firebaseFor(appId).each { k, v -> target.buildConfigField 'String', k, "\"${v}\"" }
+}
+
 android {
     namespace = "sa.commshub.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -31,6 +53,7 @@ android {
         // The compiled address list of a release: the production address alone.
         buildConfigField "String", "ALLOWED_ORIGINS", "\"${productionOrigin}\""
         buildConfigField "String", "UPDATE_FEED", "\"${productionFeed}\""
+        firebaseFields(delegate, 'sa.commshub.app')
         aaptOptions {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
@@ -65,6 +88,7 @@ android {
         debug {
             applicationIdSuffix '.dev'
             buildConfigField "String", "ALLOWED_ORIGINS", "\"${productionOrigin},${localOrigin}\""
+            firebaseFields(delegate, 'sa.commshub.app.dev')
         }
         // The check package (qa/android-*.cjs): its own id, so a check never touches a real installation.
         qa {
@@ -73,6 +97,7 @@ android {
             matchingFallbacks = ['debug']
             buildConfigField "String", "UPDATE_FEED", "\"${checkFeed}\""
             buildConfigField "String", "ALLOWED_ORIGINS", "\"${productionOrigin},${localOrigin}\""
+            firebaseFields(delegate, 'sa.commshub.app.qa')
         }
         release {
             minifyEnabled false
@@ -112,6 +137,7 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation "androidx.webkit:webkit:$androidxWebkitVersion"
+    implementation "com.google.firebase:firebase-messaging:$firebaseMessagingVersion"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"

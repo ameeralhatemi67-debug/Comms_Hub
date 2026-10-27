@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The check package only: a push handed in by the check (QaPush.java, qa/android-push.cjs). Nothing of it is in a
+     release or a development build. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <receiver
+            android:name=".QaPush"
+            android:exported="true" />
+    </application>
+</manifest>
