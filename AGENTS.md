@@ -387,6 +387,15 @@ own `package.json` and lockfile like `desktop/`, outside the site's typecheck an
   - The page registers the phone at each opening (`src/lib/native/device-push.ts`), signs out a phone removed
     from «أجهزتي», and clears its token before any sign-out.
   - `QaPush` exists in the check package alone.
+- **Links and the lock (A6, `MVP_draft.md` 64.4).** Bridge version 5 adds `links` (`verified`) and `lock`
+  (`state`, `set`).
+  - The manifest claims the site's pages (`menuEntries` without the root) as `path` and `path/` prefix, plus `/w/`
+    and `/app/return`; never `/`, `/r/`, `/m/` or `/api/`. `Links.java` opens exactly those, on the address the
+    build opens, refusing dot segments. Both are held equal to `src/lib/access.ts` by `mobile/tests`.
+  - `public/.well-known/assetlinks.json` names the release certificate. Until the owner gives it, it holds the stand-in
+    `OWNER_RELEASE_KEY_SHA256`, and `scripts/build.mjs` refuses a signed release whose certificate it does not name.
+  - The lock (`AppLock.java`) is off by default and asks Android (fingerprint or screen lock) to turn it on or off,
+    at opening, and after `LOCK_AFTER_MS` away: five minutes, five seconds in the check package only.
 - **Checks** use the emulator started read-only and the check package `sa.commshub.app.qa`, never a real
   installation, and signed-out pages only (`qa/android-*.cjs`, `qa/android-helpers.cjs`).
 - **What stays the same as everywhere:** no sign-in bypass, stub session or stored password; nothing about

@@ -51,3 +51,35 @@ if (!apk) {
 }
 const bytes = fs.readFileSync(path.join(outDir, apk));
 console.log(JSON.stringify({ apk: path.join(outDir, apk), size: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') }, null, 2));
+
+// A signed release must be the key the site names in /.well-known/assetlinks.json, or Android will not open the
+// site's links in it (A6, MVP_draft.md 64.4). An unsigned release (no key given) is not checked.
+if (kind === 'release') {
+  const signer = signerOf(path.join(outDir, apk));
+  if (signer) {
+    const site = sitePrints();
+    if (!site.includes(signer)) {
+      console.error(`The APK is signed with ${signer}, but public/.well-known/assetlinks.json names ${site.join(', ') || 'no certificate'}.`);
+      console.error('Put this certificate\'s SHA-256 fingerprint in assetlinks.json (mobile/README.md, "Links that open the application"), push it, then publish the release.');
+      process.exit(3);
+    }
+    console.log(`The site's assetlinks.json names this release's certificate (${signer}).`);
+  }
+}
+
+/** The SHA-256 of the APK's signing certificate as AA:BB:..., or null when it is not signed. */
+function signerOf(file) {
+  const sdk = process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT;
+  if (!sdk) return null;
+  const tools = fs.readdirSync(path.join(sdk, 'build-tools')).sort().pop();
+  const apksigner = path.join(sdk, 'build-tools', tools, process.platform === 'win32' ? 'apksigner.bat' : 'apksigner');
+  const r = spawnSync(apksigner, ['verify', '--print-certs', file], { env, encoding: 'utf8', shell: process.platform === 'win32' });
+  const m = /certificate SHA-256 digest: ([0-9a-f]{64})/i.exec(r.stdout || '');
+  return r.status === 0 && m ? m[1].toUpperCase().match(/../g).join(':') : null;
+}
+
+/** The fingerprints the site's assetlinks.json names for this application. */
+function sitePrints() {
+  const links = JSON.parse(fs.readFileSync(path.join(mobile, '..', 'public', '.well-known', 'assetlinks.json'), 'utf8'));
+  return links.filter((l) => l.target?.package_name === 'sa.commshub.app').flatMap((l) => l.target.sha256_cert_fingerprints ?? []).map((f) => String(f).toUpperCase());
+}

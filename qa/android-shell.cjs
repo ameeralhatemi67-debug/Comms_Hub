@@ -347,7 +347,8 @@ async function backToApp(device) {
     const field = await h.until(async () => {
       const f = await page.evaluate(() => ({ bottom: document.getElementById('qa-low').getBoundingClientRect().bottom, inner: window.innerHeight, focused: document.activeElement?.id }));
       return f.inner < open - 100 ? f : null;
-    }, 8000, 300);
+      // The software-drawn emulator may take its time to resize the page once the keyboard is up.
+    }, 20000, 400);
     const keyboard = /mInputShown=true/.test(h.shell('dumpsys input_method', { allowFail: true }));
     shot('06-keyboard');
     check('with the keyboard open the page shrinks above it, and a field at its foot stays in view', keyboard && !!field && field.bottom <= field.inner && field.focused === 'qa-low', { keyboard, before: open, field });

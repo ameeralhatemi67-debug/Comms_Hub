@@ -2982,3 +2982,19 @@ A push never carries a token, a secret, an address with a query string or a mess
 - **«أجهزتي».** The phone is listed from its first opening, with notices or without. A phone removed from «أجهزتي» on another device signs out at its next opening. Signing out inside the application takes the phone's notices off first, so a signed-out phone receives nothing.
 - **Signing out elsewhere.** «الخروج من الأجهزة الأخرى» and «الخروج من كل الأجهزة» also remove the person's other phones from «أجهزتي» (the note then adds «وأُزيلت هواتفك الأخرى من «أجهزتي»، فلا تصلها التنبيهات.»). A phone removed while signed out starts over in «أجهزتي» at its next sign-in. Every «تسجيل الخروج» of the site, on «الحساب», in the side menu and on the sign-in screen, signs out this device only.
 - **What waits.** Notices reach a phone only once the owner has created the Firebase project and built the application with it (`mobile/README.md`).
+
+## 64.4 Links that open the application, and the application lock (A6), 2026-10-27
+
+Phase A6 of `Android_Build_Plan.md`.
+
+**Links.** A link to a page of the site opens in the application instead of the browser, once Android has verified that the site and the application belong together. The site says so in `/.well-known/assetlinks.json`, which names the application and the certificate of its release key; the person may also allow it in Android's settings («فتح الروابط المتوافقة»).
+- **What opens in the application:** the site's pages (العمل، إنشاء، الموافقات والنشر، التقويم، المشاريع، الطلبات، مكتبة الوسائط، المهام، سجل النشاط، التحليلات، استوديو الحركة، البريد، حسابات المنصات، الأفكار، الحسابات، الإعدادات) and what is under them, the WhatsApp links for members (`/w/…`), and the return of a link mailed from the sign-in screen (`/app/return`).
+- **What stays with the browser:** the site's root, review links for outside people (`/r/…`), answer pages for outside parties (`/m/…`), and anything else.
+- **Mailed sign-in links.** Once links open the application, «أول دخول» and «نسيت كلمة المرور» inside the application mail a link that comes back to it, as 64 foresaw, and the note pointing to the browser no longer shows.
+- **Until the owner gives the release key's certificate**, `assetlinks.json` names a stand-in, Android cannot verify the links of a release, and a signed release build refuses to finish. Supabase's list of allowed return addresses must include `/app/return`.
+
+**The application lock.** Off by default. Once after signing in, when the phone has a screen lock and the question about notices is settled, the application offers it: «قفل التطبيق», «احمِ المركز على هذا الهاتف: يطلب التطبيق بصمتك أو قفل الشاشة عند فتحه، وبعد خمس دقائق من تركه. يمكنك تغيير ذلك من «الحساب».», with «تشغيل القفل» and «ليس الآن». It is offered once.
+- **On «الحساب»**, inside the application only, «قفل التطبيق» says whether it is on («القفل يعمل: …» or «القفل متوقف. …»), with «تشغيل القفل» or «إيقاف القفل». A phone without a screen lock or a fingerprint says «لا يوجد قفل شاشة ولا بصمة على هذا الهاتف. اضبط أحدهما في إعدادات Android ثم ارجع إلى هنا.». Turning it on or off asks Android first; if that is not confirmed: «لم يتغير القفل: لم يُؤكَّد ببصمتك أو بقفل الشاشة.».
+- **When it asks.** When the application opens, and when the person comes back to it after five minutes or more away. Android asks for the fingerprint or the phone's PIN, pattern or password («فتح مركز الاتصال المؤسسي»). Until it is answered the page is covered by the application's own screen: the rosette, «المركز مقفل», «افتح القفل ببصمتك أو بقفل الشاشة.» and «فتح القفل».
+- **While it is on**, Android's list of recent applications shows no picture of the page (Android 13 and newer).
+- **What it is not.** It guards this phone's window only. It signs nobody out, and the site's session and every rule stay as they are.

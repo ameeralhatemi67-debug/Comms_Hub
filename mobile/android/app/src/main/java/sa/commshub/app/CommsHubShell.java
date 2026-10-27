@@ -12,6 +12,10 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
 import com.google.firebase.messaging.FirebaseMessaging;
+import android.content.pm.verify.domain.DomainVerificationManager;
+import android.content.pm.verify.domain.DomainVerificationUserState;
+import androidx.fragment.app.FragmentActivity;
+import java.util.Map;
 
 /**
  * The application's methods behind window.commsHubNative (Identity.java; src/lib/native/index.ts). Capacitor
@@ -192,5 +196,60 @@ public class CommsHubShell extends Plugin {
         if (!Shell.ALLOWED.contains(site)) return false;
         p.getBridge().getWebView().post(() -> p.getBridge().getWebView().loadUrl(site + path));
         return true;
+    }
+
+    // --- links and the lock (A6) ------------------------------------------------------------------------
+
+    /**
+     * Whether Android opens the site's links in this application: verified against the site's assetlinks.json,
+     * or chosen by the person in Android's settings (Android 12 and newer report it; older ones say no, and the
+     * sign-in screen then keeps mailed links for the browser).
+     */
+    @PluginMethod
+    public void linksVerified(PluginCall call) {
+        if (!fromSite(call)) return;
+        boolean ok = false;
+        if (Build.VERSION.SDK_INT >= 31) {
+            try {
+                DomainVerificationManager m = getContext().getSystemService(DomainVerificationManager.class);
+                DomainVerificationUserState st = m != null ? m.getDomainVerificationUserState(getContext().getPackageName()) : null;
+                String host = Navigation.parse(BuildConfig.LINK_SITE).getHost();
+                Map<String, Integer> states = st != null ? st.getHostToStateMap() : null;
+                Integer state = states != null ? states.get(host) : null;
+                ok = st != null && st.isLinkHandlingAllowed() && state != null
+                    && (state == DomainVerificationUserState.DOMAIN_STATE_VERIFIED || state == DomainVerificationUserState.DOMAIN_STATE_SELECTED);
+            } catch (Exception e) {
+                ok = false;
+            }
+        }
+        JSObject out = new JSObject();
+        out.put("verified", ok);
+        call.resolve(out);
+    }
+
+    @PluginMethod
+    public void lockState(PluginCall call) {
+        if (!fromSite(call)) return;
+        JSObject out = new JSObject();
+        out.put("available", AppLock.available(getContext()));
+        out.put("on", AppLock.on(getContext()));
+        call.resolve(out);
+    }
+
+    /** Turns the lock on or off once Android has asked the person; answers whether it changed. */
+    @PluginMethod
+    public void lockSet(PluginCall call) {
+        if (!fromSite(call)) return;
+        Boolean on = call.getBoolean("on");
+        if (on == null || !(getActivity() instanceof FragmentActivity)) {
+            call.reject("refused");
+            return;
+        }
+        FragmentActivity a = (FragmentActivity) getActivity();
+        a.runOnUiThread(() -> AppLock.set(a, on, (ok) -> {
+            JSObject out = new JSObject();
+            out.put("ok", ok);
+            call.resolve(out);
+        }));
     }
 }

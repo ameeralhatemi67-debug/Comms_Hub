@@ -26,6 +26,7 @@ import { DesktopAppPanel } from './native/desktop-app';
 import { useNativePlatform } from './native/use-native';
 import { PhoneAppPanel } from './native/phone-app';
 import { MyDevicesPanels } from './native/devices';
+import { PhoneLockPanel } from './native/phone-lock';
 import { beforeSignOut, removeOtherPhones } from '@/lib/native/device-push';
 
 const pageNames: Record<string, string> = {
@@ -144,6 +145,7 @@ export function Supporting({ page }: { page: string }) {
           </Panel>
         )}
         <MyDevicesPanels />
+        <PhoneLockPanel />
         <Panel title="صلاحياتي" className="pm-minepanel">
           <MyPermissions />
         </Panel>

@@ -1972,3 +1972,46 @@ Built on `main` against the push migration of A5's server half (built at the sam
   - Nothing signed in: «أجهزتي», «إعدادات التنبيهات», the session buttons and the Firebase card were not seen rendered.
   - No real push: there is no Firebase project.
   - No real phone. Nothing pushed; the live site is still the build of 2026-10-22.
+
+### 2026-10-27: the Android application, A6: links that open the application, and the application lock
+
+The owner asked on 2026-10-27 for A6 and A7. The release key does not exist yet, so its certificate is a stand-in (below).
+
+- **What was built.**
+  - **Links** (`Links.java`, `MainActivity.java`, the manifest, `public/.well-known/assetlinks.json`):
+    - The manifest claims, with Android's verification (`autoVerify`), the site's pages from `menuEntries` without the root, each as `path` and as `path/` prefix, plus `/w/` and `/app/return`. It never claims `/`, `/r/`, `/m/` or `/api/`. Claiming the page and `page/` exactly, rather than a bare prefix, means Android never hands the application an address like `/workx` that it would then send to the browser, which would hand it back.
+    - `Links.target` opens exactly those, on the address the build opens (the check package opens the local site), with the query kept. It refuses dot segments, plain or percent-encoded, and any other host, scheme or user part. The compiled list checks the address again.
+    - `links.verified` reads Android's domain verification (Android 12 and newer): verified, or chosen by the person in Android's settings. The sign-in screen already used it (A1) to mail links back through `/app/return`.
+    - `assetlinks.json` names `sa.commshub.app` with the stand-in `OWNER_RELEASE_KEY_SHA256`. `scripts/build.mjs` reads a signed release's certificate with `apksigner` and refuses to finish (exit 3) unless the site's file names it. An unsigned release is not checked.
+  - **The lock** (`AppLock.java`, `CommsHubShell.java`), decision M-12: off by default.
+    - Android asks (fingerprint, face, or the phone's PIN, pattern or password; `androidx.biometric` 1.1.0) to turn it on or off, when the application opens, and when it comes back after `LOCK_AFTER_MS` away: five minutes, five seconds in the check package only.
+    - Until Android is answered, a native screen covers the page: the rosette, «المركز مقفل», «افتح القفل ببصمتك أو بقفل الشاشة.» and «فتح القفل».
+    - While it is on, the recent-applications list shows no picture of the page (Android 13 and newer).
+  - **Bridge version 5:** `links.verified`, `lock.state`, `lock.set`.
+  - **Site** (`src/lib/native/lock.ts`, `src/components/native/phone-lock.tsx`):
+    - «قفل التطبيق» on «الحساب», inside the application only.
+    - The offer, once after signing in, when the phone can lock and the notices question is settled, never over another window.
+  - **Documents.** `MVP_draft.md` 64.4; the A6 bullet of the Android paragraph of `AGENTS.md`; `mobile/README.md`, "Links that open the application", with the owner's steps: the fingerprint into `assetlinks.json`, the Supabase redirect address `/app/return`, and Play's own certificate if Play signs later.
+- **Verified, numbers.**
+  - **Tests.** `npm test` **585 of 585** (2 new: the lock's shapes and offer rules; the panels and `assetlinks.json`). `mobile` `npm test` **18 of 18**: the claimed links equal to `menuEntries` and to `Links.java`; the release guard and the stand-in; the lock off by default, asking both ways, five minutes. JVM **29 of 29** (`LinksTest` 3, `IdentityTest` one more). Typecheck clean; `npm run build` clean.
+  - **`qa/android-links.cjs`: 19 of 19** on the `Pixel_9_Pro` emulator, Android 16, check package.
+    - The lock, with a screen PIN set for the run and cleared after it: offered once after the notices question; on only after the PIN; covered and asked after six seconds away; put off, the cover stays with «فتح القفل», which asks again; a short absence does not lock; a cold start asks; «إيقاف القفل» asks, then nothing locks.
+    - The links, on a fresh installation and the site's own production build:
+      - `assetlinks.json` served as JSON with no redirect;
+      - `links.verified` false, then true once allowed with `pm set-app-links-user-selection`;
+      - `/work/CH-101?tab=texts`, `/app/return?qa=a6` (forwarded to `/?qa=a6`) and `/w/…` open in the application on the local site;
+      - `/r/…` and `/` open in the browser;
+      - four forged intents (two traversals, another site, a look-alike host) open nothing.
+    - Getting there took three fixes to the check, none to the application:
+      - The emulator's own System UI stopped responding while drawing Android's PIN question; the check now answers Android's «Wait».
+      - A page handle went stale across the `/app/return` redirect; the check now takes a fresh handle for each read.
+      - A second Playwright connection opened beside a live one waited for ever; the check now closes the old one first, and runs the lock part before the links part.
+  - **The earlier checks on the changed window:**
+    - `qa/android-push.cjs` **20 of 20**. It had required bridge version 4 exactly, and now accepts 4 or later; its 19 other steps passed in the first run too.
+    - `qa/android-shell.cjs` **28 of 28**. Two runs before it each missed one timing step: once a screen read just after coming back from the browser, once the keyboard step. The latter's screenshot shows the page shrunk above the keyboard as it should, but later than the check's 8 seconds; it now waits up to 20.
+- **Not verified, said plainly.**
+  - No release key: the links of a real release are not verified by Android until the owner's certificate is in `assetlinks.json` and the site is pushed.
+  - The Supabase redirect address for `/app/return` is the owner's step and was not checked.
+  - Nothing signed in: «قفل التطبيق» on «الحساب» and the offer were seen on a fixture page only.
+  - A fingerprint was not tried: the emulator has none enrolled, so the PIN stood for both.
+  - No real phone. Nothing pushed.

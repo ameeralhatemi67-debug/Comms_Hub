@@ -28,6 +28,52 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Links of the site that open the application (A6, MVP_draft.md 64.4), verified by Android against the site's
+                 /.well-known/assetlinks.json: the site's pages (src/lib/access.ts, menuEntries, without the root), the
+                 WhatsApp links for members and the return of a mailed sign-in link; never /, /r/, /m/ or /api/. The same
+                 list as Links.java, held equal by mobile/tests. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="comms-hub-three.vercel.app" />
+                <data android:path="/work" />
+                <data android:pathPrefix="/work/" />
+                <data android:path="/create" />
+                <data android:pathPrefix="/create/" />
+                <data android:path="/approvals" />
+                <data android:pathPrefix="/approvals/" />
+                <data android:path="/calendar" />
+                <data android:pathPrefix="/calendar/" />
+                <data android:path="/projects" />
+                <data android:pathPrefix="/projects/" />
+                <data android:path="/requests" />
+                <data android:pathPrefix="/requests/" />
+                <data android:path="/media" />
+                <data android:pathPrefix="/media/" />
+                <data android:path="/tasks" />
+                <data android:pathPrefix="/tasks/" />
+                <data android:path="/activity" />
+                <data android:pathPrefix="/activity/" />
+                <data android:path="/analytics" />
+                <data android:pathPrefix="/analytics/" />
+                <data android:path="/motion" />
+                <data android:pathPrefix="/motion/" />
+                <data android:path="/mail" />
+                <data android:pathPrefix="/mail/" />
+                <data android:path="/channels" />
+                <data android:pathPrefix="/channels/" />
+                <data android:path="/ideas" />
+                <data android:pathPrefix="/ideas/" />
+                <data android:path="/accounts" />
+                <data android:pathPrefix="/accounts/" />
+                <data android:path="/settings" />
+                <data android:pathPrefix="/settings/" />
+                <data android:pathPrefix="/w/" />
+                <data android:path="/app/return" />
+            </intent-filter>
+
         </activity>
 
         <provider

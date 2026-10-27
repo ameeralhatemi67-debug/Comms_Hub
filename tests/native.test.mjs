@@ -749,3 +749,40 @@ test('A5: the page reads the application\'s answers in their shape only', async 
   stopR();
   assert.equal(receiver, null);
 });
+
+// --- A6: links and the lock (MVP_draft.md 64.4) ---------------------------------------------------------------
+
+test('A6: the lock is read in its shape only, set only through the application, and offered once after the notices question', async () => {
+  const { lockState, setLock, shouldOfferLock, LOCK } = await import('../src/lib/native/lock.ts');
+  inWindow(undefined);
+  assert.equal(await lockState(), null);
+  assert.equal(await setLock(true), false);
+  const asked = [];
+  const lock = { state: async () => ({ available: true, on: false, extra: 1 }), set: async (on) => (asked.push(on), true) };
+  inWindow({ ...a1, bridge: 5, lock });
+  assert.deepEqual(await lockState(), { available: true, on: false });
+  assert.equal(await setLock(true), true);
+  assert.deepEqual(asked, [true]);
+  inWindow({ ...a1, bridge: 5, lock: { ...lock, state: async () => ({ available: 'yes', on: false }) } });
+  assert.equal(await lockState(), null);
+  const ok = { available: true, on: false };
+  assert.equal(shouldOfferLock(ok, false, 'granted'), true);
+  assert.equal(shouldOfferLock(ok, false, null), true, 'an application without push still offers it');
+  assert.equal(shouldOfferLock(ok, false, 'prompt'), false, 'the notices question first');
+  assert.equal(shouldOfferLock(ok, true, 'granted'), false, 'once');
+  assert.equal(shouldOfferLock({ available: false, on: false }, false, 'granted'), false, 'no screen lock on the phone');
+  assert.equal(shouldOfferLock({ available: true, on: true }, false, 'granted'), false, 'already on');
+  assert.equal(shouldOfferLock(null, false, 'granted'), false, 'a browser');
+  for (const v of Object.values(LOCK)) assert.match(v, /[\u0600-\u06ff]/);
+});
+
+test('A6: the account page has the lock, the shell offers it, and the site serves its assetlinks.json', async () => {
+  const fs = await import('node:fs');
+  assert.match(fs.readFileSync('src/components/supporting.tsx', 'utf8'), /<MyDevicesPanels \/>\s*<PhoneLockPanel \/>/);
+  assert.match(fs.readFileSync('src/components/shell.tsx', 'utf8'), /<PhonePush \/>\s*<PhoneLockOffer \/>/);
+  const links = JSON.parse(fs.readFileSync('public/.well-known/assetlinks.json', 'utf8'));
+  assert.equal(links[0].target.package_name, 'sa.commshub.app');
+  const proxy = fs.readFileSync('src/proxy.ts', 'utf8');
+  assert.doesNotMatch(proxy, /redirect/i, 'the proxy redirects nothing, so Android reads the file where it is');
+  for (const f of ['src/lib/native/lock.ts', 'src/components/native/phone-lock.tsx']) assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
+});

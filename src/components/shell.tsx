@@ -40,6 +40,7 @@ import { MaintenanceBanner } from './settings/maintenance-banner';
 import { DesktopUpdateBanner } from './native/desktop-app';
 import { AppUpdateWindow } from './native/phone-app';
 import { PhonePush } from './native/phone-push';
+import { PhoneLockOffer } from './native/phone-lock';
 import { beforeSignOut } from '@/lib/native/device-push';
 import { FeedbackButton, useErrorReporter } from './feedback';
 
@@ -241,6 +242,7 @@ function FullShell({ children }: { children: ReactNode }) {
           <DesktopUpdateBanner />
           <AppUpdateWindow />
           <PhonePush />
+          <PhoneLockOffer />
           {/* The page guide opens here, in place of the page (src/lib/kit/guide.ts). */}
           <div id="guide-view" hidden />
           {children}

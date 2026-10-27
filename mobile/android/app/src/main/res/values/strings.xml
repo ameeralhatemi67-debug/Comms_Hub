@@ -36,4 +36,12 @@
     <string name="push_attention_about">ما اخترت متابعته، دون صوت.</string>
     <string name="push_messages">الرسائل</string>
     <string name="push_messages_about">الرسائل المباشرة والإشارات إليك وبطاقات البريد، دون نصّها.</string>
+    <!-- The application lock (MVP_draft.md 64.4). -->
+    <string name="lock_title">المركز مقفل</string>
+    <string name="lock_body">افتح القفل ببصمتك أو بقفل الشاشة.</string>
+    <string name="lock_open">فتح القفل</string>
+    <string name="lock_prompt_title">فتح مركز الاتصال المؤسسي</string>
+    <string name="lock_prompt_on">تشغيل قفل التطبيق</string>
+    <string name="lock_prompt_off">إيقاف قفل التطبيق</string>
+    <string name="lock_prompt_sub">ببصمتك أو بقفل الشاشة</string>
 </resources>

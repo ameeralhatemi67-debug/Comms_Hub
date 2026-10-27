@@ -1,0 +1,116 @@
+{
+  "script": "qa/android-links.cjs",
+  "run": "2026-10-27T20:12:57.476Z",
+  "checks": [
+    {
+      "name": "6a. with a screen PIN on the phone the lock can be used, and it is off",
+      "pass": true,
+      "detail": "{\"available\":true,\"on\":false}"
+    },
+    {
+      "name": "6b. once the notices question is settled, the lock is offered: «قفل التطبيق», «تشغيل القفل», «ليس الآن»",
+      "pass": true,
+      "detail": "قفل التطبيق\n\nاحمِ المركز على هذا الهاتف: يطلب التطبيق بصمتك أو قفل الشاشة عند فتحه، وبعد خمس دقائق من تركه. يمكنك تغيير ذلك من «الحساب».\n\nتشغيل القفل\nليس الآن"
+    },
+    {
+      "name": "6c. «تشغيل القفل» asks Android first; with the PIN the lock is on, and it is not offered again",
+      "pass": true,
+      "detail": "{\"state\":{\"available\":true,\"on\":true},\"offered\":\"1\",\"open\":false}"
+    },
+    {
+      "name": "7a. back after longer than the lock waits, Android asks before the page shows",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "7b. the PIN opens it, and the page is there again",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "8a. put off, the page stays covered by «المركز مقفل» with «فتح القفل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "8b. «فتح القفل» asks again, and the PIN opens it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "9a. a short absence does not lock",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "9b. opened afresh, the application asks first",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "10. «إيقاف القفل» asks Android, and then nothing locks",
+      "pass": true,
+      "detail": "{\"state\":{\"available\":true,\"on\":false},\"note\":\"أُوقف قفل التطبيق.\"}"
+    },
+    {
+      "name": "1. the site serves /.well-known/assetlinks.json as JSON, where it is, with no redirect",
+      "pass": true,
+      "detail": "{\"status\":200,\"type\":\"application/json; charset=UTF-8\"}"
+    },
+    {
+      "name": "2a. bridge version 5; before Android lets the application open the site's links, links.verified says no",
+      "pass": true,
+      "detail": "{\"bridge\":{\"bridge\":5,\"verified\":false},\"declared\":\"sa.commshub.app.qa:\\r\\n    ID: 3170387f-ef77-4e3b-8668-385080512e15\\r\\n    Signatures: [EA:7B:7F:9F:33:3B:40:E7:3F:2D:FF:0E:76:A2:1B:D0:72:D3:A4:F3:75:BE:7C:2F:29:4A:A8:21:E8:1B:64:A7]\\r\\n    Domain verification state:\\r\\n      comms-hub-three.vercel.app: 1024\"}"
+    },
+    {
+      "name": "2b. once the person allows it in Android's settings, links.verified says yes",
+      "pass": true,
+      "detail": "{\"sel\":\"\",\"verified\":true}"
+    },
+    {
+      "name": "3a. a page of the site opens in the application, on the address the build opens, with its query",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/work/CH-101?tab=texts"
+    },
+    {
+      "name": "3b. the return of a mailed sign-in link opens in the application and forwards to the sign-in page with its query",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/?qa=a6"
+    },
+    {
+      "name": "3c. a member's WhatsApp link opens in the application",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/w/qa-not-a-real-token"
+    },
+    {
+      "name": "4a. a review link for outside people opens in the browser",
+      "pass": true,
+      "detail": "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
+    },
+    {
+      "name": "4b. the site's root opens in the browser",
+      "pass": true,
+      "detail": "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
+    },
+    {
+      "name": "5. an intent naming a link that climbs out of a page, or another site, opens nothing",
+      "pass": true,
+      "detail": "{\"before\":\"http://127.0.0.1:3000/work/CH-202\",\"after\":\"http://127.0.0.1:3000/work/CH-202\"}"
+    }
+  ],
+  "notes": [
+    "assetlinks.json still names the stand-in OWNER_RELEASE_KEY_SHA256: Android cannot verify the links of a release until the owner puts the release key's fingerprint there (a signed release build refuses until then).",
+    "After the check: Lock credential cleared.",
+    "After the check: the check package is uninstalled."
+  ],
+  "device": {
+    "model": "sdk_gphone16k_x86_64",
+    "android": "17",
+    "sdk": "37"
+  },
+  "pin": "Pin set to '4826'",
+  "appLinks": "sa.commshub.app.qa:\r\n    ID: 3170387f-ef77-4e3b-8668-385080512e15\r\n    Signatures: [EA:7B:7F:9F:33:3B:40:E7:3F:2D:FF:0E:76:A2:1B:D0:72:D3:A4:F3:75:BE:7C:2F:29:4A:A8:21:E8:1B:64:A7]\r\n    Domain verification state:\r\n      comms-hub-three.vercel.app: 1024",
+  "total": 19,
+  "passed": 19,
+  "failed": 0
+}

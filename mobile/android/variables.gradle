@@ -15,4 +15,6 @@ ext {
     cordovaAndroidVersion = '14.0.1'
     // Firebase BoM 34.19.0 (2026-09-09), past the project's 14-day rule; push only (A5).
     firebaseMessagingVersion = '25.1.3'
+    // The application lock (A6): the stable androidx.biometric.
+    androidxBiometricVersion = '1.1.0'
 }

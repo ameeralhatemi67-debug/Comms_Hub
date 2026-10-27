@@ -1,6 +1,6 @@
 {
   "script": "qa/android-shell.cjs",
-  "run": "2026-10-27T19:27:50.157Z",
+  "run": "2026-10-27T20:28:24.074Z",
   "checks": [
     {
       "name": "the release APK opens the production address alone, over https, uninspectable",
@@ -25,12 +25,12 @@
     {
       "name": "the page sees window.commsHubNative: platform android, shell capacitor, the installed version and its bridge",
       "pass": true,
-      "detail": "{\"n\":{\"platform\":\"android\",\"shell\":\"capacitor\",\"version\":\"0.1.0\",\"bridge\":4,\"appUpdate\":{},\"download\":{},\"share\":{},\"push\":{}},\"frozen\":true,\"replaced\":false,\"capacitor\":\"object\"}"
+      "detail": "{\"n\":{\"platform\":\"android\",\"shell\":\"capacitor\",\"version\":\"0.1.0\",\"bridge\":5,\"appUpdate\":{},\"download\":{},\"share\":{},\"push\":{},\"links\":{},\"lock\":{}},\"frozen\":true,\"replaced\":false,\"capacitor\":\"object\"}"
     },
     {
       "name": "the bridge is frozen and cannot be replaced by the page",
       "pass": true,
-      "detail": "{\"n\":{\"platform\":\"android\",\"shell\":\"capacitor\",\"version\":\"0.1.0\",\"bridge\":4,\"appUpdate\":{},\"download\":{},\"share\":{},\"push\":{}},\"frozen\":true,\"replaced\":false,\"capacitor\":\"object\"}"
+      "detail": "{\"n\":{\"platform\":\"android\",\"shell\":\"capacitor\",\"version\":\"0.1.0\",\"bridge\":5,\"appUpdate\":{},\"download\":{},\"share\":{},\"push\":{},\"links\":{},\"lock\":{}},\"frozen\":true,\"replaced\":false,\"capacitor\":\"object\"}"
     },
     {
       "name": "a frame of the same address has no bridge",
@@ -75,7 +75,7 @@
     {
       "name": "another site opens in the phone's browser",
       "pass": true,
-      "detail": "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
+      "detail": "com.android.chrome/com.google.android.apps.chrome.IntentDispatcher"
     },
     {
       "name": "a review link for outside people opens in the browser",
@@ -95,7 +95,7 @@
     {
       "name": "«متابعة في المتصفح» opens the connection in the browser",
       "pass": true,
-      "detail": "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
+      "detail": "com.android.chrome/com.google.android.apps.chrome.IntentDispatcher"
     },
     {
       "name": "the back key goes back through the site's pages",
@@ -149,10 +149,10 @@
   ],
   "apk": {
     "release": {
-      "bytes": 10649467
+      "bytes": 10852999
     },
     "qa": {
-      "bytes": 12940753
+      "bytes": 13588271
     }
   },
   "device": {

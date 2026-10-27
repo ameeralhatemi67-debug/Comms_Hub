@@ -157,6 +157,55 @@ test('A5: Firebase\'s identifiers come from outside at build time, per build id;
   }
 });
 
+test('A6: the links the application claims are the site\'s pages, the member links and the sign-in return, and nothing else', () => {
+  const m = read(app, 'src', 'main', 'AndroidManifest.xml');
+  const filter = /<intent-filter android:autoVerify="true">([\s\S]*?)<\/intent-filter>/.exec(m)[1];
+  assert.match(filter, /<action android:name="android\.intent\.action\.VIEW" \/>/);
+  assert.match(filter, /<category android:name="android\.intent\.category\.BROWSABLE" \/>/);
+  assert.deepEqual([...filter.matchAll(/android:scheme="([^"]+)"/g)].map((x) => x[1]), ['https']);
+  assert.deepEqual([...filter.matchAll(/android:host="([^"]+)"/g)].map((x) => x[1]), ['comms-hub-three.vercel.app']);
+  const access = read(root, 'src', 'lib', 'access.ts');
+  const pages = [.../export const menuEntries = \[([\s\S]*?)\] as const;/.exec(access)[1].matchAll(/href: '([^']+)'/g)].map((x) => x[1]).filter((h) => h !== '/');
+  const claimed = [...filter.matchAll(/android:(path|pathPrefix)="([^"]+)"/g)].map((x) => `${x[1]}:${x[2]}`);
+  const want = [...pages.flatMap((p) => [`path:${p}`, `pathPrefix:${p}/`]), 'pathPrefix:/w/', 'path:/app/return'];
+  assert.deepEqual(claimed, want, 'every page and what is under it, then /w/ and /app/return');
+  for (const no of ['/r/', '/m/', '/api', '"/"']) assert.ok(!filter.includes(no.startsWith('"') ? `path=${no}` : `"${no}`), no);
+  const links = java('Links');
+  const prefixes = /PREFIXES = Collections\.unmodifiableList\(Arrays\.asList\(([\s\S]*?)\)\);/.exec(links)[1].match(/"[^"]+"/g).map((s) => s.slice(1, -1));
+  assert.deepEqual(prefixes, [...pages, '/w/', '/app/return'], 'Links.java opens exactly what the manifest claims');
+  assert.match(java('MainActivity'), /String target = Links\.target\(link, BuildConfig\.LINK_SITE, opens\);\s*if \(target == null \|\| !Navigation\.isAllowed\(target, Shell\.ALLOWED\)\) return;/);
+});
+
+test('A6: a signed release must be the certificate the site\'s assetlinks.json names', () => {
+  const build = read(mobile, 'scripts', 'build.mjs');
+  assert.match(build, /if \(kind === 'release'\) \{\s*const signer = signerOf/);
+  assert.match(build, /if \(!site\.includes\(signer\)\) \{[\s\S]*?process\.exit\(3\);/);
+  const links = JSON.parse(read(root, 'public', '.well-known', 'assetlinks.json'));
+  assert.equal(links.length, 1);
+  assert.deepEqual(links[0].relation, ['delegate_permission/common.handle_all_urls']);
+  assert.equal(links[0].target.namespace, 'android_app');
+  assert.equal(links[0].target.package_name, 'sa.commshub.app');
+  for (const f of links[0].target.sha256_cert_fingerprints) {
+    assert.ok(f === 'OWNER_RELEASE_KEY_SHA256' || /^([0-9A-F]{2}:){31}[0-9A-F]{2}$/.test(f), `a fingerprint, or the stand-in a signed release refuses: ${f}`);
+  }
+});
+
+test('A6: the lock is off by default, asks Android both ways, and covers the page after five minutes away', () => {
+  const lock = java('AppLock');
+  assert.match(lock, /getBoolean\("on", false\)/, 'off by default');
+  assert.match(lock, /BIOMETRIC_WEAK \| BiometricManager\.Authenticators\.DEVICE_CREDENTIAL/);
+  assert.match(lock, /ask\(a, a\.getString\(on \? R\.string\.lock_prompt_on : R\.string\.lock_prompt_off\)/, 'turning it on or off asks');
+  assert.match(lock, /if \(leftAt < 0 \|\| SystemClock\.elapsedRealtime\(\) - leftAt >= BuildConfig\.LOCK_AFTER_MS\) lock\(a\);/);
+  assert.match(lock, /setRecentsScreenshotEnabled\(!on\(a\)\)/);
+  const g = read(app, 'build.gradle');
+  assert.match(g, /buildConfigField "long", "LOCK_AFTER_MS", "300000L"/);
+  assert.equal((g.match(/"LOCK_AFTER_MS", "5000L"/g) ?? []).length, 1, 'five seconds in the check package only');
+  assert.match(/qa \{[\s\S]*?\n {8}\}/.exec(g)[0], /"LOCK_AFTER_MS", "5000L"/);
+  assert.match(read(mobile, 'android', 'variables.gradle'), /androidxBiometricVersion = '1\.1\.0'/);
+  const strings = read(app, 'src', 'main', 'res', 'values', 'strings.xml');
+  for (const n of ['lock_title', 'lock_body', 'lock_open', 'lock_prompt_title', 'lock_prompt_on', 'lock_prompt_off', 'lock_prompt_sub']) assert.match(strings, new RegExp(`<string name="${n}">[^<]*[\\u0600-\\u06ff][^<]*</string>`), n);
+});
+
 test('the back key asks the page\'s open window first, as Escape does', () => {
   const main = java('MainActivity');
   assert.match(main, /document\.querySelectorAll\('dialog\[open\]'\)/);

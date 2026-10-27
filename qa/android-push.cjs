@@ -190,7 +190,7 @@ const dialogShown = (page) => page.evaluate(() => !!document.querySelector('dial
       const n = window.commsHubNative;
       return { bridge: n?.bridge, methods: ['state', 'request', 'token', 'onOpen', 'onReceive'].map((m) => typeof n?.push?.[m]), frozen: Object.isFrozen(n?.push), state: await n.push.state() };
     });
-    check('bridge version 4 with push (state, request, token, onOpen, onReceive), frozen, and notices still to be asked', bridge.bridge === 4 && bridge.methods.every((t) => t === 'function') && bridge.frozen && bridge.state === 'prompt', bridge);
+    check('bridge version 4 or later with push (state, request, token, onOpen, onReceive), frozen, and notices still to be asked', bridge.bridge >= 4 && bridge.methods.every((t) => t === 'function') && bridge.frozen && bridge.state === 'prompt', bridge);
     const ch = channels();
     result.channels = ch;
     check('the channels «يحتاج قرارك» (high, with sound), «للانتباه» (low, silent) and «الرسائل» (default), as Android\'s settings show them', ch.decide?.name === 'يحتاج قرارك' && ch.decide.importance === 4 && ch.attention?.name === 'للانتباه' && ch.attention.importance === 2 && ch.messages?.name === 'الرسائل' && ch.messages.importance === 3, ch);

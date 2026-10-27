@@ -12,7 +12,7 @@ public class IdentityTest {
     public void topFrameOnlyFrozenAndTheShapeTheSiteReads() {
         String s = Identity.script("0.1.0", false);
         assertTrue(s.contains("if (window.top !== window || 'commsHubNative' in window) return;"));
-        assertTrue(s.contains("platform: 'android', shell: 'capacitor', version: '0.1.0', bridge: 4"));
+        assertTrue(s.contains("platform: 'android', shell: 'capacitor', version: '0.1.0', bridge: 5"));
         assertTrue(s.contains("value: Object.freeze(bridge), writable: false, configurable: false"));
         assertFalse(s.contains("appUpdate"));
     }
@@ -34,6 +34,14 @@ public class IdentityTest {
         assertTrue(s.contains("onOpen: listen('pushOpen', function (fn, x) { if (typeof x.go === 'string') fn(x.go); }),"));
         assertTrue(s.contains("onReceive: listen('pushReceive', function (fn) { fn(); })"));
         assertTrue(s.contains("held = cap.addListener('CommsHubShell', event,"));
+    }
+
+    @Test
+    public void linksAndTheLockAnswerPlainBooleans() {
+        String s = Identity.script("0.1.0", false);
+        assertTrue(s.contains("bridge.links = Object.freeze({ verified: function () { return call('linksVerified').then(function (x) { return x.verified === true; }); } });"));
+        assertTrue(s.contains("state: function () { return call('lockState').then(function (x) { return { available: x.available === true, on: x.on === true }; }); },"));
+        assertTrue(s.contains("set: function (on) { return call('lockSet', { on: on === true }).then(function (x) { return x.ok === true; }); }"));
     }
 
     @Test

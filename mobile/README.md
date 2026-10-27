@@ -168,6 +168,22 @@ only), and a copy of 0.1.1 re-signed with a throwaway key made for the run and d
 own feed at `http://127.0.0.1:3002/android`, which is the check package's compiled feed, and drives the whole
 path on the emulator.
 
+## Links that open the application
+
+Android opens the site's links in the application only after it has read `https://comms-hub-three.vercel.app/.well-known/assetlinks.json`
+and found there the certificate the installed application is signed with (`public/.well-known/assetlinks.json` in this
+repository). Until the owner gives it, the file holds the stand-in `OWNER_RELEASE_KEY_SHA256`.
+
+1. Read the release certificate's SHA-256 fingerprint (it is public), with the `keytool -list` command of "The release key"
+   above; it looks like `AB:CD:…` (32 pairs).
+2. Put it in place of `OWNER_RELEASE_KEY_SHA256` in `public/.well-known/assetlinks.json`, commit, and push: the site must
+   serve it before the release is published. A signed `npm run pack:release` refuses to finish while the file names
+   another certificate.
+3. In Supabase, "Authentication", "URL Configuration", add `https://comms-hub-three.vercel.app/app/return` to the
+   allowed redirect addresses, so a link mailed from the sign-in screen inside the application can come back to it.
+4. If Google Play later signs the application with a key of its own, add that certificate's fingerprint too (Play
+   Console, "App integrity").
+
 ## Push notices (the owner's Firebase project)
 
 Push notices go through Firebase Cloud Messaging. The application needs four public identifiers of the owner's
@@ -211,5 +227,5 @@ page can name nothing but a file route, and that no Capacitor interface reaches 
 | `capacitor.config.json` | the release's configuration: the production address, no cleartext, no inspection |
 | `scripts/config.mjs` | the debug and check builds' configuration, derived from it |
 | `android/app/build.gradle` | the version (from `package.json`), the address list per build, the check package, the key from outside |
-| `android/app/src/main/java/sa/commshub/app/` | the window (`MainActivity`), where an address goes (`Navigation`), the page's view of the application (`Identity`, `Shell`), downloads, saving, opening and sharing the site's files (`Downloads`, `FileNames`, `SiteFiles`), Capacitor's page interfaces and cookie handler taken off (`Shell.narrow`), push notices (`Push`, `PushService`, `ShellApp`; the check package's own `src/qa/QaPush.java`), the narrowed permissions (`ShellChromeClient`), the refused file routes and the connection screen (`ShellWebViewClient`) |
+| `android/app/src/main/java/sa/commshub/app/` | the window (`MainActivity`), where an address goes (`Navigation`), the page's view of the application (`Identity`, `Shell`), downloads, saving, opening and sharing the site's files (`Downloads`, `FileNames`, `SiteFiles`), Capacitor's page interfaces and cookie handler taken off (`Shell.narrow`), links (`Links`), the lock (`AppLock`), push notices (`Push`, `PushService`, `ShellApp`; the check package's own `src/qa/QaPush.java`), the narrowed permissions (`ShellChromeClient`), the refused file routes and the connection screen (`ShellWebViewClient`) |
 | `www/offline.html` | the connection screen |

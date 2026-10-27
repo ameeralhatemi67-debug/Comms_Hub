@@ -56,8 +56,10 @@ public class MainActivity extends BridgeActivity {
         downloads = new Downloads(this, web.getSettings().getUserAgentString());
         web.setDownloadListener((url, userAgent, disposition, mime, length) -> downloads.start(url, userAgent, disposition, mime));
         clearOfSystemBars((View) web.getParent());
-        // Opened by a tapped push (PushService): its page instead of the first one.
+        // Opened by a tapped push (PushService) or a link of the site (A6): its page instead of the first one.
         openPushed(getIntent());
+        openLink(getIntent());
+        AppLock.hideFromRecents(this);
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -100,6 +102,22 @@ public class MainActivity extends BridgeActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         openPushed(intent);
+        openLink(intent);
+    }
+
+    /**
+     * A link of the site that Android handed to the application (A6): the same page and query on the address this
+     * build opens, checked again by Links (the claimed pages only, no dot segment) and by the compiled list.
+     */
+    private void openLink(Intent intent) {
+        if (intent == null || !Intent.ACTION_VIEW.equals(intent.getAction()) || intent.getData() == null || bridge == null) return;
+        String link = intent.getData().toString();
+        intent.setData(null);
+        String opens = Navigation.originOf(Navigation.parse(bridge.getServerUrl()));
+        String target = Links.target(link, BuildConfig.LINK_SITE, opens);
+        if (target == null || !Navigation.isAllowed(target, Shell.ALLOWED)) return;
+        WebView w = bridge.getWebView();
+        w.post(() -> w.loadUrl(target));
     }
 
     private void openPushed(Intent intent) {
@@ -116,6 +134,8 @@ public class MainActivity extends BridgeActivity {
     public void onResume() {
         super.onResume();
         front = true;
+        // The application lock, when the person turned it on (A6).
+        AppLock.returned(this);
         // The update's feed when due, and Android's confirmation of an update if it is still waiting (A3).
         if (AppUpdate.offered()) AppUpdate.get(this).resumed(this);
     }
@@ -124,8 +144,15 @@ public class MainActivity extends BridgeActivity {
     public void onPause() {
         super.onPause();
         front = false;
+        AppLock.left();
         // The session survives the application being closed from the recent list.
         CookieManager.getInstance().flush();
+    }
+
+    @Override
+    public void onDestroy() {
+        AppLock.destroyed();
+        super.onDestroy();
     }
 
     private void clearOfSystemBars(View holder) {

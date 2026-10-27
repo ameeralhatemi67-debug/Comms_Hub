@@ -54,6 +54,9 @@ android {
         buildConfigField "String", "ALLOWED_ORIGINS", "\"${productionOrigin}\""
         buildConfigField "String", "UPDATE_FEED", "\"${productionFeed}\""
         firebaseFields(delegate, 'sa.commshub.app')
+        // The site whose links open the application (A6), and how long away before the lock asks again (five minutes).
+        buildConfigField "String", "LINK_SITE", "\"${productionOrigin}\""
+        buildConfigField "long", "LOCK_AFTER_MS", "300000L"
         aaptOptions {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
@@ -98,6 +101,8 @@ android {
             buildConfigField "String", "UPDATE_FEED", "\"${checkFeed}\""
             buildConfigField "String", "ALLOWED_ORIGINS", "\"${productionOrigin},${localOrigin}\""
             firebaseFields(delegate, 'sa.commshub.app.qa')
+            // Five seconds, so the check need not wait five minutes for the lock.
+            buildConfigField "long", "LOCK_AFTER_MS", "5000L"
         }
         release {
             minifyEnabled false
@@ -138,6 +143,7 @@ dependencies {
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation "androidx.webkit:webkit:$androidxWebkitVersion"
     implementation "com.google.firebase:firebase-messaging:$firebaseMessagingVersion"
+    implementation "androidx.biometric:biometric:$androidxBiometricVersion"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
