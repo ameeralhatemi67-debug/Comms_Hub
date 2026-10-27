@@ -47,7 +47,7 @@ public class MainActivity extends BridgeActivity {
         if (bridge == null) return;
         WebView web = bridge.getWebView();
         bridge.setWebViewClient(new ShellWebViewClient(bridge, this));
-        downloads = new Downloads(this);
+        downloads = new Downloads(this, web.getSettings().getUserAgentString());
         web.setDownloadListener((url, userAgent, disposition, mime, length) -> downloads.start(url, userAgent, disposition, mime));
         clearOfSystemBars((View) web.getParent());
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -71,13 +71,21 @@ public class MainActivity extends BridgeActivity {
         });
     }
 
+    /** The site's files on the phone, for the bridge's download and share (A4). */
+    Downloads downloads() {
+        return downloads;
+    }
+
     /** Before the bridge loads the first page: the identity script and the narrowed permissions. */
     @Override
     protected void load() {
         WebView web = findViewById(com.getcapacitor.android.R.id.webview);
         if (web != null) Shell.identify(web);
         super.load();
-        if (bridge != null) bridge.getWebView().setWebChromeClient(new ShellChromeClient(bridge));
+        if (bridge != null) {
+            bridge.getWebView().setWebChromeClient(new ShellChromeClient(bridge));
+            Shell.narrow(bridge.getWebView());
+        }
     }
 
     @Override

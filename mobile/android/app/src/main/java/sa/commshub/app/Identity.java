@@ -7,13 +7,14 @@ import java.util.regex.Pattern;
  * Android paragraph). The script runs at the start of every page of a compiled address, before the page's
  * own scripts, and defines the object in the top frame only, frozen and not replaceable.
  *
- * Bridge version 1 (A2) was the identity alone. Version 2 (A3) adds `appUpdate` in the APK channel. Each
+ * Bridge version 1 (A2) was the identity alone. Version 2 (A3) adds `appUpdate` in the APK channel. Version 3
+ * (A4) adds `download` (save, open) and `share` (file), each naming a file of the site by its path. Each
  * method calls the application's plugin (CommsHubShell) through Capacitor, which hears only the main frame,
  * and passes only the plain values the plugin checks. Pure.
  */
 final class Identity {
 
-    static final int BRIDGE = 2;
+    static final int BRIDGE = 3;
     private static final Pattern SEMVER = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
 
     private Identity() {}
@@ -34,6 +35,9 @@ final class Identity {
             s.append("    start: function (r) { r = r || {}; return call('appUpdateStart', { version: String(r.version), file: String(r.file), size: Number(r.size), sha256: String(r.sha256) }).then(function (x) { return x.result; }); }\n");
             s.append("  });\n");
         }
+        s.append("  var file = function (method) { return function (f) { f = f || {}; return call(method, { path: String(f.path), name: String(f.name) }).then(function (x) { return x.ok === true; }); }; };\n");
+        s.append("  bridge.download = Object.freeze({ save: file('downloadSave'), open: file('downloadOpen') });\n");
+        s.append("  bridge.share = Object.freeze({ file: file('shareFile') });\n");
         s.append("  Object.defineProperty(window, 'commsHubNative', { value: Object.freeze(bridge), writable: false, configurable: false, enumerable: false });\n");
         s.append("})();\n");
         return s.toString();

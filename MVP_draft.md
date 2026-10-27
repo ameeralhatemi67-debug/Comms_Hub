@@ -2918,3 +2918,28 @@ Phase A3 of `Android_Build_Plan.md`. Releases are published by the owner to the 
 **Remembered on this phone only:** «لاحقاً», and the version whose notes were already said.
 
 **Google Play's copy** (A8) has no update window of its own: Play updates it.
+
+## 64.2 Opening, saving and sharing files (A4), 2026-10-27
+
+Phase A4 of `Android_Build_Plan.md`. Inside the Android application a file of the site can be opened in the phone's own viewer, saved to the phone, or shared. In a browser, and in the desktop application, nothing of this is offered and every file link stays as it was.
+
+**Where.**
+- **The asset page of the library.** In place of «تنزيل»: «فتح الملف» for a kind the page cannot show itself (a document, a design file), then «حفظ في الهاتف» and «مشاركة». A picture, a video or a sound shows in the page, so it has only «حفظ في الهاتف» and «مشاركة». An earlier version in «الإصدارات» has «فتح الملف» in place of «عرض» for those same kinds.
+- **A mail attachment** (from the Drive or from Gmail) **and a file in «المراسلة».** A tap on it asks which, in a small window with the file's name: «فتح الملف», «حفظ في الهاتف», «مشاركة» and «إلغاء». The back key closes it.
+- **A picture in «المراسلة»**, in its own window: «حفظ في الهاتف» and «مشاركة».
+
+**«حفظ في الهاتف».** A photo goes to the phone's gallery, in an album named «مركز الاتصال المؤسسي»; a video likewise; everything else goes to Downloads. The name is the one the site gives the file. «بدأ الحفظ في الهاتف.» says it started; «حُفظ في معرض الهاتف: …» or «اكتمل التنزيل: …» that it ended; «تعذّر التنزيل. حاول مرة أخرى.» that it failed. A library file saved this way is recorded in its log as a download, as «تنزيل» records it in a browser.
+
+**«فتح الملف».** The file is fetched into the application's own cache folder and opened in the viewer the phone has for its kind. «جارٍ تجهيز الملف لفتحه…» while it is fetched. If the phone has no viewer for it: «لا يوجد على الهاتف تطبيق يفتح هذا النوع من الملفات. احفظه في الهاتف بدلاً من ذلك.». If it cannot be fetched: «تعذّر فتح الملف. حاول مرة أخرى.».
+
+**«مشاركة».** The file is fetched the same way and handed to Android's share sheet, «مشاركة «…»». «جارٍ تجهيز الملف للمشاركة…» while it is fetched, «تعذّر تجهيز الملف للمشاركة. حاول مرة أخرى.» if it cannot be. A file over 50 MB says its size first: «حجم هذا الملف …، ويُنزَّل كاملاً إلى الهاتف قبل مشاركته. هل تتابع؟», with «تنزيل ومشاركة» and «إلغاء». A shared library file is recorded in its log as a download.
+
+**Its progress.** Once the person allows the application's notices (64.3), a file that is arriving shows its progress in a quiet notice of «التنزيلات», which goes when it ends.
+
+**Copies.** What is opened or shared is kept in the application's own cache folder for a day, since the other application may read it late, and then removed. Nothing is kept in a place any other application can read without being handed it.
+
+**Boundaries.**
+- The page names a file only by its path on the site's own address, one of the site's file routes (a library file, a mail attachment, a file in «المراسلة»). The application builds the address on the page's own address and refuses anything else.
+- The application fetches the file itself with the site's own session, as it does for downloads (64), and follows a redirect to another address without it. No file passes between the page and the application: the page hears only whether it worked.
+- The site still decides who may read each file, exactly as in a browser.
+- The studio's exports and the backup export of «الإعدادات» are made inside the page, and still cannot be saved from the application (64).

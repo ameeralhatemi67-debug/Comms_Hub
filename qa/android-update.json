@@ -1,6 +1,6 @@
 {
   "script": "qa/android-update.cjs",
-  "run": "2026-10-26T11:27:21.145Z",
+  "run": "2026-10-27T18:35:44.851Z",
   "checks": [
     {
       "name": "the check package 0.1.0 is installed",
@@ -68,8 +68,8 @@
     "After the check: the check package is uninstalled."
   ],
   "apks": {
-    "0.1.0": 9308155,
-    "0.1.1": 9308151
+    "0.1.0": 9335739,
+    "0.1.1": 9335735
   },
   "afterConfirm": [
     [

@@ -67,16 +67,30 @@ async function webPage(device, ms = 60000) {
  * The application started afresh, so it reads the feed again. A forced stop may come before the web view
  * writes its storage to disk, so «لاحقاً» of an earlier step is cleared on the page and the page loaded again.
  */
-async function relaunch(device) {
-  h.shell(`am force-stop ${h.APP}`);
-  await h.sleep(800);
-  h.shell(`am start -W -n ${h.ACTIVITY}`);
-  const page = await webPage(device);
-  await page.waitForSelector('.auth-card', { timeout: 60000 });
-  await page.evaluate(() => localStorage.removeItem('commshub.apk.later'));
-  await page.reload();
-  await page.waitForSelector('.auth-card', { timeout: 60000 });
-  return page;
+/** Playwright's handle on the phone, taken again by relaunch when Android stopped Playwright's driver. */
+let phone = null;
+
+async function relaunch() {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      h.shell(`am force-stop ${h.APP}`);
+      await h.sleep(800);
+      h.shell(`am start -W -n ${h.ACTIVITY}`);
+      const page = await webPage(phone);
+      await page.waitForSelector('.auth-card', { timeout: 60000 });
+      await page.evaluate(() => localStorage.removeItem('commshub.apk.later'));
+      await page.reload();
+      await page.waitForSelector('.auth-card', { timeout: 60000 });
+      return page;
+    } catch (e) {
+      // Playwright's driver and UI Automator's screen dumps share Android's one accessibility connection, and on a
+      // busy computer Android may stop the driver ("Target page, context or browser has been closed"; the crash log
+      // shows UiAutomation, not the application). The phone is then taken again, once.
+      if (attempt > 0 || !/has been closed/.test(String(e && e.message))) throw e;
+      note(`Playwright's handle on the phone was lost during a relaunch (${String(e.message).split('\n')[0]}); it was taken again and the step repeated.`);
+      [phone] = await _android.devices({ omitDriverInstall: true });
+    }
+  }
 }
 
 async function windowOf(page, ms = 20000) {
@@ -144,10 +158,11 @@ const installed = () => (/versionName=([\d.]+)/.exec(h.shell(`dumpsys package ${
     h.adb(['install', '-r', v010]);
     check('the check package 0.1.0 is installed', installed() === '0.1.0', installed());
     [device] = await _android.devices({ omitDriverInstall: true });
+    phone = device;
 
     // 1. offered, and put off
     feed = good;
-    let page = await relaunch(device);
+    let page = await relaunch();
     let w = await windowOf(page);
     shot('01-offered');
     check('a newer release is offered on the sign-in screen, with its notes, «تحديث الآن» and «لاحقاً»', w?.title === 'يتوفر إصدار جديد من التطبيق' && w.notes.join('|') === NOTES.join('|') && w.buttons.includes('تحديث الآن') && w.buttons.includes('لاحقاً'), w);
@@ -160,7 +175,7 @@ const installed = () => (/versionName=([\d.]+)/.exec(h.shell(`dumpsys package ${
     await page.evaluate(() => localStorage.removeItem('commshub.apk.later'));
 
     // 2. Android's permission first
-    page = await relaunch(device);
+    page = await relaunch();
     await windowOf(page);
     await tapButton(page, 'تحديث الآن');
     const settings = await h.until(() => /settings/i.test(h.resumed() || '') && h.resumed(), 15000, 400);
@@ -172,7 +187,7 @@ const installed = () => (/versionName=([\d.]+)/.exec(h.shell(`dumpsys package ${
 
     // 3. a file that is not the one stated
     feed = { ...good, sha256: 'f'.repeat(64) };
-    page = await relaunch(device);
+    page = await relaunch();
     await windowOf(page);
     await tapButton(page, 'تحديث الآن');
     const mismatch = await h.until(() => page.evaluate(() => document.querySelector('dialog.apk-window[open]')?.innerText.includes('لا يطابق الإصدار المعلن')), 30000, 500);
@@ -181,7 +196,7 @@ const installed = () => (/versionName=([\d.]+)/.exec(h.shell(`dumpsys package ${
 
     // 4. another key
     feed = { ...good, file: path.basename(other), size: fs.statSync(other).size, sha256: sha256(other) };
-    page = await relaunch(device);
+    page = await relaunch();
     await windowOf(page);
     await tapButton(page, 'تحديث الآن');
     const signature = await h.until(() => page.evaluate(() => document.querySelector('dialog.apk-window[open]')?.innerText.includes('ليس موقّعاً بمفتاحه')), 30000, 500);
@@ -190,7 +205,7 @@ const installed = () => (/versionName=([\d.]+)/.exec(h.shell(`dumpsys package ${
 
     // 5. required
     feed = { ...good, minimum: '0.1.1' };
-    page = await relaunch(device);
+    page = await relaunch();
     await page.evaluate(() => {
       document.cookie = 'qa_a3=kept; max-age=3600; path=/';
     });
@@ -245,7 +260,7 @@ const installed = () => (/versionName=([\d.]+)/.exec(h.shell(`dumpsys package ${
     if (protect) note('Google Play Protect asked to scan the application before the update ("App scan recommended"); the check took «More details» and «Install without scanning», sending nothing to Google. A pilot phone will see the same until Google knows the application.');
     check('after it, 0.1.1 is installed', !!now, { installed: installed(), seen: seen.slice(-3) });
     h.shell(`am start -W -n ${h.ACTIVITY}`);
-    page = await webPage(device);
+    page = await webPage(phone);
     await page.waitForSelector('.auth-card', { timeout: 60000 });
     const kept = await page.evaluate(() => document.cookie);
     check('the site\'s cookie is kept through the update', kept.includes('qa_a3=kept'), kept);
@@ -269,6 +284,7 @@ const installed = () => (/versionName=([\d.]+)/.exec(h.shell(`dumpsys package ${
     } catch {
       // the emulator may be gone
     }
+    if (phone && phone !== device) await phone.close().catch(() => undefined);
     if (device) await device.close().catch(() => undefined);
     if (feedServer) feedServer.close();
     if (stopSite) await stopSite();

@@ -1783,3 +1783,37 @@ When recording future implementation outcomes, follow this standardized template
   - Nothing was seen signed in, so «الحساب»'s panel was not seen rendered.
   - The bucket is not applied, so the browser's download link was not seen working against a real release.
   - No real phone, no signed release (the key is the owner's), nothing pushed or published.
+
+### 2026-10-27: the Android application, A4: opening, saving and sharing files
+
+The owner asked on 2026-10-27 to build through A5 now. A4 was built here on `main`; A5's server half runs at the same time in its own worktree.
+
+- **What was built.**
+  - **Native** (`SiteFiles.java`, `Downloads.java`, `CommsHubShell.java`, `Identity.java`, `MainActivity.java`, `Shell.java`):
+    - Bridge version 3: `download.save`, `download.open` and `share.file`, each taking `{ path, name }` and answering `true` or `false`.
+    - The path must be one of the site's four file routes (a library file with `?v=N` or `?download=1`, a messaging file, a mail attachment, an inbound mail file). The application builds the address on the origin of the page in front; anything else is refused before anything is fetched.
+    - «حفظ في الهاتف» puts photos and videos in the gallery, in the album «مركز الاتصال المؤسسي», and everything else in Downloads. A kind the gallery refuses falls back to Downloads.
+    - «فتح الملف» and «مشاركة» fetch into `cache/shared/<random>/<name>`, the FileProvider's only folder, then open the phone's viewer or Android's share sheet with a read grant. Copies are kept a day and swept at start.
+    - A file over 50 MB asks before it is fetched to share, saying its size. «إلغاء» fetches nothing.
+    - A progress notice in a quiet channel «التنزيلات», shown only when notices are allowed. `POST_NOTIFICATIONS` is declared now and asked for in A5.
+    - The tapped-link download of A2 is unchanged: Downloads, the same messages.
+  - **Site** (`src/lib/native/files.ts`, `src/components/native/phone-file.tsx`):
+    - The asset page shows «فتح الملف» (for kinds the page cannot show), «حفظ في الهاتف» and «مشاركة» in place of «تنزيل»; an earlier version has «فتح الملف» in place of «عرض».
+    - A mail attachment, a Gmail attachment and a file in «المراسلة» ask which, in a small window the back key closes. A picture in «المراسلة» gets «حفظ في الهاتف» and «مشاركة» in its own window.
+    - A browser and the desktop application see exactly what they saw before.
+    - Saving and sharing a library file use `?download=1`, so the library's log records it as a download; opening uses the version shown.
+  - **The specification** is `MVP_draft.md` 64.2; the rule is a new bullet of the Android paragraph of `AGENTS.md`; `mobile/README.md` names the new classes and the check.
+- **Found while checking, and fixed.**
+  - **Capacitor's own interfaces reached every frame.** Capacitor 8.5.3's built-in plugins add `CapacitorCookiesAndroidInterface` and `CapacitorHttpAndroidInterface` with `addJavascriptInterface`, which Android gives every frame of every address. The cookie one sets a cookie for any domain. A first run without the fix showed both as objects inside a frame of another address. `Shell.narrow` removes both once Capacitor has loaded its plugins. Capacitor's page script works without them. The A2 and A3 builds had the same exposure; nothing was released.
+  - **Capacitor's cookie handler.** The same plugin sets a process-wide `CookieHandler` that adds the web view's cookies to every Java connection by host. The first run showed the site's cookie sent twice to the site and once to another port of the same host after a redirect. `Shell.narrow` sets the handler to none, so the application's connections carry the site's cookie only where `Downloads.java` puts it, an address on the compiled list. The update feed of A3 needs no cookie.
+  - Both are held by a mobile test that also reads Capacitor's sources, so an upgrade that renames them fails the test.
+- **Verified, numbers.**
+  - **Tests.** `npm test` **556 of 556** (550 before; 6 new A4 tests: the routes equal to `SiteFiles.java`, the paths a page may name, what the phone offers, which path each action asks for, the bridge call, the three pages wired; and 3 A5 rule tests that come with A5). `mobile` `npm test` **13 of 13** (11 before). JVM **21 of 21** (15 before; `SiteFilesTest` 5, `IdentityTest` one more). Typecheck clean; `npm run build` clean.
+  - **`qa/android-files.cjs`: 23 of 23** on the `Pixel_9_Pro` emulator (Android 16, check package), first run 20 of 22 before the two fixes above and a mistake in the check (the refusal step counted the redirect step's request); 21 of 23 with the fix taken out again, to show the check catches both; 23 of 23 with it.
+    - In Edge as a browser: no phone button, «تنزيل» kept, a mail attachment followed as a link.
+    - In the application: bridge 3, the buttons in order; a PDF to Downloads under its Arabic name, a PNG and a video to the gallery album, each by SHA-256; the cookie sent and the download address asked; the window that asks, closed by the back key; the phone's PDF viewer opening the cached copy; the share sheet with the cached copy; a 60 MB file saying «60 ميغابايت» first and «إلغاء» keeping nothing; a redirect to another address without the cookie; eighteen refusals (six paths, three methods) with nothing fetched; the progress notice in «التنزيلات» shown while a slow file arrived and gone after.
+  - **Earlier checks again on the changed shell:** `qa/android-shell.cjs` **28 of 28** run alone; in the first run straight after the files check it was 27 of 28, the keyboard step not seeing the page shrink within its 8 seconds while this computer was also building the site for A5's server half (nothing in A4 touches the window's insets), `qa/android-update.cjs` **12 of 12** on the third run. The first two stopped at a relaunch (3 of 4, then 5 of 6) with "Target page, context or browser has been closed"; the crash log showed Android stopping UiAutomation, Playwright's driver, which shares Android's one accessibility connection with the checks' own screen dumps, and no crash of the application. The check now takes the phone again once when that happens (the shell check already did); on the third run it was not needed.
+- **Not verified, said plainly.**
+  - Nothing was seen signed in: the asset page, mail and «المراسلة» were not seen with real files. The fixture page uses the same component.
+  - The Android toasts (started, done, failed) cannot be read by UI Automator and were not read.
+  - No real phone. Nothing pushed.

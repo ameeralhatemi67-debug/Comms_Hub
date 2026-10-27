@@ -28,6 +28,8 @@ import { pipeline, stagePosition } from '@/lib/media/rules';
 import { cardTitle, type Draft } from './composer';
 import { Av, Bdi, CHANNEL_AR, I, fileSize, localInput, tokenName } from './parts';
 import { useMail } from './provider';
+import { fileAt } from '@/lib/native/files';
+import { PhoneFileLink } from '../native/phone-file';
 import { DecideDialog, usePermRequests } from '../perm-requests';
 import { REQUEST_STATUS, howAr } from '@/lib/permissions';
 
@@ -335,19 +337,19 @@ function Attachments({ x }: { x: MessageRow }) {
       {x.files.map((id) => {
         const f = m.files.find((y) => y.id === id);
         return (
-          <a key={id} className="ml-att" href={`/api/mail/file/${id}`}>
+          <PhoneFileLink key={id} className="ml-att" file={{ name: f?.name ?? 'مرفق', path: fileAt.mail(id) }}>
             <I n="file" />
             <span>{f?.name ?? 'مرفق'}</span>
             <small>{f ? `${fileSize(f.size_bytes)} · Drive` : 'Drive'}</small>
-          </a>
+          </PhoneFileLink>
         );
       })}
       {x.inbound_files.map((f, i) => (
-        <a key={i} className="ml-att" href={`/api/mail/inbound/${x.id}/${i}`}>
+        <PhoneFileLink key={i} className="ml-att" file={{ name: f.name, path: fileAt.inbound(x.id, i) }}>
           <I n="file" />
           <span>{f.name}</span>
           <small>{fileSize(f.size)} · Gmail</small>
-        </a>
+        </PhoneFileLink>
       ))}
     </div>
   );

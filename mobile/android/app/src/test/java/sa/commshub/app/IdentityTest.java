@@ -12,9 +12,17 @@ public class IdentityTest {
     public void topFrameOnlyFrozenAndTheShapeTheSiteReads() {
         String s = Identity.script("0.1.0", false);
         assertTrue(s.contains("if (window.top !== window || 'commsHubNative' in window) return;"));
-        assertTrue(s.contains("platform: 'android', shell: 'capacitor', version: '0.1.0', bridge: 2"));
+        assertTrue(s.contains("platform: 'android', shell: 'capacitor', version: '0.1.0', bridge: 3"));
         assertTrue(s.contains("value: Object.freeze(bridge), writable: false, configurable: false"));
         assertFalse(s.contains("appUpdate"));
+    }
+
+    @Test
+    public void filesAreNamedByPathAndNameOnlyAndAnswerTrueOrFalse() {
+        String s = Identity.script("0.1.0", false);
+        assertTrue(s.contains("call(method, { path: String(f.path), name: String(f.name) }).then(function (x) { return x.ok === true; })"));
+        assertTrue(s.contains("bridge.download = Object.freeze({ save: file('downloadSave'), open: file('downloadOpen') });"));
+        assertTrue(s.contains("bridge.share = Object.freeze({ file: file('shareFile') });"));
     }
 
     @Test

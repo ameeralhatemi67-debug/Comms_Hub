@@ -561,3 +561,96 @@ test('A1: no emoji in the new files', async () => {
     assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
   }
 });
+
+// --- A4: the site's files on the phone (MVP_draft.md 64.2) ---------------------------------------------------
+
+const FID = '3f2b8c1e-0a4d-4c6b-9e7f-1a2b3c4d5e6f';
+
+test('A4: the site file routes are the application\'s, rule for rule', async () => {
+  const fs = await import('node:fs');
+  const { FILE_ROUTES } = await import('../src/lib/native/files.ts');
+  const java = fs.readFileSync('mobile/android/app/src/main/java/sa/commshub/app/SiteFiles.java', 'utf8');
+  const id = /private static final String ID = "([^"]+)";/.exec(java)[1];
+  const block = /static final String\[\] ROUTES = \{([\s\S]*?)\};/.exec(java)[1];
+  const routes = block
+    .split(/,\s*\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((l) => l.replace(/" \+ ID \+ "/g, id).replace(/^"|"$/g, '').replace(/\\\\/g, '\\'));
+  assert.deepEqual(routes, [...FILE_ROUTES]);
+});
+
+test('A4: which paths a page may name, and the paths the pages build', async () => {
+  const { fileAt, filePath } = await import('../src/lib/native/files.ts');
+  for (const ok of [fileAt.media(FID), fileAt.media(FID, 3), fileAt.media(FID, undefined, true), fileAt.media(FID, 12, true), fileAt.chat(FID), fileAt.mail(FID), fileAt.inbound(FID, 0), fileAt.inbound(FID, 12)]) {
+    assert.equal(filePath(ok), ok, ok);
+  }
+  assert.equal(fileAt.media(FID, 12, true), `/api/media/${FID}/content?v=12&download=1`);
+  for (const no of [null, 3, '', '/', '/privacy.html', `/api/media/${FID}/content?v=0`, `/api/media/${FID}/content?download=1&v=3`, `/api/media/${FID}/content?v=3&x=1`, `/api/media/${FID}/../../health`, `/api/chat/file/${FID}/x`, `/api/mail/inbound/${FID}/123`, `//evil.example/api/chat/file/${FID}`, `https://comms-hub-three.vercel.app/api/chat/file/${FID}`, `api/chat/file/${FID}`, `/api/chat/file/${FID}\n`, `/api/chat/file/not-an-id`]) {
+    assert.equal(filePath(no), null, String(no));
+  }
+});
+
+test('A4: what the phone offers, in order, and nothing in a browser or on the desktop', async () => {
+  const { phoneActions, showsInPage } = await import('../src/lib/native/files.ts');
+  const both = (f) => f === 'download' || f === 'share';
+  assert.deepEqual(phoneActions(both, false), ['open', 'save', 'share']);
+  assert.deepEqual(phoneActions(both, true), ['save', 'share'], 'pictures, video and sound show in the page');
+  assert.deepEqual(phoneActions((f) => f === 'download', false), ['open', 'save']);
+  assert.deepEqual(phoneActions(() => false, false), []);
+  assert.deepEqual(phoneActions((f) => nativeOf(d2().bridge).has(f), false), [], 'the desktop application offers none');
+  for (const m of ['image/png', 'video/mp4', 'audio/webm', 'IMAGE/JPEG']) assert.equal(showsInPage(m), true, m);
+  for (const m of ['application/pdf', 'text/plain', '', null, undefined]) assert.equal(showsInPage(m), false, String(m));
+});
+
+test('A4: opening asks for the file as shown; saving and sharing for the download, which the library records', async () => {
+  const { askFor } = await import('../src/lib/native/files.ts');
+  const f = { name: 'تقرير الربع.pdf', path: `/api/media/${FID}/content?v=2`, downloadPath: `/api/media/${FID}/content?download=1` };
+  assert.deepEqual(askFor('open', f), { path: f.path, name: f.name });
+  assert.deepEqual(askFor('save', f), { path: f.downloadPath, name: f.name });
+  assert.deepEqual(askFor('share', f), { path: f.downloadPath, name: f.name });
+  assert.deepEqual(askFor('save', { name: '', path: `/api/chat/file/${FID}` }), { path: `/api/chat/file/${FID}`, name: 'ملف' });
+  assert.equal(askFor('save', { name: 'x', path: 'https://evil.example/x' }), null);
+  assert.equal(askFor('open', { name: 'a\u0000b\nc', path: `/api/mail/file/${FID}` }).name, 'abc');
+});
+
+test('A4: the page asks the application with the path and name only, and a refusal is a plain false', async () => {
+  const { onPhone } = await import('../src/lib/native/files.ts');
+  const asked = [];
+  const bridge = {
+    ...a1,
+    bridge: 3,
+    download: { save: async (x) => (asked.push(['save', x]), true), open: async (x) => (asked.push(['open', x]), true) },
+    share: { file: async (x) => (asked.push(['share', x]), false) },
+  };
+  inWindow(bridge);
+  const file = { name: 'صورة.png', path: `/api/chat/file/${FID}` };
+  assert.equal(await onPhone('open', file), true);
+  assert.equal(await onPhone('save', file), true);
+  assert.equal(await onPhone('share', file), false, 'the person put the share sheet off');
+  assert.deepEqual(asked, [['open', { path: file.path, name: file.name }], ['save', { path: file.path, name: file.name }], ['share', { path: file.path, name: file.name }]]);
+  assert.equal(await onPhone('save', { name: 'x', path: '/privacy.html' }), false, 'never asked');
+  assert.equal(asked.length, 3);
+  inWindow({ ...bridge, download: { save: async () => { throw new Error('refused'); }, open: async () => true } });
+  assert.equal(await onPhone('save', file), false);
+  inWindow(undefined);
+  assert.equal(await onPhone('save', file), false, 'a browser');
+});
+
+test('A4: the asset page, mail attachments and files in «المراسلة» offer the phone\'s actions', async () => {
+  const fs = await import('node:fs');
+  const asset = fs.readFileSync('src/components/media/asset-page.tsx', 'utf8');
+  assert.match(asset, /<PhoneFileButtons\s+file=\{\{ name: asset\.name, path: fileAt\.media\(asset\.id, asset\.current_version\), downloadPath: fileAt\.media\(asset\.id, undefined, true\) \}\}/);
+  assert.match(asset, /only=\{\['open'\]\}/, 'an earlier version is only opened');
+  assert.match(asset, /fallback=\{\s*<a className="button" href=\{`\/api\/media\/\$\{asset\.id\}\/content\?download=1`\}>/, 'a browser keeps «تنزيل»');
+  const mail = fs.readFileSync('src/components/mail/thread.tsx', 'utf8');
+  assert.match(mail, /<PhoneFileLink key=\{id\} className="ml-att" file=\{\{ name: f\?\.name \?\? 'مرفق', path: fileAt\.mail\(id\) \}\}>/);
+  assert.match(mail, /<PhoneFileLink key=\{i\} className="ml-att" file=\{\{ name: f\.name, path: fileAt\.inbound\(x\.id, i\) \}\}>/);
+  const chat = fs.readFileSync('src/components/chat/chat-tab.tsx', 'utf8');
+  assert.match(chat, /<PhoneFileLink className="b-file" file=\{\{ name: String\(d\.name \?\? 'ملف'\), path: fileAt\.chat\(String\(d\.file\)\) \}\}>/);
+  assert.match(chat, /<PhoneFileButtons small inPage file=/, 'a picture in its window');
+  const sheet = fs.readFileSync('src/components/native/phone-file.tsx', 'utf8');
+  assert.match(sheet, /if \(!actions\.length \|\| !native\(\)\.has\('download'\)\) return;\s*e\.preventDefault\(\);/, 'a browser follows the link as before');
+  for (const f of ['src/lib/native/files.ts', 'src/components/native/phone-file.tsx']) assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
+});
+

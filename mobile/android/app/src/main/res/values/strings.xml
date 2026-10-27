@@ -15,4 +15,18 @@
     <string name="download_in_page">لا يُحفظ هذا الملف على الهاتف من التطبيق بعد. احفظه من الحاسوب أو من المتصفح.</string>
     <string name="download_fallback_name">ملف</string>
     <string name="no_app">لا يوجد تطبيق يفتح هذا الرابط.</string>
+    <!-- Saving, opening and sharing the site's files (MVP_draft.md 64.2). -->
+    <string name="save_started">بدأ الحفظ في الهاتف.</string>
+    <string name="save_done_gallery">حُفظ في معرض الهاتف: %1$s</string>
+    <string name="open_started">جارٍ تجهيز الملف لفتحه…</string>
+    <string name="open_failed">تعذّر فتح الملف. حاول مرة أخرى.</string>
+    <string name="open_no_viewer">لا يوجد على الهاتف تطبيق يفتح هذا النوع من الملفات. احفظه في الهاتف بدلاً من ذلك.</string>
+    <string name="share_started">جارٍ تجهيز الملف للمشاركة…</string>
+    <string name="share_failed">تعذّر تجهيز الملف للمشاركة. حاول مرة أخرى.</string>
+    <string name="share_title">مشاركة «%1$s»</string>
+    <string name="share_large">حجم هذا الملف %1$s، ويُنزَّل كاملاً إلى الهاتف قبل مشاركته. هل تتابع؟</string>
+    <string name="share_continue">تنزيل ومشاركة</string>
+    <string name="downloads_channel">التنزيلات</string>
+    <string name="downloads_channel_about">تقدّم تنزيل ملفات المركز إلى الهاتف.</string>
+    <string name="downloads_progress">جارٍ التنزيل…</string>
 </resources>

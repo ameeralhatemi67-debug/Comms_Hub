@@ -33,6 +33,8 @@ import { Avatar, Icon, KIND_AR, StageChip, Thumb, Ts } from './parts';
 import { useMedia } from './provider';
 import { StorageState } from './storage-state';
 import { HOLD } from '@/lib/kit/hold-reasons';
+import { fileAt } from '@/lib/native/files';
+import { PhoneFileButtons } from '../native/phone-file';
 
 type VersionRow = { id: string; version: number; uploaded_by: string; note: string | null; created_at: string; size_bytes: number };
 type NoteRow = { id: string; author: string; body: string; timecode: string | null; created_at: string };
@@ -282,10 +284,16 @@ export function AssetPage({ id }: { id: string }) {
             )}
           </div>
           <div className="mx-toolbar">
-            <a className="button" href={`/api/media/${asset.id}/content?download=1`}>
-              <Icon name="download" />
-              تنزيل
-            </a>
+            <PhoneFileButtons
+              file={{ name: asset.name, path: fileAt.media(asset.id, asset.current_version), downloadPath: fileAt.media(asset.id, undefined, true) }}
+              inPage={['image', 'video', 'audio'].includes(asset.kind)}
+              fallback={
+                <a className="button" href={`/api/media/${asset.id}/content?download=1`}>
+                  <Icon name="download" />
+                  تنزيل
+                </a>
+              }
+            />
             <button disabled={!canEdit || locked} onClick={() => setRenaming(true)}>
               <Icon name="pencil" />
               إعادة تسمية
@@ -400,9 +408,17 @@ export function AssetPage({ id }: { id: string }) {
                     </span>
                     <span className="mx-toolbar">
                       {ok && <span className="mx-chip success">معتمد</span>}
-                      <a className="button" href={`/api/media/${asset.id}/content?v=${v.version}`} target="_blank" rel="noreferrer">
-                        عرض
-                      </a>
+                      <PhoneFileButtons
+                        file={{ name: asset.name, path: fileAt.media(asset.id, v.version) }}
+                        inPage={['image', 'video', 'audio'].includes(asset.kind)}
+                        small
+                        only={['open']}
+                        fallback={
+                          <a className="button" href={`/api/media/${asset.id}/content?v=${v.version}`} target="_blank" rel="noreferrer">
+                            عرض
+                          </a>
+                        }
+                      />
                     </span>
                   </li>
                 );

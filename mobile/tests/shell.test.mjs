@@ -61,10 +61,10 @@ test('builds: the release list holds the production address alone; the check pac
   for (const p of ['*.jks', '*.keystore', 'keystore.properties', 'google-services.json']) assert.ok(ignore.split('\n').includes(p), p);
 });
 
-test('permissions: the site and the microphone, nothing else; no backup; cleartext only to the emulator in debug and check builds', () => {
+test('permissions: the site, the microphone and notices, nothing else; no backup; cleartext only to the emulator in debug and check builds', () => {
   const m = read(app, 'src', 'main', 'AndroidManifest.xml');
   const asked = [...m.matchAll(/<uses-permission android:name="([^"]+)"/g)].map((x) => x[1]).sort();
-  assert.deepEqual(asked, ['android.permission.INTERNET', 'android.permission.MODIFY_AUDIO_SETTINGS', 'android.permission.RECORD_AUDIO']);
+  assert.deepEqual(asked, ['android.permission.INTERNET', 'android.permission.MODIFY_AUDIO_SETTINGS', 'android.permission.POST_NOTIFICATIONS', 'android.permission.RECORD_AUDIO']);
   assert.match(m, /android:allowBackup="false"/);
   assert.match(m, /android:dataExtractionRules="@xml\/data_extraction_rules"/);
   assert.match(read(app, 'src', 'main', 'res', 'xml', 'network_security_config.xml'), /<base-config cleartextTrafficPermitted="false" \/>/);
@@ -95,6 +95,31 @@ test('A3: only the APK channel installs its own updates; the feed is the site\'s
   }
   assert.match(update, /new URL\(BuildConfig\.UPDATE_FEED \+ "\/" \+ URLEncoder\.encode\(file, "UTF-8"\)\)/, 'the address is built from the compiled feed, never taken from the page');
   assert.match(java('CommsHubShell'), /Navigation\.isAllowed\(Shell\.currentUrl\(\), Shell\.ALLOWED\)/);
+});
+
+test('A4: a page names a site file by its path; the application builds the address on the page\'s origin and answers ok only', () => {
+  const plugin = java('CommsHubShell');
+  assert.match(plugin, /SiteFiles\.address\(Shell\.currentUrl\(\), call\.getString\("path"\), Shell\.ALLOWED\)/);
+  assert.match(plugin, /out\.put\("ok", ok\);/);
+  assert.doesNotMatch(plugin, /getString\("(url|address|uri|href)"\)/, 'no method takes an address');
+  for (const m of ['downloadSave', 'downloadOpen', 'shareFile']) assert.match(plugin, new RegExp(`public void ${m}\\(PluginCall call\\) \\{\\s*siteFile\\(call,`), m);
+  const files = java('Downloads');
+  assert.match(files, /FileProvider\.getUriForFile\(activity, activity\.getPackageName\(\) \+ "\.fileprovider", file\)/);
+  assert.match(files, /new File\(new File\(activity\.getCacheDir\(\), "shared"\), hex\.toString\(\)\)/, 'only the folder file_paths.xml names');
+  assert.match(files, /Intent\.FLAG_GRANT_READ_URI_PERMISSION/);
+  assert.doesNotMatch(files, /DownloadManager/, 'never the system\'s download service');
+  assert.match(files, /total > SiteFiles\.ASK_TO_SHARE/);
+});
+
+test('A4: Capacitor\'s cookie and HTTP interfaces and its cookie handler are taken off once its plugins are loaded', () => {
+  const shell = java('Shell');
+  assert.match(shell, /CAPACITOR_INTERFACES = \{ "CapacitorCookiesAndroidInterface", "CapacitorHttpAndroidInterface" \}/);
+  assert.match(shell, /for \(String name : CAPACITOR_INTERFACES\) web\.removeJavascriptInterface\(name\);\s*java\.net\.CookieHandler\.setDefault\(null\);/);
+  assert.match(java('MainActivity'), /super\.load\(\);\s*if \(bridge != null\) \{\s*bridge\.getWebView\(\)\.setWebChromeClient\(new ShellChromeClient\(bridge\)\);\s*Shell\.narrow\(bridge\.getWebView\(\)\);/);
+  const cap = path.join(mobile, 'node_modules', '@capacitor', 'android', 'capacitor', 'src', 'main', 'java', 'com', 'getcapacitor', 'plugin');
+  for (const [file, name] of [['CapacitorCookies.java', 'CapacitorCookiesAndroidInterface'], ['CapacitorHttp.java', 'CapacitorHttpAndroidInterface']]) {
+    assert.match(read(cap, file), new RegExp(`addJavascriptInterface\\(this, "${name}"\\)`), `Capacitor still names ${name}`);
+  }
 });
 
 test('the back key asks the page\'s open window first, as Escape does', () => {
@@ -143,7 +168,7 @@ test('Capacitor\'s routes to files on the phone are refused, and the site\'s err
 
 test('the interface texts are Arabic, and no emoji anywhere in the application', () => {
   const strings = read(app, 'src', 'main', 'res', 'values', 'strings.xml');
-  for (const name of ['app_name', 'connect_note', 'connect_continue', 'connect_cancel', 'download_started', 'download_done', 'download_failed', 'download_in_page', 'no_app']) {
+  for (const name of ['app_name', 'connect_note', 'connect_continue', 'connect_cancel', 'download_started', 'download_done', 'download_failed', 'download_in_page', 'no_app', 'save_started', 'save_done_gallery', 'open_started', 'open_failed', 'open_no_viewer', 'share_started', 'share_failed', 'share_title', 'share_large', 'share_continue', 'downloads_channel', 'downloads_channel_about', 'downloads_progress']) {
     const m = new RegExp(`<string name="${name}">([^<]+)</string>`).exec(strings);
     assert.ok(m && /[\u0600-\u06ff]/.test(m[1]), name);
   }

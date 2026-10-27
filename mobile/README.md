@@ -168,6 +168,14 @@ only), and a copy of 0.1.1 re-signed with a throwaway key made for the run and d
 own feed at `http://127.0.0.1:3002/android`, which is the check package's compiled feed, and drives the whole
 path on the emulator.
 
+## The files check
+
+`qa/android-files.cjs` compiles the site's own file buttons (`src/components/native/phone-file.tsx`) into a
+fixture page and serves it at `http://127.0.0.1:3000`, with fixture files at the site's file routes. It saves,
+opens and shares them on the emulator and reads the bytes back from Downloads, the gallery and the
+application's cache folder. It also checks that a redirect to another address goes without the cookie, that a
+page can name nothing but a file route, and that no Capacitor interface reaches a frame of another address.
+
 ## Where the rules are
 
 | File | Holds |
@@ -175,5 +183,5 @@ path on the emulator.
 | `capacitor.config.json` | the release's configuration: the production address, no cleartext, no inspection |
 | `scripts/config.mjs` | the debug and check builds' configuration, derived from it |
 | `android/app/build.gradle` | the version (from `package.json`), the address list per build, the check package, the key from outside |
-| `android/app/src/main/java/sa/commshub/app/` | the window (`MainActivity`), where an address goes (`Navigation`), the page's view of the application (`Identity`, `Shell`), downloads (`Downloads`, `FileNames`), the narrowed permissions (`ShellChromeClient`), the refused file routes and the connection screen (`ShellWebViewClient`) |
+| `android/app/src/main/java/sa/commshub/app/` | the window (`MainActivity`), where an address goes (`Navigation`), the page's view of the application (`Identity`, `Shell`), downloads, saving, opening and sharing the site's files (`Downloads`, `FileNames`, `SiteFiles`), Capacitor's page interfaces and cookie handler taken off (`Shell.narrow`), the narrowed permissions (`ShellChromeClient`), the refused file routes and the connection screen (`ShellWebViewClient`) |
 | `www/offline.html` | the connection screen |

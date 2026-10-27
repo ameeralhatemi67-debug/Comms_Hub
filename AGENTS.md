@@ -363,6 +363,16 @@ own `package.json` and lockfile like `desktop/`, outside the site's typecheck an
   - Google Play's copy (`play`) has no `REQUEST_INSTALL_PACKAGES` and no update of its own.
   - `qa/android-update.cjs` builds its own versions of the check package and signs one with a throwaway key
     made and deleted in the run.
+- **Files (A4, `MVP_draft.md` 64.2).** Bridge version 3 adds `download` (`save`, `open`) and `share` (`file`).
+  - A page names a file only by its path, one of the site's file routes in `src/lib/native/files.ts`, held equal
+    to `SiteFiles.java` by `tests/native.test.mjs`. The application builds the address on the page's own origin
+    and answers `{ ok }` only.
+  - Photos and videos are saved to the gallery, everything else to Downloads. What is opened or shared goes
+    through the FileProvider's `cache/shared/` folder only, and is kept a day.
+  - Capacitor's `CapacitorCookiesAndroidInterface` and `CapacitorHttpAndroidInterface` reach every frame of every
+    address, and its cookie handler adds the web view's cookies to every Java connection by host. `Shell.narrow`
+    takes all three off once Capacitor has loaded its plugins. Keep it when upgrading Capacitor (a mobile test
+    reads Capacitor's sources).
 - **Checks** use the emulator started read-only and the check package `sa.commshub.app.qa`, never a real
   installation, and signed-out pages only (`qa/android-*.cjs`, `qa/android-helpers.cjs`).
 - **What stays the same as everywhere:** no sign-in bypass, stub session or stored password; nothing about

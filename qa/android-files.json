@@ -1,0 +1,135 @@
+{
+  "script": "qa/android-files.cjs",
+  "run": "2026-10-27T18:23:47.376Z",
+  "checks": [
+    {
+      "name": "in a browser: no phone button, and the asset page keeps «تنزيل» with its download address",
+      "pass": true,
+      "detail": "{\"none\":0}"
+    },
+    {
+      "name": "in a browser: a tap on a mail attachment follows its link, and nothing asks which",
+      "pass": true,
+      "detail": "{\"asked\":false,\"url\":\"http://127.0.0.1:3000/api/mail/file/0a4d4c6b-9e7f-4a2b-8c4d-000000000003\"}"
+    },
+    {
+      "name": "the application offers bridge version 3 with download (save, open) and share (file), frozen",
+      "pass": true,
+      "detail": "{\"bridge\":3,\"save\":\"function\",\"open\":\"function\",\"share\":\"function\",\"frozen\":true}"
+    },
+    {
+      "name": "a document offers «فتح الملف», «حفظ في الهاتف» and «مشاركة», in that order, in place of «تنزيل»",
+      "pass": true,
+      "detail": "[\"open\",\"save\",\"share\"]"
+    },
+    {
+      "name": "a picture, which shows in the page, offers «حفظ في الهاتف» and «مشاركة» only",
+      "pass": true,
+      "detail": "[\"save\",\"share\"]"
+    },
+    {
+      "name": "Capacitor's cookie and HTTP interfaces are not in the site's page, and nothing native is in a frame of another address",
+      "pass": true,
+      "detail": "{\"inTop\":[\"undefined\",\"undefined\",\"object\"],\"inFrame\":[\"undefined\",\"undefined\",\"undefined\",\"undefined\"]}"
+    },
+    {
+      "name": "«حفظ في الهاتف» puts a document in Downloads under the site's Arabic name, with its bytes",
+      "pass": true,
+      "detail": "{\"sum\":\"2bccab4f649c0df4ab073938bb799f2e75183e28cd294730475c266703c3fe65\",\"file\":\"/sdcard/Download/تقرير الربع.pdf\"}"
+    },
+    {
+      "name": "it is fetched from the download address the library records, with the site's cookie, by the application",
+      "pass": true,
+      "detail": "{\"port\":3000,\"path\":\"/api/media/0a4d4c6b-9e7f-4a2b-8c4d-000000000001/content?download=1\",\"cookie\":\"qa_a4=session-stand-in\",\"ua\":\"Mozilla/5.0 (Linux; Android 17; sdk_gphone16k_x86_64 Build/CP31.260623.012; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.88 Mobile Safari/537.36\"}"
+    },
+    {
+      "name": "a picture goes to the gallery, in the application's album, with its bytes",
+      "pass": true,
+      "detail": "{\"sum\":\"77e88ab69b413554861c85555d621952ca6747bdd25ba83aa4b9a299ff34c53c\",\"file\":\"/sdcard/Pictures/مركز الاتصال المؤسسي/شعار المركز.png\"}"
+    },
+    {
+      "name": "a tap on a file in «المراسلة» asks which, with the file's name, the three actions and «إلغاء»",
+      "pass": true,
+      "detail": "{\"name\":\"مقطع.mp4\",\"actions\":[\"open\",\"save\",\"share\"],\"cancel\":true}"
+    },
+    {
+      "name": "a video goes to the gallery, in the application's album, with its bytes",
+      "pass": true,
+      "detail": "{\"sum\":\"160fb51cdb6b6e229d29414ecb765e5528e12fc4d743d00d44574e235a4ccdae\",\"file\":\"/sdcard/Movies/مركز الاتصال المؤسسي/مقطع.mp4\"}"
+    },
+    {
+      "name": "the window closes once the action is done",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the back key closes the window that asks, and the page stays",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "«فتح الملف» opens the phone's own viewer, outside the application",
+      "pass": true,
+      "detail": "{\"opened\":\"com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity\",\"viewers\":\"1 activities found:\\r\\n  Activity #0:\\r\\n    priority=0 preferredOrder=0 match=0x608000 specificIndex=-1 isDefault=true\\r\\n    com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity\"}"
+    },
+    {
+      "name": "the viewer reads a copy in the application's cache folder, with the file's bytes and name",
+      "pass": true,
+      "detail": "[{\"sum\":\"2bccab4f649c0df4ab073938bb799f2e75183e28cd294730475c266703c3fe65\",\"file\":\"cache/shared/ef4b398a627e7fc2/تقرير الربع.pdf\"}]"
+    },
+    {
+      "name": "opening asks for the version shown, not the download the library would record",
+      "pass": true,
+      "detail": "{\"port\":3000,\"path\":\"/api/media/0a4d4c6b-9e7f-4a2b-8c4d-000000000001/content?v=2\",\"cookie\":\"qa_a4=session-stand-in\",\"ua\":\"Mozilla/5.0 (Linux; Android 17; sdk_gphone16k_x86_64 Build/CP31.260623.012; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.88 Mobile Safari/537.36\"}"
+    },
+    {
+      "name": "«مشاركة» opens Android's share sheet",
+      "pass": true,
+      "detail": "com.android.intentresolver/.ChooserActivityLauncher"
+    },
+    {
+      "name": "the share sheet is given a copy in the application's cache folder, with the file's bytes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a file over 50 MB says its size before it is fetched to share",
+      "pass": true,
+      "detail": "حجم هذا الملف 60 ميغابايت، ويُنزَّل كاملاً إلى الهاتف قبل مشاركته. هل تتابع؟"
+    },
+    {
+      "name": "«إلغاء» fetches nothing and keeps nothing",
+      "pass": true,
+      "detail": "{\"before\":2,\"after\":2}"
+    },
+    {
+      "name": "a redirect to another address is followed without the site's cookie",
+      "pass": true,
+      "detail": "{\"first\":{\"port\":3000,\"path\":\"/api/chat/file/0a4d4c6b-9e7f-4a2b-8c4d-000000000006\",\"cookie\":\"qa_a4=session-stand-in\",\"ua\":\"Mozilla/5.0 (Linux; Android 17; sdk_gphone16k_x86_64 Build/CP31.260623.012; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/152.0.7977.88 Mobile Safari/537.36\"},\"second\":{\"port\":3001,\"path\":\"/elsewhere.txt\",\"cookie\":null}}"
+    },
+    {
+      "name": "a page can name only a file route of its own site: everything else is refused and nothing is fetched",
+      "pass": true,
+      "detail": "{\"tries\":{\"a page of the site (save)\":\"refused\",\"a page of the site (open)\":\"refused\",\"a page of the site (share)\":\"refused\",\"another address (save)\":\"refused\",\"another address (open)\":\"refused\",\"another address (share)\":\"refused\",\"a path that climbs (save)\":\"refused\",\"a path that climbs (open)\":\"refused\",\"a path that climbs (share)\":\"refused\",\"another site written as a path (save)\":\"refused\",\"another site written as a path (open)\":\"refused\",\"another site written as a path (share)\":\"refused\",\"a query the route does not take (save)\":\"refused\",\"a query the route does not take (open)\":\"refused\",\"a query the route does not take (share)\":\"refused\",\"nothing (save)\":\"refused\",\"nothing (open)\":\"refused\",\"nothing (share)\":\"refused\"},\"fetched\":[]}"
+    },
+    {
+      "name": "once notices are allowed, a notice shows a file's progress in «التنزيلات» and goes when it ends",
+      "pass": true,
+      "detail": "{\"showing\":true,\"saved\":true,\"gone\":true}"
+    }
+  ],
+  "notes": [
+    "The application's short messages (started, done, failed) are Android toasts, which UI Automator cannot read; they were not read by this check.",
+    "Viewers of a PDF on this emulator:     com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity.",
+    "After the check: the check package is uninstalled."
+  ],
+  "device": {
+    "model": "sdk_gphone16k_x86_64",
+    "android": "17",
+    "sdk": "37"
+  },
+  "pdfViewers": "1 activities found:\r\n  Activity #0:\r\n    priority=0 preferredOrder=0 match=0x608000 specificIndex=-1 isDefault=true\r\n    com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity",
+  "total": 23,
+  "passed": 23,
+  "failed": 0
+}

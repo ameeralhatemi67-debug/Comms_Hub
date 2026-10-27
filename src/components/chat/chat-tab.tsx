@@ -38,6 +38,8 @@ import {
 import { stageAr } from '@/lib/mail/rules';
 import { pipeline, stagePosition, type Stage } from '@/lib/media/rules';
 import { Thumb } from '../media/parts';
+import { fileAt } from '@/lib/native/files';
+import { PhoneFileButtons, PhoneFileLink } from '../native/phone-file';
 import { Face, presenceOf, presenceText, roleTitle, usePeople } from '../people';
 import { I, fileSize, localInput, type IconName } from '../mail/parts';
 import { useChat, type AssetLite } from './provider';
@@ -216,6 +218,9 @@ export function ChatTab({ onToMail }: { onToMail: (p: MailPrefill) => void }) {
             <small>
               {people.nameOf(dialog.msg.author)} · <bdi dir="ltr">{hhmm(dialog.msg.created_at)}</bdi>
             </small>
+            <span className="actions">
+              <PhoneFileButtons small inPage file={{ name: String(dialog.msg.data?.name ?? dialog.msg.body ?? 'صورة'), path: fileAt.chat(String(dialog.msg.data?.file)) }} />
+            </span>
           </div>
         </Dlg>
       )}
@@ -798,7 +803,7 @@ function Content({ room, m, onImg }: { room: RoomRow; m: ChatMessage; onImg: (m:
     );
   if (m.kind === 'file')
     return (
-      <a className="b-file" href={`/api/chat/file/${String(d.file)}`}>
+      <PhoneFileLink className="b-file" file={{ name: String(d.name ?? 'ملف'), path: fileAt.chat(String(d.file)) }}>
         <span className="fi">
           <I n="file" />
         </span>
@@ -806,7 +811,7 @@ function Content({ room, m, onImg }: { room: RoomRow; m: ChatMessage; onImg: (m:
           <b>{String(d.name ?? 'ملف')}</b>
           <small>{fileSize(Number(d.size ?? 0))} · Drive</small>
         </span>
-      </a>
+      </PhoneFileLink>
     );
   if (m.kind === 'asset') return <AssetCard id={String(d.asset_id)} />;
   if (m.kind === 'work') return <WorkCard id={String(d.id)} title={String(d.title ?? '')} />;
