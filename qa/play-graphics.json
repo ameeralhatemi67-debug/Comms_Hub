@@ -1,0 +1,51 @@
+{
+  "script": "qa/play-graphics.cjs",
+  "run": "2026-10-28T10:44:56.086Z",
+  "checks": [
+    {
+      "name": "icon-512.png: 512 by 512",
+      "pass": true,
+      "detail": "[512,512]"
+    },
+    {
+      "name": "icon-512.png: under 1 MB, as Play asks",
+      "pass": true,
+      "detail": "89406"
+    },
+    {
+      "name": "icon-512.png: the four corners are the brand's green, opaque",
+      "pass": true,
+      "detail": "[[17,92,71,255],[14,76,59,255],[9,50,39,255],[7,39,29,255]]"
+    },
+    {
+      "name": "feature-graphic-1024x500.png: 1024 by 500",
+      "pass": true,
+      "detail": "[1024,500]"
+    },
+    {
+      "name": "feature-graphic-1024x500.png: under 1 MB, as Play asks",
+      "pass": true,
+      "detail": "129104"
+    },
+    {
+      "name": "feature-graphic-1024x500.png: the four corners are the brand's green, opaque",
+      "pass": true,
+      "detail": "[[17,92,71,255],[14,76,59,255],[9,50,39,255],[7,39,29,255]]"
+    },
+    {
+      "name": "feature-graphic-1024x500.png: drawn with the site's two Arabic fonts",
+      "pass": true,
+      "detail": "[\"Kufi\",\"Plex\"]"
+    }
+  ],
+  "notes": [],
+  "icon-512.png": {
+    "bytes": 89406
+  },
+  "feature-graphic-1024x500.png": {
+    "bytes": 129104
+  },
+  "total": 7,
+  "passed": 7,
+  "failed": 0
+}

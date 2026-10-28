@@ -1,0 +1,95 @@
+{
+  "script": "qa/account-deletion.cjs",
+  "run": "2026-10-28T10:55:49.816Z",
+  "checks": [
+    {
+      "name": "/account-deletion.html answers signed out: 200, HTML, no redirect",
+      "pass": true,
+      "detail": "{\"status\":200,\"type\":\"text/html; charset=UTF-8\"}"
+    },
+    {
+      "name": "/account-deletion.html says what it should, in both languages",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "/privacy.html answers signed out: 200, HTML, no redirect",
+      "pass": true,
+      "detail": "{\"status\":200,\"type\":\"text/html; charset=UTF-8\"}"
+    },
+    {
+      "name": "/privacy.html says what it should, in both languages",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "the deletion page fits a phone's width, its Arabic half right to left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it links to the privacy policy, which fits too and links back",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no error on either page (the site's Content-Security-Policy included)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "«حذف الحساب»: what is deleted (six) and what stays (five), «طلب حذف حسابي» behind a long press, and the public page linked",
+      "pass": true,
+      "detail": "{\"title\":\"حذف الحساب\",\"lists\":[6,5],\"hold\":\"يصل الطلب إلى من يملك إزالة حسابك، وعند تنفيذه يُلغى دخولك ويُحذف ملفك الشخصي. يمكنك سحبه قبل ذلك.\",\"label\":\"طلب حذف حسابي\",\"link\":\"حذف الحساب\"}"
+    },
+    {
+      "name": "the panel and the list fit a phone's width",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "asking sends the note to account_deletion_request and kicks the phones of those told",
+      "pass": true,
+      "detail": "{\"rpc\":[{\"name\":\"account_deletion_request\",\"args\":{\"p_note\":\"أغادر المؤسسة.\"}}],\"kicks\":1,\"text\":\"حذف الحساب\\n\\nطلبت حذف حسابك في 2026-10-28 12:30. وصل الطلب إلى من يملك إزالة حسابك، وعند تنفيذه يُلغى دخولك من كل جهاز ويُحذف ملفك الشخصي.\\n\\nملاحظتك: أغادر المؤسسة.\\n\\nسحب الطلب\\n\\nوصل طلبك إلى من يملك إزالة حسابك.\\n\\nإن لم تستطع الدخول إلى المركز، فصفحة حذف الحساب تقول كيف تطلبه من بريد حسابك.\"}"
+    },
+    {
+      "name": "then the open request is shown, with its note and «سحب الطلب»",
+      "pass": true,
+      "detail": "حذف الحساب\n\nطلبت حذف حسابك في 2026-10-28 12:30. وصل الطلب إلى من يملك إزالة حسابك، وعند تنفيذه يُلغى دخولك من كل جهاز ويُحذف ملفك الشخصي.\n\nملاحظتك: أغادر المؤسسة.\n\nسحب الطلب\n\nوصل طلبك إلى من يملك إزالة حسابك.\n\nإن لم تستطع الدخول إلى المركز، فصفحة حذف الحساب تقول كيف تطلبه من بريد حسابك."
+    },
+    {
+      "name": "«سحب الطلب» withdraws it and the panel offers to ask again",
+      "pass": true,
+      "detail": "{\"last\":\"account_deletion_withdraw\",\"text\":\"حذف الحساب\\n\\nتستطيع أن تطلب حذف حسابك من المركز، في التطبيق أو في المتصفح. يصل طلبك إلى من يملك إزالة حسابك: مسؤول النظام، ومدير الاتصال لمن دونه.\\n\\nما يُحذف وما يبقى\\nملاحظة لمن ينفّذ الطلب (اختيارية)\\nطلب حذف حسابي\\n\\nسُحب طلب الحذف، ويبقى حسابك كما هو.\\n\\nإن لم تستطع الدخول إلى المركز، فصفحة حذف الحساب تقول كيف تطلبه من بريد حسابك.\"}"
+    },
+    {
+      "name": "a refusal of the database is said in Arabic",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "before the migration is applied: the button waits, and the panel points to the public page",
+      "pass": true,
+      "detail": "حذف الحساب\n\nتستطيع أن تطلب حذف حسابك من المركز، في التطبيق أو في المتصفح. يصل طلبك إلى من يملك إزالة حسابك: مسؤول النظام، ومدير الاتصال لمن دونه.\n\nما يُحذف وما يبقى\nملاحظة لمن ينفّذ الطلب (اختيارية)\nطلب حذف حسابي\n\nتعذّر قراءة طلبات الحذف الآن. أعد تحميل الصفحة، أو اتبع الطريقة الثانية في صفحة حذف الحساب.\n\nإن لم تستطع الدخول إلى المركز، فصفحة حذف الحساب تقول كيف تطلبه من بريد حسابك."
+    },
+    {
+      "name": "the director's list: each request with its name, address, time and note, and «إزالة الحساب»",
+      "pass": true,
+      "detail": "[{\"text\":\"كاتب الفحص\\nwriter@example.test · 2026-10-28 12:30\\n\\nأغادر المؤسسة نهاية الشهر.\\n\\nإزالة الحساب\",\"button\":\"إزالة الحساب\",\"disabled\":false},{\"text\":\"عضو الفحص\\nmember@example.test · 2026-10-28 13:05\\nإزالة الحساب\",\"button\":\"إزالة الحساب\",\"disabled\":false}]"
+    },
+    {
+      "name": "«إزالة الحساب» opens the removal for that person",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page error",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": [],
+  "total": 17,
+  "passed": 17,
+  "failed": 0
+}

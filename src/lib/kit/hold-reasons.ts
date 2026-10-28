@@ -74,6 +74,8 @@ export const HOLD = {
   studioUnpin: 'يصير المقطع قابلاً للنقل والقص والحذف كأي مقطع آخر.',
   /** «الحساب»، «أجهزتي»: remove a device (MVP_draft.md 64.3). */
   deviceRemove: 'تتوقف تنبيهات هذا الجهاز فوراً، ويخرج التطبيق منه في المرة التالية التي يُفتح فيها.',
+  /** «الحساب»: ask for the account to be deleted (MVP_draft.md 64.6). */
+  deletionRequest: 'يصل الطلب إلى من يملك إزالة حسابك، وعند تنفيذه يُلغى دخولك ويُحذف ملفك الشخصي. يمكنك سحبه قبل ذلك.',
 } as const;
 
 export const HOLD_MS = 900;

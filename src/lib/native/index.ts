@@ -11,7 +11,7 @@ export type Platform = 'web' | 'desktop' | 'android' | 'ios';
  * What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3),
  * files, cache and clearData from 3 (D4), media from 4 (D5), windows from 5 (D6). The Android application
  * offers its own: appUpdate (A3), download and share (A4), push (A5), links and lock (A6), capture,
- * incoming and upload (A7).
+ * incoming and upload (A7), and in Google Play's copy playUpdate instead of appUpdate (A8).
  */
 export type Feature =
   | 'info'
@@ -33,7 +33,8 @@ export type Feature =
   | 'lock'
   | 'capture'
   | 'incoming'
-  | 'upload';
+  | 'upload'
+  | 'playUpdate';
 
 /** A release of the Android application as its update asks for it: the shell builds the address itself, from its compiled feed. */
 export type NativeApkRelease = { version: string; file: string; size: number; sha256: string };
@@ -123,6 +124,11 @@ type Bridge = {
   capture?: { take?: (kind: 'photo' | 'video') => Promise<NativeHeldFile | null> };
   incoming?: { take?: () => Promise<NativeHeldFile[]> };
   upload?: { start?: (ask: { token: string; session: string }) => Promise<string>; status?: () => Promise<unknown>; cancel?: (id: string) => Promise<boolean> };
+  playUpdate?: {
+    status?: () => Promise<unknown>;
+    start?: (mode: 'flexible' | 'immediate') => Promise<'started' | 'busy' | 'uploading' | 'unavailable' | 'refused'>;
+    complete?: () => Promise<'started' | 'uploading' | 'nothing' | 'refused'>;
+  };
 };
 
 export type Native = {
@@ -157,6 +163,7 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   capture: ['capture.take'],
   incoming: ['incoming.take'],
   upload: ['upload.start', 'upload.status', 'upload.cancel'],
+  playUpdate: ['playUpdate.status', 'playUpdate.start', 'playUpdate.complete'],
 });
 
 const SHELLS = ['desktop', 'android', 'ios'];

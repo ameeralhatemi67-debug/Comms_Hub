@@ -5,11 +5,13 @@
   "description": "مركز الاتصال المؤسسي",
   "scripts": {
     "test": "node --test \"tests/*.test.mjs\"",
-    "test:jvm": "cd android && gradlew testDirectReleaseUnitTest",
+    "test:jvm": "cd android && gradlew testDirectReleaseUnitTest testPlayReleaseUnitTest",
     "sync": "cap sync android",
     "build:debug": "node scripts/build.mjs debug",
     "build:qa": "node scripts/build.mjs qa",
-    "pack:release": "node scripts/build.mjs release"
+    "pack:release": "node scripts/build.mjs release",
+    "build:qa:play": "node scripts/build.mjs qa play",
+    "pack:play": "node scripts/build.mjs release play"
   },
   "dependencies": {
     "@capacitor/android": "8.5.3",

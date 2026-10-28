@@ -10,18 +10,19 @@ import java.util.regex.Pattern;
  * Bridge version 1 (A2) was the identity alone. Version 2 (A3) adds `appUpdate` in the APK channel. Version 3
  * (A4) adds `download` (save, open) and `share` (file), each naming a file of the site by its path. Version 4
  * (A5) adds `push` (state, request, token, onOpen, onReceive). Version 5 (A6) adds `links` (verified) and `lock`
- * (state, set). Version 6 (A7) adds `capture` (take), `incoming` (take) and `upload` (start, status, cancel). Each method calls the application's plugin
+ * (state, set). Version 6 (A7) adds `capture` (take), `incoming` (take) and `upload` (start, status, cancel). Version 7
+ * (A8) adds `playUpdate` (status, start, complete) in Google Play's copy, which has no `appUpdate`. Each method calls the application's plugin
  * (CommsHubShell) through Capacitor, which hears only the main frame, and passes only the plain values the plugin
  * checks. Pure.
  */
 final class Identity {
 
-    static final int BRIDGE = 6;
+    static final int BRIDGE = 7;
     private static final Pattern SEMVER = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
 
     private Identity() {}
 
-    static String script(String version, boolean appUpdate) {
+    static String script(String version, boolean appUpdate, boolean playUpdate) {
         String v = version != null && SEMVER.matcher(version).matches() ? version : "0.0.0";
         StringBuilder s = new StringBuilder();
         s.append("(function () {\n");
@@ -35,6 +36,13 @@ final class Identity {
             s.append("  bridge.appUpdate = Object.freeze({\n");
             s.append("    status: function () { return call('appUpdateStatus'); },\n");
             s.append("    start: function (r) { r = r || {}; return call('appUpdateStart', { version: String(r.version), file: String(r.file), size: Number(r.size), sha256: String(r.sha256) }).then(function (x) { return x.result; }); }\n");
+            s.append("  });\n");
+        }
+        if (playUpdate) {
+            s.append("  bridge.playUpdate = Object.freeze({\n");
+            s.append("    status: function () { return call('playUpdateStatus'); },\n");
+            s.append("    start: function (mode) { return call('playUpdateStart', { mode: mode === 'immediate' ? 'immediate' : 'flexible' }).then(function (x) { return x.result; }); },\n");
+            s.append("    complete: function () { return call('playUpdateComplete').then(function (x) { return x.result; }); }\n");
             s.append("  });\n");
         }
         s.append("  var file = function (method) { return function (f) { f = f || {}; return call(method, { path: String(f.path), name: String(f.name) }).then(function (x) { return x.ok === true; }); }; };\n");

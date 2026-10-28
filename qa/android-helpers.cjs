@@ -142,6 +142,14 @@ function readNodes() {
   }));
 }
 
+/**
+ * The application's web view on the screen, read until it is there: while the emulator's System UI is not answering,
+ * UI Automator's dump may come back without it, and screenNodes answers that dialog with «Wait» first.
+ */
+async function webViewNode(ms = 30000) {
+  return until(() => screenNodes().find((n) => n.cls === 'android.webkit.WebView'), ms, 1000);
+}
+
 function tap(x, y) {
   shell(`input tap ${x} ${y}`);
 }
@@ -159,4 +167,4 @@ function apkEntry(apk, entry) {
   return r.status === 0 ? r.stdout : null;
 }
 
-module.exports = { root, sleep, record, until, portAnswers, startSite, adb, shell, adbPath, APP, ACTIVITY, apkOf, emulatorReady, resumed, screenNodes, tap, screenshot, apkEntry, systemUiWaits: 0 };
+module.exports = { root, sleep, record, until, portAnswers, startSite, adb, shell, adbPath, APP, ACTIVITY, apkOf, emulatorReady, resumed, screenNodes, webViewNode, tap, screenshot, apkEntry, systemUiWaits: 0 };

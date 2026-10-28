@@ -1,0 +1,21 @@
+{
+  "run": "2026-10-28",
+  "what": "Database rule run for «طلب حذف حسابي» (Android_Build_Plan.md A8, MVP_draft.md 64.6): who may ask, who is told and who sees a request (the remove rule of account_remove), withdrawing, the day's limit, removing the account carrying it out and taking what only the person could read",
+  "script": "supabase/tests/account_deletion_rules.sql",
+  "script_md5": "0b5446b07b750df46edf36d2fbf2e1f2",
+  "migration": {
+    "file": "supabase/migrations/20261028120000_account_deletion.sql",
+    "file_md5": "8ed2dba138462f0c073630ced82970af",
+    "applied": false,
+    "why_not": "Applying is the owner's go-ahead (Play_Console_Drafts.md section 1, step 2). Until then the panel says it cannot read requests and the public page's email route is the only one."
+  },
+  "how": "One transaction against comms-hub (hrghmioxvgkjpnydrxrk), rolled back at the end: the migration's statements, then the rule file's, through the MCP execute_sql tool. Seven throwaway accounts (@t.test) act through row level security. The real administrators may remove a throwaway account, so they are told too inside the run; the checks of who is told read the throwaway accounts only. The text sent was the two files without their comment lines and without the TOTAL row's md5 (the run predates applying, so there is no stored statement to match); it is otherwise the files' statements in order.",
+  "runs": [
+    { "attempt": 1, "when": "before applying", "result": "stopped at setup, before any check: the second throwaway administrator was not a founder, and accounts has the check admin_role_is_protected (every administrator is protected). The file was corrected: both throwaway administrators are founders. No database behaviour changed." },
+    { "attempt": 2, "when": "before applying", "result": "42 of 42" }
+  ],
+  "after": "Checked directly after the run: no table account_deletions, no trigger accounts_deletion_done, 0 throwaway accounts, 0 throwaway sign-ins, 0 throwaway notices.",
+  "total": 42,
+  "passed": 42,
+  "failed": 0
+}

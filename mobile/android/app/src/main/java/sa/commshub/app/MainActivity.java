@@ -148,6 +148,8 @@ public class MainActivity extends BridgeActivity {
         AppLock.returned(this);
         // The update's feed when due, and Android's confirmation of an update if it is still waiting (A3).
         if (AppUpdate.offered()) AppUpdate.get(this).resumed(this);
+        // Google Play's copy asks Play instead, and shows again an immediate update Play left under way (A8).
+        if (PlayUpdate.offered()) PlayUpdate.get(this).resumed(this);
     }
 
     @Override

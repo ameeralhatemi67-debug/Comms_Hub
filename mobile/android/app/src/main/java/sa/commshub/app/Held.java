@@ -24,11 +24,12 @@ import org.json.JSONObject;
 /**
  * Files the application holds for the page (MVP_draft.md 64.5; Android_Build_Plan.md A7): a photo or a video taken with
  * «تصوير», or files shared into the application from another one. Each is kept in its own folder,
- * `cache/held/<token>/<name>`, and named by a token of 32 random bytes; the page reads it at `/__app/file/<token>` on
+ * `files/held/<token>/<name>`, and named by a token of 32 random bytes; the page reads it at `/__app/file/<token>` on
  * its own address, which ShellWebViewClient answers itself, in byte ranges, and the site never serves. No file's bytes
  * cross the bridge, and no path ever reaches the page. The list is kept in the application's private storage, so a
  * background upload finds its file after a restart; a file is removed two days after it was taken, unless an upload
- * still reads it.
+ * still reads it. The folder is the application's files, not its cache: Android empties every application's cache when
+ * the phone runs low on space, which would take a large video away in the middle of its upload (found in A8).
  */
 final class Held {
 
@@ -38,6 +39,11 @@ final class Held {
     private static final Pattern TOKEN = Pattern.compile("^[0-9a-f]{64}$");
     private static final Pattern RANGE = Pattern.compile("^bytes=(\\d*)-(\\d*)$");
     private static final SecureRandom RANDOM = new SecureRandom();
+
+    /** Where held files live; never the cache folder, which Android may empty at any time (above). */
+    static File root(Context c) {
+        return new File(c.getFilesDir(), "held");
+    }
 
     /** A held file: its token, name, size, kind and when it was taken. */
     static final class Item {
@@ -99,7 +105,7 @@ final class Held {
 
     static Place place(Context c, String name) {
         String token = newToken();
-        File dir = new File(new File(c.getCacheDir(), "held"), token);
+        File dir = new File(root(c), token);
         if (!dir.mkdirs() && !dir.isDirectory()) throw new IllegalStateException("no folder");
         String safe = FileNames.safe(name);
         return new Place(token, new File(dir, safe != null ? safe : "ملف"));
@@ -130,7 +136,7 @@ final class Held {
     }
 
     static File fileOf(Context c, Item item) {
-        return new File(new File(new File(c.getCacheDir(), "held"), item.token), item.name);
+        return new File(new File(root(c), item.token), item.name);
     }
 
     /** Removes the files kept longer than two days, except those `inUse` (an upload still reads them). */
@@ -145,7 +151,7 @@ final class Held {
         SharedPreferences.Editor ed = p.edit();
         for (String t : gone) {
             ed.remove(t);
-            delete(new File(new File(c.getCacheDir(), "held"), t));
+            delete(new File(root(c), t));
         }
         ed.apply();
     }

@@ -2876,7 +2876,7 @@ Location and everything else are never asked.
 - «أجهزتي» and notices on the lock screen (A5, 64.3);
 - links that open the application, and the application lock (A6, 64.4);
 - the camera, sharing files in, and uploading with the screen locked (A7, 64.5);
-- Google Play (A8).
+- Google Play, and «طلب حذف حسابي» (A8, 64.6).
 
 **Boundaries.** The application holds no secret, no stored password and no sign-in bypass. It decides nothing about who may see or do what: the site and the database do, as in a browser. It approves nothing and publishes nothing, and nothing is scheduled in the site because of it.
 
@@ -2917,7 +2917,7 @@ Phase A3 of `Android_Build_Plan.md`. Releases are published by the owner to the 
 
 **Remembered on this phone only:** «لاحقاً», and the version whose notes were already said.
 
-**Google Play's copy** (A8) has no update window of its own: Play updates it.
+**Google Play's copy** (A8) downloads and checks nothing itself: Play updates it, and the same window shows what Play offers (64.6).
 
 ## 64.2 Opening, saving and sharing files (A4), 2026-10-27
 
@@ -3025,3 +3025,34 @@ Phase A7 of `Android_Build_Plan.md`. Inside the Android application only; a brow
 - A file shared in is read only from another application's provider, never from a file address and never from the application's own files.
 - An upload goes only to Google Drive's upload address.
 - Files kept for the page are removed two days after they arrived, unless an upload still reads them.
+
+## 64.6 Google Play, and «طلب حذف حسابي» (A8), 2026-10-28
+
+Phase A8 of `Android_Build_Plan.md`. The application is published on Google Play beside the APK of 64.1, signed with the same key, so a copy installed from «تطبيق الهاتف» updates from Play without being removed. What the owner enters in the Play Console is drafted in `Play_Console_Drafts.md`.
+
+**Google Play's copy.** The same application, with two differences: it never downloads or installs anything itself and has no permission to, and Play updates it.
+- **The update window** (64.1) shows what Play offers, in the same three forms, plus one:
+  - **A newer release in Play:** «يتوفر إصدار جديد من التطبيق», «الإصدار … جاهز في Google Play. يُنزَّل وأنت تعمل، ثم تعيد تشغيل التطبيق لإكماله.», with «تحديث الآن» and «لاحقاً». «تحديث الآن» opens Play's own window, which asks the person; this window steps aside for it, for that release, for a day.
+  - **While Play downloads,** no window: the person keeps working. «تطبيق الهاتف» shows «ينتظر تنزيل التحديث من Google Play…», then «جارٍ تنزيل التحديث من Google Play (…٪)…».
+  - **A downloaded update:** «التحديث جاهز», «نزّل Google Play الإصدار …. أعد تشغيل التطبيق لإكماله، وتبقى داخلاً كما أنت.», with «إعادة التشغيل الآن» and «لاحقاً». «لاحقاً» puts the restart off for a day, apart from the offer; «تطبيق الهاتف» still offers «إعادة التشغيل الآن». Then «جارٍ تثبيت التحديث من Google Play، ثم يُفتح التطبيق من جديد.».
+  - **An update that cannot wait:** when the application is older than the site needs (64.1), or when the owner marks the release in Play with priority 4 or 5: «يجب تحديث التطبيق», «الإصدار … في Google Play.», with «تحديث الآن», which opens Play's full-screen update, or «إعادة التشغيل الآن» when it is already downloaded. The back key does not close it. When Play offers nothing yet: «تعذّر الوصول إلى التحديث في Google Play الآن. تحقّق من اتصالك ثم افتح التطبيق مرة أخرى.».
+  - **After an update:** «ما الجديد في الإصدار …» and «حدّث Google Play التطبيق إلى هذا الإصدار، وما تغيّر فيه مكتوب في صفحته على Google Play.», once.
+  - **Stops:** «لم يُثبَّت التحديث: أُغلقت نافذة Google Play دون موافقة.», «أُلغي تنزيل التحديث. يمكنك المحاولة من جديد.», «تعذّر التحديث من Google Play. حاول مرة أخرى.».
+- **Restarting waits for uploads.** While a file is being sent in the background (64.5), the restart into an update and Play's full-screen update wait: «يُرفع ملف في الخلفية الآن، فيكتمل التحديث بعد انتهاء الرفع.».
+- **«تطبيق الهاتف»** in Play's copy: «تعمل الآن في تطبيق الهاتف من Google Play، الإصدار …», then what Play offers, or «هذا أحدث إصدار في Google Play.», or «يسأل التطبيق Google Play عن تحديث عند فتحه، وعند عودتك إليه بعد أربع ساعات أو أكثر.». The application asks Play when it opens and when the person comes back to it, at most every four hours unless an update is under way. Play names a release by Android's whole number, read back as the version (x.y.z is x*10000 + y*100 + z).
+
+**«حذف الحساب» on «الحساب».** For every member, in the application and in a browser alike.
+- «تستطيع أن تطلب حذف حسابك من المركز، في التطبيق أو في المتصفح. يصل طلبك إلى من يملك إزالة حسابك: مسؤول النظام، ومدير الاتصال لمن دونه.»
+- «ما يُحذف وما يبقى» opens two lists.
+  - **Deleted with the account:** «الدخول وكل الجلسات على كل جهاز»; «ملفك الشخصي: الاسم الظاهر والصورة والعنوان واللون والتوقيع»; «صلاحياتك المضافة وطلباتها»; «رقم واتساب المرتبط وما كتمته»; «هواتفك في «أجهزتي» ورموز تنبيهاتها»; «تنبيهاتك وتذكيراتك الخاصة وتقدّمك في الأدلة ونجومك في المراسلة».
+  - **Kept as the institution's record:** «الأعمال ونصوصها وتعليقاتها وقراراتها والمهام»; «الملفات التي رفعتها إلى المكتبة»; «البريد والرسائل في المحادثات، لأنها لأعضائها جميعاً»; «السجلات: من فعل ماذا ومتى»; «سجل الطلب نفسه: من طلب الحذف ومتى ومن نفّذه».
+- «ملاحظة لمن ينفّذ الطلب (اختيارية)», up to 500 characters, then «طلب حذف حسابي» behind a long press («يصل الطلب إلى من يملك إزالة حسابك، وعند تنفيذه يُلغى دخولك ويُحذف ملفك الشخصي. يمكنك سحبه قبل ذلك.»). Then «وصل طلبك إلى من يملك إزالة حسابك.».
+- **While it is open:** «طلبت حذف حسابك في …. وصل الطلب إلى من يملك إزالة حسابك، وعند تنفيذه يُلغى دخولك من كل جهاز ويُحذف ملفك الشخصي.», the note, and «سحب الطلب» («سُحب طلب الحذف، ويبقى حسابك كما هو.»).
+- **Refusals:** a founder's account («حساب مؤسس: لا يُحذف من التطبيق. تواصل مع مالك المركز.»), and more than three requests in a day («طلبت الحذف ثلاث مرات اليوم. أعد المحاولة غداً.»).
+- The panel ends with the public page for someone who cannot sign in: «إن لم تستطع الدخول إلى المركز، فصفحة حذف الحساب تقول كيف تطلبه من بريد حسابك.».
+
+**Who is told, and who carries it out.** The people who may remove that person in «الحسابات» (holders of «إزالة عضو»: an administrator for anyone, anyone else only for a lower rank) receive «يحتاج قرارك»: «طلب … (…) حذف حسابه.», which reaches their phones too (64.3). A withdrawal tells them for their information. In «الحسابات», «الطلبات», they see «طلبات حذف الحساب»: each request's name, address, time and note, with «إزالة الحساب», which opens the same «إزالة» as the person's card. There a line says what the request adds: «طلب … حذف حسابه: الإزالة تنفّذ الطلب، وتُحذف معها أيضاً التنبيهات والتذكيرات الخاصة والتقدّم في الأدلة والنجوم في المراسلة.». Removing the account carries out the request. A removal without a request is unchanged.
+
+**The public page** `/account-deletion.html`, in English and Arabic, needs no sign-in: the two ways (from «الحساب», or an email from the account's own address to the Hub's address, answered before anything is deleted), and the same two lists. Google Play's listing names it. The privacy policy `/privacy.html` is rewritten for what the Hub handles today (mail, messaging, WhatsApp, the two applications, phone notices) and links to it.
+
+**Boundaries.** Who may see a request, who is told and what goes with the account are the database's. The request deletes nothing by itself: a person who may remove the account does. A founder's account is not deleted this way.

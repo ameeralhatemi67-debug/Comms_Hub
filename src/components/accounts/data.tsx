@@ -2,7 +2,8 @@
 // What «الحسابات» reads, and its one way to write: a database function
 // (supabase/migrations/*permissions*). Row level security decides what each person sees:
 // the list of members with «فتح صفحة الحسابات», the grants and log of the people one may
-// manage, access requests with «إضافة الأعضاء». The database decides every rule; this
+// manage, access requests with «إضافة الأعضاء», the account deletions one may carry out
+// (*account_deletion*, A8). The database decides every rule; this
 // layer loads, calls and words the answer (src/lib/permissions.ts).
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Role } from '@/lib/domain';
@@ -12,6 +13,7 @@ import { useHub } from '@/lib/store';
 import { supabase } from '@/lib/supabase/client';
 import { permError, type Grant, type Mode, type PermEvent } from '@/lib/permissions';
 import { isEntryState, type EntryState } from '@/lib/entry';
+import type { DeletionRequest } from '@/lib/account-deletion';
 import { kickPush } from '@/lib/push/kick';
 import { useCaps } from '../caps';
 
@@ -43,6 +45,8 @@ type Ctx = {
   /** How far each person got into the site (entry_states); missing for those one may not see. */
   entry: Record<string, EntryState>;
   requests: AccessRequest[];
+  /** Open requests to delete an account that the signed-in person may carry out; their own is on «الحساب». */
+  deletions: DeletionRequest[];
   grants: GrantRow[];
   defaults: RoleDefault[];
   events: PermEvent[];
@@ -72,6 +76,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<Member[]>([]);
   const [entry, setEntry] = useState<Record<string, EntryState>>({});
   const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [deletions, setDeletions] = useState<DeletionRequest[]>([]);
   const [grants, setGrants] = useState<GrantRow[]>([]);
   const [defaults, setDefaults] = useState<RoleDefault[]>([]);
   const [events, setEvents] = useState<PermEvent[]>([]);
@@ -79,7 +84,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
 
   const reload = useCallback(async () => {
     const db = supabase();
-    const [a, r, g, d, e, p, en] = await Promise.all([
+    const [a, r, g, d, e, p, en, del] = await Promise.all([
       db.from('accounts').select('email, display_name, role, pages, protected, added_by, created_at, last_seen_at, invited_at, invite_count').order('created_at', { ascending: true }),
       db.from('access_requests').select('id, email, full_name, note, created_at').eq('status', 'pending').order('created_at', { ascending: true }),
       db
@@ -91,11 +96,14 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
       db.from('permission_events').select('id, at, actor, subject, role, capability, kind, data').order('at', { ascending: false }).limit(300),
       db.from('permission_presets').select('id, name, items, note, created_by').order('name'),
       db.rpc('entry_states'),
+      db.from('account_deletions').select('id, email, name, note, status, created_at').eq('status', 'open').order('created_at', { ascending: true }),
     ]);
     if (a.error || g.error || d.error) return setStatus('error');
     const now = Date.now();
     setMembers((a.data ?? []) as Member[]);
     setRequests((r.data ?? []) as AccessRequest[]);
+    // An error here (before the owner applies the migration) leaves the list empty, never the page broken.
+    setDeletions(((del.data ?? []) as DeletionRequest[]).filter((x) => x.email !== me.email));
     setGrants(
       ((g.data ?? []) as Record<string, unknown>[])
         .map((x) => ({
@@ -148,6 +156,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
       members,
       entry,
       requests,
+      deletions,
       grants,
       defaults,
       events,
@@ -157,7 +166,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
       call,
       say,
     };
-  }, [status, me, caps, members, entry, requests, grants, defaults, events, presets, reload, call, say]);
+  }, [status, me, caps, members, entry, requests, deletions, grants, defaults, events, presets, reload, call, say]);
 
   return <AccountsContext.Provider value={value}>{children}</AccountsContext.Provider>;
 }

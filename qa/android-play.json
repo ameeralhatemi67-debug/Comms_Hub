@@ -1,0 +1,136 @@
+{
+  "script": "qa/android-play.cjs",
+  "run": "2026-10-28T11:45:56.636Z",
+  "checks": [
+    {
+      "name": "the bundle is sa.commshub.app for Android 10 (API 29) and newer, targeting Android 16 (API 36)",
+      "pass": true,
+      "detail": "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" android:compileSdkVersion=\"36\" android:compileSdkVersionCodename=\"16\" android:versionCode=\"100\" android:versionName=\"0.1.0\" package=\"sa.commshub.app\" platformBuildVersionCode=\"36\" platformBuildVersionName=\"16\">\r\n      \r\n  <uses-sdk android:minSdkVersion=\"29\" android:targetSdkVersion=\"36\"/>\r\n      \r\n    \r\n  <uses-permission androi"
+    },
+    {
+      "name": "Google Play's copy asks no permission to install packages, and has no installer of its own",
+      "pass": true,
+      "detail": "[\"android.permission.ACCESS_NETWORK_STATE\",\"android.permission.FOREGROUND_SERVICE\",\"android.permission.FOREGROUND_SERVICE_DATA_SYNC\",\"android.permission.INTERNET\",\"android.permission.MODIFY_AUDIO_SETTINGS\",\"android.permission.POST_NOTIFICATIONS\",\"android.permission.RECEIVE_BOOT_COMPLETED\",\"android.permission.RECORD_AUDIO\",\"android.permission.USE_BIOMETRIC\",\"android.permission.USE_FINGERPRINT\",\"android.permission.WAKE_LOCK\",\"com.google.android.c2dm.permission.RECEIVE\",\"sa.commshub.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION\"]"
+    },
+    {
+      "name": "nothing of the check package is in it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it asks exactly what the Play Console drafts list: no camera, location, contacts, media or advertising id",
+      "pass": true,
+      "detail": "[\"android.permission.ACCESS_NETWORK_STATE\",\"android.permission.FOREGROUND_SERVICE\",\"android.permission.FOREGROUND_SERVICE_DATA_SYNC\",\"android.permission.INTERNET\",\"android.permission.MODIFY_AUDIO_SETTINGS\",\"android.permission.POST_NOTIFICATIONS\",\"android.permission.RECEIVE_BOOT_COMPLETED\",\"android.permission.RECORD_AUDIO\",\"android.permission.USE_BIOMETRIC\",\"android.permission.USE_FINGERPRINT\",\"android.permission.WAKE_LOCK\",\"com.google.android.c2dm.permission.RECEIVE\",\"sa.commshub.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION\"]"
+    },
+    {
+      "name": "the data-sync foreground task is declared, as the Play Console declaration says",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bridge version 7 with playUpdate (status, start, complete), frozen, and no appUpdate",
+      "pass": true,
+      "detail": "{\"platform\":\"android\",\"bridge\":7,\"play\":[\"function\",\"function\",\"function\"],\"appUpdate\":false,\"frozen\":true}"
+    },
+    {
+      "name": "with nothing in Play: no window, and «تطبيق الهاتف» says it is the newest in Google Play",
+      "pass": true,
+      "detail": "تعمل الآن في تطبيق الهاتف من Google Play، الإصدار 0.1.0.\n\nهذا أحدث إصدار في Google Play."
+    },
+    {
+      "name": "a release in Play is offered with its version: «تحديث الآن» and «لاحقاً»",
+      "pass": true,
+      "detail": "{\"title\":\"يتوفر إصدار جديد من التطبيق\",\"text\":\"يتوفر إصدار جديد من التطبيق\\n\\nالإصدار 0.1.1 جاهز في Google Play. يُنزَّل وأنت تعمل، ثم تعيد تشغيل التطبيق لإكماله.\\n\\nتحديث الآن\\nلاحقاً\",\"buttons\":[\"تحديث الآن\",\"لاحقاً\"]}"
+    },
+    {
+      "name": "«تطبيق الهاتف» offers it too",
+      "pass": true,
+      "detail": "تعمل الآن في تطبيق الهاتف من Google Play، الإصدار 0.1.0.\n\nيتوفر الإصدار 0.1.1 في Google Play.\n\nتحديث الآن"
+    },
+    {
+      "name": "«لاحقاً» holds after a reload",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«تحديث الآن» opens Play's own window, which asks the person",
+      "pass": true,
+      "detail": "{\"confirmation\":true,\"immediate\":false,\"splash\":false,\"type\":0}"
+    },
+    {
+      "name": "and this window steps aside for it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "while Play downloads: no window, and the panel shows the share",
+      "pass": true,
+      "detail": "تعمل الآن في تطبيق الهاتف من Google Play، الإصدار 0.1.0.\n\nجارٍ تنزيل التحديث من Google Play (40٪)…"
+    },
+    {
+      "name": "a downloaded update asks for the restart: «إعادة التشغيل الآن» and «لاحقاً»",
+      "pass": true,
+      "detail": "{\"title\":\"التحديث جاهز\",\"text\":\"التحديث جاهز\\n\\nنزّل Google Play الإصدار 0.1.1. أعد تشغيل التطبيق لإكماله، وتبقى داخلاً كما أنت.\\n\\nإعادة التشغيل الآن\\nلاحقاً\\n\\nنُزِّل التحديث، ويكتمل حين تعيد تشغيل التطبيق.\",\"buttons\":[\"إعادة التشغيل الآن\",\"لاحقاً\"]}"
+    },
+    {
+      "name": "«لاحقاً» puts the restart off, and «تطبيق الهاتف» still offers it",
+      "pass": true,
+      "detail": "تعمل الآن في تطبيق الهاتف من Google Play، الإصدار 0.1.0.\n\nنُزِّل التحديث، ويكتمل حين تعيد تشغيل التطبيق.\n\nإعادة التشغيل الآن"
+    },
+    {
+      "name": "«إعادة التشغيل الآن» hands the install to Play",
+      "pass": true,
+      "detail": "{\"confirmation\":false,\"immediate\":false,\"splash\":true,\"type\":0}"
+    },
+    {
+      "name": "a release Play marks as required cannot be put off: no «لاحقاً», the back key leaves it",
+      "pass": true,
+      "detail": "{\"w\":{\"title\":\"يجب تحديث التطبيق\",\"text\":\"يجب تحديث التطبيق\\n\\nهذا الإصدار من التطبيق أقدم مما يحتاجه المركز الآن، فحدّثه ليعمل كل شيء كما ينبغي.\\n\\nالإصدار 0.1.2 في Google Play.\\n\\nتحديث الآن\",\"buttons\":[\"تحديث الآن\"]},\"still\":true}"
+    },
+    {
+      "name": "«تحديث الآن» opens Play's immediate window",
+      "pass": true,
+      "detail": "{\"confirmation\":false,\"immediate\":true,\"splash\":false,\"type\":1}"
+    },
+    {
+      "name": "declined in Play, the window stays, with «تحديث الآن» again",
+      "pass": true,
+      "detail": "{\"title\":\"يجب تحديث التطبيق\",\"text\":\"يجب تحديث التطبيق\\n\\nهذا الإصدار من التطبيق أقدم مما يحتاجه المركز الآن، فحدّثه ليعمل كل شيء كما ينبغي.\\n\\nالإصدار 0.1.2 في Google Play.\\n\\nتحديث الآن\",\"buttons\":[\"تحديث الآن\"]}"
+    }
+  ],
+  "notes": [
+    "Playwright's handle on the phone was lost (page.waitForSelector: Target page, context or browser has been closed); it was taken again.",
+    "After the check: the check package is uninstalled."
+  ],
+  "bundle": {
+    "bytes": 4539043,
+    "sha256": "e32dffefa96fbe49f9960669baf5f99a0e45e791a0a24a359cde6ed7cb593adc"
+  },
+  "bundletool": "1.18.3",
+  "permissions": [
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+    "android.permission.INTERNET",
+    "android.permission.MODIFY_AUDIO_SETTINGS",
+    "android.permission.POST_NOTIFICATIONS",
+    "android.permission.RECEIVE_BOOT_COMPLETED",
+    "android.permission.RECORD_AUDIO",
+    "android.permission.USE_BIOMETRIC",
+    "android.permission.USE_FINGERPRINT",
+    "android.permission.WAKE_LOCK",
+    "com.google.android.c2dm.permission.RECEIVE",
+    "sa.commshub.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  ],
+  "apk": {
+    "bytes": 14607933
+  },
+  "device": {
+    "model": "sdk_gphone16k_x86_64",
+    "android": "17",
+    "sdk": "37"
+  },
+  "total": 19,
+  "passed": 19,
+  "failed": 0
+}

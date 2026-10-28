@@ -79,6 +79,41 @@ public class CommsHubShell extends Plugin {
         call.resolve(out);
     }
 
+    // --- playUpdate (A8), Google Play's copy only -----------------------------------------------------
+
+    @PluginMethod
+    public void playUpdateStatus(PluginCall call) {
+        if (!fromSite(call)) return;
+        if (!PlayUpdate.offered()) {
+            call.reject("unavailable");
+            return;
+        }
+        call.resolve(PlayUpdate.get(getContext()).status());
+    }
+
+    /** A flexible update, or the immediate one when the site says it is required; Play's own window asks the person. */
+    @PluginMethod
+    public void playUpdateStart(PluginCall call) {
+        if (!fromSite(call)) return;
+        String mode = call.getString("mode");
+        JSObject out = new JSObject();
+        if (!PlayUpdate.offered() || !("flexible".equals(mode) || "immediate".equals(mode)) || getActivity() == null) {
+            out.put("result", "refused");
+        } else {
+            out.put("result", PlayUpdate.get(getContext()).start(getActivity(), mode));
+        }
+        call.resolve(out);
+    }
+
+    /** Restarts into a flexible update Play has downloaded. */
+    @PluginMethod
+    public void playUpdateComplete(PluginCall call) {
+        if (!fromSite(call)) return;
+        JSObject out = new JSObject();
+        out.put("result", PlayUpdate.offered() && getActivity() != null ? PlayUpdate.get(getContext()).complete(getActivity()) : "refused");
+        call.resolve(out);
+    }
+
     // --- download and share (A4) --------------------------------------------------------------------
 
     private interface Start {

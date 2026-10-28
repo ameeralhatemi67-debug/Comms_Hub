@@ -226,7 +226,7 @@ function driveStub() {
     device = phone;
     await front(60000);
     const bridge = await inPage(() => ({ bridge: window.commsHubNative.bridge, capture: typeof window.commsHubNative.capture?.take, incoming: typeof window.commsHubNative.incoming?.take, upload: ['start', 'status', 'cancel'].map((k) => typeof window.commsHubNative.upload?.[k]) }));
-    check('1. bridge version 6 with capture (take), incoming (take) and upload (start, status, cancel)', bridge.bridge === 6 && bridge.capture === 'function' && bridge.incoming === 'function' && bridge.upload.every((t) => t === 'function'), bridge);
+    check('1. bridge version 6 or later with capture (take), incoming (take) and upload (start, status, cancel)', bridge.bridge >= 6 && bridge.capture === 'function' && bridge.incoming === 'function' && bridge.upload.every((t) => t === 'function'), bridge);
 
     // 2. shared in, from the check package's own provider of made files (QaFiles.java): Android does not let the shell
     // grant another application's files to this one. Only the application's own copy takes room on the emulator.
@@ -252,7 +252,7 @@ function driveStub() {
     const big = taken.find((x) => x.name === 'qa-big.mp4');
     const small = taken.find((x) => x.name === 'qa-small.txt');
     check('2a. files shared in from another application are held, «استلام ملفات» opens, and the page takes them once', !!atShare && taken.length === 2 && !!big && big.size === BIG && !!small && again.length === 0, { atShare, taken, again });
-    const copies = h.shell(`run-as ${h.APP} sh -c 'find cache/held -type f -exec sha256sum {} +' 2>/dev/null`, { allowFail: true });
+    const copies = h.shell(`run-as ${h.APP} sh -c 'find files/held -type f -exec sha256sum {} +' 2>/dev/null`, { allowFail: true });
     check('2b. the held copies have the bytes that were shared', copies.includes(bigSum) && copies.includes(smallSum), { copies, bigSum, smallSum });
     h.shell(`am start -n ${h.ACTIVITY} -a android.intent.action.SEND -t '*/*' --eu android.intent.extra.STREAM file:///data/data/${h.APP}/shared_prefs/held.xml`);
     await h.sleep(4000);

@@ -344,6 +344,7 @@ export function RemoveDialog({ emails, onClose, onDone }: { emails: string[]; on
   const [busy, setBusy] = useState(false);
   const [report, setReport] = useState<string[]>([]);
   const people = a.members.filter((m) => emails.includes(m.email));
+  const asked = people.filter((m) => a.deletions.some((d) => d.email === m.email));
   const go = async () => {
     setBusy(true);
     const out: string[] = [];
@@ -365,6 +366,12 @@ export function RemoveDialog({ emails, onClose, onDone }: { emails: string[]; on
         يُلغى دخول {people.map((m) => m.display_name).join('، ')} وجلساتهم فوراً، وتنتهي صلاحياتهم المضافة. أعمالهم ومهامهم وبريدهم تبقى كما هي في
         المركز، ويعيد القادة إسنادها من «العمل» و«المهام». إن أراد أحدهم العودة فيُضاف من جديد.
       </p>
+      {asked.length > 0 && (
+        <p className="pm-removeasked">
+          طلب {asked.map((m) => m.display_name).join('، ')} حذف {asked.length === 1 ? 'حسابه' : 'حساباتهم'}: الإزالة تنفّذ الطلب، وتُحذف معها أيضاً التنبيهات والتذكيرات
+          الخاصة والتقدّم في الأدلة والنجوم في المراسلة.
+        </p>
+      )}
       <p className="muted">
         <Lock /> حسابات المؤسسين لا تُزال.
       </p>

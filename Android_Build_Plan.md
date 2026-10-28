@@ -378,6 +378,22 @@ and simulation files are never staged.
 
 ### A8. Play readiness; release when the account is verified (S to M)
 
+> **Built 2026-10-28** (recorded in `progress.md`; `MVP_draft.md` 64.6; the Console drafts in `Play_Console_Drafts.md`).
+> Changed while building:
+> - Google's own Play in-app updates library (`com.google.android.play:app-update` 2.1.0, `play` flavour only) behind
+>   the application's plugin, instead of `@capawesome/capacitor-app-update`. A third-party Capacitor plugin would
+>   answer the page without the bridge's address check, and would sit in the APK channel too.
+> - Bridge version 7 adds `playUpdate`; the site draws Play's offer, download, restart and required update in the
+>   same window. Play names a release by its whole number, read back as the version by the builds' rule.
+> - The check package's play copy asks Play's `FakeAppUpdateManager`, so the window is checked on the emulator;
+>   Play's real update is the owner's check through internal testing.
+> - «طلب حذف حسابي» reaches the holders of «إزالة عضو» who may remove the person, and «إزالة» carries it out; a
+>   requested removal also removes what only that person could read. The migration is written and its rules pass,
+>   not applied until the owner says.
+> - The public page is static (`/account-deletion.html`, with an email route for someone who cannot sign in), and
+>   the privacy policy is rewritten for everything the Hub handles today.
+> - The listing's icon and feature graphic are drawn from the brand; phone screenshots are the owner's, signed in.
+
 - **The `play` flavour:** no `REQUEST_INSTALL_PACKAGES`. Updates through Google Play in-app updates
   (`@capawesome/capacitor-app-update`, pinned) behind the same window. An AAB build.
 - **«طلب حذف حسابي»** on «الحساب»: Play requires a deletion path for apps that create accounts. The request

@@ -1,7 +1,7 @@
 'use client';
 // «الحسابات» (Permissions_Plan.md 5): who is in the hub, with which role, and what each
 // may do. Four tabs: «الأعضاء» (the list, with a person's card beside it), «الأدوار» (each
-// role's defaults), «الطلبات» (access and permission requests), «السجل» (every change).
+// role's defaults), «الطلبات» (access, permission and account deletion requests), «السجل» (every change).
 // It opens with «فتح صفحة الحسابات»: the administrator, the director and the assistant by
 // default. What each sees and may do here is decided in the database.
 import { useState } from 'react';
@@ -9,7 +9,8 @@ import { useSearchParams } from 'next/navigation';
 import { KeyRound, Package, Plus } from 'lucide-react';
 import { Empty, Panel, Tabs, Title } from '../ui';
 import { AccountsProvider, useAccounts, type AccessRequest } from './data';
-import { AccessRequests, MemberDialog, MembersTab } from './members';
+import { AccessRequests, MemberDialog, MembersTab, RemoveDialog } from './members';
+import { DeletionRequests } from './deletions';
 import { GrantDialog, PersonCard, PresetDialog } from './card';
 import { RolesTab } from './roles';
 import { LogTab } from './log';
@@ -33,6 +34,7 @@ function Accounts() {
   const [approving, setApproving] = useState<AccessRequest | null>(null);
   const [granting, setGranting] = useState<{ emails: string[]; cap?: string } | null>(null);
   const [presetNew, setPresetNew] = useState(false);
+  const [removing, setRemoving] = useState<string | null>(null);
 
   if (!a.can('accounts.view'))
     return (
@@ -42,7 +44,7 @@ function Accounts() {
     );
 
   const perm = usePermRequests();
-  const waiting = a.requests.length + perm.list.filter((q) => q.can_decide).length;
+  const waiting = a.requests.length + a.deletions.length + perm.list.filter((q) => q.can_decide).length;
   const tabs = [
     { id: 'members', label: `الأعضاء (${a.members.length})` },
     { id: 'roles', label: 'الأدوار' },
@@ -99,6 +101,11 @@ function Accounts() {
           <Panel title={`طلبات الوصول إلى المركز${a.requests.length ? ` (${a.requests.length})` : ''}`}>
             <AccessRequests onApprove={setApproving} />
           </Panel>
+          {(a.can('members.remove') || a.deletions.length > 0) && (
+            <Panel title={`طلبات حذف الحساب${a.deletions.length ? ` (${a.deletions.length})` : ''}`}>
+              <DeletionRequests onRemove={setRemoving} />
+            </Panel>
+          )}
         </div>
       )}
       {tab === 'log' && <LogTab person={person} />}
@@ -113,6 +120,16 @@ function Accounts() {
       {approving && <MemberDialog mode="approve" request={approving} onClose={() => setApproving(null)} onAdded={added} />}
       {granting && <GrantDialog emails={granting.emails} initial={granting.cap} onClose={() => setGranting(null)} />}
       {presetNew && <PresetDialog onClose={() => setPresetNew(false)} />}
+      {removing && (
+        <RemoveDialog
+          emails={[removing]}
+          onClose={() => setRemoving(null)}
+          onDone={() => {
+            setRemoving(null);
+            void a.reload();
+          }}
+        />
+      )}
     </div>
   );
 }

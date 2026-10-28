@@ -178,7 +178,7 @@ test('A6: the links the application claims are the site\'s pages, the member lin
 
 test('A6: a signed release must be the certificate the site\'s assetlinks.json names', () => {
   const build = read(mobile, 'scripts', 'build.mjs');
-  assert.match(build, /if \(kind === 'release'\) \{\s*const signer = signerOf/);
+  assert.match(build, /if \(kind === 'release'\) \{\s*const signer = bundle \? bundleSignerOf\(path\.join\(outDir, apk\)\) : signerOf\(path\.join\(outDir, apk\)\);/);
   assert.match(build, /if \(!site\.includes\(signer\)\) \{[\s\S]*?process\.exit\(3\);/);
   const links = JSON.parse(read(root, 'public', '.well-known', 'assetlinks.json'));
   assert.equal(links.length, 1);
@@ -213,8 +213,11 @@ test('A7: files shared in come only from another application\'s provider, and he
   assert.match(java('Incoming'), /String own = a\.getPackageName\(\) \+ "\.fileprovider";/);
   assert.match(java('ShellWebViewClient'), /path\.startsWith\(Held\.PATH\) && "GET"\.equals\(request\.getMethod\(\)\) && Navigation\.isAllowed\(request\.getUrl\(\)\.toString\(\), Shell\.ALLOWED\)/);
   const paths = read(app, 'src', 'main', 'res', 'xml', 'file_paths.xml');
-  assert.match(paths, /<cache-path name="held" path="held\/" \/>/);
-  assert.doesNotMatch(paths, /<(files|external|root)-path/);
+  assert.match(paths, /<files-path name="held" path="held\/" \/>/, 'held files where Android never empties them to free space');
+  assert.equal((paths.match(/<files-path /g) ?? []).length, 1, 'the held folder alone of the application\'s files');
+  assert.doesNotMatch(paths, /<(external|root|external-files|external-cache)-path/);
+  assert.match(java('Held'), /static File root\(Context c\) \{\s*return new File\(c\.getFilesDir\(\), "held"\);/);
+  assert.doesNotMatch(java('Held'), /getCacheDir/);
 });
 
 test('A7: a background upload goes to Google Drive only, as a data-sync task, and the update waits for it', () => {
@@ -235,6 +238,43 @@ test('A7: a background upload goes to Google Drive only, as a data-sync task, an
   assert.match(java('AppUpdate'), /if \(Uploads\.busy\(activity\)\) return "busy";/);
   const strings = read(app, 'src', 'main', 'res', 'values', 'strings.xml');
   for (const n of ['capture_no_camera', 'share_in_started', 'share_in_files_only', 'share_in_failed', 'uploads_channel', 'uploads_title']) assert.match(strings, new RegExp(`<string name="${n}">[^<]*[\\u0600-\\u06ff][^<]*</string>`), n);
+});
+
+test('A8: Google Play\'s copy updates through Play only, with Play\'s library in that copy alone', () => {
+  const g = read(app, 'build.gradle');
+  assert.match(read(mobile, 'android', 'variables.gradle'), /playAppUpdateVersion = '2\.1\.0'/);
+  assert.match(g, /playImplementation "com\.google\.android\.play:app-update:\$playAppUpdateVersion"/);
+  assert.doesNotMatch(g, /(^|\s)implementation "com\.google\.android\.play/m, 'never in the APK channel');
+  assert.match(g, /defaultConfig \{[\s\S]*?buildConfigField "boolean", "PLAY_STAND_IN", "false"/);
+  assert.equal((g.match(/"PLAY_STAND_IN", "true"/g) ?? []).length, 1);
+  assert.match(/qa \{[\s\S]*?\n {8}\}/.exec(g)[0], /"PLAY_STAND_IN", "true"/, 'the stand-in in the check package only');
+  const play = read(app, 'src', 'play', 'java', 'sa', 'commshub', 'app', 'PlayUpdate.java');
+  assert.match(play, /manager = BuildConfig\.PLAY_STAND_IN \? new FakeAppUpdateManager\(app\) : AppUpdateManagerFactory\.create\(app\);/);
+  assert.match(play, /manager\.startUpdateFlow\(i, activity, AppUpdateOptions\.newBuilder\(type\)\.build\(\)\)/, 'Play\'s own window asks the person');
+  assert.match(play, /if \(type == AppUpdateType\.IMMEDIATE && Uploads\.busy\(activity\)\) return "uploading";/);
+  assert.match(play, /if \(Uploads\.busy\(activity\)\) return "uploading";\s*manager\.completeUpdate\(\)/, 'the restart waits for an upload');
+  const direct = read(app, 'src', 'direct', 'java', 'sa', 'commshub', 'app', 'PlayUpdate.java');
+  assert.doesNotMatch(direct, /com\.google\.android\.play/);
+  assert.match(direct, /static boolean offered\(\) \{\s*return false;/);
+  assert.match(java('CommsHubShell'), /if \(!PlayUpdate\.offered\(\)\) \{\s*call\.reject\("unavailable"\);/);
+  assert.match(java('MainActivity'), /if \(PlayUpdate\.offered\(\)\) PlayUpdate\.get\(this\)\.resumed\(this\);/);
+  // Play's stand-in is driven only in Google Play's copy of the check package.
+  assert.match(read(app, 'src', 'playQa', 'AndroidManifest.xml'), /android:name="\.QaPlay"/);
+  for (const m of [['src', 'main', 'AndroidManifest.xml'], ['src', 'qa', 'AndroidManifest.xml'], ['src', 'direct', 'AndroidManifest.xml']]) assert.doesNotMatch(read(app, ...m), /QaPlay/, m.join('/'));
+  assert.equal(fs.existsSync(path.join(app, 'src', 'play', 'AndroidManifest.xml')), false, 'no permission of its own: no installer');
+});
+
+test('A8: a release of the play channel is an App Bundle, checked against the site\'s assetlinks.json like an APK', () => {
+  const b = read(mobile, 'scripts', 'build.mjs');
+  assert.match(b, /const bundle = kind === 'release' && channel === 'play';/);
+  assert.match(b, /`\$\{bundle \? 'bundle' : 'assemble'\}/);
+  assert.match(b, /'outputs', 'bundle', 'playRelease'/);
+  assert.match(b, /const signer = bundle \? bundleSignerOf\(path\.join\(outDir, apk\)\) : signerOf\(path\.join\(outDir, apk\)\);/);
+  assert.match(b, /spawnSync\(keytool, \['-printcert', '-jarfile', file\]/);
+  const pkg = JSON.parse(read(mobile, 'package.json'));
+  assert.equal(pkg.scripts['pack:play'], 'node scripts/build.mjs release play');
+  assert.equal(pkg.scripts['build:qa:play'], 'node scripts/build.mjs qa play');
+  assert.match(pkg.scripts['test:jvm'], /testDirectReleaseUnitTest testPlayReleaseUnitTest/);
 });
 
 test('the back key asks the page\'s open window first, as Escape does', () => {

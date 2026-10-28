@@ -47,7 +47,7 @@ final class Shell {
      */
     static void identify(WebView web) {
         if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) return;
-        WebViewCompat.addDocumentStartJavaScript(web, Identity.script(version(web.getContext()), AppUpdate.offered()), new HashSet<>(ALLOWED));
+        WebViewCompat.addDocumentStartJavaScript(web, Identity.script(version(web.getContext()), AppUpdate.offered(), PlayUpdate.offered()), new HashSet<>(ALLOWED));
     }
 
     /** Capacitor's own page interfaces, which it gives every frame of every address; this application uses neither. */

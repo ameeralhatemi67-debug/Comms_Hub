@@ -1,6 +1,6 @@
 {
   "script": "qa/android-push.cjs",
-  "run": "2026-10-27T21:24:59.057Z",
+  "run": "2026-10-28T11:52:54.072Z",
   "checks": [
     {
       "name": "in a browser: no explanation and no registration",
@@ -10,7 +10,7 @@
     {
       "name": "bridge version 4 or later with push (state, request, token, onOpen, onReceive), frozen, and notices still to be asked",
       "pass": true,
-      "detail": "{\"bridge\":6,\"methods\":[\"function\",\"function\",\"function\",\"function\",\"function\"],\"frozen\":true,\"state\":\"prompt\"}"
+      "detail": "{\"bridge\":7,\"methods\":[\"function\",\"function\",\"function\",\"function\",\"function\"],\"frozen\":true,\"state\":\"prompt\"}"
     },
     {
       "name": "the channels «يحتاج قرارك» (high, with sound), «للانتباه» (low, silent) and «الرسائل» (default), as Android's settings show them",

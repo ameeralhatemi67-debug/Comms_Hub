@@ -1,6 +1,6 @@
 {
   "script": "qa/android-update.cjs",
-  "run": "2026-10-27T21:27:26.577Z",
+  "run": "2026-10-28T11:39:32.837Z",
   "checks": [
     {
       "name": "the check package 0.1.0 is installed",
@@ -45,7 +45,7 @@
     {
       "name": "after it, 0.1.1 is installed",
       "pass": true,
-      "detail": "{\"installed\":\"0.1.1\",\"seen\":[[\"com.android.vending: Google Play Protect\",\"com.android.vending: App scan recommended\",\"com.android.vending: مركز الاتصال المؤسسي\",\"com.android.vending: Play Protect hasn’t seen this app before. To protect your device and data, send this app to Google for a security scan.\",\"com.android.vending: More details\",\"com.android.vending: Scan app\",\"com.android.vending: Don't install app\"],[\"com.android.vending: Google Play Protect\",\"com.android.vending: App scan recommended\",\"com.android.vending: مركز الاتصال المؤسسي\",\"com.android.vending: Play Protect hasn’t seen this app before. To protect your device and data, send this app to Google for a security scan.\",\"com.android.vending: The scan may take a little while. You’ll see results on this screen. How Play Protect works&#10;&#10;Install without scanning\",\"com.android.vending: Scan app\",\"com.android.vending: Don't install app\"],[\"com.google.android.apps.nexuslauncher: Wed, Oct 28\",\"com.google.android.apps.nexuslauncher: Play Store\",\"com.google.android.apps.nexuslauncher: Gmail\",\"com.google.android.apps.nexuslauncher: Photos\",\"com.google.android.apps.nexuslauncher: YouTube\",\"com.google.android.apps.nexuslauncher: Phone\",\"com.google.android.apps.nexuslauncher: Messages\",\"com.google.android.apps.nexuslauncher: Chrome\",\"com.google.android.apps.nexuslauncher: Play Store\"]]}"
+      "detail": "{\"installed\":\"0.1.1\",\"seen\":[[\"com.android.vending: Google Play Protect\",\"com.android.vending: App scan recommended\",\"com.android.vending: مركز الاتصال المؤسسي\",\"com.android.vending: Play Protect hasn’t seen this app before. To protect your device and data, send this app to Google for a security scan.\",\"com.android.vending: More details\",\"com.android.vending: Scan app\",\"com.android.vending: Don't install app\"],[\"com.android.vending: Google Play Protect\",\"com.android.vending: App scan recommended\",\"com.android.vending: مركز الاتصال المؤسسي\",\"com.android.vending: Play Protect hasn’t seen this app before. To protect your device and data, send this app to Google for a security scan.\",\"com.android.vending: The scan may take a little while. You’ll see results on this screen. How Play Protect works&#10;&#10;Install without scanning\",\"com.android.vending: Scan app\",\"com.android.vending: Don't install app\"]]}"
     },
     {
       "name": "the site's cookie is kept through the update",
@@ -64,8 +64,6 @@
     }
   ],
   "notes": [
-    "Playwright's handle on the phone was lost during a relaunch (page.waitForSelector: Target page, context or browser has been closed); it was taken again and the step repeated.",
-    "Playwright's handle on the phone was lost during a relaunch (page.waitForSelector: Target page, context or browser has been closed); it was taken again and the step repeated.",
     "Playwright's handle on the phone was lost during a relaunch (page.waitForSelector: Target page, context or browser has been closed); it was taken again and the step repeated.",
     "Google Play Protect asked to scan the application before the update (\"App scan recommended\"); the check took «More details» and «Install without scanning», sending nothing to Google. A pilot phone will see the same until Google knows the application.",
     "After the check: the check package is uninstalled."
@@ -92,17 +90,6 @@
       "com.android.vending: The scan may take a little while. You’ll see results on this screen. How Play Protect works&#10;&#10;Install without scanning",
       "com.android.vending: Scan app",
       "com.android.vending: Don't install app"
-    ],
-    [
-      "com.google.android.apps.nexuslauncher: Wed, Oct 28",
-      "com.google.android.apps.nexuslauncher: Play Store",
-      "com.google.android.apps.nexuslauncher: Gmail",
-      "com.google.android.apps.nexuslauncher: Photos",
-      "com.google.android.apps.nexuslauncher: YouTube",
-      "com.google.android.apps.nexuslauncher: Phone",
-      "com.google.android.apps.nexuslauncher: Messages",
-      "com.google.android.apps.nexuslauncher: Chrome",
-      "com.google.android.apps.nexuslauncher: Play Store"
     ]
   ],
   "total": 12,

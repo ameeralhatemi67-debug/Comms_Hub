@@ -409,11 +409,30 @@ own `package.json` and lockfile like `desktop/`, outside the site's typecheck an
     (`src/components/native/phone-uploads.tsx`). The session's address is never shown back to the page.
   - `«استلام ملفات»` (`/share`) is open to every member; each destination keeps its own rule.
   - The check package alone has `QaFiles` (files to share in) beside `QaPush`.
+- **Google Play (A8, `MVP_draft.md` 64.6).** Bridge version 7 adds `playUpdate` (`status`, `start`, `complete`) in
+  Google Play's copy (the `play` flavour) alone, which has no `appUpdate` and no `REQUEST_INSTALL_PACKAGES`.
+  - Play's in-app updates library is a `playImplementation` dependency: `src/play/PlayUpdate.java` asks Play, and
+    `src/direct/PlayUpdate.java` answers nothing. Play's own window always asks the person, and a restart into an
+    update waits while a file is being sent.
+  - The release is an App Bundle (`npm run pack:play`), signed with the same key and refused unless `assetlinks.json`
+    names its certificate. Play App Signing takes the owner's key; no agent uploads or signs in to the Play Console.
+  - Google Play's copy of the check package asks Play's `FakeAppUpdateManager` (`PLAY_STAND_IN`, check package only),
+    driven by `src/playQa/QaPlay.java`.
 - **Checks** use the emulator started read-only and the check package `sa.commshub.app.qa`, never a real
   installation, and signed-out pages only (`qa/android-*.cjs`, `qa/android-helpers.cjs`).
 - **What stays the same as everywhere:** no sign-in bypass, stub session or stored password; nothing about
   people is decided in it; nothing is scheduled in the site because of it.
 - **The studio and «استوديو الحركة»** are not part of this application yet.
+
+Account deletion on request is real too, with A8 (`MVP_draft.md` 64.6), as Google Play requires of an application
+from which people can ask for an account. A person asks on «الحساب» («طلب حذف حسابي»); the holders of «إزالة عضو» who
+may remove that person are told in «يحتاج قرارك», and the existing «إزالة» carries it out. Requests live in Postgres
+(`supabase/migrations/*account_deletion*`, written and held by `supabase/tests/account_deletion_rules.sql`; applied
+only on the owner's go-ahead), every write is a database function, and removing an account with an open request also
+removes what only that person could read. A founder's account is not deleted this way. What is deleted and what stays
+is one list (`src/lib/account-deletion.ts`), held equal to the public page `public/account-deletion.html` by
+`tests/account-deletion.test.mjs`. `public/privacy.html` says what the Hub handles; change it when that changes, and
+keep both pages free of scripts.
 
 Push notices are real too, by owner directive of 2026-10-26 (`Android_Build_Plan.md` A5, `Mobile_Apps_Plan.md` 5.3 to
 5.5, `MVP_draft.md` 64.3, recorded in `progress.md`); this is the server half, and real delivery waits for the owner's

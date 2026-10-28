@@ -1,6 +1,6 @@
 {
   "script": "qa/android-files.cjs",
-  "run": "2026-10-27T21:01:47.624Z",
+  "run": "2026-10-28T11:54:52.395Z",
   "checks": [
     {
       "name": "in a browser: no phone button, and the asset page keeps «تنزيل» with its download address",
@@ -15,7 +15,7 @@
     {
       "name": "the application offers bridge version 3 or later with download (save, open) and share (file), frozen",
       "pass": true,
-      "detail": "{\"bridge\":6,\"save\":\"function\",\"open\":\"function\",\"share\":\"function\",\"frozen\":true}"
+      "detail": "{\"bridge\":7,\"save\":\"function\",\"open\":\"function\",\"share\":\"function\",\"frozen\":true}"
     },
     {
       "name": "a document offers «فتح الملف», «حفظ في الهاتف» and «مشاركة», in that order, in place of «تنزيل»",
@@ -55,7 +55,7 @@
     {
       "name": "a video goes to the gallery, in the application's album, with its bytes",
       "pass": true,
-      "detail": "{\"sum\":\"678ca6326b4f885a4d6fff092d545109b790fb0ae48f247fee1f6f3e9417bfb6\",\"file\":\"/sdcard/Movies/مركز الاتصال المؤسسي/مقطع.mp4\"}"
+      "detail": "{\"sum\":\"f3f0902c72809d8ea6ea4c32c35fa7ce0d576108f1e88b6ffd46f2af4ddb2c01\",\"file\":\"/sdcard/Movies/مركز الاتصال المؤسسي/مقطع.mp4\"}"
     },
     {
       "name": "the window closes once the action is done",
@@ -75,7 +75,7 @@
     {
       "name": "the viewer reads a copy in the application's cache folder, with the file's bytes and name",
       "pass": true,
-      "detail": "[{\"sum\":\"2bccab4f649c0df4ab073938bb799f2e75183e28cd294730475c266703c3fe65\",\"file\":\"cache/shared/9e0566aef82e2b6f/تقرير الربع.pdf\"}]"
+      "detail": "[{\"sum\":\"2bccab4f649c0df4ab073938bb799f2e75183e28cd294730475c266703c3fe65\",\"file\":\"cache/shared/b342b993e59099ff/تقرير الربع.pdf\"}]"
     },
     {
       "name": "opening asks for the version shown, not the download the library would record",

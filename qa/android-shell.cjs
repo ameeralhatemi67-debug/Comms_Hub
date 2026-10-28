@@ -81,8 +81,11 @@ async function tapOn(page, selector) {
     const r = document.querySelector(s).getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + r.height / 2, ratio: window.devicePixelRatio };
   }, selector);
-  const web = h.screenNodes().find((n) => n.cls === 'android.webkit.WebView');
-  if (!web) throw new Error('no web view on the screen');
+  const web = await h.webViewNode();
+  if (!web) {
+    shot('no-web-view');
+    throw new Error(`no web view on the screen; in front: ${h.resumed()}; on the screen: ${h.screenNodes().filter((n) => n.text).map((n) => n.text).slice(0, 12).join(' | ')}`);
+  }
   h.tap(Math.round(web.bounds[0] + rect.x * rect.ratio), Math.round(web.bounds[1] + rect.y * rect.ratio));
 }
 
@@ -93,6 +96,9 @@ async function tidy(page) {
 
 /** Back to the application after another one was in front; Playwright's handle on the web view is taken again. */
 async function backToApp(device) {
+  // The browser's step is already recorded. Chrome's first-run screen (the emulator starts read-only, so Chrome is
+  // never set up) can come back over the application a moment after it returned; Chrome is stopped first.
+  h.shell('am force-stop com.android.chrome', { allowFail: true });
   h.shell(`am start -W -n ${h.ACTIVITY}`, { allowFail: true });
   await h.until(() => ours(), 15000, 300);
   await h.sleep(800);
@@ -329,7 +335,7 @@ async function backToApp(device) {
     // 7. the system bars and the keyboard
     await tidy(page);
     const size = /(\d+)x(\d+)/.exec(h.shell('wm size')).slice(1).map(Number);
-    const web = h.screenNodes().find((n) => n.cls === 'android.webkit.WebView');
+    const web = await h.webViewNode();
     check('the window keeps clear of the status bar and the gesture bar', !!web && web.bounds[1] > 0 && web.bounds[3] < size[1], { web: web?.bounds, screen: size });
     shot('05-clear-of-bars');
     // UI Automator keeps reporting the web view's place from before the keyboard, so the page's own

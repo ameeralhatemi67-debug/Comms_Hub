@@ -19,4 +19,6 @@ ext {
     androidxBiometricVersion = '1.1.0'
     // Background uploads (A7): WorkManager 2.11.2 (2026-03-25), past the 14-day rule.
     androidxWorkVersion = '2.11.2'
+    // Google Play's own updates (A8), in Google Play's copy only: Play's in-app updates 2.1.0 (2023-05-22).
+    playAppUpdateVersion = '2.1.0'
 }

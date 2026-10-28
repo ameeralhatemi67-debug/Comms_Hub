@@ -28,11 +28,13 @@ the folder (`.vercelignore`).
 | `npm run build:debug` | `sa.commshub.app.dev` | the production site, or the local one (below) |
 | `npm run build:qa` | `sa.commshub.app.qa`, the check package | the local site; inspectable by the checks |
 | `npm run pack:release` | `sa.commshub.app` | the production site alone |
+| `npm run pack:play` | `sa.commshub.app`, Google Play's App Bundle | the production site alone |
+| `npm run build:qa:play` | `sa.commshub.app.qa`, Google Play's copy of the check package | the local site; asks Play's stand-in |
 
 Each command copies `www/` and `capacitor.config.json` into the Android project (`cap sync`), writes the
 local configuration of the debug and check builds, runs Gradle, and prints the APK's path, size and SHA-256.
-The APK lands in `android/app/build/outputs/apk/direct/<kind>/`. The `play` channel (`node scripts/build.mjs
-release play`) waits for Google Play (A8).
+The APK lands in `android/app/build/outputs/apk/<channel>/<kind>/`; Google Play's release is an App Bundle in
+`android/app/build/outputs/bundle/playRelease/` (A8, below).
 
 **Rules held by the files.**
 - A release opens the production address alone, over https, with inspection off.
@@ -47,8 +49,8 @@ release play`) waits for Google Play (A8).
 - `npm test`: the rules that live in files. The address equals the desktop's and the site's; the builds;
   the permissions; the desktop's connection routes, note and connection screen, word for word; no emoji.
 - `npm run test:jvm`: the rules in Java (where an address goes, the name a download is saved under, the
-  identity script), on the JVM. On Windows, run `gradlew.bat testDirectReleaseUnitTest` in `android/` with
-  `JAVA_HOME` set to the JDK above.
+  identity script, Play's update states), on the JVM, for both channels. On Windows, run
+  `gradlew.bat testDirectReleaseUnitTest testPlayReleaseUnitTest` in `android/` with `JAVA_HOME` set to the JDK above.
 - `qa/android-shell.cjs` (from the repository's root): the gate of A2 on the emulator. Start the emulator
   read-only first, so nothing the check installs is kept:
 
@@ -212,6 +214,44 @@ What the application asks: Android 13 and newer ask the person for notices after
 («تنبيهات الهاتف»). No token is made before then (`firebase_messaging_auto_init_enabled` is off): the application asks
 Firebase for one only once notices are allowed.
 
+## Google Play (A8)
+
+Google Play's copy is the `play` channel: the same application, signed with the same key, with no permission to install
+packages and no update of its own. Play updates it, and the page shows Play's offer in the same update window
+(`MVP_draft.md` 64.6). Google's Play in-app updates library (`com.google.android.play:app-update`, pinned in
+`variables.gradle`) is in this channel alone; the APK channel carries none of it.
+
+**Building the release.** With the key and the Firebase file named as for the APK:
+
+```powershell
+$env:COMMSHUB_KEYSTORE_PROPERTIES = "D:/keys/commshub-release.properties"
+$env:COMMSHUB_GOOGLE_SERVICES = "D:/keys/google-services.json"
+npm run pack:play
+```
+
+It prints the `.aab` path, size and SHA-256. Like a signed APK, a signed bundle must carry the certificate the site's
+`assetlinks.json` names, or the build refuses to finish. Raise `version` in `package.json` first, as for an APK: Play
+refuses a whole number it has already seen. A release for both channels has the same version.
+
+**The key in Play.** Choose your own app signing key at the first upload (Play Console, "App integrity"), with
+Google's PEPK tool and the command the Console shows, so that Play signs with the same key as the APK and an installed
+APK updates from Play. The bundle is signed with the same key too. Google recommends a separate upload key; using one
+needs the build's certificate check changed first. Everything else the owner enters in the Console, in order, is in
+`Play_Console_Drafts.md`.
+
+**Marking a release required.** A Play release with in-app update priority 4 or 5 (set through Play's Developer API
+when the release is rolled out) cannot be put off: the window offers only Play's full-screen update. The site's own
+floor, `MINIMUM_ANDROID`, applies to both channels.
+
+**The Play check.** `qa/android-play.cjs` builds the bundle (unsigned) and reads its manifest with bundletool from
+Gradle's cache, then installs Google Play's copy of the check package, which asks Play's `FakeAppUpdateManager` (an
+application not installed from Play has nothing to ask Play about). The check plays Play's part through the package's
+own receiver (`src/playQa/QaPlay.java`): a release offered, put off, downloaded with its share shown, the restart, and a
+required release declined. Play's real update is the owner's check, through Play's internal testing track.
+
+**The listing's pictures.** `qa/play-graphics.cjs` draws `play/icon-512.png` and `play/feature-graphic-1024x500.png`
+from the brand logo and the site's fonts.
+
 ## The files check
 
 `qa/android-files.cjs` compiles the site's own file buttons (`src/components/native/phone-file.tsx`) into a
@@ -234,5 +274,6 @@ application send a large one in the background to a stand-in of Google Drive's r
 | `capacitor.config.json` | the release's configuration: the production address, no cleartext, no inspection |
 | `scripts/config.mjs` | the debug and check builds' configuration, derived from it |
 | `android/app/build.gradle` | the version (from `package.json`), the address list per build, the check package, the key from outside |
-| `android/app/src/main/java/sa/commshub/app/` | the window (`MainActivity`), where an address goes (`Navigation`), the page's view of the application (`Identity`, `Shell`), downloads, saving, opening and sharing the site's files (`Downloads`, `FileNames`, `SiteFiles`), Capacitor's page interfaces and cookie handler taken off (`Shell.narrow`), links (`Links`), the lock (`AppLock`), files held for the page, shared in and uploaded in the background (`Held`, `Incoming`, `Uploads`, `UploadWorker`; the check package's `src/qa/QaFiles.java`), push notices (`Push`, `PushService`, `ShellApp`; the check package's own `src/qa/QaPush.java`), the narrowed permissions (`ShellChromeClient`), the refused file routes and the connection screen (`ShellWebViewClient`) |
+| `android/app/src/play/`, `android/app/src/direct/` | Google Play's updates (`PlayUpdate`) and the APK channel's empty one; the APK channel's permission to install and its receiver (`src/direct/AndroidManifest.xml`); Google Play's check package's driver of Play's stand-in (`src/playQa/QaPlay.java`) |
+| `android/app/src/main/java/sa/commshub/app/` | the window (`MainActivity`), where an address goes (`Navigation`), the page's view of the application (`Identity`, `Shell`), Play's update states in the page's words (`PlayStates`), downloads, saving, opening and sharing the site's files (`Downloads`, `FileNames`, `SiteFiles`), Capacitor's page interfaces and cookie handler taken off (`Shell.narrow`), links (`Links`), the lock (`AppLock`), files held for the page, shared in and uploaded in the background (`Held`, `Incoming`, `Uploads`, `UploadWorker`; the check package's `src/qa/QaFiles.java`), push notices (`Push`, `PushService`, `ShellApp`; the check package's own `src/qa/QaPush.java`), the narrowed permissions (`ShellChromeClient`), the refused file routes and the connection screen (`ShellWebViewClient`) |
 | `www/offline.html` | the connection screen |

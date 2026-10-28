@@ -28,6 +28,7 @@ import { PhoneAppPanel } from './native/phone-app';
 import { MyDevicesPanels } from './native/devices';
 import { PhoneLockPanel } from './native/phone-lock';
 import { beforeSignOut, removeOtherPhones } from '@/lib/native/device-push';
+import { AccountDeletionPanel } from './account-deletion';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
@@ -242,6 +243,7 @@ export function Supporting({ page }: { page: string }) {
             </p>
           </Panel>
         </div>
+        <AccountDeletionPanel />
       </div>
     );
 

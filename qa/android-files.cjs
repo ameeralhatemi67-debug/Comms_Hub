@@ -163,7 +163,7 @@ async function tapOn(page, selector) {
     return { x: r.left + r.width / 2, y: r.top + r.height / 2, ratio: window.devicePixelRatio };
   }, selector);
   if (!rect) throw new Error(`nothing at ${selector}`);
-  const web = h.screenNodes().find((n) => n.cls === 'android.webkit.WebView');
+  const web = await h.webViewNode();
   if (!web) throw new Error('no web view on the screen');
   h.tap(Math.round(web.bounds[0] + rect.x * rect.ratio), Math.round(web.bounds[1] + rect.y * rect.ratio));
 }

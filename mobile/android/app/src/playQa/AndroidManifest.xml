@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google Play's copy of the check package only: the check plays Google Play's part through Play's own stand-in
+     (QaPlay.java, qa/android-play.cjs). Nothing of it is in a release, a development build or the APK channel. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <receiver
+            android:name=".QaPlay"
+            android:exported="true" />
+    </application>
+</manifest>

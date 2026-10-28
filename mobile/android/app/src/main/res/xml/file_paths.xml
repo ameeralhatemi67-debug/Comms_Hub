@@ -2,6 +2,7 @@
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Only the application's own cache folder for sharing; nothing on the phone's storage. -->
     <cache-path name="shared" path="shared/" />
-    <!-- A photo or video the camera writes for the page (A7, Held.java). -->
-    <cache-path name="held" path="held/" />
+    <!-- A photo or video the camera writes for the page (A7, Held.java): the application's files, which Android never
+         empties to free space, as it may its cache. -->
+    <files-path name="held" path="held/" />
 </paths>

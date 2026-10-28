@@ -843,3 +843,91 @@ test('A7: «استلام ملفات» is every member\'s page, and its places ke
   assert.match(fs.readFileSync('src/components/media/library.tsx', 'utf8'), /const h = await capture\(kind\);/);
   for (const f of ['src/lib/native/held.ts', 'src/components/native/phone-uploads.tsx', 'src/components/native/share-page.tsx']) assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
 });
+
+// A8: Google Play's copy (bridge version 7) updates through Play, in the same window.
+const play = (over = {}) => ({ state: 'available', why: null, current: '0.1.0', code: 200, percent: null, priority: 0, staleDays: 2, flexible: true, immediate: true, ...over });
+
+test('A8: Google Play\'s copy offers playUpdate by its three methods, and never appUpdate', async () => {
+  const fs = await import('node:fs');
+  const g = { ...a1, bridge: 7, playUpdate: { status: async () => ({}), start: async () => 'started', complete: async () => 'nothing' } };
+  assert.equal(nativeOf(g).has('playUpdate'), true);
+  assert.equal(nativeOf(g).has('appUpdate'), false);
+  assert.equal(nativeOf({ ...g, playUpdate: { status: async () => ({}), start: async () => 'started' } }).has('playUpdate'), false, 'every method');
+  assert.equal(nativeOf(d2().bridge).has('playUpdate'), false);
+  const identity = fs.readFileSync('mobile/android/app/src/main/java/sa/commshub/app/Identity.java', 'utf8');
+  assert.match(identity, /static final int BRIDGE = 7;/);
+  assert.match(fs.readFileSync('mobile/android/app/src/main/java/sa/commshub/app/Shell.java', 'utf8'), /Identity\.script\(version\(web\.getContext\(\)\), AppUpdate\.offered\(\), PlayUpdate\.offered\(\)\)/);
+  assert.match(fs.readFileSync('mobile/android/app/src/direct/java/sa/commshub/app/PlayUpdate.java', 'utf8'), /static boolean offered\(\) \{\s*return false;/, 'the APK channel has no Play');
+});
+
+test('A8: Play\'s report is read only in its shape, and a whole number reads back as its version', async () => {
+  const { readPlayStatus, versionOfCode } = await import('../src/lib/native/play-update.ts');
+  assert.deepEqual(readPlayStatus(play()), play());
+  assert.equal(readPlayStatus(play({ code: undefined })).code, null, 'Play offers none');
+  assert.equal(readPlayStatus(play({ why: '<b>x</b>' })).why, null);
+  assert.equal(readPlayStatus(play({ priority: 9 })).priority, 0);
+  assert.equal(readPlayStatus(play({ percent: 140 })).percent, null);
+  for (const bad of [null, 'available', play({ state: 'done' }), play({ current: 'latest' })]) assert.equal(readPlayStatus(bad), null, JSON.stringify(bad));
+  assert.equal(versionOfCode(100), '0.1.0');
+  assert.equal(versionOfCode(10203), '1.2.3');
+  assert.equal(versionOfCode(200), '0.2.0');
+  for (const no of [null, 0, -1, 1.5, 100_000_000]) assert.equal(versionOfCode(no), null, String(no));
+  const fs = await import('node:fs');
+  assert.match(fs.readFileSync('mobile/android/app/build.gradle', 'utf8'), /versionCode parts\[0\] \* 10000 \+ parts\[1\] \* 100 \+ parts\[2\]/, 'the builds\' rule');
+});
+
+test('A8: which window: required first, then what changed, then a downloaded update, then a newer one once a day', async () => {
+  const { playWindow, PLAY_REQUIRED_PRIORITY } = await import('../src/lib/native/play-update.ts');
+  const { LATER_MS } = await import('../src/lib/native/app-update.ts');
+  const now = Date.parse('2026-11-02T08:00:00Z');
+  const w = (status, later = null, seen = '0.1.0') => playWindow({ status, now, later, seen });
+  assert.deepEqual(w(null), { kind: 'none' });
+  assert.deepEqual(w(play()), { kind: 'optional', version: '0.2.0', code: 200 });
+  const offer = { code: 200, until: now + 1000, kind: 'offer' };
+  const restart = { ...offer, kind: 'restart' };
+  assert.equal(w(play(), offer).kind, 'none', 'put off');
+  assert.equal(playWindow({ status: play(), now: now + LATER_MS, later: offer, seen: '0.1.0' }).kind, 'optional', 'a day later');
+  assert.equal(w(play(), { ...offer, code: 199 }).kind, 'optional', '«لاحقاً» was for another release');
+  assert.equal(w(play(), restart).kind, 'optional', 'putting off the restart does not put off the offer');
+  assert.equal(w(play({ flexible: false })).kind, 'none', 'only Play\'s flexible update is offered as optional');
+  for (const s of ['pending', 'downloading', 'installing', 'none', 'checking', 'unavailable']) assert.equal(w(play({ state: s })).kind, 'none', `${s}: no window while Play works`);
+  assert.deepEqual(w(play({ state: 'downloaded' })), { kind: 'restart', version: '0.2.0', code: 200 });
+  assert.equal(w(play({ state: 'downloaded' }), restart).kind, 'none', 'the restart put off too');
+  assert.equal(w(play({ state: 'downloaded' }), offer).kind, 'restart', 'taking or putting off the offer never hides the restart');
+  assert.deepEqual(w(play({ priority: PLAY_REQUIRED_PRIORITY })), { kind: 'required', version: '0.2.0', can: 'immediate' }, 'Play marks it required');
+  assert.deepEqual(w(play({ priority: 5, state: 'downloaded' }), restart), { kind: 'required', version: '0.2.0', can: 'restart' }, 'required overrides «لاحقاً»');
+  assert.deepEqual(w(play({ priority: 5, state: 'downloading' })), { kind: 'required', version: '0.2.0', can: null }, 'the button waits while Play downloads');
+  assert.deepEqual(w(play({ current: '0.0.9', code: null, state: 'none' }), null, '0.0.9'), { kind: 'required', version: null, can: null }, 'too old for the site, and Play offers nothing yet');
+  assert.equal(w(play({ priority: 3 })).kind, 'optional');
+  assert.deepEqual(w(play({ current: '0.2.0', code: null, state: 'none' })), { kind: 'whatsNew', version: '0.2.0' });
+  assert.equal(w(play({ current: '0.2.0', code: null, state: 'none' }), null, '0.2.0').kind, 'none', 'said once');
+  assert.equal(w(play({ current: '0.2.0', code: null, state: 'none' }), null, null).kind, 'none', 'never at the first opening after installing');
+});
+
+test('A8: Play\'s update said in Arabic, and every word the application gives is read', async () => {
+  const fs = await import('node:fs');
+  const { playLine, playIdleLine, playStartAnswer, playWhy, readPlayStatus } = await import('../src/lib/native/play-update.ts');
+  assert.equal(playLine(play({ state: 'downloading', percent: 40 })), 'جارٍ تنزيل التحديث من Google Play (40٪)…');
+  assert.equal(playLine(play()), null);
+  for (const s of ['pending', 'downloaded', 'installing']) assert.match(playLine(play({ state: s })), /[؀-ۿ]/, s);
+  const states = fs.readFileSync('mobile/android/app/src/main/java/sa/commshub/app/PlayStates.java', 'utf8');
+  const java = fs.readFileSync('mobile/android/app/src/play/java/sa/commshub/app/PlayUpdate.java', 'utf8');
+  const whys = new Set(['declined', 'cancelled', 'failed', ...[...java.matchAll(/why = "([a-z]+)";/g)].map((m) => m[1])]);
+  for (const w of whys) assert.match(playWhy(w), /[؀-ۿ]/, w);
+  const answers = new Set([...java.matchAll(/return "([a-z]+)";/g)].map((m) => m[1]));
+  for (const r of [...answers, 'refused']) if (r !== 'started') assert.match(playStartAnswer(r), /[؀-ۿ]/, r);
+  assert.equal(playStartAnswer('started'), null);
+  for (const s of [null, play({ state: 'none' }), play({ state: 'unavailable' })]) assert.match(playIdleLine(s), /Google Play/);
+  // Every state word the application reports is one the page reads.
+  const said = [...states.matchAll(/return "([a-z]+)";/g)].map((m) => m[1]).filter((s) => !whys.has(s));
+  for (const s of new Set([...said, 'checking', 'unavailable'])) assert.ok(readPlayStatus(play({ state: s })), s);
+});
+
+test('A8: the window and the panel take Play\'s copy, and the APK channel keeps its own', async () => {
+  const fs = await import('node:fs');
+  const page = fs.readFileSync('src/components/native/phone-app.tsx', 'utf8');
+  assert.match(page, /return useNativeFeature\('playUpdate'\) \? <PlayUpdateWindow \/> : <ApkUpdateWindow \/>;/);
+  assert.match(page, /if \(platform === 'android' && fromPlay\) \{/);
+  assert.match(page, /const PLAY_LATER_KEY = 'commshub\.play\.later';/);
+  for (const f of ['src/lib/native/play-update.ts', 'src/components/native/phone-app.tsx']) assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
+});

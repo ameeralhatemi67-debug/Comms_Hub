@@ -114,7 +114,7 @@ async function tapButton(page, label) {
     return { x: r.left + r.width / 2, y: r.top + r.height / 2, ratio: window.devicePixelRatio };
   }, label);
   if (!rect) throw new Error(`no button «${label}»`);
-  const web = h.screenNodes().find((n) => n.cls === 'android.webkit.WebView');
+  const web = await h.webViewNode();
   h.tap(Math.round(web.bounds[0] + rect.x * rect.ratio), Math.round(web.bounds[1] + rect.y * rect.ratio));
 }
 
@@ -260,8 +260,18 @@ const installed = () => (/versionName=([\d.]+)/.exec(h.shell(`dumpsys package ${
     if (protect) note('Google Play Protect asked to scan the application before the update ("App scan recommended"); the check took «More details» and «Install without scanning», sending nothing to Google. A pilot phone will see the same until Google knows the application.');
     check('after it, 0.1.1 is installed', !!now, { installed: installed(), seen: seen.slice(-3) });
     h.shell(`am start -W -n ${h.ACTIVITY}`);
-    page = await webPage(phone);
-    await page.waitForSelector('.auth-card', { timeout: 60000 });
+    try {
+      page = await webPage(phone);
+      await page.waitForSelector('.auth-card', { timeout: 60000 });
+    } catch (e) {
+      // The update restarted the application; on a busy computer Android may stop Playwright's driver too (as in
+      // relaunch). The phone is taken again, once, without restarting the application, so its cookie is still read.
+      if (!/has been closed/.test(String(e && e.message))) throw e;
+      note(`Playwright's handle on the phone was lost after the update (${String(e.message).split('\n')[0]}); it was taken again.`);
+      [phone] = await _android.devices({ omitDriverInstall: true });
+      page = await webPage(phone);
+      await page.waitForSelector('.auth-card', { timeout: 60000 });
+    }
     const kept = await page.evaluate(() => document.cookie);
     check('the site\'s cookie is kept through the update', kept.includes('qa_a3=kept'), kept);
     const id = await page.evaluate(() => window.commsHubNative?.version);
