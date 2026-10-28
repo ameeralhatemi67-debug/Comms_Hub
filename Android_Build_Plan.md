@@ -388,8 +388,8 @@ and simulation files are never staged.
 > - The check package's play copy asks Play's `FakeAppUpdateManager`, so the window is checked on the emulator;
 >   Play's real update is the owner's check through internal testing.
 > - «طلب حذف حسابي» reaches the holders of «إزالة عضو» who may remove the person, and «إزالة» carries it out; a
->   requested removal also removes what only that person could read. The migration is written and its rules pass,
->   not applied until the owner says.
+>   requested removal also removes what only that person could read. The migration was applied with the owner's
+>   approval the same day, its rules passing before and after.
 > - The public page is static (`/account-deletion.html`, with an email route for someone who cannot sign in), and
 >   the privacy policy is rewritten for everything the Hub handles today.
 > - The listing's icon and feature graphic are drawn from the brand; phone screenshots are the owner's, signed in.

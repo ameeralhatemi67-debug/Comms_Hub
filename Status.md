@@ -36,7 +36,8 @@ The last phase of `Android_Build_Plan.md`, at the owner's request of 2026-10-28.
   - `/privacy.html` rewritten for what the Hub handles today; `Play_Console_Drafts.md` for every Console form; the listing's icon and feature graphic (`mobile/play/`).
   - Found and fixed an A7 defect: files shared in or taken with «تصوير» were kept in the cache folder, which Android empties when a phone runs low on space, so a large video could vanish mid-upload. They now live in the application's own files.
   - Totals: `npm test` 601 of 601, `mobile` 22 of 22, JVM 39 of 39 on each channel, typecheck and build clean; every earlier emulator check passes again (shell 28, update 12, links 19, push 20, files 23, upload 11).
-- **Owner steps waiting**, in the order of `Play_Console_Drafts.md` section 1: push; apply `20261028120000_account_deletion.sql` (rules pass, go-ahead needed); the reviewer's account; the release key, its fingerprint in `assetlinks.json`, and the Firebase file; `npm run pack:play`; Play App Signing with the same key at the first upload; internal testing, then the closed test (12 testers, 14 days); the screenshots and the foreground-service video, signed in.
+- **Applied, with the owner's approval:** the account deletion migration, to comms-hub as `20261028122912`; rules 42 of 42 again after applying, and the advisors show only the three functions meant for signed-in people.
+- **Owner steps waiting**, in the order of `Play_Console_Drafts.md` section 1: push; the reviewer's account; the release key, its fingerprint in `assetlinks.json`, and the Firebase file; `npm run pack:play`; Play App Signing with the same key at the first upload; internal testing, then the closed test (12 testers, 14 days); the screenshots and the foreground-service video, signed in.
 - **Not verified.** Play's real update (the check used Play's own stand-in); anything signed in; a real phone.
 - **Next.** The owner's steps above. The Android build plan has no further phase.
 

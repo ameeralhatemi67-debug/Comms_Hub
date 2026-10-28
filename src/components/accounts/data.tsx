@@ -102,7 +102,7 @@ export function AccountsProvider({ children }: { children: ReactNode }) {
     const now = Date.now();
     setMembers((a.data ?? []) as Member[]);
     setRequests((r.data ?? []) as AccessRequest[]);
-    // An error here (before the owner applies the migration) leaves the list empty, never the page broken.
+    // An error here (a database without the table, as before 2026-10-28) leaves the list empty, never the page broken.
     setDeletions(((del.data ?? []) as DeletionRequest[]).filter((x) => x.email !== me.email));
     setGrants(
       ((g.data ?? []) as Record<string, unknown>[])

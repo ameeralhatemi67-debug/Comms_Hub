@@ -427,8 +427,8 @@ own `package.json` and lockfile like `desktop/`, outside the site's typecheck an
 Account deletion on request is real too, with A8 (`MVP_draft.md` 64.6), as Google Play requires of an application
 from which people can ask for an account. A person asks on «الحساب» («طلب حذف حسابي»); the holders of «إزالة عضو» who
 may remove that person are told in «يحتاج قرارك», and the existing «إزالة» carries it out. Requests live in Postgres
-(`supabase/migrations/*account_deletion*`, written and held by `supabase/tests/account_deletion_rules.sql`; applied
-only on the owner's go-ahead), every write is a database function, and removing an account with an open request also
+(`supabase/migrations/*account_deletion*`, held by `supabase/tests/account_deletion_rules.sql`; applied to comms-hub
+on 2026-10-28 with the owner's approval), every write is a database function, and removing an account with an open request also
 removes what only that person could read. A founder's account is not deleted this way. What is deleted and what stays
 is one list (`src/lib/account-deletion.ts`), held equal to the public page `public/account-deletion.html` by
 `tests/account-deletion.test.mjs`. `public/privacy.html` says what the Hub handles; change it when that changes, and

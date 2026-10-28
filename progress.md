@@ -2095,3 +2095,14 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - The migration is not applied: until it is, the panel says it cannot read requests, and the public page's email route is the only one.
   - The Play Console forms are drafts: the government-app question and the data-safety judgement calls are the owner's.
   - No real phone. Nothing pushed.
+
+### 2026-10-28: the account deletion migration applied
+
+- **The owner's word.** "Apply supabase/migrations/20261028120000_account_deletion.sql to comms-hub, then re-run its rules and the advisors."
+- **Applied** to `comms-hub` as version `20261028122912` (`account_deletion`). The stored statement's md5 `8ed2dba138462f0c073630ced82970af` equals the committed file's.
+- **Verified, numbers.**
+  - `supabase/tests/account_deletion_rules.sql`, sent verbatim, rolled back: **42 of 42**; the run's md5 `0b5446b07b750df46edf36d2fbf2e1f2` equals the file's (`qa/account-deletion-rules.json`, attempt 3).
+  - Afterwards: 0 requests, 0 throwaway accounts, sign-ins or notices; the 5 real accounts untouched; the three triggers on `accounts`; row level security on; execute only where intended.
+  - **Advisors**, both read in full before and after applying. Security: exactly 3 new notices, all `authenticated_security_definer_function_executable` for the functions meant for signed-in people (`account_deletion_request`, `account_deletion_withdraw`, and `deletion_visible`, the read policy's helper, which tells the caller only whether they may see a given person's request); nothing new for `anon`, nothing removed. Performance: unchanged.
+- **Not re-run.** The other rule files: no existing function was replaced. The trigger on deleting an account does nothing without an open request, which check 23 covers.
+- **Not done.** Nothing pushed: «طلب حذف حسابي» reaches people once the site is deployed.

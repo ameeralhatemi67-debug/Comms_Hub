@@ -12,10 +12,9 @@ needs a closed test first: at least 12 testers opted in for 14 days in a row.
 
 1. **Publish the site parts first.** Push, which deploys. The site must serve `/.well-known/assetlinks.json` (with the
    release certificate, see `mobile/README.md`), `/privacy.html` and `/account-deletion.html` before Google reads them.
-2. **Apply the account deletion migration** (`supabase/migrations/20261028120000_account_deletion.sql`) to the
-   `comms-hub` project. Its rules passed 42 of 42 in a rolled-back run (`qa/account-deletion-rules.json`); applying is
-   the owner's go-ahead. Without it «طلب حذف حسابي» says it cannot read requests, and the public page's email route is
-   the only one.
+2. **The account deletion migration** (`supabase/migrations/20261028120000_account_deletion.sql`): done. Applied to
+   `comms-hub` on 2026-10-28 with the owner's approval, its rules 42 of 42 before and after
+   (`qa/account-deletion-rules.json`). «طلب حذف حسابي» works once the site is pushed.
 3. **Make the reviewer's account.** Invite an address you control (for example a new Gmail address) as «عضو» from
    «الحسابات», sign in once to set its password, and keep the password in your password manager. It goes only into the
    Play Console's "App access" form (section 6), never into this repository or a chat.
