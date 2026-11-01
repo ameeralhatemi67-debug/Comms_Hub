@@ -1,7 +1,7 @@
 {
   "script": "qa/platform-gate.cjs",
-  "ran": "2026-10-14",
-  "base": "http://localhost:3100",
+  "ran": "2026-11-01",
+  "base": "http://127.0.0.1:3000",
   "total": 11,
   "passed": 11,
   "failed": 0,

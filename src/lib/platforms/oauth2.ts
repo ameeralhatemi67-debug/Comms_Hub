@@ -4,7 +4,7 @@
 // Every call takes the `fetch` it should use, so tests run it against a fake platform.
 //
 // The addresses, the parameters and the scopes were read from each platform's own documentation
-// on 2026-10-15 (Google OAuth 2.0 for web server apps and the YouTube Data API channels.list;
+// on 2026-11-01 (Google OAuth 2.0 for web server apps and the YouTube Data API channels.list;
 // LinkedIn's 3-legged OAuth flow; X's OAuth 2.0 Authorization Code flow with PKCE). They change:
 // the constants are in one place here, and each platform's guide in setup-guides.ts says the
 // documentation is the authority.
@@ -222,8 +222,8 @@ export async function linkedinAccountHealth(f: Fetch, a: { packed: string; exter
 const X_AUTH = 'https://x.com/i/oauth2/authorize';
 const X_TOKEN = 'https://api.x.com/2/oauth2/token';
 const X_API = 'https://api.x.com/2';
-/** Read the person, post for them, and stay connected (a refresh token); the access token lasts two hours. */
-export const X_SCOPES = ['tweet.read', 'tweet.write', 'users.read', 'offline.access'] as const;
+/** Read the person, post for them, upload pictures and video, and stay connected (a refresh token); the access token lasts two hours. */
+export const X_SCOPES = ['tweet.read', 'tweet.write', 'users.read', 'media.write', 'offline.access'] as const;
 
 const b64url = (bytes: Uint8Array) => Buffer.from(bytes).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 

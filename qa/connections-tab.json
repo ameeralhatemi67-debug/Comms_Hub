@@ -1,6 +1,6 @@
 {
   "script": "qa/connections-tab.cjs",
-  "run": "2026-10-15T10:05:13.192Z",
+  "run": "2026-11-01T20:58:54.476Z",
   "checks": [
     {
       "name": "guide meta exists",
@@ -70,12 +70,12 @@
     {
       "name": "guide meta: has steps and a way to the platform's page",
       "pass": true,
-      "detail": "7 steps"
+      "detail": "6 steps"
     },
     {
       "name": "guide tiktok: has steps and a way to the platform's page",
       "pass": true,
-      "detail": "6 steps"
+      "detail": "9 steps"
     },
     {
       "name": "guide google: has steps and a way to the platform's page",
@@ -90,7 +90,7 @@
     {
       "name": "guide x: has steps and a way to the platform's page",
       "pass": true,
-      "detail": "6 steps"
+      "detail": "7 steps"
     },
     {
       "name": "guide connect_google: has steps and a way to the platform's page",
@@ -145,7 +145,7 @@
     {
       "name": "there are links to follow in the steps",
       "pass": true,
-      "detail": "15"
+      "detail": "33"
     },
     {
       "name": "no unresolved placeholder in any guide",
@@ -165,12 +165,12 @@
     {
       "name": "1280: every link is https, opens in a new page and is visible",
       "pass": true,
-      "detail": "25"
+      "detail": "43"
     },
     {
       "name": "1280: copy lines are left-to-right and inside the screen",
       "pass": true,
-      "detail": "9"
+      "detail": "10"
     },
     {
       "name": "1280: the connections tab has mail, Google app and Drive, each with its guide",
@@ -195,12 +195,12 @@
     {
       "name": "390: every link is https, opens in a new page and is visible",
       "pass": true,
-      "detail": "25"
+      "detail": "43"
     },
     {
       "name": "390: copy lines are left-to-right and inside the screen",
       "pass": true,
-      "detail": "9"
+      "detail": "10"
     },
     {
       "name": "390: the connections tab has mail, Google app and Drive, each with its guide",

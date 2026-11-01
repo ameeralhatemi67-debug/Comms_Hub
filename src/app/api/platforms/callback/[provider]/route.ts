@@ -4,6 +4,7 @@ import { loadApp } from '@/lib/platforms/connect';
 import {
   OFFER_TYPE,
   PlatformCallError,
+  metaConfigToken,
   metaLongLivedUserToken,
   packTikTok,
   tiktokExchangeCode,
@@ -52,13 +53,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     let config: Record<string, unknown>;
     let label: string;
     if (provider === 'meta') {
-      const t = await metaLongLivedUserToken(fetch, { appId: app.appId, secret: app.secret, redirectUri: to, code });
+      // A configuration's token is final; a person's token is exchanged for a long-lived one.
+      const t = await (app.configId ? metaConfigToken : metaLongLivedUserToken)(fetch, { appId: app.appId, secret: app.secret, redirectUri: to, code });
       secret = t.token;
-      config = { provider, expires_at: t.expiresAt };
+      config = { provider, expires_at: t.expiresAt, ...(app.configId ? { unified: true } : {}) };
       label = 'دخول Meta بانتظار اختيار الصفحات';
     } else if (provider === 'tiktok') {
       const t = await tiktokExchangeCode(fetch, { clientKey: app.appId, secret: app.secret, redirectUri: to, code });
-      const me = await tiktokUserInfo(fetch, t.access);
+      const me = await tiktokUserInfo(fetch, t.access, { username: t.scope.includes('user.info.profile') });
       secret = packTikTok(t);
       config = {
         provider,

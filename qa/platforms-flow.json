@@ -1,0 +1,380 @@
+{
+  "script": "qa/platforms-flow.cjs",
+  "run": "2026-11-01T20:50:34.347Z",
+  "checks": [
+    {
+      "name": "every platform has one state, worked out from what is stored",
+      "pass": true,
+      "detail": "{\"x\":\"issue\",\"youtube\":\"steps\",\"tiktok\":\"steps\",\"linkedin\":\"none\",\"instagram\":\"ok\",\"snapchat\":\"manual\",\"mail\":\"mail\"}"
+    },
+    {
+      "name": "the words of the chips",
+      "pass": true,
+      "detail": "خطوات ناقصة · 6 من 9"
+    },
+    {
+      "name": "a stored secret proves the steps it proves: YouTube shows what is left of the shared Google app",
+      "pass": true,
+      "detail": "خطوات ناقصة · 7 من 9"
+    },
+    {
+      "name": "what needs the reader comes first",
+      "pass": true,
+      "detail": "[\"تحتاج منك خطوة\\n4\",\"لا شيء مطلوب منك الآن\\n3\"]"
+    },
+    {
+      "name": "each row has the one button its state asks for",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "publishing is said plainly to be a simulation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«إضافة منصة» opens every option: with steps, without, and any other",
+      "pass": true,
+      "detail": "5"
+    },
+    {
+      "name": "what is on its way is not offered again",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes the menu",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it opens where the person stopped, with the bar and the saved word",
+      "pass": true,
+      "detail": "إعداد تيك توك\nتُجرى مرة واحدة. بعدها تُضاف الحسابات من «حسابات المنصات» بلا أي من هذه الخطوات.\nخطوات ناقصة · 6 من 9\nإغلا"
+    },
+    {
+      "name": "the bar shows how far",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the app id kept from before is there; the secret is not",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the step links to the platform, in a new tab",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "in Arabic the steps are on the right and the input on the left",
+      "pass": true,
+      "detail": "{\"side\":570,\"input\":0,\"sideRight\":1056,\"inputRight\":570}"
+    },
+    {
+      "name": "a pair the platform refuses stays on the step, and says why",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the secret went to the route that checks it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and never into the saved progress",
+      "pass": true,
+      "detail": "{\"p_key\":\"tiktok\",\"p_done\":[\"app\",\"details\",\"verify\",\"products\",\"redirect\",\"scopes\",\"keys\"],\"p_step\":\"review\",\"p_fields\":{\"app_id\":\"client-key-saved\"}}"
+    },
+    {
+      "name": "accepted keys switch the platform on, so accounts can be added",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "closing says progress is kept, and the row moved on",
+      "pass": true,
+      "detail": "خطوات ناقصة · 7 من 9"
+    },
+    {
+      "name": "coming back opens the same step",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "any step can be opened",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an address to copy is filled in from the site, whole",
+      "pass": true,
+      "detail": "http://127.0.0.1:51075/api/platforms/callback/tiktok"
+    },
+    {
+      "name": "Escape closes the sheet",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a platform never started opens at its first step, with its link",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the company Page says plainly what it needs, and that the site does not connect it yet",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "what a person reports about a review becomes the state",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a platform with steps is added and opens its setup",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Meta asks for the Configuration ID: the button waits for it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and takes it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the Configuration ID goes with the pair",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a platform with no sign-in is simply added, switched on, with no sheet",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a connected platform opens its summary, with the rest folded under «خيارات متقدمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the facts say when they were read from the platform",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a save that fails says so at once",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "in English the same sheet has the steps on the left and the input on the right, with nothing else changed",
+      "pass": true,
+      "detail": "{\"side\":0,\"input\":486,\"sideRight\":486,\"inputRight\":1056}"
+    },
+    {
+      "name": "a viewer sees everything, and the controls are locked with a reason",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "before the migration the page still works",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "what needs attention comes first, with why and what depends on it",
+      "pass": true,
+      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-04 23:50\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
+    },
+    {
+      "name": "accounts are grouped by platform, each one line",
+      "pass": true,
+      "detail": "7"
+    },
+    {
+      "name": "a line says the state, who publishes, when, and what uses it",
+      "pass": true,
+      "detail": "الحساب الرسمي\n@org_official\nمتصل حتى 21 ديسمبر\nناشر الفحص\nنشر تلقائي\nعمل واحد"
+    },
+    {
+      "name": "an account connected to nothing is marked, and never says connected",
+      "pass": true,
+      "detail": "القناة التجريبية\n@org_trial\nربط محاكى\nناشر الفحص\nنشر تلقائي\nلا أعمال حالية"
+    },
+    {
+      "name": "an account with no sign-in says it is manual",
+      "pass": true,
+      "detail": "الحساب الرسمي\norg_official\nنشر يدوي\nناشر الفحص\nاسأل قبل النشر\nلا أعمال حالية"
+    },
+    {
+      "name": "the guide marks keep their shape",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the old wall of buttons is gone from the list",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the filter leaves one platform",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an account opens in a sheet: what it is, and its connection",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "cutting off, stopping and deleting are folded, and an account in use says why it stays",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "disconnecting still needs the long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "adding starts from the platforms that can take an account",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a platform not set up says so and leads to its setup",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the steps are on the right here too",
+      "pass": true,
+      "detail": "{\"side\":570,\"input\":0,\"sideRight\":1056,\"inputRight\":570}"
+    },
+    {
+      "name": "there is no password field: one sign-in at the platform",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Meta says one login gives several accounts, from one portfolio",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "back from the sign-in, the last step lists what it can connect",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a handle equal to the name is not printed twice",
+      "pass": true,
+      "detail": "ربط حسابات عبر Meta (فيسبوك وإنستغرام)\nسجّلت الدخول عند المنصة نفسها. بقي أن تختار.\nإغلاق\nالخطوة 3 من 3\nاختر المنصة\nسجّل الدخول عند المنصة\n3\nاختر الحسابات\n\nيُحفظ رمز كل حساب في خزنة الأسرار على الخادم وحده، ولا يظهر هنا ولا في أي صفحة. صلاحية الربط تأتي من المنصة وتنتهي بانتهاء رمزها.\n\nالخطوة الأخيرة\nاختر ما يُربط\n\nلم تظهر هنا فيسبوك: لا تُربط قبل أن تُضاف وتُفعّل من «المنصات».\n\nإنستغرام ·\n@org_news\nإنستغرام ·\n@org_campaigns\nمن ينشر عليها\nناشر الفحص\nعند الموعد\nنشر تلقائي\nتغيير هذه الخيارات\n\nالربط حقيقي، أما النشر نفسه فما زال محاكاة: لا يصل شيء إلى المنصة بعد.\n\nتراجع\nربط"
+    },
+    {
+      "name": "a platform the site does not have yet is named and cannot be picked: no raw key",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "who publishes starts from the publishers, folded",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "several accounts from one sign-in",
+      "pass": true,
+      "detail": "[{\"platform\":\"instagram\",\"id\":\"ig-news\"},{\"platform\":\"instagram\",\"id\":\"ig-camp\"}]"
+    },
+    {
+      "name": "they join the list",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«حساب آخر» starts at the sign-in of that platform",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and YouTube says each channel is a sign-in of its own",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a platform with no sign-in takes a name, in two steps",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and is added",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an account connected to nothing is still possible, folded and named for what it is",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the publisher adds nothing, and is told what is theirs",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and can reconnect a really-connected account",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "with nobody in the publisher role, the person connecting is the default, so the button is not stuck",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing sideways on the list",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: the current step alone, above its input",
+      "pass": true,
+      "detail": "{\"above\":true,\"wide\":390,\"steps\":1}"
+    },
+    {
+      "name": "phone: nothing sideways on the accounts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: a line keeps its state and folds the rest under it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: the sheet follows the theme",
+      "pass": true,
+      "detail": "rgb(14, 31, 24) / rgb(232, 241, 234)"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 74,
+  "passed": 74,
+  "failed": 0
+}

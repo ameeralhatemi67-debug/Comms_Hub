@@ -212,6 +212,7 @@ test('X: PKCE, the challenge is the S256 of a verifier that never leaves the ser
   assert.doesNotMatch(u.toString(), new RegExp(verifier));
   assert.deepEqual(u.searchParams.get('scope').split(' '), [...X_SCOPES]);
   assert.ok(X_SCOPES.includes('offline.access') && X_SCOPES.includes('tweet.write'));
+  assert.ok(X_SCOPES.includes('media.write'), 'a picture or a video cannot be uploaded without it');
 });
 
 test('X: the pair is checked with Basic auth; the code and the verifier become tokens; refresh rotates the refresh token', async () => {

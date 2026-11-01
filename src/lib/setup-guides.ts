@@ -1,19 +1,31 @@
 // The "how do I set this up" steps of every outside connection, kept in the site so a person can
-// follow them from the screen that needs them (the circled "!" beside a platform or a storage
-// provider). Pure data, Arabic, no network. The facts come from each platform's own developer
-// documentation as read on 2026-10-15 and change often; each guide says so, and the exact scopes
-// and the API version live in one place in code (src/lib/platforms/oauth.ts).
+// follow them from the screen that needs them (the setup sheet of «المنصات», or the circled "!" beside
+// a storage provider). Pure data, Arabic, no network. The facts come from each service's own developer
+// documentation, as read on the date each guide states, and change often; the exact scopes and the
+// API version live in one place in code (src/lib/platforms/oauth.ts).
 //
 // `{redirect}` in a step is replaced with the address of this site plus the platform's return path
 // when the guide is drawn; `{origin}` with the site's address.
 
 export type GuideStep = {
+  /** A stable name for saved progress in «المنصات», so a reworded step keeps its place. */
+  id?: string;
   t: string;
   b?: string;
   /** A value to copy exactly (an address), shown on its own line. */
   copy?: string;
+  /** What the value to copy is. */
+  copyLabel?: string;
+  /** More values to copy in the same step. */
+  more?: { label: string; copy: string }[];
   /** Where this step is done, on the platform's own site. */
   link?: { href: string; label: string };
+  /** What the input side of the setup sheet asks; without it the step is done outside and confirmed there. */
+  kind?: 'copy' | 'keys' | 'review';
+  /** The button that says the step is done. On a review step, the button that leaves it for later. */
+  ok?: string;
+  /** Already true once the app's secret is stored: another connection of the same app did it. */
+  implied?: boolean;
 };
 export type Guide = {
   title: string;
@@ -27,55 +39,86 @@ export type Guide = {
 };
 
 const DEV_FACTS = 'المعلومات هنا من وثائق المنصة الرسمية كما قُرئت في 2026-10-15، وتتغير. راجع صفحة المنصة نفسها عند التسجيل.';
+const PLATFORM_FACTS = 'المعلومات هنا من وثائق المنصة الرسمية كما قُرئت في 2026-11-01، وتتغير. راجع صفحة المنصة نفسها عند التسجيل.';
 const SIMULATION = 'النشر نفسه ما زال محاكاة في كل الحالات. هذه الخطوات تجهّز الربط والفحص فقط.';
+const META_APPS = { href: 'https://developers.facebook.com/apps/', label: 'Meta for Developers' };
+const META_PORTFOLIO = { href: 'https://business.facebook.com/settings', label: 'إعدادات حافظة الأعمال' };
+const TIKTOK_APPS = { href: 'https://developers.tiktok.com/apps/', label: 'TikTok for Developers' };
+const LINKEDIN_APPS = { href: 'https://www.linkedin.com/developers/apps', label: 'تطبيقاتي في LinkedIn' };
+const X_CONSOLE = { href: 'https://console.x.com', label: 'وحدة مطوّري X' };
 
 export const GUIDES: Record<string, Guide> = {
   meta: {
-    title: 'تجهيز تطبيق Meta (فيسبوك وإنستغرام)',
-    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف التطبيق وسره في الحقلين أسفل هذه البطاقة.',
+    title: 'تجهيز تطبيق Meta لإنستغرام',
+    intro: 'للمدير. تُجرى مرة واحدة على مسار Meta الجديد (Unified login)، وتنتهي بإدخال معرّف التطبيق وسره ومعرّف الإعداد في الموقع.',
     steps: [
-      { t: 'أنشئ التطبيق', b: 'في Meta for Developers: «إنشاء تطبيق»، النوع Business، داخل حافظة أعمال القسم. إن لم يكن للقسم حساب أعمال موثّق في Meta فاكتب ذلك في ملاحظة «التجهيز»: هو ما يحدد مدة الانتظار.', link: { href: 'https://developers.facebook.com/apps/', label: 'Meta for Developers' } },
-      { t: 'أضف «Facebook Login»', b: 'من «Add products»، نمط الويب.' },
-      { t: 'سجّل عنوان العودة', b: 'في إعدادات Facebook Login، الحقل «Valid OAuth Redirect URIs»: الصق هذا العنوان تماماً.', copy: '{redirect}' },
-      { t: 'أضف من سيربطون الحسابات', b: 'ما دام التطبيق في وضع التطوير يعمل فقط لمن له دور على التطبيق (مسؤول أو مطوّر أو مختبر). أضفهم من «App roles». للجميع لاحقاً يلزم «App Review» والتحقق من النشاط التجاري، وهو ما يستغرق أسابيع.' },
-      { t: 'جهّز الصفحات والحسابات', b: 'صفحة فيسبوك: يجب أن يكون من يربطها ممن يديرونها. حساب إنستغرام: مهني ومربوط بصفحة فيسبوك، وإلا لا يظهر في القائمة.' },
-      { t: 'انسخ المعرّف والسر', b: 'من «App settings» ثم «Basic»: App ID و App Secret. الصقهما في الحقلين أسفل البطاقة فقط، ولا ترسلهما إلى أحد.' },
-      { t: 'احفظ وفعّل', b: 'اضغط «فحص وحفظ»: يسأل الموقع Meta أولاً إن كان الزوج صحيحاً، ولا يحفظ شيئاً إن لم يكن. ثم فعّل المنصة من بطاقتها، وأخبر الناشرين أن يربطوا حساباتهم من «حسابات المنصات».' },
+      { id: 'accounts', implied: true, t: 'جهّز حسابات إنستغرام', b: 'كل حساب مهني (Business أو Creator) ومملوك لحافظة أعمال القسم. الحساب الشخصي لا يعمل، والحساب في حافظة أخرى يحتاج دخولاً مستقلاً.', link: META_PORTFOLIO, ok: 'الحسابات جاهزة' },
+      { id: 'app', implied: true, t: 'أنشئ التطبيق', b: '«Create app»، ثم حالة الاستخدام «Manage messaging & content on Instagram»، واربطه بحافظة أعمال القسم. بدون الحافظة لا يظهر تبويب الخطوة التالية.', link: META_APPS, ok: 'أنشأت التطبيق' },
+      { id: 'config', implied: true, t: 'أنشئ الإعداد', b: 'في التطبيق: «Use cases» ثم «Customize» ثم «API setup with Unified login» ثم «Create new configuration». تأكد أن instagram_content_publish ضمن الصلاحيات، ثم «Use this configuration».', link: META_APPS, ok: 'أنشأت الإعداد' },
+      { id: 'redirect', implied: true, kind: 'copy', t: 'سجّل عنوان العودة', b: 'في الحقل «Redirect URL» تحت الإعداد: الصق هذا العنوان تماماً واحفظ.', copy: '{redirect}', copyLabel: 'عنوان العودة', ok: 'سجّلت العنوان' },
+      { id: 'roles', implied: true, t: 'أضف من سيربطون الحسابات', b: 'في «App roles» أضف كل من سيسجّل الدخول لربط الحسابات. هذا يكفي لحسابات القسم نفسه، و«App Review» لازمة فقط لخدمة حسابات لا تملكها.', link: META_APPS, ok: 'أضفتهم' },
+      { id: 'keys', kind: 'keys', t: 'انسخ المعرّف والسر', b: '«App ID» و«App Secret» من «App settings» ثم «Basic»، و«Configuration ID» من الإعداد الذي أنشأته. الصقهما هنا فقط، ولا ترسلهما إلى أحد.', link: META_APPS },
     ],
-    notes: [SIMULATION, DEV_FACTS, 'الصلاحيات المطلوبة: pages_show_list وpages_read_engagement وpages_manage_posts وinstagram_basic وinstagram_content_publish.'],
-    link: { href: 'https://developers.facebook.com/apps/', label: 'Meta for Developers' },
+    notes: [
+      'بعد هذه الخطوات تُربط الحسابات من «حسابات المنصات»: دخول واحد يعطي كل حسابات إنستغرام التي تختارها من حافظة واحدة.',
+      'ما يُنشأ والتطبيق في وضع التطوير قد لا يراه إلا أصحاب الأدوار عليه، فتحقق من أول منشور.',
+      'تذكر Meta عنوان Webhooks ضمن متطلبات هذا المسار، ولا يملك الموقع عنواناً لها بعد. إن منعك ذلك من المتابعة فأخبر مسؤول النظام.',
+      'أفاد مطوّرون في 2026-11-01 أن الخطأ 100/33 زال بإضافة business_management إلى الإعداد من «Facebook Login for Business» ثم «Configurations». ليس هذا من وثائق Meta.',
+      SIMULATION,
+      PLATFORM_FACTS,
+    ],
+    link: META_APPS,
+  },
+  facebook: {
+    title: 'تجهيز تطبيق Meta لفيسبوك',
+    intro: 'للمدير. تُجرى مرة واحدة على تطبيق Meta نفسه إن قبل الجمع بين حالتي الاستخدام، وتنتهي بنشر التطبيق.',
+    steps: [
+      { id: 'usecase', t: 'أضف حالة الاستخدام', b: 'في التطبيق: «Use cases» ثم إضافة «Manage everything on your Page». إن ظهرت رمادية فهي لا تجتمع مع إنستغرام في تطبيق واحد: توقف هنا وأخبر مسؤول النظام.', link: META_APPS, ok: 'أضفتها' },
+      { id: 'permissions', t: 'أضف الصلاحيات', b: 'في «Customize»: pages_manage_posts وpages_read_engagement، وpublish_video لنشر الفيديو. تُضاف من نفسها business_management وpages_show_list وpublic_profile.', link: META_APPS, ok: 'أضفتها' },
+      { id: 'redirect', kind: 'copy', t: 'سجّل عنوان العودة', b: 'في «Facebook Login for Business» ثم «Settings»، الحقل «Valid OAuth Redirect URIs»: الصق هذا العنوان تماماً.', copy: '{redirect}', copyLabel: 'عنوان العودة', ok: 'سجّلت العنوان' },
+      { id: 'config', t: 'أكمل الإعداد', b: 'في «Facebook Login for Business» ثم «Configurations»: اجعل الإعداد يشمل الصفحات وهذه الصلاحيات. للتطبيق في الموقع إعداد واحد، فعدّل إعداد إنستغرام إن وُجد.', link: META_APPS, ok: 'أكملته' },
+      { id: 'keys', implied: true, kind: 'keys', t: 'انسخ المعرّف والسر', b: '«App ID» و«App Secret» من «App settings» ثم «Basic»، و«Configuration ID» من الإعداد. الصقهما هنا فقط، ولا ترسلهما إلى أحد.', link: META_APPS },
+      { id: 'tasks', t: 'تأكد من صلاحية من يربط الصفحة', b: 'يجب أن يستطيع إنشاء المحتوى على الصفحة (CREATE_CONTENT). إن جاء دوره من حافظة الأعمال فليكن الإعداد شاملاً ads_management وads_read.', link: META_PORTFOLIO, ok: 'تأكدت' },
+      { id: 'publish', kind: 'review', t: 'انشر التطبيق', b: 'ما يُنشر والتطبيق في وضع التطوير لا يراه إلا أصحاب الأدوار عليه. جهّز الأيقونة ورابط الخصوصية ورابط حذف البيانات، ثم «App Review» و«Publish».', link: META_APPS, copy: '{origin}/privacy.html', copyLabel: 'رابط الخصوصية', more: [{ label: 'رابط حذف البيانات', copy: '{origin}/account-deletion.html' }], ok: 'سأكمل لاحقاً' },
+    ],
+    notes: ['لم تؤكد وثائق Meta أن حالتي الاستخدام تجتمعان في تطبيق واحد: لوحة Meta تقول ذلك في الخطوة الأولى.', SIMULATION, PLATFORM_FACTS],
+    link: META_APPS,
   },
   tiktok: {
     title: 'تجهيز تطبيق TikTok',
-    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال مفتاح العميل وسره في الحقلين أسفل هذه البطاقة.',
+    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال مفتاح العميل وسره في الموقع، ثم مراجعة TikTok وتدقيقها.',
     steps: [
-      { t: 'أنشئ التطبيق', b: 'في TikTok for Developers: «Manage apps» ثم «Connect an app».', link: { href: 'https://developers.tiktok.com/apps/', label: 'TikTok for Developers' } },
-      { t: 'أضف المنتجين', b: '«Login Kit» و«Content Posting API» (Direct Post).' },
-      { t: 'سجّل عنوان العودة', b: 'في Login Kit، الحقل «Redirect URI»: الصق هذا العنوان تماماً.', copy: '{redirect}' },
-      { t: 'حدّد الصلاحيات', b: 'user.info.basic (يحتاجها فحص الاتصال) وvideo.publish وvideo.upload. اكتب في حقل «الصلاحيات المطلوبة» ما أضفته إلى التطبيق فقط: صلاحية لم تُمنح تجعل TikTok يرفض الدخول.' },
-      { t: 'انسخ المفتاح والسر', b: 'Client key و Client secret من «App details». الصقهما أسفل البطاقة فقط.' },
-      { t: 'احفظ وفعّل', b: 'اضغط «فحص وحفظ» ثم فعّل المنصة، وليربط الناشرون حساباتهم من «حسابات المنصات».' },
+      { id: 'app', implied: true, t: 'أنشئ التطبيق', b: 'في TikTok for Developers: «Manage apps» ثم «Connect an app»، واختر مؤسسة مالكة له لا حساباً فردياً.', link: TIKTOK_APPS, ok: 'أنشأت التطبيق' },
+      { id: 'details', implied: true, kind: 'copy', t: 'أكمل بيانات التطبيق', b: 'الأيقونة (1024 في 1024)، والاسم، والفئة، والوصف، والمنصة Web. وهذه روابط الموقع والشروط والخصوصية.', copy: '{origin}', copyLabel: 'عنوان الموقع', more: [{ label: 'رابط الشروط', copy: '{origin}/terms.html' }, { label: 'رابط الخصوصية', copy: '{origin}/privacy.html' }], ok: 'أكملتها' },
+      { id: 'verify', implied: true, t: 'وثّق الروابط', b: 'اختر التوثيق بـ«URL prefix». تعطيك TikTok ملف توقيع يوضع على الموقع: أرسله إلى مسؤول النظام ليضيفه، ثم اضغط «Verify».', link: TIKTOK_APPS, ok: 'وثّقتها' },
+      { id: 'products', implied: true, t: 'أضف المنتجين', b: '«Login Kit» و«Content Posting API»، وفعّل فيه «Direct Post».', link: TIKTOK_APPS, ok: 'أضفتهما' },
+      { id: 'redirect', implied: true, kind: 'copy', t: 'سجّل عنوان العودة', b: 'في Login Kit، الحقل «Redirect URI»: الصق هذا العنوان تماماً.', copy: '{redirect}', copyLabel: 'عنوان العودة', ok: 'سجّلت العنوان' },
+      { id: 'scopes', implied: true, t: 'حدّد الصلاحيات', b: 'user.info.basic (يحتاجها فحص الاتصال) وvideo.publish وvideo.upload. صلاحية لم تُمنح تجعل TikTok يرفض الدخول.', link: TIKTOK_APPS, ok: 'حدّدتها' },
+      { id: 'keys', kind: 'keys', t: 'انسخ المفتاح والسر', b: '«Client key» و«Client secret» من «App details». الصقهما هنا فقط، ولا ترسلهما إلى أحد.', link: TIKTOK_APPS },
+      { id: 'review', t: 'قدّم التطبيق للمراجعة', b: 'في «App review» اشرح كل منتج وصلاحية، وارفع فيديو يعرض الاستعمال كاملاً، ثم «Submit for review». يصير التطبيق «Live» بعد الموافقة.', link: TIKTOK_APPS, ok: 'صار Live' },
+      { id: 'audit', kind: 'review', t: 'تدقيق النشر', b: 'قبل اجتياز «التدقيق» كل ما يُنشر مقيّد بالمشاهدة الخاصة: هذه قاعدة TikTok لا قاعدة الموقع.', link: TIKTOK_APPS, ok: 'سأقدّمه لاحقاً' },
     ],
     notes: [
-      'قبل أن يجتاز التطبيق «التدقيق» عند TikTok، كل ما يُنشر عبره مقيّد بالمشاهدة الخاصة وللحسابات الخاصة: هذه قاعدة TikTok لا قاعدة الموقع.',
+      'قبل التدقيق يجب أن يكون الحساب خاصاً وقت النشر، وبحد 5 مستخدمين في 24 ساعة. بعده يبقى حد نحو 15 منشوراً في اليوم للحساب.',
+      'بيئة Sandbox تتيح التجربة بلا مراجعة.',
       'مدة رمز الدخول 24 ساعة ويُجدَّد تلقائياً بالفحص الذي يجري حين تُفتح صفحة الحسابات.',
       SIMULATION,
-      DEV_FACTS,
+      PLATFORM_FACTS,
     ],
-    link: { href: 'https://developers.tiktok.com/', label: 'TikTok for Developers' },
+    link: { href: 'https://developers.tiktok.com/doc/content-posting-api-get-started', label: 'وثائق Content Posting API' },
   },
   connect_meta: {
     title: 'ربط حسابك عبر Meta',
-    intro: 'لمن ينشر على الصفحات. تنتهي بحساب «ربط حقيقي» يُفحص اتصاله فعلاً.',
+    intro: 'لمن ينشر على الصفحات وحسابات إنستغرام. تنتهي بحساب «ربط حقيقي» يُفحص اتصاله فعلاً.',
     steps: [
-      { t: 'اضغط «ربط عبر Meta»', b: 'ستنتقل إلى صفحة تسجيل الدخول في فيسبوك. هناك تسجّل أنت بحسابك، ولا يطلب الموقع كلمة مرورك أبداً.' },
-      { t: 'اسمح بالصلاحيات', b: 'اختر الصفحات وحسابات إنستغرام التي تريد ربطها ووافق. إن لم تظهر صفحة فتأكد أنك تديرها، وأن حساب إنستغرام مهني ومربوط بها.' },
-      { t: 'عُد إلى الموقع واختر', b: 'تظهر قائمة بأسماء الصفحات والحسابات: اختر ما يُربط، وحدّد من ينشر على كل حساب.' },
-      { t: 'تأكد من الحالة', b: 'يظهر الحساب بعلامة «ربط حقيقي» وتاريخ انتهاء التفويض. «فحص الاتصال» يسأل المنصة فوراً.' },
+      { t: 'اضغط «ربط عبر Meta»', b: 'تنتقل إلى صفحة Meta وتسجّل الدخول هناك بفيسبوك أو إنستغرام، ولا يطلب الموقع كلمة مرورك أبداً.' },
+      { t: 'اختر الحافظة والحسابات', b: 'اختر حافظة الأعمال، ثم حسابات إنستغرام والصفحات، ووافق. الحساب في حافظة أخرى يحتاج دخولاً مستقلاً.' },
+      { t: 'عُد إلى الموقع واختر', b: 'تظهر الصفحات والحسابات بأسمائها: اختر ما يُربط، ولو عدة حسابات معاً، وحدّد من ينشر عليها.' },
+      { t: 'تأكد من الحالة', b: 'يظهر الحساب بعلامة «ربط حقيقي» وتاريخ انتهاء التفويض إن كان له تاريخ. «فحص الاتصال» يسأل المنصة فوراً.' },
     ],
     notes: [
-      'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فالتطبيق لم يُجهَّز بعد: يجهّزه مسؤول النظام من «الإعدادات» ثم «المنصات» (علامة «!» بجانب بطاقة Meta).',
-      'إن قال Meta إن التطبيق في وضع التطوير فاطلب من المسؤول أن يضيفك مختبراً على التطبيق.',
+      'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فالتطبيق لم يُجهَّز بعد: يجهّزه المدير من «الإعدادات» ثم «المنصات».',
+      'إن قال Meta إن التطبيق في وضع التطوير فاطلب من المدير أن يعطيك دوراً على التطبيق.',
       SIMULATION,
     ],
   },
@@ -83,82 +126,86 @@ export const GUIDES: Record<string, Guide> = {
     title: 'ربط حسابك عبر TikTok',
     intro: 'لمن ينشر على TikTok. تنتهي بحساب «ربط حقيقي» يُفحص اتصاله فعلاً.',
     steps: [
-      { t: 'اضغط «ربط عبر TikTok»', b: 'تنتقل إلى TikTok لتسجّل الدخول بحسابك وتوافق على الصلاحيات.' },
+      { t: 'اضغط «ربط عبر TikTok»', b: 'تنتقل إلى TikTok لتسجّل الدخول بحسابك وتوافق على الصلاحيات. كل دخول يربط حساباً واحداً.' },
       { t: 'عُد إلى الموقع', b: 'يظهر حسابك باسمه، فحدّد من ينشر عليه.' },
       { t: 'تأكد من الحالة', b: '«ربط حقيقي» وتاريخ التفويض. يُجدَّد الرمز تلقائياً حين تُفتح هذه الصفحة.' },
     ],
-    notes: ['إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز مسؤول النظام التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
+    notes: ['لربط حساب آخر سجّل خروجك من TikTok ثم أعد الخطوات.', 'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز المدير التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
   },
   google: {
     title: 'تجهيز تطبيق Google (يوتيوب وDrive معاً)',
-    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف العميل وسره في الحقلين. التطبيق نفسه يخدم ربط قناة يوتيوب واتصال Google Drive، فلا تُنشئ تطبيقين.',
+    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف العميل وسره في الموقع. التطبيق نفسه يخدم ربط قناة يوتيوب واتصال Google Drive، فلا تُنشئ تطبيقين.',
     steps: [
-      { t: 'أنشئ مشروعاً في Google Cloud', b: 'سجّل الدخول بحساب Google الذي يملكه القسم، ثم «Create project» باسم مثل «Comms Hub». المشروع مجاني.', link: { href: 'https://console.cloud.google.com/projectcreate', label: 'إنشاء مشروع في Google Cloud' } },
-      { t: 'فعّل واجهة يوتيوب', b: 'افتح الصفحة واضغط «Enable» لـ YouTube Data API v3.', link: { href: 'https://console.cloud.google.com/apis/library/youtube.googleapis.com', label: 'YouTube Data API v3' } },
-      { t: 'فعّل واجهة Drive', b: 'الأمر نفسه لـ Google Drive API.', link: { href: 'https://console.cloud.google.com/apis/library/drive.googleapis.com', label: 'Google Drive API' } },
-      { t: 'اضبط شاشة الموافقة', b: 'في «OAuth consent screen» (أو «Google Auth Platform»): اسم التطبيق وبريد الدعم، والنوع External ما لم يكن حساب القسم ضمن Google Workspace فاختر Internal. أضف بريد من سيربط القناة والمخزن ضمن «Test users».', link: { href: 'https://console.cloud.google.com/apis/credentials/consent', label: 'شاشة الموافقة' } },
-      { t: 'أنشئ معرّف العميل', b: '«Credentials» ثم «Create credentials» ثم «OAuth client ID»، النوع «Web application».', link: { href: 'https://console.cloud.google.com/apis/credentials', label: 'Credentials في Google Cloud' } },
-      { t: 'سجّل عنوان العودة ليوتيوب', b: 'في «Authorized redirect URIs»: الصق هذا العنوان تماماً.', copy: '{redirect}' },
-      { t: 'وسجّل عنوان العودة لـ Drive', b: 'أضف هذا العنوان تحته في القائمة نفسها.', copy: '{origin}/api/drive/callback' },
-      { t: 'انسخ المعرّف والسر', b: 'تظهر «Client ID» و«Client secret» بعد الإنشاء. الصقهما في الحقلين أسفل البطاقة فقط، ولا ترسلهما إلى أحد.' },
-      { t: 'احفظ، ثم اربط', b: 'اضغط «فحص وحفظ». بعدها اربط Drive من «الإعدادات» ثم «الاتصالات»، واربط القناة من «حسابات المنصات».' },
+      { id: 'project', implied: true, t: 'أنشئ مشروعاً في Google Cloud', b: 'سجّل الدخول بحساب Google الذي يملكه القسم، ثم «Create project» باسم مثل «Comms Hub». المشروع مجاني.', link: { href: 'https://console.cloud.google.com/projectcreate', label: 'إنشاء مشروع في Google Cloud' }, ok: 'أنشأته' },
+      { id: 'youtube', t: 'فعّل واجهة يوتيوب', b: 'افتح الصفحة واضغط «Enable» لـ YouTube Data API v3.', link: { href: 'https://console.cloud.google.com/apis/library/youtube.googleapis.com', label: 'YouTube Data API v3' }, ok: 'فعّلتها' },
+      { id: 'drive', implied: true, t: 'فعّل واجهة Drive', b: 'الأمر نفسه لـ Google Drive API.', link: { href: 'https://console.cloud.google.com/apis/library/drive.googleapis.com', label: 'Google Drive API' }, ok: 'فعّلتها' },
+      { id: 'consent', implied: true, t: 'اضبط شاشة الموافقة', b: 'في Google Auth Platform: «Branding» لاسم التطبيق وبريد الدعم، و«Audience» للنوع External (أو Internal لحساب Google Workspace) وإضافة بريد من سيربط القناة والمخزن ضمن «Test users».', link: { href: 'https://console.cloud.google.com/auth/branding', label: 'Google Auth Platform' }, ok: 'ضبطتها' },
+      { id: 'client', implied: true, t: 'أنشئ معرّف العميل', b: '«Clients» ثم «Create client»، النوع «Web application».', link: { href: 'https://console.cloud.google.com/auth/clients', label: 'Clients في Google Cloud' }, ok: 'أنشأته' },
+      { id: 'redirect', kind: 'copy', t: 'سجّل عنوان العودة ليوتيوب', b: 'في «Authorized redirect URIs»: الصق هذا العنوان تماماً.', copy: '{redirect}', copyLabel: 'عنوان العودة ليوتيوب', ok: 'سجّلت العنوان' },
+      { id: 'redirect_drive', implied: true, kind: 'copy', t: 'وسجّل عنوان العودة لـ Drive', b: 'أضف هذا العنوان تحته في القائمة نفسها.', copy: '{origin}/api/drive/callback', copyLabel: 'عنوان العودة لـ Drive', ok: 'سجّلت العنوان' },
+      { id: 'keys', kind: 'keys', t: 'انسخ المعرّف والسر', b: 'يظهر «Client secret» كاملاً مرة واحدة عند إنشائه، فانسخه فوراً. الصقهما هنا فقط، ولا ترسلهما إلى أحد.', link: { href: 'https://console.cloud.google.com/auth/clients', label: 'Clients في Google Cloud' } },
+      { id: 'publish', t: 'انشر التطبيق', b: 'في «Audience» اضغط «Publish app» ليصير «In production»: ما دام في «Testing» ينتهي الربط بعد 7 أيام. ستظهر شاشة «تطبيق لم يُتحقق منه» عند الموافقة، مع حد 100 مستخدم جديد.', link: { href: 'https://console.cloud.google.com/auth/audience', label: 'Audience في Google Cloud' }, ok: 'نشرته' },
     ],
     notes: [
-      'ما دام التطبيق في حالة «Testing» تنتهي رموز التجديد بعد 7 أيام فيطلب الموقع إعادة الربط. لتدوم، اضغط «Publish app» في شاشة الموافقة ليصير «In production».',
-      'رفع الفيديو إلى يوتيوب عبر الواجهة قد يبقى «خاصاً» حتى تجتاز مراجعة الامتثال التي يطلبها يوتيوب لمشاريع الواجهة. اقرأ سياسة YouTube API Services قبل أن تعتمد على النشر الآلي.',
+      'بعد هذه الخطوات تُربط القنوات من «حسابات المنصات»، ولكل قناة دخول مستقل.',
+      'صفحة الواجهة الرسمية تقول إن رفع المشاريع غير الموثقة لم يعد مقيّداً بالخصوصية الخاصة، وقد يبدأ المقطع خاصاً بحسب إعدادات الحساب. تحقق من أول مقطع.',
+      'حد الرفع 100 مقطع في اليوم، وبقية الطلبات 10000 وحدة في اليوم.',
       'Drive: يرى الموقع الملفات التي أنشأها وحده فقط، لا بقية ملفات الحساب.',
       SIMULATION,
-      DEV_FACTS,
+      PLATFORM_FACTS,
     ],
     link: { href: 'https://console.cloud.google.com/', label: 'Google Cloud Console' },
   },
   linkedin: {
     title: 'تجهيز تطبيق LinkedIn',
-    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف العميل وسره في الحقلين. يربط الموقع بها ملف عضو (من يسجّل الدخول) لينشر باسمه.',
+    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف العميل وسره في الموقع. يربط الموقع بها ملف عضو (من يسجّل الدخول) لينشر باسمه.',
     steps: [
-      { t: 'أنشئ التطبيق', b: 'في LinkedIn Developers: «Create app». يطلب صفحة LinkedIn للمؤسسة تُربط بالتطبيق (يكفي أن تكون مديرها) وشعاراً.', link: { href: 'https://www.linkedin.com/developers/apps/new', label: 'إنشاء تطبيق LinkedIn' } },
-      { t: 'اطلب المنتجين', b: 'من تبويب «Products»: «Share on LinkedIn» (للنشر) و«Sign In with LinkedIn using OpenID Connect» (لمعرفة صاحب الحساب).', link: { href: 'https://www.linkedin.com/developers/apps', label: 'تطبيقاتي في LinkedIn' } },
-      { t: 'سجّل عنوان العودة', b: 'من تبويب «Auth»، حقل «Authorized redirect URLs for your app»: الصق هذا العنوان تماماً.', copy: '{redirect}' },
-      { t: 'انسخ المعرّف والسر', b: 'في التبويب نفسه: «Client ID» و«Primary Client Secret». الصقهما في الحقلين أسفل البطاقة فقط.' },
-      { t: 'احفظ وفعّل', b: 'اضغط «فحص وحفظ» ثم فعّل المنصة، وليربط الناشرون حساباتهم من «حسابات المنصات».' },
+      { id: 'app', implied: true, t: 'أنشئ التطبيق', b: 'في LinkedIn Developers: «Create app». يطلب صفحة LinkedIn للمؤسسة (يكفي أن تكون مديرها) وشعاراً.', link: { href: 'https://www.linkedin.com/developers/apps/new', label: 'إنشاء تطبيق LinkedIn' }, ok: 'أنشأت التطبيق' },
+      { id: 'products', implied: true, t: 'اطلب المنتجين', b: 'من تبويب «Products»: «Share on LinkedIn» (للنشر) و«Sign In with LinkedIn using OpenID Connect» (لمعرفة صاحب الحساب).', link: LINKEDIN_APPS, ok: 'طلبتهما' },
+      { id: 'redirect', implied: true, kind: 'copy', t: 'سجّل عنوان العودة', b: 'من تبويب «Auth»، حقل «Authorized redirect URLs for your app»: الصق هذا العنوان تماماً.', copy: '{redirect}', copyLabel: 'عنوان العودة', ok: 'سجّلت العنوان' },
+      { id: 'keys', kind: 'keys', t: 'انسخ المعرّف والسر', b: 'في التبويب نفسه: «Client ID» و«Primary Client Secret». الصقهما هنا فقط، ولا ترسلهما إلى أحد.', link: LINKEDIN_APPS },
+      { id: 'page', kind: 'review', t: 'النشر باسم صفحة الشركة', b: 'ما سبق ينشر باسم شخص. صفحة الشركة تحتاج تطبيقاً جديداً منفصلاً بمنتج «Community Management API» وحده، ومؤسسة مسجلة، وبريد عمل موثّقاً (لا Gmail)، ويوثّق التطبيق مدير أعلى للصفحة. الموقع لا يربط الصفحة بعد.', link: { href: 'https://learn.microsoft.com/en-us/linkedin/marketing/community-management-app-review', label: 'شروط Community Management' }, ok: 'أكتفي بالنشر باسم شخص' },
     ],
     notes: [
       'مدة رمز الدخول 60 يوماً ولا يُجدَّد بصمت (التجديد البرمجي لشركاء LinkedIn المعتمدين فقط). يُسجَّل التاريخ في الحساب ويُنبَّه الناشرون، وتُعاد الدخلة قبل انتهائه.',
-      'النشر على صفحة مؤسسة (لا على ملف عضو) يحتاج منتج «Community Management API» وموافقة LinkedIn عليه: خارج هذا الربط.',
+      'تطبيق صفحة الشركة يبدأ بمستوى التطوير (500 طلب في اليوم، و12 شهراً لإكمال التكامل)، والمستوى القياسي يحتاج تسجيل شاشة. الاسم بلا «Linked» ولا «In». ومن رُفض طلبه ينشئ تطبيقاً جديداً.',
       SIMULATION,
-      DEV_FACTS,
+      PLATFORM_FACTS,
     ],
-    link: { href: 'https://www.linkedin.com/developers/apps', label: 'LinkedIn Developers' },
+    link: LINKEDIN_APPS,
   },
   x: {
     title: 'تجهيز تطبيق X',
-    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف العميل وسره في الحقلين.',
+    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف العميل وسره في الموقع.',
     steps: [
-      { t: 'ادخل بوابة المطوّرين', b: 'سجّل الدخول بحساب القسم على X، وأنشئ مشروعاً وتطبيقاً داخله.', link: { href: 'https://developer.x.com/en/portal/dashboard', label: 'بوابة مطوّري X' } },
-      { t: 'فعّل تسجيل دخول المستخدم', b: 'في تطبيقك: «User authentication settings» ثم «Set up». الصلاحيات «Read and write»، والنوع «Web App, Automated App or Bot» (عميل سرّي).' },
-      { t: 'سجّل عنوان العودة', b: 'في حقل «Callback URI / Redirect URL»: الصق هذا العنوان تماماً.', copy: '{redirect}' },
-      { t: 'أدخل عنوان الموقع', b: 'في «Website URL»: الصق عنوان هذا الموقع.', copy: '{origin}' },
-      { t: 'انسخ المعرّف والسر', b: 'من «Keys and tokens»، قسم «OAuth 2.0 Client ID and Client Secret»: «Client ID» و«Client Secret». الصقهما في الحقلين أسفل البطاقة فقط.' },
-      { t: 'احفظ وفعّل', b: 'اضغط «فحص وحفظ» ثم فعّل المنصة، وليربط الناشرون حساباتهم من «حسابات المنصات».' },
+      { id: 'console', implied: true, t: 'ادخل وحدة المطوّرين', b: 'سجّل الدخول في console.x.com بحساب القسم على X، واقبل اتفاقية المطوّرين.', link: X_CONSOLE, ok: 'دخلت' },
+      { id: 'credits', implied: true, t: 'اشحن رصيداً', b: 'X تحاسب على كل طلب من رصيد مسبق: 0.015 دولار للمنشور، و0.20 دولار للمنشور الذي فيه رابط. لا مستوى مجاني في صفحة الأسعار.', link: { href: 'https://docs.x.com/x-api/getting-started/pricing', label: 'أسعار X API' }, ok: 'شحنت الرصيد' },
+      { id: 'app', implied: true, t: 'أنشئ التطبيق', b: '«Create App»، ثم الاسم والوصف والاستعمال.', link: X_CONSOLE, ok: 'أنشأت التطبيق' },
+      { id: 'auth', implied: true, t: 'فعّل تسجيل دخول المستخدم', b: 'في إعدادات OAuth 2.0: الصلاحيات «Read and write»، والنوع «Web App» (عميل سرّي).', link: X_CONSOLE, ok: 'فعّلته' },
+      { id: 'redirect', implied: true, kind: 'copy', t: 'سجّل عنوان العودة', b: 'أضفه إلى عناوين العودة في التطبيق. يجب أن يطابق تماماً، حتى الشرطة الأخيرة.', copy: '{redirect}', copyLabel: 'عنوان العودة', ok: 'سجّلت العنوان' },
+      { id: 'website', implied: true, kind: 'copy', t: 'أدخل عنوان الموقع', b: 'في حقل عنوان الموقع: الصق هذا العنوان.', copy: '{origin}', copyLabel: 'عنوان الموقع', ok: 'أدخلته' },
+      { id: 'keys', kind: 'keys', t: 'انسخ المعرّف والسر', b: '«Client ID» و«Client Secret» من مفاتيح التطبيق. يظهران مرة واحدة، فانسخهما فوراً. الصقهما هنا فقط، ولا ترسلهما إلى أحد.', link: X_CONSOLE },
     ],
     notes: [
-      'واجهة X مدفوعة بمستويات وحدود تتغير: تأكد في بوابة المطوّرين أن مستوى اشتراككم يسمح بالكتابة (النشر) قبل أن تعتمد عليه.',
-      'رمز الدخول ساعتان ويُجدَّد تلقائياً بالفحص الذي يجري حين تُفتح صفحة الحسابات، ما دام تطبيقك طلب «offline.access».',
+      'بعد هذه الخطوات تُربط الحسابات من «حسابات المنصات»، ولكل حساب دخول مستقل.',
+      'الأسعار من صفحة X الرسمية في 2026-11-01، وتتغير. يمكن وضع حد للإنفاق في وحدة المطوّرين.',
+      'رمز الدخول ساعتان ويُجدَّد تلقائياً بالفحص الذي يجري حين تُفتح صفحة الحسابات، ما دام الدخول طلب «offline.access».',
       SIMULATION,
-      DEV_FACTS,
+      PLATFORM_FACTS,
     ],
-    link: { href: 'https://developer.x.com/en/portal/dashboard', label: 'بوابة مطوّري X' },
+    link: X_CONSOLE,
   },
   connect_google: {
     title: 'ربط قناة يوتيوب',
     intro: 'لمن ينشر على القناة. تنتهي بحساب «ربط حقيقي» يُفحص اتصاله فعلاً.',
     steps: [
-      { t: 'اضغط «ربط عبر Google (يوتيوب)»', b: 'تنتقل إلى صفحة Google لتسجّل الدخول بالحساب الذي يملك القناة (أو يديرها كحساب علامة تجارية).' },
+      { t: 'اضغط «ربط عبر Google (يوتيوب)»', b: 'تنتقل إلى صفحة Google لتسجّل الدخول، واختر هناك القناة: الحساب الذي يملكها، أو حساب العلامة التجارية الذي يديرها.' },
       { t: 'وافق على الصلاحيتين', b: 'رفع الفيديو، وقراءة القنوات التي تملكها. لا يطلب الموقع كلمة مرورك أبداً.' },
-      { t: 'عُد إلى الموقع واختر القناة', b: 'تظهر قنواتك بأسمائها: اختر ما يُربط، وحدّد من ينشر عليها.' },
+      { t: 'عُد إلى الموقع', b: 'تظهر القناة باسمها، فحدّد من ينشر عليها.' },
       { t: 'تأكد من الحالة', b: '«ربط حقيقي» وتاريخ التفويض. يُجدَّد التفويض مع كل فحص ناجح.' },
     ],
     notes: [
+      'لكل قناة دخول مستقل: لربط قناة أخرى أعد الخطوات واخترها عند Google.',
       'إن قالت Google «التطبيق لم يتحقق منه» أو لم يُسمح لك بالدخول فأضف بريدك ضمن «Test users» في شاشة الموافقة، أو انشر التطبيق.',
       'إن لم يصل رمز تجديد فأزل وصول «Comms Hub» من حسابك على Google ثم أعد الربط.',
       SIMULATION,
@@ -173,17 +220,17 @@ export const GUIDES: Record<string, Guide> = {
       { t: 'عُد إلى الموقع', b: 'يظهر ملفك باسمه، فحدّد من ينشر عليه.' },
       { t: 'تأكد من الحالة', b: '«ربط حقيقي» وتاريخ الانتهاء بعد 60 يوماً تقريباً. أعد الربط قبله.' },
     ],
-    notes: ['إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز المدير التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
+    notes: ['يربط الموقع شخصاً لا صفحة شركة: كل دخول يربط ملفاً واحداً.', 'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز المدير التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
   },
   connect_x: {
     title: 'ربط حساب X',
     intro: 'لمن ينشر على X. تنتهي بحساب «ربط حقيقي» يُفحص اتصاله فعلاً.',
     steps: [
-      { t: 'اضغط «ربط عبر X»', b: 'تنتقل إلى X لتسجّل الدخول بحساب القسم وتوافق على القراءة والكتابة.' },
+      { t: 'اضغط «ربط عبر X»', b: 'تنتقل إلى X لتسجّل الدخول بحساب القسم وتوافق على القراءة والكتابة ورفع الوسائط.' },
       { t: 'عُد إلى الموقع', b: 'يظهر الحساب باسمه، فحدّد من ينشر عليه.' },
       { t: 'تأكد من الحالة', b: '«ربط حقيقي». يُجدَّد الرمز تلقائياً بالفحص الذي يجري حين تُفتح هذه الصفحة.' },
     ],
-    notes: ['إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز المدير التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
+    notes: ['لربط حساب آخر سجّل خروجك من X ثم أعد الخطوات.', 'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز المدير التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
   },
   mail: {
     title: 'ربط صندوق بريد القسم (Gmail)',
@@ -393,5 +440,5 @@ export const storageGuideKey = (flavor: string) => (`storage_${flavor}` in GUIDE
 /** The steps with the site's own addresses filled in. */
 export function resolveGuide(g: Guide, origin: string, provider?: string): Guide {
   const fill = (s: string) => s.replace(/\{redirect\}/g, `${origin}/api/platforms/callback/${provider ?? ''}`).replace(/\{origin\}/g, origin);
-  return { ...g, steps: g.steps.map((s) => ({ ...s, copy: s.copy ? fill(s.copy) : undefined })) };
+  return { ...g, steps: g.steps.map((s) => ({ ...s, copy: s.copy ? fill(s.copy) : undefined, more: s.more?.map((m) => ({ ...m, copy: fill(m.copy) })) })) };
 }

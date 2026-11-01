@@ -1,6 +1,6 @@
 import { fail } from '@/lib/drive/guard';
 import { loadSecret } from '@/lib/platforms/connect';
-import { PlatformCallError, connErrorAr, metaPages } from '@/lib/platforms/oauth';
+import { PlatformCallError, connErrorAr, metaConfigAssets, metaPages } from '@/lib/platforms/oauth';
 import { connectGuard, isUuid, json } from '@/lib/platforms/route';
 
 // What a person's sign-in can connect: the Facebook pages they manage with the Instagram account
@@ -55,6 +55,17 @@ export async function GET(request: Request) {
   const token = await loadSecret(g.db, id, 'قائمة صفحات للاختيار');
   if (!token) return fail(404, 'انتهت صلاحية الربط. ابدأ من جديد.');
   try {
+    // A configuration's token (Unified login): the Instagram accounts the portfolio gave it, and any pages.
+    if (offer.config.unified === true) {
+      const { instagram, pages } = await metaConfigAssets(fetch, token);
+      return json({
+        provider: 'meta',
+        candidates: [
+          ...instagram.map((a) => ({ platform: 'instagram', id: a.id, name: a.username ? `@${a.username}` : a.id, handle: a.username ? `@${a.username}` : null, parent: null, canPost: true })),
+          ...pages.map((p) => ({ platform: 'facebook', id: p.id, name: p.name, handle: p.username ? `@${p.username}` : null, parent: null, canPost: p.tasks.includes('CREATE_CONTENT') || p.tasks.includes('MANAGE') })),
+        ],
+      });
+    }
     const pages = await metaPages(fetch, token);
     const candidates = pages.flatMap((p) => [
       { platform: 'facebook', id: p.id, name: p.name, handle: p.username ? `@${p.username}` : null, parent: null, canPost: p.tasks.includes('CREATE_CONTENT') || p.tasks.includes('MANAGE') },

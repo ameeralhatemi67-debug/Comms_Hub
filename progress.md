@@ -2208,3 +2208,33 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **October is empty and that is correct.** `activity_log`, `work_log`, finished stages and finished tasks have no row before 2026-11-01. Only `permission_events` has rows in October (21), and the report does not count those. The page opens on the month before (`defaultMonth`), so until the last days of November it opens on the words «لا إنجاز مسجّل في هذا الشهر.», and the Director has to choose November.
 - **Behaviour changed.** The assistant no longer sees the whole log unless given it. comms-hub has 3 admins, 1 director and 1 producer, so nobody lost anything yet.
 - **Not verified.** The page signed in on the real site, and the three downloads from real data: both need a real sign-in, which is the Director's. The Excel and PDF files remain checked on the fixture only.
+
+### 2026-11-01: «المنصات» and «حسابات المنصات» rebuilt, with the steps of 2026-11-01
+
+- **The owner's word.** "ok now we have the correct info on the steps, yes fix those, and now please build this in the live site, add the new visuals, correctly add the correct steps (with links). as for the arabic, yes swtich sides in the steps sheet, so the side switch when in Arabic, from when In English. then commit"
+- **Where it stands.** Committed on `claude/platforms-redesign`. Not merged, not pushed, so not on the live site yet. `supabase/migrations/20261101200000_platform_setup.sql` is written and not applied.
+- **Done.** `MVP_draft.md` section 67 holds the behaviour.
+  - «المنصات»: one chip per platform worked out from what is stored (`src/lib/platforms/setup.ts`), «إضافة منصة» as one menu, the rest folded.
+  - The steps sheet (`src/components/sheet.tsx`, `src/components/settings/platform-sheet.tsx`): links, a bar, saved progress. The owner first described the steps on the left; the steps now come first in the document, so they sit on the right in Arabic and on the left in English.
+  - «حسابات المنصات» (`src/components/work/channels.tsx`, `connect.tsx`): attention first, a filter, groups, and adding as one sign-in and a choice. A publisher may reconnect.
+  - The migration adds `platform_setup` and `platform_setup_save`, lets a publisher reconnect, and has `platform_ready` return each application's state.
+- **The steps and the code follow the official pages of 2026-11-01** (`src/lib/setup-guides.ts`, `src/lib/platforms/info.ts`, `oauth.ts`, `oauth2.ts`).
+  - Meta: Unified Login with a Configuration ID, its token and account list, `publish_video`.
+  - X: the new console, pay per use, `media.write`.
+  - TikTok: `username` asked for only when `user.info.profile` was granted, and the review, URL and audit steps added.
+  - LinkedIn: the separate application a company Page needs is explained, and not built.
+  - Google: the secret shown once, 100 uploads a day.
+- **Verified, numbers.**
+  - `npm test` **645 of 645**; `npm run typecheck` and `npm run build` clean.
+  - `qa/platforms-flow.cjs`, new, **74 of 74** on a fixture of the real components, with screenshots of each state, English, a phone and the evening theme.
+  - `qa/permissions-pages.cjs` **1275 of 1275**, `qa/work-pages.cjs` **1021 of 1021**, `qa/post-preview.cjs` **202 of 202**, `qa/connections-tab.cjs` **43 of 43**.
+  - `supabase/tests/platform_setup_rules.sql` **35 of 35** on a private container (`qa/platform-setup-rules.json`), the migration and rules run together, nothing touching comms-hub.
+  - `qa/platform-gate.cjs` **11 of 11**, signed out, on a local build of the site with comms-hub's public key. It ran before the last change to the chooser, which no signed-out page reaches.
+- **Found on the way.**
+  - comms-hub's registry has no Facebook. A Meta sign-in returning Pages would have shown the raw key `facebook`, and picking it would have failed with `PLATFORM_INVALID`. The chooser now offers only what can be linked and names the rest (`splitOffer`, `platformName`, tested). The list was read from comms-hub with one select, changing nothing.
+  - Instagram offers carry the same `@name` as name and handle, so it printed twice and reversed in Arabic. Fixed.
+  - `qa/work-pages.cjs` and `qa/post-preview.cjs` had stopped running since the desktop and Android work added modules they did not build. Repaired, which also brought their stale expectations up to date.
+  - A `فصل<` check in `qa/post-preview.cjs` could never fail, because it compared against text with the tags stripped. It now reads the page, with the director's page beside it.
+- **Decided without asking.** Simulated accounts stay, folded. The Google application can still be edited in «الاتصالات» too, as one record. TikTok stays video-only, because the site has no rule for a post that needs media. A LinkedIn company Page is not built.
+- **Not verified.** Anything signed in on the real site: both pages were checked on fixtures only. The Meta Unified Login code has met a stand-in, never a real application, and whether one Meta application can hold both the Instagram and the Page use cases is still unconfirmed. Until the migration is applied, the pages work, a saved step says it failed, and a publisher cannot reconnect.
+- **Left out of the commit.** `validation/recheck-R01.md`, `videos/`, `supabase/.temp/`, `qa/simulations/`, `Owner_Setup_Guide.md`, the `Role_Simulation_*` documents and `qa/site-live.json`.

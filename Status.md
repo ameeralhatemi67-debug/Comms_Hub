@@ -26,6 +26,16 @@ related:
 
 # Communication Department Hub — Current Status
 
+## «المنصات» and «حسابات المنصات» rebuilt, 2026-11-01
+
+From the owner's directive (`MVP_draft.md` section 67). Committed on the branch `claude/platforms-redesign`; not merged, not pushed, not on the live site. The migration `20261101200000_platform_setup.sql` is written and not applied.
+
+- **Done.** «المنصات» shows one chip per platform and «إضافة منصة» opens one menu. The steps sheet has its links, a bar and saved progress, and its sides follow the language. «حسابات المنصات» is rebuilt around one sign-in and a choice. The guides and the connection code follow the official pages as read on 2026-11-01, Meta's Unified Login included.
+- **Evidence.** `npm test` 645 of 645, typecheck and build clean. `qa/platforms-flow.cjs` 74 of 74, new. `qa/permissions-pages.cjs` 1275, `qa/work-pages.cjs` 1021 and `qa/post-preview.cjs` 202, all passing. `supabase/tests/platform_setup_rules.sql` 35 of 35 on a private container.
+- **Not verified.** Anything signed in on the real site. The Meta Unified Login code has only met a stand-in, never a real application.
+- **Owner to decide.** Merge and push, and apply the migration with them. Until it is applied the pages work, a saved step says it failed, and a publisher cannot reconnect. `next` 16.3.8 has an advisory to clear before a push.
+- **Next.** Enter the first real platform application, following the sheet.
+
 ## The site's icon, «سجل النشاط» and «تقرير الشهر», 2026-11-01
 
 From the owner's request (`MVP_draft.md` section 66). **Live on production** since 2026-11-01 as `91e2c9a`, for the Director to test. The migration is **applied** to comms-hub since 2026-11-01, as version `20261101184751`, with the owner's approval.

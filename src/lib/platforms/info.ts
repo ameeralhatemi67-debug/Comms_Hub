@@ -2,9 +2,8 @@
 // Pure. The database holds the registry and the readiness (supabase/migrations/*platform_registry*);
 // this file holds what the interface says about each platform: what it can publish, what it asks
 // of the department outside the site, how long that usually takes, and where its own
-// documentation is. The facts of a platform change often and none of this was re-read from the
-// platform's official documentation when it was written (`checked` is null): the info card says
-// so, and the readiness tracker is how the owner records what is true for the department.
+// documentation is. The facts of a platform change often: `checked` is the day a card was re-read
+// from the platform's official documentation, and null says it never was. The info card says which.
 import type { PublishMode, Readiness } from '../work/rules.ts';
 import { TEMPLATE_LIMITS, type Limits } from './limits.ts';
 
@@ -45,76 +44,74 @@ export type PlatformKnowledge = {
   lead: string;
   connect: string;
   docs: string | null;
-  /** When the facts were last read from the platform's official documentation: never so far. */
+  /** When the facts were last read from the platform's official documentation; null if never. */
   checked: string | null;
 };
-
-const meta = 'يحتاج تطبيق مطوّر في Meta وتوثيق النشاط التجاري ومراجعة التطبيق (App Review) لصلاحيات النشر.';
 
 /** What is known per platform key, for the platforms the registry holds and those it may be given. */
 export const KNOWLEDGE: Record<string, PlatformKnowledge> = {
   instagram: {
-    can: 'منشور بصورة أو فيديو أو دوّارة، وفيديو قصير، عبر واجهة Graph API لحساب احترافي.',
-    cannot: 'لا يُنشر على حساب شخصي، ولا تُجدول الأنواع كلها بالطريقة نفسها.',
-    requires: ['حساب إنستغرام احترافي (تجاري أو منشئ محتوى) مرتبط بصفحة فيسبوك', 'تطبيق في Meta for Developers', meta],
-    lead: 'من أيام إلى أسابيع بحسب المراجعة.',
-    connect: 'تسجيل دخول Meta (OAuth) واختيار الصفحة والحساب. يلزم تجديد التفويض عند انتهائه.',
-    docs: 'https://developers.facebook.com/docs/instagram-platform/',
-    checked: null,
+    can: 'منشور بصورة أو فيديو أو دوّارة، وفيديو قصير وقصة، لحساب مهني، عبر Instagram API.',
+    cannot: 'لا يُنشر على حساب شخصي. الصور JPEG فقط، وتجلب Meta الملف من عنوان عام وقت النشر، والحد 100 منشور في 24 ساعة.',
+    requires: ['حساب إنستغرام مهني (Business أو Creator) مملوك لحافظة أعمال القسم', 'تطبيق في Meta for Developers مملوك لحافظة الأعمال', 'دور على التطبيق لكل من يربط الحسابات. «App Review» لازمة فقط لخدمة حسابات لا تملكها'],
+    lead: 'ساعات لحسابات القسم نفسه، وأسابيع إن لزمت مراجعة Meta.',
+    connect: 'تسجيل دخول Meta أو إنستغرام، ثم اختيار حافظة الأعمال والحسابات. دخول واحد يعطي عدة حسابات من حافظة واحدة.',
+    docs: 'https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-unified-login',
+    checked: '2026-11-01',
   },
   facebook: {
     can: 'منشور نصي أو بصورة أو فيديو على صفحة فيسبوك، ويمكن جدولته، عبر Graph API.',
     cannot: 'لا يُنشر على ملف شخصي ولا على مجموعة بهذا المسار.',
-    requires: ['صفحة فيسبوك يديرها حساب مسؤول', 'تطبيق في Meta for Developers (التطبيق نفسه مع إنستغرام)', meta],
+    requires: ['صفحة فيسبوك يستطيع من يربطها إنشاء المحتوى عليها', 'تطبيق Meta بحالة الاستخدام «Manage everything on your Page»', 'نشر التطبيق: ما يُنشر في وضع التطوير لا يراه إلا أصحاب الأدوار عليه'],
     lead: 'من أيام إلى أسابيع بحسب المراجعة.',
-    connect: 'تسجيل دخول Meta (OAuth) واختيار الصفحة. رمز الصفحة يُحفظ في الخادم وحده.',
+    connect: 'تسجيل دخول Meta واختيار الصفحات. لكل صفحة رمزها في الخادم وحده، ودخول واحد يعطي كل الصفحات التي تديرها.',
     docs: 'https://developers.facebook.com/docs/pages-api/',
-    checked: null,
+    checked: '2026-11-01',
   },
   x: {
-    can: 'تغريدة نصية أو بوسائط عبر X API v2.',
-    cannot: 'النشر عبر الواجهة يعتمد على مستوى اشتراك مدفوع، وقد لا يتوفر في المستوى المجاني.',
-    requires: ['حساب مطوّر وتطبيق في X', 'مستوى اشتراك يسمح بالنشر'],
-    lead: 'فوري عادةً بعد الاشتراك.',
-    connect: 'تسجيل دخول X (OAuth 2.0 مع PKCE). تنتهي الرموز وتُجدَّد.',
-    docs: 'https://developer.x.com/en/docs/x-api',
-    checked: null,
+    can: 'منشور نصي أو بوسائط عبر X API v2.',
+    cannot: 'لا مستوى مجاني في صفحة الأسعار: كل عملية تُخصم من رصيد مسبق، والمنشور الذي فيه رابط أغلى بكثير.',
+    requires: ['حساب وتطبيق في وحدة مطوّري X (console.x.com)', 'رصيد مسبق: 0.015 دولار للمنشور و0.20 دولار للمنشور الذي فيه رابط (2026-11-01)'],
+    lead: 'فوري عادةً بعد شحن الرصيد.',
+    connect: 'تسجيل دخول X (OAuth 2.0 مع PKCE)، حساب واحد في كل دخول. تنتهي الرموز وتُجدَّد.',
+    docs: 'https://docs.x.com/x-api/getting-started/getting-access',
+    checked: '2026-11-01',
   },
   linkedin: {
-    can: 'منشور نصي أو بصورة أو فيديو على صفحة المؤسسة.',
-    cannot: 'النشر نيابةً عن صفحات المؤسسات يحتاج موافقة شراكة على واجهة إدارة المجتمع.',
-    requires: ['صفحة مؤسسة على لينكدإن', 'طلب شراكة لواجهة Community Management وموافقة لينكدإن'],
-    lead: 'أسابيع في الغالب.',
-    connect: 'تسجيل دخول لينكدإن (OAuth) واختيار الصفحة. تنتهي الرموز وتُجدَّد.',
-    docs: 'https://learn.microsoft.com/en-us/linkedin/marketing/',
-    checked: null,
+    can: 'منشور نصي أو بصورة أو فيديو باسم شخص. النشر باسم صفحة الشركة يحتاج منتجاً آخر.',
+    cannot: 'يربط الموقع شخصاً لا صفحة. صفحة الشركة تحتاج Community Management API في تطبيق منفصل، وهي للمؤسسات المسجلة.',
+    requires: ['تطبيق LinkedIn بمنتجي Share on LinkedIn وSign In with LinkedIn', 'لصفحة الشركة: تطبيق جديد بلا منتجات أخرى، وبريد عمل موثّق، وتوثيق من مدير أعلى للصفحة'],
+    lead: 'دقائق للنشر باسم شخص، وأسابيع في الغالب لصفحة الشركة.',
+    connect: 'تسجيل دخول لينكدإن، شخص واحد في كل دخول. يُعاد الربط كل 60 يوماً.',
+    docs: 'https://learn.microsoft.com/en-us/linkedin/marketing/community-management/community-management-overview',
+    checked: '2026-11-01',
   },
   youtube: {
     can: 'رفع فيديو بعنوان ووصف وصورة مصغّرة وخصوصية، طويلاً أو Shorts، عبر YouTube Data API.',
-    cannot: 'فيديو فقط. للرفع حصة يومية، وتحتاج شاشة موافقة Google إلى تحقق قبل الاستعمال العام.',
-    requires: ['قناة يوتيوب', 'مشروع Google Cloud وشاشة موافقة OAuth', 'تحقق Google للتطبيق وزيادة الحصة عند الحاجة'],
-    lead: 'من أيام إلى أسابيع.',
-    connect: 'تسجيل دخول Google (OAuth) واختيار القناة. رمز التحديث يُحفظ في الخادم وحده.',
+    cannot: 'فيديو فقط. الحد 100 مقطع في اليوم، وقد يبدأ المقطع خاصاً بحسب إعدادات الحساب.',
+    requires: ['قناة يوتيوب', 'مشروع Google Cloud وشاشة موافقة OAuth', 'نشر التطبيق (In production) حتى لا ينتهي الربط كل 7 أيام'],
+    lead: 'ساعات، وأطول إن طُلب التحقق من التطبيق.',
+    connect: 'تسجيل دخول Google واختيار القناة، ولكل قناة دخول مستقل. رمز التحديث يُحفظ في الخادم وحده.',
     docs: 'https://developers.google.com/youtube/v3',
-    checked: null,
+    checked: '2026-11-01',
   },
   tiktok: {
-    can: 'رفع فيديو أو إرساله مسودة عبر Content Posting API.',
-    cannot: 'قبل اجتياز تدقيق التطبيق تُقيَّد المنشورات بالخصوصية الخاصة وعدد محدود.',
-    requires: ['حساب مطوّر وتطبيق في TikTok', 'تدقيق التطبيق (Audit) لصلاحية النشر'],
+    can: 'فيديو أو صور إلى الحساب مباشرة أو مسودة، عبر Content Posting API.',
+    cannot: 'قبل اجتياز التدقيق: النشر خاص، ويجب أن يكون الحساب خاصاً، وبحد 5 مستخدمين في 24 ساعة. والصور تحتاج عنواناً موثّقاً، والموقع يقبل الفيديو فقط الآن.',
+    requires: ['حساب مطوّر وتطبيق في TikTok', 'مراجعة التطبيق بفيديو توضيحي وروابط موثّقة', 'تدقيق التطبيق (Audit) للنشر العام'],
     lead: 'أسابيع في الغالب.',
-    connect: 'تسجيل دخول TikTok (OAuth). تنتهي الرموز وتُجدَّد.',
+    connect: 'تسجيل دخول TikTok، حساب واحد في كل دخول. الرمز 24 ساعة ويُجدَّد.',
     docs: 'https://developers.tiktok.com/doc/content-posting-api-get-started',
-    checked: null,
+    checked: '2026-11-01',
   },
   snapchat: {
-    can: 'لا مسار نشر عام معروف للمؤسسات عبر واجهة.',
-    cannot: 'يُفترض أن النشر يدوي حتى يثبت مسار رسمي آمن.',
-    requires: ['البحث في وثائق Snap الرسمية قبل الاعتماد على أي مسار'],
-    lead: 'غير معروفة.',
+    can: 'ينشر الناشر من Snapchat بحزمة جاهزة. وتتيح Public Profile API نشر القصص وSpotlight لمن تقبله Snap.',
+    cannot: 'الواجهة بدعوة من Snap فقط (allowlist)، والموقع لا يربطها. المسار اليدوي هو المسار المكتمل.',
+    requires: ['ملف عام (Public Profile) للمؤسسة', 'للواجهة: حساب أعمال في Ads Manager، وتطبيق OAuth من Business Details، وموافقة جهة الاتصال في Snap'],
+    lead: 'النشر اليدوي فوري، ومدة موافقة الواجهة غير معروفة.',
     connect: 'لا ربط تلقائي: مهمة يدوية لمسؤول النشر بحزمة جاهزة.',
-    docs: null,
-    checked: null,
+    docs: 'https://developers.snap.com/api/marketing-api/Public-Profile-API/GetStarted',
+    checked: '2026-11-01',
   },
   whatsapp_channel: {
     can: 'نشر تحديث في قناة واتساب.',

@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-14T21:38:21.004Z",
+  "run": "2026-11-01T20:54:09.392Z",
   "checks": [
     {
       "name": "preview-instagram: renders",
@@ -47,12 +47,52 @@
       "detail": ""
     },
     {
+      "name": "channels-real: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-broken: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-failed: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-real-publisher: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "chooser-shell: renders",
       "pass": true,
       "detail": ""
     },
     {
       "name": "conn-lines: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-real: the director has «تعديل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-real-publisher: no «تعديل» button",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-real: the director has «فصل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-real-publisher: no «فصل» button",
       "pass": true,
       "detail": ""
     },
@@ -232,79 +272,89 @@
       "detail": "   جارٍ فحص النسخ…   "
     },
     {
-      "name": "channels-director: shows «ربط حقيقي · سليم»",
-      "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
-    },
-    {
-      "name": "channels-director: shows «ربط حقيقي · يحتاج ربطاً من جديد»",
-      "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
-    },
-    {
       "name": "channels-director: shows «رفضت المنصة الرمز»",
       "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
-    },
-    {
-      "name": "channels-director: shows «تعذّر الفحص»",
-      "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
     },
     {
       "name": "channels-director: shows «ربط محاكى»",
       "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
-    },
-    {
-      "name": "channels-director: shows «فحص الاتصال»",
-      "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
-    },
-    {
-      "name": "channels-director: shows «إعادة الربط عبر المنصة»",
-      "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
-    },
-    {
-      "name": "channels-director: shows «ربط عبر Meta»",
-      "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
-    },
-    {
-      "name": "channels-director: shows «ربط عبر TikTok»",
-      "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
     },
     {
       "name": "channels-director: shows «مسار يدوي»",
       "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
     },
     {
       "name": "channels-director: shows «يحتاج ربطاً من جديد»",
       "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
     },
     {
-      "name": "channels-director: shows «النشر نفسه ما زال محاكاة»",
+      "name": "channels-director: shows «أما النشر نفسه فما زال محاكاة»",
       "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
     },
     {
-      "name": "channels-director: does not show «ربط حقيقي · سليم · آخر فحص لم يُفحص»",
+      "name": "channels-director: shows «إعادة الربط»",
+      "pass": true,
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
+    },
+    {
+      "name": "channels-real: shows «ربط حقيقي · سليم»",
+      "pass": true,
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
+    },
+    {
+      "name": "channels-real: shows «فحص الاتصال»",
+      "pass": true,
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
+    },
+    {
+      "name": "channels-real: shows «إعادة الربط عبر المنصة»",
+      "pass": true,
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
+    },
+    {
+      "name": "channels-real: shows «فصل»",
+      "pass": true,
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
+    },
+    {
+      "name": "channels-real: does not show «ربط حقيقي · سليم · آخر فحص لم يُفحص»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "channels-publisher: shows «فحص الاتصال»",
+      "name": "channels-broken: shows «ربط حقيقي · يحتاج ربطاً من جديد»",
       "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
+    },
+    {
+      "name": "channels-broken: shows «رفضت المنصة الرمز»",
+      "pass": true,
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
+    },
+    {
+      "name": "channels-failed: shows «تعذّر الفحص»",
+      "pass": true,
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
+    },
+    {
+      "name": "channels-real-publisher: shows «فحص الاتصال»",
+      "pass": true,
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.            "
+    },
+    {
+      "name": "channels-real-publisher: shows «إعادة الربط عبر المنصة»",
+      "pass": true,
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.            "
     },
     {
       "name": "channels-publisher: shows «ربط محاكى»",
       "pass": true,
-      "detail": "     الحسابات المرتبطة  حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر ا"
+      "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.            "
     },
     {
       "name": "channels-publisher: does not show «ربط عبر Meta»",
@@ -317,19 +367,19 @@
       "detail": ""
     },
     {
-      "name": "channels-publisher: does not show «إعادة الربط عبر المنصة»",
+      "name": "channels-publisher: does not show «إضافة حساب»",
       "pass": true,
       "detail": ""
     },
     {
       "name": "chooser-shell: shows «ربط حسابات عبر Meta»",
       "pass": true,
-      "detail": "     ربط حسابات عبر Meta (فيسبوك وإنستغرام)           جارٍ قراءة ما يمكن ربطه…  "
+      "detail": "             ربط حسابات عبر Meta (فيسبوك وإنستغرام)  سجّلت الدخول عند المنصة نفس"
     },
     {
       "name": "chooser-shell: shows «جارٍ قراءة ما يمكن ربطه»",
       "pass": true,
-      "detail": "     ربط حسابات عبر Meta (فيسبوك وإنستغرام)           جارٍ قراءة ما يمكن ربطه…  "
+      "detail": "             ربط حسابات عبر Meta (فيسبوك وإنستغرام)  سجّلت الدخول عند المنصة نفس"
     },
     {
       "name": "conn-lines: shows «ربط حقيقي»",
@@ -452,6 +502,46 @@
       "detail": ""
     },
     {
+      "name": "channels-real a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-real a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-broken a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-broken a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-failed a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-failed a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-real-publisher a/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-real-publisher a/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "chooser-shell a/1280: no sideways scroll",
       "pass": true,
       "detail": "1280 > 1280"
@@ -558,6 +648,46 @@
     },
     {
       "name": "channels-publisher a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-real a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-real a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-broken a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-broken a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-failed a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-failed a/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-real-publisher a/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-real-publisher a/390: no page errors",
       "pass": true,
       "detail": ""
     },
@@ -672,6 +802,46 @@
       "detail": ""
     },
     {
+      "name": "channels-real e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-real e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-broken e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-broken e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-failed e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-failed e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-real-publisher e/1280: no sideways scroll",
+      "pass": true,
+      "detail": "1280 > 1280"
+    },
+    {
+      "name": "channels-real-publisher e/1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "chooser-shell e/1280: no sideways scroll",
       "pass": true,
       "detail": "1280 > 1280"
@@ -782,6 +952,46 @@
       "detail": ""
     },
     {
+      "name": "channels-real e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-real e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-broken e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-broken e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-failed e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-failed e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-real-publisher e/390: no sideways scroll",
+      "pass": true,
+      "detail": "390 > 390"
+    },
+    {
+      "name": "channels-real-publisher e/390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "chooser-shell e/390: no sideways scroll",
       "pass": true,
       "detail": "390 > 390"
@@ -804,8 +1014,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 160,
-    "passed": 160,
+    "total": 202,
+    "passed": 202,
     "failed": 0
   }
 }

@@ -15,7 +15,7 @@ import {
 } from './oauth.ts';
 import { googleAccountHealth, linkedinAccountHealth, xAccountHealth } from './oauth2.ts';
 
-export type AppCreds = { id: string; appId: string; secret: string; scopes: string[] | null };
+export type AppCreds = { id: string; appId: string; secret: string; scopes: string[] | null; configId: string | null };
 
 /** The registered app of a provider, with its secret, for one purpose. Null when none is entered. */
 export async function loadApp(db: SupabaseClient, provider: Provider, purpose: string): Promise<AppCreds | null> {
@@ -27,7 +27,7 @@ export async function loadApp(db: SupabaseClient, provider: Provider, purpose: s
   const appId = typeof d.config?.app_id === 'string' ? d.config.app_id : '';
   if (!appId || typeof d.secret !== 'string') return null;
   const scopes = Array.isArray(d.config?.scopes) ? (d.config.scopes as unknown[]).filter((x): x is string => typeof x === 'string') : null;
-  return { id: d.id, appId, secret: d.secret, scopes };
+  return { id: d.id, appId, secret: d.secret, scopes, configId: typeof d.config?.config_id === 'string' && d.config.config_id ? d.config.config_id : null };
 }
 
 /** The stored token of one platform integration (a user offer or an account). */

@@ -1,33 +1,48 @@
 'use client';
-// «حسابات المنصات», after «النموذج المرجعي للمركز» version 5: the department's accounts on
-// each platform (several per platform, YouTube for video only), who publishes on each, and
-// whether it publishes by itself or asks first. The director, the assistant and the
-// administrator add, edit, stop and delete them; the publisher reconnects them. Linking is a
-// simulation: no platform is contacted, and an authorisation runs 60 days. Approval binds to
-// the account and its handle, so renaming a handle re-opens «المنصات والحسابات» (account_save),
-// and an account in use by approved, scheduled or in-review work cannot be stopped or deleted.
+// «حسابات المنصات» (MVP_draft.md section 67), after «النموذج المرجعي للمركز» version 5: the department's accounts on each
+// platform (several per platform, YouTube for video only), who publishes on each, and whether it publishes by itself or
+// asks first. What needs someone comes first; each account is one line, and everything else about it opens in a sheet.
+// The director, the assistant and the administrator add, edit, stop and delete accounts; the publisher reconnects them.
+// An account is added through the platform's own sign-in, and the site never asks for a password. A simulated account
+// connects to nothing, for trying a platform that is not set up, and an authorisation runs 60 days. Approval binds to
+// the account and its handle, so renaming a handle re-opens «المنصات والحسابات» (account_save), and an account in use by
+// approved, scheduled or in-review work cannot be stopped or deleted. Publishing itself is a simulation.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SetupGuide } from '../setup-guide';
-import { Film, Link2, Lock, Mail, Pencil, Plus, RefreshCw, Send, Trash2, TriangleAlert, Unplug, Users } from 'lucide-react';
+import { ChevronLeft, Film, Link2, Lock, Pencil, Plus, RefreshCw, Trash2, TriangleAlert, Unplug, Users } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import { HOLD } from '@/lib/kit/hold-reasons';
-import { accountName, accountState, countOf, isLead, canPublish, platformLabels, statusLabels, VIDEO_ONLY, WORKS, type AccountRow, type Platform } from '@/lib/work/rules';
-import { MODE_AR, READINESS_AR, connErrorAr } from '@/lib/platforms/info';
-import { CONN_PROVIDERS, PROVIDER_NAME, providerOf, type ConnProvider } from '@/lib/platforms/provider';
+import { supabase } from '@/lib/supabase/client';
+import { GUIDES } from '@/lib/setup-guides';
+import { accountName, accountState, countOf, isLead, canPublish, platformLabels, statusLabels, VIDEO_ONLY, WORKS, type AccountRow, type Platform, type PlatformInfo } from '@/lib/work/rules';
+import { connErrorAr } from '@/lib/platforms/info';
+import { APP_INTEGRATION_TYPE, CONN_PROVIDERS, PROVIDER_NAME, providerOf, type ConnProvider } from '@/lib/platforms/provider';
+import { PlatformTile } from '../platform-icon';
+import { Sheet, SheetHead, SheetProgress, SheetSteps } from '../sheet';
 import { useWork, useWorkList, type ListItem } from './data';
-import { ConnectChooser, RECONNECT_KEY, connLine } from './connect';
+import { ConnectChooser, RECONNECT_KEY, connLine, defaultPublishers } from './connect';
 import { Empty, Hint, Ic, Modal } from './parts';
 import { staffOf } from './plan';
 
 const LOCKING = ['APPROVED', 'SCHEDULED', 'IN_REVIEW'];
+/** A platform's own state, beside its name, when it is not simply working. */
+const groupNote = (info: PlatformInfo): [string, string] | null => {
+  if (!info.enabled) return ['موقوفة', 'off'];
+  if (info.publish_mode === 'manual' && !providerOf(info.key)) return ['نشر يدوي', 'man'];
+  return null;
+};
 
-export function ChannelsPage() {
+export function ChannelsPage({ initialOpen }: { /** Draws an account's sheet without a click (qa). */ initialOpen?: string } = {}) {
   const w = useWork();
   const { items, reload } = useWorkList();
   const mgr = isLead(w.role);
   const pub = canPublish(w.role);
   const [dlg, setDlg] = useState<{ t: 'edit'; a: AccountRow | null } | { t: 'delete'; a: AccountRow } | null>(null);
+  const [viewing, setViewing] = useState<string | null>(initialOpen ?? null);
+  const [adding, setAdding] = useState<{ platform?: Platform } | null>(null);
+  const [filter, setFilter] = useState<string>('all');
+  const [ready, setReady] = useState<Record<string, string> | null>(null);
   const [choose, setChoose] = useState<{ provider: ConnProvider; offer: string } | null>(null);
   const [connNote, setConnNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [checking, setChecking] = useState(false);
@@ -62,6 +77,17 @@ export function ChannelsPage() {
       .catch(() => undefined);
   }, [w, mgr, pub]);
 
+  // Which apps are ready, so nobody is sent to a sign-in that cannot work. Before its migration nothing is known,
+  // and the sign-in itself says so.
+  useEffect(() => {
+    if (!mgr) return;
+    void supabase()
+      .rpc('platform_ready')
+      .then(({ data, error }) => {
+        if (!error) setReady((data ?? {}) as Record<string, string>);
+      });
+  }, [mgr]);
+
   const checkNow = async (a: AccountRow) => {
     setChecking(true);
     try {
@@ -94,7 +120,7 @@ export function ChannelsPage() {
   // Every platform of the registry that is on or has accounts: social ones in registry order, the shared mailbox last.
   const sections = useMemo(() => {
     const has = new Set(w.accounts.map((a) => a.platform));
-    const live = w.platforms.filter((p) => p.enabled || has.has(p.key));
+    const live = w.platforms.filter((p) => has.has(p.key));
     return [...live.filter((p) => p.kind === 'social').sort((a, b) => a.sort - b.sort), ...live.filter((p) => p.kind === 'mail')];
   }, [w.platforms, w.accounts]);
   const useOf = (id: string) => items.filter((x) => !x.w.closed_at && x.w.channels.includes(id) && !['PUBLISHED', 'PARTIAL', 'FAILED', 'PUBLISHING'].includes(x.w.status));
@@ -108,6 +134,11 @@ export function ChannelsPage() {
     await Promise.all([w.reloadBase(), reload()]);
     return true;
   };
+  const reconnect = (a: AccountRow) => {
+    const provider = providerOf(a.platform);
+    if (a.conn_kind === 'oauth' && provider) return startConnect(provider, a);
+    void act('account_reconnect', { p_id: a.id }, `أُعيد ربط ${accountName(a)} 60 يوماً (محاكاة).`);
+  };
   if (!mgr && !pub)
     return (
       <div className="wk">
@@ -116,16 +147,30 @@ export function ChannelsPage() {
         </Empty>
       </div>
     );
+
+  const attention = w.accounts
+    .filter((a) => a.active && a.platform !== 'mail')
+    .map((a) => {
+      const [label, cls] = accountState(a, nowIso);
+      const scheduled = items.filter((x) => !x.w.closed_at && x.w.status === 'SCHEDULED' && x.w.channels.includes(a.id)).length;
+      const reason = a.conn_state === 'needs_reconnect' ? connErrorAr(a.conn_error) || label : a.conn_state === 'error' ? connErrorAr(a.conn_error) || label : label;
+      return { a, cls, why: `${reason}${scheduled ? ` يعتمد عليه ${countOf(scheduled, WORKS)} مجدول.` : ''}` };
+    })
+    .filter((x) => x.cls === 'danger' || x.cls === 'warn');
+  const social = w.accounts.filter((a) => a.platform !== 'mail');
+  const shownSections = sections.filter((s) => filter === 'all' || s.key === filter);
+  const current = viewing ? w.accounts.find((a) => a.id === viewing) : undefined;
+
   return (
     <div className="wk">
       <div className="wk-head">
         <div>
           <h1>حسابات المنصات</h1>
-          <p>حسابات النشر على كل منصة، ومن ينشر عليها، وطريقة النشر المبدئية. الاعتماد يرتبط بالحساب بعينه، فتغيير اسمه يعيد «المنصات والحسابات» للاعتماد.</p>
+          <p>الحسابات التي ننشر عليها، ومن ينشر على كل حساب.</p>
         </div>
         {mgr && (
           <div className="wk-acts">
-            <button type="button" className="wk-btn gold" onClick={() => setDlg({ t: 'edit', a: null })}>
+            <button type="button" className="wk-btn gold" onClick={() => setAdding({})}>
               <Ic i={Plus} />
               إضافة حساب
             </button>
@@ -134,9 +179,7 @@ export function ChannelsPage() {
       </div>
       <p className="wk-simnote">
         <Ic i={TriangleAlert} />
-        <span>
-          حساب «ربط حقيقي» مربوط بتسجيل دخول المنصة الرسمي، ويُفحص اتصاله فعلاً وتُحفظ مفاتيحه في خزنة الخادم وحده. حساب «ربط محاكى» لا يتصل بشيء. النشر نفسه ما زال محاكاة في الحالتين. المنصات وحالة تجهيز كل منها في «الإعدادات» ثم «المنصات».
-        </span>
+        <span>الربط حقيقي، أما النشر نفسه فما زال محاكاة: لا يصل شيء إلى المنصة بعد.</span>
       </p>
       {connNote && (
         <p className={connNote.ok ? 'wk-simnote' : 'wk-err'} role="status">
@@ -149,134 +192,136 @@ export function ChannelsPage() {
           جارٍ التحميل…
         </div>
       ) : (
-        sections.map((info) => {
-          const pl = info.key;
-          const list = w.accounts.filter((a) => a.platform === pl);
-          return (
-            <section className="wk-psec" data-gd={`plat-${pl}`} key={pl}>
-              <h3>
-                <Ic i={pl === 'mail' ? Mail : VIDEO_ONLY.includes(pl) ? Film : Send} />
-                {platformLabels[pl]} <span className="n">{list.length}</span>
-                {info.kind === 'social' && (
-                  <small className="wk-plat-meta">
-                    النشر محاكاة · المسار المخطط: {MODE_AR[info.publish_mode]} · التجهيز: {READINESS_AR[info.readiness]}
-                    {!info.enabled ? ' · موقوفة لإضافة حسابات جديدة' : ''}
-                  </small>
-                )}
-                {info.kind === 'social' && (providerOf(pl) || info.publish_mode === 'manual') && (
-                  <SetupGuide
-                    guide={providerOf(pl) ? `connect_${providerOf(pl)}` : 'manual'}
-                    label={providerOf(pl) ? 'كيف تربط حسابك' : 'كيف يُنشر على هذه المنصة'}
-                  />
-                )}
-                {mgr && info.enabled && providerOf(pl) && (
-                  <button type="button" className="wk-btn sm" onClick={() => startConnect(providerOf(pl)!)}>
-                    <Ic i={Link2} />
-                    ربط عبر {PROVIDER_NAME[providerOf(pl)!]}
+        <>
+          {attention.length > 0 && (
+            <section className="ac-attn" aria-label="يحتاج انتباهك">
+              <h2>يحتاج انتباهك</h2>
+              {attention.map(({ a, why }) => (
+                <div className="ac-attn-row" key={a.id}>
+                  <PlatformTile k={a.platform} />
+                  <div className="ac-attn-text">
+                    <b>{accountName(a)}</b>
+                    <small>{why}</small>
+                  </div>
+                  <button type="button" className="wk-btn sm" onClick={() => reconnect(a)}>
+                    <Ic i={RefreshCw} />
+                    إعادة الربط
                   </button>
-                )}
-              </h3>
-              {info.kind === 'social' && info.publish_mode === 'manual' && (
-                <Hint>
-                  مسار يدوي: لا ربط تلقائي بهذه المنصة. يُنشر من تطبيقها بحزمة جاهزة (النص والملفات) تظهر في نافذة النشر، ثم يؤكد مسؤول النشر أنه نُشر.
-                </Hint>
-              )}
-              {list.length ? (
-                <div className="wk-accgrid">
-                  {list.map((a) => {
-                    const [label, cls] = accountState(a, nowIso);
-                    const use = useOf(a.id);
-                    return (
-                      <article className={`wk-acccard ${a.active ? '' : 'off'}`} key={a.id}>
-                        <div className="ac-top">
-                          <b>{accountName(a)}</b>
-                          <span className={`wk-chip ${cls}`}>{label}</span>
-                        </div>
-                        {a.handle && <span className="handle">{a.handle}</span>}
-                        {a.platform === 'mail' && <span className="handle">صندوق القسم المشترك</span>}
-                        {a.platform !== 'mail' && (() => {
-                          const c = connLine(a);
-                          return (
-                            <small className={`wk-conn ${c.tone}`} data-conn={c.real ? 'oauth' : 'simulated'}>
-                              {c.text}
-                              {c.real && a.external_name ? ` · ${a.external_name}` : ''}
-                            </small>
-                          );
-                        })()}
-                        {a.purpose && <small>{a.purpose}</small>}
-                        {VIDEO_ONLY.includes(a.platform) && (
-                          <p className="ytn">
-                            <Ic i={Film} />{' '}
-                            {a.platform === 'youtube'
-                              ? 'يقبل الفيديو فقط: الطويل وShorts. لكل منشور عنوان ووصف وصورة مصغّرة وخصوصية (عام، غير مدرج، خاص).'
-                              : 'يقبل الفيديو فقط: لا يُرسل إليه عمل بلا فيديو.'}
-                          </p>
-                        )}
-                        <dl className="wk-kv">
-                          <dt>ينشر عليه</dt>
-                          <dd>{a.platform === 'mail' ? 'مسؤول النشر عند الإرسال' : a.publishers.map(w.nameOf).join('، ') || 'لا أحد'}</dd>
-                          <dt>عند الموعد</dt>
-                          <dd>{a.mode === 'ask' ? 'اسأل قبل النشر' : 'نشر تلقائي'}</dd>
-                          <dt>يستخدمه</dt>
-                          <dd>{use.length ? `${countOf(use.length, WORKS)}: ${use.slice(0, 3).map((x) => x.w.id).join('، ')}${use.length > 3 ? '…' : ''}` : 'لا أعمال حالية'}</dd>
-                        </dl>
-                        <div className="acts">
-                          {(mgr || pub) && a.platform !== 'mail' && a.conn_kind !== 'oauth' && (
-                            <button type="button" className="wk-btn sm" onClick={() => void act('account_reconnect', { p_id: a.id }, `أُعيد ربط ${accountName(a)} 60 يوماً (محاكاة).`)}>
-                              <Ic i={RefreshCw} />
-                              إعادة الربط
-                            </button>
-                          )}
-                          {(mgr || pub) && a.conn_kind === 'oauth' && (
-                            <button type="button" className="wk-btn sm" disabled={checking} onClick={() => void checkNow(a)}>
-                              <Ic i={RefreshCw} />
-                              فحص الاتصال
-                            </button>
-                          )}
-                          {mgr && a.conn_kind === 'oauth' && providerOf(a.platform) && (
-                            <button type="button" className="wk-btn sm" onClick={() => startConnect(providerOf(a.platform)!, a)}>
-                              <Ic i={Link2} />
-                              إعادة الربط عبر المنصة
-                            </button>
-                          )}
-                          {mgr && a.conn_kind === 'oauth' && a.conn_state !== 'needs_reconnect' && (
-                            <button type="button" className="wk-btn sm quiet" data-hold={HOLD.accountDisconnect} onClick={() => void disconnect(a)}>
-                              <Ic i={Unplug} />
-                              فصل
-                            </button>
-                          )}
-                          {mgr && (
-                            <button type="button" className="wk-btn sm" onClick={() => setDlg({ t: 'edit', a })}>
-                              <Ic i={Pencil} />
-                              تعديل
-                            </button>
-                          )}
-                          {mgr && !a.fixed && (
-                            <>
-                              <button
-                                type="button"
-                                className="wk-btn sm quiet"
-                                onClick={() => void act('account_set_active', { p_id: a.id, p_active: !a.active }, a.active ? `أُوقف ${accountName(a)}.` : `فُعّل ${accountName(a)}.`)}
-                              >
-                                {a.active ? 'إيقاف' : 'تفعيل'}
-                              </button>
-                              <button type="button" className="wk-btn sm quiet danger" onClick={() => setDlg({ t: 'delete', a })}>
-                                <Ic i={Trash2} />
-                                حذف
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </article>
-                    );
-                  })}
                 </div>
-              ) : (
-                <p className="wk-col-hint">لا حسابات.</p>
-              )}
+              ))}
             </section>
-          );
-        })
+          )}
+          {sections.length > 1 && (
+            <div className="ac-filters" role="group" aria-label="تصفية حسب المنصة">
+              <button type="button" className={filter === 'all' ? 'on' : ''} aria-pressed={filter === 'all'} onClick={() => setFilter('all')}>
+                الكل {w.accounts.length}
+              </button>
+              {sections.map((s) => (
+                <button type="button" key={s.key} className={filter === s.key ? 'on' : ''} aria-pressed={filter === s.key} onClick={() => setFilter(s.key)}>
+                  {platformLabels[s.key]} {w.accounts.filter((a) => a.platform === s.key).length}
+                </button>
+              ))}
+            </div>
+          )}
+          {social.length === 0 && mgr && (
+            <Empty i={Link2} title="لا حسابات بعد">
+              أضف أول حساب بتسجيل الدخول عند المنصة نفسها.
+            </Empty>
+          )}
+          {shownSections.map((info) => {
+            const pl = info.key;
+            const list = w.accounts.filter((a) => a.platform === pl);
+            const note = groupNote(info);
+            return (
+              <section className="ac-group" data-gd={`plat-${pl}`} key={pl} aria-label={platformLabels[pl]}>
+                <div className="ac-group-head">
+                  <PlatformTile k={pl} />
+                  <h3>
+                    {platformLabels[pl]} <span className="n">{list.length}</span>
+                  </h3>
+                  {note && <span className={`pf-chip ${note[1]}`}>{note[0]}</span>}
+                  {info.kind === 'social' && (providerOf(pl) || info.publish_mode === 'manual') && (
+                    <SetupGuide guide={providerOf(pl) ? `connect_${providerOf(pl)}` : 'manual'} label={providerOf(pl) ? 'كيف تربط حسابك' : 'كيف يُنشر على هذه المنصة'} />
+                  )}
+                  {mgr && info.enabled && info.kind === 'social' && (
+                    <button type="button" className="wk-btn sm quiet ac-more" onClick={() => setAdding({ platform: pl })}>
+                      <Ic i={Plus} />
+                      حساب آخر
+                    </button>
+                  )}
+                </div>
+                {info.kind === 'social' && info.publish_mode === 'manual' && (
+                  <p className="ac-manual">مسار يدوي: يُنشر من تطبيقها بحزمة جاهزة، ثم يؤكد مسؤول النشر أنه نُشر.</p>
+                )}
+                <div className="ac-cols" aria-hidden="true">
+                  <span>الحساب</span>
+                  <span>الحالة</span>
+                  <span>من ينشر عليه</span>
+                  <span>عند الموعد</span>
+                  <span>يستخدمه</span>
+                  <span />
+                </div>
+                {list.map((a) => {
+                  const [label, cls] = accountState(a, nowIso);
+                  const use = useOf(a.id);
+                  const c = a.platform !== 'mail' ? connLine(a) : null;
+                  // Green says connected: an account that reaches nothing says what it is unless it needs someone.
+                  const reachesNothing = c !== null && !c.real && cls === 'approved';
+                  const manual = c !== null && !providerOf(a.platform);
+                  const who = a.platform === 'mail' ? 'مسؤول النشر عند الإرسال' : a.publishers.map(w.nameOf).join('، ') || 'لا أحد';
+                  const mode = a.mode === 'ask' ? 'اسأل قبل النشر' : 'نشر تلقائي';
+                  const works = use.length ? countOf(use.length, WORKS) : 'لا أعمال حالية';
+                  return (
+                    <button type="button" className={`ac-row ${a.active ? '' : 'off'}`} key={a.id} data-account={a.id} data-conn={c ? (c.real ? 'oauth' : 'simulated') : undefined} onClick={() => setViewing(a.id)}>
+                      <span className="ac-name">
+                        <b>{a.label}</b>
+                        <small className="handle">{a.platform === 'mail' ? 'صندوق القسم المشترك' : <bdi>{a.handle}</bdi>}</small>
+                      </span>
+                      <span className="ac-state">{reachesNothing ? <span className={`pf-chip ${manual ? 'man' : 'none'}`}>{manual ? 'نشر يدوي' : 'ربط محاكى'}</span> : <span className={`wk-chip ${cls}`}>{label}</span>}</span>
+                      <span className="ac-col">{who}</span>
+                      <span className="ac-col">{mode}</span>
+                      <span className="ac-col">{works}</span>
+                      <span className="ac-meta">
+                        {who} · {mode} · {works}
+                      </span>
+                      <ChevronLeft className="ac-chev" aria-hidden="true" />
+                    </button>
+                  );
+                })}
+              </section>
+            );
+          })}
+        </>
+      )}
+      {current && (
+        <AccountSheet
+          a={current}
+          use={useOf(current.id)}
+          nowIso={nowIso}
+          mgr={mgr}
+          pub={pub}
+          checking={checking}
+          onClose={() => setViewing(null)}
+          onCheck={() => void checkNow(current)}
+          onReconnect={() => reconnect(current)}
+          onDisconnect={() => void disconnect(current)}
+          onEdit={() => setDlg({ t: 'edit', a: current })}
+          onDelete={() => setDlg({ t: 'delete', a: current })}
+          act={act}
+        />
+      )}
+      {adding && (
+        <AddAccountSheet
+          first={adding.platform}
+          ready={ready}
+          onClose={() => setAdding(null)}
+          onConnect={startConnect}
+          onSimulated={() => {
+            setAdding(null);
+            setDlg({ t: 'edit', a: null });
+          }}
+          act={act}
+        />
       )}
       {choose && (
         <ConnectChooser
@@ -290,12 +335,297 @@ export function ChannelsPage() {
         />
       )}
       {dlg?.t === 'edit' && <AccountDialog a={dlg.a} use={dlg.a ? useOf(dlg.a.id).filter((x) => LOCKING.includes(x.w.status)) : []} onClose={() => setDlg(null)} act={act} />}
-      {dlg?.t === 'delete' && <DeleteDialog a={dlg.a} use={useOf(dlg.a.id)} onClose={() => setDlg(null)} act={act} />}
+      {dlg?.t === 'delete' && (
+        <DeleteDialog
+          a={dlg.a}
+          use={useOf(dlg.a.id)}
+          onClose={() => {
+            setDlg(null);
+            if (!w.accounts.some((x) => x.id === dlg.a.id)) setViewing(null);
+          }}
+          act={act}
+        />
+      )}
     </div>
   );
 }
 
 type Act = (fn: string, args: Record<string, unknown>, ok: string) => Promise<boolean>;
+
+/** One account: what it is on the right, its connection beside it, and what is rarely needed folded. */
+function AccountSheet({
+  a,
+  use,
+  nowIso,
+  mgr,
+  pub,
+  checking,
+  onClose,
+  onCheck,
+  onReconnect,
+  onDisconnect,
+  onEdit,
+  onDelete,
+  act,
+}: {
+  a: AccountRow;
+  use: ListItem[];
+  nowIso: string;
+  mgr: boolean;
+  pub: boolean;
+  checking: boolean;
+  onClose: () => void;
+  onCheck: () => void;
+  onReconnect: () => void;
+  onDisconnect: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  act: Act;
+}) {
+  const w = useWork();
+  const [label, cls] = accountState(a, nowIso);
+  const c = a.platform !== 'mail' ? connLine(a) : null;
+  const oauth = a.conn_kind === 'oauth';
+  const locked = use.filter((x) => LOCKING.includes(x.w.status));
+  return (
+    <Sheet label={accountName(a)} onClose={onClose}>
+      <SheetHead tile={<PlatformTile k={a.platform} />} title={accountName(a)} sub={a.platform === 'mail' ? 'صندوق القسم المشترك' : <bdi>{a.handle}</bdi>} chip={<span className={`wk-chip ${cls}`}>{label}</span>} onClose={onClose} />
+      <div className="pf-body">
+        <div className="pf-input">
+          <span className="pf-eyebrow">الحساب</span>
+          <h3>{a.label}</h3>
+          <dl className="pf-facts">
+            <div>
+              <dt>ينشر عليه</dt>
+              <dd>{a.platform === 'mail' ? 'مسؤول النشر عند الإرسال' : a.publishers.map(w.nameOf).join('، ') || 'لا أحد'}</dd>
+            </div>
+            <div>
+              <dt>عند الموعد</dt>
+              <dd>{a.mode === 'ask' ? 'اسأل قبل النشر' : 'نشر تلقائي'}</dd>
+            </div>
+            {a.purpose && (
+              <div>
+                <dt>الغرض</dt>
+                <dd>{a.purpose}</dd>
+              </div>
+            )}
+            <div>
+              <dt>يستخدمه</dt>
+              <dd>{use.length ? `${countOf(use.length, WORKS)}: ${use.slice(0, 3).map((x) => x.w.id).join('، ')}${use.length > 3 ? '…' : ''}` : 'لا أعمال حالية'}</dd>
+            </div>
+          </dl>
+          {VIDEO_ONLY.includes(a.platform) && (
+            <p className="ytn">
+              <Ic i={Film} />{' '}
+              {a.platform === 'youtube' ? 'يقبل الفيديو فقط: الطويل وShorts. لكل منشور عنوان ووصف وصورة مصغّرة وخصوصية (عام، غير مدرج، خاص).' : 'يقبل الفيديو فقط: لا يُرسل إليه عمل بلا فيديو.'}
+            </p>
+          )}
+          {mgr && (
+            <div className="pf-acts">
+              <button type="button" className="wk-btn" onClick={onEdit}>
+                <Ic i={Pencil} />
+                تعديل
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="pf-side pf-info">
+          <h3>الربط</h3>
+          {c ? (
+            <p className={`wk-conn ${c.tone}`} data-conn={c.real ? 'oauth' : 'simulated'}>
+              {c.text}
+              {c.real && a.external_name ? ` · ${a.external_name}` : ''}
+            </p>
+          ) : (
+            <p className="muted">البريد لا يحتاج ربطاً: يُضبط صندوق القسم من «الإعدادات».</p>
+          )}
+          {(mgr || pub) && a.platform !== 'mail' && (
+            <div className="pf-acts">
+              {oauth && (
+                <button type="button" className="wk-btn sm" disabled={checking} onClick={onCheck}>
+                  <Ic i={RefreshCw} />
+                  فحص الاتصال
+                </button>
+              )}
+              <button type="button" className="wk-btn sm" onClick={onReconnect}>
+                <Ic i={oauth ? Link2 : RefreshCw} />
+                {oauth ? 'إعادة الربط عبر المنصة' : 'إعادة الربط'}
+              </button>
+            </div>
+          )}
+          {mgr && !a.fixed && (
+            <details className="pf-more">
+              <summary>خيارات أخرى</summary>
+              {locked.length > 0 && <Hint i={Lock}>يستخدمه عمل قائم، فلا يُوقف ولا يُحذف. انقل الأعمال إلى حساب آخر أولاً.</Hint>}
+              <div className="pf-acts">
+                {oauth && a.conn_state !== 'needs_reconnect' && (
+                  <button type="button" className="wk-btn sm quiet" data-hold={HOLD.accountDisconnect} onClick={onDisconnect}>
+                    <Ic i={Unplug} />
+                    فصل
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="wk-btn sm quiet"
+                  onClick={() => void act('account_set_active', { p_id: a.id, p_active: !a.active }, a.active ? `أُوقف ${accountName(a)}.` : `فُعّل ${accountName(a)}.`)}
+                >
+                  {a.active ? 'إيقاف' : 'تفعيل'}
+                </button>
+                <button type="button" className="wk-btn sm quiet danger" onClick={onDelete}>
+                  <Ic i={Trash2} />
+                  حذف
+                </button>
+              </div>
+            </details>
+          )}
+        </div>
+      </div>
+    </Sheet>
+  );
+}
+
+const CONNECT_STEPS = [
+  { id: 'platform', t: 'اختر المنصة', b: 'تظهر هنا المنصات المفعّلة. ما لم يكتمل إعداده يُكمل من «المنصات».' },
+  { id: 'signin', t: 'سجّل الدخول عند المنصة', b: 'هناك فقط تُكتب كلمة المرور، عند المنصة نفسها. يعود الموقع برمز يُحفظ في الخزنة.' },
+  { id: 'choose', t: 'اختر الحسابات', b: 'تظهر الحسابات التي يديرها من سجّل الدخول، فتختار ما يُربط.' },
+];
+const MANUAL_STEPS = [CONNECT_STEPS[0], { id: 'signin', t: 'سمِّ الحساب', b: 'لا تسجيل دخول هنا: يُنشر على هذه المنصة من تطبيقها بحزمة جاهزة.' }];
+/** How many accounts one sign-in can bring: Meta several, the others one (MVP_draft.md 67.3). */
+const ONE_AT_A_TIME: Partial<Record<ConnProvider, string>> = {
+  google: 'لكل قناة دخول مستقل: اختر القناة عند Google، ولربط أخرى أعد هذه الخطوة.',
+  tiktok: 'كل دخول يربط حساباً واحداً: لربط آخر سجّل خروجك من TikTok ثم أعد هذه الخطوة.',
+  x: 'كل دخول يربط حساباً واحداً: لربط آخر سجّل خروجك من X ثم أعد هذه الخطوة.',
+  linkedin: 'يربط الموقع شخصاً لا صفحة شركة: كل دخول يربط ملفاً واحداً.',
+};
+
+/** «إضافة حساب»: the hard work was done in «المنصات»; here it is one sign-in and a choice. */
+function AddAccountSheet({ first, ready, onClose, onConnect, onSimulated, act }: { first?: Platform; ready: Record<string, string> | null; onClose: () => void; onConnect: (p: ConnProvider) => void; onSimulated: () => void; act: Act }) {
+  const w = useWork();
+  const offered = w.platforms.filter((p) => p.kind === 'social' && p.enabled).sort((x, y) => x.sort - y.sort);
+  const [platform, setPlatform] = useState<Platform | null>(first ?? null);
+  const [label, setLabel] = useState('');
+  const [handle, setHandle] = useState('');
+  const [busy, setBusy] = useState(false);
+  const provider = platform ? providerOf(platform) : null;
+  const manual = Boolean(platform) && !provider;
+  const appReady = (p: ConnProvider) => (ready ? Boolean(ready[APP_INTEGRATION_TYPE[p]]) : true);
+  const at = platform ? 'signin' : 'platform';
+  const steps = (manual ? MANUAL_STEPS : CONNECT_STEPS).map((s) => ({ ...s, done: s.id === 'platform' && Boolean(platform) }));
+  const addManual = async () => {
+    setBusy(true);
+    const publishers = defaultPublishers(w.people, w.me);
+    const ok = await act('account_save', { p_id: null, p: { platform, label: label.trim(), handle: handle.trim(), purpose: '', publishers, mode: 'ask' } }, `أُضيف حساب ${platformLabels[platform as Platform] ?? ''}.`);
+    setBusy(false);
+    if (ok) onClose();
+  };
+  return (
+    <Sheet label="إضافة حساب" onClose={onClose}>
+      <SheetHead title="إضافة حساب" sub="الإعداد الصعب تم في «المنصات». هنا تسجيل دخول واحد واختيار." onClose={onClose} />
+      <SheetProgress at={`الخطوة ${steps.findIndex((s) => s.id === at) + 1} من ${steps.length}`} pct={platform ? 40 : 10} />
+      <div className="pf-body">
+        <SheetSteps steps={steps} at={at} />
+        <div className="pf-input">
+          {at === 'platform' && (
+            <>
+              <span className="pf-eyebrow">الخطوة الأولى</span>
+              <h3>على أي منصة الحساب؟</h3>
+              {offered.map((p: PlatformInfo) => {
+                const prov = providerOf(p.key);
+                const blocked = prov ? !appReady(prov) : false;
+                return blocked ? (
+                  <div className="ac-pick off" key={p.key}>
+                    <PlatformTile k={p.key} />
+                    <span className="ac-pick-text">
+                      <b>{p.label_ar}</b>
+                      <small>الإعداد لم يكتمل</small>
+                    </span>
+                    <a className="pf-btn" href="/settings?tab=platforms">
+                      إكمال الإعداد
+                    </a>
+                  </div>
+                ) : (
+                  <button type="button" className="ac-pick" key={p.key} data-platform={p.key} onClick={() => setPlatform(p.key)}>
+                    <PlatformTile k={p.key} />
+                    <span className="ac-pick-text">
+                      <b>{p.label_ar}</b>
+                      <small>{prov ? `تسجيل دخول عبر ${PROVIDER_NAME[prov]}` : 'نشر يدوي: بلا تسجيل دخول'}</small>
+                    </span>
+                    <ChevronLeft className="ac-chev" aria-hidden="true" />
+                  </button>
+                );
+              })}
+              <a className="pf-link" href="/settings?tab=platforms">
+                منصة غير موجودة هنا؟ تُضاف من «المنصات»
+              </a>
+              <details className="pf-more">
+                <summary>حساب تجريبي بلا ربط</summary>
+                <p className="muted">لتجربة منصة لم تُجهَّز بعد: يظهر في الأعمال بعلامة «ربط محاكى» ولا يتصل بشيء.</p>
+                <div className="pf-acts">
+                  <button type="button" className="pf-btn" onClick={onSimulated}>
+                    إضافة حساب تجريبي
+                  </button>
+                </div>
+              </details>
+            </>
+          )}
+          {at === 'signin' && provider && (
+            <>
+              <span className="pf-eyebrow">{platformLabels[platform as Platform]}</span>
+              <h3>سجّل الدخول عند {PROVIDER_NAME[provider]}</h3>
+              <p>تنتقل إلى صفحة المنصة وتسجّل دخولك هناك، ثم تعود إلى هنا لتختار. لا يطلب الموقع كلمة مرورك أبداً.</p>
+              <div className="pf-acts">
+                <button type="button" className="pf-btn pri" onClick={() => onConnect(provider)}>
+                  <Link2 aria-hidden="true" />
+                  ربط عبر {PROVIDER_NAME[provider]}
+                </button>
+                {!first && (
+                  <button type="button" className="pf-btn ghost" onClick={() => setPlatform(null)}>
+                    السابق
+                  </button>
+                )}
+              </div>
+              {ONE_AT_A_TIME[provider] && <p className="pf-note info">{ONE_AT_A_TIME[provider]}</p>}
+              {provider === 'meta' && <p className="pf-note info">دخول واحد يعطي كل الحسابات التي تختارها من حافظة أعمال واحدة. والحساب في حافظة أخرى يحتاج دخولاً مستقلاً.</p>}
+              {GUIDES[`connect_${provider}`] && (
+                <details className="pf-more">
+                  <summary>إن لم يكتمل الدخول</summary>
+                  <ul className="pf-list">
+                    {GUIDES[`connect_${provider}`].notes?.filter((n) => !n.includes('محاكاة')).map((n) => <li key={n}>{n}</li>)}
+                  </ul>
+                </details>
+              )}
+            </>
+          )}
+          {at === 'signin' && manual && (
+            <>
+              <span className="pf-eyebrow">{platformLabels[platform as Platform]}</span>
+              <h3>سمِّ الحساب</h3>
+              <label className="pf-f">
+                الاسم في المركز <small>مثلاً: الرسمي، الفعاليات</small>
+                <input value={label} maxLength={60} onChange={(e) => setLabel(e.target.value)} />
+              </label>
+              <label className="pf-f">
+                اسم الحساب على المنصة
+                <input className="ltr" value={handle} maxLength={120} onChange={(e) => setHandle(e.target.value)} />
+              </label>
+              <div className="pf-acts">
+                <button type="button" className="pf-btn pri" disabled={busy || !label.trim() || !handle.trim()} onClick={() => void addManual()}>
+                  إضافة
+                </button>
+                {!first && (
+                  <button type="button" className="pf-btn ghost" onClick={() => setPlatform(null)}>
+                    السابق
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </Sheet>
+  );
+}
+
 export function AccountDialog({ a, use, onClose, act }: { a: AccountRow | null; use: ListItem[]; onClose: () => void; act: Act }) {
   const w = useWork();
   const edit = !!a;
@@ -309,7 +639,7 @@ export function AccountDialog({ a, use, onClose, act }: { a: AccountRow | null; 
   const staff = staffOf(w.people);
   const renamed = edit && handle.trim() !== (a?.handle ?? '');
   return (
-    <Modal title={edit ? 'تعديل الحساب' : 'إضافة حساب'} onClose={onClose}>
+    <Modal title={edit ? 'تعديل الحساب' : 'إضافة حساب تجريبي'} onClose={onClose}>
       {!edit && (
         <label className="l">
           المنصة
@@ -367,7 +697,7 @@ export function AccountDialog({ a, use, onClose, act }: { a: AccountRow | null; 
           </label>
         </div>
       </div>
-      {!edit && <Hint>يُربط الحساب بعد الإضافة بتسجيل الدخول الرسمي للمنصة (محاكاة هنا)، ويصبح تفويضه سارياً 60 يوماً.</Hint>}
+      {!edit && <Hint>حساب تجريبي: لا يتصل بشيء، ويبقى تفويضه المحاكى 60 يوماً. الربط الحقيقي من «إضافة حساب» بتسجيل الدخول عند المنصة.</Hint>}
       <div className="wk-row-acts">
         <button type="button" className="wk-btn quiet" onClick={onClose}>
           تراجع
@@ -383,7 +713,7 @@ export function AccountDialog({ a, use, onClose, act }: { a: AccountRow | null; 
             ).then((ok) => ok && onClose())
           }
         >
-          {edit ? 'حفظ' : 'إضافة وربط الحساب'}
+          {edit ? 'حفظ' : 'إضافة حساب تجريبي'}
         </button>
       </div>
     </Modal>

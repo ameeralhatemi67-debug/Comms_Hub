@@ -36,6 +36,8 @@ const sources = [
   // Readiness audit steps 5 and 6: the preview, the send step's checks, the connection lines
   'components/work/post-preview.tsx', 'components/work/connect.tsx',
   'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts',
+  // «المنصات» and «حسابات المنصات» redesigned: the sheet, the marks, the words of a sign-in
+  'components/sheet.tsx', 'components/platform-icon.tsx', 'lib/setup-guides.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts', 'lib/native/notices.ts',
   // The studio's third round, Phase 9: the review player, its keys, the queue, notes, the key hold
   'components/work/review-player.tsx', 'lib/work/queue.ts', 'lib/work/review-keys.ts', 'lib/studio/shortcuts.ts',
   'lib/media/notes.ts', 'lib/kit/hold.ts', 'lib/kit/layer.ts', 'lib/motion/preview.js',
@@ -59,6 +61,7 @@ for (const m of sources) {
     .replace(/from '\.\.\/studio\/work-links'/g, `from '${up}mocks/studio-links.js'`)
     // the channels page's setup guide has its own check (tests/setup-guides.test.mjs)
     .replace(/from '\.\.\/setup-guide'/g, `from '${up}mocks/setup-guide.js'`)
+    .replace(/from '\.\.\/(sheet|platform-icon)'/g, "from '../$1.js'")
     .replace(/from '@\/lib\/([^']+)\.js'/g, `from '${up}lib/$1.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
@@ -75,6 +78,10 @@ fs.writeFileSync(path.join(build, 'mocks', 'navigation.js'), `export const useRo
 export const usePathname = () => '/approvals';
 export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search || '');`);
 fs.writeFileSync(path.join(build, 'mocks', 'setup-guide.js'), 'export const SetupGuide = () => null;');
+// The shells around the site: a browser has none (tests/native.test.mjs holds the real ones).
+fs.mkdirSync(path.join(build, 'lib', 'native'), { recursive: true });
+fs.writeFileSync(path.join(build, 'lib', 'native.js'), 'export const native = () => ({ platform: "web", has: () => false });\nexport const notifyNative = async () => undefined;\nexport const onNoticeOpen = () => () => undefined;\nexport const setBadge = async () => undefined;');
+fs.writeFileSync(path.join(build, 'lib', 'native', 'push.js'), 'export const onPushOpen = () => () => undefined;\nexport const onPushReceive = () => () => undefined;');
 fs.writeFileSync(path.join(build, 'mocks', 'studio-links.js'), `export const StudioOpenLink = () => null;
 export const WorkStudioButton = () => null;
 export const useStudioOrigins = () => new Map();`);
@@ -305,6 +312,7 @@ async function renderAll() {
   });
   render('channels-director', 'dir@x.sa', 'director', h(chan.ChannelsPage));
   render('channels-publisher', 'noura@x.sa', 'publisher', h(chan.ChannelsPage));
+  render('channels-sheet', 'dir@x.sa', 'director', h(chan.ChannelsPage, { initialOpen: 'a-yt' }));
   render('channels-writer', 'khalid@x.sa', 'writer', h(chan.ChannelsPage));
   render('item-publisher', 'noura@x.sa', 'publisher', h(item.WorkItemPage, { id: 'CH-4' }), { detail: detailOf(3) });
   const nlist = [
@@ -459,7 +467,8 @@ window.__ready = true;
       'review-writer': ['عرض للمراجعة', 'القرار لمدير الاتصال ومساعده'],
       'review-self': ['لا تعتمد ما أرسلته أو رفعته بنفسك'],
       'review-package': ['الحزمة كاملة', 'اعتماد الحزمة كاملة', 'يُعتمد حزمة كاملة'],
-      'channels-director': ['حسابات المنصات', 'إضافة حساب', 'يوتيوب', 'يقبل الفيديو فقط', 'صندوق القسم', 'تعديل', 'إيقاف', 'حذف', 'التفويض منتهٍ'],
+      'channels-director': ['حسابات المنصات', 'إضافة حساب', 'يوتيوب', 'صندوق القسم', 'يحتاج انتباهك', 'التفويض منتهٍ', 'إعادة الربط'],
+      'channels-sheet': ['يقبل الفيديو فقط', 'تعديل', 'خيارات أخرى'],
       'channels-publisher': ['إعادة الربط', 'لك إعادة ربط الحسابات'],
       'channels-writer': ['حسابات المنصات لمن يديرها وينشر عليها'],
       'item-publisher': ['جدولة الإرسال', 'إرسال الآن من البريد'],
@@ -468,7 +477,7 @@ window.__ready = true;
       'dialog-pubnow': ['محاكاة', 'التفويض منتهٍ: سيفشل', 'نشر الآن'],
       'dialog-changes': ['على أي جزء؟', 'ملاحظات زمنية تُرفق بالطلب', '00:32'],
       'dialog-reject': ['السبب', 'أغلق العمل أيضاً', 'تأكيد الرفض'],
-      'dialog-account-add': ['المنصة', 'إضافة وربط الحساب', '60 يوماً'],
+      'dialog-account-add': ['المنصة', 'إضافة حساب تجريبي', '60 يوماً'],
       'dialog-account-busy': ['لا يُحذف', 'CH-7'],
       // Step 5
       'calendar-week': ['التقويم', '11 أكتوبر إلى 17 أكتوبر 2026', 'مراحل ومهام ممتدة', 'إنستغرام · الرسمي', 'X · الرسمي', 'التفويض منتهٍ', 'التسليم والمهام', 'حمل الفريق', 'منشور الملتقى المجدول', 'ملتقى الشركاء', 'اليوم الوطني 2026', 'التفويض لا يغطي الموعد', 'النشر في هذه المرحلة محاكاة', 'اسحب موعد نشر إلى يوم آخر لطلب نقله، واسحب التسليم أو المرحلة', 'سارة · المرئيات', 'أحمد · تغطية يومية للمعرض'],
@@ -511,11 +520,13 @@ window.__ready = true;
       'dialog-reminder': ['تذكير لي', 'لا يراه غيرك'],
       'dialog-task-extension': ['طلب تمديد مهمة', 'كتابة التعليقات'],
       'dialog-add-director': ['إضافة في الأربعاء 14 أكتوبر', 'عمل يُسلَّم في هذا اليوم', 'تغطية حدث في هذا اليوم', 'مهمة', 'اجتماع أو معرض', 'تذكير لي'],
-      'dialog-add-publisher': ['جدولة عمل جاهز للنشر', '1 أعمال معتمدة'],
+      'dialog-add-publisher': ['جدولة عمل جاهز للنشر', 'عمل واحد معتمد'],
       'dialog-add-member-past': ['طلب يُسلَّم في هذا اليوم', 'يوم مضى'],
       'dialog-project-new': ['مشروع جديد', 'خطة الأعمال', 'عمل في الخطة', 'إنشاء المشروع'],
       'dialog-project-edit': ['تعديل المشروع', 'حفظ'],
     };
+    // Stopping and deleting an account stay folded under «خيارات أخرى», so they are read from the page itself.
+    for (const w of ['إيقاف', 'حذف']) check(`channels-sheet: folded, «${w}» is there`, pages['channels-sheet'].includes(w));
     const absent = {
       'list-writer': ['الطلبات', 'كل الأشخاص'],
       'list-member': ['كل الأشخاص', 'لوحة الفريق'],

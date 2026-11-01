@@ -1,7 +1,8 @@
-// Runs supabase/tests/activity_report_rules.sql on a private database in Docker: a throwaway container of the same
-// Supabase image, every migration replayed in order, then the rule file, then the container removed. Nothing here can
-// reach comms-hub, and the container publishes no port. Use it to test a migration that is not applied yet.
-// Usage: node qa/activity-rules-local.cjs   (writes qa/activity-report-rules.json)
+// Runs a rule file on a private database in Docker: a throwaway container of the same Supabase image, every migration
+// replayed in order, then the rule file, then the container removed. Nothing here can reach comms-hub, and the container
+// publishes no port. Use it to test a migration that is not applied yet.
+// Usage: node qa/activity-rules-local.cjs   (runs supabase/tests/activity_report_rules.sql, writes qa/activity-report-rules.json)
+//        node qa/activity-rules-local.cjs supabase/tests/platform_setup_rules.sql supabase/migrations/20261101200000_platform_setup.sql qa/platform-setup-rules.json
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
@@ -10,8 +11,9 @@ const { spawnSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const NAME = 'comms-hub-rules-check';
 const IMAGE = 'public.ecr.aws/supabase/postgres:17.11.0.004';
-const SCRIPT = path.join(root, 'supabase', 'tests', 'activity_report_rules.sql');
-const MIGRATION = path.join(root, 'supabase', 'migrations', '20261101120000_activity_report.sql');
+const [scriptArg = 'supabase/tests/activity_report_rules.sql', migrationArg = 'supabase/migrations/20261101120000_activity_report.sql', outArg = 'qa/activity-report-rules.json'] = process.argv.slice(2);
+const SCRIPT = path.join(root, scriptArg);
+const MIGRATION = path.join(root, migrationArg);
 
 const run = (args, input) => spawnSync('docker', args, { input, encoding: 'utf8', windowsHide: true, maxBuffer: 1 << 28 });
 const psql = (sql, user = 'supabase_admin') => run(['exec', '-i', '-e', 'PGPASSWORD=local-only', NAME, 'psql', '-h', '127.0.0.1', '-U', user, '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-qAt', '-f', '-'], sql);
@@ -32,7 +34,7 @@ function start() {
   throw Error('the database did not start');
 }
 
-const result = { script: 'supabase/tests/activity_report_rules.sql', script_md5: md5(fs.readFileSync(SCRIPT, 'utf8')), migration: { file: 'supabase/migrations/20261101120000_activity_report.sql', file_md5: md5(fs.readFileSync(MIGRATION, 'utf8')), applied: 'this run is on a private container and touched nothing; the run on comms-hub is qa/activity-report-rules-comms-hub.json' }, how: `A private Docker container of ${IMAGE}, no published port, removed after the run; every migration replayed in order.`, run: new Date().toISOString() };
+const result = { script: scriptArg, script_md5: md5(fs.readFileSync(SCRIPT, 'utf8')), migration: { file: migrationArg, file_md5: md5(fs.readFileSync(MIGRATION, 'utf8')), applied: 'this run is on a private container and touched nothing' }, how: `A private Docker container of ${IMAGE}, no published port, removed after the run; every migration replayed in order.`, run: new Date().toISOString() };
 
 try {
   start();
@@ -78,4 +80,4 @@ try {
 } finally {
   run(['rm', '-f', NAME]);
 }
-fs.writeFileSync(path.join(root, 'qa', 'activity-report-rules.json'), `${JSON.stringify(result, null, 2)}\n`);
+fs.writeFileSync(path.join(root, outArg), `${JSON.stringify(result, null, 2)}\n`);

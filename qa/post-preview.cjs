@@ -27,6 +27,7 @@ const sources = [
   'components/work/post-preview.tsx', 'components/work/connect.tsx', 'components/work/channels.tsx', 'components/work/parts.tsx', 'components/work/plan.tsx',
   'lib/work/rules.ts', 'lib/work/planning.ts', 'lib/work/drag.ts', 'lib/media/rules.ts', 'lib/domain.ts', 'lib/kit/hold-reasons.ts',
   'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts',
+  'components/sheet.tsx', 'components/platform-icon.tsx', 'lib/setup-guides.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -41,6 +42,8 @@ for (const m of sources) {
     .replace(/from 'next\/navigation'/g, `from '${up}mocks/navigation.js'`)
     .replace(/from '\.\/data'/g, `from '${up}mocks/data.js'`)
     .replace(/from '\.\.\/perm-requests'/g, `from '${up}mocks/perm-requests.js'`)
+    .replace(/from '\.\.\/(sheet|platform-icon)'/g, "from '../$1.js'")
+    .replace(/from '\.\.\/setup-guide'/g, `from '${up}mocks/setup-guide.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
     .replace(/from '(\.\/(?:plan|parts|post-preview|connect))'/g, "from '$1.js'");
@@ -57,6 +60,7 @@ export const usePathname = () => '/channels';
 export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search || '');`);
 fs.writeFileSync(path.join(build, 'mocks', 'supabase.js'), `const chain = new Proxy(function () {}, { get: () => chain, apply: () => chain });
 export const supabase = () => chain;`);
+fs.writeFileSync(path.join(build, 'mocks', 'setup-guide.js'), 'export const SetupGuide = () => null;');
 fs.writeFileSync(path.join(build, 'mocks', 'perm-requests.js'), 'export const usePermRequests = () => ({ list: [], status: "ready", reload: async () => {} });');
 fs.writeFileSync(path.join(build, 'mocks', 'data.js'), `export const useWork = () => globalThis.__WK.ctx;
 export const useWorkList = () => ({ items: globalThis.__WK.items, status: 'ready', reload: async () => {} });
@@ -142,6 +146,10 @@ const accounts = [
   // ---- the channels page with real, broken and simulated connections ----
   render('channels-director', 'director', 'dir@x.sa', h(chan.ChannelsPage));
   render('channels-publisher', 'publisher', 'noura@x.sa', h(chan.ChannelsPage));
+  render('channels-real', 'director', 'dir@x.sa', h(chan.ChannelsPage, { initialOpen: 'a-ig' }));
+  render('channels-broken', 'director', 'dir@x.sa', h(chan.ChannelsPage, { initialOpen: 'a-fb' }));
+  render('channels-failed', 'director', 'dir@x.sa', h(chan.ChannelsPage, { initialOpen: 'a-tt' }));
+  render('channels-real-publisher', 'publisher', 'noura@x.sa', h(chan.ChannelsPage, { initialOpen: 'a-ig' }));
   render('chooser-shell', 'director', 'dir@x.sa', h(conn.ConnectChooser, { provider: 'meta', offer: '00000000-0000-4000-8000-000000000001', onClose() {}, onDone() {} }));
   render('conn-lines', 'director', 'dir@x.sa', h('div', null, accounts.filter((a) => a.platform !== 'mail').map((a) => h('p', { key: a.id }, conn.connLine(a).text))));
 
@@ -168,16 +176,25 @@ const accounts = [
       'send-checks': ['يمنع النشر', 'ضمن الحدود', 'حزمة النشر', 'مهمة يدوية', 'نسخ النص', 'محجوب'],
       'send-checks-clean': ['ضمن الحدود', 'حزمة النشر'],
       'send-checks-loading': ['جارٍ فحص النسخ'],
-      'channels-director': ['ربط حقيقي · سليم', 'ربط حقيقي · يحتاج ربطاً من جديد', 'رفضت المنصة الرمز', 'تعذّر الفحص', 'ربط محاكى', 'فحص الاتصال', 'إعادة الربط عبر المنصة', 'ربط عبر Meta', 'ربط عبر TikTok', 'مسار يدوي', 'يحتاج ربطاً من جديد', 'النشر نفسه ما زال محاكاة'],
-      'channels-publisher': ['فحص الاتصال', 'ربط محاكى'],
+      'channels-director': ['رفضت المنصة الرمز', 'ربط محاكى', 'مسار يدوي', 'يحتاج ربطاً من جديد', 'أما النشر نفسه فما زال محاكاة', 'إعادة الربط'],
+      'channels-real': ['ربط حقيقي · سليم', 'فحص الاتصال', 'إعادة الربط عبر المنصة', 'فصل'],
+      'channels-broken': ['ربط حقيقي · يحتاج ربطاً من جديد', 'رفضت المنصة الرمز'],
+      'channels-failed': ['تعذّر الفحص'],
+      'channels-real-publisher': ['فحص الاتصال', 'إعادة الربط عبر المنصة'],
+      'channels-publisher': ['ربط محاكى'],
       'chooser-shell': ['ربط حسابات عبر Meta', 'جارٍ قراءة ما يمكن ربطه'],
       'conn-lines': ['ربط حقيقي', 'ربط محاكى'],
     };
     const notExpect = {
-      'channels-director': ['ربط حقيقي · سليم · آخر فحص لم يُفحص'],
-      'channels-publisher': ['ربط عبر Meta', 'ربط عبر TikTok', 'إعادة الربط عبر المنصة'],
+      'channels-real': ['ربط حقيقي · سليم · آخر فحص لم يُفحص'],
+      'channels-publisher': ['ربط عبر Meta', 'ربط عبر TikTok', 'إضافة حساب'],
       'send-checks-clean': ['يمنع النشر'],
     };
+    // Buttons, so these two read the page itself: the words alone also appear in the hint a publisher sees.
+    for (const b of ['تعديل', 'فصل']) {
+      check(`channels-real: the director has «${b}»`, pages['channels-real'].includes(`${b}</button>`));
+      check(`channels-real-publisher: no «${b}» button`, !pages['channels-real-publisher'].includes(`${b}</button>`));
+    }
     for (const [name, words] of Object.entries(expect)) {
       const html = pages[name] ?? '';
       const text = html.replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/g, ' ');
@@ -185,7 +202,7 @@ const accounts = [
       for (const w of notExpect[name] ?? []) check(`${name}: does not show «${w}»`, !text.includes(w));
     }
     // The real connection offers no simulated reconnect, the simulated one does.
-    const chText = (pages['channels-director'] ?? '');
+    const chText = (pages['channels-real'] ?? '');
     check('channels: a real connection has the platform reconnect and a hold-to-confirm disconnect', chText.includes('data-hold="الفصل يدمّر رمز الحساب') && />فصل<\/button>/.test(chText));
     check('send step: the over-limit account blocks', (pages['send-checks'] ?? '').includes('id="blocked"'));
     check('send step: a clean work does not block', !(pages['send-checks-clean'] ?? '').includes('id="blocked"'));

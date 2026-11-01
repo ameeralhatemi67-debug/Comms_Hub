@@ -22,7 +22,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prov
   const to = redirectUri(request, provider);
   let verifier: string | null = null;
   let url: string;
-  if (provider === 'meta') url = metaAuthUrl({ appId: app.appId, redirectUri: to, state, scopes: META_SCOPES });
+  if (provider === 'meta') url = metaAuthUrl({ appId: app.appId, redirectUri: to, state, scopes: META_SCOPES, configId: app.configId });
   else if (provider === 'tiktok') url = tiktokAuthUrl({ clientKey: app.appId, redirectUri: to, state, scopes: app.scopes?.length ? app.scopes : TIKTOK_SCOPES });
   else if (provider === 'google') url = googleAuthUrl({ clientId: app.appId, redirectUri: to, state });
   else if (provider === 'linkedin') url = linkedinAuthUrl({ clientId: app.appId, redirectUri: to, state });

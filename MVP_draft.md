@@ -3135,3 +3135,45 @@ Made in the browser from what is on the screen, so nothing about people passes t
 - **PDF, «الملخص التنفيذي»:** one page for a glance: a deep green head with the rosette, the first place, four numbers and the ranking as bars.
 - **PDF, «التقرير التفصيلي»:** a ledger: the full table, each person with what they finished, then the method, with page numbers.
 - In the Android application the buttons are off and say where to get the file, because it refuses a file made in a page.
+
+# 67. «المنصات» and «حسابات المنصات» rebuilt, 2026-11-01
+
+The owner's directive of 2026-11-01: «المنصات» is the connection, done once; «حسابات المنصات» is the accounts, which change, are added and are removed. The hard work belongs to the first, so the second asks for a sign-in and a choice. A design artifact was agreed before the build. Publishing stays a simulation on every platform.
+
+## 67.1 «المنصات»
+
+- One line per platform, with one chip worked out from what is stored (`src/lib/platforms/setup.ts`), never kept by hand: غير متصلة، خطوات ناقصة · n من m، بانتظار موافقة المنصة، متصلة، ينتهي السر قريباً، يوجد خلل، موقوفة، نشر يدوي، قناة بريد.
+- Each line has one sentence and at most one button, and what needs the reader comes first.
+- «بانتظار موافقة المنصة» alone rests on what a person told the site, because no platform says where a review stands. A review never holds a connection back.
+- «إضافة منصة» opens one menu of what is not on its way yet: platforms with steps, platforms with no sign-in, and «منصة أخرى…». A platform switched off and never touched waits there.
+- A platform's registry fields, its limits, its log and stopping it are folded under «خيارات متقدمة».
+
+## 67.2 The steps sheet
+
+- A bottom sheet (`src/components/sheet.tsx`): the steps on one side, what the site needs on the other, a bar on top. On a phone, one column.
+- The steps come first in the document, so the sides follow the language: in Arabic the steps are on the right and the input on the left, in English the other way round. No side is named anywhere.
+- Each step links to the platform's own page, in a new tab, and gives what has to be copied there. The steps and links exist once, in `src/lib/setup-guides.ts`.
+- Closing loses nothing. `platform_setup` holds the steps done, the step reached and the two public identifiers (`app_id`, `config_id`), and the database refuses any other field. The secret goes to the vault when it is checked and is never progress.
+- A stored secret proves the steps before it, so nobody is asked again what is already done.
+
+## 67.3 «حسابات المنصات»
+
+- What needs attention first, a filter per platform, then the accounts grouped by platform. A row gives the name, the handle, who publishes, the mode and the chip.
+- A simulated or manual account never says «متصل»: it says «ربط محاكى» or «نشر يدوي».
+- «إضافة حساب» has three steps: the platform, the sign-in at the platform, the choice. No password is ever typed in the site. A platform whose setup is not finished sends the reader to «المنصات».
+- **How many accounts one sign-in brings.** Meta: every Page and Instagram account that sign-in manages. Google, TikTok, X and LinkedIn: one, and the sheet says how to link another.
+- **What a sign-in brings and the site cannot link** is not offered. It is named, never by its key, and added or switched on from «المنصات» first (`splitOffer`). comms-hub had no Facebook in its registry on 2026-11-01, so a Meta sign-in that returns Pages reaches exactly this.
+- Who publishes starts from the publishers, or the person connecting if there are none, and is folded with the mode and the purpose.
+- A simulated account stays possible, folded as «حساب تجريبي بلا ربط».
+- A publisher may reconnect an account and may not add, remove or disconnect one (`platform_conn_may`, `platform_conn_link` by account id, `platform_conn_disconnect`).
+
+## 67.4 The steps, as read on 2026-11-01
+
+Read from the platforms' official pages. These facts move: re-read them before building an adapter.
+
+- **Meta.** Instagram API with Unified Login, on a business portfolio, with a Configuration ID. The token is a Business Integration System User's, and Instagram accounts come from `/me/assigned_instagram_accounts`. Standard Access is enough for one's own accounts with an app role. In development mode, content is visible to role users only. `publish_video` was added.
+- **X.** `console.x.com`, pay per use: $0.015 a post, $0.20 with a link. `media.write` was added.
+- **TikTok.** `username` needs `user.info.profile`, so the site asks for it only when the scope was granted. App review, URL verification and the posting audit are steps of their own.
+- **LinkedIn.** The site links a person. A company Page needs a separate application with the Community Management API; the steps say so and it is not built.
+- **YouTube.** The client secret is shown once, and uploads have their own daily limit of 100.
+- **Snapchat.** The Public Profile API is allowlist only, so the manual path stays.

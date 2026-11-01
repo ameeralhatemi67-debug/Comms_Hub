@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   if (!g.ok) return g.response;
   if (!vaultReachable()) return fail(503, 'خزنة الأسرار غير متاحة: مفتاح الخادم غير مضبوط.');
 
-  const body = (await request.json().catch(() => null)) as { provider?: unknown; app_id?: unknown; secret?: unknown; scopes?: unknown; secret_expires_on?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { provider?: unknown; app_id?: unknown; secret?: unknown; scopes?: unknown; secret_expires_on?: unknown; config_id?: unknown } | null;
   if (!body || !isProvider(body.provider)) return fail(400, 'اختر منصة التطبيق.');
   const provider = body.provider;
   const appId = typeof body.app_id === 'string' ? body.app_id.trim() : '';
@@ -40,6 +40,10 @@ export async function POST(request: Request) {
     provider === 'tiktok' && Array.isArray(body.scopes) && body.scopes.every((s) => typeof s === 'string' && /^[a-z_.]{3,60}$/.test(s)) && body.scopes.length <= 12
       ? (body.scopes as string[])
       : null;
+
+  // Meta's Configuration ID (not a secret): the sign-in of a new Meta app is built on it.
+  const configId = provider === 'meta' && typeof body.config_id === 'string' ? body.config_id.trim() : '';
+  if (configId && !/^[0-9]{5,30}$/.test(configId)) return fail(400, 'معرّف الإعداد أرقام فقط.');
 
   // The date the secret was made to last until (optional): the site reminds before it.
   const rawExpiry = typeof body.secret_expires_on === 'string' ? body.secret_expires_on.trim() : '';
@@ -71,7 +75,7 @@ export async function POST(request: Request) {
     p_key: serverKeyOrNull(),
     p_type: APP_TYPE[provider],
     p_label: LABEL[provider],
-    p_config: { app_id: appId, ...(scopes ? { scopes } : provider === 'tiktok' ? { scopes: [...TIKTOK_SCOPES] } : {}), ...(rawExpiry ? { secret_expires_on: rawExpiry } : {}) },
+    p_config: { app_id: appId, ...(scopes ? { scopes } : provider === 'tiktok' ? { scopes: [...TIKTOK_SCOPES] } : {}), ...(rawExpiry ? { secret_expires_on: rawExpiry } : {}), ...(configId ? { config_id: configId } : {}) },
     p_secret: secret,
   });
   if (error) return fail(error.message.includes('FORBIDDEN') ? 403 : 400, 'تعذّر حفظ السر.');

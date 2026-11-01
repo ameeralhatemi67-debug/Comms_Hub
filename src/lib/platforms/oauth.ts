@@ -3,10 +3,10 @@
 // component, never logs a response body, and returns errors as short codes. Every call takes the
 // `fetch` it should use, so tests run it against a fake platform.
 //
-// The facts below were read from the platforms' own developer documentation on 2026-10-15 (Graph
-// API v26.0 pages and Facebook Login; TikTok Login Kit and the v2 token endpoint). They change
-// often: the version and the scopes are constants here, in one place, and the info card says the
-// documentation is the authority.
+// The facts below were read from the platforms' own developer documentation on 2026-11-01 (Graph
+// API v26.0 pages, Facebook Login for Business and the Instagram API with Unified login; TikTok
+// Login Kit and the v2 token endpoint). They change often: the version and the scopes are constants
+// here, in one place, and the info card says the documentation is the authority.
 
 export type Fetch = typeof fetch;
 
@@ -14,8 +14,11 @@ export const GRAPH_VERSION = 'v26.0';
 const GRAPH = `https://graph.facebook.com/${GRAPH_VERSION}`;
 const FB_DIALOG = `https://www.facebook.com/${GRAPH_VERSION}/dialog/oauth`;
 
-/** What the Meta sign-in asks for: the pages, their posts, and the linked Instagram accounts. */
-export const META_SCOPES = ['pages_show_list', 'pages_read_engagement', 'pages_manage_posts', 'instagram_basic', 'instagram_content_publish'] as const;
+/**
+ * What the Meta sign-in asks for when the app has no configuration: the pages, their posts and videos, and
+ * the linked Instagram accounts. An app with a configuration (config_id) asks for what the configuration lists.
+ */
+export const META_SCOPES = ['pages_show_list', 'pages_read_engagement', 'pages_manage_posts', 'publish_video', 'instagram_basic', 'instagram_content_publish'] as const;
 
 const TIKTOK_AUTH = 'https://www.tiktok.com/v2/auth/authorize/';
 const TIKTOK_API = 'https://open.tiktokapis.com/v2';
@@ -116,7 +119,10 @@ const toIso = (unixSeconds: unknown): string | null => {
 // ---------------------------------------------------------------------------
 // Meta (Facebook Pages and Instagram professional accounts)
 // ---------------------------------------------------------------------------
-export function metaAuthUrl(a: { appId: string; redirectUri: string; state: string; scopes?: readonly string[] }): string {
+export function metaAuthUrl(a: { appId: string; redirectUri: string; state: string; scopes?: readonly string[]; configId?: string | null }): string {
+  // A configuration replaces the list of scopes. prompt=login offers both the Facebook and the Instagram sign-in,
+  // so a second login can be used without signing out of Facebook first.
+  if (a.configId) return `${FB_DIALOG}?${qs({ client_id: a.appId, redirect_uri: a.redirectUri, state: a.state, response_type: 'code', config_id: a.configId, prompt: 'login' })}`;
   return `${FB_DIALOG}?${qs({ client_id: a.appId, redirect_uri: a.redirectUri, state: a.state, response_type: 'code', scope: (a.scopes ?? META_SCOPES).join(',') })}`;
 }
 
@@ -135,6 +141,17 @@ export async function metaLongLivedUserToken(f: Fetch, a: { appId: string; secre
   if (long.status !== 200 || typeof long.body.access_token !== 'string') throw new PlatformCallError(metaErrorCode(long.body, long.status), 502);
   const secs = Number(long.body.expires_in);
   return { token: long.body.access_token, expiresAt: Number.isFinite(secs) && secs > 0 ? new Date(Date.now() + secs * 1000).toISOString() : null };
+}
+
+/**
+ * The sign-in code of a configuration (Unified login) for its token, which belongs to the business portfolio
+ * and not to the person. It is not exchanged again: how long it lasts was chosen in the configuration.
+ */
+export async function metaConfigToken(f: Fetch, a: { appId: string; secret: string; redirectUri: string; code: string }): Promise<{ token: string; expiresAt: string | null }> {
+  const r = await getJson(f, `${GRAPH}/oauth/access_token?${qs({ client_id: a.appId, client_secret: a.secret, redirect_uri: a.redirectUri, code: a.code })}`);
+  if (r.status !== 200 || typeof r.body.access_token !== 'string') throw new PlatformCallError('CODE_REFUSED', 400);
+  const secs = Number(r.body.expires_in);
+  return { token: r.body.access_token, expiresAt: Number.isFinite(secs) && secs > 0 ? new Date(Date.now() + secs * 1000).toISOString() : null };
 }
 
 export type MetaPage = {
@@ -171,6 +188,34 @@ export async function metaPages(f: Fetch, userToken: string): Promise<MetaPage[]
     url = typeof next === 'string' && next.startsWith('https://graph.facebook.com/') ? next : null;
   }
   return out;
+}
+
+export type MetaInstagram = { id: string; username: string | null };
+
+/** The Instagram accounts a portfolio's token was given (Unified login). */
+export async function metaAssignedInstagram(f: Fetch, token: string): Promise<MetaInstagram[]> {
+  const out: MetaInstagram[] = [];
+  let url: string | null = `${GRAPH}/me/assigned_instagram_accounts?${qs({ fields: 'id,username', limit: '100', access_token: token })}`;
+  for (let guard = 0; url && guard < 5; guard++) {
+    const r = await getJson(f, url);
+    if (r.status !== 200) throw new PlatformCallError(metaErrorCode(r.body, r.status), 502);
+    for (const a of (r.body.data ?? []) as Record<string, unknown>[]) {
+      if (typeof a.id === 'string') out.push({ id: a.id, username: typeof a.username === 'string' ? a.username : null });
+    }
+    const next = ((r.body.paging ?? {}) as { next?: string }).next;
+    url = typeof next === 'string' && next.startsWith('https://graph.facebook.com/') ? next : null;
+  }
+  return out;
+}
+
+/** What a configuration's token can reach: Instagram accounts, and pages if the configuration includes them. */
+export async function metaConfigAssets(f: Fetch, token: string): Promise<{ instagram: MetaInstagram[]; pages: MetaPage[] }> {
+  const [ig, pg] = await Promise.allSettled([metaAssignedInstagram(f, token), metaPages(f, token)]);
+  if (ig.status === 'rejected' && pg.status === 'rejected') throw ig.reason;
+  const pages = pg.status === 'fulfilled' ? pg.value : [];
+  const seen = ig.status === 'fulfilled' ? ig.value : [];
+  const linked = pages.flatMap((p) => (p.instagram ? [p.instagram] : [])).filter((x) => !seen.some((y) => y.id === x.id));
+  return { instagram: [...seen, ...linked], pages };
 }
 
 export type TokenInfo = { valid: boolean; expiresAt: string | null; scopes: string[]; userId: string | null; error: string | null };
@@ -261,15 +306,16 @@ export async function tiktokRefresh(f: Fetch, a: { clientKey: string; secret: st
 
 export type TikTokUser = { openId: string; displayName: string; username: string | null };
 
-export async function tiktokUserInfo(f: Fetch, access: string): Promise<TikTokUser | { error: string }> {
-  const r = await getJson(f, `${TIKTOK_API}/user/info/?fields=open_id,display_name,username`, { headers: { Authorization: `Bearer ${access}` } });
+/** `username` needs user.info.profile, which the site does not ask for by default: ask for it only if it was granted. */
+export async function tiktokUserInfo(f: Fetch, access: string, o: { username?: boolean } = {}): Promise<TikTokUser | { error: string }> {
+  const r = await getJson(f, `${TIKTOK_API}/user/info/?fields=open_id,display_name${o.username ? ',username' : ''}`, { headers: { Authorization: `Bearer ${access}` } });
   const data = (((r.body.data ?? {}) as { user?: Record<string, unknown> }).user ?? {}) as Record<string, unknown>;
   const err = ((r.body.error ?? {}) as { code?: string }).code;
   if (r.status === 200 && (!err || err === 'ok') && typeof data.open_id === 'string') {
     return { openId: data.open_id, displayName: String(data.display_name ?? ''), username: typeof data.username === 'string' ? data.username : null };
   }
   if (r.status === 401 || err === 'access_token_invalid') return { error: 'TOKEN_REFUSED' };
-  if (err === 'scope_not_authorized') return { error: 'PERMISSION_REVOKED' };
+  if (err === 'scope_not_authorized' || err === 'scope_permission_missed') return { error: 'PERMISSION_REVOKED' };
   return { error: r.status >= 500 ? 'PLATFORM_DOWN' : 'PLATFORM_ERROR' };
 }
 

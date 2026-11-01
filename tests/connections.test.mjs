@@ -24,6 +24,9 @@ import {
   tiktokExchangeCode,
   tiktokRefresh,
   tiktokUserInfo,
+  metaAssignedInstagram,
+  metaConfigAssets,
+  metaConfigToken,
   unpackTikTok,
   providerOf,
   ACCOUNT_TYPE,
@@ -217,6 +220,54 @@ test('TikTok health renews an ended access token with the refresh token and stor
   assert.equal((await tiktokUserInfo(fake(() => json({ error: { code: 'access_token_invalid' } }, 401)), 'x')).error, 'TOKEN_REFUSED');
   const none = await tiktokAccountHealth(f3, { clientKey: 'ck', secret: SECRET, packed: 'garbage' });
   assert.equal(none.error, 'NOT_CONNECTED');
+});
+
+test('Meta with a configuration: the sign-in names it and no scopes, and offers both sign-ins', () => {
+  const u = new URL(metaAuthUrl({ appId: '123456', redirectUri: 'https://hub.test/api/platforms/callback/meta', state: 'st-1', configId: '987654321' }));
+  assert.equal(u.searchParams.get('config_id'), '987654321');
+  assert.equal(u.searchParams.get('scope'), null);
+  assert.equal(u.searchParams.get('response_type'), 'code');
+  assert.equal(u.searchParams.get('prompt'), 'login');
+  assert.equal(u.searchParams.get('state'), 'st-1');
+  assert.ok(META_SCOPES.includes('publish_video'), 'a video on a page needs its own permission');
+});
+
+test('Meta with a configuration: the code becomes one token, never exchanged again, and it lists what the portfolio gave', async () => {
+  const code = fake((url) => (assert.ok(url.includes('/oauth/access_token') && url.includes('code=C1') && !url.includes('fb_exchange_token')), json({ access_token: 'SUAT' })));
+  assert.deepEqual(await metaConfigToken(code, { appId: 'a', secret: SECRET, redirectUri: 'https://hub.test/cb', code: 'C1' }), { token: 'SUAT', expiresAt: null });
+  assert.equal(code.calls.length, 1);
+  const refused = fake(() => json({ error: { code: 100 } }, 400));
+  await assert.rejects(metaConfigToken(refused, { appId: 'a', secret: SECRET, redirectUri: 'https://hub.test/cb', code: 'C1' }), /CODE_REFUSED/);
+
+  const list = fake(() => json({ data: [{ id: 'IG1', username: 'one' }, { id: 'IG2' }] }));
+  assert.deepEqual(await metaAssignedInstagram(list, 'SUAT'), [{ id: 'IG1', username: 'one' }, { id: 'IG2', username: null }]);
+  assert.ok(list.calls[0].url.includes('/me/assigned_instagram_accounts'));
+
+  // A configuration with no pages: Meta refuses the second list, and the first still stands.
+  const onlyIg = fake((url) => (url.includes('/me/accounts') ? json({ error: { code: 100 } }, 400) : json({ data: [{ id: 'IG1', username: 'one' }] })));
+  assert.deepEqual(await metaConfigAssets(onlyIg, 'SUAT'), { instagram: [{ id: 'IG1', username: 'one' }], pages: [] });
+  // An account reached through a page is not offered twice.
+  const both = fake((url) =>
+    url.includes('/me/accounts')
+      ? json({ data: [{ id: 'P1', name: 'الصفحة', access_token: 'ptok', tasks: ['CREATE_CONTENT'], instagram_business_account: { id: 'IG1', username: 'one' } }] })
+      : json({ data: [{ id: 'IG1', username: 'one' }] }),
+  );
+  const a = await metaConfigAssets(both, 'SUAT');
+  assert.equal(a.instagram.length, 1);
+  assert.equal(a.pages[0].token, 'ptok');
+  const none = fake(() => json({ error: { code: 190 } }, 400));
+  await assert.rejects(metaConfigAssets(none, 'SUAT'), /TOKEN_REFUSED/);
+});
+
+test('TikTok: the check asks only for what user.info.basic gives, and a refused field is a permission, not an unknown error', async () => {
+  const f = fake(() => json({ data: { user: { open_id: 'OID', display_name: 'الحساب' } }, error: { code: 'ok' } }));
+  await tiktokUserInfo(f, 'x');
+  assert.ok(f.calls[0].url.endsWith('fields=open_id,display_name'), f.calls[0].url);
+  const g = fake(() => json({ data: { user: { open_id: 'OID', username: 'u' } }, error: { code: 'ok' } }));
+  await tiktokUserInfo(g, 'x', { username: true });
+  assert.ok(g.calls[0].url.endsWith('fields=open_id,display_name,username'), g.calls[0].url);
+  assert.equal((await tiktokUserInfo(fake(() => json({ error: { code: 'scope_permission_missed' } }, 400)), 'x')).error, 'PERMISSION_REVOKED');
+  assert.ok(!TIKTOK_SCOPES.includes('user.info.profile'), 'the guide and the default scopes agree');
 });
 
 test('which registry platform connects through which sign-in', () => {

@@ -31,15 +31,16 @@ test('a guide exists for every platform app, every way of connecting, the manual
 
 test('the return address is filled in from the site and the platform, and shown to copy exactly', () => {
   const g = resolveGuide(GUIDES.meta, 'https://hub.example.org', 'meta');
-  const copy = g.steps.find((s) => s.copy);
+  const copy = g.steps.find((s) => s.id === 'redirect');
   assert.equal(copy.copy, 'https://hub.example.org/api/platforms/callback/meta');
-  assert.equal(resolveGuide(GUIDES.tiktok, 'https://hub.example.org', 'tiktok').steps.find((s) => s.copy).copy, 'https://hub.example.org/api/platforms/callback/tiktok');
+  assert.equal(resolveGuide(GUIDES.tiktok, 'https://hub.example.org', 'tiktok').steps.find((s) => s.id === 'redirect').copy, 'https://hub.example.org/api/platforms/callback/tiktok');
+  assert.equal(resolveGuide(GUIDES.facebook, 'https://hub.example.org', 'meta').steps.find((s) => s.id === 'publish').more[0].copy, 'https://hub.example.org/account-deletion.html');
   assert.doesNotMatch(JSON.stringify(g), /\{redirect\}|\{origin\}/);
 });
 
 test('the platform guides say plainly that publishing is still a simulation, and where the facts came from', () => {
-  for (const k of ['meta', 'tiktok', 'connect_meta', 'connect_tiktok']) assert.match(JSON.stringify(GUIDES[k].notes), /محاكاة/, k);
-  for (const k of ['meta', 'tiktok']) assert.match(JSON.stringify(GUIDES[k].notes), /2026-10-15/, k);
+  for (const k of ['meta', 'facebook', 'tiktok', 'google', 'linkedin', 'x', 'connect_meta', 'connect_tiktok', 'connect_google', 'connect_linkedin', 'connect_x']) assert.match(JSON.stringify(GUIDES[k].notes), /محاكاة/, k);
+  for (const k of ['meta', 'facebook', 'tiktok', 'google', 'linkedin', 'x']) assert.match(JSON.stringify(GUIDES[k].notes), /2026-11-01/, k);
 });
 
 test('no guide asks for a secret to be sent anywhere but its own form, and none carries a value', () => {

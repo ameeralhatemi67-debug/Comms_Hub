@@ -47,7 +47,7 @@ const sources = [
   // Entry flow: the state of a person's entry, the invitation and the log words
   'lib/entry.ts', 'components/accounts/entry-help.tsx',
   // Settings Step S5: «المنصات»
-  'components/settings/platforms.tsx', 'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/provider.ts', 'lib/integrations/expiry.ts',
+  'components/settings/platforms.tsx', 'components/settings/platform-sheet.tsx', 'components/sheet.tsx', 'components/platform-icon.tsx', 'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/provider.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -380,6 +380,10 @@ async function renderAll() {
     youtube: { accounts: 1, active_accounts: 1, open_works: 1, copies: 1 }, facebook: { accounts: 0, active_accounts: 0, open_works: 0, copies: 0 }, tiktok: { accounts: 1, active_accounts: 0, open_works: 0, copies: 2 }, mail: { accounts: 1, active_accounts: 1, open_works: 0, copies: 0 } };
   render('settings-platforms', 'amir@x.sa', 'admin', adminSet, pnl(h(stp.PlatformsTab, { initial: { list: plist, impact: pimpact } })), wx);
   render('settings-platforms-viewer', 'dir@x.sa', 'director', capsWith(directorCaps, ['settings.view']), pnl(h(stp.PlatformsTab, { initial: { list: plist, impact: pimpact } })), wx);
+  render('settings-platforms-added', 'amir@x.sa', 'admin', adminSet, pnl(h(stp.PlatformsTab, { initial: { list: plist, impact: pimpact, open: { key: 'facebook', to: 'finish' } } })), wx);
+  render('settings-platforms-builtin', 'amir@x.sa', 'admin', adminSet, pnl(h(stp.PlatformsTab, { initial: { list: plist, impact: pimpact, open: { key: 'instagram', to: 'finish' } } })), wx);
+  render('settings-platforms-mail', 'amir@x.sa', 'admin', adminSet, pnl(h(stp.PlatformsTab, { initial: { list: plist, impact: pimpact, open: { key: 'mail', to: 'finish' } } })), wx);
+  render('settings-platforms-steps', 'amir@x.sa', 'admin', adminSet, pnl(h(stp.PlatformsTab, { initial: { list: plist, impact: pimpact, open: { key: 'instagram', to: 'first' } } })), wx);
   render('urgency-badges', 'khalid@x.sa', 'writer', writerCaps, h('div', { className: 'ml' }, ...[0, 1, 2, 3].map((l) => h('div', { key: l, className: 'cx-badge-row' }, `الدرجة ${l}: `, h(urg.UrgencyBadge, { level: l })))));
   return pages;
 }
@@ -450,10 +454,11 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'settings-general-locked': ['صحة النظام وإعداداته العامة لمن يملك', 'اطلب هذه الصلاحية'],
       'settings-audit': ['كل الأحداث', 'اعتُمد السر الجديد بعد فحصه · Google Drive', 'استعمل الخادم السر · Google Drive لـ «drive access»', 'تغيّرت الإعدادات العامة: شُغّل شريط الصيانة، حد الرفع 100 ميغابايت', 'أمير', 'الخادم', 'ولا يحمل قيمة سرّ أبداً'],
       'settings-audit-locked': ['السجل لمن يملك', 'اطلب هذه الصلاحية'],
-      'settings-platforms': ['النشر على كل المنصات محاكاة', 'إضافة منصة', 'إنستغرام', 'يوتيوب', 'فيسبوك', 'البريد', 'منصة اجتماعية', 'قناة بريد', 'النشر الآن', 'محاكاة', 'المسار المخطط', 'نشر تلقائي', 'نشر مساعد',
-        'الفيديو فقط', 'نصاً وصورة وفيديو', 'التجهيز', 'لم يبدأ', 'قيد التجهيز', 'قُدّم للمراجعة', 'يعمل', 'حفظ التجهيز', 'قناة القسم جاهزة، وشاشة الموافقة قيد الإعداد', 'ما تقدمه وما تطلبه',
-        'تيك توك', 'مفعّلة', 'موقوفة', 'قائمة', 'سجل المنصة', 'لا تُوقف منصة عليها حسابات فعّالة', 'لا تُحذف منصة عليها حسابات أو نسخ نصوص'],
-      'settings-platforms-viewer': ['إنستغرام', 'فيسبوك', 'حفظ التجهيز'],
+      'settings-platforms': ['النشر على كل المنصات محاكاة', 'إضافة منصة', 'إنستغرام', 'يوتيوب', 'فيسبوك', 'البريد', 'تيك توك', 'قناة بريد', 'غير متصلة', 'بانتظار موافقة المنصة', 'تحتاج منك خطوة', 'لا شيء مطلوب منك الآن', 'بدء الإعداد', 'تحديث الحالة', 'التفاصيل'],
+      'settings-platforms-added': ['خيارات متقدمة', 'فيسبوك'],
+      'settings-platforms-builtin': ['خيارات متقدمة', 'حسابات إنستغرام'],
+      'settings-platforms-steps': ['إعداد إنستغرام', 'الخطوة 1 من 6', 'جهّز حسابات إنستغرام', 'يُحفظ تقدمك', 'الحسابات جاهزة', 'إعدادات حافظة الأعمال', 'ملاحظات مهمة'],
+      'settings-platforms-viewer': ['إنستغرام', 'فيسبوك', 'إضافة منصة'],
       'settings-storage': ['مزودو التخزين', 'Google Drive', 'متصل', 'hub@example.com', 'نسخ محفوظة هنا', '5 · 1.50 غيغابايت', 'منها إصدارات مكتبة الوسائط', 'آخر تحقق', 'لم تُفحص بعد', 'تحقق من عينة',
         'ما يخدمه كل مزود', 'مكتبة الوسائط', 'مرفقات البريد', 'ملفات المراسلة', 'النسخ الاحتياطي', 'لا مزود بعد', 'غير متاح بعد', 'جهاز تخزين شبكي', 'الوكيل', 'لم يُبنَ بعد', 'إضافة مزود تخزين', 'النقل يحتاج مزودين متصلين'],
       'settings-storage-bad': ['مفقودة أو تحتاج انتباهاً', '3 ملفات بلا موضع مسجّل', 'لم يُتحقق من شيء بعد'],
@@ -476,8 +481,8 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
       'settings-backups-empty': ['لم يُحدَّد مزود', 'لا مزود متصل غير مزود المكتبة', 'لا ملف يحتاج استعادة الآن', 'لم تُؤخذ نسخة بعد', 'حدّد مزود النسخ أعلاه أولاً'],
       'settings-backups-viewer': ['ملفات المكتبة والمرفقات', 'انسخ الملفات الجديدة', 'تحقق من النسخة'],
       'settings-backups-locked': ['النسخ الاحتياطي لمن يملك', 'اطلب هذه الصلاحية'],
-      'guide-meta': ['تجهيز تطبيق Meta', 'أنشئ التطبيق', 'Facebook Login', 'Valid OAuth Redirect URIs', '/api/platforms/callback/meta', 'App ID و App Secret', 'ولا ترسلهما إلى أحد', 'النشر نفسه ما زال محاكاة', 'فهمت'],
-      'guide-tiktok': ['تجهيز تطبيق TikTok', 'Login Kit', '/api/platforms/callback/tiktok', 'user.info.basic', 'التدقيق'],
+      'guide-meta': ['تجهيز تطبيق Meta', 'أنشئ التطبيق', 'Manage messaging & content on Instagram', 'API setup with Unified login', '/api/platforms/callback/meta', 'Configuration ID', 'ولا ترسلهما إلى أحد', 'النشر نفسه ما زال محاكاة', 'فهمت'],
+      'guide-tiktok': ['تجهيز تطبيق TikTok', 'Login Kit', '/api/platforms/callback/tiktok', 'user.info.basic', 'التدقيق', 'App review', 'URL prefix'],
       'guide-connect-meta': ['ربط حسابك عبر Meta', 'اضغط «ربط عبر Meta»', 'لا يطلب الموقع كلمة مرورك أبداً', 'تطبيق المطوّر غير مضبوط'],
       'guide-manual': ['النشر اليدوي على هذه المنصة', 'حزمة النشر', 'أكّد النشر'],
       'guide-storage-supabase': ['إضافة تخزين Supabase', 'S3 connection', 'New access key', 'حفظ وفحص الاتصال'],
@@ -562,19 +567,23 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     check('settings-backups-locked: the request is for «backups.run»', /data-need="backups.run"/.test(pages['settings-backups-locked']));
     // The circled "!" guides.
     check('guide-meta: the return address is on its own line to copy, with the platform in its path', /class="su-copy"[^>]*>https:\/\/[^<]*\/api\/platforms\/callback\/meta</.test(pages['guide-meta']));
-    check('guide-meta: the steps are numbered in a list', (pages['guide-meta'].match(/<li>/g) ?? []).length >= 7 && /<ol class="su-steps">/.test(pages['guide-meta']));
+    check('guide-meta: the steps are numbered in a list', (pages['guide-meta'].match(/<li>/g) ?? []).length >= 6 && /<ol class="su-steps">/.test(pages['guide-meta']));
     check('guide-meta: the button is the icon set\'s circle with an exclamation mark, labelled', /class="su-hint"[^>]*aria-label="[^"]+"/.test(pages['guide-meta']) && /lucide-circle-alert|circle-alert/.test(pages['guide-meta']));
-    check('settings-platforms: every platform app block and manual platform carries the circled guide', (pages['settings-platforms'].match(/class="su-hint"/g) ?? []).length >= 2, (pages['settings-platforms'].match(/class="su-hint"/g) ?? []).length);
+    check('settings-platforms: every platform is one line with one chip', (pages['settings-platforms'].match(/class="pf-row"/g) ?? []).length === 7 && (pages['settings-platforms'].match(/class="pf-chip /g) ?? []).length === 7, (pages['settings-platforms'].match(/class="pf-row"/g) ?? []).length);
     check('settings-storage-move-plan: the move panel carries its guide', /data-guide="move"/.test(pages['settings-storage-move-plan']));
     check('settings-storage-one: with one provider there is no plan button, only the way to add a second', !/st-move-plan-btn/.test(pages['settings-storage-one']) && /st-provider-add/.test(pages['settings-storage-one']));
     // Settings Step S5: reading is open, writing needs «platforms.manage».
     check('settings-platforms: an administrator has working controls, none locked', !/data-need="platforms.manage"/.test(pages['settings-platforms']));
-    check('settings-platforms: a viewer sees every control locked for «platforms.manage»', (pages['settings-platforms-viewer'].match(/data-need="platforms.manage"/g) ?? []).length >= 8, (pages['settings-platforms-viewer'].match(/data-need="platforms.manage"/g) ?? []).length);
-    check('settings-platforms: the built-in platforms cannot be deleted, the added one can', (pages['settings-platforms'].match(/st-delete/g) ?? []).length === 2, (pages['settings-platforms'].match(/st-delete/g) ?? []).length);
-    check('settings-platforms: the info card is there (closed), says it was not read from the official documents, and links the platform own page', /لم تُراجع هذه المعلومات من وثائق المنصة الرسمية بعد/.test(pages['settings-platforms']) && /href="https:\/\/developers\.facebook\.com\/docs\/pages-api\/"/.test(pages['settings-platforms']) && /rel="noopener noreferrer"/.test(pages['settings-platforms']));
-    check('settings-platforms: the platform with an account is not offered a working delete', !/data-platform="instagram"[\s\S]*?st-delete[\s\S]*?data-platform="x"/.test(pages['settings-platforms']));
-    check('settings-platforms: the mail channel has no readiness tracker or switch', !/data-platform="mail"[\s\S]*?st-ready[\s\S]*?<\/article>/.test(pages['settings-platforms'].replace(/<article class="st-plat[^>]*data-platform="(?!mail)[\s\S]*?<\/article>/g, '')));
-    check('settings-platforms: the added platform is stopped and its toggle says «تفعيل»', /data-platform="facebook"[\s\S]*?تفعيل/.test(pages['settings-platforms']));
+    check('settings-platforms: a viewer sees every control locked for «platforms.manage»', (pages['settings-platforms-viewer'].match(/data-need="platforms.manage"/g) ?? []).length >= 6, (pages['settings-platforms-viewer'].match(/data-need="platforms.manage"/g) ?? []).length);
+    check('settings-platforms: the built-in platforms cannot be deleted, the added one can', /st-delete/.test(pages['settings-platforms-added']) && !/st-delete/.test(pages['settings-platforms-builtin']));
+    check('settings-platforms: the info card is there (closed), says when it was read from the official documents, and links the platform own page', /href="https:\/\/developers\.facebook\.com\/docs\/pages-api\/"/.test(pages['settings-platforms-added']) && /rel="noopener noreferrer"/.test(pages['settings-platforms-added']) && !/<details[^>]* open/.test(pages['settings-platforms-added']));
+    // What is folded is not in the visible text, so it is read from the page itself.
+    for (const w of ['النشر الآن', 'المسار المخطط', 'نشر مساعد', 'نصاً وصورة وفيديو', 'ما تقدمه وما تطلبه', 'سجل المنصة', 'تعديل', 'روجعت من وثائق المنصة الرسمية في 2026-11-01']) check(`settings-platforms-added: folded, «${w}» is there`, pages['settings-platforms-added'].includes(w));
+    check('settings-platforms-builtin: folded, the reason a platform with accounts stays on', pages['settings-platforms-builtin'].includes('لا تُوقف منصة عليها حسابات فعّالة'));
+    check('settings-platforms-steps: the step links to the platform, in a new tab', /href="https:\/\/business\.facebook\.com\/settings" target="_blank" rel="noopener noreferrer"/.test(pages['settings-platforms-steps']));
+    check('settings-platforms: the advanced options start folded', /class="pf-more st-advanced"/.test(pages['settings-platforms-added']) && !/class="pf-more st-advanced"[^>]*open/.test(pages['settings-platforms-added']));
+    check('settings-platforms: the mail channel has no setup and no switch', !/st-toggle/.test(pages['settings-platforms-mail']) && !/pf-prog/.test(pages['settings-platforms-mail']));
+    check('settings-platforms: the added platform is stopped and its toggle says «تفعيل»', /st-toggle[^>]*>تفعيل</.test(pages['settings-platforms-added']));
     // Step P5a: the push is a locked control until granted (D-13); nobody's number appears in messaging.
     check('wa-push-locked: the request is a locked control for «whatsapp.push»', /data-need="whatsapp.push"[^>]*aria-disabled="true"|aria-disabled="true"[^>]*data-need="whatsapp.push"/.test(pages['wa-push-locked']));
     check('wa-push-locked: no member can be sent to', !/class="ml-btn sm primary"/.test(pages['wa-push-locked']));

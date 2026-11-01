@@ -9,6 +9,10 @@ screen says so.
 
 The same steps are in the site, beside each platform app and each account section, as a circled "!" (`src/lib/setup-guides.ts`), so the people who need them follow them from the screen.
 
+**2026-11-01: follow the sheet, not this page.** The official pages were read again on 2026-11-01 and the site's steps were
+rewritten: `src/lib/setup-guides.ts`, shown as the steps sheet in «المنصات», `MVP_draft.md` section 67. Meta now needs Unified
+Login with a Configuration ID. Where this page and the sheet differ, the sheet is current.
+
 Facts below were read from each platform's own developer documentation on 2026-10-15 and
 change often. `src/lib/platforms/oauth.ts` holds the Graph API version (`v26.0`) and the
 scopes in one place each; check them against the documentation when you register the app.

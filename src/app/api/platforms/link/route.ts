@@ -1,7 +1,7 @@
 import { fail } from '@/lib/drive/guard';
 import { serverKeyOrNull } from '@/lib/integrations/vault';
 import { loadApp, loadSecret } from '@/lib/platforms/connect';
-import { PlatformCallError, connErrorAr, metaDebugToken, metaPages, unpackTikTok } from '@/lib/platforms/oauth';
+import { PlatformCallError, connErrorAr, metaConfigAssets, metaDebugToken, metaPages, unpackTikTok, type MetaInstagram, type MetaPage } from '@/lib/platforms/oauth';
 import { unpackTokens } from '@/lib/platforms/oauth2';
 import { connectGuard, isUuid, json } from '@/lib/platforms/route';
 import { workErrorText } from '@/lib/work/rules';
@@ -128,13 +128,20 @@ export async function POST(request: Request) {
     return json({ results });
   }
 
-  // Meta: the person's long-lived user token gives each page its own token, read here once.
+  // Meta: the person's long-lived user token gives each page its own token, read here once. A configuration's
+  // token (Unified login) belongs to the portfolio and serves its Instagram accounts itself.
   const app = await loadApp(g.db, 'meta', 'ربط صفحات');
   const userToken = await loadSecret(g.db, body.offer, 'ربط صفحات');
   if (!app || !userToken) return fail(404, 'انتهت صلاحية الربط. ابدأ من جديد.');
-  let pages;
+  const unified = offerRow.config?.unified === true;
+  let pages: MetaPage[];
+  let assigned: MetaInstagram[] = [];
   try {
-    pages = await metaPages(fetch, userToken);
+    if (unified) {
+      const assets = await metaConfigAssets(fetch, userToken);
+      pages = assets.pages;
+      assigned = assets.instagram;
+    } else pages = await metaPages(fetch, userToken);
   } catch (e) {
     return fail(502, connErrorAr(e instanceof PlatformCallError ? e.code : 'PLATFORM_ERROR'));
   }
@@ -142,36 +149,39 @@ export async function POST(request: Request) {
   for (let i = 0; i < picks.length; i++) {
     const pick = picks[i];
     const page = pick.platform === 'facebook' ? pages.find((p) => p.id === pick.id) : pages.find((p) => p.instagram?.id === pick.id);
-    if (!page || pick.platform === 'tiktok') {
+    const ig = unified && pick.platform === 'instagram' ? assigned.find((a) => a.id === pick.id) : undefined;
+    if ((!page && !ig) || pick.platform === 'tiktok') {
       results.push({ platform: pick.platform, id: pick.id, ok: false, error: 'لم تعد هذه الصفحة ضمن ما تديره. ابدأ الربط من جديد.' });
       continue;
     }
-    const info = await metaDebugToken(fetch, app.appId, app.secret, page.token);
+    const token = ig ? userToken : page!.token;
+    const info = await metaDebugToken(fetch, app.appId, app.secret, token);
     if (!info.valid) {
       results.push({ platform: pick.platform, id: pick.id, ok: false, error: connErrorAr(info.error) });
       continue;
     }
     const isIg = pick.platform === 'instagram';
-    const username = isIg ? page.instagram?.username : page.username;
+    const username = ig ? ig.username : isIg ? page!.instagram?.username : page!.username;
+    const name = page?.name ?? (username ? `@${username}` : pick.id);
     const missing = info.scopes.length && !info.scopes.includes(NEEDED[pick.platform]) ? [NEEDED[pick.platform]] : [];
     const { data, error } = await g.db.rpc('platform_conn_link', {
       p_key: key,
       p: {
         platform: pick.platform,
         type: isIg ? 'meta_instagram' : 'meta_page',
-        label: pick.label || (isIg ? (username ? `@${username}` : page.name) : page.name).slice(0, 60),
+        label: pick.label || (isIg ? (username ? `@${username}` : name) : name).slice(0, 60),
         handle: username ? `@${username}` : `${isIg ? 'ig' : 'fb'}:${pick.id}`,
         purpose,
         publishers,
         mode,
         external_id: pick.id,
-        external_name: isIg ? (username ?? page.name) : page.name,
+        external_name: isIg ? (username ?? name) : name,
         scopes: info.scopes,
         expires_at: info.expiresAt,
         account_id: reconnect,
         offer: i === last ? body.offer : null,
       },
-      p_secret: page.token,
+      p_secret: token,
     });
     results.push(error ? { platform: pick.platform, id: pick.id, ok: false, error: workErrorText(error.message) } : { platform: pick.platform, id: pick.id, ok: true, account: String(data), missing });
   }

@@ -1,51 +1,56 @@
 'use client';
-// «المنصات» in Settings (Settings_Integrations_Plan.md 8): the registry the whole work cycle
-// reads. One card per platform with what it can publish, what it asks of the department outside
-// the site, the owner's readiness tracker, and the controls to add, edit, switch on or off and
-// delete. Publishing is still a simulation for every platform, and the card says so. Every rule
-// is in the database (platform_save and its neighbours); this page explains and asks.
+// «المنصات» in Settings (MVP_draft.md section 67): every connection on one line, with one state worked out from what is
+// stored and the one button it asks for. «إضافة منصة» opens every option, and a setup runs in the sheet of
+// platform-sheet.tsx. What used to fill each card (limits, publishing path, the log, what a platform asks of the
+// department) is folded under «خيارات متقدمة». Publishing is still a simulation for every platform, and the page says so.
+// Every rule is in the database (platform_save and its neighbours); this page explains and asks.
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ChevronDown, Plus } from 'lucide-react';
 import { needProps } from '@/lib/kit/need';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { supabase } from '@/lib/supabase/client';
+import { GUIDES } from '@/lib/setup-guides';
 import {
-  KIND_AR,
   KNOWLEDGE,
   MODE_AR,
   MODE_HELP_AR,
-  PLATFORM_TEMPLATES,
-  READINESS_AR,
-  READINESS_HELP_AR,
-  READINESS_ORDER,
-  READINESS_TONE,
   platformError,
   platformEventLine,
 } from '@/lib/platforms/info';
 import { limitsOf, limitsToAccepts } from '@/lib/platforms/limits';
-import { APP_INTEGRATION_TYPE, CONN_PROVIDERS, providerOf, type ConnProvider } from '@/lib/platforms/provider';
+import { APP_INTEGRATION_TYPE, CONN_PROVIDERS, PROVIDER_COPY, providerOf, type ConnProvider } from '@/lib/platforms/provider';
+import { CHIP_CLASS, actionOf, addOptions, chipOf, doneSteps, firstOpen, lineOf, listed, needsYou, platformState, setupGuideOf, stateRank, stepId, type AddOption, type PlatformState, type SetupRow } from '@/lib/platforms/setup';
 import { STATE_AR, STATE_TONE, type Integration } from '@/lib/integrations/rules';
 import { expiryLineAr, expiryOf, riyadhToday } from '@/lib/integrations/expiry';
-import type { PlatformInfo, PublishMode, Readiness } from '@/lib/work/rules';
+import type { PlatformInfo, PublishMode } from '@/lib/work/rules';
 import { useCaps } from '../caps';
+import { PlatformTile } from '../platform-icon';
 import { Modal } from '../ui';
 import { SetupGuide } from '../setup-guide';
+import { PlatformSheet, type SheetTo } from './platform-sheet';
 
 type Impact = { accounts: number; active_accounts: number; open_works: number; copies: number };
 type LogRow = { id: number; at: string; kind: string; actor: string | null; actor_name: string | null; data: Record<string, unknown> };
+type Apps = Partial<Record<ConnProvider, Integration>>;
 
 const when = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString('ar-SA-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' }) : '');
 const COLUMNS = 'key,label_ar,kind,sort,accepts,publish_mode,scheduling,requires_review,token_life_days,enabled,builtin,docs_url,readiness,readiness_note,readiness_at,readiness_by';
 
-/** `initial` lets a check draw the tab without the database (qa/permissions-pages.cjs). */
-export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; impact: Record<string, Impact> } }) {
+/** `initial` lets a check draw the tab without the database (qa/permissions-pages.cjs, qa/platforms-flow.cjs). */
+export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; impact: Record<string, Impact>; apps?: Apps; setup?: Record<string, SetupRow>; open?: { key: string; to: SheetTo } } }) {
   const caps = useCaps();
   const [list, setList] = useState<PlatformInfo[] | null>(initial?.list ?? null);
   const [impact, setImpact] = useState<Record<string, Impact>>(initial?.impact ?? {});
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [apps, setApps] = useState<Partial<Record<ConnProvider, Integration>>>({});
+  const [apps, setApps] = useState<Apps>(initial?.apps ?? {});
+  const [setup, setSetup] = useState<Record<string, SetupRow>>(initial?.setup ?? {});
+  const [menu, setMenu] = useState(false);
+  const [open, setOpen] = useState<{ key: string; to: SheetTo } | null>(initial?.open ?? null);
   const [dlg, setDlg] = useState<{ t: 'add' } | { t: 'edit'; p: PlatformInfo } | { t: 'delete'; p: PlatformInfo } | null>(null);
   const canManage = caps.has('platforms.manage');
+  const canSecrets = caps.has('integrations.secrets') && canManage;
+  const today = riyadhToday();
 
   const load = useCallback(async () => {
     const db = supabase();
@@ -66,12 +71,28 @@ export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; im
     const ints = await db.rpc('int_list');
     if (!ints.error) {
       const rows = (ints.data ?? []) as Integration[];
-      setApps(Object.fromEntries(CONN_PROVIDERS.map((p) => [p, rows.find((r) => r.type === APP_INTEGRATION_TYPE[p])])) as Partial<Record<ConnProvider, Integration>>);
+      setApps(Object.fromEntries(CONN_PROVIDERS.map((p) => [p, rows.find((r) => r.type === APP_INTEGRATION_TYPE[p])])) as Apps);
     }
+    // Saved progress. Before its migration the table is not there: the page works, and a save says it failed.
+    const saved = await db.from('platform_setup').select('key,done,step,fields');
+    if (!saved.error) setSetup(Object.fromEntries(((saved.data ?? []) as SetupRow[]).map((s) => [s.key, s])));
   }, []);
   useEffect(() => {
     if (!initial) void load();
   }, [initial, load]);
+
+  useEffect(() => {
+    if (!menu) return;
+    const shut = (e: MouseEvent | KeyboardEvent) => {
+      if (e instanceof KeyboardEvent ? e.key === 'Escape' : !(e.target as HTMLElement).closest('.pf-add')) setMenu(false);
+    };
+    document.addEventListener('click', shut);
+    document.addEventListener('keydown', shut);
+    return () => {
+      document.removeEventListener('click', shut);
+      document.removeEventListener('keydown', shut);
+    };
+  }, [menu]);
 
   const act = async (fn: string, args: Record<string, unknown>, ok: string) => {
     setBusy(true);
@@ -86,83 +107,210 @@ export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; im
     return true;
   };
 
-  const ordered = useMemo(() => [...(list ?? [])].sort((a, b) => (a.kind === b.kind ? a.sort - b.sort : a.kind === 'mail' ? 1 : -1)), [list]);
+  const facts = useCallback(
+    (p: PlatformInfo) => {
+      const provider = providerOf(p.key);
+      return { provider, app: provider ? apps[provider] : undefined, row: setup[p.key] ?? null, accounts: impact[p.key]?.accounts ?? 0 };
+    },
+    [apps, setup, impact],
+  );
+  const stateOf = useCallback(
+    (p: PlatformInfo): PlatformState => {
+      const { app, row } = facts(p);
+      return platformState({ p, app, setup: row, today });
+    },
+    [facts, today],
+  );
+
+  const views = useMemo(
+    () =>
+      (list ?? [])
+        .filter((p) => {
+          const { app, row, accounts } = facts(p);
+          return listed(p, { app, setup: row, accounts });
+        })
+        .map((p) => {
+          const { provider, app, row, accounts } = facts(p);
+          const state = stateOf(p);
+          const guide = setupGuideOf(p.key);
+          const steps = guide ? GUIDES[guide].steps : [];
+          const done = doneSteps(steps, row, app?.has_secret === true);
+          const open = firstOpen(steps, done);
+          const next = open === null ? null : (steps[steps.map(stepId).indexOf(open)]?.t ?? null);
+          return { p, state, accounts, chip: chipOf(state, done.size, steps.length), line: lineOf(state, { accounts, next, app, today, provider }) };
+        })
+        .sort((a, b) => stateRank(a.state) - stateRank(b.state) || a.p.sort - b.p.sort),
+    [list, facts, stateOf, today],
+  );
+  const shown = useMemo(() => new Set(views.map((v) => v.p.key)), [views]);
+  const options = useMemo(
+    () => addOptions(list ?? [], (key) => (shown.has(key) ? stateOf((list ?? []).find((p) => p.key === key)!) : null)),
+    [list, shown, stateOf],
+  );
+
   if (!list) return <p className="muted">جارٍ تحميل المنصات…</p>;
   const lock = (why: string) => needProps('platforms.manage', why);
+  const opened = open ? list.find((p) => p.key === open.key) : undefined;
+
+  const pick = async (o: AddOption) => {
+    setMenu(false);
+    if (o.kind === 'custom') return setDlg({ t: 'add' });
+    if (o.kind === 'open') return setOpen({ key: o.key, to: 'first' });
+    const t = o.template;
+    const saved = await act('platform_save', { p_key: t.key, p: { label_ar: t.label_ar, publish_mode: t.publish_mode, video_only: t.video_only, requires_review: t.requires_review, docs_url: null, ...limitsToAccepts(t.limits) } }, `أُضيفت «${t.label_ar}».`);
+    if (!saved) return;
+    if (o.manual) await act('platform_set_enabled', { p_key: t.key, p_on: true }, `أُضيفت «${t.label_ar}». أضف حسابها من «حسابات المنصات».`);
+    else setOpen({ key: t.key, to: 'first' });
+  };
+
+  const todo = views.filter((v) => needsYou(v.state));
+  const rest = views.filter((v) => !needsYou(v.state));
+  const group = (title: string, rows: typeof views) =>
+    rows.length > 0 && (
+      <section className="pf-group" aria-label={title}>
+        <h3>
+          {title} <span>{rows.length}</span>
+        </h3>
+        {rows.map(({ p, state, accounts, chip, line }) => {
+          const action = actionOf(state);
+          return (
+            <article className="pf-row" data-platform={p.key} data-state={state} key={p.key}>
+              <PlatformTile k={p.key} />
+              <div className="pf-row-text">
+                <b>{p.label_ar}</b>
+                <small>{line}</small>
+              </div>
+              <div className="pf-row-chip">
+                <span className={`pf-chip ${CHIP_CLASS[state]}`}>{chip}</span>
+              </div>
+              <div className="pf-row-acts">
+                {action && (
+                  <button
+                    type="button"
+                    className={`pf-btn ${action.tone}`}
+                    disabled={busy}
+                    {...(canManage
+                      ? { onClick: () => (action.to === 'enable' ? void act('platform_set_enabled', { p_key: p.key, p_on: true }, `فُعّلت ${p.label_ar}.`) : setOpen({ key: p.key, to: action.to as SheetTo })) }
+                      : lock('إعداد المنصات لمن يملك «إدارة المنصات وتطبيقاتها».'))}
+                  >
+                    {action.label}
+                  </button>
+                )}
+                {(state === 'ok' || state === 'soon' || state === 'manual') && (
+                  <a className="pf-btn" href="/channels">
+                    الحسابات {accounts}
+                  </a>
+                )}
+                {(state === 'ok' || state === 'soon' || state === 'manual' || state === 'off' || state === 'mail' || state === 'wait') && (
+                  <button type="button" className="pf-btn ghost" onClick={() => setOpen({ key: p.key, to: 'finish' })}>
+                    التفاصيل
+                  </button>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </section>
+    );
+  const firstOf = (kinds: AddOption['kind'][], manual?: boolean) => options.filter((o) => kinds.includes(o.kind) && (o.kind !== 'template' || (manual === undefined ? true : o.manual === manual)));
+  const menuGroup = (title: string, rows: AddOption[]) =>
+    rows.length > 0 && (
+      <div key={title}>
+        <span className="pf-menu-h">{title}</span>
+        {rows.map((o) => (
+          <button type="button" className="pf-menu-item" role="menuitem" data-add={o.key} key={o.key} onClick={() => void pick(o)}>
+            <PlatformTile k={o.kind === 'custom' ? 'other' : o.key} />
+            <span>
+              <b>{o.label}</b>
+              <small>{o.hint}</small>
+            </span>
+          </button>
+        ))}
+      </div>
+    );
 
   return (
     <div className="st-platforms">
-      <p className="wk-simnote st-simnote">
-        النشر على كل المنصات محاكاة في هذه المرحلة: لا يصل شيء إلى أي منصة. «المسار المخطط» هو ما سيكون عليه النشر حين يُبنى ربط المنصة، و«التجهيز» تتبّعٌ لما تطلبه المنصة خارج الموقع.
-      </p>
-      <div className="actions">
-        <button type="button" className="primary st-add" {...(canManage ? { onClick: () => setDlg({ t: 'add' }) } : lock('إضافة المنصات لمن يملك «إدارة المنصات وتطبيقاتها»: مسؤول النظام افتراضياً.'))}>
-          إضافة منصة
-        </button>
+      <div className="pf-top">
+        <p className="muted">تُجهَّز كل منصة مرة واحدة، ثم تُضاف حساباتها من «حسابات المنصات».</p>
+        <div className="pf-add">
+          <button
+            type="button"
+            className="pf-btn pri st-add"
+            aria-haspopup="menu"
+            aria-expanded={menu}
+            {...(canManage ? { onClick: () => setMenu((m) => !m) } : lock('إضافة المنصات لمن يملك «إدارة المنصات وتطبيقاتها»: مسؤول النظام افتراضياً.'))}
+          >
+            <Plus aria-hidden="true" />
+            إضافة منصة
+            <ChevronDown aria-hidden="true" />
+          </button>
+          {menu && (
+            <div className="pf-menu" role="menu" aria-label="إضافة منصة">
+              {menuGroup('تحتاج إعداداً مرة واحدة', firstOf(['open']).concat(firstOf(['template'], false)))}
+              {menuGroup('بلا ربط', firstOf(['template'], true))}
+              {menuGroup('غير ذلك', firstOf(['custom']))}
+            </div>
+          )}
+        </div>
       </div>
-
-      {ordered.map((p) => (
-        <PlatformCard
-          key={p.key}
-          p={p}
-          impact={impact[p.key]}
-          canManage={canManage}
-          busy={busy}
-          lock={lock}
-          onEdit={() => setDlg({ t: 'edit', p })}
-          onDelete={() => setDlg({ t: 'delete', p })}
-          act={act}
-          app={providerOf(p.key) ? apps[providerOf(p.key)!] : undefined}
-          onSaved={load}
-          canSecrets={caps.has('integrations.secrets') && canManage}
-        />
-      ))}
-
+      <p className="wk-simnote st-simnote pf-sim">النشر على كل المنصات محاكاة في هذه المرحلة: لا يصل شيء إلى أي منصة.</p>
       {note && (
         <p className={note.ok ? 'ml-hint' : 'ml-err'} role="status">
           {note.text}
         </p>
       )}
-      {dlg?.t === 'add' && <AddDialog existing={list.map((x) => x.key)} onClose={() => setDlg(null)} act={act} />}
+      {group('تحتاج منك خطوة', todo)}
+      {group('لا شيء مطلوب منك الآن', rest)}
+
+      {opened && open && (
+        <PlatformSheet
+          key={opened.key}
+          p={opened}
+          app={facts(opened).app}
+          setup={facts(opened).row}
+          state={stateOf(opened)}
+          accounts={facts(opened).accounts}
+          to={open.to}
+          canManage={canManage}
+          canSecrets={canSecrets}
+          lock={lock}
+          act={act}
+          onClose={() => {
+            setOpen(null);
+            if (!initial) void load();
+          }}
+          onChanged={load}
+          say={(text) => setNote({ ok: true, text })}
+        >
+          <Advanced
+            p={opened}
+            impact={impact[opened.key]}
+            canManage={canManage}
+            busy={busy}
+            lock={lock}
+            act={act}
+            onEdit={() => setDlg({ t: 'edit', p: opened })}
+            onDelete={() => setDlg({ t: 'delete', p: opened })}
+          />
+        </PlatformSheet>
+      )}
+      {dlg?.t === 'add' && <AddDialog onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'edit' && <EditDialog p={dlg.p} onClose={() => setDlg(null)} act={act} />}
-      {dlg?.t === 'delete' && <DeleteDialog p={dlg.p} impact={impact[dlg.p.key]} onClose={() => setDlg(null)} act={act} />}
+      {dlg?.t === 'delete' && <DeleteDialog p={dlg.p} impact={impact[dlg.p.key]} onClose={() => { setDlg(null); setOpen(null); }} act={act} />}
     </div>
   );
 }
 
 type Act = (fn: string, args: Record<string, unknown>, ok: string) => Promise<boolean>;
 
-function PlatformCard({
-  p,
-  impact,
-  canManage,
-  busy,
-  lock,
-  onEdit,
-  onDelete,
-  act,
-  app,
-  onSaved,
-  canSecrets,
-}: {
-  p: PlatformInfo;
-  impact: Impact | undefined;
-  canManage: boolean;
-  busy: boolean;
-  lock: (why: string) => ReturnType<typeof needProps>;
-  onEdit: () => void;
-  onDelete: () => void;
-  act: Act;
-  app: Integration | undefined;
-  onSaved: () => Promise<void>;
-  canSecrets: boolean;
-}) {
+/** What used to fill a card: all of it stays, folded until someone needs it. */
+function Advanced({ p, impact, canManage, busy, lock, act, onEdit, onDelete }: { p: PlatformInfo; impact: Impact | undefined; canManage: boolean; busy: boolean; lock: (why: string) => ReturnType<typeof needProps>; act: Act; onEdit: () => void; onDelete: () => void }) {
   const k = KNOWLEDGE[p.key];
-  const [state, setState] = useState<Readiness>(p.readiness);
-  const [text, setText] = useState(p.readiness_note ?? '');
   const [log, setLog] = useState<LogRow[] | null>(null);
   const social = p.kind === 'social';
   const inUse = (impact?.accounts ?? 0) > 0 || (impact?.copies ?? 0) > 0;
+  const liveAccounts = social && p.enabled && (impact?.active_accounts ?? 0) > 0;
 
   const showLog = async () => {
     const { data } = await supabase().rpc('platform_log', { p_key: p.key, p_limit: 20 });
@@ -170,14 +318,8 @@ function PlatformCard({
   };
 
   return (
-    <article className={`st-plat ${p.enabled || !social ? '' : 'off'}`} data-platform={p.key}>
-      <header className="between">
-        <b>
-          {p.label_ar} <small>· {KIND_AR[p.kind]}</small>
-        </b>
-        <span className={`mx-chip ${p.enabled ? 'success' : ''}`}>{!social ? 'قائمة' : p.enabled ? 'مفعّلة' : 'موقوفة'}</span>
-      </header>
-
+    <details className="pf-more st-advanced">
+      <summary>خيارات متقدمة</summary>
       <div className="table st-plat-facts">
         <div className="between">
           <span>النشر الآن</span>
@@ -196,12 +338,6 @@ function PlatformCard({
           </div>
         )}
         {social && <LimitsFact p={p} />}
-        {social && (
-          <div className="between">
-            <span>مراجعة المنصة للتطبيق</span>
-            <b>{p.requires_review ? 'تطلبها' : 'لا تطلبها'}</b>
-          </div>
-        )}
         {impact && (
           <div className="between st-plat-use">
             <span>الحسابات</span>
@@ -213,65 +349,6 @@ function PlatformCard({
         )}
       </div>
 
-      {social && (
-        <section className="st-ready" aria-label={`تجهيز ${p.label_ar}`}>
-          <div className="between">
-            <b>التجهيز</b>
-            <span className={`mx-chip ${READINESS_TONE[p.readiness]}`}>{READINESS_AR[p.readiness]}</span>
-          </div>
-          <div className="st-ready-steps" role="list">
-            {READINESS_ORDER.map((r) => (
-              <span key={r} role="listitem" className={`${r === p.readiness ? 'on' : ''} ${READINESS_ORDER.indexOf(r) < READINESS_ORDER.indexOf(p.readiness) ? 'done' : ''}`}>
-                {READINESS_AR[r]}
-              </span>
-            ))}
-          </div>
-          <small className="muted">{READINESS_HELP_AR[p.readiness]}</small>
-          {p.readiness_at && (
-            <small className="muted">
-              آخر تحديث {when(p.readiness_at)}
-              {p.readiness_note ? `: ${p.readiness_note}` : ''}
-            </small>
-          )}
-          <div className="st-ready-form">
-            <select
-              aria-label={`حالة تجهيز ${p.label_ar}`}
-              value={state}
-              disabled={!canManage || busy}
-              {...(!canManage ? lock('تحديث التجهيز لمن يملك «إدارة المنصات وتطبيقاتها».') : {})}
-              onChange={(e) => setState(e.target.value as Readiness)}
-            >
-              {READINESS_ORDER.map((r) => (
-                <option key={r} value={r}>
-                  {READINESS_AR[r]}
-                </option>
-              ))}
-            </select>
-            <input
-              aria-label={`ملاحظة تجهيز ${p.label_ar}`}
-              value={text}
-              maxLength={300}
-              placeholder="ملاحظة: ماذا قُدّم ومتى وإلى من"
-              disabled={!canManage || busy}
-              onChange={(e) => setText(e.target.value)}
-            />
-            <button
-              type="button"
-              className="secondary st-ready-save"
-              disabled={busy || (state === p.readiness && text.trim() === (p.readiness_note ?? ''))}
-              {...(canManage
-                ? { onClick: () => void act('platform_set_readiness', { p_key: p.key, p_state: state, p_note: text }, 'حُفظ التجهيز.') }
-                : lock('تحديث التجهيز لمن يملك «إدارة المنصات وتطبيقاتها».'))}
-            >
-              حفظ التجهيز
-            </button>
-          </div>
-        </section>
-      )}
-
-      {social && providerOf(p.key) && (
-        <AppBlock provider={providerOf(p.key)!} app={app} canSecrets={canSecrets} onSaved={onSaved} lock={lock} />
-      )}
       {social && !providerOf(p.key) && p.publish_mode === 'manual' && (
         <p className="st-manual-guide muted">
           <SetupGuide guide="manual" label="كيف يُنشر على هذه المنصة" /> مسار يدوي: يُنشر من تطبيق المنصة بحزمة جاهزة، وتؤكد أنت أنه نُشر.
@@ -315,15 +392,15 @@ function PlatformCard({
         </details>
       )}
 
-      <div className="actions">
+      <div className="pf-acts">
         {social && (
           <>
-            <button type="button" className="secondary st-edit" disabled={busy} {...(canManage ? { onClick: onEdit } : lock('تعديل المنصات لمن يملك «إدارة المنصات وتطبيقاتها».'))}>
+            <button type="button" className="pf-btn st-edit" disabled={busy} {...(canManage ? { onClick: onEdit } : lock('تعديل المنصات لمن يملك «إدارة المنصات وتطبيقاتها».'))}>
               تعديل
             </button>
             <button
               type="button"
-              className="secondary st-toggle"
+              className="pf-btn st-toggle"
               disabled={busy}
               {...(canManage
                 ? { onClick: () => void act('platform_set_enabled', { p_key: p.key, p_on: !p.enabled }, p.enabled ? 'أُوقفت المنصة لإضافة حسابات جديدة.' : 'فُعّلت المنصة لإضافة حسابات.') }
@@ -332,24 +409,17 @@ function PlatformCard({
               {p.enabled ? 'إيقاف' : 'تفعيل'}
             </button>
             {!p.builtin && (
-              <button
-                type="button"
-                className="secondary danger st-delete"
-                disabled={busy}
-                {...(canManage ? { onClick: onDelete } : lock('الحذف لمن يملك «إدارة المنصات وتطبيقاتها».'))}
-              >
+              <button type="button" className="pf-btn fix st-delete" disabled={busy} {...(canManage ? { onClick: onDelete } : lock('الحذف لمن يملك «إدارة المنصات وتطبيقاتها».'))}>
                 حذف
               </button>
             )}
           </>
         )}
-        <button type="button" className="secondary st-log-btn" onClick={() => void showLog()}>
+        <button type="button" className="pf-btn st-log-btn" onClick={() => void showLog()}>
           سجل المنصة
         </button>
       </div>
-      {social && p.enabled && (impact?.active_accounts ?? 0) > 0 && (
-        <small className="muted">لا تُوقف منصة عليها حسابات فعّالة: أوقف حساباتها من «حسابات المنصات» أولاً.</small>
-      )}
+      {liveAccounts && <small className="muted">لا تُوقف منصة عليها حسابات فعّالة: أوقف حساباتها من «حسابات المنصات» أولاً.</small>}
       {social && !p.builtin && inUse && <small className="muted">لا تُحذف منصة عليها حسابات أو نسخ نصوص.</small>}
       {log && (
         <ol className="st-plat-log">
@@ -364,73 +434,51 @@ function PlatformCard({
           {!log.length && <li className="muted">لا أحداث بعد.</li>}
         </ol>
       )}
-    </article>
+    </details>
   );
 }
 
-function AddDialog({ existing, onClose, act }: { existing: string[]; onClose: () => void; act: Act }) {
-  const templates = PLATFORM_TEMPLATES.filter((t) => !existing.includes(t.key));
-  const [pick, setPick] = useState(templates[0]?.key ?? 'custom');
+/** «منصة أخرى…»: by name, stopped until it is switched on. A platform with a template comes from the menu. */
+function AddDialog({ onClose, act }: { onClose: () => void; act: Act }) {
   const [key, setKey] = useState('');
   const [label, setLabel] = useState('');
-  const t = templates.find((x) => x.key === pick);
-  const [mode, setMode] = useState<PublishMode>(t?.publish_mode ?? 'assisted');
-  const [video, setVideo] = useState(t?.video_only ?? false);
-  const [review, setReview] = useState(t?.requires_review ?? false);
-  const pickTemplate = (v: string) => {
-    setPick(v);
-    const x = templates.find((y) => y.key === v);
-    if (x) {
-      setMode(x.publish_mode);
-      setVideo(x.video_only);
-      setReview(x.requires_review);
-    }
-  };
-  const custom = pick === 'custom';
-  const finalKey = custom ? key.trim().toLowerCase() : pick;
-  const finalLabel = custom ? label.trim() : (t?.label_ar ?? '');
+  const [mode, setMode] = useState<PublishMode>('manual');
+  const [video, setVideo] = useState(false);
+  const [review, setReview] = useState(false);
+  const finalKey = key.trim().toLowerCase();
+  const finalLabel = label.trim();
   return (
     <Modal title="إضافة منصة" onClose={onClose}>
-      <label className="l">
-        المنصة
-        <select className="wk-inp" value={pick} onChange={(e) => pickTemplate(e.target.value)}>
-          {templates.map((x) => (
-            <option key={x.key} value={x.key}>
-              {x.label_ar}
-            </option>
-          ))}
-          <option value="custom">منصة أخرى…</option>
-        </select>
-      </label>
-      {custom && (
-        <div className="wk-two">
-          <label className="l">
-            الاسم بالعربية
-            <input className="wk-inp" value={label} maxLength={40} onChange={(e) => setLabel(e.target.value)} />
-          </label>
-          <label className="l">
-            المعرّف <small>حروف إنجليزية صغيرة وأرقام</small>
-            <input className="wk-inp ltr" value={key} maxLength={30} onChange={(e) => setKey(e.target.value)} />
-          </label>
-        </div>
-      )}
-      <label className="l">
-        المسار المخطط للنشر
-        <select className="wk-inp" value={mode} onChange={(e) => setMode(e.target.value as PublishMode)}>
-          {(['auto', 'assisted', 'manual'] as PublishMode[]).map((m) => (
-            <option key={m} value={m}>
-              {MODE_AR[m]}
-            </option>
-          ))}
-        </select>
-        <small>{MODE_HELP_AR[mode]}</small>
-      </label>
-      <label className="l ml-check">
-        <input type="checkbox" checked={video} onChange={(e) => setVideo(e.target.checked)} /> تقبل الفيديو فقط
-      </label>
-      <label className="l ml-check">
-        <input type="checkbox" checked={review} onChange={(e) => setReview(e.target.checked)} /> تطلب مراجعة التطبيق قبل النشر
-      </label>
+      <div className="wk-two">
+        <label className="l">
+          الاسم بالعربية
+          <input className="wk-inp" value={label} maxLength={40} onChange={(e) => setLabel(e.target.value)} />
+        </label>
+        <label className="l">
+          المعرّف <small>حروف إنجليزية صغيرة وأرقام</small>
+          <input className="wk-inp ltr" value={key} maxLength={30} onChange={(e) => setKey(e.target.value)} />
+        </label>
+      </div>
+      <details>
+        <summary>خيارات أخرى</summary>
+        <label className="l">
+          المسار المخطط للنشر
+          <select className="wk-inp" value={mode} onChange={(e) => setMode(e.target.value as PublishMode)}>
+            {(['auto', 'assisted', 'manual'] as PublishMode[]).map((m) => (
+              <option key={m} value={m}>
+                {MODE_AR[m]}
+              </option>
+            ))}
+          </select>
+          <small>{MODE_HELP_AR[mode]}</small>
+        </label>
+        <label className="l ml-check">
+          <input type="checkbox" checked={video} onChange={(e) => setVideo(e.target.checked)} /> تقبل الفيديو فقط
+        </label>
+        <label className="l ml-check">
+          <input type="checkbox" checked={review} onChange={(e) => setReview(e.target.checked)} /> تطلب مراجعة التطبيق قبل النشر
+        </label>
+      </details>
       <p className="muted">
         تُضاف موقوفة: لا تُعرض لإضافة حسابات حتى تفعّلها. النشر عليها محاكاة كبقية المنصات إلى أن يُبنى ربطها.
       </p>
@@ -440,7 +488,7 @@ function AddDialog({ existing, onClose, act }: { existing: string[]; onClose: ()
           className="primary"
           disabled={!finalKey || !finalLabel}
           onClick={() =>
-            void act('platform_save', { p_key: finalKey, p: { label_ar: finalLabel, publish_mode: mode, video_only: video, requires_review: review, docs_url: null, ...(t ? limitsToAccepts(t.limits) : {}) } }, `أُضيفت «${finalLabel}». فعّلها لتظهر عند إضافة حساب.`).then(
+            void act('platform_save', { p_key: finalKey, p: { label_ar: finalLabel, publish_mode: mode, video_only: video, requires_review: review, docs_url: null } }, `أُضيفت «${finalLabel}». فعّلها لتظهر عند إضافة حساب.`).then(
               (ok) => ok && onClose(),
             )
           }
@@ -554,45 +602,6 @@ function EditDialog({ p, onClose, act }: { p: PlatformInfo; onClose: () => void;
     </Modal>
   );
 }
-
-const PROVIDER_COPY: Record<ConnProvider, { name: string; idLabel: string; secretLabel: string; where: string }> = {
-  meta: {
-    name: 'تطبيق Meta (فيسبوك وإنستغرام معاً)',
-    idLabel: 'معرّف التطبيق (App ID)',
-    secretLabel: 'سر التطبيق (App Secret)',
-    where: 'من Meta for Developers، تطبيقك، «إعدادات التطبيق» ثم «أساسي».',
-  },
-  tiktok: {
-    name: 'تطبيق TikTok',
-    idLabel: 'مفتاح العميل (Client key)',
-    secretLabel: 'سر العميل (Client secret)',
-    where: 'من TikTok for Developers، تطبيقك، «App details».',
-  },
-  google: {
-    name: 'تطبيق Google (يوتيوب وDrive)',
-    idLabel: 'معرّف العميل (Client ID)',
-    secretLabel: 'سر العميل (Client secret)',
-    where: 'من Google Cloud Console، «APIs & Services» ثم «Credentials»، عميل OAuth من نوع «Web application». هذا التطبيق نفسه يخدم ربط قناة يوتيوب واتصال Google Drive.',
-  },
-  linkedin: {
-    name: 'تطبيق LinkedIn',
-    idLabel: 'معرّف العميل (Client ID)',
-    secretLabel: 'سر العميل (Primary Client Secret)',
-    where: 'من LinkedIn Developers، تطبيقك، تبويب «Auth».',
-  },
-  microsoft: {
-    name: 'تطبيق Microsoft (OneDrive)',
-    idLabel: 'معرّف التطبيق (Application / client ID)',
-    secretLabel: 'قيمة السر (Client secret Value)',
-    where: 'من Microsoft Entra، «App registrations»، تطبيقك: «Overview» للمعرّف و«Certificates & secrets» للسر. انسخ «Value» لا «Secret ID».',
-  },
-  x: {
-    name: 'تطبيق X',
-    idLabel: 'معرّف العميل (OAuth 2.0 Client ID)',
-    secretLabel: 'سر العميل (OAuth 2.0 Client Secret)',
-    where: 'من X Developer Portal، تطبيقك، «Keys and tokens»، قسم OAuth 2.0.',
-  },
-};
 
 /** The platform app's credentials: entered once, checked with the platform, kept in the vault, never read back. */
 export function AppBlock({ provider, app, canSecrets, onSaved, lock }: { provider: ConnProvider; app: Integration | undefined; canSecrets: boolean; onSaved: () => Promise<void>; lock: (why: string) => ReturnType<typeof needProps> }) {

@@ -91,15 +91,17 @@ test('the video-only message names the platforms in the choice', () => {
   assert.match(workErrorText('PLATFORM_INVALID'), /منصة مفعّلة/);
 });
 
-test('every platform the registry may hold has a card of knowledge, and says it was not read from official documents', () => {
+test('every platform the registry may hold has a card of knowledge, and says when it was read from official documents', () => {
   for (const p of BUILTIN_PLATFORMS) assert.ok(KNOWLEDGE[p.key], p.key);
   for (const t of PLATFORM_TEMPLATES) assert.ok(KNOWLEDGE[t.key], t.key);
   for (const [k, v] of Object.entries(KNOWLEDGE)) {
     assert.ok(v.can && v.cannot && v.lead && v.connect, k);
     assert.ok(v.requires.length >= 1, k);
-    assert.equal(v.checked, null, `${k}: nothing here was re-read from the platform's own documents`);
+    assert.ok(v.checked === null || /^\d{4}-\d{2}-\d{2}$/.test(v.checked), `${k}: a date, or null if it never was`);
     if (v.docs) assert.match(v.docs, /^https:\/\//, k);
   }
+  for (const k of ['instagram', 'facebook', 'x', 'linkedin', 'youtube', 'tiktok', 'snapchat']) assert.equal(KNOWLEDGE[k].checked, '2026-11-01', k);
+  for (const k of ['whatsapp_channel', 'whatsapp_status', 'mail']) assert.equal(KNOWLEDGE[k].checked, null, k);
 });
 
 test('the templates are not already in the registry, and only video-only where the platform is', () => {

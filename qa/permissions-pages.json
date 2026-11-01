@@ -1,5 +1,5 @@
 {
-  "run": "2026-11-01T09:56:47.685Z",
+  "run": "2026-11-01T20:51:02.529Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -342,6 +342,26 @@
       "detail": ""
     },
     {
+      "name": "settings-platforms-added: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-builtin: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-mail: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "urgency-badges: renders",
       "pass": true,
       "detail": ""
@@ -502,9 +522,9 @@
       "detail": ""
     },
     {
-      "name": "settings-platforms: every platform app block and manual platform carries the circled guide",
+      "name": "settings-platforms: every platform is one line with one chip",
       "pass": true,
-      "detail": "6"
+      "detail": "7"
     },
     {
       "name": "settings-storage-move-plan: the move panel carries its guide",
@@ -524,25 +544,75 @@
     {
       "name": "settings-platforms: a viewer sees every control locked for «platforms.manage»",
       "pass": true,
-      "detail": "33"
+      "detail": "7"
     },
     {
       "name": "settings-platforms: the built-in platforms cannot be deleted, the added one can",
       "pass": true,
-      "detail": "2"
+      "detail": ""
     },
     {
-      "name": "settings-platforms: the info card is there (closed), says it was not read from the official documents, and links the platform own page",
+      "name": "settings-platforms: the info card is there (closed), says when it was read from the official documents, and links the platform own page",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "settings-platforms: the platform with an account is not offered a working delete",
+      "name": "settings-platforms-added: folded, «النشر الآن» is there",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "settings-platforms: the mail channel has no readiness tracker or switch",
+      "name": "settings-platforms-added: folded, «المسار المخطط» is there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added: folded, «نشر مساعد» is there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added: folded, «نصاً وصورة وفيديو» is there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added: folded, «ما تقدمه وما تطلبه» is there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added: folded, «سجل المنصة» is there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added: folded, «تعديل» is there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added: folded, «روجعت من وثائق المنصة الرسمية في 2026-11-01» is there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-builtin: folded, the reason a platform with accounts stays on",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps: the step links to the platform, in a new tab",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: the advanced options start folded",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms: the mail channel has no setup and no switch",
       "pass": true,
       "detail": ""
     },
@@ -5522,12 +5592,12 @@
       "detail": ""
     },
     {
-      "name": "guide-meta: shows «Facebook Login»",
+      "name": "guide-meta: shows «Manage messaging & content on Instagram»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "guide-meta: shows «Valid OAuth Redirect URIs»",
+      "name": "guide-meta: shows «API setup with Unified login»",
       "pass": true,
       "detail": ""
     },
@@ -5537,7 +5607,7 @@
       "detail": ""
     },
     {
-      "name": "guide-meta: shows «App ID و App Secret»",
+      "name": "guide-meta: shows «Configuration ID»",
       "pass": true,
       "detail": ""
     },
@@ -5628,6 +5698,16 @@
     },
     {
       "name": "guide-tiktok: shows «التدقيق»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok: shows «App review»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "guide-tiktok: shows «URL prefix»",
       "pass": true,
       "detail": ""
     },
@@ -5882,7 +5962,7 @@
       "detail": ""
     },
     {
-      "name": "settings-platforms: shows «منصة اجتماعية»",
+      "name": "settings-platforms: shows «تيك توك»",
       "pass": true,
       "detail": ""
     },
@@ -5892,112 +5972,37 @@
       "detail": ""
     },
     {
-      "name": "settings-platforms: shows «النشر الآن»",
+      "name": "settings-platforms: shows «غير متصلة»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "settings-platforms: shows «محاكاة»",
+      "name": "settings-platforms: shows «بانتظار موافقة المنصة»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "settings-platforms: shows «المسار المخطط»",
+      "name": "settings-platforms: shows «تحتاج منك خطوة»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "settings-platforms: shows «نشر تلقائي»",
+      "name": "settings-platforms: shows «لا شيء مطلوب منك الآن»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "settings-platforms: shows «نشر مساعد»",
+      "name": "settings-platforms: shows «بدء الإعداد»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "settings-platforms: shows «الفيديو فقط»",
+      "name": "settings-platforms: shows «تحديث الحالة»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "settings-platforms: shows «نصاً وصورة وفيديو»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «التجهيز»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «لم يبدأ»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «قيد التجهيز»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «قُدّم للمراجعة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «يعمل»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «حفظ التجهيز»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «قناة القسم جاهزة، وشاشة الموافقة قيد الإعداد»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «ما تقدمه وما تطلبه»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «تيك توك»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «مفعّلة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «موقوفة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «قائمة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «سجل المنصة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «لا تُوقف منصة عليها حسابات فعّالة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "settings-platforms: shows «لا تُحذف منصة عليها حسابات أو نسخ نصوص»",
+      "name": "settings-platforms: shows «التفاصيل»",
       "pass": true,
       "detail": ""
     },
@@ -6052,7 +6057,7 @@
       "detail": ""
     },
     {
-      "name": "settings-platforms-viewer: shows «حفظ التجهيز»",
+      "name": "settings-platforms-viewer: shows «إضافة منصة»",
       "pass": true,
       "detail": ""
     },
@@ -6068,6 +6073,161 @@
     },
     {
       "name": "settings-platforms-viewer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms-added · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms-added: shows «خيارات متقدمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added: shows «فيسبوك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-added · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms-builtin · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-builtin · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms-builtin: shows «خيارات متقدمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-builtin: shows «حسابات إنستغرام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-builtin: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-builtin · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-builtin · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms-mail · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-mail · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms-mail: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-mail · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-mail · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms-steps · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "settings-platforms-steps: shows «إعداد إنستغرام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps: shows «الخطوة 1 من 6»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps: shows «جهّز حسابات إنستغرام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps: shows «يُحفظ تقدمك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps: shows «الحسابات جاهزة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps: shows «إعدادات حافظة الأعمال»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps: shows «ملاحظات مهمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings-platforms-steps · a · 390: no sideways scroll",
       "pass": true,
       "detail": "overflow 0px"
     },
@@ -6219,8 +6379,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 1243,
-    "passed": 1243,
+    "total": 1275,
+    "passed": 1275,
     "failed": 0
   }
 }
