@@ -2192,3 +2192,19 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Found.** The site used to answer every unknown address with an HTML page, `/favicon.ico` included. That is why browsers showed a globe, and it means a status of 200 proves nothing: waiting on a new file only worked once the check read its content type.
 - **Not verified.** Anything signed in on production. The migration is not applied, because the Supabase connector cannot see comms-hub.
 - **Rollback.** The deployment before this one is `dpl_2D8VxoZVVHBjtdeoh7Q6PuKNLQ6z`, on `15c36ea`.
+
+### 2026-11-01: the migration of «تقرير الشهر» applied to comms-hub
+
+- **The owner's word.** "Yes, apply it", after the Director asked where the report was, and "Connector switched" once the Supabase connector was on the account that holds comms-hub.
+- **Found first.** The tab was missing because the function did not exist on comms-hub. Signed out, `activity_report` answered 404 `PGRST202`, as a name that does not exist does, while `deletion_visible`, which exists and is closed to visitors, answered 401 `42501`.
+- **Applied.** `supabase/migrations/20261101120000_activity_report.sql` as version `20261101184751` 'activity_report'. The md5 of the stored statement, `370fff3023eccaf057334c3af9f28de6`, equals the file's.
+- **Verified on comms-hub, numbers** (`qa/activity-report-rules-comms-hub.json`).
+  - Before applying: the migration and the rules in one rolled-back transaction, **38 of 38**. Capabilities still 39 and role rows still 152 after it, nothing of the fixture left.
+  - After applying: the rules file run verbatim, **38 of 38**, the run's md5 `19fed7b0d3833fa8b1525329a4187460` equal to the file's.
+  - Capabilities 39 to 41, role rows 152 to 168. Both permissions on for `admin` and `director` only, in all eight roles' rows; no personal overrides.
+  - Signed out, `activity_report` now answers 401 `42501`.
+  - Security advisors, 318 findings before and 319 after, compared in full by script: one new, `activity_report` callable by `authenticated`, which is meant, since it checks `activity.report` itself. Nothing new for `anon`. Performance advisors: nothing new; `unused_index` 22 to 21, because the rules run used `activity_log_at_idx`.
+  - On the real months, as a throwaway director in a rolled-back run, sizes only and no real identity used: September and October empty, November 9 action groups, 2 active people, 4 finished stages, each month 3 to 13 ms.
+- **October is empty and that is correct.** `activity_log`, `work_log`, finished stages and finished tasks have no row before 2026-11-01. Only `permission_events` has rows in October (21), and the report does not count those. The page opens on the month before (`defaultMonth`), so until the last days of November it opens on the words «لا إنجاز مسجّل في هذا الشهر.», and the Director has to choose November.
+- **Behaviour changed.** The assistant no longer sees the whole log unless given it. comms-hub has 3 admins, 1 director and 1 producer, so nobody lost anything yet.
+- **Not verified.** The page signed in on the real site, and the three downloads from real data: both need a real sign-in, which is the Director's. The Excel and PDF files remain checked on the fixture only.

@@ -32,7 +32,7 @@ function start() {
   throw Error('the database did not start');
 }
 
-const result = { script: 'supabase/tests/activity_report_rules.sql', script_md5: md5(fs.readFileSync(SCRIPT, 'utf8')), migration: { file: 'supabase/migrations/20261101120000_activity_report.sql', file_md5: md5(fs.readFileSync(MIGRATION, 'utf8')), applied: 'not applied to comms-hub' }, how: `A private Docker container of ${IMAGE}, no published port, removed after the run; every migration replayed in order.`, run: new Date().toISOString() };
+const result = { script: 'supabase/tests/activity_report_rules.sql', script_md5: md5(fs.readFileSync(SCRIPT, 'utf8')), migration: { file: 'supabase/migrations/20261101120000_activity_report.sql', file_md5: md5(fs.readFileSync(MIGRATION, 'utf8')), applied: 'this run is on a private container and touched nothing; the run on comms-hub is qa/activity-report-rules-comms-hub.json' }, how: `A private Docker container of ${IMAGE}, no published port, removed after the run; every migration replayed in order.`, run: new Date().toISOString() };
 
 try {
   start();

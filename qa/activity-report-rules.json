@@ -4,7 +4,7 @@
   "migration": {
     "file": "supabase/migrations/20261101120000_activity_report.sql",
     "file_md5": "370fff3023eccaf057334c3af9f28de6",
-    "applied": "not applied to comms-hub"
+    "applied": "this run is on a private container and touched nothing; the run on comms-hub is qa/activity-report-rules-comms-hub.json"
   },
   "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
   "run": "2026-11-01T09:55:32.787Z",

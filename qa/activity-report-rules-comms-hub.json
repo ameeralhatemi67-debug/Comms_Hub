@@ -1,0 +1,50 @@
+{
+  "script": "supabase/tests/activity_report_rules.sql",
+  "script_md5": "19fed7b0d3833fa8b1525329a4187460",
+  "run": "2026-11-01",
+  "migration": {
+    "file": "supabase/migrations/20261101120000_activity_report.sql",
+    "file_md5": "370fff3023eccaf057334c3af9f28de6",
+    "applied": "applied to comms-hub (hrghmioxvgkjpnydrxrk) with the owner's approval of 2026-11-01, as version 20261101184751 'activity_report'; md5 of the stored statement 370fff3023eccaf057334c3af9f28de6 equals the md5 of the file"
+  },
+  "how": "Each run is one transaction against comms-hub, rolled back at the end, through the MCP execute_sql tool. Throwaway accounts (@t.test) act through row level security; nothing about a real person is read into the result. The TOTAL row carries the md5 of the text the run executed.",
+  "before_applying": {
+    "what": "The migration and the rules together in one rolled-back transaction, so the run's text is not the file's.",
+    "total": 38,
+    "passed": 38,
+    "differ": [],
+    "left_behind": "nothing: capabilities 39, role_capabilities 152, no @t.test account, user, log line, task or event, no CH-999991"
+  },
+  "after_applying": {
+    "what": "The rules file verbatim.",
+    "total": 38,
+    "passed": 38,
+    "differ": [],
+    "run_md5": "19fed7b0d3833fa8b1525329a4187460"
+  },
+  "state": {
+    "capabilities": { "before": 39, "after": 41 },
+    "role_capabilities": { "before": 152, "after": 168 },
+    "held_by_default": ["admin", "director"],
+    "personal_overrides": 0
+  },
+  "signed_out_call": {
+    "before": "404 PGRST202",
+    "after": "401 42501",
+    "control": "deletion_visible, which exists and is closed to visitors: 401 42501"
+  },
+  "advisors": {
+    "security": { "before": 318, "after": 319, "new": ["authenticated_security_definer_function_executable on public.activity_report(p_month text), meant: the function checks activity.report itself"], "gone": [] },
+    "performance": { "unindexed_foreign_keys": "7 and 7", "unused_index": "22 and 21", "multiple_permissive_policies": "2 and 2", "new": [] }
+  },
+  "real_months": {
+    "how": "A throwaway director in a rolled-back transaction, sizes only.",
+    "months": [
+      { "month": "2026-09", "people": 6, "actions": 0, "days": 0, "approved": 0, "stages": 0, "tasks": 0, "late": 0, "ms": 13 },
+      { "month": "2026-10", "people": 6, "actions": 0, "days": 0, "approved": 0, "stages": 0, "tasks": 0, "late": 0, "ms": 3 },
+      { "month": "2026-11", "people": 6, "actions": 9, "days": 2, "approved": 0, "stages": 4, "tasks": 0, "late": 0, "ms": 7 }
+    ],
+    "note": "people includes the throwaway director. October is truly empty: no row of activity_log, work_log, finished stages or finished tasks is older than 2026-11-01."
+  },
+  "not_verified": "The page signed in on the real site, and the three downloads from real data."
+}

@@ -28,15 +28,14 @@ related:
 
 ## The site's icon, «سجل النشاط» and «تقرير الشهر», 2026-11-01
 
-From the owner's request (`MVP_draft.md` section 66). **Live on production** since 2026-11-01 as `91e2c9a`, for the Director to test. The migration is **not applied**.
+From the owner's request (`MVP_draft.md` section 66). **Live on production** since 2026-11-01 as `91e2c9a`, for the Director to test. The migration is **applied** to comms-hub since 2026-11-01, as version `20261101184751`, with the owner's approval.
 
 - **Done.** The logo in the browser's tab. «سجل النشاط» reads the work cycle too, with «الكل» and «نشاطي» behind the new permission «عرض سجل النشاط كاملاً». «تقرير الشهر» shows what each person did and who came first, and downloads as Excel or as PDF in two templates.
-- **Evidence.** `npm test` 628 of 628, typecheck and build clean; database rules 38 of 38 on a private container; `qa/activity-exports.mjs` 21 of 21, with Excel itself opening the file; `qa/activity-flow.cjs` 39 of 39; `qa/site-icon.cjs` 6 of 6; `qa/accounts-flow.cjs` 63 of 63; `qa/permissions-pages.cjs` 1243 of 1243.
-- **Blocked on the owner.** The Supabase connector is signed in to an account without comms-hub, so the migration could not be run or applied there. Reconnect it to the right account, then approve applying `supabase/migrations/20261101120000_activity_report.sql`.
-- **Until it is applied, the Director sees** the logo, the log with the work cycle, «الكل» and «نشاطي». They do not see «تقرير الشهر», and the two new permissions show in «الأدوار» but refuse when switched.
-- **Changes behaviour when applied.** The assistant stops seeing the whole log unless given it.
+- **Evidence.** `npm test` 628 of 628, typecheck and build clean; database rules 38 of 38 on a private container, and on comms-hub both before and after applying; `qa/activity-exports.mjs` 21 of 21, with Excel itself opening the file; `qa/activity-flow.cjs` 39 of 39; `qa/site-icon.cjs` 6 of 6; `qa/accounts-flow.cjs` 63 of 63; `qa/permissions-pages.cjs` 1243 of 1243. The run on comms-hub is `qa/activity-report-rules-comms-hub.json`.
+- **What the Director sees now.** After reloading the page, «تقرير الشهر» is the third tab of «سجل النشاط». It opens on the month before, and until the last days of a month that is October here, which is truly empty: real work was first logged on 2026-11-01. Choose November («حتى اليوم») to see a report with something in it.
+- **Behaviour changed.** The assistant no longer sees the whole log unless given it. There is no assistant account today, so nobody lost anything yet.
 - **Owner to confirm.** How productivity is counted (`MVP_draft.md` 66.3), and that the Admin and the director are left out of the ranking.
-- **Not verified.** The rules on comms-hub itself, and the page signed in on the real site with real data.
+- **Not verified.** The page signed in on the real site, and the three downloads from real data. The report function itself ran on the real months as a throwaway director, sizes only.
 - **Security.** `next` 16.3.8 has critical advisories, fixed in 16.4.3: proposed as a task of its own, and worth doing before the next push.
 
 ## «الحسابات» redesigned, 2026-11-01
