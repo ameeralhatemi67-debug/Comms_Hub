@@ -218,10 +218,11 @@ information, not a connection.
 `progress.md`): the first is the setup done once, the second the accounts that change. A platform's chip is worked out from
 what is stored (`src/lib/platforms/setup.ts`); the steps and their links exist once, in `src/lib/setup-guides.ts`; the sheet
 is `src/components/sheet.tsx`. Steps come first in the document so the sides follow the language: never name a side. Saved
-progress is `platform_setup` (`supabase/migrations/*platform_setup*`, written and not applied until the owner approves),
+progress is `platform_setup` (`supabase/migrations/*platform_setup*`, applied to comms-hub on 2026-11-02 with the owner's approval),
 written only through `platform_setup_save`, and holds the two public identifiers and nothing secret. A sign-in offers only
 platforms the registry has switched on (`splitOffer`). A publisher may reconnect an account, and may not add, remove or
-disconnect one. `qa/platforms-flow.cjs` clicks through both pages on a fixture.
+disconnect one. `qa/platforms-flow.cjs` clicks through both pages on a fixture, and `qa/platform-setup-live.cjs` looks at the
+live site after a deployment.
 
 Platform accounts of Facebook, Instagram and TikTok can be connected for real, by owner
 directive of 2026-10-15 (`Platform_Connections_Setup.md`, recorded in `progress.md`): the

@@ -6,7 +6,7 @@ tags:
   - document/progress
   - knowledge/dated
 created: 2026-08-18
-updated: 2026-11-01
+updated: 2026-11-02
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -2238,3 +2238,22 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Decided without asking.** Simulated accounts stay, folded. The Google application can still be edited in «الاتصالات» too, as one record. TikTok stays video-only, because the site has no rule for a post that needs media. A LinkedIn company Page is not built.
 - **Not verified.** Anything signed in on the real site: both pages were checked on fixtures only. The Meta Unified Login code has met a stand-in, never a real application, and whether one Meta application can hold both the Instagram and the Page use cases is still unconfirmed. Until the migration is applied, the pages work, a saved step says it failed, and a publisher cannot reconnect.
 - **Left out of the commit.** `validation/recheck-R01.md`, `videos/`, `supabase/.temp/`, `qa/simulations/`, `Owner_Setup_Guide.md`, the `Role_Simulation_*` documents and `qa/site-live.json`.
+
+### 2026-11-02: «المنصات» and «حسابات المنصات» live, the migration applied, `next` at 16.4.3
+
+- **The owner's word.** "Yes, take it live", answering "Should I merge to main, push, and apply the migration so it goes live?"
+- **What went out.** `9385e14..8917fa1`, fast-forwarded: `a13c2b8`, the rebuild recorded in the entry above, and `8917fa1`, the upgrade.
+- **`next` 16.3.8 to 16.4.3.** Listed the day before as what had to be cleared before going live, and done as its own commit. "An advisory" undersold it: `npm audit` rated it critical, with unauthenticated remote code execution in the image optimisation API and in `use cache` functions, and a denial of service through Server Actions (GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr, GHSA-p3m5-59mp-jv5r). No source change. On a local build: `npm test` 645 of 645, typecheck and build clean, `qa/site-live.cjs` 9 of 9, the nonce policy still sent, and `qa/platform-gate.cjs` 11 of 11.
+- **Applied.** `supabase/migrations/20261101200000_platform_setup.sql` as version `20261101211812` 'platform_setup'. The md5 of the stored statement, `2ee597843c835447f7d1d23ab358b267`, equals the file's.
+- **Verified on comms-hub, numbers** (`qa/platform-setup-rules-comms-hub.json`).
+  - Before applying: the migration and the rules in one rolled-back transaction, **35 of 35**, nothing left behind.
+  - After applying: the rules file run verbatim, **35 of 35**, the run's md5 `16933fa438b518a9835d7da584ade7e1` equal to the file's. No throwaway account, user or secret left, `platform_setup` empty, `platform_accounts` still 1.
+  - Security advisors, 319 findings before and 322 after, compared in full by script: three new, `platform_conn_manage`, `platform_ready` and `platform_setup_save`, callable by `authenticated`, which is meant. Nothing new for `anon`, nothing gone. Performance unchanged at 30.
+- **Verified on production, numbers.**
+  - Vercel: READY on `8917fa1` in 66 seconds (`dpl_CYP4ocrnVFp6WQqbKjpqqfUJ1gnn`), `comms-hub-three.vercel.app` pointing at it, no runtime errors in the 15 minutes after.
+  - `qa/site-live.cjs` **9 of 9**, `qa/site-icon.cjs` **13 of 13**, `qa/platform-gate.cjs` **11 of 11**.
+  - `qa/platform-setup-live.cjs`, new, **10 of 10**: the live page reports `next` 16.4.3, the styles of both pages are out and the old ones gone, both pages stay behind the sign-in, the image route serves no SVG, and the new functions and table refuse anyone signed out.
+- **Found.** A check can pass on the wrong site. `qa/site-live.cjs` takes its address as an argument and ignores `QA_BASE_URL`, and `qa/site-icon.cjs` with no address checks a local build. Each gave a clean result for the wrong site on a first run here. The numbers above are from the runs that named the right address.
+- **Not verified.** Anything signed in on the real site, so saving a step and a publisher's reconnection have run only in the rules, not from the page. The Meta Unified Login code has met a stand-in, never a real application. Whether the holes in `next` 16.3.8 were ever used on production was not checked.
+- **Left as they are.** Three moderate `npm audit` findings in the mail libraries (`nodemailer`, `mailparser`, `ip-address`). `validation/recheck-R01.md`, `videos/`, `supabase/.temp/`, `qa/simulations/`, `Owner_Setup_Guide.md` and the `Role_Simulation_*` documents stay out of the commits.
+- **Rollback.** The deployment before this one is `dpl_3MnFGeWHCdzx7hydSzLG1F18ShW7`, on `9385e14`, but it returns `next` to 16.3.8. Reverting `a13c2b8` alone keeps the upgrade. The migration can stay in place, because the old pages do not use what it adds.

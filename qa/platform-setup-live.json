@@ -1,0 +1,60 @@
+{
+  "script": "qa/platform-setup-live.cjs",
+  "run": "2026-11-01T21:23:26.134Z",
+  "checks": [
+    {
+      "name": "the page really runs next 16.4.3",
+      "pass": true,
+      "detail": "16.4.3"
+    },
+    {
+      "name": "the styles of both pages are out",
+      "pass": true,
+      "detail": "281219 bytes"
+    },
+    {
+      "name": "and the old ones are gone",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«حسابات المنصات» stays behind the sign-in",
+      "pass": true,
+      "detail": "{\"password\":true,\"rows\":0}"
+    },
+    {
+      "name": "so does «المنصات»",
+      "pass": true,
+      "detail": "{\"password\":true,\"rows\":0}"
+    },
+    {
+      "name": "the image route does not serve an SVG",
+      "pass": true,
+      "detail": "400 text/plain; charset=utf-8"
+    },
+    {
+      "name": "signed out, platform_ready is refused, and it exists",
+      "pass": true,
+      "detail": "{\"status\":401,\"code\":\"42501\"}"
+    },
+    {
+      "name": "signed out, platform_conn_manage is refused, and it exists",
+      "pass": true,
+      "detail": "{\"status\":401,\"code\":\"42501\"}"
+    },
+    {
+      "name": "signed out, platform_setup_save is refused, and it exists",
+      "pass": true,
+      "detail": "{\"status\":401,\"code\":\"42501\"}"
+    },
+    {
+      "name": "signed out, nobody reads a setup",
+      "pass": true,
+      "detail": "401"
+    }
+  ],
+  "notes": [],
+  "total": 10,
+  "passed": 10,
+  "failed": 0
+}

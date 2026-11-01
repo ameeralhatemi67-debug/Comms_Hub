@@ -1,0 +1,48 @@
+{
+  "script": "supabase/tests/platform_setup_rules.sql",
+  "script_md5": "16933fa438b518a9835d7da584ade7e1",
+  "run": "2026-11-02",
+  "migration": {
+    "file": "supabase/migrations/20261101200000_platform_setup.sql",
+    "file_md5": "2ee597843c835447f7d1d23ab358b267",
+    "applied": "applied to comms-hub (hrghmioxvgkjpnydrxrk) with the owner's approval of 2026-11-02, as version 20261101211812 'platform_setup'; md5 of the stored statement 2ee597843c835447f7d1d23ab358b267 equals the md5 of the file"
+  },
+  "how": "Each run is one transaction against comms-hub, rolled back at the end, through the MCP execute_sql tool. Throwaway accounts (@t.test) act through row level security; nothing about a real person is read into the result.",
+  "before_applying": {
+    "what": "The migration and the rules together in one rolled-back transaction, so the run's text is not the file's.",
+    "total": 35,
+    "passed": 35,
+    "left_behind": { "throwaway_accounts": 0, "throwaway_users": 0, "leftover_secrets": 0, "platform_setup_table": "absent", "platform_accounts": "1, as before" }
+  },
+  "after_applying": {
+    "what": "The rules file run verbatim against the applied migration.",
+    "total": 35,
+    "passed": 35,
+    "run_md5": "16933fa438b518a9835d7da584ade7e1",
+    "run_md5_equals_file": true,
+    "left_behind": { "platform_setup_rows": 0, "throwaway_accounts": 0, "throwaway_users": 0, "leftover_secrets": 0, "platform_accounts": "1, as before" }
+  },
+  "signed_out": {
+    "platform_setup_save": false,
+    "platform_ready": false,
+    "platform_conn_manage": false,
+    "read_platform_setup": false,
+    "row_level_security_on": true
+  },
+  "advisors": {
+    "security": {
+      "before": 319,
+      "after": 322,
+      "compared": "in full, by script",
+      "new": [
+        "platform_conn_manage() callable by authenticated",
+        "platform_ready() callable by authenticated",
+        "platform_setup_save(text, text[], text, jsonb) callable by authenticated"
+      ],
+      "new_for_anon": 0,
+      "gone": 0,
+      "note": "All three are meant for signed-in people. The two that give or take anything check the right themselves."
+    },
+    "performance": { "before": 30, "after": 30 }
+  }
+}

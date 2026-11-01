@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-11-01
+updated: 2026-11-02
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -26,15 +26,15 @@ related:
 
 # Communication Department Hub — Current Status
 
-## «المنصات» and «حسابات المنصات» rebuilt, 2026-11-01
+## «المنصات» and «حسابات المنصات» rebuilt, live 2026-11-02
 
-From the owner's directive (`MVP_draft.md` section 67). Committed on the branch `claude/platforms-redesign`; not merged, not pushed, not on the live site. The migration `20261101200000_platform_setup.sql` is written and not applied.
+From the owner's directive (`MVP_draft.md` section 67). Live on production since 2026-11-02, on `next` 16.4.3, with the migration applied to comms-hub as version `20261101211812`.
 
 - **Done.** «المنصات» shows one chip per platform and «إضافة منصة» opens one menu. The steps sheet has its links, a bar and saved progress, and its sides follow the language. «حسابات المنصات» is rebuilt around one sign-in and a choice. The guides and the connection code follow the official pages as read on 2026-11-01, Meta's Unified Login included.
-- **Evidence.** `npm test` 645 of 645, typecheck and build clean. `qa/platforms-flow.cjs` 74 of 74, new. `qa/permissions-pages.cjs` 1275, `qa/work-pages.cjs` 1021 and `qa/post-preview.cjs` 202, all passing. `supabase/tests/platform_setup_rules.sql` 35 of 35 on a private container.
+- **Evidence.** `npm test` 645 of 645, typecheck and build clean. `qa/platforms-flow.cjs` 74 of 74. `qa/permissions-pages.cjs` 1275, `qa/work-pages.cjs` 1021 and `qa/post-preview.cjs` 202, all passing. On comms-hub, `supabase/tests/platform_setup_rules.sql` 35 of 35 before and after applying. On the live site, `qa/site-live.cjs` 9 of 9, `qa/site-icon.cjs` 13 of 13, `qa/platform-gate.cjs` 11 of 11, `qa/platform-setup-live.cjs` 10 of 10, no runtime errors.
 - **Not verified.** Anything signed in on the real site. The Meta Unified Login code has only met a stand-in, never a real application.
-- **Owner to decide.** Merge and push, and apply the migration with them. Until it is applied the pages work, a saved step says it failed, and a publisher cannot reconnect. `next` 16.3.8 has an advisory to clear before a push.
-- **Next.** Enter the first real platform application, following the sheet.
+- **Owner to decide.** `npm audit` still lists three moderate findings in the mail libraries (`nodemailer`, `mailparser`, `ip-address`). `validation/recheck-R01.md` still holds another project's Firebase identifiers, uncommitted.
+- **Next.** Walk both pages signed in, then enter the first real platform application, following the sheet. comms-hub has no Facebook yet: add it from «إضافة منصة» before linking Pages.
 
 ## The site's icon, «سجل النشاط» and «تقرير الشهر», 2026-11-01
 

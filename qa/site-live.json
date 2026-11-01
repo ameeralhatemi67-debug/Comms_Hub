@@ -1,11 +1,11 @@
 {
   "script": "qa/site-live.cjs",
-  "run": "2026-11-01T10:12:29.493Z",
+  "run": "2026-11-01T21:21:49.871Z",
   "checks": [
     {
       "name": "the page carries the Content-Security-Policy, with a nonce and no unsafe-eval",
       "pass": true,
-      "detail": "default-src 'self'; script-src 'self' 'nonce-SPpkwgp9bGqmgBhqBNSpJA==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQV"
+      "detail": "default-src 'self'; script-src 'self' 'nonce-RqgqOBVG6qDOVHuY6StaaQ==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQV"
     },
     {
       "name": "the sign-in page draws, right to left, with its form",
