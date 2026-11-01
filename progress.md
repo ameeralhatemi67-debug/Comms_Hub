@@ -2136,9 +2136,45 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Known limits.**
   - A person who holds a permission from their role and also from a live temporary grant needs two flips: the first adds the removal and the temporary grant still allows it (`perm_eval`), the second ends it.
   - A one-time grant bound to one conversation reads as off on the switch, because `perm_card` evaluates without a target. It is counted on the row. This is as before.
-- **Not done.** Nothing pushed. Committed on the branch `claude/accounts-redesign`, with the earlier studio and calendar edits in a commit of their own after it.
+- **Merged.** The redesign is on `main` as `975d546`, by fast-forward, by the owner's word "Merge the redesign only". On `main`, without the studio edits: `npm test` 604 of 604, typecheck and build clean. The two browser checks were not re-run there: they ran with those edits in the tree, and the four files that separate the two commits are outside what either check reaches.
+- **Not done.** Nothing pushed. The earlier studio and calendar edits are `8bdb7b1` on the branch `claude/accounts-redesign`, not merged.
 - **Left out of the commits, on purpose.**
   - `validation/recheck-R01.md`: its only change is a block of another project's Firebase identifiers, pasted in. The project's rules keep Firebase values out of this repository.
   - `videos/` (96 MB) and `supabase/.temp/` (tool residue).
   - `qa/simulations/`: already on the `codex/role-simulation-*` branches, and it carries the real project reference.
   - `Owner_Setup_Guide.md` and the two `Role_Simulation_*` documents: untracked for weeks across many commits, so left for the owner to decide.
+
+### 2026-11-01: the site's icon, «سجل النشاط» upgraded, and «تقرير الشهر»
+
+- **The owner's word.** The logo in the browser's tab; a tab between the whole view and the solo view, for the Admin and the Director by default, either of whom can add the permission to anyone; and a report for the Director at the end of the month of what each person did and who is the most productive, to download as Excel or as PDF with two templates designed here.
+- **Specification.** `MVP_draft.md` section 66.
+- **Built.**
+  - The icon: `src/app/favicon.ico` (16 to 64 pixels), `icon.svg`, `apple-icon.png`. The site had none, so tabs showed a globe. The rosette is redrawn with a heavier line by size, because the logo's own line is a quarter of a pixel at 16 (`qa/site-icons-build.cjs`).
+  - One list from three logs (`src/lib/activity/feed.ts`): the work cycle's `work_log` was not on this page before, though the page said "every action". Paging across the three never skips a row (`mergePage`). Filters by person and period ask the database, and a kind of action spans the logs.
+  - Two capabilities, migration `20261101120000_activity_report.sql`: `activity.full` (grantable to anyone) replaces the list of roles in the read rule, and `activity.report` (from rank 2). Both are the Admin's and the director's by default, so **the assistant no longer sees the whole log by default**, as asked.
+  - «تقرير الشهر»: `activity_report` gives counts; `src/lib/activity/report.ts` gives points, ranks and the method in words, once, for the page and all three files.
+  - The files, made in the browser: Excel with no library (`report-xlsx.ts`), PDF in two templates with pdf-lib 1.17.1 and fontkit 1.1.1, loaded only when asked for (`report-pdf.ts`, `bidi.ts`, fonts in `public/report/`).
+- **Decisions taken here, for the owner to overrule.**
+  - How productivity is counted (`MVP_draft.md` 66.3). A stage or task 3 and 1 more in time, an approved work 4, a review or publication 2, a text or file 1, tidying 0.
+  - The Admin and the director are shown and not ranked, because a director's approvals would otherwise put them first in their own report.
+  - «تقرير الشهر» can be granted to the assistant but not to team roles.
+- **Found and fixed.**
+  - `Title` joined its two words with no space, so the live site reads «سجلالنشاط» and «مكتبةالوسائط» (`src/components/ui.tsx`).
+  - Counting the logs plainly would have counted twice: a file approved in a work is written to both logs, and a finished stage or task is both a record and a log line. The function and `report.ts` count each once.
+  - An empty month ranked everyone first at zero. Nobody is placed for nothing now.
+  - pdf-lib drops Reem Kufi's dot positions, so headings are drawn as outlines. The Arabic font file has no digits, brackets or quotation marks, so `bidi.ts` cuts a line by font and mirrors brackets.
+- **Verified, numbers.**
+  - `npm test` **628 of 628**, with 24 new in `tests/activity-report.test.mjs`. Typecheck and build clean.
+  - `supabase/tests/activity_report_rules.sql` **38 of 38**, with all migrations replayed on a private Docker container of the Supabase image (`qa/activity-rules-local.cjs`, `qa/activity-report-rules.json`). This is new: nothing touched comms-hub. The container stands in for what the platform's services add (`auth.users` columns, `auth.uid()`, `storage` tables), and feeds the migrations with LF line endings, because `20261015220000_limits_enforced.sql` patches functions by matching text and a CRLF checkout does not match.
+  - `qa/activity-exports.mjs` **21 of 21**: both PDFs rendered and their text read back with PyMuPDF; the .xlsx opened by Excel itself, without a repair, right to left, its cells read back; an empty month and a large one.
+  - `qa/activity-flow.cjs` **39 of 39**: the real page on a fixture under the site's Content-Security-Policy, the three files really downloaded; a person without the permission, one given it, and the database before the migration.
+  - `qa/site-icon.cjs` **6 of 6** on the production build, signed out.
+  - `qa/accounts-flow.cjs` **63 of 63**, `qa/team-panel.cjs` **16 of 16**.
+  - `qa/permissions-pages.cjs` **1243 of 1243**.
+- **Not verified.**
+  - The rules on comms-hub itself, and the migration is **not applied**. The Supabase connector in this session is signed in to an account that does not list comms-hub (it lists NBC, streamer_app and dnfom-system), so both the read and the rolled-back run were refused.
+  - The signed-in page on the real site.
+  - The report on real data: the fixture's month is invented.
+  - The long press is not involved here. The Android application's disabled buttons were not run on the emulator.
+- **Before the migration is applied.** The site keeps working: the director keeps the whole log (tested), and «تقرير الشهر» simply does not appear. So the site can be deployed first, or the migration applied first.
+- **Not done.** Nothing committed or pushed. `npm audit` lists critical advisories for `next` 16.3.8, fixed in 16.4.3; proposed as a task of its own.

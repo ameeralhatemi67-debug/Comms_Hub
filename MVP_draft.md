@@ -725,8 +725,9 @@ Reading it:
   «الحسابات» (the administrator, the director and the assistant, by the capability «فتح صفحة الحسابات»
   their templates carry since Step P2; the table of 2026-10-15 first listed it for the administrator
   alone because the interface's mirror of the templates was out of date: corrected the same day), and what
-  «سجل النشاط» shows (the whole log and the team panel for the administrator, director and assistant;
-  everyone else sees their own actions and the files they reach).
+  «سجل النشاط» shows (the whole log and the team panel for the administrator and the director, by the
+  capability «عرض سجل النشاط كاملاً», which either can give to anyone, section 66; everyone else sees their own
+  actions and the files they reach).
 - **«الإعدادات» is the administrator's and the Director's by default** (decisions of 2026-10-15, B4b and
   B9). The Director opens it because the template carries «settings.view», «settings.manage»,
   «platforms.manage», «integrations.secrets», «storage.manage» and «whatsapp.system.manage»: the Director
@@ -3098,4 +3099,39 @@ The Director's notes of 2026-11-01: the page was hard to understand and needed p
 
 ## 65.5 «السجل» and «سجل النشاط»
 
-«السجل» holds accounts and permissions only (`permission_events`). «سجل النشاط» holds what happens in the library and the mail (`activity_log`) and shows the same permission events among them. «السجل» says so at its head and links to it. A work's own history is on the work's page (`work_log`), in neither.
+«السجل» holds accounts and permissions only (`permission_events`). «سجل النشاط» holds everything: the library and the mail (`activity_log`), the work cycle (`work_log`, since section 66) and the same permission events. «السجل» says so at its head and links to it.
+
+# 66. «سجل النشاط» upgraded, the month's report and the site's icon, 2026-11-01
+
+The Director's request of 2026-11-01: the site's logo in the browser's tab; a tab between the whole view and one's own, for the Admin and the Director by default, either of whom can give it to anyone; and a report at the end of the month of what each person did and who is the most productive, to download as Excel or as PDF in two templates.
+
+## 66.1 The icon
+
+The tab shows the logo's tile and rosette (`src/app/favicon.ico`, `icon.svg`, `apple-icon.png`), redrawn with a heavier line, heavier as the size falls, because the logo's own line is a quarter of a pixel at 16 pixels. `qa/site-icons-build.cjs` draws them from the logo's shapes.
+
+## 66.2 One log, two views
+
+- The page reads three logs as one list, newest first: the library and mail (`activity_log`), the work cycle (`work_log`, not shown here before) and permissions (`permission_events`). A row about a work links to it.
+- **Tabs:** «الكل» (everyone, with the team panel, folded) and «نشاطي» (one's own actions), for whoever holds «عرض سجل النشاط كاملاً», and «تقرير الشهر» for whoever holds «تقرير الشهر عن الفريق».
+- **The permission:** the Admin's and the director's by default, grantable to anyone from «الحسابات», so it is a switch on a person's card and a column in «الأدوار». The assistant no longer sees the whole log by default; this is the owner's choice of default. Row level security decides it: the tab only asks.
+- **Everyone else** has no tabs, sees their own actions and what happened on files they reach, as before, and can ask for the whole log from a locked control.
+- **Filters:** the person and the period ask the database, so older rows are found; the kind of action and the text search act on what is loaded. «تحميل أحداث أقدم» reads on, and paging across the three logs never skips a row.
+- A restricted work's history still follows `work_can_see`, whoever holds the whole log.
+
+## 66.3 «تقرير الشهر»
+
+- Any month of the last twelve; it opens on the last whole month, or the current one in its last three days. A month that has not ended says so. Nothing is scheduled: it is made when opened.
+- The first place, the team's four numbers, then everyone in a table of points and counts. Opening a person lists the stages and tasks they finished, by date, in time or late.
+- **What counts** (`src/lib/activity/report.ts`, the one place): a stage or a task 3 points and 1 more if in time; a work approved 4, to whom it was given; a review or decision 2; a scheduling or publication 2; a text, platform copy, file or version 1; tidying 0, shown and not scored.
+- **Nothing is counted twice.** A finished stage or task is counted from its own record and not again from its log line, and a file approved in a work is one review, though both logs write it. A stage goes to its owner, because a leader may tick it for them.
+- **The ranking** covers the team. The Admin and the director are shown and not ranked: the report is theirs to read. Nobody is placed for nothing, so an empty month names nobody. A tie shares the place. Someone who left keeps their month, outside the ranking.
+- Every report says the method in words, and that it measures what was recorded, not its quality.
+
+## 66.4 The files
+
+Made in the browser from what is on the screen, so nothing about people passes through a server.
+
+- **Excel:** three right-to-left sheets: the summary, what each person finished, how points are counted.
+- **PDF, «الملخص التنفيذي»:** one page for a glance: a deep green head with the rosette, the first place, four numbers and the ranking as bars.
+- **PDF, «التقرير التفصيلي»:** a ledger: the full table, each person with what they finished, then the method, with page numbers.
+- In the Android application the buttons are off and say where to get the file, because it refuses a file made in a page.

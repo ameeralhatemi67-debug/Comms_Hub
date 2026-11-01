@@ -1,0 +1,205 @@
+{
+  "script": "qa/activity-flow.cjs",
+  "run": "2026-11-01T09:54:48.358Z",
+  "checks": [
+    {
+      "name": "the director has three tabs",
+      "pass": true,
+      "detail": "[\"الكل\",\"نشاطي\",\"تقرير الشهر\"]"
+    },
+    {
+      "name": "the three logs are one list: the library, the work cycle and permissions",
+      "pass": true,
+      "detail": "مركز الاتصال المؤسسي · اليوم: الأحد، 1 نوفمبر 2026\nسجل النشاط\n\nكل إجراء يقوم به أي عضو، بوقته وصاحبه وما تغيّر.\n\nسجل لا يُعدَّل ولا يُحذف\nالكل\nنشاطي\nتقرير الشهر\n303\nحدثاً مطابقاً\n0\nاليوم\nمصممة الفحص\nالأكثر نشاطاً\nالفريق\nآخر إجراء لكل عضو، وما أنجزه في الأسبوع الأخير، وما ينتظره من مهام.\nكل الأشخاص\nم"
+    },
+    {
+      "name": "a work's line links to the work",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the team panel is in the whole view",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a raw key never shows",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the first read is newest first, in pages",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«نشاطي» asks each log for this person's rows, not a filter on the screen",
+      "pass": true,
+      "detail": "[{\"table\":\"activity_log\",\"filters\":[\"actor_email=director@example.test\"]},{\"table\":\"work_log\",\"filters\":[\"actor=director@example.test\"]},{\"table\":\"permission_events\",\"filters\":[\"actor=director@example.test\"]}]"
+    },
+    {
+      "name": "the solo view drops the team panel and the person filter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it shows only their own actions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "choosing a person asks the database too, so their older rows are not lost",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a kind of action gathers it from whichever log it came",
+      "pass": true,
+      "detail": "[\"12:00\\nن\\nناشر الفحص: جدولة النشر\\nجدولة\\nCH-107 · تقرير الربع\"]"
+    },
+    {
+      "name": "a period is a range sent to the database",
+      "pass": true,
+      "detail": "[\"at>=2026-09-30T21:00:00.000Z\",\"at<2026-10-31T21:00:00.000Z\"]"
+    },
+    {
+      "name": "«تحميل أحداث أقدم» reads on from where the list stopped",
+      "pass": true,
+      "detail": "[\"at<=2026-09-18T04:00:00.000Z\"]"
+    },
+    {
+      "name": "paging adds rows and repeats none",
+      "pass": true,
+      "detail": "{\"before\":303,\"keys\":327}"
+    },
+    {
+      "name": "it asks for the chosen month",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the first place is named, with its points",
+      "pass": true,
+      "detail": "الأكثر إنتاجية في أكتوبر 2026\nمصممة الفحص\nالمصمم\n60\nنقطة"
+    },
+    {
+      "name": "the ranking runs from most to least, the leaders after it",
+      "pass": true,
+      "detail": "[\"مصممة الفحص\",\"كاتب أول\",\"ناشر الفحص\",\"Lina Producer\",\"مساعدة الفحص\",\"كاتبة ثانية\",\"عضو هادئ\",\"مدير الفحص\",\"gone\",\"مسؤول الفحص\"]"
+    },
+    {
+      "name": "the Director is shown as outside the ranking",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "opening a person shows what they finished, in time or late",
+      "pass": true,
+      "detail": "مراحل 5 · أعمال 3 · محتوى 20 · تنظيم 6\n\nنشط في 19 أيام · في الموعد 80%\n\n10-04\nكتابة النص · حملة اليوم الوطني\nفي الموعد\n10-09\nمراجعة لغوية · حملة اليوم الوطني\nفي الموعد\n10-15\nكتابة النص · تقرير الربع الثالث\nمتأخرة\n10-21\nنصوص المنصات · إطلاق الخدمة الجديدة\nفي الموعد\n10-27\nكتابة النص · بيان المؤتمر السنوي\nفي الموعد"
+    },
+    {
+      "name": "how points are counted is one click away",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Excel downloads as a real .xlsx with a clear name",
+      "pass": true,
+      "detail": "تقرير-الفريق-2026-10.xlsx"
+    },
+    {
+      "name": "«الملخص التنفيذي» downloads as a real PDF, under the site's policy",
+      "pass": true,
+      "detail": "تقرير-الفريق-2026-10-ملخص.pdf"
+    },
+    {
+      "name": "«التقرير التفصيلي» downloads too, and is the other template",
+      "pass": true,
+      "detail": "تقرير-الفريق-2026-10-مفصل.pdf"
+    },
+    {
+      "name": "the libraries load only when a file is asked for",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a quiet month says so and names nobody",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page error for the director, the site's policy included",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "a member without the whole log has no tabs and no report",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "they are told what they see, with a way to ask",
+      "pass": true,
+      "detail": "مركز الاتصال المؤسسي · اليوم: الأحد، 1 نوفمبر 2026\nسجل النشاط\n\nكل إجراء يقوم به أي عضو، بوقته وصاحبه وما تغيّر.\n\nسجل لا يُعدَّل ولا يُحذف\n\nتعرض أنشطتك أنت وما جرى على الأصول التي تراها.\nالسجل الكامل\n\n"
+    },
+    {
+      "name": "they see no team panel and no one else's rows",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a writer given the whole log has both views, and not the report",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and sees everyone",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "before the migration the director keeps the whole log",
+      "pass": true,
+      "detail": "الكل\nنشاطي"
+    },
+    {
+      "name": "phone: the log has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: the report has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tablet: the log has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tablet: the report has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: the log has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: the report has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page error for anyone",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": [],
+  "total": 39,
+  "passed": 39,
+  "failed": 0
+}

@@ -1,6 +1,6 @@
 {
   "script": "qa/accounts-flow.cjs",
-  "run": "2026-11-01T08:13:12.083Z",
+  "run": "2026-11-01T09:55:09.736Z",
   "checks": [
     {
       "name": "«الأعضاء»: six people, in the columns the head names, and no sideways scroll",

@@ -93,8 +93,9 @@ test('the team panel counts what the rows say: last action, the week, open and l
 
 test('the team panel is for those who see the whole log, and writes nothing', () => {
   const page = read('src/components/media/activity-page.tsx');
-  assert.match(page, /\{all && team\.length > 0 && \(/);
-  assert.match(page, /teamSummary\(m\.people, rows \?\? \[\], m\.tasks\)/);
+  assert.match(page, /const panel = all && shown === 'all';/);
+  assert.match(page, /\{panel && team\.length > 0 && \(/);
+  assert.match(page, /teamSummary\(m\.people, teamRows, m\.tasks\)/);
   assert.doesNotMatch(read('src/lib/media/team.ts'), /supabase|fetch\(/);
 });
 

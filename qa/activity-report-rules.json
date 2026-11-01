@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/activity_report_rules.sql",
+  "script_md5": "19fed7b0d3833fa8b1525329a4187460",
+  "migration": {
+    "file": "supabase/migrations/20261101120000_activity_report.sql",
+    "file_md5": "370fff3023eccaf057334c3af9f28de6",
+    "applied": "not applied to comms-hub"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-01T09:55:32.787Z",
+  "migrations_replayed": 58,
+  "differ": [],
+  "total": 38,
+  "passed": 38
+}

@@ -34,6 +34,7 @@ export function Title({
         </span>
         <h1>
           {title}
+          {title && accent ? ' ' : null}
           {accent && <em className="accent-word">{accent}</em>}
         </h1>
         {sub && <p>{sub}</p>}

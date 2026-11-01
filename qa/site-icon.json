@@ -1,0 +1,40 @@
+{
+  "script": "qa/site-icon.cjs",
+  "run": "2026-11-01T09:57:20.087Z",
+  "checks": [
+    {
+      "name": "the head names the icons on the page people land on",
+      "pass": true,
+      "detail": "[{\"rel\":\"icon\",\"href\":\"/favicon.ico\",\"type\":\"image/x-icon\",\"sizes\":\"64x64\"},{\"rel\":\"icon\",\"href\":\"/icon.svg\",\"type\":\"image/svg+xml\",\"sizes\":\"any\"},{\"rel\":\"apple-touch-icon\",\"href\":\"/apple-icon.png\",\"type\":\"image/png\",\"sizes\":\"180x180\"}]"
+    },
+    {
+      "name": "/favicon.ico answers signed out, as an image, not the sign-in page",
+      "pass": true,
+      "detail": "{\"status\":200,\"type\":\"image/x-icon\",\"size\":13237}"
+    },
+    {
+      "name": "/icon.svg answers signed out, as an image, not the sign-in page",
+      "pass": true,
+      "detail": "{\"status\":200,\"type\":\"image/svg+xml\",\"size\":1107}"
+    },
+    {
+      "name": "/apple-icon.png answers signed out, as an image, not the sign-in page",
+      "pass": true,
+      "detail": "{\"status\":200,\"type\":\"image/png\",\"size\":21886}"
+    },
+    {
+      "name": "favicon.ico holds five sizes, 16 to 64",
+      "pass": true,
+      "detail": "5"
+    },
+    {
+      "name": "the browser draws it",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 6,
+  "passed": 6,
+  "failed": 0
+}

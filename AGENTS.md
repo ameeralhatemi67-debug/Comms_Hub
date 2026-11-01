@@ -183,6 +183,19 @@ Time is checked at the moment of use; there is no sweep job. On «الحسابا
 is one switch: `switchStep` in `src/lib/permissions.ts` turns on or off into the database call, and
 `MVP_draft.md` section 65 holds the page. `qa/accounts-flow.cjs` clicks through it on a fixture.
 
+«سجل النشاط» reads three logs as one list (`src/lib/activity/feed.ts`), by owner directive of 2026-11-01 (`MVP_draft.md`
+section 66, recorded in `progress.md`). The whole log is the capability `activity.full`: the Admin's and the director's by
+default, grantable to anyone, and row level security decides it; the assistant holds it only if given it.
+«تقرير الشهر» is `activity.report`, for the Admin and the director by default and grantable from rank 2. The database gives
+counts through `activity_report`; points, the ranking and the words of the method exist once, in
+`src/lib/activity/report.ts`, so the page, the Excel file and both PDFs always agree. Files are made in the browser, and
+nothing about people passes through a server: the Excel writer is `report-xlsx.ts` (no library), the PDFs `report-pdf.ts`
+(pdf-lib, loaded only on demand, fonts in `public/report/`). pdf-lib joins Arabic with IBM Plex but drops Reem Kufi's dot
+positions, so headings are drawn as outlines; mixed text goes through `bidi.ts`. The Android application refuses a file made
+in a page (`Downloads.java`), so there the buttons say where to get it. Its rules run on a private container
+(`qa/activity-rules-local.cjs`, `supabase/tests/activity_report_rules.sql`); the files are rendered and opened in Excel by
+`qa/activity-exports.mjs`, and the page is clicked through by `qa/activity-flow.cjs`.
+
 WhatsApp is a real outside channel, by the same directive: one way (the system sends,
 nothing is read back), only to numbers a member proved on the site, and only for urgent
 or pushed messages. Routing is decided inside the database from room membership; the

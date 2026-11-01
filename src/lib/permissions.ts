@@ -62,6 +62,9 @@ export const CAPABILITIES: Capability[] = [
   { key: 'members.remove', grp: 'accounts', label: 'إزالة عضو', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 44 },
   { key: 'roles.templates.edit', grp: 'accounts', label: 'تعديل صلاحيات الأدوار', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 45 },
   { key: 'whatsapp.system.manage', grp: 'accounts', label: 'إدارة رقم واتساب النظام', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 46 },
+  // «سجل النشاط» (MVP_draft.md 66): the whole log for anyone it is given to; the month's report stays with the leaders.
+  { key: 'activity.full', grp: 'accounts', label: 'عرض سجل النشاط كاملاً', grantable: true, scope: 'none', minRank: 1, fixedRoles: [], sort: 47 },
+  { key: 'activity.report', grp: 'accounts', label: 'تقرير الشهر عن الفريق', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 48 },
   // Settings and integrations (Settings_Integrations_Plan.md 4.3), the administrator's by default.
   { key: 'settings.view', grp: 'settings', label: 'عرض صحة النظام وسجل الإعدادات', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 50 },
   { key: 'settings.manage', grp: 'settings', label: 'تعديل الإعدادات العامة للنظام', grantable: true, scope: 'none', minRank: 2, fixedRoles: [], sort: 51 },
@@ -153,6 +156,8 @@ export const roleHolds = (defaults: { role: string; capability: string; allowed:
  *     settings.manage, platforms.manage, integrations.secrets and storage.manage, because the
  *     Director connects the platforms, the mail and the storage from the site; and
  *     (20261015200000) whatsapp.system.manage, to set up the WhatsApp bridge from the site.
+ *   - 2026-11-01, the Director's request (20261101120000): the director also holds activity.full and
+ *     activity.report.
  * tests/permissions.test.mjs reads those migrations and holds this table to them. Pages are the
  * account's own list, not part of the templates.
  */
@@ -161,7 +166,7 @@ export const TEMPLATE_HOLDS: Partial<Record<Role, readonly string[]>> = {
     'urgency.2', 'mail.outside.send', 'room.create',
     'accounts.view', 'permissions.grant', 'roles.assign', 'members.invite', 'members.remove', 'roles.templates.edit',
     'settings.view', 'settings.manage', 'platforms.manage', 'integrations.secrets', 'storage.manage',
-    'whatsapp.system.manage',
+    'whatsapp.system.manage', 'activity.full', 'activity.report',
   ],
   assistant: ['urgency.2', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant'],
 };
@@ -415,6 +420,7 @@ export function permError(message: string): string {
     ['BAD_SOURCE', 'تعذّر إرسال الطلب من هنا.'],
     ['INVITE_TOO_SOON', 'أُرسلت دعوة لهذا الشخص قبل أقل من دقيقة. انتظر قليلاً.'],
     ['ALREADY_ACTIVE', 'هذا الشخص دخل المركز بالفعل، فلا حاجة إلى دعوة.'],
+    ['BAD_MONTH', 'اختر شهراً صحيحاً.'],
     ['BAD_KIND', 'نوع غير معروف.'],
     ['FORBIDDEN', 'لا تملك صلاحية هذا الإجراء.'],
   ];

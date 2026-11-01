@@ -67,8 +67,8 @@ test("an administrator viewing as a role sees that role's creating and accounts 
   }
 });
 
-test('the whole log and the team panel are for the administrator, the director and the assistant', () => {
-  for (const role of MATRIX_ROLES) assert.equal(byRole[role].activity, ['admin', 'director', 'assistant'].includes(role) ? 'whole' : 'own', role);
+test('the whole log and the team panel are for the administrator and the director by default', () => {
+  for (const role of MATRIX_ROLES) assert.equal(byRole[role].activity, ['admin', 'director'].includes(role) ? 'whole' : 'own', role);
 });
 
 test("the capabilities held by default are the administrator's, the leaders' and the publisher's, and nobody else's", () => {

@@ -22,12 +22,15 @@ const sql = readFileSync('supabase/migrations/20261013150000_permissions.sql', '
 const intSql = readFileSync('supabase/migrations/20261014120000_integrations.sql', 'utf8');
 // The studio adds its fixed capability (Studio_Build_Plan.md, Phase 1).
 const studioSql = readFileSync('supabase/migrations/20261019120000_studio_access.sql', 'utf8');
+// «سجل النشاط» adds the whole log and the month's report (MVP_draft.md 66).
+const activitySql = readFileSync('supabase/migrations/20261101120000_activity_report.sql', 'utf8');
 
 /** The catalog rows of the migration's insert, parsed. */
 function seeded() {
   const block = sql.slice(sql.indexOf('insert into public.capabilities'), sql.indexOf('-- Role templates equal'))
     + intSql.slice(intSql.indexOf('insert into public.capabilities'), intSql.indexOf('insert into public.role_capabilities'))
-    + studioSql.slice(studioSql.indexOf('insert into public.capabilities'), studioSql.indexOf('create function public.studio_can'));
+    + studioSql.slice(studioSql.indexOf('insert into public.capabilities'), studioSql.indexOf('create function public.studio_can'))
+    + activitySql.slice(activitySql.indexOf('insert into public.capabilities'), activitySql.indexOf('insert into public.role_capabilities'));
   const rows = [];
   // A later migration removes a page from the catalogue (Action_Plan.md B6, «المراقبة» folded into «سجل النشاط»).
   const foldSql = readFileSync('supabase/migrations/20261015170000_fold_monitoring.sql', 'utf8');
@@ -89,7 +92,10 @@ test('installed role templates equal what the migrations leave in role_capabilit
   assert.deepEqual(fromWa, ['whatsapp.system.manage']);
   const seed = ['urgency.2', 'mail.outside.send', 'room.create'];
   assert.deepEqual([...grantable.filter((k) => installedDefault('assistant', k))].sort(), [...seed, ...fromP2('assistant')].sort());
-  assert.deepEqual([...grantable.filter((k) => installedDefault('director', k))].sort(), [...seed, ...fromP2('director'), ...fromB9, ...fromWa].sort());
+  const fromActivity = [...activitySql.slice(0, activitySql.indexOf('insert into public.role_capabilities')).matchAll(/\('(activity\.[a-z]+)',/g)].map((m) => m[1]);
+  assert.deepEqual(fromActivity, ['activity.full', 'activity.report']);
+  assert.match(activitySql, /select r, c\.key, r in \('admin','director'\), 'installation'/);
+  assert.deepEqual([...grantable.filter((k) => installedDefault('director', k))].sort(), [...seed, ...fromP2('director'), ...fromB9, ...fromWa, ...fromActivity].sort());
   // The Director, and nobody below, enters the platforms' apps and secrets by default.
   for (const k of ['platforms.manage', 'integrations.secrets', 'settings.view', 'settings.manage', 'storage.manage'])
     assert.equal(installedDefault('assistant', k), false, `assistant ${k}`);

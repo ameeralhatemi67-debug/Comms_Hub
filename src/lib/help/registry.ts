@@ -87,7 +87,7 @@ export const PAGE_SOURCES: Record<string, string[]> = {
   library: ['src/components/media/library.tsx', 'src/components/media/parts.tsx'],
   asset: ['src/components/media/asset-page.tsx', 'src/components/media/parts.tsx'],
   tasks: ['src/components/media/tasks-page.tsx'],
-  activity: ['src/components/media/activity-page.tsx'],
+  activity: ['src/components/media/activity-page.tsx', 'src/components/media/activity-report.tsx'],
   mail: ['src/components/mail/mail-page.tsx', 'src/components/mail/thread.tsx', 'src/components/mail/parts.tsx', 'src/components/mail/composer.tsx'],
   chat: ['src/components/chat/chat-tab.tsx', 'src/components/chat/urgency.tsx', 'src/components/chat/whatsapp.tsx', 'src/components/mail/mail-page.tsx'],
   work: ['src/components/work/list.tsx', 'src/components/work/parts.tsx'],

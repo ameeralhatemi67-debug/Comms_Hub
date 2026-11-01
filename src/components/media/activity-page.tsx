@@ -1,16 +1,34 @@
 'use client';
-// سجل النشاط: every action by everyone, with what changed. Append-only in the database.
-// Managers and administrators see all of it, with a panel of the team (Action_Plan.md B2: what
-// «المراقبة» promised and nothing else); everyone else sees their own actions.
+// سجل النشاط (MVP_draft.md 66): every recorded action, from the three logs, with what changed. Append-only in the database.
+// Whoever holds «عرض سجل النشاط كاملاً» (the Admin and the director by default, and anyone they give it to) switches
+// between the whole log, with a panel of the team (Action_Plan.md B2), and their own actions. Everyone else sees their
+// own actions and what happened on files they reach. «تقرير الشهر» is the holders of «تقرير الشهر عن الفريق». What each
+// person may read is row level security; the tabs only choose among it.
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { describe, logTypeLabels, type LogRow } from '@/lib/media/log-text';
-import { eventText, type PermEvent } from '@/lib/permissions';
-import { logAllRoles, riyadhStamp } from '@/lib/media/rules';
+import { riyadhStamp } from '@/lib/media/rules';
+import type { LogRow } from '@/lib/media/log-text';
+import type { PermEvent } from '@/lib/permissions';
 import { teamSummary } from '@/lib/media/team';
-import { roles } from '@/lib/domain';
-import { Title } from '../ui';
+import {
+  ENTRY_KINDS,
+  PERIODS,
+  libraryEntry,
+  mergePage,
+  periodRange,
+  permissionEntry,
+  workEntry,
+  type Entry,
+  type EntryKind,
+  type Period,
+  type WorkLogRow,
+} from '@/lib/activity/feed';
+import { needProps } from '@/lib/kit/need';
+import { roles, type Role } from '@/lib/domain';
+import { Tabs, Title } from '../ui';
+import { useCaps } from '../caps';
+import { ActivityReport } from './activity-report';
 import { Avatar, Icon, StageChip, Ts } from './parts';
 import { useMedia } from './provider';
 
@@ -18,13 +36,17 @@ const typeIcon: Record<string, string> = {
   upload: 'upload',
   version: 'history',
   approve: 'check',
+  approved: 'check',
   changes: 'pencil',
   reject: 'x',
   schedule: 'cal',
   publish: 'send',
   assign: 'users',
   done: 'check',
+  stage_done: 'check',
   copy: 'file',
+  text: 'file',
+  submit: 'send',
   rename: 'pencil',
   move: 'move',
   remove: 'trash',
@@ -37,66 +59,141 @@ const typeIcon: Record<string, string> = {
   download: 'download',
   link: 'link',
   stage: 'board',
+  start: 'board',
   permission: 'shield',
 };
 
-/** Permission events (Permissions_Plan.md 9, «Activity log») as rows of this log, a type of their own. */
-const PERM_TYPE = 'permission';
-const permRows = (events: PermEvent[]): LogRow[] =>
-  events.map((e) => ({ id: -e.id, at: e.at, actor_email: e.actor ?? 'system', type: PERM_TYPE, asset_id: null, folder_id: null, task_id: null, data: { event: e } }));
+const PAGE = 300;
+
+/** Who saw the whole log before «عرض سجل النشاط كاملاً» existed: used only while the database does not know it yet. */
+const BEFORE_THE_RIGHT: Role[] = ['director', 'assistant'];
+
+type View = 'all' | 'mine' | 'report';
+
+/** The part of a table query the three logs share. */
+type LogQuery = {
+  gte(column: string, value: string): LogQuery;
+  lt(column: string, value: string): LogQuery;
+  lte(column: string, value: string): LogQuery;
+  eq(column: string, value: string): LogQuery;
+  order(column: string, options: { ascending: boolean }): LogQuery;
+  limit(count: number): PromiseLike<{ data: unknown; error: unknown }>;
+};
 
 export function ActivityPage() {
   const m = useMedia();
-  const [rows, setRows] = useState<LogRow[] | null>(null);
+  const caps = useCaps();
+  const all = caps.evalOf('activity.full') ? caps.has('activity.full') : m.isAdmin || BEFORE_THE_RIGHT.includes(m.role);
+  const canReport = caps.has('activity.report');
+  const [view, setView] = useState<View>('all');
+  const shown: View = view === 'report' && canReport ? 'report' : view === 'mine' || !all ? 'mine' : 'all';
+  const [rows, setRows] = useState<Entry[] | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [who, setWho] = useState('all');
-  const [type, setType] = useState('all');
+  const [kind, setKind] = useState<EntryKind | 'all'>('all');
+  const [period, setPeriod] = useState<Period>('all');
   const [q, setQ] = useState('');
-  const all = m.isAdmin || logAllRoles.includes(m.role);
+  const nameOf = useRef(m.nameOf);
+  nameOf.current = m.nameOf;
+  // Someone without the whole log reads what row level security gives them, which is more than their own actions.
+  const actor = shown === 'mine' && all ? m.email : shown === 'all' && who !== 'all' ? who : null;
+
+  const read = useCallback(
+    async (before: string | null) => {
+      const { from, to } = periodRange(period, new Date());
+      const db = supabase();
+      const log = (table: string, columns: string, by: string) => {
+        let q = db.from(table).select(columns) as unknown as LogQuery;
+        if (from) q = q.gte('at', from);
+        if (to) q = q.lt('at', to);
+        if (before) q = q.lte('at', before);
+        if (actor) q = q.eq(by, actor);
+        return q.order('at', { ascending: false }).limit(PAGE);
+      };
+      // The permission log and the work log each have their own row level security: each reader sees what concerns them.
+      const [a, w, p] = await Promise.all([
+        log('activity_log', '*', 'actor_email'),
+        log('work_log', 'id, work_id, at, actor, type, text, works(title)', 'actor'),
+        log('permission_events', 'id, at, actor, subject, role, capability, kind, data', 'actor'),
+      ]);
+      if (a.error && w.error && p.error) throw a.error;
+      const name = (e: string) => nameOf.current(e);
+      return mergePage(
+        [
+          ((a.data as LogRow[]) ?? []).map((r) => libraryEntry(r, name)),
+          ((w.data as unknown as WorkLogRow[]) ?? []).map((r) => workEntry(r, name)),
+          ((p.data as PermEvent[]) ?? []).map((e) => permissionEntry(e, name)),
+        ],
+        PAGE,
+      );
+    },
+    [actor, period],
+  );
 
   useEffect(() => {
+    if (shown === 'report') return;
     let live = true;
-    // The permission log has its own row level security: each reader sees what concerns them.
-    void Promise.all([
-      supabase().from('activity_log').select('*').order('at', { ascending: false }).limit(500),
-      supabase().from('permission_events').select('id, at, actor, subject, role, capability, kind, data').order('at', { ascending: false }).limit(200),
-    ]).then(([a, p]) => {
-      if (!live) return;
-      const merged = [...((a.data as LogRow[]) ?? []), ...permRows((p.data as PermEvent[]) ?? [])].sort((x, y) => y.at.localeCompare(x.at));
-      setRows(merged);
-    });
+    setFailed(false);
+    read(null)
+      .then((page) => {
+        if (!live) return;
+        setRows(page.entries);
+        setCursor(page.cursor);
+      })
+      .catch(() => live && setFailed(true));
     return () => {
       live = false;
     };
-  }, [m.assets, m.tasks, m.folders]);
+  }, [read, shown, m.assets, m.tasks, m.folders]);
 
-  const described = useMemo(
-    () => (rows ?? []).map((r) => ({ r, d: r.type === PERM_TYPE ? { text: eventText(r.data.event as PermEvent, m.nameOf) } : describe(r, m.nameOf) })),
-    [rows, m.nameOf],
-  );
-  const shown = described.filter(({ r, d }) => {
-    if (who !== 'all' && r.actor_email !== who) return false;
-    if (type !== 'all' && r.type !== type) return false;
-    if (q && !`${d.text} ${d.before ?? ''} ${d.after ?? ''}`.includes(q)) return false;
+  const more = async () => {
+    setBusy(true);
+    try {
+      const page = await read(cursor);
+      setRows((had) => {
+        const have = new Set((had ?? []).map((e) => e.key));
+        return [...(had ?? []), ...page.entries.filter((e) => !have.has(e.key))];
+      });
+      setCursor(page.cursor);
+    } catch {
+      setFailed(true);
+    }
+    setBusy(false);
+  };
+
+  const list = (rows ?? []).filter((e) => {
+    if (kind !== 'all' && e.kind !== kind) return false;
+    if (q && !`${e.text} ${e.before ?? ''} ${e.after ?? ''} ${e.work?.label ?? ''}`.includes(q)) return false;
     return true;
   });
   const today = riyadhStamp(new Date()).slice(0, 10);
   const days: string[] = [];
-  const byDay = new Map<string, typeof shown>();
-  for (const x of shown) {
-    const day = riyadhStamp(x.r.at).slice(0, 10);
+  const byDay = new Map<string, Entry[]>();
+  for (const e of list) {
+    const day = riyadhStamp(e.at).slice(0, 10);
     if (!byDay.has(day)) {
       byDay.set(day, []);
       days.push(day);
     }
-    byDay.get(day)!.push(x);
+    byDay.get(day)!.push(e);
   }
   const counts = new Map<string, number>();
-  shown.forEach((x) => counts.set(x.r.actor_email, (counts.get(x.r.actor_email) ?? 0) + 1));
+  list.forEach((e) => counts.set(e.actor, (counts.get(e.actor) ?? 0) + 1));
   const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
 
-  const team = useMemo(() => (all ? teamSummary(m.people, rows ?? [], m.tasks) : []), [all, m.people, rows, m.tasks]);
+  const panel = all && shown === 'all';
+  const teamRows = useMemo(() => (rows ?? []).map((e) => ({ at: e.at, actor_email: e.actor })), [rows]);
+  const team = useMemo(() => (panel ? teamSummary(m.people, teamRows, m.tasks) : []), [panel, m.people, teamRows, m.tasks]);
 
-  if (m.status === 'loading' || rows === null) return <p role="status">جارٍ التحميل…</p>;
+  const tabs = [
+    ...(all ? [{ id: 'all', label: 'الكل' }] : []),
+    ...(all || canReport ? [{ id: 'mine', label: 'نشاطي' }] : []),
+    ...(canReport ? [{ id: 'report', label: 'تقرير الشهر' }] : []),
+  ];
+
+  if (m.status === 'loading' || (rows === null && shown !== 'report' && !failed)) return <p role="status">جارٍ التحميل…</p>;
 
   return (
     <div className="mx" dir="rtl">
@@ -106,132 +203,178 @@ export function ActivityPage() {
           سجل لا يُعدَّل ولا يُحذف
         </span>
       </Title>
-      {!all && (
-        <p className="warning" role="status">
-          تعرض أنشطتك أنت وما جرى على الأصول التي تراها. السجل الكامل لمدير الاتصال ومساعده وAdmin.
-        </p>
+      {tabs.length > 1 && (
+        <div className="mx-views">
+          <Tabs items={tabs} value={shown} onChange={(id) => setView(id as View)} />
+        </div>
       )}
-      <div className="mx-stats">
-        <div className="mx-stat">
-          <b>{shown.length}</b>
-          <span>حدثاً مطابقاً</span>
-        </div>
-        <div className="mx-stat">
-          <b>{shown.filter((x) => riyadhStamp(x.r.at).slice(0, 10) === today).length}</b>
-          <span>اليوم</span>
-        </div>
-        <div className="mx-stat">
-          <b>{top ? m.nameOf(top[0]) : '—'}</b>
-          <span>الأكثر نشاطاً</span>
-        </div>
-      </div>
-      {all && team.length > 0 && (
-        <section className="mx-team" aria-label="الفريق">
-          <div className="mx-team-head">
-            <b>الفريق</b>
-            <span>آخر إجراء لكل عضو، وما أنجزه في الأسبوع الأخير، وما ينتظره من مهام.</span>
-          </div>
-          <div className="mx-team-grid" role="table">
-            <div className="mx-team-row head" role="row">
-              <span role="columnheader">العضو</span>
-              <span role="columnheader">الدور</span>
-              <span role="columnheader">آخر إجراء</span>
-              <span role="columnheader">إجراءات الأسبوع</span>
-              <span role="columnheader">مهام مفتوحة</span>
-            </div>
-            {team.map((t) => (
-              <div className={`mx-team-row ${who === t.email ? 'on' : ''}`} role="row" key={t.email}>
-                <span role="cell">
-                  <button type="button" className="mx-team-who" aria-pressed={who === t.email} onClick={() => setWho(who === t.email ? 'all' : t.email)} title="اعرض أحداثه وحدها">
-                    <Avatar name={t.name} />
-                    <b>{t.name}</b>
-                  </button>
-                </span>
-                <span role="cell">{roles[t.role as keyof typeof roles]?.name ?? t.role}</span>
-                <span role="cell">{t.last ? <Ts>{riyadhStamp(t.last)}</Ts> : <small className="muted">لا إجراء مسجلاً</small>}</span>
-                <span role="cell">{t.week}</span>
-                <span role="cell">
-                  {t.open}
-                  {t.late > 0 && <small className="late"> · متأخرة {t.late}</small>}
-                </span>
-              </div>
-            ))}
-          </div>
-          <p className="muted">المحسوب من آخر {rows.length} حدثاً مقروءاً من السجل؛ ما قبلها لا يدخل في «آخر إجراء» ولا في أعداد الأسبوع.</p>
-        </section>
-      )}
-      <div className="mx-toolbar">
-        <label className="mx-field">
-          <Icon name="search" />
-          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث في السجل…" aria-label="بحث في السجل" />
-        </label>
-        <select className="sel" value={who} onChange={(e) => setWho(e.target.value)} aria-label="الشخص">
-          <option value="all">كل الأشخاص</option>
-          {m.people.map((p) => (
-            <option key={p.email} value={p.email}>
-              {p.display_name}
-            </option>
-          ))}
-        </select>
-        <select className="sel" value={type} onChange={(e) => setType(e.target.value)} aria-label="الإجراء">
-          <option value="all">كل الإجراءات</option>
-          {Object.entries(logTypeLabels).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {days.length ? (
-        days.map((day) => (
-          <div key={day}>
-            <div className="mx-day">
-              {day === today ? 'اليوم · ' : ''}
-              <Ts>{day}</Ts>
-            </div>
-            <div className="mx-log">
-              {byDay.get(day)!.map(({ r, d }) => {
-                const a = r.asset_id ? m.assets.find((x) => x.id === r.asset_id) : null;
-                return (
-                  <div className="mx-lr" key={r.id}>
-                    <time>{riyadhStamp(r.at).slice(11)}</time>
-                    <Avatar name={m.nameOf(r.actor_email)} />
-                    <span>
-                      {d.text}
-                      <span className="tg">
-                        <span className="mx-chip plain">
-                          <Icon name={typeIcon[r.type] ?? 'file'} />
-                          {logTypeLabels[r.type] ?? r.type}
-                        </span>
-                        {a && (
-                          <Link className="mx-link" href={`/media/${a.id}`}>
-                            {a.name}
-                          </Link>
-                        )}
-                      </span>
-                      {(d.before || d.after) && (
-                        <span className="mx-ba">
-                          <s>{d.before ?? '—'}</s>
-                          <span aria-hidden="true">←</span>
-                          <b>{d.after ?? '—'}</b>
-                        </span>
-                      )}
-                    </span>
-                    <span>{d.stage && <StageChip stage={d.stage} />}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))
+      {shown === 'report' ? (
+        <ActivityReport />
       ) : (
-        <div className="mx-empty">
-          <span className="ei">
-            <Icon name="history" />
-          </span>
-          <b>لا توجد أحداث مطابقة</b>
-        </div>
+        <>
+          {!all && (
+            <p className="warning mx-limited" role="status">
+              <span>تعرض أنشطتك أنت وما جرى على الأصول التي تراها.</span>
+              <button type="button" className="mx-link" {...needProps('activity.full', 'السجل الكامل لمن يملك «عرض سجل النشاط كاملاً»: مدير الاتصال وAdmin افتراضياً، ولمن يمنحانه له.')}>
+                السجل الكامل
+              </button>
+            </p>
+          )}
+          {failed && (
+            <p className="warning" role="alert">
+              تعذّر تحميل السجل. أعد تحميل الصفحة.
+            </p>
+          )}
+          <div className="mx-stats">
+            <div className="mx-stat">
+              <b>{list.length}</b>
+              <span>حدثاً مطابقاً</span>
+            </div>
+            <div className="mx-stat">
+              <b>{list.filter((e) => riyadhStamp(e.at).slice(0, 10) === today).length}</b>
+              <span>اليوم</span>
+            </div>
+            {shown === 'mine' ? (
+              <div className="mx-stat">
+                <b>{new Set(list.map((e) => riyadhStamp(e.at).slice(0, 10))).size}</b>
+                <span>أيام فيها نشاط</span>
+              </div>
+            ) : (
+              <div className="mx-stat">
+                <b>{top ? m.nameOf(top[0]) : '—'}</b>
+                <span>الأكثر نشاطاً</span>
+              </div>
+            )}
+          </div>
+          {panel && team.length > 0 && (
+            <details className="mx-team" aria-label="الفريق">
+              <summary className="mx-team-head">
+                <b>الفريق</b>
+                <span>آخر إجراء لكل عضو، وما أنجزه في الأسبوع الأخير، وما ينتظره من مهام.</span>
+              </summary>
+              <div className="mx-team-grid" role="table">
+                <div className="mx-team-row head" role="row">
+                  <span role="columnheader">العضو</span>
+                  <span role="columnheader">الدور</span>
+                  <span role="columnheader">آخر إجراء</span>
+                  <span role="columnheader">إجراءات الأسبوع</span>
+                  <span role="columnheader">مهام مفتوحة</span>
+                </div>
+                {team.map((t) => (
+                  <div className={`mx-team-row ${who === t.email ? 'on' : ''}`} role="row" key={t.email}>
+                    <span role="cell">
+                      <button type="button" className="mx-team-who" aria-pressed={who === t.email} onClick={() => setWho(who === t.email ? 'all' : t.email)} title="اعرض أحداثه وحدها">
+                        <Avatar name={t.name} />
+                        <b>{t.name}</b>
+                      </button>
+                    </span>
+                    <span role="cell">{roles[t.role as keyof typeof roles]?.name ?? t.role}</span>
+                    <span role="cell">{t.last ? <Ts>{riyadhStamp(t.last)}</Ts> : <small className="muted">لا إجراء مسجلاً</small>}</span>
+                    <span role="cell">{t.week}</span>
+                    <span role="cell">
+                      {t.open}
+                      {t.late > 0 && <small className="late"> · متأخرة {t.late}</small>}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="muted">المحسوب مما حُمّل من السجل الآن؛ ما قبله لا يدخل في «آخر إجراء» ولا في أعداد الأسبوع.</p>
+            </details>
+          )}
+          <div className="mx-toolbar">
+            <label className="mx-field">
+              <Icon name="search" />
+              <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث في السجل…" aria-label="بحث في السجل" />
+            </label>
+            {shown === 'all' && (
+              <select className="sel" value={who} onChange={(e) => setWho(e.target.value)} aria-label="الشخص">
+                <option value="all">كل الأشخاص</option>
+                {m.people.map((p) => (
+                  <option key={p.email} value={p.email}>
+                    {p.display_name}
+                  </option>
+                ))}
+              </select>
+            )}
+            <select className="sel" value={kind} onChange={(e) => setKind(e.target.value as EntryKind | 'all')} aria-label="الإجراء">
+              <option value="all">كل الإجراءات</option>
+              {ENTRY_KINDS.map((k) => (
+                <option key={k.id} value={k.id}>
+                  {k.label}
+                </option>
+              ))}
+            </select>
+            <select className="sel" value={period} onChange={(e) => setPeriod(e.target.value as Period)} aria-label="الفترة">
+              {PERIODS.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {days.length ? (
+            days.map((day) => (
+              <div key={day}>
+                <div className="mx-day">
+                  {day === today ? 'اليوم · ' : ''}
+                  <Ts>{day}</Ts>
+                </div>
+                <div className="mx-log">
+                  {byDay.get(day)!.map((e) => {
+                    const a = e.asset ? m.assets.find((x) => x.id === e.asset) : null;
+                    return (
+                      <div className="mx-lr" key={e.key}>
+                        <time>{riyadhStamp(e.at).slice(11)}</time>
+                        <Avatar name={m.nameOf(e.actor)} />
+                        <span>
+                          {e.text}
+                          <span className="tg">
+                            <span className="mx-chip plain">
+                              <Icon name={typeIcon[e.type] ?? 'file'} />
+                              {e.label}
+                            </span>
+                            {a && (
+                              <Link className="mx-link" href={`/media/${a.id}`}>
+                                {a.name}
+                              </Link>
+                            )}
+                            {e.work && (
+                              <Link className="mx-link" href={e.work.href}>
+                                {e.work.label}
+                              </Link>
+                            )}
+                          </span>
+                          {(e.before || e.after) && (
+                            <span className="mx-ba">
+                              <s>{e.before ?? '—'}</s>
+                              <span aria-hidden="true">←</span>
+                              <b>{e.after ?? '—'}</b>
+                            </span>
+                          )}
+                        </span>
+                        <span>{e.stage && <StageChip stage={e.stage} />}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="mx-empty">
+              <span className="ei">
+                <Icon name="history" />
+              </span>
+              <b>لا توجد أحداث مطابقة</b>
+              {cursor && <span>قد تكون فيما لم يُحمّل بعد.</span>}
+            </div>
+          )}
+          {cursor && (
+            <button type="button" className="secondary mx-more" disabled={busy} onClick={() => void more()}>
+              {busy ? 'جارٍ التحميل…' : 'تحميل أحداث أقدم'}
+            </button>
+          )}
+        </>
       )}
     </div>
   );

@@ -96,8 +96,6 @@ export const isAssetLocked = (a: { approved_version: number | null; stage: Stage
 // ---------------------------------------------------------------- roles
 export const creativeRoles: Role[] = ['writer', 'designer', 'producer', 'assistant', 'director'];
 export const reviewerRoles: Role[] = ['director', 'assistant'];
-/** Roles that see everyone's activity in the log. */
-export const logAllRoles: Role[] = ['admin', 'director', 'assistant'];
 /** Roles that may assign tasks. */
 export const assignerRoles: Role[] = ['admin', 'director', 'assistant', 'producer'];
 

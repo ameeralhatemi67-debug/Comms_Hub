@@ -21,6 +21,13 @@ unmodified from `node_modules`, at the exact version pinned in `package.json`.
   later. FFmpeg source: https://ffmpeg.org/download.html. The WebAssembly module is a separate file loaded
   at run time and can be replaced by another build of the same encoder.
 
+## pdf-lib and fontkit
+
+- Packages: `pdf-lib` 1.17.1 and `@pdf-lib/fontkit` 1.1.1, loaded by «تقرير الشهر» in «سجل النشاط» only when a PDF is
+  asked for, to draw it in the browser.
+- Licence: MIT. Sources: https://github.com/Hopding/pdf-lib and https://github.com/Hopding/fontkit
+- The files are not modified.
+
 ## Fonts
 
 All fonts are served from the site itself, from the `@fontsource` packages pinned in `package.json`
@@ -29,6 +36,8 @@ All fonts are served from the site itself, from the `@fontsource` packages pinne
 each package's `LICENSE` file. The font software may not be sold on its own.
 
 - Used across the site: IBM Plex Sans Arabic, Reem Kufi, Aref Ruqaa.
+- Copied unmodified from those packages into `public/report/`, for the report's PDF to embed: IBM Plex Sans Arabic
+  (Arabic and Latin, regular and bold) and Reem Kufi (Arabic, semi-bold).
 - Added for the studio's text (2026-10-20), Arabic: Cairo, Tajawal, Almarai, Readex Pro, Noto Kufi Arabic,
   Changa, Amiri, Noto Naskh Arabic, Markazi Text, El Messiri, Lalezar, Rakkas.
 - Added for the studio's text (2026-10-20), English: Inter, Montserrat, Poppins, Raleway, Oswald,

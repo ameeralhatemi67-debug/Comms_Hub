@@ -7,7 +7,6 @@
 import { roles, type Role } from './domain.ts';
 import { canOpenRoute, defaultPages, linkedAccountRoles, menuEntries, menuFor, type Account } from './access.ts';
 import { CAPABILITIES, installedDefault, resolve } from './permissions.ts';
-import { logAllRoles } from './media/rules.ts';
 
 /** Administrator first, then the department's roles in the order the product lists them. */
 export const MATRIX_ROLES: Role[] = ['admin', 'director', 'assistant', 'writer', 'designer', 'producer', 'publisher', 'member'];
@@ -61,7 +60,7 @@ export function accessMatrix(): AccessMatrix {
       caps,
       menu: menuFor(account, { viewAs: role }).map((e) => homeId(e.href)),
       open: MATRIX_ROUTES.map((r) => r.id).filter((id) => canOpenRoute(account, id.split('/')) && !['monitoring', 'admin'].includes(id)),
-      activity: role === 'admin' || logAllRoles.includes(role) ? 'whole' : 'own',
+      activity: held(role, 'activity.full') ? 'whole' : 'own',
     };
   });
 

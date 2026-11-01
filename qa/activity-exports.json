@@ -1,0 +1,114 @@
+{
+  "script": "qa/activity-exports.mjs",
+  "run": "2026-11-01T09:54:47.413Z",
+  "total": 21,
+  "passed": 21,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "brief: A4, the site's fonts embedded, titled",
+      "pass": true,
+      "detail": "[\"IBMPlexSansArabic-Bold-2015\",\"IBMPlexSansArabic-Bold-8733\",\"IBMPlexSansArabic-Regular-763\",\"IBMPlexSansArabic-Regular-7845\"]"
+    },
+    {
+      "name": "brief: under 400 KB, 35 KB",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "brief: the numbers are selectable text, not a picture",
+      "pass": true,
+      "detail": "مركز االتصال المؤسيس\nالملخص التنفيذي\nاألكرث إنتاجية هذا الشهر\nالمصمم\n4مراحل4مهام71%يف الموعد17أيام النشاط\n60\nنقطة\n12\nمرا"
+    },
+    {
+      "name": "brief: page numbers on every page",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "brief: no Arabic letter fell out to a missing glyph",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "full: A4, the site's fonts embedded, titled",
+      "pass": true,
+      "detail": "[\"IBMPlexSansArabic-Bold-1939\",\"IBMPlexSansArabic-Bold-9533\",\"IBMPlexSansArabic-Regular-4362\",\"IBMPlexSansArabic-Regular-5672\"]"
+    },
+    {
+      "name": "full: under 400 KB, 45 KB",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "full: the numbers are selectable text, not a picture",
+      "pass": true,
+      "detail": "تقرير الفريق الشهري\n2026 أكتوبر\nلالطالع الداخلي\n2026 أكتوبر\n مصممة: األكرث إنتاجية. مما له موعد يف وقته76%  من األعمال، "
+    },
+    {
+      "name": "full: page numbers on every page",
+      "pass": true,
+      "detail": "3"
+    },
+    {
+      "name": "full: no Arabic letter fell out to a missing glyph",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "full: the date of a finished stage is in the ledger",
+      "pass": true,
+      "detail": "تقرير الفريق الشهري\n2026 أكتوبر\nلالطالع الداخلي\n2026 أكتوبر\n مصممة: األكرث إنتاجية. مما له موعد يف وقته76%  من األعمال، وأُنجز6  من المهام، واعتُمد6 من المراحل و12 أنجز الفريق\n.الفحص\n#االسم\nالنقاط\nمرا"
+    },
+    {
+      "name": "empty month, brief: it draws, 1 page(s)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "empty month, full: it draws, 1 page(s)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "large month, brief: it draws, 2 page(s)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "large month, full: it draws, 7 page(s)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Excel opened the file without a repair, three sheets",
+      "pass": true,
+      "detail": "[{\"used\":\"A1:N15\",\"name\":\"الملخص\",\"rtl\":true},{\"used\":\"A1:F21\",\"name\":\"ما أنجزه كل شخص\",\"rtl\":true},{\"used\":\"A1:A11\",\"name\":\"كيف تُحسب النقاط\",\"rtl\":true}]"
+    },
+    {
+      "name": "every sheet runs right to left",
+      "pass": true,
+      "detail": "[{\"used\":\"A1:N15\",\"name\":\"الملخص\",\"rtl\":true},{\"used\":\"A1:F21\",\"name\":\"ما أنجزه كل شخص\",\"rtl\":true},{\"used\":\"A1:A11\",\"name\":\"كيف تُحسب النقاط\",\"rtl\":true}]"
+    },
+    {
+      "name": "the title, the first place and the table are where they should be",
+      "pass": true,
+      "detail": "{\"A1\":\"تقرير الفريق: أكتوبر 2026\",\"D5\":\"النقاط\",\"A3\":\"الأكثر إنتاجية: مصممة الفحص (60 نقطة)\",\"A5\":\"الترتيب\",\"K6\":\"6\",\"A6\":\"1\",\"C6\":\"المصمم\",\"D6\":\"60\",\"B6\":\"مصممة الفحص\",\"B5\":\"الاسم\"}"
+    },
+    {
+      "name": "the first row is the first place, its points a real number",
+      "pass": true,
+      "detail": "{\"A1\":\"تقرير الفريق: أكتوبر 2026\",\"D5\":\"النقاط\",\"A3\":\"الأكثر إنتاجية: مصممة الفحص (60 نقطة)\",\"A5\":\"الترتيب\",\"K6\":\"6\",\"A6\":\"1\",\"C6\":\"المصمم\",\"D6\":\"60\",\"B6\":\"مصممة الفحص\",\"B5\":\"الاسم\"}"
+    },
+    {
+      "name": "the table can be filtered",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Excel opened an empty month too",
+      "pass": true,
+      "detail": "{\"A1\":\"تقرير الفريق: أكتوبر 2026\",\"D5\":\"النقاط\",\"A3\":\"لا إنجاز مسجّل في هذا الشهر.\",\"A5\":\"الترتيب\",\"K6\":\"0\",\"A6\":\"–\",\"C6\":\"عضو\",\"D6\":\"0\",\"B6\":\"عضو هادئ\",\"B5\":\"الاسم\"}"
+    }
+  ]
+}
