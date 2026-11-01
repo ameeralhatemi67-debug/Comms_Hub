@@ -1,6 +1,6 @@
 {
   "script": "qa/site-icon.cjs",
-  "run": "2026-11-01T09:57:20.087Z",
+  "run": "2026-11-01T10:11:51.929Z",
   "checks": [
     {
       "name": "the head names the icons on the page people land on",
@@ -10,7 +10,7 @@
     {
       "name": "/favicon.ico answers signed out, as an image, not the sign-in page",
       "pass": true,
-      "detail": "{\"status\":200,\"type\":\"image/x-icon\",\"size\":13237}"
+      "detail": "{\"status\":200,\"type\":\"image/vnd.microsoft.icon\",\"size\":13237}"
     },
     {
       "name": "/icon.svg answers signed out, as an image, not the sign-in page",
@@ -31,10 +31,45 @@
       "name": "the browser draws it",
       "pass": true,
       "detail": ""
+    },
+    {
+      "name": "/report/plex-arabic-400.woff is served for the report's PDF",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "/report/plex-arabic-700.woff is served for the report's PDF",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "/report/plex-latin-400.woff is served for the report's PDF",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "/report/plex-latin-700.woff is served for the report's PDF",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "/report/reem-kufi-600.woff is served for the report's PDF",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "/brand/comms-hub-logo-120.png is served for the report's PDF",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "nothing on the page was refused by the site's Content-Security-Policy",
+      "pass": true,
+      "detail": "[]"
     }
   ],
   "notes": [],
-  "total": 6,
-  "passed": 6,
+  "total": 13,
+  "passed": 13,
   "failed": 0
 }

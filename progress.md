@@ -2177,4 +2177,18 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - The report on real data: the fixture's month is invented.
   - The long press is not involved here. The Android application's disabled buttons were not run on the emulator.
 - **Before the migration is applied.** The site keeps working: the director keeps the whole log (tested), and «تقرير الشهر» simply does not appear. So the site can be deployed first, or the migration applied first.
-- **Not done.** Nothing committed or pushed. `npm audit` lists critical advisories for `next` 16.3.8, fixed in 16.4.3; proposed as a task of its own.
+- **Not done at the time.** `npm audit` lists critical advisories for `next` 16.3.8, fixed in 16.4.3; proposed as a task of its own.
+
+### 2026-11-01: pushed to production for the Director's test
+
+- **The owner's word.** "please commit, push and deploy. so we can have the director test"
+- **What went out.** `15c36ea..91e2c9a`, 25 commits: this work and the 24 waiting since 2026-10-22, among them the desktop application's site code, the Android application's, push notices, «طلب حذف حسابي», the Content-Security-Policy on every page and the redesign of «الحسابات». Production deployment `dpl_GWJFjSqTPTUp69cSczatWbYdc7gK`.
+- **Left out of the commit.** `validation/recheck-R01.md` (another project's Firebase identifiers), `videos/`, `supabase/.temp/`, `qa/simulations/`, `Owner_Setup_Guide.md` and the `Role_Simulation_*` documents. The studio and calendar edits stay on `claude/accounts-redesign`.
+- **Checked before pushing.** Of the four migrations in those commits, push and account deletion are applied, and the two release buckets wait for a first release by design, so none of them could break the site. `next` was 16.3.8 on production already, so the push added no exposure. On the commit: `npm test` 628 of 628, typecheck and build clean.
+- **Verified on production, numbers.**
+  - Vercel: READY on `91e2c9a` in 69 seconds, `comms-hub-three.vercel.app` pointing at it, no runtime errors.
+  - `qa/site-icon.cjs` against the live address **13 of 13**: the icons, and the files the report's PDF needs.
+  - `qa/site-live.cjs`, new, **9 of 9**: the policy with a nonce, the sign-in page running under it, the public pages, «سجل النشاط» behind sign-in, a phone's width.
+- **Found.** The site used to answer every unknown address with an HTML page, `/favicon.ico` included. That is why browsers showed a globe, and it means a status of 200 proves nothing: waiting on a new file only worked once the check read its content type.
+- **Not verified.** Anything signed in on production. The migration is not applied, because the Supabase connector cannot see comms-hub.
+- **Rollback.** The deployment before this one is `dpl_2D8VxoZVVHBjtdeoh7Q6PuKNLQ6z`, on `15c36ea`.

@@ -1,0 +1,55 @@
+{
+  "script": "qa/site-live.cjs",
+  "run": "2026-11-01T10:12:29.493Z",
+  "checks": [
+    {
+      "name": "the page carries the Content-Security-Policy, with a nonce and no unsafe-eval",
+      "pass": true,
+      "detail": "default-src 'self'; script-src 'self' 'nonce-SPpkwgp9bGqmgBhqBNSpJA==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQV"
+    },
+    {
+      "name": "the sign-in page draws, right to left, with its form",
+      "pass": true,
+      "detail": "{\"email\":true,\"password\":true,\"dir\":\"rtl\",\"title\":\"مركز الاتصال المؤسسي\",\"hydrated\":true}"
+    },
+    {
+      "name": "the form takes typing, so the page's scripts ran under the policy",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page error and nothing refused by the policy",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "/privacy.html answers",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "/account-deletion.html answers",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "/health answers",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "«سجل النشاط» stays behind sign-in",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a phone width has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 9,
+  "passed": 9,
+  "failed": 0
+}

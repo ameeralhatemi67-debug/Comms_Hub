@@ -28,11 +28,12 @@ related:
 
 ## The site's icon, «سجل النشاط» and «تقرير الشهر», 2026-11-01
 
-From the owner's request (`MVP_draft.md` section 66). In the working tree on `main`: not committed, not pushed, and the migration is **not applied**.
+From the owner's request (`MVP_draft.md` section 66). **Live on production** since 2026-11-01 as `91e2c9a`, for the Director to test. The migration is **not applied**.
 
 - **Done.** The logo in the browser's tab. «سجل النشاط» reads the work cycle too, with «الكل» and «نشاطي» behind the new permission «عرض سجل النشاط كاملاً». «تقرير الشهر» shows what each person did and who came first, and downloads as Excel or as PDF in two templates.
 - **Evidence.** `npm test` 628 of 628, typecheck and build clean; database rules 38 of 38 on a private container; `qa/activity-exports.mjs` 21 of 21, with Excel itself opening the file; `qa/activity-flow.cjs` 39 of 39; `qa/site-icon.cjs` 6 of 6; `qa/accounts-flow.cjs` 63 of 63; `qa/permissions-pages.cjs` 1243 of 1243.
-- **Blocked on the owner.** The Supabase connector is signed in to an account without comms-hub, so the migration could not be run or applied there. Reconnect it to the right account, then approve applying `supabase/migrations/20261101120000_activity_report.sql`. Until then «تقرير الشهر» does not appear; the rest works.
+- **Blocked on the owner.** The Supabase connector is signed in to an account without comms-hub, so the migration could not be run or applied there. Reconnect it to the right account, then approve applying `supabase/migrations/20261101120000_activity_report.sql`.
+- **Until it is applied, the Director sees** the logo, the log with the work cycle, «الكل» and «نشاطي». They do not see «تقرير الشهر», and the two new permissions show in «الأدوار» but refuse when switched.
 - **Changes behaviour when applied.** The assistant stops seeing the whole log unless given it.
 - **Owner to confirm.** How productivity is counted (`MVP_draft.md` 66.3), and that the Admin and the director are left out of the ranking.
 - **Not verified.** The rules on comms-hub itself, and the page signed in on the real site with real data.
@@ -40,13 +41,13 @@ From the owner's request (`MVP_draft.md` section 66). In the working tree on `ma
 
 ## «الحسابات» redesigned, 2026-11-01
 
-From the Director's notes (`MVP_draft.md` section 65). On `main` as `975d546`; nothing pushed, no migration. The earlier studio and calendar edits wait on the branch `claude/accounts-redesign` (`8bdb7b1`), not merged, at the owner's choice.
+From the Director's notes (`MVP_draft.md` section 65). Live on production since 2026-11-01; no migration. The earlier studio and calendar edits wait on the branch `claude/accounts-redesign` (`8bdb7b1`), not merged, at the owner's choice.
 
 - **Done.** A role changes on the person's row and says what it gives and takes; every permission is one switch; «الأدوار» shows one role with a column per person, so two people of one role can differ; «إضافة عضو» starts from defaults, with «خيارات متقدمة» folded.
 - **Evidence.** On `main`, without the studio edits: `npm test` 604 of 604, typecheck and build clean. `qa/permissions-pages.cjs` 1243 of 1243 (repaired: it had not run since A5) and `qa/accounts-flow.cjs` 63 of 63 (new, clicks through the real components on a fixture) ran with those edits in the tree, and neither reaches them.
 - **Not verified.** The signed-in page on the real site, and the long press itself.
 - **Owner to decide.** `validation/recheck-R01.md` holds another project's Firebase identifiers, pasted in and left uncommitted: remove them or move them out of this repository.
-- **Next.** Push `main` to deploy; then the Director walks the page signed in. The push carries all 24 commits not yet on `origin/main`, not only this one.
+- **Next.** The Director walks the page signed in.
 
 ## The Android application, A8, 2026-10-28
 
