@@ -1,12 +1,14 @@
 'use client';
 // «الحسابات» (Permissions_Plan.md 5): who is in the hub, with which role, and what each
-// may do. Four tabs: «الأعضاء» (the list, with a person's card beside it), «الأدوار» (each
-// role's defaults), «الطلبات» (access, permission and account deletion requests), «السجل» (every change).
+// may do. Four tabs: «الأعضاء» (the list, with a person's card beside it), «الأدوار» (one role and the
+// people who hold it, side by side), «الطلبات» (access, permission and account deletion requests),
+// «السجل» (every change to accounts and permissions).
 // It opens with «فتح صفحة الحسابات»: the administrator, the director and the assistant by
 // default. What each sees and may do here is decided in the database.
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { KeyRound, Package, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import type { Role } from '@/lib/domain';
 import { Empty, Panel, Tabs, Title } from '../ui';
 import { AccountsProvider, useAccounts, type AccessRequest } from './data';
 import { AccessRequests, MemberDialog, MembersTab, RemoveDialog } from './members';
@@ -28,8 +30,10 @@ export function AccountsPage() {
 function Accounts() {
   const a = useAccounts();
   const search = useSearchParams();
+  const perm = usePermRequests();
   const [tab, setTab] = useState(search?.get('tab') ?? 'members');
   const [person, setPerson] = useState<string | null>(search?.get('person') ?? null);
+  const [roleView, setRoleView] = useState<string | null>(search?.get('role') ?? null);
   const [adding, setAdding] = useState(false);
   const [approving, setApproving] = useState<AccessRequest | null>(null);
   const [granting, setGranting] = useState<{ emails: string[]; cap?: string } | null>(null);
@@ -43,7 +47,6 @@ function Accounts() {
       </Panel>
     );
 
-  const perm = usePermRequests();
   const waiting = a.requests.length + a.deletions.length + perm.list.filter((q) => q.can_decide).length;
   const tabs = [
     { id: 'members', label: `الأعضاء (${a.members.length})` },
@@ -51,11 +54,18 @@ function Accounts() {
     { id: 'requests', label: waiting ? `الطلبات (${waiting})` : 'الطلبات' },
     { id: 'log', label: 'السجل' },
   ];
+  const openPerson = (email: string) => {
+    setTab('members');
+    setPerson(email);
+  };
   const added = (email: string) => {
     setAdding(false);
     setApproving(null);
-    setTab('members');
-    setPerson(email);
+    openPerson(email);
+  };
+  const compare = (role: Role) => {
+    setRoleView(role);
+    setTab('roles');
   };
 
   return (
@@ -70,12 +80,6 @@ function Accounts() {
           <Plus />
           إضافة عضو
         </button>
-        {a.can('permissions.grant') && (
-          <button type="button" className="secondary pm-newpreset" onClick={() => setPresetNew(true)}>
-            <Package />
-            حزمة جديدة
-          </button>
-        )}
       </Title>
       {a.status === 'error' && (
         <p className="warning" role="alert">
@@ -89,10 +93,10 @@ function Accounts() {
       {tab === 'members' && (
         <div className={`pm-split ${person ? 'with-card' : ''}`}>
           <MembersTab selected={person} onOpen={setPerson} onGrant={(emails) => setGranting({ emails })} />
-          {person && <PersonCard key={person} email={person} onClose={() => setPerson(null)} onGrant={(emails, cap) => setGranting({ emails, cap })} />}
+          {person && <PersonCard key={person} email={person} onClose={() => setPerson(null)} onGrant={(emails, cap) => setGranting({ emails, cap })} onCompare={compare} />}
         </div>
       )}
-      {tab === 'roles' && <RolesTab />}
+      {tab === 'roles' && <RolesTab first={roleView} onOpen={openPerson} onNewPreset={() => setPresetNew(true)} />}
       {tab === 'requests' && (
         <div className="pm-reqs">
           <Panel title="طلبات الصلاحيات">
@@ -109,12 +113,6 @@ function Accounts() {
         </div>
       )}
       {tab === 'log' && <LogTab person={person} />}
-
-      {a.presets.length > 0 && tab === 'members' && (
-        <p className="muted pm-presetline">
-          <KeyRound /> الحزم المحفوظة: {a.presets.map((p) => p.name).join('، ')}. تُطبَّق من بطاقة العضو.
-        </p>
-      )}
 
       {adding && <MemberDialog mode="add" onClose={() => setAdding(false)} onAdded={added} />}
       {approving && <MemberDialog mode="approve" request={approving} onClose={() => setApproving(null)} onAdded={added} />}

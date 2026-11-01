@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-10-28
+updated: 2026-11-01
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -25,6 +25,16 @@ related:
 ---
 
 # Communication Department Hub — Current Status
+
+## «الحسابات» redesigned, 2026-11-01
+
+From the Director's notes (`MVP_draft.md` section 65). Local commits on the branch `claude/accounts-redesign`, not yet on `main`; nothing pushed, no migration.
+
+- **Done.** A role changes on the person's row and says what it gives and takes; every permission is one switch; «الأدوار» shows one role with a column per person, so two people of one role can differ; «إضافة عضو» starts from defaults, with «خيارات متقدمة» folded.
+- **Evidence.** `npm test` 604 of 604, typecheck and build clean, `qa/permissions-pages.cjs` 1243 of 1243 (repaired: it had not run since A5), `qa/accounts-flow.cjs` 63 of 63 (new, clicks through the real components on a fixture).
+- **Not verified.** The signed-in page on the real site, and the long press itself.
+- **Owner to decide.** `validation/recheck-R01.md` holds another project's Firebase identifiers, pasted in and left uncommitted: remove them or move them out of this repository.
+- **Next.** Merge the branch into `main` and deploy; then the Director walks the page signed in.
 
 ## The Android application, A8, 2026-10-28
 

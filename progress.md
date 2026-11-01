@@ -6,7 +6,7 @@ tags:
   - document/progress
   - knowledge/dated
 created: 2026-08-18
-updated: 2026-10-22
+updated: 2026-11-01
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -2106,3 +2106,39 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - **Advisors**, both read in full before and after applying. Security: exactly 3 new notices, all `authenticated_security_definer_function_executable` for the functions meant for signed-in people (`account_deletion_request`, `account_deletion_withdraw`, and `deletion_visible`, the read policy's helper, which tells the caller only whether they may see a given person's request); nothing new for `anon`, nothing removed. Performance: unchanged.
 - **Not re-run.** The other rule files: no existing function was replaced. The trigger on deleting an account does nothing without an open request, which check 23 covers.
 - **Not done.** Nothing pushed: «طلب حذف حسابي» reaches people once the site is deployed.
+
+### 2026-11-01: «الحسابات» redesigned from the Director's notes
+
+- **The owner's word.** The Director's notes: the page is hard to understand and needs polish; «الأعضاء» should make changing a person's role and permissions easier; «الأدوار» should allow two members of one role to differ; «إضافة عضو» should start from defaults and open the rest only when needed. Asked with it: the difference between «السجل» and «سجل النشاط».
+- **Specification.** `MVP_draft.md` section 65; `Permissions_Plan.md` 5 says that section replaces its layout where they differ. No rule changed and no migration was written: every action is a database function that already existed.
+- **Built.**
+  - «الأعضاء»: named columns; a role changed on the person's row, saying what it gives and takes (`roleChange`) before it is saved, with a long press when anything is taken away.
+  - The card: one switch for every permission and page. `switchStep` turns on or off into the database call by where the permission comes from, and clears an override when that alone gives the wanted state, so a person returns to their role with no row left behind. `switchWhy` words what cannot move, as the database would refuse. The seven control words are gone. The clock gives a permission for a time; «إعادته إلى دوره» replaces «إنهاء كل الإضافات»; a search box filters the card.
+  - «الأدوار»: one role at a time, with the role's column and a column for each person of the role whom the signed-in person manages. A switch in a person's column changes that person alone. «ما يختلف» keeps the rows where someone stands apart. Each person's state comes from `resolve`, the tested mirror of `perm_eval`.
+  - «إضافة عضو»: three fields and one sentence that says what the defaults are; «خيارات متقدمة» folds the pages, extra permissions from the start and the invitation. After adding, the card opens.
+  - «السجل» says what it holds and links to «سجل النشاط». The help of the page moved to version 4, with three news steps.
+- **Deliberately removed.** The table of eight roles side by side, in favour of one role at a time. «حزمة جديدة» left the page's header for «الأدوار».
+- **Found and fixed.**
+  - `qa/permissions-pages.cjs` had not run since A5 and A8: it did not compile `deletions.tsx`, `lib/push/kick.ts` or `lib/integrations/expiry.ts`, and its screenshots were old. It also skipped `auth.css`, so dialogs were drawn without their grids. Repaired. One stale expectation corrected: OneDrive under «غير متاح بعد», connected since B10.
+  - The default pages of a new member were not limited to those the adder holds, so an adder missing a page would be refused with the list folded away. They are limited now.
+  - `usePermRequests` was called after an early return in `page.tsx`, against the rules of hooks.
+  - A refused card (`perm_card`) showed nothing; it says why now.
+  - While building: page rows marked everyone as different, because a role has no page list; a page now sets a person apart only when the people of the role differ on it. The role row crashed the page after `scrollIntoView` was returned from an effect, because recent browsers return a Promise there. `qa/accounts-flow.cjs` caught that one; typecheck and tests could not.
+- **Verified, numbers.**
+  - `npm test` **604 of 604**, with three new tests. One simulates the database's writes and proves a flip reaches the opposite state from every source and leaves no row when back on the role.
+  - `npm run typecheck` and `npm run build` clean.
+  - `qa/permissions-pages.cjs` **1243 of 1243**: the first full run since A5.
+  - `qa/accounts-flow.cjs`, new, **63 of 63**, in Edge: the real page and components clicked through on a fixture (`qa/fixtures/accounts-flow.tsx`), reading the database calls they make, at desktop, tablet, phone and evening.
+  - `impeccable detect` over the changed files: three warnings, all in older requests and settings styles, left alone.
+- **Not verified.**
+  - The signed-in page on the real site and the real database: the page needs a signed-in person and no bypass is allowed. The rules were not touched, so `supabase/tests/` were not re-run.
+  - The long press itself: the fixture has no kit, so the check reads the `data-hold` reason and clicks through.
+- **Known limits.**
+  - A person who holds a permission from their role and also from a live temporary grant needs two flips: the first adds the removal and the temporary grant still allows it (`perm_eval`), the second ends it.
+  - A one-time grant bound to one conversation reads as off on the switch, because `perm_card` evaluates without a target. It is counted on the row. This is as before.
+- **Not done.** Nothing pushed. Committed on the branch `claude/accounts-redesign`, with the earlier studio and calendar edits in a commit of their own after it.
+- **Left out of the commits, on purpose.**
+  - `validation/recheck-R01.md`: its only change is a block of another project's Firebase identifiers, pasted in. The project's rules keep Firebase values out of this repository.
+  - `videos/` (96 MB) and `supabase/.temp/` (tool residue).
+  - `qa/simulations/`: already on the `codex/role-simulation-*` branches, and it carries the real project reference.
+  - `Owner_Setup_Guide.md` and the two `Role_Simulation_*` documents: untracked for weeks across many commits, so left for the owner to decide.

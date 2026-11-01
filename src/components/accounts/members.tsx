@@ -1,13 +1,15 @@
 'use client';
-// «الأعضاء»: the people of the hub, with their role, pages and small markers for temporary,
-// one-time and removed permissions. One click opens a person's card beside the list; ticking
-// rows grants, changes the role of, or removes several people at once. Who may do what is
-// the database's decision (perm_require); the list only explains it.
-import { useMemo, useState } from 'react';
-import { Check, Clock, KeyRound, Lock, Plus, Trash2, UserCog, X } from 'lucide-react';
+// «الأعضاء»: the people of the hub. A person's role is changed where it is read, on their row,
+// and says what the change gives and takes before it is saved. A row shows where the person stands
+// apart from their role; «الصلاحيات» opens their card beside the list; ticking rows grants, changes
+// the role of, or removes several people at once. Adding a member asks for a name, an address and a
+// role, and folds the rest away. Who may do what is the database's decision (perm_require); the
+// list only explains it.
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, Check, ChevronDown, Clock, KeyRound, Lock, Plus, SlidersHorizontal, Trash2, UserCog, X } from 'lucide-react';
 import { roles, type Role } from '@/lib/domain';
 import { defaultPages, grantablePages, sanitizePages } from '@/lib/access';
-import { assignableBy, manageBlock, markers, rankOf, roleAr } from '@/lib/permissions';
+import { CAPABILITIES, ROLE_HINT, assignableBy, capLabel, manageBlock, markers, pagesAr, rankOf, roleAr, roleChange, roleHolds } from '@/lib/permissions';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { ENTRY_STATE_AR, sendInvite } from '@/lib/entry';
 import { Modal } from '../ui';
@@ -29,11 +31,120 @@ export function manageWhy(me: { email: string; role: Role }, can: (c: string) =>
   return null;
 }
 
+/** The small chips that say where a person stands apart from their role. */
+export function ApartMarks({ grants }: { grants: { mode: 'standing' | 'timed' | 'once'; effect: 'allow' | 'deny' }[] }) {
+  const mk = markers(grants);
+  return (
+    <>
+      {mk.added > 0 && <span className="pm-mark added">{mk.added} مضافة</span>}
+      {mk.timed > 0 && (
+        <span className="pm-mark timed" title="صلاحيات مؤقتة">
+          <Clock />
+          {mk.timed} مؤقتة
+        </span>
+      )}
+      {mk.once > 0 && <span className="pm-mark once">{mk.once} لمرة واحدة</span>}
+      {mk.removed > 0 && <span className="pm-mark removed">{mk.removed} مسحوبة</span>}
+    </>
+  );
+}
+
+/** A person's role, changed where it is read; or, when it cannot be, the role with the reason. */
+export function RolePick({ member, onPick }: { member: Member; onPick: (to: Role) => void }) {
+  const a = useAccounts();
+  const why = member.protected ? 'حساب مؤسس: لا يتغير دوره من التطبيق.' : manageWhy(a.me, a.can, member, 'roles.assign');
+  if (why)
+    return (
+      <span className="chip pm-rolefixed" title={why}>
+        {roleAr(member.role)}
+      </span>
+    );
+  return (
+    <select className="pm-rolepick" aria-label={`دور ${member.display_name}`} value={member.role} onChange={(e) => onPick(e.target.value as Role)}>
+      {[...new Set([member.role, ...assignableBy(a.me.role, roleIds)])].map((r) => (
+        <option key={r} value={r}>
+          {roleAr(r)}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+/** Changing one person's role: what it gives and takes, in words, before it is saved. */
+export function RoleChangeDialog({ member, to, onClose }: { member: Member; to: Role; onClose: () => void }) {
+  const a = useAccounts();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const { gains, losses } = roleChange(member.role, to, (r, k) => roleHolds(a.defaults, r, k));
+  const lower = losses.length > 0 || rankOf(to) < rankOf(member.role);
+  const go = async () => {
+    setBusy(true);
+    const r = await a.call('assign_role', { p_email: member.email, p_role: to, p_pages: null });
+    setBusy(false);
+    if (!r.ok) return setError(r.error);
+    a.say(`صار دور ${member.display_name} «${roleAr(to)}». يسري عند أول تحميل جديد لصفحته.`);
+    await a.reload();
+    onClose();
+  };
+  return (
+    <Modal title={`تغيير دور ${member.display_name}`} onClose={onClose}>
+      <div className="pm-rolefromto">
+        <span className="chip">{roleAr(member.role)}</span>
+        <ArrowLeft aria-hidden="true" />
+        <span className="chip success">{roleAr(to)}</span>
+      </div>
+      <p className="pm-rolehint">{ROLE_HINT[to]}</p>
+      {gains.length > 0 && (
+        <div className="pm-change gains">
+          <b>سيستطيع</b>
+          <ul>
+            {gains.map((x) => (
+              <li key={x}>{x}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {losses.length > 0 && (
+        <div className="pm-change losses">
+          <b>لن يستطيع</b>
+          <ul>
+            {losses.map((x) => (
+              <li key={x}>{x}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {!gains.length && !losses.length && <p>لا فرق في الصلاحيات بين الدورين.</p>}
+      <p className="muted">صفحاته، وما أُضيف له أو سُحب منه وحده، يبقى كما هو.</p>
+      {error && (
+        <p className="warning" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="actions">
+        {lower ? (
+          <button type="button" className="primary" disabled={busy} data-hold={HOLD.roleDown} onClick={() => void go()}>
+            {busy ? 'جارٍ الحفظ…' : `تغيير إلى «${roleAr(to)}»`}
+          </button>
+        ) : (
+          <button type="button" className="primary" disabled={busy} onClick={() => void go()}>
+            {busy ? 'جارٍ الحفظ…' : `تغيير إلى «${roleAr(to)}»`}
+          </button>
+        )}
+        <button type="button" className="secondary" onClick={onClose}>
+          إلغاء
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
 export function MembersTab({ selected, onOpen, onGrant }: { selected: string | null; onOpen: (email: string) => void; onGrant: (emails: string[]) => void }) {
   const a = useAccounts();
   const [q, setQ] = useState('');
   const [ticked, setTicked] = useState<string[]>([]);
   const [roleFor, setRoleFor] = useState<string[] | null>(null);
+  const [roleTo, setRoleTo] = useState<{ member: Member; to: Role } | null>(null);
   const [removing, setRemoving] = useState<string[] | null>(null);
   const list = useMemo(() => {
     const n = q.trim().toLowerCase();
@@ -50,7 +161,6 @@ export function MembersTab({ selected, onOpen, onGrant }: { selected: string | n
           <span className="sr">ابحث عن عضو</span>
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث بالاسم أو البريد أو الدور" />
         </label>
-        <small className="muted">{a.members.length} عضواً</small>
       </div>
       {picked.length > 0 && (
         <div className="pm-bulk" role="toolbar" aria-label="ما حددته">
@@ -73,10 +183,17 @@ export function MembersTab({ selected, onOpen, onGrant }: { selected: string | n
         </div>
       )}
       <div className="pm-list" role="list">
-        {a.status === 'loading' && <p className="muted">جارٍ التحميل…</p>}
+        <div className="pm-rowhead" aria-hidden="true">
+          <span />
+          <span>العضو</span>
+          <span>الدور</span>
+          <span>الوصول</span>
+          <span>آخر دخول</span>
+          <span />
+        </div>
+        {a.status === 'loading' && <p className="muted pm-listnote">جارٍ التحميل…</p>}
         {list.map((m) => {
           const g = a.grants.filter((x) => x.email === m.email);
-          const mk = markers(g);
           const why = manageWhy(a.me, a.can, m);
           return (
             <div role="listitem" key={m.email} className={`pm-row ${selected === m.email ? 'on' : ''}`}>
@@ -89,14 +206,19 @@ export function MembersTab({ selected, onOpen, onGrant }: { selected: string | n
                 onChange={() => tick(m.email)}
               />
               <button type="button" className="pm-who" onClick={() => onOpen(m.email)}>
-                <b>{m.display_name}</b>
-                <small>
-                  <bdi dir="ltr">{m.email}</bdi>
-                </small>
+                <span className="face sm" aria-hidden="true">
+                  {m.display_name.trim().charAt(0)}
+                </span>
+                <span className="pm-whotext">
+                  <b>{m.display_name}</b>
+                  <small>
+                    <bdi dir="ltr">{m.email}</bdi>
+                  </small>
+                </span>
               </button>
               <span className="pm-rolechip">
-                <span className="chip">{roleAr(m.role)}</span>
-                {m.protected && <small className="acct-founder"> مؤسس</small>}
+                <RolePick member={m} onPick={(to) => setRoleTo({ member: m, to })} />
+                {m.protected && <small className="acct-founder">مؤسس</small>}
                 {a.entry[m.email] && a.entry[m.email] !== 'active' && (
                   <small className="pm-entrymark" data-state={a.entry[m.email]}>
                     {ENTRY_STATE_AR[a.entry[m.email]]}
@@ -104,92 +226,101 @@ export function MembersTab({ selected, onOpen, onGrant }: { selected: string | n
                 )}
               </span>
               <span className="pm-marks">
-                {mk.timed > 0 && (
-                  <span className="pm-mark timed" title="صلاحيات مؤقتة">
-                    <Clock />
-                    {mk.timed} مؤقتة
-                  </span>
-                )}
-                {mk.once > 0 && <span className="pm-mark once">{mk.once} لمرة واحدة</span>}
-                {mk.removed > 0 && <span className="pm-mark removed">{mk.removed} مسحوبة</span>}
-                {m.role !== 'admin' && <span className="muted">{sanitizePages(m.pages).length} صفحة</span>}
+                <small className="pm-pagecount">{m.role === 'admin' ? 'كل الصفحات' : pagesAr(sanitizePages(m.pages).length)}</small>
+                <ApartMarks grants={g} />
               </span>
               <small className="muted pm-seen">
                 <bdi dir="ltr">{when(m.last_seen_at)}</bdi>
               </small>
-              <button type="button" className="secondary pm-open" onClick={() => onOpen(m.email)} aria-label={`بطاقة ${m.display_name}`}>
-                البطاقة
+              <button type="button" className="secondary pm-open" onClick={() => onOpen(m.email)} aria-label={`صلاحيات ${m.display_name}`}>
+                الصلاحيات
               </button>
             </div>
           );
         })}
-        {a.status === 'ready' && !list.length && <p className="muted">لا أحد بهذا البحث.</p>}
+        {a.status === 'ready' && !list.length && <p className="muted pm-listnote">لا أحد بهذا البحث.</p>}
       </div>
-      <p className="muted">
-        انقر اسماً لتفتح بطاقته بجانب القائمة. المربع يحدد عدة أشخاص لتمنحهم أو تغيّر دورهم أو تزيلهم معاً؛ يُعطَّل لمن لا تديره، ويقول السبب.
+      <p className="muted pm-listhelp">
+        غيّر الدور من القائمة في صف الشخص. «الصلاحيات» تفتح ما يملكه بمفاتيح تشغيل وإيقاف. المربع يحدد عدة أشخاص معاً؛ ويُعطَّل لمن لا تديره، ويقول السبب.
         {!a.members.some((m) => manageable(m)) && ' لا تدير صلاحيات أحد هنا.'}
       </p>
+      {roleTo && <RoleChangeDialog member={roleTo.member} to={roleTo.to} onClose={() => setRoleTo(null)} />}
       {roleFor && <BulkRoleDialog emails={roleFor} onClose={() => setRoleFor(null)} onDone={() => (setRoleFor(null), setTicked([]))} />}
       {removing && <RemoveDialog emails={removing} onClose={() => setRemoving(null)} onDone={() => (setRemoving(null), setTicked([]))} />}
     </div>
   );
 }
 
-/** Add a member, accept an access request, or edit a member's name and pages. */
+/**
+ * Add a member, or accept an access request. The name, the address and the role are all it asks:
+ * pages and the invitation start from their defaults, and «خيارات متقدمة» opens them only when needed.
+ */
 export function MemberDialog({
   mode,
-  member,
   request,
   onClose,
   onAdded,
 }: {
-  mode: 'add' | 'edit' | 'approve';
-  member?: Member;
+  mode: 'add' | 'approve';
   request?: AccessRequest;
   onClose: () => void;
   onAdded?: (email: string) => void;
 }) {
   const a = useAccounts();
-  const firstRole: Role = member?.role ?? 'member';
-  const [name, setName] = useState(member?.display_name ?? request?.full_name ?? '');
-  const [email, setEmail] = useState(member?.email ?? request?.email ?? '');
-  const [role, setRole] = useState<Role>(firstRole);
-  const [pages, setPages] = useState<string[]>(member ? sanitizePages(member.pages) : defaultPages('member'));
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [invite, setInvite] = useState(true);
   const myRoles = assignableBy(a.me.role, roleIds);
   const holds = (p: string) => a.me.role === 'admin' || a.me.pages.includes(p);
-  const canRole = mode !== 'edit' || (a.can('roles.assign') && !member?.protected && !manageWhy(a.me, a.can, member!, 'roles.assign'));
-  const lower = mode === 'edit' && member && rankOf(role) < rankOf(member.role);
+  // Only pages the adder holds: the database refuses the rest (perm_pages_ok), and here the list is folded away.
+  const startPages = (r: Role): string[] => defaultPages(r).filter(holds);
+  const firstRole: Role = myRoles.includes('member') ? 'member' : myRoles[0] ?? 'member';
+  const [name, setName] = useState(request?.full_name ?? '');
+  const [email, setEmail] = useState(request?.email ?? '');
+  const [role, setRole] = useState<Role>(firstRole);
+  const [pages, setPages] = useState<string[]>(() => startPages(firstRole));
+  const [extra, setExtra] = useState<string[]>([]);
+  const [invite, setInvite] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const extras = a.can('permissions.grant')
+    ? CAPABILITIES.filter((c) => c.grantable && c.scope !== 'page' && rankOf(role) >= c.minRank && !roleHolds(a.defaults, role, c.key) && (a.me.role === 'admin' || a.can(c.key)))
+    : [];
+  const chosen = extra.filter((k) => extras.some((c) => c.key === k));
+  const open = sanitizePages(pages).filter((p) => p !== 'create' || roles[role].create);
+  const nameField = useRef<HTMLInputElement>(null);
+  // The dialog gives focus to its first control as it opens, which is its close button: the name is what comes next.
+  useEffect(() => {
+    if (mode !== 'add') return;
+    const t = requestAnimationFrame(() => nameField.current?.focus());
+    return () => cancelAnimationFrame(t);
+  }, [mode]);
 
   const save = async () => {
     setBusy(true);
     setError('');
-    const p = sanitizePages(pages);
-    let r;
-    if (mode === 'add') r = await a.call('add_account', { p_email: email, p_name: name, p_role: role, p_pages: p });
-    else if (mode === 'approve') r = await a.call('approve_request', { p_id: request!.id, p_role: role, p_pages: p });
-    else if (member && role !== member.role) {
-      r = await a.call('assign_role', { p_email: member.email, p_role: role, p_pages: p });
-      if (r.ok) r = await a.call('account_update', { p_email: member.email, p_name: name.trim(), p_pages: null });
-    } else r = await a.call('account_update', { p_email: member!.email, p_name: name.trim(), p_pages: member!.protected ? null : p });
-    setBusy(false);
-    if (!r.ok) return setError(r.error);
+    const to = email.trim().toLowerCase();
+    const r = mode === 'add' ? await a.call('add_account', { p_email: email, p_name: name, p_role: role, p_pages: open }) : await a.call('approve_request', { p_id: request!.id, p_role: role, p_pages: open });
+    if (!r.ok) {
+      setBusy(false);
+      return setError(r.error);
+    }
+    const refused: string[] = [];
+    for (const k of chosen) {
+      const g = await a.call('grant_capability', { p_email: to, p_cap: k, p_mode: 'standing', p_until: null, p_uses: null, p_scope: null, p_reason: null });
+      if (!g.ok) refused.push(capLabel(k));
+    }
     // A new person gets the invitation at once, unless the leader unticks it; the card can send it later.
-    let said = mode === 'edit' ? 'حُفظ الحساب. يسري عند أول تحميل جديد لصفحته.' : 'أُضيف الحساب. يعيّن صاحبه كلمة مروره من تبويب «أول دخول».';
-    if (mode !== 'edit' && invite) {
-      const err = await sendInvite(email.trim().toLowerCase());
+    let said = 'أُضيف الحساب. يعيّن صاحبه كلمة مروره من تبويب «أول دخول».';
+    if (invite) {
+      const err = await sendInvite(to);
       said = err ? `أُضيف الحساب، لكن تعذّر إرسال الدعوة: ${err} أرسلها من بطاقته.` : 'أُضيف الحساب وأُرسلت الدعوة إلى بريده.';
     }
-    a.say(said);
+    setBusy(false);
+    a.say(refused.length ? `${said} لم تُمنح: ${refused.join('، ')}.` : said);
     await a.reload();
-    if (mode !== 'edit') onAdded?.(email.trim().toLowerCase());
-    else onClose();
+    onAdded?.(to);
   };
 
   return (
-    <Modal title={mode === 'add' ? 'إضافة عضو' : mode === 'approve' ? 'قبول طلب وصول' : 'تعديل الحساب'} onClose={onClose}>
+    <Modal title={mode === 'add' ? 'إضافة عضو' : 'قبول طلب وصول'} onClose={onClose}>
       <form
         className="acct-form pm-form"
         onSubmit={(e) => {
@@ -199,35 +330,47 @@ export function MemberDialog({
       >
         <label>
           الاسم
-          <input required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
+          <input ref={nameField} required maxLength={80} value={name} autoComplete="off" onChange={(e) => setName(e.target.value)} />
         </label>
         <label>
           البريد الإلكتروني
-          <input type="email" required dir="ltr" value={email} readOnly={mode !== 'add'} onChange={(e) => setEmail(e.target.value)} />
+          <input type="email" required dir="ltr" autoComplete="off" value={email} readOnly={mode !== 'add'} onChange={(e) => setEmail(e.target.value)} />
         </label>
-        {member?.protected ? (
-          <p className="muted">حساب مؤسس بدور Admin: يفتح كل الصفحات، ولا يتغير دوره ولا يُحذف من التطبيق.</p>
-        ) : (
-          <>
-            <label>
-              الدور
-              <select value={role} disabled={!canRole} onChange={(e) => {
-                const r = e.target.value as Role;
-                setRole(r);
-                // A new role brings the pages that role can use; adjust them after.
-                if (mode !== 'edit') setPages(defaultPages(r).filter(holds));
-              }}>
-                {[...new Set([firstRole, ...myRoles])].filter((r) => r !== 'admin' || firstRole === 'admin').map((r) => (
-                  <option key={r} value={r} disabled={r !== firstRole && !myRoles.includes(r)}>
-                    {roleAr(r)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {!canRole && <p className="muted">تغيير الدور لمن يملك «تغيير دور عضو» ورتبته فوق هذا الشخص.</p>}
-            <p className="muted">
-              لا تمنح دوراً في رتبتك أو فوقها{a.me.role === 'assistant' ? '، والمساعد يمنح أدوار الفريق فقط' : ''}. صلاحيات الدور تظهر في تبويب «الأدوار».
-            </p>
+        <label>
+          الدور
+          <select
+            value={role}
+            onChange={(e) => {
+              const r = e.target.value as Role;
+              setRole(r);
+              // A new role brings the pages that role can use; adjust them after.
+              setPages(startPages(r));
+            }}
+          >
+            {myRoles.map((r) => (
+              <option key={r} value={r}>
+                {roleAr(r)}
+              </option>
+            ))}
+          </select>
+          <small className="pm-rolehint">{ROLE_HINT[role]}</small>
+        </label>
+        {a.me.role === 'assistant' && <p className="muted">المساعد يمنح أدوار الفريق فقط.</p>}
+
+        <p className="pm-defaults">
+          <Check aria-hidden="true" />
+          <span>
+            يبدأ بـ{pagesAr(open.length)} وصلاحيات دوره{chosen.length ? ` و${chosen.length} إضافية` : ''}. {invite ? 'وتصله دعوة بالبريد الآن.' : 'ولن تُرسل دعوة الآن.'}
+          </span>
+        </p>
+
+        <details className="pm-fold pm-advanced">
+          <summary>
+            <SlidersHorizontal aria-hidden="true" />
+            <span>خيارات متقدمة</span>
+            <ChevronDown className="pm-foldmark" aria-hidden="true" />
+          </summary>
+          <div className="pm-advbody">
             <fieldset>
               <legend>الصفحات المفتوحة</legend>
               <div className="page-grid">
@@ -247,31 +390,38 @@ export function MemberDialog({
                   );
                 })}
               </div>
-              <p className="muted">الرئيسية والحساب مفتوحتان دائماً. صفحة لمدة محددة تُمنح من بطاقة العضو.</p>
+              <small>الرئيسية والحساب مفتوحتان دائماً.</small>
             </fieldset>
-          </>
-        )}
-        {mode !== 'edit' && (
-          <label className="check-row">
-            <input type="checkbox" checked={invite} onChange={(e) => setInvite(e.target.checked)} />
-            أرسل دعوة إلى بريده الآن
-          </label>
-        )}
+            {extras.length > 0 && (
+              <fieldset>
+                <legend>صلاحيات إضافية من البداية</legend>
+                <div className="pm-extras">
+                  {extras.map((c) => (
+                    <label className="check-row" key={c.key}>
+                      <input type="checkbox" checked={extra.includes(c.key)} onChange={() => setExtra((x) => (x.includes(c.key) ? x.filter((y) => y !== c.key) : [...x, c.key]))} />
+                      {c.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            )}
+            <label className="check-row">
+              <input type="checkbox" checked={invite} onChange={(e) => setInvite(e.target.checked)} />
+              أرسل دعوة إلى بريده الآن
+            </label>
+            <small>لا تمنح دوراً في رتبتك أو فوقها، ولا صفحة أو صلاحية لا تملكها أنت.</small>
+          </div>
+        </details>
+
         {error && (
           <p className="warning" role="alert">
             {error}
           </p>
         )}
         <div className="actions">
-          {lower ? (
-            <button type="button" className="primary" disabled={busy} data-hold={HOLD.roleDown} onClick={() => void save()}>
-              {busy ? 'جارٍ الحفظ…' : `حفظ: «${roleAr(role)}»`}
-            </button>
-          ) : (
-            <button className="primary" disabled={busy}>
-              {busy ? 'جارٍ الحفظ…' : 'حفظ'}
-            </button>
-          )}
+          <button className="primary" disabled={busy}>
+            {busy ? 'جارٍ الحفظ…' : mode === 'add' ? 'إضافة العضو' : 'قبول وإضافة'}
+          </button>
           <button type="button" className="secondary" onClick={onClose}>
             إلغاء
           </button>

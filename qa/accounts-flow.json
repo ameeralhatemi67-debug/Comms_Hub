@@ -1,0 +1,325 @@
+{
+  "script": "qa/accounts-flow.cjs",
+  "run": "2026-11-01T08:13:12.083Z",
+  "checks": [
+    {
+      "name": "«الأعضاء»: six people, in the columns the head names, and no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a role that cannot be changed is shown with its reason, and is no control",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the row offers the roles the director may give, never director or Admin",
+      "pass": true,
+      "detail": "[\"writer\",\"assistant\",\"designer\",\"producer\",\"publisher\",\"member\"]"
+    },
+    {
+      "name": "it asks first, saying what it gives and what it takes",
+      "pass": true,
+      "detail": "تغيير دور كاتب أول\n×\nكاتب المحتوى\nمسؤول النشر وإدارة الحسابات\n\nيجدول وينشر ما اعتُمد، ويدير حسابات المنصات.\n\nسيستطيع\nالنشر والجدولة\nلن يستطيع\nصفحة «إنشاء»\n\nصفحاته، وما أُضيف له أو سُحب منه وحده، يبقى كما هو.\n\nتغيير إلى «مسؤول النشر وإدارة الحسابات»\nإلغاء"
+    },
+    {
+      "name": "a change that takes something away is a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing is saved until it is confirmed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "between roles that hold the same it says so, and needs no long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "confirming asks assign_role for that person alone, and keeps the pages",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the row shows the new role at once",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the card opens beside the list, which stays",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the card says the person works by their role as it is",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "off to on: one call, for this person",
+      "pass": true,
+      "detail": "{\"name\":\"set_member_override\",\"args\":{\"p_email\":\"two@example.test\",\"p_cap\":\"mail.outside.send\",\"p_effect\":\"allow\",\"p_reason\":null}}"
+    },
+    {
+      "name": "the source and the row both show it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the switch reads on for a screen reader",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "on to off, for what the role does not give: cleared, not denied, so the person is back on their role",
+      "pass": true,
+      "detail": "{\"name\":\"set_member_override\",\"args\":{\"p_email\":\"two@example.test\",\"p_cap\":\"mail.outside.send\",\"p_effect\":null,\"p_reason\":null}}"
+    },
+    {
+      "name": "a page is the same switch",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a refusal is said in Arabic and the switch goes back",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the clock beside a switch opens the time-limited grant for that permission",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a temporary grant shows its end, «تمديد», and the way back to the role",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«إعادته إلى دوره» is a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "switching a temporary grant off ends it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "searching keeps only what matches, and opens its group",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«قارنه بزملائه» opens that role, with both of them in columns",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "both start the same as the role but for the page closed above",
+      "pass": true,
+      "detail": "الصلاحية\tالدور كله\nشخصان\n\tكاتب أول\nمثل الدور\n\tكاتبة ثانية\nيختلف في 1\n\n"
+    },
+    {
+      "name": "each person has a switch of their own for the same permission",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "giving it to one writer asks for that person alone",
+      "pass": true,
+      "detail": "{\"name\":\"set_member_override\",\"args\":{\"p_email\":\"one@example.test\",\"p_cap\":\"room.create\",\"p_effect\":\"allow\",\"p_reason\":null}}"
+    },
+    {
+      "name": "the other writer of the same role stays as they were",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the cell is marked, in words as well as colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«ما يختلف» keeps only the rows where someone stands apart",
+      "pass": true,
+      "detail": "[\"البريد\",\"إنشاء قناة إعلانات في المراسلة\"]"
+    },
+    {
+      "name": "the role's own switch says how many it touches before it is saved",
+      "pass": true,
+      "detail": "تفعيل «رسائل «مهم» (المستوى 2)»\n×\n\nلكل من يحمل دور «كاتب المحتوى»: شخصان الآن، ومن يُعطى هذا الدور لاحقاً. من أُضيفت له أو سُحبت منه وحده يبقى كما هو.\n\nتفعيل للدور\nإلغاء"
+    },
+    {
+      "name": "and it asks set_role_default, not a person",
+      "pass": true,
+      "detail": "{\"name\":\"set_role_default\",\"args\":{\"p_role\":\"writer\",\"p_cap\":\"urgency.2\",\"p_allowed\":true}}"
+    },
+    {
+      "name": "a role at the director's own rank is shown, locked, with no columns of people",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the fixed rules are there, each with its reason",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a person's name in the table opens their card",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the cursor is already in the name",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«إضافة عضو» opens with three fields, the rest folded away",
+      "pass": true,
+      "detail": "3"
+    },
+    {
+      "name": "it says what the defaults are",
+      "pass": true,
+      "detail": "يبدأ بـ10 صفحات وصلاحيات دوره. وتصله دعوة بالبريد الآن."
+    },
+    {
+      "name": "choosing a role says what the role is for",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "three fields are enough: it adds with the role's pages, those the director holds",
+      "pass": true,
+      "detail": "{\"name\":\"add_account\",\"args\":{\"p_email\":\"New@Example.test\",\"p_name\":\"موظفة جديدة\",\"p_role\":\"designer\",\"p_pages\":[\"work\",\"create\",\"approvals\",\"calendar\",\"media\",\"tasks\",\"activity\",\"motion\",\"mail\",\"analytics\"]}}"
+    },
+    {
+      "name": "the invitation goes out once, to the address in small letters",
+      "pass": true,
+      "detail": "[{\"email\":\"new@example.test\",\"kind\":\"invite\"}]"
+    },
+    {
+      "name": "and the new person's card opens",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«خيارات متقدمة» opens the pages, extra permissions and the invitation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a page the director does not hold cannot be ticked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the summary follows every choice",
+      "pass": true,
+      "detail": "يبدأ بـ9 صفحات وصلاحيات دوره و1 إضافية. ولن تُرسل دعوة الآن."
+    },
+    {
+      "name": "the options are used: one page fewer, the extra permission for good, no invitation",
+      "pass": true,
+      "detail": "{\"second\":{\"name\":\"add_account\",\"args\":{\"p_email\":\"opts@example.test\",\"p_name\":\"موظف بخيارات\",\"p_role\":\"member\",\"p_pages\":[\"work\",\"create\",\"approvals\",\"calendar\",\"media\",\"tasks\",\"activity\",\"motion\",\"mail\"]}},\"extra\":{\"name\":\"grant_capability\",\"args\":{\"p_email\":\"opts@example.test\",\"p_cap\":\"urgency.2\",\"p_mode\":\"standing\",\"p_until\":null,\"p_uses\":null,\"p_scope\":null,\"p_reason\":null}},\"invites\":[{\"email\":\"new@example.test\",\"kind\":\"invite\"}]}"
+    },
+    {
+      "name": "«السجل» says what it holds, and where the rest is",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and links to «سجل النشاط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page error on a desktop",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "phone: «الأعضاء» has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: the card has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: the card takes the page, and closing it brings the list back",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: the list is back",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: «الأدوار» has no sideways scroll on the page itself",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: the chosen role is in sight in the row of roles",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: no page error",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "tablet: «الأعضاء» has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tablet: the card has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tablet: «الأدوار» has no sideways scroll on the page itself",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "tablet: no page error",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "evening: «الأعضاء» has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: the card has no sideways scroll",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: «الأدوار» has no sideways scroll on the page itself",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: no page error",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": [],
+  "total": 63,
+  "passed": 63,
+  "failed": 0
+}

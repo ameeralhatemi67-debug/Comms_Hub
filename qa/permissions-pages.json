@@ -1,5 +1,5 @@
 {
-  "run": "2026-10-15T06:57:51.892Z",
+  "run": "2026-11-01T08:16:14.367Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -18,6 +18,11 @@
     },
     {
       "name": "accounts-roles: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-own: renders",
       "pass": true,
       "detail": ""
     },
@@ -63,6 +68,11 @@
     },
     {
       "name": "dialog-member-add-assistant: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: renders",
       "pass": true,
       "detail": ""
     },
@@ -494,7 +504,7 @@
     {
       "name": "settings-platforms: every platform app block and manual platform carries the circled guide",
       "pass": true,
-      "detail": "3"
+      "detail": "6"
     },
     {
       "name": "settings-storage-move-plan: the move panel carries its guide",
@@ -514,7 +524,7 @@
     {
       "name": "settings-platforms: a viewer sees every control locked for «platforms.manage»",
       "pass": true,
-      "detail": "30"
+      "detail": "33"
     },
     {
       "name": "settings-platforms: the built-in platforms cannot be deleted, the added one can",
@@ -594,22 +604,62 @@
     {
       "name": "dialog-member-add-assistant: offers rank 1 roles only (D-11)",
       "pass": true,
-      "detail": "member,writer,designer,producer,publisher"
+      "detail": "writer,designer,producer,publisher,member"
     },
     {
       "name": "dialog-member-add: a director offers the assistant and rank 1, never director or Admin",
       "pass": true,
-      "detail": "member,assistant,writer,designer,producer,publisher"
+      "detail": "assistant,writer,designer,producer,publisher,member"
     },
     {
-      "name": "accounts-roles-assistant: without «تعديل صلاحيات الأدوار» every switch is disabled with its reason",
+      "name": "accounts-roles-assistant: without «تعديل صلاحيات الأدوار» every switch of the role is disabled with its reason",
       "pass": true,
-      "detail": "152 switches"
+      "detail": "5 switches"
     },
     {
-      "name": "accounts-roles: the director edits roles below his rank only (Admin, director columns locked)",
+      "name": "accounts-roles-assistant: a person of the team still has working switches of their own",
       "pass": true,
-      "detail": "123 locked of 152"
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: the director edits a role below his rank",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-own: his own role is locked, and no one is given a column",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: two people of one role, each with a column, and what sets one apart is marked in the cell",
+      "pass": true,
+      "detail": "2"
+    },
+    {
+      "name": "accounts-roles: pages the two share are not marked, only what truly sets one apart",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "accounts-roles: a capability the role cannot hold is not a row",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: the rest is folded away, and is there when opened",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: a change that takes something away needs a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: a role is changed on the row, and only where it can be",
+      "pass": true,
+      "detail": ""
     },
     {
       "name": "accounts-card: the two large effects need a long press",
@@ -622,7 +672,12 @@
       "detail": ""
     },
     {
-      "name": "accounts-card: what the person does not hold is folded away, each with its reason or «منح»",
+      "name": "accounts-card: every permission that can change is one switch; what cannot is folded away with its reason",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: nothing the person does not hold hides the way to give it",
       "pass": true,
       "detail": ""
     },
@@ -647,7 +702,7 @@
       "detail": ""
     },
     {
-      "name": "accounts-members: shows «الأعضاء (8)»",
+      "name": "accounts-members: shows «الأعضاء (9)»",
       "pass": true,
       "detail": ""
     },
@@ -672,11 +727,6 @@
       "detail": ""
     },
     {
-      "name": "accounts-members: shows «حزمة جديدة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
       "name": "accounts-members: shows «أمير»",
       "pass": true,
       "detail": ""
@@ -688,6 +738,16 @@
     },
     {
       "name": "accounts-members: shows «مدير الاتصال المؤسسي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «الوصول»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «1 مضافة»",
       "pass": true,
       "detail": ""
     },
@@ -707,17 +767,22 @@
       "detail": ""
     },
     {
+      "name": "accounts-members: shows «3 صفحات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-members: shows «كل الصفحات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "accounts-members: shows «لم يسجل الدخول بعد»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "accounts-members: shows «البطاقة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-members: shows «تغطية النشر لأسبوع»",
+      "name": "accounts-members: shows «الصلاحيات»",
       "pass": true,
       "detail": ""
     },
@@ -807,11 +872,6 @@
       "detail": "overflow 0px"
     },
     {
-      "name": "accounts-card: shows «بطاقة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
       "name": "accounts-card: shows «لم يعيّن كلمة مرور بعد»",
       "pass": true,
       "detail": ""
@@ -827,7 +887,17 @@
       "detail": ""
     },
     {
-      "name": "accounts-card: shows «منح»",
+      "name": "accounts-card: shows «يكتب المحتوى ويرسله إلى المراجعة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «قارنه بزملائه في الدور»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: shows «منح مؤقت»",
       "pass": true,
       "detail": ""
     },
@@ -842,12 +912,12 @@
       "detail": ""
     },
     {
-      "name": "accounts-card: shows «الاسم والصفحات والدور»",
+      "name": "accounts-card: shows «تعديل الاسم»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "accounts-card: shows «إنهاء كل الإضافات»",
+      "name": "accounts-card: shows «إعادته إلى دوره»",
       "pass": true,
       "detail": ""
     },
@@ -862,6 +932,11 @@
       "detail": ""
     },
     {
+      "name": "accounts-card: shows «3 من 12»",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "accounts-card: shows «المراسلة والبريد»",
       "pass": true,
       "detail": ""
@@ -872,17 +947,22 @@
       "detail": ""
     },
     {
+      "name": "accounts-card: shows «لا تناسب دور كاتب المحتوى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "accounts-card: shows «مقفلة بقواعد المركز»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "accounts-card: shows «من صفحات الحساب»",
+      "name": "accounts-card: shows «مجلدات المكتبة»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "accounts-card: shows «إغلاق الصفحة»",
+      "name": "accounts-card: shows «مكتبة الوسائط»",
       "pass": true,
       "detail": ""
     },
@@ -893,11 +973,6 @@
     },
     {
       "name": "accounts-card: shows «تمديد»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-card: shows «إنهاء الآن»",
       "pass": true,
       "detail": ""
     },
@@ -913,41 +988,6 @@
     },
     {
       "name": "accounts-card: shows «مسحوبة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-card: shows «إعادة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-card: shows «لا يملكها (»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-card: shows «الاعتماد لمدير الاتصال ومساعده»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-card: shows «مجلدات المكتبة»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-card: shows «العقود»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-card: shows «عرض»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-card: shows «مستويات المجلدات تُدار من المكتبة»",
       "pass": true,
       "detail": ""
     },
@@ -973,6 +1013,31 @@
     },
     {
       "name": "accounts-card: does not show «إعادة إرسال رابط التأكيد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: does not show «إيقاف له»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: does not show «إغلاق الصفحة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: does not show «إنهاء الآن»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: does not show «سحب»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card: does not show «NaN»",
       "pass": true,
       "detail": ""
     },
@@ -1047,7 +1112,7 @@
       "detail": ""
     },
     {
-      "name": "accounts-card-above: does not show «إنهاء كل الإضافات»",
+      "name": "accounts-card-above: does not show «إعادته إلى دوره»",
       "pass": true,
       "detail": ""
     },
@@ -1058,6 +1123,11 @@
     },
     {
       "name": "accounts-card-above: does not show «إرسال دعوة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-card-above: does not show «منح مؤقت»",
       "pass": true,
       "detail": ""
     },
@@ -1087,32 +1157,57 @@
       "detail": "overflow 0px"
     },
     {
-      "name": "accounts-roles: shows «ما يملكه كل دور»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-roles: shows «الصلاحية»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-roles: shows «مدير الاتصال المؤسسي»",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "accounts-roles: shows «مساعد مدير الاتصال المؤسسي»",
-      "pass": true,
-      "detail": ""
-    },
-    {
       "name": "accounts-roles: shows «كاتب المحتوى»",
       "pass": true,
       "detail": ""
     },
     {
       "name": "accounts-roles: shows «مسؤول النشر وإدارة الحسابات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «يكتب المحتوى ويرسله إلى المراجعة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «الدور كله»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «شخصان»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «لمى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «يختلف في»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «له وحده»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «عمود الشخص له وحده»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «ما يختلف (»",
       "pass": true,
       "detail": ""
     },
@@ -1127,17 +1222,42 @@
       "detail": ""
     },
     {
+      "name": "accounts-roles: shows «لا تناسب هذا الدور»",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "accounts-roles: shows «مقفلة بقواعد المركز»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "accounts-roles: shows «يملكها»",
+      "name": "accounts-roles: shows «الحزم الجاهزة»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "accounts-roles: shows «لا يعتمد أحد ما أرسله أو رفعه»",
+      "name": "accounts-roles: shows «حزمة جديدة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: shows «تغطية النشر لأسبوع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: does not show «NaN»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles: does not show «urgency.2»",
       "pass": true,
       "detail": ""
     },
@@ -1197,6 +1317,56 @@
       "detail": "overflow 0px"
     },
     {
+      "name": "accounts-roles-own · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-own · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-roles-own: shows «مدير الاتصال المؤسسي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-own: shows «في رتبتك أو فوقها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-own: shows «الدور كله»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-own: does not show «undefined»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-own: does not show «يختلف في»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-own: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-own · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-own · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
       "name": "accounts-roles-assistant · a · 1280: no page errors",
       "pass": true,
       "detail": ""
@@ -1207,7 +1377,17 @@
       "detail": "overflow 0px"
     },
     {
-      "name": "accounts-roles-assistant: shows «ما يملكه كل دور»",
+      "name": "accounts-roles-assistant: shows «الدور كله»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-assistant: shows «خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-roles-assistant: shows «لمى»",
       "pass": true,
       "detail": ""
     },
@@ -1285,6 +1465,21 @@
       "name": "accounts-log · a · 1280: no sideways scroll",
       "pass": true,
       "detail": "overflow 0px"
+    },
+    {
+      "name": "accounts-log: shows «ما يخص الحسابات والصلاحيات وحدها»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: shows «سجل النشاط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accounts-log: shows «وهو يضم هذه الأحداث أيضاً»",
+      "pass": true,
+      "detail": ""
     },
     {
       "name": "accounts-log: shows «كل الأشخاص»",
@@ -1657,17 +1852,52 @@
       "detail": ""
     },
     {
-      "name": "dialog-member-add: shows «الصفحات المفتوحة»",
+      "name": "dialog-member-add: shows «يشارك في الأعمال ويتابع ما يُسند إليه»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "dialog-member-add: shows «لا تمنح دوراً في رتبتك أو فوقها»",
+      "name": "dialog-member-add: shows «يبدأ بـ»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: shows «وصلاحيات دوره»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: shows «وتصله دعوة بالبريد الآن»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: shows «خيارات متقدمة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: shows «إضافة العضو»",
       "pass": true,
       "detail": ""
     },
     {
       "name": "dialog-member-add: does not show «>Admin<»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: does not show «الصفحات المفتوحة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: does not show «صلاحيات إضافية من البداية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add: does not show «أرسل دعوة إلى بريده الآن»",
       "pass": true,
       "detail": ""
     },
@@ -1697,7 +1927,12 @@
       "detail": "overflow 0px"
     },
     {
-      "name": "dialog-member-add-assistant: shows «والمساعد يمنح أدوار الفريق فقط»",
+      "name": "dialog-member-add-assistant: shows «المساعد يمنح أدوار الفريق فقط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-member-add-assistant: shows «خيارات متقدمة»",
       "pass": true,
       "detail": ""
     },
@@ -1713,6 +1948,76 @@
     },
     {
       "name": "dialog-member-add-assistant · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-role-change · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "dialog-role-change: shows «تغيير دور خالد»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: shows «كاتب المحتوى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: shows «مسؤول النشر وإدارة الحسابات»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: shows «سيستطيع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: shows «النشر والجدولة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: shows «لن يستطيع»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: shows «صفحة «إنشاء»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: shows «يبقى كما هو»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: shows «تغيير إلى»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dialog-role-change · a · 390: no sideways scroll",
       "pass": true,
       "detail": "overflow 0px"
     },
@@ -3957,11 +4262,6 @@
       "detail": ""
     },
     {
-      "name": "settings-storage: shows «OneDrive»",
-      "pass": true,
-      "detail": ""
-    },
-    {
       "name": "settings-storage: shows «جهاز تخزين شبكي»",
       "pass": true,
       "detail": ""
@@ -5919,8 +6219,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 1183,
-    "passed": 1183,
+    "total": 1243,
+    "passed": 1243,
     "failed": 0
   }
 }

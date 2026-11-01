@@ -26,8 +26,8 @@ const check = (name, pass, detail = '') => result.checks.push({ name, pass: Bool
 fs.rmSync(build, { recursive: true, force: true });
 const sources = [
   'components/accounts/page.tsx', 'components/accounts/members.tsx', 'components/accounts/card.tsx', 'components/accounts/roles.tsx',
-  'components/accounts/log.tsx', 'components/my-permissions.tsx', 'components/ui.tsx', 'components/logo-loader.tsx',
-  'lib/domain.ts', 'lib/permissions.ts', 'lib/access.ts', 'lib/kit/hold-reasons.ts',
+  'components/accounts/log.tsx', 'components/accounts/deletions.tsx', 'components/my-permissions.tsx', 'components/ui.tsx', 'components/logo-loader.tsx',
+  'lib/domain.ts', 'lib/permissions.ts', 'lib/access.ts', 'lib/kit/hold-reasons.ts', 'lib/push/kick.ts',
   // Step P3
   'components/perm-requests.tsx', 'components/home-perms.tsx', 'lib/kit/need.ts', 'lib/kit/layer.ts',
   // Step P4: the urgency picker and the level marks of messaging
@@ -47,7 +47,7 @@ const sources = [
   // Entry flow: the state of a person's entry, the invitation and the log words
   'lib/entry.ts', 'components/accounts/entry-help.tsx',
   // Settings Step S5: «المنصات»
-  'components/settings/platforms.tsx', 'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/provider.ts',
+  'components/settings/platforms.tsx', 'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/provider.ts', 'lib/integrations/expiry.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -98,7 +98,7 @@ export const PeopleProvider = ({ children }) => children;
 export const usePeople = () => ({ people: P(), me: P().find((p) => p.email === globalThis.__PM.ctx.me.email), personOf: (e) => P().find((p) => p.email === e), nameOf: (e) => P().find((p) => p.email === e)?.display_name ?? e, reload: async () => {}, update: async () => ({ ok: true }) });`);
 fs.writeFileSync(path.join(build, 'mocks', 'chatprov.js'), `export const useChat = () => globalThis.__PM.chat;`);
 fs.writeFileSync(path.join(build, 'mocks', 'permreq.js'), `export const usePermRequests = () => ({ list: globalThis.__PM.perm ?? [], status: 'ready', reload: async () => {} });`);
-for (const f of ['globals.css', 'identity.css', 'work.css', 'chat.css', 'permissions.css']) fs.copyFileSync(path.join(root, 'src/app', f), path.join(out, f));
+for (const f of ['globals.css', 'identity.css', 'work.css', 'chat.css', 'auth.css', 'permissions.css']) fs.copyFileSync(path.join(root, 'src/app', f), path.join(out, f));
 
 // ---------- fixture: a department on 13 October 2026 ----------
 const NOW = '2026-10-13T09:00:00Z';
@@ -106,6 +106,7 @@ const in1d = '2026-10-14T09:00:00Z';
 const members = [
   ['amir@x.sa', 'أمير', 'admin', true], ['dir@x.sa', 'محمد', 'director'], ['asst@x.sa', 'ريم', 'assistant'], ['khalid@x.sa', 'خالد', 'writer'],
   ['sara@x.sa', 'سارة', 'designer'], ['ahmed@x.sa', 'أحمد', 'producer'], ['noura@x.sa', 'نورة', 'publisher'], ['abd@x.sa', 'عبدالله', 'member'],
+  ['lama@x.sa', 'لمى', 'writer'],
 ].map(([email, display_name, role, prot]) => ({ email, display_name, role, pages: ['work', 'mail', 'media'], protected: !!prot, added_by: 'seed', created_at: '2026-10-11T00:00:00Z', last_seen_at: email === 'abd@x.sa' ? null : '2026-10-13T07:30:00Z' }));
 const G = (over) => ({ id: 'g', email: 'khalid@x.sa', k: 'urgency.2', mode: 'timed', effect: 'allow', until: in1d, uses: null, total: null, scope: null, by: 'dir@x.sa', at: '2026-10-13T08:00:00Z', reason: 'تغطية', ...over });
 const grants = [
@@ -113,6 +114,8 @@ const grants = [
   G({ id: 'g2', k: 'whatsapp.push', mode: 'once', until: null, uses: 1, total: 1, scope: { room: 'r1' } }),
   G({ id: 'g3', k: 'room.create', mode: 'standing', effect: 'deny', until: null }),
   G({ id: 'g4', email: 'sara@x.sa', k: 'mail.outside.send', mode: 'timed', until: in1d }),
+  // Two writers who differ: لمى has one permission added for her alone.
+  G({ id: 'g5', email: 'lama@x.sa', k: 'mail.outside.send', mode: 'standing', until: null }),
 ];
 const ROLE_ON = { director: ['urgency.2', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant', 'roles.assign', 'members.invite', 'members.remove', 'roles.templates.edit'], assistant: ['urgency.2', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant'] };
 const grantable = ['urgency.2', 'whatsapp.push', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant', 'roles.assign', 'members.invite', 'members.remove', 'roles.templates.edit', 'whatsapp.system.manage'];
@@ -151,8 +154,8 @@ const directorCaps = KEYS.map((k) => (k.startsWith('page.') ? capEval(k, ['page.
 const capsOf = (evals) => ({ ready: true, evals, grants: [], has: (k) => !!evals.find((e) => e.k === k)?.ok, evalOf: (k) => evals.find((e) => e.k === k), reload: async () => {} });
 const assistantCaps = KEYS.map((k) => (k.startsWith('page.') ? capEval(k, ['page.work', 'page.mail'].includes(k), 'page') : ROLE_ON.assistant.includes(k) ? capEval(k, true, 'role') : ['urgency.3', 'work.approve', 'media.approve'].includes(k) ? capEval(k, true, 'fixed') : capEval(k, false, k.startsWith('work.') || k.includes('.own') || k.startsWith('role.') || k.startsWith('account.') ? 'fixed' : 'none')));
 const ctx = (email, role, evals) => ({
-  status: 'ready', me: { email, name: members.find((m) => m.email === email)?.display_name ?? '', role, pages: ['work', 'mail', 'media', 'calendar'], protected: false, caps: evals.filter((e) => e.ok && !e.k.startsWith('page.')).map((e) => e.k) },
-  can: (k) => !!evals.find((e) => e.k === k)?.ok, members, requests, grants, defaults, events, presets,
+  status: 'ready', me: { email, name: members.find((m) => m.email === email)?.display_name ?? '', role, pages: ['work', 'mail', 'media', 'calendar', 'activity'], protected: false, caps: evals.filter((e) => e.ok && !e.k.startsWith('page.')).map((e) => e.k) },
+  can: (k) => !!evals.find((e) => e.k === k)?.ok, members, requests, deletions: [], grants, defaults, events, presets,
   entry: { 'khalid@x.sa': 'not_started' },
   nameOf: (e) => members.find((m) => m.email === e)?.display_name ?? (e ? e.split('@')[0] : ''), reload: async () => {}, call: async () => ({ ok: true, data: null }), say: () => {},
 });
@@ -188,8 +191,9 @@ async function renderAll() {
   render('accounts-members', 'dir@x.sa', 'director', directorCaps, h(page.AccountsPage));
   render('accounts-card', 'dir@x.sa', 'director', directorCaps, h(page.AccountsPage), { search: 'person=khalid%40x.sa' });
   render('accounts-card-above', 'asst@x.sa', 'assistant', assistantCaps, h(page.AccountsPage), { search: 'person=dir%40x.sa' });
-  render('accounts-roles', 'dir@x.sa', 'director', directorCaps, h(page.AccountsPage), { search: 'tab=roles' });
-  render('accounts-roles-assistant', 'asst@x.sa', 'assistant', assistantCaps, h(page.AccountsPage), { search: 'tab=roles' });
+  render('accounts-roles', 'dir@x.sa', 'director', directorCaps, h(page.AccountsPage), { search: 'tab=roles&role=writer' });
+  render('accounts-roles-own', 'dir@x.sa', 'director', directorCaps, h(page.AccountsPage), { search: 'tab=roles&role=director' });
+  render('accounts-roles-assistant', 'asst@x.sa', 'assistant', assistantCaps, h(page.AccountsPage), { search: 'tab=roles&role=writer' });
   render('accounts-requests', 'dir@x.sa', 'director', directorCaps, h(page.AccountsPage), { search: 'tab=requests' });
   render('accounts-log', 'dir@x.sa', 'director', directorCaps, h(page.AccountsPage), { search: 'tab=log' });
   render('accounts-writer', 'khalid@x.sa', 'writer', writerCaps, h(page.AccountsPage));
@@ -199,6 +203,7 @@ async function renderAll() {
   render('dialog-grant-once', 'amir@x.sa', 'admin', directorCaps, wk(h(card.GrantDialog, { emails: ['khalid@x.sa'], initial: 'whatsapp.push', defaults: { mode: 'once', uses: 1, scope: { room: 'r1' } }, onClose() {} })));
   render('dialog-member-add', 'dir@x.sa', 'director', directorCaps, wk(h(mem.MemberDialog, { mode: 'add', onClose() {} })));
   render('dialog-member-add-assistant', 'asst@x.sa', 'assistant', assistantCaps, wk(h(mem.MemberDialog, { mode: 'add', onClose() {} })));
+  render('dialog-role-change', 'dir@x.sa', 'director', directorCaps, wk(h(mem.RoleChangeDialog, { member: members.find((m) => m.email === 'khalid@x.sa'), to: 'publisher', onClose() {} })));
   render('dialog-remove', 'dir@x.sa', 'director', directorCaps, wk(h(mem.RemoveDialog, { emails: ['abd@x.sa'], onClose() {}, onDone() {} })));
   render('dialog-preset', 'dir@x.sa', 'director', directorCaps, wk(h(card.PresetDialog, { onClose() {} })));
   render('my-permissions', 'khalid@x.sa', 'writer', writerCaps, h('section', { className: 'panel' }, h('h2', null, 'صلاحياتي'), h(mine.MyPermissions)));
@@ -380,7 +385,7 @@ async function renderAll() {
 }
 
 const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${attrs}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" href="data:,"><link rel="stylesheet" href="globals.css"><link rel="stylesheet" href="identity.css"><link rel="stylesheet" href="work.css"><link rel="stylesheet" href="chat.css"><link rel="stylesheet" href="permissions.css">
+<link rel="icon" href="data:,"><link rel="stylesheet" href="globals.css"><link rel="stylesheet" href="identity.css"><link rel="stylesheet" href="work.css"><link rel="stylesheet" href="chat.css"><link rel="stylesheet" href="auth.css"><link rel="stylesheet" href="permissions.css">
 <style>body{font-family:"Segoe UI",Tahoma,sans-serif}main{max-width:1400px}</style></head><body><main id="main">${body}</main></body></html>`;
 
 (async () => {
@@ -396,21 +401,23 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
   const browser = await chromium.launch(launchOptions);
   try {
     const expect = {
-      'accounts-members': ['الحسابات', 'الأعضاء (8)', 'الأدوار', 'الطلبات (1)', 'السجل', 'إضافة عضو', 'حزمة جديدة', 'أمير', 'مؤسس', 'مدير الاتصال المؤسسي', '1 مؤقتة', '1 لمرة واحدة', '1 مسحوبة', 'لم يسجل الدخول بعد', 'البطاقة', 'تغطية النشر لأسبوع', 'لم يعيّن كلمة مرور بعد'],
-      'accounts-card': ['بطاقة', 'لم يعيّن كلمة مرور بعد', 'إرسال دعوة', 'يفتح الموقع ويختار «أول دخول»', 'منح', 'حزمة جاهزة', 'تطبيق', 'الاسم والصفحات والدور', 'إنهاء كل الإضافات', 'إزالة العضو', 'الصفحات', 'المراسلة والبريد', 'الحسابات والصلاحيات', 'مقفلة بقواعد المركز',
-        'من صفحات الحساب', 'إغلاق الصفحة', 'مؤقتة حتى 2026-10-14 12:00', 'تمديد', 'إنهاء الآن', 'مرة واحدة · 1 استخدام باقٍ', 'لمحادثة واحدة', 'مسحوبة', 'إعادة', 'لا يملكها (', 'الاعتماد لمدير الاتصال ومساعده', 'مجلدات المكتبة', 'العقود', 'عرض', 'مستويات المجلدات تُدار من المكتبة'],
+      'accounts-members': ['الحسابات', 'الأعضاء (9)', 'الأدوار', 'الطلبات (1)', 'السجل', 'إضافة عضو', 'أمير', 'مؤسس', 'مدير الاتصال المؤسسي', 'الوصول', '1 مضافة', '1 مؤقتة', '1 لمرة واحدة', '1 مسحوبة', '3 صفحات', 'كل الصفحات', 'لم يسجل الدخول بعد', 'الصلاحيات', 'لم يعيّن كلمة مرور بعد'],
+      'accounts-card': ['لم يعيّن كلمة مرور بعد', 'إرسال دعوة', 'يفتح الموقع ويختار «أول دخول»', 'يكتب المحتوى ويرسله إلى المراجعة', 'قارنه بزملائه في الدور', 'منح مؤقت', 'حزمة جاهزة', 'تطبيق', 'تعديل الاسم', 'إعادته إلى دوره', 'إزالة العضو', 'الصفحات', '3 من 12', 'المراسلة والبريد', 'الحسابات والصلاحيات', 'لا تناسب دور كاتب المحتوى', 'مقفلة بقواعد المركز', 'مجلدات المكتبة',
+        'مكتبة الوسائط', 'مؤقتة حتى 2026-10-14 12:00', 'تمديد', 'مرة واحدة · 1 استخدام باقٍ', 'لمحادثة واحدة', 'مسحوبة'],
       'accounts-card-above': ['في رتبتك أو فوقها، فلا تدير صلاحياته'],
-      'accounts-roles': ['ما يملكه كل دور', 'الصلاحية', 'مدير الاتصال المؤسسي', 'مساعد مدير الاتصال المؤسسي', 'كاتب المحتوى', 'مسؤول النشر وإدارة الحسابات', 'رسائل «مهم» (المستوى 2)', 'إرسال رسالة إلى واتساب زميل', 'مقفلة بقواعد المركز', 'يملكها', 'لا يعتمد أحد ما أرسله أو رفعه'],
-      'accounts-roles-assistant': ['ما يملكه كل دور'],
+      'accounts-roles': ['كاتب المحتوى', 'مسؤول النشر وإدارة الحسابات', 'يكتب المحتوى ويرسله إلى المراجعة', 'الدور كله', 'شخصان', 'خالد', 'لمى', 'يختلف في', 'له وحده', 'عمود الشخص له وحده', 'ما يختلف (', 'رسائل «مهم» (المستوى 2)', 'إرسال رسالة إلى واتساب زميل', 'لا تناسب هذا الدور', 'مقفلة بقواعد المركز', 'الحزم الجاهزة', 'حزمة جديدة', 'تغطية النشر لأسبوع'],
+      'accounts-roles-own': ['مدير الاتصال المؤسسي', 'في رتبتك أو فوقها', 'الدور كله'],
+      'accounts-roles-assistant': ['الدور كله', 'خالد', 'لمى'],
       'accounts-requests': ['طلبات الوصول إلى المركز (1)', 'لمى', 'منضمة إلى فريق التصميم', 'قبول', 'رفض'],
-      'accounts-log': ['كل الأشخاص', 'كل الصلاحيات', 'كل الأحداث', 'محمد منح خالد «رسائل «مهم» (المستوى 2)» حتى 2026-10-14 12:00.', 'محمد سحب «إنشاء قناة إعلانات في المراسلة» من خالد.',
+      'accounts-log': ['ما يخص الحسابات والصلاحيات وحدها', 'سجل النشاط', 'وهو يضم هذه الأحداث أيضاً', 'كل الأشخاص', 'كل الصلاحيات', 'كل الأحداث', 'محمد منح خالد «رسائل «مهم» (المستوى 2)» حتى 2026-10-14 12:00.', 'محمد سحب «إنشاء قناة إعلانات في المراسلة» من خالد.',
         'النظام فعّل «فتح صفحة «الحسابات»» لدور «مدير الاتصال المؤسسي» (1 شخص).', 'محمد غيّر دور سارة من «المنتج الإعلامي» إلى «المصمم».', 'استخدم خالد «إرسال رسالة إلى واتساب زميل» مرة، وبقي 0.', 'السجل يُكتب ولا يُعدَّل'],
       'accounts-writer': ['لمن يملك «فتح صفحة الحسابات»', 'صلاحياتك أنت في صفحة «الحساب»'],
       'dialog-grant': ['منح خالد', 'رسائل «مهم» (المستوى 2)', 'دائمة', 'مؤقتة', 'مرة واحدة', 'ساعة', 'يوم', 'أسبوع', 'تاريخ محدد', 'السبب (اختياري)', 'سيملك خالد «رسائل «مهم» (المستوى 2)» حتى', 'ثم تنتهي وحدها'],
       'dialog-grant-pick': ['منح 2 أشخاص', 'الصلاحية', 'لا تملكها أنت', 'مقفل بقواعد المركز', 'اختر صلاحية.'],
       'dialog-grant-once': ['عدد المرات', 'لمحادثة واحدة (اختياري)', 'فريق الحملة', 'بلا نهاية', 'سيستطيع خالد «إرسال رسالة إلى واتساب زميل» في «فريق الحملة» مرة واحدة، ثم تنتهي.'],
-      'dialog-member-add': ['إضافة عضو', 'الاسم', 'البريد الإلكتروني', 'الدور', 'الصفحات المفتوحة', 'لا تمنح دوراً في رتبتك أو فوقها'],
-      'dialog-member-add-assistant': ['والمساعد يمنح أدوار الفريق فقط'],
+      'dialog-member-add': ['إضافة عضو', 'الاسم', 'البريد الإلكتروني', 'الدور', 'يشارك في الأعمال ويتابع ما يُسند إليه', 'يبدأ بـ', 'وصلاحيات دوره', 'وتصله دعوة بالبريد الآن', 'خيارات متقدمة', 'إضافة العضو'],
+      'dialog-member-add-assistant': ['المساعد يمنح أدوار الفريق فقط', 'خيارات متقدمة'],
+      'dialog-role-change': ['تغيير دور خالد', 'كاتب المحتوى', 'مسؤول النشر وإدارة الحسابات', 'سيستطيع', 'النشر والجدولة', 'لن يستطيع', 'صفحة «إنشاء»', 'يبقى كما هو', 'تغيير إلى'],
       'dialog-remove': ['إزالة عبدالله', 'تبقى كما هي', 'حسابات المؤسسين لا تُزال'],
       'dialog-preset': ['حزمة جديدة', 'بند آخر', 'حفظ الحزمة'],
       'requests-perm-granter': ['طلب خالد «رسائل «مهم» (المستوى 2)» لمدة 1 أسبوع', '«تغطية حملة الأسبوع»', 'كاتب المحتوى', 'من المراسلة', 'بانتظار القرار', 'موافقة', 'رفض',
@@ -448,7 +455,7 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
         'تيك توك', 'مفعّلة', 'موقوفة', 'قائمة', 'سجل المنصة', 'لا تُوقف منصة عليها حسابات فعّالة', 'لا تُحذف منصة عليها حسابات أو نسخ نصوص'],
       'settings-platforms-viewer': ['إنستغرام', 'فيسبوك', 'حفظ التجهيز'],
       'settings-storage': ['مزودو التخزين', 'Google Drive', 'متصل', 'hub@example.com', 'نسخ محفوظة هنا', '5 · 1.50 غيغابايت', 'منها إصدارات مكتبة الوسائط', 'آخر تحقق', 'لم تُفحص بعد', 'تحقق من عينة',
-        'ما يخدمه كل مزود', 'مكتبة الوسائط', 'مرفقات البريد', 'ملفات المراسلة', 'النسخ الاحتياطي', 'لا مزود بعد', 'غير متاح بعد', 'OneDrive', 'جهاز تخزين شبكي', 'الوكيل', 'لم يُبنَ بعد', 'إضافة مزود تخزين', 'النقل يحتاج مزودين متصلين'],
+        'ما يخدمه كل مزود', 'مكتبة الوسائط', 'مرفقات البريد', 'ملفات المراسلة', 'النسخ الاحتياطي', 'لا مزود بعد', 'غير متاح بعد', 'جهاز تخزين شبكي', 'الوكيل', 'لم يُبنَ بعد', 'إضافة مزود تخزين', 'النقل يحتاج مزودين متصلين'],
       'settings-storage-bad': ['مفقودة أو تحتاج انتباهاً', '3 ملفات بلا موضع مسجّل', 'لم يُتحقق من شيء بعد'],
       'settings-storage-viewer': ['مزودو التخزين', 'تحقق من عينة'],
       'settings-storage-locked': ['أين تُحفظ الملفات لمن يملك', 'اطلب هذه الصلاحية'],
@@ -481,11 +488,13 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     };
     const absent = {
       'accounts-members': ['undefined', 'urgency.2', 'permissions.grant'],
-      'accounts-card': ['undefined', 'whatsapp.push', 'urgency.3', 'إرسال رابط كلمة مرور جديدة', 'إعادة إرسال رابط التأكيد'],
-      'accounts-card-above': ['إنهاء كل الإضافات', 'إزالة العضو', 'إرسال دعوة'],
+      'accounts-card': ['undefined', 'whatsapp.push', 'urgency.3', 'إرسال رابط كلمة مرور جديدة', 'إعادة إرسال رابط التأكيد', 'إيقاف له', 'إغلاق الصفحة', 'إنهاء الآن', 'سحب', 'NaN'],
+      'accounts-card-above': ['إعادته إلى دوره', 'إزالة العضو', 'إرسال دعوة', 'منح مؤقت'],
+      'accounts-roles': ['undefined', 'NaN', 'urgency.2'],
+      'accounts-roles-own': ['undefined', 'يختلف في'],
       'accounts-writer': ['إضافة عضو', 'الأعضاء ('],
       'dialog-grant-pick': ['اعتماد جزء من عمل أو رفضه', 'النشر والجدولة'],
-      'dialog-member-add': ['>Admin<'],
+      'dialog-member-add': ['>Admin<', 'الصفحات المفتوحة', 'صلاحيات إضافية من البداية', 'أرسل دعوة إلى بريده الآن'],
       'my-permissions': ['urgency.2', 'undefined'],
       'requests-perm-requester': ['موافقة'],
       'dialog-ask-page': ['منح الصلاحيات وسحبها', 'اعتماد جزء من عمل أو رفضه', 'رسائل «عاجل»'],
@@ -588,13 +597,25 @@ const page = (body, attrs = '') => `<!doctype html><html lang="ar" dir="rtl" ${a
     const dirOptions = (pages['dialog-member-add'].match(/<option value="([a-z]+)"(?![^>]*disabled)/g) ?? []).map((x) => x.split('"')[1]);
     check('dialog-member-add: a director offers the assistant and rank 1, never director or Admin', dirOptions.includes('assistant') && !dirOptions.includes('director') && !dirOptions.includes('admin'), dirOptions.join(','));
     // switches the assistant may not touch are disabled with a reason
-    const asstSwitches = (pages['accounts-roles-assistant'].match(/class="pm-switch[^"]*"[^>]*>/g) ?? []);
-    check('accounts-roles-assistant: without «تعديل صلاحيات الأدوار» every switch is disabled with its reason', asstSwitches.length > 0 && asstSwitches.every((x) => /disabled/.test(x) && /title="[^"]+"/.test(x)), `${asstSwitches.length} switches`);
-    const dirSwitches = (pages['accounts-roles'].match(/class="pm-switch[^"]*"[^>]*>/g) ?? []);
-    check('accounts-roles: the director edits roles below his rank only (Admin, director columns locked)', dirSwitches.some((x) => !/disabled/.test(x)) && dirSwitches.filter((x) => /disabled/.test(x)).length >= 22, `${dirSwitches.filter((x) => /disabled/.test(x)).length} locked of ${dirSwitches.length}`);
+    const roleSwitches = (name) => pages[name].match(/<button[^>]*data-col="role"[^>]*>/g) ?? [];
+    const asstSwitches = roleSwitches('accounts-roles-assistant');
+    check('accounts-roles-assistant: without «تعديل صلاحيات الأدوار» every switch of the role is disabled with its reason', asstSwitches.length > 0 && asstSwitches.every((x) => /disabled/.test(x) && /title="[^"]+"/.test(x)), `${asstSwitches.length} switches`);
+    const personSwitches = (html) => (html.match(/<button[^>]*role="switch"[^>]*>/g) ?? []).filter((x) => !/data-col="role"/.test(x));
+    check('accounts-roles-assistant: a person of the team still has working switches of their own', personSwitches(pages['accounts-roles-assistant']).some((x) => !/disabled/.test(x)));
+    check('accounts-roles: the director edits a role below his rank', roleSwitches('accounts-roles').some((x) => !/disabled/.test(x)));
+    check('accounts-roles-own: his own role is locked, and no one is given a column', roleSwitches('accounts-roles-own').length > 0 && roleSwitches('accounts-roles-own').every((x) => /disabled/.test(x)) && personSwitches(pages['accounts-roles-own']).length === 0);
+    const rolesText = pages['accounts-roles'].replace(/<!-- -->/g, '');
+    check('accounts-roles: two people of one role, each with a column, and what sets one apart is marked in the cell', (rolesText.match(/class="pm-colhead"/g) ?? []).length === 2 && /<td class="apart">/.test(rolesText) && /يختلف في 1/.test(rolesText), (rolesText.match(/class="pm-colhead"/g) ?? []).length);
+    // One cell: لمى's addition. خالد's temporary grant ended on the fixture's date, so it reads as ended, and the three pages they share are not a difference.
+    check('accounts-roles: pages the two share are not marked, only what truly sets one apart', (rolesText.match(/<td class="apart">/g) ?? []).length === 1, (rolesText.match(/<td class="apart">/g) ?? []).length);
+    check('accounts-roles: a capability the role cannot hold is not a row', !rolesText.includes('منح الصلاحيات وسحبها') && !rolesText.includes('إدارة مزودي التخزين'));
+    check('dialog-member-add: the rest is folded away, and is there when opened', /<details class="pm-fold pm-advanced">/.test(pages['dialog-member-add']) && pages['dialog-member-add'].includes('الصفحات المفتوحة') && pages['dialog-member-add'].includes('صلاحيات إضافية من البداية') && pages['dialog-member-add'].includes('أرسل دعوة إلى بريده الآن'));
+    check('dialog-role-change: a change that takes something away needs a long press', /data-hold="ينقص هذا التغيير/.test(pages['dialog-role-change']));
+    check('accounts-members: a role is changed on the row, and only where it can be', /<select class="pm-rolepick" aria-label="دور خالد"/.test(pages['accounts-members']) && !/aria-label="دور أمير"/.test(pages['accounts-members']) && !/aria-label="دور محمد"/.test(pages['accounts-members']));
     check('accounts-card: the two large effects need a long press', (pages['accounts-card'].match(/data-hold=/g) ?? []).length >= 1);
     check('dialog-remove: removing needs a long press with the plan\'s reason', pages['dialog-remove'].includes('data-hold="إزالة العضو تفصله عن المركز وتبقي أعماله لدى من يُسند إليه."'));
-    check('accounts-card: what the person does not hold is folded away, each with its reason or «منح»', /<details class="pm-more">[\s\S]*غير ممنوحة/.test(pages['accounts-card']) && pages['accounts-card'].includes('لا تناسب دور'));
+    check('accounts-card: every permission that can change is one switch; what cannot is folded away with its reason', (pages['accounts-card'].match(/role="switch"/g) ?? []).length >= 16 && /class="pm-fold "[\s\S]*لا تناسب دور/.test(pages['accounts-card']) && pages['accounts-card'].includes('الاعتماد لمدير الاتصال ومساعده'));
+    check('accounts-card: nothing the person does not hold hides the way to give it', /<details class="pm-fold pm-group" open/.test(pages['accounts-card']));
     check('dialog-grant-pick: the capability search box is there', pages['dialog-grant-pick'].includes('placeholder="ابحث في الصلاحيات"'));
 
     const looks = [['a', ''], ['emerald', 'data-identity="emerald"'], ['evening', 'data-identity="emerald" data-theme="dark"']];

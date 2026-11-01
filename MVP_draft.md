@@ -3056,3 +3056,46 @@ Phase A8 of `Android_Build_Plan.md`. The application is published on Google Play
 **The public page** `/account-deletion.html`, in English and Arabic, needs no sign-in: the two ways (from «الحساب», or an email from the account's own address to the Hub's address, answered before anything is deleted), and the same two lists. Google Play's listing names it. The privacy policy `/privacy.html` is rewritten for what the Hub handles today (mail, messaging, WhatsApp, the two applications, phone notices) and links to it.
 
 **Boundaries.** Who may see a request, who is told and what goes with the account are the database's. The request deletes nothing by itself: a person who may remove the account does. A founder's account is not deleted this way.
+
+# 65. «الحسابات»: members, roles and adding someone, 2026-11-01
+
+The Director's notes of 2026-11-01: the page was hard to understand and needed polish; changing a person's role and permissions should be easier; two members of one role should be able to differ; adding a member should start from defaults, with the rest opened only when needed. No rule changed and no migration was needed: who may do what is still the database's (`Permissions_Plan.md` 4). This section replaces the layout of `Permissions_Plan.md` 5.1 to 5.3 where they differ.
+
+**The tabs stay four:** «الأعضاء», «الأدوار», «الطلبات», «السجل». «حزمة جديدة» left the page's header for «الأدوار».
+
+## 65.1 «الأعضاء»
+
+- One list with named columns: العضو, الدور, الوصول, آخر دخول. On a narrow list (a card open, a tablet, a phone) the columns fold into the row.
+- **A role is changed on the person's row**, from a list. It asks first, with what the change gives («سيستطيع») and takes («لن يستطيع»), from the two role templates and the fixed rules, and says the person's pages and own additions stay. A change that takes anything away is a long press. Where a role cannot be changed (a founder, oneself, a rank at or above one's own, no «تغيير دور عضو»), the role is shown with the reason and is no control.
+- «الوصول» is the number of pages, and a chip for each way the person stands apart from their role: مضافة, مؤقتة, لمرة واحدة, مسحوبة.
+
+## 65.2 The person's card
+
+- Order: who they are; their role, what the role is for, and where they stand apart from it; then their permissions.
+- **Every permission and page is one switch.** On or off is all a leader decides: the database call that takes follows from where the permission comes from (`switchStep`). Switching off what was added for the person returns them to their role and leaves no row behind. Words such as «إيقاف له», «سحب», «إعادة», «إغلاق الصفحة» and «إنهاء الآن» are gone.
+- A small line under the name says where a permission comes from, when that is not plain: أُضيفت, مؤقتة حتى …, مرة واحدة, مسحوبة, من الدور. A page says nothing when it is simply on or off.
+- The clock beside a switch that is off gives it for a time or once; a temporary one has «تمديد». «منح مؤقت» opens the same dialog with a choice of permission. «إعادته إلى دوره» ends everything that is the person's alone, with a long press.
+- A short group stays open even when the person holds nothing in it, so the way to give something is in sight. What cannot be switched is folded with its reason: «لا تناسب دور …» and «مقفلة بقواعد المركز». A search box filters the card.
+- «قارنه بزملائه في الدور» opens «الأدوار» on that role.
+- On a phone or a tablet the card takes the page and closing it brings the list back.
+
+## 65.3 «الأدوار»
+
+- One role at a time: the roles on one side, each with how many hold it; it opens on the role with the most people the signed-in person manages.
+- **The first column is the role, for everyone who holds it. Beside it each person who holds the role, and whom the signed-in person manages, has a column of their own.** A switch in a person's column changes that person alone, so two people of one role can have different access and permissions, and it acts at once as on the card. A switch in the role's column says how many people it touches before it is saved, and switching one off needs a long press, as before.
+- A cell that sets a person apart is tinted and says so in words («له وحده», مؤقتة, مرة واحدة). A column head says «مثل الدور» or «يختلف في N». «ما يختلف» keeps only those rows.
+- A role has no page list of its own, only where a new account starts (the role column shows this with a mark, not a switch). So a page sets a person apart only when the people of that role really differ on it.
+- Only what can apply to the role is a row; the rest is counted in a line. The fixed rules are folded, each with its reason. People at or above the signed-in person's rank have no column, and the page says why.
+- «الحزم الجاهزة» and «حزمة جديدة» are under the table.
+- The table of eight roles side by side is gone: one role at a time is what could be read.
+
+## 65.4 «إضافة عضو» and accepting a request
+
+- Three fields: الاسم, البريد الإلكتروني, الدور, and a line on what the role is for. A sentence says what the defaults are («يبدأ بـ… وصلاحيات دوره. وتصله دعوة بالبريد الآن.») and follows every choice.
+- «خيارات متقدمة», folded: the pages, extra permissions from the start, and the invitation.
+- The default pages are those of the role that the adder holds, because the database refuses the rest and the list is folded away.
+- After adding, the person's card opens.
+
+## 65.5 «السجل» and «سجل النشاط»
+
+«السجل» holds accounts and permissions only (`permission_events`). «سجل النشاط» holds what happens in the library and the mail (`activity_log`) and shows the same permission events among them. «السجل» says so at its head and links to it. A work's own history is on the work's page (`work_log`), in neither.

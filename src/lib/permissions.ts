@@ -122,6 +122,25 @@ export function rankOf(role: Role | string | null | undefined): number {
 
 const CREATORS = ['admin', 'director', 'assistant', 'writer', 'designer', 'producer', 'member'];
 
+/** May this role use «إنشاء»? The one page a page grant cannot give (perm_eval, layer 5). */
+export const createsContent = (role: Role | string) => CREATORS.includes(role);
+
+/** What each role is for, in one line, wherever a role is chosen. */
+export const ROLE_HINT: Record<Role, string> = {
+  director: 'يراجع ويعتمد، ويدير الفريق وأدواره وصلاحياته.',
+  assistant: 'يراجع ويعتمد، ويمنح أدوار الفريق ما يملكه.',
+  writer: 'يكتب المحتوى ويرسله إلى المراجعة.',
+  designer: 'يصمم ويرفع إصدارات الوسائط.',
+  producer: 'ينتج المواد الإعلامية ويسلّمها.',
+  publisher: 'يجدول وينشر ما اعتُمد، ويدير حسابات المنصات.',
+  member: 'يشارك في الأعمال ويتابع ما يُسند إليه.',
+  admin: 'مسؤول النظام: يفتح كل الصفحات ويدير الإعدادات.',
+};
+
+/** Does this role's template hold this capability? Pages are not in the templates. */
+export const roleHolds = (defaults: { role: string; capability: string; allowed: boolean }[], role: string, key: string) =>
+  !!defaults.find((d) => d.role === role && d.capability === key)?.allowed;
+
 /**
  * What each role holds from its template (role_capabilities), as the migrations leave it:
  *   - 2026-10-13, Step P1: the administrator everything except the WhatsApp push (D-13); the
@@ -248,6 +267,74 @@ export function manageBlock(me: { email: string; role: Role; caps: string[] }, t
 /** The roles `me` may give: never Admin; below their own rank unless they are an administrator. */
 export function assignableBy(meRole: Role, all: Role[]): Role[] {
   return all.filter((r) => r !== 'admin' && (meRole === 'admin' || rankOf(r) < rankOf(meRole)));
+}
+
+/** What flipping a person's switch asks the database to do. */
+export type SwitchStep = { fn: 'set_member_override'; effect: 'allow' | 'deny' | null } | { fn: 'revoke_capability'; id: string };
+
+/**
+ * One switch for every permission of a person (Permissions_Plan.md 5.2 as changed on
+ * 2026-11-01): on or off, whatever put it there. A standing override is cleared when that alone
+ * gives the wanted state, so a person returns to their role instead of keeping a row that repeats it.
+ */
+export function switchStep(e: Pick<CapEval, 'src' | 'id'>, roleHas: boolean): SwitchStep | null {
+  switch (e.src) {
+    case 'role':
+    case 'page':
+      return { fn: 'set_member_override', effect: 'deny' };
+    case 'added':
+      return { fn: 'set_member_override', effect: roleHas ? 'deny' : null };
+    case 'removed':
+      return { fn: 'set_member_override', effect: roleHas ? null : 'allow' };
+    case 'none':
+      return { fn: 'set_member_override', effect: 'allow' };
+    case 'timed':
+    case 'once':
+      return e.id ? { fn: 'revoke_capability', id: e.id } : null;
+    default:
+      return null;
+  }
+}
+
+/** Why this switch cannot be flipped, in words; '' when it can. The database checks the same (grant_capability). */
+export function switchWhy(key: string, e: Pick<CapEval, 'src' | 'id'>, role: Role, roleHas: boolean, mine: boolean): string {
+  const c = capability(key);
+  if (!c) return 'صلاحية غير معروفة.';
+  if (!c.grantable) return c.why ?? 'مقفلة بقواعد المركز.';
+  if (c.scope === 'page' && role === 'admin') return 'Admin يفتح كل الصفحات.';
+  if (key === 'page.create' && !createsContent(role)) return 'هذا الدور لا ينشئ المحتوى.';
+  if (e.src === 'rank' || rankOf(role) < c.minRank) return `لا تناسب دور «${roleAr(role)}».`;
+  const step = switchStep(e, roleHas);
+  if (!step) return 'مقفلة بقواعد المركز.';
+  if (step.fn === 'set_member_override' && step.effect === 'allow' && !mine) return 'لا تمنح ما لا تملكه أنت.';
+  return '';
+}
+
+/**
+ * What changing a role gives and takes, from the two templates and the fixed rules. A person's
+ * own additions, removals and page list stay as they are (assign_role), so they are not here.
+ */
+export function roleChange(from: Role, to: Role, has: (role: Role, key: string) => boolean): { gains: string[]; losses: string[] } {
+  const holds = (r: Role, c: Capability) => (c.grantable ? has(r, c.key) : c.fixedRoles.includes(r));
+  const list = CAPABILITIES.filter((c) => c.scope !== 'page');
+  const gains = list.filter((c) => holds(to, c) && !holds(from, c)).map((c) => c.label);
+  const losses = list.filter((c) => holds(from, c) && !holds(to, c)).map((c) => c.label);
+  if (createsContent(from) && !createsContent(to)) losses.push(capLabel('page.create'));
+  return { gains, losses };
+}
+
+/** Counts in the words a sentence needs: 1 صفحة واحدة, 2 صفحتين, 3 صفحات, 11 صفحة. */
+export function pagesAr(n: number): string {
+  if (n === 1) return 'صفحة واحدة';
+  if (n === 2) return 'صفحتين';
+  return n >= 3 && n <= 10 ? `${n} صفحات` : `${n} صفحة`;
+}
+
+export function peopleAr(n: number): string {
+  if (n === 0) return 'لا أحد';
+  if (n === 1) return 'شخص واحد';
+  if (n === 2) return 'شخصان';
+  return n <= 10 ? `${n} أشخاص` : `${n} شخصاً`;
 }
 
 export const SOURCE_AR: Record<Source, string> = {
@@ -433,9 +520,10 @@ export function eventText(e: PermEvent, nameOf: (email: string) => string): stri
   }
 }
 
-/** The small markers on a member's row: temporary, one-time and removed. */
-export function markers(grants: Pick<Grant, 'mode' | 'effect'>[]): { timed: number; once: number; removed: number } {
+/** The small markers on a member's row: where this person stands apart from their role. */
+export function markers(grants: Pick<Grant, 'mode' | 'effect'>[]): { added: number; timed: number; once: number; removed: number } {
   return {
+    added: grants.filter((g) => g.mode === 'standing' && g.effect === 'allow').length,
     timed: grants.filter((g) => g.mode === 'timed').length,
     once: grants.filter((g) => g.mode === 'once').length,
     removed: grants.filter((g) => g.mode === 'standing' && g.effect === 'deny').length,

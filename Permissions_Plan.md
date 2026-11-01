@@ -198,6 +198,8 @@ the TypeScript mirror.
 
 ## 5. The accounts page
 
+**Changed 2026-11-01, by the Director's notes:** the layout of 5.1 to 5.3 is replaced by `MVP_draft.md` section 65 where they differ. A role is changed on the person's row; every permission is one switch; «الأدوار» shows one role with a column per person; «إضافة عضو» starts from defaults. The rules of section 4 did not change.
+
 Today `/accounts` is admin only (`adminOnlyPages`, and `accounts` RLS is admin based;
 this is an open Compass finding this plan closes). It becomes open to anyone holding
 `accounts.view`, which is admin, director and assistant by default. What each sees and

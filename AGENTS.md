@@ -179,7 +179,9 @@ every write is a database function, and who may give what to whom is decided the
 (`has_capability`, `use_capability`), never by the interface. The catalog is
 `src/lib/permissions.ts`, tested against the seeded `capabilities` table. Approval and
 publishing stay fixed by the reference: no grant can make a person approve or publish.
-Time is checked at the moment of use; there is no sweep job.
+Time is checked at the moment of use; there is no sweep job. On «الحسابات» a person's permission
+is one switch: `switchStep` in `src/lib/permissions.ts` turns on or off into the database call, and
+`MVP_draft.md` section 65 holds the page. `qa/accounts-flow.cjs` clicks through it on a fixture.
 
 WhatsApp is a real outside channel, by the same directive: one way (the system sends,
 nothing is read back), only to numbers a member proved on the site, and only for urgent

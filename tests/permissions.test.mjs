@@ -155,6 +155,79 @@ test('the person\'s card words each source; the preview says what and until when
   assert.equal(capLabel('nope'), 'صلاحية');
 });
 
+test('one switch: a flip reaches the opposite state from any source, and returning to the role leaves no row behind', async () => {
+  const { switchStep } = await import('../src/lib/permissions.ts');
+  const key = 'room.create';
+  const NOW = Date.parse('2026-10-13T09:00:00Z');
+  const row = (over) => ({ id: 'x', k: key, mode: 'standing', effect: 'allow', until: null, uses: null, scope: null, ...over });
+  // What the database does (set_member_override, revoke_capability), on the mirror's rows.
+  const apply = (grants, step) => {
+    if (step.fn === 'revoke_capability') return grants.filter((g) => g.id !== step.id);
+    const rest = grants.filter((g) => g.mode !== 'standing');
+    return step.effect ? [...rest, row({ id: 'new', effect: step.effect })] : rest;
+  };
+  const cases = [
+    [true, []],
+    [false, []],
+    [true, [row({ effect: 'deny' })]],
+    [false, [row({ effect: 'deny' })]],
+    [true, [row({})]],
+    [false, [row({})]],
+    [false, [row({ mode: 'timed', until: '2026-10-14T09:00:00Z' })]],
+    [false, [row({ mode: 'once', uses: 1 })]],
+  ];
+  for (const [roleHas, grants] of cases) {
+    const p = { role: 'writer', pages: [], templates: () => roleHas, grants };
+    const before = resolve(p, key, NOW);
+    const step = switchStep(before, roleHas);
+    const left = apply(grants, step);
+    const after = resolve({ ...p, grants: left }, key, NOW);
+    const named = `${roleHas ? 'in the role' : 'not in the role'}, ${before.src}`;
+    assert.equal(after.ok, !before.ok, named);
+    if (after.ok === roleHas) assert.equal(left.length, 0, `${named}: back to the role, nothing left`);
+  }
+  assert.deepEqual(switchStep({ src: 'page', id: null }, false), { fn: 'set_member_override', effect: 'deny' }, 'a page comes off the account list');
+  assert.deepEqual(switchStep({ src: 'none', id: null }, false), { fn: 'set_member_override', effect: 'allow' }, 'and goes on it the same way');
+  for (const src of ['fixed', 'rank']) assert.equal(switchStep({ src, id: null }, false), null, src);
+});
+
+test('a switch that cannot move says why, as the database would refuse', async () => {
+  const { switchWhy } = await import('../src/lib/permissions.ts');
+  const none = { src: 'none', id: null };
+  assert.equal(switchWhy('urgency.2', none, 'writer', false, true), '');
+  assert.equal(switchWhy('urgency.2', none, 'writer', false, false), 'لا تمنح ما لا تملكه أنت.', 'NOT_HELD');
+  assert.equal(switchWhy('urgency.2', { src: 'removed', id: 'x' }, 'writer', true, false), '', 'clearing a removal gives nothing new');
+  assert.equal(switchWhy('urgency.2', { src: 'role', id: null }, 'writer', true, false), '', 'taking away needs no holding');
+  assert.match(switchWhy('permissions.grant', none, 'writer', false, true), /لا تناسب دور/, 'CAP_RANK');
+  assert.equal(switchWhy('page.create', none, 'publisher', false, true), 'هذا الدور لا ينشئ المحتوى.', 'PAGE_NEEDS_CREATE');
+  assert.equal(switchWhy('page.work', { src: 'page', id: null }, 'admin', false, true), 'Admin يفتح كل الصفحات.');
+  assert.match(switchWhy('work.approve', { src: 'fixed', id: null }, 'writer', false, true), /الاعتماد/, 'CAP_FIXED, with the catalog\'s reason');
+});
+
+test('changing a role says what it gives and takes, from the templates and the fixed rules', async () => {
+  const { roleChange, roleHolds, pagesAr, peopleAr, ROLE_HINT, createsContent } = await import('../src/lib/permissions.ts');
+  const has = (r, k) => installedDefault(r, k);
+  const none = roleChange('writer', 'designer', has);
+  assert.deepEqual(none, { gains: [], losses: [] }, 'the five team roles hold the same by default');
+  const up = roleChange('writer', 'assistant', has);
+  assert.ok(up.gains.includes('اعتماد جزء من عمل أو رفضه'), 'a fixed rule follows the role');
+  assert.ok(up.gains.includes('منح الصلاحيات وسحبها'), 'a template follows the role');
+  assert.deepEqual(up.losses, []);
+  const side = roleChange('writer', 'publisher', has);
+  assert.ok(side.gains.includes('النشر والجدولة'));
+  assert.ok(side.losses.includes('صفحة «إنشاء»'), 'a publisher does not create');
+  assert.ok(roleChange('assistant', 'writer', has).losses.includes('رسائل «عاجل» (المستوى 3)'));
+  const defaults = [{ role: 'writer', capability: 'urgency.2', allowed: true }, { role: 'writer', capability: 'room.create', allowed: false }];
+  assert.equal(roleHolds(defaults, 'writer', 'urgency.2'), true);
+  assert.equal(roleHolds(defaults, 'writer', 'room.create'), false);
+  assert.equal(roleHolds(defaults, 'designer', 'urgency.2'), false);
+  assert.deepEqual([1, 2, 3, 10, 11].map(pagesAr), ['صفحة واحدة', 'صفحتين', '3 صفحات', '10 صفحات', '11 صفحة']);
+  assert.deepEqual([0, 1, 2, 3, 11].map(peopleAr), ['لا أحد', 'شخص واحد', 'شخصان', '3 أشخاص', '11 شخصاً']);
+  for (const r of roleIds) assert.ok(ROLE_HINT[r], `a line for ${r}`);
+  assert.equal(createsContent('publisher'), false);
+  assert.equal(createsContent('member'), true);
+});
+
 test('every refusal is worded in Arabic, never as a raw key', () => {
   for (const code of ['SELF_EDIT', 'NOT_MANAGEABLE', 'NOT_HELD', 'CAP_FIXED', 'CAP_RANK', 'ROLE_ABOVE', 'ADMIN_NOT_ASSIGNABLE', 'PROTECTED_ACCOUNT', 'BAD_UNTIL', 'ONCE_NOT_FOR_PAGES', 'FORBIDDEN']) {
     const text = permError(`ERROR: ${code}`);
@@ -196,7 +269,7 @@ test('the permission log is worded in Arabic, for every kind the database writes
     assert.ok(EVENT_KINDS[k], k);
     assert.doesNotMatch(eventText(E(k, { data: { mode: 'standing', allowed: true } }), name), /[a-z]+\.[a-z]+|_/, k);
   }
-  assert.deepEqual(markers([{ mode: 'timed', effect: 'allow' }, { mode: 'once', effect: 'allow' }, { mode: 'standing', effect: 'deny' }, { mode: 'standing', effect: 'allow' }]), { timed: 1, once: 1, removed: 1 });
+  assert.deepEqual(markers([{ mode: 'timed', effect: 'allow' }, { mode: 'once', effect: 'allow' }, { mode: 'standing', effect: 'deny' }, { mode: 'standing', effect: 'allow' }]), { added: 1, timed: 1, once: 1, removed: 1 });
   const now = Date.parse('2026-10-13T09:00:00Z');
   assert.equal(nextEnd([{ until: '2026-10-13T08:00:00Z' }, { until: '2026-10-13T10:00:00Z' }, { until: null }, { until: '2026-10-13T12:00:00Z' }], now), Date.parse('2026-10-13T10:00:00Z'));
   assert.equal(nextEnd([{ until: null }], now), null);

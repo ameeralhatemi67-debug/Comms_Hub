@@ -4,6 +4,7 @@
 // one sees follows row level security: one's own events, those of people one manages, and
 // role changes for those who grant.
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { CAPABILITIES, EVENT_KINDS, eventText, stamp } from '@/lib/permissions';
 import { useAccounts } from './data';
 
@@ -18,6 +19,15 @@ export function LogTab({ person }: { person?: string | null }) {
   );
   return (
     <div className="pm-logtab">
+      <p className="pm-howto">
+        هنا ما يخص الحسابات والصلاحيات وحدها: من أُضيف أو أُزيل، ومن مُنح أو سُحب منه، وتغييرات الأدوار والدعوات.
+        {(a.me.role === 'admin' || a.me.pages.includes('activity')) && (
+          <>
+            {' '}
+            ما يجري في المكتبة والبريد في <Link href="/activity">سجل النشاط</Link>، وهو يضم هذه الأحداث أيضاً.
+          </>
+        )}
+      </p>
       <div className="filters pm-filters">
         <select aria-label="الشخص" value={who} onChange={(e) => setWho(e.target.value)}>
           <option value="">كل الأشخاص</option>
