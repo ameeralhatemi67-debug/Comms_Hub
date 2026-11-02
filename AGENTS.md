@@ -482,6 +482,26 @@ Firebase project and the application's half. Devices and the push outbox live in
   addresses are fixed in the code, never taken from the file. Its rules are held by `supabase/tests/push_rules.sql`,
   `tests/push.test.mjs` and `qa/push-flush.cjs`.
 
+«ورقة الكتابة» and the writing documents are real, by owner directive of 2026-11-02 (`Writing_Build_Plan.md`, `MVP_draft.md`
+section 68, recorded in `progress.md`).
+- **The document.** The master of a written text is a checked JSON file (`src/lib/writing/doc.ts`, `checkDoc`), one per saved
+  version, in the library's Drive under `Comms Hub/مستندات الكتابة/`. The database keeps the record and a plain-text copy, so approval,
+  comparison, search and review never need Drive. Platform copies stay plain text in the database. Documents are not `media_files`
+  rows: they join moves, serving and backups through `file_locations` with `subject_kind = 'work_doc'`.
+- **Who.** Reading follows `work_can_see`. Writing is `work_text_writer`: a leader, «المسؤول», and a holder of a `writer` stage, who
+  writes only in the four statuses before sending. This departs from the reference. Sending stays with «المسؤول» and the leaders.
+  Approval and publishing do not change.
+- **The editor** is Tiptap 3 in `src/components/writing/`, loaded only when the sheet opens. Never inject stored HTML: read-only
+  rendering is `doc-view.tsx`. A table's fill, lines and transparency apply to the selected cells only (`table-ops.ts`, `updateCells`).
+- **Keys.** The sheet listens on the document, because a button that disappears takes the focus out of it, and it answers only when
+  it is the top dialog. Escape closes one thing at a time; cards sit inside the sheet's dialog, so their Escape reaches it too.
+- **Drafts** are private, not even an administrator reads them. A draft is not a version: no log, no notice, not in a backup.
+- **Limits.** A request through the site's server carries about 4 MB, so pictures are redrawn in the browser and a large Word file
+  downloads from the browser. PDF is Drive's own conversion. Editing a Word file inside the site is not built. Pruning happens at a
+  save, because nothing is scheduled.
+- Its rules are held by `supabase/tests/writing_rules.sql`, `tests/writing.test.mjs`, `tests/writing-storage.test.mjs` and
+  `qa/writing-flow.cjs`, which clicks through the real sheet and pages on a fixture.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted

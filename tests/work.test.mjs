@@ -309,8 +309,8 @@ test('stages: the open ones, the current one, the late ones, and the line the li
 });
 
 test('«العمل»: tabs per role, what each tab holds, the order, and the attention counts', () => {
-  assert.deepEqual(tabsFor('director').map((t) => t[0]), ['team', 'all', 'mine', 'requests', 'closed']);
-  assert.deepEqual(tabsFor('writer').map((t) => t[1]), ['الكل', 'مهامي', 'المغلقة']);
+  assert.deepEqual(tabsFor('director').map((t) => t[0]), ['team', 'all', 'mine', 'requests', 'docs', 'closed']);
+  assert.deepEqual(tabsFor('writer').map((t) => t[1]), ['الكتابة', 'الكل', 'مهامي', 'المستندات', 'المغلقة']);
   assert.deepEqual(tabsFor('member').map((t) => t[1]), ['الكل', 'طلباتي', 'المغلقة']);
   const st = [{ who: 'd@x.sa' }];
   assert.equal(inTab(W(), st, 'mine', 'd@x.sa', 'designer'), true, 'a stage makes it mine');

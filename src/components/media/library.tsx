@@ -1,5 +1,6 @@
 'use client';
 // مكتبة الوسائط: folders, pipeline stages and assets. Views: grid, list, stage board.
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Fragment, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { stageLabels, pipeline, stagePosition, formatBytes, canCreateAt, type Stage, LEVELS, levelLabels, LEVEL_NAMES } from '@/lib/media/rules';
@@ -483,6 +484,12 @@ export function MediaLibrary() {
             <span className="ct">{m.assets.filter((a) => openIds.has(a.folder_id)).length}</span>
           </button>
           {kids(null).map((f) => treeRow(f))}
+          {m.role !== 'member' && (
+            <Link className="mx-trow" href="/work?tab=docs" data-gd="writing-docs">
+              <Icon name="file" />
+              <span className="nm">مستندات الكتابة</span>
+            </Link>
+          )}
           <div className="mx-legend">انقر مرتين على اسم مجلد لإعادة تسميته. اسحب بطاقة إلى مجلد لنقلها.</div>
         </aside>
 

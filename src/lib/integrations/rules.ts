@@ -171,6 +171,7 @@ export type StorageProviderRow = {
   bytes: number;
   library_files: number;
   mail_files: number;
+  writing_files?: number;
   ok: number;
   pending: number;
   failed: number;
@@ -460,7 +461,7 @@ export type BackupOverview = {
   can_migrate: boolean;
   can_manage: boolean;
 };
-export type Restorable = { kind: 'media_version' | 'mail_file'; subject: string; name: string | null; version: number | null; size_bytes: number | null; state: string };
+export type Restorable = { kind: 'media_version' | 'mail_file' | 'work_doc'; subject: string; name: string | null; version: number | null; size_bytes: number | null; state: string };
 
 export const BACKUP_KIND_AR: Record<BackupKind, string> = {
   files: 'ملفات المكتبة والمرفقات',
@@ -515,6 +516,7 @@ export const BACKUP_EXCLUDED: { what: string; why: string }[] = [
   { what: 'البريد الداخلي ومحادثات المراسلة', why: 'خاصة بأصحابها حتى عن مسؤول النظام' },
   { what: 'التذكيرات الخاصة والإشعارات وتقدم الإرشاد وخطوات التراجع', why: 'خاصة بكل شخص' },
   { what: 'أرقام واتساب ورموز التحقق', why: 'يراها مسؤول النظام في صفحة الأعضاء فقط' },
+  { what: 'مسودات الكتابة والأفكار', why: 'خاصة بأصحابها، والمسودة ليست إصداراً' },
   { what: 'جلسات الرفع الجارية ومفاتيح الخادم وكل سر', why: 'لا يغادر الخزنة ولا يُصدَّر' },
   { what: 'صور الملفات الشخصية', why: 'صور مصغّرة محفوظة في قاعدة البيانات، لا قيمة لها في نسخة السجلات' },
 ];

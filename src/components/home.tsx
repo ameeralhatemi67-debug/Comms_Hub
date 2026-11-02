@@ -5,7 +5,7 @@
 // sample works and their numbers) is gone from Home: every link here opens a real page.
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { BriefcaseBusiness, CalendarDays, Inbox, Plus, Shield, TriangleAlert, Users } from 'lucide-react';
+import { BriefcaseBusiness, CalendarDays, Inbox, PenLine, Plus, Shield, TriangleAlert, Users } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import {
   ACTIVE,
@@ -33,7 +33,9 @@ import {
 import { CAL_KIND, calEntries, entryTitle,
   whenText,
 } from '@/lib/work/planning';
-import { usePlanData, useWork, useWorkList, type ListItem } from './work/data';
+import { resumeRow, writingQueue } from '@/lib/writing/flow';
+import { readLocalDraft } from './writing/api';
+import { usePlanData, useWork, useWorkList, useWritingMarks, type ListItem } from './work/data';
 import { HomePermissions } from './home-perms';
 import { Av, Empty, Ic, StatusChip, Wid } from './work/parts';
 
@@ -51,6 +53,14 @@ export function HomePage() {
   const mySteps = open.flatMap((x) => openSteps(x.stages).filter((i) => x.stages[i].who === me).map((i) => ({ x, s: x.stages[i] })));
   const myTasks = plan.tasks.filter((t) => t.assignee === me && t.status !== 'done');
   const nowIso = useMemo(() => new Date().toISOString(), [items]); // eslint-disable-line react-hooks/exhaustive-deps
+  const maker = !lead && role !== 'publisher' && role !== 'member';
+  const marks = useWritingMarks(maker);
+  const resume = useMemo(() => {
+    if (!maker || status !== 'ready') return null;
+    const rows = writingQueue({ items, tasks: [], latest: marks.latest, copies: marks.copies, me, today: w.today, nameOf: w.nameOf });
+    const row = resumeRow(rows, (id) => !!readLocalDraft(id, me));
+    return row ? { row, draft: !!(row.work && readLocalDraft(row.work, me)) } : null;
+  }, [maker, status, items, marks, me, w.today, w.nameOf]);
 
   const tiles: Tile[] = lead
     ? [
@@ -73,9 +83,11 @@ export function HomePage() {
             { key: 'tasks', label: 'مهامي', value: myTasks.length, hint: 'ما أُسند إليك', href: '/tasks' },
           ]
         : [
+            { key: 'back', label: 'بحاجة إلى تعديل', value: mine.filter((x) => x.w.status === 'CHANGES_REQUESTED').length, hint: 'عاد إليك من المراجعة', href: role === 'writer' ? '/work?tab=write' : '/work?tab=mine', hot: true },
+            { key: 'review', label: 'بانتظار المراجعة', value: mine.filter((x) => x.w.status === 'IN_REVIEW').length, hint: 'أرسلتها وتنتظر قراراً', href: '/work?tab=mine' },
             { key: 'mine', label: 'أعمالي النشطة', value: mine.filter((x) => OUTSTANDING.includes(x.w.status) && x.w.assignee).length, hint: 'أنا مسؤولها أو مشارك فيها', href: '/work?tab=mine' },
             { key: 'steps', label: 'مراحلي الجاهزة', value: mySteps.length, hint: 'أستطيع العمل عليها الآن', href: '/work?tab=mine' },
-            { key: 'late', label: 'متأخر', value: mine.filter((x) => x.w.assignee === me && isOverdue(x.w, w.today)).length, hint: 'أعمال أنا مسؤولها تجاوزت موعدها', href: '/work?tab=mine', hot: true },
+            { key: 'late', label: 'متأخر', value: mine.filter((x) => (x.w.assignee === me && isOverdue(x.w, w.today)) || lateStages(x.w, x.stages, w.today).some((s) => s.who === me)).length, hint: 'يشمل مراحلك في أعمال غيرك', href: '/work?tab=mine', hot: true },
             { key: 'tasks', label: 'مهامي المفتوحة', value: myTasks.length, hint: 'من صفحة «المهام»', href: '/tasks' },
           ];
 
@@ -149,6 +161,21 @@ export function HomePage() {
               <span>
                 تحتاج انتباهك: تفويض {accountName(risky[0].a)} لا يغطي موعد «{risky[0].x.w.title}» {risky[0].x.w.sched_at ? whenText(risky[0].x.w.sched_at) : ''}
                 {risky.length > 1 ? ` و${risky.length - 1} غيره` : ''}.
+              </span>
+            </Link>
+          )}
+
+          {resume && (
+            <Link className="wk-resume" href={resume.row.href} data-gd="resume">
+              <span className="ic">
+                <Ic i={PenLine} />
+              </span>
+              <span>
+                <b>تابع الكتابة: {resume.row.title}</b>
+                <small>
+                  {resume.draft ? 'مسودتك محفوظة · ' : ''}
+                  {resume.row.line}
+                </small>
               </span>
             </Link>
           )}

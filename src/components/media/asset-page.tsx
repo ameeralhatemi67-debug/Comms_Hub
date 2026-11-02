@@ -2,7 +2,7 @@
 // صفحة الأصل: its path through the pipeline, who worked on it, versions, notes,
 // channels and the quick actions the current person may take.
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { channelAccounts } from '@/lib/domain';
 import { supabase } from '@/lib/supabase/client';
@@ -48,6 +48,14 @@ export function AssetPage({ id }: { id: string }) {
   const [notes, setNotes] = useState<NoteRow[]>([]);
   const [journey, setJourney] = useState<LogRow[]>([]);
   const [dialog, setDialog] = useState<Dialog | null>(null);
+  // From «الكتابة»: ?copy=1 opens «العنوان والوصف» once.
+  const askCopy = useSearchParams()?.get('copy') === '1';
+  const asked = useRef(false);
+  useEffect(() => {
+    if (!askCopy || asked.current || !asset) return;
+    asked.current = true;
+    setDialog({ type: 'writecopy', assetId: asset.id });
+  }, [askCopy, asset]);
   const [renaming, setRenaming] = useState(false);
   const [tag, setTag] = useState('');
   const media = useRef<HTMLVideoElement & HTMLAudioElement>(null);

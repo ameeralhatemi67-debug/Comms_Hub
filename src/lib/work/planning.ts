@@ -52,6 +52,7 @@ export type TaskItem = {
   work_id: string | null;
   group_key: string | null;
   priority: string;
+  asset_id?: string | null;
 };
 export type EventItem = { id: string; title: string; start_at: string; end_at: string; place: string | null; project_id: string | null; created_by: string };
 export type ReminderItem = { id: string; at: string; body: string };

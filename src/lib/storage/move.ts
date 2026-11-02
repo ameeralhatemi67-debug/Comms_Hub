@@ -19,7 +19,7 @@ export type DestLocation = { id: string; ref: string; state: string; size: numbe
 export type ClaimItem = {
   id: string;
   state: 'pending' | 'copying' | 'copied' | 'verified';
-  kind: 'media_version' | 'mail_file';
+  kind: 'media_version' | 'mail_file' | 'work_doc';
   subject: string;
   approved: boolean;
   size: number;
@@ -102,7 +102,7 @@ export async function runBatch(deps: BatchDeps, moveId: string): Promise<BatchRe
     const dest = dst!;
     const sink = dest.sink?.();
     if (!sink) throw new Final('DEST_NOT_WRITABLE');
-    const kindDir = item.kind === 'media_version' ? 'library' : 'mail';
+    const kindDir = item.kind === 'media_version' ? 'library' : item.kind === 'work_doc' ? 'writing' : 'mail';
 
     let phase: ClaimItem['state'] = item.state;
     let ref: string | null = null;

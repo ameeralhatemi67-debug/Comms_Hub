@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/writing_rules.sql",
+  "script_md5": "41b7273835dbdff5e8e95e8f8655b738",
+  "migration": {
+    "file": "supabase/migrations/20261102120000_writing_documents.sql",
+    "file_md5": "4f2a558267804e54394465d1c65923e3",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-02T00:44:53.163Z",
+  "migrations_replayed": 60,
+  "differ": [],
+  "total": 322,
+  "passed": 322
+}

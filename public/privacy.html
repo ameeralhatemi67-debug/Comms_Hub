@@ -50,7 +50,7 @@
 <h2>Google user data</h2>
 <p>When an administrator connects the Hub's Google account for storage, the Hub asks for one permission only: <code>https://www.googleapis.com/auth/drive.file</code>. With it the Hub can see and manage <b>only the files and folders it has created itself</b> in that account's Google Drive. The Hub cannot read any other file, email, contact or calendar entry in that account.</p>
 <ul>
-  <li>The Hub uses this access to upload files that team members choose to add, to show and download them to signed-in team members, and to move them to the Drive trash when a team member deletes them.</li>
+  <li>The Hub uses this access to upload files that team members choose to add, to keep the texts they write, with their Word and PDF copies and private drafts, to show and download them to signed-in team members, and to move them to the Drive trash when a team member deletes them or a text passes its version limit.</li>
   <li>The connection credential is kept as a server-side secret. It is never sent to a browser and never shown to team members.</li>
   <li>Files are shown only to signed-in members whose accounts an administrator approved, under the library's folder permissions, or to someone outside the team through a review link a member creates for that file.</li>
 </ul>
@@ -92,6 +92,7 @@
   <li>الملف الشخصي: الصورة التي تختارها (تُصغَّر على جهازك قبل إرسالها) والعنوان واللون والحالة والتوقيع.</li>
   <li>العمل: الأعمال ونصوصها ونسخ المنصات والتعليقات والقرارات والمهام والمشاريع والتقويم والطلبات والتنبيهات. التذكيرات الخاصة لك وحدك.</li>
   <li>الملفات: ما يرفعه الأعضاء إلى المكتبة أو يرفقونه بالبريد أو يرسلونه في المراسلة، ومنها الصور والرسائل الصوتية، مع اسم كل ملف ونوعه وحجمه ومن رفعه ومكان حفظه.</li>
+  <li>النصوص: ما يُكتب في ورقة الكتابة، بإصداراته ونسخه بصيغة Word وPDF ومسوداته الخاصة، في Google Drive، مع نسخة نصية في قاعدة البيانات.</li>
   <li>البريد: البريد الداخلي، وصندوق القسم الخارجي (حساب Gmail واحد يقرأ منه المركز ويرسل).</li>
   <li>المراسلة: الرسائل والتفاعلات والتصويت والإقرار، ويرى المحادثة أعضاؤها وحدهم.</li>
   <li>السجلات: من فعل ماذا ومتى.</li>

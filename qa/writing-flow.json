@@ -1,0 +1,510 @@
+{
+  "script": "qa/writing-flow.cjs",
+  "run": "2026-11-02T01:09:12.573Z",
+  "checks": [
+    {
+      "name": "the page is on the right and the panel on the left in Arabic",
+      "pass": true,
+      "detail": "{\"main\":365,\"side\":43}"
+    },
+    {
+      "name": "the brief is beside the page",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the ribbon keeps its height on every tab",
+      "pass": true,
+      "detail": "111.25"
+    },
+    {
+      "name": "a stage writer may write, and hands over",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the text on the page is dark ink, not muted grey",
+      "pass": true,
+      "detail": "rgb(16, 36, 29)"
+    },
+    {
+      "name": "the tools keep their own size, not the 42px of site buttons",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the Word file picker stays hidden",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the writer starts in the text",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a style applies from the list",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Ctrl+B applies bold",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Ctrl+E centres",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a shortcut works from an Arabic layout, by the key's place",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a font applies to the selection",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "there are 25 fonts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a size applies",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a text colour applies",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a highlight applies",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Ctrl+Shift+L makes a list",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the picker says the size",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "numbers make that table",
+      "pass": true,
+      "detail": "4x3"
+    },
+    {
+      "name": "the «الجدول» tab comes forward by itself",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the ribbon does not jump when it does",
+      "pass": true,
+      "detail": "111.25"
+    },
+    {
+      "name": "the handles show",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the handles sit above the table, not on its first row",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "seven designs",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a click on the strip selects that column",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the bar says what is selected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing in the colour panel spills out of it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a fill reaches that column and no other cell",
+      "pass": true,
+      "detail": "[\"rgb(238, 243, 236)\",\"rgb(249, 229, 225)\",\"rgb(238, 243, 236)\",\"rgba(0, 0, 0, 0)\",\"rgb(249, 229, 225)\",\"rgba(0, 0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"rgb(249, 229, 225)\",\"rgba(0, 0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"rgb(249, 229, 225)\",\"rgba(0, 0, 0, 0)\"]"
+    },
+    {
+      "name": "its transparency reaches those cells only",
+      "pass": true,
+      "detail": "[\"rgba(249, 229, 225, 0.5)\",\"rgba(249, 229, 225, 0.5)\",\"rgba(249, 229, 225, 0.5)\",\"rgba(249, 229, 225, 0.5)\"]"
+    },
+    {
+      "name": "a click on the side strip selects that row",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "line colours reach that row only",
+      "pass": true,
+      "detail": "[\"rgb(182, 200, 187)\",\"rgb(182, 200, 187)\",\"rgb(182, 200, 187)\",\"rgb(182, 200, 187)\",\"rgb(182, 200, 187)\",\"rgb(182, 200, 187)\",\"rgb(162, 58, 46)\",\"rgb(162, 58, 46)\",\"rgb(162, 58, 46)\",\"rgb(182, 200, 187)\",\"rgb(182, 200, 187)\",\"rgb(182, 200, 187)\"]"
+    },
+    {
+      "name": "so does the lines' transparency",
+      "pass": true,
+      "detail": "[\"rgba(162, 58, 46, 0.6)\",\"rgba(162, 58, 46, 0.6)\",\"rgba(162, 58, 46, 0.6)\"]"
+    },
+    {
+      "name": "dragging along the strip selects several columns",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dragging across cells selects a range",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a design applies to the table",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and the header follows it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a row can be added",
+      "pass": true,
+      "detail": "5x3"
+    },
+    {
+      "name": "and undone like anything else",
+      "pass": true,
+      "detail": "4x3"
+    },
+    {
+      "name": "Ctrl+S saves a version, and the server's check accepts what the editor made",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the note goes with it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the table's colours are in the saved document",
+      "pass": true,
+      "detail": "{\"doc\":{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"textAlign\":\"right\",\"level\":2},\"content\":[{\"type\":\"text\",\"text\":\"عنوان الفيديو\"}]},{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"text\":\"لقطة واسعة للقاعة قبل الجلسة\",\"marks\":[{\"type\":\"textStyle\",\"attrs\":{\"color\":\"#a23a2e\",\"backgroundColor\":"
+    },
+    {
+      "name": "«الحالي» follows: the Word file, then the PDF",
+      "pass": true,
+      "detail": "[{\"kind\":\"export\",\"size\":12310,\"head\":\"PK\"},{\"kind\":\"pdf\",\"size\":0,\"head\":\"\"}]"
+    },
+    {
+      "name": "the read-only view draws the same table with no injected HTML",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a draft is kept as you type",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no tool panel is left open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes the sheet",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and the draft goes to its private file",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "opening again keeps what was typed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«المسؤول» sends for review",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "notes open first when text came back",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a note marks its sentence, and that mark is not stored",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a note can be marked done",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "versions compare word by word",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes a card and not the sheet",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an earlier version comes back as a draft",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a copy shows its stale mark and its limit",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no formatting tools on a copy",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a copy starts from the main text, without formatting",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a copy saves through its own function",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Ctrl+Alt+O asks for an opinion",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Ctrl+Alt+M sends internal mail linked to the work",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Ctrl+Alt+G sends a message",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Ctrl+/ lists commands and searches inside texts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Ctrl+Enter sends",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the library opens with its files",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a video can only be linked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a link to a library file goes into the text",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a picture goes into the text",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the «الصورة» tab comes forward",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "its size and text apply",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a picture too large for one request is made smaller first",
+      "pass": true,
+      "detail": "{\"size\":11107,\"type\":\"image/jpeg\"}"
+    },
+    {
+      "name": "a Word file opens in the sheet with its headings and bold",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and the page says what does not come across",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "search marks what it finds",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "replace reaches them all",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes the search and not the sheet",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "PDF comes from the Word file",
+      "pass": true,
+      "detail": "null"
+    },
+    {
+      "name": "in review the text is locked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it can be pulled back before any decision",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a person with no stage only reads",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no sideways scroll on a phone",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the sides swap in a left-to-right page",
+      "pass": true,
+      "detail": "{\"main\":43,\"side\":1001}"
+    },
+    {
+      "name": "Home counts what came back and what waits for review",
+      "pass": true,
+      "detail": "[\"1\",\"2\"]"
+    },
+    {
+      "name": "and a late stage in someone else's work counts as late",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "the resume card names the work",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a writer opens «العمل» on «الكتابة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it gathers what came back, what is ready and the library's request",
+      "pass": true,
+      "detail": "عاد إليك 1بيان الشراكةCH-10أجزاء عادت: 2 · نسخة X تحتاج مراجعةبحاجة إلى تعديلمتأخر 1فيديو قصص الملتقىCH-2مرحلة «النص» · المسؤول لمىمتأخرةعناوين وأوصاف 1كتابة عنوان ووصف «ملصق الملتقى»موعدها الأحد 11 أ"
+    },
+    {
+      "name": "a row opens the sheet",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«المستندات» offers the current Word file and the text",
+      "pass": true,
+      "detail": "[\"/api/writing/CH-10/file?kind=docx\",\"/api/writing/CH-10/file?kind=txt\"]"
+    },
+    {
+      "name": "and not a PDF older than the text",
+      "pass": true,
+      "detail": "[\"/api/writing/CH-10/file?kind=docx\",\"/api/writing/CH-10/file?kind=txt\"]"
+    },
+    {
+      "name": "a round compares with the round before",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the text can be read as it was written",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "selecting a sentence offers a note on it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the note is saved on that part and that sentence",
+      "pass": true,
+      "detail": "[{\"p_work\":\"CH-21\",\"p_part\":\"text\",\"p_quote\":\"تشمل الاتفاقية ثلاثة برامج تدريبية، ويبدأ البرنامج الأول في يناير.\",\"p_body\":\"صحّح الرقم.\"}]"
+    },
+    {
+      "name": "the request need not repeat the notes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "saved ideas are listed with what became of them",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a new idea stays on the page",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an idea goes to «إنشاء» with its id, so it is marked afterwards",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing failed in the page",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 100,
+  "passed": 100,
+  "failed": 0
+}

@@ -22,6 +22,7 @@ import {
 import type { EventItem, HeldMail, ReminderItem, RequestRow, TaskItem } from '@/lib/work/planning';
 import { addNote, msOfTimecode, NOTE_COLUMNS, type Note } from '@/lib/media/notes';
 import { kickPush } from '@/lib/push/kick';
+import type { CopyMark, WriteTask } from '@/lib/writing/flow';
 
 export type Person = { email: string; display_name: string; role: Role };
 export type Load = {
@@ -195,10 +196,11 @@ export function useWorkList() {
 // ---------------------------------------------------------------------------
 // One work, in full
 // ---------------------------------------------------------------------------
-export type TextVersion = { n: number; body: string; note: string | null; author: string; created_at: string };
+export type TextVersion = { n: number; body: string; note: string | null; author: string; created_at: string; master_ref?: string | null; pruned_at?: string | null; keep?: boolean };
+export type WorkNote = { id: string; cycle: number | null; part: string; quote: string | null; body: string; author: string; created_at: string; resolved_at: string | null };
 export type Variant = { platform: string; n: number; body: string; base: number; author: string; created_at: string };
 export type PartRow = { key: string; label: string; ver: string; kind: string; snap?: string | null };
-export type Cycle = { n: number; sent_by: string; sent_at: string; note: string | null };
+export type Cycle = { n: number; sent_by: string; sent_at: string; note: string | null; text_n?: number | null };
 export type Decision = { id: number; cycle: number; op: string; labels: string[]; decided_by: string; decided_at: string; note: string | null };
 export type Comment = { id: string; author: string; body: string; created_at: string };
 export type LogRow = { id: number; at: string; actor: string; type: string; text: string };
@@ -226,6 +228,7 @@ export type WorkDetail = {
   mail: MailLink[];
   chats: ChatLink[];
   extensions: Extension[];
+  notes: WorkNote[];
 };
 
 export function useWorkDetail(id: string) {
@@ -237,13 +240,13 @@ export function useWorkDetail(id: string) {
     if (w.error) return setStatus('error');
     // Not found and not visible read the same: a restricted work does not exist for those outside it.
     if (!w.data) return setStatus('missing');
-    const [st, tx, va, ap, fl, cy, de, co, lg, pj, as, parts, pend, blk, ml, ch] = await Promise.all([
+    const [st, tx, va, ap, fl, cy, de, co, lg, pj, as, parts, pend, blk, ml, ch, nt] = await Promise.all([
       db.from('work_stages').select('*').eq('work_id', id).order('pos'),
-      db.from('work_texts').select('n,body,note,author,created_at').eq('work_id', id).order('n'),
+      db.from('work_texts').select('n,body,note,author,created_at,master_ref,pruned_at,keep').eq('work_id', id).order('n'),
       db.from('work_variants').select('platform,n,body,base,author,created_at').eq('work_id', id).order('n'),
       db.from('work_approvals').select('part,ver,approved_by,approved_at,snap').eq('work_id', id),
       db.from('work_flags').select('part,ver,note').eq('work_id', id),
-      db.from('work_cycles').select('n,sent_by,sent_at,note').eq('work_id', id).order('n'),
+      db.from('work_cycles').select('n,sent_by,sent_at,note,text_n').eq('work_id', id).order('n'),
       db.from('work_decisions').select('id,cycle,op,labels,decided_by,decided_at,note').eq('work_id', id).order('decided_at'),
       db.from('work_comments').select('id,author,body,created_at').eq('work_id', id).order('created_at'),
       db.from('work_log').select('id,at,actor,type,text').eq('work_id', id).order('at'),
@@ -255,6 +258,7 @@ export function useWorkDetail(id: string) {
       // A JSON string, not an array: an array is written as a Postgres array literal ({[object Object]}) and fails on jsonb.
       db.from('mail_threads').select('id,subject,kind,req_no').contains('links', JSON.stringify([{ type: 'work', id }])),
       db.from('chat_rooms').select('id,name').eq('link->>id', id),
+      db.from('work_notes').select('id,cycle,part,quote,body,author,created_at,resolved_at').eq('work_id', id).order('created_at'),
     ]);
     const stages = (st.data ?? []) as StageRow[];
     const ex = stages.length
@@ -279,6 +283,7 @@ export function useWorkDetail(id: string) {
       mail: (ml.data ?? []) as MailLink[],
       chats: (ch.data ?? []) as ChatLink[],
       extensions: (ex.data ?? []) as Extension[],
+      notes: (nt.data ?? []) as WorkNote[],
     });
     setStatus('ready');
   }, [id]);
@@ -289,6 +294,52 @@ export function useWorkDetail(id: string) {
     return () => document.removeEventListener('visibilitychange', again);
   }, [reload]);
   return { detail, status, reload };
+}
+
+/** The newest version of each text and copy this person can see, without their words, and the library's open requests for a
+ *  title and description: what «الكتابة» and Home need. */
+export function useWritingMarks(on: boolean) {
+  const [latest, setLatest] = useState<Record<string, number>>({});
+  const [copies, setCopies] = useState<CopyMark[]>([]);
+  const [tasks, setTasks] = useState<WriteTask[]>([]);
+  useEffect(() => {
+    if (!on) return;
+    let live = true;
+    const db = supabase();
+    void Promise.all([
+      db.from('work_texts').select('work_id,n').order('n'),
+      db.from('work_variants').select('work_id,platform,n,base'),
+      db.from('media_tasks').select('id,what,kind,assignee,status,due,asset_id').eq('kind', 'copy').eq('status', 'open').order('due').limit(200),
+    ]).then(([t, v, k]) => {
+      if (!live) return;
+      setTasks((k.data ?? []) as WriteTask[]);
+      setLatest(Object.fromEntries(((t.data ?? []) as { work_id: string; n: number }[]).map((r) => [r.work_id, r.n])));
+      setCopies((v.data ?? []) as CopyMark[]);
+    });
+    return () => {
+      live = false;
+    };
+  }, [on]);
+  return { latest, copies, tasks };
+}
+
+export type DocRow = { work_id: string; word_n: number | null; pdf_n: number | null; text_ref: string | null; updated_at: string };
+/** The written documents of works this person may see (row level security): «المستندات». */
+export function useWorkDocs(on: boolean) {
+  const [docs, setDocs] = useState<DocRow[]>([]);
+  useEffect(() => {
+    if (!on) return;
+    let live = true;
+    void supabase()
+      .from('work_docs')
+      .select('work_id,word_n,pdf_n,text_ref,updated_at')
+      .order('updated_at', { ascending: false })
+      .then(({ data }) => live && setDocs((data ?? []) as DocRow[]));
+    return () => {
+      live = false;
+    };
+  }, [on]);
+  return docs;
 }
 
 /** Files this person can reach in the library, newest first, for the pickers. */
@@ -349,7 +400,7 @@ export function usePlanData() {
   const reload = useCallback(async () => {
     const db = supabase();
     const [t, e, r] = await Promise.all([
-      db.from('media_tasks').select('id,what,kind,assignee,assigned_by,due,start_on,after_ids,status,note,project_id,work_id,group_key,priority').order('due').limit(1000),
+      db.from('media_tasks').select('id,what,kind,assignee,assigned_by,due,start_on,after_ids,status,note,project_id,work_id,group_key,priority,asset_id').order('due').limit(1000),
       db.from('events').select('id,title,start_at,end_at,place,project_id,created_by').order('start_at').limit(1000),
       db.from('reminders').select('id,at,body').order('at').limit(500),
     ]);

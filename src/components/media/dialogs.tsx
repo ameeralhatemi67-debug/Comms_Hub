@@ -16,6 +16,7 @@ import {
   type TaskKind,
 } from '@/lib/media/rules';
 import { Modal } from '../ui';
+import { Sheet, SheetHead } from '../sheet';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { Icon, Ts } from './parts';
 import { useMedia, type AssetRow } from './provider';
@@ -621,17 +622,20 @@ function WriteCopy({ asset, onClose }: AP) {
     onClose();
   };
   return (
-    <Modal title="العنوان والوصف" onClose={onClose}>
-      <form className="mx-form" onSubmit={submit}>
-        <p className="mx-note">
-          <Icon name="file" />
-          <span>اكتب النص لكل منصة. يُحفظ مع الأصل ويراه مسؤول النشر عند الجدولة.</span>
-        </p>
-        <PlatformFields channels={shown} checked={checked} setChecked={setChecked} copy={copy} setCopy={setCopy} withCopy />
-        <ErrorLine text={error} />
-        <Actions onClose={onClose} label="حفظ النص" busy={busy} />
-      </form>
-    </Modal>
+    <Sheet label={`العنوان والوصف: ${asset.name}`} onClose={onClose}>
+      <SheetHead title={asset.name} sub="العنوان والوصف لكل منصة" onClose={onClose} />
+      <div className="wr-libcopy">
+        <form className="mx-form" onSubmit={submit}>
+          <p className="mx-note">
+            <Icon name="file" />
+            <span>اكتب النص لكل منصة. يُحفظ مع الأصل ويراه مسؤول النشر عند الجدولة.</span>
+          </p>
+          <PlatformFields channels={shown} checked={checked} setChecked={setChecked} copy={copy} setCopy={setCopy} withCopy />
+          <ErrorLine text={error} />
+          <Actions onClose={onClose} label="حفظ النص" busy={busy} />
+        </form>
+      </div>
+    </Sheet>
   );
 }
 

@@ -40,6 +40,7 @@ import { around, reviewQueue } from '@/lib/work/queue';
 import { REVIEW_GROUPS, REVIEW_KEYS, matchReviewKey, reviewKeyLabel, reviewStart } from '@/lib/work/review-keys';
 import { comboLabel } from '@/lib/studio/shortcuts';
 import { supabase } from '@/lib/supabase/client';
+import { reviewBase } from '@/lib/writing/flow';
 import {
   accountName,
   authOk,
@@ -56,6 +57,7 @@ import { fileNotes, useDecisions, useWork, useWorkDetail, useWorkList, type File
 import { ReviewPlayer, type PlayerStart } from './review-player';
 import { Av, Empty, Hint, Ic, Modal } from './parts';
 import { CopyStrip, PreviewOfWork } from './post-preview';
+import { TextShow } from '../writing/doc-view';
 
 const KIND_ICON: Record<string, LucideIcon> = { text: FileText, copy: Send, asset: ImageIcon, dest: Users, date: Clock };
 /** The version number of a file part («v3» to 3). */
@@ -300,6 +302,7 @@ export function ReviewPage({ id }: { id: string }) {
                 mine={p.kind === 'asset' && mineUploads.includes(p.key.slice(2))}
                 notes={notes.filter((n) => p.kind === 'asset' && n.asset_id === p.key.slice(2))}
                 onNote={loadNotes}
+                onTextNote={reload}
                 busy={busy}
                 onApprove={() => void act('work_decide', { p_work: x.id, p_op: 'approve', p_parts: [p.key], p_note: null, p_close: false }, `اعتُمد «${p.label}».`)}
                 onChanges={() => setDlg({ t: 'changes', part: p.key })}
@@ -464,6 +467,7 @@ function PartRowView({
   mine,
   notes,
   onNote,
+  onTextNote,
   busy,
   onApprove,
   onChanges,
@@ -478,6 +482,7 @@ function PartRowView({
   mine: boolean;
   notes: FileNote[];
   onNote: () => Promise<void>;
+  onTextNote: () => Promise<void>;
   busy: boolean;
   onApprove: () => void;
   onChanges: () => void;
@@ -489,6 +494,17 @@ function PartRowView({
   const w = useWork();
   const a = d.approvals.find((x) => x.part === p.key);
   const f = d.flags.find((x) => x.part === p.key);
+  // A note may sit on the sentence selected in the text.
+  const box = useRef<HTMLDivElement>(null);
+  const [quote, setQuote] = useState('');
+  const pick = () => {
+    const s = window.getSelection();
+    if (s && !s.isCollapsed && box.current?.contains(s.anchorNode)) setQuote(s.toString().trim().slice(0, 500));
+  };
+  const written = p.kind === 'text' || p.kind === 'copy';
+  const base = written ? reviewBase({ part: p, approvals: d.approvals, flags: d.flags, texts: d.texts, variants: d.variants, cycles: d.cycles, cycle: d.w.review_cycle }) : null;
+  const tv = p.kind === 'text' ? d.texts.find((t) => `t${t.n}` === p.ver) : undefined;
+  const asWritten = tv && <TextShow work={d.w.id} n={tv.n} body={p.snap ?? ''} master={tv.pruned_at ? null : tv.master_ref} />;
   const tag =
     f && f.ver !== p.ver ? (
       <span className="wk-chip info">عُدّل بعد طلب التعديل</span>
@@ -513,22 +529,31 @@ function PartRowView({
         {tag}
       </div>
       {f?.note && <Hint warn>طلب التعديل السابق: «{f.note}»</Hint>}
-      {(p.kind === 'text' || p.kind === 'copy') && (
+      {written && (
         <>
-          {a?.snap && p.snap && a.snap !== p.snap ? (
-            <>
-              <span className="wk-why">ما تغيّر منذ الإصدار المعتمد:</span>
-              <div className="wk-textbox wk-diff">
-                {diffWords(a.snap, p.snap).map(([t, word], i) => (
-                  <span key={i}>
-                    {t === 's' ? word : t === 'a' ? <ins>{word}</ins> : <del>{word}</del>}{' '}
-                  </span>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="wk-textbox">{p.snap}</div>
-          )}
+          <div ref={box} onMouseUp={pick} onKeyUp={pick}>
+            {base ? (
+              <>
+                <span className="wk-why">{base.label}</span>
+                <div className="wk-textbox wk-diff">
+                  {diffWords(base.body, p.snap ?? '').map(([t, word], i) => (
+                    <span key={i}>
+                      {t === 's' ? word : t === 'a' ? <ins>{word}</ins> : <del>{word}</del>}{' '}
+                    </span>
+                  ))}
+                </div>
+                {asWritten && (
+                  <details className="wk-fulltext">
+                    <summary>النص كاملاً كما كُتب</summary>
+                    {asWritten}
+                  </details>
+                )}
+              </>
+            ) : (
+              (asWritten ?? <div className="wk-textbox">{p.snap}</div>)
+            )}
+          </div>
+          <TextNotes d={d} part={p.key} canNote={canNote} quote={quote} clear={() => setQuote('')} reload={onTextNote} />
           {p.kind === 'copy' && (
             <PreviewOfWork
               platform={p.key.slice(2)}
@@ -625,6 +650,59 @@ function PartRowView({
   );
 }
 
+/** The notes on a part, and a new one on it or on the sentence selected in it. They reach the writer in the sheet, on that sentence. */
+function TextNotes({ d, part, canNote, quote, clear, reload }: { d: WorkDetail; part: string; canNote: boolean; quote: string; clear: () => void; reload: () => Promise<void> }) {
+  const w = useWork();
+  const [body, setBody] = useState('');
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const list = d.notes.filter((n) => n.part === part && !n.resolved_at);
+  const close = () => {
+    setBody('');
+    setOpen(false);
+    clear();
+  };
+  const add = async () => {
+    setBusy(true);
+    const r = await w.call('work_note_add', { p_work: d.w.id, p_part: part, p_quote: quote || null, p_body: body.trim() });
+    setBusy(false);
+    if (!r.ok) return w.say(r.error);
+    close();
+    await reload();
+  };
+  return (
+    <div className="wk-tnotes" data-gd="text-notes">
+      {list.map((n) => (
+        <div className="wk-vn" key={n.id} data-open="yes">
+          <span>
+            {n.quote && <q>{n.quote}</q>} <b>{w.nameOf(n.author)}</b> · {n.body}
+          </span>
+        </div>
+      ))}
+      {canNote &&
+        (open || quote ? (
+          <div className="wk-tnote-new">
+            {quote && <small>على الجملة: «{quote}»</small>}
+            <textarea className="wk-inp" aria-label="الملاحظة" autoFocus maxLength={1000} value={body} placeholder="ما الذي يجب تعديله هنا؟" onChange={(e) => setBody(e.target.value)} />
+            <div className="wk-row-acts">
+              <button type="button" className="wk-btn quiet" onClick={close}>
+                تراجع
+              </button>
+              <button type="button" className="wk-btn primary" disabled={busy || !body.trim()} onClick={() => void add()}>
+                إضافة الملاحظة
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" className="wk-btn sm quiet wk-tnote-add" title="أو حدّد جملة في النص لتُربط بها" onClick={() => setOpen(true)}>
+            <Ic i={Plus} />
+            ملاحظة على هذا الجزء
+          </button>
+        ))}
+    </div>
+  );
+}
+
 function AssetReview({ d, p, prev, notes, onNote, canNote, active = false, onActivate, start = null }: { d: WorkDetail; p: PartRow; prev: string | null; notes: FileNote[]; onNote: () => Promise<void>; canNote: boolean; active?: boolean; onActivate?: () => void; start?: PlayerStart | null }) {
   const w = useWork();
   const id = p.key.slice(2);
@@ -702,7 +780,9 @@ type Act = (fn: string, args: Record<string, unknown>, ok: string) => Promise<bo
 export function ChangesDialog({ d, pend, first, notes, onClose, act }: { d: WorkDetail; pend: PartRow[]; first?: string; notes: FileNote[]; onClose: () => void; act: Act }) {
   const w = useWork();
   const [parts, setParts] = useState<string[]>(first ? [first] : pend.map((p) => p.key));
-  const [note, setNote] = useState('');
+  // Notes already sit on the text, so the request need not repeat them.
+  const onText = d.notes.filter((n) => !n.resolved_at && n.cycle === d.w.review_cycle).length;
+  const [note, setNote] = useState(onText ? `ملاحظاتي مثبتة على النص (${onText}).` : '');
   // the open notes with a time on the version under review of each file (older notes without a version too)
   const verOfAsset = (asset: string) => Number(d.parts.find((p) => p.key === `a:${asset}`)?.ver.slice(1)) || null;
   const timed = notes.filter((n) => !n.parent_id && !n.done_at && noteMs(n) !== null && ((n.version ?? null) === null || n.version === verOfAsset(n.asset_id)));

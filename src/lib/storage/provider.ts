@@ -41,6 +41,19 @@ export type UploadRequest = {
   assetId?: string;
 };
 
+/** A small file the server writes in one request (a saved version, a draft, a picture). */
+export type SmallFile = {
+  name: string;
+  mimeType: string;
+  bytes: Uint8Array;
+  /** The provider folder. Defaults to the site root folder there. */
+  parentId?: string;
+  appProperties?: Record<string, string>;
+};
+
+/** New content for a file that keeps its reference, and a new name when one is given. */
+export type FileChange = { bytes: Uint8Array; mimeType: string; name?: string };
+
 /** What a check of one stored copy found. */
 export type CopyCheck = { state: 'ok' | 'missing' | 'failed'; size: number | null };
 
@@ -90,6 +103,18 @@ export interface StorageProvider {
   /** Starts a resumable upload and returns the address the browser sends the chunks to. */
   startUpload(meta: UploadRequest): Promise<string>;
   createFolder(name: string, parentId?: string): Promise<string>;
+  /**
+   * The writing documents go to the role's provider, Google Drive, which alone answers the next three; a second
+   * provider holds them only through the move engine, and says StorageError(501).
+   * A folder of the site's own, found by a marker it carries, or made once.
+   */
+  markedFolder(marker: string, name: string): Promise<string>;
+  /** Writes a small file in one request and returns its reference. */
+  putSmall(file: SmallFile): Promise<string>;
+  /** New content for an existing file, which keeps its reference. */
+  update(ref: string, change: FileChange): Promise<void>;
+  /** A PDF of a Word file, by the provider's own conversion. */
+  convertToPdf(docx: Uint8Array): Promise<Uint8Array>;
   rename(ref: string, name: string): Promise<void>;
   move(ref: string, fromParent: string, toParent: string): Promise<void>;
   /** To the provider's recoverable trash; never a hard delete. */
@@ -99,6 +124,8 @@ export interface StorageProvider {
   info(ref: string): Promise<StoredFile>;
   /** The raw response for the bytes, honouring a Range header so video can seek. */
   open(ref: string, range?: string | null): Promise<Response>;
+  /** A whole small file's bytes. Throws StorageError with the provider's status. */
+  read(ref: string): Promise<Uint8Array>;
   /** A content hash the provider keeps, or null when it has none for this file. */
   checksum(ref: string): Promise<string | null>;
 

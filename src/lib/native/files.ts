@@ -9,12 +9,14 @@ import { native, type Feature, type NativeSiteFile } from './index.ts';
 
 const ID = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
 
-/** The site's file routes, as a page may name them: a library file (a version, a download), messaging, mail. */
+/** The site's file routes, as a page may name them: a library file (a version, a download), messaging, mail, a written work. */
 export const FILE_ROUTES: readonly string[] = Object.freeze([
   `^/api/media/${ID}/content(\\?(v=[1-9][0-9]{0,5}(&download=1)?|download=1))?$`,
   `^/api/chat/file/${ID}$`,
   `^/api/mail/file/${ID}$`,
   `^/api/mail/inbound/${ID}/[0-9]{1,2}$`,
+  '^/api/writing/CH-[0-9]{1,6}/file\\?kind=(docx|pdf|txt)$',
+  `^/api/writing/CH-[0-9]{1,6}/image/${ID}$`,
 ]);
 const COMPILED = FILE_ROUTES.map((r) => new RegExp(r));
 
@@ -34,6 +36,10 @@ export const fileAt = {
   chat: (id: string) => `/api/chat/file/${id}`,
   mail: (id: string) => `/api/mail/file/${id}`,
   inbound: (message: string, index: number) => `/api/mail/inbound/${message}/${index}`,
+  /** A current file of a written work. */
+  writing: (work: string, kind: 'docx' | 'pdf' | 'txt') => `/api/writing/${work}/file?kind=${kind}`,
+  /** A picture from the device, placed in a document. */
+  writingImage: (work: string, image: string) => `/api/writing/${work}/image/${image}`,
 };
 
 /**

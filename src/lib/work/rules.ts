@@ -47,6 +47,8 @@ export type WorkRow = {
   move_from: string | null;
   move_by: string | null;
   review_cycle: number | null;
+  /** What the writer gathered beside the text. Not a version. */
+  research?: string | null;
   results: Record<string, { ok: boolean; at: string; why: string | null }>;
   closed_at: string | null;
   closed_by: string | null;
@@ -254,6 +256,22 @@ export const isWhole = (t: WorkType) => WHOLE_TYPES.includes(t);
 /** Text can be edited in production and after approval (which re-opens review), not while a decision is pending. */
 export const textEditable = (w: Pick<WorkRow, 'status' | 'closed_at'>) =>
   !w.closed_at && ['DRAFT', 'IN_PRODUCTION', 'CHANGES_REQUESTED', 'REJECTED', 'APPROVED', 'SCHEDULED'].includes(w.status);
+
+/** Who writes a work's text (work_text_writer): a leader, «المسؤول», and a person holding a stage whose role is writer. */
+export function isTextWriter(r: Role, me: string, w: Pick<WorkRow, 'assignee'>, stages: Pick<StageRow, 'who' | 'role'>[]) {
+  return isLead(r) || w.assignee === me || stages.some((s) => s.who === me && s.role === 'writer');
+}
+/** The statuses a person who writes through a stage alone may write in. After sending, it stays with «المسؤول» and the leaders. */
+export const STAGE_WRITER_STATUSES: readonly WorkStatus[] = ['DRAFT', 'IN_PRODUCTION', 'CHANGES_REQUESTED', 'REJECTED'];
+/** Whether this person may save the text and copies now (work_text_block). The database decides again. */
+export function canWriteText(r: Role, me: string, w: Pick<WorkRow, 'assignee' | 'status' | 'closed_at'>, stages: Pick<StageRow, 'who' | 'role'>[]) {
+  if (!isTextWriter(r, me, w, stages) || !textEditable(w)) return false;
+  return isLead(r) || w.assignee === me || STAGE_WRITER_STATUSES.includes(w.status);
+}
+/** Sending stays with «المسؤول» and the leaders; a stage writer delivers the stage (work_submit). */
+export function canSendWork(r: Role, me: string, w: Pick<WorkRow, 'assignee' | 'status' | 'closed_at'>) {
+  return !w.closed_at && !!w.assignee && (isLead(r) || w.assignee === me) && (w.status === 'IN_PRODUCTION' || w.status === 'CHANGES_REQUESTED');
+}
 
 // ---------------------------------------------------------------------------
 // Dates: plain 'YYYY-MM-DD' strings, counted in whole days
@@ -662,13 +680,15 @@ export function stageLine(
   return { text: '', tone: '' };
 }
 
-export type WorkTab = 'team' | 'all' | 'mine' | 'requests' | 'closed';
+export type WorkTab = 'team' | 'write' | 'all' | 'mine' | 'requests' | 'docs' | 'closed';
 export function tabsFor(r: Role): [WorkTab, string][] {
   const t: [WorkTab, string][] = [];
   if (isLead(r)) t.push(['team', 'الفريق']);
+  if (r === 'writer') t.push(['write', 'الكتابة']);
   t.push(['all', 'الكل']);
   t.push(['mine', r === 'member' ? 'طلباتي' : 'مهامي']);
   if (isLead(r)) t.push(['requests', 'الطلبات']);
+  if (r !== 'member') t.push(['docs', 'المستندات']);
   t.push(['closed', 'المغلقة']);
   return t;
 }
@@ -723,7 +743,7 @@ export type ActionInput = {
     & Partial<Pick<WorkRow, 'proposed_at' | 'sched_at' | 'confirm_pending'>>;
   /** The work goes out by the shared mailbox rather than a platform. */
   mail?: boolean;
-  stages: (StageLike & Pick<StageRow, 'name' | 'who'>)[];
+  stages: (StageLike & Pick<StageRow, 'name' | 'who'> & Partial<Pick<StageRow, 'role'>>)[];
   me: string;
   role: Role;
   hasText: boolean;
@@ -774,10 +794,12 @@ export function workActions(x: ActionInput): WorkAction[] {
       add('review', x.decideBlock ? 'عرض المراجعة' : 'مراجعة واعتماد', x.decideBlock || `ينتظر قرارك: ${countOf(x.pending, PARTS)} من ${x.total}`, !x.decideBlock);
     if (boss && textEditable(w)) {
       const after = ['APPROVED', 'SCHEDULED'].includes(w.status);
-      add('edittext', `${x.hasText ? 'تعديل' : 'كتابة'} ${textLabels[w.type]}`,
+      add('edittext', 'فتح ورقة الكتابة',
         !x.hasText ? 'يصبح جزءاً يُراجع ويُعتمد'
           : after ? (isWhole(w.type) ? 'معتمد: التعديل يعيد الحزمة كاملة إلى المراجعة' : 'معتمد: التعديل يعيده وحده إلى المراجعة')
             : 'يُحفظ إصداراً جديداً باسم من عدّله');
+    } else if (!boss && stages.some((s) => s.who === me && s.role === 'writer') && STAGE_WRITER_STATUSES.includes(w.status)) {
+      add('edittext', 'فتح ورقة الكتابة', `الكتابة لك، والإرسال للمراجعة لـ${nameOf(w.assignee)} بعد أن تسلّمه`, true);
     }
     if (part && ['DRAFT', 'IN_PRODUCTION', 'CHANGES_REQUESTED', 'REJECTED'].includes(w.status))
       add('lib', 'إضافة وسائط من المكتبة', 'تبقى الوسائط في مجلدها بصلاحياته');
@@ -1028,6 +1050,17 @@ const ERRORS: Record<string, string> = {
   DATES_INVALID: 'اختر بداية ونهاية صحيحتين.',
   TASK_ROLE: 'إسناد المهام إلى غيرك لمدير الاتصال ومساعده والمنتج الإعلامي.',
   TASK_INVALID: 'إحدى المهام التي تنتظرها غير موجودة.',
+  TEXT_TOO_LONG: 'النص أطول من الحد المسموح.',
+  WRITER_LOCKED: 'بعد الإرسال يبقى التعديل لمسؤول العمل ومدير الاتصال ومساعده.',
+  DOC_INVALID: 'تعذّر قراءة المستند. أعد المحاولة.',
+  DOC_TOO_BIG: 'المستند أكبر من الحد المسموح.',
+  IMAGE_INVALID: 'الصورة غير مقبولة: PNG أو JPEG أو WebP أو GIF، حتى 5 ميغابايت.',
+  EXPORT_STALE: 'الملف يخص إصداراً أقدم من الأخير. أعد تجهيزه من الإصدار الأخير.',
+  WITHDRAW_DECIDED: 'صدر قرار في هذه الدورة، فلا يُسحب العمل.',
+  WITHDRAW_MOVE: 'هذه الدورة طلب نقل موعد: يُسحب الطلب نفسه، لا العمل.',
+  PART_INVALID: 'هذا الجزء ليس من أجزاء العمل.',
+  KEEP_INVALID: 'عدد الإصدارات من 3 إلى 50.',
+  IDEA_USED: 'صارت هذه الفكرة عملاً من قبل.',
 };
 export function workErrorText(message: string | null | undefined): string {
   const m = message ?? '';
@@ -1053,4 +1086,10 @@ export const WORK_RPC = [
   'account_save', 'account_set_active', 'account_delete', 'account_reconnect', 'project_save', 'event_save', 'event_delete',
   'reminder_add', 'reminder_delete', 'plan_template_save', 'plan_template_delete', 'task_create', 'notifications_read',
   'project_create', 'work_request_list',
+] as const;
+
+/** The same for the writing documents. tests/writing-storage.test.mjs checks each exists and is granted. */
+export const WRITING_RPC = [
+  'work_text_block', 'work_doc_prepare', 'work_research_save', 'work_note_add', 'work_note_resolve', 'work_withdraw', 'work_set_channels',
+  'work_ask_opinion', 'work_text_search', 'idea_add', 'idea_remove', 'idea_to_work', 'phrase_add', 'phrase_remove', 'writing_keep_set',
 ] as const;

@@ -13,7 +13,7 @@ import { onedriveStorage } from './onedrive.ts';
 import { parseCredentials, s3ConfigFrom, s3Storage } from './s3.ts';
 
 export { StorageError } from './provider.ts';
-export type { CopyCheck, SinkState, SinkTarget, StorageProvider, StorageRole, StorageSink, StoredFile, UploadRequest } from './provider.ts';
+export type { CopyCheck, FileChange, SinkState, SinkTarget, SmallFile, StorageProvider, StorageRole, StorageSink, StoredFile, UploadRequest } from './provider.ts';
 
 /** The roles a provider serves in this build. */
 export const SERVED_ROLES: readonly StorageRole[] = ['library', 'mail', 'chat'];
@@ -95,6 +95,43 @@ export async function openStored(role: StorageRole, ref: string, range?: string 
   }
   if (last) return last;
   throw error instanceof Error ? error : new StorageError(502, 'NO_COPY_READABLE');
+}
+
+/** A whole small file's bytes, from wherever its live copies are. */
+export async function readStored(role: StorageRole, ref: string): Promise<Uint8Array> {
+  const res = await openStored(role, ref);
+  if (!res.ok) throw new StorageError(res.status, 'NO_COPY_READABLE');
+  return new Uint8Array(await res.arrayBuffer());
+}
+
+/** One live copy of a file, as the database names it when it lets go of the file. */
+export type LiveCopy = { integration_id: string; type: string; config: Record<string, unknown>; ref: string };
+
+/**
+ * The copies of files the database has already let go of (a pruned version): each to its provider's recoverable
+ * trash, and the bare references no copy was named for, to the role's provider. Never throws: the record is already
+ * right, and what stays at a provider must not fail what the person did.
+ */
+export async function trashQuietly(role: StorageRole, copies: readonly LiveCopy[], refs: readonly string[] = []): Promise<void> {
+  const named = new Set(copies.map((c) => c.ref));
+  await Promise.all([
+    ...copies.map(async (c) => {
+      try {
+        await (await providerFor({ id: c.integration_id, type: c.type, config: c.config })).trash(c.ref);
+      } catch {
+        // It stays where it is, unreferenced.
+      }
+    }),
+    ...refs
+      .filter((r) => !named.has(r))
+      .map(async (r) => {
+        try {
+          await storageFor(role).trash(r);
+        } catch {
+          // It stays where it is, unreferenced.
+        }
+      }),
+  ]);
 }
 
 /**

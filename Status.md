@@ -26,6 +26,14 @@ related:
 
 # Communication Department Hub — Current Status
 
+## «ورقة الكتابة» and the writing documents, 2026-11-02
+
+From the owner's approval of the artifact «كاتب المحتوى في المركز» and the storage idea (`Writing_Build_Plan.md`, `MVP_draft.md` section 68, `progress.md`).
+
+- **Done.** The sheet with its ribbon, keys and application shortcuts. Tables where a row, a column or a range is selected and only those cells take a fill, a line colour or a transparency. Documents in Drive, one master per version, with Word, PDF and text in «الحالي» and a version limit in «الإعدادات». A stage writer can write and is told. «الكتابة» and «المستندات» in «العمل», Home's tiles and «تابع الكتابة», comparison and notes in every review round, real «الأفكار», and Ctrl+/ search.
+- **Not built, by decision.** Editing a Word file inside the site (W-10): a Word file opens in the sheet and loses fonts, sizes, colours and table borders, and the page says so.
+- **Not verified.** Anything signed in on the real site, so the first real save, the first Drive folder and the first PDF happen with the first person who writes. Drive's PDF conversion of an Arabic file is unproven.
+
 ## «المنصات» and «حسابات المنصات» rebuilt, live 2026-11-02
 
 From the owner's directive (`MVP_draft.md` section 67). Live on production since 2026-11-02, on `next` 16.4.3, with the migration applied to comms-hub as version `20261101211812`.

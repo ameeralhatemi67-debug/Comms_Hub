@@ -41,6 +41,8 @@ const sources = [
   // The studio's third round, Phase 9: the review player, its keys, the queue, notes, the key hold
   'components/work/review-player.tsx', 'lib/work/queue.ts', 'lib/work/review-keys.ts', 'lib/studio/shortcuts.ts',
   'lib/media/notes.ts', 'lib/kit/hold.ts', 'lib/kit/layer.ts', 'lib/motion/preview.js',
+  // «ورقة الكتابة»: its list, the read-only view of a document and its calls. The sheet has its own check (qa/writing-flow.cjs).
+  'lib/writing/flow.ts', 'lib/writing/doc.ts', 'lib/studio/fonts.ts', 'components/writing/doc-view.tsx', 'components/writing/api.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -62,6 +64,9 @@ for (const m of sources) {
     // the channels page's setup guide has its own check (tests/setup-guides.test.mjs)
     .replace(/from '\.\.\/setup-guide'/g, `from '${up}mocks/setup-guide.js'`)
     .replace(/from '\.\.\/(sheet|platform-icon)'/g, "from '../$1.js'")
+    .replace(/from '(\.\.?)\/writing\/(doc-view|api)'/g, "from '$1/writing/$2.js'")
+    .replace(/from '\.\/api'/g, "from './api.js'")
+    .replace(/from 'next\/dynamic'/g, `from '${up}mocks/dynamic.js'`)
     .replace(/from '@\/lib\/([^']+)\.js'/g, `from '${up}lib/$1.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
@@ -78,6 +83,7 @@ fs.writeFileSync(path.join(build, 'mocks', 'navigation.js'), `export const useRo
 export const usePathname = () => '/approvals';
 export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search || '');`);
 fs.writeFileSync(path.join(build, 'mocks', 'setup-guide.js'), 'export const SetupGuide = () => null;');
+fs.writeFileSync(path.join(build, 'mocks', 'dynamic.js'), 'export default () => () => null;');
 // The shells around the site: a browser has none (tests/native.test.mjs holds the real ones).
 fs.mkdirSync(path.join(build, 'lib', 'native'), { recursive: true });
 fs.writeFileSync(path.join(build, 'lib', 'native.js'), 'export const native = () => ({ platform: "web", has: () => false });\nexport const notifyNative = async () => undefined;\nexport const onNoticeOpen = () => () => undefined;\nexport const setBadge = async () => undefined;');
@@ -102,6 +108,8 @@ export const fileNotes = async () => [];
 export const addFileNote = async () => null;
 export const WorkProvider = ({ children }) => children;
 export const usePlanData = () => ({ ...globalThis.__WK.plan, status: 'ready', reload: async () => {} });
+export const useWritingMarks = () => ({ latest: {}, copies: [], tasks: [] });
+export const useWorkDocs = () => [];
 export const useRequestData = () => ({ ...globalThis.__WK.rq, status: 'ready', reload: async () => {} });`);
 for (const f of ['globals.css', 'identity.css', 'work.css']) fs.copyFileSync(path.join(root, 'src/app', f), path.join(out, f));
 
@@ -216,7 +224,7 @@ const detailOf = (i, over = {}) => {
     projects: x.projects,
     assets: [{ asset_id: 'f1', file: { id: 'f1', name: 'ملصق اليوم الوطني', kind: 'image', current_version: 3, approved_version: null, stage: 'production' } }, { asset_id: 'f2', file: null }],
     parts: [{ key: 'text', label: 'النص الأساسي', ver: 't2', kind: 'text' }, { key: 'v:x', label: 'نسخة X', ver: 'c1', kind: 'copy' }, { key: 'a:f1', label: 'ملصق اليوم الوطني', ver: 'v3', kind: 'asset' }, { key: 'dest', label: 'المنصات والحسابات', ver: 'd', kind: 'dest' }],
-    pending: [], decideBlock: '', mail: [{ id: 'm1', subject: 'طلب منشور شكر', kind: 'external', req_no: 7 }], chats: [], extensions: [],
+    pending: [], decideBlock: '', mail: [{ id: 'm1', subject: 'طلب منشور شكر', kind: 'external', req_no: 7 }], chats: [], extensions: [], notes: [],
     ...over,
   };
 };
@@ -327,7 +335,6 @@ async function renderAll() {
   const dialogs = [
     ['submit', h(item.SubmitDialog, { d: d0, onClose() {}, act: async () => true })],
     ['close', h(item.CloseDialog, { d: d0, onClose() {}, act: async () => true })],
-    ['text', h(item.TextDialog, { d: d0, target: 'x', onClose() {}, act: async () => true })],
     ['details', h(item.DetailsDialog, { d: d0, onClose() {}, act: async () => true })],
     ['assign', h(item.AssignDialog, { d: d0, onClose() {}, act: async () => true })],
     ['extension', h(item.ExtensionDialog, { d: d0, stage: d0.stages[1], onClose() {}, act: async () => true })],

@@ -258,6 +258,11 @@ export function s3Storage(cfg: S3Config, credentials: S3Credentials, deps: Deps 
     startUpload: async () => unsupported(),
     // Objects are named by file id: the library's own folders do not exist here.
     createFolder: async () => cfg.prefix,
+    // The writing documents reach a store through the move engine, never directly.
+    markedFolder: async () => unsupported(),
+    putSmall: async () => unsupported(),
+    update: async () => unsupported(),
+    convertToPdf: async () => unsupported(),
     rename: async () => undefined,
     move: async () => undefined,
 
@@ -281,6 +286,10 @@ export function s3Storage(cfg: S3Config, credentials: S3Credentials, deps: Deps 
     },
 
     open: (ref, range) => c.get(ref, range),
+
+    async read(ref) {
+      return new Uint8Array(await c.need(await c.get(ref)).arrayBuffer());
+    },
 
     async checksum(ref) {
       const res = c.need(await c.head(ref));

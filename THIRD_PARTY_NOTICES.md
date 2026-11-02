@@ -21,6 +21,23 @@ unmodified from `node_modules`, at the exact version pinned in `package.json`.
   later. FFmpeg source: https://ffmpeg.org/download.html. The WebAssembly module is a separate file loaded
   at run time and can be replaced by another build of the same encoder.
 
+## Tiptap and ProseMirror
+
+- Packages: `@tiptap/core`, `@tiptap/react`, `@tiptap/pm`, `@tiptap/starter-kit`, `@tiptap/extension-table`,
+  `@tiptap/extension-text-style`, `@tiptap/extension-text-align` and `@tiptap/extensions` 3.32.0, with the `prosemirror-*`
+  packages they bring, loaded only when «ورقة الكتابة» opens.
+- Licence: MIT. Sources: https://github.com/ueberdosis/tiptap and https://github.com/ProseMirror
+
+## docx
+
+- Package: `docx` 9.12.0, loaded by «ورقة الكتابة» only when a Word file is made.
+- Licence: MIT. Source: https://github.com/dolanmiu/docx
+
+## mammoth
+
+- Package: `mammoth` 1.13.0, loaded by «ورقة الكتابة» only when a Word file is opened.
+- Licence: BSD 2-Clause. Source: https://github.com/mwilliamson/mammoth.js
+
 ## pdf-lib and fontkit
 
 - Packages: `pdf-lib` 1.17.1 and `@pdf-lib/fontkit` 1.1.1, loaded by «تقرير الشهر» in «سجل النشاط» only when a PDF is

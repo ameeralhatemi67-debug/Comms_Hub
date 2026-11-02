@@ -4,8 +4,9 @@
 // part; publishing (read only until «الموافقات والنشر» is built); discussion; the append-only
 // log; and the actions this person may take now. After «النموذج المرجعي للمركز» version 5.
 // Every action is a database function, which checks the rule again.
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
@@ -76,6 +77,7 @@ import {
   stageState,
   stageStateLabels,
   statusLabels,
+  canWriteText,
   textEditable,
   textLabels,
   typeLabels,
@@ -95,15 +97,16 @@ import { useWork, useWorkDetail, type WorkDetail } from './data';
 import { Av, Empty, Hint, Ic, LibraryPicker, Modal, PrioChip, RestrictedChip, StatusChip, TYPE_ICON, Wid } from './parts';
 import { PlanEditor, type EditRow } from './plan';
 import { PublishNowDialog, ScheduleDialog, isMailWork, publishOp } from './publish';
-import { CheckList, CopyStrip, PreviewOfWork } from './post-preview';
-import { checkCopy, limitsOf } from '@/lib/platforms/limits';
-import { mediaCounts } from '@/lib/platforms/copies';
+import { CopyStrip, PreviewOfWork } from './post-preview';
+import { TextShow } from '../writing/doc-view';
+
+// Tiptap travels with the sheet, so no other page pays for it.
+const WritingSheet = dynamic(() => import('../writing/sheet').then((m) => m.WritingSheet), { ssr: false });
 
 type Dialog =
   | { t: 'assign' }
   | { t: 'close' }
   | { t: 'submit' }
-  | { t: 'text'; target: 'main' | Platform }
   | { t: 'details' }
   | { t: 'lib' }
   | { t: 'plan' }
@@ -127,6 +130,9 @@ export function WorkItemPage({ id }: { id: string }) {
   const router = useRouter();
   const { detail: d, status, reload } = useWorkDetail(id);
   const [dlg, setDlg] = useState<Dialog | null>(null);
+  // ?write=1 opens the sheet on the text, and ?write=<platform> on that copy: «الكتابة» and Home link here.
+  const writeTo = useSearchParams()?.get('write');
+  const [sheet, setSheet] = useState<'main' | Platform | null>(writeTo ? (writeTo === '1' ? 'main' : (writeTo as Platform)) : null);
   const [busy, setBusy] = useState(false);
 
   /** Run a database function, report the result, reload what changed. */
@@ -207,7 +213,7 @@ export function WorkItemPage({ id }: { id: string }) {
         return router.push(`/mail/chat?room=${r.data}`);
       }
       case 'edittext':
-        return setDlg({ t: 'text', target: 'main' });
+        return setSheet('main');
       case 'review':
         return router.push(`/approvals/${x.id}`);
       case 'schedule':
@@ -313,7 +319,7 @@ export function WorkItemPage({ id }: { id: string }) {
 
       <div className="wk-grid">
         <div className="wk-col">
-          <TextPanel d={d} onEdit={(target) => setDlg({ t: 'text', target })} act={act} />
+          <TextPanel d={d} onEdit={setSheet} act={act} />
           <MediaPanel d={d} onAdd={() => setDlg({ t: 'lib' })} act={act} />
           <ApprovalPanel d={d} />
           <PublishPanel d={d} />
@@ -469,10 +475,22 @@ export function WorkItemPage({ id }: { id: string }) {
         </div>
       </div>
 
+      {sheet && (
+        <WritingSheet
+          d={d}
+          target={sheet}
+          reload={async () => {
+            await Promise.all([reload(), w.reloadBase()]);
+          }}
+          onClose={() => setSheet(null)}
+          onSend={() => setDlg({ t: 'submit' })}
+          onExt={(s) => setDlg({ t: 'ext', stage: s })}
+          onFinish={finishStage}
+        />
+      )}
       {dlg?.t === 'assign' && <AssignDialog d={d} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'close' && <CloseDialog d={d} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'submit' && <SubmitDialog d={d} onClose={() => setDlg(null)} act={act} />}
-      {dlg?.t === 'text' && <TextDialog d={d} target={dlg.target} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'details' && <DetailsDialog d={d} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'ext' && <ExtensionDialog d={d} stage={dlg.stage} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'schedule' && (
@@ -690,7 +708,7 @@ function TextPanel({ d, onEdit, act }: { d: WorkDetail; onEdit: (t: 'main' | Pla
     const v = latestVariant(d, p);
     return cur && v && v.body.trim() && v.base < cur.n;
   });
-  const canEdit = (isLead(w.role) || x.assignee === w.me) && textEditable(x);
+  const canEdit = canWriteText(w.role, w.me, x, d.stages) && textEditable(x);
   if (!cur && !plats.length)
     return x.brief ? (
       <section className="wk-pn" data-gd="text">
@@ -734,7 +752,7 @@ function TextPanel({ d, onEdit, act }: { d: WorkDetail; onEdit: (t: 'main' | Pla
       {t === 'main' ? (
         cur ? (
           <>
-            <div className="wk-textbox">{cur.body}</div>
+            <TextShow work={x.id} n={cur.n} body={cur.body} master={cur.pruned_at ? null : cur.master_ref} />
             <div className="wk-vmeta">
               <span>
                 الإصدار <b>{cur.n}</b>
@@ -755,7 +773,7 @@ function TextPanel({ d, onEdit, act }: { d: WorkDetail; onEdit: (t: 'main' | Pla
               {canEdit && (
                 <button type="button" className="wk-btn sm" onClick={() => onEdit('main')}>
                   <Ic i={Pencil} />
-                  تعديل
+                  فتح ورقة الكتابة
                 </button>
               )}
             </div>
@@ -824,7 +842,7 @@ function TextPanel({ d, onEdit, act }: { d: WorkDetail; onEdit: (t: 'main' | Pla
             {canEdit && x.channels.length > 0 && (
               <button type="button" className="wk-btn sm" onClick={() => onEdit(t as Platform)}>
                 <Ic i={Pencil} />
-                {v?.body.trim() ? 'تعديل النسخة' : 'كتابة نسخة خاصة'}
+                {v?.body.trim() ? 'فتح ورقة الكتابة' : 'كتابة نسخة خاصة'}
               </button>
             )}
           </div>
@@ -1252,67 +1270,6 @@ export function SubmitDialog({ d, onClose, act }: { d: WorkDetail; onClose: () =
         <button type="button" className="wk-btn primary" disabled={!parts.length} onClick={send}>
           <Ic i={Send} />
           إرسال للمراجعة
-        </button>
-      </div>
-    </Modal>
-  );
-}
-
-export function TextDialog({ d, target, onClose, act }: { d: WorkDetail; target: 'main' | Platform; onClose: () => void; act: Act }) {
-  const w = useWork();
-  const x = d.w;
-  const isV = target !== 'main';
-  const cur = d.texts[d.texts.length - 1];
-  const v = isV ? latestVariant(d, target) : null;
-  const label = isV ? `نسخة ${platformLabels[target as Platform]}` : textLabels[x.type];
-  const [body, setBody] = useState(isV ? (v?.body ?? '') : (cur?.body ?? ''));
-  const [note, setNote] = useState('');
-  const after = ['APPROVED', 'SCHEDULED'].includes(x.status);
-  const hasVariants = d.variants.some((y) => y.body.trim());
-  return (
-    <Modal title={`${(isV ? v?.body.trim() : cur) ? 'تعديل' : 'كتابة'} ${label}`} onClose={onClose}>
-      {after && (
-        <Hint warn>
-          {isWhole(x.type) ? 'العمل معتمد. حفظ التعديل يعيد الحزمة كاملة إلى المراجعة.' : `العمل معتمد. حفظ التعديل يعيد «${label}» وحده إلى المراجعة، والأجزاء الأخرى تبقى معتمدة.`}
-          {x.status === 'SCHEDULED' ? ' الجدولة تُعلَّق حتى الاعتماد، ثم تعود إلى موعدها.' : ''}
-        </Hint>
-      )}
-      {!isV && cur && x.assignee && x.assignee !== w.me && (
-        <Hint i={Pencil}>
-          تعدّل نص {w.nameOf(x.assignee)}. يُحفظ إصداراً جديداً يقول «عدّله {w.nameOf(w.me)}»، ويبقى {w.nameOf(x.assignee)} كاتب العمل.
-        </Hint>
-      )}
-      <label className="l">
-        {label}
-        {isV && <small>{[...body].length} حرفاً</small>}
-        <textarea className="wk-inp" rows={7} value={body} maxLength={isV ? 4000 : 8000} onChange={(e) => setBody(e.target.value)} />
-      </label>
-      {isV && (() => {
-        // The platform's own limits, from the registry, counted as the person writes.
-        const lim = limitsOf(platformInfo(target)?.accepts);
-        const m = mediaCounts(d.assets);
-        return <CheckList check={checkCopy(lim, { text: body, images: m.images, videos: m.videos, typeVideo: x.type === 'video' })} limits={lim} />;
-      })()}
-      {!isV && (
-        <label className="l">
-          ما الذي تغيّر؟ <small>اختياري، يظهر في الإصدارات</small>
-          <input className="wk-inp" value={note} maxLength={200} onChange={(e) => setNote(e.target.value)} />
-        </label>
-      )}
-      {!isV && hasVariants && cur && <Hint warn>نسخ المنصات المكتوبة ستُعلَّم «تحتاج مراجعة» حتى تُعاد صياغتها أو تُؤكَّد.</Hint>}
-      <div className="wk-row-acts">
-        <button type="button" className="wk-btn quiet" onClick={onClose}>
-          تراجع
-        </button>
-        <button
-          type="button"
-          className="wk-btn primary"
-          disabled={!body.trim() && !isV}
-          onClick={() =>
-            void act('work_text_save', { p_work: x.id, p_target: target, p_body: body, p_note: note }, after ? `حُفظ إصدار جديد، وعاد «${label}» إلى المراجعة.` : 'حُفظ إصدار جديد.').then((ok) => ok && onClose())
-          }
-        >
-          {cur || isV ? 'حفظ إصدار جديد' : 'حفظ النص'}
         </button>
       </div>
     </Modal>

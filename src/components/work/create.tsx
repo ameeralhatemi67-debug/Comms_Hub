@@ -109,13 +109,15 @@ export function CreatePage() {
   const [busy, setBusy] = useState(false);
   const set = (patch: Partial<Draft>) => setD((x) => ({ ...x, ...patch }));
 
-  // From «الأفكار»: the text written there arrives through the session, not the address.
+  // From «الأفكار»: the text written there arrives through the session, not the address, and the idea is marked once the work exists.
+  const ideaId = useRef<string | null>(null);
   useEffect(() => {
     if (params.get('idea') !== '1') return;
     try {
       const raw = window.sessionStorage.getItem('comms-hub:idea');
       window.sessionStorage.removeItem('comms-hub:idea');
-      const idea = raw ? (JSON.parse(raw) as { title?: string; brief?: string }) : null;
+      const idea = raw ? (JSON.parse(raw) as { title?: string; brief?: string; id?: string }) : null;
+      if (idea?.id) ideaId.current = idea.id;
       if (idea) setD((x) => ({ ...x, title: x.title || String(idea.title ?? '').slice(0, 140), brief: x.brief || String(idea.brief ?? '').slice(0, 4000) }));
     } catch {
       // Storage unavailable: the page opens blank, which is still correct.
@@ -301,6 +303,7 @@ export function CreatePage() {
     });
     setBusy(false);
     if (!r.ok) return setErrors([r.error]);
+    if (ideaId.current) await w.call('idea_to_work', { p_id: ideaId.current, p_work: r.data });
     w.say(isReq ? `أُرسل الطلب ${r.data}. يصل إلى مدير الاتصال ومساعده.` : `أُنشئ العمل ${r.data}${d.assignee && d.assignee !== w.me ? ` وأُبلغ ${w.nameOf(d.assignee)}` : ''}.`);
     await w.reloadBase();
     router.push(`/work/${r.data}`);

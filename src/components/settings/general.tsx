@@ -25,7 +25,7 @@ import { useCaps } from '../caps';
 
 const when = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString('ar-SA-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' }) : '');
 
-export type GeneralInitial = { list: Integration[]; overview: Overview; config: ConfigView | null; settings: { maintenance_on: boolean; maintenance_text: string | null; upload_max_mb: number } };
+export type GeneralInitial = { list: Integration[]; overview: Overview; config: ConfigView | null; keep?: number; settings: { maintenance_on: boolean; maintenance_text: string | null; upload_max_mb: number } };
 
 /** `initial` lets a check draw the tab without the database (qa/settings-pages.cjs). */
 export function GeneralTab({ initial }: { initial?: GeneralInitial }) {
@@ -34,17 +34,22 @@ export function GeneralTab({ initial }: { initial?: GeneralInitial }) {
   const [overview, setOverview] = useState<Overview | null>(initial?.overview ?? null);
   const [config, setConfig] = useState<ConfigView | null>(initial?.config ?? null);
   const [form, setForm] = useState(initial?.settings ?? { maintenance_on: false, maintenance_text: '', upload_max_mb: 5120 });
+  const [keep, setKeep] = useState(initial?.keep ?? 10);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [refused, setRefused] = useState(false);
 
   const load = useCallback(async () => {
     const db = supabase();
-    const [l, o, s] = await Promise.all([db.rpc('int_list'), db.rpc('settings_overview'), db.from('site_settings').select('maintenance_on, maintenance_text, upload_max_mb').eq('id', 1).maybeSingle()]);
+    const [l, o, s] = await Promise.all([db.rpc('int_list'), db.rpc('settings_overview'), db.from('site_settings').select('maintenance_on, maintenance_text, upload_max_mb, writing_keep').eq('id', 1).maybeSingle()]);
     if (l.error) return setRefused(true);
     setList(l.data as Integration[]);
     setOverview(o.data as Overview);
-    if (s.data) setForm({ ...(s.data as GeneralInitial['settings']), maintenance_text: (s.data as GeneralInitial['settings']).maintenance_text ?? '' });
+    if (s.data) {
+      const { writing_keep, ...rest } = s.data as GeneralInitial['settings'] & { writing_keep: number };
+      setForm({ ...rest, maintenance_text: rest.maintenance_text ?? '' });
+      setKeep(writing_keep);
+    }
     const c = await fetch('/api/integrations/config').then((r) => (r.ok ? r.json() : null)).catch(() => null);
     setConfig(c as ConfigView | null);
   }, []);
@@ -221,9 +226,23 @@ export function GeneralTab({ initial }: { initial?: GeneralInitial }) {
           أقصى حجم لملف في المكتبة بالميغابايت <small>حتى 5120 (5 غيغابايت). يُفرض عند بدء الرفع.</small>
           <input id="st-upload" type="number" min={1} max={5120} value={form.upload_max_mb} disabled={!canManage} onChange={(e) => setForm({ ...form, upload_max_mb: Number(e.target.value) })} />
         </label>
+        <label htmlFor="st-keep">
+          إصدارات النص المحفوظة لكل عمل <small>من 3 إلى 50. يبقى معها كل إصدار أُرسل للمراجعة أو اعتُمد، وما زاد يذهب إلى سلة Drive ويبقى سجله ونصه.</small>
+          <input id="st-keep" type="number" min={3} max={50} value={keep} disabled={!canManage} onChange={(e) => setKeep(Number(e.target.value))} />
+        </label>
         {canManage && (
           <div className="actions">
-            <button type="button" className="primary" disabled={busy} onClick={() => void act(rpc('settings_update', { p: form }), 'حُفظت الإعدادات العامة.')}>
+            <button
+              type="button"
+              className="primary"
+              disabled={busy}
+              onClick={() =>
+                void act(async () => {
+                  const r = await rpc('settings_update', { p: form })();
+                  return r.error ? r : rpc('writing_keep_set', { p_n: keep })();
+                }, 'حُفظت الإعدادات العامة.')
+              }
+            >
               حفظ
             </button>
           </div>

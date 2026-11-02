@@ -100,7 +100,12 @@ export function HubPage({ route }: { route: string[] }) {
   if (page === 'mail') return <MailPage key={id === 'chat' ? 'chat' : 'mail'} tab={id === 'chat' ? 'chat' : 'mail'} />;
   if (page === 'motion') return id === 'studio' ? <StudioPage projectId={route[2]} /> : <MotionStudio />;
   if (page === 'accounts') return <AccountsPage />;
-  if (page === 'ideas') return <IdeasPage />;
+  if (page === 'ideas')
+    return (
+      <WorkProvider key={state.role}>
+        <IdeasPage />
+      </WorkProvider>
+    );
   if (page === 'share') return <SharePage />;
   if (['settings', 'account'].includes(page))
     return <Supporting page={page} />;

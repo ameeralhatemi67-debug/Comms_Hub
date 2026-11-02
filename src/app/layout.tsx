@@ -26,6 +26,7 @@ import './chat.css';
 import './kit.css';
 import './work.css';
 import './permissions.css';
+import './writing.css';
 
 export const metadata: Metadata = {
   title: 'مركز الاتصال المؤسسي',

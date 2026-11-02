@@ -10,7 +10,7 @@
 // never the rest of the account's Drive.
 
 import { forgetCreds, integrationCreds, vaultReachable, vaultSecret } from '../integrations/vault.ts';
-import { StorageError, type SinkState, type SinkTarget, type StorageSink } from '../storage/provider.ts';
+import { StorageError, type FileChange, type SinkState, type SinkTarget, type SmallFile, type StorageSink } from '../storage/provider.ts';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const API = 'https://www.googleapis.com/drive/v3';
@@ -18,6 +18,23 @@ const UPLOAD = 'https://www.googleapis.com/upload/drive/v3';
 export const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const FOLDER_MIME = 'application/vnd.google-apps.folder';
 const ROOT_NAME = 'Comms Hub';
+const GOOGLE_DOC_MIME = 'application/vnd.google-apps.document';
+export const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+/** Drive's multipart body: the file's description, then its bytes. */
+function multipart(meta: Record<string, unknown>, mimeType: string, bytes: Uint8Array) {
+  const boundary = `commshub${globalThis.crypto.randomUUID().replace(/-/g, '')}`;
+  const encode = new TextEncoder();
+  const head = encode.encode(
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n`,
+  );
+  const tail = encode.encode(`\r\n--${boundary}--`);
+  const body = new Uint8Array(head.length + bytes.length + tail.length);
+  body.set(head);
+  body.set(bytes, head.length);
+  body.set(tail, head.length + bytes.length);
+  return { body, contentType: `multipart/related; boundary=${boundary}` };
+}
 
 export type DriveEnv = {
   clientId?: string;
@@ -142,6 +159,22 @@ export function createDrive(deps: Partial<Deps> = {}) {
     return (folder = created.id);
   }
 
+  /** A one-shot write: a new file (POST on /files) or new content for one (PATCH on /files/<id>). */
+  async function sendMultipart(path: string, method: 'POST' | 'PATCH', meta: Record<string, unknown>, mimeType: string, bytes: Uint8Array) {
+    const m = multipart(meta, mimeType, bytes);
+    const res = await http(`${UPLOAD}${path}`, {
+      method,
+      headers: { Authorization: `Bearer ${await accessToken()}`, 'Content-Type': m.contentType },
+      body: m.body as unknown as BodyInit,
+    });
+    if (!res.ok) throw new DriveError(res.status, `DRIVE_${res.status}`);
+    const made = (await res.json().catch(() => null)) as { id?: string } | null;
+    if (!made?.id) throw new DriveError(502, 'NO_FILE_ID');
+    return made.id;
+  }
+
+  const marked = new Map<string, string>();
+
   return {
     rootFolder,
 
@@ -194,6 +227,50 @@ export function createDrive(deps: Partial<Deps> = {}) {
       return created.id;
     },
 
+    /** A folder of the site's own, found by a marker it carries (never by its name) or made once inside the Hub's folder. */
+    async markedFolder(marker: string, name: string) {
+      const known = marked.get(marker);
+      if (known) return known;
+      const q = `mimeType='${FOLDER_MIME}' and trashed=false and appProperties has { key='${marker}' and value='1' }`;
+      const found = await api<{ files?: { id: string }[] }>(
+        `/files?q=${encodeURIComponent(q)}&fields=${encodeURIComponent('files(id)')}&pageSize=1&spaces=drive`,
+      );
+      const id =
+        found.files?.[0]?.id ??
+        (
+          await api<{ id: string }>('/files?fields=id', {
+            method: 'POST',
+            json: { name, mimeType: FOLDER_MIME, parents: [await rootFolder()], appProperties: { commsHub: '1', [marker]: '1' } },
+          })
+        ).id;
+      marked.set(marker, id);
+      return id;
+    },
+
+    /** A small file written in one request from the server (a saved version, a draft, a picture). Returns its id. */
+    putSmall(file: SmallFile) {
+      return rootFolder().then((root) =>
+        sendMultipart(
+          `/files?uploadType=multipart&fields=id`,
+          'POST',
+          { name: file.name, mimeType: file.mimeType, parents: [file.parentId ?? root], appProperties: { commsHub: '1', ...file.appProperties } },
+          file.mimeType,
+          file.bytes,
+        ),
+      );
+    },
+
+    /** New content for an existing file, which keeps its id. A new name goes with it when one is given. */
+    async update(id: string, change: FileChange) {
+      await sendMultipart(
+        `/files/${encodeURIComponent(id)}?uploadType=multipart&fields=id`,
+        'PATCH',
+        change.name ? { name: change.name } : {},
+        change.mimeType,
+        change.bytes,
+      );
+    },
+
     /** Renames a file or folder in Drive. */
     async rename(id: string, name: string) {
       await api(`/files/${encodeURIComponent(id)}?fields=id`, { method: 'PATCH', json: { name } });
@@ -218,6 +295,44 @@ export function createDrive(deps: Partial<Deps> = {}) {
       return http(`${API}/files/${encodeURIComponent(id)}?alt=media`, {
         headers: { Authorization: `Bearer ${await accessToken()}`, ...(range ? { Range: range } : {}) },
       });
+    },
+
+    /** A whole small file's bytes. */
+    async read(id: string) {
+      const res = await http(`${API}/files/${encodeURIComponent(id)}?alt=media`, { headers: { Authorization: `Bearer ${await accessToken()}` } });
+      if (!res.ok) throw new DriveError(res.status, `DRIVE_${res.status}`);
+      return new Uint8Array(await res.arrayBuffer());
+    },
+
+    /**
+     * A PDF of a Word file, by Drive's own conversion (W-9): uploaded as a temporary Google Doc, exported, and
+     * deleted whatever happened. Drive refuses an export above 10 MB, with exportSizeLimitExceeded.
+     */
+    async convertToPdf(docx: Uint8Array) {
+      const temp = await sendMultipart(
+        `/files?uploadType=multipart&fields=id`,
+        'POST',
+        { name: 'comms-hub-pdf-temporary', mimeType: GOOGLE_DOC_MIME, parents: [await rootFolder()], appProperties: { commsHub: '1', temporary: '1' } },
+        DOCX_MIME,
+        docx,
+      );
+      try {
+        const res = await http(`${API}/files/${encodeURIComponent(temp)}/export?mimeType=${encodeURIComponent('application/pdf')}`, {
+          headers: { Authorization: `Bearer ${await accessToken()}` },
+        });
+        if (!res.ok) {
+          const said = await res.text().catch(() => '');
+          throw new DriveError(res.status, said.includes('exportSizeLimitExceeded') ? 'PDF_TOO_LARGE' : `DRIVE_${res.status}`);
+        }
+        return new Uint8Array(await res.arrayBuffer());
+      } finally {
+        // The temporary copy holds the text: it is removed outright, not left in the trash. A failure here must not lose the PDF.
+        try {
+          await http(`${API}/files/${encodeURIComponent(temp)}`, { method: 'DELETE', headers: { Authorization: `Bearer ${await accessToken()}` } });
+        } catch {
+          // Nothing to do: the next conversion is not affected.
+        }
+      }
     },
 
     /** Moves the file to the Drive trash (recoverable for 30 days from Drive itself). */

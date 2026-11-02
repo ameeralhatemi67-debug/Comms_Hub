@@ -33,6 +33,7 @@ import { canSwitchRole, menuFor } from '@/lib/access';
 import { supabase } from '@/lib/supabase/client';
 import { Modal, Empty, LogoLoader } from './ui';
 import { HelpButton, ToastUndo, UndoButton, useKit } from './kit';
+import { TextSearch } from './writing/text-search';
 import { NoticeDrawer, useNotices } from './notices';
 import { isPanelWindow } from '@/lib/studio/preview-link';
 import { useCaps } from './caps';
@@ -311,6 +312,7 @@ function FullShell({ children }: { children: ReactNode }) {
         <div className="toast" role="status">
           <span>{state.message || `تم: ${kit.offer?.label}`}</span>
           <ToastUndo />
+          <TextSearch />
           <button
             aria-label="إغلاق الرسالة"
             onClick={() => {

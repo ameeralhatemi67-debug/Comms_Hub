@@ -14,12 +14,14 @@ final class SiteFiles {
 
     private static final String ID = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
-    /** The site's file routes, as a page may name them: a library file (a version, a download), messaging, mail. */
+    /** The site's file routes, as a page may name them: a library file (a version, a download), messaging, mail, a written work. */
     static final String[] ROUTES = {
         "^/api/media/" + ID + "/content(\\?(v=[1-9][0-9]{0,5}(&download=1)?|download=1))?$",
         "^/api/chat/file/" + ID + "$",
         "^/api/mail/file/" + ID + "$",
         "^/api/mail/inbound/" + ID + "/[0-9]{1,2}$",
+        "^/api/writing/CH-[0-9]{1,6}/file\\?kind=(docx|pdf|txt)$",
+        "^/api/writing/CH-[0-9]{1,6}/image/" + ID + "$",
     };
 
     private static final Pattern[] COMPILED = compile();

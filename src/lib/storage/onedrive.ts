@@ -260,6 +260,20 @@ export function onedriveStorage(deps: OneDriveDeps): StorageProvider {
       return made.id;
     },
 
+    // The writing documents reach OneDrive through the move engine, never directly.
+    async markedFolder() {
+      throw new StorageError(501, 'ONEDRIVE_NOT_A_PRIMARY');
+    },
+    async putSmall() {
+      throw new StorageError(501, 'ONEDRIVE_NOT_A_PRIMARY');
+    },
+    async update() {
+      throw new StorageError(501, 'ONEDRIVE_NOT_A_PRIMARY');
+    },
+    async convertToPdf() {
+      throw new StorageError(501, 'ONEDRIVE_NOT_A_PRIMARY');
+    },
+
     async rename(ref, name) {
       await graphJson<Item>(itemUrl(ref), { method: 'PATCH', json: { name: safeName(name) } });
     },
@@ -284,6 +298,12 @@ export function onedriveStorage(deps: OneDriveDeps): StorageProvider {
     // header goes with it, and the bearer token does not (a cross-origin redirect drops it).
     async open(ref, range) {
       return graph(`${itemUrl(ref)}/content`, { headers: range ? { Range: range } : {}, redirect: 'follow' });
+    },
+
+    async read(ref) {
+      const res = await graph(`${itemUrl(ref)}/content`, { redirect: 'follow' });
+      if (!res.ok) throw new StorageError(res.status === 401 ? 503 : res.status, res.status === 401 ? 'TOKEN_REFUSED' : `ONEDRIVE_${res.status}`);
+      return new Uint8Array(await res.arrayBuffer());
     },
 
     async checksum(ref) {

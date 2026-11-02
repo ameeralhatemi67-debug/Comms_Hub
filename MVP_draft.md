@@ -3177,3 +3177,104 @@ Read from the platforms' official pages. These facts move: re-read them before b
 - **LinkedIn.** The site links a person. A company Page needs a separate application with the Community Management API; the steps say so and it is not built.
 - **YouTube.** The client secret is shown once, and uploads have their own daily limit of 100.
 - **Snapchat.** The Public Profile API is allowlist only, so the manual path stays.
+
+---
+
+# 68. «ورقة الكتابة» and the writing documents, 2026-11-02
+
+By owner directive of 2026-11-02, who approved the artifact «كاتب المحتوى في المركز» and the storage idea. The contract and the
+decisions W-1 to W-11 are in `Writing_Build_Plan.md`.
+
+## 68.1 What waits for a writer
+
+- «الكتابة», the first tab of «العمل» for the role `writer`, gathers what used to be in three places: what came back from review,
+  what is late, what is ready, copies older than the text, and the library's requests for a title and description. Every row
+  opens the place it is about: `/work/<id>?write=1`, `/work/<id>?write=<platform>` or `/media/<id>?copy=1`. The list is one
+  function, `writingQueue` in `src/lib/writing/flow.ts`.
+- A stage still waiting for an earlier stage is not listed.
+- Home, for the writer, designer and producer: «بحاجة إلى تعديل» and «بانتظار المراجعة» beside the four tiles, «متأخر» also counts
+  their stages in someone else's work, and «تابع الكتابة» opens what holds a draft, or else the first row.
+- «المستندات», a tab of «العمل» for everyone but `member`, lists every text saved as a version, with its current files. It offers a
+  Word or PDF file only when it is of the latest version. The library has a fixed entry, «مستندات الكتابة», that opens this tab.
+
+## 68.2 The sheet
+
+One sheet for the main text and the platform copies, with the page on the right in Arabic and the panel beside it. A page in a left
+to right language swaps them, and nothing names a side.
+
+- **Who may write.** A leader, the work's «المسؤول», and a person holding a stage of role `writer`, who writes only in `DRAFT`,
+  `IN_PRODUCTION`, `CHANGES_REQUESTED` and `REJECTED`. This is a dated deviation from the reference (`progress.md`). Sending stays
+  with «المسؤول» and the leaders; a stage writer hands over with «تسليم إلى …». A person who may not write reads the same sheet.
+- **The ribbon.** Tabs «ملف», «الرئيسية», «إدراج», «عرض», and «الجدول» and «الصورة» that come forward by themselves and go back when
+  the caret leaves. The row keeps one height on every tab, so the text never jumps.
+- **«الرئيسية».** Undo, styles, 25 fonts, size, bold, italic, underline, strike, text colour, highlight, clear formatting, lists,
+  alignment, indent and line spacing.
+- **«ملف».** Word, PDF and text, and opening a Word file (68.4).
+- **The panel.** «الموجز» with «ملاحظات البحث», «الملاحظات», «الإصدارات» with comparison and «استعادة هذا الإصدار», «العبارات», and «الفحص»
+  with fixed rules and no AI.
+- **Drafts.** A draft is private. The browser keeps it a moment after typing stops, and the main text goes to a private Drive file
+  about once a minute and on closing. A version saved after a draft replaces it. Copies stay in the browser until saved.
+- **After sending** the text locks. The sender or a leader may take the work back with «سحب الإرسال» until the first decision of the
+  round. After approval, a new version reopens the part for review, and the sheet says so first.
+- **A copy** is plain text, because platforms take no formatting. It can start from the main text, and its limits are shown as it is
+  written.
+- **A note** sits on its sentence as a mark that is never stored. «اذهب إليها» shows it, and «عولجت» closes it.
+
+## 68.3 Tables
+
+- «جدول» gives a grid to drag, or numbers for rows and columns, up to 40 by 20.
+- A strip above the columns and beside the rows selects one column or one row. Dragging along a strip selects several, the corner
+  selects the whole table, and dragging across cells selects a range, as in Word.
+- **Fill, line colour and each one's transparency apply to the selected cells only**, never to the table, unless the whole table is
+  selected. The ribbon says what is selected («عمود واحد», «4 خلايا»).
+- Seven designs apply to the whole table: grid, dark, band, rule, gold, side, soft. A cell's own colours stay over a design.
+- Rows and columns are added and deleted from the ribbon, and cells merged and split. Every change is one undo step.
+
+## 68.4 Word and PDF
+
+- Each saved version writes to «الحالي» its Word file, then its PDF, and its text file. Word is made in the browser, right to left,
+  with the header `<id> · <title> · الإصدار n`, and «· مسودة» until that version is approved.
+- PDF is Google Drive's conversion of that Word file, limited to 10 MB.
+- **Opening a Word file** puts its content in the sheet, and the page says what is lost: fonts, sizes, colours and table borders.
+  Editing a Word file inside the site is not built (W-10).
+- A request through the site's server carries about 4 MB. A larger picture is redrawn smaller in the browser before it leaves. A Word
+  file too large to upload still downloads directly from the browser, and is not kept in «الحالي». The Android application accepts
+  only files from the site, so there the page says what to do.
+
+## 68.5 Keys and shortcuts
+
+Keys are read by their place on the keyboard, so they work with the keyboard set to Arabic. The table is `SHORTCUTS` in
+`src/lib/writing/shortcuts.ts`; Ctrl+/ lists them.
+
+- **Writing:** Ctrl+B, I, U, S, Z, Y, E, R, L, J, H, F, K, Ctrl+Shift+L for a list, Ctrl+Alt+1 to 3 for headings.
+- **The application:** Ctrl+Enter send or hand over, Ctrl+Alt+T «طلب تمديد», Ctrl+Alt+O «طلب رأي», Ctrl+Alt+M mail, Ctrl+Alt+G a message,
+  Ctrl+Alt+D «تمّت», Ctrl+Alt+B, N and V for the panel, Ctrl+Alt+C comparison, Alt+1 to 9 for the text and its copies.
+- Escape closes one thing at a time: a card, a panel, the search, then the sheet, which keeps the draft first.
+- Ctrl+/ on any other page searches inside the texts and copies of works the person may see.
+- The sheet's cards: «طلب رأي» is a comment plus a notice at «يحتاج انتباهك»; mail and messages carry a link to the work; accounts can be
+  chosen before sending.
+
+## 68.6 Review
+
+- Every round compares: with the approved wording, else the version that came back, else the version sent the round before. The
+  text can also be read as written, with its tables and pictures.
+- A decider adds a note on a part, or selects a sentence and adds it there. It reaches the writer on that sentence.
+- «طلب تعديل» starts with a line saying the notes are on the text, so nothing has to be written twice.
+- A writer holding a stage is told what «المسؤول» is told when a work comes back, is rejected, or is published.
+
+## 68.7 «الأفكار»
+
+An idea is saved with an optional tag and stays until it is deleted or becomes a work. A person sees their own and the leaders see
+all. «تحويل إلى عمل» opens «إنشاء» with its words, and the work created marks the idea.
+
+## 68.8 Where a document lives
+
+- `Comms Hub/مستندات الكتابة/<CH-10 العنوان>/` in the library's Drive, with «الحالي», «الإصدارات», «مسودات» and «صور». The site tracks ids,
+  never names.
+- The master of each version is a checked JSON file. The database keeps the version's number, author, note, reference, checksum and
+  a plain-text copy, so approval, comparison, search and the review screen never need Drive.
+- Whoever may see the work may read its documents, the same rule as the work.
+- The last N versions are kept, 10 by default and 3 to 50 in «الإعدادات» «عام», plus every version sent or approved. Pruning happens
+  at a save: the file goes to Drive's trash, and the record and its plain text stay.
+- Moves of the whole library, serving and backups carry documents through `file_locations` (`subject_kind = 'work_doc'`). A version
+  sent or approved moves only by its checksum. Backups leave out drafts and ideas.

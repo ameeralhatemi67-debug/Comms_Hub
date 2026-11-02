@@ -6,7 +6,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { BriefcaseBusiness, CalendarDays, Columns3, Flag, List, Plus, Search } from 'lucide-react';
+import { BriefcaseBusiness, CalendarDays, Columns3, Download, FileText, Flag, List, PenLine, Plus, Search } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import {
   ACTIVE,
@@ -38,7 +38,9 @@ import {
   type WorkTab,
   type WorkType,
 } from '@/lib/work/rules';
-import { useWork, useWorkList, type ListItem } from './data';
+import { WRITE_GROUPS, writingQueue, type WriteRow } from '@/lib/writing/flow';
+import { fileUrl } from '../writing/api';
+import { useWork, useWorkDocs, useWorkList, useWritingMarks, type DocRow, type ListItem } from './data';
 import { Av, Empty, Hint, Ic, PrioChip, RestrictedChip, StatusChip, Wid } from './parts';
 
 type Quick = '' | 'late' | 'soon' | 'stages' | 'review' | 'urgent';
@@ -60,6 +62,16 @@ export function WorkListPage() {
   const [personF, setPersonF] = useState('all');
   const today = w.today;
   const projectName = (id: string) => w.projects.find((p) => p.id === id)?.name ?? '';
+  // «الفريق», «الكتابة» and «المستندات» are lists of their own, without the filters of a list of works.
+  const own = tab === 'team' || tab === 'write' || tab === 'docs';
+  const hasWrite = tabs.some((t) => t[0] === 'write');
+  const hasDocs = tabs.some((t) => t[0] === 'docs');
+  const marks = useWritingMarks(hasWrite || hasDocs);
+  const docRows = useWorkDocs(hasDocs).filter((d) => items.some((x) => x.w.id === d.work_id));
+  const writeRows = useMemo(
+    () => (hasWrite ? writingQueue({ items, tasks: marks.tasks, latest: marks.latest, copies: marks.copies, me: w.me, today, nameOf: w.nameOf }) : []),
+    [hasWrite, items, marks, w.me, today, w.nameOf],
+  );
 
   const n = useMemo(() => attentionCounts(items.map((x) => ({ w: x.w, stages: x.stages })), today), [items, today]);
   const filtered = (t: WorkTab) =>
@@ -101,7 +113,7 @@ export function WorkListPage() {
     ['urgent', 'عاجل', n.urgent, true],
   ];
   const open = (id: string) => router.push(`/work/${id}`);
-  const list = tab === 'team' ? [] : filtered(tab);
+  const list = own ? [] : filtered(tab);
 
   return (
     <div className="wk">
@@ -134,7 +146,7 @@ export function WorkListPage() {
             aria-pressed={quick === id}
             onClick={() => {
               setQuick(quick === id ? '' : id);
-              if (tab === 'team') setTab('all');
+              if (own) setTab('all');
             }}
           >
             <b>{count}</b>
@@ -153,11 +165,11 @@ export function WorkListPage() {
           {tabs.map(([id, label]) => (
             <button type="button" key={id} aria-pressed={tab === id} onClick={() => setTab(id)}>
               {label}
-              {id !== 'team' && <span className="n">{filtered(id).length}</span>}
+              {id !== 'team' && <span className="n">{id === 'write' ? writeRows.length : id === 'docs' ? docRows.length : filtered(id).length}</span>}
             </button>
           ))}
         </div>
-        {tab !== 'team' && (
+        {!own && (
           <div className="wk-seg" role="group" aria-label="طريقة العرض" data-gd="views">
             <button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>
               <Ic i={List} />
@@ -171,7 +183,7 @@ export function WorkListPage() {
         )}
       </div>
 
-      {tab !== 'team' && (
+      {!own && (
         <>
           <div className="wk-tools">
             <label className="wk-field">
@@ -235,6 +247,10 @@ export function WorkListPage() {
         </Empty>
       ) : tab === 'team' ? (
         <Team items={items} onTab={setTab} open={open} />
+      ) : tab === 'write' ? (
+        <WriteList rows={writeRows} />
+      ) : tab === 'docs' ? (
+        <DocsList docs={docRows} items={items} latest={marks.latest} />
       ) : !list.length ? (
         <EmptyTab tab={tab} total={items.length} />
       ) : view === 'board' ? (
@@ -243,6 +259,93 @@ export function WorkListPage() {
         <WorkTable list={list} open={open} projectName={projectName} />
       )}
     </div>
+  );
+}
+
+/** «الكتابة»: everything that waits for a writer, in one list. */
+function WriteList({ rows }: { rows: WriteRow[] }) {
+  if (!rows.length)
+    return (
+      <Empty i={PenLine} title="لا شيء ينتظر كتابتك الآن">
+        ما يُسند إليك، وما يعود من المراجعة، وما يُطلب من المكتبة يظهر هنا.
+      </Empty>
+    );
+  return (
+    <div className="wk-wlist" data-gd="writing">
+      {WRITE_GROUPS.map(([g, label]) => {
+        const group = rows.filter((r) => r.group === g);
+        if (!group.length) return null;
+        return (
+          <section className="wk-pn" key={g}>
+            <h3>
+              {label} <small>{group.length}</small>
+            </h3>
+            <div className="wk-qlist">
+              {group.map((r) => (
+                <Link key={r.key} className="wk-hrow" href={r.href}>
+                  <span className="t">
+                    <b>{r.title}</b>
+                    <small>
+                      {r.work && <Wid id={r.work} />}
+                      <span className={r.tone === 'late' ? 'late' : ''}>{r.line}</span>
+                    </small>
+                  </span>
+                  <span className={`wk-chip ${r.tone === 'late' ? 'danger' : r.tone === 'warn' ? 'warn' : 'plain'}`}>{r.chip}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+/** «المستندات»: the written documents of the works this person may see, with their current files. */
+function DocsList({ docs, items, latest }: { docs: DocRow[]; items: ListItem[]; latest: Record<string, number> }) {
+  if (!docs.length)
+    return (
+      <Empty i={FileText} title="لا مستندات بعد">
+        يظهر هنا كل نص حُفظ إصداراً في ورقة الكتابة، مع ملفاته الحالية بصيغة Word وPDF والنص.
+      </Empty>
+    );
+  const file = (id: string, kind: 'docx' | 'pdf' | 'txt', label: string) => (
+    <a className="wk-btn sm" href={fileUrl(id, kind)} download>
+      <Ic i={Download} />
+      {label}
+    </a>
+  );
+  return (
+    <section className="wk-pn" data-gd="documents">
+      <h3>
+        مستندات الكتابة <small>{docs.length}</small>
+      </h3>
+      <p className="wk-col-hint">مجلد لكل عمل في Google Drive بجانب المكتبة: «الحالي» وفيه أحدث الملفات، و«الإصدارات». يراها من يرى العمل.</p>
+      <div className="wk-chanlist">
+        {docs.map((d) => {
+          const x = items.find((i) => i.w.id === d.work_id);
+          if (!x) return null;
+          return (
+            <div className="wk-chanrow" key={d.work_id}>
+              <span>
+                <b>
+                  <Link href={`/work/${d.work_id}`}>{x.w.title}</Link>
+                </b>
+                <small>
+                  {d.work_id}
+                  {latest[d.work_id] ? ` · الإصدار ${latest[d.work_id]}` : ''} · {sdate(riyadhStamp(d.updated_at))}
+                </small>
+              </span>
+              <span className="wk-row-acts">
+                {d.word_n === latest[d.work_id] && file(d.work_id, 'docx', 'Word')}
+                {d.pdf_n === latest[d.work_id] && file(d.work_id, 'pdf', 'PDF')}
+                {latest[d.work_id] > 0 && file(d.work_id, 'txt', 'النص')}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
