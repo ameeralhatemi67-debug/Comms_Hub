@@ -103,7 +103,7 @@ reset role;
 select pg_temp.c('47 and is not told of their own action', (select count(*)::text from public.notifications where recipient = 'dir@t.test'), '0');
 
 -- 5. Merging ---------------------------------------------------------------------------------------------------
-delete from public.notifications;
+delete from public.notifications where recipient like '%@t.test';
 set local role authenticated;
 select pg_temp.who('00000000-0000-0000-0000-0000000000e1');
 select pg_temp.t('48 a second note from the designer', $q$ insert into v select 'm1', public.feedback_submit('problem', '/work', 'نفس المشكلة') $q$, 'ok');
@@ -124,8 +124,8 @@ select pg_temp.t('56 nor does a note merge into an error', $q$ select public.fee
 select pg_temp.t('57 marking the first note done', $q$ select public.feedback_mark(pg_temp.g('n1')::uuid, 'done') $q$, 'ok');
 reset role;
 select pg_temp.c('58 the merged note follows it', (select state from public.feedback_reports where id = pg_temp.g('m1')::uuid), 'done');
-select pg_temp.c('59 and both authors are told', (select count(distinct recipient)::text from public.notifications), '2');
-delete from public.notifications;
+select pg_temp.c('59 and both authors are told', (select count(distinct recipient)::text from public.notifications where recipient like '%@t.test'), '2');
+delete from public.notifications where recipient like '%@t.test';
 set local role authenticated;
 select pg_temp.who('00000000-0000-0000-0000-0000000000d1');
 select pg_temp.t('60 a late note merges into one already done', $q$ select public.feedback_merge(pg_temp.g('n3')::uuid, pg_temp.g('n1')::uuid) $q$, 'ok');
