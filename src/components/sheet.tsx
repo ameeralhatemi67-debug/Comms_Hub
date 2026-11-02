@@ -5,6 +5,7 @@
 // left in English, and nothing here names a side.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Check, ExternalLink } from 'lucide-react';
+import { Rich } from './guide-text';
 
 export function Sheet({ label, onClose, children }: { label: string; onClose: () => void; children: ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -81,20 +82,28 @@ export function SheetSteps({ steps, at, onPick, children }: { steps: SheetStep[]
               {onPick ? (
                 <button type="button" className="pf-step-btn" aria-current={cur ? 'step' : undefined} onClick={() => onPick(s.id)}>
                   {mark}
-                  <span>{s.t}</span>
+                  <span>
+                    <Rich text={s.t} />
+                  </span>
                 </button>
               ) : (
                 <div className="pf-step-btn" aria-current={cur ? 'step' : undefined}>
                   {mark}
-                  <span>{s.t}</span>
+                  <span>
+                    <Rich text={s.t} />
+                  </span>
                 </div>
               )}
               {cur && (s.b || s.link) && (
                 <div className="pf-step-text">
-                  {s.b && <p>{s.b}</p>}
+                  {s.b && (
+                    <p>
+                      <Rich text={s.b} />
+                    </p>
+                  )}
                   {s.link && (
                     <a className="pf-link" href={s.link.href} target="_blank" rel="noopener noreferrer">
-                      {s.link.label}
+                      <Rich text={s.link.label} />
                       <ExternalLink aria-hidden="true" />
                     </a>
                   )}
@@ -124,7 +133,7 @@ export function CopyField({ label, value }: { label: string; value: string }) {
   const ref = useRef<HTMLInputElement>(null);
   return (
     <label className="pf-f">
-      {label}
+      <Rich text={label} />
       <span className="pf-copy">
         <input ref={ref} className="ltr" readOnly value={value} onFocus={(e) => e.target.select()} />
         <button type="button" className="pf-btn" onClick={() => void copy(ref.current)}>

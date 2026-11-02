@@ -15,6 +15,7 @@ import { PROVIDER_COPY, providerOf, type ConnProvider } from '@/lib/platforms/pr
 import { CHIP_CLASS, chipOf, countAccounts, doneSteps, firstOpen, setupGuideOf, stepId, type PlatformState, type SetupRow } from '@/lib/platforms/setup';
 import type { PlatformInfo } from '@/lib/work/rules';
 import { PlatformTile } from '../platform-icon';
+import { GuideShots, GuideTodo, Rich } from '../guide-text';
 import { CopyField, Sheet, SheetHead, SheetProgress, SheetSteps } from '../sheet';
 
 export type SheetTo = 'first' | 'keys' | 'review' | 'finish';
@@ -117,7 +118,7 @@ export function PlatformSheet({
       <SheetHead
         tile={<PlatformTile k={p.key} />}
         title={at === null ? p.label_ar : `إعداد ${p.label_ar}`}
-        sub={(guideKey && SUB[guideKey]) || (guideKey ? SUB_DEFAULT : SUB.manual)}
+        sub={<Rich text={(guideKey && SUB[guideKey]) || (guideKey ? SUB_DEFAULT : SUB.manual)} />}
         chip={<span className={`pf-chip ${CHIP_CLASS[state]}`}>{chipOf(state, done.size, steps.length)}</span>}
         onClose={close}
       />
@@ -146,7 +147,9 @@ export function PlatformSheet({
               <summary>ملاحظات مهمة</summary>
               <ul>
                 {guide.notes.map((n) => (
-                  <li key={n}>{n}</li>
+                  <li key={n}>
+                    <Rich text={n} />
+                  </li>
                 ))}
               </ul>
             </details>
@@ -196,14 +199,23 @@ export function PlatformSheet({
 
 function StepPanel({ step, canGoBack, canManage, lock, onDone, onBack, manual }: { step: GuideStep; canGoBack: boolean; canManage: boolean; lock: Lock; onDone: () => void; onBack: () => void; manual: boolean }) {
   const hasCopy = Boolean(step.copy);
+  const todo = step.todo ?? [];
   return (
     <>
       <span className="pf-eyebrow">{hasCopy ? 'انسخ هذا إلى صفحة المنصة' : 'في هذه الخطوة'}</span>
-      <h3>{step.t}</h3>
-      {!hasCopy && !manual && <p>لا يحتاج الموقع منك شيئاً هنا. أنجزها في الصفحة التي فتحتها، ثم عُد وأكّد.</p>}
-      {manual && <p>{step.b}</p>}
+      <h3>
+        <Rich text={step.t} />
+      </h3>
+      {todo.length > 0 && <GuideTodo items={todo} />}
+      {!hasCopy && !manual && todo.length === 0 && <p>لا يحتاج الموقع منك شيئاً هنا. أنجزها في الصفحة التي فتحتها، ثم عُد وأكّد.</p>}
+      {manual && (
+        <p>
+          <Rich text={step.b ?? ''} />
+        </p>
+      )}
       {step.copy && <CopyField label={step.copyLabel ?? 'العنوان'} value={step.copy} />}
       {step.more?.map((m) => <CopyField key={m.label} label={m.label} value={m.copy} />)}
+      {step.shots && step.shots.length > 0 && <GuideShots shots={step.shots} />}
       {!manual && (
         <div className="pf-acts">
           <button type="button" className="pf-btn pri" {...(canManage ? { onClick: onDone } : lock(LOCKED))}>
@@ -224,7 +236,9 @@ function ReviewPanel({ step, submitted, canManage, lock, onSkip, onState }: { st
   return (
     <>
       <span className="pf-eyebrow">خارج الموقع: قرار المنصة</span>
-      <h3>{step.t}</h3>
+      <h3>
+        <Rich text={step.t} />
+      </h3>
       <p>لا تخبر المنصة الموقع بما قررت، فقل له أنت أين وصل الطلب.</p>
       {step.copy && <CopyField label={step.copyLabel ?? 'الرابط'} value={step.copy} />}
       {step.more?.map((m) => <CopyField key={m.label} label={m.label} value={m.copy} />)}
@@ -284,19 +298,22 @@ function KeysPanel({ provider, step, app, fields, problem, canSecrets, lock, onS
   return (
     <>
       <span className="pf-eyebrow">ما يحتاجه الموقع منك</span>
-      <h3>{step.t}</h3>
+      <h3>
+        <Rich text={step.t} />
+      </h3>
+      {step.todo && step.todo.length > 0 && <GuideTodo items={step.todo} />}
       {problem && !tail && <p className="pf-note bad">{expiry.state === 'expired' ? expiryLineAr(expiry) : 'رفضت المنصة المعرّف أو السر المحفوظ. أدخلهما من جديد.'}</p>}
       {have && !problem && (
         <p className="pf-note ok">
-          السر محفوظ في الخزنة ({app?.secret_tail ?? ''}). أدخله من جديد لتستبدله فقط.
+          السر محفوظ في الخزنة (<bdi dir="ltr">{app?.secret_tail ?? ''}</bdi>). أدخله من جديد لتستبدله فقط.
         </p>
       )}
       <label className="pf-f">
-        {c.idLabel}
+        <Rich text={c.idLabel} />
         <input className="ltr" value={id} autoComplete="off" disabled={!canSecrets || busy} onChange={(e) => setId(e.target.value)} />
       </label>
       <label className="pf-f">
-        {c.secretLabel}
+        <Rich text={c.secretLabel} />
         <input className="ltr" type="password" value={secret} autoComplete="new-password" disabled={!canSecrets || busy} onChange={(e) => setSecret(e.target.value)} />
       </label>
       {needsConfig && (
@@ -350,7 +367,9 @@ function FinishPanel({ p, app, provider, accounts, hasGuide, onReplace, children
         {app?.has_secret && (
           <div>
             <dt>السر</dt>
-            <dd>في الخزنة ({app.secret_tail ?? ''})</dd>
+            <dd>
+              في الخزنة (<bdi dir="ltr">{app.secret_tail ?? ''}</bdi>)
+            </dd>
           </div>
         )}
         <div>

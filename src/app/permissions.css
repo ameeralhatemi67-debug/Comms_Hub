@@ -358,8 +358,8 @@ span.pm-locked svg{width:13px;height:13px;margin-top:4px}
 .su-hint:hover,.su-hint:focus-visible{background:var(--chip-bg);border-color:var(--green)}
 .su-body{display:grid;gap:12px;max-width:560px}
 .su-steps{margin:0;padding:0;list-style:none;counter-reset:su;display:grid;gap:12px}
-.su-steps li{counter-increment:su;display:grid;gap:2px;position:relative;padding-inline-start:36px}
-.su-steps li::before{content:counter(su);position:absolute;inset-inline-start:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--green);color:var(--on-brand);display:grid;place-items:center;font-weight:600;font-size:13px}
+.su-steps>li{counter-increment:su;display:grid;gap:2px;position:relative;padding-inline-start:36px}
+.su-steps>li::before{content:counter(su);position:absolute;inset-inline-start:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--green);color:var(--on-brand);display:grid;place-items:center;font-weight:600;font-size:13px}
 .su-steps li span{color:var(--muted);font-size:13px}
 .su-copy{display:block;padding:6px 10px;border-radius:6px;background:var(--chip-bg);font-size:12.5px;word-break:break-all;user-select:all}
 .su-notes{margin:0;padding-inline-start:18px;display:grid;gap:4px;font-size:13px;color:var(--muted)}

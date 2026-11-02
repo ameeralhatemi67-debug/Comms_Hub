@@ -951,6 +951,23 @@ p.pf-note.info{background:var(--surface-2);border:1px solid var(--line);color:va
 .pf-more{margin-top:14px;border-top:1px solid var(--line);padding-top:4px}
 .pf-more>summary{min-height:42px;display:flex;align-items:center;font-weight:600;color:var(--green-text);cursor:pointer;width:fit-content}
 .pf-sheet .ytn{display:flex;gap:8px;margin:0 0 12px;padding:8px 10px;border-radius:8px;background:var(--surface-2);font-size:12.5px;color:var(--muted)}
+/* The words and pictures of a setup guide (src/components/guide-text.tsx; MVP_draft.md section 67.5). Tokens only. */
+.gd-ui,.gd-val{display:inline-block;max-width:100%;padding:1px 7px;border-radius:6px;font-weight:600;color:var(--ink);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.gd-ui{background:var(--chip-bg);border:1px solid var(--line)}
+.gd-val{background:var(--surface);border:1px dashed var(--green);font-family:ui-monospace,Consolas,monospace;font-size:.92em}
+.gd-todo{margin:6px 0 16px;padding:0;list-style:none;counter-reset:gd;display:grid;gap:10px}
+.gd-todo li{counter-increment:gd;position:relative;padding-inline-start:36px;font-size:14px;line-height:1.95;color:var(--ink);overflow-wrap:anywhere}
+.gd-todo li::before{content:counter(gd);position:absolute;inset-inline-start:0;top:4px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12.5px;font-weight:600;line-height:1;background:var(--soft);border:1px solid var(--green);color:var(--green-text)}
+.gd-shots{display:grid;gap:16px;margin:4px 0 18px}
+.gd-shot{margin:0;width:100%}
+.gd-zoom{display:block;width:100%;min-height:0;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-2);box-shadow:0 1px 2px #1233;direction:ltr;text-align:start}
+button.gd-zoom{cursor:zoom-in}
+button.gd-zoom:hover{background:var(--surface-2);border-color:var(--green)}
+.gd-zoom img{display:block;width:100%;height:auto}
+.gd-shot.big .gd-zoom{overflow-x:auto;cursor:zoom-out}
+.gd-shot.big .gd-zoom img{width:auto;min-width:100%;max-width:none}
+.gd-shot figcaption{margin-top:6px;font-size:12.5px;line-height:1.8;color:var(--muted)}
+.gd-hint{display:block;font-weight:600;color:var(--green-text)}
 .ac-attn{padding:6px 16px 4px;border:1px solid var(--st-warn-fg);border-radius:12px;background:var(--surface)}
 .ac-attn h2{margin:6px 0 2px;font-size:13px;font-weight:600;color:var(--st-warn-fg)}
 .ac-attn-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 0;border-top:1px solid var(--line)}

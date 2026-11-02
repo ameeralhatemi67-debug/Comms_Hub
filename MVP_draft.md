@@ -3178,6 +3178,28 @@ Read from the platforms' official pages. These facts move: re-read them before b
 - **YouTube.** The client secret is shown once, and uploads have their own daily limit of 100.
 - **Snapchat.** The Public Profile API is allowlist only, so the manual path stays.
 
+## 67.5 The words and pictures of a guide, 2026-11-02
+
+The director found the YouTube steps still hard to follow, above all the step of the consent screen, where Branding, Audience, External,
+Internal, Workspace and Test users shared one sentence beside Arabic punctuation. The whole Google guide was rewritten for a first-time reader.
+
+- **One action to a step.** The Google guide (`src/lib/setup-guides.ts`, `google`) has 13 steps. The consent screen is five: «افتح شاشة الموافقة»،
+  «اكتب اسم التطبيق وبريد الدعم»، «اختر نوع المستخدمين»، «اكتب بريد التواصل وأنهِ الإعداد»، «أضف بريد من سيربط القناة». The order follows
+  Google's own «Get started» wizard (App Information, Audience, Contact Information, Finish), read from Google's page on 2026-11-02.
+- **What a step holds.** A short sentence `b` under its name in the list; on the input side, a numbered list `todo` (one action to a line),
+  the address to copy where there is one, and the pictures `shots`. The link to the platform's page stays under the step's name.
+- **English inside Arabic** (`src/lib/guide-text.ts`, `src/components/guide-text.tsx`). A label on Google's screen is written in «» and drawn as
+  a chip, without the guillemets. A value to type is written in backticks and drawn as a dashed chip. Every other run of English is isolated, so
+  it keeps its own direction and the Arabic around it keeps its order. A chip is never split across two lines. The rule applies to every guide, in
+  the sheet and in the circled "!".
+- **Pictures.** Cropped to the part that matters, private text blurred (pixelated and then blurred, so it cannot be read or sharpened back),
+  numbered amber rings that match the numbers of the actions, and a red ring with a cross for what not to do (the logo). The page rounds the
+  corners (12px) and clips to them. A picture wider than its place enlarges on a click and scrolls inside its frame, never the page. They are
+  files of the site in `public/guides/google/`, made by `scripts/guide-shots.mjs`; the originals are not kept.
+- **The pictures are of another Google project.** The names in them are examples, and the guide says so.
+- **Saved progress is unchanged.** The ids a person confirmed (`youtube`, `redirect`, `publish`) are kept, and every step added is `implied`, so a
+  connected platform still reads «متصلة» with nothing asked again.
+
 ---
 
 # 68. «ورقة الكتابة» and the writing documents, 2026-11-02
