@@ -223,6 +223,12 @@ written only through `platform_setup_save`, and holds the two public identifiers
 platforms the registry has switched on (`splitOffer`). A publisher may reconnect an account, and may not add, remove or
 disconnect one. `qa/platforms-flow.cjs` clicks through both pages on a fixture, and `qa/platform-setup-live.cjs` looks at the
 live site after a deployment.
+Since 2026-11-02 (`MVP_draft.md` section 67.5) a guide is written one action to a step: a short `b`, a `todo` list, and `shots`,
+pictures of the platform's own page made by `scripts/guide-shots.mjs` from originals that are never kept, because they hold real
+addresses. English inside Arabic follows `src/lib/guide-text.ts`: a label on the platform's screen in «», a value to type in
+backticks, and every other run of English is isolated by the page. A step added to a guide whose platform may already be connected
+is `implied`, so the stored secret proves it and a connected platform never falls back to «خطوات ناقصة»; the ids of the steps a
+person confirmed are never renamed.
 
 Platform accounts of Facebook, Instagram and TikTok can be connected for real, by owner
 directive of 2026-10-15 (`Platform_Connections_Setup.md`, recorded in `progress.md`): the

@@ -8,6 +8,7 @@
 //   5. «حسابات المنصات»: what needs attention, the filter, an account's sheet, the publisher.
 //   6. «إضافة حساب»: no password anywhere, the sign-in and its return, one at a time where a platform works so.
 //   7. Phone and evening: nothing sideways, the current step alone above its input.
+//   8. The YouTube guide: thirteen steps, English set apart and read in order, the pictures load and enlarge, progress unchanged.
 // What this cannot check: the rules (supabase/tests/platform_setup_rules.sql) and a real platform's own pages.
 // Usage: node qa/platforms-flow.cjs   (writes qa/platforms-flow.json, screenshots in qa/artifacts/platforms-flow/)
 const fs = require('node:fs');
@@ -77,6 +78,16 @@ const sides = (t) =>
     const bundle = fs.readFileSync(path.join(out, 'flow.js'), 'utf8');
     fixture = http.createServer((req, res) => {
       const url = new URL(req.url, 'http://x');
+      // The guides' pictures are files of the site (public/guides), served as the site serves them.
+      if (url.pathname.startsWith('/guides/')) {
+        const file = path.join(h.root, 'public', path.normalize(url.pathname));
+        if (!file.startsWith(path.join(h.root, 'public', 'guides')) || !fs.existsSync(file)) {
+          res.writeHead(404);
+          return res.end();
+        }
+        res.writeHead(200, { 'Content-Type': 'image/png' });
+        return res.end(fs.readFileSync(file));
+      }
       if (url.pathname === '/flow.js') {
         res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' });
         return res.end(bundle);
@@ -109,7 +120,7 @@ const sides = (t) =>
     const states = await t.locator('.pf-row').evaluateAll((l) => Object.fromEntries(l.map((e) => [e.dataset.platform, e.dataset.state])));
     check('every platform has one state, worked out from what is stored', JSON.stringify(states) === JSON.stringify({ x: 'issue', youtube: 'steps', tiktok: 'steps', linkedin: 'none', instagram: 'ok', snapchat: 'manual', mail: 'mail' }), JSON.stringify(states));
     check('the words of the chips', (await chip(t, 'x')) === 'يوجد خلل' && (await chip(t, 'linkedin')) === 'غير متصلة' && (await chip(t, 'instagram')) === 'متصلة' && (await chip(t, 'snapchat')) === 'نشر يدوي' && (await chip(t, 'tiktok')) === 'خطوات ناقصة · 6 من 9', await chip(t, 'tiktok'));
-    check('a stored secret proves the steps it proves: YouTube shows what is left of the shared Google app', (await chip(t, 'youtube')) === 'خطوات ناقصة · 7 من 9' && (await row(t, 'youtube').innerText()).includes('التالي: سجّل عنوان العودة ليوتيوب'), await chip(t, 'youtube'));
+    check('a stored secret proves the steps it proves: YouTube shows what is left of the shared Google app', (await chip(t, 'youtube')) === 'خطوات ناقصة · 11 من 13' && (await row(t, 'youtube').innerText()).includes('التالي: سجّل عنوان العودة ليوتيوب'), await chip(t, 'youtube'));
     const groups = await t.locator('.pf-group h3').allInnerTexts();
     check('what needs the reader comes first', groups[0].includes('تحتاج منك خطوة') && groups[0].includes('4') && groups[1].includes('لا شيء مطلوب منك الآن'), groups);
     check('each row has the one button its state asks for', (await row(t, 'x').locator('.pf-btn').innerText()) === 'إصلاح' && (await row(t, 'tiktok').locator('.pf-btn').innerText()) === 'متابعة الإعداد' && (await row(t, 'linkedin').locator('.pf-btn').innerText()) === 'بدء الإعداد');
@@ -405,6 +416,158 @@ const sides = (t) =>
     const ink = await d.evaluate(() => [getComputedStyle(document.querySelector('dialog[open]')).backgroundColor, getComputedStyle(document.querySelector('dialog[open] h2')).color]);
     check('evening: the sheet follows the theme', ink[0] !== 'rgb(255, 255, 255)' && ink[0] !== ink[1], ink.join(' / '));
     await d.context().close();
+    // ---------- 8. the YouTube guide: words, pictures and progress (MVP_draft.md section 67.5) ----------
+    const y = await fresh();
+    await y.goto(base);
+    await y.waitForSelector('.pf-row');
+    await row(y, 'youtube').locator('.pf-btn').first().click();
+    await sheet(y).waitFor();
+    await y.waitForTimeout(300);
+    text = await sheet(y).innerText();
+    check('YouTube opens where the stored secret leaves it: the address to register, step 10 of 13', text.includes('الخطوة 10 من 13') && (await sheet(y).locator('.pf-step.cur').getAttribute('data-step')) === 'redirect', text.slice(0, 80));
+    const yIds = await sheet(y).locator('.pf-step').evaluateAll((l) => l.map((e) => e.dataset.step));
+    check('thirteen steps, one action each, under the ids the saved progress knows', JSON.stringify(yIds) === JSON.stringify(['project', 'youtube', 'drive', 'consent', 'branding', 'audience', 'contact', 'testusers', 'client', 'redirect', 'redirect_drive', 'keys', 'publish']), yIds.join(','));
+    const stray = () =>
+      y.evaluate(() => {
+        const bad = [];
+        for (const root of document.querySelectorAll('dialog[open] .pf-side, dialog[open] .pf-input')) {
+          const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+          for (let n = w.nextNode(); n; n = w.nextNode()) if (!n.parentElement.closest('bdi') && /[A-Za-z]/.test(n.textContent)) bad.push(n.textContent.trim().slice(0, 50));
+        }
+        return bad;
+      });
+    const reversed = () =>
+      y.evaluate(() => {
+        const bad = [];
+        for (const el of document.querySelectorAll('dialog[open] .gd-todo li, dialog[open] .pf-step-text p, dialog[open] figcaption')) {
+          const b = [...el.querySelectorAll('bdi')];
+          for (let i = 0; i + 1 < b.length; i++) {
+            const r1 = b[i].getBoundingClientRect();
+            const r2 = b[i + 1].getBoundingClientRect();
+            if (Math.abs(r1.top - r2.top) < 4 && !(r1.left > r2.left)) bad.push(el.textContent.trim().slice(0, 50));
+          }
+        }
+        return bad;
+      });
+    const walked = [];
+    for (let i = 0; i < yIds.length; i++) {
+      await sheet(y).locator('.pf-step-btn').nth(i).click();
+      await y.waitForTimeout(60);
+      await y.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
+      const info = await y.evaluate(() => {
+        const inp = document.querySelector('dialog[open] .pf-input');
+        const imgs = [...inp.querySelectorAll('.gd-shot img')];
+        return {
+          h3: inp.querySelector('h3')?.innerText ?? '',
+          todo: inp.querySelectorAll('.gd-todo li').length,
+          imgs: imgs.length,
+          loaded: imgs.every((e) => e.naturalWidth > 0 && e.naturalWidth === Number(e.getAttribute('width')) && e.naturalHeight === Number(e.getAttribute('height'))),
+          raw: /[«»`]/.test(document.querySelector('dialog[open] .pf-body').innerText),
+          ltr: [...document.querySelectorAll('dialog[open] .pf-body bdi')].every((e) => e.getAttribute('dir') === 'ltr'),
+          side: document.querySelector('dialog[open] .pf-step.cur')?.dataset.step,
+          wide: document.documentElement.scrollWidth <= window.innerWidth + 1,
+        };
+      });
+      walked.push({ id: yIds[i], ...info });
+      await y.screenshot({ path: path.join(out, `20-youtube-${String(i + 1).padStart(2, '0')}-${yIds[i]}.png`) });
+      const lost = await stray();
+      const flipped = await reversed();
+      check(`youtube step ${i + 1} (${yIds[i]}): its actions are listed, English is isolated, and the order reads right to left`, info.todo >= 1 && info.side === yIds[i] && !info.raw && info.ltr && lost.length === 0 && flipped.length === 0 && info.wide, JSON.stringify({ ...info, lost, flipped }));
+      check(`youtube step ${i + 1} (${yIds[i]}): every picture loads at its own size`, info.loaded, JSON.stringify(info));
+    }
+    check('the pictures are where the steps put them: 1 in the menu step, 1 each in the Branding and contact steps, 2 for test users, 2 for the client, 1 for each address', JSON.stringify(walked.map((s) => s.imgs)) === JSON.stringify([0, 0, 0, 1, 1, 0, 1, 2, 2, 1, 1, 0, 0]), JSON.stringify(walked.map((s) => s.imgs)));
+    check('the step that was too crowded is now three small ones, each with its own title', ['افتح شاشة الموافقة', 'اكتب اسم التطبيق وبريد الدعم', 'اختر نوع المستخدمين', 'اكتب بريد التواصل وأنهِ الإعداد'].every((x) => walked.some((s) => s.h3.includes(x))), walked.map((s) => s.h3).join(' | '));
+
+    // The picture: rounded by the page, enlarged on a click, and blurred where it was private (the files hold no text to read).
+    await sheet(y).locator('.pf-step-btn').nth(4).click();
+    const fig = sheet(y).locator('.gd-shot').first();
+    const radius = await fig.locator('.gd-zoom').evaluate((e) => [getComputedStyle(e).borderRadius, getComputedStyle(e).overflow]);
+    check('the corners are rounded and the picture is clipped to them', radius[0] === '12px' && radius[1] === 'hidden', radius.join(' '));
+    const zoomBefore = await fig.locator('img').evaluate((e) => [e.clientWidth, e.naturalWidth]);
+    await fig.locator('button.gd-zoom').click();
+    const zoomed = await fig.evaluate((f) => ({ big: f.classList.contains('big'), w: f.querySelector('img').clientWidth, scroll: f.querySelector('.gd-zoom').scrollWidth > f.querySelector('.gd-zoom').clientWidth, pressed: f.querySelector('button').getAttribute('aria-pressed') }));
+    await y.screenshot({ path: path.join(out, '21-youtube-zoom.png') });
+    check('a click enlarges it to its own size, and scrolls sideways inside the frame instead of the page', zoomBefore[0] < zoomBefore[1] && zoomed.big && zoomed.w === zoomBefore[1] && zoomed.scroll && zoomed.pressed === 'true' && (await fits(y)), JSON.stringify({ zoomBefore, zoomed }));
+    await fig.locator('button.gd-zoom').click();
+    check('and a second click puts it back', !(await fig.evaluate((f) => f.classList.contains('big'))));
+    await sheet(y).locator('.pf-step-btn').nth(0).click();
+    check('a step with no picture has none to click', (await sheet(y).locator('.gd-shot').count()) === 0);
+    await sheet(y).locator('.pf-step-btn').nth(3).click();
+    check('a narrow picture is shown whole and is not a button', (await sheet(y).locator('.gd-shot button').count()) === 0 && (await sheet(y).locator('.gd-shot img').getAttribute('alt')).includes('Google Auth Platform'));
+
+    // The addresses and the keys.
+    await sheet(y).locator('.pf-step-btn').nth(9).click();
+    check('the YouTube address is filled in from the site, whole, under the list of actions', /^http:\/\/127\.0\.0\.1:\d+\/api\/platforms\/callback\/google$/.test(await sheet(y).locator('.pf-copy input').inputValue()) && (await sheet(y).locator('.pf-input').evaluate((e) => e.querySelector('.gd-todo').compareDocumentPosition(e.querySelector('.pf-copy')) & Node.DOCUMENT_POSITION_FOLLOWING)) > 0);
+    await sheet(y).locator('.pf-step-btn').nth(10).click();
+    check('the Drive address is the second one', /\/api\/drive\/callback$/.test(await sheet(y).locator('.pf-copy input').inputValue()));
+    await sheet(y).locator('.pf-step-btn').nth(11).click();
+    text = await sheet(y).locator('.pf-input').innerText();
+    check('the keys step lists where to find the two values above the two fields, and holds the secret once', text.includes('Client secret') && text.includes('مرة واحدة عند إنشائه') && (await sheet(y).locator('.pf-input input[type="password"]').count()) === 1 && !text.includes(SECRET));
+
+    // The progress is the same as before: the three steps a person confirms, then the platform is connected.
+    await sheet(y).locator('.pf-step-btn').nth(9).click();
+    await sheet(y).getByRole('button', { name: 'سجّلت العنوان' }).click();
+    await y.waitForFunction(() => document.querySelector('dialog[open]')?.innerText.includes('الخطوة 13 من 13'));
+    await sheet(y).getByRole('button', { name: 'نشرته' }).click();
+    await y.waitForFunction(() => document.querySelector('dialog[open]')?.innerText.includes('اكتملت الخطوات'));
+    const ySaves = await calls(y, 'platform_setup_save');
+    const saved = ySaves.at(-1).args;
+    check('every saved step is one the database accepts, and only the three a person confirms are in the progress', saved.p_done.every((d) => /^[a-z0-9_]{1,30}$/.test(d)) && JSON.stringify([...saved.p_done].sort()) === JSON.stringify(['publish', 'redirect', 'youtube']) , JSON.stringify(saved.p_done));
+    check('the sheet ends as before, with its finishing page', (await sheet(y).innerText()).includes('يوتيوب جاهزة') && (await sheet(y).innerText()).includes('حساب'));
+    await y.screenshot({ path: path.join(out, '22-youtube-done.png') });
+    await sheet(y).getByRole('button', { name: 'إغلاق', exact: true }).click();
+    await y.locator('dialog.pf-sheet').waitFor({ state: 'detached' });
+    await y.waitForFunction(() => document.querySelector('.pf-row[data-platform="youtube"]')?.dataset.state === 'ok');
+    check('and the row says connected: nothing the old steps proved is asked again', (await chip(y, 'youtube')) === 'متصلة', await chip(y, 'youtube'));
+    await y.context().close();
+
+    // The phone: the page never scrolls sideways, and a wide picture does inside its frame.
+    const ym = await fresh({ width: 390, height: 844 });
+    await ym.goto(base);
+    await ym.waitForSelector('.pf-row');
+    await row(ym, 'youtube').locator('.pf-btn').first().click();
+    await sheet(ym).waitFor();
+    await ym.evaluate(() => document.querySelector('dialog[open] .pf-step.cur'));
+    const phoneStep = async (id) => {
+      await ym.evaluate((i) => {
+        document.querySelector(`dialog[open] .pf-step[data-step="${i}"] .pf-step-btn`)?.click();
+      }, id);
+      await ym.waitForTimeout(80);
+    };
+    for (const id of ['branding', 'testusers', 'client', 'redirect_drive']) {
+      await phoneStep(id);
+      await ym.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
+      const phone = await ym.evaluate(() => ({ page: document.documentElement.scrollWidth <= window.innerWidth + 1, body: (() => { const b = document.querySelector('dialog[open] .pf-body'); return b.scrollWidth <= b.clientWidth + 1; })(), shots: [...document.querySelectorAll('dialog[open] .gd-shot')].every((f) => f.getBoundingClientRect().right <= window.innerWidth + 1) }));
+      check(`phone, ${id}: nothing sideways on the page, the sheet or the pictures`, phone.page && phone.body && phone.shots, JSON.stringify(phone));
+    }
+    await phoneStep('branding');
+    await ym.locator('dialog[open] .pf-input').evaluate((e) => e.scrollIntoView());
+    await ym.screenshot({ path: path.join(out, '23-youtube-phone.png') });
+    await ym.context().close();
+
+    // Evening, and English (the page's direction changes the sides, never the pictures).
+    const yd = await fresh();
+    await yd.goto(`${base}?dark=1`);
+    await yd.waitForSelector('.pf-row');
+    await row(yd, 'youtube').locator('.pf-btn').first().click();
+    await sheet(yd).waitFor();
+    await sheet(yd).locator('.pf-step-btn').nth(4).click();
+    await yd.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
+    await yd.screenshot({ path: path.join(out, '24-youtube-evening.png') });
+    const chipInk = await yd.evaluate(() => { const c = document.querySelector('dialog[open] .gd-todo .gd-ui'); const s = getComputedStyle(c); return [s.backgroundColor, s.color]; });
+    check('evening: a label chip is told from the page behind it', chipInk[0] !== chipInk[1] && chipInk[1] !== 'rgb(0, 0, 0)', chipInk.join(' / '));
+    await yd.context().close();
+    const yl = await fresh();
+    await yl.goto(`${base}?dir=ltr`);
+    await yl.waitForSelector('.pf-row');
+    await row(yl, 'youtube').locator('.pf-btn').first().click();
+    await sheet(yl).waitFor();
+    await sheet(yl).locator('.pf-step-btn').nth(8).click();
+    await yl.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
+    await yl.screenshot({ path: path.join(out, '25-youtube-ltr.png') });
+    check('English direction: the pictures keep their own direction and the page does not scroll sideways', (await fits(yl)) && (await yl.evaluate(() => [...document.querySelectorAll('dialog[open] .gd-zoom')].every((e) => getComputedStyle(e).direction === 'ltr'))));
+    await yl.context().close();
+
     await t.context().close();
 
     check('no page error and nothing in the console', errs.length === 0, errs.slice(0, 3).join(' | '));

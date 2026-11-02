@@ -2,9 +2,10 @@
 // names a guide that exists. The screens that draw them are checked in qa/permissions-pages.cjs.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { GUIDES, resolveGuide, storageGuideKey } from '../src/lib/setup-guides.ts';
+import { plainText, segments } from '../src/lib/guide-text.ts';
 import { FLAVORS } from '../src/lib/integrations/rules.ts';
 
 const walk = (dir) =>
@@ -16,7 +17,8 @@ const walk = (dir) =>
 test('every guide has a title, who it is for, and numbered steps with something to do in each', () => {
   for (const [key, g] of Object.entries(GUIDES)) {
     assert.ok(g.title.length > 5 && g.intro.length > 20, key);
-    assert.ok(g.steps.length >= 2 && g.steps.length <= 10, `${key}: ${g.steps.length} steps`);
+    // The Google guide is longer on purpose (MVP_draft.md section 67.5): one action to a step is what a first-time reader can follow.
+    assert.ok(g.steps.length >= 2 && g.steps.length <= (key === 'google' ? 14 : 10), `${key}: ${g.steps.length} steps`);
     for (const s of g.steps) assert.ok(s.t.length > 3, `${key}: a step has a title`);
     if (g.link) assert.match(g.link.href, /^https:\/\//, key);
     for (const s of g.steps) if (s.link) assert.match(s.link.href, /^https:\/\//, `${key}: ${s.t}`);
@@ -60,4 +62,93 @@ test('every place that draws a guide names one that exists, and the icon is the 
   const comp = readFileSync('src/components/setup-guide.tsx', 'utf8');
   assert.match(comp, /CircleAlert/);
   assert.doesNotMatch(JSON.stringify(GUIDES) + comp, /\p{Extended_Pictographic}/u);
+});
+
+const png = (file) => {
+  const b = readFileSync(file);
+  assert.equal(b.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', `${file} is a PNG`);
+  return { w: b.readUInt32BE(16), h: b.readUInt32BE(20), bytes: b.length };
+};
+
+test('English inside an Arabic sentence is set apart: labels as chips, values as chips, the rest isolated', () => {
+  const kinds = (t) => segments(t).map((g) => `${g.k}:${g.s}`);
+  assert.deepEqual(kinds('اضغط «Create client» ثم اختر «Web application».'), ['text:اضغط ', 'ui:Create client', 'text: ثم اختر ', 'ui:Web application', 'text:.']);
+  assert.deepEqual(kinds('في «App name» اكتب `Comms Hub`.'), ['text:في ', 'ui:App name', 'text: اكتب ', 'val:Comms Hub', 'text:.']);
+  assert.deepEqual(kinds('تنتقل إلى Google Cloud، ثم Drive.'), ['text:تنتقل إلى ', 'latin:Google Cloud', 'text:، ثم ', 'latin:Drive', 'text:.']);
+  // A guillemet around Arabic, or Arabic with English, is the site's own wording: it stays, and only its English is isolated.
+  assert.deepEqual(kinds('«حسابات المنصات»'), ['text:«', 'text:حسابات المنصات', 'text:»']);
+  assert.deepEqual(kinds('«ربط عبر Google (يوتيوب)»'), ['text:«', 'text:ربط عبر ', 'latin:Google', 'text: (يوتيوب)', 'text:»']);
+  // A number beside Arabic is not English, and a run keeps its own punctuation.
+  assert.deepEqual(kinds('بعد 7 أيام و100 مقطع'), ['text:بعد 7 أيام و100 مقطع']);
+  assert.deepEqual(kinds('أضف https://www.example.com/a-b هنا'), ['text:أضف ', 'latin:https://www.example.com/a-b', 'text: هنا']);
+  assert.equal(plainText('اضغط «Enable» ثم `Comms Hub`'), 'اضغط Enable ثم Comms Hub');
+});
+
+test('every text of every guide is balanced, and the marks lose none of its words', () => {
+  for (const [key, g] of Object.entries(GUIDES)) {
+    const texts = [g.title, g.intro, ...(g.notes ?? []), ...g.steps.flatMap((x) => [x.t, x.b ?? '', ...(x.todo ?? []), ...(x.shots?.map((h) => h.caption ?? '') ?? [])])];
+    for (const t of texts) {
+      assert.equal((t.match(/`/g) ?? []).length % 2, 0, `${key}: an open backtick in ${t.slice(0, 40)}`);
+      assert.doesNotMatch(t, /«\s|\s»/, `${key}: a space inside a guillemet in ${t.slice(0, 40)}`);
+      const bare = (x) => x.replace(/[«»`]/g, '').replace(/\s+/g, '');
+      assert.equal(bare(segments(t).map((x) => x.s).join('')), bare(t), `${key}: ${t.slice(0, 40)}`);
+    }
+  }
+});
+
+test('the Google guide: one action to a line, the old crowded step is gone, and the saved progress still means the same', () => {
+  const g = GUIDES.google;
+  const ids = g.steps.map((s) => s.id);
+  assert.deepEqual(ids, ['project', 'youtube', 'drive', 'consent', 'branding', 'audience', 'contact', 'testusers', 'client', 'redirect', 'redirect_drive', 'keys', 'publish']);
+  // Only these three were ever saved as done by a person; every step added since is proved by the stored secret.
+  assert.deepEqual(g.steps.filter((s) => !s.implied && s.kind !== 'keys').map((s) => s.id), ['youtube', 'redirect', 'publish']);
+  for (const s of g.steps) {
+    assert.ok(s.todo && s.todo.length >= 1, `${s.id}: what to do`);
+    assert.ok((s.b ?? '').length > 10 && s.b.length <= 110, `${s.id}: one short sentence, not the whole step (${s.b?.length})`);
+    for (const t of s.todo) assert.ok(t.length <= 260, `${s.id}: a line is one action (${t.length}): ${t.slice(0, 30)}`);
+    assert.ok(s.t.length <= 48, `${s.id}: a short name`);
+  }
+  // The sentence a first reader could not follow (Branding, Audience, External, Internal, Workspace, Test users in one breath).
+  assert.ok(!g.steps.some((s) => /Branding[^]*Audience[^]*Test users/.test(s.b ?? '')));
+  assert.ok(g.steps.find((s) => s.id === 'testusers').todo.some((t) => /Add users/.test(t)));
+  assert.match(JSON.stringify(g.steps.find((s) => s.id === 'branding')), /App logo/, 'the logo warning is there');
+  // A value to type is marked as a value, and an address to copy is the field below, not text in the line.
+  assert.ok(g.steps.find((s) => s.id === 'project').todo.some((t) => t.includes('`Comms Hub`')));
+  for (const s of g.steps.filter((x) => x.kind === 'copy')) assert.ok(s.copy && s.todo.some((t) => /الحقل أدناه/.test(t)), s.id);
+});
+
+test('the pictures of the Google guide are the files in public/guides/google, whole, small, and never an original', () => {
+  const dir = 'public/guides/google';
+  const used = new Set();
+  for (const s of GUIDES.google.steps) {
+    for (const h of s.shots ?? []) {
+      assert.match(h.src, /^\/guides\/google\/[a-z-]+\.png$/, h.src);
+      used.add(h.src.split('/').pop());
+      const file = `public${h.src}`;
+      assert.ok(existsSync(file), file);
+      const d = png(file);
+      assert.deepEqual([d.w, d.h], [h.w, h.h], `${file} is ${d.w} x ${d.h}`);
+      assert.ok(d.bytes < 120_000, `${file}: ${d.bytes} bytes`);
+      assert.ok(h.alt.length > 15, `${file}: alt`);
+      assert.ok(h.w <= 1000, `${file}: wider than a screen shows`);
+    }
+  }
+  assert.equal(used.size, 9);
+  assert.deepEqual(readdirSync(dir).sort(), [...used].sort(), 'no file in the folder is left unused, and no original screenshot is kept');
+  // What was private in the originals is nowhere in the words either.
+  assert.doesNotMatch(JSON.stringify(GUIDES), /@gmail\.com|990812869923|zkkmfjsjouqzibvnzkau/);
+});
+
+test('the sheet and the circled "!" draw a guide with the same parts, and a picture is a button only when it can be enlarged', () => {
+  for (const f of ['src/components/settings/platform-sheet.tsx', 'src/components/setup-guide.tsx']) {
+    const src = readFileSync(f, 'utf8');
+    assert.match(src, /GuideTodo/, f);
+    assert.match(src, /GuideShots/, f);
+    assert.match(src, /Rich/, f);
+  }
+  const comp = readFileSync('src/components/guide-text.tsx', 'utf8');
+  assert.match(comp, /zoomable \? \(\s*<button/, 'a wide picture is a button');
+  assert.doesNotMatch(comp, /dangerouslySetInnerHTML/);
+  assert.doesNotMatch(comp, /\p{Extended_Pictographic}/u);
+  assert.match(readFileSync('src/app/work.css', 'utf8'), /\.gd-zoom\{[^}]*border-radius:12px/, 'the corners are rounded by the page');
 });

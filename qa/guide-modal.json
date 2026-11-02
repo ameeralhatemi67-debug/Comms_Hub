@@ -1,0 +1,60 @@
+{
+  "script": "qa/guide-modal.cjs",
+  "run": "2026-11-02T12:34:28.914Z",
+  "checks": [
+    {
+      "name": "the circled \"!\" draws the thirteen steps of the guide, each with its list of actions",
+      "pass": true,
+      "detail": "[3,3,2,3,4,3,4,5,4,3,3,5,4]"
+    },
+    {
+      "name": "and the nine pictures, loaded at their own size and inside the dialog",
+      "pass": true,
+      "detail": "{\"imgs\":9,\"loaded\":true,\"inside\":true}"
+    },
+    {
+      "name": "English is isolated everywhere, and no mark («» or backtick) is left in the words",
+      "pass": true,
+      "detail": "{\"stray\":[],\"raw\":false}"
+    },
+    {
+      "name": "a step keeps its own number, and the actions inside it count on their own",
+      "pass": true,
+      "detail": "{\"outer\":\"counter(su)\",\"inner\":\"counter(gd)\"}"
+    },
+    {
+      "name": "the links open in a new tab, safely",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing sideways in the dialog",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing sideways in the dialog, pictures included",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: a label chip is told from the dialog behind it",
+      "pass": true,
+      "detail": "rgb(26, 45, 36) / rgb(232, 241, 234) / rgb(14, 31, 24)"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 10,
+  "passed": 10,
+  "failed": 0
+}

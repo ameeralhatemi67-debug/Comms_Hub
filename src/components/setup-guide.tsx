@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { CircleAlert } from 'lucide-react';
 import { GUIDES, resolveGuide, type Guide } from '@/lib/setup-guides';
+import { GuideShots, GuideTodo, Rich } from './guide-text';
 import { Modal } from './ui';
 
 export function SetupGuide({
@@ -46,20 +47,30 @@ export function SetupGuide({
       {open && (
         <Modal title={g.title} onClose={() => setOpen(false)}>
           <div className="su-body" data-guide-open={guide}>
-            <p>{g.intro}</p>
+            <p>
+              <Rich text={g.intro} />
+            </p>
             <ol className="su-steps">
               {g.steps.map((s, i) => (
                 <li key={i}>
-                  <b>{s.t}</b>
-                  {s.b && <span>{s.b}</span>}
+                  <b>
+                    <Rich text={s.t} />
+                  </b>
+                  {s.b && (
+                    <span>
+                      <Rich text={s.b} />
+                    </span>
+                  )}
+                  {s.todo && s.todo.length > 0 && <GuideTodo items={s.todo} />}
                   {s.copy && (
                     <bdi className="su-copy" dir="ltr">
                       {s.copy}
                     </bdi>
                   )}
+                  {s.shots && s.shots.length > 0 && <GuideShots shots={s.shots} />}
                   {s.link && (
                     <a className="su-link" href={s.link.href} target="_blank" rel="noopener noreferrer">
-                      {s.link.label}
+                      <Rich text={s.link.label} />
                     </a>
                   )}
                 </li>
@@ -68,14 +79,16 @@ export function SetupGuide({
             {g.notes && g.notes.length > 0 && (
               <ul className="su-notes">
                 {g.notes.map((n) => (
-                  <li key={n}>{n}</li>
+                  <li key={n}>
+                    <Rich text={n} />
+                  </li>
                 ))}
               </ul>
             )}
             {g.link && (
               <p>
                 <a href={g.link.href} target="_blank" rel="noopener noreferrer">
-                  {g.link.label}
+                  <Rich text={g.link.label} />
                 </a>
               </p>
             )}

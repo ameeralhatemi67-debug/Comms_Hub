@@ -6,12 +6,31 @@
 //
 // `{redirect}` in a step is replaced with the address of this site plus the platform's return path
 // when the guide is drawn; `{origin}` with the site's address.
+//
+// Mixed Arabic and English is written once, in the markup of src/lib/guide-text.ts: a label on the platform's own
+// screen goes in «», a value to type in backticks, and everything else is left alone (the page isolates it).
+
+/** A picture of the platform's own page, made by scripts/guide-shots.mjs: cropped, with what is private blurred. */
+export type GuideShot = {
+  /** A path in public/, such as /guides/google/menu.png. */
+  src: string;
+  /** The picture's own size in pixels, so the page keeps its place before it loads. */
+  w: number;
+  h: number;
+  alt: string;
+  caption?: string;
+};
 
 export type GuideStep = {
   /** A stable name for saved progress in «المنصات», so a reworded step keeps its place. */
   id?: string;
   t: string;
+  /** One sentence: what this step is and why. It sits under the step's name in the list. */
   b?: string;
+  /** What to do, one small action to a line, in order. Drawn beside the pictures instead of the sentence above. */
+  todo?: string[];
+  /** Where on the platform's page to look. */
+  shots?: GuideShot[];
   /** A value to copy exactly (an address), shown on its own line. */
   copy?: string;
   /** What the value to copy is. */
@@ -46,6 +65,8 @@ const META_PORTFOLIO = { href: 'https://business.facebook.com/settings', label: 
 const TIKTOK_APPS = { href: 'https://developers.tiktok.com/apps/', label: 'TikTok for Developers' };
 const LINKEDIN_APPS = { href: 'https://www.linkedin.com/developers/apps', label: 'تطبيقاتي في LinkedIn' };
 const X_CONSOLE = { href: 'https://console.x.com', label: 'وحدة مطوّري X' };
+/** A picture of Google's console for the «google» guide (public/guides/google/, made by scripts/guide-shots.mjs). */
+const shot = (name: string, w: number, h: number, alt: string, caption?: string): GuideShot => ({ src: `/guides/google/${name}.png`, w, h, alt, caption });
 
 export const GUIDES: Record<string, Guide> = {
   meta: {
@@ -133,24 +154,198 @@ export const GUIDES: Record<string, Guide> = {
     notes: ['لربط حساب آخر سجّل خروجك من TikTok ثم أعد الخطوات.', 'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز المدير التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
   },
   google: {
-    title: 'تجهيز تطبيق Google (يوتيوب وDrive معاً)',
-    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف العميل وسره في الموقع. التطبيق نفسه يخدم ربط قناة يوتيوب واتصال Google Drive، فلا تُنشئ تطبيقين.',
+    title: 'تجهيز تطبيق Google ليوتيوب وDrive',
+    intro: 'للمدير. تُجرى مرة واحدة في موقع Google Cloud، وتنتهي بنسخ معرّف العميل وسره إلى هذا الموقع. التطبيق نفسه يخدم ربط قناة يوتيوب واتصال Google Drive، فلا تُنشئ تطبيقين.',
     steps: [
-      { id: 'project', implied: true, t: 'أنشئ مشروعاً في Google Cloud', b: 'سجّل الدخول بحساب Google الذي يملكه القسم، ثم «Create project» باسم مثل «Comms Hub». المشروع مجاني.', link: { href: 'https://console.cloud.google.com/projectcreate', label: 'إنشاء مشروع في Google Cloud' }, ok: 'أنشأته' },
-      { id: 'youtube', t: 'فعّل واجهة يوتيوب', b: 'افتح الصفحة واضغط «Enable» لـ YouTube Data API v3.', link: { href: 'https://console.cloud.google.com/apis/library/youtube.googleapis.com', label: 'YouTube Data API v3' }, ok: 'فعّلتها' },
-      { id: 'drive', implied: true, t: 'فعّل واجهة Drive', b: 'الأمر نفسه لـ Google Drive API.', link: { href: 'https://console.cloud.google.com/apis/library/drive.googleapis.com', label: 'Google Drive API' }, ok: 'فعّلتها' },
-      { id: 'consent', implied: true, t: 'اضبط شاشة الموافقة', b: 'في Google Auth Platform: «Branding» لاسم التطبيق وبريد الدعم، و«Audience» للنوع External (أو Internal لحساب Google Workspace) وإضافة بريد من سيربط القناة والمخزن ضمن «Test users».', link: { href: 'https://console.cloud.google.com/auth/branding', label: 'Google Auth Platform' }, ok: 'ضبطتها' },
-      { id: 'client', implied: true, t: 'أنشئ معرّف العميل', b: '«Clients» ثم «Create client»، النوع «Web application».', link: { href: 'https://console.cloud.google.com/auth/clients', label: 'Clients في Google Cloud' }, ok: 'أنشأته' },
-      { id: 'redirect', kind: 'copy', t: 'سجّل عنوان العودة ليوتيوب', b: 'في «Authorized redirect URIs»: الصق هذا العنوان تماماً.', copy: '{redirect}', copyLabel: 'عنوان العودة ليوتيوب', ok: 'سجّلت العنوان' },
-      { id: 'redirect_drive', implied: true, kind: 'copy', t: 'وسجّل عنوان العودة لـ Drive', b: 'أضف هذا العنوان تحته في القائمة نفسها.', copy: '{origin}/api/drive/callback', copyLabel: 'عنوان العودة لـ Drive', ok: 'سجّلت العنوان' },
-      { id: 'keys', kind: 'keys', t: 'انسخ المعرّف والسر', b: 'يظهر «Client secret» كاملاً مرة واحدة عند إنشائه، فانسخه فوراً. الصقهما هنا فقط، ولا ترسلهما إلى أحد.', link: { href: 'https://console.cloud.google.com/auth/clients', label: 'Clients في Google Cloud' } },
-      { id: 'publish', t: 'انشر التطبيق', b: 'في «Audience» اضغط «Publish app» ليصير «In production»: ما دام في «Testing» ينتهي الربط بعد 7 أيام. ستظهر شاشة «تطبيق لم يُتحقق منه» عند الموافقة، مع حد 100 مستخدم جديد.', link: { href: 'https://console.cloud.google.com/auth/audience', label: 'Audience في Google Cloud' }, ok: 'نشرته' },
+      {
+        id: 'project',
+        implied: true,
+        t: 'أنشئ مشروعاً في Google Cloud',
+        b: 'المشروع هو الحاوية التي يعيش فيها تطبيقك عند Google، وهو مجاني.',
+        todo: [
+          'افتح الصفحة من الرابط، وسجّل الدخول بحساب Google الذي يملكه القسم.',
+          'في «Project name» اكتب `Comms Hub`.',
+          'اضغط «Create». يظهر اسم المشروع بعدها في الشريط العلوي من الصفحة: تأكد منه قبل كل خطوة، فكل ما يلي يجب أن يتم داخل هذا المشروع.',
+        ],
+        link: { href: 'https://console.cloud.google.com/projectcreate', label: 'إنشاء مشروع في Google Cloud' },
+        ok: 'أنشأته',
+      },
+      {
+        id: 'youtube',
+        t: 'فعّل واجهة YouTube Data API v3',
+        b: 'بدونها لا يستطيع الموقع الوصول إلى قناتك.',
+        todo: ['افتح الصفحة من الرابط، وتأكد أن اسم مشروعك ظاهر في الشريط العلوي.', 'اضغط الزر الأزرق «Enable».', 'إن كان الزر «Manage» بدل «Enable» فالواجهة مفعّلة من قبل، ولا تحتاج شيئاً.'],
+        link: { href: 'https://console.cloud.google.com/apis/library/youtube.googleapis.com', label: 'YouTube Data API v3' },
+        ok: 'فعّلتها',
+      },
+      {
+        id: 'drive',
+        implied: true,
+        t: 'فعّل واجهة Google Drive API',
+        b: 'بها يحفظ الموقع ملفات القسم في Drive.',
+        todo: ['افتح الصفحة من الرابط.', 'اضغط الزر الأزرق «Enable»، وإن كان «Manage» فهي مفعّلة من قبل.'],
+        link: { href: 'https://console.cloud.google.com/apis/library/drive.googleapis.com', label: 'Google Drive API' },
+        ok: 'فعّلتها',
+      },
+      {
+        id: 'consent',
+        implied: true,
+        t: 'افتح شاشة الموافقة',
+        b: 'هي الشاشة التي تظهر لمن يربط قناته. تضبطها من «Google Auth Platform».',
+        todo: [
+          'افتح الصفحة من الرابط. على اليسار قائمة فيها ما سنستعمله: «Branding» و«Audience» و«Clients».',
+          'إن ظهرت رسالة تقول إن Google Auth Platform لم تُضبط بعد، فاضغط «Get started». ستسألك أربع شاشات بالترتيب: «App Information» ثم «Audience» ثم «Contact Information» ثم «Finish»، وهي موضوع الخطوات الثلاث التالية.',
+          'وإن كانت مضبوطة من قبل فلا تضغط «Get started»: عدّل ما يلي من القائمة نفسها.',
+        ],
+        shots: [shot('menu', 340, 467, 'القائمة الجانبية في Google Auth Platform: Overview وBranding وAudience وClients وData access وVerification centre وSettings', 'قائمة الصفحة التي على اليسار: منها تفتح «Branding» و«Audience» و«Clients».')],
+        link: { href: 'https://console.cloud.google.com/auth/branding', label: 'Google Auth Platform' },
+        ok: 'فتحتها',
+      },
+      {
+        id: 'branding',
+        implied: true,
+        t: 'اكتب اسم التطبيق وبريد الدعم',
+        b: 'هذان ما يراه الناس حين يوافقون على ربط قناتهم.',
+        todo: [
+          'في «App name» اكتب `Comms Hub`.',
+          'في «User support email» اختر بريدك من القائمة.',
+          'لا ترفع شعاراً في «App logo»: رفعه يستلزم أن تراجع Google التطبيق عند نشره.',
+          'اضغط «Next»، أو «Save» إن كنت في صفحة Branding نفسها.',
+        ],
+        shots: [shot('branding', 755, 582, 'صفحة Branding: حقل App name وحقل User support email، وتحتهما App logo', 'الاسم في الصورة مثال من مشروع آخر، والبريد محجوب. الحلقة الحمراء تعني: لا تفعل هذا.')],
+        link: { href: 'https://console.cloud.google.com/auth/branding', label: 'Branding في Google Cloud' },
+        ok: 'كتبتهما',
+      },
+      {
+        id: 'audience',
+        implied: true,
+        t: 'اختر نوع المستخدمين',
+        b: 'اختر «External» ما لم يكن للقسم حساب Google Workspace مؤسسي.',
+        todo: [
+          'في «Audience» اختر «External».',
+          'لا تختر «Internal» إلا إن كان الحساب من Google Workspace للمؤسسة وكل من سيربط القناة من داخلها: القناة التي يملكها حساب من خارج المؤسسة لا تُربط بها.',
+          'اضغط «Next».',
+        ],
+        ok: 'اخترته',
+      },
+      {
+        id: 'contact',
+        implied: true,
+        t: 'اكتب بريد التواصل وأنهِ الإعداد',
+        b: 'تستعمله Google لتنبيهك بأي تغيير يخص المشروع.',
+        todo: [
+          'في «Contact Information» اكتب بريدك ثم اضغط «Next».',
+          'في «Finish» علّم «I agree to the Google API Services: User Data Policy» ثم اضغط «Continue».',
+          'اضغط «Create». بهذا ينتهي الإعداد الأول.',
+          'وفي صفحة Branding تجد هذا الحقل أسفلها باسم «Developer contact information»: اكتب بريدك ثم اضغط «Save».',
+        ],
+        shots: [shot('contact', 733, 198, 'أسفل صفحة Branding: Developer contact information وحقل Email addresses وزرا Save وDiscard changes', 'الحلقتان على الحقل وعلى زر «Save»، والبريد محجوب.')],
+        link: { href: 'https://console.cloud.google.com/auth/branding', label: 'Branding في Google Cloud' },
+        ok: 'ضبطتها',
+      },
+      {
+        id: 'testusers',
+        implied: true,
+        t: 'أضف بريد من سيربط القناة',
+        b: 'ما دام التطبيق في وضع التجربة «Testing» لا يدخل إلا من تضيفه هنا.',
+        todo: [
+          'من القائمة التي على اليسار افتح «Audience».',
+          'تحت «Test users» اضغط «Add users».',
+          'اكتب بريد حساب Google الذي يملك القناة أو يديرها. ولك أن تضيف أكثر من بريد.',
+          'اضغط «Save».',
+          'هذه الخطوة تخص مرحلة التجربة، وستنشر التطبيق في الخطوة الأخيرة. ولا تظهر إن اخترت «Internal».',
+        ],
+        shots: [
+          shot('test-users', 650, 371, 'صفحة Audience: قسم Test users وزر Add users وتحته قائمة البريد', 'قائمة الأسماء محجوبة.'),
+          shot('add-users', 435, 175, 'لوحة Add users: حقل كتابة البريد وزر Save', 'الحقل لكتابة البريد، ثم زر «Save».'),
+        ],
+        link: { href: 'https://console.cloud.google.com/auth/audience', label: 'Audience في Google Cloud' },
+        ok: 'أضفتها',
+      },
+      {
+        id: 'client',
+        implied: true,
+        t: 'أنشئ معرّف العميل',
+        b: 'هو الهوية التي يعرّف بها الموقع نفسه عند Google.',
+        todo: [
+          'من القائمة التي على اليسار افتح «Clients» ثم اضغط «Create client».',
+          'في «Application type» اختر «Web application».',
+          'في «Name» اكتب `Comms Hub Web`: اسم للتمييز داخل Google فقط.',
+          'اترك «Authorised JavaScript origins» فارغاً. ولا تضغط «Create» الآن: نضيف عنواني العودة أولاً في الخطوتين التاليتين.',
+        ],
+        shots: [
+          shot('clients', 975, 295, 'صفحة Clients: زر Create client وجدول OAuth 2.0 Client IDs', 'الأسماء في الجدول أمثلة من مشروع آخر.'),
+          shot('app-type', 688, 297, 'قائمة Application type: Web application أولها، ثم Android وChrome extension وiOS', 'اختر «Web application»، وهي أول القائمة.'),
+        ],
+        link: { href: 'https://console.cloud.google.com/auth/clients', label: 'Clients في Google Cloud' },
+        ok: 'أنشأته',
+      },
+      {
+        id: 'redirect',
+        kind: 'copy',
+        t: 'سجّل عنوان العودة ليوتيوب',
+        b: 'هو العنوان الذي تعيد Google الناس إليه بعد موافقتهم، ويجب أن يطابق تماماً.',
+        todo: [
+          'انزل في الصفحة نفسها إلى «Authorised redirect URIs». وقد تُكتب «Authorized» بحسب لغة حسابك.',
+          'اضغط «Add URI» فيظهر حقل «URIs 1».',
+          'انسخ العنوان من الحقل أدناه والصقه في «URIs 1» بالضبط، بلا مسافة قبله أو بعده.',
+        ],
+        copy: '{redirect}',
+        copyLabel: 'عنوان العودة ليوتيوب',
+        shots: [shot('redirect', 660, 245, 'قسم Authorised redirect URIs: حقل URIs 1 وزر Add URI', 'الحقل فارغ، والنص الباهت «https://www.example.com» مثال فقط: الصق عنواننا مكانه.')],
+        ok: 'سجّلت العنوان',
+      },
+      {
+        id: 'redirect_drive',
+        implied: true,
+        kind: 'copy',
+        t: 'وسجّل عنوان العودة لـ Drive',
+        b: 'عنوان ثانٍ في القائمة نفسها، به يربط الموقع Google Drive.',
+        todo: [
+          'اضغط «Add URI» مرة ثانية فيظهر حقل «URIs 2».',
+          'انسخ العنوان من الحقل أدناه والصقه في «URIs 2».',
+          'اضغط «Create» في أسفل الصفحة. يصير الزر أزرق حين تمتلئ الحقول.',
+        ],
+        copy: '{origin}/api/drive/callback',
+        copyLabel: 'عنوان العودة لـ Drive',
+        shots: [shot('redirect-create', 660, 272, 'أسفل Create OAuth client ID: زر Add URI ثم زرا Create وCancel', 'الزر «Create» رمادي في الصورة لأن الحقول فارغة.')],
+        ok: 'سجّلت العنوان',
+      },
+      {
+        id: 'keys',
+        kind: 'keys',
+        t: 'انسخ المعرّف والسر',
+        b: 'تظهر بعد «Create» نافذة فيها القيمتان.',
+        todo: [
+          'بعد «Create» تظهر نافذة فيها «Client ID» و«Client secret».',
+          'انسخ «Client ID» والصقه في الحقل الأول هنا.',
+          'انسخ «Client secret» والصقه في الحقل الثاني. يظهر كاملاً مرة واحدة عند إنشائه، فانسخه فوراً.',
+          'إن أغلقت النافذة قبل نسخه فافتح العميل من «Clients» وأنشئ سراً جديداً.',
+          'الصقهما هنا فقط، ولا ترسلهما إلى أحد.',
+        ],
+        link: { href: 'https://console.cloud.google.com/auth/clients', label: 'Clients في Google Cloud' },
+      },
+      {
+        id: 'publish',
+        t: 'انشر التطبيق',
+        b: 'حتى لا ينتهي الربط بعد 7 أيام.',
+        todo: [
+          'من القائمة التي على اليسار افتح «Audience».',
+          'تحت «Publishing status» اضغط «Publish app» ثم «Confirm». تصير الحالة «In production».',
+          'ما دام التطبيق في «Testing» ينتهي الربط بعد 7 أيام، فلا تترك هذه الخطوة.',
+          'عند الموافقة ستظهر شاشة تحذير تقول إن Google لم تتحقق من التطبيق، ولهذه المرحلة حد 100 مستخدم جديد. هذا طبيعي ويكفي للقسم.',
+        ],
+        link: { href: 'https://console.cloud.google.com/auth/audience', label: 'Audience في Google Cloud' },
+        ok: 'نشرته',
+      },
     ],
     notes: [
       'بعد هذه الخطوات تُربط القنوات من «حسابات المنصات»، ولكل قناة دخول مستقل.',
+      'الصور من مشروع Google آخر: الأسماء فيها أمثلة، وقد حُجبت العناوين والمعرّفات الخاصة. قد يختلف شكل صفحات Google قليلاً بحسب لغة حسابك وتحديثاتها، فاعتمد على أسماء الأزرار.',
       'صفحة الواجهة الرسمية تقول إن رفع المشاريع غير الموثقة لم يعد مقيّداً بالخصوصية الخاصة، وقد يبدأ المقطع خاصاً بحسب إعدادات الحساب. تحقق من أول مقطع.',
       'حد الرفع 100 مقطع في اليوم، وبقية الطلبات 10000 وحدة في اليوم.',
       'Drive: يرى الموقع الملفات التي أنشأها وحده فقط، لا بقية ملفات الحساب.',
+      'ترتيب شاشات «Get started» من وثائق Google الرسمية كما قُرئت في 2026-11-02.',
       SIMULATION,
       PLATFORM_FACTS,
     ],
@@ -199,8 +394,9 @@ export const GUIDES: Record<string, Guide> = {
     title: 'ربط قناة يوتيوب',
     intro: 'لمن ينشر على القناة. تنتهي بحساب «ربط حقيقي» يُفحص اتصاله فعلاً.',
     steps: [
-      { t: 'اضغط «ربط عبر Google (يوتيوب)»', b: 'تنتقل إلى صفحة Google لتسجّل الدخول، واختر هناك القناة: الحساب الذي يملكها، أو حساب العلامة التجارية الذي يديرها.' },
-      { t: 'وافق على الصلاحيتين', b: 'رفع الفيديو، وقراءة القنوات التي تملكها. لا يطلب الموقع كلمة مرورك أبداً.' },
+      { t: 'اضغط «ربط عبر Google (يوتيوب)»', b: 'تنتقل إلى صفحة Google. ولا يطلب الموقع كلمة مرورك أبداً.' },
+      { t: 'اختر الحساب ثم القناة', b: 'سجّل الدخول بحساب Google الذي يملك القناة أو يديرها. وإن كانت القناة لحساب علامة تجارية فاختره حين تعرضه Google.' },
+      { t: 'وافق على الصلاحيتين', b: 'رفع الفيديو، وقراءة القنوات التي تملكها.' },
       { t: 'عُد إلى الموقع', b: 'تظهر القناة باسمها، فحدّد من ينشر عليها.' },
       { t: 'تأكد من الحالة', b: '«ربط حقيقي» وتاريخ التفويض. يُجدَّد التفويض مع كل فحص ناجح.' },
     ],
