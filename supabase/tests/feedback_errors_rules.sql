@@ -38,11 +38,11 @@ select pg_temp.who('00000000-0000-0000-0000-0000000000c1');
 select pg_temp.t('08 a page that is not a path is dropped, not stored', $q$ insert into v select 'n2', public.feedback_submit('question', 'javascript:alert(1)', 'سؤال') $q$, 'ok');
 reset role;
 select pg_temp.c('09 so it is null', (select coalesce(page, 'null') from public.feedback_reports where id = pg_temp.g('n2')::uuid), 'null');
--- 18 more notes the same day make 20; the 21st is refused.
-insert into public.feedback_reports (kind, author, page, body) select 'idea', 'wri@t.test', '/work', 'n' || g from generate_series(1, 18) g;
+-- 48 more notes the same day make 50; the 51st is refused.
+insert into public.feedback_reports (kind, author, page, body) select 'idea', 'wri@t.test', '/work', 'n' || g from generate_series(1, 48) g;
 set local role authenticated;
 select pg_temp.who('00000000-0000-0000-0000-0000000000c1');
-select pg_temp.t('10 the 21st note in a day is refused', $q$ select public.feedback_submit('idea', '/work', 'زيادة') $q$, 'ERR FEEDBACK_LIMIT');
+select pg_temp.t('10 the 51st note in a day is refused', $q$ select public.feedback_submit('idea', '/work', 'زيادة') $q$, 'ERR FEEDBACK_LIMIT');
 select pg_temp.who('00000000-0000-0000-0000-0000000000b1');
 select pg_temp.t('11 someone else is not affected by that limit', $q$ select public.feedback_submit('idea', '/work', 'من المساعد') $q$, 'ok');
 
@@ -58,7 +58,7 @@ select pg_temp.t('15 the same error from another person', $q$ select public.erro
 select pg_temp.t('16 a different error', $q$ select public.error_report('/work', 'Another failure', 'Calendar (calendar.tsx)') $q$, 'ok');
 reset role;
 select pg_temp.c('17 equal errors are one row with a counter', (select count(*)::text || ' ' || max(count)::text from public.feedback_reports where kind = 'error'), '2 2');
-select pg_temp.c('18 errors do not use the notes limit', (select count(*)::text from public.feedback_reports where author = 'wri@t.test' and kind <> 'error'), '20');
+select pg_temp.c('18 errors do not use the notes limit', (select count(*)::text from public.feedback_reports where author = 'wri@t.test' and kind <> 'error'), '50');
 
 -- 3. Who reads and marks ------------------------------------------------------------------------------
 set local role authenticated;
@@ -68,7 +68,7 @@ select pg_temp.c('20 nor the table', (select count(*)::text from public.feedback
 select pg_temp.who('00000000-0000-0000-0000-0000000000b1');
 select pg_temp.t('21 the assistant cannot read it', $q$ select * from public.feedback_list(50) $q$, 'ERR FORBIDDEN');
 select pg_temp.who('00000000-0000-0000-0000-0000000000d1');
-select pg_temp.c('22 the director reads it, new first', (select count(*)::text from public.feedback_list(500)), '23');
+select pg_temp.c('22 the director reads it, new first', (select count(*)::text from public.feedback_list(500)), '53');
 select pg_temp.t('23 the director marks an error done', $q$ select public.feedback_mark((select id from public.feedback_list(500) where kind = 'error' and body like 'Another%'), 'done') $q$, 'ok');
 select pg_temp.t('24 an unknown state is refused', $q$ select public.feedback_mark((select id from public.feedback_list(500) limit 1), 'archived') $q$, 'ERR STATE_INVALID');
 select pg_temp.who('00000000-0000-0000-0000-0000000000b1');
@@ -84,7 +84,7 @@ select pg_temp.who('00000000-0000-0000-0000-0000000000c1');
 select pg_temp.t('29 it happens again', $q$ select public.error_report('/work', 'Cannot read properties of undefined for dept@example.com at /api/x?token=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef012345 secret ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef012345', 'WorkItem (item.tsx)') $q$, 'ok');
 reset role;
 select pg_temp.c('30 and is new again with the count at 3', (select state || ' ' || count::text from public.feedback_reports where body like 'Cannot read%'), 'new 3');
-select pg_temp.c('31 anonymous callers cannot call the functions', (select (has_function_privilege('anon', 'public.feedback_submit(text,text,text)', 'execute')
+select pg_temp.c('31 anonymous callers cannot call the functions', (select (has_function_privilege('anon', 'public.feedback_submit(text,text,text,text,jsonb,jsonb,jsonb)', 'execute')
    or has_function_privilege('anon', 'public.error_report(text,text,text)', 'execute')
    or has_function_privilege('anon', 'public.feedback_list(int)', 'execute'))::text), 'false');
 select pg_temp.c('32 the scrub helpers are not callable through the API', (select (has_function_privilege('authenticated', 'public.feedback_scrub(text,int)', 'execute'))::text), 'false');

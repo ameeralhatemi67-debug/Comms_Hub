@@ -2302,3 +2302,29 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** Anything signed in on the real site. The first real save, the first Drive folder under «مستندات الكتابة» and the first Arabic PDF happen with the first person who writes. A file above 4 MB has not gone through Vercel.
 - **Left as they are.** `validation/recheck-R01.md`, `videos/`, `supabase/.temp/`, `qa/simulations/`, `Owner_Setup_Guide.md` and `Role_Simulation_*` stay out of the commits. The four stale rule checks of `storage_rules`, `storage_move_rules` and `backup_rules`, and the quotes that stop `backup_rules.sql` under psql, were found here and not changed.
 - **Rollback.** The site: promote `dpl_6hf5unQ6UF7WJRMzoCQuSSY8WRam`, on `b795065`. The migration can stay, because that site reads nothing it changed. Undoing the migration itself would take a new migration.
+
+### 2026-11-02: a tester's note and its marks, built and committed locally
+
+- **Owner direction.** Ahead of the test week: add a pointer and a free box to «أرسل ملاحظة», either with more Drive space or by saving the location as code. After the review of those ideas, "Yes, build it" to the version that saves everything as data (`MVP_draft.md` section 69).
+- **Decision: data, not pictures.** Measured on comms-hub the same day: the database is 21 MB, `feedback_reports` was empty and the library lists 5 files, 37 MB. Space was not the deciding reason. A screenshot of mail, messaging or a draft would show administrators what the rules hide from them, so no picture is taken at all. Drive's real free space was not visible to an agent.
+- **Built.**
+  - A click sets a pointer and a drag draws a box, up to three, in a layer above any open window (`src/components/feedback-mark.tsx`).
+  - The note is reachable from inside any open window, which blocked the top bar before, and by Alt+Shift+N. It opens on «مشكلة» with a severity, and a note closed by accident waits.
+  - A note carries its marks, an outline of at most 140 rectangles with no words, and its context: role from the account, «عرض بصفة», site version, device, screen, theme, open window, errors of the visit (`src/lib/feedback/marks.ts`, `capture.ts`). The version is a `hub-build` meta tag read from `VERCEL_GIT_COMMIT_SHA`.
+  - On the mail pages and inside `data-fb-private` (the writing sheet) a mark keeps only the word for what it is.
+  - The inbox has an outline view, severity and page filters, new and blocking first, merge and separate, and «انسخ للمطور» with the page's files. «عولج» tells the author through «للعلم», and «ملاحظاتي» is on «الحساب».
+  - The daily limit rose from 20 to 50. The note's window and `public/privacy.html` in both languages say what is sent.
+- **Verified, numbers.**
+  - `npm test` **711 of 711**, typecheck and `npm run build` clean.
+  - `qa/feedback-flow.cjs`, new, **63 of 63** in Edge on the real components with the database stood in: desktop, 390 wide with a real tap, the evening theme. It replaces the static `qa/feedback-fixture.cjs`, removed, which drew a copy of the markup and would have kept passing whatever the component did.
+  - On a private Docker container with every migration replayed, nothing touching comms-hub: `supabase/tests/feedback_marks_rules.sql`, new, **72 of 72**, and `feedback_errors_rules.sql`, updated for the new limit and signature, **32 of 32**.
+  - The production build loaded on the sign-in page under the real Content-Security-Policy: `hub-build` read `local`, the layer's styles were present, no console or server errors.
+- **Size.** The fixture's note was 889 bytes for the whole call. At most, a stored note is about 7 KB: the outline 4.1 KB, the marks 1.1 KB, the context under 2 KB. The review's "1 to 2 KB" was an estimate that left the outline out. Eight testers at 50 notes a day for seven days would be 2,800 notes, about 20 MB at the very most.
+- **Found by the checks and fixed.**
+  - An open dialog makes the page inert, so the browser's hit test cannot find what a mark sits on. Targets are worked out from rectangles read when the layer opens (`pickTarget`).
+  - The writing sheet asks which window is on top by document order, so the note is rendered at the end of the body, where that answer is the note.
+  - Reading the screenshots showed mark numbers too small to read on the outline, position percentages that said nothing beside it, and wrapped labels. The brief keeps the positions.
+- **Not verified.** Anything signed in on the real site: the first real note is the first real test of the button inside each kind of window and of the role and version it sends. `hub-build` holds a commit only once deployed. The floating button was driven in the shared `Modal` only, not in `Sheet`, the mail composer or the messaging windows.
+- **Not applied.** `supabase/migrations/20261102180000_feedback_marks.sql` is not on comms-hub, and nothing is pushed. Apply first, then push: the live site's three-argument call still resolves on the new function, but the new site needs the new functions.
+- **Not built.** Drawing a mark over the real page from the inbox. It would fail for what the reader cannot see, so the outline comes first. Nothing scrolls during marking, so a person scrolls first, and the note's window says so.
+- **Left as they are.** `validation/recheck-R01.md`, `videos/`, `supabase/.temp/`, `qa/simulations/`, `Owner_Setup_Guide.md` and `Role_Simulation_*` stay out of the commit.

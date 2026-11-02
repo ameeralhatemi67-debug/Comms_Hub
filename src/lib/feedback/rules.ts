@@ -3,17 +3,29 @@
 // error is turned into a message and a place. The database scrubs again; this keeps noise and
 // personal text from being sent at all.
 
+import type { Mark, NoteContext, Outline } from './marks.ts';
+
 export const NOTE_KINDS = [
-  ['idea', 'فكرة'],
   ['problem', 'مشكلة'],
+  ['idea', 'فكرة'],
   ['question', 'سؤال'],
 ] as const;
 export type NoteKind = (typeof NOTE_KINDS)[number][0];
 
+/** How much a problem gets in the way. A problem nobody graded is «مزعجة». */
+export const SEVERITIES = [
+  ['blocking', 'توقف عملي'],
+  ['annoying', 'مزعجة'],
+  ['cosmetic', 'شكلية'],
+] as const;
+export type Severity = (typeof SEVERITIES)[number][0];
+export const DEFAULT_SEVERITY: Severity = 'annoying';
+export const SEVERITY_AR: Record<string, string> = Object.fromEntries(SEVERITIES);
+
 export const KIND_AR: Record<string, string> = { idea: 'فكرة', problem: 'مشكلة', question: 'سؤال', error: 'خطأ في الصفحة' };
 export const STATE_AR: Record<string, string> = { new: 'جديد', seen: 'اطُّلع عليه', done: 'عولج' };
 export const NOTE_MAX = 2000;
-export const NOTES_PER_DAY = 20;
+export const NOTES_PER_DAY = 50;
 /** Errors sent from one visit, so a loop in a page cannot flood the channel. */
 export const MAX_REPORTS_PER_VISIT = 5;
 
@@ -24,7 +36,10 @@ const ERRORS: Record<string, string> = {
   TEXT_TOO_LONG: `الملاحظة أطول من ${NOTE_MAX} حرف.`,
   FEEDBACK_LIMIT: `أرسلت ${NOTES_PER_DAY} ملاحظة اليوم. جرّب غداً، أو اجمع ما بقي في ملاحظة واحدة.`,
   STATE_INVALID: 'حالة غير معروفة.',
+  SEVERITY_INVALID: 'اختر شدة المشكلة.',
   NOT_FOUND: 'الملاحظة غير موجودة.',
+  MERGE_INVALID: 'لا يمكن دمج هاتين الملاحظتين.',
+  MERGED: 'هذه الملاحظة مدموجة في أخرى. عالج الأصل أو افصلها أولاً.',
 };
 export function feedbackErrorAr(message: string | null | undefined): string {
   const m = message ?? '';
@@ -46,7 +61,15 @@ export type FeedbackRow = {
   last_at: string;
   handled_by: string | null;
   handled_at: string | null;
+  severity?: Severity | null;
+  marks?: Mark[] | null;
+  outline?: Outline | null;
+  context?: NoteContext | null;
+  duplicate_of?: string | null;
 };
+
+/** One of a person's own notes, from feedback_mine. */
+export type MyNote = Pick<FeedbackRow, 'id' | 'kind' | 'severity' | 'page' | 'body' | 'state' | 'created_at' | 'handled_at'>;
 
 // Errors that are the browser's own noise or a person's own doing, not the site's.
 const IGNORED = [

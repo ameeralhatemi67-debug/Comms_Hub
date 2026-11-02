@@ -1,10 +1,15 @@
 {
-  "run": "2026-10-15",
-  "what": "Database rule run for the feedback channel and error monitoring (Action_Plan.md section 5)",
   "script": "supabase/tests/feedback_errors_rules.sql",
-  "migrations": ["supabase/migrations/20261015240000_feedback_errors.sql (applied as feedback_errors)"],
-  "how": "One transaction against the Supabase project comms-hub, aborted at the end by a raised exception that carried the result out (nothing committed). Four throwaway accounts (@t.test).",
+  "script_md5": "669c0a79378606e08276e030fdf8bd77",
+  "migration": {
+    "file": "supabase/migrations/20261102180000_feedback_marks.sql",
+    "file_md5": "47d34a0209fc3963f56eecdc2f356516",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-02T07:35:39.326Z",
+  "migrations_replayed": 61,
+  "differ": [],
   "total": 32,
-  "passed": 32,
-  "failed": []
+  "passed": 32
 }

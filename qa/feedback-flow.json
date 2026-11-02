@@ -1,0 +1,325 @@
+{
+  "script": "qa/feedback-flow.cjs",
+  "run": "2026-11-02T07:39:28.594Z",
+  "checks": [
+    {
+      "name": "the note opens on «مشكلة», graded «مزعجة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says what is sent, and that no picture is",
+      "pass": true,
+      "detail": "يقرؤها مسؤولو النظام، ويصلك إشعار حين تُعالج. تُرسل معها الصفحة (/work/CH-1) واسمك ودورك، ونوع جهازك وحجم شاشتك، وإصدار الموقع، وأخطاء هذه الزيارة، وما تحدده على الصفحة. لا تُرسل صورة للشاشة."
+    },
+    {
+      "name": "an idea has no severity to choose",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the layer replaces the note and covers the screen",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a click sets a pointer",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the page behind is not pressed",
+      "pass": true,
+      "detail": "[\"حدد المكان على الصفحة\"]"
+    },
+    {
+      "name": "a drag draws a box",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "three marks are numbered in order",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a fourth is refused and the bar says so",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "undo takes the last one away",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the bar can move out of the way",
+      "pass": true,
+      "detail": "{\"x\":640,\"y\":44.8984375,\"l\":280,\"t\":12,\"r\":1000,\"b\":77.796875}"
+    },
+    {
+      "name": "a control is named by its words",
+      "pass": true,
+      "detail": "1. زر «افتح نافذة»"
+    },
+    {
+      "name": "or by its label",
+      "pass": true,
+      "detail": "2. زر «زر له اسم»"
+    },
+    {
+      "name": "a field by its label, never its value",
+      "pass": true,
+      "detail": "3. حقل «اسم الحقل»"
+    },
+    {
+      "name": "the outline is drawn with the marks on it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the note carries its severity and three marks",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing typed on the page leaves it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the outline holds no words",
+      "pass": true,
+      "detail": "{\"w\":1280,\"h\":900,\"r\":[[0,0,1280,900,4],[0,72,1280,780,4],[24,96,1232,710,4],[0,0,1280,72,4],[41,255,1198,73,3],[41,284,1198,44,1],[41,113,1198,31,3],[41,164,1198,24,3],[1052,199,94,44,0],[1151,199,88"
+    },
+    {
+      "name": "the context has the version, the screen, the device and the visit's error",
+      "pass": true,
+      "detail": "{\"build\":\"abc1234\",\"app\":\"web\",\"w\":1280,\"h\":900,\"dpr\":1,\"theme\":\"light\",\"errors\":[\"boom in the page\"]}"
+    },
+    {
+      "name": "a person viewing as themself sends no «عرض بصفة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the page has no query or address beyond its path",
+      "pass": true,
+      "detail": "/work/CH-1"
+    },
+    {
+      "name": "a note with an outline is small",
+      "pass": true,
+      "detail": "889"
+    },
+    {
+      "name": "it points to «ملاحظاتي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a sent note leaves nothing behind",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "closed by accident, the note waits with its marks",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«إلغاء» forgets it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape leaves the layer and returns to the note",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "every open window has the button",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the note opens above the window, which stays open",
+      "pass": true,
+      "detail": "[\"نافذة الاختبار\",\"أرسل ملاحظة\"]"
+    },
+    {
+      "name": "the layer works above an open window",
+      "pass": true,
+      "detail": "[\"نافذة الاختبار\",\"حدد المكان على الصفحة\"]"
+    },
+    {
+      "name": "and names it, though the window is inert behind the layer",
+      "pass": true,
+      "detail": "1. زر «زر داخل النافذة»"
+    },
+    {
+      "name": "the window's title goes with the note",
+      "pass": true,
+      "detail": "نافذة الاختبار"
+    },
+    {
+      "name": "and the window is still open afterwards",
+      "pass": true,
+      "detail": "[\"نافذة الاختبار\"]"
+    },
+    {
+      "name": "the key opens the note from inside a window too",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "with no window open there is no floating button",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a private part keeps only the word for what a mark sits on",
+      "pass": true,
+      "detail": "زر"
+    },
+    {
+      "name": "and its window's title stays behind",
+      "pass": true,
+      "detail": "{\"build\":\"abc1234\",\"app\":\"web\",\"w\":1280,\"h\":900,\"dpr\":1,\"theme\":\"light\",\"errors\":[\"boom in the page\"]}"
+    },
+    {
+      "name": "on a mail page the note shows its path",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "on the mail pages a mark keeps only its word",
+      "pass": true,
+      "detail": "زر"
+    },
+    {
+      "name": "an administrator viewing as a role says so",
+      "pass": true,
+      "detail": "designer"
+    },
+    {
+      "name": "new first, then what stops work, merged notes under theirs",
+      "pass": true,
+      "detail": "زر الجدولة لا يستجيب | Cannot read properties | فكرة للترتيب | لون غريب | عولجت من قبل"
+    },
+    {
+      "name": "the note shows its severity and its count",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the outline carries its marks",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the details read in Arabic with no role key",
+      "pass": true,
+      "detail": "الدوركاتب المحتوىعرض بصفةالمصممالجهازمتصفحالشاشة1280×900المظهرنهاريإصدار الموقعabc1234أخطاء الزيارةboom in the page"
+    },
+    {
+      "name": "a merged note keeps its text and author",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the severity filter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the page filter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the brief reaches the clipboard with the page's files",
+      "pass": true,
+      "detail": "[مشكلة · توقف عملي · جديد] /work\r\n\r\nزر الجدولة لا يستجيب\r\n\r\nالدور: كاتب المحتوى\r\nعرض بصفة: المصمم\r\nالجهاز: متصفح\r\nالشاشة: 1280×900\r\nالمظهر: نهاري\r\nإصدار الموقع: abc1234\r\n\r\nالعلامات:\r\n1. زر «افتح نافذة»، عند 93% من العرض و25% من الارتفاع | div.app-shell > main > section.panel > button.primary.target-"
+    },
+    {
+      "name": "«عولج» marks the note",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "merging sends both notes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "separating sends no target",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an error offers no merge",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no sideways overflow in the inbox",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«ملاحظاتي» lists a person's notes with their state",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the daily limit reads in Arabic and the note is kept",
+      "pass": true,
+      "detail": "أرسلت 50 ملاحظة اليوم. جرّب غداً، أو اجمع ما بقي في ملاحظة واحدة."
+    },
+    {
+      "name": "390: the note fits the screen",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: a tap sets a pointer and names what is under it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: the bar fits the screen",
+      "pass": true,
+      "detail": "{\"x\":195,\"y\":783.203125,\"l\":12,\"t\":734.40625,\"r\":378,\"b\":832}"
+    },
+    {
+      "name": "390: the name is right",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: no sideways overflow with the outline",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "390: the inbox has no sideways overflow",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dark: the mark stands apart from the screen behind it",
+      "pass": true,
+      "detail": "{\"box\":\"rgb(241, 154, 141)\",\"frame\":\"rgb(7, 19, 14)\"}"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 63,
+  "passed": 63,
+  "failed": 0
+}

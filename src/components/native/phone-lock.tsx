@@ -113,6 +113,7 @@ function LockDialog({ busy, onOn, onLater }: { busy: boolean; onOn: () => void; 
       ref={ref}
       className="apk-window phone-lock"
       dir="rtl"
+      data-no-note
       aria-label={LOCK.title}
       onCancel={(e) => {
         e.preventDefault();

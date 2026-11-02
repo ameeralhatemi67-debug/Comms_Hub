@@ -3278,3 +3278,54 @@ all. «تحويل إلى عمل» opens «إنشاء» with its words, and the w
   at a save: the file goes to Drive's trash, and the record and its plain text stay.
 - Moves of the whole library, serving and backups carry documents through `file_locations` (`subject_kind = 'work_doc'`). A version
   sent or approved moves only by its checksum. Backups leave out drafts and ideas.
+
+# 69. A tester's note and its marks, 2026-11-02
+
+By owner directive of 2026-11-02, ahead of the test week. A person shows where a problem is, and the note carries what is needed to
+find and fix it. Everything is data on the note's own row: no picture is taken, no file is made and nothing goes to Drive.
+
+## 69.1 Reaching the note
+
+- The button in the top bar, the same button inside any open window (an open window blocks the top bar), and Alt+Shift+N anywhere.
+- It opens on «مشكلة» graded «مزعجة». Severity is «توقف عملي», «مزعجة» or «شكلية», for a problem only.
+- A note closed by accident waits with its text and marks, so a person can close it, scroll to the place and come back. «إلغاء»
+  forgets it. On another page the text stays and the marks go.
+- The limit is 50 notes a day per person.
+
+## 69.2 Marking
+
+- «حدد المكان على الصفحة» opens a layer over the screen, above any open window. A click sets a pointer and a drag draws a box: one
+  gesture, no tool to choose. Up to three numbered marks, «تراجع» takes the last away, and Escape returns to the note.
+- The page behind is never pressed. Nothing scrolls while the layer is up, so a person scrolls first.
+- What a mark sits on is worked out from rectangles read when the layer opens, because an open dialog makes the rest of the page inert
+  and the browser's own hit test cannot answer. A pointer takes the smallest thing under it, a box the thing it matches best.
+
+## 69.3 What a note carries
+
+- **A mark:** its position in thousandths of the screen, the name of what it sits on (a word such as «زر», plus the control's own
+  label, cut to 40 characters) and a short path of tags and class names.
+- **An outline:** the screen as at most 140 rectangles and whole numbers, with no words, kept only when there are marks.
+- **The context:** the role from the account, never from the browser, «عرض بصفة», the site's version, the device and its application
+  version, the screen, the theme, the open window's title, and up to three errors of that visit.
+
+What is never read or sent: a picture, the value of a field, the text of an editor, or anything else a person typed on the page.
+
+**Private spots.** On `/mail` and `/mail/chat`, and inside anything carrying `data-fb-private` (the writing sheet), a mark keeps only the
+word for what it is, and the window's title is dropped. The database applies the same rule to the mail pages again, and rebuilds every
+part from the fields it may hold. Anything malformed is dropped, because a note must never fail for its marks.
+
+The note's window says what is sent, and `public/privacy.html` says it in both languages.
+
+## 69.4 «ملاحظات وأخطاء»
+
+- New notes first, then what stops work, then the latest. Filters: kind, state, severity, page.
+- A note shows its marks on the outline with each mark's name. «التفاصيل» folds the context, in Arabic, with no role key.
+- «انسخ للمطور» copies the note as plain text with the marks' positions and paths and the files that draw the page, from
+  `PAGE_SOURCES`, so it can be handed straight to whoever fixes it.
+- «ادمجها في» merges a note into another, and «افصلها» undoes it. A merged note keeps its row, text and author, is listed under the
+  note it joined, and follows its state. Errors do not merge.
+
+## 69.5 The tester hears back
+
+«عولج» tells the author through «للعلم», which is never pushed, and a late note merged into a handled one is told at once. Nobody is
+told of their own action. «ملاحظاتي» on «الحساب» lists a person's own notes and their state.

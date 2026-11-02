@@ -44,6 +44,8 @@ export default async function Layout({ children }: { children: React.ReactNode }
     <html lang="ar" dir="rtl" data-identity={IDENTITY_NEW} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: RESTORE_THEME }} />
+        {/* The site's version, sent with a tester's note (MVP_draft.md section 69). */}
+        <meta name="hub-build" content={process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? 'local'} />
       </head>
       <body>
         {session.status === 'ready' ? (

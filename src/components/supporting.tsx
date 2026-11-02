@@ -21,7 +21,7 @@ import { StorageTab } from './settings/storage';
 import { BackupsTab } from './settings/backups';
 import { PlatformsTab } from './settings/platforms';
 import { ConnectionsTab } from './settings/connections';
-import { FeedbackTab } from './feedback';
+import { FeedbackTab, MyNotes } from './feedback';
 import { DesktopAppPanel } from './native/desktop-app';
 import { useNativePlatform } from './native/use-native';
 import { PhoneAppPanel } from './native/phone-app';
@@ -149,6 +149,9 @@ export function Supporting({ page }: { page: string }) {
         <PhoneLockPanel />
         <Panel title="صلاحياتي" className="pm-minepanel">
           <MyPermissions />
+        </Panel>
+        <Panel title="ملاحظاتي" className="fb-minepanel">
+          <MyNotes />
         </Panel>
         <Panel title="واتساب" className="wa-panel">
           <WhatsAppSettings />

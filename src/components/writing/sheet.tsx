@@ -527,7 +527,7 @@ export function WritingSheet({ d, target = 'main', reload, onClose, onSend, onEx
 
   return (
     <Sheet label={`ورقة الكتابة: ${x.title}`} onClose={close}>
-      <div ref={root} className={`wr-sheet ${focus ? 'focus' : ''}`} data-gd="writing-sheet">
+      <div ref={root} className={`wr-sheet ${focus ? 'focus' : ''}`} data-gd="writing-sheet" data-fb-private>
         <header className="wr-head">
           <div className="wr-title">
             <h2>{x.title}</h2>

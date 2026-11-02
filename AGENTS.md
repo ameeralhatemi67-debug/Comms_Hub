@@ -503,6 +503,15 @@ section 68, recorded in `progress.md`).
   `qa/writing-flow.cjs`, which clicks through the real sheet and pages on a fixture. `qa/writing-live.cjs` looks at the live site
   after a deployment. The migration was applied to comms-hub on 2026-11-02 with the owner's approval.
 
+A tester's note carries marks, by owner directive of 2026-11-02 (`MVP_draft.md` section 69, recorded in `progress.md`). A click sets a
+pointer and a drag draws a box, up to three, in `src/components/feedback-mark.tsx`. Everything is data on the note's row in
+`feedback_reports` (`supabase/migrations/*feedback_marks*`): never add a screenshot, a page snapshot or a read of a field's value,
+because mail, messaging and drafts are private from the people who read the notes. An outline is rectangles and numbers with no
+words. The rules are `src/lib/feedback/marks.ts`, reading the page is `capture.ts`, and the database rebuilds every part again. A
+private part of a page carries `data-fb-private`, and a window that must offer no note carries `data-no-note`. The limits and the private
+paths exist once in TypeScript and once in SQL, held equal by `tests/feedback.test.mjs`. `qa/feedback-flow.cjs` clicks through the real
+note, layer and inbox on a fixture, and `supabase/tests/feedback_marks_rules.sql` holds the database's half.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted

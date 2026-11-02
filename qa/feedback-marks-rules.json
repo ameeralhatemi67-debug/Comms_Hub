@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/feedback_marks_rules.sql",
+  "script_md5": "4b6c15f73dd9e4439911ed123a7c1aea",
+  "migration": {
+    "file": "supabase/migrations/20261102180000_feedback_marks.sql",
+    "file_md5": "47d34a0209fc3963f56eecdc2f356516",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-02T07:35:06.024Z",
+  "migrations_replayed": 61,
+  "differ": [],
+  "total": 72,
+  "passed": 72
+}
