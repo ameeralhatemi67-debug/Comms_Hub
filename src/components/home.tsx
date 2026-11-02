@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 import { BriefcaseBusiness, CalendarDays, Inbox, PenLine, Plus, Shield, TriangleAlert, Users } from 'lucide-react';
 import { roles } from '@/lib/domain';
+import { useCanCreate } from './can-create';
 import {
   ACTIVE,
   OUTSTANDING,
@@ -45,6 +46,7 @@ export function HomePage() {
   const w = useWork();
   const { items, status } = useWorkList();
   const plan = usePlanData();
+  const canCreate = useCanCreate();
   const role = w.role;
   const lead = isLead(role);
   const me = w.me;
@@ -130,7 +132,7 @@ export function HomePage() {
             <Ic i={CalendarDays} />
             اليوم: {fdate(w.today)}
           </span>
-          {roles[role].create && (
+          {canCreate && (
             <Link className="wk-btn gold" href="/create">
               <Ic i={Plus} />
               {role === 'member' ? 'طلب جديد' : 'إنشاء عمل'}
@@ -209,7 +211,7 @@ export function HomePage() {
                 </div>
               ) : (
                 <Empty i={BriefcaseBusiness} title={items.length ? 'لا شيء ينتظرك الآن' : 'لا أعمال بعد'}>
-                  {items.length ? 'ما يحتاجك يظهر هنا حين يصل.' : roles[role].create ? 'ابدأ من «إنشاء عمل». يصدر المركز الرقم الأول CH-1.' : 'تظهر هنا الأعمال حين ينشئها الفريق.'}
+                  {items.length ? 'ما يحتاجك يظهر هنا حين يصل.' : canCreate ? 'ابدأ من «إنشاء عمل». يصدر المركز الرقم الأول CH-1.' : 'تظهر هنا الأعمال حين ينشئها الفريق.'}
                 </Empty>
               )}
               <Link className="wk-lk" href="/work">

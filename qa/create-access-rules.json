@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/create_access_rules.sql",
+  "script_md5": "7e0930bfbe8f73f384a8b01eb7951ed7",
+  "migration": {
+    "file": "supabase/migrations/20261102200000_create_access.sql",
+    "file_md5": "ec7c7f71087089e0fe514a65446e67fd",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-02T09:53:20.172Z",
+  "migrations_replayed": 62,
+  "differ": [],
+  "total": 61,
+  "passed": 61
+}

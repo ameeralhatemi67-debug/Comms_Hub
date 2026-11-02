@@ -115,7 +115,8 @@ function FullShell({ children }: { children: ReactNode }) {
   // database; an administrator viewing as another role sees it as that role's leaders do.
   const caps = useCaps();
   useErrorReporter();
-  const visible = menuFor(account, { viewAs: state.role, hasCap: caps.has }).map((e) => [e.href, e.label, menuIcons[e.href]] as const);
+  const roleCreates = caps.creators ? (r: Role) => caps.creators!.includes(r) : undefined;
+  const visible = menuFor(account, { viewAs: state.role, hasCap: caps.has, roleCreates }).map((e) => [e.href, e.label, menuIcons[e.href]] as const);
   const allowed = (href: string) => visible.some((n) => n[0] === href);
 
   const signOut = async () => {

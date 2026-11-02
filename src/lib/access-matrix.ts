@@ -46,7 +46,7 @@ export type AccessMatrix = {
 const homeId = (href: string) => (href === '/' ? '' : href.slice(1));
 
 export function accessMatrix(): AccessMatrix {
-  const capKeys = CAPABILITIES.filter((c) => c.scope !== 'page');
+  const capKeys = CAPABILITIES.filter((c) => !c.key.startsWith('page.'));
   const held = (role: Role, key: string) =>
     resolve({ role, pages: [], templates: installedDefault, grants: [] }, key, 0).ok;
 

@@ -38,6 +38,14 @@ const alwaysOpen = new Set(['', 'account', 'share']);
 /** The roles that open «حسابات المنصات» (/channels), with the «الموافقات والنشر» page. */
 export const linkedAccountRoles: Role[] = ['director', 'assistant', 'publisher'];
 
+/**
+ * The roles a new account holds «إنشاء» by. The designer and the member are given it, as a role or one by one, by the
+ * Admin or the Director (MVP_draft.md section 70). It lives in the capability `page.create`, not in an account's page
+ * list, and it is not the role's ability to create content (`roles[...].create`, which also decides uploads): that says
+ * who may ever hold it.
+ */
+export const createStarts: readonly Role[] = ['director', 'assistant', 'writer', 'producer'];
+
 /** The grants that open «المشاريع» (/projects) and «الطلبات» (/requests). */
 export const projectPageGrants = ['work', 'calendar'] as const;
 export const requestPageGrants = ['work', 'media', 'tasks'] as const;
@@ -93,7 +101,7 @@ export function sanitizePages(pages: readonly string[] | null | undefined): Gran
  */
 export function defaultPages(role: Role): GrantablePage[] {
   return grantablePages
-    .filter((p) => (p.id !== 'create' || roles[role].create) && (p.id !== 'settings' || role === 'admin'))
+    .filter((p) => (p.id !== 'create' || createStarts.includes(role)) && (p.id !== 'settings' || role === 'admin'))
     .map((p) => p.id);
 }
 
@@ -120,6 +128,20 @@ export function canOpen(account: Pick<Account, 'role' | 'pages' | 'caps'>, page:
   // Creating is also a role ability; a page grant cannot give it to a role that lacks it.
   if (page === 'create' && !roles[account.role].create) return false;
   return account.pages.includes(page);
+}
+
+/**
+ * May this person create, as the role they are viewing? A person answers for themself. An administrator viewing as a role
+ * sees what that role holds (`roleHolds`, read live where it can be), so the page looks as it does to that role.
+ */
+export function mayCreate(
+  account: Pick<Account, 'role'>,
+  viewAs: Role,
+  holds: boolean,
+  roleHolds: (role: Role) => boolean = (r) => createStarts.includes(r),
+): boolean {
+  if (!roles[viewAs].create) return false;
+  return isAdmin(account) ? roleHolds(viewAs) : holds;
 }
 
 /** May this person open the studio? The motion page and the studio capability, as studio_can() decides. */
@@ -190,7 +212,7 @@ export type MenuHref = (typeof menuEntries)[number]['href'];
  */
 export function menuFor(
   account: Pick<Account, 'role' | 'pages' | 'caps'>,
-  opts: { viewAs?: Role; hasCap?: (key: string) => boolean } = {},
+  opts: { viewAs?: Role; hasCap?: (key: string) => boolean; roleCreates?: (role: Role) => boolean } = {},
 ): (typeof menuEntries)[number][] {
   const viewAs = opts.viewAs ?? account.role;
   const hasCap = opts.hasCap ?? ((k: string) => !!account.caps?.includes(k));
@@ -202,7 +224,7 @@ export function menuFor(
         : e.href === '/settings'
           ? canOpen(account, 'settings') || SETTINGS_CAPS.some((c) => hasCap(c))
           : canOpen(account, e.href.slice(1))) &&
-      (e.href !== '/create' || roles[viewAs].create),
+      (e.href !== '/create' || mayCreate(account, viewAs, canOpen(account, 'create'), opts.roleCreates)),
   );
 }
 

@@ -9,6 +9,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, ChartGantt, FileText, Film, Flag, Image as ImageIcon, Lock, Mail, Play, Plus, Send, Users, WandSparkles, X } from 'lucide-react';
 import { roles } from '@/lib/domain';
+import { needProps } from '@/lib/kit/need';
+import { useCanCreate } from '../can-create';
 import { supabase } from '@/lib/supabase/client';
 import {
   ACTIVE,
@@ -61,6 +63,7 @@ type Draft = {
 
 export function CreatePage() {
   const w = useWork();
+  const canCreate = useCanCreate();
   const router = useRouter();
   const member = w.role === 'member';
   const lead = isLead(w.role);
@@ -175,6 +178,17 @@ export function CreatePage() {
       <div className="wk">
         <Empty i={Lock} title="إنشاء العمل غير متاح لدورك">
           مسؤول النشر يستلم الأعمال المعتمدة للجدولة، ولا ينشئ عملاً جديداً.
+        </Empty>
+      </div>
+    );
+  if (!canCreate)
+    return (
+      <div className="wk">
+        <Empty i={Lock} title="«إنشاء» غير مفتوحة لك">
+          يفتحها مدير الاتصال أو مسؤول النظام، لدورك كله أو لك وحدك.
+          <button type="button" className="secondary" {...needProps('page.create', 'يفتحها مدير الاتصال أو مسؤول النظام، لدورك كله أو لك وحدك.')}>
+            اطلب هذه الصلاحية
+          </button>
         </Empty>
       </div>
     );

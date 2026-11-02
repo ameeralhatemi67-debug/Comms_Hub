@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, Lock, Minus, Package, Plus } from 'lucide-react';
 import type { Role } from '@/lib/domain';
 import { defaultPages, sanitizePages } from '@/lib/access';
-import { CAPABILITIES, GROUP_AR, ROLE_HINT, capability, createsContent, peopleAr, rankOf, resolve, roleAr, roleHolds, sourceLine, type Capability } from '@/lib/permissions';
+import { CAPABILITIES, GROUP_AR, ROLE_HINT, capability, createsContent, givesCreate, peopleAr, rankOf, resolve, roleAr, roleHolds, sourceLine, type Capability } from '@/lib/permissions';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { Modal } from '../ui';
 import { useAccounts, type Member } from './data';
@@ -36,6 +36,7 @@ export function RolesTab({ first, onOpen, onNewPreset }: { first?: string | null
   const isOn = (r: Role, cap: string) => roleHolds(a.defaults, r, cap);
   const editWhy = (r: Role, cap: string): string => {
     if (r === 'admin') return 'صلاحيات Admin ثابتة.';
+    if (cap === 'page.create' && !givesCreate(a.me.role)) return 'صفحة «إنشاء» يمنحها مدير الاتصال ومسؤول النظام.';
     if (!a.can('roles.templates.edit')) return 'تعديل الأدوار لمن يملك «تعديل صلاحيات الأدوار».';
     if (a.me.role !== 'admin' && rankOf(r) >= rankOf(a.me.role)) return 'لا تعدّل دوراً في رتبتك أو فوقها.';
     if (!isOn(r, cap) && a.me.role !== 'admin' && !a.can(cap)) return 'لا تفعّل ما لا تملكه أنت.';
@@ -144,7 +145,7 @@ export function RolesTab({ first, onOpen, onNewPreset }: { first?: string | null
                   <tr key={grp} className="pm-grp">
                     <th colSpan={managed.length + 2}>
                       {GROUP_AR[grp]}
-                      {grp === 'pages' && <small>الدور يحدد ما يبدأ به الحساب الجديد، وصفحات كل شخص تخصه.</small>}
+                      {grp === 'pages' && <small>الدور يحدد ما يبدأ به الحساب الجديد، وصفحات كل شخص تخصه. «إنشاء» تُفتح للدور كله أو لشخص بعينه.</small>}
                     </th>
                   </tr>,
                   ...list.map((c) => {

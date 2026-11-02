@@ -20,6 +20,8 @@ type Caps = {
   has: (key: string) => boolean;
   evalOf: (key: string) => CapEval | undefined;
   reload: () => Promise<void>;
+  /** For an administrator viewing as a role: the roles that hold «إنشاء» now. */
+  creators: string[] | null;
 };
 
 const CapsContext = createContext<Caps | null>(null);
@@ -28,7 +30,7 @@ export function useCaps(): Caps {
   const v = useContext(CapsContext);
   if (v) return v;
   // Outside the provider (a page drawn on its own): nothing beyond what the server said.
-  return { ready: false, evals: [], grants: [], has: () => false, evalOf: () => undefined, reload: async () => {} };
+  return { ready: false, evals: [], grants: [], has: () => false, evalOf: () => undefined, reload: async () => {}, creators: null };
 }
 
 export function CapsProvider({ children }: { children: ReactNode }) {
@@ -37,6 +39,7 @@ export function CapsProvider({ children }: { children: ReactNode }) {
   const [evals, setEvals] = useState<CapEval[]>([]);
   const [grants, setGrants] = useState<Grant[]>([]);
   const [ready, setReady] = useState(false);
+  const [creators, setCreators] = useState<string[] | null>(null);
   const pagesKey = useRef<string | null>(null);
 
   const reload = useCallback(async () => {
@@ -47,10 +50,14 @@ export function CapsProvider({ children }: { children: ReactNode }) {
     setEvals(caps);
     setGrants(d.grants ?? []);
     setReady(true);
+    if (account.role === 'admin') {
+      const { data: rows } = await supabase().from('role_capabilities').select('role').eq('capability', 'page.create').eq('allowed', true);
+      if (rows) setCreators((rows as { role: string }[]).map((r) => r.role));
+    }
     const key = caps.filter((c) => c.k.startsWith('page.') && c.ok).map((c) => c.k).join(',') + '|' + (caps.find((c) => c.k === 'accounts.view')?.ok ?? '');
     if (pagesKey.current !== null && pagesKey.current !== key) router.refresh();
     pagesKey.current = key;
-  }, [router]);
+  }, [account.role, router]);
 
   // Live: a grant, an override or a role template that concerns this person.
   useEffect(() => {
@@ -94,8 +101,9 @@ export function CapsProvider({ children }: { children: ReactNode }) {
       evalOf: (k) => byKey.get(k),
       has: (k) => (ready ? !!byKey.get(k)?.ok : k.startsWith('page.') ? account.pages.includes(k.slice(5)) : fallback.has(k)),
       reload,
+      creators,
     };
-  }, [account.caps, account.pages, evals, grants, ready, reload]);
+  }, [account.caps, account.pages, creators, evals, grants, ready, reload]);
 
   return <CapsContext.Provider value={value}>{children}</CapsContext.Provider>;
 }

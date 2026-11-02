@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { roles } from '@/lib/domain';
+import { useCanCreate } from '../can-create';
 import { useHub } from '@/lib/store';
 import { Title } from '../ui';
 import {
@@ -104,6 +105,7 @@ function Mail() {
   const m = useMail();
   const router = useRouter();
   const { state, dispatch } = useHub();
+  const canCreate = useCanCreate();
   const [folder, setFolderState] = useState<FolderId>(memory.folder);
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<'all' | 'unread' | 'internal' | 'external' | 'cards'>('all');
@@ -582,7 +584,7 @@ function Mail() {
         <WorkDialog
           view={open}
           onClose={() => setDialog(null)}
-          canCreate={roles[state.role].create}
+          canCreate={canCreate}
           onCreate={() => router.push(`/create?mail=${open.thread.id}`)}
           onLink={async (id, title, assignee) => {
             const r = await m.call('mail_link_work', { p_thread: open.thread.id, p_work: id, p_title: title, p_assignee: assignee || null }, `رُبطت المحادثة بالعمل ${id}.`);

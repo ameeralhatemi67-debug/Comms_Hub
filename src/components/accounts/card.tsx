@@ -32,6 +32,8 @@ import {
   type CapGroup,
   type Grant,
   type Mode,
+  givesCreate,
+  notOnce,
 } from '@/lib/permissions';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { Modal } from '../ui';
@@ -76,7 +78,7 @@ export function PersonSwitch({ person, k, e, label, blocked }: {
   const [want, setWant] = useState<boolean | null>(null);
   useEffect(() => setWant(null), [e.ok, e.src, e.id]);
   const has = roleHolds(a.defaults, person.role, k);
-  const why = blocked || switchWhy(k, e, person.role, has, a.can(k) || a.me.role === 'admin');
+  const why = blocked || switchWhy(k, e, person.role, has, a.can(k) || a.me.role === 'admin', a.me.role);
   const on = want ?? e.ok;
   const flip = async () => {
     const step = switchStep(e, has);
@@ -371,7 +373,7 @@ function PermRow({ e, card, short, blocked, onGrant, onExtend }: { e: CapEval; c
   const label = short ? pageName(e.k) : capLabel(e.k);
   // «من صفحات الحساب» on every page says nothing: what is plainly so stays unsaid, what stands out is named.
   const note = e.src === 'none' || e.src === 'page' ? '' : `${sourceLine(e)}${g?.scope?.room ? ' · لمحادثة واحدة' : ''}`;
-  const free = !blocked && !switchWhy(e.k, e, card.role, roleHolds(a.defaults, card.role, e.k), a.can(e.k) || a.me.role === 'admin');
+  const free = !blocked && !switchWhy(e.k, e, card.role, roleHolds(a.defaults, card.role, e.k), a.can(e.k) || a.me.role === 'admin', a.me.role);
   return (
     <div className={`pm-perm ${e.ok ? 'on' : 'off'}`}>
       <span className="pm-permname">
@@ -506,7 +508,8 @@ export function GrantDialog({ emails, initial, requestId, defaults, onClose, onD
     const n = q.trim();
     return CAPABILITIES.filter((x) => x.grantable && (!n || x.label.includes(n))).map((x) => {
       let why = '';
-      if (!a.can(x.key) && a.me.role !== 'admin') why = 'لا تملكها أنت';
+      if (x.key === 'page.create' && !givesCreate(a.me.role)) why = 'يمنحها مدير الاتصال ومسؤول النظام';
+      else if (!a.can(x.key) && a.me.role !== 'admin') why = 'لا تملكها أنت';
       else if (minRank < x.minRank) why = 'لا تناسب دور من اخترت';
       else if (x.key === 'page.create' && people.some((p) => !['director', 'assistant', 'writer', 'designer', 'producer', 'member'].includes(p.role))) why = 'لمن يملك دوره الإنشاء';
       return { x, why };
@@ -518,7 +521,7 @@ export function GrantDialog({ emails, initial, requestId, defaults, onClose, onD
   const effUntil = mode === 'standing' || (mode === 'once' && dur === 'none') ? null : picked;
   const roomName = rooms.find((r) => r.id === room)?.name ?? null;
   const names = people.map((p) => p.display_name).join(' و');
-  const ready = !!c && (mode !== 'timed' || !!effUntil) && !(mode === 'once' && c.scope === 'page');
+  const ready = !!c && (mode !== 'timed' || !!effUntil) && !(mode === 'once' && notOnce(c));
 
   const save = async () => {
     if (!c) return;
@@ -596,8 +599,8 @@ export function GrantDialog({ emails, initial, requestId, defaults, onClose, onD
               key={m}
               aria-pressed={mode === m}
               className={mode === m ? 'on' : ''}
-              disabled={m === 'once' && c?.scope === 'page'}
-              title={m === 'once' && c?.scope === 'page' ? 'الصفحة تُفتح دائماً أو مؤقتاً، لا مرة واحدة.' : ''}
+              disabled={m === 'once' && !!c && notOnce(c)}
+              title={m === 'once' && c && notOnce(c) ? 'الصفحة تُفتح دائماً أو مؤقتاً، لا مرة واحدة.' : ''}
               onClick={() => {
                 setMode(m);
                 if (m === 'once') setDur('none');

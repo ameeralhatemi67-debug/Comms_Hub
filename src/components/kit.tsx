@@ -11,7 +11,7 @@ import { installGuide, type GuideApi } from '@/lib/kit/guide';
 import { installHold } from '@/lib/kit/hold';
 import { installNeed, NEED_EVENT, type NeedDetail } from '@/lib/kit/need';
 import { RequestPermissionDialog } from './perm-requests';
-import { undoKeyApplies, undoTip, type UndoItem } from '@/lib/kit/undo';
+import { undoKeyApplies, undoNothing, undoTarget, undoTip, undoable, type UndoItem } from '@/lib/kit/undo';
 import { pageKeyOf, roleGroup } from '@/lib/help/registry';
 
 type Offer = { tx: number; label: string; at: number };
@@ -59,14 +59,16 @@ export function KitProvider({ children }: { children: ReactNode }) {
   const undo = useCallback(
     async (tx?: number) => {
       if (busy.current) return;
-      const target = tx ?? itemsRef.current[0]?.tx;
-      if (!target) return say('لا شيء للتراجع عنه.');
       busy.current = true;
       setOffer(null);
       try {
+        // The list is only read after a library change, so read it again: what was possible may not be now.
+        const fresh = tx ? itemsRef.current : await list();
+        const target = tx ?? undoTarget(fresh)?.tx;
+        if (!target) return say(undoNothing(fresh));
         const res = await fetch('/api/undo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tx: target }) });
         const j = (await res.json().catch(() => null)) as { label?: string; error?: string } | null;
-        const left = await list();
+        const left = undoable(await list());
         reloaders.current.forEach((f) => f());
         if (!res.ok) return say(j?.error ?? 'تعذّر التراجع. أعد المحاولة.');
         say(`تراجعتَ عن: ${j?.label ?? 'الإجراء'}${left.length ? `. يمكنك التراجع عن ${left.length} قبله` : ''}`);
@@ -211,10 +213,11 @@ export function HelpButton() {
 export function UndoButton() {
   const k = useKit();
   const tip = undoTip(k.undoItems);
+  const able = undoable(k.undoItems).length;
   return (
-    <button type="button" className="undo-button" disabled={!k.undoItems.length} aria-label={tip} title={tip} onClick={() => void k.undo()}>
+    <button type="button" className="undo-button" disabled={!able} aria-label={tip} title={tip} onClick={() => void k.undo()}>
       <Undo2 />
-      {k.undoItems.length > 0 && <i>{k.undoItems.length}</i>}
+      {able > 0 && <i>{able}</i>}
     </button>
   );
 }

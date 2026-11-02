@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { HubPage } from '@/components/hub-page';
 import { NoAccess } from '@/components/no-access';
 import { canOpenRoute } from '@/lib/access';
+import { createsContent } from '@/lib/permissions';
 import { getSession } from '@/lib/supabase/session';
 
 export default async function Page({ params }: { params: Promise<{ slug?: string[] }> }) {
@@ -16,6 +17,6 @@ export default async function Page({ params }: { params: Promise<{ slug?: string
   // «المراقبة» joined «سجل النشاط» (Action_Plan.md B2).
   if (slug[0] === 'monitoring') redirect('/activity');
   // The page of the first segment, and the studio's own rule for /motion/studio (MVP_draft.md 62).
-  if (!canOpenRoute(session.account, slug)) return <NoAccess />;
+  if (!canOpenRoute(session.account, slug)) return <NoAccess askCreate={slug[0] === 'create' && createsContent(session.account.role)} />;
   return <HubPage route={slug} />;
 }

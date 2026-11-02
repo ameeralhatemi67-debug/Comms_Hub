@@ -24,10 +24,21 @@ export function undoErrorText(message: string | null | undefined): string {
   return 'تعذّر التراجع. أعد المحاولة.';
 }
 
-/** The undo button's title: the latest action, and how many before it. */
+/** What the button works on: the newest action that can still be undone. One that is refused must not hide those before it. */
+export const undoTarget = (items: UndoItem[]): UndoItem | null => items.find((x) => x.ok) ?? null;
+export const undoable = (items: UndoItem[]) => items.filter((x) => x.ok);
+
+const NOTHING_LEFT = 'لا يمكن التراجع: تغيّر شيء آخر بعد إجراءاتك.';
+
+/** What to say when the button finds nothing to work on. */
+export const undoNothing = (items: UndoItem[]) => (items.length ? NOTHING_LEFT : 'لا شيء للتراجع عنه.');
+
+/** The undo button's title: the action it will undo, and how many before it. */
 export function undoTip(items: UndoItem[]): string {
   if (!items.length) return 'لا شيء للتراجع عنه';
-  const [last, ...rest] = items;
+  const able = undoable(items);
+  if (!able.length) return NOTHING_LEFT;
+  const [last, ...rest] = able;
   return `تراجع عن: ${last.label}${rest.length ? ` · و${rest.length} قبله` : ''} · Ctrl+Z`;
 }
 

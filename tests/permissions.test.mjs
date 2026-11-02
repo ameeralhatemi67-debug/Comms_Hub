@@ -25,6 +25,9 @@ const studioSql = readFileSync('supabase/migrations/20261019120000_studio_access
 // «سجل النشاط» adds the whole log and the month's report (MVP_draft.md 66).
 const activitySql = readFileSync('supabase/migrations/20261101120000_activity_report.sql', 'utf8');
 
+// «إنشاء» as a role template, given by the Admin and the Director (MVP_draft.md section 70).
+const createSql = readFileSync('supabase/migrations/20261102200000_create_access.sql', 'utf8');
+
 /** The catalog rows of the migration's insert, parsed. */
 function seeded() {
   const block = sql.slice(sql.indexOf('insert into public.capabilities'), sql.indexOf('-- Role templates equal'))
@@ -47,6 +50,11 @@ test('the catalog in TypeScript is the catalog the database seeds', () => {
   for (const c of CAPABILITIES) {
     const d = db.find((x) => x.key === c.key);
     assert.ok(d, c.key);
+    // «إنشاء» moved from the page list to the capability model (MVP_draft.md section 70).
+    if (c.key === 'page.create') {
+      assert.match(createSql, /update public\.capabilities set scope_kind = 'none' where key = 'page\.create'/);
+      d.scope = 'none';
+    }
     assert.deepEqual({ ...d }, { key: c.key, grp: c.grp, label: c.label, grantable: c.grantable, scope: c.scope, minRank: c.minRank, fixedRoles: c.fixedRoles, why: c.why, sort: c.sort }, c.key);
   }
 });
@@ -77,8 +85,10 @@ test('the studio is fixed to the Admin and the director, with its reason in Arab
 test('installed role templates equal what the migrations leave in role_capabilities', () => {
   const grantable = CAPABILITIES.filter((c) => c.grantable && c.scope !== 'page').map((c) => c.key);
   for (const k of grantable) assert.equal(installedDefault('admin', k), k !== 'whatsapp.push', `admin ${k}`);
-  for (const role of ['writer', 'designer', 'producer', 'publisher', 'member'])
-    assert.deepEqual(grantable.filter((k) => installedDefault(role, k)), [], role);
+  for (const role of ['designer', 'publisher', 'member']) assert.deepEqual(grantable.filter((k) => installedDefault(role, k)), [], role);
+  for (const role of ['writer', 'producer']) assert.deepEqual(grantable.filter((k) => installedDefault(role, k)), ['page.create'], role);
+  for (const role of ['admin', 'director', 'assistant', 'writer', 'producer']) assert.match(createSql, new RegExp(`\\('${role}', 'page\\.create', true, 'system'\\)`), role);
+  for (const role of ['designer', 'member', 'publisher']) assert.match(createSql, new RegExp(`\\('${role}', 'page\\.create', false, 'system'\\)`), role);
   // The same cases appear in the migration's seed.
   assert.match(sql, /when c\.key = 'whatsapp\.push' then false/);
   assert.match(sql, /when c\.key in \('urgency\.2','mail\.outside\.send','room\.create'\) then r in \('director','assistant'\)/);
@@ -90,7 +100,7 @@ test('installed role templates equal what the migrations leave in role_capabilit
   const wa = readFileSync('supabase/migrations/20261015200000_whatsapp_bridge_from_site.sql', 'utf8');
   const fromWa = [...wa.matchAll(/rc\.capability = '([a-z.]+)'/g)].map((m) => m[1]);
   assert.deepEqual(fromWa, ['whatsapp.system.manage']);
-  const seed = ['urgency.2', 'mail.outside.send', 'room.create'];
+  const seed = ['page.create', 'urgency.2', 'mail.outside.send', 'room.create'];
   assert.deepEqual([...grantable.filter((k) => installedDefault('assistant', k))].sort(), [...seed, ...fromP2('assistant')].sort());
   const fromActivity = [...activitySql.slice(0, activitySql.indexOf('insert into public.role_capabilities')).matchAll(/\('(activity\.[a-z]+)',/g)].map((m) => m[1]);
   assert.deepEqual(fromActivity, ['activity.full', 'activity.report']);
@@ -213,8 +223,10 @@ test('a switch that cannot move says why, as the database would refuse', async (
 test('changing a role says what it gives and takes, from the templates and the fixed rules', async () => {
   const { roleChange, roleHolds, pagesAr, peopleAr, ROLE_HINT, createsContent } = await import('../src/lib/permissions.ts');
   const has = (r, k) => installedDefault(r, k);
-  const none = roleChange('writer', 'designer', has);
-  assert.deepEqual(none, { gains: [], losses: [] }, 'the five team roles hold the same by default');
+  const none = roleChange('writer', 'producer', has);
+  assert.deepEqual(none, { gains: [], losses: [] }, 'the writer and the producer hold the same by default');
+  assert.deepEqual(roleChange('writer', 'designer', has), { gains: [], losses: ['صفحة «إنشاء»'] }, 'the designer does not start with «إنشاء»');
+  assert.deepEqual(roleChange('designer', 'writer', has), { gains: ['صفحة «إنشاء»'], losses: [] });
   const up = roleChange('writer', 'assistant', has);
   assert.ok(up.gains.includes('اعتماد جزء من عمل أو رفضه'), 'a fixed rule follows the role');
   assert.ok(up.gains.includes('منح الصلاحيات وسحبها'), 'a template follows the role');

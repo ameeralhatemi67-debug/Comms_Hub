@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { BriefcaseBusiness, CalendarDays, Columns3, Download, FileText, Flag, List, PenLine, Plus, Search } from 'lucide-react';
 import { roles } from '@/lib/domain';
+import { useCanCreate } from '../can-create';
 import {
   ACTIVE,
   ACTIVE_WORKS,
@@ -47,6 +48,7 @@ type Quick = '' | 'late' | 'soon' | 'stages' | 'review' | 'urgent';
 
 export function WorkListPage() {
   const w = useWork();
+  const canCreate = useCanCreate();
   const { items, status } = useWorkList();
   const router = useRouter();
   const params = useSearchParams();
@@ -127,7 +129,7 @@ export function WorkListPage() {
             <Ic i={CalendarDays} />
             اليوم: {fdate(today)}
           </span>
-          {roles[w.role].create && (
+          {canCreate && (
             <Link className="wk-btn gold" href="/create">
               <Ic i={Plus} />
               {w.role === 'member' ? 'طلب جديد' : 'إنشاء عمل'}
@@ -350,11 +352,11 @@ function DocsList({ docs, items, latest }: { docs: DocRow[]; items: ListItem[]; 
 }
 
 function EmptyTab({ tab, total }: { tab: WorkTab; total: number }) {
-  const w = useWork();
+  const canCreate = useCanCreate();
   if (!total)
     return (
       <Empty i={BriefcaseBusiness} title="لا أعمال بعد">
-        {roles[w.role].create ? 'ابدأ من «إنشاء عمل»، أو حوّل رسالة بريد إلى عمل. يصدر المركز الرقم الأول CH-1.' : 'تظهر هنا الأعمال حين ينشئها الفريق.'}
+        {canCreate ? 'ابدأ من «إنشاء عمل»، أو حوّل رسالة بريد إلى عمل. يصدر المركز الرقم الأول CH-1.' : 'تظهر هنا الأعمال حين ينشئها الفريق.'}
       </Empty>
     );
   const [t, b] =

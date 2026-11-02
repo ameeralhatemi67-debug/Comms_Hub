@@ -237,7 +237,6 @@ export const isLead = (r: Role) => r === 'director' || r === 'assistant' || r ==
 /** Approvers, urgent work included (owner decision of 2026-10-12). */
 export const isApprover = (r: Role) => isLead(r);
 export const isUrgentApprover = (r: Role) => isLead(r);
-export const canCreateWork = (r: Role) => r !== 'publisher';
 export const canPublish = (r: Role) => r === 'publisher' || r === 'admin';
 export const canManageAccounts = (r: Role) => isLead(r);
 export const canAssignTasksToOthers = (r: Role) => isLead(r) || r === 'producer';

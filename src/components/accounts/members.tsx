@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Check, ChevronDown, Clock, KeyRound, Lock, Plus, SlidersHorizontal, Trash2, UserCog, X } from 'lucide-react';
 import { roles, type Role } from '@/lib/domain';
 import { defaultPages, grantablePages, sanitizePages } from '@/lib/access';
-import { CAPABILITIES, ROLE_HINT, assignableBy, capLabel, manageBlock, markers, pagesAr, rankOf, roleAr, roleChange, roleHolds } from '@/lib/permissions';
+import { CAPABILITIES, ROLE_HINT, assignableBy, capLabel, createsContent, givesCreate, manageBlock, markers, pagesAr, rankOf, roleAr, roleChange, roleHolds } from '@/lib/permissions';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { ENTRY_STATE_AR, sendInvite } from '@/lib/entry';
 import { Modal } from '../ui';
@@ -281,10 +281,11 @@ export function MemberDialog({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const extras = a.can('permissions.grant')
-    ? CAPABILITIES.filter((c) => c.grantable && c.scope !== 'page' && rankOf(role) >= c.minRank && !roleHolds(a.defaults, role, c.key) && (a.me.role === 'admin' || a.can(c.key)))
+    ? CAPABILITIES.filter((c) => c.grantable && c.scope !== 'page' && (c.key !== 'page.create' || (createsContent(role) && givesCreate(a.me.role))) && rankOf(role) >= c.minRank && !roleHolds(a.defaults, role, c.key) && (a.me.role === 'admin' || a.can(c.key)))
     : [];
   const chosen = extra.filter((k) => extras.some((c) => c.key === k));
-  const open = sanitizePages(pages).filter((p) => p !== 'create' || roles[role].create);
+  // «إنشاء» follows the role, or a permission chosen below: it is not in the account's page list.
+  const open = sanitizePages(pages).filter((p) => p !== 'create');
   const nameField = useRef<HTMLInputElement>(null);
   // The dialog gives focus to its first control as it opens, which is its close button: the name is what comes next.
   useEffect(() => {
@@ -374,15 +375,14 @@ export function MemberDialog({
             <fieldset>
               <legend>الصفحات المفتوحة</legend>
               <div className="page-grid">
-                {grantablePages.map((p) => {
-                  const noCreate = p.id === 'create' && !roles[role].create;
+                {grantablePages.filter((p) => p.id !== 'create').map((p) => {
                   const notMine = !holds(p.id) && !pages.includes(p.id);
                   return (
-                    <label className="check-row" key={p.id} title={noCreate ? 'هذا الدور لا ينشئ المحتوى' : notMine ? 'لا تفتح صفحة لا تملكها أنت' : ''}>
+                    <label className="check-row" key={p.id} title={notMine ? 'لا تفتح صفحة لا تملكها أنت' : ''}>
                       <input
                         type="checkbox"
-                        disabled={noCreate || notMine}
-                        checked={!noCreate && pages.includes(p.id)}
+                        disabled={notMine}
+                        checked={pages.includes(p.id)}
                         onChange={() => setPages((x) => (x.includes(p.id) ? x.filter((y) => y !== p.id) : [...x, p.id]))}
                       />
                       {p.label}

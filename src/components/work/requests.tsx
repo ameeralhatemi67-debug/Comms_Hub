@@ -11,7 +11,8 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { BriefcaseBusiness, Check, Clock, Inbox, KeyRound, Lock, Mail, Plus, Send, Upload, Users, X } from 'lucide-react';
 import { PermRequestList, RequestPermissionDialog, usePermRequests } from '../perm-requests';
-import { canCreateWork, fdate, isLead, riyadhStamp, sdate, type StageRow } from '@/lib/work/rules';
+import { useCanCreate } from '../can-create';
+import { fdate, isLead, riyadhStamp, sdate, type StageRow } from '@/lib/work/rules';
 import {
   INBOX_TABS,
   INBOX_TYPE,
@@ -396,6 +397,7 @@ function NewRequestDialog({
   onClose: () => void;
 }) {
   const w = useWork();
+  const canCreate = useCanCreate();
   const mySteps = items.flatMap((x) => (x.w.closed_at ? [] : x.stages.filter((s) => s.who === w.me && !s.done_at).map((s) => ({ x, s }))));
   const myTasks = tasks.filter((t) => t.assignee === w.me && t.status !== 'done');
   const asked = (id: string) => pending.some((q) => q.status === 'pending' && q.requested_by === w.me && (q.stage_id === id || q.task_id === id || q.folder_id === id));
@@ -446,7 +448,7 @@ function NewRequestDialog({
           <small>لا مجلدات مقيّدة ظاهرة لك.</small>
         )}
       </div>
-      {canCreateWork(w.role) && (
+      {canCreate && (
         <div className="l">
           عمل جديد
           <div className="wk-pick-list">

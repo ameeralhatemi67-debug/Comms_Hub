@@ -5,7 +5,7 @@ import {
   statusLabels, typeLabels, textLabels, TYPE_PLANS, STAGE_LIBRARY, stageState, cleared, gatePending, waitsFor, dependents,
   planMove, planInsert, planRemove, planCalc, planIssues, backSchedule, stepImpact, taskImpact, partsOf, partState,
   pendingParts, decideBlock, youtubeOk, publishOutcome, failedChannels, autoPick, dueNote, dayAdd, workErrorText,
-  WORK_ERROR_CODES, WORK_RPC, isApprover, isUrgentApprover, canCreateWork, canPublish, canAssignTasksToOthers,
+  WORK_ERROR_CODES, WORK_RPC, isApprover, isUrgentApprover, canPublish, canAssignTasksToOthers,
   canSeeWork, textEditable, isWhole,
 } from '../src/lib/work/rules.ts';
 
@@ -149,8 +149,6 @@ test('who decides: leaders only, never on what they sent; urgent by the director
 });
 
 test('roles: the publisher does not create, only the publisher publishes, the producer assigns tasks', () => {
-  assert.equal(canCreateWork('publisher'), false);
-  assert.equal(canCreateWork('member'), true);
   assert.equal(canPublish('director'), false);
   assert.equal(canPublish('publisher'), true);
   assert.equal(canAssignTasksToOthers('producer'), true);

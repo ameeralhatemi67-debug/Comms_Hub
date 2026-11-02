@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { PAGES, SHELL_PARTS, PAGE_HREF, PAGE_SOURCES, SHARED_SOURCES, pageKeyOf, roleGroup } from '../src/lib/help/registry.ts';
 import { HOLD, HOLD_MS } from '../src/lib/kit/hold-reasons.ts';
 import { place, overlap } from '../src/lib/kit/place.ts';
-import { undoErrorText, undoTip, undoKeyApplies } from '../src/lib/kit/undo.ts';
+import { undoErrorText, undoNothing, undoTarget, undoTip, undoKeyApplies, undoable } from '../src/lib/kit/undo.ts';
 import { describe } from '../src/lib/media/log-text.ts';
 
 const read = (f) => readFileSync(f, 'utf8');
@@ -148,6 +148,17 @@ test('undo: the reasons it is refused, the button title, and when Ctrl+Z belongs
   assert.match(undoErrorText('MOVE_DENIED'), /التحرير/);
   assert.match(undoErrorText('anything'), /أعد المحاولة/);
   assert.equal(undoTip([]), 'لا شيء للتراجع عنه');
+  // A refused action must not block the ones before it: the button stuck for up to an hour otherwise.
+  const refused = { tx: 3, label: 'تغيّر بعدي', n: 1, at: '', ok: false };
+  const older = { tx: 2, label: 'نقل «أ»', n: 1, at: '', ok: true };
+  assert.equal(undoTarget([refused, older]), older);
+  assert.equal(undoTarget([refused]), null);
+  assert.equal(undoTarget([]), null);
+  assert.deepEqual(undoable([refused, older]), [older]);
+  assert.match(undoTip([refused, older]), /^تراجع عن: نقل «أ» · Ctrl\+Z$/);
+  assert.match(undoTip([refused]), /لا يمكن التراجع/);
+  assert.match(undoNothing([refused]), /لا يمكن التراجع/);
+  assert.equal(undoNothing([]), 'لا شيء للتراجع عنه.');
   assert.equal(undoTip([{ tx: 2, label: 'نقل «أ»', n: 1, at: '', ok: true }, { tx: 1, label: 'وسوم «ب»', n: 1, at: '', ok: true }]), 'تراجع عن: نقل «أ» · و1 قبله · Ctrl+Z');
   const k = { ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, key: 'z', code: 'KeyZ' };
   assert.equal(undoKeyApplies(k, { tagName: 'DIV' }, '/media'), true);

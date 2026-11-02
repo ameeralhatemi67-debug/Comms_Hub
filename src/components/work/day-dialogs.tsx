@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { Bell, BriefcaseBusiness, CalendarDays, Check, Clock, Flag, ListChecks, Send, Upload, Users, WandSparkles } from 'lucide-react';
 import { roles } from '@/lib/domain';
+import { useCanCreate } from '../can-create';
 import {
   KIND_ROLE,
   TASKS,
@@ -17,7 +18,6 @@ import {
   authOk,
   autoPick,
   canAssignTasksToOthers,
-  canCreateWork,
   canPublish,
   dayAdd,
   fdate,
@@ -547,6 +547,7 @@ export type DayPick = 'task' | 'event' | 'rem' | { ready: WorkRow };
 /** «إضافة» from a day: what this role may add there. */
 export function AddDayDialog({ date, ready, onPick, onClose }: { date: string; ready: WorkRow[]; onPick: (p: DayPick) => void; onClose: () => void }) {
   const x = useWork();
+  const canCreate = useCanCreate();
   const [sched, setSched] = useState(false);
   const past = date < x.today;
   const member = x.role === 'member';
@@ -572,7 +573,7 @@ export function AddDayDialog({ date, ready, onPick, onClose }: { date: string; r
   return (
     <Modal title={`إضافة في ${fdate(date)}`} onClose={onClose}>
       <div className="wk-pick-list wk-dayadd">
-        {canCreateWork(x.role) && (
+        {canCreate && (
           <Link className="wk-pickrow" href={past ? '#' : `/create?due=${date}`} aria-disabled={past} onClick={(e) => past && e.preventDefault()}>
             <Ic i={BriefcaseBusiness} />
             <span className="grow">
@@ -581,7 +582,7 @@ export function AddDayDialog({ date, ready, onPick, onClose }: { date: string; r
             </span>
           </Link>
         )}
-        {canCreateWork(x.role) && (
+        {canCreate && (
           <Link className="wk-pickrow" href={past ? '#' : `/create?type=event&due=${date}`} aria-disabled={past} onClick={(e) => past && e.preventDefault()}>
             <Ic i={CalendarDays} />
             <span className="grow">

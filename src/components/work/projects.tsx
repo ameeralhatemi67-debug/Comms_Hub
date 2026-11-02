@@ -11,11 +11,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { ArrowRight, BriefcaseBusiness, CalendarDays, Clock, Flag, FolderKanban, ListChecks, Pencil, Plus, Users, X } from 'lucide-react';
 import { roles } from '@/lib/domain';
+import { useCanCreate } from '../can-create';
 import {
   TASKS,
   TYPE_PLANS,
   WORKS,
-  canCreateWork,
   countOf,
   dayAdd,
   dayDiff,
@@ -187,6 +187,7 @@ const PTABS: [PTab, string][] = [['timeline', 'الجدول الزمني'], ['pe
 
 export function ProjectPage({ id }: { id: string }) {
   const w = useWork();
+  const canCreate = useCanCreate();
   const tab0 = useSearchParams().get('tab');
   const { items, status, reload } = useWorkList();
   const plan = usePlanData();
@@ -258,7 +259,7 @@ export function ProjectPage({ id }: { id: string }) {
           </div>
           {P.description && <p className="wk-pdesc">{P.description}</p>}
           <div className="wk-row-acts start">
-            {canCreateWork(w.role) && (
+            {canCreate && (
               <Link className="wk-btn sm" href={`/create?project=${P.id}${P.end_on >= w.today ? `&due=${P.end_on}` : ''}`}>
                 <Ic i={Plus} />
                 عمل في المشروع
@@ -304,7 +305,7 @@ export function ProjectPage({ id }: { id: string }) {
           <WorkTable list={ws} open={(wid) => router.push(`/work/${wid}`)} projectName={(pid) => w.projects.find((p) => p.id === pid)?.name ?? ''} />
         ) : (
           <Empty i={BriefcaseBusiness} title="لا أعمال بعد">
-            {canCreateWork(w.role) ? 'أضف عملاً من «عمل في المشروع»، أو اربط عملاً قائماً من تفاصيله.' : 'تظهر هنا أعمال المشروع.'}
+            {canCreate ? 'أضف عملاً من «عمل في المشروع»، أو اربط عملاً قائماً من تفاصيله.' : 'تظهر هنا أعمال المشروع.'}
           </Empty>
         ))}
       {tab === 'tasks' && <TasksView tasks={ts} all={plan.tasks} onExt={(t) => setDlg({ ext: t })} onNew={() => setDlg('task')} />}

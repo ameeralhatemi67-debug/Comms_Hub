@@ -35,7 +35,8 @@ const page = (id: string, label: string, sort: number): Capability => ({
 
 export const CAPABILITIES: Capability[] = [
   page('work', 'العمل', 10),
-  page('create', 'إنشاء', 11),
+  // Not in an account's page list: a role template, so it can be given to a whole role and taken from one person.
+  { ...page('create', 'إنشاء', 11), scope: 'none' },
   page('approvals', 'الموافقات والنشر', 12),
   page('calendar', 'التقويم', 13),
   page('media', 'مكتبة الوسائط', 14),
@@ -125,8 +126,15 @@ export function rankOf(role: Role | string | null | undefined): number {
 
 const CREATORS = ['admin', 'director', 'assistant', 'writer', 'designer', 'producer', 'member'];
 
-/** May this role use «إنشاء»? The one page a page grant cannot give (perm_eval, layer 5). */
+/** May this role ever hold «إنشاء»? The one page a grant cannot give to every role (perm_eval, layer 5). */
 export const createsContent = (role: Role | string) => CREATORS.includes(role);
+
+/** Who may give «إنشاء», to a role or a person. The database checks the same (perm_create_giver). */
+export const givesCreate = (role: Role | string) => role === 'admin' || role === 'director';
+const NOT_CREATE_GIVER = 'صفحة «إنشاء» يمنحها مدير الاتصال ومسؤول النظام.';
+
+/** A page opens for good or for a time, never once. */
+export const notOnce = (c: Pick<Capability, 'key' | 'scope'>) => c.scope === 'page' || c.key === 'page.create';
 
 /** What each role is for, in one line, wherever a role is chosen. */
 export const ROLE_HINT: Record<Role, string> = {
@@ -164,11 +172,13 @@ export const roleHolds = (defaults: { role: string; capability: string; allowed:
 export const TEMPLATE_HOLDS: Partial<Record<Role, readonly string[]>> = {
   director: [
     'urgency.2', 'mail.outside.send', 'room.create',
-    'accounts.view', 'permissions.grant', 'roles.assign', 'members.invite', 'members.remove', 'roles.templates.edit',
+    'page.create', 'accounts.view', 'permissions.grant', 'roles.assign', 'members.invite', 'members.remove', 'roles.templates.edit',
     'settings.view', 'settings.manage', 'platforms.manage', 'integrations.secrets', 'storage.manage',
     'whatsapp.system.manage', 'activity.full', 'activity.report',
   ],
-  assistant: ['urgency.2', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant'],
+  assistant: ['page.create', 'urgency.2', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant'],
+  writer: ['page.create'],
+  producer: ['page.create'],
 };
 
 export function installedDefault(role: Role, key: string): boolean {
@@ -302,10 +312,11 @@ export function switchStep(e: Pick<CapEval, 'src' | 'id'>, roleHas: boolean): Sw
 }
 
 /** Why this switch cannot be flipped, in words; '' when it can. The database checks the same (grant_capability). */
-export function switchWhy(key: string, e: Pick<CapEval, 'src' | 'id'>, role: Role, roleHas: boolean, mine: boolean): string {
+export function switchWhy(key: string, e: Pick<CapEval, 'src' | 'id'>, role: Role, roleHas: boolean, mine: boolean, myRole?: Role): string {
   const c = capability(key);
   if (!c) return 'صلاحية غير معروفة.';
   if (!c.grantable) return c.why ?? 'مقفلة بقواعد المركز.';
+  if (key === 'page.create' && myRole && !givesCreate(myRole)) return NOT_CREATE_GIVER;
   if (c.scope === 'page' && role === 'admin') return 'Admin يفتح كل الصفحات.';
   if (key === 'page.create' && !createsContent(role)) return 'هذا الدور لا ينشئ المحتوى.';
   if (e.src === 'rank' || rankOf(role) < c.minRank) return `لا تناسب دور «${roleAr(role)}».`;
@@ -324,7 +335,6 @@ export function roleChange(from: Role, to: Role, has: (role: Role, key: string) 
   const list = CAPABILITIES.filter((c) => c.scope !== 'page');
   const gains = list.filter((c) => holds(to, c) && !holds(from, c)).map((c) => c.label);
   const losses = list.filter((c) => holds(from, c) && !holds(to, c)).map((c) => c.label);
-  if (createsContent(from) && !createsContent(to)) losses.push(capLabel('page.create'));
   return { gains, losses };
 }
 
@@ -395,6 +405,7 @@ export function permError(message: string): string {
     ['NOT_HELD', 'لا تمنح ما لا تملكه أنت.'],
     ['CAP_FIXED', 'هذه مقفلة بقواعد المركز ولا تُمنح.'],
     ['CAP_RANK', 'هذه الصلاحية لا تناسب دور هذا الشخص.'],
+    ['CREATE_GIVER', NOT_CREATE_GIVER],
     ['PAGE_NEEDS_CREATE', 'صفحة «إنشاء» لمن يملك دوره الإنشاء.'],
     ['ONCE_NOT_FOR_PAGES', 'الصفحة تُفتح دائماً أو مؤقتاً، لا مرة واحدة.'],
     ['BAD_UNTIL', 'اختر نهاية في المستقبل، خلال سنة.'],

@@ -6,8 +6,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { accessMatrix, MATRIX_ROLES } from '../src/lib/access-matrix.ts';
-import { menuEntries, menuFor, canOpen, defaultPages } from '../src/lib/access.ts';
-import { resolve, installedDefault } from '../src/lib/permissions.ts';
+import { menuEntries, menuFor, canOpen, defaultPages, createStarts, mayCreate } from '../src/lib/access.ts';
+import { resolve, installedDefault, createsContent, givesCreate, notOnce, switchWhy } from '../src/lib/permissions.ts';
+import { roles } from '../src/lib/domain.ts';
 
 const m = accessMatrix();
 const byRole = Object.fromEntries(m.roles.map((r) => [r.role, r]));
@@ -24,10 +25,10 @@ const EXPECTED_MENU = {
   director: [...COMMON, 'settings', 'create', 'channels', 'accounts'],
   assistant: [...COMMON, 'create', 'channels', 'accounts'],
   writer: [...COMMON, 'create'],
-  designer: [...COMMON, 'create'],
+  designer: COMMON,
   producer: [...COMMON, 'create'],
   publisher: [...COMMON, 'channels'],
-  member: [...COMMON, 'create'],
+  member: COMMON,
 };
 
 test('the sidebar each role starts with is exactly the written table', () => {
@@ -61,7 +62,7 @@ test('creating is for the roles that create, and a page grant cannot give it to 
 
 test("an administrator viewing as a role sees that role's creating and accounts entries", () => {
   for (const [role, menu] of Object.entries(m.adminViewAs)) {
-    assert.equal(menu.includes('create'), !['admin', 'publisher'].includes(role), `${role}: create`);
+    assert.equal(menu.includes('create'), createStarts.includes(role), `${role}: create`);
     assert.equal(menu.includes('accounts'), ['admin', 'director', 'assistant'].includes(role), `${role}: accounts`);
     assert.equal(menu.includes('settings') && menu.includes('channels'), true, `${role}: the administrator still opens every page`);
   }
@@ -102,18 +103,70 @@ test('«الإعدادات» is the administrator\'s by default, and opens for o
   assert.equal(canOpen({ ...writer, caps: ['storage.manage'] }, 'settings'), false);
 });
 
-test('the member creates: «إنشاء» is held by the member in the permissions list as in the menu', () => {
-  assert.equal(resolve({ role: 'member', pages: ['create'], templates: installedDefault, grants: [] }, 'page.create', 0).ok, true);
-  assert.equal(resolve({ role: 'publisher', pages: ['create'], templates: installedDefault, grants: [] }, 'page.create', 0).ok, false);
-  assert.equal(byRole.member.menu.includes('create'), true);
-  const sql = readFileSync('supabase/migrations/20261015160000_member_creates.sql', 'utf8');
-  assert.match(sql, /'designer'',''producer''\)'/);
-  assert.match(sql, /'perm_eval', 'grant_capability', 'request_capability'/);
+const grant = (effect) => [{ id: 'g', k: 'page.create', mode: 'standing', effect, until: null, uses: null, scope: null }];
+const templates = (on) => (role, key) => (key === 'page.create' ? on.includes(role) : installedDefault(role, key));
+
+test('«إنشاء»: the designer and the member start without it and can be given it', () => {
+  assert.deepEqual([...createStarts].sort(), ['assistant', 'director', 'producer', 'writer']);
+  for (const role of ['designer', 'member']) {
+    assert.equal(defaultPages(role).includes('create'), false, role);
+    assert.equal(resolve({ role, pages: [], templates: installedDefault, grants: [] }, 'page.create', 0).ok, false, role);
+    assert.equal(byRole[role].menu.includes('create'), false, role);
+    assert.equal(resolve({ role, pages: [], templates: installedDefault, grants: grant('allow') }, 'page.create', 0).src, 'added', 'one person');
+    assert.equal(resolve({ role, pages: [], templates: templates([role]), grants: [] }, 'page.create', 0).src, 'role', 'the whole role');
+    assert.equal(resolve({ role, pages: [], templates: templates([role]), grants: grant('deny') }, 'page.create', 0).ok, false, 'one person off while the role is on');
+    assert.equal(canOpen({ role, pages: ['create'], caps: [] }, 'create'), true, 'the session adds the page when the permission is held');
+    assert.equal(menuFor({ role, pages: ['create'], caps: [] }, { viewAs: role }).some((e) => e.href === '/create'), true, role);
+  }
+  assert.equal(resolve({ role: 'publisher', pages: [], templates: templates(['publisher']), grants: grant('allow') }, 'page.create', 0).ok, false, 'never the publisher');
+});
+
+test('«إنشاء» is not the ability to create content: uploads stay with the role', () => {
+  for (const role of ['designer', 'member']) assert.equal(roles[role].create, true, role);
+  assert.equal(createsContent('designer'), true);
+  assert.equal(createsContent('publisher'), false);
+});
+
+test('mayCreate: a person answers for themself, an administrator viewing as a role sees that role', () => {
+  const admin = { role: 'admin' };
+  assert.equal(mayCreate({ role: 'designer' }, 'designer', true), true);
+  assert.equal(mayCreate({ role: 'designer' }, 'designer', false), false);
+  assert.equal(mayCreate({ role: 'publisher' }, 'publisher', true), false);
+  assert.equal(mayCreate(admin, 'admin', true), false, 'the administrator is not offered it as themself');
+  assert.equal(mayCreate(admin, 'writer', true), true);
+  assert.equal(mayCreate(admin, 'designer', true), false);
+  assert.equal(mayCreate(admin, 'designer', true, (r) => r === 'designer'), true, 'read live when a role is switched on');
+  assert.equal(menuFor({ role: 'admin', pages: [], caps: [] }, { viewAs: 'designer', roleCreates: (r) => r === 'designer' }).some((e) => e.href === '/create'), true);
+});
+
+test('only the Admin and the Director give «إنشاء», in the interface and the database', () => {
+  for (const r of ['admin', 'director']) assert.equal(givesCreate(r), true, r);
+  for (const r of ['assistant', 'writer', 'designer', 'member']) assert.equal(givesCreate(r), false, r);
+  const sql = readFileSync('supabase/migrations/20261102200000_create_access.sql', 'utf8');
+  assert.match(sql, /is distinct from 'admin' and public\.media_my_role\(\) is distinct from 'director'/);
+  for (const fn of ['grant_capability', 'set_member_override', 'revoke_capability', 'revoke_all_capabilities', 'set_role_default', 'perm_may_decide', 'request_capability', 'work_create'])
+    assert.ok(sql.includes(`public.${fn}(`), fn);
+  assert.match(sql, /has_capability\(''page\.create''\)/);
+  assert.match(sql, /revoke all on function public\.perm_create_giver\(text\) from public, anon, authenticated/);
+  assert.match(switchWhy('page.create', { src: 'none', id: null }, 'designer', false, true, 'assistant'), /مدير الاتصال/);
+  assert.equal(switchWhy('page.create', { src: 'none', id: null }, 'designer', false, true, 'director'), '');
+  assert.equal(notOnce({ key: 'page.create', scope: 'none' }), true);
+  assert.equal(notOnce({ key: 'urgency.2', scope: 'none' }), false);
+});
+
+test('every place that offers creating asks the same rule', () => {
+  for (const f of ['home', 'work/list', 'work/projects', 'work/requests', 'work/day-dialogs', 'mail/mail-page', 'work/create']) {
+    const text = readFileSync(`src/components/${f}.tsx`, 'utf8');
+    assert.match(text, /useCanCreate\(\)/, f);
+    assert.doesNotMatch(text, f === 'work/create' ? /canCreateWork/ : /roles\[[a-z.]+\]\.create|canCreateWork/, f);
+  }
+  assert.match(readFileSync('src/components/ideas.tsx', 'utf8'), /canOpen\(account, 'create'\)/);
+  assert.match(readFileSync('src/components/no-access.tsx', 'utf8'), /needProps\('page\.create'/);
 });
 
 test('the shell draws its menu from menuFor and has an icon for every entry', () => {
   const shell = readFileSync('src/components/shell.tsx', 'utf8');
-  assert.match(shell, /menuFor\(account, \{ viewAs: state\.role, hasCap: caps\.has \}\)/);
+  assert.match(shell, /menuFor\(account, \{ viewAs: state\.role, hasCap: caps\.has, roleCreates \}\)/);
   assert.doesNotMatch(shell, /canOpen\(/);
   for (const e of menuEntries) assert.ok(shell.includes(`'${e.href}':`), `icon for ${e.href}`);
   const own = { role: 'member', pages: defaultPages('member'), caps: [] };
