@@ -118,15 +118,22 @@ newer installer in the background, checks its SHA-512, and installs it when the 
 
 Publishing is the owner's alone; nothing is uploaded by the site or by an agent. The first time:
 
-1. In the Supabase dashboard of `comms-hub`, Storage, Settings: raise the upload size limit above 300 MB
-   (an installer is about 110 MB).
-2. Apply `supabase/migrations/20261021090000_desktop_releases.sql`. It creates the public bucket, which no
-   visitor or signed-in person can write to.
+1. In the Supabase dashboard of `comms-hub`, Storage, Settings: raise the global upload size limit to at
+   least 150 MB (an installer is about 110 MB; the bucket itself allows 300 MB, but the project's global limit
+   caps it first).
+2. `supabase/migrations/20261021090000_desktop_releases.sql` is applied (2026-11-02). It created the public
+   bucket, which no visitor or signed-in person can write to.
 
 Each release:
 
-1. Raise `version` in `package.json` (and the lockfile's two copies of it), then `npm run pack`.
-2. Upload these three files from `dist/release/` to `desktop-releases/windows-x64/`, the installer first and
+1. `npm run release:bump -- <x.y.z>` raises `version` in `package.json` and the lockfile's two copies
+   (refusing a version that is not higher). The first release may keep `0.6.0`. Then `npm run pack`.
+2. `npm run release:check` proves `dist/release/` is ready: `latest.yml` names the same version as
+   `package.json`, the installer's size and SHA-512 equal `latest.yml`'s, the blockmap is there, the installer is
+   under the bucket's limit, and, if the published `latest.yml` can be reached, the new version is strictly
+   higher than it (applications update only to a higher version, so a lower or equal one is offered to nobody).
+   It prints the upload order and uploads nothing.
+3. Upload these three files from `dist/release/` to `desktop-releases/windows-x64/`, the installer first and
    `latest.yml` last, so no application sees a manifest before its file:
    - `CommsHub-Setup-<version>-x64.exe`;
    - `CommsHub-Setup-<version>-x64.exe.blockmap`;

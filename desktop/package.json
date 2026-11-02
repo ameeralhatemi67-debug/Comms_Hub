@@ -13,6 +13,8 @@
     "ffmpeg": "node scripts/fetch-ffmpeg.mjs",
     "pack": "npm run ffmpeg && npm run build && electron-builder --config electron-builder.release.cjs --win --x64 --publish never",
     "pack:dev": "npm run ffmpeg && npm run build:dev && electron-builder --config electron-builder.dev.cjs --win --x64 --publish never",
+    "release:bump": "node scripts/release.mjs bump",
+    "release:check": "node scripts/release.mjs check",
     "fuses": "electron-fuses read --app dist/release/win-unpacked/CommsHub.exe"
   },
   "devDependencies": {

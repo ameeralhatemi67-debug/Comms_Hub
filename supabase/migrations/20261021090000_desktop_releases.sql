@@ -4,8 +4,8 @@
 -- the installer. The binaries hold no secret, only the site's address, so the bucket is public for
 -- reading. Nobody writes to it through the site: no policy grants insert, update or delete on its
 -- objects to a visitor or a signed-in person. The owner uploads a release from the Supabase dashboard
--- (desktop/README.md, "Publishing a release"). Written on 2026-10-20 and not applied: the owner applies
--- it when the first release is published.
+-- (desktop/README.md, "Publishing a release"). Written on 2026-10-20; applied to comms-hub on 2026-11-02
+-- at the owner's request (as version 'desktop_releases' in the migration list).
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
