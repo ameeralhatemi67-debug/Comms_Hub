@@ -219,6 +219,24 @@ test('D3: an application older than the site needs, a newer release, and the upd
   for (const state of ['idle', 'checking', 'none', 'error']) assert.match(updateLine({ state, version: null, percent: null }), /[\u0600-\u06ff]/);
 });
 
+test('D3: the download says Windows only, and a device that cannot run it is told so', async () => {
+  const { desktopFit, desktopFitNote } = await import('../src/lib/native/releases.ts');
+  const win = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36';
+  assert.equal(desktopFit(win), 'windows');
+  assert.equal(desktopFit('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15'), 'mac');
+  assert.equal(desktopFit('Mozilla/5.0 (X11; Linux x86_64) Chrome/126'), 'linux');
+  assert.equal(desktopFit('Mozilla/5.0 (Linux; Android 14; Pixel 8) Chrome/126 Mobile'), 'phone', 'Android reports Linux too');
+  assert.equal(desktopFit('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)'), 'phone', 'an iPhone reports Mac OS X too');
+  assert.equal(desktopFit(''), 'unknown');
+  assert.equal(desktopFit(null), 'unknown');
+  assert.equal(desktopFitNote('windows'), null);
+  assert.equal(desktopFitNote('unknown'), null, 'an unknown device still gets the download');
+  for (const fit of ['mac', 'linux', 'phone']) assert.match(desktopFitNote(fit), /[؀-ۿ]/);
+  const fs = await import('node:fs');
+  const panel = fs.readFileSync(new URL('../src/components/native/desktop-app.tsx', import.meta.url), 'utf8');
+  assert.ok(panel.includes('متاح لنظام Windows فقط حالياً'));
+});
+
 test('D3: update is detected by its two methods; D2 has none', () => {
   const app = d2();
   assert.equal(nativeOf(app.bridge).has('update'), false);

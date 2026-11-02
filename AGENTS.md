@@ -305,8 +305,8 @@ applications, `Mobile_Apps_Plan.md` 5.2), and detects each feature before use, s
 application keep working. Only «يحتاج قرارك» items become native notices. What a minimised window really
 does is measured with nothing attached (`qa/desktop-helpers.cjs`, `launchPlain`), because Playwright keeps
 every page visible. Updates (D3, `MVP_draft.md` 63.2) come from the public bucket `desktop-releases` of the
-`comms-hub` project (`supabase/migrations/20261021090000_desktop_releases.sql`, written and not applied
-until the owner publishes the first release). Its address is compiled in (`desktop/src/update.ts`, held
+`comms-hub` project (`supabase/migrations/20261021090000_desktop_releases.sql`, applied to comms-hub on
+2026-11-02 at the owner's request; no release is uploaded yet). Its address is compiled in (`desktop/src/update.ts`, held
 equal to `src/lib/native/releases.ts`), no build may carry another except the update check's own package,
 and nothing is ever uploaded through the site or by an agent: the owner publishes a release from the
 dashboard (`desktop/README.md`). The updater checks every installer's SHA-512 against `latest.yml`, and

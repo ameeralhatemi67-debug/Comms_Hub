@@ -150,7 +150,7 @@ The owner asked for the merge before the Android application is planned. `deskto
 - **Evidence.** Typecheck and build clean; `npm test` 537 of 537; desktop tests 120 of 120; `qa/sim03-quick-fixes.cjs` 17 of 17; `qa/desktop-csp.cjs` 13 of 13.
 - **Not done.**
   - Not pushed. A push deploys the desktop's site part, including a Content-Security-Policy on every page.
-  - The `desktop-releases` migration is not applied, no release is published, and the application is unsigned.
+  - The `desktop-releases` migration was applied on 2026-11-02 (bucket exists, public, 300 MB). No release is uploaded yet, and the application is unsigned. The account card now says "Windows only for now"; that and `npm run release:check` are written but not committed or pushed.
   - The owner's signed-in walkthrough is still to do.
 - **Left as it was.** Main's uncommitted studio, calendar and simulation files are untouched and still uncommitted.
 - **Next.** The Android application plan (no studio features), at the owner's request.

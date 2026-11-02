@@ -104,8 +104,34 @@ export function apkMustUpdate(version: string | null, latest: AndroidRelease | n
   return !!latest?.minimum && compareVersions(version, latest.minimum) < 0;
 }
 
+/** What the person's own device can run: the application is built for Windows (x64) only, for now. */
+export type DesktopFit = 'windows' | 'mac' | 'linux' | 'phone' | 'unknown';
+
+/** Reads a browser's user agent, nothing else; an empty or odd one is 'unknown', which still offers the download. */
+export function desktopFit(userAgent: string | null | undefined): DesktopFit {
+  const ua = typeof userAgent === 'string' ? userAgent.slice(0, 500) : '';
+  if (/android|iphone|ipad|ipod/i.test(ua)) return 'phone';
+  if (/windows nt/i.test(ua)) return 'windows';
+  if (/macintosh|mac os x/i.test(ua)) return 'mac';
+  if (/linux|x11|cros/i.test(ua)) return 'linux';
+  return 'unknown';
+}
+
+/** The line shown beside the download for a device the application does not run on yet; null where it does. */
+export function desktopFitNote(fit: DesktopFit): string | null {
+  switch (fit) {
+    case 'mac':
+    case 'linux':
+      return 'هذا الحاسوب لا يعمل بنظام Windows، ولذلك لا يعمل عليه التطبيق الآن. ما زال المركز يعمل كاملًا في المتصفح.';
+    case 'phone':
+      return 'هذا جهاز هاتف. تطبيق سطح المكتب للحاسوب فقط، وتطبيق الهاتف في البطاقة الخاصة به.';
+    default:
+      return null;
+  }
+}
+
 /** A newer release than the one running. */
-export const newer = (r: Release | null, version: string | null) => !!r && !!version && compareVersions(r.version, version) > 0;
+export const newer =(r: Release | null, version: string | null) => !!r && !!version && compareVersions(r.version, version) > 0;
 
 export type UpdateView = { state: 'idle' | 'checking' | 'none' | 'downloading' | 'ready' | 'error'; version: string | null; percent: number | null };
 

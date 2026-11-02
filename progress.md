@@ -2345,3 +2345,19 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** Anything signed in on the real site. The first real note is the first real test of a mark on a real page, of the button inside the real mail, messaging and writing windows, and of the role it sends.
 - **Left as they are.** `validation/recheck-R01.md`, `videos/`, `supabase/.temp/`, `qa/simulations/`, `Owner_Setup_Guide.md` and `Role_Simulation_*` stay out of the commits.
 - **Rollback.** The site: promote `dpl_9uWrKTDXHxEcQMBo48uTL52GJNB5`, on `3412e08`. The migration can stay, because that site's three-argument call still resolves on the new function. Undoing the migration itself would take a new migration.
+
+### 2026-11-02: the desktop release channel opened, and the account card says Windows only
+
+- **Owner direction.** Apply the SQL, make the account page offer the download and say it is for Windows for now, give the first release a version, and add logic for sending an update when one is ready.
+- **Applied to comms-hub, with the owner's word.** `desktop_releases`: the public bucket `desktop-releases`, 300 MB per file, no write policy. Read back after: the bucket exists, `public` true, limit 314572800. No file is uploaded.
+- **Already built, found by reading.** «تطبيق سطح المكتب» on «الحساب» (`src/components/native/desktop-app.tsx`), the download from the bucket's `latest.yml`, the old-application banner and the application's own updater (`desktop/src/update.ts`: checks at start and every four hours, SHA-512, installs on quit) were done in D3. None of it was rewritten.
+- **Added.**
+  - The card opens with «متاح لنظام Windows فقط حالياً» (Windows 10 or 11, 64 bit; macOS and Linux not built). `desktopFit` reads the browser's user agent after mounting; a Mac, a Linux machine or a phone gets a plain note and no download button, an unknown device still gets it. The release date shows beside the version.
+  - Inside the application, when its own update ends in an error and the feed names a higher version, the card offers the installer to run over the current one.
+  - `desktop/scripts/release.mjs`, `npm run release:bump -- <x.y.z>` and `npm run release:check`. The check refuses a `latest.yml` whose version differs from `package.json`, an installer whose size or SHA-512 differs from it, a missing blockmap, an installer over 300 MB, and a version not higher than the published one. It prints the upload order and uploads nothing.
+- **Release version.** `0.6.0` stands as the first release (never published); the next is raised with `release:bump`.
+- **Verified, numbers.**
+  - Site `npm test` **717 of 717** (one new test in `tests/native.test.mjs`), `npm run typecheck` clean, `npm run build` clean.
+  - Desktop `npm test`: 116 run, 113 passed, 2 skipped, 1 failed. The failure is `tests/build.test.mjs`: `desktop/node_modules` is not installed on this laptop, so esbuild cannot resolve `electron-updater`. It is not from this change; `npm ci` in `desktop/` is the fix. The new `tests/release.test.mjs` (3 tests) passed.
+- **Not verified.** The card in a real browser (not drawn), `release:check` on a real `dist/release/` (nothing was packed), and an actual upload.
+- **Not done, said plainly.** Not committed, not pushed. The card is not on production: the desktop's site code reaches production only on a push, and `main` also holds the «إنشاء» and `work_cancel` commits whose migrations are not applied, so apply those first. The project's global upload limit in the dashboard (Storage, Settings) is not changed by an agent and must be at least 150 MB before the installer can be uploaded. The application is unsigned.

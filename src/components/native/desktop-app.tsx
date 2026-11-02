@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { Download, Eraser, MonitorDown, RotateCw } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { native } from '@/lib/native';
-import { downloadUrl, newer, parseLatest, tooOld, updateLine, DESKTOP_FEED, type Release, type UpdateView } from '@/lib/native/releases';
+import { desktopFit, desktopFitNote, downloadUrl, newer, parseLatest, tooOld, updateLine, DESKTOP_FEED, type DesktopFit, type Release, type UpdateView } from '@/lib/native/releases';
 import { formatBytes } from '@/lib/studio/support';
 import { useNativeFeature, useNativePlatform, useNativeVersion } from './use-native';
 
@@ -38,6 +38,9 @@ export function DesktopAppPanel() {
   const latest = useLatest();
   const [update, setUpdate] = useState<UpdateView | null>(null);
   const [note, setNote] = useState<string | null>(null);
+  // Read after mounting, so the server's page and the first browser render agree.
+  const [fit, setFit] = useState<DesktopFit>('unknown');
+  useEffect(() => setFit(desktopFit(navigator.userAgent)), []);
 
   useEffect(() => {
     if (!canUpdate) return;
@@ -61,6 +64,11 @@ export function DesktopAppPanel() {
         {tooOld(version) && <p className="warning">هذا الإصدار أقدم مما يحتاجه المركز الآن، فحدّثه ليعمل كل شيء كما ينبغي.</p>}
         {update && <p className="muted">{updateLine(update)}</p>}
         {!update && newer(latest ?? null, version) && <p className="muted">يتوفر الإصدار {latest!.version}.</p>}
+        {update?.state === 'error' && newer(latest ?? null, version) && (
+          <p className="muted">
+            يتوفر الإصدار <bdi dir="ltr">{latest!.version}</bdi> وتعذّر تنزيله من داخل التطبيق. <a href={downloadUrl(latest!)} download>نزّل المثبّت</a> وشغّله فوق الإصدار الحالي، وتبقى جلستك.
+          </p>
+        )}
         {update?.state === 'ready' && (
           <div className="actions">
             <button
@@ -93,21 +101,27 @@ export function DesktopAppPanel() {
       </div>
     );
   }
+  const fitNote = desktopFitNote(fit);
   return (
     <div className="dv-app">
-      <p>تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.</p>
+      <p>
+        <b>متاح لنظام Windows فقط حالياً</b> (Windows 10 أو 11، معالج 64 بت). نسخ macOS وLinux لم تُبنَ بعد.
+      </p>
+      <p>تطبيق «مركز الاتصال المؤسسي»: يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب. يتحدّث التطبيق بنفسه كلما نُشر إصدار أحدث.</p>
+      {fitNote && <p className="warning" role="status">{fitNote}</p>}
       {latest === undefined && <p className="muted" role="status">جارٍ البحث عن آخر إصدار…</p>}
       {latest === null && <p className="muted">لم يُنشر إصدار للتنزيل بعد.</p>}
-      {latest && (
+      {latest && !fitNote && (
         <>
           <div className="actions">
             <a className="primary button" href={downloadUrl(latest)} download>
               <Download aria-hidden="true" />
-              تنزيل التطبيق
+              تنزيل التطبيق لنظام Windows
             </a>
           </div>
           <p className="muted">
             الإصدار <bdi dir="ltr">{latest.version}</bdi>
+            {latest.date ? `، نُشر في ${new Date(latest.date).toLocaleDateString('ar', { year: 'numeric', month: 'long', day: 'numeric' })}` : ''}
             {latest.size ? `، نحو ${formatBytes(latest.size)}` : ''}. يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».
           </p>
         </>
