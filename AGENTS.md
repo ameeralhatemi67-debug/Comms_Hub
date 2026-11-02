@@ -500,7 +500,8 @@ section 68, recorded in `progress.md`).
   downloads from the browser. PDF is Drive's own conversion. Editing a Word file inside the site is not built. Pruning happens at a
   save, because nothing is scheduled.
 - Its rules are held by `supabase/tests/writing_rules.sql`, `tests/writing.test.mjs`, `tests/writing-storage.test.mjs` and
-  `qa/writing-flow.cjs`, which clicks through the real sheet and pages on a fixture.
+  `qa/writing-flow.cjs`, which clicks through the real sheet and pages on a fixture. `qa/writing-live.cjs` looks at the live site
+  after a deployment. The migration was applied to comms-hub on 2026-11-02 with the owner's approval.
 
 ## Writing markdown from a shell
 

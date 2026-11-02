@@ -1,0 +1,90 @@
+{
+  "script": "qa/writing-live.cjs",
+  "run": "2026-11-02T02:11:56.414Z",
+  "checks": [
+    {
+      "name": "the site answers",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "signed out: a version is not read",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "signed out: a draft is not read",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "signed out: a current file is not read",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "signed out: a picture is not read",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "signed out: a version is not saved",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "signed out: a draft is not written",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "signed out: a Word file is not uploaded",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "signed out: a PDF is not made",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "the privacy page says texts are kept in Drive",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the deletion page lists ideas and drafts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«العمل» stays behind the sign-in",
+      "pass": true,
+      "detail": "200"
+    },
+    {
+      "name": "every page carries the policy",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the sheet's styles are out",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the site's minimum button height no longer reaches the tools",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing failed in the page",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 16,
+  "passed": 16,
+  "failed": 0
+}

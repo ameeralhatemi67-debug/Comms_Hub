@@ -2286,3 +2286,19 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** Nothing signed in has run on the real site, and no route has met a real Drive: they ran against stand-ins. Drive's PDF conversion of an Arabic file is unproven. A file above 4 MB was not sent through Vercel itself.
 - **Not built.** Editing a Word file inside the site (W-10). A Word file opens in the sheet, and the page says it loses fonts, sizes, colours and table borders.
 - **Tools.** Tiptap 3.32.0, `docx` 9.12.0 and `mammoth` 1.13.0 are pinned and in `THIRD_PARTY_NOTICES.md`. The database and server half was written by a subagent; its report was checked by reading the migration and routes and rerunning the rules, not taken on trust.
+
+### 2026-11-02: «ورقة الكتابة» live, the migration applied
+
+- **The owner's word.** "then commit, then push and deploy", and "Apply and deploy" to the question naming the migration, which adds tables and columns, removes no data, and changes existing functions.
+- **Applied.** `supabase/migrations/20261102120000_writing_documents.sql` as version `20261102020350` 'writing_documents'. The md5 of the stored statement, `4f2a558267804e54394465d1c65923e3`, equals the file's, read back independently of the helper that pasted it. The live history records the time of applying, not the file's timestamp, as for every earlier migration.
+- **Verified on comms-hub, numbers** (`qa/writing-rules-comms-hub.json`).
+  - Before applying: the migration and the rules in one rolled-back transaction, **322 of 322**. The migration ran only after the md5 of its text inside the query equalled the file's. Nothing stayed: no `work_docs`, no new column, no throwaway account or user.
+  - After applying: the rules file run verbatim, **322 of 322**, the run's md5 `41b7273835dbdff5e8e95e8f8655b738` equal to the file's. No throwaway account or user, every new table empty, `writing_keep` 10, the work counter unchanged. comms-hub has no saved text yet, so the backfill of `keep` and `text_n` had nothing to act on.
+  - Security advisors, 322 findings before and 342 after, compared entry by entry by script: 20 new, all new functions callable by `authenticated`, each checking its own rule. None for `anon`, no table without a policy, none gone.
+- **Verified on production, numbers.**
+  - Vercel: READY on `08d0bf1` (`dpl_Bu2TuJ6ZcZHRbAqYPGTUwZwEnXrv`), no runtime errors in the hour after.
+  - `qa/writing-live.cjs`, new, **16 of 16**: signed out, all eight routes of the writing documents refuse, the styles and both public pages are out, and «العمل» stays behind the sign-in.
+  - `qa/site-live.cjs` **9 of 9**, `qa/site-icon.cjs` **13 of 13**, `qa/platform-gate.cjs` **11 of 11**.
+- **Not verified.** Anything signed in on the real site. The first real save, the first Drive folder under «مستندات الكتابة» and the first Arabic PDF happen with the first person who writes. A file above 4 MB has not gone through Vercel.
+- **Left as they are.** `validation/recheck-R01.md`, `videos/`, `supabase/.temp/`, `qa/simulations/`, `Owner_Setup_Guide.md` and `Role_Simulation_*` stay out of the commits. The four stale rule checks of `storage_rules`, `storage_move_rules` and `backup_rules`, and the quotes that stop `backup_rules.sql` under psql, were found here and not changed.
+- **Rollback.** The site: promote `dpl_6hf5unQ6UF7WJRMzoCQuSSY8WRam`, on `b795065`. The migration can stay, because that site reads nothing it changed. Undoing the migration itself would take a new migration.
