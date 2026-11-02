@@ -6,6 +6,7 @@
 //   3. What is sent: nothing typed on the page, an outline with no words.
 //   4. A note left unsent waits; «إلغاء» forgets it.
 //   5. From inside a window: the button there, the key, the window kept open, its title sent.
+//      Every kind of window the site has, on desktop and at phone width: the button is on top of it and works.
 //   6. Private spots: a private part of a window and the mail pages keep only the word for what a mark sits on.
 //   7. The inbox: order, outline, details, filters, merge, separate, the brief.
 //   8. «ملاحظاتي», phone width with a real tap, and the evening theme.
@@ -216,6 +217,35 @@ async function drag(p, a, b) {
     await p.waitForFunction(() => !document.querySelector('dialog[open]'));
     check('with no window open there is no floating button', (await p.locator('.fb-float').count()) === 0);
 
+    const frames = async (page, width) => {
+      await page.goto(`${base}?view=frames`);
+      for (const kind of ['ml-dlg', 'ml-dlg wide', 'nt-drawer', 'wk-modal', 'sheet']) {
+        await page.click(`[data-frame="${kind}"]`);
+        await page.waitForSelector('dialog[open] .fb-float');
+        await page.waitForTimeout(280);
+        const seen = await page.evaluate(() => {
+          const b = document.querySelector('.fb-float');
+          const r = b.getBoundingClientRect();
+          const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          const d = document.querySelector('dialog[open]');
+          d.scrollTop = 900;
+          const after = b.getBoundingClientRect();
+          return { inView: r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight, onTop: b === at || b.contains(at), stays: Math.abs(after.top - r.top) < 1 };
+        });
+        check(`${width}: «${kind}» shows the button on top, in view, and it stays when the window scrolls`, seen.inView && seen.onTop && seen.stays, seen);
+        await page.click('dialog[open] .fb-float');
+        await page.waitForSelector('.fb-form');
+        check(`${width}: «${kind}» opens the note above it`, (await openDialogs(page)).length === 2, JSON.stringify(await openDialogs(page)));
+        await page.click('.fb-form .actions button:has-text("إلغاء")');
+        await page.waitForFunction(() => !document.querySelector('.fb-form'));
+        await page.keyboard.press('Escape');
+        await page.waitForFunction(() => !document.querySelector('dialog[open]'));
+      }
+    };
+    await frames(p, 1280);
+    await p.goto(`${base}work/CH-1`);
+    await p.waitForSelector('.target-b');
+
     // 6. Private spots
     await p.click('.target-b');
     await p.waitForSelector('.secret');
@@ -344,6 +374,7 @@ async function drag(p, a, b) {
     await q.waitForSelector('.fb-item');
     check('390: the inbox has no sideways overflow', !(await overflow(q)) && (await q.evaluate(() => [...document.querySelectorAll('.fb-item')].every((i) => i.getBoundingClientRect().right <= innerWidth + 1))));
     await q.screenshot({ path: path.join(out, 'inbox-390.png'), fullPage: true });
+    await frames(q, 390);
     await phone.close();
 
     await p.goto(`${base}?view=inbox&dark`);

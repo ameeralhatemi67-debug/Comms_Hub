@@ -31,7 +31,7 @@ related:
 From the owner's request ahead of the test week (`MVP_draft.md` section 69, `progress.md`). Committed locally, not pushed, and the migration `20261102180000_feedback_marks.sql` is not applied to comms-hub.
 
 - **Done.** A click sets a pointer and a drag draws a box, up to three, above any open window. The note is reachable from inside a window and by Alt+Shift+N, and carries its severity and context. The inbox shows an outline of the screen with no words, filters, merging and a brief for whoever fixes it. «عولج» tells the author, and «ملاحظاتي» is on «الحساب». No picture, no file and nothing in Drive.
-- **Evidence.** `npm test` 711 of 711, typecheck and build clean. `qa/feedback-flow.cjs` 63 of 63 on the real components. On a private container, `feedback_marks_rules` 72 of 72 and `feedback_errors_rules` 32 of 32.
+- **Evidence.** `npm test` 711 of 711, typecheck and build clean. `qa/feedback-flow.cjs` 83 of 83 on the real components and in every kind of window. On a private container, `feedback_marks_rules` 72 of 72 and `feedback_errors_rules` 32 of 32.
 - **Not verified.** Anything signed in on the real site, and the migration on comms-hub.
 - **Next.** With the owner's word: apply the migration first, then push. The site now live keeps working on the new migration, because its three-argument call still resolves, but the new site needs the new functions.
 

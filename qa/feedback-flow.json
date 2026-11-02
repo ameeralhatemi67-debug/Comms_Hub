@@ -1,6 +1,6 @@
 {
   "script": "qa/feedback-flow.cjs",
-  "run": "2026-11-02T07:39:28.594Z",
+  "run": "2026-11-02T07:41:25.688Z",
   "checks": [
     {
       "name": "the note opens on «مشكلة», graded «مزعجة»",
@@ -178,6 +178,56 @@
       "detail": ""
     },
     {
+      "name": "1280: «ml-dlg» shows the button on top, in view, and it stays when the window scrolls",
+      "pass": true,
+      "detail": "{\"inView\":true,\"onTop\":true,\"stays\":true}"
+    },
+    {
+      "name": "1280: «ml-dlg» opens the note above it",
+      "pass": true,
+      "detail": "[\"ml-dlg\",\"أرسل ملاحظة\"]"
+    },
+    {
+      "name": "1280: «ml-dlg wide» shows the button on top, in view, and it stays when the window scrolls",
+      "pass": true,
+      "detail": "{\"inView\":true,\"onTop\":true,\"stays\":true}"
+    },
+    {
+      "name": "1280: «ml-dlg wide» opens the note above it",
+      "pass": true,
+      "detail": "[\"ml-dlg wide\",\"أرسل ملاحظة\"]"
+    },
+    {
+      "name": "1280: «nt-drawer» shows the button on top, in view, and it stays when the window scrolls",
+      "pass": true,
+      "detail": "{\"inView\":true,\"onTop\":true,\"stays\":true}"
+    },
+    {
+      "name": "1280: «nt-drawer» opens the note above it",
+      "pass": true,
+      "detail": "[\"nt-drawer\",\"أرسل ملاحظة\"]"
+    },
+    {
+      "name": "1280: «wk-modal» shows the button on top, in view, and it stays when the window scrolls",
+      "pass": true,
+      "detail": "{\"inView\":true,\"onTop\":true,\"stays\":true}"
+    },
+    {
+      "name": "1280: «wk-modal» opens the note above it",
+      "pass": true,
+      "detail": "[\"wk-modal\",\"أرسل ملاحظة\"]"
+    },
+    {
+      "name": "1280: «sheet» shows the button on top, in view, and it stays when the window scrolls",
+      "pass": true,
+      "detail": "{\"inView\":true,\"onTop\":true,\"stays\":true}"
+    },
+    {
+      "name": "1280: «sheet» opens the note above it",
+      "pass": true,
+      "detail": "[\"sheet\",\"أرسل ملاحظة\"]"
+    },
+    {
       "name": "a private part keeps only the word for what a mark sits on",
       "pass": true,
       "detail": "زر"
@@ -185,7 +235,7 @@
     {
       "name": "and its window's title stays behind",
       "pass": true,
-      "detail": "{\"build\":\"abc1234\",\"app\":\"web\",\"w\":1280,\"h\":900,\"dpr\":1,\"theme\":\"light\",\"errors\":[\"boom in the page\"]}"
+      "detail": "{\"build\":\"abc1234\",\"app\":\"web\",\"w\":1280,\"h\":900,\"dpr\":1,\"theme\":\"light\"}"
     },
     {
       "name": "on a mail page the note shows its path",
@@ -308,6 +358,56 @@
       "detail": ""
     },
     {
+      "name": "390: «ml-dlg» shows the button on top, in view, and it stays when the window scrolls",
+      "pass": true,
+      "detail": "{\"inView\":true,\"onTop\":true,\"stays\":true}"
+    },
+    {
+      "name": "390: «ml-dlg» opens the note above it",
+      "pass": true,
+      "detail": "[\"ml-dlg\",\"أرسل ملاحظة\"]"
+    },
+    {
+      "name": "390: «ml-dlg wide» shows the button on top, in view, and it stays when the window scrolls",
+      "pass": true,
+      "detail": "{\"inView\":true,\"onTop\":true,\"stays\":true}"
+    },
+    {
+      "name": "390: «ml-dlg wide» opens the note above it",
+      "pass": true,
+      "detail": "[\"ml-dlg wide\",\"أرسل ملاحظة\"]"
+    },
+    {
+      "name": "390: «nt-drawer» shows the button on top, in view, and it stays when the window scrolls",
+      "pass": true,
+      "detail": "{\"inView\":true,\"onTop\":true,\"stays\":true}"
+    },
+    {
+      "name": "390: «nt-drawer» opens the note above it",
+      "pass": true,
+      "detail": "[\"nt-drawer\",\"أرسل ملاحظة\"]"
+    },
+    {
+      "name": "390: «wk-modal» shows the button on top, in view, and it stays when the window scrolls",
+      "pass": true,
+      "detail": "{\"inView\":true,\"onTop\":true,\"stays\":true}"
+    },
+    {
+      "name": "390: «wk-modal» opens the note above it",
+      "pass": true,
+      "detail": "[\"wk-modal\",\"أرسل ملاحظة\"]"
+    },
+    {
+      "name": "390: «sheet» shows the button on top, in view, and it stays when the window scrolls",
+      "pass": true,
+      "detail": "{\"inView\":true,\"onTop\":true,\"stays\":true}"
+    },
+    {
+      "name": "390: «sheet» opens the note above it",
+      "pass": true,
+      "detail": "[\"sheet\",\"أرسل ملاحظة\"]"
+    },
+    {
       "name": "dark: the mark stands apart from the screen behind it",
       "pass": true,
       "detail": "{\"box\":\"rgb(241, 154, 141)\",\"frame\":\"rgb(7, 19, 14)\"}"
@@ -319,7 +419,7 @@
     }
   ],
   "notes": [],
-  "total": 63,
-  "passed": 63,
+  "total": 83,
+  "passed": 83,
   "failed": 0
 }
