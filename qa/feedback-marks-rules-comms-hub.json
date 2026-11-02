@@ -1,0 +1,47 @@
+{
+  "script": "supabase/tests/feedback_marks_rules.sql",
+  "script_md5": "5c6c14a50fb3a912a17d494d5d309451",
+  "run": "2026-11-02",
+  "migration": {
+    "file": "supabase/migrations/20261102180000_feedback_marks.sql",
+    "file_md5": "47d34a0209fc3963f56eecdc2f356516",
+    "applied": "applied to comms-hub (hrghmioxvgkjpnydrxrk) with the owner's approval of 2026-11-02, as version 20261102080038 'feedback_marks'; md5 of the stored statement 47d34a0209fc3963f56eecdc2f356516 equals the md5 of the file"
+  },
+  "how": "Each run is one transaction against comms-hub, rolled back at the end, through the MCP execute_sql tool. Throwaway accounts (@t.test) act through row level security; nothing about a real person is read into the result.",
+  "before_applying": {
+    "what": "The migration and the marks rules together in one rolled-back transaction. The migration ran only after the md5 of its text inside the query equalled the file's.",
+    "total": 72,
+    "passed": 72,
+    "left_behind": {
+      "feedback_rows": 0,
+      "columns": 13,
+      "old_submit_present": true,
+      "feedback_mine_present": false,
+      "throwaway_accounts": 0,
+      "throwaway_users": 0,
+      "notifications": 15
+    }
+  },
+  "after_applying": {
+    "what": "supabase/tests/feedback_errors_rules.sql run against the applied migration. The marks rules were not run a second time: the stored statement is byte-equal to the text they passed against.",
+    "script_md5": "669c0a79378606e08276e030fdf8bd77",
+    "total": 32,
+    "passed": 32,
+    "state": {
+      "feedback_rows": 0,
+      "columns": 18,
+      "old_submit_gone": true,
+      "new_submit_present": true,
+      "member_may_call_mine": true,
+      "anon_may_call_mine": false,
+      "member_may_call_tell": false,
+      "throwaway_accounts": 0,
+      "notifications": 15
+    }
+  },
+  "advisors": {
+    "security_findings_before": 342,
+    "security_findings_after": 344,
+    "new": "feedback_merge and feedback_mine, both authenticated_security_definer_function_executable, each checking its own rule. feedback_submit changed signature, so it reads as one new and one gone. None for anon (21 before and after), rls_enabled_no_policy 13 before and after."
+  }
+}

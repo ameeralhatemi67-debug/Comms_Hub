@@ -1,0 +1,50 @@
+{
+  "script": "qa/feedback-live.cjs",
+  "run": "2026-11-02T08:04:06.139Z",
+  "checks": [
+    {
+      "name": "the page carries the deployed version",
+      "pass": true,
+      "detail": "ed657c0"
+    },
+    {
+      "name": "nothing of the note is served to a stranger",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the privacy page says no picture is taken, in both languages",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a stranger cannot send a note",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "a stranger cannot call feedback_list",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "a stranger cannot call feedback_mine",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "a stranger cannot call feedback_merge",
+      "pass": true,
+      "detail": "401"
+    },
+    {
+      "name": "a stranger cannot reach a helper",
+      "pass": true,
+      "detail": "401"
+    }
+  ],
+  "notes": [],
+  "total": 8,
+  "passed": 8,
+  "failed": 0
+}

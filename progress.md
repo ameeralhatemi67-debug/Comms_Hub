@@ -2328,3 +2328,20 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not applied.** `supabase/migrations/20261102180000_feedback_marks.sql` is not on comms-hub, and nothing is pushed. Apply first, then push: the live site's three-argument call still resolves on the new function, but the new site needs the new functions.
 - **Not built.** Drawing a mark over the real page from the inbox. It would fail for what the reader cannot see, so the outline comes first. Nothing scrolls during marking, so a person scrolls first, and the note's window says so.
 - **Left as they are.** `validation/recheck-R01.md`, `videos/`, `supabase/.temp/`, `qa/simulations/`, `Owner_Setup_Guide.md` and `Role_Simulation_*` stay out of the commit.
+
+### 2026-11-02: a tester's note and its marks live, the migration applied
+
+- **The owner's word.** "Apply and deploy", to the question naming the migration on comms-hub. It adds columns and functions, removes no data, and changes `feedback_submit`, `feedback_list` and `feedback_mark`.
+- **Found before applying.** The rules file cleared the whole of `notifications`, inside a transaction that would roll back. It would have touched real rows on the live database for the length of the run, so it was limited to `@t.test` before anything ran there (`ed657c0`), and rerun on the private container, **72 of 72**.
+- **Applied.** `supabase/migrations/20261102180000_feedback_marks.sql` as version `20261102080038` 'feedback_marks'. The md5 of the stored statement, `47d34a0209fc3963f56eecdc2f356516`, equals the file's.
+- **Verified on comms-hub, numbers** (`qa/feedback-marks-rules-comms-hub.json`).
+  - Before applying: the migration and the marks rules in one rolled-back transaction, **72 of 72**. The migration ran only after the md5 of its text inside the query equalled the file's. Nothing stayed: 13 columns, no `feedback_mine`, no throwaway account or user, `notifications` still 15.
+  - After applying: `feedback_errors_rules.sql`, **32 of 32**. The marks rules were not run a second time, because the stored statement is byte-equal to the text they passed against. 18 columns, the old function gone, 0 notes, no throwaway account, `notifications` still 15.
+  - Security advisors, 342 findings before and 344 after, compared entry by entry by script: `feedback_merge` and `feedback_mine` are new, callable by `authenticated`, each checking its own rule. `feedback_submit` reads as one new and one gone because its signature changed. None new for `anon`.
+- **Verified on production, numbers.**
+  - Vercel: READY on `ed657c0` (`dpl_ofUcf9aEsVLhEYLwhBDH8BvGaRMk`), no runtime errors in the hour checked.
+  - `qa/feedback-live.cjs`, new, **8 of 8**: the page carries `ed657c0` as `hub-build`, so the version really reaches a note, the privacy page says no picture is taken in both languages, and a stranger is refused by `feedback_submit`, `feedback_list`, `feedback_mine`, `feedback_merge` and the helper `feedback_tell`.
+  - `qa/site-live.cjs` **9 of 9**, `qa/site-icon.cjs` **13 of 13**, `qa/platform-gate.cjs` **11 of 11**, `qa/writing-live.cjs` **16 of 16**.
+- **Not verified.** Anything signed in on the real site. The first real note is the first real test of a mark on a real page, of the button inside the real mail, messaging and writing windows, and of the role it sends.
+- **Left as they are.** `validation/recheck-R01.md`, `videos/`, `supabase/.temp/`, `qa/simulations/`, `Owner_Setup_Guide.md` and `Role_Simulation_*` stay out of the commits.
+- **Rollback.** The site: promote `dpl_9uWrKTDXHxEcQMBo48uTL52GJNB5`, on `3412e08`. The migration can stay, because that site's three-argument call still resolves on the new function. Undoing the migration itself would take a new migration.
