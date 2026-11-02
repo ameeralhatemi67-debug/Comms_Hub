@@ -26,6 +26,16 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The YouTube setup guide rewritten, live 2026-11-02
+
+From the director's note that the steps were still hard to follow (`MVP_draft.md` section 67.5, `progress.md`). Live on production since 2026-11-02 as `8133276`; no migration, nothing in the database changed.
+
+- **Done.** The Google guide of «المنصات» is 13 steps, one action to a step, in the order of Google's own wizard, with a numbered list of actions and nine pictures of Google's console: private text blurred, numbered rings, rounded corners, enlarged on a click. English inside Arabic is isolated in every guide, in the setup sheet and the circled "!". The saved progress and the connection are unchanged: on the stored data of comms-hub the platform still computes «متصلة».
+- **Evidence.** `npm test` 717 of 717, typecheck and build clean. `qa/platforms-flow.cjs` 121 of 121 (was 74), `qa/guide-modal.cjs` 10 of 10. On production: READY, no runtime errors, the nine pictures byte-identical to the files.
+- **Not verified.** Anything signed in on the real site, and the steps followed from nothing on a fresh Google project. The pictures are of another project's console (the names in them are examples).
+- **Next.** The next person to set up a Google project follows the guide and says where they stopped.
+- **Note.** Local `main` still holds the «إنشاء» commits whose migrations are not applied; this change was pushed from a clean worktree on `origin/main` so none of them went out.
+
 ## «إنشاء» as a permission and «إلغاء العمل», built 2026-11-02, not live
 
 From the owner's request (`Create_Access_Plan.md`, `MVP_draft.md` section 70, `progress.md`). Committed locally, not pushed, and the two migrations are not applied to comms-hub.
