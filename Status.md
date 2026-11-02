@@ -26,6 +26,15 @@ related:
 
 # Communication Department Hub — Current Status
 
+## «إنشاء» as a permission and «إلغاء العمل», built 2026-11-02, not live
+
+From the owner's request (`Create_Access_Plan.md`, `MVP_draft.md` section 70, `progress.md`). Committed locally, not pushed, and the two migrations are not applied to comms-hub.
+
+- **Done.** The designer and the member start without «إنشاء», and the Admin or the Director gives it to a role or a person. The database refuses creating without it. A creator can cancel a work within the hour if nobody else touched it. The return button no longer gets stuck on a refused action.
+- **Evidence.** `npm test` 716 of 716, typecheck and build clean. `qa/work-pages.cjs` 1077 of 1077, `qa/accounts-flow.cjs` 68 of 68. On a private container, `create_access_rules` 61 of 61 and `work_cancel_rules` 40 of 40.
+- **Not verified.** Anything signed in on the real site, and the migrations on comms-hub.
+- **Next.** With the owner's word: rehearse and apply both migrations, then push.
+
 ## A tester's note and its marks, live 2026-11-02
 
 From the owner's request ahead of the test week (`MVP_draft.md` section 69, `progress.md`). Live on production since 2026-11-02 as `ed657c0`, with the migration applied to comms-hub as version `20261102080038`.

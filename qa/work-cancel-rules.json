@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/work_cancel_rules.sql",
+  "script_md5": "5b33f718a3f760bc86cf824f500517e4",
+  "migration": {
+    "file": "supabase/migrations/20261102210000_work_cancel.sql",
+    "file_md5": "b73c33be1f4ede66c07b9dd0b79f6935",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-02T10:23:42.413Z",
+  "migrations_replayed": 63,
+  "differ": [],
+  "total": 40,
+  "passed": 40
+}

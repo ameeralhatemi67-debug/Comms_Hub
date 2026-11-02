@@ -82,6 +82,7 @@ const page = (dark, dir) =>
             b.onResolve({ filter: /^@\/lib\/supabase\/client$/ }, () => ({ path: fake }));
             b.onResolve({ filter: /^@\/lib\/account-context$/ }, () => ({ path: fake }));
             b.onResolve({ filter: /\/home-perms$/ }, () => ({ path: fake }));
+            b.onResolve({ filter: /\/can-create$/ }, () => ({ path: fake }));
             b.onResolve({ filter: /(^\.\/data$|^\.\.\/work\/data$|^\.\/work\/data$)/ }, () => ({ path: fake }));
             b.onResolve({ filter: /^next\/(navigation|link)$/ }, () => ({ path: path.join(fixtures, 'fake-next.tsx') }));
             b.onResolve({ filter: /studio-fonts$/ }, () => ({ path: 'empty', namespace: 'empty' }));

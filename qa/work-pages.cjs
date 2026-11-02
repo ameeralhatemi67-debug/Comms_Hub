@@ -42,6 +42,7 @@ const sources = [
   'components/work/review-player.tsx', 'lib/work/queue.ts', 'lib/work/review-keys.ts', 'lib/studio/shortcuts.ts',
   'lib/media/notes.ts', 'lib/kit/hold.ts', 'lib/kit/layer.ts', 'lib/motion/preview.js',
   // «ورقة الكتابة»: its list, the read-only view of a document and its calls. The sheet has its own check (qa/writing-flow.cjs).
+  'lib/kit/need.ts', 'lib/permissions.ts',
   'lib/writing/flow.ts', 'lib/writing/doc.ts', 'lib/studio/fonts.ts', 'components/writing/doc-view.tsx', 'components/writing/api.ts',
 ];
 for (const m of sources) {
@@ -58,6 +59,7 @@ for (const m of sources) {
     .replace(/from '\.\/data'/g, `from '${up}mocks/data.js'`)
     .replace(/from '\.\/work\/data'/g, `from '${up}mocks/data.js'`)
     .replace(/from '\.\/home-perms'/g, `from '${up}mocks/home-perms.js'`)
+    .replace(/from '\.\.?\/can-create'/g, `from '${up}mocks/can-create.js'`)
     .replace(/from '\.\.\/perm-requests'/g, `from '${up}mocks/perm-requests.js'`)
     // the studio's links on the work page («فتح في الاستوديو») have their own check (qa/studio-ui.cjs --only=work)
     .replace(/from '\.\.\/studio\/work-links'/g, `from '${up}mocks/studio-links.js'`)
@@ -93,6 +95,8 @@ export const WorkStudioButton = () => null;
 export const useStudioOrigins = () => new Map();`);
 // Home's permissions part has its own check (qa/permissions-pages.cjs).
 fs.writeFileSync(path.join(build, 'mocks', 'home-perms.js'), 'export const HomePermissions = () => null;');
+// «إنشاء» follows the permission (MVP_draft.md section 70). The member of these pages was given it; the designer was not.
+fs.writeFileSync(path.join(build, 'mocks', 'can-create.js'), "export const useCanCreate = () => { const c = globalThis.__WK.ctx; return ['director', 'assistant', 'writer', 'producer'].includes(c.role) || c.me === 'abd@x.sa'; };");
 // The permissions tab of «الطلبات» has its own check (qa/permissions-pages.cjs).
 fs.writeFileSync(path.join(build, 'mocks', 'perm-requests.js'), `export const usePermRequests = () => ({ list: [], status: 'ready', reload: async () => {} });
 export const PermRequestList = () => null;
@@ -299,6 +303,14 @@ async function renderAll() {
   render('create-writer-video', 'khalid@x.sa', 'writer', h(create.CreatePage), { search: 'type=video' });
   render('create-member', 'abd@x.sa', 'member', h(create.CreatePage), { search: 'type=event' });
   render('create-publisher', 'noura@x.sa', 'publisher', h(create.CreatePage));
+  // «إنشاء» for a designer who was not given it, and a work its creator can still take back.
+  render('create-locked', 'sara@x.sa', 'designer', h(create.CreatePage));
+  render('list-designer', 'sara@x.sa', 'designer', h(list.WorkListPage));
+  const fresh = (log, comments) => detailOf(5, { w: { ...works[5].w, id: 'CH-6', closed_at: null, closed_by: null, close_reason: null, status: 'DRAFT', review_cycle: null, created_by: 'khalid@x.sa', created_at: new Date().toISOString() }, log, comments });
+  const own = [{ id: 1, at: new Date().toISOString(), actor: 'khalid@x.sa', type: 'create', text: 'إنشاء العمل' }];
+  render('item-cancel', 'khalid@x.sa', 'writer', h(item.WorkItemPage, { id: 'CH-6' }), { detail: fresh(own, []) });
+  render('item-cancel-touched', 'khalid@x.sa', 'writer', h(item.WorkItemPage, { id: 'CH-6' }), { detail: fresh(own, [{ id: 'c1', author: 'dir@x.sa', body: 'رأي', created_at: new Date().toISOString() }]) });
+  render('item-cancel-other', 'sara@x.sa', 'designer', h(item.WorkItemPage, { id: 'CH-6' }), { detail: fresh(own, []) });
   const rows = works[0].stages.map((s) => ({ id: s.id, n: s.name, role: s.role, who: s.who ?? '', start: s.start_on ?? '', due: s.due_on ?? '', after: s.after_pos, days: 1, gate: s.gate, note: s.note ?? '', done: !!s.done_at }));
   // The editor and the dialogs open inside a work page, so they render inside its .wk frame.
   const wk = (el) => h('div', { className: 'wk' }, el);
@@ -389,6 +401,12 @@ async function renderAll() {
   render('home-writer', 'khalid@x.sa', 'writer', h(home.HomePage), s5);
   render('home-publisher', 'noura@x.sa', 'publisher', h(home.HomePage), s5);
   render('home-member', 'abd@x.sa', 'member', h(home.HomePage), s5);
+  // Who was not given «إنشاء» is not offered it, wherever it is offered (MVP_draft.md section 70).
+  render('home-designer', 'sara@x.sa', 'designer', h(home.HomePage), s5);
+  render('home-writer', 'khalid@x.sa', 'writer', h(home.HomePage), s5);
+  render('project-designer', 'sara@x.sa', 'designer', h(proj.ProjectPage, { id: 'p1' }), { ...s5, search: 'tab=works' });
+  render('add-designer', 'sara@x.sa', 'designer', h(dayd.AddDayDialog, { date: '2026-10-20', ready: [], onPick() {}, onClose() {} }), s5);
+  render('add-writer', 'khalid@x.sa', 'writer', h(dayd.AddDayDialog, { date: '2026-10-20', ready: [], onPick() {}, onClose() {} }), s5);
   globalThis.__WK = { ctx: ctx('dir@x.sa', 'director'), ...s5, detail: null, search: '', dec };
   const w11 = works5.find((x) => x.w.id === 'CH-12').w;
   const step5Dialogs = [
@@ -453,6 +471,8 @@ window.__ready = true;
       'item-director-review': ['مراجعة واعتماد', 'افتح شاشة المراجعة', 'دورات المراجعة'],
       'item-closed': ['أغلقه', 'أُلغي الحدث'],
       'item-missing': ['العمل غير موجود'],
+      'create-locked': ['«إنشاء» غير مفتوحة لك', 'اطلب هذه الصلاحية'],
+      'item-cancel': ['إلغاء العمل', 'خلال ساعة من إنشائه'],
       'create-types': ['منشور اجتماعي', 'تغطية حدث', 'مشروع', 'تحويل إلى عمل'],
       'create-post': ['خطة المراحل', 'كتابة النص', 'تلقائي', 'بلا مسؤول الآن (يبقى طلباً)', 'إرسال الطلب', 'إنستغرام · الرسمي', 'حمل الفريق الآن'],
       'create-writer-video': ['أنا المسؤول', 'اتركه للقادة', 'المدة التقريبية', 'حفظ مسودة', 'إنشاء وبدء الإنتاج', 'يوتيوب · الرسمي'],
@@ -534,6 +554,13 @@ window.__ready = true;
     };
     // Stopping and deleting an account stay folded under «خيارات أخرى», so they are read from the page itself.
     for (const w of ['إيقاف', 'حذف']) check(`channels-sheet: folded, «${w}» is there`, pages['channels-sheet'].includes(w));
+    check('create: a designer who was not given it is not offered it on the work list', !pages['list-designer'].includes('إنشاء عمل') && pages['list-writer'].includes('إنشاء عمل'));
+    check('create: nor on Home', !pages['home-designer'].includes('href="/create"') && pages['home-writer'].includes('href="/create"'));
+    check('create: nor in a project', !pages['project-designer'].includes('/create?project') && pages['project-timeline'].includes('/create?project'));
+    check('create: nor from a day of the calendar', !pages['add-designer'].includes('/create?') && pages['add-writer'].includes('/create?'));
+    check('cancel: its creator is offered it', pages['item-cancel'].includes('إلغاء العمل') && pages['item-cancel'].includes('data-hold="الإلغاء يغلق العمل'));
+    check('cancel: not once someone else has commented', !pages['item-cancel-touched'].includes('إلغاء العمل'));
+    check('cancel: and never to someone else', !pages['item-cancel-other'].includes('إلغاء العمل'));
     const absent = {
       'list-writer': ['الطلبات', 'كل الأشخاص'],
       'list-member': ['كل الأشخاص', 'لوحة الفريق'],

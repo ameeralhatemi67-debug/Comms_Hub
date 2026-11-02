@@ -119,6 +119,9 @@ const grants = [
 ];
 const ROLE_ON = { director: ['urgency.2', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant', 'roles.assign', 'members.invite', 'members.remove', 'roles.templates.edit'], assistant: ['urgency.2', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant'] };
 const grantable = ['urgency.2', 'whatsapp.push', 'mail.outside.send', 'room.create', 'accounts.view', 'permissions.grant', 'roles.assign', 'members.invite', 'members.remove', 'roles.templates.edit', 'whatsapp.system.manage'];
+// «إنشاء» is a role template since 2026-11-02 (MVP_draft.md section 70).
+grantable.push('page.create');
+for (const r of ['director', 'assistant', 'writer', 'producer']) (ROLE_ON[r] ??= []).push('page.create');
 const defaults = ['admin', 'director', 'assistant', 'writer', 'designer', 'producer', 'publisher', 'member'].flatMap((role) =>
   grantable.map((capability) => ({ role, capability, allowed: role === 'admin' ? capability !== 'whatsapp.push' : (ROLE_ON[role] ?? []).includes(capability) })));
 const ev = (id, kind, over) => ({ id, at: '2026-10-13T08:00:00Z', actor: 'dir@x.sa', subject: 'khalid@x.sa', role: null, capability: 'urgency.2', kind, data: {}, ...over });

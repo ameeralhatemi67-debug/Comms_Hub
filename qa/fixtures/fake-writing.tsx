@@ -167,6 +167,7 @@ export const fileNotes = async () => [];
 export const addFileNote = async () => null;
 export const useAccount = () => ({ email: ME, role: ROLE, pages: ['create', 'work'], caps: [] });
 export const HomePermissions = () => null;
+export const useCanCreate = () => true;
 
 // The routes.
 const realFetch = window.fetch.bind(window);

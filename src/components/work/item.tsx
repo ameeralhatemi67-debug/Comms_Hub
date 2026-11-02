@@ -56,6 +56,7 @@ import {
   dueNote,
   fdate,
   gatePending,
+  canCancelWork,
   isLead,
   isOutstanding,
   isRequest,
@@ -116,7 +117,7 @@ type Dialog =
 
 const ACTION_ICON: Record<string, LucideIcon> = {
   reopen: LockOpen, assign: Users, details: Settings, start: Play, submit: Send, plan: ChartGantt, review: Eye, edittext: Pencil,
-  lib: ImageIcon, schedule: Clock, pubnow: Upload, confirmpub: Upload, declinepub: X, unsched: X, retry: Upload, chat: MessagesSquare, restrict: Shield, close: Lock, stepdone: Check, wait: Clock,
+  cancel: X, lib: ImageIcon, schedule: Clock, pubnow: Upload, confirmpub: Upload, declinepub: X, unsched: X, retry: Upload, chat: MessagesSquare, restrict: Shield, close: Lock, stepdone: Check, wait: Clock,
 };
 const LOG_ICON: Record<string, LucideIcon> = {
   create: Plus, request: Send, start: Play, stage_start: Play, stage_done: Check, gate: ShieldCheck, gate_wait: ShieldCheck, plan: ChartGantt,
@@ -186,6 +187,7 @@ export function WorkItemPage({ id }: { id: string }) {
     hasChat: d.chats.length > 0,
     nameOf: w.nameOf,
     mail: isMailWork(d.w, w.accounts),
+    cancellable: canCancelWork(x, w.me, Date.now(), [...d.log.map((e) => e.actor), ...d.comments.map((c) => c.author)]),
   });
   const owners = actionOwners(x, w.me, w.role, w.nameOf);
   const Type = TYPE_ICON[x.type];
@@ -196,6 +198,8 @@ export function WorkItemPage({ id }: { id: string }) {
     switch (id0) {
       case 'reopen':
         return void act('work_reopen', { p_work: x.id }, 'أُعيد فتح العمل.');
+      case 'cancel':
+        return void act('work_cancel', { p_work: x.id }, 'أُلغي العمل، ويبقى في «المغلقة».');
       case 'start':
         return void act('work_start', { p_work: x.id }, x.status === 'DRAFT' ? 'بدأ الإنتاج.' : 'عاد العمل إلى «قيد الإنتاج».');
       case 'restrict':
@@ -356,7 +360,7 @@ export function WorkItemPage({ id }: { id: string }) {
                     type="button"
                     className={`wk-qbtn ${a.next ? 'next' : ''}`}
                     disabled={a.disabled || busy}
-                    data-hold={a.id === 'confirmpub' ? HOLD.publishNow : undefined}
+                    data-hold={a.id === 'confirmpub' ? HOLD.publishNow : a.id === 'cancel' ? HOLD.cancelWork : undefined}
                     onClick={() => void run(a)}
                   >
                     <span className="q-i">

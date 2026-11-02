@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { canCancelWork, CANCEL_WINDOW_MIN } from '../src/lib/work/rules.ts';
 import { readFileSync, readdirSync } from 'node:fs';
 import {
   statusLabels, typeLabels, textLabels, TYPE_PLANS, STAGE_LIBRARY, stageState, cleared, gatePending, waitsFor, dependents,
@@ -10,7 +11,7 @@ import {
 } from '../src/lib/work/rules.ts';
 
 const T = '2026-10-12';
-const migrations = readdirSync('supabase/migrations').filter((f) => f.includes('work_cycle'))
+const migrations = readdirSync('supabase/migrations').filter((f) => f.includes('work_cycle') || f.includes('work_cancel'))
   .map((f) => readFileSync(`supabase/migrations/${f}`, 'utf8')).join('\n');
 const reference = readFileSync('reference/comms-hub-reference-v5.html', 'utf8');
 
@@ -227,7 +228,7 @@ test('every error the database raises has Arabic wording', () => {
 test('every work function the pages will call exists in a migration', () => {
   for (const fn of WORK_RPC) assert.match(migrations, new RegExp(`create (or replace )?function public\\.${fn}\\(`), fn);
   // ...and is callable by signed-in people.
-  for (const fn of WORK_RPC) assert.match(migrations, new RegExp(`'${fn}\\(`), `${fn} granted`);
+  for (const fn of WORK_RPC) assert.match(migrations, new RegExp(`('|grant execute on function public\\.)${fn}\\(`), `${fn} granted`);
 });
 
 // ---------------------------------------------------------------------------
@@ -514,4 +515,23 @@ test('counts read as Arabic: one and two in words, 3 to 10 plural, 11 and up sin
   // No interface line writes a bare number before these plurals any more.
   const files = ['src/components/home.tsx', ...readdirSync('src/components/work').map((f) => `src/components/work/${f}`)];
   for (const f of files) assert.doesNotMatch(readFileSync(f, 'utf8'), /\}\s?(أعمال|مراحل|أجزاء|مشاريع|نشطة|مهام)(?![\u0600-\u06FF])/u, f);
+});
+
+test('a creator can take a work back within the hour if nobody else touched it', () => {
+  const at = Date.parse('2026-11-02T10:00:00Z');
+  const work = { status: 'DRAFT', closed_at: null, created_by: 'a@t.test', created_at: '2026-11-02T10:00:00Z', review_cycle: null };
+  const me = 'a@t.test';
+  assert.equal(CANCEL_WINDOW_MIN, 60);
+  assert.equal(canCancelWork(work, me, at + 59 * 60e3, [me, 'system']), true);
+  assert.equal(canCancelWork(work, me, at + 61 * 60e3, [me]), false, 'after the hour');
+  assert.equal(canCancelWork(work, 'b@t.test', at, []), false, 'only the creator');
+  assert.equal(canCancelWork(work, me, at, [me, 'b@t.test']), false, 'someone else acted');
+  assert.equal(canCancelWork({ ...work, status: 'IN_PRODUCTION' }, me, at, []), true);
+  assert.equal(canCancelWork({ ...work, status: 'IN_REVIEW' }, me, at, []), false, 'sent');
+  assert.equal(canCancelWork({ ...work, review_cycle: 1 }, me, at, []), false, 'sent');
+  assert.equal(canCancelWork({ ...work, closed_at: '2026-11-02T10:01:00Z' }, me, at, []), false, 'closed');
+  const sql = readFileSync('supabase/migrations/20261102210000_work_cancel.sql', 'utf8');
+  assert.match(sql, /interval '1 hour'/);
+  assert.match(sql, /grant execute on function public\.work_cancel\(text\) to authenticated/);
+  assert.doesNotMatch(sql, /delete from public\.works/, 'a work is closed, never deleted');
 });

@@ -1,6 +1,6 @@
 {
   "script": "qa/accounts-flow.cjs",
-  "run": "2026-11-01T09:55:09.736Z",
+  "run": "2026-11-02T10:14:47.262Z",
   "checks": [
     {
       "name": "«الأعضاء»: six people, in the columns the head names, and no sideways scroll",
@@ -150,12 +150,32 @@
     {
       "name": "the role's own switch says how many it touches before it is saved",
       "pass": true,
-      "detail": "تفعيل «رسائل «مهم» (المستوى 2)»\n×\n\nلكل من يحمل دور «كاتب المحتوى»: شخصان الآن، ومن يُعطى هذا الدور لاحقاً. من أُضيفت له أو سُحبت منه وحده يبقى كما هو.\n\nتفعيل للدور\nإلغاء"
+      "detail": "إيقاف «صفحة «إنشاء»»\n×\n\nلكل من يحمل دور «كاتب المحتوى»: شخصان الآن، ومن يُعطى هذا الدور لاحقاً. من أُضيفت له أو سُحبت منه وحده يبقى كما هو.\n\nإيقاف للدور\nإلغاء"
     },
     {
       "name": "and it asks set_role_default, not a person",
       "pass": true,
-      "detail": "{\"name\":\"set_role_default\",\"args\":{\"p_role\":\"writer\",\"p_cap\":\"urgency.2\",\"p_allowed\":true}}"
+      "detail": "{\"name\":\"set_role_default\",\"args\":{\"p_role\":\"writer\",\"p_cap\":\"page.create\",\"p_allowed\":false}}"
+    },
+    {
+      "name": "«إنشاء» has a real switch for a whole role, off for the designer",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "turning it on asks set_role_default for that role",
+      "pass": true,
+      "detail": "{\"name\":\"set_role_default\",\"args\":{\"p_role\":\"designer\",\"p_cap\":\"page.create\",\"p_allowed\":true}}"
+    },
+    {
+      "name": "it is off for the member too",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and the publisher has no such row",
+      "pass": true,
+      "detail": ""
     },
     {
       "name": "a role at the director's own rank is shown, locked, with no columns of people",
@@ -185,7 +205,7 @@
     {
       "name": "it says what the defaults are",
       "pass": true,
-      "detail": "يبدأ بـ10 صفحات وصلاحيات دوره. وتصله دعوة بالبريد الآن."
+      "detail": "يبدأ بـ9 صفحات وصلاحيات دوره. وتصله دعوة بالبريد الآن."
     },
     {
       "name": "choosing a role says what the role is for",
@@ -195,7 +215,7 @@
     {
       "name": "three fields are enough: it adds with the role's pages, those the director holds",
       "pass": true,
-      "detail": "{\"name\":\"add_account\",\"args\":{\"p_email\":\"New@Example.test\",\"p_name\":\"موظفة جديدة\",\"p_role\":\"designer\",\"p_pages\":[\"work\",\"create\",\"approvals\",\"calendar\",\"media\",\"tasks\",\"activity\",\"motion\",\"mail\",\"analytics\"]}}"
+      "detail": "{\"name\":\"add_account\",\"args\":{\"p_email\":\"New@Example.test\",\"p_name\":\"موظفة جديدة\",\"p_role\":\"designer\",\"p_pages\":[\"work\",\"approvals\",\"calendar\",\"media\",\"tasks\",\"activity\",\"motion\",\"mail\",\"analytics\"]}}"
     },
     {
       "name": "the invitation goes out once, to the address in small letters",
@@ -213,6 +233,11 @@
       "detail": ""
     },
     {
+      "name": "«إنشاء» is not a page tick: the role decides, and it is offered as a permission",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "a page the director does not hold cannot be ticked",
       "pass": true,
       "detail": ""
@@ -220,12 +245,12 @@
     {
       "name": "the summary follows every choice",
       "pass": true,
-      "detail": "يبدأ بـ9 صفحات وصلاحيات دوره و1 إضافية. ولن تُرسل دعوة الآن."
+      "detail": "يبدأ بـ8 صفحات وصلاحيات دوره و1 إضافية. ولن تُرسل دعوة الآن."
     },
     {
       "name": "the options are used: one page fewer, the extra permission for good, no invitation",
       "pass": true,
-      "detail": "{\"second\":{\"name\":\"add_account\",\"args\":{\"p_email\":\"opts@example.test\",\"p_name\":\"موظف بخيارات\",\"p_role\":\"member\",\"p_pages\":[\"work\",\"create\",\"approvals\",\"calendar\",\"media\",\"tasks\",\"activity\",\"motion\",\"mail\"]}},\"extra\":{\"name\":\"grant_capability\",\"args\":{\"p_email\":\"opts@example.test\",\"p_cap\":\"urgency.2\",\"p_mode\":\"standing\",\"p_until\":null,\"p_uses\":null,\"p_scope\":null,\"p_reason\":null}},\"invites\":[{\"email\":\"new@example.test\",\"kind\":\"invite\"}]}"
+      "detail": "{\"second\":{\"name\":\"add_account\",\"args\":{\"p_email\":\"opts@example.test\",\"p_name\":\"موظف بخيارات\",\"p_role\":\"member\",\"p_pages\":[\"work\",\"approvals\",\"calendar\",\"media\",\"tasks\",\"activity\",\"motion\",\"mail\"]}},\"extra\":{\"name\":\"grant_capability\",\"args\":{\"p_email\":\"opts@example.test\",\"p_cap\":\"urgency.2\",\"p_mode\":\"standing\",\"p_until\":null,\"p_uses\":null,\"p_scope\":null,\"p_reason\":null}},\"invites\":[{\"email\":\"new@example.test\",\"kind\":\"invite\"}]}"
     },
     {
       "name": "«السجل» says what it holds, and where the rest is",
@@ -319,7 +344,7 @@
     }
   ],
   "notes": [],
-  "total": 63,
-  "passed": 63,
+  "total": 68,
+  "passed": 68,
   "failed": 0
 }

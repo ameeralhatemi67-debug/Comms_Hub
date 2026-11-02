@@ -18,6 +18,8 @@ export const HOLD = {
   chatDelete: 'تُحذف الرسالة عند كل الأعضاء.',
   /** Work page: close a work with its reason. */
   closeWork: 'الإغلاق يخرج العمل من القوائم النشطة ومن حمل صاحبه.',
+  /** Work page: the creator takes a work back. */
+  cancelWork: 'الإلغاء يغلق العمل ويُعلم من أُسند إليهم. يبقى في «المغلقة»، ويعيد فتحه مدير الاتصال.',
   /** Review screen: approve the pending parts or the whole package. */
   approveAll: 'الاعتماد قرار يُسجَّل باسمك ويجعل العمل جاهزاً للنشر.',
   /** Review screen: the key A held approves the file shown at its version (a key hold, data-keyhold). */

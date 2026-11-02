@@ -40,6 +40,8 @@ create function pg_temp.before(cap text) returns boolean language sql as $$
     when cap = 'mail.outside.send' then public.mail_approver()
     when cap = 'room.create' then public.media_acts(array['director','assistant'])
     when cap in ('accounts.view','permissions.grant','roles.assign','members.invite','members.remove','roles.templates.edit','whatsapp.system.manage') then public.is_admin()
+    -- A role template since 2026-11-02 (MVP_draft.md section 70), not the account's page list.
+    when cap = 'page.create' then public.media_my_role() in ('admin','director','assistant','writer','producer')
     when cap like 'page.%' then public.is_admin() or (substr(cap, 6) in (select unnest(pages) from public.accounts where email = public.current_email())
          and (cap <> 'page.create' or public.media_my_role() in ('director','assistant','writer','designer','producer','member')))
     when cap = 'whatsapp.push' then false

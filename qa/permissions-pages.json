@@ -1,5 +1,5 @@
 {
-  "run": "2026-11-01T20:51:02.529Z",
+  "run": "2026-11-02T10:08:44.933Z",
   "checks": [
     {
       "name": "accounts-members: renders",
@@ -684,7 +684,7 @@
     {
       "name": "accounts-roles-assistant: without «تعديل صلاحيات الأدوار» every switch of the role is disabled with its reason",
       "pass": true,
-      "detail": "6 switches"
+      "detail": "7 switches"
     },
     {
       "name": "accounts-roles-assistant: a person of the team still has working switches of their own",

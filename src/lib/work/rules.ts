@@ -735,7 +735,7 @@ export function attentionCounts(list: { w: ListWork; stages: DatedStage[] }[], t
 export type ActionId =
   | 'reopen' | 'assign' | 'details' | 'start' | 'submit' | 'plan' | 'review' | 'edittext' | 'lib'
   | 'schedule' | 'pubnow' | 'confirmpub' | 'declinepub' | 'unsched' | 'retry'
-  | 'chat' | 'restrict' | 'close' | `stepdone:${number}` | `wait:${number}`;
+  | 'chat' | 'restrict' | 'close' | 'cancel' | `stepdone:${number}` | `wait:${number}`;
 export type WorkAction = { id: ActionId; label: string; hint: string; next: boolean; disabled: boolean };
 export type ActionInput = {
   w: Pick<WorkRow, 'status' | 'closed_at' | 'assignee' | 'created_by' | 'people' | 'type' | 'restricted' | 'channels' | 'priority' | 'review_cycle'>
@@ -751,7 +751,29 @@ export type ActionInput = {
   decideBlock: string;
   hasChat: boolean;
   nameOf: (email: string) => string;
+  /** The creator can still take the work back (canCancelWork). */
+  cancellable?: boolean;
 };
+
+/** How long a creator can take a work back, as the return button's hour. */
+export const CANCEL_WINDOW_MIN = 60;
+
+/**
+ * May this person take this work back? The database decides (work_cancel); this says when to offer it. `others` is
+ * everyone who appears in the work's log and comments.
+ */
+export function canCancelWork(
+  w: Pick<WorkRow, 'status' | 'closed_at' | 'created_by' | 'created_at' | 'review_cycle'>,
+  me: string,
+  nowMs: number,
+  others: (string | null)[],
+): boolean {
+  if (w.closed_at || w.created_by !== me || w.review_cycle !== null) return false;
+  if (w.status !== 'DRAFT' && w.status !== 'IN_PRODUCTION') return false;
+  if (nowMs - Date.parse(w.created_at) > CANCEL_WINDOW_MIN * 60e3) return false;
+  return others.every((who) => !who || who === me || who === 'system');
+}
+
 export function workActions(x: ActionInput): WorkAction[] {
   const { w, stages, me, role: r, nameOf } = x;
   const out: WorkAction[] = [];
@@ -823,6 +845,7 @@ export function workActions(x: ActionInput): WorkAction[] {
   if (!x.hasChat && part) add('chat', 'فتح محادثة للعمل', 'مجموعة مراسلة تضم المسؤول والمشاركين');
   if (lead) add('restrict', w.restricted ? 'إلغاء التقييد' : 'تقييد الرؤية', w.restricted ? 'يراه كل القسم' : 'لا يراه إلا المعنيون والقادة');
   if (lead) add('close', 'إغلاق العمل', 'مع سبب مكتوب، ويبقى في «المغلقة»');
+  if (x.cancellable) add('cancel', 'إلغاء العمل', 'خلال ساعة من إنشائه وما لم يلمسه أحد، ويبقى في «المغلقة»');
   return out;
 }
 /** Under the actions: who holds what this person does not. */
@@ -985,6 +1008,10 @@ export function noticeHref(go: { page?: string; id?: string; tab?: string } | nu
 // ---------------------------------------------------------------------------
 const ERRORS: Record<string, string> = {
   FORBIDDEN: 'لا تملك هذا الإجراء.',
+  CREATE_DENIED: '«إنشاء» غير مفتوحة لك. يفتحها مدير الاتصال أو مسؤول النظام.',
+  CANCEL_LATE: 'مرّت ساعة على إنشاء العمل، فلا يُلغى الآن. اطلب إغلاقه من مدير الاتصال.',
+  CANCEL_SENT: 'أُرسل العمل للمراجعة، فلا يُلغى الآن.',
+  CANCEL_TOUCHED: 'عمل أحد الزملاء على هذا العمل، فلا يُلغى الآن. اطلب إغلاقه من مدير الاتصال.',
   FORBIDDEN_DECIDE: 'القرار لمدير الاتصال ومساعده.',
   NOT_IN_REVIEW: 'العمل ليس بانتظار قرار.',
   SELF_APPROVAL: 'لا تعتمد ما أرسلته أو رفعته بنفسك.',
@@ -1077,7 +1104,7 @@ export const WORK_ERROR_CODES = Object.keys(ERRORS);
 
 /** The database functions the work pages call. tests/work.test.mjs checks each exists in a migration. */
 export const WORK_RPC = [
-  'work_create', 'work_update', 'work_assign', 'work_set_restricted', 'work_close', 'work_reopen', 'work_start',
+  'work_create', 'work_update', 'work_assign', 'work_set_restricted', 'work_close', 'work_cancel', 'work_reopen', 'work_start',
   'work_stage_act', 'work_save_plan', 'work_text_save', 'work_variant_confirm', 'work_asset_link', 'work_comment',
   'work_submit', 'work_decide', 'work_request_move', 'work_cancel_move', 'work_schedule', 'work_publish', 'work_due_run',
   'work_view_parts', 'work_view_pending', 'work_decide_block', 'work_step_impact', 'work_task_impact',

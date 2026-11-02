@@ -112,13 +112,13 @@ const flip = (t, scope, label) => scope.getByRole('switch', { name: new RegExp(l
     check('nothing is saved until it is confirmed', (await asked(t, 'assign_role')).length === 0 && (await row(t, 'كاتب أول').locator('.pm-rolepick').inputValue()) === 'writer');
     await t.screenshot({ path: path.join(out, '02-role-change.png') });
     await t.locator('dialog[open] button', { hasText: 'إلغاء' }).click();
-    await row(t, 'كاتب أول').locator('.pm-rolepick').selectOption('designer');
+    await row(t, 'كاتب أول').locator('.pm-rolepick').selectOption('producer');
     await t.waitForSelector('dialog .pm-rolefromto');
     check('between roles that hold the same it says so, and needs no long press', (await t.locator('dialog[open]').innerText()).includes('لا فرق في الصلاحيات بين الدورين') && !(await t.locator('dialog[open] button.primary').getAttribute('data-hold')));
     await t.locator('dialog[open] button.primary').click();
     await t.waitForSelector('dialog[open]', { state: 'detached' });
-    check('confirming asks assign_role for that person alone, and keeps the pages', JSON.stringify(await asked(t, 'assign_role')) === JSON.stringify([{ name: 'assign_role', args: { p_email: 'one@example.test', p_role: 'designer', p_pages: null } }]));
-    check('the row shows the new role at once', (await row(t, 'كاتب أول').locator('.pm-rolepick').inputValue()) === 'designer');
+    check('confirming asks assign_role for that person alone, and keeps the pages', JSON.stringify(await asked(t, 'assign_role')) === JSON.stringify([{ name: 'assign_role', args: { p_email: 'one@example.test', p_role: 'producer', p_pages: null } }]));
+    check('the row shows the new role at once', (await row(t, 'كاتب أول').locator('.pm-rolepick').inputValue()) === 'producer');
     await row(t, 'كاتب أول').locator('.pm-rolepick').selectOption('writer');
     await t.locator('dialog[open] button.primary').click();
     await t.waitForSelector('dialog[open]', { state: 'detached' });
@@ -199,6 +199,20 @@ const flip = (t, scope, label) => scope.getByRole('switch', { name: new RegExp(l
     await t.locator('dialog[open] button.primary').click();
     await t.waitForSelector('dialog[open]', { state: 'detached' });
     check('and it asks set_role_default, not a person', (await last(t)).name === 'set_role_default' && (await last(t)).args.p_role === 'writer', await last(t));
+    // «إنشاء» for a whole role (MVP_draft.md section 70).
+    await t.locator('.pm-rail button', { hasText: 'المصمم' }).click();
+    const createRole = t.getByRole('switch', { name: 'صفحة «إنشاء»، المصمم: موقوفة' });
+    check('«إنشاء» has a real switch for a whole role, off for the designer', (await createRole.count()) === 1 && !(await createRole.isDisabled()));
+    await createRole.click();
+    await t.waitForSelector('dialog[open]');
+    await t.locator('dialog[open] button.primary').click();
+    await t.waitForSelector('dialog[open]', { state: 'detached' });
+    const opened = await last(t);
+    check('turning it on asks set_role_default for that role', opened.name === 'set_role_default' && opened.args.p_role === 'designer' && opened.args.p_cap === 'page.create' && opened.args.p_allowed === true, opened);
+    await t.locator('.pm-rail button', { hasText: /^عضو/ }).click();
+    check('it is off for the member too', (await t.getByRole('switch', { name: 'صفحة «إنشاء»، عضو: موقوفة' }).count()) === 1);
+    await t.locator('.pm-rail button', { hasText: 'مسؤول النشر' }).click();
+    check('and the publisher has no such row', (await t.getByRole('switch', { name: /صفحة «إنشاء»/ }).count()) === 0);
     await t.locator('.pm-rail button', { hasText: 'مدير الاتصال المؤسسي' }).first().click();
     check('a role at the director\'s own rank is shown, locked, with no columns of people', (await t.locator('.pm-colhead').count()) === 0 && (await t.locator('button[data-col="role"]').first().isDisabled()) && (await t.locator('.pm-howto').first().innerText()).includes('في رتبتك أو فوقها'));
     await t.locator('.pm-rail button', { hasText: 'كاتب المحتوى' }).click();
@@ -226,7 +240,7 @@ const flip = (t, scope, label) => scope.getByRole('switch', { name: new RegExp(l
     await form.locator('button.primary').click();
     await t.waitForSelector('dialog[open]', { state: 'detached' });
     const added = (await asked(t, 'add_account')).pop();
-    check('three fields are enough: it adds with the role\'s pages, those the director holds', added.args.p_role === 'designer' && added.args.p_pages.length === 10 && !added.args.p_pages.includes('settings') && !added.args.p_pages.includes('ideas'), added);
+    check('three fields are enough: it adds with the role\'s pages, those the director holds', added.args.p_role === 'designer' && added.args.p_pages.length === 9 && !added.args.p_pages.includes('create') && !added.args.p_pages.includes('settings') && !added.args.p_pages.includes('ideas'), added);
     check('the invitation goes out once, to the address in small letters', JSON.stringify(invites) === JSON.stringify([{ email: 'new@example.test', kind: 'invite' }]), invites);
     check('and the new person\'s card opens', (await card.innerText()).includes('new@example.test'));
 
@@ -238,16 +252,17 @@ const flip = (t, scope, label) => scope.getByRole('switch', { name: new RegExp(l
     await t.waitForTimeout(250);
     await t.screenshot({ path: path.join(out, '07-add-advanced.png') });
     check('«خيارات متقدمة» opens the pages, extra permissions and the invitation', (await form.locator('.page-grid').isVisible()) && (await form.locator('.pm-extras').isVisible()));
+    check('«إنشاء» is not a page tick: the role decides, and it is offered as a permission', (await form.locator('.page-grid label', { hasText: 'إنشاء' }).count()) === 0 && (await form.locator('.pm-extras label', { hasText: 'صفحة «إنشاء»' }).count()) === 1);
     await form.locator('.page-grid label', { hasText: 'التحليلات' }).locator('input').uncheck();
     check('a page the director does not hold cannot be ticked', await form.locator('.page-grid label', { hasText: 'الأفكار' }).locator('input').isDisabled());
     await form.locator('.pm-extras label', { hasText: 'رسائل «مهم»' }).locator('input').check();
     await form.locator('.pm-advbody > label', { hasText: 'أرسل دعوة' }).locator('input').uncheck();
-    check('the summary follows every choice', (await sum()).includes('9 صفحات') && (await sum()).includes('و1 إضافية') && (await sum()).includes('ولن تُرسل دعوة الآن'), await sum());
+    check('the summary follows every choice', (await sum()).includes('8 صفحات') && (await sum()).includes('و1 إضافية') && (await sum()).includes('ولن تُرسل دعوة الآن'), await sum());
     await form.locator('button.primary').click();
     await t.waitForSelector('dialog[open]', { state: 'detached' });
     const second = (await asked(t, 'add_account')).pop();
     const extra = (await asked(t, 'grant_capability')).pop();
-    check('the options are used: one page fewer, the extra permission for good, no invitation', second.args.p_pages.length === 9 && !second.args.p_pages.includes('analytics') && extra.args.p_email === 'opts@example.test' && extra.args.p_cap === 'urgency.2' && extra.args.p_mode === 'standing' && invites.length === 1, { second, extra, invites });
+    check('the options are used: one page fewer, the extra permission for good, no invitation', second.args.p_pages.length === 8 && !second.args.p_pages.includes('analytics') && extra.args.p_email === 'opts@example.test' && extra.args.p_cap === 'urgency.2' && extra.args.p_mode === 'standing' && invites.length === 1, { second, extra, invites });
 
     await openTab(t, 'السجل');
     const about = await t.locator('.pm-logtab .pm-howto').innerText();

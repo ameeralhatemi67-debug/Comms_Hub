@@ -1,6 +1,6 @@
 # «إنشاء» access and reversing a work: plan
 
-Written 2026-11-02 from the owner's request, after reading the code and the live database. Nothing here is built yet.
+Written 2026-11-02 from the owner's request, after reading the code and the live database. Built the same day and committed locally: see `progress.md`, which records what changed from this plan.
 
 ## Decisions taken
 

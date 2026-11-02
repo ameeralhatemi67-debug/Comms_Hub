@@ -1,5 +1,5 @@
 {
-  "run": "2026-11-02T00:54:57.506Z",
+  "run": "2026-11-02T10:12:05.831Z",
   "checks": [
     {
       "name": "list-director: renders",
@@ -73,6 +73,31 @@
     },
     {
       "name": "create-publisher: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-locked: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-designer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel-touched: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel-other: renders",
       "pass": true,
       "detail": ""
     },
@@ -367,6 +392,31 @@
       "detail": ""
     },
     {
+      "name": "home-designer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-designer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add-designer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "dialog-move: renders",
       "pass": true,
       "detail": ""
@@ -438,6 +488,41 @@
     },
     {
       "name": "channels-sheet: folded, «حذف» is there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create: a designer who was not given it is not offered it on the work list",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create: nor on Home",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create: nor in a project",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create: nor from a day of the calendar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "cancel: its creator is offered it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "cancel: not once someone else has commented",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "cancel: and never to someone else",
       "pass": true,
       "detail": ""
     },
@@ -1253,6 +1338,151 @@
     },
     {
       "name": "create-publisher · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-locked · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-locked · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "create-locked: shows ««إنشاء» غير مفتوحة لك»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-locked: shows «اطلب هذه الصلاحية»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-locked: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-locked · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "create-locked · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-designer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-designer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "list-designer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-designer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list-designer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-cancel · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-cancel: shows «إلغاء العمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel: shows «خلال ساعة من إنشائه»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-cancel-touched · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel-touched · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-cancel-touched: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel-touched · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel-touched · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-cancel-other · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel-other · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-cancel-other: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel-other · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-cancel-other · a · 390: no sideways scroll",
       "pass": true,
       "detail": "overflow 0px"
     },
@@ -4422,6 +4652,106 @@
       "detail": "overflow 0px"
     },
     {
+      "name": "home-designer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-designer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "home-designer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-designer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home-designer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-designer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-designer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "project-designer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-designer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "project-designer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "add-designer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add-designer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "add-designer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add-designer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add-designer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "add-writer · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add-writer · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "add-writer: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add-writer · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add-writer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
       "name": "dialog-move · a · 1280: no page errors",
       "pass": true,
       "detail": ""
@@ -5059,8 +5389,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 1011,
-    "passed": 1011,
+    "total": 1077,
+    "passed": 1077,
     "failed": 0
   }
 }

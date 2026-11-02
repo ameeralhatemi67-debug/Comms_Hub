@@ -67,6 +67,10 @@ select pg_temp.c('10b number issued by the server', (select pg_temp.g('A') ~ '^C
 select pg_temp.who('00000000-0000-0000-0000-00000000b002');
 select pg_temp.c('10c designer told, waiting', (select tier from public.notifications where recipient = 'des@t.test' order by created_at limit 1), 'info');
 select pg_temp.who('00000000-0000-0000-0000-00000000e001');
+-- The member holds «إنشاء» only when given it (MVP_draft.md section 70): this one was.
+reset role;
+update public.role_capabilities set allowed = true where role = 'member' and capability = 'page.create';
+set local role authenticated;
 select pg_temp.t('11 member sends a request', $q$ insert into v select 'M', public.work_create(jsonb_build_object('type','event','title','طلب تغطية',
   'due',public.work_today()+9,'assignee','mem@t.test','stages','[{"n":"التخطيط","who":"pro@t.test","start":"2026-01-01"},{"n":"التصوير","after":[0]}]'::jsonb)) $q$, 'ok');
 select pg_temp.c('11b request has no assignee and no people on stages',

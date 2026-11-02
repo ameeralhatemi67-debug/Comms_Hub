@@ -107,7 +107,7 @@ test('hold to confirm: the reference\'s reasons, each used by a button, about a 
     'src/components/accounts/members.tsx', 'src/components/accounts/card.tsx', 'src/components/accounts/roles.tsx', 'src/components/settings/general.tsx', 'src/components/settings/platforms.tsx', 'src/components/settings/storage-provider.tsx', 'src/components/settings/storage-move.tsx', 'src/components/settings/backups.tsx',
     'src/components/studio/project-list.tsx', 'src/components/studio/project-shell.tsx', 'src/components/studio/cache-panel.tsx', 'src/components/studio/export-panel.tsx', 'src/components/studio/versions-panel.tsx', 'src/components/studio/inspector.tsx', 'src/components/studio/photo-editor.tsx', 'src/components/native/desktop-app.tsx', 'src/components/native/devices.tsx', 'src/components/account-deletion.tsx'].map(read).join('\n');
   // a key hold (the review screen's A, MVP_draft.md 62.13) carries its reason as data-keyhold
-  for (const k of Object.keys(HOLD)) assert.match(comps, new RegExp(`data-(?:key)?hold=\\{HOLD\\.${k}\\}`), k);
+  for (const k of Object.keys(HOLD)) assert.match(comps, new RegExp(`data-(?:key)?hold=\\{[^}]*HOLD\\.${k}\\b`), k);
 });
 
 test('an explanation window sits beside its target and away from an open dialog', () => {

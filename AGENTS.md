@@ -512,6 +512,15 @@ private part of a page carries `data-fb-private`, and a window that must offer n
 paths exist once in TypeScript and once in SQL, held equal by `tests/feedback.test.mjs`. `qa/feedback-flow.cjs` clicks through the real
 note, layer and inbox on a fixture, and `supabase/tests/feedback_marks_rules.sql` holds the database's half.
 
+«إنشاء» is a permission, not a page in an account's list, by owner directive of 2026-11-02 (`MVP_draft.md` section 70,
+`Create_Access_Plan.md`, recorded in `progress.md`). `page.create` is a role template with a person's override, in
+`supabase/migrations/*create_access*`. The designer and the member start without it (`createStarts` in `src/lib/access.ts`), and
+only the Admin and the Director give it (`perm_create_giver`). Never gate it on `roles[...].create`: that says who may ever hold it,
+and it also decides uploads. Anything that offers creating asks `useCanCreate` (`src/components/can-create.ts`), and `work_create`
+asks the permission. `work_cancel` (`*work_cancel*`) lets a creator take a work back within the hour if nobody else touched it, by
+closing it: a work is never deleted. Its rules are held by `supabase/tests/create_access_rules.sql` and
+`supabase/tests/work_cancel_rules.sql`.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted

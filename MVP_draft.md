@@ -698,7 +698,7 @@ database decides which rows come back.
 |---|---|---|---|---|---|---|---|---|---|
 | الرئيسية | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
 | العمل | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
-| إنشاء | بالعنوان | نعم | نعم | نعم | نعم | نعم | لا | نعم | القائمة |
+| إنشاء | بالعنوان | نعم | نعم | نعم | لا | نعم | لا | لا | القائمة |
 | الموافقات والنشر | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
 | التقويم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
 | المشاريع | نعم | نعم | نعم | نعم | نعم | نعم | نعم | نعم | القائمة |
@@ -720,7 +720,8 @@ database decides which rows come back.
 
 Reading it:
 
-- **What differs by role, by default, is small:** «إنشاء» (not the publisher, and not offered to the
+- **What differs by role, by default, is small:** «إنشاء» (the director, the assistant, the writer and the
+  producer; the designer and the member are given it, section 70; never the publisher, and not offered to the
   administrator), «حسابات المنصات» (administrator, director, assistant, publisher; with «الموافقات والنشر»),
   «الحسابات» (the administrator, the director and the assistant, by the capability «فتح صفحة الحسابات»
   their templates carry since Step P2; the table of 2026-10-15 first listed it for the administrator
@@ -740,9 +741,9 @@ Reading it:
 - **«الاستوديو»** (`/motion/studio`, section 62) is a tab of «استوديو الحركة», the Admin's and the director's only
   (fixed capability `motion.studio`, owner decision of 2026-10-19), together with the page of «استوديو الحركة». An
   administrator viewing as another role sees the tab only as the Admin or the director; the address still opens.
-- **The member creates** (decision of 2026-10-15, B4b): «إنشاء» is offered to the member and the capability
-  `page.create` is held by the member as by the other creating roles (migration `member_creates`); the
-  publisher stays without it.
+- **The member and the designer start without «إنشاء»** (decision of 2026-11-02, section 70, replacing B4b of
+  2026-10-15): the capability `page.create` can be given to them, as a role or one by one; the publisher
+  stays without it.
 
 Selected state:
 
@@ -3329,3 +3330,42 @@ The note's window says what is sent, and `public/privacy.html` says it in both l
 
 «عولج» tells the author through «للعلم», which is never pushed, and a late note merged into a handled one is told at once. Nobody is
 told of their own action. «ملاحظاتي» on «الحساب» lists a person's own notes and their state.
+
+# 70. Who holds «إنشاء», and taking a work back, 2026-11-02
+
+By owner directive of 2026-11-02 (`Create_Access_Plan.md`).
+
+## 70.1 Who holds «إنشاء»
+
+- A new account of the director, the assistant, the writer or the producer holds it. The designer and the member start without it.
+  The publisher can never hold it, and the Admin holds it but is not offered it in the menu.
+- It is the capability `page.create`, with a role switch and a person's own switch, not an entry in an account's page list. The
+  page list cannot say "the role has it but this person does not".
+- It is not the role's ability to create content (`roles[...].create`), which says who may ever hold it and also decides who may
+  upload files. The designer keeps uploading.
+- **Who gives it:** the Admin and the Director alone, whatever else a person holds. That covers a role, a person, a temporary grant,
+  taking it away, and a request. The assistant, who gives other permissions, does not give this one.
+- **A whole role:** the switch in «الأدوار», which long-presses to turn off because it touches everyone in the role. A person's own
+  switch overrides the role's in either direction, and a personal grant outlives the role being turned off.
+- **A person:** the switch on their card, or a temporary grant. Never a one-time grant, because a page opens for good or for a time.
+- **Asking:** a designer or a member asks from «اطلب صلاحية» on «الحساب», or from the page they were refused.
+- A member without it has no way to ask for a work inside the site. They message someone, or are given it. A member who holds it
+  sends a request, as before.
+- The database is the lock: `work_create` asks for the permission. Every place that offers creating asks one rule (`useCanCreate`).
+
+## 70.2 «إلغاء العمل»
+
+- For the person who created the work, in its actions, with a long press.
+- **Within the hour**, if the work was never sent for review, and if **nobody else has touched it**: nobody else in its log, no
+  comment, text, copy, note, picture, file or task from anyone else. The creator's own edits do not stand in the way.
+- The work closes with the reason «أُلغي بعد إنشائه» and stays in «المغلقة». Its number is not used again, and a leader can reopen it.
+- People who had something waiting from it no longer have it, and they are told through «للعلم». A request's decision leaves
+  «يحتاج قرارك». An idea that became this work is free again. A mail thread and a project keep their link.
+- After that hour, or once someone else has acted, the way out is «إغلاق العمل», which is for leaders.
+
+## 70.3 The return button
+
+The button in the top bar undoes the person's own library edits and nothing else: renames, moves, tags, a file's title, description,
+checklist and platforms, a stage move that is not a decision, and a folder's name, lock, restriction and access. It works for an hour
+and on the last 15 actions. It works on the newest action it can still undo and skips one that is refused, so an old refusal never
+blocks what came before it. Mail, the studio and the writing sheet have their own undo.

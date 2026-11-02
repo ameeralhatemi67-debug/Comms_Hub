@@ -1,6 +1,6 @@
 {
   "script": "qa/feedback-flow.cjs",
-  "run": "2026-11-02T07:41:25.688Z",
+  "run": "2026-11-02T10:18:10.406Z",
   "checks": [
     {
       "name": "the note opens on «مشكلة», graded «مزعجة»",

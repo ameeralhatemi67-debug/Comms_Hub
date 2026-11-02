@@ -1,6 +1,6 @@
 {
   "script": "qa/writing-flow.cjs",
-  "run": "2026-11-02T01:09:12.573Z",
+  "run": "2026-11-02T10:20:58.688Z",
   "checks": [
     {
       "name": "the page is on the right and the panel on the left in Arabic",
