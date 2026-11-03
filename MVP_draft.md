@@ -2621,6 +2621,7 @@ Owner request of 2026-10-20 (the third round, `Studio_Build_Plan.md` section 10)
 - «تصدير الترجمة SRT» writes the texts of a text track as an SRT file, downloaded or saved to the library.
 - «علامة مسودة» writes the word «مسودة» across a downloaded video or picture. It is never offered for a file saved to the library: what is approved there is the exact file that is published.
 - «إطار إلى مشروع صورة» starts a photo project whose picture is the frame at the playhead, read from the same library file, for covers and thumbnails.
+- From 2026-11-03 an exported video's colour is BT.709 on every computer. Where the computer encodes on its processor rather than its graphics chip (no graphics chip, or none that encodes this format), the studio turns each frame into BT.709 itself before encoding; such a computer used to write BT.601, which players that assume BT.709 for HD video show with shifted colours, green most of all. Nothing changes in the export window.
 
 ## 62.11 Templates and the brand kit, 2026-10-20
 

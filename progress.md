@@ -2786,3 +2786,36 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** Nothing signed in. A real project with squares was not opened: a project saved before today shows the same
   squares softer in colour.
 - **Not done.** Nothing pushed.
+
+### 2026-11-03: an export's colour is BT.709 on every computer
+
+- **Owner direction.** "Yes, fix the colour", after D9's proof found that with no graphics chip an export was BT.601.
+- **What it was.** Given the canvas, Chromium's processor-only encoders convert to YUV as BT.601 and say so (`smpte170m`); the
+  graphics chips' encoders convert as BT.709. Read with its own label the file was close to right (31.8 dB in RGB); read as
+  BT.709, as players often read HD video, green fell to 19.6 dB.
+- **What changed (the studio, every client; `MVP_draft.md` 62.10).**
+  - `src/lib/studio/yuv.ts`: `rgbaToI420`, BT.709 limited range in fixed point (coefficients scaled by 2^16, every grey exactly
+    neutral), chroma from each 2 by 2 block's rounded average, each pixel read once as a 32-bit word.
+  - `export.ts`: where no hardware encoder is offered for the export's codec and size, frames go to the encoder as BT.709 I420
+    made by `rgbaToI420` (`VideoSampleSource`), labelled BT.709. Elsewhere the canvas path is unchanged, and if its encoder's
+    first packets report any matrix but BT.709 (a chip that fell back to the processor), the export starts again the BT.709
+    way. `ExportResult.via` says which path made the file.
+- **Verified, numbers.**
+  - `npm run typecheck` clean; `npm test` **783 of 783** (five new in `tests/studio-colour.test.mjs`); `npm run build` passes.
+  - A first experiment with no graphics chip: the same two seconds from the canvas came out `smpte170m`, from BT.709 frames
+    `bt709`.
+  - `qa/studio-export.cjs` **18 of 18** in Edge (the canvas path; the studio's record), and **18 of 18 inside the development
+    package with no graphics chip** (the BT.709 path: sound in step, speeds, ramps, reverse, a square shape, stills; record kept
+    in the session's scratch folder, not over the studio's).
+  - **`qa/studio-crossdevice.cjs` 35 of 43** (34 before): "the application writes the same colour description on every chip
+    and with no chip" now passes; the no-chip export is `bt709` throughout, its green 38.8 dB from the source in RGB (19.6
+    before, read as BT.709), and two runs wrote the same file to the byte.
+- **What it costs, said plainly.** Only where the encoder runs on the processor. Profiled with no graphics chip, per 1080p frame:
+  the conversion 13 ms and reading the frame about 10 ms; the whole path 46 ms against 26 from the canvas. The proof's
+  three-second no-chip export took 3.1 s, against about 1.7 s before. Computers that encode on a graphics chip, the pilot
+  laptops included, take the canvas path as before.
+- **Still open, separate.**
+  - With no graphics chip the encoder writes about 6 Mbit/s where the chips write 10.5 (2.4 MB against 4.0 MB for the proof's
+    three seconds), so the file stays 39.3 dB from its source, under the check's 40. That is quality, not colour.
+  - Edge 156 labels the transfer `iec61966-2-1` and the application's Chromium 152 `bt709`; the matrix and primaries agree.
+- **Not done.** Nothing pushed.

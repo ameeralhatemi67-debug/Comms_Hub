@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-crossdevice.cjs",
-  "run": "2026-11-03T19:41:26.156Z",
+  "run": "2026-11-03T20:10:55.747Z",
   "version": "0.7.0",
   "checks": [
     {
@@ -176,7 +176,7 @@
     {
       "name": "edge: the encoded file is at least 40 dB from its source",
       "pass": true,
-      "detail": "{\"psnr\":42.147763,\"bytes\":3982815,\"ms\":3438}"
+      "detail": "{\"psnr\":42.147763,\"bytes\":3982815,\"ms\":2509}"
     },
     {
       "name": "app-saving: the real export's structure is the reference's exactly (codec, profile, size, pixel format, rate, 90 video timestamps, sound)",
@@ -186,7 +186,7 @@
     {
       "name": "app-saving: the encoded file is at least 40 dB from its source",
       "pass": true,
-      "detail": "{\"psnr\":42.297187,\"bytes\":4008618,\"ms\":7316}"
+      "detail": "{\"psnr\":42.297187,\"bytes\":4008618,\"ms\":9089}"
     },
     {
       "name": "app-strong: the real export's structure is the reference's exactly (codec, profile, size, pixel format, rate, 90 video timestamps, sound)",
@@ -196,7 +196,7 @@
     {
       "name": "app-strong: the encoded file is at least 40 dB from its source",
       "pass": true,
-      "detail": "{\"psnr\":42.304707,\"bytes\":4007980,\"ms\":3103}"
+      "detail": "{\"psnr\":42.304707,\"bytes\":4007980,\"ms\":3385}"
     },
     {
       "name": "app-software: the real export's structure is the reference's exactly (codec, profile, size, pixel format, rate, 90 video timestamps, sound)",
@@ -206,12 +206,12 @@
     {
       "name": "app-software: the encoded file is at least 40 dB from its source",
       "pass": false,
-      "detail": "{\"psnr\":39.108329,\"bytes\":2361794,\"ms\":1605}"
+      "detail": "{\"psnr\":39.283215,\"bytes\":2361608,\"ms\":3132}"
     },
     {
       "name": "the application writes the same colour description on every chip and with no chip",
-      "pass": false,
-      "detail": "{\"app-saving\":{\"space\":\"bt709\",\"primaries\":\"bt709\",\"transfer\":\"bt709\",\"range\":\"tv\"},\"app-strong\":{\"space\":\"bt709\",\"primaries\":\"bt709\",\"transfer\":\"bt709\",\"range\":\"tv\"},\"app-software\":{\"space\":\"smpte170m\",\"primaries\":\"smpte170m\",\"transfer\":\"smpte170m\",\"range\":\"tv\"}}"
+      "pass": true,
+      "detail": "{\"app-saving\":{\"space\":\"bt709\",\"primaries\":\"bt709\",\"transfer\":\"bt709\",\"range\":\"tv\"},\"app-strong\":{\"space\":\"bt709\",\"primaries\":\"bt709\",\"transfer\":\"bt709\",\"range\":\"tv\"},\"app-software\":{\"space\":\"bt709\",\"primaries\":\"bt709\",\"transfer\":\"bt709\",\"range\":\"tv\"}}"
     },
     {
       "name": "the browser and the application write the same colour description",
@@ -302,9 +302,9 @@
         "rate": "30/1"
       },
       "colour": {
-        "space": "smpte170m",
-        "primaries": "smpte170m",
-        "transfer": "smpte170m",
+        "space": "bt709",
+        "primaries": "bt709",
+        "transfer": "bt709",
         "range": "tv"
       },
       "audio": {
@@ -707,7 +707,7 @@
         "bytes": 3982815,
         "audio": true,
         "target": "device",
-        "ms": 3438
+        "ms": 2509
       },
       "psnr": 42.147763,
       "summary": null,
@@ -763,7 +763,7 @@
         "bytes": 4008618,
         "audio": true,
         "target": "device",
-        "ms": 7316
+        "ms": 9089
       },
       "psnr": 42.297187,
       "summary": {
@@ -1204,7 +1204,7 @@
         "bytes": 4007980,
         "audio": true,
         "target": "device",
-        "ms": 3103
+        "ms": 3385
       },
       "psnr": 42.304707,
       "summary": {
@@ -1642,12 +1642,12 @@
       "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)",
       "exported": {
         "frames": 90,
-        "bytes": 2361794,
+        "bytes": 2361608,
         "audio": true,
         "target": "device",
-        "ms": 1605
+        "ms": 3132
       },
-      "psnr": 39.108329,
+      "psnr": 39.283215,
       "summary": {
         "frames": 54,
         "identical": 14,
@@ -2071,6 +2071,6 @@
     }
   },
   "total": 43,
-  "passed": 34,
-  "failed": 9
+  "passed": 35,
+  "failed": 8
 }

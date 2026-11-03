@@ -423,6 +423,9 @@ choice of 2026-11-03): bridge version 6 adds `gpu` and `profile`.
   WebGL2 (`src/lib/studio/squares-gl.ts`, texelFetch and unsigned sums) and in plain code (`cover.ts` `mosaic`), held equal
   byte for byte by `qa/studio-crossdevice.cjs`. Never read the composed picture back each frame on the chip's canvas: it
   slowed an export with squares from about 115 to about 41 frames a second (measured 2026-11-03).
+- **An export is BT.709 everywhere.** Never hand an encoder that runs on the processor the canvas: Chromium's processor
+  encoders then write BT.601. `export.ts` sends them BT.709 YUV made by `src/lib/studio/yuv.ts`, and restarts on that path
+  if a chip's encoder reports any other matrix.
 
 The Android application is being built, by owner directive of 2026-10-26 (`Android_Build_Plan.md`,
 `MVP_draft.md` section 64, recorded in `progress.md`). It is a Capacitor 8 application in `mobile/`, with its

@@ -26,6 +26,19 @@ related:
 
 # Communication Department Hub — Current Status
 
+## An export's colour is BT.709 on every computer, 2026-11-03
+
+From the owner's "Yes, fix the colour" (`MVP_draft.md` 62.10, `progress.md`).
+
+- **Done.** Where the encoder runs on the processor, the studio converts each frame to BT.709 itself (`yuv.ts`) and the file
+  says BT.709; a graphics chip's encoder that reports another matrix makes the export start again that way.
+- **Evidence.** `npm test` 783 of 783, typecheck and build clean; `qa/studio-export.cjs` 18 of 18 in Edge and 18 of 18 in the
+  application with no graphics chip; `qa/studio-crossdevice.cjs` 35 of 43, the colour description now the same on every chip
+  and with none.
+- **Cost.** Processor-encoded exports only: about 46 ms a 1080p frame against 26 before. Chip-encoded exports are unchanged.
+- **Still open.** The processor encoder's low bitrate (39.3 dB, under the check's 40); Edge's sRGB transfer label.
+- **Next.** The owner's choice. Nothing pushed.
+
 ## «إخفاء بالمربعات» the same on every computer, 2026-11-03
 
 From the owner's "Yes, fix the squares" (`MVP_draft.md` 62.8, `progress.md`).
@@ -38,7 +51,7 @@ From the owner's "Yes, fix the squares" (`MVP_draft.md` 62.8, `progress.md`).
   squares run as fast as before (109 to 128 frames a second on this laptop).
 - **Still open (found by D9, separate).** With no graphics chip an export is BT.601 and drawing differs a little; Edge and the
   application describe colour differently.
-- **Next.** The owner's choice: D10, or the no-chip colour. Nothing pushed.
+- **Next.** Done the same day: the no-chip colour (above). Nothing pushed.
 
 ## The desktop application, D9: measuring the device and choosing the graphics chip, built 2026-11-03
 
