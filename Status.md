@@ -26,6 +26,25 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, merge 1: the desktop application on Electron 45, 2026-11-04
+
+The owner's stage after D9: use a stronger computer's power without the video depending on it, run as four parallel forks
+from `998ef0c` (export, preview, desktop, effects), verified and merged locally by a manager session. On 2026-11-03 the owner
+accepted the recommended answers to Q1 to Q7 of `Desktop_Power_Ideas.md` section 10.
+
+- **Done.** Fork 3 (`power-desktop`) item 1: Electron 44.5.1 to 45.0.0 (Chromium 156, Node 24), desktop 0.7.1, bridge
+  unchanged at 6 (`e3cab67`, merged as `60335d7`).
+- **Evidence, re-run by the manager** in a clean worktree at `e3cab67`: desktop typecheck clean and `npm test` 135 of 135;
+  site `npm test` 783 of 783 (no site source changed); `qa/desktop-native.cjs` 37 of 37 and `qa/desktop-studio-parity.cjs
+  --parity-only` 12 of 12 on a freshly built development package. The fork's own runs: `qa/desktop-shell.cjs` 68 of 68,
+  desktop-csp 13 of 13, desktop-files 16 of 16, desktop-media 52 of 52, desktop-windows 13 of 13, the chip switches still
+  AMD and RTX.
+- **Not verified.** `qa/desktop-shell.cjs` skipped its install, run and uninstall: this laptop has a real installation,
+  which the check never touches. The profile's key now carries Chromium 156, so «تلقائي» waits for a new measurement.
+  Electron 45.0.0 was thirteen days and some hours old by UTC when installed.
+- **Next.** Forks 1, 2 and 4 bring their branches up to date; Fork 1's BT.709 worker is at 1.58 times the canvas path
+  (target 1.2). Nothing pushed.
+
 ## An export's colour is BT.709 on every computer, 2026-11-03
 
 From the owner's "Yes, fix the colour" (`MVP_draft.md` 62.10, `progress.md`).

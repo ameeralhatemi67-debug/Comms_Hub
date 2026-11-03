@@ -89,7 +89,7 @@ function compare(lead, follow, skip = []) {
       return { bridge: window.commsHubNative.bridge, keys: Object.keys(w), screens, timeline: await refuse({ panel: 'timeline', project: window.PROJECT }), badProject: await refuse({ panel: 'preview', project: '../../x' }) };
     });
     result.screens = bridge.screens;
-    check('the bridge is version 5, with windows: screens, popOut and close', bridge.bridge === 5 && JSON.stringify(bridge.keys) === JSON.stringify(['screens', 'popOut', 'close']), bridge);
+    check('the bridge is version 5 or later, with windows: screens, popOut and close', bridge.bridge >= 5 && JSON.stringify(bridge.keys) === JSON.stringify(['screens', 'popOut', 'close']), bridge);
     check('the screens: at least one, exactly one holding the editor, each with its bounds and scale', bridge.screens.length >= 1 && bridge.screens.filter((s) => s.current).length === 1 && bridge.screens.every((s) => s.bounds.width > 0 && s.scaleFactor > 0 && Object.keys(s).join() === 'id,label,primary,current,bounds,workArea,scaleFactor'), bridge.screens);
     check('another panel, or a project that is not one, is refused', bridge.timeline === 'refused' && bridge.badProject === 'refused', bridge);
     note(`Screens on this laptop: ${bridge.screens.length} (${bridge.screens.map((s) => `${s.label || 'unnamed'} ${s.bounds.width}x${s.bounds.height} at ${s.scaleFactor}`).join('; ')}). A second screen was ${bridge.screens.length > 1 ? '' : 'not '}connected.`);
