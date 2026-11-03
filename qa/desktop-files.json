@@ -1,7 +1,7 @@
 {
   "script": "qa/desktop-files.cjs",
-  "run": "2026-10-21T01:30:42.431Z",
-  "version": "0.6.0",
+  "run": "2026-11-03T21:02:53.754Z",
+  "version": "0.7.1",
   "checks": [
     {
       "name": "DT-11: the file is over 4 GB",
@@ -11,7 +11,7 @@
     {
       "name": "DT-11: chosen in the page, it is given a token (43 characters), not copied",
       "pass": true,
-      "detail": "{\"token\":true,\"place\":\"commshub-file://local/GaPFpwa2u7sTQ0aNZ2A0Qq0DDi9pEUTezun1WstkKpU\"}"
+      "detail": "{\"token\":true,\"place\":\"commshub-file://local/dqGJj4qxJZ8L99gyLNth3Zzkhhvp3bqkAT6jw1KS_jA\"}"
     },
     {
       "name": "DT-11: the media pool reads it where it is and is ready",
@@ -31,7 +31,7 @@
     {
       "name": "DT-11: no copy was made: the private storage grew by the export's own file only, and the profile on disk far less than the source",
       "pass": true,
-      "detail": "{\"opfsBefore\":0,\"opfsAfter\":2864643,\"exportBytes\":2864294,\"diskBefore\":3296509,\"diskAfter\":11055142,\"source\":4503664011}"
+      "detail": "{\"opfsBefore\":0,\"opfsAfter\":2864643,\"exportBytes\":2864294,\"diskBefore\":3298483,\"diskAfter\":11057434,\"source\":4503664011}"
     },
     {
       "name": "a file changed after it was chosen is no longer served (410), the studio sees it as gone from this device",
@@ -85,28 +85,28 @@
     }
   ],
   "notes": [
-    "DT-11: profile on disk 3296509 bytes before, 11055142 after, for a 4503664011-byte source; the export took 3118 ms."
+    "DT-11: profile on disk 3298483 bytes before, 11057434 after, for a 4503664011-byte source; the export took 5516 ms."
   ],
   "media": {
     "big": 4503664011,
-    "seconds": 0
+    "seconds": 36
   },
   "inPlace": {
-    "key": "65583c2879e49c10f5dc6187a98768ae9b493aa42cec040360e28f9a147a9e79",
+    "key": "420f707bada1419782167fcb4f1f59fc97bcef9a29824debf0de2827a27fd0bb",
     "size": 4503664011,
     "token": true,
     "tokenLength": 43,
     "state": {
       "kind": "ready"
     },
-    "place": "commshub-file://local/GaPFpwa2u7sTQ0aNZ2A0Qq0DDi9pEUTezun1WstkKpU",
+    "place": "commshub-file://local/dqGJj4qxJZ8L99gyLNth3Zzkhhvp3bqkAT6jw1KS_jA",
     "frame": [
       127,
       127,
       127
     ],
     "frames": 150,
-    "exportMs": 3118,
+    "exportMs": 5516,
     "uploaded": 200,
     "opfsBefore": 0,
     "opfsAfter": 2864643,
@@ -117,8 +117,8 @@
       "inPlace": 4503664011,
       "files": 1
     },
-    "diskBefore": 3296509,
-    "diskAfter": 11055142,
+    "diskBefore": 3298483,
+    "diskAfter": 11057434,
     "reference": [
       124,
       132,

@@ -1,22 +1,22 @@
 {
   "script": "qa/desktop-native.cjs",
-  "run": "2026-11-03T18:14:21.060Z",
-  "version": "0.7.0",
+  "run": "2026-11-03T20:58:13.879Z",
+  "version": "0.7.1",
   "checks": [
     {
       "name": "the bridge is version 6: who the application is, then info, power, life, notify, update, files, cache, data, windows, media, gpu and profile",
       "pass": true,
-      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"windows\",\"media\",\"gpu\",\"profile\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.7.0\",\"bridge\":6},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"],\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\"],\"cache\":[\"library\",\"cancel\",\"has\",\"usage\",\"choose\",\"useDefault\",\"limit\",\"sweep\",\"clear\",\"onProgress\"],\"data\":[\"clear\"],\"windows\":[\"screens\",\"popOut\",\"close\"],\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\"],\"gpu\":[\"state\",\"choose\",\"restart\"],\"profile\":[\"read\",\"save\"]},\"frozen\":true,\"fns\":true}"
+      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"windows\",\"media\",\"gpu\",\"profile\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.7.1\",\"bridge\":6},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"],\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\"],\"cache\":[\"library\",\"cancel\",\"has\",\"usage\",\"choose\",\"useDefault\",\"limit\",\"sweep\",\"clear\",\"onProgress\"],\"data\":[\"clear\"],\"windows\":[\"screens\",\"popOut\",\"close\"],\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\"],\"gpu\":[\"state\",\"choose\",\"restart\"],\"profile\":[\"read\",\"save\"]},\"frozen\":true,\"fns\":true}"
     },
     {
       "name": "the bridge and each of its groups cannot be changed by the page",
       "pass": true,
-      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"windows\",\"media\",\"gpu\",\"profile\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.7.0\",\"bridge\":6},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"],\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\"],\"cache\":[\"library\",\"cancel\",\"has\",\"usage\",\"choose\",\"useDefault\",\"limit\",\"sweep\",\"clear\",\"onProgress\"],\"data\":[\"clear\"],\"windows\":[\"screens\",\"popOut\",\"close\"],\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\"],\"gpu\":[\"state\",\"choose\",\"restart\"],\"profile\":[\"read\",\"save\"]},\"frozen\":true,\"fns\":true}"
+      "detail": "{\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"windows\",\"media\",\"gpu\",\"profile\"],\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.7.1\",\"bridge\":6},\"groups\":{\"power\":[\"keepAwake\",\"release\"],\"life\":[\"busy\",\"idle\"],\"notify\":[\"show\",\"badge\",\"onOpen\"],\"update\":[\"status\",\"restart\"],\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\"],\"cache\":[\"library\",\"cancel\",\"has\",\"usage\",\"choose\",\"useDefault\",\"limit\",\"sweep\",\"clear\",\"onProgress\"],\"data\":[\"clear\"],\"windows\":[\"screens\",\"popOut\",\"close\"],\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\"],\"gpu\":[\"state\",\"choose\",\"restart\"],\"profile\":[\"read\",\"save\"]},\"frozen\":true,\"fns\":true}"
     },
     {
       "name": "info names the version, processor, memory, free disk and the chip in use, and no path",
       "pass": true,
-      "detail": "{\"version\":\"0.7.0\",\"bridge\":6,\"os\":\"win32\",\"osVersion\":\"10.0.26300\",\"arch\":\"x64\",\"cores\":12,\"cpu\":\"AMD Ryzen 5 6600H with Radeon Graphics\",\"memory\":16310259712,\"freeDisk\":33470738432,\"gpu\":{\"chips\":[{\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"vendor\":\"NVIDIA\",\"active\":true},{\"name\":\"AMD Radeon(TM) Graphics\",\"vendor\":\"AMD\",\"active\":false}],\"active\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"software\":false}}"
+      "detail": "{\"version\":\"0.7.1\",\"bridge\":6,\"os\":\"win32\",\"osVersion\":\"10.0.26300\",\"arch\":\"x64\",\"cores\":12,\"cpu\":\"AMD Ryzen 5 6600H with Radeon Graphics\",\"memory\":16310259712,\"freeDisk\":29661114368,\"gpu\":{\"chips\":[{\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"vendor\":\"NVIDIA\",\"active\":true},{\"name\":\"AMD Radeon(TM) Graphics\",\"vendor\":\"AMD\",\"active\":false}],\"active\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"software\":false}}"
     },
     {
       "name": "keepAwake starts the system's blocker that keeps the laptop from sleeping (screen may sleep)",
@@ -186,14 +186,14 @@
     {
       "name": "DT-07, nothing attached: minimised and hidden, the hook reads its list again on its own within the minute, so a new decision reaches the tray",
       "pass": true,
-      "detail": "{\"added\":\"2\",\"seconds\":56,\"heard\":\"load:hidden:2\"}"
+      "detail": "{\"added\":\"2\",\"seconds\":58,\"heard\":\"load:hidden:2\"}"
     }
   ],
   "notes": [
     "Removed Start menu shortcuts Electron had written for this worktree's packages: مركز الاتصال المؤسسي، نسخة التطوير.lnk."
   ],
   "device": {
-    "version": "0.7.0",
+    "version": "0.7.1",
     "bridge": 6,
     "os": "win32",
     "osVersion": "10.0.26300",
@@ -201,7 +201,7 @@
     "cores": 12,
     "cpu": "AMD Ryzen 5 6600H with Radeon Graphics",
     "memory": 16310259712,
-    "freeDisk": 33470738432,
+    "freeDisk": 29661114368,
     "gpu": {
       "chips": [
         {
@@ -233,7 +233,7 @@
       "visibility": "hidden"
     }
   },
-  "timerSeconds": 56,
+  "timerSeconds": 58,
   "total": 37,
   "passed": 37,
   "failed": 0
