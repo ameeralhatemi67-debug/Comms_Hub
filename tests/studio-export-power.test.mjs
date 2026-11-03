@@ -104,7 +104,7 @@ test("the WebAssembly conversion gives i420Into's bytes in every shape and size,
 
 test('the workers are offered and the page stays the way where they cannot be made', () => {
   const src = fs.readFileSync('src/lib/studio/export.ts', 'utf8');
-  assert.match(src, /e\.code === 'YUV_WORKER'\) return run\(via, 0\)/, 'a failed worker starts the export again on the page');
+  assert.match(src, /code === 'YUV_WORKER' && workers > 0\) workers = 0;/, 'a failed worker starts the export again on the page');
   assert.match(src, /rgbaToI420\(ctx\.getImageData\(0, 0, w, h\)\.data, w, h\)/, 'the page\'s conversion is kept');
   const pipe = fs.readFileSync('src/lib/studio/yuv-pipe.ts', 'utf8');
   assert.match(pipe, /const i420Into = \$\{i420Into\.toString\(\)\}/);
