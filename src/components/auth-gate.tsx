@@ -10,6 +10,7 @@ import { linkProblem } from '@/lib/entry';
 import { native } from '@/lib/native';
 import { BROWSER_ONLY, mailReturn, type MailReturn } from '@/lib/native/entry';
 import { LogoLoader } from './ui';
+import { AuthBackdrop } from './auth-backdrop';
 import { AppUpdateWindow } from './native/phone-app';
 
 type View = 'signin' | 'first' | 'request' | 'forgot' | 'recovery' | 'expired';
@@ -448,6 +449,7 @@ export function AuthGate({
 function Screen({ children }: { children: ReactNode }) {
   return (
     <main className="auth-screen">
+      <AuthBackdrop />
       {children}
       {/* An Android application older than the site needs updates before signing in (MVP_draft.md 64.1). */}
       <AppUpdateWindow />
