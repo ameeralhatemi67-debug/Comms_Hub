@@ -2579,3 +2579,27 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** Anything against Meta itself: no Instagram account is connected on comms-hub yet, and the Meta app is not
   entered. In particular: Meta fetching the file from the site within the function's 60 seconds, whether the Unified-login token
   may delete, and Meta's real daily quota. The first real Story is the proof.
+
+### 2026-11-03: «تجربة النشر» on Instagram live, with the checks
+
+- **Owner direction.** "Yes, apply and push", after the first attempt to apply the migration was held back for that approval.
+- **Database.** `20261103180000_platform_tests_instagram.sql` applied to comms-hub (recorded as `platform_tests_instagram`) with
+  the owner's approval; the table had 0 rows. Read back:
+  - signed-in people may read `kind` and `post_url`, never `link_hash`, `temp_ref` or `upload_url`;
+  - signed-out callers may run `platform_test_fetch` alone (gated by the server key), never `platform_test_link` or `_start`;
+  - one `platform_test_done`; eleven `platform_test_*` functions, all security definer with an empty search path.
+  - Supabase's security advisor: `platform_test_fetch` joins the 21 functions already callable signed out (review links among
+    them), by design; the rest only under the project-wide notice for signed-in callers.
+- **Deployed** from the worktree on `origin/main`: pushed `3143604..bf7388a` (`bf7388a` removes a duplicated line in the start
+  route's check, found after `f80e528`). Vercel production `dpl_EkYf82Ztjn9fSUhcrsSwdeRS71LW`, READY, serving after about 80 seconds.
+- **Live checks.**
+  - `privacy.html` has the Instagram section in both languages and names `instagram_manage_contents`.
+  - `/api/platforms/test/file/<token>`: 404 for an unknown token (GET and HEAD) and for a malformed one, with
+    `Cache-Control: no-store` and `X-Robots-Tag: noindex, nofollow`.
+  - `POST /api/platforms/test` from another site 403, signed out 401; a step signed out 401.
+  - Signed out, through the REST API: `platform_test_fetch` without the key answers `FORBIDDEN`; `platform_test_link` and a select
+    of `link_hash` are refused (`42501`).
+  - No runtime errors in the 30 minutes after.
+- **Not verified.** Anything against Meta: no Instagram account is connected, and the Meta app is not entered yet.
+- **Next.** The owner finishes the Meta app, adds `instagram_manage_contents` to its configuration, connects the department's
+  Instagram account, and publishes one test Story from its card.

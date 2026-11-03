@@ -26,17 +26,18 @@ related:
 
 # Communication Department Hub — Current Status
 
-## «تجربة النشر» on Instagram, built 2026-11-03
+## «تجربة النشر» on Instagram, live 2026-11-03 (bf7388a)
 
 From the owner's request after the Instagram guide went live (`MVP_draft.md` section 72, `Instagram_Test_Plan.md`, `progress.md`).
+Live on production as `bf7388a`; migration `platform_tests_instagram` applied to comms-hub with the owner's approval.
 
 - **Done.** A Story (the default), a picture post or a Reel, from the library or the device, with progress, cancel, the result
   and its link, Meta's daily quota, the last five tests and delete. Meta fetches the file from a short-lived address on the site.
-- **Evidence.** `npm test` 741 of 741, typecheck and build clean, rules 62 of 62 (and YouTube's 75 of 75) on a private container,
-  `qa/instagram-test-flow.cjs` 43 of 43, `qa/youtube-test-flow.cjs` 49 of 49, `qa/platforms-flow.cjs` 132 of 132.
+- **Evidence.** In the deployed tree: `npm test` 741 of 741, build clean, rules 62 of 62 (YouTube's 75 of 75),
+  `qa/instagram-test-flow.cjs` 43 of 43. Live: the temporary address and the routes refuse what they should, no runtime errors.
 - **Not verified.** Anything against Meta: no Instagram account is connected yet.
-- **Next.** The owner finishes the Meta app, connects the department's Instagram account (adding `instagram_manage_contents` to
-  the configuration to allow deleting), then publishes one test Story.
+- **Next.** The owner finishes the Meta app, adds `instagram_manage_contents` to its configuration, connects the department's
+  Instagram account, then publishes one test Story.
 
 ## «تجربة النشر» on a YouTube account, live 2026-11-03
 
