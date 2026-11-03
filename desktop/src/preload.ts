@@ -5,7 +5,8 @@
 // `notify`; version 2 (D3) adds `update`; version 3 (D4) adds `files`, `cache` and `data`; version 4 (D5)
 // adds `media`, which names a source by its token or library version, never by a path; version 5 (D6) adds
 // `windows`, which names a panel and its project, never an address; version 6 (D9) adds `gpu`, which takes a
-// word from a fixed list, and `profile`, which takes measured numbers in a fixed shape. Each method only
+// word from a fixed list, and `profile`, which takes measured numbers in a fixed shape; version 7 (D12) adds
+// `life.activity`, a word from a fixed list, and `media.queue`, which names sources as `media` does. Each method only
 // sends a message; its main-process handler checks the sender again (sender.ts) and every argument. No
 // method takes a file path, a command or another address: `files.fromDropped` takes a File the person
 // chose, and only here, in the preload, is the path Chromium attached to it read (webUtils).
@@ -19,8 +20,10 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
   let opener: ((go: string) => void) | null = null;
   let progress: ((p: unknown) => void) | null = null;
   let mediaProgress: ((p: unknown) => void) | null = null;
+  let queueState: ((s: unknown) => void) | null = null;
   ipcRenderer.on(CHANNEL.cacheProgress, (_event, p: unknown) => progress?.(p));
   ipcRenderer.on(CHANNEL.mediaProgress, (_event, p: unknown) => mediaProgress?.(p));
+  ipcRenderer.on(CHANNEL.mediaQueueState, (_event, s: unknown) => queueState?.(s));
   // A native notice was clicked: the page moves itself if it said how, otherwise the address changes.
   ipcRenderer.on(CHANNEL.open, (_event, go: unknown) => {
     if (typeof go !== 'string' || !go.startsWith('/') || go.startsWith('//')) return;
@@ -36,7 +39,7 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
       bridge: BRIDGE_VERSION,
       info: () => call(CHANNEL.info),
       power: Object.freeze({ keepAwake: (reason: unknown) => call(CHANNEL.keepAwake, reason), release: (id: unknown) => call(CHANNEL.release, id) }),
-      life: Object.freeze({ busy: (reason: unknown) => call(CHANNEL.busy, reason), idle: () => call(CHANNEL.idle) }),
+      life: Object.freeze({ busy: (reason: unknown) => call(CHANNEL.busy, reason), idle: () => call(CHANNEL.idle), activity: (kind: unknown) => call(CHANNEL.activity, kind) }),
       notify: Object.freeze({
         show: (notice: unknown) => call(CHANNEL.notify, notice),
         badge: (count: unknown) => call(CHANNEL.badge, count),
@@ -87,6 +90,11 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
         cancel: (name: unknown) => call(CHANNEL.mediaCancel, name),
         onProgress: (fn: unknown) => {
           mediaProgress = typeof fn === 'function' ? (fn as (p: unknown) => void) : null;
+        },
+        queue: (ask: unknown) => call(CHANNEL.mediaQueue, ask),
+        queued: () => call(CHANNEL.mediaQueued),
+        onQueue: (fn: unknown) => {
+          queueState = typeof fn === 'function' ? (fn as (s: unknown) => void) : null;
         },
       }),
       gpu: Object.freeze({

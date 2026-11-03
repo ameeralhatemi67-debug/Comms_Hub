@@ -3,6 +3,7 @@
 // shows stays the site's. Established terms only; no emoji. Pure.
 import type { Reason } from './bridge.ts';
 import { PRODUCT_NAME } from './identity.ts';
+import type { Hold } from './idle.ts';
 
 export const TRAY_OPEN = `فتح ${PRODUCT_NAME}`;
 export const TRAY_KEEP = 'إبقاء التطبيق في شريط المهام';
@@ -23,10 +24,32 @@ export const UPDATE_WAITS = { title: 'التحديث ينتظر', body: 'لا ي
 
 const WORKING: Record<Reason, string> = { export: 'جارٍ التصدير', upload: 'جارٍ رفع ملف' };
 
-/** The tray's tooltip: the name, what is running, and how many notices wait for a decision. */
-export function trayTooltip(busy: Reason | null, decisions: number): string {
+/** Why the light copies made in idle time wait (idle.ts HOLDS), said in the tray. */
+const HELD: Record<Hold, string> = {
+  battery: 'تنتظر التوصيل بالكهرباء',
+  throttled: 'تنتظر حتى يعود المعالج إلى سرعته',
+  export: 'تنتظر انتهاء التصدير',
+  upload: 'تنتظر انتهاء الرفع',
+  measuring: 'تنتظر انتهاء القياس',
+  playing: 'تنتظر انتهاء التشغيل',
+  scrubbing: 'تنتظر انتهاء التمرير',
+  asked: 'تنتظر النسخة التي طلبتها',
+  input: 'تنتظر حتى تتوقف عن العمل لحظات',
+};
+
+/** The tray's line for the light copies made in idle time (D12, P-08), or null when there are none to make. */
+export function copiesLine(c: { making: number; waiting: number; hold: Hold | null }): string | null {
+  const left = c.making + c.waiting;
+  if (!left) return null;
+  return c.hold ? `نسخ خفيفة للمعاينة: ${left} ${HELD[c.hold]}` : `نسخ خفيفة للمعاينة: تُنشأ ${c.making} من ${left} في وقت فراغ الجهاز`;
+}
+
+/** The tray's tooltip: the name, what is running, how many notices wait for a decision, and the copies being made. */
+export function trayTooltip(busy: Reason | null, decisions: number, copies: { making: number; waiting: number; hold: Hold | null } = { making: 0, waiting: 0, hold: null }): string {
   const lines = [busy ? `${PRODUCT_NAME}: ${WORKING[busy]}` : PRODUCT_NAME];
   if (decisions > 0) lines.push(decisionsLine(decisions));
+  const line = copiesLine(copies);
+  if (line) lines.push(line);
   return lines.join('\n');
 }
 

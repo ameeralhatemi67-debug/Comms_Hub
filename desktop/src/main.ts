@@ -16,7 +16,7 @@ import { keyAction, nextZoom, type KeyAction } from './keys.ts';
 import { givenSwitch, measuredPick, switchFor, SWITCH_NAMES } from './gpu.ts';
 import { startNative, type Native } from './native.ts';
 import { startFiles } from './native-files.ts';
-import { ProfileStore } from './profile.ts';
+import { decodeCapacity, ProfileStore } from './profile.ts';
 import { parseSettings } from './settings.ts';
 import { startMedia } from './native-media.ts';
 import { startWindows } from './native-windows.ts';
@@ -344,7 +344,16 @@ if (lock && !refused) {
     stores.onClear(() => void profiles.clear());
     // FFmpeg is packaged beside the application (resources/ffmpeg); unpacked, it is the fetched copy in vendor/.
     const tools = app.isPackaged ? path.join(process.resourcesPath, 'ffmpeg') : path.join(__dirname, '..', 'vendor', 'ffmpeg');
-    startMedia({ handle: native.handle, ...stores, tools: { ffmpeg: path.join(tools, 'ffmpeg.exe'), ffprobe: path.join(tools, 'ffprobe.exe'), tag: FFMPEG_TAG }, worker: pagePath('media-worker.js') });
+    // From D12 the idle-time broker reads the native layer's facts, and the profile says which sources need a light copy.
+    startMedia({
+      handle: native.handle,
+      ...stores,
+      tools: { ffmpeg: path.join(tools, 'ffmpeg.exe'), ffprobe: path.join(tools, 'ffprobe.exe'), tag: FFMPEG_TAG },
+      worker: pagePath('media-worker.js'),
+      idle: native.idle,
+      background: native.background,
+      decode4k: () => decodeCapacity(profiles.entries(), process.versions.chrome, gpuSwitch),
+    });
     // A studio panel in a window of its own (D6): every rule of the site's windows, black behind the picture.
     startWindows({
       handle: native.handle,
