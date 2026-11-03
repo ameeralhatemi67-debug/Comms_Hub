@@ -95,37 +95,42 @@ async function copies() {
  * Plays `seconds` from the start: `resolution` a share (fixed) or 'auto', starting at `start` (a share); `budget` the
  * stream budget or null. The canvas follows «تلقائية» as stage.tsx does. Returns the play's figures.
  */
+/** The stage: one canvas and one player for the whole session, as the editor keeps them (the budget it lowered stays). */
+let stage: { canvas: HTMLCanvasElement; player: Player; size: (share: number) => void; onAuto: (share: number) => void } | null = null;
+
 async function play(o: { resolution: number | 'auto'; start: number; budget: number | null; seconds: number }) {
   const c = cur!;
-  document.querySelectorAll('canvas.stage').forEach((x) => x.remove());
-  const canvas = document.createElement('canvas');
-  canvas.className = 'stage';
-  canvas.style.width = '1280px';
-  canvas.style.height = '720px';
-  document.body.append(canvas);
-  const size = (share: number) => {
-    canvas.width = canvasWidth(1920, 1280, 1, share);
-    canvas.height = Math.round((canvas.width * 1080) / 1920);
-  };
-  const player = new Player({ canvas, pool: c.pool, motion: new MotionRenderer(), getDoc: () => c.doc, scale: () => canvas.width / 1920, onTime: () => undefined });
+  if (!stage) {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'stage';
+    canvas.style.width = '1280px';
+    canvas.style.height = '720px';
+    document.body.append(canvas);
+    const size = (share: number) => {
+      canvas.width = canvasWidth(1920, 1280, 1, share);
+      canvas.height = Math.round((canvas.width * 1080) / 1920);
+    };
+    const player = new Player({ canvas, pool: c.pool, motion: new MotionRenderer(), getDoc: () => c.doc, scale: () => canvas.width / 1920, onTime: () => undefined });
+    stage = { canvas, player, size, onAuto: () => undefined };
+    player.onAuto = (sh) => stage!.onAuto(sh);
+  }
+  const { player, size } = stage;
   player.budget = () => o.budget;
   // as the editor sets it with a plan
   player.steady = o.budget !== null;
   const levels: { at: number; share: number }[] = [];
   let share = o.resolution === 'auto' ? PREVIEW_STEPS[stepOf(PREVIEW_STEPS, o.start)] : o.resolution;
-  if (o.resolution === 'auto') {
-    const a = new AutoLevel(PREVIEW_STEPS, stepOf(PREVIEW_STEPS, o.start));
-    player.auto = a;
-    player.onAuto = (s) => {
-      share = s;
-      levels.push({ at: Math.round(performance.now() - t0), share: s });
-      size(s);
-    };
-  }
+  let t0 = 0;
+  player.auto = o.resolution === 'auto' ? new AutoLevel(PREVIEW_STEPS, stepOf(PREVIEW_STEPS, o.start)) : null;
+  stage.onAuto = (sh) => {
+    share = sh;
+    levels.push({ at: Math.round(performance.now() - t0), share: sh });
+    size(sh);
+  };
   size(share);
   player.seek(0);
   await sleep(1500);
-  const t0 = performance.now();
+  t0 = performance.now();
   player.play();
   // the elements count their frames from when they were made: this play's are the difference
   const q0 = player.quality();
@@ -138,7 +143,6 @@ async function play(o: { resolution: number | 'auto'; start: number; budget: num
     return { source: i, copy: el?.dataset.copy === '1', width: el?.videoWidth ?? null };
   });
   player.pause();
-  player.dispose();
   return { stats, quality, levels, end: share, playing, missedPct: Math.round((stats.missed / Math.max(1, stats.due)) * 1000) / 10, droppedPct: quality.total ? Math.round((quality.dropped / quality.total) * 1000) / 10 : null };
 }
 

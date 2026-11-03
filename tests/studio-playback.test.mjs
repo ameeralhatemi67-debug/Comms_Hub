@@ -78,8 +78,8 @@ test('calm seconds step up again, but never back to a level that missed in the s
 test('the stream budget: 4K decoding over 30 frames, with a margin, lowered when drawing is slow; none with no profile', () => {
   assert.equal(streamBudget(null), null);
   const p = (hw, sw, effects) => ({ decode: { h264_2160: { hw, sw } }, compose: { effects } });
-  // a half of the measured rate: media elements decoding several streams at once carry less than one stream measured alone
-  assert.equal(STREAM_MARGIN, 0.5);
+  // a third of the measured rate: media elements decoding several streams at once carry far less than one measured alone
+  assert.equal(STREAM_MARGIN, 1 / 3);
   assert.equal(streamBudget(p(187, 102.8, 7)), (187 / 30) * STREAM_MARGIN);
   assert.equal(streamBudget(p(null, 102.8, 7)), (102.8 / 30) * STREAM_MARGIN);
   assert.equal(streamBudget(p(100, 50, 24)), (100 / 30) * STREAM_MARGIN * 0.5);

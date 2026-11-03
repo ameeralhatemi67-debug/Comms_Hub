@@ -2914,8 +2914,10 @@ The badge reads «تلقائية: 1/2» while lowered, and the menu says «تل�
 «كاملة» stays the default, and «تلقائية» can be chosen. «عند الإيقاف» is unchanged.
 
 **The streams played at once.** Where playing starts or jumps, the videos at the playhead are weighed by their pixels against
-the 4K decoding the device measured (three quarters of it, less when drawing is slow). The largest on the canvas play their
-own file and the rest their light copy (63.4) where one exists. Before a measurement every light copy plays, as before.
+the 4K decoding the device measured (a third of it, less when drawing is slow: several videos played at once carry far less
+than one decoded alone). The largest on the canvas play their own file and the rest their light copy (63.4) where one exists.
+When videos keep falling behind, fewer play their own file for the rest of the session, a change made at the moment one is
+put back in step. A video catching up shows its last frame. Before a measurement every light copy plays, as before.
 
 # 64. The Android application «مركز الاتصال المؤسسي», 2026-10-26
 

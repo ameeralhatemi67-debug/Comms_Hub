@@ -8,8 +8,8 @@
 //   The stream budget (streamPlan): at play start and at a seek, the video streams at the playhead are weighed by
 //   their pixels against the decoding the profile measured; the largest on screen play their source, the rest their
 //   light copy where one exists. The measurement decodes one stream alone; media elements decoding several at once
-//   carry less (measured on 2026-11-04: three 4K30 streams fell behind on a chip measured at four), so the margin is
-//   a half, and elements that keep falling behind lower the budget for the session.
+//   carry far less (measured on 2026-11-04 on the RTX: three 4K30 streams fell behind on a chip measured at four and
+//   at six), so the margin is a third, and elements that keep falling behind lower the budget for the session.
 
 /** A window of the play this long (ms) is judged at once. */
 export const AUTO_WINDOW = 250;
@@ -110,7 +110,7 @@ export type Stream = { clip: string; pixels: number; area: number; copy: boolean
 /** A 4K picture thirty times a second: the unit the budget is counted in. */
 export const UHD30 = 3840 * 2160 * 30;
 /** The share of the measured decoding the preview counts on, leaving room for drawing and sound. */
-export const STREAM_MARGIN = 0.5;
+export const STREAM_MARGIN = 1 / 3;
 /** Elements put back in step within one second that lower the budget, and the share it is lowered to each time. */
 export const BEHIND_RESEEKS = 2;
 export const BUDGET_STEP = 0.6;
