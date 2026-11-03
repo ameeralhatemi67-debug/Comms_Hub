@@ -170,6 +170,10 @@ function takeLock() {
         const ratio = Math.round((fl.median / Math.max(0.1, kp.median)) * 10) / 10;
         f.ratio = { right: ratio, sharp: Math.round((fl.sharp.median / Math.max(0.1, kp.sharp.median)) * 10) / 10, cold: Math.round((f.floor.cold.median / Math.max(0.1, f.kept.cold.median)) * 10) / 10 };
         check(`${engine}, ${name}: the median of ${SEEKS} random seeks to the right frame is at least three times faster with the frame memory, the preview having been open on the clip (${fl.median} ms against ${kp.median} ms, ${ratio} times; the sharp frame ${fl.sharp.median} against ${kp.sharp.median}; just opened ${f.floor.cold.median} against ${f.kept.cold.median})`, ratio >= 3 && !fl.timeouts && !kp.timeouts, { floor: fl, kept: kp, cold: [f.floor.cold, f.kept.cold], settled: f.kept.settled, load: [f.floor.load, f.kept.load] });
+        // the person sees the sharp frame: it must not come later than today's (10% and 5 ms for noise and the timer)
+        const notLater = (kept, floor) => kept <= floor * 1.1 + 5;
+        check(`${engine}, ${name}: the sharp frame after a jump comes no later than today's (${kp.sharp.median} ms against ${fl.sharp.median})`, notLater(kp.sharp.median, fl.sharp.median), { kept: kp.sharp, floor: fl.sharp });
+        check(`${engine}, ${name}: a jump right after the project opens comes no later than today's (${f.kept.cold.median} ms against ${f.floor.cold.median})`, notLater(f.kept.cold.median, f.floor.cold.median), { kept: f.kept.cold, floor: f.floor.cold });
         const id = f.kept.identity;
         const same = id.rows.filter((x) => x.shown === x.decoder && x.shown === x.expected).length;
         check(`${engine}, ${name}: at 48 times the kept frame is the frame the decoder gives and the time names (${same} of ${id.rows.length})`, same === 48 && id.rows.length === 48, id.rows.filter((x) => !(x.shown === x.decoder && x.shown === x.expected)));
