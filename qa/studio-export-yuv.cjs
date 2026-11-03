@@ -7,11 +7,14 @@
 //     same video packets, at least 40 dB from the source and within 15% of the 10 Mbit/s the export aims at;
 //   - on a graphics chip, the export as it is and as it was at 998ef0c carry the same video packets (the encoder
 //     settings did not change there), and the file says BT.709 (Edge's said iec61966-2-1);
+//   - under the site's own Content-Security-Policy (src/lib/csp.ts, as src/proxy.ts sends it), the workers compile
+//     their WebAssembly; with 'wasm-unsafe-eval' taken out of it, they convert in plain code, to the same bytes;
 //   - with QUIET=1 (only in a quiet window: speed figures are worthless on a busy laptop), three rounds of the no-chip
 //     export as it is, at 998ef0c (the page's conversion) and at 996a9b5 (the canvas, before BT.709), timed, with the
 //     processor's load beside them; the target is at most 1.2 times the canvas's time.
 // The earlier exports are written from git into qa/artifacts and bundled with today's other modules.
-// Usage: node qa/studio-export-yuv.cjs [QUIET=1]   (writes qa/studio-export-yuv.json)
+// Usage: node qa/studio-export-yuv.cjs   (writes qa/studio-export-yuv.json; QUIET=1 qa/studio-export-yuv-speed.json;
+// ONLY=edge qa/studio-export-yuv-edge.json)
 // Needs: npm run pack:dev in desktop/, ffmpeg and ffprobe, the port-3000 lock free (the runner takes it).
 const fs = require('node:fs');
 const os = require('node:os');
@@ -28,7 +31,7 @@ const out = path.join(__dirname, 'artifacts', 'studio-export-yuv');
 const REAL = '00000000-0000-4000-8000-0000000000f1';
 const SOURCE = path.join(out, 'source.mp4');
 const QUIET = process.env.QUIET === '1';
-/** ONLY=edge runs Edge alone (port 3101, no lock): a quick look, never the record. */
+/** ONLY=edge runs Edge alone (port 3101, no lock), recorded apart in qa/studio-export-yuv-edge.json. */
 const EDGE_ONLY = process.env.ONLY === 'edge';
 const LOCK = path.join(process.env.TEMP || os.tmpdir(), 'comms-hub-port3000.lock');
 const BRANCH = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: h.root, encoding: 'utf8' }).stdout.trim();
@@ -67,12 +70,27 @@ function send(req, res, file, type) {
   res.end(data);
 }
 
+/** The site's policy builder, bundled for Node from src/lib/csp.ts. */
+function policy(wasm) {
+  const file = path.join(out, 'csp.cjs');
+  if (!fs.existsSync(file)) esbuild.buildSync({ entryPoints: [path.join(h.root, 'src', 'lib', 'csp.ts')], bundle: true, platform: 'node', format: 'cjs', outfile: file, logLevel: 'silent', absWorkingDir: h.root });
+  const { buildCsp, newNonce } = require(file);
+  const nonce = newNonce();
+  const csp = buildCsp({ nonce, hashes: [], dev: false });
+  return { nonce, csp: wasm ? csp : csp.replace(" 'wasm-unsafe-eval'", '') };
+}
+
 function serve(port) {
   const http = require('node:http');
-  const page = (min) => `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>تحويل الألوان</title><style>${fontCss}</style></head><body><script type="module" src="/${min ? 'bundle.min.js' : 'bundle.js'}"></script></body></html>`;
+  const page = (min, nonce) => `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>تحويل الألوان</title><style>${fontCss}</style></head><body><script type="module"${nonce ? ` nonce="${nonce}"` : ''} src="/${min ? 'bundle.min.js' : 'bundle.js'}"></script></body></html>`;
   const server = http.createServer((req, res) => {
     const url = new URL(req.url, 'http://x');
     const p = url.pathname;
+    if (p === '/' && url.searchParams.get('csp')) {
+      const { nonce, csp } = policy(url.searchParams.get('csp') === 'site');
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'content-security-policy': csp });
+      return res.end(page(false, nonce));
+    }
     if (p === '/') return (res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }), res.end(page(url.searchParams.get('min') === '1')));
     if (p === '/favicon.ico') return (res.writeHead(204), res.end());
     if (p === '/bundle.js' || p === '/bundle.min.js') return send(req, res, path.join(out, p.slice(1)), 'text/javascript');
@@ -133,6 +151,24 @@ async function inEngine(page, name, url, chip) {
   r.prepared = await page.evaluate(() => window.yuvcheck.prepare());
   r.engine = await page.evaluate(() => window.yuvcheck.engine());
   r.parity = await page.evaluate(() => window.yuvcheck.parity(2));
+  if (name.startsWith('edge')) {
+    // under the site's own policy, and under it without WebAssembly
+    const refused = [];
+    const watch = (m) => /Content Security Policy|Content-Security-Policy|wasm/i.test(m.text()) && refused.push(m.text());
+    page.on('console', watch);
+    for (const kind of ['site', 'nowasm']) {
+      await page.goto(`${url}/?csp=${kind}`);
+      await ready(page);
+      await page.evaluate(() => window.yuvcheck.prepare());
+      r[`parity_${kind}`] = await page.evaluate(() => window.yuvcheck.parity(2));
+    }
+    page.off('console', watch);
+    r.cspMessages = refused;
+    // the exports below run on the plain page again
+    await page.goto(`${url}/`);
+    await ready(page);
+    await page.evaluate(() => window.yuvcheck.prepare());
+  }
   const exp = async (tag, code, yuvWorkers) => {
     const e = await page.evaluate((o) => window.yuvcheck.exportReal(o), { tag: `${name}-${tag}`, code, yuvWorkers });
     const file = path.join(out, `${name}-${tag}.mp4`);
@@ -222,6 +258,12 @@ function takeLock() {
       }
     }
     for (const [name, r] of Object.entries(runs)) {
+      if (!r.parity_site) continue;
+      const same = (list) => list.length === r.parity.length && list.every((f, i) => f.workers === r.parity[i].workers && f.page === r.parity[i].page);
+      check(`${name}, under the site's own Content-Security-Policy: the workers convert with WebAssembly, to the same bytes`, same(r.parity_site) && r.parity_site.every((f) => f.simd === true && f.page === f.workers), { simd: [...new Set(r.parity_site.map((f) => f.simd))], messages: r.cspMessages });
+      check(`${name}, under that policy without 'wasm-unsafe-eval': the workers convert in plain code, to the same bytes`, same(r.parity_nowasm) && r.parity_nowasm.every((f) => f.simd === false && f.page === f.workers), { simd: [...new Set(r.parity_nowasm.map((f) => f.simd))], messages: r.cspMessages.slice(0, 3) });
+    }
+    for (const [name, r] of Object.entries(runs)) {
       const x = r.exports;
       if (x.workers) {
         check(`${name}: the export takes the BT.709 way with two workers converting with WebAssembly, and with none when asked`, r.engine.onChip === false && x.workers.via === 'yuv' && x.workers.yuvWorkers === 2 && x.workers.yuvSimd === true && x.page.via === 'yuv' && x.page.yuvWorkers === 0, { engine: r.engine, workers: x.workers.yuvWorkers, simd: x.workers.yuvSimd, page: x.page.yuvWorkers });
@@ -252,6 +294,7 @@ function takeLock() {
     if (locked && fs.existsSync(LOCK) && fs.readFileSync(LOCK, 'utf8') === BRANCH) fs.rmSync(LOCK);
   }
   result.runs = Object.fromEntries(Object.entries(runs).map(([n, r]) => [n, { browser: r.browser, versions: r.versions, engine: r.engine, exports: r.exports, timing: r.timing ?? null, frames: r.parity?.length ?? 0 }]));
-  const failed = finish(EDGE_ONLY ? path.join(out, 'edge-only.json') : path.join(__dirname, 'studio-export-yuv.json'));
+  // the timed run is its own record, made only in a quiet window
+  const failed = finish(path.join(__dirname, QUIET ? 'studio-export-yuv-speed.json' : EDGE_ONLY ? 'studio-export-yuv-edge.json' : 'studio-export-yuv.json'));
   process.exit(failed ? 1 : 0);
 })();

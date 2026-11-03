@@ -2898,8 +2898,19 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     (996a9b5), 4521 ms by the page's BT.709 conversion (998ef0c), 2729 ms with workers in plain code: **1.58 times, the target 1.2 not
     met**. Edge with `--disable-gpu`: 1574, 3837 and 2552 ms, 1.62 times. A stage profile then showed the conversion competing for the
     processor, which led to the WebAssembly lanes.
-  - **After the WebAssembly lanes, not in a quiet window:** Edge with `--disable-gpu`, load 48 to 52%: 2158 ms by the canvas, 3697 ms by
-    the page's conversion, 1954 ms now: **0.91 times**. To be timed again in a quiet window, on the application too.
+  - **After the WebAssembly lanes, in the manager's second quiet window** (`qa/studio-export-yuv-speed.json`, 30 of 30; the load
+    with nothing of this fork running was 30 to 73%, mean 55%, before another fork's check ended; the first timed run straddled that end
+    and is not the record). Medians of three interleaved rounds, the same three ways:
+    - the application with no chip: 1386 ms by the canvas, 3257 ms by the page's conversion, 1648 ms now: **1.19 times** (load 19% before,
+      22% after);
+    - Edge with `--disable-gpu`: 1369, 3074 and 1562 ms: **1.14 times** (load 15% before, 5% after).
+    The target of 1.2 is met, the application's narrowly. Earlier, not in a quiet window, Edge gave 0.91 at 48 to 52% load.
+  - **Under the site's own Content-Security-Policy.** `buildCsp` (`src/lib/csp.ts`) gives every page `script-src ... 'wasm-unsafe-eval'`
+    and `worker-src 'self' blob:`, and a blob: worker keeps its page's policy. `qa/studio-export-yuv.cjs` now serves its page with that
+    policy, built by `buildCsp` itself with a nonce: the workers compile their WebAssembly there. With `'wasm-unsafe-eval'` taken out,
+    they convert in plain code, to the same bytes, in Edge with and without its chip (`qa/studio-export-yuv-edge.json`, 16 of 16;
+    the policy is a page's, so the application's engines run the other checks only). The timed record was made before these two
+    checks were added.
 - **Not verified, said plainly.** Nothing signed in: the panel was seen on the studio's fixture with the real component. A WebM export
   was not timed (VP9 has no chip encoder here, so it always takes the BT.709 path).
 - **Not done.** Nothing pushed.
