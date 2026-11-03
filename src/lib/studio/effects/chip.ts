@@ -43,7 +43,9 @@ void main() {
   if (useMatrix) {
     ivec3 s = ivec3(c);
     ivec3 v = max(ivec3(0), ivec3(m0.x * s.r + m0.y * s.g + m0.z * s.b, m1.x * s.r + m1.y * s.g + m1.z * s.b, m2.x * s.r + m2.y * s.g + m2.z * s.b) + offset);
-    c = uvec3(min(ivec3(255), (v + 32768) >> 16));
+    ivec3 q = (v + 32768) >> 16;
+    q -= ivec3(equal(v & 65535, ivec3(32768))) * (q & 1);
+    c = uvec3(min(ivec3(255), q));
   }
   uvec3 o = a == 255u ? c : (c * a + 127u) / 255u;
   colour = vec4(vec3(o), float(a)) / 255.0;
@@ -287,6 +289,8 @@ export function effectsOnChip(picture: TexImageSource, w: number, h: number, pla
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
     if (s.canvas.width !== w) s.canvas.width = w;
     if (s.canvas.height !== h) s.canvas.height = h;
+    // a canvas too large for the chip's memory gets a smaller drawing buffer, silently: then the plain code works it out
+    if (gl.drawingBufferWidth !== w || gl.drawingBufferHeight !== h) return null;
     let from = s.input;
     const c = plan.colour;
     if (c) {

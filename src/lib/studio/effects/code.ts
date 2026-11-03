@@ -30,31 +30,41 @@ export function toStraight(px: Uint8ClampedArray): void {
   }
 }
 
+/** A sum in 1/65536 to a byte: rounded to the nearest, an exact half to the even neighbour, within 0 to 255. */
+export const toByte = (v: number) => (v <= 0 ? 0 : Math.min(255, (v & 65535) === 32768 ? ((v + 32768) >> 16) & ~1 : (v + 32768) >> 16));
+
 /** A colour plan over premultiplied pixels, in place. */
 export function colourPixels(px: Uint8ClampedArray, plan: ColourPlan): void {
-  const t = plan.table;
+  const t = plan.table ?? Uint8Array.from({ length: 256 }, (_, i) => i);
   const m = plan.matrix;
   const o0 = plan.offset ? plan.offset[0] : 0;
   const o1 = plan.offset ? plan.offset[1] : 0;
   const o2 = plan.offset ? plan.offset[2] : 0;
+  // each matrix entry times the table, looked up rather than multiplied: the same whole numbers
+  const k = m ? Array.from({ length: 9 }, (_, e) => Int32Array.from(t, (v) => m[e] * v)) : null;
   for (let i = 0; i < px.length; i += 4) {
     const a = px[i + 3];
     if (!a) continue;
-    let r = unpremultiply(px[i], a);
-    let g = unpremultiply(px[i + 1], a);
-    let b = unpremultiply(px[i + 2], a);
-    if (t) {
+    let r = a === 255 ? px[i] : unpremultiply(px[i], a);
+    let g = a === 255 ? px[i + 1] : unpremultiply(px[i + 1], a);
+    let b = a === 255 ? px[i + 2] : unpremultiply(px[i + 2], a);
+    if (k) {
+      const vr = k[0][r] + k[1][g] + k[2][b] + o0;
+      const vg = k[3][r] + k[4][g] + k[5][b] + o1;
+      const vb = k[6][r] + k[7][g] + k[8][b] + o2;
+      r = toByte(vr);
+      g = toByte(vg);
+      b = toByte(vb);
+    } else {
       r = t[r];
       g = t[g];
       b = t[b];
     }
-    if (m) {
-      const vr = m[0] * r + m[1] * g + m[2] * b + o0;
-      const vg = m[3] * r + m[4] * g + m[5] * b + o1;
-      const vb = m[6] * r + m[7] * g + m[8] * b + o2;
-      r = vr <= 0 ? 0 : Math.min(255, (vr + 32768) >> 16);
-      g = vg <= 0 ? 0 : Math.min(255, (vg + 32768) >> 16);
-      b = vb <= 0 ? 0 : Math.min(255, (vb + 32768) >> 16);
+    if (a === 255) {
+      px[i] = r;
+      px[i + 1] = g;
+      px[i + 2] = b;
+      continue;
     }
     px[i] = premultiply(r, a);
     px[i + 1] = premultiply(g, a);

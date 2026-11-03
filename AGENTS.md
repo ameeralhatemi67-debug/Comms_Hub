@@ -423,6 +423,14 @@ choice of 2026-11-03): bridge version 6 adds `gpu` and `profile`.
   WebGL2 (`src/lib/studio/squares-gl.ts`, texelFetch and unsigned sums) and in plain code (`cover.ts` `mosaic`), held equal
   byte for byte by `qa/studio-crossdevice.cjs`. Never read the composed picture back each frame on the chip's canvas: it
   slowed an export with squares from about 115 to about 41 frames a second (measured 2026-11-03).
+- **Colour adjustments and blur are effects, never the canvas filter** (P-09, `MVP_draft.md` 62.15). `src/lib/studio/effects/`
+  specifies each as whole numbers once (`plan.ts`), works it out on the chip (`chip.ts`, WebGL2) or in plain code
+  (`code.ts`), held equal byte for byte by `qa/studio-effects-parity.cjs`; it imports no DOM, so it runs in a worker. A
+  picture is uploaded as the canvas keeps it (premultiplied): letting the upload unpremultiply rounds differently on each
+  chip. `compose.ts` draws an item with effects into a layer and lays it down; an item drawn in several calls takes its
+  opacity inside the layer, as the filter did. Never set `ctx.filter` for an effect. Photos (`photo.ts`, P-17) use the
+  same colour on the chip in tiles of 4096, and bands across workers (`bandsOf`, `setPhotoWorkers`), all one worker's bytes
+  (`qa/studio-photo-tiles.cjs`).
 - **An export is BT.709 everywhere.** Never hand an encoder that runs on the processor the canvas: Chromium's processor
   encoders then write BT.601. `export.ts` sends them BT.709 YUV made by `src/lib/studio/yuv.ts`, and restarts on that path
   if a chip's encoder reports any other matrix.

@@ -7,7 +7,8 @@
 
 /**
  * A colour adjustment on straight (not premultiplied) colour: the table first, then the matrix (rows of 1/65536) with
- * its constant `offset` (1/65536 too), rounded to the nearest and kept within 0 to 255.
+ * its constant `offset` (1/65536 too), rounded to the nearest (an exact half to the even neighbour) and kept within 0
+ * to 255.
  */
 export type ColourPlan = { table: Uint8Array | null; matrix: Int32Array | null; offset: Int32Array | null };
 
@@ -66,6 +67,33 @@ export function colourPlan(a: { brightness?: number; contrast?: number; saturati
   }
   const matrix = sat !== 1 ? saturationMatrix(sat) : null;
   return table || matrix ? { table, matrix, offset: null } : null;
+}
+
+/**
+ * A photo's adjustment (photo.ts; brightness, contrast, saturation and warmth, -100 to 100 each) as one map on
+ * straight colour, matrix and offset to 1/65536: brightness then contrast about 128, saturation about the Rec. 709
+ * luma, then warmth on red and blue, as photo.ts worked it out in floating point before 2026-11-04. Null when nothing
+ * changes.
+ */
+export function photoColourPlan(a: { brightness?: number; contrast?: number; saturation?: number; warmth?: number } | undefined): ColourPlan | null {
+  if (!a) return null;
+  const num = (v: number | undefined) => (Number.isFinite(v) ? (v as number) : 0);
+  const br = 1 + num(a.brightness) / 100;
+  const ct = 1 + num(a.contrast) / 100;
+  const sat = 1 + num(a.saturation) / 100;
+  const wr = num(a.warmth) / 100;
+  if (br === 1 && ct === 1 && sat === 1 && wr === 0) return null;
+  const luma = [0.2126, 0.7152, 0.0722];
+  const warm = [1 + wr * 0.25, 1, 1 - wr * 0.25];
+  const k = br * ct;
+  const matrix = new Int32Array(9);
+  const offset = new Int32Array(3);
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) matrix[i * 3 + j] = Math.round(65536 * warm[i] * k * ((i === j ? sat : 0) + (1 - sat) * luma[j]));
+    // saturation leaves a grey grey, so contrast's constant passes through it unchanged
+    offset[i] = Math.round(65536 * warm[i] * 128 * (1 - ct));
+  }
+  return { table: null, matrix, offset };
 }
 
 /** e^-x from additions, products and quotients alone, so every engine computes the same weights. */

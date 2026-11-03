@@ -1,16 +1,17 @@
 // Fixture of the effect identity check (Desktop_Power_Ideas.md P-09, H-03; MVP_draft.md 62.15), bundled by
 // qa/studio-effects-parity.cjs from the real modules and run in Edge and inside the development package on each
 // graphics chip and with none. In every engine:
-//   - each effect of effects/, at several strengths, over three pictures (a frame of the synthetic 4K footage, an item
-//     with soft edges and see-through parts, every straight colour at every opacity), worked out on the graphics chip
-//     and in plain code: the two must give the same bytes;
+//   - each effect of effects/, at several strengths, over three pictures (synthetic footage, an item with soft edges
+//     and see-through parts, every straight colour at every opacity, all written from whole numbers), worked out on
+//     the graphics chip and in plain code: the two must give the same bytes, and the same as in Edge;
 //   - every frame of the proof's corpus composed with the chip path and with the plain code: the same hash;
 //   - how far each effect moved from the canvas filter the studio drew with before (compose.ts filterOf), on this
 //     engine's own filter: what a project saved before the change shows now.
 import { corpus } from '../../src/lib/studio/bench-docs.ts';
-import { SyntheticSources } from '../../src/lib/studio/bench.ts';
+import { SyntheticSources, basePixels } from '../../src/lib/studio/bench.ts';
 import { composeFrame, filterOf } from '../../src/lib/studio/compose.ts';
 import { applyEffect, blurPlan, effectOf, effectsChip, setEffectPath, type EffectPlan } from '../../src/lib/studio/effects/index.ts';
+import { toPremultiplied } from '../../src/lib/studio/effects/code.ts';
 import * as schema from '../../src/lib/studio/schema.ts';
 import { loadFonts, usedFonts } from '../../src/lib/studio/text.ts';
 import { loadSticker, MotionRenderer } from '../../src/lib/studio/motion-adapter.ts';
@@ -30,26 +31,25 @@ function canvasOf(w: number, h: number) {
   return { c, ctx: c.getContext('2d')! };
 }
 
-/** The three pictures the effects are worked out on. */
+/**
+ * The three pictures the effects are worked out on, written with putImageData from whole numbers so every engine
+ * starts from the same bytes (drawing them scaled, turned or with text would differ by chip before any effect).
+ */
 function pictures(): Picture[] {
   const frame = canvasOf(1280, 720);
-  frame.ctx.drawImage(src.videoAt(1_000_000) as CanvasImageSource, 0, 0, 1280, 720);
+  frame.ctx.putImageData(basePixels(1280, 720, 2026), 0, 0);
+  // an item: footage with soft edges fading out over 60 pixels, a see-through band and clear holes
   const item = canvasOf(900, 700);
-  item.ctx.save();
-  item.ctx.translate(450, 350);
-  item.ctx.rotate((12 * Math.PI) / 180);
-  item.ctx.globalAlpha = 0.85;
-  item.ctx.drawImage(src.picture() as CanvasImageSource, -300, -260, 600, 520);
-  item.ctx.restore();
-  item.ctx.fillStyle = 'rgba(200, 40, 90, 0.37)';
-  item.ctx.beginPath();
-  item.ctx.ellipse(250, 520, 180, 110, 0.4, 0, Math.PI * 2);
-  item.ctx.fill();
-  item.ctx.font = '700 72px "IBM Plex Sans Arabic", sans-serif';
-  item.ctx.shadowColor = 'rgba(0,0,0,0.6)';
-  item.ctx.shadowBlur = 14;
-  item.ctx.fillStyle = '#f4ead2';
-  item.ctx.fillText('مركز الاتصال', 420, 140);
+  const it = basePixels(900, 700, 7);
+  for (let y = 0; y < 700; y++) {
+    for (let x = 0; x < 900; x++) {
+      const edge = Math.min(x, y, 899 - x, 699 - y);
+      const soft = edge >= 60 ? 255 : Math.floor((edge * 255) / 60);
+      const band = y > 420 && y < 520 ? 94 : 255;
+      it.data[(y * 900 + x) * 4 + 3] = ((x >> 5) + (y >> 5)) % 7 === 0 ? 0 : Math.floor((soft * band) / 255);
+    }
+  }
+  item.ctx.putImageData(it, 0, 0);
   const ramp = canvasOf(256, 256);
   const img = new ImageData(256, 256);
   for (let a = 0; a < 256; a++) {
@@ -94,16 +94,27 @@ function cases(): Case[] {
   return out;
 }
 
-/** The bytes of a picture as getImageData reads it, drawn onto a fresh canvas. */
+/**
+ * The bytes a canvas holds, premultiplied: getImageData's straight colour premultiplied again, which is exact. Its
+ * straight colour itself is not: each engine divides by opacity its own way (measured on 2026-11-04), so straight
+ * colour would compare engines, not effects.
+ */
+function held(ctx: OffscreenCanvasRenderingContext2D, w: number, h: number): Uint8ClampedArray {
+  const px = ctx.getImageData(0, 0, w, h).data;
+  toPremultiplied(px);
+  return px;
+}
+
+/** The bytes of a picture drawn onto a fresh canvas, premultiplied (held). */
 function read(img: CanvasImageSource, w: number, h: number): Uint8ClampedArray {
   const { ctx } = canvasOf(w, h);
   ctx.drawImage(img, 0, 0);
-  return ctx.getImageData(0, 0, w, h).data;
+  return held(ctx, w, h);
 }
 
 /**
- * Two pictures as getImageData reads them: `differing` counts channels that differ at all; the rest measures colour
- * premultiplied (the picture over black, as it is seen), since straight colour at an opacity of 1 or 2 is noise.
+ * Two pictures premultiplied (held): `differing` counts channels that differ at all; the rest measures colour as it is
+ * seen over black, and the opacity apart.
  */
 function compare(a: Uint8ClampedArray, b: Uint8ClampedArray) {
   let differing = 0;
@@ -114,13 +125,12 @@ function compare(a: Uint8ClampedArray, b: Uint8ClampedArray) {
   let n = 0;
   for (let p = 0; p < a.length; p += 4) {
     for (let k = 0; k < 4; k++) {
-      const raw = Math.abs(a[p + k] - b[p + k]);
-      if (raw) differing++;
+      const d = Math.abs(a[p + k] - b[p + k]);
+      if (d) differing++;
       if (k === 3) {
-        if (raw > alphaMax) alphaMax = raw;
+        if (d > alphaMax) alphaMax = d;
         continue;
       }
-      const d = Math.abs(Math.round((a[p + k] * a[p + 3]) / 255) - Math.round((b[p + k] * b[p + 3]) / 255));
       if (d > max) max = d;
       if (d > 2) over2++;
       sum += d * d;
@@ -151,7 +161,7 @@ export async function identity() {
       old.ctx.filter = c.filter;
       old.ctx.drawImage(p.canvas, 0, 0);
       old.ctx.filter = 'none';
-      const before = old.ctx.getImageData(0, 0, w, h).data;
+      const before = held(old.ctx, w, h);
       out.push({ picture: p.name, effect: c.name, chip: chipPx ? compare(chipPx, code) : null, sinceFilter: compare(before, code), hash: await sha256(code) });
     }
   }

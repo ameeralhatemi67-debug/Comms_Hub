@@ -8,8 +8,8 @@ import { effectsOnChip } from './chip.ts';
 import { blurPixels, colourPixels, toPremultiplied, toStraight } from './code.ts';
 import type { EffectPlan } from './plan.ts';
 
-export { blurPlan, colourPlan, effectOf, type BlurPlan, type ColourPlan, type EffectPlan } from './plan.ts';
-export { effectsChip } from './chip.ts';
+export { blurPlan, colourPlan, effectOf, photoColourPlan, type BlurPlan, type ColourPlan, type EffectPlan } from './plan.ts';
+export { effectsChip, effectsOnChip } from './chip.ts';
 
 export type EffectPath = 'auto' | 'chip' | 'code';
 let asked: EffectPath = 'auto';

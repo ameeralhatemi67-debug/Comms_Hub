@@ -1,0 +1,5692 @@
+{
+  "script": "qa/studio-effects-parity.cjs",
+  "run": "2026-11-03T22:44:16.030Z",
+  "version": "0.7.1",
+  "checks": [
+    {
+      "name": "Edge loaded the fonts and the corpus, and worked out every case",
+      "pass": true,
+      "detail": "{\"prepared\":{\"fonts\":true,\"docs\":8},\"cases\":84,\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "edge: every effect on the graphics chip equals the plain code byte for byte (84 cases)",
+      "pass": true,
+      "detail": "{\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"bad\":[]}"
+    },
+    {
+      "name": "app-saving: every effect on the graphics chip equals the plain code byte for byte (84 cases)",
+      "pass": true,
+      "detail": "{\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"bad\":[]}"
+    },
+    {
+      "name": "app-strong: every effect on the graphics chip equals the plain code byte for byte (84 cases)",
+      "pass": true,
+      "detail": "{\"renderer\":\"ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"bad\":[]}"
+    },
+    {
+      "name": "app-software: with no usable graphics chip the effects take the plain code",
+      "pass": true,
+      "detail": "{\"renderer\":\"ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "edge: the plain code gives Edge's bytes for every case",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "app-saving: the plain code gives Edge's bytes for every case",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "app-strong: the plain code gives Edge's bytes for every case",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "app-software: the plain code gives Edge's bytes for every case",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "edge: every corpus frame is the same whichever path works out its effects (chip, code, auto; 54 frames)",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "app-saving: every corpus frame is the same whichever path works out its effects (chip, code, auto; 54 frames)",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "app-strong: every corpus frame is the same whichever path works out its effects (chip, code, auto; 54 frames)",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "app-software: every corpus frame is the same whichever path works out its effects (code, auto; 54 frames)",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "against Edge's canvas filter, every colour adjustment on footage and on an item within the proof's tolerance (PSNR at least 50 dB, at most 0.1% of channels more than 2 apart)",
+      "pass": true,
+      "detail": "{\"worst\":[{\"picture\":\"item\",\"effect\":\"saturation 25\",\"differing\":140560,\"max\":2,\"alphaMax\":0,\"over2\":0,\"psnr\":59.42},{\"picture\":\"item\",\"effect\":\"saturation 100\",\"differing\":131829,\"max\":2,\"alphaMax\":0,\"over2\":0,\"psnr\":59.62},{\"picture\":\"item\",\"effect\":\"saturation 50\",\"differing\":133348,\"max\":2,\"alphaMax\":0,\"over2\":0,\"psnr\":59.64},{\"picture\":\"item\",\"effect\":\"grey\",\"differing\":129771,\"max\":1,\"alphaMax\":0,\"over2\":0,\"psnr\":59.76}],\"off\":[]}"
+    },
+    {
+      "name": "against Edge's canvas filter, every blur moved no further than the filter itself differed between this laptop's engines (at most 6 levels, PSNR at least 49 dB)",
+      "pass": true,
+      "detail": "{\"worst\":[{\"picture\":\"frame\",\"effect\":\"effects A and blur 9\",\"differing\":1324072,\"max\":5,\"alphaMax\":4,\"over2\":2.2077,\"psnr\":49.1},{\"picture\":\"item\",\"effect\":\"effects A and blur 9\",\"differing\":1090828,\"max\":5,\"alphaMax\":5,\"over2\":1.3033,\"psnr\":49.73},{\"picture\":\"frame\",\"effect\":\"blur 30\",\"differing\":1242623,\"max\":5,\"alphaMax\":5,\"over2\":1.4913,\"psnr\":50.38},{\"picture\":\"item\",\"effect\":\"blur 100\",\"differing\":1207479,\"max\":3,\"alphaMax\":3,\"over2\":0.0004,\"psnr\":51.74}],\"off\":[]}"
+    }
+  ],
+  "notes": [
+    "The chip path and the plain code are compared byte for byte; how far each effect moved from the canvas filter is measured against each engine's own filter, and checked against Edge's."
+  ],
+  "runs": {
+    "edge": {
+      "engine": {
+        "browser": "156.0.4314.58"
+      },
+      "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "chip": true,
+      "cases": [
+        {
+          "picture": "frame",
+          "effect": "effects A",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 92102,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 62.9
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "effects B",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 114135,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.97
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "grey",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 126807,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.52
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation -90",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 126327,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.53
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 125911,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.55
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 105900,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 62.3
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 102478,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 62.44
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 89186,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.04
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "all three",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 129538,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.42
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 0.4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 641428,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 54.48
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 1.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 241130,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 58.73
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 239982,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 58.82
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 4.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 751968,
+            "max": 2,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 53.9
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 873128,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0075,
+            "psnr": 53.39
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 30",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1242623,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 1.4913,
+            "psnr": 50.38
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 64",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1336729,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.003,
+            "psnr": 52.12
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1298589,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0031,
+            "psnr": 52.93
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "effects A and blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1324072,
+            "max": 5,
+            "alphaMax": 4,
+            "over2": 2.2077,
+            "psnr": 49.1
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects A",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 86433,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.53
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects B",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 110012,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.48
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "grey",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 129771,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.76
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3222,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 75.81
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 10261,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 70.78
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 14882,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 69.17
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 5082,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 73.84
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 26556,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 66.65
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 6588,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 72.71
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 6422,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 72.82
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 4666,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 74.21
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3164,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 75.89
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation -90",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 127558,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.84
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 129266,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.78
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 140560,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.42
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 133348,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.64
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 131829,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.62
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "all three",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 119007,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.14
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 0.4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 359420,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 55.36
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 1.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 117466,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 60.33
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 120799,
+            "max": 1,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 60.5
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 4.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 731889,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0014,
+            "psnr": 53.26
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 916329,
+            "max": 4,
+            "alphaMax": 5,
+            "over2": 0.1113,
+            "psnr": 52.08
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 30",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 891684,
+            "max": 2,
+            "alphaMax": 3,
+            "over2": 0,
+            "psnr": 52.95
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 64",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 906737,
+            "max": 2,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 53.01
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1207479,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0004,
+            "psnr": 51.74
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects A and blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1090828,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 1.3033,
+            "psnr": 49.73
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects A",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 14734,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.38
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects B",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 24596,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 57.16
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "grey",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 25062,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 57.08
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 2127,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 67.79
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3291,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 65.89
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3159,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 66.07
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 2253,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 67.54
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 11520,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.45
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3252,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 65.95
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3228,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 65.98
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 2427,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 67.22
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 2007,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 68.04
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation -90",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 26728,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.8
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 28125,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.58
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 30753,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.18
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 29593,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.33
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 26966,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.56
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "all three",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 25247,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 57.04
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 0.4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 154,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 79.93
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 1.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1212,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 71.79
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 4835,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 64.72
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 4.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 65457,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.0036,
+            "psnr": 53.22
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 94348,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.032,
+            "psnr": 52.9
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 30",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 130776,
+            "max": 6,
+            "alphaMax": 4,
+            "over2": 4.3986,
+            "psnr": 47.04
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 64",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 86998,
+            "max": 2,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 53.43
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 209895,
+            "max": 4,
+            "alphaMax": 7,
+            "over2": 8.4045,
+            "psnr": 44.61
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects A and blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 135471,
+            "max": 4,
+            "alphaMax": 2,
+            "over2": 0.9608,
+            "psnr": 49.41
+          }
+        }
+      ],
+      "corpus": {
+        "chip": 54,
+        "code": 54,
+        "auto": 54
+      }
+    },
+    "app-saving": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "chip": true,
+      "cases": [
+        {
+          "picture": "frame",
+          "effect": "effects A",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 92102,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 62.9
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "effects B",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 114135,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.97
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "grey",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 126807,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.52
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation -90",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 126327,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.53
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 125911,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.55
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 105900,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 62.3
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 102478,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 62.44
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 89186,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.04
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "all three",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 129538,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.42
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 0.4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 641428,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 54.48
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 1.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 241130,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 58.73
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 239982,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 58.82
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 4.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 751968,
+            "max": 2,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 53.9
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 873128,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0075,
+            "psnr": 53.39
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 30",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1242623,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 1.4913,
+            "psnr": 50.38
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 64",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1336729,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.003,
+            "psnr": 52.12
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1298589,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0031,
+            "psnr": 52.93
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "effects A and blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1324072,
+            "max": 5,
+            "alphaMax": 4,
+            "over2": 2.2077,
+            "psnr": 49.1
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects A",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 86433,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.53
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects B",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 110012,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.48
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "grey",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 129771,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.76
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3222,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 75.81
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 10261,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 70.78
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 14882,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 69.17
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 5082,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 73.84
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 26556,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 66.65
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 6588,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 72.71
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 6422,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 72.82
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 4666,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 74.21
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3164,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 75.89
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation -90",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 127558,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.84
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 129266,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.78
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 140560,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.42
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 133348,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.64
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 131829,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.62
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "all three",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 119007,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.14
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 0.4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 359420,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 55.36
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 1.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 117466,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 60.33
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 120799,
+            "max": 1,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 60.5
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 4.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 731889,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0014,
+            "psnr": 53.26
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 916329,
+            "max": 4,
+            "alphaMax": 5,
+            "over2": 0.1113,
+            "psnr": 52.08
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 30",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 891684,
+            "max": 2,
+            "alphaMax": 3,
+            "over2": 0,
+            "psnr": 52.95
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 64",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 906737,
+            "max": 2,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 53.01
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1207479,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0004,
+            "psnr": 51.74
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects A and blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1090828,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 1.3033,
+            "psnr": 49.73
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects A",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 14734,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.38
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects B",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 24596,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 57.16
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "grey",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 25062,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 57.08
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 2127,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 67.79
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3291,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 65.89
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3159,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 66.07
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 2253,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 67.54
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 11520,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.45
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3252,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 65.95
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3228,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 65.98
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 2427,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 67.22
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 2007,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 68.04
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation -90",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 26728,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.8
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 28125,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.58
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 30753,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.18
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 29593,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.33
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 26966,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.56
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "all three",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 25247,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 57.04
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 0.4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 154,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 79.93
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 1.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1212,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 71.79
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 4835,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 64.72
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 4.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 65457,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.0036,
+            "psnr": 53.22
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 94348,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.032,
+            "psnr": 52.9
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 30",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 130776,
+            "max": 6,
+            "alphaMax": 4,
+            "over2": 4.3986,
+            "psnr": 47.04
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 64",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 86998,
+            "max": 2,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 53.43
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 209895,
+            "max": 4,
+            "alphaMax": 7,
+            "over2": 8.4045,
+            "psnr": 44.61
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects A and blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 135471,
+            "max": 4,
+            "alphaMax": 2,
+            "over2": 0.9608,
+            "psnr": 49.41
+          }
+        }
+      ],
+      "corpus": {
+        "chip": 54,
+        "code": 54,
+        "auto": 54
+      }
+    },
+    "app-strong": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "chip": true,
+      "cases": [
+        {
+          "picture": "frame",
+          "effect": "effects A",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 64951,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 64.42
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "effects B",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 87550,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.12
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "grey",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 86307,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.19
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation -90",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 84763,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.27
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 86662,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.17
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 77308,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.67
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 76020,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.74
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 66705,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 64.31
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "all three",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 87052,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.15
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 0.4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 635835,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 54.51
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 1.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 176350,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.08
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 176261,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 60.17
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 4.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 780228,
+            "max": 2,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 53.73
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 892235,
+            "max": 3,
+            "alphaMax": 4,
+            "over2": 0.0056,
+            "psnr": 53.31
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 30",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1227582,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 1.4043,
+            "psnr": 50.5
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 64",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1243264,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0008,
+            "psnr": 52.54
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1227048,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0004,
+            "psnr": 53.2
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "effects A and blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1419289,
+            "max": 5,
+            "alphaMax": 4,
+            "over2": 2.3643,
+            "psnr": 48.77
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects A",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 78886,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.92
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects B",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 105890,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.65
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "grey",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 118575,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.16
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 32401,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 65.79
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 20629,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 67.69
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 27139,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 66.51
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 5471,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 72.24
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 26556,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 66.65
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 7829,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 71.96
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 15014,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 69.13
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 10013,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 70.89
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 6514,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 72.76
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation -90",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 117865,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.18
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 118963,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.14
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 131935,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.69
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 125422,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.9
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 124419,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.87
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "all three",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 105859,
+            "max": 3,
+            "alphaMax": 0,
+            "over2": 0.0001,
+            "psnr": 60.64
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 0.4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 357962,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 55.38
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 1.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 115524,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 60.39
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 131194,
+            "max": 1,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 60.18
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 4.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 716207,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0015,
+            "psnr": 53.34
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 897078,
+            "max": 4,
+            "alphaMax": 5,
+            "over2": 0.1003,
+            "psnr": 52.23
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 30",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 863287,
+            "max": 2,
+            "alphaMax": 3,
+            "over2": 0,
+            "psnr": 53.05
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 64",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 866968,
+            "max": 2,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 53.19
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1166345,
+            "max": 2,
+            "alphaMax": 3,
+            "over2": 0,
+            "psnr": 51.89
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects A and blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1095002,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 1.3594,
+            "psnr": 49.63
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects A",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 15439,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 59.18
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects B",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 25466,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 57.01
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "grey",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 25644,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.98
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 10647,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.79
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 5295,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.75
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 7416,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 62.3
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 2430,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 66.47
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast -100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 11520,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.45
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3681,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 65.41
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 5310,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 63.82
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3954,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 65.1
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 3720,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 65.36
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation -90",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 27601,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.66
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation -50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 28813,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.47
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 25",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 31111,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.14
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 50",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 29887,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.29
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 27241,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.54
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "all three",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 26072,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.9
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 0.4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 199,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 78.59
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 1.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 1432,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 70.73
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 4",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 5228,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 64.27
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 4.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 59603,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.0046,
+            "psnr": 53.36
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 92768,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.0331,
+            "psnr": 52.89
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 30",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 128885,
+            "max": 6,
+            "alphaMax": 3,
+            "over2": 4.3538,
+            "psnr": 47.12
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 64",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 81749,
+            "max": 2,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 53.97
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 100",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 215038,
+            "max": 4,
+            "alphaMax": 7,
+            "over2": 8.6833,
+            "psnr": 44.46
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects A and blur 9",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "sinceFilter": {
+            "differing": 134010,
+            "max": 4,
+            "alphaMax": 2,
+            "over2": 0.9165,
+            "psnr": 49.52
+          }
+        }
+      ],
+      "corpus": {
+        "chip": 54,
+        "code": 54,
+        "auto": 54
+      }
+    },
+    "app-software": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "chip": false,
+      "cases": [
+        {
+          "picture": "frame",
+          "effect": "effects A",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 4665,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 75.86
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "effects B",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 2393,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 78.76
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "grey",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1560,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 80.62
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness -100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness -50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 25",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "brightness 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast -100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast -50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 25",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "contrast 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation -90",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 2345,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 78.85
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation -50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1236,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 81.63
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 25",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 4994,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 75.56
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1017,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 82.47
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "saturation 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 977,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 82.65
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "all three",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 34,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 97.23
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 0.4",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 2184921,
+            "max": 20,
+            "alphaMax": 20,
+            "over2": 11.3221,
+            "psnr": 43.66
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 1.5",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 470319,
+            "max": 5,
+            "alphaMax": 4,
+            "over2": 0.0172,
+            "psnr": 55.68
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 4",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 500987,
+            "max": 8,
+            "alphaMax": 8,
+            "over2": 0.7892,
+            "psnr": 53.61
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 4.5",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1062014,
+            "max": 6,
+            "alphaMax": 6,
+            "over2": 0.5451,
+            "psnr": 51.57
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 9",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1346431,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.1173,
+            "psnr": 50.96
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 30",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1912658,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 2.0806,
+            "psnr": 47.73
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 64",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 2354873,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 5.377,
+            "psnr": 45.86
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 2666158,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 11.6504,
+            "psnr": 44.17
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "effects A and blur 9",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1271963,
+            "max": 5,
+            "alphaMax": 4,
+            "over2": 0.1074,
+            "psnr": 51.13
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects A",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 55536,
+            "max": 3,
+            "alphaMax": 0,
+            "over2": 0.0016,
+            "psnr": 63.36
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects B",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 74093,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 62.19
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "grey",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 86145,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.54
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness -100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness -50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 2362,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 77.16
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 25",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 4618,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 73.54
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 7373,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 71.18
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "brightness 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 3095,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 69.97
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast -100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast -50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 3623,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 75.3
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 25",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 5200,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 73.74
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 3527,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 75.42
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "contrast 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 3337,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 75.66
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation -90",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 84330,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.64
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation -50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 85026,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.6
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 25",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 102118,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.8
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 94881,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 61.11
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "saturation 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 97599,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.91
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "all three",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 72335,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 62.25
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 0.4",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1036310,
+            "max": 20,
+            "alphaMax": 20,
+            "over2": 8.3328,
+            "psnr": 44.36
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 1.5",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 416275,
+            "max": 4,
+            "alphaMax": 5,
+            "over2": 0.0713,
+            "psnr": 54.69
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 4",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 720911,
+            "max": 7,
+            "alphaMax": 8,
+            "over2": 3.0359,
+            "psnr": 49.25
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 4.5",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1101108,
+            "max": 6,
+            "alphaMax": 6,
+            "over2": 2.1566,
+            "psnr": 48.7
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 9",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1229579,
+            "max": 6,
+            "alphaMax": 7,
+            "over2": 1.1607,
+            "psnr": 49.24
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 30",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1645515,
+            "max": 5,
+            "alphaMax": 6,
+            "over2": 4.095,
+            "psnr": 46.69
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 64",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1691176,
+            "max": 4,
+            "alphaMax": 5,
+            "over2": 4.3275,
+            "psnr": 46.43
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1803973,
+            "max": 5,
+            "alphaMax": 6,
+            "over2": 5.2097,
+            "psnr": 45.64
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "effects A and blur 9",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1187968,
+            "max": 7,
+            "alphaMax": 7,
+            "over2": 1.8855,
+            "psnr": 48.78
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects A",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 15192,
+            "max": 3,
+            "alphaMax": 0,
+            "over2": 0.0036,
+            "psnr": 59.18
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects B",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 24793,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 57.12
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "grey",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 25068,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 57.08
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness -100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness -50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 486,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 74.2
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 25",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 882,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 70.73
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1488,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 68.32
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "brightness 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 570,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 67.7
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast -100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast -50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 696,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 72.64
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 25",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 1152,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 70.45
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 678,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 72.75
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "contrast 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 642,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 72.99
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation -90",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 26315,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.86
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation -50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 27898,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.61
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 25",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 30308,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.25
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 50",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 29256,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.38
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "saturation 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 26849,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 56.61
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "all three",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 25287,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 57.01
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 0.4",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 5111,
+            "max": 20,
+            "alphaMax": 20,
+            "over2": 1.7761,
+            "psnr": 48.86
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 1.5",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 14586,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0498,
+            "psnr": 57.7
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 4",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 38018,
+            "max": 8,
+            "alphaMax": 8,
+            "over2": 4.4378,
+            "psnr": 49.06
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 4.5",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 85249,
+            "max": 7,
+            "alphaMax": 7,
+            "over2": 3.1911,
+            "psnr": 48.48
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 9",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 105816,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.6027,
+            "psnr": 50.02
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 30",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 152785,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 4.4484,
+            "psnr": 46.86
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 64",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 176618,
+            "max": 4,
+            "alphaMax": 6,
+            "over2": 9.5357,
+            "psnr": 44.89
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 100",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 232741,
+            "max": 3,
+            "alphaMax": 4,
+            "over2": 0.2055,
+            "psnr": 46.04
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "effects A and blur 9",
+          "chip": null,
+          "sinceFilter": {
+            "differing": 101395,
+            "max": 5,
+            "alphaMax": 4,
+            "over2": 1.4526,
+            "psnr": 49.37
+          }
+        }
+      ],
+      "corpus": {
+        "code": 54,
+        "auto": 54
+      }
+    }
+  },
+  "total": 15,
+  "passed": 15,
+  "failed": 0
+}
