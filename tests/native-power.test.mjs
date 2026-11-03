@@ -216,3 +216,33 @@ test('D12: the cache folder is shown by its label; an older application\'s path 
   assert.match(ui, /folderLabelOf\(folder\)/);
   assert.equal(/\{folder\.folder\}/.test(ui), false);
 });
+
+test('D12, P-20: the card import is detected by its four methods; what is said of a card, its copy and each failure', async () => {
+  const { CARD_WORDS, cardDone, cardLine, cardWhy } = await import('../src/lib/native/copies.ts');
+  const b = v7().bridge;
+  b.bridge = 9;
+  b.files = { pick: async () => [], fromDropped: async () => null, check: async () => ({ ok: true }), forget: async () => true, dragOut: async () => true, importCard: async () => null, copyCard: async () => null, cancelCard: async () => true, onCard: () => undefined };
+  assert.equal(nativeOf(b).has('cardImport'), true);
+  assert.equal(nativeOf({ ...b, files: { ...b.files, onCard: undefined } }).has('cardImport'), false);
+  assert.equal(CARD_WORDS.hint, 'تُنسخ الملفات ويُتحقَّق منها قبل استعمالها.', 'the words of Desktop_Power_Ideas.md P-20, verbatim');
+  assert.equal(cardLine('EOS_DIGITAL', 3, '2.1 ج.ب'), 'في «EOS_DIGITAL»: 3 ملفات (2.1 ج.ب).');
+  assert.equal(cardLine('X', 1, '1 م.ب'), 'في «X»: 1 ملف (1 م.ب).');
+  assert.equal(cardLine('X', 12, '1 م.ب'), 'في «X»: 12 ملفاً (1 م.ب).');
+  assert.equal(cardDone(0, 'Shoot'), 'لم يُنسخ أي ملف.');
+  assert.match(cardDone(2, 'Shoot'), /^نُسخ ملفان|^نُسخ 2 ملفان/);
+  for (const w of ['changed', 'mismatch', 'gone', 'space', 'cancelled', 'inside', 'failed']) assert.ok(cardWhy(w).length > 3 && !cardWhy(w).includes(w), w);
+  assert.equal(cardWhy('anything else'), cardWhy('failed'));
+  // every word the application gives is one the site says
+  const app = fs.readFileSync('desktop/src/native-files.ts', 'utf8') + fs.readFileSync('desktop/src/card-copy.ts', 'utf8');
+  for (const w of ['changed', 'mismatch', 'gone', 'space', 'cancelled', 'inside', 'failed']) assert.ok(app.includes(`'${w}'`), `the application says ${w}`);
+});
+
+test('D12, P-20: a card\'s videos join the light-copy queue as soon as they are copied in', async () => {
+  const log = [];
+  inApp(v7(log).bridge);
+  const c = await DeviceCache.open();
+  c.wantFiles([{ token, media: 'video' }, { token: 'P'.repeat(43), media: 'image' }]);
+  await sleep(250);
+  const sent = log.filter((x) => x[0] === 'queue');
+  assert.deepEqual(sent.at(-1)[1].items, [{ token }], 'the video only');
+});

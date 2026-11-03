@@ -5,12 +5,14 @@
 // files kept from «هذا الجهاز», each removable by long press. In the desktop application (63.3) it also
 // shows the cache folder, its free space and its size limit, and a file used where it is is only let go
 // of: the file itself stays where it is. From D12 (63.9) it also says how far the light copies made in idle time are,
-// and a file used where it is can be dragged out into another program.
+// and a file used where it is can be dragged out into another program, and a camera's card is imported here
+// («استيراد من بطاقة الكاميرا»).
 import { useEffect, useState } from 'react';
 import { FolderOpen, HardDrive, Trash2 } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { copyQueueLine } from '@/lib/native/copies';
 import { dragOutFile, native } from '@/lib/native';
+import { CardImport } from '@/components/native/card-import';
 import { folderLabelOf, type DeviceCache } from '@/lib/studio/cache';
 import { formatBytes } from '@/lib/studio/support';
 
@@ -80,6 +82,7 @@ export function CachePanel({ cache, inUse, onChanged }: { cache: DeviceCache | n
             <p className="st-hint">عند تغيير المجلد تُحذف النسخ من المجلد السابق وتُنسخ في الجديد عند الحاجة، ولا يُمس غيرها. وإذا تجاوزت النسخ الحد حُذف أقدمها استعمالاً.</p>
           </div>
         )}
+        {native().has('cardImport') && <CardImport cache={cache} onDone={changed} />}
         <button
           type="button"
           data-hold={HOLD.studioClearCache}

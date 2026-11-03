@@ -13,6 +13,9 @@ export const TRAY_RESTART = 'إعادة التشغيل للتحديث';
 /** The system dialogs the page may open (D4). */
 export const PICK_TITLE = 'اختيار ملفات من هذا الجهاز';
 export const FOLDER_TITLE = 'اختيار مجلد التخزين المؤقت للاستوديو';
+/** «استيراد من بطاقة الكاميرا» (D12, P-20): the card, then where its files are copied. */
+export const CARD_TITLE = 'اختيار بطاقة الكاميرا أو مجلدها';
+export const CARD_DEST_TITLE = 'اختيار مجلد لحفظ الملفات المنسوخة';
 
 /** The notice when an update has been downloaded (D3). */
 export function updateReady(version: string): { title: string; body: string } {

@@ -4,20 +4,25 @@
 // الجهاز». Every handler goes through the same guard() as the rest of the bridge; every argument is checked
 // here. The page never sends a path: `files.pick` opens the system's own dialog, and a dropped or chosen
 // File reaches the main process only as the path Chromium attached to it, read in the preload. From D12 (P-22) a file
-// the application gave a token for can be dragged out of the window into another program, by its token.
+// the application gave a token for can be dragged out of the window into another program, by its token; and
+// «استيراد من بطاقة الكاميرا» (P-20) lists a card the person picked, copies the recordings they chose into a folder they
+// pick, each verified (card-copy.ts), and hands back tokens. Neither dialog's path reaches the page.
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { app, BrowserWindow, dialog, nativeImage } from 'electron';
 import type { IpcMainInvokeEvent, Session } from 'electron';
-import { CacheStore, LIMITS, libraryName } from './cache-store.ts';
+import { CacheStore, folderLabel, LIMITS, libraryName } from './cache-store.ts';
+import { cardItems, cardView, chosenKeys, freeName, type CardItem } from './card.ts';
+import { copyVerified, listCard, onCard } from './card-copy.ts';
 import { freeBytes } from './device.ts';
 import { FileStore } from './file-store.ts';
-import { addressOf, CACHE_NAME, dialogFilters, publicView, SCHEME, TOKEN } from './files.ts';
+import { addressOf, CACHE_NAME, dialogFilters, newToken, publicView, SCHEME, TOKEN } from './files.ts';
 import { CHANNEL } from './ipc.ts';
 import { isAllowed } from './origins.ts';
 import { answer } from './protocol.ts';
 import type { Handle } from './native.ts';
-import { FOLDER_TITLE, PICK_TITLE } from './words.ts';
+import { CARD_DEST_TITLE, CARD_TITLE, FOLDER_TITLE, PICK_TITLE } from './words.ts';
 
 const refused = () => new Error('refused');
 const MAX_IN_USE = 2000;
@@ -141,9 +146,113 @@ export function startFiles(o: { handle: Handle; site: Session; allowed: readonly
   o.handle(CHANNEL.cacheSweep, (_event, inUse: unknown) => cache.sweep(inUseOf(inUse ?? [])));
   o.handle(CHANNEL.cacheClear, (_event, inUse: unknown) => cache.clear(inUseOf(inUse ?? [])));
 
+  // --- «استيراد من بطاقة الكاميرا» (D12, P-20) ---------------------------------------------------------
+  /** The cards listed, by an id of 32 random bytes; the page names recordings by the keys of one listing. */
+  const cards = new Map<string, { root: string; items: CardItem[]; ctl: AbortController | null }>();
+  const MAX_CARDS = 4;
+  /** A folder's name for the page: its last name, or a drive's letter. */
+  const nameOf = (folder: string) => folderLabel(path.join(folder, 'x'));
+  o.handle(CHANNEL.filesImportCard, async (event) => {
+    const win = owner(event);
+    const options = { title: CARD_TITLE, properties: ['openDirectory'] as 'openDirectory'[] };
+    const r = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options);
+    if (r.canceled || !r.filePaths[0]) return null;
+    const root = r.filePaths[0];
+    const items = cardItems(listCard(root));
+    const id = newToken(crypto.randomBytes(32));
+    for (const [old, c] of cards) if (cards.size >= MAX_CARDS && !c.ctl) cards.delete(old);
+    cards.set(id, { root, items, ctl: null });
+    return { id, label: nameOf(root), items: cardView(items) };
+  });
+  const whyOf = (e: unknown, signal: AbortSignal) => {
+    if (signal.aborted) return 'cancelled';
+    const x = e as { why?: string; code?: string };
+    if (x?.why === 'changed' || x?.why === 'mismatch') return x.why;
+    if (x?.code === 'ENOENT' || x?.code === 'EIO' || x?.code === 'ENODEV' || x?.code === 'EBUSY') return 'gone';
+    if (x?.code === 'ENOSPC') return 'space';
+    return 'failed';
+  };
+  o.handle(CHANNEL.filesCopyCard, async (event, ask: unknown) => {
+    const a = (ask ?? {}) as { id?: unknown; keys?: unknown };
+    if (typeof a.id !== 'string' || !TOKEN.test(a.id)) throw refused();
+    const id = a.id;
+    const card = cards.get(id);
+    if (!card) throw refused();
+    const keys = chosenKeys(a.keys, card.items);
+    if (!keys) throw refused();
+    if (card.ctl) throw new Error('busy');
+    const win = owner(event);
+    const options = { title: CARD_DEST_TITLE, properties: ['openDirectory', 'createDirectory'] as ('openDirectory' | 'createDirectory')[] };
+    const r = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options);
+    if (r.canceled || !r.filePaths[0]) return null;
+    const dest = r.filePaths[0];
+    // the copies never go back onto the card
+    const inside = path.relative(path.resolve(card.root), path.resolve(dest));
+    if (!inside || (!inside.startsWith('..') && !path.isAbsolute(inside))) return { folder: nameOf(dest), results: keys.map((key) => ({ key, ok: false, why: 'inside' })) };
+    const ctl = new AbortController();
+    card.ctl = ctl;
+    const chosen = keys.map((k) => card.items.find((i) => i.key === k)!);
+    const total = chosen.reduce((n, i) => n + i.size, 0) * 2;
+    let before = 0;
+    const tell = (done: number) => {
+      if (!event.sender.isDestroyed()) event.sender.send(CHANNEL.cardProgress, { id, done, total });
+    };
+    let taken: Set<string>;
+    try {
+      taken = new Set(fs.readdirSync(dest));
+    } catch {
+      taken = new Set();
+    }
+    const results: ({ key: string; ok: true; file: ReturnType<typeof publicView> } | { key: string; ok: false; why: string })[] = [];
+    try {
+      for (const item of chosen) {
+        const parts = item.parts.map((rel) => onCard(card.root, rel));
+        if (ctl.signal.aborted || parts.some((p) => !p)) {
+          results.push({ key: item.key, ok: false, why: ctl.signal.aborted ? 'cancelled' : 'gone' });
+          continue;
+        }
+        const name = freeName(taken, item.name);
+        taken.add(name);
+        let last = 0;
+        try {
+          await copyVerified(parts as string[], path.join(dest, name), {
+            signal: ctl.signal,
+            onProgress: (n, phase) => {
+              const now = Date.now();
+              if (now - last < 200) return;
+              last = now;
+              tell(before + (phase === 'copy' ? n : item.size + n));
+            },
+          });
+          const rec = files.add(path.join(dest, name));
+          results.push(rec ? { key: item.key, ok: true, file: publicView(rec) } : { key: item.key, ok: false, why: 'failed' });
+        } catch (e) {
+          results.push({ key: item.key, ok: false, why: whyOf(e, ctl.signal) });
+        }
+        before += item.size * 2;
+        tell(before);
+      }
+    } finally {
+      card.ctl = null;
+    }
+    return { folder: nameOf(dest), results };
+  });
+  o.handle(CHANNEL.filesCancelCard, (_event, id: unknown) => {
+    if (typeof id !== 'string' || !TOKEN.test(id)) throw refused();
+    const c = cards.get(id);
+    if (!c?.ctl) return false;
+    c.ctl.abort();
+    return true;
+  });
+
   // --- «مسح بيانات هذا الجهاز» (D-11) ----------------------------------------------------------------
-  /** What else stops before the data goes: the media jobs (native-media.ts). */
-  const stops: (() => void)[] = [];
+  /** What else stops before the data goes: the media jobs (native-media.ts) and a card's copy. */
+  const stops: (() => void)[] = [
+    () => {
+      for (const c of cards.values()) c.ctl?.abort();
+      cards.clear();
+    },
+  ];
   o.handle(CHANNEL.dataClear, async () => {
     for (const ctl of running.values()) ctl.abort();
     for (const stop of stops) stop();

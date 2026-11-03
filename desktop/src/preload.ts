@@ -7,7 +7,8 @@
 // `windows`, which names a panel and its project, never an address; version 6 (D9) adds `gpu`, which takes a
 // word from a fixed list, and `profile`, which takes measured numbers in a fixed shape; version 7 (D12) adds
 // `life.activity`, a word from a fixed list, and `media.queue`, which names sources as `media` does; version 8 adds
-// `life.progress`, a number from 0 to 1 or a word of a fixed list, and `files.dragOut`, which takes a token.
+// `life.progress`, a number from 0 to 1 or a word of a fixed list, and `files.dragOut`, which takes a token; version 9
+// adds the camera card's import, which opens the system's dialogs and names recordings by the keys it gave.
 // Each method only
 // sends a message; its main-process handler checks the sender again (sender.ts) and every argument. No
 // method takes a file path, a command or another address: `files.fromDropped` takes a File the person
@@ -23,9 +24,11 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
   let progress: ((p: unknown) => void) | null = null;
   let mediaProgress: ((p: unknown) => void) | null = null;
   let queueState: ((s: unknown) => void) | null = null;
+  let cardProgress: ((p: unknown) => void) | null = null;
   ipcRenderer.on(CHANNEL.cacheProgress, (_event, p: unknown) => progress?.(p));
   ipcRenderer.on(CHANNEL.mediaProgress, (_event, p: unknown) => mediaProgress?.(p));
   ipcRenderer.on(CHANNEL.mediaQueueState, (_event, s: unknown) => queueState?.(s));
+  ipcRenderer.on(CHANNEL.cardProgress, (_event, p: unknown) => cardProgress?.(p));
   // A native notice was clicked: the page moves itself if it said how, otherwise the address changes.
   ipcRenderer.on(CHANNEL.open, (_event, go: unknown) => {
     if (typeof go !== 'string' || !go.startsWith('/') || go.startsWith('//')) return;
@@ -64,6 +67,12 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
         check: (token: unknown) => call(CHANNEL.filesCheck, token),
         forget: (token: unknown) => call(CHANNEL.filesForget, token),
         dragOut: (token: unknown) => call(CHANNEL.filesDragOut, token),
+        importCard: () => call(CHANNEL.filesImportCard),
+        copyCard: (ask: unknown) => call(CHANNEL.filesCopyCard, ask),
+        cancelCard: (id: unknown) => call(CHANNEL.filesCancelCard, id),
+        onCard: (fn: unknown) => {
+          cardProgress = typeof fn === 'function' ? (fn as (p: unknown) => void) : null;
+        },
       }),
       cache: Object.freeze({
         library: (ask: unknown) => call(CHANNEL.cacheLibrary, ask),

@@ -11,7 +11,7 @@ export type Platform = 'web' | 'desktop' | 'android' | 'ios';
  * What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3),
  * files, cache and clearData from 3 (D4), media from 4 (D5), windows from 5 (D6), gpu and profile from 6 (D9,
  * Desktop_Power_Ideas.md P-01 and P-33), activity and copyQueue from 7 (D12, P-30 and P-08), taskbar and dragOut from 8
- * (D12, P-26 and P-22).
+ * (D12, P-26 and P-22), cardImport from 9 (D12, P-20).
  * The Android application
  * offers its own: appUpdate (A3), download and share (A4), push (A5), links and lock (A6), capture,
  * incoming and upload (A7), and in Google Play's copy playUpdate instead of appUpdate (A8).
@@ -34,6 +34,7 @@ export type Feature =
   | 'copyQueue'
   | 'taskbar'
   | 'dragOut'
+  | 'cardImport'
   | 'appUpdate'
   | 'download'
   | 'share'
@@ -104,6 +105,13 @@ export type CopyHold = 'battery' | 'throttled' | 'export' | 'upload' | 'measurin
 export type NativeQueueItem = { name: string; state: 'probing' | 'waiting' | 'running' | 'paused' | 'ready' | 'light' | 'failed' | 'missing'; done: number; total: number; why: string | null };
 export type NativeQueueState = { hold: CopyHold | null; width: number; items: NativeQueueItem[] };
 
+/** A recording on a camera's card as the desktop application lists it (D12, P-20): a key of this listing, never a path. */
+export type NativeCardItem = { key: string; name: string; size: number; media: 'video' | 'audio' | 'image'; modified: number; parts: number };
+export type NativeCard = { id: string; label: string; items: NativeCardItem[] };
+/** Why a recording was not copied: changed or pulled out mid-copy, a copy that did not read back the same, a full disk, cancelled, onto the card itself. */
+export type CardWhy = 'changed' | 'mismatch' | 'gone' | 'space' | 'cancelled' | 'inside' | 'failed';
+export type NativeCardCopy = { folder: string; results: ({ key: string; ok: true; file: NativeFile } | { key: string; ok: false; why: CardWhy })[] };
+
 export type Reason = 'export' | 'upload';
 export type NativeNotice = { title: string; body?: string; go?: string | null };
 
@@ -123,6 +131,10 @@ type Bridge = {
     check?: (token: string) => Promise<{ ok: boolean; url?: string; why?: string }>;
     forget?: (token: string) => Promise<boolean>;
     dragOut?: (token: string) => Promise<boolean>;
+    importCard?: () => Promise<NativeCard | null>;
+    copyCard?: (ask: { id: string; keys: string[] }) => Promise<NativeCardCopy | null>;
+    cancelCard?: (id: string) => Promise<boolean>;
+    onCard?: (fn: ((p: { id: string; done: number; total: number }) => void) | null) => void;
   };
   cache?: {
     library?: (ask: { asset: string; version: number; label?: string; inUse?: string[] }) => Promise<{ name: string; url: string; bytes: number }>;
@@ -214,6 +226,7 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   copyQueue: ['media.queue', 'media.queued', 'media.onQueue'],
   taskbar: ['life.progress'],
   dragOut: ['files.fromDropped', 'files.dragOut'],
+  cardImport: ['files.importCard', 'files.copyCard', 'files.cancelCard', 'files.onCard'],
   appUpdate: ['appUpdate.status', 'appUpdate.start'],
   download: ['download.save', 'download.open'],
   share: ['share.file'],

@@ -28,3 +28,35 @@ export function copyQueueLine(s: NativeQueueState | null): string | null {
   const making = count('running');
   return making ? `${head}، وتُنشأ ${making} الآن.` : `${head}.`;
 }
+
+/** «استيراد من بطاقة الكاميرا» (D12, MVP_draft.md 63.9): what is said of a card's recordings and their copy. */
+export const CARD_WORDS = Object.freeze({
+  action: 'استيراد من بطاقة الكاميرا',
+  hint: 'تُنسخ الملفات ويُتحقَّق منها قبل استعمالها.',
+  copy: 'نسخ الملفات والتحقق منها',
+  cancel: 'إلغاء',
+  none: 'لا توجد في هذا المجلد ملفات فيديو أو صوت أو صور يأخذها الاستوديو.',
+  joined: 'تسجيل واحد من أجزاء',
+});
+
+const CARD_WHY: Readonly<Record<string, string>> = Object.freeze({
+  changed: 'تغيّر الملف أثناء نسخه',
+  mismatch: 'لم تطابق النسخة الأصل عند التحقق',
+  gone: 'لم يعد الملف في البطاقة (أُخرجت البطاقة؟)',
+  space: 'لا تتسع مساحة القرص',
+  cancelled: 'أُلغي',
+  inside: 'لا تُنسخ الملفات إلى البطاقة نفسها',
+  failed: 'تعذّر نسخه',
+});
+export const cardWhy = (why: string) => CARD_WHY[why] ?? CARD_WHY.failed;
+
+/** What a card holds, in one line. */
+export function cardLine(label: string, n: number, bytes: string): string {
+  return `في «${label}»: ${n} ${n === 1 ? 'ملف' : n === 2 ? 'ملفان' : n <= 10 ? 'ملفات' : 'ملفاً'} (${bytes}).`;
+}
+
+/** After the copy: how many are copied and verified, where, and what to do next. */
+export function cardDone(copied: number, folder: string): string {
+  if (!copied) return 'لم يُنسخ أي ملف.';
+  return `نُسخ ${copied} ${copied === 1 ? 'ملف' : copied === 2 ? 'ملفان' : copied <= 10 ? 'ملفات' : 'ملفاً'} إلى «${folder}» وتُحقِّق منها. أضفها إلى المشروع من «هذا الجهاز»، وتُنشأ نسخها الخفيفة حين يكون الجهاز متفرغاً.`;
+}

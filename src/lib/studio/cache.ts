@@ -415,6 +415,15 @@ export class DeviceCache {
     }, 150);
   }
 
+  /**
+   * Files copied in from a camera's card (D12, P-20): their videos join the queue, so their light copies are made while
+   * the laptop is free, before they are even added to the project.
+   */
+  wantFiles(files: { token: string; media: string }[]) {
+    if (!this.copyQueue) return;
+    for (const f of files) if (f.media === 'video') this.want({ token: f.token });
+  }
+
   /** The open project is closed: the application stops making its copies (nothing of an unfinished copy is kept). */
   stopQueue() {
     if (!this.copyQueue) return;
