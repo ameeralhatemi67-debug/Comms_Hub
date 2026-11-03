@@ -27,6 +27,21 @@ const { check, note, result, finish } = h.record('qa/desktop-native.cjs');
 const out = path.join(__dirname, 'artifacts', 'desktop-native');
 const BASE = 'http://127.0.0.1:3000';
 const NOTE = 'إشعارات تحتاج قرارك';
+/** The bridge version this tree compiles (desktop/src/ipc.ts), and the groups it has: D12 added to life, files and media. */
+const BRIDGE = Number(/BRIDGE_VERSION = (\d+)/.exec(fs.readFileSync(path.join(h.desktop, 'src', 'ipc.ts'), 'utf8'))[1]);
+const GROUPS = {
+  power: ['keepAwake', 'release'],
+  life: ['busy', 'idle', ...(BRIDGE >= 7 ? ['activity'] : []), ...(BRIDGE >= 8 ? ['progress'] : [])],
+  notify: ['show', 'badge', 'onOpen'],
+  update: ['status', 'restart'],
+  files: ['pick', 'fromDropped', 'check', 'forget', ...(BRIDGE >= 8 ? ['dragOut'] : []), ...(BRIDGE >= 9 ? ['importCard', 'copyCard', 'cancelCard', 'onCard'] : [])],
+  cache: ['library', 'cancel', 'has', 'usage', 'choose', 'useDefault', 'limit', 'sweep', 'clear', 'onProgress'],
+  data: ['clear'],
+  windows: ['screens', 'popOut', 'close'],
+  media: ['probe', 'copies', 'proxy', 'convert', 'cancel', 'onProgress', ...(BRIDGE >= 7 ? ['queue', 'queued', 'onQueue'] : [])],
+  gpu: ['state', 'choose', 'restart'],
+  profile: ['read', 'save'],
+};
 
 const page = (title, body) => `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${title}</title></head><body>${body}</body></html>`;
 const bridgePage = page(
@@ -102,10 +117,10 @@ async function partOne(state) {
     };
   });
   check(
-    'the bridge is version 7: who the application is, then info, power, life (with activity), notify, update, files, cache, data, windows, media (with the queue), gpu and profile',
+    `the bridge is version ${BRIDGE}: who the application is, then info, power, life, notify, update, files, cache, data, windows, media, gpu and profile, each with the methods of its version`,
     JSON.stringify(shape.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify', 'update', 'files', 'cache', 'data', 'windows', 'media', 'gpu', 'profile']) &&
-      JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: 7 }) &&
-      JSON.stringify(shape.groups) === JSON.stringify({ power: ['keepAwake', 'release'], life: ['busy', 'idle', 'activity'], notify: ['show', 'badge', 'onOpen'], update: ['status', 'restart'], files: ['pick', 'fromDropped', 'check', 'forget'], cache: ['library', 'cancel', 'has', 'usage', 'choose', 'useDefault', 'limit', 'sweep', 'clear', 'onProgress'], data: ['clear'], windows: ['screens', 'popOut', 'close'], media: ['probe', 'copies', 'proxy', 'convert', 'cancel', 'onProgress', 'queue', 'queued', 'onQueue'], gpu: ['state', 'choose', 'restart'], profile: ['read', 'save'] }) &&
+      JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: BRIDGE }) &&
+      JSON.stringify(shape.groups) === JSON.stringify(GROUPS) &&
       shape.fns,
     shape,
   );

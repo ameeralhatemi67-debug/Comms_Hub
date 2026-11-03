@@ -79,7 +79,7 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
     await win.waitForLoadState('load');
     await win.waitForFunction(() => typeof window.openCorpus === 'function');
     const bridge = await win.evaluate(() => ({ bridge: window.commsHubNative.bridge, life: Object.keys(window.commsHubNative.life), media: Object.keys(window.commsHubNative.media) }));
-    check('the bridge is version 7, with life.activity and media.queue, queued and onQueue', bridge.bridge === 7 && bridge.life.includes('activity') && ['queue', 'queued', 'onQueue'].every((m) => bridge.media.includes(m)), bridge);
+    check('the bridge is version 7 or later, with life.activity and media.queue, queued and onQueue', bridge.bridge >= 7 && bridge.life.includes('activity') && ['queue', 'queued', 'onQueue'].every((m) => bridge.media.includes(m)), bridge);
     const folder = path.join(data, 'StudioCache');
     const q = () => win.evaluate(() => window.queued());
     const parts = () => (fs.existsSync(folder) ? fs.readdirSync(folder).filter((f) => f.endsWith('.part')) : []);
