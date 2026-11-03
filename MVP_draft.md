@@ -2903,6 +2903,8 @@ of 63.6 gives (64 MB a gigabyte of the computer's memory, at most 3 GB; «أخف
 - Every frame of the stretch of each source the timeline uses, small (at most 480 pixels wide), in a third of the memory,
   filled while the preview is paused and nothing else is read: after a jump the right frame appears at once, small, and its
   sharp version replaces it.
+- A jump waits for nothing else: it reads only the frame it asks for, so its sharp frame comes as soon as it did before.
+  What is read ahead, behind and small is read only after a moment with nothing asked, and stops at the next ask.
 - A time shows the frame the export takes for it. Nothing is read ahead while playing.
 
 **«تلقائية».** A first choice in «أثناء التشغيل», in the preview's menu and in «عرض». While playing, the preview draws each project

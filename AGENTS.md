@@ -432,6 +432,8 @@ The faster preview (D10, `MVP_draft.md` 63.7) reads the plan through `src/compon
   export's (`sink` for `frameAt`, `passSink` for `frames`). A time takes the frame the export takes (`EPS`), and a kept frame
   answers only while its next frame is known to start later. Frames are kept at a power-of-two share of the source, never
   smaller than drawn (`needOf`), so the layout is the full frame's to the bit. A budget of 0 is today's decoder, unchanged.
+  A jump paints only its own frame and ends every other pass; reading ahead, behind and the small frames waits for
+  `SCRUB_IDLE` with nothing asked. Keep it so: the sharp frame after a jump must never come later than today's.
 - **«تلقائية» and the stream budget** (`src/lib/studio/playback.ts`) change only the preview canvas's size and which copy an
   element plays. Without a plan every light copy plays as D5 made it, and «كاملة» stays the browser's default.
 - The proofs are `qa/studio-scrub.cjs` (identity at 48 times, the small frames included) and `qa/studio-autores.cjs`.

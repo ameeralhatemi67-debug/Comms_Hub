@@ -36,10 +36,15 @@ const UNDECODABLE = 'هذا المتصفح لا يفك ترميز هذا الف�
 export const contentUrl = (asset: string, version: number) => `/api/media/${asset}/content?v=${version}`;
 
 type Canvas = HTMLCanvasElement | OffscreenCanvas;
-/** Seconds of frames kept behind a moment that had to be decoded (a step back is then drawn at once). */
+/**
+ * Seconds of frames kept behind where the person is, read while nothing else is (a step back is then drawn at once).
+ * A jump never waits for them: it paints only the frame it asked for, so its sharp frame comes no later than before.
+ */
 export const SCRUB_BEHIND = 0.5;
 /** Seconds read ahead of where the person is, while nothing plays, at most a quarter of the frames the memory holds. */
 export const SCRUB_AHEAD = 2;
+/** Milliseconds with nothing asked before anything is read ahead, behind or small: a drag or a run of jumps waits for nothing. */
+export const SCRUB_IDLE = 150;
 
 /** The paused preview's own decoder (D10): the light copy's when there is one, its key frames, and the stretch it is reading. */
 type Scrub = {
@@ -86,6 +91,8 @@ type Loaded = {
   shown?: Kept<Canvas> | null;
   /** The frame on screen is a small one, shown while the sharp one is read. */
   shownSmall?: boolean;
+  /** Wakes the frames' reading from its short wait when something is asked. */
+  wake?: () => void;
   want?: number | null;
   anchor?: number;
   scrubbing?: boolean;
@@ -631,6 +638,7 @@ export class MediaPool {
     if (l.want !== s) {
       l.want = s;
       if (!l.scrubbing) void this.scrubLoop(l);
+      else l.wake?.();
     }
     return (l.shown?.canvas as CanvasImageSource) ?? null;
   }
@@ -642,6 +650,7 @@ export class MediaPool {
       const sc = await this.scrubOf(l);
       if (!l.scrub) return;
       l.scrubReady = sc;
+      let asked = performance.now();
       while (!this.disposed && this.store && !l.scrubFailed && this.loaded.get(id) === l && l.scrubReady === sc) {
         const d = this.shareOf(l, sc);
         if (!d) {
@@ -662,10 +671,26 @@ export class MediaPool {
           this.latest = l;
           for (const o of this.loaded.values()) if (o !== l && !o.scrubbing) void this.endRun(o);
           await this.readTo(l, sc, want, d);
+          asked = performance.now();
           continue;
         }
         if (this.playing) break;
-        if (await this.readAhead(l, sc, d)) continue;
+        const quiet = performance.now() - asked;
+        if (quiet < SCRUB_IDLE) {
+          // woken at once by an ask (keptNear)
+          await new Promise<void>((r) => {
+            l.wake = r;
+            setTimeout(r, SCRUB_IDLE - quiet);
+          });
+          l.wake = undefined;
+          continue;
+        }
+        // while nothing is asked: the frames just ahead of where the person is, then just behind, then the small ones
+        const anchor = l.anchor ?? 0;
+        const frames = Math.max(8, Math.floor(this.store.budget / ((sc.w / d) * (sc.h / d) * 4) / 4));
+        const span = (secs: number) => Math.min(secs, frames * (sc.run?.frame ?? 1 / 30));
+        if (await this.readSpan(l, sc, d, anchor, anchor + span(SCRUB_AHEAD))) continue;
+        if (await this.readSpan(l, sc, d, Math.max(0, anchor - span(SCRUB_BEHIND)), anchor)) continue;
         if (await this.fillStep(l, sc, d)) continue;
         break;
       }
@@ -697,6 +722,12 @@ export class MediaPool {
     };
     const kept = store.find(id, want, d);
     if (kept) return done(kept);
+    // nothing else decodes beside a jump: the small frames' pass starts again later from where they stop
+    if (sc.fill) {
+      const f = sc.fill;
+      sc.fill = null;
+      await f.it.return(undefined).catch(() => undefined);
+    }
     const ts = Math.max(0, want - sc.off);
     const keyAt = async () => (await sc.keys.getKeyPacket(ts + EPS, { metadataOnly: true }))?.timestamp ?? 0;
     // the frame that answers `want` is known before it is decoded (the packets' own times): shown as soon as it comes
@@ -709,10 +740,10 @@ export class MediaPool {
       await run.it.return(undefined).catch(() => undefined);
       run = null;
     }
-    if (!run) run = sc.run = { it: sc.sink.samples(Math.max(await keyAt(), ts - SCRUB_BEHIND)), d, pos: -Infinity, prev: null, done: false, frame: 1 / 30, kept: 0 };
+    if (!run) run = sc.run = { it: sc.sink.samples(ts), d, pos: -Infinity, prev: null, done: false, frame: 1 / 30, kept: 0 };
     while (l.want === want && !this.disposed && this.store === store && sc.run === run) {
-      // frames well before `want` are passed without being painted
-      const f = await this.pull(l, sc, run, d, store, want - SCRUB_BEHIND);
+      // the frames before `want` are passed without being painted: the jump waits for its own frame only
+      const f = await this.pull(l, sc, run, d, store, want);
       if (f === null) return done(store.find(id, want, d));
       if (f !== 'passed' && targetFrom !== null && Math.abs(f.from - targetFrom) < 1e-6) return done(f);
       const hit = store.find(id, want, d);
@@ -720,15 +751,27 @@ export class MediaPool {
     }
   }
 
-  /** One more frame ahead of where the person is, while nothing plays; false when far enough or nothing to read. */
-  private async readAhead(l: Loaded, sc: Scrub, d: number): Promise<boolean> {
-    const run = sc.run;
+  /**
+   * One more frame toward keeping [from, to) at the preview's size, while nothing plays: from where the kept frames stop,
+   * by the pass under way when it is there already, else by a new one; false once the stretch is kept.
+   */
+  private async readSpan(l: Loaded, sc: Scrub, d: number, from: number, to: number): Promise<boolean> {
     const store = this.store;
-    if (!run || run.done || run.d !== d || !store) return false;
-    const frames = Math.max(8, Math.floor(store.budget / ((sc.w / d) * (sc.h / d) * 4) / 4));
-    const ahead = Math.min(SCRUB_AHEAD, frames * run.frame);
-    if (run.pos >= (l.anchor ?? 0) - sc.off + ahead) return false;
-    return (await this.pull(l, sc, run, d, store, -Infinity)) !== null;
+    if (!store || to - from < EPS) return false;
+    const id = l.source.id;
+    const gap = store.coveredUntil(id, from, d);
+    if (gap >= to - EPS) return false;
+    const ts = Math.max(0, gap - sc.off);
+    let run = sc.run;
+    if (run && (run.done || run.d !== d || run.pos > ts + EPS || ((await sc.keys.getKeyPacket(ts + EPS, { metadataOnly: true }))?.timestamp ?? 0) > run.pos + EPS)) {
+      sc.run = null;
+      await run.it.return(undefined).catch(() => undefined);
+      run = null;
+    }
+    if (!run) run = sc.run = { it: sc.sink.samples(ts), d, pos: -Infinity, prev: null, done: false, frame: 1 / 30, kept: 0 };
+    const f = await this.pull(l, sc, run, d, store, from);
+    // the source ended before `to`: nothing more to read there
+    return f !== null || !run.done ? true : false;
   }
 
   /**
