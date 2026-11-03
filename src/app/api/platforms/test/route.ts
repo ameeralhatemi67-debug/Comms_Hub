@@ -23,7 +23,6 @@ export async function POST(request: Request) {
   if (account?.platform === 'instagram') return igStart(request, await serverClient(), b, g.account.email);
   if (
     (b.privacy !== 'private' && b.privacy !== 'public') ||
-    (b.privacy !== 'private' && b.privacy !== 'public') ||
     typeof b.title !== 'string' ||
     typeof b.description !== 'string' ||
     (b.source !== 'device' && b.source !== 'library')
