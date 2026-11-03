@@ -27,7 +27,7 @@ async function fingerprint(frame: VideoFrame): Promise<string> {
   return (a >>> 0).toString(16).padStart(8, '0') + (b >>> 0).toString(16).padStart(8, '0');
 }
 
-export async function exportWith(o: { tag: string; seconds: number; w: number; h: number; short: Short; lanes: number; hash: boolean; faults?: { configOf?: number; failAt?: number } }) {
+export async function exportWith(o: { tag: string; seconds: number; w: number; h: number; short: Short; lanes: number; hash: boolean; faults?: { configOf?: number; failAt?: number }; sample?: boolean[] | null }) {
   const root = await navigator.storage.getDirectory();
   for (const d of [cache.CACHE_DIR, 'studio-exports', 'studio-manifest.json', 'studio-lanes']) await root.removeEntry(d, { recursive: true }).catch(() => undefined);
   const pool = new media.MediaPool({ cache: await cache.DeviceCache.open(), onChange: () => undefined });
@@ -49,6 +49,7 @@ export async function exportWith(o: { tag: string; seconds: number; w: number; h
     faults: o.faults ? { ...o.faults } : undefined,
     inspect: o.hash
       ? async (n, frame) => {
+          if (o.sample && !o.sample[n]) return frame.close();
           prints[n] = await fingerprint(frame);
         }
       : undefined,

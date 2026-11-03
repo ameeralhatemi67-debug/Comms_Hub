@@ -11,6 +11,9 @@
 //     again on the lanes left), the first segment's lane failing (the export runs again with a lane fewer);
 //   - with QUIET=1, in a quiet window only, each lane count is timed again without fingerprints, with the load beside it.
 // SECONDS (default 20) and SIZE (1080 or 2160) choose the fixture; the gate's are ten minutes at 1080p and at 4K.
+// ENGINES (a comma list of edge, edge-nochip, app-nochip, app-saving, app-strong; default all) chooses where; FAULTS=0
+// leaves out the forced faults; EVERY=n fingerprints every n-th frame and the 30 frames each side of a boundary (default
+// 1: every frame), for the long 4K runs, and says so in the record.
 // Usage: SECONDS=600 SIZE=1080 node qa/studio-lanes.cjs   (writes qa/studio-lanes-<SIZE>-<SECONDS>s.json; ONLY=edge, Edge alone)
 const fs = require('node:fs');
 const os = require('node:os');
@@ -26,6 +29,9 @@ const SECONDS = Number(process.env.SECONDS || 20);
 const SIZE = Number(process.env.SIZE || 1080);
 const QUIET = process.env.QUIET === '1';
 const EDGE_ONLY = process.env.ONLY === 'edge';
+const ENGINES = (process.env.ENGINES || 'edge,edge-nochip,app-nochip,app-saving,app-strong').split(',');
+const FAULTS = process.env.FAULTS !== '0';
+const EVERY = Math.max(1, Number(process.env.EVERY || 1));
 const W = SIZE === 2160 ? 3840 : 1920;
 const H = SIZE === 2160 ? 2160 : 1080;
 const out = path.join(__dirname, 'artifacts', `studio-lanes-${SIZE}-${SECONDS}s`);
@@ -128,17 +134,22 @@ async function inEngine(page, name, url) {
     }
     return out;
   };
+  // the frames fingerprinted: every EVERY-th, and 30 each side of every boundary of two and three lanes
+  const near = new Set([...seg(2), ...seg(3)].filter((b) => b > 0).flatMap((b) => Array.from({ length: 60 }, (_, i) => b - 30 + i)));
+  const sample = EVERY === 1 ? null : Array.from({ length: total }, (_, n) => n % EVERY === 0 || near.has(n));
   const exp = async (tag, lanes, faults, hash = true) => {
-    const e = await page.evaluate((o) => window.lanecheck.exportWith(o), { tag: `${name}-${tag}`, seconds: SECONDS, w: W, h: H, short, lanes, hash, faults });
+    const e = await page.evaluate((o) => window.lanecheck.exportWith(o), { tag: `${name}-${tag}`, seconds: SECONDS, w: W, h: H, short, lanes, hash, faults, sample });
     const file = path.join(out, `${name}-${tag}.mp4`);
     return { ...e, file, structure: structure(file), psnr: framePsnr(file) };
   };
   r.runs.one = await exp('k1', 1);
   r.runs.two = await exp('k2', 2);
   r.runs.three = await exp('k3', 3);
-  r.runs.guard = await exp('guard', 3, { configOf: 1 });
-  r.runs.lateFault = await exp('late', 3, { failAt: seg(3)[1] + 10 });
-  r.runs.firstFault = await exp('first', 3, { failAt: 10 });
+  if (FAULTS) {
+    r.runs.guard = await exp('guard', 3, { configOf: 1 });
+    r.runs.lateFault = await exp('late', 3, { failAt: seg(3)[1] + 10 });
+    r.runs.firstFault = await exp('first', 3, { failAt: 10 });
+  }
   r.starts = { two: seg(2), three: seg(3) };
   if (QUIET) {
     r.timing = { loadBefore: load(), rounds: [] };
@@ -182,7 +193,7 @@ function takeLock() {
     const edge = await serve(0);
     servers.push(edge);
     if (!EDGE_ONLY) servers.push(await serve(3000));
-    for (const [name, args] of [['edge', []], ['edge-nochip', ['--disable-gpu']]]) {
+    for (const [name, args] of [['edge', []], ['edge-nochip', ['--disable-gpu']]].filter(([n]) => ENGINES.includes(n))) {
       const browser = await chromium.launch({ ...launchOptions, args });
       try {
         engines[name] = { browser: browser.version(), ...(await inEngine(await browser.newPage(), name, `http://127.0.0.1:${edge.port}`)) };
@@ -190,11 +201,11 @@ function takeLock() {
         await browser.close();
       }
     }
-    for (const [name, settings, args] of EDGE_ONLY ? [] : [
+    for (const [name, settings, args] of (EDGE_ONLY ? [] : [
       ['app-nochip', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu']],
       ['app-saving', { keepInTray: false, gpu: 'saving' }, []],
       ['app-strong', { keepInTray: false, gpu: 'strong' }, []],
-    ]) {
+    ]).filter(([n]) => ENGINES.includes(n))) {
       const { app, win } = await h.launchDev(`lanes-${name}`, { settings, args });
       try {
         await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
@@ -210,9 +221,10 @@ function takeLock() {
     for (const [name, e] of Object.entries(engines)) {
       const one = e.runs.one;
       const frames = SECONDS * 30;
-      check(`${name}: one lane is the floor (${frames} frames, every one fingerprinted)`, one.lanes === 1 && one.steps.length === 0 && one.prints.length === frames && one.prints.every(Boolean), { via: one.via, ms: one.ms });
+      const printed = one.prints.filter(Boolean).length;
+      check(`${name}: one lane is the floor (${frames} frames, ${EVERY === 1 ? 'every one' : `${printed}`} fingerprinted)`, one.lanes === 1 && one.steps.length === 0 && one.prints.length >= frames - EVERY && printed > 0 && (EVERY > 1 || printed === frames), { via: one.via, ms: one.ms, printed });
       const sameStructure = (x) => JSON.stringify(x.structure.video) === JSON.stringify(one.structure.video) && JSON.stringify(x.structure.audio) === JSON.stringify(one.structure.audio) && JSON.stringify(x.structure.pts) === JSON.stringify(one.structure.pts) && x.structure.audioPackets === one.structure.audioPackets && x.structure.pts.length === frames;
-      const samePrints = (x) => x.prints.length === frames && x.prints.every((p, i) => p === one.prints[i]);
+      const samePrints = (x) => x.prints.length === one.prints.length && one.prints.every((p, i) => p === x.prints[i]);
       const firstDiff = (x) => x.prints.findIndex((p, i) => p !== one.prints[i]);
       for (const [key, k] of [['two', 2], ['three', 3]]) {
         const x = e.runs[key];
@@ -220,6 +232,10 @@ function takeLock() {
         const bounds = e.starts[key].slice(1).flatMap((s) => [s - 1, s]);
         const worst = bounds.map((i) => ({ frame: i, one: one.psnr[i], lanes: x.psnr[i], delta: Math.round((x.psnr[i] - one.psnr[i]) * 100) / 100 }));
         check(`${name}, ${k} lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)`, worst.length > 0 && worst.every((b) => Math.abs(b.delta) <= 0.5), worst);
+      }
+      if (!FAULTS) {
+        if (e.timing) note(`${name}: time with 1, 2 and 3 lanes (medians of three, ms): ${JSON.stringify(e.timing.median)}, speed-up ${JSON.stringify(e.timing.ratio)}, load ${e.timing.loadBefore}% before and ${e.timing.loadAfter}% after.`);
+        continue;
       }
       const g = e.runs.guard;
       check(`${name}: a lane with another H.264 profile is refused by the join's guard; the export runs with one lane and its file is the floor's`, g.lanes === 1 && g.steps.join() === 'LANE:LANES' && samePrints(g) && sameStructure(g), { lanes: g.lanes, steps: g.steps });
@@ -236,7 +252,7 @@ function takeLock() {
     for (const s of servers) s.close();
     if (locked && fs.existsSync(LOCK) && fs.readFileSync(LOCK, 'utf8') === BRANCH) fs.rmSync(LOCK);
   }
-  result.fixture = { seconds: SECONDS, size: `${W}x${H}`, short };
+  result.fixture = { seconds: SECONDS, size: `${W}x${H}`, short, engines: ENGINES, faults: FAULTS, fingerprinted: EVERY === 1 ? 'every frame' : `every ${EVERY}th frame and 30 each side of every boundary` };
   result.engines = Object.fromEntries(Object.entries(engines).map(([n, e]) => [n, { browser: e.browser, versions: e.versions, engine: e.engine, starts: e.starts, timing: e.timing ?? null, runs: Object.fromEntries(Object.entries(e.runs).map(([k, x]) => [k, { lanes: x.lanes, steps: x.steps, ms: x.ms, bytes: x.bytes, via: x.via, keys: x.structure.keys.length, frames: x.structure.pts.length }])) }]));
   const failed = finish(path.join(__dirname, `studio-lanes-${SIZE}-${SECONDS}s${EDGE_ONLY ? '-edge' : QUIET ? '-speed' : ''}.json`));
   process.exit(failed ? 1 : 0);
