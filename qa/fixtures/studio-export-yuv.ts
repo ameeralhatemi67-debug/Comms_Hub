@@ -45,7 +45,7 @@ export async function engine() {
 
 /** Every composed frame of the corpus converted both ways: the page's bytes and the workers' bytes, by hash. */
 export async function parity(workers = 2) {
-  const out: { name: string; i: number; size: string; page: string; workers: string }[] = [];
+  const out: { name: string; i: number; size: string; page: string; workers: string; simd: boolean | null }[] = [];
   const src = new SyntheticSources(0);
   for (const c of corpus()) {
     const { w, h } = schema.canvasOf(c.doc);
@@ -66,7 +66,7 @@ export async function parity(workers = 2) {
         await frame.copyTo(bytes);
         const space = frame.colorSpace.toJSON();
         frame.close();
-        out.push({ name: c.name, i, size: `${w}x${h}`, page, workers: `${await sha256(bytes)}${space.matrix === 'bt709' && space.transfer === 'bt709' && space.fullRange === false ? '' : ':' + JSON.stringify(space)}` });
+        out.push({ name: c.name, i, size: `${w}x${h}`, page, workers: `${await sha256(bytes)}${space.matrix === 'bt709' && space.transfer === 'bt709' && space.fullRange === false ? '' : ':' + JSON.stringify(space)}`, simd: pipe.simd });
       }
     } finally {
       pipe.close();
@@ -93,8 +93,8 @@ export async function exportReal(o: { tag: string; code: 'now' | 'at998' | 'at99
   const ms = Math.round(performance.now() - t0);
   await fetch(`/upload/${o.tag}.mp4`, { method: 'POST', body: res.file });
   pool.dispose();
-  const x = res as { via?: string; yuvWorkers?: number };
-  return { tag: o.tag, code: o.code, frames: res.frames, bytes: res.bytes, ms, via: x.via ?? 'canvas', yuvWorkers: x.yuvWorkers ?? 0 };
+  const x = res as { via?: string; yuvWorkers?: number; yuvSimd?: boolean };
+  return { tag: o.tag, code: o.code, frames: res.frames, bytes: res.bytes, ms, via: x.via ?? 'canvas', yuvWorkers: x.yuvWorkers ?? 0, yuvSimd: x.yuvSimd ?? false };
 }
 
 (window as unknown as { yuvcheck: object }).yuvcheck = { prepare, engine, parity, exportReal };

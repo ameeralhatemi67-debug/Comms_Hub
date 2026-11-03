@@ -30,11 +30,12 @@ export function rgbaToI420(rgba: Uint8ClampedArray, w: number, h: number, out?: 
 }
 
 /**
- * rgbaToI420's arithmetic, into `dst` (w * h * 3 / 2 bytes), with every constant written inside it (BT709 above, held
- * equal by tests/studio-colour.test.mjs): a worker is made from this function's text. Each pixel is read once as a
- * 32-bit word where the bytes are in that order (every desktop and phone processor) and the pixels start on a word.
+ * rgbaToI420's arithmetic, into `dst` (w * h * 3 / 2 bytes), for the columns from x0 (even; 0 is the whole frame,
+ * yuv-simd.ts does the columns before it), with every constant written inside it (BT709 above, held equal by
+ * tests/studio-export-power.test.mjs): a worker is made from this function's text. Each pixel is read once as a 32-bit
+ * word where the bytes are in that order (every desktop and phone processor) and the pixels start on a word.
  */
-export function i420Into(rgba: Uint8ClampedArray | Uint8Array, w: number, h: number, dst: Uint8Array): void {
+export function i420Into(rgba: Uint8ClampedArray | Uint8Array, w: number, h: number, dst: Uint8Array, x0 = 0): void {
   const YR = 11966, YG = 40254, YB = 4064;
   const UR = -6596, UG = -22189, UB = 28785;
   const VR = 28785, VG = -26145, VB = -2640;
@@ -42,12 +43,12 @@ export function i420Into(rgba: Uint8ClampedArray | Uint8Array, w: number, h: num
   const size = w * h;
   const little = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
   const words = little && rgba.byteOffset % 4 === 0 ? new Uint32Array(rgba.buffer, rgba.byteOffset, size) : null;
-  let u = size;
-  let v = size + (size >> 2);
   for (let y = 0; y < h; y += 2) {
     const top = y * w;
     const bottom = top + w;
-    for (let x = 0; x < w; x += 2, u++, v++) {
+    let u = size + (y >> 1) * (w >> 1) + (x0 >> 1);
+    let v = u + (size >> 2);
+    for (let x = x0; x < w; x += 2, u++, v++) {
       let r0: number, g0: number, b0: number, r1: number, g1: number, b1: number, r2: number, g2: number, b2: number, r3: number, g3: number, b3: number;
       if (words) {
         const p0 = words[top + x];

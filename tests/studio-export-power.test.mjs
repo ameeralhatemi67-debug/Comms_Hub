@@ -8,6 +8,7 @@ import * as mb from 'mediabunny';
 import { buildVideoCodecString } from '../node_modules/mediabunny/dist/modules/src/codec.js';
 import { HIGH_QP, aimMbps, asBt709, outputSize, videoQuality } from '../src/lib/studio/export.ts';
 import { BT709, i420Into, rgbaToI420 } from '../src/lib/studio/yuv.ts';
+import { simdModule } from '../src/lib/studio/yuv-simd.ts';
 import { RATIOS, FPS_CHOICES, newVideoDoc } from '../src/lib/studio/schema.ts';
 
 const sizes = () => {
@@ -76,6 +77,29 @@ test('the conversion the workers are made from names nothing outside its own tex
   }
   const text = i420Into.toString();
   for (const c of [...BT709.y, ...BT709.cb, ...BT709.cr]) assert.ok(text.includes(String(c)), `the coefficient ${c} is written inside`);
+});
+
+test("the WebAssembly conversion gives i420Into's bytes in every shape and size, the last columns in plain code", async () => {
+  const bytes = simdModule();
+  assert.equal(WebAssembly.validate(bytes), true);
+  const mod = await WebAssembly.compile(bytes);
+  for (const { ratio, short, w, h } of [...sizes().filter((x) => x.short !== 2160), { ratio: 'tail', short: 0, w: 40, h: 6 }, { ratio: 'one block', short: 0, w: 16, h: 2 }]) {
+    const size = w * h;
+    const memory = new WebAssembly.Memory({ initial: Math.ceil((size * 4 + (size * 3) / 2) / 65536) });
+    const { convert } = (await WebAssembly.instantiate(mod, { env: { memory } })).exports;
+    const rgba = new Uint8Array(memory.buffer, 0, size * 4);
+    let s = w * 31 + h;
+    for (let i = 0; i < rgba.length; i++) rgba[i] = i % 4 === 3 ? 255 : ((s = (s * 1103515245 + 12345) & 0x7fffffff) >> 16) & 255;
+    // the extremes, where a lane could overflow or a narrowing saturate: black, white, pure colours
+    for (const [k, px] of [[0, [0, 0, 0]], [1, [255, 255, 255]], [2, [255, 0, 0]], [3, [0, 255, 0]], [4, [0, 0, 255]], [5, [255, 0, 255]]]) rgba.set([...px, 255], k * 4);
+    const out = new Uint8Array(memory.buffer, size * 4, (size * 3) / 2);
+    const x1 = w - (w % 16);
+    convert(w, h, x1);
+    if (x1 < w) i420Into(rgba, w, h, out, x1);
+    const want = new Uint8Array((size * 3) / 2);
+    i420Into(rgba, w, h, want);
+    assert.ok(Buffer.from(out).equals(Buffer.from(want)), `${ratio} ${short}: ${w}x${h}`);
+  }
 });
 
 test('the workers are offered and the page stays the way where they cannot be made', () => {

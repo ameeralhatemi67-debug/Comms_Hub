@@ -76,9 +76,9 @@ export function asBt709(space: VideoColorSpaceInit | null | undefined): boolean 
 export type ExportProgress = { phase: 'prepare' | 'encode' | 'finish'; done: number; total: number };
 /**
  * `via`: the frames went to the encoder from the canvas (a graphics chip encoding) or as BT.709 YUV made here (yuv.ts),
- * by `yuvWorkers` workers (0: on the page).
+ * by `yuvWorkers` workers (0: on the page), with WebAssembly where `yuvSimd`.
  */
-export type ExportResult = { file: File; bytes: number; frames: number; duration: Micros; target: Target['kind']; audio: boolean; via: 'canvas' | 'yuv'; yuvWorkers: number };
+export type ExportResult = { file: File; bytes: number; frames: number; duration: Micros; target: Target['kind']; audio: boolean; via: 'canvas' | 'yuv'; yuvWorkers: number; yuvSimd: boolean };
 
 export class ExportError extends Error {
   code: string;
@@ -330,7 +330,7 @@ export async function exportVideo(
       for (const f of iters.values()) await f.gen.return(undefined).catch(() => undefined);
     }
     const file = await target.result();
-    return { file, bytes: file.size, frames: total, duration, target: target.kind, audio: !!audio, via, yuvWorkers: workers };
+    return { file, bytes: file.size, frames: total, duration, target: target.kind, audio: !!audio, via, yuvWorkers: workers, yuvSimd: pipe?.simd === true };
   }
 }
 

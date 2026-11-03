@@ -218,13 +218,13 @@ function takeLock() {
       const frames = r.prepared.docs.reduce((n, d) => n + d.frames, 0);
       for (const [kind, list] of [['the bundle', r.parity], ['a minified bundle', r.parityMin]]) {
         const differing = list.filter((f) => f.page !== f.workers).map((f) => `${f.name}#${f.i}`);
-        check(`${name}, ${kind}: every composed frame of the corpus converted by the workers is the page's conversion byte for byte, labelled BT.709 limited range`, list.length === frames && differing.length === 0, { frames: list.length, differing, sizes: [...new Set(list.map((f) => f.size))] });
+        check(`${name}, ${kind}: every composed frame of the corpus converted by the workers (WebAssembly) is the page's conversion byte for byte, labelled BT.709 limited range`, list.length === frames && differing.length === 0 && list.every((f) => f.simd === true), { frames: list.length, differing, simd: [...new Set(list.map((f) => f.simd))], sizes: [...new Set(list.map((f) => f.size))] });
       }
     }
     for (const [name, r] of Object.entries(runs)) {
       const x = r.exports;
       if (x.workers) {
-        check(`${name}: the export takes the BT.709 way with two workers, and with none when asked`, r.engine.onChip === false && x.workers.via === 'yuv' && x.workers.yuvWorkers === 2 && x.page.via === 'yuv' && x.page.yuvWorkers === 0, { engine: r.engine, workers: x.workers.yuvWorkers, page: x.page.yuvWorkers });
+        check(`${name}: the export takes the BT.709 way with two workers converting with WebAssembly, and with none when asked`, r.engine.onChip === false && x.workers.via === 'yuv' && x.workers.yuvWorkers === 2 && x.workers.yuvSimd === true && x.page.via === 'yuv' && x.page.yuvWorkers === 0, { engine: r.engine, workers: x.workers.yuvWorkers, simd: x.workers.yuvSimd, page: x.page.yuvWorkers });
         check(`${name}: with workers and on the page, the same ${x.workers.packets.count} video packets`, x.workers.packets.count === 90 && x.workers.packets.hash === x.page.packets.hash, { workers: x.workers.packets, page: x.page.packets });
         check(`${name}: the file is at least 40 dB from its source and within 15% of the 10 Mbit/s aimed at`, x.workers.psnr >= 40 && Math.abs(x.workers.mbps - 10) <= 1.5, { psnr: x.workers.psnr, mbps: x.workers.mbps, bytes: x.workers.bytes });
         check(`${name}: the file says BT.709 limited range`, JSON.stringify(x.workers.colour) === JSON.stringify({ space: 'bt709', primaries: 'bt709', transfer: 'bt709', range: 'tv' }), x.workers.colour);
