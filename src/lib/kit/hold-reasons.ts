@@ -36,6 +36,12 @@ export const HOLD = {
   platformTestPublic: 'المقطع العام يراه كل من يزور القناة فور رفعه.',
   /** «حسابات المنصات»: delete a test video from YouTube. */
   platformTestDelete: 'يُحذف المقطع من القناة على يوتيوب نهائياً، ولا يُسترجع.',
+  /** «حسابات المنصات»: an Instagram test Story (MVP_draft.md section 72). */
+  igTestStory: 'يراها كل من يتابع الحساب 24 ساعة، ثم تختفي.',
+  /** «حسابات المنصات»: an Instagram test post or Reel, which stays until it is deleted. */
+  igTestPost: 'يراه كل من يزور الحساب فور نشره ويبقى حتى يُحذف. لا يوجد على إنستغرام نشر خاص.',
+  /** «حسابات المنصات»: delete a test post from Instagram. */
+  igTestDelete: 'يُحذف المنشور من الحساب على إنستغرام نهائياً، ولا يُسترجع.',
   // Permissions (Permissions_Plan.md 10, «New hold buttons»).
   /** «الحسابات»: remove a member. */
   removeMember: 'إزالة العضو تفصله عن المركز وتبقي أعماله لدى من يُسند إليه.',

@@ -116,7 +116,8 @@ function rpc(name: string, args: Record<string, unknown> = {}) {
 
 function from(table: string) {
   const answer = () => (table === 'platforms' ? ok(db.platforms) : table === 'platform_setup' ? (q.get('nosetup') ? no('relation does not exist') : ok(db.setup)) : ok([]));
-  const chain = { select: () => chain, order: () => answer(), then: (f: (r: unknown) => void) => answer().then(f) };
+  // `eq` and `limit` as the real client has them: an account's sheet reads its last tests (platform_tests), and gets none here.
+  const chain = { select: () => chain, eq: () => chain, order: () => chain, limit: () => answer(), then: (f: (r: unknown) => void) => answer().then(f) };
   return chain;
 }
 

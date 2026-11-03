@@ -14,17 +14,26 @@ import { openStored } from '../storage/index.ts';
 export type TestInfo = {
   id: string;
   account: string;
+  /** The account's platform: 'youtube' or 'instagram'. */
+  platform: string;
   integration: string | null;
   external_id: string | null;
   state: 'uploading' | 'published' | 'failed' | 'deleted';
   mine: boolean;
+  kind: string;
   size: number;
   mime: string;
   source: 'device' | 'library';
   asset: string | null;
   version: number | null;
+  /** The post's id on the platform: a YouTube video or an Instagram media. */
   video: string | null;
+  /** YouTube's upload address, for its starter only. */
   url: string | null;
+  /** Instagram: Meta's container, the reel's feed choice, and the device file's temporary copy. */
+  container: string | null;
+  share_to_feed: boolean | null;
+  temp_ref: string | null;
 };
 
 /** The short code a database refusal carries («FORBIDDEN», «TEST_LIMIT», ...). */

@@ -25,22 +25,7 @@ import {
 import type { AccountRow } from '@/lib/work/rules';
 import { useWork, type LibraryFile } from './data';
 import { Hint, Ic, LibraryPicker } from './parts';
-
-/** The type of a file from this device, from its name when the browser gives none. */
-const EXT: Record<string, string> = {
-  mp4: 'video/mp4',
-  m4v: 'video/x-m4v',
-  mov: 'video/quicktime',
-  webm: 'video/webm',
-  mkv: 'video/x-matroska',
-  avi: 'video/x-msvideo',
-  mpeg: 'video/mpeg',
-  mpg: 'video/mpeg',
-  '3gp': 'video/3gpp',
-};
-const mimeOf = (f: File) => (f.type || EXT[f.name.split('.').pop()?.toLowerCase() ?? ''] || '').toLowerCase();
-const mb = (n: number) => `${(n / 1048576).toFixed(n < 10 * 1048576 ? 1 : 0)} ميغابايت`;
-const when = (iso: string) => new Date(iso).toLocaleString('ar-SA-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' });
+import { api, mb, mimeOf, said, when } from './test-kit';
 
 type Picked = { from: 'device'; file: File; mime: string } | { from: 'library'; file: LibraryFile };
 type Phase =
@@ -48,18 +33,6 @@ type Phase =
   | { t: 'sending'; pct: number }
   | { t: 'done'; video: string; privacy: string | null; asked: TestPrivacy }
   | { t: 'error'; text: string; code?: string };
-type Reply = { ok: boolean; b: Record<string, unknown> };
-
-async function api(url: string, init: RequestInit): Promise<Reply> {
-  try {
-    const r = await fetch(url, init);
-    const b = (await r.json().catch(() => ({}))) as Record<string, unknown>;
-    return { ok: r.ok, b };
-  } catch {
-    return { ok: false, b: { error: 'تعذّر الوصول إلى الخادم.', retry: true } };
-  }
-}
-const said = (b: Record<string, unknown>) => (typeof b.error === 'string' && b.error ? b.error : 'تعذّر إتمام التجربة.');
 
 export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: () => void }) {
   const w = useWork();
@@ -434,7 +407,7 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
                 </b>
                 <small>
                   {t.state === 'published'
-                    ? `منشور · ${PRIVACY_AR[t.shown_privacy ?? t.privacy] ?? ''}`
+                    ? `منشور · ${PRIVACY_AR[t.shown_privacy ?? t.privacy ?? ''] ?? ''}`
                     : t.state === 'deleted'
                       ? 'حُذف من يوتيوب'
                       : t.state === 'uploading'

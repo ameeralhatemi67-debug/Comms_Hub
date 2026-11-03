@@ -2,18 +2,36 @@ import { guard } from '@/lib/drive/guard';
 import { serverKeyOrNull } from '@/lib/integrations/vault';
 import { isUuid, json } from '@/lib/platforms/route';
 import { DEVICE_PIECE, LIBRARY_PIECE, pieceAt } from '@/lib/platforms/test-rules';
+import { igAdvance, igRemove, igUploaded } from '@/lib/platforms/test-instagram';
 import { dbCode, giveUp, libraryPiece, refuse, testInfo, youtubeToken } from '@/lib/platforms/test-server';
 import { youtubeDelete, youtubeSendPiece } from '@/lib/platforms/youtube';
 import { serverClient } from '@/lib/supabase/server';
 
 export const maxDuration = 60;
 
-// The rest of «تجربة النشر» (MVP_draft.md section 71).
-//   PUT ?from=N   one piece of the file, relayed to the upload the server opened: the page's bytes for a file from its
+// The rest of «تجربة النشر» (MVP_draft.md sections 71 and 72).
+//   POST          Instagram: {step: 'uploaded', ref, caption, alt} once a device file is in Drive, then {step: 'advance'}
+//                 each time the page asks how Meta is getting on (src/lib/platforms/test-instagram.ts).
+//   PUT ?from=N   YouTube:   one piece of the file, relayed to the upload the server opened: the page's bytes for a file from its
 //                 device (each piece exactly the agreed size, so YouTube gets 256 KiB multiples), or a piece the server
 //                 reads from the library itself. ?ask=1 sends nothing and asks YouTube where the upload stands.
-//   DELETE        a test still uploading is cancelled by whoever started it; a published one is deleted from YouTube by
-//                 anyone who may test the account, by the id recorded when it arrived, after the token is checked.
+//   DELETE        a test still uploading is cancelled by whoever started it; a published one is deleted from its platform
+//                 by anyone who may test the account, by the id recorded when it arrived, after the token is checked.
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const g = await guard(request, { mutating: true });
+  if (!g.ok) return g.response;
+  const { id } = await params;
+  if (!isUuid(id)) return refuse('TEST_INVALID');
+  const b = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+  const db = await serverClient();
+  const t = await testInfo(db, id);
+  if (!t || !t.mine) return refuse('FORBIDDEN');
+  if (t.platform !== 'instagram' || !b) return refuse('TEST_INVALID');
+  if (b.step === 'uploaded') return igUploaded(request, db, t, b, g.account.email);
+  if (b.step === 'advance') return igAdvance(db, t);
+  return refuse('TEST_INVALID');
+}
+
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const g = await guard(request, { mutating: true });
   if (!g.ok) return g.response;
@@ -25,6 +43,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   const db = await serverClient();
   const t = await testInfo(db, id);
   if (!t || !t.mine) return refuse('FORBIDDEN');
+  if (t.platform !== 'youtube') return refuse('TEST_INVALID');
   if (t.state !== 'uploading' || !t.url) return refuse(t.state === 'uploading' ? 'UPLOAD_EXPIRED' : 'TEST_INVALID');
   if (!Number.isInteger(from) || from < 0 || from >= t.size) return refuse('TEST_INVALID');
 
@@ -63,6 +82,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const db = await serverClient();
   const t = await testInfo(db, id);
   if (!t) return refuse('FORBIDDEN');
+  if (t.platform === 'instagram') return igRemove(db, t);
 
   if (t.state === 'uploading') {
     if (!t.mine) return refuse('FORBIDDEN');
