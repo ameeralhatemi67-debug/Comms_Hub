@@ -3,7 +3,8 @@
 // ahead of the pictures, encoded by Mediabunny (H.264 and AAC in MP4; VP9 and Opus in WebM where MP4
 // cannot be made) and written as a stream to the browser's private storage (target.ts). The picture is
 // BT.709 on every computer: where the encoder runs on the processor, the frames go to it as BT.709 YUV
-// made here (yuv.ts), not as the canvas (exportVideo). It runs in
+// made by workers (yuv.ts, yuv-pipe.ts), not as the canvas, and the file says BT.709 whichever way it was
+// made (exportVideo). It runs in
 // this page: the person keeps the page visible until it ends. A still frame is a PNG. Browser only.
 import type { VideoEncodingConfig, WrappedCanvas } from 'mediabunny';
 import { US, canvasOf, durationOf, type Clip, type Micros, type ProjectDoc } from './schema.ts';
@@ -19,6 +20,7 @@ import { loadFonts, usedFonts } from './text.ts';
 import { isHold, sourceTime } from './speed.ts';
 import { LoudnessMeter, type LoudnessResult } from './loudness.ts';
 import { BT709_SPACE, rgbaToI420 } from './yuv.ts';
+import { YUV_WORKERS, YuvPipe } from './yuv-pipe.ts';
 
 export type Short = 720 | 1080 | 2160;
 export type VideoFormat = 'mp4' | 'webm';
@@ -31,20 +33,52 @@ export function outputSize(doc: ProjectDoc, short: number): { w: number; h: numb
   return { w: Math.round((w * k) / 2) * 2, h: Math.round((h * k) / 2) * 2 };
 }
 
-/** Megabits a second the encoder aims at (Mediabunny's high quality), by short side, at 30 frames. */
+/** Megabits a second the export aims at, by short side, at 30 frames (half as much again above 30). */
 const MBPS: Record<number, number> = { 720: 5, 1080: 10, 2160: 35 };
+export const aimMbps = (short: number, fps: number) => (MBPS[short] ?? 10) * (fps > 30 ? 1.5 : 1);
+
+/**
+ * The quantizer of Mediabunny's high quality for H.264 (its level 0.75 between 41 and 16), which every encoder that
+ * takes a quantizer is given, as the graphics chips' are.
+ */
+export const HIGH_QP = 22;
+
+/**
+ * What an H.264 export asks of its encoder (MVP_draft.md 62.10): the high quantizer, and where the encoder takes no
+ * quantizer, as the processor's does not, the rate the export aims at. Measured on 2026-11-03: left to Mediabunny,
+ * that fallback was 6.1 Mbit/s at 1080p, and the proof's file 39.3 dB from its source; at 10 Mbit/s, 41.2 dB. The
+ * chips' files are the same packets either way (qa/studio-export-yuv.cjs). WebM keeps Mediabunny's high quality.
+ */
+export function videoQuality(mb: typeof import('mediabunny'), codec: 'avc' | 'vp9', short: number, fps: number) {
+  return codec === 'avc' ? new mb.Quality({ quantizer: HIGH_QP, bitrate: Math.round(aimMbps(short, fps) * 1e6) }) : mb.QUALITY_HIGH;
+}
 
 /** An estimate of the file's size, said before exporting. */
 export function estimateBytes(doc: ProjectDoc, short: Short): number {
   const fps = doc.video?.fps ?? 30;
-  const video = (MBPS[short] ?? 10) * (fps > 30 ? 1.5 : 1);
+  const video = aimMbps(short, fps);
   const audio = hasSound(doc) ? 0.192 : 0;
   return Math.round((((video + audio) * 1e6) / 8) * (durationOf(doc) / US));
 }
 
+/**
+ * The colour a canvas path's file says (MVP_draft.md 62.10). A graphics chip's encoder converts the canvas with the
+ * BT.709 matrix; Edge 156 then names the transfer iec61966-2-1, the canvas's own, where the application's Chromium 152
+ * and the processor path name bt709. The name goes into the file's colr box from the encoder's description (Edge's
+ * H.264 headers leave it unspecified), so the export names it bt709 there, and changes nothing else.
+ */
+export function asBt709(space: VideoColorSpaceInit | null | undefined): boolean {
+  if (!space || space.matrix !== 'bt709' || space.primaries !== 'bt709' || space.fullRange !== false || space.transfer !== 'iec61966-2-1') return false;
+  space.transfer = 'bt709';
+  return true;
+}
+
 export type ExportProgress = { phase: 'prepare' | 'encode' | 'finish'; done: number; total: number };
-/** `via`: the frames went to the encoder from the canvas (a graphics chip encoding) or as BT.709 YUV made here (yuv.ts). */
-export type ExportResult = { file: File; bytes: number; frames: number; duration: Micros; target: Target['kind']; audio: boolean; via: 'canvas' | 'yuv' };
+/**
+ * `via`: the frames went to the encoder from the canvas (a graphics chip encoding) or as BT.709 YUV made here (yuv.ts),
+ * by `yuvWorkers` workers (0: on the page), with WebAssembly where `yuvSimd`.
+ */
+export type ExportResult = { file: File; bytes: number; frames: number; duration: Micros; target: Target['kind']; audio: boolean; via: 'canvas' | 'yuv'; yuvWorkers: number; yuvSimd: boolean };
 
 export class ExportError extends Error {
   code: string;
@@ -79,14 +113,16 @@ function audioReader(pool: MediaPool, mb: typeof import('mediabunny')): AudioSou
 
 /**
  * The loudness of the project's sound (MVP_draft.md 62.9): the same windows the export mixes, measured by
- * BS.1770 (loudness.ts). «قياس المستوى», and the first pass of «توحيد مستوى الصوت».
+ * BS.1770 (loudness.ts). «قياس المستوى», and the first pass of «توحيد مستوى الصوت», unless it was worked out ahead
+ * (loudness-ahead.ts, which waits for the browser's idle time between windows: `between`).
  */
-export async function measureLoudness(doc: ProjectDoc, pool: MediaPool, opts: { onProgress?: (f: number) => void; signal?: AbortSignal } = {}): Promise<LoudnessResult> {
+export async function measureLoudness(doc: ProjectDoc, pool: MediaPool, opts: { onProgress?: (f: number) => void; signal?: AbortSignal; between?: () => Promise<void> } = {}): Promise<LoudnessResult> {
   const mb = await import('mediabunny');
   const read = audioReader(pool, mb);
   const meter = new LoudnessMeter();
   const wins = windows(durationOf(doc));
   for (let i = 0; i < wins.length; i++) {
+    if (opts.between) await opts.between();
     if (opts.signal?.aborted) throw new ExportError('ABORTED');
     const b = await mixWindow(doc, wins[i], read);
     meter.push([b.getChannelData(0), b.getChannelData(1)]);
@@ -108,7 +144,21 @@ function applyGain(b: AudioBuffer, gain: number): AudioBuffer {
 export async function exportVideo(
   doc: ProjectDoc,
   pool: MediaPool,
-  opts: { short: Short; format: VideoFormat; name: string; onProgress?: (p: ExportProgress) => void; signal?: AbortSignal; /** One gain for the whole sound (loudness.ts normalizeGain). */ gain?: number; /** «مسودة» across the picture (downloads only). */ watermark?: string | null; /** A file the person chose (desktop application): written there directly. */ saveTo?: FileSystemFileHandle },
+  opts: {
+    short: Short;
+    format: VideoFormat;
+    name: string;
+    onProgress?: (p: ExportProgress) => void;
+    signal?: AbortSignal;
+    /** One gain for the whole sound (loudness.ts normalizeGain). */
+    gain?: number;
+    /** «مسودة» across the picture (downloads only). */
+    watermark?: string | null;
+    /** A file the person chose (desktop application): written there directly. */
+    saveTo?: FileSystemFileHandle;
+    /** Workers converting to BT.709 where the encoder is on the processor (yuv-pipe.ts); 0 is on the page. Speed only. */
+    yuvWorkers?: number;
+  },
 ): Promise<ExportResult> {
   const mb = await import('mediabunny');
   // every font a text uses is ready before the first frame is drawn (fonts.ts: loaded only when used)
@@ -139,9 +189,26 @@ export async function exportVideo(
     throw e;
   }
 
+  // The BT.709 way with workers; if a worker fails, again on the page: the same bytes, slower.
   async function attempt(via: 'canvas' | 'yuv'): Promise<ExportResult> {
+    const workers = via === 'yuv' ? (opts.yuvWorkers ?? YUV_WORKERS) : 0;
+    if (workers < 1) return run(via, 0);
+    try {
+      return await run(via, workers);
+    } catch (e) {
+      if (e instanceof ExportError && e.code === 'YUV_WORKER') return run(via, 0);
+      throw e;
+    }
+  }
+
+  async function run(via: 'canvas' | 'yuv', workers: number): Promise<ExportResult> {
     opts.onProgress?.({ phase: 'prepare', done: 0, total });
-    const target = await openTarget(opts.name, mime, estimateBytes(doc, opts.short), opts.saveTo);
+    const pipe = workers > 0 ? YuvPipe.open(w, h, workers) : null;
+    if (workers > 0 && !pipe) throw new ExportError('YUV_WORKER');
+    const target = await openTarget(opts.name, mime, estimateBytes(doc, opts.short), opts.saveTo).catch((e) => {
+      pipe?.close();
+      throw e;
+    });
     const output = new mb.Output({ format: opts.format === 'mp4' ? new mb.Mp4OutputFormat({ fastStart: false }) : new mb.WebMOutputFormat(), target: target.target });
     const canvas = document.createElement('canvas');
     canvas.width = w;
@@ -150,14 +217,36 @@ export async function exportVideo(
     let matrix: string | null = null;
     const encoding: VideoEncodingConfig = {
       codec: vcodec,
-      quality: mb.QUALITY_HIGH,
+      quality: videoQuality(mb, vcodec, opts.short, fps),
       keyFrameInterval: 2,
+      // called with the description Mediabunny writes into the file next (asBt709)
       onEncodedPacket: (_packet: unknown, meta: EncodedVideoChunkMetadata | undefined) => {
         matrix ??= meta?.decoderConfig?.colorSpace?.matrix ?? null;
+        if (via === 'canvas') asBt709(meta?.decoderConfig?.colorSpace);
       },
     };
     const fromCanvas = via === 'canvas' ? new mb.CanvasSource(canvas, encoding) : null;
     const fromYuv = via === 'yuv' ? new mb.VideoSampleSource(encoding) : null;
+    // frames with the workers, oldest first: each goes to the encoder when its turn comes
+    const inflight: { t: Micros; frame: Promise<VideoFrame> }[] = [];
+    const addYuv = async (t: Micros, frame: VideoFrame) => {
+      const sample = new mb.VideoSample(frame, { timestamp: t / US, duration: frameUs(fps) / US });
+      try {
+        await fromYuv!.add(sample);
+      } finally {
+        sample.close();
+      }
+    };
+    const oldest = async () => {
+      const job = inflight.shift()!;
+      let frame: VideoFrame;
+      try {
+        frame = await job.frame;
+      } catch {
+        throw new ExportError('YUV_WORKER');
+      }
+      await addYuv(job.t, frame);
+    };
     output.addVideoTrack((fromCanvas ?? fromYuv)!, { frameRate: fps });
     const audio = sound ? new mb.AudioBufferSource({ codec: acodec, quality: mb.QUALITY_HIGH }) : null;
     if (audio) output.addAudioTrack(audio);
@@ -214,6 +303,9 @@ export async function exportVideo(
         if (fromCanvas) {
           await fromCanvas.add(t / US, frameUs(fps) / US);
           if (matrix && matrix !== 'bt709') throw new ExportError('COLOUR');
+        } else if (pipe) {
+          inflight.push({ t, frame: pipe.convert(new VideoFrame(canvas, { timestamp: t, duration: frameUs(fps) })) });
+          while (inflight.length >= pipe.depth) await oldest();
         } else {
           const yuv = rgbaToI420(ctx.getImageData(0, 0, w, h).data, w, h);
           const sample = new mb.VideoSample(yuv, { format: 'I420', codedWidth: w, codedHeight: h, timestamp: t / US, duration: frameUs(fps) / US, colorSpace: { ...BT709_SPACE } });
@@ -225,6 +317,7 @@ export async function exportVideo(
         }
         if (n % 5 === 0 || n === total - 1) opts.onProgress?.({ phase: 'encode', done: n + 1, total });
       }
+      while (inflight.length) await oldest();
       while (audio && wi < wins.length) await audio.add(applyGain(await mixWindow(doc, wins[wi++], read), opts.gain ?? 1));
       opts.onProgress?.({ phase: 'finish', done: total, total });
       await output.finalize();
@@ -234,10 +327,12 @@ export async function exportVideo(
       await target.discard();
       throw e;
     } finally {
+      pipe?.close();
+      for (const job of inflight) void job.frame.then((f) => f.close(), () => undefined);
       for (const f of iters.values()) await f.gen.return(undefined).catch(() => undefined);
     }
     const file = await target.result();
-    return { file, bytes: file.size, frames: total, duration, target: target.kind, audio: !!audio, via };
+    return { file, bytes: file.size, frames: total, duration, target: target.kind, audio: !!audio, via, yuvWorkers: workers, yuvSimd: pipe?.simd === true };
   }
 }
 
