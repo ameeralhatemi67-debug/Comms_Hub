@@ -3551,3 +3551,55 @@ publishing works stays a simulation.
 Ten tests per account a day, as YouTube's, beside Meta's own quota, read live. Meta's refusals are worded by its publishing error
 codes: the file could not be fetched, the file or its shape or caption was refused, the daily quota, a restricted account, and
 suspected spam.
+
+# 73. «تجربة النشر» on a Facebook Page, 2026-11-03
+
+By owner directive of 2026-11-03 (`Facebook_Test_Plan.md`, with its six recommended answers). The sheet of a really-connected Page
+offers the same test as YouTube's and Instagram's (sections 71 and 72), shaped by what a Page allows. It is not a work, and
+publishing works stays a simulation.
+
+## 73.1 What is different
+
+- **A test can show nothing at all.** A Page post can be scheduled ahead and deleted before it shows, so the default is
+  «فحص صامت»: a text post scheduled four weeks ahead, read back from the Page (unpublished, on this Page), and deleted at once.
+  It proves that the site can create, read and delete posts on the Page, and nobody ever sees it. It needs no long press.
+- **Delete needs nothing new:** the Page's token and `pages_manage_posts`, which the connection already asks for.
+- **Text is allowed,** with an optional link.
+- **A photo is sent, not fetched:** redrawn to JPEG here and sent through the site as a file of at most 4 MB, with nothing kept
+  in Drive.
+- **A Reel is fetched,** like Instagram's, from the site's temporary address. It lasts 3 to 90 seconds, and a Page publishes at
+  most 30 a day through applications.
+
+## 73.2 Where it is, and who sees it
+
+As sections 71 and 72: in the sheet's «الربط» column, «الصفحة على فيسبوك», then «تجربة النشر», folded until «بدء تجربة», for
+those who manage accounts and the Page's own publishers (`platform_test_may`). A Page that is stopped or needs reconnecting
+says so and offers no test.
+
+## 73.3 The form
+
+- **النوع:** «فحص صامت» (the default), «منشور نصي», «منشور صورة» or «ريلز», each with one line on what it does.
+- **«فحص صامت»** has nothing to fill in. Its button reads «تشغيل الفحص الصامت» and asks for no long press.
+- **«منشور نصي»:** the text, and «الرابط», optional, `https://` only.
+- **«منشور صورة»:** a picture from the library or the device, redrawn to JPEG; «الشرح» and «النص البديل», both optional.
+- **«ريلز»:** a video from the library (read by the server where it is) or the device (sent to «تجارب النشر» first), and
+  «الوصف». A Reel's length and size are checked before sending.
+- **The public kinds** say «نشر التجربة للعموم» and ask for a long press: «يراه كل من يزور الصفحة فور نشره ويبقى حتى يُحذف.»
+- **While a Reel waits:** «فيسبوك يجلب المقطع ويجهّزه», with the time elapsed, a line to keep the page open, and «إلغاء».
+- **The result:**
+  - A silent check: «تم الفحص: أُنشئ منشور مجدول، وقُرئ من الصفحة، وحُذف. لم يظهر لأحد.»
+  - A silent check whose delete was refused: what happened, and a link to the Page's scheduled posts in Meta Business Suite.
+  - A public test: «نُشرت التجربة على الصفحة.» with «فتح على فيسبوك».
+
+## 73.4 «آخر التجارب»
+
+- The last five tests: title, state, time and who.
+- A silent check reads «أُنشئ وقُرئ وحُذف، ولم يظهر», with nothing to delete. One whose delete was refused reads «لم يُحذف بعد»
+  with the date it would appear, and offers «حذف».
+- A public test has «فتح» and «حذف». Delete asks for a long press: «يُحذف المنشور من الصفحة على فيسبوك نهائياً، ولا يُسترجع.»
+
+## 73.5 Limits
+
+Ten tests per Page a day, as YouTube's and Instagram's, beside Meta's 30 Reels a day. Meta's refusals are worded by its error
+codes; a permissions refusal names the two usual causes: the person who connected cannot create content on the Page, or the
+Page waits for Page Publishing Authorization.

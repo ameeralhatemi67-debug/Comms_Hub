@@ -1,6 +1,6 @@
 {
   "script": "qa/instagram-test-flow.cjs",
-  "run": "2026-11-03T08:46:16.532Z",
+  "run": "2026-11-03T11:00:23.487Z",
   "checks": [
     {
       "name": "a link to the account on Instagram, by its username, in a new tab",
@@ -80,7 +80,7 @@
     {
       "name": "the list shows the Story and when it disappears",
       "pass": true,
-      "detail": "تجربة قصة\nقصة · تختفي 04‏/11‏/2026، 11:46 ص · 03‏/11‏/2026، 11:46 ص · مدير الفحص\nحذف"
+      "detail": "تجربة قصة\nقصة · تختفي 04‏/11‏/2026، 2:00 م · 03‏/11‏/2026، 2:00 م · مدير الفحص\nحذف"
     },
     {
       "name": "a post asks for a caption with counters, and alt text",

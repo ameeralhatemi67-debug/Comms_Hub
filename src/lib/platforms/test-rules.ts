@@ -11,6 +11,10 @@
 // video is MP4 or MOV, 3 to 60 seconds, at most 100 MB; a Reel 3 seconds to 15 minutes, at most 300 MB (100 MB for a test
 // here); a caption has at most 2200 characters, 30 hashtags and 20 mentions, and a Story none; alt text 1000 characters,
 // picture posts only. Deleting needs instagram_manage_contents. Instagram has no private post.
+//
+// And for a Facebook Page: a post may be scheduled 10 minutes to 30 days ahead and deleted before it shows (the silent check);
+// a photo is sent as a file of at most 4 MB; a Reel lasts 3 to 90 seconds, and a Page publishes at most 30 a day through
+// applications. Deleting a Page post needs pages_manage_posts, which the connection already asks for.
 import { copyStats } from './limits.ts';
 
 /** The largest file a test sends. A test needs a short clip, and a file from this device goes through the site in pieces. */
@@ -43,6 +47,8 @@ export type TestRow = {
   created_by: string;
   created_at: string;
   deleted_at: string | null;
+  link?: string | null;
+  scheduled_for?: string | null;
 };
 
 const bytes = (s: string) => new TextEncoder().encode(s).length;
@@ -113,12 +119,19 @@ export const TEST_ERROR_AR: Record<string, string> = {
   TEMP_UPLOAD_FAILED: 'تعذّر رفع الملف إلى المساحة المؤقتة في Google Drive.',
   TEMP_MISMATCH: 'الملف المرفوع لا يطابق هذه التجربة.',
   DRIVE_NOT_CONNECTED: 'لم يُربط Google Drive بعد، وفيه يُحفظ الملف مؤقتاً.',
+  // Facebook
+  PAGE_REFUSED: 'رفضت فيسبوك النشر على الصفحة: تأكد أن من ربطها يستطيع إنشاء المحتوى عليها، وأن الصفحة لا تنتظر «تفويض النشر».',
+  LINK_REFUSED: 'رفضت فيسبوك الرابط. تأكد أنه يفتح للعموم.',
+  REEL_LIMIT: 'بلغت الصفحة 30 ريلز في يوم عبر التطبيقات. جرّب غداً.',
+  SILENT_MISMATCH: 'قرأ الفحص منشوراً لا يطابق ما أنشأه، فلم يُعدّ ناجحاً. حُذف المنشور إن أمكن.',
+  SILENT_NOT_DELETED: 'أنشأ الفحص المنشور المجدول وقرأه، لكن فيسبوك رفض حذفه. احذفه من هنا أو من Meta Business Suite قبل موعده.',
+  PHOTO_REFUSED: 'رفضت فيسبوك الصورة. جرّب صورة أخرى.',
 };
 
 // ---------------------------------------------------------------------------
 // Instagram (MVP_draft.md section 72)
 // ---------------------------------------------------------------------------
-export type TestKind = 'video' | 'story_image' | 'story_video' | 'image' | 'reel';
+export type TestKind = 'video' | 'story_image' | 'story_video' | 'image' | 'reel' | 'fb_silent' | 'fb_text' | 'fb_photo' | 'fb_reel';
 /** What the person chooses; a Story becomes a picture or a video Story by its file. */
 export type IgChoice = 'story' | 'image' | 'reel';
 export const IG_PICTURE_MAX = 8 * 1024 * 1024;
@@ -183,3 +196,60 @@ const isIgName = (h: string | null | undefined): h is string => typeof h === 'st
 export const igProfileUrl = (handle: string | null | undefined) => (isIgName(handle) ? `https://www.instagram.com/${encodeURIComponent(handle.replace(/^@/, ''))}/` : null);
 /** A Story is gone 24 hours after it was published. */
 export const storyEnds = (doneAt: string | null | undefined) => (doneAt ? new Date(Date.parse(doneAt) + 24 * 3600e3).toISOString() : null);
+
+// ---------------------------------------------------------------------------
+// Facebook (MVP_draft.md section 73)
+// ---------------------------------------------------------------------------
+export type FbChoice = 'silent' | 'text' | 'photo' | 'reel';
+export const FB_KIND: Record<FbChoice, TestKind> = { silent: 'fb_silent', text: 'fb_text', photo: 'fb_photo', reel: 'fb_reel' };
+export const FB_PHOTO_MAX = 4 * 1024 * 1024;
+export const FB_VIDEO_MAX = IG_VIDEO_MAX;
+/** A test message is short; Facebook's own limit is far above it. */
+export const FB_MESSAGE_MAX = 5000;
+export const FB_REEL_SECONDS: [number, number] = [3, 90];
+/** How far ahead the silent check schedules its post: inside both of Meta's stated windows (30 and 75 days). */
+export const FB_SILENT_DAYS = 28;
+/** The silent check's words, so a post left behind by a refused delete says what it is. */
+export const FB_SILENT_MESSAGE = 'فحص صامت من مركز الاتصال: منشور مجدول يُحذف فوراً ولا يُنشر.';
+/** A request to the site's server carries a photo and its words; a little room is left under the host's 4.5 MB. */
+export const FB_PHOTO_BODY_MAX = FB_PHOTO_MAX + 64 * 1024;
+export const FB_KIND_AR: Record<string, string> = { fb_silent: 'فحص صامت', fb_text: 'منشور نصي', fb_photo: 'منشور صورة', fb_reel: 'ريلز' };
+export const isFbKind = (k: string): k is 'fb_silent' | 'fb_text' | 'fb_photo' | 'fb_reel' => k.startsWith('fb_');
+
+/** What is wrong with a Page test before it is sent, in words, or null. The database checks the same and more. */
+export function fbProblem(t: { kind: TestKind; message: string; link: string; size?: number | null; mime?: string | null; seconds?: number | null }): string | null {
+  if (t.kind === 'fb_silent') return null;
+  if (t.kind === 'fb_text' && !t.message.trim() && !t.link.trim()) return 'اكتب نص المنشور.';
+  if ([...t.message].length > FB_MESSAGE_MAX) return `النص أطول من ${FB_MESSAGE_MAX} حرف.`;
+  if (t.link.trim()) {
+    if (t.kind !== 'fb_text') return 'الرابط للمنشور النصي وحده.';
+    if (!/^https:\/\/[^\s<>"]+$/.test(t.link.trim()) || t.link.trim().length > 2000) return 'الرابط يبدأ بـ https:// وبلا مسافات.';
+  }
+  if (t.kind === 'fb_text') return null;
+  if (t.kind === 'fb_photo') {
+    if (t.mime !== 'image/jpeg') return 'الصورة تُرسل JPEG.';
+    if (!t.size || t.size < 1) return 'الملف فارغ.';
+    if (t.size > FB_PHOTO_MAX) return 'الصورة أكبر من 4 ميغابايت.';
+    return null;
+  }
+  if (!(IG_VIDEO_TYPES as readonly string[]).includes(t.mime ?? '')) return 'تقبل فيسبوك الريلز MP4 أو MOV.';
+  if (!t.size || t.size < 1) return 'الملف فارغ.';
+  if (t.size > FB_VIDEO_MAX) return 'التجربة تقبل مقطعاً حتى 100 ميغابايت.';
+  if (t.seconds != null && t.seconds < FB_REEL_SECONDS[0]) return 'المقطع أقصر من 3 ثوانٍ.';
+  if (t.seconds != null && t.seconds > FB_REEL_SECONDS[1]) return 'ريلز فيسبوك حتى 90 ثانية.';
+  return null;
+}
+
+/** The list's title for a Page test: the text's first line, else the kind. Never holds < or >. */
+export function fbTitle(kind: TestKind, message: string): string {
+  if (kind === 'fb_silent') return 'فحص صامت';
+  const line = message.split(/\r?\n/).find((l) => l.trim())?.trim().replace(/[<>]/g, '') ?? '';
+  const t = [...line].slice(0, TITLE_MAX).join('');
+  return t || `تجربة ${FB_KIND_AR[kind] ?? ''}`.trim();
+}
+
+/** The Page on Facebook, by its id. */
+export const fbPageUrl = (id: string | null | undefined) => (id && /^[0-9]{5,30}$/.test(id) ? `https://www.facebook.com/${id}` : null);
+/** Where a Page's scheduled posts are listed, for a silent check whose delete was refused. */
+export const fbScheduledUrl = (id: string | null | undefined) =>
+  id && /^[0-9]{5,30}$/.test(id) ? `https://business.facebook.com/latest/posts/scheduled_posts?asset_id=${id}` : null;

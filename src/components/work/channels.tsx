@@ -6,8 +6,9 @@
 // An account is added through the platform's own sign-in, and the site never asks for a password. A simulated account
 // connects to nothing, for trying a platform that is not set up, and an authorisation runs 60 days. Approval binds to
 // the account and its handle, so renaming a handle re-opens «المنصات والحسابات» (account_save), and an account in use by
-// approved, scheduled or in-review work cannot be stopped or deleted. Publishing works is a simulation; a YouTube or an
-// Instagram account's sheet alone publishes a real test (youtube-test.tsx and instagram-test.tsx, MVP_draft.md 71 and 72).
+// approved, scheduled or in-review work cannot be stopped or deleted. Publishing works is a simulation; a YouTube, an
+// Instagram or a Facebook account's sheet alone publishes a real test (youtube-test.tsx, instagram-test.tsx and
+// facebook-test.tsx, MVP_draft.md 71 to 73).
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SetupGuide } from '../setup-guide';
@@ -25,6 +26,7 @@ import { useWork, useWorkList, type ListItem } from './data';
 import { ConnectChooser, RECONNECT_KEY, connLine, defaultPublishers } from './connect';
 import { Empty, Hint, Ic, Modal } from './parts';
 import { staffOf } from './plan';
+import { FacebookTest } from './facebook-test';
 import { InstagramTest } from './instagram-test';
 import { YouTubeTest } from './youtube-test';
 
@@ -182,7 +184,7 @@ export function ChannelsPage({ initialOpen }: { /** Draws an account's sheet wit
       </div>
       <p className="wk-simnote">
         <Ic i={TriangleAlert} />
-        <span>الربط حقيقي، أما نشر الأعمال فما زال محاكاة: لا يصل منها شيء إلى المنصة بعد. وحدها «تجربة النشر» في حسابات يوتيوب وإنستغرام تنشر شيئاً حقيقياً.</span>
+        <span>الربط حقيقي، أما نشر الأعمال فما زال محاكاة: لا يصل منها شيء إلى المنصة بعد. وحدها «تجربة النشر» في حسابات يوتيوب وإنستغرام وفيسبوك تنشر شيئاً حقيقياً.</span>
       </p>
       {connNote && (
         <p className={connNote.ok ? 'wk-simnote' : 'wk-err'} role="status">
@@ -458,6 +460,7 @@ function AccountSheet({
           )}
           {a.platform === 'youtube' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <YouTubeTest a={a} onReconnect={onReconnect} />}
           {a.platform === 'instagram' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <InstagramTest a={a} onReconnect={onReconnect} />}
+          {a.platform === 'facebook' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <FacebookTest a={a} onReconnect={onReconnect} />}
           {mgr && !a.fixed && (
             <details className="pf-more">
               <summary>خيارات أخرى</summary>

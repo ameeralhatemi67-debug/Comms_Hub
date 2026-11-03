@@ -26,6 +26,18 @@ related:
 
 # Communication Department Hub — Current Status
 
+## «تجربة النشر» on a Facebook Page, built 2026-11-03, not live
+
+From the owner's request after the Instagram test went live (`MVP_draft.md` section 73, `Facebook_Test_Plan.md`, `progress.md`).
+
+- **Done.** A silent check (the default: scheduled, read back, deleted, never shown), a text post with a link, a photo sent as a
+  file, and a Reel fetched by Meta, with the last five tests and delete. The three test panels share one kit.
+- **Evidence.** `npm test` 755 of 755, typecheck and build clean, rules 48 of 48 (Instagram's 62, YouTube's 75) on a private
+  container, `qa/facebook-test-flow.cjs` 37 of 37, Instagram's 43, YouTube's 49, `qa/platforms-flow.cjs` 136.
+- **Not verified.** Anything against Meta: Facebook is off in the platform list and no Page is connected.
+- **Next.** The owner approves applying `20261103200000_platform_tests_facebook.sql` and a deployment; then the Meta app with
+  the Page use case, Facebook switched on, a Page connected, and a first silent check.
+
 ## «تجربة النشر» on Instagram, live 2026-11-03 (bf7388a)
 
 From the owner's request after the Instagram guide went live (`MVP_draft.md` section 72, `Instagram_Test_Plan.md`, `progress.md`).

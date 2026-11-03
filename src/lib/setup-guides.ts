@@ -68,6 +68,8 @@ const SIMULATION = 'النشر نفسه ما زال محاكاة في كل ال�
 const SIMULATION_YT = 'نشر الأعمال ما زال محاكاة. وحدها «تجربة النشر» في بطاقة القناة من «حسابات المنصات» ترفع مقطعاً حقيقياً، ولها أن تحذفه.';
 /** Instagram's real test (MVP_draft.md section 72). */
 const SIMULATION_IG = 'نشر الأعمال ما زال محاكاة. وحدها «تجربة النشر» في بطاقة الحساب من «حسابات المنصات» تنشر قصة أو منشوراً حقيقياً، ولها أن تحذفه.';
+/** A Facebook Page's real test (MVP_draft.md section 73). */
+const SIMULATION_FB = 'نشر الأعمال ما زال محاكاة. وحدها «تجربة النشر» في بطاقة الصفحة من «حسابات المنصات» تنشر حقاً، وأولها «فحص صامت» لا يظهر لأحد.';
 const META_APPS = { href: 'https://developers.facebook.com/apps/', label: 'Meta for Developers' };
 const META_PORTFOLIO = { href: 'https://business.facebook.com/settings', label: 'إعدادات حافظة الأعمال' };
 const TIKTOK_APPS = { href: 'https://developers.tiktok.com/apps/', label: 'TikTok for Developers' };
@@ -262,7 +264,12 @@ export const GUIDES: Record<string, Guide> = {
       { id: 'tasks', t: 'تأكد من صلاحية من يربط الصفحة', b: 'يجب أن يستطيع إنشاء المحتوى على الصفحة (CREATE_CONTENT). إن جاء دوره من حافظة الأعمال فليكن الإعداد شاملاً ads_management وads_read.', link: META_PORTFOLIO, ok: 'تأكدت' },
       { id: 'publish', kind: 'review', t: 'انشر التطبيق', b: 'ما يُنشر والتطبيق في وضع التطوير لا يراه إلا أصحاب الأدوار عليه. جهّز الأيقونة ورابط الخصوصية ورابط حذف البيانات، ثم «App Review» و«Publish».', link: META_APPS, copy: '{origin}/privacy.html', copyLabel: 'رابط الخصوصية', more: [{ label: 'رابط حذف البيانات', copy: '{origin}/account-deletion.html' }], ok: 'سأكمل لاحقاً' },
     ],
-    notes: ['لم تؤكد وثائق Meta أن حالتي الاستخدام تجتمعان في تطبيق واحد: لوحة Meta تقول ذلك في الخطوة الأولى.', SIMULATION, PLATFORM_FACTS],
+    notes: [
+      'لم تؤكد وثائق Meta أن حالتي الاستخدام تجتمعان في تطبيق واحد: لوحة Meta تقول ذلك في الخطوة الأولى. إن رفضت فلا يحفظ الموقع اليوم إلا تطبيق Meta واحداً: أخبر مسؤول النظام.',
+      '«تجربة النشر» على الصفحة تحتاج pages_manage_posts وpages_read_engagement، وpublish_video للريلز. وحذف منشور التجربة لا يحتاج غيرها.',
+      SIMULATION_FB,
+      PLATFORM_FACTS,
+    ],
     link: META_APPS,
   },
   tiktok: {
@@ -301,6 +308,7 @@ export const GUIDES: Record<string, Guide> = {
       'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فالتطبيق لم يُجهَّز بعد: يجهّزه المدير من «الإعدادات» ثم «المنصات».',
       'إن قال Meta إن التطبيق في وضع التطوير فاطلب من المدير أن يعطيك دوراً على التطبيق.',
       SIMULATION_IG,
+      SIMULATION_FB,
     ],
   },
   connect_tiktok: {

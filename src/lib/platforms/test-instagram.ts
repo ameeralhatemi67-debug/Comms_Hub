@@ -26,7 +26,7 @@ const TEMP_MARKER = 'commsHubPublishTests';
 const TEMP_FOLDER = 'تجارب النشر';
 const IG_KINDS: readonly TestKind[] = ['story_image', 'story_video', 'image', 'reel'];
 const quiet = <T>(p: Promise<T>) => p.then(() => undefined, () => undefined);
-const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
+export const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
 
 /** The name the server gives a device file in «تجارب النشر»: it alone proves which upload is this test's. */
 export const tempName = (id: string, mime: string) => `تجربة-${id}.${mime === 'image/jpeg' ? 'jpg' : mime === 'video/quicktime' ? 'mov' : 'mp4'}`;
@@ -37,8 +37,11 @@ export function newLink(): { token: string; hash: string } {
 }
 export const hashOf = (token: string) => createHash('sha256').update(token).digest('hex');
 
-/** The account's token, checked with Meta first when `check` (the account answers and the token is valid), as a check records it. */
-export async function instagramToken(db: SupabaseClient, f: Fetch, t: Pick<TestInfo, 'account' | 'integration' | 'external_id'>, purpose: string, check: boolean): Promise<{ token: string } | { error: string }> {
+/**
+ * A Meta account's token (an Instagram account's or a Facebook Page's), checked with Meta first when `check` (the account
+ * answers and the token is valid), as a check records it.
+ */
+export async function metaToken(db: SupabaseClient, f: Fetch, t: Pick<TestInfo, 'account' | 'integration' | 'external_id'>, purpose: string, check: boolean, instagram: boolean): Promise<{ token: string } | { error: string }> {
   const key = serverKeyOrNull();
   if (!key) return { error: 'APP_NOT_CONFIGURED' };
   const app = await loadApp(db, 'meta', purpose);
@@ -47,7 +50,7 @@ export async function instagramToken(db: SupabaseClient, f: Fetch, t: Pick<TestI
   if (!token) return { error: 'NOT_CONNECTED' };
   if (!check) return { token };
   try {
-    const h = await metaAccountHealth(f, { appId: app.appId, secret: app.secret, objectId: t.external_id ?? '', token, instagram: true });
+    const h = await metaAccountHealth(f, { appId: app.appId, secret: app.secret, objectId: t.external_id ?? '', token, instagram });
     await quiet(Promise.resolve(db.rpc('platform_conn_health', { p_key: key, p_account: t.account, p_ok: h.ok, p_error: h.error, p_expires: h.expiresAt, p_new_secret: null })));
     return h.ok ? { token } : { error: h.error ?? 'TOKEN_REFUSED' };
   } catch {
@@ -55,11 +58,14 @@ export async function instagramToken(db: SupabaseClient, f: Fetch, t: Pick<TestI
   }
 }
 
-async function trashTemp(t: Pick<TestInfo, 'temp_ref'>) {
+const instagramToken = (db: SupabaseClient, f: Fetch, t: Pick<TestInfo, 'account' | 'integration' | 'external_id'>, purpose: string, check: boolean) =>
+  metaToken(db, f, t, purpose, check, true);
+
+export async function trashTemp(t: Pick<TestInfo, 'temp_ref'>) {
   if (t.temp_ref) await quiet(storageFor('library').trash(t.temp_ref));
 }
 /** Stops a test that cannot go on: the record, the address and the temporary copy. */
-async function stop(db: SupabaseClient, t: TestInfo, code: string) {
+export async function stop(db: SupabaseClient, t: TestInfo, code: string) {
   await trashTemp(t);
   return giveUp(db, t.id, code);
 }
@@ -106,18 +112,23 @@ export async function igStart(request: Request, db: SupabaseClient, b: Record<st
   if (quota && quota.used >= quota.total) return giveUp(db, id, 'QUOTA_REACHED');
 
   if (t.source === 'library') return igSend(request, db, t, tok.token, { caption, alt }, quota);
+  const upload = await openTempUpload(request, t, me);
+  return upload ? json({ test: id, phase: 'upload', upload, quota }) : giveUp(db, id, 'TEMP_UPLOAD_FAILED');
+}
+
+/** A Drive upload session in «تجارب النشر» for a device file, under the name that alone proves it is this test's. */
+export async function openTempUpload(request: Request, t: Pick<TestInfo, 'id' | 'mime' | 'size'>, me: string): Promise<string | null> {
   try {
     const storage = storageFor('library');
     const folder = await storage.markedFolder(TEMP_MARKER, TEMP_FOLDER);
-    const upload = await storage.startUpload({ name: tempName(id, mime), mimeType: mime, size, origin: new URL(request.url).origin, uploadedBy: me, parentId: folder });
-    return json({ test: id, phase: 'upload', upload, quota });
+    return await storage.startUpload({ name: tempName(t.id, t.mime), mimeType: t.mime, size: t.size, origin: new URL(request.url).origin, uploadedBy: me, parentId: folder });
   } catch {
-    return giveUp(db, id, 'TEMP_UPLOAD_FAILED');
+    return null;
   }
 }
 
-/** Step 2: the device file arrived in Drive. Only the file this test's session made is accepted. */
-export async function igUploaded(request: Request, db: SupabaseClient, t: TestInfo, b: Record<string, unknown>, me: string) {
+/** Records a device file's temporary copy once Drive shows exactly this test's file. A refusal comes back as a response. */
+export async function acceptTemp(db: SupabaseClient, t: TestInfo, b: Record<string, unknown>, me: string): Promise<{ ref: string } | Response> {
   if (!t.mine || t.state !== 'uploading' || t.source !== 'device' || t.temp_ref || t.container) return refuse('TEST_INVALID');
   const ref = typeof b.ref === 'string' && /^[A-Za-z0-9_-]{10,200}$/.test(b.ref) ? b.ref : null;
   if (!ref) return refuse('TEST_INVALID');
@@ -131,7 +142,26 @@ export async function igUploaded(request: Request, db: SupabaseClient, t: TestIn
     return giveUp(db, t.id, 'TEMP_UPLOAD_FAILED');
   }
   const { error } = await db.rpc('platform_test_temp', { p_key: serverKeyOrNull(), p_test: t.id, p_ref: ref });
-  if (error) return refuse(dbCode(error.message));
+  return error ? refuse(dbCode(error.message)) : { ref };
+}
+
+/** The temporary address Meta fetches the file from: a new token, only its hash kept. A refusal comes back as a response. */
+export async function setLink(request: Request, db: SupabaseClient, t: TestInfo): Promise<{ url: string } | Response> {
+  const link = newLink();
+  const until = new Date(Date.now() + IG_LINK_MINUTES * 60_000).toISOString();
+  const { error } = await db.rpc('platform_test_link', { p_key: serverKeyOrNull(), p_test: t.id, p_hash: link.hash, p_until: until });
+  if (error) return stop(db, t, dbCode(error.message));
+  return { url: `${new URL(request.url).origin}/api/platforms/test/file/${link.token}` };
+}
+/** Ends the temporary address at once. */
+export const endLink = (db: SupabaseClient, t: Pick<TestInfo, 'id'>) =>
+  quiet(Promise.resolve(db.rpc('platform_test_link', { p_key: serverKeyOrNull(), p_test: t.id, p_hash: null, p_until: null })));
+
+/** Step 2: the device file arrived in Drive. Only the file this test's session made is accepted. */
+export async function igUploaded(request: Request, db: SupabaseClient, t: TestInfo, b: Record<string, unknown>, me: string) {
+  const got = await acceptTemp(db, t, b, me);
+  if (got instanceof Response) return got;
+  const ref = got.ref;
   const tok = await instagramToken(db, fetch, t, 'تجربة نشر على إنستغرام', false);
   if ('error' in tok) return stop(db, { ...t, temp_ref: ref }, tok.error);
   return igSend(request, db, { ...t, temp_ref: ref }, tok.token, { caption: str(b.caption, 2400), alt: str(b.alt, 1100) }, null);
@@ -145,11 +175,9 @@ async function igSend(request: Request, db: SupabaseClient, t: TestInfo, token: 
   const alt = kind === 'image' ? words.alt : '';
   const problem = igProblem({ kind, size: t.size, mime: t.mime, caption, alt });
   if (problem) return stop(db, t, 'TEST_INVALID');
-  const link = newLink();
-  const until = new Date(Date.now() + IG_LINK_MINUTES * 60_000).toISOString();
-  const { error } = await db.rpc('platform_test_link', { p_key: key, p_test: t.id, p_hash: link.hash, p_until: until });
-  if (error) return stop(db, t, dbCode(error.message));
-  const url = `${new URL(request.url).origin}/api/platforms/test/file/${link.token}`;
+  const link = await setLink(request, db, t);
+  if (link instanceof Response) return link;
+  const url = link.url;
   const c = await igCreateContainer(fetch, { token, user: t.external_id ?? '', post: { kind, url, caption, alt, shareToFeed: t.share_to_feed === true } });
   if ('error' in c) return stop(db, t, c.error);
   const { error: kept } = await db.rpc('platform_test_container', { p_key: key, p_test: t.id, p_container: c.id });
@@ -167,7 +195,7 @@ export async function igAdvance(db: SupabaseClient, t: TestInfo) {
   if (s.state === 'wait') return json({ phase: 'wait' });
   if (s.state === 'published') return stop(db, t, 'PLATFORM_ERROR');
   // Meta has the file: the address ends before anything else.
-  await quiet(Promise.resolve(db.rpc('platform_test_link', { p_key: serverKeyOrNull(), p_test: t.id, p_hash: null, p_until: null })));
+  await endLink(db, t);
   const p = await igPublish(fetch, { token: tok.token, user: t.external_id ?? '', container: t.container });
   if ('error' in p) return stop(db, t, p.error);
   const m = await igMedia(fetch, { token: tok.token, id: p.id });

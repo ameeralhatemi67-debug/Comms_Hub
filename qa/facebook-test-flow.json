@@ -1,0 +1,195 @@
+{
+  "script": "qa/facebook-test-flow.cjs",
+  "run": "2026-11-03T10:59:40.936Z",
+  "checks": [
+    {
+      "name": "a link to the Page on Facebook, by its id, in a new tab",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says the silent check shows nothing and the rest is public",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "folded until asked for",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the silent check by default",
+      "pass": true,
+      "detail": "[\"فحص صامت\"]"
+    },
+    {
+      "name": "it needs no file, no words and no long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says what it does",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "one request names the silent check and sends no words of the page",
+      "pass": true,
+      "detail": "{\"account\":\"a-fb\",\"kind\":\"fb_silent\",\"message\":\"\",\"link\":\"\"}"
+    },
+    {
+      "name": "the result says it was made, read and deleted, and seen by nobody",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the list says so, with nothing to delete",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a link that is not https is caught before sending",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a public post asks for a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the post carries its words and link, and no file",
+      "pass": true,
+      "detail": "{\"account\":\"a-fb\",\"kind\":\"fb_text\",\"message\":\"تجربة نشر نصي\",\"link\":\"https://example.com/a\"}"
+    },
+    {
+      "name": "the result links the post",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the list shows it published, with open and a held delete",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "for a photo the library offers pictures only",
+      "pass": true,
+      "detail": "[\"صورة الغلاف.png\\n· الإصدار 1\"]"
+    },
+    {
+      "name": "a library picture is redrawn to JPEG here",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the start names a device JPEG and its size",
+      "pass": true,
+      "detail": "{\"account\":\"a-fb\",\"kind\":\"fb_photo\",\"message\":\"شرح الصورة\",\"link\":\"\",\"source\":\"device\",\"size\":57792,\"mime\":\"image/jpeg\"}"
+    },
+    {
+      "name": "the picture goes to the site as a form, the same size, with its words",
+      "pass": true,
+      "detail": "{\"file\":57792,\"caption\":\"شرح الصورة\",\"alt\":\"وصف للصورة\"}"
+    },
+    {
+      "name": "no Drive upload for a photo",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "for a Reel the library offers videos only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a library Reel is named by its id, never uploaded by the page",
+      "pass": true,
+      "detail": "{\"account\":\"a-fb\",\"kind\":\"fb_reel\",\"message\":\"وصف الريلز\",\"link\":\"\",\"source\":\"library\",\"asset\":\"f-video\"}"
+    },
+    {
+      "name": "the page asked until it was published, carrying the words",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a device Reel goes to Drive whole, then is registered",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a test is deleted through the site, and the list says so",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing was loaded from outside the fixture",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "a refused delete is said, with where the scheduled post is",
+      "pass": true,
+      "detail": "أنشأ الفحص المنشور المجدول وقرأه، لكن فيسبوك رفض حذفه. احذفه من هنا أو من Meta Business Suite قبل موعده.\nالمنشورات المجدولة في Meta Business Suite"
+    },
+    {
+      "name": "the list says it is not deleted yet and when it would show, and offers delete",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and deleting it from the list works",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a Page refusal is said in words, with what to look at",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the wait says the page must stay open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a cancel closes the test",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the Page's own publisher sees the panel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a publisher who is not on the Page does not",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a Page that needs reconnecting is not tested",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing sideways with the form open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: the result is readable on its own ground",
+      "pass": true,
+      "detail": "rgb(16, 48, 31) / rgb(111, 209, 155)"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 37,
+  "passed": 37,
+  "failed": 0
+}

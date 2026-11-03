@@ -271,6 +271,19 @@ post, and both send buttons ask for a long press.
 - The server half is `src/lib/platforms/instagram.ts` and `test-instagram.ts`. The rules are held by
   `supabase/tests/platform_tests_instagram_rules.sql`, `tests/instagram-test.test.mjs` and `qa/instagram-test-flow.cjs`.
 
+A test on a Facebook Page is real too, by the same day's directive (`MVP_draft.md` section 73, `Facebook_Test_Plan.md`), from
+`src/components/work/facebook-test.tsx`.
+- **The default is a silent check.** A text post scheduled four weeks ahead, read back from the Page (unpublished, on this Page)
+  and deleted at once, in one request. It shows nothing to anyone and needs no long press. If Meta refuses the delete, the test
+  stays published (scheduled) with its `scheduled_for`, and the panel says so and offers the delete; never hide that.
+- **The public kinds** (a text post with an optional link, a photo, a Reel) ask for a long press. A photo is sent through the
+  site as a file (`PUT /api/platforms/test/[id]`, at most 4 MB, checked to be the started file and a JPEG by its own bytes);
+  nothing is kept in Drive. A Reel is fetched by Meta from the temporary address, as Instagram's.
+- **Delete** uses `pages_manage_posts`, which the connection already asks for.
+- The server half is `src/lib/platforms/facebook.ts` and `test-facebook.ts`, which shares the token check, the temporary copy
+  and the address with `test-instagram.ts`. The panels share `src/components/work/test-kit.ts`. The rules are held by
+  `supabase/tests/platform_tests_facebook_rules.sql`, `tests/facebook-test.test.mjs` and `qa/facebook-test-flow.cjs`.
+
 Integrations, storage providers and backups are real, by owner directive of 2026-10-14
 (`Settings_Integrations_Plan.md`, decisions E-1 to E-7, recorded in `progress.md`). Every
 connection (storage provider, platform app, messaging) is a row of one integrations core

@@ -2,6 +2,7 @@ import { guard } from '@/lib/drive/guard';
 import { serverKeyOrNull } from '@/lib/integrations/vault';
 import { isUuid, json } from '@/lib/platforms/route';
 import { DEVICE_PIECE, LIBRARY_PIECE, pieceAt } from '@/lib/platforms/test-rules';
+import { fbAdvance, fbPhotoStep, fbRemove, fbUploaded } from '@/lib/platforms/test-facebook';
 import { igAdvance, igRemove, igUploaded } from '@/lib/platforms/test-instagram';
 import { dbCode, giveUp, libraryPiece, refuse, testInfo, youtubeToken } from '@/lib/platforms/test-server';
 import { youtubeDelete, youtubeSendPiece } from '@/lib/platforms/youtube';
@@ -9,9 +10,10 @@ import { serverClient } from '@/lib/supabase/server';
 
 export const maxDuration = 60;
 
-// The rest of «تجربة النشر» (MVP_draft.md sections 71 and 72).
-//   POST          Instagram: {step: 'uploaded', ref, caption, alt} once a device file is in Drive, then {step: 'advance'}
-//                 each time the page asks how Meta is getting on (src/lib/platforms/test-instagram.ts).
+// The rest of «تجربة النشر» (MVP_draft.md sections 71 to 73).
+//   POST          Instagram and a Facebook Reel: {step: 'uploaded', ref, ...} once a device file is in Drive, then
+//                 {step: 'advance'} each time the page asks how Meta is getting on (test-instagram.ts, test-facebook.ts).
+//   PUT           a Facebook photo: the page's form with the JPEG and its words, at most 4 MB, passed to Meta as a file.
 //   PUT ?from=N   YouTube:   one piece of the file, relayed to the upload the server opened: the page's bytes for a file from its
 //                 device (each piece exactly the agreed size, so YouTube gets 256 KiB multiples), or a piece the server
 //                 reads from the library itself. ?ask=1 sends nothing and asks YouTube where the upload stands.
@@ -26,7 +28,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const db = await serverClient();
   const t = await testInfo(db, id);
   if (!t || !t.mine) return refuse('FORBIDDEN');
-  if (t.platform !== 'instagram' || !b) return refuse('TEST_INVALID');
+  if (!b || (t.platform !== 'instagram' && t.platform !== 'facebook')) return refuse('TEST_INVALID');
+  if (t.platform === 'facebook') {
+    if (b.step === 'uploaded') return fbUploaded(request, db, t, b, g.account.email);
+    if (b.step === 'advance') return fbAdvance(db, t, b);
+    return refuse('TEST_INVALID');
+  }
   if (b.step === 'uploaded') return igUploaded(request, db, t, b, g.account.email);
   if (b.step === 'advance') return igAdvance(db, t);
   return refuse('TEST_INVALID');
@@ -43,6 +50,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   const db = await serverClient();
   const t = await testInfo(db, id);
   if (!t || !t.mine) return refuse('FORBIDDEN');
+  if (t.platform === 'facebook') return fbPhotoStep(request, db, t);
   if (t.platform !== 'youtube') return refuse('TEST_INVALID');
   if (t.state !== 'uploading' || !t.url) return refuse(t.state === 'uploading' ? 'UPLOAD_EXPIRED' : 'TEST_INVALID');
   if (!Number.isInteger(from) || from < 0 || from >= t.size) return refuse('TEST_INVALID');
@@ -83,6 +91,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const t = await testInfo(db, id);
   if (!t) return refuse('FORBIDDEN');
   if (t.platform === 'instagram') return igRemove(db, t);
+  if (t.platform === 'facebook') return fbRemove(db, t);
 
   if (t.state === 'uploading') {
     if (!t.mine) return refuse('FORBIDDEN');

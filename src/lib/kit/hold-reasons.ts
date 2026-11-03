@@ -42,6 +42,10 @@ export const HOLD = {
   igTestPost: 'يراه كل من يزور الحساب فور نشره ويبقى حتى يُحذف. لا يوجد على إنستغرام نشر خاص.',
   /** «حسابات المنصات»: delete a test post from Instagram. */
   igTestDelete: 'يُحذف المنشور من الحساب على إنستغرام نهائياً، ولا يُسترجع.',
+  /** «حسابات المنصات»: a public test on a Facebook Page (MVP_draft.md section 73). The silent check needs none. */
+  fbTestPost: 'يراه كل من يزور الصفحة فور نشره ويبقى حتى يُحذف.',
+  /** «حسابات المنصات»: delete a test post from a Facebook Page. */
+  fbTestDelete: 'يُحذف المنشور من الصفحة على فيسبوك نهائياً، ولا يُسترجع.',
   // Permissions (Permissions_Plan.md 10, «New hold buttons»).
   /** «الحسابات»: remove a member. */
   removeMember: 'إزالة العضو تفصله عن المركز وتبقي أعماله لدى من يُسند إليه.',

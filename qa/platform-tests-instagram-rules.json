@@ -2,13 +2,13 @@
   "script": "supabase/tests/platform_tests_instagram_rules.sql",
   "script_md5": "c31563dd38985aa8c6d851a0a6a1c3a3",
   "migration": {
-    "file": "supabase/migrations/20261103180000_platform_tests_instagram.sql",
-    "file_md5": "4f22f8491c5ddb67c739a99aa7146cea",
+    "file": "supabase/migrations/20261103200000_platform_tests_facebook.sql",
+    "file_md5": "8a62413b55627e6b17b20652db8a5187",
     "applied": "this run is on a private container and touched nothing"
   },
   "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
-  "run": "2026-11-03T08:36:50.800Z",
-  "migrations_replayed": 63,
+  "run": "2026-11-03T10:41:45.621Z",
+  "migrations_replayed": 64,
   "differ": [],
   "total": 62,
   "passed": 62

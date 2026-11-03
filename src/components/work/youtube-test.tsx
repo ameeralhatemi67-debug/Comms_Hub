@@ -5,10 +5,9 @@
 // page never holds a token or YouTube's upload address. A community post cannot be published by any outside application,
 // because YouTube's API has no such method: it is written here, copied, and posted on YouTube itself. Who may test is the
 // database's decision (platform_test_may); the panel is drawn for the same people.
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Copy, ExternalLink, FolderOpen, Laptop, Link2, Trash2, Upload, X } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
-import { supabase } from '@/lib/supabase/client';
 import {
   PRIVACY_AR,
   TEST_ERROR_AR,
@@ -25,7 +24,7 @@ import {
 import type { AccountRow } from '@/lib/work/rules';
 import { useWork, type LibraryFile } from './data';
 import { Hint, Ic, LibraryPicker } from './parts';
-import { api, mb, mimeOf, said, when } from './test-kit';
+import { api, mb, mimeOf, said, useTests, when } from './test-kit';
 
 type Picked = { from: 'device'; file: File; mime: string } | { from: 'library'; file: LibraryFile };
 type Phase =
@@ -46,7 +45,7 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
   const [post, setPost] = useState('');
   const [copied, setCopied] = useState(false);
   const [phase, setPhase] = useState<Phase>({ t: 'idle' });
-  const [tests, setTests] = useState<TestRow[]>([]);
+  const [tests, load] = useTests(a.id);
   const [removing, setRemoving] = useState<string | null>(null);
   const [scopeNote, setScopeNote] = useState(false);
   const stop = useRef(false);
@@ -60,18 +59,6 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
   const posts = postsUrl(a);
   const connected = a.conn_state === 'connected' && a.active;
 
-  const load = useCallback(async () => {
-    const { data } = await supabase()
-      .from('platform_tests')
-      .select('id,privacy,title,state,video_id,shown_privacy,error,created_by,created_at,deleted_at')
-      .eq('account_id', a.id)
-      .order('created_at', { ascending: false })
-      .limit(5);
-    setTests((data ?? []) as TestRow[]);
-  }, [a.id]);
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   const size = picked ? (picked.from === 'device' ? picked.file.size : null) : null;
   const problem =

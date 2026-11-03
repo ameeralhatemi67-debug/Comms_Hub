@@ -2603,3 +2603,52 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** Anything against Meta: no Instagram account is connected, and the Meta app is not entered yet.
 - **Next.** The owner finishes the Meta app, adds `instagram_manage_contents` to its configuration, connects the department's
   Instagram account, and publishes one test Story from its card.
+
+### 2026-11-03: «تجربة النشر» on a Facebook Page, built
+
+- **Owner direction.** "Plan the testing for the Facebook connection", then "Yes, build it" with the six recommended answers of
+  `Facebook_Test_Plan.md`. Built, not deployed.
+- **Read first.** Meta's Pages API posts, Page Post, Page feed, Page photos and Reels publishing pages (Graph API v26.0). Two
+  details changed the build:
+  - The feed page allows scheduling 10 minutes to 75 days ahead and the posts guide says 30 days, so the silent check schedules
+    28 days ahead.
+  - The Page Post reference says API deletes are for "select developers", while the posts guide documents `DELETE` plainly. So a
+    refused delete is kept honest: the test stays scheduled, the panel says so with a link to the Page's scheduled posts in
+    Meta Business Suite, and the list offers the delete again.
+- **Built (`MVP_draft.md` section 73).**
+  - `supabase/migrations/20261103200000_platform_tests_facebook.sql`:
+    - the kinds `fb_silent`, `fb_text`, `fb_photo` and `fb_reel`;
+    - `source`, `size` and `mime` empty for the two text kinds;
+    - new columns `link` and `scheduled_for`;
+    - a Page post's long id (`page_post`) accepted, and a Facebook `post_url` kept;
+    - `platform_test_may` and `platform_test_start` accept a Page.
+  - `src/lib/platforms/facebook.ts` (feed post, read back, photo as a file, Reel start, upload by `file_url`, status, finish,
+    delete; Meta's codes as the site's) and `test-facebook.ts` (the silent check in one request, the text post, the photo
+    step, the Reel steps, delete). `test-instagram.ts` now shares its token check, temporary copy and address (`metaToken`,
+    `openTempUpload`, `acceptTemp`, `setLink`, `endLink`). The routes branch by platform; `PUT` takes a Facebook photo as a form.
+  - `src/components/work/facebook-test.tsx`. The panels now share `test-kit.ts`: the request wrapper, the JPEG redraw, a video's
+    length, the direct-to-Drive upload and the list hook `useTests`, used by all three panels.
+  - Words: the simulation line, help card Z01 (and `Help_Content_Matrix.md`), the page help, the Facebook and Meta guides'
+    notes, and `public/privacy.html` in both languages (a «Facebook Pages» section).
+- **Where it differs from the plan.**
+  - The silent check needed no special database step: it is recorded as published, then deleted, with the existing functions.
+  - The file chooser stays in each panel, because each platform treats files differently; what the three share went into the kit.
+  - A Reel's words travel with each `advance`, because Meta takes them at the finish and the database does not keep them.
+- **Verified, numbers (on the tree on GitHub's `main`, `4914ddb`).**
+  - `npm run typecheck` clean; `npm test` **755 of 755** (eleven new in `tests/facebook-test.test.mjs`); `npm run build` clean.
+  - On a private Docker container with every migration replayed, nothing touching comms-hub:
+    `platform_tests_facebook_rules.sql` **48 of 48**, Instagram's **62 of 62** and YouTube's **75 of 75**.
+  - `qa/facebook-test-flow.cjs` **37 of 37**:
+    - the silent check by default with no long press, its result and its list line;
+    - a refused delete shown with the scheduled posts link and deleted from the list;
+    - an http link caught; a Page refusal in words;
+    - a library picture redrawn and sent as a form with its words;
+    - a library Reel never uploaded by the page, and a device Reel sent to Drive;
+    - a cancel while Meta prepares; delete; who sees it; phone and evening.
+    - One wording fixed from its screenshots: the silent check's list line repeated its title.
+  - After the shared kit, `qa/instagram-test-flow.cjs` **43 of 43**, `qa/youtube-test-flow.cjs` **49 of 49**,
+    `qa/platforms-flow.cjs` **136 of 136**.
+- **Not verified.** Anything against Meta:
+  - Facebook is switched off in the platform list, the Meta app is not entered, and no Page is connected.
+  - Whether the Page use case sits on the same Meta app as Instagram's (the guide's first step) is the first unknown.
+- **Not done, said plainly.** The migration is not applied to comms-hub, and nothing is pushed or deployed.
