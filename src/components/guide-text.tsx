@@ -3,9 +3,9 @@
 // the words with their English set apart (rules in src/lib/guide-text.ts), the short list of things to do, and the
 // pictures of the platform's own page. Tokens only, no emoji.
 import { useState } from 'react';
-import { Check, Copy, Image as ImageIcon } from 'lucide-react';
+import { Check, CircleAlert, Copy, Image as ImageIcon } from 'lucide-react';
 import { segments } from '@/lib/guide-text';
-import type { GuideShot } from '@/lib/setup-guides';
+import type { GuideShot, GuideTable } from '@/lib/setup-guides';
 
 /** A value to type, with a button that copies it exactly: nobody retypes a name or an address by eye. */
 function Val({ s }: { s: string }) {
@@ -45,6 +45,64 @@ export function Rich({ text, copy = false }: { text: string; copy?: boolean }) {
         ),
       )}
     </>
+  );
+}
+
+/** Things worth knowing in a step, each a note with the circled "!". */
+export function GuideInfo({ items }: { items: string[] }) {
+  return (
+    <div className="gd-infos">
+      {items.map((t) => (
+        <aside key={t} className="gd-info">
+          <CircleAlert aria-hidden="true" />
+          <p>
+            <Rich text={t} />
+          </p>
+        </aside>
+      ))}
+    </div>
+  );
+}
+
+/** Tables of figures: the first columns are names and the second figures, both usually English, so every cell is isolated. A table can be folded. */
+export function GuideTables({ tables }: { tables: GuideTable[] }) {
+  return (
+    <div className="gd-tables">
+      {tables.map((t) => (
+        <details key={t.title} className="gd-tbl" open={!t.fold}>
+          <summary>
+            <Rich text={t.title} />
+          </summary>
+          <div className="gd-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">{t.head[0]}</th>
+                  <th scope="col">{t.head[1]}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {t.rows.map(([a, b], i) => (
+                  <tr key={`${a}${i}`}>
+                    <td>
+                      <bdi dir="ltr">{a}</bdi>
+                    </td>
+                    <td>
+                      <bdi dir="ltr">{b}</bdi>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {t.note && (
+            <p className="gd-tnote">
+              <Rich text={t.note} />
+            </p>
+          )}
+        </details>
+      ))}
+    </div>
   );
 }
 

@@ -12,14 +12,15 @@ export type Seg = { k: 'text' | 'latin' | 'ui' | 'val'; s: string };
 
 const ARABIC = /[؀-ۿݐ-ݿ]/;
 const LETTER = /[A-Za-z]/;
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TOKEN = String.raw`[A-Za-z0-9](?:[A-Za-z0-9_.\-/\\:@+&#%='’]*[A-Za-z0-9])?`;
 const RUN = new RegExp(`${TOKEN}(?: ${TOKEN})*`, 'g');
 
-/** English runs of a plain stretch of text: a run with no letter (a number beside Arabic) is not English. */
+/** English runs of a plain stretch of text: a run with no letter (a number beside Arabic) is not English, except a date (2026-11-03), whose hyphens an Arabic line would otherwise reverse. */
 function plain(s: string, out: Seg[]) {
   let last = 0;
   for (const m of s.matchAll(RUN)) {
-    if (!LETTER.test(m[0])) continue;
+    if (!LETTER.test(m[0]) && !DATE.test(m[0])) continue;
     if (m.index > last) out.push({ k: 'text', s: s.slice(last, m.index) });
     out.push({ k: 'latin', s: m[0] });
     last = m.index + m[0].length;

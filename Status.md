@@ -39,6 +39,14 @@ Live on production as `bf7388a`; migration `platform_tests_instagram` applied to
 - **Next.** The owner finishes the Meta app, adds `instagram_manage_contents` to its configuration, connects the department's
   Instagram account, then publishes one test Story.
 
+## The X guide, first steps, built 2026-11-03
+
+From the owner's walk through the X developer console (`MVP_draft.md` section 67.8, `progress.md`).
+
+- **Done.** A step can carry notes with the circled "!" and tables. The price step shows the console's prices of 2026-11-03 (a short open table and three folded ones), the first step lists its actions, and the dashboard picture has the name blurred.
+- **Evidence.** `npm test` 733 of 733, `qa/platforms-flow.cjs` 136 of 136, `qa/guide-modal.cjs` 16 of 16, typecheck and build clean.
+- **Next.** The owner finds where «Create App» is and sends the next pages; then the steps from «أنشئ التطبيق» on are rewritten the same way.
+
 ## The Instagram guide and the look of a setup step, live 2026-11-03 (6d75aab)
 
 From the owner's walk through a real Meta app and their note that the YouTube steps were right and the look should follow (`MVP_draft.md` sections 67.6 and 67.7, `progress.md`).

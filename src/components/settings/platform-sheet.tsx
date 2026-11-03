@@ -15,7 +15,7 @@ import { PROVIDER_COPY, providerOf, type ConnProvider } from '@/lib/platforms/pr
 import { CHIP_CLASS, chipOf, countAccounts, doneSteps, firstOpen, setupGuideOf, stepId, type PlatformState, type SetupRow } from '@/lib/platforms/setup';
 import type { PlatformInfo } from '@/lib/work/rules';
 import { PlatformTile } from '../platform-icon';
-import { GuideShots, GuideTodo, Rich } from '../guide-text';
+import { GuideInfo, GuideShots, GuideTables, GuideTodo, Rich } from '../guide-text';
 import { CopyField, Sheet, SheetHead, SheetProgress, SheetSteps } from '../sheet';
 
 export type SheetTo = 'first' | 'keys' | 'review' | 'finish';
@@ -258,6 +258,8 @@ function StepPanel({ step, n, done, canGoBack, canManage, lock, onDone, onBack, 
     >
       {done && !manual && <p className="pf-note ok">أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.</p>}
       {todo.length > 0 && <GuideTodo items={todo} shots={step.shots} />}
+      {step.info && step.info.length > 0 && <GuideInfo items={step.info} />}
+      {step.tables && step.tables.length > 0 && <GuideTables tables={step.tables} />}
       {!hasCopy && !manual && todo.length === 0 && <p>لا يحتاج الموقع منك شيئاً هنا. أنجزها في الصفحة التي فتحتها، ثم عُد وأكّد.</p>}
       {manual && (
         <p>
