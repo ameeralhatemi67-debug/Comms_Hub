@@ -7,7 +7,9 @@
 //   of the next one, per project shape, on this device.
 //   The stream budget (streamPlan): at play start and at a seek, the video streams at the playhead are weighed by
 //   their pixels against the decoding the profile measured; the largest on screen play their source, the rest their
-//   light copy where one exists.
+//   light copy where one exists. The measurement decodes one stream alone; media elements decoding several at once
+//   carry less (measured on 2026-11-04: three 4K30 streams fell behind on a chip measured at four), so the margin is
+//   a half, and elements that keep falling behind lower the budget for the session.
 
 /** A window of the play this long (ms) is judged at once. */
 export const AUTO_WINDOW = 250;
@@ -37,6 +39,11 @@ export class AutoLevel {
 
   get value() {
     return this.steps[this.level];
+  }
+
+  /** Starts no higher than `level` (what the streams at the playhead can be drawn at). */
+  atLeast(level: number) {
+    this.level = Math.max(this.level, Math.min(this.steps.length - 1, level));
   }
 
   /** A play starts at `now` (ms). */
@@ -83,6 +90,14 @@ export class AutoLevel {
   }
 }
 
+/**
+ * The step a play may start at for `load` 4K30 streams decoded at once: full up to one, a half up to two, a quarter
+ * beyond (drawing several large videos each frame costs more than the canvas, and a quarter canvas leaves the most).
+ */
+export function startLevel(load: number): number {
+  return load > 2 ? 2 : load > 1 ? 1 : 0;
+}
+
 /** The index of the step a share starts at (the nearest step not above it). */
 export function stepOf(steps: readonly number[], share: number): number {
   for (let i = 0; i < steps.length; i++) if (steps[i] <= share + 1e-9) return i;
@@ -95,7 +110,10 @@ export type Stream = { clip: string; pixels: number; area: number; copy: boolean
 /** A 4K picture thirty times a second: the unit the budget is counted in. */
 export const UHD30 = 3840 * 2160 * 30;
 /** The share of the measured decoding the preview counts on, leaving room for drawing and sound. */
-export const STREAM_MARGIN = 0.75;
+export const STREAM_MARGIN = 0.5;
+/** Elements put back in step within one second that lower the budget, and the share it is lowered to each time. */
+export const BEHIND_RESEEKS = 2;
+export const BUDGET_STEP = 0.6;
 
 /**
  * How many 4K30 streams the machine carries while drawing, from the profile: its 4K decoding rate (the chip's if it has

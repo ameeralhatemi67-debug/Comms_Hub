@@ -97,12 +97,14 @@ async function runIn(page) {
   return run;
 }
 
+const BRANCH = 'claude/power-preview-b15ae2';
+/** The lock of 127.0.0.1:3000: taken here, or already held for this branch by whoever runs the checks in a row. */
 function takeLock() {
   try {
-    fs.writeFileSync(LOCK, 'claude/power-preview-b15ae2', { flag: 'wx' });
-    return true;
+    fs.writeFileSync(LOCK, BRANCH, { flag: 'wx' });
+    return 'taken';
   } catch {
-    return false;
+    return fs.readFileSync(LOCK, 'utf8').trim() === BRANCH ? 'held' : null;
   }
 }
 
@@ -141,8 +143,9 @@ function takeLock() {
     ].filter(([n]) => !only || only === n);
     if (apps.length) {
       if (!fs.existsSync(h.devExe)) throw new Error(`the development package is missing: ${h.devExe} (npm run pack:dev in desktop/)`);
-      if (!takeLock()) throw new Error(`${LOCK} exists: another check holds 127.0.0.1:3000`);
-      locked = true;
+      const lock = takeLock();
+      if (!lock) throw new Error(`${LOCK} exists: another check holds 127.0.0.1:3000`);
+      locked = lock === 'taken';
       if (await h.portAnswers(3000)) throw new Error('something already answers on 127.0.0.1:3000');
       server = await serve(3000);
       for (const [engine, settings, args] of apps) {

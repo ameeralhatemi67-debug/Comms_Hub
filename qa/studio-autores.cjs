@@ -74,11 +74,12 @@ async function playIn(win, o) {
   try {
     makeFixtures();
     if (!fs.existsSync(h.devExe)) throw new Error(`the development package is missing: ${h.devExe} (npm run pack:dev in desktop/)`);
+    // the lock of 127.0.0.1:3000: taken here, or already held for this branch by whoever runs the checks in a row
     try {
       fs.writeFileSync(LOCK, 'claude/power-preview-b15ae2', { flag: 'wx' });
       locked = true;
     } catch {
-      throw new Error(`${LOCK} exists: another check holds 127.0.0.1:3000`);
+      if (fs.readFileSync(LOCK, 'utf8').trim() !== 'claude/power-preview-b15ae2') throw new Error(`${LOCK} exists: another check holds 127.0.0.1:3000`);
     }
     if (await h.portAnswers(3000)) throw new Error('something already answers on 127.0.0.1:3000');
     server = await serve();

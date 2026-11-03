@@ -109,6 +109,8 @@ async function play(o: { resolution: number | 'auto'; start: number; budget: num
   };
   const player = new Player({ canvas, pool: c.pool, motion: new MotionRenderer(), getDoc: () => c.doc, scale: () => canvas.width / 1920, onTime: () => undefined });
   player.budget = () => o.budget;
+  // as the editor sets it with a plan
+  player.steady = o.budget !== null;
   const levels: { at: number; share: number }[] = [];
   let share = o.resolution === 'auto' ? PREVIEW_STEPS[stepOf(PREVIEW_STEPS, o.start)] : o.resolution;
   if (o.resolution === 'auto') {
@@ -125,8 +127,11 @@ async function play(o: { resolution: number | 'auto'; start: number; budget: num
   await sleep(1500);
   const t0 = performance.now();
   player.play();
+  // the elements count their frames from when they were made: this play's are the difference
+  const q0 = player.quality();
   await sleep(o.seconds * 1000);
-  const quality = player.quality();
+  const q1 = player.quality();
+  const quality = { total: q1.total - q0.total, dropped: q1.dropped - q0.dropped };
   const stats = { ...player.stats };
   const playing = c.ids.map((id, i) => {
     const el = c.pool.elementOf(c.doc.video!.tracks.flatMap((t) => t.clips).find((x) => x.source === id)!.id) as HTMLVideoElement | null;

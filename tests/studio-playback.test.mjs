@@ -4,7 +4,7 @@
 // with no profile every copy plays as it always did.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { AUTO_CALM, AUTO_SETTLE, AUTO_WINDOW, AutoLevel, stepOf, streamBudget, streamPlan, UHD30 } from '../src/lib/studio/playback.ts';
+import { AUTO_CALM, AUTO_SETTLE, AUTO_WINDOW, AutoLevel, startLevel, stepOf, STREAM_MARGIN, streamBudget, streamPlan, UHD30 } from '../src/lib/studio/playback.ts';
 import { PREVIEW_STEPS } from '../src/lib/studio/scale.ts';
 
 /** Plays `ms` milliseconds at 60 draws a second (30 fps project): `miss(t)` says how many frames each draw missed. */
@@ -78,9 +78,11 @@ test('calm seconds step up again, but never back to a level that missed in the s
 test('the stream budget: 4K decoding over 30 frames, with a margin, lowered when drawing is slow; none with no profile', () => {
   assert.equal(streamBudget(null), null);
   const p = (hw, sw, effects) => ({ decode: { h264_2160: { hw, sw } }, compose: { effects } });
-  assert.equal(streamBudget(p(187, 102.8, 7)), (187 / 30) * 0.75);
-  assert.equal(streamBudget(p(null, 102.8, 7)), (102.8 / 30) * 0.75);
-  assert.equal(streamBudget(p(100, 50, 24)), (100 / 30) * 0.75 * 0.5);
+  // a half of the measured rate: media elements decoding several streams at once carry less than one stream measured alone
+  assert.equal(STREAM_MARGIN, 0.5);
+  assert.equal(streamBudget(p(187, 102.8, 7)), (187 / 30) * STREAM_MARGIN);
+  assert.equal(streamBudget(p(null, 102.8, 7)), (102.8 / 30) * STREAM_MARGIN);
+  assert.equal(streamBudget(p(100, 50, 24)), (100 / 30) * STREAM_MARGIN * 0.5);
   assert.equal(streamBudget(p(null, null, 7)), null);
   assert.ok(streamBudget(p(200, 1, 5)) > streamBudget(p(100, 1, 5)), 'faster decoding never a smaller budget');
 });
@@ -98,4 +100,19 @@ test('which streams play their copy: the largest keep their source within the bu
   assert.deepEqual([...streamPlan([s('a', 1, false)], null)], []);
   // a 1080p stream costs a quarter of a 4K one
   assert.deepEqual([...streamPlan([s('a', 1), s('b', 0.5, true, UHD30 / 4)], 1.25)], []);
+});
+
+test('a play starts no higher than the streams at the playhead allow; a lower remembered level is kept', () => {
+  assert.equal(startLevel(0), 0);
+  assert.equal(startLevel(1), 0);
+  assert.equal(startLevel(1.5), 1);
+  assert.equal(startLevel(3), 2);
+  const a = new AutoLevel(PREVIEW_STEPS, 0);
+  a.atLeast(startLevel(3));
+  assert.equal(a.value, 0.25);
+  const b = new AutoLevel(PREVIEW_STEPS, 2);
+  b.atLeast(startLevel(0.5));
+  assert.equal(b.value, 0.25);
+  b.atLeast(9);
+  assert.equal(b.level, 2);
 });

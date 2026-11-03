@@ -309,7 +309,10 @@ export function VideoEditor(p: EditorProps) {
   // D10: the memory the paused preview keeps frames in, and the decoding the playing streams may count on
   useEffect(() => {
     pool?.setFrameCache(studioPlan?.knobs.frameCacheMB ?? 0);
-    if (player) player.budget = () => streamBudget(studioPlan?.numbers ?? null);
+    if (player) {
+      player.budget = () => streamBudget(studioPlan?.numbers ?? null);
+      player.steady = !!studioPlan;
+    }
   }, [pool, player, studioPlan]);
   // «تلقائية»: the level starts where the last play of this shape ended on this device, else at the plan's start
   const ratio = doc.video?.ratio ?? '9:16';
@@ -324,6 +327,8 @@ export function VideoEditor(p: EditorProps) {
       return;
     }
     const a = new AutoLevel(PREVIEW_STEPS, stepOf(PREVIEW_STEPS, shares.current[ratio] ?? previewStart));
+    // chosen while playing: judged from now
+    if (player.playing) a.start(performance.now());
     player.auto = a;
     player.onAuto = setAutoShare;
     setAutoShare(a.value);

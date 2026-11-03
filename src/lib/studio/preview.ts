@@ -14,7 +14,7 @@ import type { MediaPool } from './media.ts';
 import type { MotionRenderer } from './motion-adapter.ts';
 import { wallNow, type Clock } from './preview-link.ts';
 import { needOf, rangeOf } from './scrub.ts';
-import { streamPlan, type AutoLevel, type Stream } from './playback.ts';
+import { BEHIND_RESEEKS, BUDGET_STEP, startLevel, streamPlan, UHD30, type AutoLevel, type Stream } from './playback.ts';
 
 export const DRIFT = 0.12;
 
@@ -50,6 +50,15 @@ export class Player {
   budget: (() => number | null) | null = null;
   /** The clips playing their light copy, as the budget decided at play start or the last seek. */
   private copies = new Set<string>();
+  /**
+   * With a plan (D10): while playing, a clip whose element is catching up keeps the element's last frame instead of
+   * asking the paused decoder, and elements that keep falling behind lower the budget for the rest of the session.
+   */
+  steady = false;
+  /** The share of the budget the session has kept to after elements fell behind (playback.ts BUDGET_STEP). */
+  private budgetShare = 1;
+  /** When elements had to be put back in step lately (ms), to tell a run of them from one. */
+  private behind: number[] = [];
   /** The play so far: project frames due, draws, frames not drawn in time, elements put back in step, milliseconds. */
   stats = { due: 0, drawn: 0, missed: 0, reseeks: 0, ms: 0 };
   private lastN = -1;
@@ -67,6 +76,8 @@ export class Player {
         if (this.playing && clipId && this.live.has(clipId)) {
           const el = this.o.pool.elementOf(clipId) as HTMLVideoElement | null;
           if (el && el.readyState >= 2 && el.videoWidth) return el;
+          // catching up after a jump: its last frame, rather than a second decoder of the same file
+          if (this.steady && el && el.readyState >= 1 && el.videoWidth) return el;
         }
         return this.o.pool.frameNear(id, at);
       },
@@ -119,8 +130,15 @@ export class Player {
     this.startT = this.t;
     this.stats = { due: 0, drawn: 0, missed: 0, reseeks: 0, ms: 0 };
     this.lastN = -1;
-    this.auto?.start(this.startPerf);
+    this.behind = [];
     this.sync(true);
+    // «تلقائية» never starts above what the streams at the playhead can be drawn at
+    if (this.auto) {
+      const was = this.auto.level;
+      this.auto.atLeast(startLevel(this.load()));
+      this.auto.start(this.startPerf);
+      if (this.auto.level !== was) this.onAuto?.(this.auto.value);
+    }
     cancelAnimationFrame(this.raf);
     this.raf = requestAnimationFrame(this.loop);
     this.o.onTime(this.t, true);
@@ -188,7 +206,7 @@ export class Player {
   };
 
   /** Keeps each playing clip's element at the clip's place and gain; stops the others. */
-  private sync(force: boolean) {
+  private sync(force: boolean): void {
     const doc = this.o.getDoc();
     const keep = new Set<string>();
     const heard = new Map<string, number>();
@@ -196,7 +214,11 @@ export class Player {
     // reversed clips and stills are drawn from the decoder (frameNear), not from an element
     const seen = visibleAt(doc, this.t).filter(({ clip }) => clip.source && !clip.reverse && !isHold(clip) && doc.sources.find((s) => s.id === clip.source)?.media === 'video');
     // which streams play their light copy is decided where playing starts or jumps, never in the middle (playback.ts)
-    if (force) this.copies = streamPlan(this.streams(doc, seen.map((v) => v.clip)), this.budget?.() ?? null);
+    const plan = () => {
+      const b = this.budget?.() ?? null;
+      this.copies = streamPlan(this.streams(doc, seen.map((v) => v.clip)), b === null ? null : b * this.budgetShare);
+    };
+    if (force) plan();
     const clips = new Map<string, (typeof seen)[number]['clip']>();
     for (const v of seen) clips.set(v.clip.id, v.clip);
     for (const { clip } of audibleAt(doc, this.t)) clips.set(clip.id, clip);
@@ -216,7 +238,20 @@ export class Player {
         }
       }
       if (force || Math.abs(el.currentTime - want) > DRIFT) {
-        if (!force) this.stats.reseeks++;
+        if (!force) {
+          this.stats.reseeks++;
+          // a run of elements falling behind: the decoders carry less than measured; the jump is the moment to move a
+          // stream to its light copy
+          const now = performance.now();
+          this.behind = [...this.behind.filter((x) => now - x < 1000), now];
+          if (this.steady && this.budget?.() != null && this.behind.length >= BEHIND_RESEEKS) {
+            this.behind = [];
+            this.budgetShare *= BUDGET_STEP;
+            const before = this.copies;
+            plan();
+            if ([...this.copies].some((c) => !before.has(c))) return this.sync(true);
+          }
+        }
         try {
           el.currentTime = want;
         } catch {
@@ -230,6 +265,21 @@ export class Player {
     }
     this.o.pool.pauseExcept(keep);
     this.live = keep;
+  }
+
+  /** The pixels a second the playing elements decode, in 4K30 streams (a light copy counts its own size). */
+  private load(): number {
+    let n = 0;
+    for (const id of this.live) {
+      const el = this.o.pool.elementOf(id) as HTMLVideoElement | null;
+      if (el?.videoWidth) n += (el.videoWidth * el.videoHeight * 30 * Math.max(0.1, el.playbackRate)) / UHD30;
+      else {
+        const c = this.o.getDoc().video?.tracks.flatMap((t) => t.clips).find((x) => x.id === id);
+        const info = c?.source ? this.o.pool.info(c.source) : null;
+        if (info?.w && info.h && !this.copies.has(id)) n += (info.w * info.h * 30) / UHD30;
+      }
+    }
+    return n;
   }
 
   /** The video streams at the playhead, for the budget: their pixels a second, their share of the canvas, their copy. */
