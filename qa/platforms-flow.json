@@ -1,6 +1,6 @@
 {
   "script": "qa/platforms-flow.cjs",
-  "run": "2026-11-02T12:33:18.822Z",
+  "run": "2026-11-03T05:35:38.447Z",
   "checks": [
     {
       "name": "every platform has one state, worked out from what is stored",
@@ -115,7 +115,7 @@
     {
       "name": "an address to copy is filled in from the site, whole",
       "pass": true,
-      "detail": "http://127.0.0.1:55374/api/platforms/callback/tiktok"
+      "detail": "http://127.0.0.1:49989/api/platforms/callback/tiktok"
     },
     {
       "name": "Escape closes the sheet",
@@ -195,7 +195,7 @@
     {
       "name": "what needs attention comes first, with why and what depends on it",
       "pass": true,
-      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-05 15:33\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
+      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-06 08:35\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
     },
     {
       "name": "accounts are grouped by platform, each one line",
@@ -205,7 +205,7 @@
     {
       "name": "a line says the state, who publishes, when, and what uses it",
       "pass": true,
-      "detail": "الحساب الرسمي\n@org_official\nمتصل حتى 22 ديسمبر\nناشر الفحص\nنشر تلقائي\nعمل واحد"
+      "detail": "الحساب الرسمي\n@org_official\nمتصل حتى 23 ديسمبر\nناشر الفحص\nنشر تلقائي\nعمل واحد"
     },
     {
       "name": "an account connected to nothing is marked, and never says connected",
@@ -518,6 +518,56 @@
       "detail": "أنشئ مشروعاً في Google Cloud | فعّل واجهة YouTube Data API v3 | فعّل واجهة Google Drive API | افتح شاشة الموافقة | اكتب اسم التطبيق وبريد الدعم | اختر نوع المستخدمين | اكتب بريد التواصل وأنهِ الإعداد | أضف بريد من سيربط القناة | أنشئ معرّف العميل | سجّل عنوان العودة ليوتيوب | وسجّل عنوان العودة لـ Drive | انسخ المعرّف والسر | انشر التطبيق"
     },
     {
+      "name": "the progress strip is one segment per step: the done ones filled, one marks where you are, and it says how many are done and left",
+      "pass": true,
+      "detail": "{\"n\":13,\"done\":11,\"cur\":1,\"tall\":true,\"counts\":\"أُنجز 11 وبقي 2\"}"
+    },
+    {
+      "name": "a step is one card: its number and name, what it says when it is already done, and the button that goes on",
+      "pass": true,
+      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(39, 61, 52)\",\"upDashed\":\"dashed\"}"
+    },
+    {
+      "name": "an action a picture shows says which picture; the pictures are numbered and say what their rings mean",
+      "pass": true,
+      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(39, 61, 52)\",\"upDashed\":\"dashed\"}"
+    },
+    {
+      "name": "the steps still to do are dimmed and drawn dashed, and the one you are on is not",
+      "pass": true,
+      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(39, 61, 52)\",\"upDashed\":\"dashed\"}"
+    },
+    {
+      "name": "a value to type has its own copy button, and it copies the value exactly",
+      "pass": true,
+      "detail": "{\"got\":[\"Comms Hub Web\"],\"label\":\"نُسخ Comms Hub Web\"}"
+    },
+    {
+      "name": "a picture that says \"do not\" explains the red ring",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a single picture with no numbered rings says nothing it does not need",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a step that does not apply to everyone says so, in the list and on its card",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the button that says a step is done stays in view while its pictures scroll, and sits on the bottom edge",
+      "pass": true,
+      "detail": "[{\"inView\":true,\"tall\":true,\"bottomGap\":0},{\"inView\":true,\"tall\":false,\"bottomGap\":25}]"
+    },
+    {
+      "name": "a step not yet done has no \"done\" note and keeps its own button",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "the corners are rounded and the picture is clipped to them",
       "pass": true,
       "detail": "12px hidden"
@@ -525,7 +575,7 @@
     {
       "name": "a click enlarges it to its own size, and scrolls sideways inside the frame instead of the page",
       "pass": true,
-      "detail": "{\"zoomBefore\":[512,755],\"zoomed\":{\"big\":true,\"w\":755,\"scroll\":true,\"pressed\":\"true\"}}"
+      "detail": "{\"zoomBefore\":[470,755],\"zoomed\":{\"big\":true,\"w\":755,\"scroll\":true,\"pressed\":\"true\"}}"
     },
     {
       "name": "and a second click puts it back",
@@ -609,7 +659,7 @@
     }
   ],
   "notes": [],
-  "total": 121,
-  "passed": 121,
+  "total": 131,
+  "passed": 131,
   "failed": 0
 }

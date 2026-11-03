@@ -19,6 +19,8 @@ export type GuideShot = {
   h: number;
   alt: string;
   caption?: string;
+  /** The rings drawn on it: the number of the action in the step's list each one points at, and 'x' for what not to do. */
+  rings?: string[];
 };
 
 export type GuideStep = {
@@ -45,6 +47,8 @@ export type GuideStep = {
   ok?: string;
   /** Already true once the app's secret is stored: another connection of the same app did it. */
   implied?: boolean;
+  /** A short condition shown beside the step's name: who needs it, when it does not apply. */
+  tag?: string;
 };
 export type Guide = {
   title: string;
@@ -66,7 +70,7 @@ const TIKTOK_APPS = { href: 'https://developers.tiktok.com/apps/', label: 'TikTo
 const LINKEDIN_APPS = { href: 'https://www.linkedin.com/developers/apps', label: 'تطبيقاتي في LinkedIn' };
 const X_CONSOLE = { href: 'https://console.x.com', label: 'وحدة مطوّري X' };
 /** A picture of Google's console for the «google» guide (public/guides/google/, made by scripts/guide-shots.mjs). */
-const shot = (name: string, w: number, h: number, alt: string, caption?: string): GuideShot => ({ src: `/guides/google/${name}.png`, w, h, alt, caption });
+const shot = (name: string, w: number, h: number, alt: string, caption?: string, rings?: string[]): GuideShot => ({ src: `/guides/google/${name}.png`, w, h, alt, caption, rings });
 
 export const GUIDES: Record<string, Guide> = {
   meta: {
@@ -212,7 +216,7 @@ export const GUIDES: Record<string, Guide> = {
           'لا ترفع شعاراً في «App logo»: رفعه يستلزم أن تراجع Google التطبيق عند نشره.',
           'اضغط «Next»، أو «Save» إن كنت في صفحة Branding نفسها.',
         ],
-        shots: [shot('branding', 755, 582, 'صفحة Branding: حقل App name وحقل User support email، وتحتهما App logo', 'الاسم في الصورة مثال من مشروع آخر، والبريد محجوب. الحلقة الحمراء تعني: لا تفعل هذا.')],
+        shots: [shot('branding', 755, 582, 'صفحة Branding: حقل App name وحقل User support email، وتحتهما App logo', 'الاسم في الصورة مثال من مشروع آخر، والبريد محجوب.', ['1', '2', 'x'])],
         link: { href: 'https://console.cloud.google.com/auth/branding', label: 'Branding في Google Cloud' },
         ok: 'كتبتهما',
       },
@@ -246,6 +250,7 @@ export const GUIDES: Record<string, Guide> = {
       {
         id: 'testusers',
         implied: true,
+        tag: 'لمن اختار «External»',
         t: 'أضف بريد من سيربط القناة',
         b: 'ما دام التطبيق في وضع التجربة «Testing» لا يدخل إلا من تضيفه هنا.',
         todo: [
@@ -256,8 +261,8 @@ export const GUIDES: Record<string, Guide> = {
           'هذه الخطوة تخص مرحلة التجربة، وستنشر التطبيق في الخطوة الأخيرة. ولا تظهر إن اخترت «Internal».',
         ],
         shots: [
-          shot('test-users', 650, 371, 'صفحة Audience: قسم Test users وزر Add users وتحته قائمة البريد', 'قائمة الأسماء محجوبة.'),
-          shot('add-users', 435, 175, 'لوحة Add users: حقل كتابة البريد وزر Save', 'الحقل لكتابة البريد، ثم زر «Save».'),
+          shot('test-users', 650, 371, 'صفحة Audience: قسم Test users وزر Add users وتحته قائمة البريد', 'قائمة الأسماء محجوبة.', ['2']),
+          shot('add-users', 435, 175, 'لوحة Add users: حقل كتابة البريد وزر Save', 'الحقل لكتابة البريد، ثم زر «Save».', ['3', '4']),
         ],
         link: { href: 'https://console.cloud.google.com/auth/audience', label: 'Audience في Google Cloud' },
         ok: 'أضفتها',
@@ -274,8 +279,8 @@ export const GUIDES: Record<string, Guide> = {
           'اترك «Authorised JavaScript origins» فارغاً. ولا تضغط «Create» الآن: نضيف عنواني العودة أولاً في الخطوتين التاليتين.',
         ],
         shots: [
-          shot('clients', 975, 295, 'صفحة Clients: زر Create client وجدول OAuth 2.0 Client IDs', 'الأسماء في الجدول أمثلة من مشروع آخر.'),
-          shot('app-type', 688, 297, 'قائمة Application type: Web application أولها، ثم Android وChrome extension وiOS', 'اختر «Web application»، وهي أول القائمة.'),
+          shot('clients', 975, 295, 'صفحة Clients: زر Create client وجدول OAuth 2.0 Client IDs', 'أسماء العملاء في الجدول محجوبة.', ['1']),
+          shot('app-type', 688, 297, 'قائمة Application type: Web application أولها، ثم Android وChrome extension وiOS', 'اختر «Web application»، وهي أول القائمة.', ['2']),
         ],
         link: { href: 'https://console.cloud.google.com/auth/clients', label: 'Clients في Google Cloud' },
         ok: 'أنشأته',
@@ -292,7 +297,7 @@ export const GUIDES: Record<string, Guide> = {
         ],
         copy: '{redirect}',
         copyLabel: 'عنوان العودة ليوتيوب',
-        shots: [shot('redirect', 660, 245, 'قسم Authorised redirect URIs: حقل URIs 1 وزر Add URI', 'الحقل فارغ، والنص الباهت «https://www.example.com» مثال فقط: الصق عنواننا مكانه.')],
+        shots: [shot('redirect', 660, 245, 'قسم Authorised redirect URIs: حقل URIs 1 وزر Add URI', 'الحقل فارغ، والنص الباهت «https://www.example.com» مثال فقط: الصق عنواننا مكانه.', ['2', '3'])],
         ok: 'سجّلت العنوان',
       },
       {
@@ -308,7 +313,7 @@ export const GUIDES: Record<string, Guide> = {
         ],
         copy: '{origin}/api/drive/callback',
         copyLabel: 'عنوان العودة لـ Drive',
-        shots: [shot('redirect-create', 660, 272, 'أسفل Create OAuth client ID: زر Add URI ثم زرا Create وCancel', 'الزر «Create» رمادي في الصورة لأن الحقول فارغة.')],
+        shots: [shot('redirect-create', 660, 272, 'أسفل Create OAuth client ID: زر Add URI ثم زرا Create وCancel', 'الزر «Create» رمادي في الصورة لأن الحقول فارغة.', ['1', '3'])],
         ok: 'سجّلت العنوان',
       },
       {

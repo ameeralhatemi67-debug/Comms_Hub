@@ -73,6 +73,10 @@ const SHOTS = [
   {
     name: 'clients',
     from: '3.png',
+    blur: [
+      [443, 237, 208, 28],
+      [443, 276, 242, 28],
+    ],
     marks: [{ box: [494, 52, 174, 48], n: '1' }],
     crop: [337, 30, 975, 295],
     alt: 'صفحة Clients في Google Auth Platform: زر Create client وجدول OAuth 2.0 Client IDs',

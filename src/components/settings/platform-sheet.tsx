@@ -88,6 +88,9 @@ export function PlatformSheet({
   });
   const cur = at === null ? null : (steps[ids.indexOf(at)] ?? null);
   const pct = Math.round((done.size / steps.length) * 100);
+  const marks = ids.map((id) => (id === at ? 'cur' : done.has(id) ? 'done' : 'todo')) as ('done' | 'cur' | 'todo')[];
+  const left = steps.length - done.size;
+  const n = at === null ? 0 : ids.indexOf(at) + 1;
 
   const persist = async (nextDone: string[], nextAt: string | null, nextFields: Fields) => {
     if (!guideKey || !canManage) return;
@@ -124,7 +127,9 @@ export function PlatformSheet({
       />
       {guideKey && (
         <SheetProgress
-          at={at === null ? 'اكتملت الخطوات' : `الخطوة ${ids.indexOf(at) + 1} من ${steps.length}`}
+          at={at === null ? 'اكتملت الخطوات' : `الخطوة ${n} من ${steps.length}`}
+          count={left === 0 ? undefined : `أُنجز ${done.size} وبقي ${left}`}
+          marks={marks}
           pct={pct}
           saved={
             failed ? (
@@ -141,7 +146,7 @@ export function PlatformSheet({
         />
       )}
       <div className="pf-body">
-        <SheetSteps steps={steps.map((s, i) => ({ id: ids[i], t: s.t, b: s.b, link: s.link, done: done.has(ids[i]) }))} at={at} onPick={guideKey ? open : (id) => setAt(id)}>
+        <SheetSteps steps={steps.map((s, i) => ({ id: ids[i], t: s.t, b: s.b, tag: s.tag, link: s.link, done: done.has(ids[i]) }))} at={at} onPick={guideKey ? open : (id) => setAt(id)}>
           {guide.notes && guide.notes.length > 0 && (
             <details className="pf-notes">
               <summary>ملاحظات مهمة</summary>
@@ -161,6 +166,8 @@ export function PlatformSheet({
               key={at}
               provider={provider}
               step={cur}
+              n={n}
+              done={done.has(at!)}
               app={app}
               fields={fields}
               problem={state === 'issue'}
@@ -175,6 +182,8 @@ export function PlatformSheet({
           ) : cur?.kind === 'review' ? (
             <ReviewPanel
               step={cur}
+              n={n}
+              done={done.has(at!)}
               submitted={p.readiness === 'submitted'}
               canManage={canManage}
               lock={lock}
@@ -185,7 +194,7 @@ export function PlatformSheet({
               }}
             />
           ) : cur ? (
-            <StepPanel step={cur} canGoBack={ids.indexOf(at!) > 0} canManage={canManage} lock={lock} onDone={() => void finishStep(at!)} onBack={() => open(ids[ids.indexOf(at!) - 1])} manual={!guideKey} />
+            <StepPanel step={cur} n={n} done={done.has(at!)} canGoBack={ids.indexOf(at!) > 0} canManage={canManage} lock={lock} onDone={() => void finishStep(at!)} onBack={() => open(ids[ids.indexOf(at!) - 1])} manual={!guideKey} />
           ) : (
             <FinishPanel p={p} app={app} provider={provider} accounts={accounts} hasGuide={Boolean(guideKey)} onReplace={provider ? () => setAt(find('keys')) : undefined}>
               {children}
@@ -197,16 +206,58 @@ export function PlatformSheet({
   );
 }
 
-function StepPanel({ step, canGoBack, canManage, lock, onDone, onBack, manual }: { step: GuideStep; canGoBack: boolean; canManage: boolean; lock: Lock; onDone: () => void; onBack: () => void; manual: boolean }) {
+/** One step, as one card: its number and name, what to do, what to copy, the pictures, and the button that says it is done, which stays in view while the pictures scroll. */
+function StepCard({ n, eyebrow, step, done, foot, children }: { n: number; eyebrow: string; step: GuideStep; done: boolean; foot?: ReactNode; children: ReactNode }) {
+  return (
+    <article className={`pf-card${done ? ' done' : ''}`} data-card={n}>
+      <header className="pf-card-head">
+        <span className="pf-card-num" aria-hidden="true">
+          {done ? <Check /> : n}
+        </span>
+        <div className="pf-card-title">
+          <span className="pf-eyebrow">{eyebrow}</span>
+          <h3>
+            <Rich text={step.t} />
+          </h3>
+        </div>
+        {step.tag && (
+          <small className="pf-tag">
+            <Rich text={step.tag} />
+          </small>
+        )}
+      </header>
+      <div className="pf-card-body">{children}</div>
+      {foot && <div className="pf-acts pf-card-foot">{foot}</div>}
+    </article>
+  );
+}
+
+function StepPanel({ step, n, done, canGoBack, canManage, lock, onDone, onBack, manual }: { step: GuideStep; n: number; done: boolean; canGoBack: boolean; canManage: boolean; lock: Lock; onDone: () => void; onBack: () => void; manual: boolean }) {
   const hasCopy = Boolean(step.copy);
   const todo = step.todo ?? [];
   return (
-    <>
-      <span className="pf-eyebrow">{hasCopy ? 'انسخ هذا إلى صفحة المنصة' : 'في هذه الخطوة'}</span>
-      <h3>
-        <Rich text={step.t} />
-      </h3>
-      {todo.length > 0 && <GuideTodo items={todo} />}
+    <StepCard
+      n={n}
+      eyebrow={hasCopy ? 'انسخ هذا إلى صفحة المنصة' : 'في هذه الخطوة'}
+      step={step}
+      done={done}
+      foot={
+        manual ? undefined : (
+          <>
+            <button type="button" className="pf-btn pri" {...(canManage ? { onClick: onDone } : lock(LOCKED))}>
+              {done ? 'متابعة' : (step.ok ?? 'تمت')}
+            </button>
+            {canGoBack && (
+              <button type="button" className="pf-btn ghost" onClick={onBack}>
+                السابق
+              </button>
+            )}
+          </>
+        )
+      }
+    >
+      {done && !manual && <p className="pf-note ok">أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.</p>}
+      {todo.length > 0 && <GuideTodo items={todo} shots={step.shots} />}
       {!hasCopy && !manual && todo.length === 0 && <p>لا يحتاج الموقع منك شيئاً هنا. أنجزها في الصفحة التي فتحتها، ثم عُد وأكّد.</p>}
       {manual && (
         <p>
@@ -216,53 +267,44 @@ function StepPanel({ step, canGoBack, canManage, lock, onDone, onBack, manual }:
       {step.copy && <CopyField label={step.copyLabel ?? 'العنوان'} value={step.copy} />}
       {step.more?.map((m) => <CopyField key={m.label} label={m.label} value={m.copy} />)}
       {step.shots && step.shots.length > 0 && <GuideShots shots={step.shots} />}
-      {!manual && (
-        <div className="pf-acts">
-          <button type="button" className="pf-btn pri" {...(canManage ? { onClick: onDone } : lock(LOCKED))}>
-            {step.ok ?? 'تمت'}
-          </button>
-          {canGoBack && (
-            <button type="button" className="pf-btn ghost" onClick={onBack}>
-              السابق
-            </button>
-          )}
-        </div>
-      )}
-    </>
+    </StepCard>
   );
 }
 
-function ReviewPanel({ step, submitted, canManage, lock, onSkip, onState }: { step: GuideStep; submitted: boolean; canManage: boolean; lock: Lock; onSkip: () => void; onState: (s: 'submitted' | 'approved') => void }) {
+function ReviewPanel({ step, n, done, submitted, canManage, lock, onSkip, onState }: { step: GuideStep; n: number; done: boolean; submitted: boolean; canManage: boolean; lock: Lock; onSkip: () => void; onState: (s: 'submitted' | 'approved') => void }) {
   return (
-    <>
-      <span className="pf-eyebrow">خارج الموقع: قرار المنصة</span>
-      <h3>
-        <Rich text={step.t} />
-      </h3>
+    <StepCard
+      n={n}
+      eyebrow="خارج الموقع: قرار المنصة"
+      step={step}
+      done={done}
+      foot={
+        <>
+          {!submitted && (
+            <button type="button" className="pf-btn pri" {...(canManage ? { onClick: () => onState('submitted') } : lock(LOCKED))}>
+              قدّمت الطلب
+            </button>
+          )}
+          <button type="button" className={`pf-btn ${submitted ? 'pri' : ''}`} {...(canManage ? { onClick: () => onState('approved') } : lock(LOCKED))}>
+            وافقت المنصة
+          </button>
+          {step.ok && (
+            <button type="button" className="pf-btn ghost" {...(canManage ? { onClick: onSkip } : lock(LOCKED))}>
+              {step.ok}
+            </button>
+          )}
+        </>
+      }
+    >
       <p>لا تخبر المنصة الموقع بما قررت، فقل له أنت أين وصل الطلب.</p>
       {step.copy && <CopyField label={step.copyLabel ?? 'الرابط'} value={step.copy} />}
       {step.more?.map((m) => <CopyField key={m.label} label={m.label} value={m.copy} />)}
       {submitted && <p className="pf-note info">قُدّم الطلب، وننتظر قرار المنصة.</p>}
-      <div className="pf-acts">
-        {!submitted && (
-          <button type="button" className="pf-btn pri" {...(canManage ? { onClick: () => onState('submitted') } : lock(LOCKED))}>
-            قدّمت الطلب
-          </button>
-        )}
-        <button type="button" className={`pf-btn ${submitted ? 'pri' : ''}`} {...(canManage ? { onClick: () => onState('approved') } : lock(LOCKED))}>
-          وافقت المنصة
-        </button>
-        {step.ok && (
-          <button type="button" className="pf-btn ghost" {...(canManage ? { onClick: onSkip } : lock(LOCKED))}>
-            {step.ok}
-          </button>
-        )}
-      </div>
-    </>
+    </StepCard>
   );
 }
 
-function KeysPanel({ provider, step, app, fields, problem, canSecrets, lock, onSaved }: { provider: ConnProvider; step: GuideStep; app: Integration | undefined; fields: Fields; problem: boolean; canSecrets: boolean; lock: Lock; onSaved: (f: Fields) => Promise<void> }) {
+function KeysPanel({ provider, step, n, done, app, fields, problem, canSecrets, lock, onSaved }: { provider: ConnProvider; step: GuideStep; n: number; done: boolean; app: Integration | undefined; fields: Fields; problem: boolean; canSecrets: boolean; lock: Lock; onSaved: (f: Fields) => Promise<void> }) {
   const c = PROVIDER_COPY[provider];
   const have = app?.has_secret === true;
   const [id, setId] = useState(fields.app_id ?? (typeof app?.config?.app_id === 'string' ? app.config.app_id : ''));
@@ -296,12 +338,23 @@ function KeysPanel({ provider, step, app, fields, problem, canSecrets, lock, onS
     }
   };
   return (
-    <>
-      <span className="pf-eyebrow">ما يحتاجه الموقع منك</span>
-      <h3>
-        <Rich text={step.t} />
-      </h3>
-      {step.todo && step.todo.length > 0 && <GuideTodo items={step.todo} />}
+    <StepCard
+      n={n}
+      eyebrow="ما يحتاجه الموقع منك"
+      step={step}
+      done={done}
+      foot={
+        <button
+          type="button"
+          className="pf-btn pri st-app-save"
+          disabled={busy || (canSecrets && (!id.trim() || !secret.trim() || (needsConfig && !config.trim())))}
+          {...(canSecrets ? { onClick: () => void save() } : lock('إدخال الأسرار لمن يملك «إدارة المنصات وتطبيقاتها» و«إدخال أسرار التكاملات وتجديدها».'))}
+        >
+          {busy ? 'جارٍ الفحص…' : have ? 'استبدال بعد الفحص' : 'فحص وحفظ'}
+        </button>
+      }
+    >
+      {step.todo && step.todo.length > 0 && <GuideTodo items={step.todo} shots={step.shots} />}
       {problem && !tail && <p className="pf-note bad">{expiry.state === 'expired' ? expiryLineAr(expiry) : 'رفضت المنصة المعرّف أو السر المحفوظ. أدخلهما من جديد.'}</p>}
       {have && !problem && (
         <p className="pf-note ok">
@@ -341,17 +394,7 @@ function KeysPanel({ provider, step, app, fields, problem, canSecrets, lock, onS
           {error}
         </p>
       )}
-      <div className="pf-acts">
-        <button
-          type="button"
-          className="pf-btn pri st-app-save"
-          disabled={busy || (canSecrets && (!id.trim() || !secret.trim() || (needsConfig && !config.trim())))}
-          {...(canSecrets ? { onClick: () => void save() } : lock('إدخال الأسرار لمن يملك «إدارة المنصات وتطبيقاتها» و«إدخال أسرار التكاملات وتجديدها».'))}
-        >
-          {busy ? 'جارٍ الفحص…' : have ? 'استبدال بعد الفحص' : 'فحص وحفظ'}
-        </button>
-      </div>
-    </>
+    </StepCard>
   );
 }
 

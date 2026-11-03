@@ -152,3 +152,19 @@ test('the sheet and the circled "!" draw a guide with the same parts, and a pict
   assert.doesNotMatch(comp, /\p{Extended_Pictographic}/u);
   assert.match(readFileSync('src/app/work.css', 'utf8'), /\.gd-zoom\{[^}]*border-radius:12px/, 'the corners are rounded by the page');
 });
+
+test('a ring in a picture points at an action that exists in its step, and a step tag is a short condition', () => {
+  for (const [key, g] of Object.entries(GUIDES)) {
+    for (const s of g.steps) {
+      for (const shot of s.shots ?? []) {
+        for (const r of shot.rings ?? []) {
+          if (r === 'x') continue;
+          assert.ok(/^[1-9]$/.test(r) && Number(r) <= (s.todo?.length ?? 0), `${key}/${s.id ?? s.t}: ring ${r}`);
+        }
+      }
+      if (s.tag) assert.ok(plainText(s.tag).length <= 30, `${key}/${s.id}: tag too long`);
+    }
+  }
+  const rings = GUIDES.google.steps.flatMap((s) => (s.shots ?? []).map((x) => (x.rings ?? []).join('')));
+  assert.deepEqual(rings, ['', '12x', '', '2', '34', '1', '2', '23', '13'], 'the rings match the ones drawn in the pictures (scripts/guide-shots.mjs)');
+});

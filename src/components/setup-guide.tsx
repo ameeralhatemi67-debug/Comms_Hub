@@ -61,7 +61,7 @@ export function SetupGuide({
                       <Rich text={s.b} />
                     </span>
                   )}
-                  {s.todo && s.todo.length > 0 && <GuideTodo items={s.todo} />}
+                  {s.todo && s.todo.length > 0 && <GuideTodo items={s.todo} shots={s.shots} />}
                   {s.copy && (
                     <bdi className="su-copy" dir="ltr">
                       {s.copy}

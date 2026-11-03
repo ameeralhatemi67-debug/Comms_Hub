@@ -1,6 +1,6 @@
 {
   "script": "qa/guide-modal.cjs",
-  "run": "2026-11-02T12:34:28.914Z",
+  "run": "2026-11-03T05:36:09.002Z",
   "checks": [
     {
       "name": "the circled \"!\" draws the thirteen steps of the guide, each with its list of actions",

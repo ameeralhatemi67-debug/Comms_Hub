@@ -2398,3 +2398,21 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - The stored progress of YouTube on comms-hub, read only (the nine old step ids, the Google app connected with its secret stored, one YouTube account), run through the new rules: **13 of 13** steps, state `ok`, chip «متصلة». Nothing was written to the database.
 - **Not verified.** A signed-in session on the real site: the sheet drawn from real data in a real browser (the fixture uses the real components and stand-ins for the database). The new steps followed from nothing on a fresh Google project; the order of the wizard's four screens comes from Google's page of 2026-11-02, not from a screenshot, and Google's wording differs by language. `qa/platform-setup-live.cjs` was not run (it needs `.env.local`, which the worktree does not have). The pictures are of another project's console.
 - **Next.** The next person to set up a Google project follows the guide and says where they stopped.
+
+### 2026-11-03: the look of a setup step, and the client names blurred
+
+- **Owner direction.** After the YouTube steps were called right, the owner asked to blur the two client names in the picture of the «Clients» page, and then for the look to follow: the four suggestions A1 to A4 (progress, one card per step, pictures in order, calm states). Which platform comes next was asked as a separate question and is answered in the session, not built.
+- **Built (`MVP_draft.md` section 67.6).**
+  - `public/guides/google/clients.png`: the two names pixelated and blurred. The originals are not kept, so it was done on the finished file with the same routine, and the same two boxes were added to `scripts/guide-shots.mjs`. Its caption now says the names are blurred.
+  - Progress: «الخطوة 9 من 13» with «أُنجز 11 وبقي 2», and a strip of one segment per step (`SheetProgress` with `marks`; the other two sheets keep the single fill).
+  - One card per step (`StepCard` in `platform-sheet.tsx`, used by the ordinary, keys and review steps): number or check, name, an optional condition (`tag`, set on the test-users step), the body, and a bar with the buttons kept in view and on the sheet's bottom edge. A done step says so and its button reads «متابعة».
+  - A copy button on every value in backticks (`Rich copy`), a «في الصورة» marker on an action a picture shows, «الصورة 1 من 2» on pictures, and a legend for the rings (`rings` in a shot, held equal to the pictures by a new test).
+  - Done and to-do steps in the muted ink, to-do numbers dashed.
+- **Not changed.** Saved progress, step ids, `implied`, every database rule. Pictures stay stacked: the card is too narrow for two side by side, which differs from what was first suggested.
+- **Verified, numbers.**
+  - `npm run typecheck` clean; `npm test` **723 of 723** (one new test in `tests/setup-guides.test.mjs`: every ring points at an action of its step, a tag is short, and the rings equal the nine pictures').
+  - `qa/platforms-flow.cjs` **131 of 131** in Edge (was 121; ten new: the strip's segments and counts, the card, the picture markers and legends, the dimmed steps, the copy button copying exactly `Comms Hub Web`, the red-ring legend, the tag in the list and on the card, the button in view while pictures scroll and on the bottom edge, a step not yet done keeping its own button). `qa/guide-modal.cjs` **10 of 10**. Screenshots of every step, the phone and the evening theme were looked at.
+  - One defect found by looking, not by a check: the strip's segments had no height at first (a percentage height inside the flex strip), so the bar looked empty although every check on its markup passed. Fixed, and the check now asks for the segments' real size.
+  - `npm run build` clean (exit 0).
+- **Not verified.** Signed in on the real site (the fixture uses the real components with stand-ins for the database). The look on a real phone. The circled "!" shows the copy buttons and picture notes but was checked only through `qa/guide-modal.cjs`.
+- **Not done, said plainly.** Not committed, not pushed, not deployed.

@@ -3201,6 +3201,28 @@ Internal, Workspace and Test users shared one sentence beside Arabic punctuation
 - **Saved progress is unchanged.** The ids a person confirmed (`youtube`, `redirect`, `publish`) are kept, and every step added is `implied`, so a
   connected platform still reads «متصلة» with nothing asked again.
 
+## 67.6 The look of a step, 2026-11-03
+
+The director found the written steps of the YouTube guide right and asked for the look to follow. Four changes, in the setup sheet
+(`src/components/settings/platform-sheet.tsx`, `src/components/sheet.tsx`, `src/components/guide-text.tsx`, `src/app/work.css`); the circled "!"
+gets the copy buttons and the picture notes only.
+
+- **Progress.** Under the title, «الخطوة 9 من 13» and «أُنجز 11 وبقي 2», and a strip of one segment per step: filled for a done step, outlined for the
+  one you are on, pale for the rest. The strip keeps `role="progressbar"` and its percentage. The other sheets keep the single fill.
+- **One card per step.** The input side shows a card: the step's number (a check once done), its name, a short condition when it does not apply to
+  everyone (`tag` in a guide step, now «لمن اختار «External»» on the test-users step, drawn also in the list), what to do, the address to copy,
+  the pictures, and a bar with the button that goes on. The bar stays in view while the pictures scroll, and sits on the sheet's bottom edge.
+  A step already done says so and its button reads «متابعة». The reason sentence and the link to the platform stay under the step's name in the list.
+- **Values to type.** A value in backticks carries its own copy button and copies exactly what is shown.
+- **Pictures in order.** When a step has more than one, each says «الصورة 1 من 2». A picture whose rings are numbered (`rings` in a shot) says that the
+  number is the number of the action in the list, and a red ring says «لا تفعل هذا». An action a picture shows ends with «في الصورة» (and the picture's
+  number when there are several). The rings listed in `src/lib/setup-guides.ts` are held equal to the ones drawn by `scripts/guide-shots.mjs`
+  by `tests/setup-guides.test.mjs`. The pictures are stacked, not set side by side: the card is too narrow for two.
+- **Calm.** Steps done and steps still to do are drawn in the muted ink; the ones still to do have a dashed number. The step you are on is the only
+  one in full ink.
+- **Also.** The names of the clients in the picture of the «Clients» page are blurred (they were examples; now unreadable).
+- **Unchanged.** Saved progress, the ids, what is `implied`, every rule of the database. Nothing but how a step is drawn.
+
 ---
 
 # 68. «ورقة الكتابة» and the writing documents, 2026-11-02
