@@ -16,6 +16,7 @@ import * as cache from '../../src/lib/studio/cache.ts';
 import { exportVideo } from '../../src/lib/studio/export.ts';
 import { loadFonts, usedFonts } from '../../src/lib/studio/text.ts';
 import { loadSticker, MotionRenderer } from '../../src/lib/studio/motion-adapter.ts';
+import { mosaicStep, squaresImage } from '../../src/lib/studio/cover.ts';
 import { loadAssets } from '../../src/lib/motion/renderers.js';
 
 export const REAL = '00000000-0000-4000-8000-0000000000f1';
@@ -133,10 +134,48 @@ export async function exportReal(engine: string) {
   return { frames: res.frames, bytes: res.bytes, audio: res.audio, target: res.target, ms };
 }
 
+/**
+ * «إخفاء بالمربعات» worked out on the graphics chip and in plain code, over the same picture, compared byte for byte
+ * (cover.ts squaresImage). Where the chip path is not available here, says so.
+ */
+export function squaresParity() {
+  const src = new SyntheticSources(0);
+  const c = document.createElement('canvas');
+  c.width = 1920;
+  c.height = 1080;
+  const ctx = c.getContext('2d')!;
+  ctx.drawImage(src.videoAt(1_000_000) as CanvasImageSource, 0, 0, 1920, 1080);
+  const pixels = (img: CanvasImageSource, w: number, h: number) => {
+    const o = new OffscreenCanvas(w, h);
+    const x = o.getContext('2d', { willReadFrequently: true })!;
+    x.drawImage(img, 0, 0);
+    return x.getImageData(0, 0, w, h).data;
+  };
+  // x, y, width, height, square size: a face, the whole frame, a corner, odd sizes, the smallest squares
+  const cases: [number, number, number, number, number][] = [[100, 80, 520, 300, 31], [0, 0, 1920, 1080, 64], [1700, 900, 220, 180, 8], [333, 444, 97, 61, 5], [10, 20, 37, 29, 2]];
+  return cases.map(([x0, y0, bw, bh, size]) => {
+    const cols = Math.min(bw, Math.max(1, Math.round(bw / size)));
+    const rows = Math.min(bh, Math.max(1, Math.round(bh / size)));
+    const stride = mosaicStep(size);
+    const chip = squaresImage(ctx, x0, y0, bw, bh, cols, rows, stride, 'chip');
+    if (!chip) return { area: `${bw}x${bh}`, size, chip: false, differing: null };
+    const a = pixels(chip, bw, bh);
+    const b = pixels(squaresImage(ctx, x0, y0, bw, bh, cols, rows, stride, 'code')!, bw, bh);
+    let differing = 0;
+    let max = 0;
+    for (let i = 0; i < a.length; i++) {
+      const d = Math.abs(a[i] - b[i]);
+      if (d) differing++;
+      if (d > max) max = d;
+    }
+    return { area: `${bw}x${bh}`, size, chip: true, differing, max };
+  });
+}
+
 function renderer(): string {
   const gl = document.createElement('canvas').getContext('webgl');
   const ext = gl?.getExtension('WEBGL_debug_renderer_info');
   return gl && ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
 }
 
-Object.assign(window as unknown as Record<string, unknown>, { crossdevice: { prepare, draw, compare, exportReal, renderer } });
+Object.assign(window as unknown as Record<string, unknown>, { crossdevice: { prepare, draw, compare, exportReal, renderer, squaresParity } });

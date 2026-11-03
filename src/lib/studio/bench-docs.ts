@@ -31,7 +31,11 @@ function withImage(doc: ProjectDoc): { doc: ProjectDoc; image: string } {
 
 const put = (doc: ProjectDoc, clip: Parameters<typeof addClip>[1]) => addClip(doc, clip);
 
-/** Four shapes moving and turning on keys, over a coloured background: the lightest work there is. */
+// Graphics and text each have two tracks (schema.ts TRACK_LIMITS), and a clip that fits on none is moved to the end of
+// the timeline; so at most two graphics and two texts are on screen at once, and the documents below take turns.
+const HALF = BENCH_LENGTH / 2;
+
+/** Four shapes moving and turning on keys, two at a time, over a coloured background: the lightest work there is. */
 export function plainDoc(): ProjectDoc {
   let doc = newVideoDoc('9:16', 30);
   doc = { ...doc, video: { ...doc.video!, background: '#0d3b2e' } };
@@ -42,34 +46,34 @@ export function plainDoc(): ProjectDoc {
     { type: 'line', fill: null, stroke: '#c9a227' },
   ];
   shapes.forEach((s, i) => {
-    const r = put(doc, { start: 0, length: BENCH_LENGTH, shape: { type: s.type, w: 360, h: 220, fill: s.fill, stroke: s.stroke, strokeWidth: 10, radius: 28 }, transform: { x: 540, y: 300 + i * 420, scale: 1, rotation: 0, opacity: 0.9 } });
+    const r = put(doc, { start: i < 2 ? 0 : HALF, length: HALF, shape: { type: s.type, w: 360, h: 220, fill: s.fill, stroke: s.stroke, strokeWidth: 10, radius: 28 }, transform: { x: 540, y: 500 + (i % 2) * 900, scale: 1, rotation: 0, opacity: 0.9 } });
     doc = updateClip(r.doc, r.clipId, {
       keys: {
-        x: [{ t: 0, v: 200 }, { t: BENCH_LENGTH, v: 880, ease: 'inOut' }],
-        rotation: [{ t: 0, v: 0 }, { t: BENCH_LENGTH, v: 90 * (i + 1) }],
-        scale: [{ t: 0, v: 0.8 }, { t: BENCH_LENGTH / 2, v: 1.2, ease: 'out' }, { t: BENCH_LENGTH, v: 0.9 }],
+        x: [{ t: 0, v: 200 }, { t: HALF, v: 880, ease: 'inOut' }],
+        rotation: [{ t: 0, v: 0 }, { t: HALF, v: 90 * (i + 1) }],
+        scale: [{ t: 0, v: 0.8 }, { t: HALF / 2, v: 1.2, ease: 'out' }, { t: HALF, v: 0.9 }],
       },
     } as Partial<Clip>);
   });
   return doc;
 }
 
-/** Three Arabic texts with a box, a stroke and a shadow, revealed letter by letter and word by word. */
+/** Three Arabic texts with a box, a stroke and a shadow, revealed letter by letter and word by word; two at a time. */
 export function textDoc(): ProjectDoc {
   let doc = newVideoDoc('9:16', 30);
   const lines = [
-    { content: 'مركز الاتصال المؤسسي يرحّب بكم', font: 'IBM Plex Sans Arabic', anim: 'typewriter' as const, y: 420 },
-    { content: 'لا إله إلا الله، والله أكبر: «الإعلان» عن الفعالية ٢٠٢٦', font: 'Reem Kufi', anim: 'words' as const, y: 960 },
-    { content: 'Comms Hub 2026 مع نصّ عربي طويل يلتفّ على أكثر من سطر واحد', font: 'Aref Ruqaa', anim: 'fade' as const, y: 1500 },
+    { content: 'مركز الاتصال المؤسسي يرحّب بكم', font: 'IBM Plex Sans Arabic', anim: 'typewriter' as const, y: 420, start: 0, length: BENCH_LENGTH },
+    { content: 'لا إله إلا الله، والله أكبر: «الإعلان» عن الفعالية ٢٠٢٦', font: 'Reem Kufi', anim: 'words' as const, y: 1100, start: 0, length: HALF },
+    { content: 'Comms Hub 2026 مع نصّ عربي طويل يلتفّ على أكثر من سطر واحد', font: 'Aref Ruqaa', anim: 'fade' as const, y: 1100, start: HALF, length: HALF },
   ];
   for (const l of lines) {
     const r = put(doc, {
-      start: 0,
-      length: BENCH_LENGTH,
+      start: l.start,
+      length: l.length,
       text: { ...defaultText(l.content), font: l.font, size: 84, box: { color: '#0d3b2e', opacity: 0.7, padding: 24, radius: 16 }, stroke: { color: '#000000', width: 3 }, shadow: { color: 'rgba(0,0,0,0.6)', blur: 14 } },
       transform: { x: 540, y: l.y, scale: 1, rotation: 0, opacity: 1 },
     });
-    doc = updateClip(r.doc, r.clipId, { animIn: { kind: l.anim, length: sec(2.5) }, animOut: null } as Partial<Clip>);
+    doc = updateClip(r.doc, r.clipId, { animIn: { kind: l.anim, length: Math.min(sec(2.5), Math.round(l.length * 0.75)) }, animOut: null } as Partial<Clip>);
   }
   return doc;
 }
@@ -101,19 +105,19 @@ export function transitionsDoc(): ProjectDoc {
   return doc;
 }
 
-/** Covers in both modes and both shapes, turning and fading, over the synthetic video. */
+/** Covers in both modes and both shapes, turning and fading, over the synthetic video: blur first, then squares. */
 export function coversDoc(): ProjectDoc {
   let { doc, video } = withVideo(newVideoDoc('9:16', 30));
   doc = put(doc, { source: video, start: 0, length: BENCH_LENGTH, in: sec(5), fit: 'cover' }).doc;
   const covers = [
-    { mode: 'blur' as const, shape: 'ellipse' as const, amount: 100, x: 300, y: 500 },
-    { mode: 'blur' as const, shape: 'rect' as const, amount: 20, x: 780, y: 900 },
-    { mode: 'blocks' as const, shape: 'ellipse' as const, amount: 80, x: 300, y: 1400 },
-    { mode: 'blocks' as const, shape: 'rect' as const, amount: 10, x: 780, y: 1650 },
+    { mode: 'blur' as const, shape: 'ellipse' as const, amount: 100, x: 300, y: 600, start: 0 },
+    { mode: 'blur' as const, shape: 'rect' as const, amount: 20, x: 780, y: 1300, start: 0 },
+    { mode: 'blocks' as const, shape: 'ellipse' as const, amount: 80, x: 300, y: 600, start: HALF },
+    { mode: 'blocks' as const, shape: 'rect' as const, amount: 10, x: 780, y: 1300, start: HALF },
   ];
   for (const c of covers) {
-    const r = put(doc, { start: 0, length: BENCH_LENGTH, cover: { mode: c.mode, amount: c.amount, shape: c.shape, w: 380, h: 300 }, transform: { x: c.x, y: c.y, scale: 1, rotation: 0, opacity: 1 } });
-    doc = updateClip(r.doc, r.clipId, { keys: { rotation: [{ t: 0, v: -20 }, { t: BENCH_LENGTH, v: 30 }], opacity: [{ t: 0, v: 1 }, { t: BENCH_LENGTH, v: 0.4 }] } } as Partial<Clip>);
+    const r = put(doc, { start: c.start, length: HALF, cover: { mode: c.mode, amount: c.amount, shape: c.shape, w: 380, h: 300 }, transform: { x: c.x, y: c.y, scale: 1, rotation: 0, opacity: 1 } });
+    doc = updateClip(r.doc, r.clipId, { keys: { rotation: [{ t: 0, v: -20 }, { t: HALF, v: 30 }], opacity: [{ t: 0, v: 1 }, { t: HALF, v: 0.4 }] } } as Partial<Clip>);
   }
   return doc;
 }
@@ -142,8 +146,12 @@ export function brandDoc(): ProjectDoc {
   doc = { ...doc, video: { ...doc.video!, background: '#f4f6f2' } };
   const g = motionCatalog[0];
   if (g) doc = put(doc, { ...motionClip(g, '1:1', 0), length: BENCH_LENGTH }).doc;
-  STICKERS.slice(0, 3).forEach((key, i) => {
-    doc = put(doc, { start: 0, length: BENCH_LENGTH, sticker: { key, color: i % 2 ? '#c9a227' : '#0d3b2e' }, transform: { x: 200 + i * 340, y: 900, scale: 0.6, rotation: 0, opacity: 1 } }).doc;
+  // the marks take turns on the second graphics track
+  const marks = STICKERS.slice(0, 3);
+  marks.forEach((key, i) => {
+    const start = Math.round((i * BENCH_LENGTH) / marks.length);
+    const end = Math.round(((i + 1) * BENCH_LENGTH) / marks.length);
+    doc = put(doc, { start, length: end - start, sticker: { key, color: i % 2 ? '#c9a227' : '#0d3b2e' }, transform: { x: 300 + i * 240, y: 860, scale: 0.6, rotation: 0, opacity: 1 } }).doc;
   });
   return doc;
 }

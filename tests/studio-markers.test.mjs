@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { newVideoDoc, US } from '../src/lib/studio/schema.ts';
 import { addMarker, updateMarker, removeMarker, markersOf, chapters, chapterIssues, youtubeTime, YOUTUBE_CHAPTERS } from '../src/lib/studio/markers.ts';
-import { coverBlock, coverRadius, newCover, coverLabel } from '../src/lib/studio/cover.ts';
+import { coverBlock, coverRadius, newCover, coverLabel, mosaic, mosaicStep, squareEdges } from '../src/lib/studio/cover.ts';
 import { addClip, kindFor, snapPoints, locate } from '../src/lib/studio/timeline.ts';
 import { diffDocs } from '../src/lib/studio/diff.ts';
 
@@ -63,4 +63,46 @@ test('a covered area sits on a graphics track; its strength sets the blur and th
   assert.equal(coverBlock({ amount: 100 }), 64);
   assert.equal(coverRadius({ amount: 500 }), 50, 'kept within 1 to 100');
   assert.equal(coverLabel({ mode: 'blocks' }), 'إخفاء بالمربعات');
+});
+
+// «إخفاء بالمربعات» worked out the same on every machine (2026-11-03; qa/studio-crossdevice.cjs found the old squares
+// chip-dependent): each square is the opacity-weighted average of the pixels under it.
+const px = (pixels) => new Uint8ClampedArray(pixels.flat());
+const colour = (colours, cols, i, j) => [...colours.subarray((j * cols + i) * 4, (j * cols + i) * 4 + 4)];
+
+test('squares: each takes the average colour of the pixels under it, rounded once', () => {
+  // 4 x 1: black, white | red, blue
+  const data = px([[0, 0, 0, 255], [255, 255, 255, 255], [255, 0, 0, 255], [0, 0, 255, 255]]);
+  const out = mosaic(data, 4, 1, 2, 1);
+  assert.equal(out.length, 2 * 4, 'one colour per square');
+  assert.deepEqual(colour(out, 2, 0, 0), [128, 128, 128, 255], '127.5 rounds to 128');
+  assert.deepEqual(colour(out, 2, 1, 0), [128, 0, 128, 255]);
+});
+
+test('squares: a clear pixel does not tint the square, and the square keeps the average opacity', () => {
+  assert.deepEqual(colour(mosaic(px([[255, 0, 0, 255], [0, 255, 0, 0]]), 2, 1, 1, 1), 1, 0, 0), [255, 0, 0, 128]);
+  assert.deepEqual(colour(mosaic(px([[9, 9, 9, 0], [7, 7, 7, 0]]), 2, 1, 1, 1), 1, 0, 0), [0, 0, 0, 0], 'nothing under it: clear');
+});
+
+test('squares: edges on whole pixels, the same pixels give the same colours, one square per pixel keeps the picture', () => {
+  assert.deepEqual([...squareEdges(5, 2)], [0, 2, 5]);
+  assert.deepEqual([...squareEdges(1000, 3)], [0, 333, 666, 1000]);
+  const w = 5;
+  const h = 3;
+  const data = new Uint8ClampedArray(w * h * 4).map((_, i) => (i % 4 === 3 ? 255 : (i * 37) % 256));
+  // columns [0, 2) and [2, 5); rows [0, 1) and [1, 3): the first square averages pixels (0,0) and (1,0)
+  const out = mosaic(data, w, h, 2, 2);
+  const p = (x, y) => [...data.subarray((y * w + x) * 4, (y * w + x) * 4 + 3)];
+  assert.deepEqual(colour(out, 2, 0, 0).slice(0, 3), [0, 1, 2].map((c) => Math.round((p(0, 0)[c] + p(1, 0)[c]) / 2)));
+  assert.deepEqual([...mosaic(data, w, h, 2, 2)], [...out]);
+  assert.deepEqual([...mosaic(data, w, h, w, h)], [...data], 'one square per pixel is the picture itself');
+});
+
+test('squares: a large square is averaged on a fixed grid from its corner, the same on every machine', () => {
+  assert.equal(mosaicStep(4), 1, 'small squares: every pixel');
+  assert.equal(mosaicStep(31), 5);
+  // 12 x 1, one square, grid of 4: pixels 0, 4, 8 only
+  const data = new Uint8ClampedArray(12 * 4).map((_, i) => (i % 4 === 3 ? 255 : i % 4 === 0 ? ((i >> 2) % 4 === 0 ? 200 : 0) : 0));
+  assert.deepEqual(colour(mosaic(data, 12, 1, 1, 1, 4), 1, 0, 0), [200, 0, 0, 255], 'only the grid pixels count');
+  assert.deepEqual(colour(mosaic(data, 12, 1, 1, 1, 1), 1, 0, 0), [50, 0, 0, 255], 'every pixel: a quarter of them are red');
 });

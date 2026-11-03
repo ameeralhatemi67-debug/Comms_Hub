@@ -2746,3 +2746,43 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - `qa/desktop-shell.cjs` (D1's install check) was updated for bridge version 6 and not re-run: it needs the release package
     and an install on this laptop.
 - **Not done.** Nothing pushed, no release published.
+
+### 2026-11-03: «إخفاء بالمربعات» the same on every computer
+
+- **Owner direction.** "Yes, fix the squares", after D9's proof found them chip-dependent; the owner had been told it changes
+  those squares' pixels everywhere.
+- **What changed (the studio, every client; `MVP_draft.md` 62.8).**
+  - Each square takes the average colour, weighted by opacity, of what it covers, on a fixed grid of about six samples a side
+    (`cover.ts`: `squareEdges`, `mosaic`, `mosaicStep`), with whole-number sums and integer rounding.
+  - On the graphics chip, in WebGL2 (`src/lib/studio/squares-gl.ts`): texelFetch reads the pixels without filtering, the
+    sums are 32-bit unsigned integers, a second pass paints the area. Nothing is read back. Where WebGL2 is missing, would
+    run without a graphics chip, or loses its context, `cover.ts` works the squares out in plain code (`squaresImage`).
+  - Before: each square was one pixel of what it covered, picked by shrinking without smoothing, and each chip picked its own.
+- **On the way.**
+  - **The first version read the picture back each frame and averaged it in plain code.** Exact, and too slow: in an
+    export-like loop on this laptop a 560 by 360 read-back each frame brought 110 to 120 frames a second down to 41, and
+    large squares to 8 to 14. The chip path replaced it; the plain-code path remains only where there is no chip, where a
+    read-back is cheap.
+  - **D9's reference documents were wrong, and D9's record above with them.** Two graphics and two text tracks are allowed,
+    and `addClip` moves a clip that fits on none to the end of the timeline. So in «plain», «text», «covers» and «brand» every
+    item beyond the second at a time was pushed past the times the proof draws. In particular, **D9's proof never drew the
+    squares of the covers document**; only «effects» had squares on screen. `bench-docs.ts` now lays them out in turns within
+    the limits, and `tests/scale.test.mjs` refuses a reference document with a clip pushed past its length. «effects», the
+    one the measurement's export rate uses, was not affected.
+- **Verified, numbers.**
+  - `npm run typecheck` clean; `npm test` **778 of 778** (four new in `tests/studio-markers.test.mjs`); `npm run build` passes.
+  - `qa/studio-engine.cjs` **41 of 41** in Edge (the squares still change what they cover and nothing outside it).
+  - **`qa/studio-crossdevice.cjs` 34 of 43** (29 of 39 before the fix):
+    - the squares worked out on the chip equal the plain-code squares **byte for byte** in Edge, on the AMD chip and on the
+      RTX, in five areas from 37 by 29 pixels to the whole frame; with no graphics chip the chip path declines, as designed;
+    - **the RTX now passes on all eight documents**, «effects» included (its worst frame 40.5 dB before, 53.8 now), with the
+      covers document's squares on screen; the AMD chip still draws all 54 frames identical to Edge's;
+    - with no graphics chip: «covers» 50.8 dB at worst (the squares no longer differ), «effects» 48.2 (40.0 before); what still
+      differs there is picture scaling and colour adjustments drawn on the processor, up to 53 levels on scaled pictures;
+    - still failing, unchanged and separate: the BT.601 export with no graphics chip (39.1 dB) and the two colour descriptions.
+  - **Cost, an export-like loop on this laptop** (draw, VideoFrame, encode; 1080p over the 4K synthetic footage; scratch
+    timing, not a check): squares on the chip **109 to 128 frames a second**, the same as no cover (114 to 129) and as the old
+    squares (115 to 124), with nothing slower afterwards.
+- **Not verified.** Nothing signed in. A real project with squares was not opened: a project saved before today shows the same
+  squares softer in colour.
+- **Not done.** Nothing pushed.

@@ -2605,6 +2605,7 @@ Owner request of 2026-10-20 (the third round, `Studio_Build_Plan.md` section 10)
 - Markers: M puts a marker at the playhead; markers sit on the time ruler, edges snap to them, and the window «العلامات» lists them with their names and colours, renames them, removes them and moves the playhead to them.
 - Chapters: «نسخ الفصول» copies the markers as YouTube chapter lines (time and name), after checking YouTube's own rules for chapters; a broken rule is said in words.
 - Covered areas: «تمويه منطقة» and «إخفاء بالمربعات» in «النصوص والعلامات» add a box or an oval that blurs, or turns into large squares, whatever is under it, on a video (as a clip) or a photo (as a layer). Its strength is set in the settings. With keyframes it follows a moving face or plate. The preview and the export cover the same pixels.
+- From 2026-11-03 each square of «إخفاء بالمربعات» takes the average colour of what it covers, worked out with whole numbers on the graphics chip, or by the page where there is none, so the same picture gives the same squares on every computer. Before, each square showed one pixel of what it covered, and which pixel depended on the computer's graphics chip. Squares already in a project look a little softer in colour; what they hide is hidden as before.
 
 ## 62.9 Sound, 2026-10-20
 

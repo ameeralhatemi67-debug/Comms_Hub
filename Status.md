@@ -26,6 +26,20 @@ related:
 
 # Communication Department Hub — Current Status
 
+## «إخفاء بالمربعات» the same on every computer, 2026-11-03
+
+From the owner's "Yes, fix the squares" (`MVP_draft.md` 62.8, `progress.md`).
+
+- **Done.** Each square is the average colour of what it covers, worked out with whole numbers on the graphics chip (WebGL2,
+  `squares-gl.ts`) or in plain code where there is no chip; both give the same bytes. D9's reference documents, which pushed
+  some items off the timeline, were corrected.
+- **Evidence.** `npm test` 778 of 778, typecheck and build clean, `qa/studio-engine.cjs` 41 of 41; `qa/studio-crossdevice.cjs`
+  34 of 43: chip and plain code identical byte for byte, the RTX now within tolerance on all eight documents. Exports with
+  squares run as fast as before (109 to 128 frames a second on this laptop).
+- **Still open (found by D9, separate).** With no graphics chip an export is BT.601 and drawing differs a little; Edge and the
+  application describe colour differently.
+- **Next.** The owner's choice: D10, or the no-chip colour. Nothing pushed.
+
 ## The desktop application, D9: measuring the device and choosing the graphics chip, built 2026-11-03
 
 From the owner's "Build D9 first" after `Desktop_Power_Ideas.md` (`MVP_draft.md` 63.6, `progress.md`).
@@ -41,8 +55,7 @@ From the owner's "Build D9 first" after `Desktop_Power_Ideas.md` (`MVP_draft.md`
 - **Found by the proof (the studio as it was).** «إخفاء بالمربعات» depends on the graphics chip; with no graphics chip an export
   is written as BT.601 and loses quality; Edge and the application describe colour differently.
 - **Not verified.** Nothing signed in; the laptop was busy with other work during the speed runs; no real weak laptop.
-- **Next.** The owner's choice: make «إخفاء بالمربعات» the same on every chip (it changes those squares' pixels everywhere), or
-  D10. Nothing pushed.
+- **Next.** Done the same day: «إخفاء بالمربعات» made the same on every chip (above). Nothing pushed.
 
 ## «تجربة النشر» on a Facebook Page, built 2026-11-03, not live
 

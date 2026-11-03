@@ -130,7 +130,8 @@ async function runIn(page, engine, reference) {
   const second = await page.evaluate(() => window.crossdevice.draw({ order: 'shuffled' }));
   const compared = reference ? null : await page.evaluate(() => window.crossdevice.compare());
   const exported = await page.evaluate((e) => window.crossdevice.exportReal(e), engine);
-  return { prepared, renderer, first, second, compared, exported };
+  const squares = await page.evaluate(() => window.crossdevice.squaresParity());
+  return { prepared, renderer, first, second, compared, exported, squares };
 }
 
 (async () => {
@@ -184,6 +185,10 @@ async function runIn(page, engine, reference) {
       check(`${engine}: every composed frame is the same when drawn again in another order (exact, by hash)`, same, { frames: r.first.length, differing, renderer: r.renderer });
     }
     for (const [engine, r] of Object.entries(runs)) {
+      const chip = r.squares.filter((s) => s.chip);
+      check(`${engine}: «إخفاء بالمربعات» on the graphics chip equals the plain-code squares byte for byte (or the chip path is not offered here)`, chip.every((s) => s.differing === 0), { offered: chip.length > 0, cases: r.squares });
+    }
+    for (const [engine, r] of Object.entries(runs)) {
       if (!r.compared) continue;
       const identical = r.compared.filter((c) => c.maxDiff === 0).length;
       r.summary = { frames: r.compared.length, identical, minPsnr: Math.min(...r.compared.map((c) => c.psnr)), maxOver2: Math.max(...r.compared.map((c) => c.over2)), maxDiff: Math.max(...r.compared.map((c) => c.maxDiff)) };
@@ -216,7 +221,7 @@ async function runIn(page, engine, reference) {
   }
   // the record keeps every frame's hash per engine, and the comparisons; the PNGs stay in qa/artifacts
   result.reference = runs.edge ? runs.edge.first.map((f) => ({ name: f.name, i: f.i, t: f.t, size: `${f.w}x${f.h}`, hash: f.hash })) : [];
-  result.runs = Object.fromEntries(Object.entries(runs).map(([e, r]) => [e, { engine: r.engine, renderer: r.renderer, exported: r.exported, psnr: r.psnr, summary: r.summary ?? null, sameAsReference: r.first.filter((f, i) => f.hash === runs.edge?.first[i]?.hash).length, compared: r.compared }]));
+  result.runs = Object.fromEntries(Object.entries(runs).map(([e, r]) => [e, { engine: r.engine, renderer: r.renderer, exported: r.exported, psnr: r.psnr, summary: r.summary ?? null, sameAsReference: r.first.filter((f, i) => f.hash === runs.edge?.first[i]?.hash).length, squares: r.squares, compared: r.compared }]));
   note(`Tolerance across machines: PSNR at least ${MIN_PSNR} dB and at most ${MAX_OVER2}% of channels more than 2 levels apart, per frame. Exact equality is asked only of the same machine.`);
   const failed = finish(path.join(__dirname, 'studio-crossdevice.json'));
   process.exit(failed ? 1 : 0);

@@ -89,6 +89,16 @@ test('the reference documents are studio projects the database would keep, and t
     assert.ok(times.length >= 3 && times.every((t) => t >= 0 && t < durationOf(doc)), `${name}: its times are inside it`);
     for (const s of doc.sources) assert.ok([SYNTHETIC_VIDEO, SYNTHETIC_IMAGE].includes(s.asset), `${name}: only synthetic sources`);
   }
+  // a clip that fits on no track is moved to the end of the timeline (timeline.ts addClip); none may be, or the
+  // corpus would not show it at its times (found 2026-11-03: the squares of the covers document were never drawn)
+  const { BENCH_LENGTH } = await import('../src/lib/studio/bench-docs.ts');
+  for (const { name, doc } of all) {
+    if (name === 'transitions') continue;
+    for (const c of doc.video.tracks.flatMap((t) => t.clips)) assert.ok(c.start + c.length <= BENCH_LENGTH, `${name}: a clip at ${c.start} was pushed past the document`);
+  }
+  const covers = all.find((c) => c.name === 'covers');
+  const shown = (t) => covers.doc.video.tracks.flatMap((tr) => tr.clips).filter((c) => c.cover && c.start <= t && t < c.start + c.length).map((c) => c.cover.mode);
+  assert.ok(covers.times.some((t) => shown(t).includes('blocks')) && covers.times.some((t) => shown(t).includes('blur')), 'the covers document shows both kinds at its times');
   const transitions = all.find((c) => c.name === 'transitions').doc;
   const kinds = transitions.video.tracks.flatMap((t) => t.clips).map((c) => c.transition?.kind).filter(Boolean);
   assert.deepEqual([...kinds].sort(), TRANSITIONS.map((t) => t.kind).sort(), 'every transition once');

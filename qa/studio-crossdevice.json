@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-crossdevice.cjs",
-  "run": "2026-11-03T18:09:45.111Z",
+  "run": "2026-11-03T19:41:26.156Z",
   "version": "0.7.0",
   "checks": [
     {
@@ -27,6 +27,26 @@
       "name": "app-software: every composed frame is the same when drawn again in another order (exact, by hash)",
       "pass": true,
       "detail": "{\"frames\":54,\"differing\":[],\"renderer\":\"ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "edge: «إخفاء بالمربعات» on the graphics chip equals the plain-code squares byte for byte (or the chip path is not offered here)",
+      "pass": true,
+      "detail": "{\"offered\":true,\"cases\":[{\"area\":\"520x300\",\"size\":31,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"1920x1080\",\"size\":64,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"220x180\",\"size\":8,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"97x61\",\"size\":5,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"37x29\",\"size\":2,\"chip\":true,\"differing\":0,\"max\":0}]}"
+    },
+    {
+      "name": "app-saving: «إخفاء بالمربعات» on the graphics chip equals the plain-code squares byte for byte (or the chip path is not offered here)",
+      "pass": true,
+      "detail": "{\"offered\":true,\"cases\":[{\"area\":\"520x300\",\"size\":31,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"1920x1080\",\"size\":64,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"220x180\",\"size\":8,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"97x61\",\"size\":5,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"37x29\",\"size\":2,\"chip\":true,\"differing\":0,\"max\":0}]}"
+    },
+    {
+      "name": "app-strong: «إخفاء بالمربعات» on the graphics chip equals the plain-code squares byte for byte (or the chip path is not offered here)",
+      "pass": true,
+      "detail": "{\"offered\":true,\"cases\":[{\"area\":\"520x300\",\"size\":31,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"1920x1080\",\"size\":64,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"220x180\",\"size\":8,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"97x61\",\"size\":5,\"chip\":true,\"differing\":0,\"max\":0},{\"area\":\"37x29\",\"size\":2,\"chip\":true,\"differing\":0,\"max\":0}]}"
+    },
+    {
+      "name": "app-software: «إخفاء بالمربعات» on the graphics chip equals the plain-code squares byte for byte (or the chip path is not offered here)",
+      "pass": true,
+      "detail": "{\"offered\":false,\"cases\":[{\"area\":\"520x300\",\"size\":31,\"chip\":false,\"differing\":null},{\"area\":\"1920x1080\",\"size\":64,\"chip\":false,\"differing\":null},{\"area\":\"220x180\",\"size\":8,\"chip\":false,\"differing\":null},{\"area\":\"97x61\",\"size\":5,\"chip\":false,\"differing\":null},{\"area\":\"37x29\",\"size\":2,\"chip\":false,\"differing\":null}]}"
     },
     {
       "name": "app-saving, «plain»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
@@ -80,8 +100,8 @@
     },
     {
       "name": "app-strong, «effects»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
-      "pass": false,
-      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"effects\",\"i\":0,\"maxDiff\":89,\"over2\":1.0241,\"psnr\":40.48},\"bad\":5}"
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"effects\",\"i\":2,\"maxDiff\":3,\"over2\":0,\"psnr\":54.97},\"bad\":0}"
     },
     {
       "name": "app-strong, «transitions»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
@@ -91,7 +111,7 @@
     {
       "name": "app-strong, «covers»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
       "pass": true,
-      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"covers\",\"i\":1,\"maxDiff\":2,\"over2\":0,\"psnr\":61.07},\"bad\":0}"
+      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"covers\",\"i\":0,\"maxDiff\":3,\"over2\":0.0001,\"psnr\":60.91},\"bad\":0}"
     },
     {
       "name": "app-strong, «keys»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
@@ -101,7 +121,7 @@
     {
       "name": "app-strong, «brand»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
       "pass": true,
-      "detail": "{\"frames\":5,\"identical\":0,\"worst\":{\"name\":\"brand\",\"i\":4,\"maxDiff\":3,\"over2\":0.0045,\"psnr\":61.74},\"bad\":0}"
+      "detail": "{\"frames\":5,\"identical\":0,\"worst\":{\"name\":\"brand\",\"i\":4,\"maxDiff\":3,\"over2\":0.0045,\"psnr\":61.77},\"bad\":0}"
     },
     {
       "name": "app-strong, «landscape-keys»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
@@ -121,7 +141,7 @@
     {
       "name": "app-software, «effects»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
       "pass": false,
-      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"effects\",\"i\":0,\"maxDiff\":87,\"over2\":4.2471,\"psnr\":39.99},\"bad\":6}"
+      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"effects\",\"i\":2,\"maxDiff\":21,\"over2\":0.7701,\"psnr\":48.21},\"bad\":5}"
     },
     {
       "name": "app-software, «transitions»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
@@ -131,7 +151,7 @@
     {
       "name": "app-software, «covers»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
       "pass": false,
-      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"covers\",\"i\":1,\"maxDiff\":4,\"over2\":0.1393,\"psnr\":50.88},\"bad\":2}"
+      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"covers\",\"i\":5,\"maxDiff\":3,\"over2\":0.0128,\"psnr\":50.76},\"bad\":1}"
     },
     {
       "name": "app-software, «keys»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
@@ -141,7 +161,7 @@
     {
       "name": "app-software, «brand»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
       "pass": false,
-      "detail": "{\"frames\":5,\"identical\":0,\"worst\":{\"name\":\"brand\",\"i\":2,\"maxDiff\":51,\"over2\":0.6325,\"psnr\":50.06},\"bad\":5}"
+      "detail": "{\"frames\":5,\"identical\":0,\"worst\":{\"name\":\"brand\",\"i\":2,\"maxDiff\":51,\"over2\":0.5967,\"psnr\":50.17},\"bad\":5}"
     },
     {
       "name": "app-software, «landscape-keys»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
@@ -156,7 +176,7 @@
     {
       "name": "edge: the encoded file is at least 40 dB from its source",
       "pass": true,
-      "detail": "{\"psnr\":42.147763,\"bytes\":3982815,\"ms\":2915}"
+      "detail": "{\"psnr\":42.147763,\"bytes\":3982815,\"ms\":3438}"
     },
     {
       "name": "app-saving: the real export's structure is the reference's exactly (codec, profile, size, pixel format, rate, 90 video timestamps, sound)",
@@ -166,7 +186,7 @@
     {
       "name": "app-saving: the encoded file is at least 40 dB from its source",
       "pass": true,
-      "detail": "{\"psnr\":42.297187,\"bytes\":4008618,\"ms\":7151}"
+      "detail": "{\"psnr\":42.297187,\"bytes\":4008618,\"ms\":7316}"
     },
     {
       "name": "app-strong: the real export's structure is the reference's exactly (codec, profile, size, pixel format, rate, 90 video timestamps, sound)",
@@ -176,7 +196,7 @@
     {
       "name": "app-strong: the encoded file is at least 40 dB from its source",
       "pass": true,
-      "detail": "{\"psnr\":42.304707,\"bytes\":4007980,\"ms\":3087}"
+      "detail": "{\"psnr\":42.304707,\"bytes\":4007980,\"ms\":3103}"
     },
     {
       "name": "app-software: the real export's structure is the reference's exactly (codec, profile, size, pixel format, rate, 90 video timestamps, sound)",
@@ -186,7 +206,7 @@
     {
       "name": "app-software: the encoded file is at least 40 dB from its source",
       "pass": false,
-      "detail": "{\"psnr\":39.108329,\"bytes\":2361794,\"ms\":1711}"
+      "detail": "{\"psnr\":39.108329,\"bytes\":2361794,\"ms\":1605}"
     },
     {
       "name": "the application writes the same colour description on every chip and with no chip",
@@ -302,119 +322,119 @@
       "i": 0,
       "t": 200000,
       "size": "1080x1080",
-      "hash": "80850c1849f1052f98a8c7ccf6c81c3ac626bbb74c112b2b5e0c58bf80183527"
+      "hash": "1742c617e89ce9bafb13cbe9c6fc375c91cfa9c58612bf28b8cbc54aaa5fb62f"
     },
     {
       "name": "brand",
       "i": 1,
       "t": 800000,
       "size": "1080x1080",
-      "hash": "2963f615e8dda6f354c7177b18d6beea8f1daccd89aae7fc03f780087cbd3444"
+      "hash": "0fb2f0bb18b1d89340312910206db52cb3e8043b3a21ff95171ef5e491009c19"
     },
     {
       "name": "brand",
       "i": 2,
       "t": 1600000,
       "size": "1080x1080",
-      "hash": "c6cfc5dad704d2c77f9bf3182bcc3e78a48c72813421bfbac8346fea6cf98909"
+      "hash": "02f995e3390afde37737afb2693e37adb05c05828546050959523b97c5f3327f"
     },
     {
       "name": "brand",
       "i": 3,
       "t": 2400000,
       "size": "1080x1080",
-      "hash": "e70faa9ab0e12e349ac2d7f52b84aa6f1c1b2a1d4aa0a4e3112eb5eb83ed524b"
+      "hash": "32ac3f6e866a0ed74deccf4eea83db982a540aa51f618dd7a7127e440f0b60fa"
     },
     {
       "name": "brand",
       "i": 4,
       "t": 3200000,
       "size": "1080x1080",
-      "hash": "177e0bbde2ab236653b1de13ee251aeba8a16ab10115f8dfda45d80c2f9d8197"
+      "hash": "fdcb18c9d64d8cad7599e8424564c9271baef5f7f1030fa3cf34654089bc97b0"
     },
     {
       "name": "covers",
       "i": 0,
       "t": 100000,
       "size": "1080x1920",
-      "hash": "0b9a6fe9cd3e42f5c0d4aa2b0228f787c20611404c8dff31346f091686607831"
+      "hash": "769964e0b7ec0854a883faec70a0517beddefc94dc763ec903f2192ae2c70fd9"
     },
     {
       "name": "covers",
       "i": 1,
       "t": 1100000,
       "size": "1080x1920",
-      "hash": "7ea8c6716f65f09b49f4fb0d04a41091ddcfab24f56dcfbd91120c8a47e35f97"
+      "hash": "0614154f3091048667e9dd609cd69aa5725d6809a61239b802414d3de2009045"
     },
     {
       "name": "covers",
       "i": 2,
       "t": 2050000,
       "size": "1080x1920",
-      "hash": "a78568b2fe9b3bc2004a7392977db5dd7e530e55f5d16d29d678485ac0ec840b"
+      "hash": "7efba2566f0252d73e4eb10c190cc08c06f6ad2a38a965c37e64a297f68280b4"
     },
     {
       "name": "covers",
       "i": 3,
       "t": 2500000,
       "size": "1080x1920",
-      "hash": "20220ba679158ea204f3f9fdb69e65c2639542c1eba8f6f3d3f4d6ff2a543ab4"
+      "hash": "d6d8430e0b6864edef55f0aa835db7def2291c67cd5afd3220f38e5dfa0973a4"
     },
     {
       "name": "covers",
       "i": 4,
       "t": 3300000,
       "size": "1080x1920",
-      "hash": "80c0d35bc311fc3871e5b28b8984bef9df629e99487d9879680ab697b85e6c10"
+      "hash": "68b1c8cecb0d82b1035ec8549ce58c6b4d3bd4fc919a959f569473698603638f"
     },
     {
       "name": "covers",
       "i": 5,
       "t": 3900000,
       "size": "1080x1920",
-      "hash": "d6fad7e138fed630afefce3d776b81ca4bcc7613fbfd0a7c0e812f5b3ad7b81c"
+      "hash": "51f4a9594787be2cf44bc3173f60141d21e8bc01673063261bac8b91c9987244"
     },
     {
       "name": "effects",
       "i": 0,
       "t": 100000,
       "size": "1920x1080",
-      "hash": "be1c09501260309c075b62bad0bb5fa6bd405684437879530662802d3fefb074"
+      "hash": "b5ac0a6f8c4689461cd50b2aa29a9bc2e8e3122d7e9fa3e9828e50c96b1538b0"
     },
     {
       "name": "effects",
       "i": 1,
       "t": 1100000,
       "size": "1920x1080",
-      "hash": "c5c23eaa0f3e6b7dc359578af5021cfe15ecab256e4b249a0503ab0750712975"
+      "hash": "907f70e90bdaaa84a0d54a298fad915f77a3bcb5020497d326a4e934f83fbd3e"
     },
     {
       "name": "effects",
       "i": 2,
       "t": 2050000,
       "size": "1920x1080",
-      "hash": "6674bb63951101a7372221e0c812ff88133f66a503ac5192ad0d078bb8a9b09b"
+      "hash": "6f899aa39ef582761cec7414304f91870222c18ebd307615448726cabe9021f3"
     },
     {
       "name": "effects",
       "i": 3,
       "t": 2500000,
       "size": "1920x1080",
-      "hash": "c813cae8cd7313c21ac3df86a46ad23712e96cb21135b4fedc457c254eac6da3"
+      "hash": "49bfe0dd104774a1d9df822559cfcd9f429f5858a29cdbc0adc196482626d08c"
     },
     {
       "name": "effects",
       "i": 4,
       "t": 3300000,
       "size": "1920x1080",
-      "hash": "41754a22a5ec3a6900ce4dbe24532ff8ac0c0c44b2e0958935eb7a8441d992c8"
+      "hash": "ac2b79df42a1b562c1b6623d6b0271a346139862fba938942f6e3f1141798238"
     },
     {
       "name": "effects",
       "i": 5,
       "t": 3900000,
       "size": "1920x1080",
-      "hash": "00a9d5e64e124fee506ff3e90c33bb5b3c6828be5ac419345870aa1e33ad5c07"
+      "hash": "bb39ba88ce4f3f02d821a6cd96c2cb38b6ef8446ff8eb4cdad70e58e80bc314c"
     },
     {
       "name": "keys",
@@ -484,84 +504,84 @@
       "i": 0,
       "t": 100000,
       "size": "1080x1920",
-      "hash": "0e19990721b396e96ab3ee1338b3880ac1172c23fc68542b7f49f25a076be696"
+      "hash": "bbae36c1cfe0e650bd6a7b3233cdecfa3375dceb3f4a5588a162ec2c3ba5c693"
     },
     {
       "name": "plain",
       "i": 1,
       "t": 1100000,
       "size": "1080x1920",
-      "hash": "51726cdcdcb2b3fafd5d0aa2aa6a242c6b8716e65a2a5677185df89345087638"
+      "hash": "4ca8ec8f75aeb95fe42a147c84aef0f0962fad9e11885158b6f2c4b303c4fbea"
     },
     {
       "name": "plain",
       "i": 2,
       "t": 2050000,
       "size": "1080x1920",
-      "hash": "a49c452a0f795800fe5c8e2be2cf1b69d87b39e8de9a7ac38bd911a9f34ae390"
+      "hash": "0a3128e8d888368574c366376ed3d12373e6b0a24ff6a60d727c02c5409eeab2"
     },
     {
       "name": "plain",
       "i": 3,
       "t": 2500000,
       "size": "1080x1920",
-      "hash": "3083988927c130f2ed201a122918bba2bc703dcd4b734e2849928c0bdeae408f"
+      "hash": "cf0b247c0ebf6be46fb6222e8c531e740ef6c1fa3a5ddca13174c9963885ea25"
     },
     {
       "name": "plain",
       "i": 4,
       "t": 3300000,
       "size": "1080x1920",
-      "hash": "b235f1bf4ab0782945b3c4b6fecfcea08f28d69a21475d4672de8fa354dc538c"
+      "hash": "950f359400ddee5d04894bcfbedd15050da6af4009e4ef8736ac9b280961dfec"
     },
     {
       "name": "plain",
       "i": 5,
       "t": 3900000,
       "size": "1080x1920",
-      "hash": "b65bc2e892c250b73ecc6732dc39cb3f5708bfc847d5eda427b55e5b5b7f43d5"
+      "hash": "6e6b6755f1c00890fa68fa0021431deeb6070fa32719ceca8cc3caa8908f4ed0"
     },
     {
       "name": "text",
       "i": 0,
       "t": 100000,
       "size": "1080x1920",
-      "hash": "cecd0be7afd93697de2b3d2b902c0c91ffb5b0b5bc72dfe0c745757f3eabdc10"
+      "hash": "2929e659d2832398b688821c45b5b581085b14d4925b4a5dabe76a826b7418f9"
     },
     {
       "name": "text",
       "i": 1,
       "t": 1100000,
       "size": "1080x1920",
-      "hash": "d565f9afce333b317cbde8d84631d2ba5920462f9b28924a47b5942401103748"
+      "hash": "23621e31bff8eb92035e84808aaba00e933e263444834d96908ccd01ad7eb95d"
     },
     {
       "name": "text",
       "i": 2,
       "t": 2050000,
       "size": "1080x1920",
-      "hash": "9521412a7f5e1fce090f7d82699bb2b706e3ada2b5e20f1624556d0b29e96725"
+      "hash": "0a4bd6ae863a1348755d0e0c2b77544ef09d4ac73aa7fb61a5dcce909569ebf7"
     },
     {
       "name": "text",
       "i": 3,
       "t": 2500000,
       "size": "1080x1920",
-      "hash": "07080983be20025b7e46082a534866a1dda2d28010674df6a2b0401874d1e6b1"
+      "hash": "57d5bbc426dd83ddb48e4e580bcab658b3007ef477c69cf06b927a92d8f49f25"
     },
     {
       "name": "text",
       "i": 4,
       "t": 3300000,
       "size": "1080x1920",
-      "hash": "07080983be20025b7e46082a534866a1dda2d28010674df6a2b0401874d1e6b1"
+      "hash": "d956562399b03d0e19d0920f0f74802556b2d03222982733c773143ef2731528"
     },
     {
       "name": "text",
       "i": 5,
       "t": 3900000,
       "size": "1080x1920",
-      "hash": "07080983be20025b7e46082a534866a1dda2d28010674df6a2b0401874d1e6b1"
+      "hash": "5e98fa2aaeb38a576b73d1fb92c39485ccd3f51c0e0548cffce3c29ce2770b7a"
     },
     {
       "name": "transitions",
@@ -687,11 +707,48 @@
         "bytes": 3982815,
         "audio": true,
         "target": "device",
-        "ms": 2915
+        "ms": 3438
       },
       "psnr": 42.147763,
       "summary": null,
       "sameAsReference": 54,
+      "squares": [
+        {
+          "area": "520x300",
+          "size": 31,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "1920x1080",
+          "size": 64,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "220x180",
+          "size": 8,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "97x61",
+          "size": 5,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "37x29",
+          "size": 2,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        }
+      ],
       "compared": null
     },
     "app-saving": {
@@ -706,7 +763,7 @@
         "bytes": 4008618,
         "audio": true,
         "target": "device",
-        "ms": 7151
+        "ms": 7316
       },
       "psnr": 42.297187,
       "summary": {
@@ -717,6 +774,43 @@
         "maxDiff": 0
       },
       "sameAsReference": 54,
+      "squares": [
+        {
+          "area": "520x300",
+          "size": 31,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "1920x1080",
+          "size": 64,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "220x180",
+          "size": 8,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "97x61",
+          "size": 5,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "37x29",
+          "size": 2,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        }
+      ],
       "compared": [
         {
           "name": "plain",
@@ -1110,17 +1204,54 @@
         "bytes": 4007980,
         "audio": true,
         "target": "device",
-        "ms": 3087
+        "ms": 3103
       },
       "psnr": 42.304707,
       "summary": {
         "frames": 54,
         "identical": 14,
-        "minPsnr": 40.48,
-        "maxOver2": 1.0241,
-        "maxDiff": 112
+        "minPsnr": 53.83,
+        "maxOver2": 0.0268,
+        "maxDiff": 3
       },
       "sameAsReference": 14,
+      "squares": [
+        {
+          "area": "520x300",
+          "size": 31,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "1920x1080",
+          "size": 64,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "220x180",
+          "size": 8,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "97x61",
+          "size": 5,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        },
+        {
+          "area": "37x29",
+          "size": 2,
+          "chip": true,
+          "differing": 0,
+          "max": 0
+        }
+      ],
       "compared": [
         {
           "name": "plain",
@@ -1209,44 +1340,44 @@
         {
           "name": "effects",
           "i": 0,
-          "maxDiff": 89,
-          "over2": 1.0241,
-          "psnr": 40.48
+          "maxDiff": 3,
+          "over2": 0.0255,
+          "psnr": 61.74
         },
         {
           "name": "effects",
           "i": 1,
-          "maxDiff": 112,
-          "over2": 0.8614,
-          "psnr": 47.05
+          "maxDiff": 3,
+          "over2": 0.0268,
+          "psnr": 62.07
         },
         {
           "name": "effects",
           "i": 2,
-          "maxDiff": 51,
-          "over2": 0.0356,
-          "psnr": 52.28
+          "maxDiff": 3,
+          "over2": 0,
+          "psnr": 54.97
         },
         {
           "name": "effects",
           "i": 3,
-          "maxDiff": 52,
-          "over2": 0.9945,
-          "psnr": 48.29
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 62.64
         },
         {
           "name": "effects",
           "i": 4,
-          "maxDiff": 59,
-          "over2": 0.8993,
-          "psnr": 48.71
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 62.84
         },
         {
           "name": "effects",
           "i": 5,
-          "maxDiff": 38,
-          "over2": 0.9278,
-          "psnr": 51.46
+          "maxDiff": 3,
+          "over2": 0.0001,
+          "psnr": 62.44
         },
         {
           "name": "transitions",
@@ -1363,44 +1494,44 @@
         {
           "name": "covers",
           "i": 0,
-          "maxDiff": 2,
-          "over2": 0,
-          "psnr": 61.83
+          "maxDiff": 3,
+          "over2": 0.0001,
+          "psnr": 60.91
         },
         {
           "name": "covers",
           "i": 1,
           "maxDiff": 2,
           "over2": 0,
-          "psnr": 61.07
+          "psnr": 61.52
         },
         {
           "name": "covers",
           "i": 2,
           "maxDiff": 2,
           "over2": 0,
-          "psnr": 61.15
+          "psnr": 62.57
         },
         {
           "name": "covers",
           "i": 3,
           "maxDiff": 2,
           "over2": 0,
-          "psnr": 61.43
+          "psnr": 61.65
         },
         {
           "name": "covers",
           "i": 4,
           "maxDiff": 2,
           "over2": 0,
-          "psnr": 61.22
+          "psnr": 61.44
         },
         {
           "name": "covers",
           "i": 5,
           "maxDiff": 2,
           "over2": 0,
-          "psnr": 61.44
+          "psnr": 61.54
         },
         {
           "name": "keys",
@@ -1463,21 +1594,21 @@
           "i": 2,
           "maxDiff": 3,
           "over2": 0.0016,
-          "psnr": 62.17
+          "psnr": 62.22
         },
         {
           "name": "brand",
           "i": 3,
           "maxDiff": 3,
           "over2": 0.0029,
-          "psnr": 61.93
+          "psnr": 61.98
         },
         {
           "name": "brand",
           "i": 4,
           "maxDiff": 3,
           "over2": 0.0045,
-          "psnr": 61.74
+          "psnr": 61.77
         },
         {
           "name": "landscape-keys",
@@ -1514,17 +1645,49 @@
         "bytes": 2361794,
         "audio": true,
         "target": "device",
-        "ms": 1711
+        "ms": 1605
       },
       "psnr": 39.108329,
       "summary": {
         "frames": 54,
         "identical": 14,
-        "minPsnr": 39.99,
-        "maxOver2": 4.2471,
-        "maxDiff": 112
+        "minPsnr": 48.21,
+        "maxOver2": 3.014,
+        "maxDiff": 90
       },
       "sameAsReference": 14,
+      "squares": [
+        {
+          "area": "520x300",
+          "size": 31,
+          "chip": false,
+          "differing": null
+        },
+        {
+          "area": "1920x1080",
+          "size": 64,
+          "chip": false,
+          "differing": null
+        },
+        {
+          "area": "220x180",
+          "size": 8,
+          "chip": false,
+          "differing": null
+        },
+        {
+          "area": "97x61",
+          "size": 5,
+          "chip": false,
+          "differing": null
+        },
+        {
+          "area": "37x29",
+          "size": 2,
+          "chip": false,
+          "differing": null
+        }
+      ],
       "compared": [
         {
           "name": "plain",
@@ -1613,44 +1776,44 @@
         {
           "name": "effects",
           "i": 0,
-          "maxDiff": 87,
-          "over2": 4.2471,
-          "psnr": 39.99
+          "maxDiff": 13,
+          "over2": 3.014,
+          "psnr": 49.5
         },
         {
           "name": "effects",
           "i": 1,
-          "maxDiff": 112,
-          "over2": 3.9847,
-          "psnr": 45.11
+          "maxDiff": 27,
+          "over2": 2.9307,
+          "psnr": 49.5
         },
         {
           "name": "effects",
           "i": 2,
-          "maxDiff": 51,
-          "over2": 0.9127,
-          "psnr": 47.44
+          "maxDiff": 21,
+          "over2": 0.7701,
+          "psnr": 48.21
         },
         {
           "name": "effects",
           "i": 3,
-          "maxDiff": 52,
-          "over2": 1.1181,
-          "psnr": 46.92
+          "maxDiff": 21,
+          "over2": 0.1473,
+          "psnr": 52.42
         },
         {
           "name": "effects",
           "i": 4,
-          "maxDiff": 59,
-          "over2": 1.0488,
-          "psnr": 47.29
+          "maxDiff": 20,
+          "over2": 0.149,
+          "psnr": 52.49
         },
         {
           "name": "effects",
           "i": 5,
-          "maxDiff": 38,
-          "over2": 1.0201,
-          "psnr": 49.09
+          "maxDiff": 12,
+          "over2": 0.0923,
+          "psnr": 52.51
         },
         {
           "name": "transitions",
@@ -1768,43 +1931,43 @@
           "name": "covers",
           "i": 0,
           "maxDiff": 5,
-          "over2": 0.2404,
-          "psnr": 50.9
+          "over2": 0.2031,
+          "psnr": 51.01
         },
         {
           "name": "covers",
           "i": 1,
           "maxDiff": 4,
-          "over2": 0.1393,
-          "psnr": 50.88
+          "over2": 0.0648,
+          "psnr": 51.04
         },
         {
           "name": "covers",
           "i": 2,
           "maxDiff": 4,
-          "over2": 0.0481,
-          "psnr": 51.12
+          "over2": 0.0072,
+          "psnr": 50.79
         },
         {
           "name": "covers",
           "i": 3,
-          "maxDiff": 4,
-          "over2": 0.052,
-          "psnr": 51.01
+          "maxDiff": 3,
+          "over2": 0.0155,
+          "psnr": 50.77
         },
         {
           "name": "covers",
           "i": 4,
           "maxDiff": 3,
-          "over2": 0.0404,
-          "psnr": 51.11
+          "over2": 0.0111,
+          "psnr": 50.81
         },
         {
           "name": "covers",
           "i": 5,
           "maxDiff": 3,
-          "over2": 0.0331,
-          "psnr": 50.96
+          "over2": 0.0128,
+          "psnr": 50.76
         },
         {
           "name": "keys",
@@ -1852,36 +2015,36 @@
           "name": "brand",
           "i": 0,
           "maxDiff": 35,
-          "over2": 0.122,
-          "psnr": 59.84
+          "over2": 0.1212,
+          "psnr": 59.86
         },
         {
           "name": "brand",
           "i": 1,
           "maxDiff": 57,
-          "over2": 0.5404,
+          "over2": 0.5396,
           "psnr": 51.2
         },
         {
           "name": "brand",
           "i": 2,
           "maxDiff": 51,
-          "over2": 0.6325,
-          "psnr": 50.06
+          "over2": 0.5967,
+          "psnr": 50.17
         },
         {
           "name": "brand",
           "i": 3,
           "maxDiff": 50,
-          "over2": 0.6574,
-          "psnr": 50.91
+          "over2": 0.6216,
+          "psnr": 51.05
         },
         {
           "name": "brand",
           "i": 4,
           "maxDiff": 90,
-          "over2": 0.7811,
-          "psnr": 51.22
+          "over2": 0.777,
+          "psnr": 51.23
         },
         {
           "name": "landscape-keys",
@@ -1907,7 +2070,7 @@
       ]
     }
   },
-  "total": 39,
-  "passed": 29,
-  "failed": 10
+  "total": 43,
+  "passed": 34,
+  "failed": 9
 }
