@@ -1,0 +1,91 @@
+{
+  "script": "qa/studio-loudness-ahead.cjs",
+  "run": "2026-11-03T21:37:51.868Z",
+  "version": "0.7.1",
+  "checks": [
+    {
+      "name": "the two-minute source is ready",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "worked out ahead, the loudness equals the export's own measurement within 0.1 LU, and the peak too",
+      "pass": true,
+      "detail": "{\"ahead\":{\"integrated\":-11.16587186070043,\"peakDb\":-9.884250634308916,\"blocks\":1149},\"fresh\":{\"integrated\":-11.16587186070043,\"peakDb\":-9.884250634308916,\"blocks\":1149},\"before\":-11.16587186070043}"
+    },
+    {
+      "name": "an export with «توحيد مستوى الصوت» after it uses the stored figure and reaches its first frame sooner",
+      "pass": true,
+      "detail": "{\"before\":11196,\"after\":553,\"aheadMs\":5916,\"load\":[88,65]}"
+    },
+    {
+      "name": "a change of volume is measured again (about 6 dB quieter); a picture moved keeps the stored figure",
+      "pass": true,
+      "detail": "{\"quieter\":{\"cached\":false,\"integrated\":-17.18647177398005},\"fresh\":-11.16587186070043,\"moved\":[true,true]}"
+    },
+    {
+      "name": "panel: while the export panel is open, the sound's level is worked out by itself and said",
+      "pass": true,
+      "detail": "{\"said\":\"قيس مستوى الصوت مسبقاً: -18.1 LUFS، فيبدأ التصدير الموحَّد دون انتظار القياس.\",\"ms\":1398}"
+    },
+    {
+      "name": "panel: an export with «توحيد مستوى الصوت» starts without measuring again, and says the level before and after",
+      "pass": true,
+      "detail": "{\"measured\":[],\"labels\":[\"جارٍ التجهيز…\",\"جارٍ التصدير 1٪\",\"جارٍ التصدير 3٪\",\"جارٍ التصدير 6٪\",\"جارٍ التصدير 9٪\",\"جارٍ التصدير 12٪\"],\"level\":\"كان الصوت -18.1 LUFS، وصار في الملف نحو -14.0 LUFS.\"}"
+    },
+    {
+      "name": "panel: the file is at -14 LUFS within 1 LU (ffmpeg)",
+      "pass": true,
+      "detail": "{\"lufs\":-14}"
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "Times are of this laptop as it was during the run, with the load recorded beside them; they are not a speed figure."
+  ],
+  "engine": "156.0.4314.58",
+  "module": {
+    "ready": true,
+    "before": {
+      "ms": 11196,
+      "cached": false,
+      "integrated": -11.16587186070043,
+      "peakDb": -9.884250634308916
+    },
+    "aheadMs": 5916,
+    "ahead": {
+      "integrated": -11.16587186070043,
+      "peakDb": -9.884250634308916,
+      "blocks": 1149
+    },
+    "after": {
+      "ms": 553,
+      "cached": true,
+      "integrated": -11.16587186070043,
+      "peakDb": -9.884250634308916
+    },
+    "fresh": {
+      "integrated": -11.16587186070043,
+      "peakDb": -9.884250634308916,
+      "blocks": 1149
+    },
+    "quieterStored": false,
+    "quieter": {
+      "cached": false,
+      "integrated": -17.18647177398005
+    },
+    "movedSameKey": true,
+    "movedStored": true,
+    "load": [
+      88,
+      65
+    ]
+  },
+  "total": 8,
+  "passed": 8,
+  "failed": 0
+}
