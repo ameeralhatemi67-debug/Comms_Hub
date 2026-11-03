@@ -97,7 +97,7 @@ test('«إضافة منصة» offers everything not yet on its way, those with s
   const keys = o.map((x) => x.key);
   assert.deepEqual(keys.slice(0, 3), ['instagram', 'tiktok', 'facebook']);
   assert.equal(o[0].kind, 'open');
-  assert.equal(o[0].hint, '6 خطوات');
+  assert.equal(o[0].hint, '9 خطوات');
   assert.ok(!keys.includes('x'), 'a connected platform is not offered');
   assert.ok(!keys.includes('mail'));
   assert.deepEqual(o.find((x) => x.key === 'facebook').kind, 'template');

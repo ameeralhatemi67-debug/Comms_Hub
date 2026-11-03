@@ -132,6 +132,39 @@ const page = (dark) =>
     check('evening: a label chip is told from the dialog behind it', ink[0] !== ink[2] && ink[1] !== ink[0], ink.join(' / '));
     await d.context().close();
 
+    // The Instagram guide (MVP_draft.md section 67.7): eight steps, twenty-two pictures from Meta's pages, drawn the same way.
+    const ig = await open({ width: 1056, height: 900 }, '?guide=meta');
+    await loadAll(ig);
+    const igInfo = await ig.evaluate(() => {
+      const d = document.querySelector('dialog[open]');
+      const steps = [...d.querySelectorAll('.su-steps > li')];
+      const imgs = [...d.querySelectorAll('.gd-shot img')];
+      const stray = [];
+      const w = document.createTreeWalker(d.querySelector('.su-body'), NodeFilter.SHOW_TEXT);
+      for (let n = w.nextNode(); n; n = w.nextNode()) if (!n.parentElement.closest('bdi') && /[A-Za-z]/.test(n.textContent)) stray.push(n.textContent.trim().slice(0, 40));
+      return {
+        steps: steps.length,
+        todo: steps.map((li) => li.querySelectorAll('.gd-todo li').length),
+        imgs: imgs.length,
+        loaded: imgs.every((e) => e.naturalWidth > 0 && e.naturalWidth === Number(e.getAttribute('width')) && e.naturalHeight === Number(e.getAttribute('height'))),
+        inside: imgs.every((e) => e.getBoundingClientRect().right <= d.getBoundingClientRect().right + 1 && e.getBoundingClientRect().left >= d.getBoundingClientRect().left - 1),
+        marks: [...d.querySelectorAll('.gd-seen')].map((e) => e.innerText.trim()),
+        order: [...d.querySelectorAll('.gd-order')].map((e) => e.innerText),
+        stray,
+      };
+    });
+    await ig.screenshot({ path: path.join(out, '05-instagram.png') });
+    check('the Instagram guide draws nine steps, the first five with a list of actions and pictures', igInfo.steps === 9 && igInfo.todo.slice(0, 5).join() === '3,5,5,5,5' && igInfo.todo[5] === 3 && igInfo.todo[6] === 3 && igInfo.todo[8] === 5, JSON.stringify(igInfo.todo));
+    check('its eleven pictures load at their own size and sit inside the dialog', igInfo.imgs === 22 && igInfo.loaded && igInfo.inside, JSON.stringify({ imgs: igInfo.imgs, loaded: igInfo.loaded, inside: igInfo.inside }));
+    check('the actions a picture shows say which picture (just "in the picture" when a step has one), and the pictures of a step are numbered out of its own count', igInfo.marks.length === 24 && igInfo.marks[0] === 'في الصورة 1' && igInfo.order.length === 22 && igInfo.order.includes('الصورة 4 من 4') && igInfo.order.filter((x) => /من 2$/.test(x)).length === 10 && igInfo.stray.length === 0, JSON.stringify(igInfo));
+    check('its pictures say what their rings mean, the red one included', (await ig.locator('dialog[open] .gd-legend .gd-ring.x').count()) === 3 && (await ig.locator('dialog[open] .gd-legend .gd-ring').count()) >= 7);
+    check('nothing sideways in the Instagram dialog', await fits(ig));
+    await ig.context().close();
+    const igm = await open({ width: 390, height: 844 }, '?guide=meta');
+    await loadAll(igm);
+    check('phone: the Instagram guide fits, pictures included', await fits(igm));
+    await igm.context().close();
+
     check('no page error and nothing in the console', errs.length === 0, errs.slice(0, 3).join(' | '));
   } catch (e) {
     check('the flow ran to its end', false, String(e.message ?? e).slice(0, 500));

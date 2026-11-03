@@ -1,6 +1,6 @@
 {
   "script": "qa/guide-modal.cjs",
-  "run": "2026-11-02T12:34:28.914Z",
+  "run": "2026-11-03T07:55:52.814Z",
   "checks": [
     {
       "name": "the circled \"!\" draws the thirteen steps of the guide, each with its list of actions",
@@ -48,13 +48,43 @@
       "detail": "rgb(26, 45, 36) / rgb(232, 241, 234) / rgb(14, 31, 24)"
     },
     {
+      "name": "the Instagram guide draws nine steps, the first five with a list of actions and pictures",
+      "pass": true,
+      "detail": "[3,5,5,5,5,3,3,0,5]"
+    },
+    {
+      "name": "its eleven pictures load at their own size and sit inside the dialog",
+      "pass": true,
+      "detail": "{\"imgs\":22,\"loaded\":true,\"inside\":true}"
+    },
+    {
+      "name": "the actions a picture shows say which picture (just \"in the picture\" when a step has one), and the pictures of a step are numbered out of its own count",
+      "pass": true,
+      "detail": "{\"steps\":9,\"todo\":[3,5,5,5,5,3,3,0,5],\"imgs\":22,\"loaded\":true,\"inside\":true,\"marks\":[\"في الصورة 1\",\"في الصورة 2\",\"في الصورة 1\",\"في الصورة 2\",\"في الصورة 3\",\"في الصورة 4\",\"في الصورة 1\",\"في الصورة 2\",\"في الصورة 2\",\"في الصورة 2\",\"في الصورة 1\",\"في الصورة 2\",\"في الصورة 2\",\"في الصورة 1\",\"في الصورة 2\",\"في الصورة 3\",\"في الصورة 4\",\"في الصورة 5\",\"في الصورة 1\",\"في الصورة 1\",\"في الصورة 1\",\"في الصورة 2\",\"في الصورة 2\",\"في الصورة 3\"],\"order\":[\"الصورة 1 من 2\",\"الصورة 2 من 2\",\"الصورة 1 من 4\",\"الصورة 2 من 4\",\"الصورة 3 من 4\",\"الصورة 4 من 4\",\"الصورة 1 من 2\",\"الصورة 2 من 2\",\"الصورة 1 من 2\",\"الصورة 2 من 2\",\"الصورة 1 من 5\",\"الصورة 2 من 5\",\"الصورة 3 من 5\",\"الصورة 4 من 5\",\"الصورة 5 من 5\",\"الصورة 1 من 2\",\"الصورة 2 من 2\",\"الصورة 1 من 2\",\"الصورة 2 من 2\",\"الصورة 1 من 3\",\"الصورة 2 من 3\",\"الصورة 3 من 3\"],\"stray\":[]}"
+    },
+    {
+      "name": "its pictures say what their rings mean, the red one included",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing sideways in the Instagram dialog",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: the Instagram guide fits, pictures included",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "no page error and nothing in the console",
       "pass": true,
       "detail": ""
     }
   ],
   "notes": [],
-  "total": 10,
-  "passed": 10,
+  "total": 16,
+  "passed": 16,
   "failed": 0
 }

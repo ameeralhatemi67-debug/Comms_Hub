@@ -26,6 +26,16 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The Instagram guide and the look of a setup step, live 2026-11-03
+
+From the owner's walk through a real Meta app and their note that the YouTube steps were right and the look should follow (`MVP_draft.md` sections 67.6 and 67.7, `progress.md`).
+
+- **Done.** The setup sheet has a strip of one segment per step with «أُنجز … وبقي …», one card per step with its button kept in view, a copy button on every value to type, and numbered pictures with their rings explained. The Instagram guide is nine steps with a list of actions each and 22 pictures from the portfolio's Instagram accounts to the three keys; names, handles, email and IDs are blurred. The client names in the Google guide's «Clients» picture are blurred too.
+- **Evidence.** `npm test` 735 of 735, typecheck and build clean, `qa/guide-modal.cjs` 16 of 16, `qa/platforms-flow.cjs` 132 of 132. Deployment: see `progress.md`.
+- **Not verified.** A real Instagram connection through the site with a real app (nobody has entered the keys yet), anything signed in on the real site, a real phone. The steps «Business», «Requirements» and «Overview» of Meta's wizard were never photographed.
+- **Next.** Try the Instagram connection with the real keys, then rewrite Facebook's steps, which share the same Meta app.
+- **Note.** Pushed from a clean worktree on `origin/main`, so local `main`'s unapplied «إنشاء» migrations did not go out.
+
 ## «تجربة النشر» on a YouTube account, live 2026-11-03
 
 From the owner's request for a quick test in a connected YouTube channel's sheet (`MVP_draft.md` section 71, `progress.md`). Live on

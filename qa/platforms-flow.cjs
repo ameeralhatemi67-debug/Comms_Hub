@@ -232,6 +232,16 @@ const sides = (t) =>
     check('a connected platform opens its summary, with the rest folded under «خيارات متقدمة»', text.includes('إنستغرام جاهزة') && text.includes('في الخزنة') && text.includes('حدود المنشور') && text.includes('تعديل') && text.includes('سجل المنصة'));
     await sheet(t).locator('.st-info > summary').click();
     check('the facts say when they were read from the platform', (await sheet(t).locator('.st-info').innerText()).includes('روجعت من وثائق المنصة الرسمية في 2026-11-01'));
+    // The keys step of the Instagram guide carries its own pictures (MVP_draft.md section 67.7), drawn inside the keys card.
+    await sheet(t).getByRole('button', { name: 'استبدال السر' }).click();
+    await t.waitForFunction(() => document.querySelectorAll('dialog[open] .pf-card .gd-shot img').length === 3);
+    await t.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
+    const keys = await t.evaluate(() => {
+      const c = document.querySelector('dialog[open] .pf-input .pf-card');
+      const imgs = [...c.querySelectorAll('.gd-shot img')];
+      return { todo: c.querySelectorAll('.gd-todo li').length, imgs: imgs.length, loaded: imgs.every((e) => e.naturalWidth > 0 && e.naturalWidth === Number(e.getAttribute('width'))), marks: [...c.querySelectorAll('.gd-seen')].map((e) => e.innerText.trim()), fields: c.querySelectorAll('input').length };
+    });
+    check('the keys step of Instagram lists five actions with its three pictures, and still asks for the three values', keys.todo === 5 && keys.imgs === 3 && keys.loaded && keys.marks.join('|') === 'في الصورة 1|في الصورة 2|في الصورة 2|في الصورة 3' && keys.fields >= 3, JSON.stringify(keys));
     await t.keyboard.press('Escape');
     await t.locator('dialog.pf-sheet').waitFor({ state: 'detached' });
 
@@ -477,6 +487,54 @@ const sides = (t) =>
     }
     check('the pictures are where the steps put them: 1 in the menu step, 1 each in the Branding and contact steps, 2 for test users, 2 for the client, 1 for each address', JSON.stringify(walked.map((s) => s.imgs)) === JSON.stringify([0, 0, 0, 1, 1, 0, 1, 2, 2, 1, 1, 0, 0]), JSON.stringify(walked.map((s) => s.imgs)));
     check('the step that was too crowded is now three small ones, each with its own title', ['افتح شاشة الموافقة', 'اكتب اسم التطبيق وبريد الدعم', 'اختر نوع المستخدمين', 'اكتب بريد التواصل وأنهِ الإعداد'].every((x) => walked.some((s) => s.h3.includes(x))), walked.map((s) => s.h3).join(' | '));
+
+    // The look of a step (MVP_draft.md 67.6): a segment per step, one card per step with its button kept in view, a copy button on every
+    // value to type, pictures numbered and explained, the steps still to do dimmed.
+    const bar = await y.evaluate(() => {
+      const b = document.querySelector('dialog[open] .pf-bar');
+      const seg = [...b.querySelectorAll('i')];
+      return { n: seg.length, done: seg.filter((e) => e.className === 'done').length, cur: seg.filter((e) => e.className === 'cur').length, tall: seg.every((e) => e.getBoundingClientRect().height >= 6 && e.getBoundingClientRect().width > 10), counts: document.querySelector('dialog[open] .pf-prog-count')?.innerText ?? '' };
+    });
+    check('the progress strip is one segment per step: the done ones filled, one marks where you are, and it says how many are done and left', bar.n === 13 && bar.done === 11 && bar.cur === 1 && bar.tall && /^أُنجز 11 وبقي 2$/.test(bar.counts), JSON.stringify(bar));
+    await sheet(y).locator('.pf-step-btn').nth(8).click();
+    await y.waitForTimeout(80);
+    const card = await y.evaluate(() => {
+      const c = document.querySelector('dialog[open] .pf-input .pf-card');
+      const lis = [...c.querySelectorAll('.gd-todo li')].map((li) => li.querySelector('.gd-seen')?.innerText.trim() ?? '');
+      const cap = [...c.querySelectorAll('figcaption')].map((f) => ({ order: f.querySelector('.gd-order')?.innerText ?? '', rings: [...f.querySelectorAll('.gd-legend .gd-ring')].map((r) => r.innerText) }));
+      const up = document.querySelector('dialog[open] .pf-step.up .pf-step-btn');
+      const here = document.querySelector('dialog[open] .pf-step.cur .pf-step-btn');
+      return { n: c.dataset.card, head: c.querySelector('.pf-card-head h3')?.innerText, done: c.classList.contains('done'), note: c.querySelector('.pf-note.ok')?.innerText ?? '', btn: c.querySelector('.pf-card-foot .pf-btn.pri')?.innerText, lis, cap, upInk: getComputedStyle(up).color, hereInk: getComputedStyle(here).color, upDashed: getComputedStyle(up.querySelector('.pf-num')).borderStyle };
+    });
+    check('a step is one card: its number and name, what it says when it is already done, and the button that goes on', card.n === '9' && card.head === 'أنشئ معرّف العميل' && card.done && /^أنجزت هذه الخطوة/.test(card.note) && card.btn === 'متابعة', JSON.stringify(card));
+    check('an action a picture shows says which picture; the pictures are numbered and say what their rings mean', JSON.stringify(card.lis) === JSON.stringify(['في الصورة 1', 'في الصورة 2', '', '']) && card.cap[0].order === 'الصورة 1 من 2' && card.cap[1].order === 'الصورة 2 من 2' && card.cap[0].rings[0] === '1' && card.cap[1].rings[0] === '2', JSON.stringify(card));
+    check('the steps still to do are dimmed and drawn dashed, and the one you are on is not', card.upInk !== card.hereInk && card.upDashed === 'dashed', JSON.stringify(card));
+    await y.evaluate(() => {
+      window.__copied = [];
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (v) => void window.__copied.push(v) }, configurable: true });
+    });
+    await sheet(y).locator('.gd-copy').first().click();
+    const copied = await y.evaluate(() => ({ got: window.__copied, label: document.querySelector('dialog[open] .gd-copy').getAttribute('aria-label') }));
+    check('a value to type has its own copy button, and it copies the value exactly', copied.got.length === 1 && copied.got[0] === 'Comms Hub Web' && copied.label === 'نُسخ Comms Hub Web', JSON.stringify(copied));
+    await sheet(y).locator('.pf-step-btn').nth(4).click();
+    check('a picture that says "do not" explains the red ring', (await sheet(y).locator('figcaption .gd-ring.x').count()) === 1 && (await sheet(y).locator('figcaption .gd-order').count()) === 0);
+    await sheet(y).locator('.pf-step-btn').nth(3).click();
+    check('a single picture with no numbered rings says nothing it does not need', (await sheet(y).locator('figcaption .gd-legend').count()) === 0 && (await sheet(y).locator('.gd-seen').count()) === 0);
+    await sheet(y).locator('.pf-step-btn').nth(7).click();
+    check('a step that does not apply to everyone says so, in the list and on its card', (await sheet(y).locator('.pf-step[data-step="testusers"] .pf-tag').innerText()).includes('External') && (await sheet(y).locator('.pf-card .pf-tag').innerText()).includes('External'));
+    const foot = async () =>
+      y.evaluate(() => {
+        const inp = document.querySelector('dialog[open] .pf-input').getBoundingClientRect();
+        const f = document.querySelector('dialog[open] .pf-card-foot').getBoundingClientRect();
+        const c = document.querySelector('dialog[open] .pf-card').getBoundingClientRect();
+        return { inView: f.bottom <= inp.bottom + 1 && f.top >= inp.top, tall: c.bottom > inp.bottom + 40, bottomGap: Math.round(inp.bottom - f.bottom) };
+      });
+    const f1 = await foot();
+    await y.locator('dialog[open] .pf-input').evaluate((e) => (e.scrollTop = e.scrollHeight));
+    const f2 = await foot();
+    check('the button that says a step is done stays in view while its pictures scroll, and sits on the bottom edge', f1.inView && f1.tall && f1.bottomGap <= 1 && f2.inView, JSON.stringify([f1, f2]));
+    await sheet(y).locator('.pf-step-btn').nth(9).click();
+    check('a step not yet done has no "done" note and keeps its own button', (await sheet(y).locator('.pf-card .pf-note.ok').count()) === 0 && (await sheet(y).locator('.pf-card-foot .pf-btn.pri').innerText()) === 'سجّلت العنوان');
 
     // The picture: rounded by the page, enlarged on a click, and blurred where it was private (the files hold no text to read).
     await sheet(y).locator('.pf-step-btn').nth(4).click();

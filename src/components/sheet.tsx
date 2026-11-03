@@ -53,21 +53,23 @@ export function SheetHead({ tile, title, sub, chip, onClose }: { tile?: ReactNod
   );
 }
 
-export function SheetProgress({ at, pct, saved }: { at: string; pct: number; saved?: ReactNode }) {
+/** Where the person is. With `marks` the bar is one segment per step (done, here, still to do) instead of one fill. */
+export function SheetProgress({ at, count, pct, marks, saved }: { at: string; count?: string; pct: number; marks?: ('done' | 'cur' | 'todo')[]; saved?: ReactNode }) {
   return (
     <div className="pf-prog">
       <div className="pf-prog-line">
         <b>{at}</b>
+        {count && <span className="pf-prog-count">{count}</span>}
         {saved}
       </div>
-      <div className="pf-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label="نسبة الإنجاز">
-        <i style={{ width: `${pct}%` }} />
+      <div className={`pf-bar${marks ? ' seg' : ''}`} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label="نسبة الإنجاز">
+        {marks ? marks.map((m, i) => <i key={i} className={m} />) : <i style={{ width: `${pct}%` }} />}
       </div>
     </div>
   );
 }
 
-export type SheetStep = { id: string; t: string; b?: string; link?: { href: string; label: string }; done: boolean };
+export type SheetStep = { id: string; t: string; b?: string; tag?: string; link?: { href: string; label: string }; done: boolean };
 
 /** The steps side. A step can be opened by clicking it when `onPick` is given. */
 export function SheetSteps({ steps, at, onPick, children }: { steps: SheetStep[]; at: string | null; onPick?: (id: string) => void; children?: ReactNode }) {
@@ -78,13 +80,18 @@ export function SheetSteps({ steps, at, onPick, children }: { steps: SheetStep[]
           const cur = s.id === at;
           const mark = <span className="pf-num">{s.done ? <Check aria-hidden="true" /> : i + 1}</span>;
           return (
-            <li key={s.id} className={`pf-step ${cur ? 'cur' : ''} ${s.done ? 'done' : ''}`} data-step={s.id}>
+            <li key={s.id} className={`pf-step ${cur ? 'cur' : ''} ${s.done ? 'done' : ''} ${!cur && !s.done ? 'up' : ''}`} data-step={s.id}>
               {onPick ? (
                 <button type="button" className="pf-step-btn" aria-current={cur ? 'step' : undefined} onClick={() => onPick(s.id)}>
                   {mark}
                   <span>
                     <Rich text={s.t} />
                   </span>
+                  {s.tag && (
+                    <small className="pf-tag">
+                      <Rich text={s.tag} />
+                    </small>
+                  )}
                 </button>
               ) : (
                 <div className="pf-step-btn" aria-current={cur ? 'step' : undefined}>
@@ -92,6 +99,11 @@ export function SheetSteps({ steps, at, onPick, children }: { steps: SheetStep[]
                   <span>
                     <Rich text={s.t} />
                   </span>
+                  {s.tag && (
+                    <small className="pf-tag">
+                      <Rich text={s.tag} />
+                    </small>
+                  )}
                 </div>
               )}
               {cur && (s.b || s.link) && (

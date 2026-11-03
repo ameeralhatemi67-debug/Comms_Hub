@@ -19,6 +19,8 @@ export type GuideShot = {
   h: number;
   alt: string;
   caption?: string;
+  /** The rings drawn on it: the number of the action in the step's list each one points at, and 'x' for what not to do. */
+  rings?: string[];
 };
 
 export type GuideStep = {
@@ -45,6 +47,8 @@ export type GuideStep = {
   ok?: string;
   /** Already true once the app's secret is stored: another connection of the same app did it. */
   implied?: boolean;
+  /** A short condition shown beside the step's name: who needs it, when it does not apply. */
+  tag?: string;
 };
 export type Guide = {
   title: string;
@@ -67,25 +71,176 @@ const META_PORTFOLIO = { href: 'https://business.facebook.com/settings', label: 
 const TIKTOK_APPS = { href: 'https://developers.tiktok.com/apps/', label: 'TikTok for Developers' };
 const LINKEDIN_APPS = { href: 'https://www.linkedin.com/developers/apps', label: 'تطبيقاتي في LinkedIn' };
 const X_CONSOLE = { href: 'https://console.x.com', label: 'وحدة مطوّري X' };
-/** A picture of Google's console for the «google» guide (public/guides/google/, made by scripts/guide-shots.mjs). */
-const shot = (name: string, w: number, h: number, alt: string, caption?: string): GuideShot => ({ src: `/guides/google/${name}.png`, w, h, alt, caption });
+/** A picture of a platform's own page (public/guides/<set>/, made by scripts/guide-shots.mjs): Google's console for «google», Meta's pages for «meta». */
+const shotOf =
+  (set: string) =>
+  (name: string, w: number, h: number, alt: string, caption?: string, rings?: string[]): GuideShot => ({ src: `/guides/${set}/${name}.png`, w, h, alt, caption, rings });
+const shot = shotOf('google');
+const metaShot = shotOf('meta');
 
 export const GUIDES: Record<string, Guide> = {
   meta: {
     title: 'تجهيز تطبيق Meta لإنستغرام',
     intro: 'للمدير. تُجرى مرة واحدة على مسار Meta الجديد (Unified login)، وتنتهي بإدخال معرّف التطبيق وسره ومعرّف الإعداد في الموقع.',
     steps: [
-      { id: 'accounts', implied: true, t: 'جهّز حسابات إنستغرام', b: 'كل حساب مهني (Business أو Creator) ومملوك لحافظة أعمال القسم. الحساب الشخصي لا يعمل، والحساب في حافظة أخرى يحتاج دخولاً مستقلاً.', link: META_PORTFOLIO, ok: 'الحسابات جاهزة' },
-      { id: 'app', implied: true, t: 'أنشئ التطبيق', b: '«Create app»، ثم حالة الاستخدام «Manage messaging & content on Instagram»، واربطه بحافظة أعمال القسم. بدون الحافظة لا يظهر تبويب الخطوة التالية.', link: META_APPS, ok: 'أنشأت التطبيق' },
-      { id: 'config', implied: true, t: 'أنشئ الإعداد', b: 'في التطبيق: «Use cases» ثم «Customize» ثم «API setup with Unified login» ثم «Create new configuration». تأكد أن instagram_content_publish ضمن الصلاحيات، ثم «Use this configuration».', link: META_APPS, ok: 'أنشأت الإعداد' },
-      { id: 'redirect', implied: true, kind: 'copy', t: 'سجّل عنوان العودة', b: 'في الحقل «Redirect URL» تحت الإعداد: الصق هذا العنوان تماماً واحفظ.', copy: '{redirect}', copyLabel: 'عنوان العودة', ok: 'سجّلت العنوان' },
+      {
+        id: 'accounts',
+        implied: true,
+        t: 'افتح حسابات إنستغرام في الحافظة',
+        b: 'حافظة الأعمال هي التي تملك حسابات القسم، ومنها يربطها التطبيق.',
+        todo: [
+          'افتح الصفحة من الرابط، وسجّل الدخول بحساب فيسبوك الذي يدير حافظة أعمال القسم.',
+          'إن فتحت الصفحة الرئيسية للحافظة «Home» بدل الإعدادات، فاضغط «Go to Business settings».',
+          'من القائمة التي على اليسار افتح «Accounts» ثم «Instagram accounts».',
+        ],
+        shots: [
+          metaShot('ig-home', 975, 128, 'الصفحة الرئيسية لحافظة الأعمال: «No ad accounts» وتحتها زر Go to Business settings', 'الاسم في الصورة محجوب. هذه الصفحة تفتح أحياناً بدل الإعدادات.', ['2']),
+          metaShot('ig-menu', 378, 560, 'قائمة Business settings: تحت Accounts تجد Pages وAd accounts وApps وInstagram accounts', 'العنصر المظلل هو «Instagram accounts».', ['3']),
+        ],
+        link: META_PORTFOLIO,
+        ok: 'فتحتها',
+      },
+      {
+        id: 'ig_add',
+        implied: true,
+        t: 'أضف حساب إنستغرام إلى الحافظة',
+        b: 'يجب أن يكون الحساب مهنياً ومملوكاً لحافظة القسم، فالشخصي لا يعمل.',
+        todo: [
+          'في «Instagram accounts» اضغط «Add» أعلى الصفحة.',
+          'يقول التنبيه إن الحسابات المهنية وحدها تُضاف، وإن الحساب الشخصي يتحول إلى مهني. اقرأه ثم اضغط «Add Instagram account».',
+          'تفتح نافذة إنستغرام: سجّل الدخول بحساب القسم نفسه.',
+          'إن سألتك «Which best describes you?» فاختر «Business» للقسم، أو «Creator» لحساب شخص عام، ثم «Next». لا يُسأل عنها حساب مهني من قبل.',
+          'تظهر رسالة أن الحساب أُضيف إلى الحافظة. اترك المفتاح الأخير مطفأً: تشغيله يعطي من يدخل بهذا الحساب صلاحيات على إعدادات الحافظة. ثم اضغط «Done».',
+        ],
+        shots: [
+          metaShot('ig-add', 902, 100, 'أعلى صفحة Instagram accounts: حقل البحث وزر Filters وزر Add', undefined, ['1']),
+          metaShot('ig-warning', 751, 430, 'نافذة Add an Instagram account: تنبيه أن الحسابات المهنية وحدها تُضاف، وزر Add Instagram account', undefined, ['2']),
+          metaShot('ig-professional', 469, 724, 'نافذة إنستغرام «Which best describes you?»: خياران Creator وBusiness وزر Next', 'تظهر هذه النافذة لحساب لم يكن مهنياً.', ['4']),
+          metaShot('ig-added', 748, 380, 'أسفل نافذة إضافة الحساب: Summary of changes ومفتاح إدارة المستخدمين وزر Done', 'اسم الحافظة والحساب محجوبان. الحلقة الحمراء على المفتاح: اتركه مطفأً.', ['5', 'x']),
+        ],
+        ok: 'أضفته',
+      },
+      {
+        id: 'app',
+        implied: true,
+        t: 'أنشئ التطبيق',
+        b: 'التطبيق هو الهوية التي يعرّف بها الموقع نفسه عند Meta.',
+        todo: [
+          'افتح الصفحة من الرابط، وسجّل الدخول بحساب فيسبوك الذي يدير حافظة أعمال القسم.',
+          'اضغط «Create App»: في أعلى الصفحة، أو في وسطها إن لم يكن عندك تطبيق بعد.',
+          'في «App name» اكتب `Comms Hub`. الاسم يظهر لمن يوافق على الربط، وتعدّله لاحقاً من «Settings».',
+          'في «App contact email» اترك بريدك، أو اكتب بريداً تراجعه بانتظام: تراسلك Meta عليه في شأن التطبيق.',
+          'اضغط «Next». يصير الزر أزرق حين يُكتب الاسم.',
+        ],
+        shots: [
+          metaShot('app-list', 640, 70, 'أعلى صفحة Apps في Meta for Developers: حقل البحث وزر Create App', undefined, ['2']),
+          metaShot('app-name', 975, 263, 'شاشة App details في Create an app: حقل App name وحقل App contact email وزر Next', 'البريد محجوب. الزر «Next» رمادي لأن الاسم فارغ.', ['3', '4', '5']),
+        ],
+        link: META_APPS,
+        ok: 'أنشأت التطبيق',
+      },
+      {
+        id: 'usecase',
+        implied: true,
+        t: 'اختر حالة الاستخدام',
+        b: 'هي ما يحدد الصلاحيات التي يطلبها التطبيق، فاختر إنستغرام وحده.',
+        todo: [
+          'في «Add use cases» لن تجد إنستغرام في «Featured»: اضغط «Content management» من القائمة التي على اليسار.',
+          'علّم «Manage messaging & content on Instagram» وحدها. ولا تعلّم «Manage everything on your Page»: لفيسبوك خطوات مستقلة.',
+          'اضغط «Next».',
+          'في «Business» اختر حافظة الأعمال التي أضفت إليها حساب إنستغرام. بدون الحافظة لا يظهر الإعداد في الخطوة التالية.',
+          'تابع «Requirements» ثم «Overview» وأنشئ التطبيق. تفتح بعدها لوحة التطبيق «Dashboard».',
+        ],
+        shots: [
+          metaShot('use-featured', 975, 582, 'شاشة Add use cases على قائمة Featured: ست حالات استخدام ليس بينها إنستغرام', 'القائمة المميزة لا تحمل إنستغرام.', ['1']),
+          metaShot('use-instagram', 975, 527, 'شاشة Add use cases على Content management: «Manage messaging & content on Instagram» معلَّمة وزر Next', 'الخيار الثاني معلَّم وحده. شاشات «Business» و«Requirements» و«Overview» لم تُصوَّر بعد.', ['2', '3']),
+        ],
+        link: META_APPS,
+        ok: 'اخترتها',
+      },
+      {
+        id: 'config',
+        implied: true,
+        t: 'أنشئ الإعداد',
+        b: 'هو ما يحدد الصلاحيات التي يطلبها الموقع ممن يربط حسابه.',
+        todo: [
+          'من لوحة التطبيق اضغط «Customize the Manage messaging & content on Instagram use case».',
+          'من القائمة التي على اليسار اختر «API setup with Unified login». تقول لافتة أعلى الصفحة إن «API setup with Instagram login» لا يتوفر للتطبيقات الجديدة: هذا طبيعي.',
+          'تحت «1. Configure your app» اضغط «Create new configuration».',
+          'تعرض النافذة الصلاحيات: تأكد أن `instagram_content_publish` بينها، ثم اضغط «Create from template».',
+          'يظهر الإعداد باسم «Instagram API (unified login)» وعليه «Selected»، وفيه «Configuration ID». ابق في الصفحة: ستنسخه في خطوة المعرّف والسر.',
+        ],
+        shots: [
+          metaShot('dashboard', 975, 210, 'لوحة التطبيق Dashboard: «App customization and requirements» وأولها Customize the Manage messaging & content on Instagram use case', 'هذا أول ما تراه بعد إنشاء التطبيق. اسم التطبيق خارج الصورة.', ['1']),
+          metaShot('config-menu', 376, 300, 'قائمة حالة الاستخدام Instagram API: Permissions and features وAPI setup with Unified login وAPI setup with Facebook login', undefined, ['2']),
+          metaShot('config-page', 975, 385, 'قسم «1. Configure your app»: «No compatible configurations found» وجدول الإعداد وزر Create new configuration', 'الجدول هو ما سيُنشأ: رمز وصول لمستخدم نظام لا ينتهي، وحساب إنستغرام مطلوب.', ['3']),
+          metaShot('config-confirm', 738, 560, 'نافذة Confirm login configuration details: قائمة الصلاحيات وفيها instagram_content_publish وزر Create from template', 'ads_management وads_read في القائمة من قالب Meta نفسه: اتركهما.', ['4']),
+          metaShot('config-done', 975, 87, 'الإعداد Instagram API (unified login) وعليه «Instagram Login Compatible» و«Selected» ومعرّف الإعداد Configuration ID', 'المعرّف محجوب.', ['5']),
+        ],
+        link: META_APPS,
+        ok: 'أنشأت الإعداد',
+      },
+      {
+        id: 'redirect',
+        implied: true,
+        kind: 'copy',
+        t: 'سجّل عنوان العودة',
+        b: 'هو العنوان الذي تعيد Meta الناس إليه بعد موافقتهم، ويجب أن يطابق تماماً.',
+        todo: [
+          'في الصفحة نفسها انزل إلى «Redirect URL».',
+          'انسخ العنوان من الحقل أدناه والصقه في «Register a new redirect URL» بالضبط، بلا مسافة قبله أو بعده.',
+          'اضغط «Save».',
+        ],
+        copy: '{redirect}',
+        copyLabel: 'عنوان العودة',
+        shots: [metaShot('redirect-url', 975, 140, 'قسم Redirect URL: حقل Register a new redirect URL وزر Save', 'النص الباهت «https://yourdomain.com/auth/callback» مثال فقط: الصق عنواننا مكانه.', ['2', '3']),
+          metaShot('redirect-saved', 975, 256, 'قسم Redirect URL بعد الحفظ: العنوان في القائمة المنسدلة ورسالة «Redirect URL saved»', 'بعد «Save» يظهر العنوان في القائمة، وتظهر رسالة النجاح.'),
+        ],
+        link: META_APPS,
+        ok: 'سجّلت العنوان',
+      },
+      {
+        id: 'skip',
+        implied: true,
+        t: 'اترك الأقسام التي تحت الإعداد',
+        b: 'ثلاثة أقسام في الصفحة نفسها، ولا يحتاجها الربط.',
+        todo: [
+          'في «2. Generate access tokens» لا تضغط «Add account»: يأخذ الموقع الرمز من تسجيل الدخول نفسه.',
+          'في «3. Configure webhooks» اترك «Callback URL» و«Verify token» فارغين. لا يملك الموقع عنوان Webhooks بعد، وإن منعتك Meta من المتابعة فأخبر مسؤول النظام.',
+          'في «4. Complete App Review» تقول Meta إن لك تخطّيه إن كنت تبني لحسابات تملكها فقط. لا تضغط «Go to app review».',
+        ],
+        shots: [
+          metaShot('skip-webhooks', 975, 477, 'قسما «2. Generate access tokens» و«3. Configure webhooks»: زر Add account وحقلا Callback URL وVerify token', undefined, ['x']),
+          metaShot('skip-review', 975, 221, 'قسم «4. Complete App Review»: عبارة أن لك تخطّيه إن كنت تبني لحسابات تملكها فقط وزر Go to app review', 'العبارة في الصورة هي كلام Meta نفسها.', ['x']),
+        ],
+        ok: 'تركتها',
+      },
       { id: 'roles', implied: true, t: 'أضف من سيربطون الحسابات', b: 'في «App roles» أضف كل من سيسجّل الدخول لربط الحسابات. هذا يكفي لحسابات القسم نفسه، و«App Review» لازمة فقط لخدمة حسابات لا تملكها.', link: META_APPS, ok: 'أضفتهم' },
-      { id: 'keys', kind: 'keys', t: 'انسخ المعرّف والسر', b: '«App ID» و«App Secret» من «App settings» ثم «Basic»، و«Configuration ID» من الإعداد الذي أنشأته. الصقهما هنا فقط، ولا ترسلهما إلى أحد.', link: META_APPS },
+      {
+        id: 'keys',
+        kind: 'keys',
+        t: 'انسخ المعرّف والسر',
+        b: 'ثلاث قيم من Meta، تلصقها هنا وحدها ولا ترسلها إلى أحد.',
+        todo: [
+          'من القائمة التي على اليسار افتح «App settings» ثم «Basic».',
+          'انسخ «App ID» والصقه في الحقل الأول هنا.',
+          'بجانب «App secret» اضغط «Show» وانسخ السر والصقه في الحقل الثاني. لا ترسله إلى أحد.',
+          'من صفحة الإعداد («API setup with Unified login») اضغط أيقونة النسخ بجانب «Configuration ID» والصقه في الحقل الثالث.',
+          'اضغط «فحص وحفظ». يسأل الموقع Meta أولاً، ولا يحفظ شيئاً إن رفضت.',
+        ],
+        shots: [
+          metaShot('basic-menu', 376, 140, 'قائمة التطبيق: App settings مفتوحة وتحتها Basic وAdvanced', undefined, ['1']),
+          metaShot('basic-keys', 975, 74, 'صفحة App settings ثم Basic: حقل App ID وحقل App secret المخفي وزر Show', 'المعرّف محجوب. السر مخفي حتى تضغط «Show».', ['2', '3']),
+          metaShot('config-id', 650, 75, 'الإعداد Instagram API (unified login): سطر Configuration ID وبجانبه أيقونة النسخ', 'المعرّف محجوب.', ['4']),
+        ],
+        link: META_APPS,
+      },
     ],
     notes: [
       'بعد هذه الخطوات تُربط الحسابات من «حسابات المنصات»: دخول واحد يعطي كل حسابات إنستغرام التي تختارها من حافظة واحدة.',
       'ما يُنشأ والتطبيق في وضع التطوير قد لا يراه إلا أصحاب الأدوار عليه، فتحقق من أول منشور.',
       'تذكر Meta عنوان Webhooks ضمن متطلبات هذا المسار، ولا يملك الموقع عنواناً لها بعد. إن منعك ذلك من المتابعة فأخبر مسؤول النظام.',
+      'الصور من حساب Meta تجريبي: الأسماء والحسابات والبريد فيها محجوبة. قد يختلف شكل صفحات Meta قليلاً بحسب لغة حسابك وتحديثاتها، فاعتمد على أسماء الأزرار.',
       'أفاد مطوّرون في 2026-11-01 أن الخطأ 100/33 زال بإضافة business_management إلى الإعداد من «Facebook Login for Business» ثم «Configurations». ليس هذا من وثائق Meta.',
       SIMULATION,
       PLATFORM_FACTS,
@@ -214,7 +369,7 @@ export const GUIDES: Record<string, Guide> = {
           'لا ترفع شعاراً في «App logo»: رفعه يستلزم أن تراجع Google التطبيق عند نشره.',
           'اضغط «Next»، أو «Save» إن كنت في صفحة Branding نفسها.',
         ],
-        shots: [shot('branding', 755, 582, 'صفحة Branding: حقل App name وحقل User support email، وتحتهما App logo', 'الاسم في الصورة مثال من مشروع آخر، والبريد محجوب. الحلقة الحمراء تعني: لا تفعل هذا.')],
+        shots: [shot('branding', 755, 582, 'صفحة Branding: حقل App name وحقل User support email، وتحتهما App logo', 'الاسم في الصورة مثال من مشروع آخر، والبريد محجوب.', ['1', '2', 'x'])],
         link: { href: 'https://console.cloud.google.com/auth/branding', label: 'Branding في Google Cloud' },
         ok: 'كتبتهما',
       },
@@ -248,6 +403,7 @@ export const GUIDES: Record<string, Guide> = {
       {
         id: 'testusers',
         implied: true,
+        tag: 'لمن اختار «External»',
         t: 'أضف بريد من سيربط القناة',
         b: 'ما دام التطبيق في وضع التجربة «Testing» لا يدخل إلا من تضيفه هنا.',
         todo: [
@@ -258,8 +414,8 @@ export const GUIDES: Record<string, Guide> = {
           'هذه الخطوة تخص مرحلة التجربة، وستنشر التطبيق في الخطوة الأخيرة. ولا تظهر إن اخترت «Internal».',
         ],
         shots: [
-          shot('test-users', 650, 371, 'صفحة Audience: قسم Test users وزر Add users وتحته قائمة البريد', 'قائمة الأسماء محجوبة.'),
-          shot('add-users', 435, 175, 'لوحة Add users: حقل كتابة البريد وزر Save', 'الحقل لكتابة البريد، ثم زر «Save».'),
+          shot('test-users', 650, 371, 'صفحة Audience: قسم Test users وزر Add users وتحته قائمة البريد', 'قائمة الأسماء محجوبة.', ['2']),
+          shot('add-users', 435, 175, 'لوحة Add users: حقل كتابة البريد وزر Save', 'الحقل لكتابة البريد، ثم زر «Save».', ['3', '4']),
         ],
         link: { href: 'https://console.cloud.google.com/auth/audience', label: 'Audience في Google Cloud' },
         ok: 'أضفتها',
@@ -276,8 +432,8 @@ export const GUIDES: Record<string, Guide> = {
           'اترك «Authorised JavaScript origins» فارغاً. ولا تضغط «Create» الآن: نضيف عنواني العودة أولاً في الخطوتين التاليتين.',
         ],
         shots: [
-          shot('clients', 975, 295, 'صفحة Clients: زر Create client وجدول OAuth 2.0 Client IDs', 'الأسماء في الجدول أمثلة من مشروع آخر.'),
-          shot('app-type', 688, 297, 'قائمة Application type: Web application أولها، ثم Android وChrome extension وiOS', 'اختر «Web application»، وهي أول القائمة.'),
+          shot('clients', 975, 295, 'صفحة Clients: زر Create client وجدول OAuth 2.0 Client IDs', 'أسماء العملاء في الجدول محجوبة.', ['1']),
+          shot('app-type', 688, 297, 'قائمة Application type: Web application أولها، ثم Android وChrome extension وiOS', 'اختر «Web application»، وهي أول القائمة.', ['2']),
         ],
         link: { href: 'https://console.cloud.google.com/auth/clients', label: 'Clients في Google Cloud' },
         ok: 'أنشأته',
@@ -294,7 +450,7 @@ export const GUIDES: Record<string, Guide> = {
         ],
         copy: '{redirect}',
         copyLabel: 'عنوان العودة ليوتيوب',
-        shots: [shot('redirect', 660, 245, 'قسم Authorised redirect URIs: حقل URIs 1 وزر Add URI', 'الحقل فارغ، والنص الباهت «https://www.example.com» مثال فقط: الصق عنواننا مكانه.')],
+        shots: [shot('redirect', 660, 245, 'قسم Authorised redirect URIs: حقل URIs 1 وزر Add URI', 'الحقل فارغ، والنص الباهت «https://www.example.com» مثال فقط: الصق عنواننا مكانه.', ['2', '3'])],
         ok: 'سجّلت العنوان',
       },
       {
@@ -310,7 +466,7 @@ export const GUIDES: Record<string, Guide> = {
         ],
         copy: '{origin}/api/drive/callback',
         copyLabel: 'عنوان العودة لـ Drive',
-        shots: [shot('redirect-create', 660, 272, 'أسفل Create OAuth client ID: زر Add URI ثم زرا Create وCancel', 'الزر «Create» رمادي في الصورة لأن الحقول فارغة.')],
+        shots: [shot('redirect-create', 660, 272, 'أسفل Create OAuth client ID: زر Add URI ثم زرا Create وCancel', 'الزر «Create» رمادي في الصورة لأن الحقول فارغة.', ['1', '3'])],
         ok: 'سجّلت العنوان',
       },
       {

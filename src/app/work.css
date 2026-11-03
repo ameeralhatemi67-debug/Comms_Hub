@@ -1001,6 +1001,39 @@ button.gd-zoom:hover{background:var(--surface-2);border-color:var(--green)}
 .gd-shot.big .gd-zoom img{width:auto;min-width:100%;max-width:none}
 .gd-shot figcaption{margin-top:6px;font-size:12.5px;line-height:1.8;color:var(--muted)}
 .gd-hint{display:block;font-weight:600;color:var(--green-text)}
+/* A value to type carries its own copy button; an action a picture shows says which picture; the rings are explained under each picture */
+.gd-copyable{display:inline-flex;align-items:center;gap:4px;padding-inline-end:2px}
+.gd-copyable>span{min-width:0;overflow-wrap:anywhere}
+.gd-copy{flex:none;display:inline-grid;place-items:center;width:26px;height:26px;min-height:0;padding:0;border:0;border-radius:6px;background:transparent;color:var(--green-text);cursor:pointer}
+.gd-copy:hover{background:var(--soft)}
+.gd-copy svg{width:14px;height:14px}
+.gd-seen{display:inline-flex;align-items:center;gap:5px;margin-inline-start:8px;padding:0 9px;border-radius:999px;background:var(--chip-bg);color:var(--chip-fg);font-size:11.5px;font-weight:600;line-height:1.8;white-space:nowrap;vertical-align:middle}
+.gd-seen svg{width:13px;height:13px}
+.gd-order{display:block;color:var(--ink);font-weight:600}
+.gd-legend{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:4px}
+.gd-legend>span{display:inline-flex;align-items:center;gap:4px}
+.gd-ring{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#ffb300;color:#1d1d1d;font-style:normal;font-size:11.5px;font-weight:700}
+.gd-ring.x{background:#ff5a4d}/* The setup sheet: progress with a segment per step, the steps still to do dimmed, and one card per step with its button kept in view */
+.pf-prog-count{color:var(--muted)}
+.pf-bar.seg{display:flex;gap:3px;height:8px;overflow:visible;background:transparent}
+.pf-bar.seg i{flex:1 1 0;min-width:0;width:auto;height:8px;border-radius:3px;background:var(--chip-bg);box-shadow:inset 0 0 0 1px var(--line)}
+.pf-bar.seg i.done{background:var(--green);box-shadow:none}
+.pf-bar.seg i.cur{background:var(--soft);box-shadow:inset 0 0 0 2px var(--green)}
+.pf-step-btn>span:not(.pf-num){flex:1;min-width:0}
+.pf-step.up .pf-step-btn,.pf-step.done:not(.cur) .pf-step-btn{color:var(--muted);font-weight:400}
+.pf-step.up .pf-num{border-style:dashed}
+.pf-tag{flex:none;display:inline-flex;align-items:center;padding:1px 9px;border-radius:999px;background:var(--chip-bg);color:var(--chip-fg);font-size:11.5px;font-weight:600;line-height:1.7;white-space:nowrap}
+.pf-step-btn>.pf-tag{margin-inline-start:auto}
+.pf-input:has(>.pf-card){padding-bottom:0}
+.pf-card{margin-bottom:24px;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:0 20px 18px}
+.pf-card-head{display:flex;align-items:center;gap:12px;padding:16px 0 12px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.pf-card-num{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:var(--on-brand);font-size:15px;font-weight:700}
+.pf-card-num svg{width:18px;height:18px}
+.pf-card.done .pf-card-num{background:var(--soft);color:var(--green-text);box-shadow:inset 0 0 0 1.5px var(--green)}
+.pf-card-title{flex:1;min-width:0}
+.pf-card-head h3{margin:0}
+.pf-card-body>p:not(.pf-note){margin:0 0 14px;font-size:13.5px;color:var(--muted)}
+.pf-card-foot{position:sticky;bottom:0;z-index:2;margin:16px -20px -18px;padding:12px 20px;background:var(--surface);border-top:1px solid var(--line);border-radius:0 0 13px 13px}
 .ac-attn{padding:6px 16px 4px;border:1px solid var(--st-warn-fg);border-radius:12px;background:var(--surface)}
 .ac-attn h2{margin:6px 0 2px;font-size:13px;font-weight:600;color:var(--st-warn-fg)}
 .ac-attn-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 0;border-top:1px solid var(--line)}
