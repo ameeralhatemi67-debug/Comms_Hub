@@ -26,6 +26,24 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The desktop application, D9: measuring the device and choosing the graphics chip, built 2026-11-03
+
+From the owner's "Build D9 first" after `Desktop_Power_Ideas.md` (`MVP_draft.md` 63.6, `progress.md`).
+
+- **Done.** Version 0.7.0, bridge version 6: «بطاقة الرسوميات للاستوديو» (Chromium's switch, chosen before it starts),
+  «قياس قدرة الجهاز» with the studio's own modules, the device profile kept by the application with its own key, the plan
+  of `scale.ts` with today's behaviour as its floor, and the cross-device proof `qa/studio-crossdevice.cjs`. Nothing is
+  drawn or exported differently.
+- **Evidence.** Site `npm test` 774 of 774, desktop 135 of 135, typecheck and build clean; `qa/desktop-device-panel.cjs`
+  10 of 10; `qa/desktop-native.cjs` 37 of 37; `qa/desktop-profile.cjs` 12 of 14 (the spread gate failed on a laptop at
+  94-100% load from other work); `qa/studio-crossdevice.cjs` 29 of 39 (its failures are the findings below). The reference
+  export ran at 39.8 frames a second on the AMD chip and 76.7 on the RTX.
+- **Found by the proof (the studio as it was).** «إخفاء بالمربعات» depends on the graphics chip; with no graphics chip an export
+  is written as BT.601 and loses quality; Edge and the application describe colour differently.
+- **Not verified.** Nothing signed in; the laptop was busy with other work during the speed runs; no real weak laptop.
+- **Next.** The owner's choice: make «إخفاء بالمربعات» the same on every chip (it changes those squares' pixels everywhere), or
+  D10. Nothing pushed.
+
 ## «تجربة النشر» on a Facebook Page, built 2026-11-03, not live
 
 From the owner's request after the Instagram test went live (`MVP_draft.md` section 73, `Facebook_Test_Plan.md`, `progress.md`).

@@ -10,6 +10,13 @@
 .st-support li svg{width:18px;height:18px;margin-top:3px}
 .st-support li.ok svg{color:var(--success)}
 .st-support li.no svg{color:var(--warning-fg)}
+/* the desktop application's chip, measurement and plan (MVP_draft.md 63.6) */
+.st-support .dv-tune{display:grid;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.st-support .dv-row{display:grid;gap:8px;justify-items:start}
+.st-support .dv-row .actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.st-support .dv-row b{font-size:13px}
+.st-support .dv-details summary{font-size:13px}
+.st-support .dv-details .dv-row{margin-top:12px}
 
 /* home */
 .st-home{margin-bottom:22px}

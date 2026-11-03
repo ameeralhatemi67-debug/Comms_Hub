@@ -1,0 +1,1913 @@
+{
+  "script": "qa/studio-crossdevice.cjs",
+  "run": "2026-11-03T18:09:45.111Z",
+  "version": "0.7.0",
+  "checks": [
+    {
+      "name": "the reference loaded the shipped fonts, the template assets and the marks, and drew every frame of the eight documents",
+      "pass": true,
+      "detail": "{\"prepared\":{\"fonts\":true,\"docs\":[{\"name\":\"plain\",\"frames\":6},{\"name\":\"text\",\"frames\":6},{\"name\":\"effects\",\"frames\":6},{\"name\":\"transitions\",\"frames\":16},{\"name\":\"covers\",\"frames\":6},{\"name\":\"keys\",\"frames\":6},{\"name\":\"brand\",\"frames\":5},{\"name\":\"landscape-keys\",\"frames\":3}]},\"frames\":54,\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "edge: every composed frame is the same when drawn again in another order (exact, by hash)",
+      "pass": true,
+      "detail": "{\"frames\":54,\"differing\":[],\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "app-saving: every composed frame is the same when drawn again in another order (exact, by hash)",
+      "pass": true,
+      "detail": "{\"frames\":54,\"differing\":[],\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "app-strong: every composed frame is the same when drawn again in another order (exact, by hash)",
+      "pass": true,
+      "detail": "{\"frames\":54,\"differing\":[],\"renderer\":\"ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "app-software: every composed frame is the same when drawn again in another order (exact, by hash)",
+      "pass": true,
+      "detail": "{\"frames\":54,\"differing\":[],\"renderer\":\"ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "app-saving, «plain»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":6,\"worst\":{\"name\":\"plain\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-saving, «text»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":6,\"worst\":{\"name\":\"text\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-saving, «effects»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":6,\"worst\":{\"name\":\"effects\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-saving, «transitions»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":16,\"identical\":16,\"worst\":{\"name\":\"transitions\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-saving, «covers»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":6,\"worst\":{\"name\":\"covers\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-saving, «keys»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":6,\"worst\":{\"name\":\"keys\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-saving, «brand»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":5,\"identical\":5,\"worst\":{\"name\":\"brand\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-saving, «landscape-keys»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":3,\"identical\":3,\"worst\":{\"name\":\"landscape-keys\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-strong, «plain»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":6,\"worst\":{\"name\":\"plain\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-strong, «text»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":6,\"worst\":{\"name\":\"text\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-strong, «effects»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": false,
+      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"effects\",\"i\":0,\"maxDiff\":89,\"over2\":1.0241,\"psnr\":40.48},\"bad\":5}"
+    },
+    {
+      "name": "app-strong, «transitions»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":16,\"identical\":2,\"worst\":{\"name\":\"transitions\",\"i\":15,\"maxDiff\":3,\"over2\":0,\"psnr\":53.83},\"bad\":0}"
+    },
+    {
+      "name": "app-strong, «covers»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"covers\",\"i\":1,\"maxDiff\":2,\"over2\":0,\"psnr\":61.07},\"bad\":0}"
+    },
+    {
+      "name": "app-strong, «keys»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"keys\",\"i\":4,\"maxDiff\":1,\"over2\":0,\"psnr\":66.05},\"bad\":0}"
+    },
+    {
+      "name": "app-strong, «brand»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":5,\"identical\":0,\"worst\":{\"name\":\"brand\",\"i\":4,\"maxDiff\":3,\"over2\":0.0045,\"psnr\":61.74},\"bad\":0}"
+    },
+    {
+      "name": "app-strong, «landscape-keys»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":3,\"identical\":0,\"worst\":{\"name\":\"landscape-keys\",\"i\":2,\"maxDiff\":1,\"over2\":0,\"psnr\":68.24},\"bad\":0}"
+    },
+    {
+      "name": "app-software, «plain»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":6,\"worst\":{\"name\":\"plain\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-software, «text»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": true,
+      "detail": "{\"frames\":6,\"identical\":6,\"worst\":{\"name\":\"text\",\"i\":0,\"maxDiff\":0,\"over2\":0,\"psnr\":99},\"bad\":0}"
+    },
+    {
+      "name": "app-software, «effects»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": false,
+      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"effects\",\"i\":0,\"maxDiff\":87,\"over2\":4.2471,\"psnr\":39.99},\"bad\":6}"
+    },
+    {
+      "name": "app-software, «transitions»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": false,
+      "detail": "{\"frames\":16,\"identical\":2,\"worst\":{\"name\":\"transitions\",\"i\":13,\"maxDiff\":4,\"over2\":0.0836,\"psnr\":48.9},\"bad\":1}"
+    },
+    {
+      "name": "app-software, «covers»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": false,
+      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"covers\",\"i\":1,\"maxDiff\":4,\"over2\":0.1393,\"psnr\":50.88},\"bad\":2}"
+    },
+    {
+      "name": "app-software, «keys»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": false,
+      "detail": "{\"frames\":6,\"identical\":0,\"worst\":{\"name\":\"keys\",\"i\":4,\"maxDiff\":32,\"over2\":0.1503,\"psnr\":55.04},\"bad\":4}"
+    },
+    {
+      "name": "app-software, «brand»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": false,
+      "detail": "{\"frames\":5,\"identical\":0,\"worst\":{\"name\":\"brand\",\"i\":2,\"maxDiff\":51,\"over2\":0.6325,\"psnr\":50.06},\"bad\":5}"
+    },
+    {
+      "name": "app-software, «landscape-keys»: every frame within the tolerance of the reference (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)",
+      "pass": false,
+      "detail": "{\"frames\":3,\"identical\":0,\"worst\":{\"name\":\"landscape-keys\",\"i\":2,\"maxDiff\":53,\"over2\":0.1388,\"psnr\":53.36},\"bad\":1}"
+    },
+    {
+      "name": "edge: the real export's structure is the reference's exactly (codec, profile, size, pixel format, rate, 90 video timestamps, sound)",
+      "pass": true,
+      "detail": "{\"video\":{\"codec\":\"h264\",\"profile\":\"High\",\"width\":1920,\"height\":1080,\"pix_fmt\":\"yuv420p\",\"rate\":\"30/1\"},\"audio\":{\"codec\":\"aac\",\"rate\":\"48000\",\"channels\":2},\"frames\":90,\"audioPackets\":141,\"firstPts\":[\"0.000000\",\"0.033333\",\"0.066667\"],\"lastPts\":[\"2.933333\",\"2.966667\"]}"
+    },
+    {
+      "name": "edge: the encoded file is at least 40 dB from its source",
+      "pass": true,
+      "detail": "{\"psnr\":42.147763,\"bytes\":3982815,\"ms\":2915}"
+    },
+    {
+      "name": "app-saving: the real export's structure is the reference's exactly (codec, profile, size, pixel format, rate, 90 video timestamps, sound)",
+      "pass": true,
+      "detail": "{\"video\":{\"codec\":\"h264\",\"profile\":\"High\",\"width\":1920,\"height\":1080,\"pix_fmt\":\"yuv420p\",\"rate\":\"30/1\"},\"audio\":{\"codec\":\"aac\",\"rate\":\"48000\",\"channels\":2},\"frames\":90,\"audioPackets\":141,\"firstPts\":[\"0.000000\",\"0.033333\",\"0.066667\"],\"lastPts\":[\"2.933333\",\"2.966667\"]}"
+    },
+    {
+      "name": "app-saving: the encoded file is at least 40 dB from its source",
+      "pass": true,
+      "detail": "{\"psnr\":42.297187,\"bytes\":4008618,\"ms\":7151}"
+    },
+    {
+      "name": "app-strong: the real export's structure is the reference's exactly (codec, profile, size, pixel format, rate, 90 video timestamps, sound)",
+      "pass": true,
+      "detail": "{\"video\":{\"codec\":\"h264\",\"profile\":\"High\",\"width\":1920,\"height\":1080,\"pix_fmt\":\"yuv420p\",\"rate\":\"30/1\"},\"audio\":{\"codec\":\"aac\",\"rate\":\"48000\",\"channels\":2},\"frames\":90,\"audioPackets\":141,\"firstPts\":[\"0.000000\",\"0.033333\",\"0.066667\"],\"lastPts\":[\"2.933333\",\"2.966667\"]}"
+    },
+    {
+      "name": "app-strong: the encoded file is at least 40 dB from its source",
+      "pass": true,
+      "detail": "{\"psnr\":42.304707,\"bytes\":4007980,\"ms\":3087}"
+    },
+    {
+      "name": "app-software: the real export's structure is the reference's exactly (codec, profile, size, pixel format, rate, 90 video timestamps, sound)",
+      "pass": true,
+      "detail": "{\"video\":{\"codec\":\"h264\",\"profile\":\"High\",\"width\":1920,\"height\":1080,\"pix_fmt\":\"yuv420p\",\"rate\":\"30/1\"},\"audio\":{\"codec\":\"aac\",\"rate\":\"48000\",\"channels\":2},\"frames\":90,\"audioPackets\":141,\"firstPts\":[\"0.000000\",\"0.033333\",\"0.066667\"],\"lastPts\":[\"2.933333\",\"2.966667\"]}"
+    },
+    {
+      "name": "app-software: the encoded file is at least 40 dB from its source",
+      "pass": false,
+      "detail": "{\"psnr\":39.108329,\"bytes\":2361794,\"ms\":1711}"
+    },
+    {
+      "name": "the application writes the same colour description on every chip and with no chip",
+      "pass": false,
+      "detail": "{\"app-saving\":{\"space\":\"bt709\",\"primaries\":\"bt709\",\"transfer\":\"bt709\",\"range\":\"tv\"},\"app-strong\":{\"space\":\"bt709\",\"primaries\":\"bt709\",\"transfer\":\"bt709\",\"range\":\"tv\"},\"app-software\":{\"space\":\"smpte170m\",\"primaries\":\"smpte170m\",\"transfer\":\"smpte170m\",\"range\":\"tv\"}}"
+    },
+    {
+      "name": "the browser and the application write the same colour description",
+      "pass": false,
+      "detail": "{\"edge\":{\"space\":\"bt709\",\"primaries\":\"bt709\",\"transfer\":\"iec61966-2-1\",\"range\":\"tv\"},\"application\":{\"space\":\"bt709\",\"primaries\":\"bt709\",\"transfer\":\"bt709\",\"range\":\"tv\"},\"engines\":{\"edge\":{\"browser\":\"156.0.4314.58\"},\"application\":{\"electron\":\"44.5.1\",\"chrome\":\"152.0.7977.130\",\"switch\":\"low\"}}}"
+    }
+  ],
+  "notes": [
+    "Tolerance across machines: PSNR at least 50 dB and at most 0.1% of channels more than 2 levels apart, per frame. Exact equality is asked only of the same machine."
+  ],
+  "probes": {
+    "edge": {
+      "video": {
+        "codec": "h264",
+        "profile": "High",
+        "width": 1920,
+        "height": 1080,
+        "pix_fmt": "yuv420p",
+        "rate": "30/1"
+      },
+      "colour": {
+        "space": "bt709",
+        "primaries": "bt709",
+        "transfer": "iec61966-2-1",
+        "range": "tv"
+      },
+      "audio": {
+        "codec": "aac",
+        "rate": "48000",
+        "channels": 2
+      },
+      "pts": "90 timestamps, 0.000000 to 2.966667",
+      "audioPackets": 141
+    },
+    "app-saving": {
+      "video": {
+        "codec": "h264",
+        "profile": "High",
+        "width": 1920,
+        "height": 1080,
+        "pix_fmt": "yuv420p",
+        "rate": "30/1"
+      },
+      "colour": {
+        "space": "bt709",
+        "primaries": "bt709",
+        "transfer": "bt709",
+        "range": "tv"
+      },
+      "audio": {
+        "codec": "aac",
+        "rate": "48000",
+        "channels": 2
+      },
+      "pts": "90 timestamps, 0.000000 to 2.966667",
+      "audioPackets": 141
+    },
+    "app-strong": {
+      "video": {
+        "codec": "h264",
+        "profile": "High",
+        "width": 1920,
+        "height": 1080,
+        "pix_fmt": "yuv420p",
+        "rate": "30/1"
+      },
+      "colour": {
+        "space": "bt709",
+        "primaries": "bt709",
+        "transfer": "bt709",
+        "range": "tv"
+      },
+      "audio": {
+        "codec": "aac",
+        "rate": "48000",
+        "channels": 2
+      },
+      "pts": "90 timestamps, 0.000000 to 2.966667",
+      "audioPackets": 141
+    },
+    "app-software": {
+      "video": {
+        "codec": "h264",
+        "profile": "High",
+        "width": 1920,
+        "height": 1080,
+        "pix_fmt": "yuv420p",
+        "rate": "30/1"
+      },
+      "colour": {
+        "space": "smpte170m",
+        "primaries": "smpte170m",
+        "transfer": "smpte170m",
+        "range": "tv"
+      },
+      "audio": {
+        "codec": "aac",
+        "rate": "48000",
+        "channels": 2
+      },
+      "pts": "90 timestamps, 0.000000 to 2.966667",
+      "audioPackets": 141
+    }
+  },
+  "reference": [
+    {
+      "name": "brand",
+      "i": 0,
+      "t": 200000,
+      "size": "1080x1080",
+      "hash": "80850c1849f1052f98a8c7ccf6c81c3ac626bbb74c112b2b5e0c58bf80183527"
+    },
+    {
+      "name": "brand",
+      "i": 1,
+      "t": 800000,
+      "size": "1080x1080",
+      "hash": "2963f615e8dda6f354c7177b18d6beea8f1daccd89aae7fc03f780087cbd3444"
+    },
+    {
+      "name": "brand",
+      "i": 2,
+      "t": 1600000,
+      "size": "1080x1080",
+      "hash": "c6cfc5dad704d2c77f9bf3182bcc3e78a48c72813421bfbac8346fea6cf98909"
+    },
+    {
+      "name": "brand",
+      "i": 3,
+      "t": 2400000,
+      "size": "1080x1080",
+      "hash": "e70faa9ab0e12e349ac2d7f52b84aa6f1c1b2a1d4aa0a4e3112eb5eb83ed524b"
+    },
+    {
+      "name": "brand",
+      "i": 4,
+      "t": 3200000,
+      "size": "1080x1080",
+      "hash": "177e0bbde2ab236653b1de13ee251aeba8a16ab10115f8dfda45d80c2f9d8197"
+    },
+    {
+      "name": "covers",
+      "i": 0,
+      "t": 100000,
+      "size": "1080x1920",
+      "hash": "0b9a6fe9cd3e42f5c0d4aa2b0228f787c20611404c8dff31346f091686607831"
+    },
+    {
+      "name": "covers",
+      "i": 1,
+      "t": 1100000,
+      "size": "1080x1920",
+      "hash": "7ea8c6716f65f09b49f4fb0d04a41091ddcfab24f56dcfbd91120c8a47e35f97"
+    },
+    {
+      "name": "covers",
+      "i": 2,
+      "t": 2050000,
+      "size": "1080x1920",
+      "hash": "a78568b2fe9b3bc2004a7392977db5dd7e530e55f5d16d29d678485ac0ec840b"
+    },
+    {
+      "name": "covers",
+      "i": 3,
+      "t": 2500000,
+      "size": "1080x1920",
+      "hash": "20220ba679158ea204f3f9fdb69e65c2639542c1eba8f6f3d3f4d6ff2a543ab4"
+    },
+    {
+      "name": "covers",
+      "i": 4,
+      "t": 3300000,
+      "size": "1080x1920",
+      "hash": "80c0d35bc311fc3871e5b28b8984bef9df629e99487d9879680ab697b85e6c10"
+    },
+    {
+      "name": "covers",
+      "i": 5,
+      "t": 3900000,
+      "size": "1080x1920",
+      "hash": "d6fad7e138fed630afefce3d776b81ca4bcc7613fbfd0a7c0e812f5b3ad7b81c"
+    },
+    {
+      "name": "effects",
+      "i": 0,
+      "t": 100000,
+      "size": "1920x1080",
+      "hash": "be1c09501260309c075b62bad0bb5fa6bd405684437879530662802d3fefb074"
+    },
+    {
+      "name": "effects",
+      "i": 1,
+      "t": 1100000,
+      "size": "1920x1080",
+      "hash": "c5c23eaa0f3e6b7dc359578af5021cfe15ecab256e4b249a0503ab0750712975"
+    },
+    {
+      "name": "effects",
+      "i": 2,
+      "t": 2050000,
+      "size": "1920x1080",
+      "hash": "6674bb63951101a7372221e0c812ff88133f66a503ac5192ad0d078bb8a9b09b"
+    },
+    {
+      "name": "effects",
+      "i": 3,
+      "t": 2500000,
+      "size": "1920x1080",
+      "hash": "c813cae8cd7313c21ac3df86a46ad23712e96cb21135b4fedc457c254eac6da3"
+    },
+    {
+      "name": "effects",
+      "i": 4,
+      "t": 3300000,
+      "size": "1920x1080",
+      "hash": "41754a22a5ec3a6900ce4dbe24532ff8ac0c0c44b2e0958935eb7a8441d992c8"
+    },
+    {
+      "name": "effects",
+      "i": 5,
+      "t": 3900000,
+      "size": "1920x1080",
+      "hash": "00a9d5e64e124fee506ff3e90c33bb5b3c6828be5ac419345870aa1e33ad5c07"
+    },
+    {
+      "name": "keys",
+      "i": 0,
+      "t": 100000,
+      "size": "1080x1350",
+      "hash": "acd02d65767d8da173c274dd524815d6293ca1ec6e5c49557d7b5457d77084a3"
+    },
+    {
+      "name": "keys",
+      "i": 1,
+      "t": 1100000,
+      "size": "1080x1350",
+      "hash": "d8e26cc3f5fdfc1be7d314dd1cce00a227fc32e768c2221315b6bea691921f6e"
+    },
+    {
+      "name": "keys",
+      "i": 2,
+      "t": 2050000,
+      "size": "1080x1350",
+      "hash": "3b8c6e907af323b3f3716eb004ba5a59fed2238f53e4ea12ab561ba15a9f408d"
+    },
+    {
+      "name": "keys",
+      "i": 3,
+      "t": 2500000,
+      "size": "1080x1350",
+      "hash": "3c9399ae0d73df2bfb912a6cd5780c6cf6ab685f2d641a9c1b7c9eee97148838"
+    },
+    {
+      "name": "keys",
+      "i": 4,
+      "t": 3300000,
+      "size": "1080x1350",
+      "hash": "04a91243ced777fd13746d8b7d8698134ffcbc659f7c4af8e9c02fa07388447c"
+    },
+    {
+      "name": "keys",
+      "i": 5,
+      "t": 3900000,
+      "size": "1080x1350",
+      "hash": "dbacee76487a7f85fa27cc4e5e6c0c894716041577008c6ca77cfc3b38f2ac80"
+    },
+    {
+      "name": "landscape-keys",
+      "i": 0,
+      "t": 300000,
+      "size": "1920x1080",
+      "hash": "29e8093855ebbc7b8e1abaf989feabe79a8bbd9b270901746a44f169800b5854"
+    },
+    {
+      "name": "landscape-keys",
+      "i": 1,
+      "t": 1900000,
+      "size": "1920x1080",
+      "hash": "03c81eb3f9bffdbe269254d5373709162286e6e5a6d36bf01c7cc97a6980a29f"
+    },
+    {
+      "name": "landscape-keys",
+      "i": 2,
+      "t": 3500000,
+      "size": "1920x1080",
+      "hash": "e15499a9cbe967584a6b0350036e56310af890b957a49fa83d915c32b6b40eec"
+    },
+    {
+      "name": "plain",
+      "i": 0,
+      "t": 100000,
+      "size": "1080x1920",
+      "hash": "0e19990721b396e96ab3ee1338b3880ac1172c23fc68542b7f49f25a076be696"
+    },
+    {
+      "name": "plain",
+      "i": 1,
+      "t": 1100000,
+      "size": "1080x1920",
+      "hash": "51726cdcdcb2b3fafd5d0aa2aa6a242c6b8716e65a2a5677185df89345087638"
+    },
+    {
+      "name": "plain",
+      "i": 2,
+      "t": 2050000,
+      "size": "1080x1920",
+      "hash": "a49c452a0f795800fe5c8e2be2cf1b69d87b39e8de9a7ac38bd911a9f34ae390"
+    },
+    {
+      "name": "plain",
+      "i": 3,
+      "t": 2500000,
+      "size": "1080x1920",
+      "hash": "3083988927c130f2ed201a122918bba2bc703dcd4b734e2849928c0bdeae408f"
+    },
+    {
+      "name": "plain",
+      "i": 4,
+      "t": 3300000,
+      "size": "1080x1920",
+      "hash": "b235f1bf4ab0782945b3c4b6fecfcea08f28d69a21475d4672de8fa354dc538c"
+    },
+    {
+      "name": "plain",
+      "i": 5,
+      "t": 3900000,
+      "size": "1080x1920",
+      "hash": "b65bc2e892c250b73ecc6732dc39cb3f5708bfc847d5eda427b55e5b5b7f43d5"
+    },
+    {
+      "name": "text",
+      "i": 0,
+      "t": 100000,
+      "size": "1080x1920",
+      "hash": "cecd0be7afd93697de2b3d2b902c0c91ffb5b0b5bc72dfe0c745757f3eabdc10"
+    },
+    {
+      "name": "text",
+      "i": 1,
+      "t": 1100000,
+      "size": "1080x1920",
+      "hash": "d565f9afce333b317cbde8d84631d2ba5920462f9b28924a47b5942401103748"
+    },
+    {
+      "name": "text",
+      "i": 2,
+      "t": 2050000,
+      "size": "1080x1920",
+      "hash": "9521412a7f5e1fce090f7d82699bb2b706e3ada2b5e20f1624556d0b29e96725"
+    },
+    {
+      "name": "text",
+      "i": 3,
+      "t": 2500000,
+      "size": "1080x1920",
+      "hash": "07080983be20025b7e46082a534866a1dda2d28010674df6a2b0401874d1e6b1"
+    },
+    {
+      "name": "text",
+      "i": 4,
+      "t": 3300000,
+      "size": "1080x1920",
+      "hash": "07080983be20025b7e46082a534866a1dda2d28010674df6a2b0401874d1e6b1"
+    },
+    {
+      "name": "text",
+      "i": 5,
+      "t": 3900000,
+      "size": "1080x1920",
+      "hash": "07080983be20025b7e46082a534866a1dda2d28010674df6a2b0401874d1e6b1"
+    },
+    {
+      "name": "transitions",
+      "i": 0,
+      "t": 950000,
+      "size": "1920x1080",
+      "hash": "e49446dabe1edc257242ee6eb82de240771e2c456969116dc2160682cb30f0d2"
+    },
+    {
+      "name": "transitions",
+      "i": 1,
+      "t": 1650000,
+      "size": "1920x1080",
+      "hash": "d7489c5f92e95426f405806b89a221d798c8dd31992b20de26caf7a97789fc99"
+    },
+    {
+      "name": "transitions",
+      "i": 2,
+      "t": 2350000,
+      "size": "1920x1080",
+      "hash": "598ddbfa658eaf70a2e0c50fa12f914c28a4496bbb150a21d6d77d73b0d8c55d"
+    },
+    {
+      "name": "transitions",
+      "i": 3,
+      "t": 3050000,
+      "size": "1920x1080",
+      "hash": "11de2e64ef51dc5faf59b4b1e412256008bd8c621960baf8323a78118c108821"
+    },
+    {
+      "name": "transitions",
+      "i": 4,
+      "t": 3750000,
+      "size": "1920x1080",
+      "hash": "7531aa959d2ed6475621d72d81293dd08ea564aa2a02da6d62b14a7ce59c4d81"
+    },
+    {
+      "name": "transitions",
+      "i": 5,
+      "t": 4450000,
+      "size": "1920x1080",
+      "hash": "4f6e06eaee2084e8dbf7cb17bc5e8b3c0a64f5f8f7ceb3b01258ba8e41f3af0b"
+    },
+    {
+      "name": "transitions",
+      "i": 6,
+      "t": 5150000,
+      "size": "1920x1080",
+      "hash": "b5810d523bcabc78b14ded5a79beb80319aac3dc263309f7e079305ab9f99ab5"
+    },
+    {
+      "name": "transitions",
+      "i": 7,
+      "t": 5850000,
+      "size": "1920x1080",
+      "hash": "a8f96d12067e7e740246b21a4a2872c0225df5d661d438d1e5f160fa15cda17c"
+    },
+    {
+      "name": "transitions",
+      "i": 8,
+      "t": 6550000,
+      "size": "1920x1080",
+      "hash": "2353bb02ae6786de365f29af35157e4cfa05d80229d6d3ad2bc7d1341a22bfd7"
+    },
+    {
+      "name": "transitions",
+      "i": 9,
+      "t": 7250000,
+      "size": "1920x1080",
+      "hash": "246dae677f3b0ac243a5e09f4f6602adb4665c8a96c96b9027c2e2f6f26d7c1e"
+    },
+    {
+      "name": "transitions",
+      "i": 10,
+      "t": 7950000,
+      "size": "1920x1080",
+      "hash": "d7aa339747b96f908fbea6070e6645e23bf7df8b14795d98251d7eb8f69be969"
+    },
+    {
+      "name": "transitions",
+      "i": 11,
+      "t": 8650000,
+      "size": "1920x1080",
+      "hash": "6ee1ffb072175a7094e8108df98f7dd4563793b90fa4778b2a378d7728ade8a7"
+    },
+    {
+      "name": "transitions",
+      "i": 12,
+      "t": 9350000,
+      "size": "1920x1080",
+      "hash": "11ff83c2aa169c37f04baae1be7988377ff6df42da4b096eb4efaa838848becf"
+    },
+    {
+      "name": "transitions",
+      "i": 13,
+      "t": 10050000,
+      "size": "1920x1080",
+      "hash": "60487a3f628d4dd267ceb4faa7f02e5fe5bfd4cfe0ccc432fa735e2ff178f561"
+    },
+    {
+      "name": "transitions",
+      "i": 14,
+      "t": 10750000,
+      "size": "1920x1080",
+      "hash": "20770d54b1deaf7afe6753656fce26b6a35cf4c5c0e8b8560273789e7aef3eb1"
+    },
+    {
+      "name": "transitions",
+      "i": 15,
+      "t": 11450000,
+      "size": "1920x1080",
+      "hash": "caf8406a5de3d29285f8fa7e832bb0542eac87ff36bce0f596725e8b280264c7"
+    }
+  ],
+  "runs": {
+    "edge": {
+      "engine": {
+        "browser": "156.0.4314.58"
+      },
+      "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "exported": {
+        "frames": 90,
+        "bytes": 3982815,
+        "audio": true,
+        "target": "device",
+        "ms": 2915
+      },
+      "psnr": 42.147763,
+      "summary": null,
+      "sameAsReference": 54,
+      "compared": null
+    },
+    "app-saving": {
+      "engine": {
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130",
+        "switch": "low"
+      },
+      "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "exported": {
+        "frames": 90,
+        "bytes": 4008618,
+        "audio": true,
+        "target": "device",
+        "ms": 7151
+      },
+      "psnr": 42.297187,
+      "summary": {
+        "frames": 54,
+        "identical": 54,
+        "minPsnr": 99,
+        "maxOver2": 0,
+        "maxDiff": 0
+      },
+      "sameAsReference": 54,
+      "compared": [
+        {
+          "name": "plain",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 5,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 5,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "effects",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "effects",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "effects",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "effects",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "effects",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "effects",
+          "i": 5,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 5,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 6,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 7,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 8,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 9,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 10,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 11,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 12,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 14,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "covers",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "covers",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "covers",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "covers",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "covers",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "covers",
+          "i": 5,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "keys",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "keys",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "keys",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "keys",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "keys",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "keys",
+          "i": 5,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "brand",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "brand",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "brand",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "brand",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "brand",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "landscape-keys",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "landscape-keys",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "landscape-keys",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        }
+      ]
+    },
+    "app-strong": {
+      "engine": {
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130",
+        "switch": "high"
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "exported": {
+        "frames": 90,
+        "bytes": 4007980,
+        "audio": true,
+        "target": "device",
+        "ms": 3087
+      },
+      "psnr": 42.304707,
+      "summary": {
+        "frames": 54,
+        "identical": 14,
+        "minPsnr": 40.48,
+        "maxOver2": 1.0241,
+        "maxDiff": 112
+      },
+      "sameAsReference": 14,
+      "compared": [
+        {
+          "name": "plain",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 5,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 5,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "effects",
+          "i": 0,
+          "maxDiff": 89,
+          "over2": 1.0241,
+          "psnr": 40.48
+        },
+        {
+          "name": "effects",
+          "i": 1,
+          "maxDiff": 112,
+          "over2": 0.8614,
+          "psnr": 47.05
+        },
+        {
+          "name": "effects",
+          "i": 2,
+          "maxDiff": 51,
+          "over2": 0.0356,
+          "psnr": 52.28
+        },
+        {
+          "name": "effects",
+          "i": 3,
+          "maxDiff": 52,
+          "over2": 0.9945,
+          "psnr": 48.29
+        },
+        {
+          "name": "effects",
+          "i": 4,
+          "maxDiff": 59,
+          "over2": 0.8993,
+          "psnr": 48.71
+        },
+        {
+          "name": "effects",
+          "i": 5,
+          "maxDiff": 38,
+          "over2": 0.9278,
+          "psnr": 51.46
+        },
+        {
+          "name": "transitions",
+          "i": 0,
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 54.06
+        },
+        {
+          "name": "transitions",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 3,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 65.73
+        },
+        {
+          "name": "transitions",
+          "i": 4,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 65.81
+        },
+        {
+          "name": "transitions",
+          "i": 5,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 66.84
+        },
+        {
+          "name": "transitions",
+          "i": 6,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 66.86
+        },
+        {
+          "name": "transitions",
+          "i": 7,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 65.39
+        },
+        {
+          "name": "transitions",
+          "i": 8,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 65.81
+        },
+        {
+          "name": "transitions",
+          "i": 9,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 65.33
+        },
+        {
+          "name": "transitions",
+          "i": 10,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 65.26
+        },
+        {
+          "name": "transitions",
+          "i": 11,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 64.64
+        },
+        {
+          "name": "transitions",
+          "i": 12,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 64.61
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 54.62
+        },
+        {
+          "name": "transitions",
+          "i": 14,
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 65.68
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "maxDiff": 3,
+          "over2": 0,
+          "psnr": 53.83
+        },
+        {
+          "name": "covers",
+          "i": 0,
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 61.83
+        },
+        {
+          "name": "covers",
+          "i": 1,
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 61.07
+        },
+        {
+          "name": "covers",
+          "i": 2,
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 61.15
+        },
+        {
+          "name": "covers",
+          "i": 3,
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 61.43
+        },
+        {
+          "name": "covers",
+          "i": 4,
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 61.22
+        },
+        {
+          "name": "covers",
+          "i": 5,
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 61.44
+        },
+        {
+          "name": "keys",
+          "i": 0,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 76.82
+        },
+        {
+          "name": "keys",
+          "i": 1,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 68.88
+        },
+        {
+          "name": "keys",
+          "i": 2,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 67.13
+        },
+        {
+          "name": "keys",
+          "i": 3,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 66.47
+        },
+        {
+          "name": "keys",
+          "i": 4,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 66.05
+        },
+        {
+          "name": "keys",
+          "i": 5,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 70.69
+        },
+        {
+          "name": "brand",
+          "i": 0,
+          "maxDiff": 3,
+          "over2": 0,
+          "psnr": 69.21
+        },
+        {
+          "name": "brand",
+          "i": 1,
+          "maxDiff": 3,
+          "over2": 0.0007,
+          "psnr": 63.06
+        },
+        {
+          "name": "brand",
+          "i": 2,
+          "maxDiff": 3,
+          "over2": 0.0016,
+          "psnr": 62.17
+        },
+        {
+          "name": "brand",
+          "i": 3,
+          "maxDiff": 3,
+          "over2": 0.0029,
+          "psnr": 61.93
+        },
+        {
+          "name": "brand",
+          "i": 4,
+          "maxDiff": 3,
+          "over2": 0.0045,
+          "psnr": 61.74
+        },
+        {
+          "name": "landscape-keys",
+          "i": 0,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 75.67
+        },
+        {
+          "name": "landscape-keys",
+          "i": 1,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 69.99
+        },
+        {
+          "name": "landscape-keys",
+          "i": 2,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 68.24
+        }
+      ]
+    },
+    "app-software": {
+      "engine": {
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130",
+        "switch": "none"
+      },
+      "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "exported": {
+        "frames": 90,
+        "bytes": 2361794,
+        "audio": true,
+        "target": "device",
+        "ms": 1711
+      },
+      "psnr": 39.108329,
+      "summary": {
+        "frames": 54,
+        "identical": 14,
+        "minPsnr": 39.99,
+        "maxOver2": 4.2471,
+        "maxDiff": 112
+      },
+      "sameAsReference": 14,
+      "compared": [
+        {
+          "name": "plain",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "plain",
+          "i": 5,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 0,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 3,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 4,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "text",
+          "i": 5,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "effects",
+          "i": 0,
+          "maxDiff": 87,
+          "over2": 4.2471,
+          "psnr": 39.99
+        },
+        {
+          "name": "effects",
+          "i": 1,
+          "maxDiff": 112,
+          "over2": 3.9847,
+          "psnr": 45.11
+        },
+        {
+          "name": "effects",
+          "i": 2,
+          "maxDiff": 51,
+          "over2": 0.9127,
+          "psnr": 47.44
+        },
+        {
+          "name": "effects",
+          "i": 3,
+          "maxDiff": 52,
+          "over2": 1.1181,
+          "psnr": 46.92
+        },
+        {
+          "name": "effects",
+          "i": 4,
+          "maxDiff": 59,
+          "over2": 1.0488,
+          "psnr": 47.29
+        },
+        {
+          "name": "effects",
+          "i": 5,
+          "maxDiff": 38,
+          "over2": 1.0201,
+          "psnr": 49.09
+        },
+        {
+          "name": "transitions",
+          "i": 0,
+          "maxDiff": 2,
+          "over2": 0,
+          "psnr": 50.42
+        },
+        {
+          "name": "transitions",
+          "i": 1,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 2,
+          "maxDiff": 0,
+          "over2": 0,
+          "psnr": 99
+        },
+        {
+          "name": "transitions",
+          "i": 3,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 54.13
+        },
+        {
+          "name": "transitions",
+          "i": 4,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 54.14
+        },
+        {
+          "name": "transitions",
+          "i": 5,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 54.14
+        },
+        {
+          "name": "transitions",
+          "i": 6,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 54.14
+        },
+        {
+          "name": "transitions",
+          "i": 7,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 54.12
+        },
+        {
+          "name": "transitions",
+          "i": 8,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 54.14
+        },
+        {
+          "name": "transitions",
+          "i": 9,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 54.14
+        },
+        {
+          "name": "transitions",
+          "i": 10,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 54.14
+        },
+        {
+          "name": "transitions",
+          "i": 11,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 54.13
+        },
+        {
+          "name": "transitions",
+          "i": 12,
+          "maxDiff": 1,
+          "over2": 0,
+          "psnr": 54.14
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "maxDiff": 4,
+          "over2": 0.0836,
+          "psnr": 48.9
+        },
+        {
+          "name": "transitions",
+          "i": 14,
+          "maxDiff": 3,
+          "over2": 0,
+          "psnr": 54.14
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "maxDiff": 4,
+          "over2": 0.0298,
+          "psnr": 50.6
+        },
+        {
+          "name": "covers",
+          "i": 0,
+          "maxDiff": 5,
+          "over2": 0.2404,
+          "psnr": 50.9
+        },
+        {
+          "name": "covers",
+          "i": 1,
+          "maxDiff": 4,
+          "over2": 0.1393,
+          "psnr": 50.88
+        },
+        {
+          "name": "covers",
+          "i": 2,
+          "maxDiff": 4,
+          "over2": 0.0481,
+          "psnr": 51.12
+        },
+        {
+          "name": "covers",
+          "i": 3,
+          "maxDiff": 4,
+          "over2": 0.052,
+          "psnr": 51.01
+        },
+        {
+          "name": "covers",
+          "i": 4,
+          "maxDiff": 3,
+          "over2": 0.0404,
+          "psnr": 51.11
+        },
+        {
+          "name": "covers",
+          "i": 5,
+          "maxDiff": 3,
+          "over2": 0.0331,
+          "psnr": 50.96
+        },
+        {
+          "name": "keys",
+          "i": 0,
+          "maxDiff": 8,
+          "over2": 0.0192,
+          "psnr": 63.59
+        },
+        {
+          "name": "keys",
+          "i": 1,
+          "maxDiff": 40,
+          "over2": 0.0685,
+          "psnr": 62.4
+        },
+        {
+          "name": "keys",
+          "i": 2,
+          "maxDiff": 36,
+          "over2": 0.1403,
+          "psnr": 55.64
+        },
+        {
+          "name": "keys",
+          "i": 3,
+          "maxDiff": 34,
+          "over2": 0.1465,
+          "psnr": 56.47
+        },
+        {
+          "name": "keys",
+          "i": 4,
+          "maxDiff": 32,
+          "over2": 0.1503,
+          "psnr": 55.04
+        },
+        {
+          "name": "keys",
+          "i": 5,
+          "maxDiff": 18,
+          "over2": 0.1238,
+          "psnr": 56.31
+        },
+        {
+          "name": "brand",
+          "i": 0,
+          "maxDiff": 35,
+          "over2": 0.122,
+          "psnr": 59.84
+        },
+        {
+          "name": "brand",
+          "i": 1,
+          "maxDiff": 57,
+          "over2": 0.5404,
+          "psnr": 51.2
+        },
+        {
+          "name": "brand",
+          "i": 2,
+          "maxDiff": 51,
+          "over2": 0.6325,
+          "psnr": 50.06
+        },
+        {
+          "name": "brand",
+          "i": 3,
+          "maxDiff": 50,
+          "over2": 0.6574,
+          "psnr": 50.91
+        },
+        {
+          "name": "brand",
+          "i": 4,
+          "maxDiff": 90,
+          "over2": 0.7811,
+          "psnr": 51.22
+        },
+        {
+          "name": "landscape-keys",
+          "i": 0,
+          "maxDiff": 21,
+          "over2": 0.0562,
+          "psnr": 60.1
+        },
+        {
+          "name": "landscape-keys",
+          "i": 1,
+          "maxDiff": 22,
+          "over2": 0.058,
+          "psnr": 62.23
+        },
+        {
+          "name": "landscape-keys",
+          "i": 2,
+          "maxDiff": 53,
+          "over2": 0.1388,
+          "psnr": 53.36
+        }
+      ]
+    }
+  },
+  "total": 39,
+  "passed": 29,
+  "failed": 10
+}

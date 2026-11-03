@@ -2840,6 +2840,51 @@ Phase D6 of `Desktop_App_Plan.md`, from version 0.6.0. Everything here exists on
 - Nothing of the project passes through the application or the server: it goes only between the two pages on this laptop.
 - The photo editor has no such window.
 
+## 63.6 Measuring the device and choosing the graphics chip (D9), 2026-11-03
+
+Phase D9 of `Desktop_Power_Ideas.md` (ideas P-01, P-33, P-34, P-36, P-37 and P-38), from version 0.7.0, on the owner's
+choice of 2026-11-03 ("Build D9 first"). Everything here exists only inside the application; in a browser «معلومات
+الجهاز» is as before. Nothing here changes how anything is drawn, previewed or exported.
+
+**«بطاقة الرسوميات للاستوديو».** On a laptop with two graphics chips, «معلومات الجهاز» shows one choice:
+«تلقائي» (the default), «الأقوى», «الموفّرة للطاقة».
+- «الأقوى» and «الموفّرة للطاقة» start the application on that chip; «تلقائي» starts it on the chip that measured faster for the
+  studio's reference export once both were measured, on mains power, and leaves Windows' own choice on battery or until
+  both are measured: «تلقائي: بعد قياس البطاقتين يختار التطبيق الأسرع منهما في التصدير عند التوصيل بالكهرباء، ويترك
+  اختيار Windows على البطارية.». Until then it adds «لقياس البطاقة الأخرى: اخترها، ثم أعد تشغيل التطبيق، ثم «قياس قدرة
+  الجهاز» مرة أخرى.».
+- A change takes effect at the next start: «تُطبَّق بعد إعادة تشغيل التطبيق.» with «إعادة التشغيل الآن». During an export the
+  restart waits: «لا يُعاد تشغيل التطبيق أثناء التصدير. أعد تشغيله بعد انتهائه.».
+- On a laptop with one chip the choice is not shown. When the Windows guide to the stronger chip used to appear, the choice
+  replaces it inside the application.
+
+**«قياس قدرة الجهاز».** A button, with «يقيس التطبيق ما يقدر عليه هذا الجهاز في نحو نصف دقيقة. لا يُرسل شيء خارج الجهاز.».
+While it works: «جارٍ القياس …٪…» with «إلغاء». Afterwards one line: «سرعة التصدير المرجعية … إطار/ث (1080p) على …».
+- It measures with the studio's own means: H.264 encoding at 1080p and 4K on the chip and on the processor, 4K decoding, one
+  to three export lanes at once, and the studio's compositor drawing three reference documents (shapes on keys, Arabic text
+  with reveals, effects over 4K footage). One lane is the reference export.
+- The numbers are kept by the application on this laptop for the chip, the application's version, Chromium's version and
+  mains or battery; a measurement for the same of these replaces the older one. They are never project data and never leave
+  the laptop. «مسح بيانات هذا الجهاز» removes them.
+
+**«التفاصيل»**, folded, below the line:
+- the figures: «قيس على», «سرعة التصدير المرجعية», «ترميز H.264 بمقاس 1080p», «ترميز H.264 بمقاس 4K», «فك ترميز H.264 بمقاس 4K»,
+  «مرمّزات تعمل معاً (1080p)», «رسم إطار 1080p», «ثبات القياس» and «لا يقدر عليه هذا الجهاز» (HEVC, 10-bit or AV1 encoding,
+  HEVC or AV1 decoding, as measured). When the measured spread is above 10%, «ثبات القياس» adds «، فأعد القياس حين لا يعمل
+  على الجهاز شيء ثقيل»;
+- «الأداء»: «تلقائي» (the default), «أخف على الجهاز», «أقصى ما يقدر عليه الجهاز», remembered on this device only;
+- the plan the studio will follow on this computer in the next phases: «دقة المعاينة عند البدء», «ذاكرة الإطارات للتنقل»,
+  «مسارات التصدير معاً», «النسخ الخفيفة معاً», «عمّال تعديل الصور», under «هذه القيم خطة المراحل القادمة للاستوديو على هذا
+  الجهاز، ولا تغيّر شيئاً في المعاينة أو التصدير الآن.».
+
+**Boundaries.**
+- The page sends the application a word from a fixed list for the chip, and numbers in a fixed shape for a measurement. What a
+  measurement is true for (the chip and its driver, the versions, the power) is the application's own record, never the
+  page's.
+- Speed only: the export's codec, size, frame rate, quality and pictures never depend on the chip or the measurement. The
+  proof is `qa/studio-crossdevice.cjs`.
+- Nothing is scheduled: the measurement runs when the person asks.
+
 # 64. The Android application «مركز الاتصال المؤسسي», 2026-10-26
 
 Owner decisions of 2026-10-26: `Android_Build_Plan.md`, accepted and recorded in `progress.md`. An application for Android phones that opens the live site in its own window, as the desktop application does on Windows (63). It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a phone browser remains a full client. The studio is left out of this application for now (below). This section describes phases A1 and A2; the later phases add 64.1 onward.

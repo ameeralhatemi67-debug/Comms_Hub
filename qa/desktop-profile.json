@@ -1,0 +1,638 @@
+{
+  "script": "qa/desktop-profile.cjs",
+  "run": "2026-11-03T18:16:10.511Z",
+  "version": "0.7.0",
+  "checks": [
+    {
+      "name": "Edge measures with the studio's own modules: an export rate, encoders and the compositor",
+      "pass": true,
+      "detail": "{\"exportFps\":40.04,\"encode\":{\"h264_1080\":{\"hw\":43.95,\"sw\":34.01},\"h264_2160\":{\"hw\":11.58,\"sw\":3.32}},\"decode\":{\"h264_2160\":{\"hw\":183.88,\"sw\":67.4}},\"lanes\":[40.04,44.26,47.63],\"compose\":{\"plain\":2.56,\"text\":4.79,\"effects\":16.28},\"support\":{\"hevcEncode\":false,\"av1Encode\":true,\"tenBitEncode\":false,\"hevcDecode\":true,\"av1Decode\":true},\"spread\":10.59,\"seconds\":88.49,\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "«الموفّرة للطاقة»: Chromium started with its switch and draws on the AMD chip",
+      "pass": true,
+      "detail": "{\"state\":{\"choice\":\"saving\",\"active\":\"low\",\"given\":false,\"pick\":null,\"power\":\"ac\",\"next\":\"low\",\"restart\":false},\"active\":\"AMD Radeon(TM) Graphics\",\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "«saving»: the application keeps the numbers under its own key: its version, its Chromium, the AMD chip and driver, the switch",
+      "pass": true,
+      "detail": "{\"app\":\"0.7.0\",\"chrome\":\"152.0.7977.130\",\"chip\":{\"vendorId\":4098,\"deviceId\":5761,\"vendor\":\"AMD\",\"name\":\"AMD Radeon(TM) Graphics\",\"driver\":\"31.0.12044.3\"},\"switch\":\"low\",\"power\":\"ac\"}"
+    },
+    {
+      "name": "«saving»: every figure timed three times; those the plan decides on (export lanes, 4K decoding, the effects drawing) spread at most 10%",
+      "pass": false,
+      "detail": "{\"spread\":36.55,\"seconds\":84.87,\"load\":{\"before\":96,\"after\":94},\"deciding\":[[\"d2160sw\",{\"values\":[29.23,60.68,61.78],\"cv\":36.6}],[\"lane1\",{\"values\":[31.12,41.21,39.83],\"cv\":14.6}],[\"effects\",{\"values\":[13.25,10.49,10.82],\"cv\":13.1}]],\"all\":[[\"e1080sw\",{\"values\":[14.85,29.88,40.49],\"cv\":45.3}],[\"d2160sw\",{\"values\":[29.23,60.68,61.78],\"cv\":36.6}],[\"e2160sw\",{\"values\":[2.9,5.9,5.85],\"cv\":35.2}]]}"
+    },
+    {
+      "name": "the bridge refuses numbers out of their shape and a choice off its list; nothing beyond the shape is kept",
+      "pass": true,
+      "detail": "{\"outcome\":[\"refused\",\"refused\",\"refused\",\"refused\",\"refused\"],\"extraKept\":false,\"entries\":1}"
+    },
+    {
+      "name": "choosing «الأقوى» is kept and asks for a restart",
+      "pass": true,
+      "detail": "{\"choice\":\"strong\",\"active\":\"low\",\"given\":false,\"pick\":null,\"power\":\"ac\",\"next\":\"high\",\"restart\":true}"
+    },
+    {
+      "name": "the restart for the chip is refused during an export, and relaunches the application when idle",
+      "pass": true,
+      "detail": "{\"busy\":\"busy\",\"idle\":\"restart\",\"calls\":{\"relaunched\":1,\"quits\":1}}"
+    },
+    {
+      "name": "«الأقوى»: Chromium started with its switch and draws on the NVIDIA chip",
+      "pass": true,
+      "detail": "{\"state\":{\"choice\":\"strong\",\"active\":\"high\",\"given\":false,\"pick\":null,\"power\":\"ac\",\"next\":\"high\",\"restart\":false},\"active\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"renderer\":\"ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "«strong»: the application keeps the numbers under its own key: its version, its Chromium, the NVIDIA chip and driver, the switch",
+      "pass": true,
+      "detail": "{\"app\":\"0.7.0\",\"chrome\":\"152.0.7977.130\",\"chip\":{\"vendorId\":4318,\"deviceId\":9634,\"vendor\":\"NVIDIA\",\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"driver\":\"32.0.16.1091\"},\"switch\":\"high\",\"power\":\"ac\"}"
+    },
+    {
+      "name": "«strong»: every figure timed three times; those the plan decides on (export lanes, 4K decoding, the effects drawing) spread at most 10%",
+      "pass": false,
+      "detail": "{\"spread\":21.82,\"seconds\":56.81,\"load\":{\"before\":97,\"after\":74},\"deciding\":[[\"lane1\",{\"values\":[55.92,87.4,76.65],\"cv\":21.8}],[\"d2160sw\",{\"values\":[43.11,66.55,54.26],\"cv\":21.5}],[\"d2160hw\",{\"values\":[126.72,155.52,190.09],\"cv\":20.2}]],\"all\":[[\"e1080sw\",{\"values\":[26.92,47.48,43.22],\"cv\":27.7}],[\"e2160sw\",{\"values\":[4.08,6.77,5.36],\"cv\":24.9}],[\"lane1\",{\"values\":[55.92,87.4,76.65],\"cv\":21.8}]]}"
+    },
+    {
+      "name": "«تلقائي» starts on the chip the rule picks from the two measurements on this power",
+      "pass": true,
+      "detail": "{\"state\":{\"choice\":\"auto\",\"active\":\"high\",\"given\":false,\"pick\":\"high\",\"power\":\"ac\",\"next\":\"high\",\"restart\":false},\"expected\":\"high\",\"power\":\"ac\",\"exportFps\":{\"saving\":39.83,\"strong\":76.65},\"entries\":2}"
+    },
+    {
+      "name": "«مسح بيانات هذا الجهاز» removes the device profile: nothing read back, no file",
+      "pass": true,
+      "detail": "{\"entries\":0,\"file\":false}"
+    },
+    {
+      "name": "emulated weak machine: the measurement still completes, slower than either chip",
+      "pass": true,
+      "detail": "{\"exportFps\":1.78,\"encode\":{\"h264_1080\":{\"hw\":null,\"sw\":9.74},\"h264_2160\":{\"hw\":null,\"sw\":2.56}},\"decode\":{\"h264_2160\":{\"hw\":null,\"sw\":30.9}},\"lanes\":[1.78,1.46,1.59],\"compose\":{\"plain\":9.03,\"text\":22.07,\"effects\":502.16},\"support\":{\"hevcEncode\":false,\"av1Encode\":true,\"tenBitEncode\":false,\"hevcDecode\":false,\"av1Decode\":true},\"spread\":0,\"seconds\":342.56,\"renderer\":\"ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "emulated weak machine: its plan is never above the strong chip's, knob by knob",
+      "pass": true,
+      "detail": "{\"weak\":{\"previewStart\":0.25,\"frameCacheMB\":1024,\"exportLanes\":1,\"copiesAtOnce\":1,\"photoWorkers\":10},\"strong\":{\"previewStart\":1,\"frameCacheMB\":1024,\"exportLanes\":1,\"copiesAtOnce\":1,\"photoWorkers\":10}}"
+    }
+  ],
+  "notes": [],
+  "runs": {
+    "edge": {
+      "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "numbers": {
+        "exportFps": 40.04,
+        "encode": {
+          "h264_1080": {
+            "hw": 43.95,
+            "sw": 34.01
+          },
+          "h264_2160": {
+            "hw": 11.58,
+            "sw": 3.32
+          }
+        },
+        "decode": {
+          "h264_2160": {
+            "hw": 183.88,
+            "sw": 67.4
+          }
+        },
+        "lanes": [
+          40.04,
+          44.26,
+          47.63
+        ],
+        "compose": {
+          "plain": 2.56,
+          "text": 4.79,
+          "effects": 16.28
+        },
+        "support": {
+          "hevcEncode": false,
+          "av1Encode": true,
+          "tenBitEncode": false,
+          "hevcDecode": true,
+          "av1Decode": true
+        },
+        "spread": 10.59,
+        "seconds": 88.49,
+        "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      },
+      "spreads": {
+        "e1080hw": {
+          "values": [
+            43.95,
+            42.9,
+            48.82
+          ],
+          "cv": 7
+        },
+        "e1080sw": {
+          "values": [
+            19.1,
+            34.01,
+            46.2
+          ],
+          "cv": 41
+        },
+        "e2160hw": {
+          "values": [
+            10.95,
+            11.58,
+            15.79
+          ],
+          "cv": 20.6
+        },
+        "e2160sw": {
+          "values": [
+            3.81,
+            2.88,
+            3.32
+          ],
+          "cv": 13.9
+        },
+        "d2160hw": {
+          "values": [
+            176.77,
+            183.88,
+            186.72
+          ],
+          "cv": 2.8
+        },
+        "d2160sw": {
+          "values": [
+            59.5,
+            67.4,
+            68.92
+          ],
+          "cv": 7.7
+        },
+        "lane1": {
+          "values": [
+            39.45,
+            40.04,
+            42.28
+          ],
+          "cv": 3.7
+        },
+        "lane2": {
+          "values": [
+            44.26,
+            42.46,
+            50.76
+          ],
+          "cv": 9.5
+        },
+        "lane3": {
+          "values": [
+            47.92,
+            43.89,
+            47.63
+          ],
+          "cv": 4.8
+        },
+        "plain": {
+          "values": [
+            2.5,
+            2.64,
+            2.56
+          ],
+          "cv": 2.8
+        },
+        "text": {
+          "values": [
+            4.75,
+            4.79,
+            4.84
+          ],
+          "cv": 1
+        },
+        "effects": {
+          "values": [
+            15.3,
+            16.28,
+            18.75
+          ],
+          "cv": 10.6
+        }
+      },
+      "load": {
+        "before": 100,
+        "after": 100
+      }
+    },
+    "saving": {
+      "state": {
+        "choice": "saving",
+        "active": "low",
+        "given": false,
+        "pick": null,
+        "power": "ac",
+        "next": "low",
+        "restart": false
+      },
+      "chip": "AMD Radeon(TM) Graphics",
+      "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "numbers": {
+        "exportFps": 39.83,
+        "encode": {
+          "h264_1080": {
+            "hw": 79,
+            "sw": 29.88
+          },
+          "h264_2160": {
+            "hw": 16.01,
+            "sw": 5.85
+          }
+        },
+        "decode": {
+          "h264_2160": {
+            "hw": 193.47,
+            "sw": 60.68
+          }
+        },
+        "lanes": [
+          39.83,
+          54.85,
+          56.7
+        ],
+        "compose": {
+          "plain": 3.06,
+          "text": 4.51,
+          "effects": 10.82
+        },
+        "support": {
+          "hevcEncode": true,
+          "av1Encode": true,
+          "tenBitEncode": false,
+          "hevcDecode": true,
+          "av1Decode": true
+        },
+        "spread": 36.55,
+        "seconds": 84.87,
+        "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      },
+      "key": {
+        "app": "0.7.0",
+        "chrome": "152.0.7977.130",
+        "chip": {
+          "vendorId": 4098,
+          "deviceId": 5761,
+          "vendor": "AMD",
+          "name": "AMD Radeon(TM) Graphics",
+          "driver": "31.0.12044.3"
+        },
+        "switch": "low",
+        "power": "ac"
+      },
+      "spreads": {
+        "e1080hw": {
+          "values": [
+            70.23,
+            79,
+            90.14
+          ],
+          "cv": 12.5
+        },
+        "e1080sw": {
+          "values": [
+            14.85,
+            29.88,
+            40.49
+          ],
+          "cv": 45.3
+        },
+        "e2160hw": {
+          "values": [
+            13.61,
+            16.3,
+            16.01
+          ],
+          "cv": 9.6
+        },
+        "e2160sw": {
+          "values": [
+            2.9,
+            5.9,
+            5.85
+          ],
+          "cv": 35.2
+        },
+        "d2160hw": {
+          "values": [
+            188.86,
+            194.64,
+            193.47
+          ],
+          "cv": 1.6
+        },
+        "d2160sw": {
+          "values": [
+            29.23,
+            60.68,
+            61.78
+          ],
+          "cv": 36.6
+        },
+        "lane1": {
+          "values": [
+            31.12,
+            41.21,
+            39.83
+          ],
+          "cv": 14.6
+        },
+        "lane2": {
+          "values": [
+            50.04,
+            57.11,
+            54.85
+          ],
+          "cv": 6.7
+        },
+        "lane3": {
+          "values": [
+            51.73,
+            64.96,
+            56.7
+          ],
+          "cv": 11.6
+        },
+        "plain": {
+          "values": [
+            3.11,
+            2.41,
+            3.06
+          ],
+          "cv": 13.6
+        },
+        "text": {
+          "values": [
+            5.71,
+            4.51,
+            4.35
+          ],
+          "cv": 15.3
+        },
+        "effects": {
+          "values": [
+            13.25,
+            10.49,
+            10.82
+          ],
+          "cv": 13.1
+        }
+      },
+      "load": {
+        "before": 96,
+        "after": 94
+      }
+    },
+    "strong": {
+      "state": {
+        "choice": "strong",
+        "active": "high",
+        "given": false,
+        "pick": null,
+        "power": "ac",
+        "next": "high",
+        "restart": false
+      },
+      "chip": "NVIDIA GeForce RTX 3050 Laptop GPU",
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "numbers": {
+        "exportFps": 76.65,
+        "encode": {
+          "h264_1080": {
+            "hw": 94.43,
+            "sw": 43.22
+          },
+          "h264_2160": {
+            "hw": 29.06,
+            "sw": 5.36
+          }
+        },
+        "decode": {
+          "h264_2160": {
+            "hw": 155.52,
+            "sw": 54.26
+          }
+        },
+        "lanes": [
+          76.65,
+          68.93,
+          84.44
+        ],
+        "compose": {
+          "plain": 2.05,
+          "text": 2.92,
+          "effects": 6.44
+        },
+        "support": {
+          "hevcEncode": true,
+          "av1Encode": true,
+          "tenBitEncode": false,
+          "hevcDecode": true,
+          "av1Decode": true
+        },
+        "spread": 21.82,
+        "seconds": 56.81,
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      },
+      "key": {
+        "app": "0.7.0",
+        "chrome": "152.0.7977.130",
+        "chip": {
+          "vendorId": 4318,
+          "deviceId": 9634,
+          "vendor": "NVIDIA",
+          "name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+          "driver": "32.0.16.1091"
+        },
+        "switch": "high",
+        "power": "ac"
+      },
+      "spreads": {
+        "e1080hw": {
+          "values": [
+            82.03,
+            99.41,
+            94.43
+          ],
+          "cv": 9.7
+        },
+        "e1080sw": {
+          "values": [
+            26.92,
+            47.48,
+            43.22
+          ],
+          "cv": 27.7
+        },
+        "e2160hw": {
+          "values": [
+            23.46,
+            30.7,
+            29.06
+          ],
+          "cv": 13.7
+        },
+        "e2160sw": {
+          "values": [
+            4.08,
+            6.77,
+            5.36
+          ],
+          "cv": 24.9
+        },
+        "d2160hw": {
+          "values": [
+            126.72,
+            155.52,
+            190.09
+          ],
+          "cv": 20.2
+        },
+        "d2160sw": {
+          "values": [
+            43.11,
+            66.55,
+            54.26
+          ],
+          "cv": 21.5
+        },
+        "lane1": {
+          "values": [
+            55.92,
+            87.4,
+            76.65
+          ],
+          "cv": 21.8
+        },
+        "lane2": {
+          "values": [
+            68.93,
+            89.19,
+            68.15
+          ],
+          "cv": 15.8
+        },
+        "lane3": {
+          "values": [
+            84.44,
+            90.29,
+            79.8
+          ],
+          "cv": 6.2
+        },
+        "plain": {
+          "values": [
+            2.05,
+            1.6,
+            2.37
+          ],
+          "cv": 19.3
+        },
+        "text": {
+          "values": [
+            2.92,
+            2.67,
+            3.19
+          ],
+          "cv": 8.9
+        },
+        "effects": {
+          "values": [
+            6.29,
+            6.82,
+            6.44
+          ],
+          "cv": 4.2
+        }
+      },
+      "load": {
+        "before": 97,
+        "after": 74
+      }
+    },
+    "auto": {
+      "state": {
+        "choice": "auto",
+        "active": "high",
+        "given": false,
+        "pick": "high",
+        "power": "ac",
+        "next": "high",
+        "restart": false
+      },
+      "expected": "high",
+      "power": "ac",
+      "exportFps": {
+        "saving": 39.83,
+        "strong": 76.65
+      },
+      "entries": 2
+    },
+    "weak": {
+      "software": false,
+      "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "numbers": {
+        "exportFps": 1.78,
+        "encode": {
+          "h264_1080": {
+            "hw": null,
+            "sw": 9.74
+          },
+          "h264_2160": {
+            "hw": null,
+            "sw": 2.56
+          }
+        },
+        "decode": {
+          "h264_2160": {
+            "hw": null,
+            "sw": 30.9
+          }
+        },
+        "lanes": [
+          1.78,
+          1.46,
+          1.59
+        ],
+        "compose": {
+          "plain": 9.03,
+          "text": 22.07,
+          "effects": 502.16
+        },
+        "support": {
+          "hevcEncode": false,
+          "av1Encode": true,
+          "tenBitEncode": false,
+          "hevcDecode": false,
+          "av1Decode": true
+        },
+        "spread": 0,
+        "seconds": 342.56,
+        "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      },
+      "knobs": {
+        "weak": {
+          "previewStart": 0.25,
+          "frameCacheMB": 1024,
+          "exportLanes": 1,
+          "copiesAtOnce": 1,
+          "photoWorkers": 10
+        },
+        "strong": {
+          "previewStart": 1,
+          "frameCacheMB": 1024,
+          "exportLanes": 1,
+          "copiesAtOnce": 1,
+          "photoWorkers": 10
+        }
+      }
+    }
+  },
+  "total": 14,
+  "passed": 12,
+  "failed": 2
+}

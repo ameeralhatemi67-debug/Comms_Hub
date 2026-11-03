@@ -949,3 +949,60 @@ test('A8: the window and the panel take Play\'s copy, and the APK channel keeps 
   assert.match(page, /const PLAY_LATER_KEY = 'commshub\.play\.later';/);
   for (const f of ['src/lib/native/play-update.ts', 'src/components/native/phone-app.tsx']) assert.equal(/\p{Extended_Pictographic}/u.test(fs.readFileSync(f, 'utf8')), false, f);
 });
+
+// D9: the graphics chip's choice and the device profile (bridge version 6; Desktop_Power_Ideas.md P-01, P-33).
+test('D9: gpu and profile are detected by their methods; version 5 has neither', () => {
+  const v6 = {
+    ...d2().bridge,
+    bridge: 6,
+    gpu: { state: async () => ({}), choose: async () => ({}), restart: async () => 'nothing' },
+    profile: { read: async () => ({ entries: [] }), save: async () => ({}) },
+  };
+  assert.equal(nativeOf(v6).has('gpu'), true);
+  assert.equal(nativeOf(v6).has('profile'), true);
+  assert.equal(nativeOf({ ...v6, gpu: { ...v6.gpu, restart: undefined } }).has('gpu'), false);
+  assert.equal(nativeOf({ ...v6, profile: { read: v6.profile.read } }).has('profile'), false);
+  assert.equal(nativeOf(d2().bridge).has('gpu'), false);
+  assert.equal(nativeOf(d2().bridge).has('profile'), false);
+});
+
+test('D9: the choices and «الأداء» are the desktop\'s own words and lists, in Arabic', async () => {
+  const fs = await import('node:fs');
+  const { GPU_CHOICES, PERFORMANCE_CHOICES } = await import('../src/lib/native/device.ts');
+  const { PERFORMANCE } = await import('../src/lib/studio/scale.ts');
+  const app = fs.readFileSync('desktop/src/gpu.ts', 'utf8');
+  assert.deepEqual(GPU_CHOICES.map((c) => c.value), [...app.match(/GPU_CHOICES = Object\.freeze\(\[([^\]]+)\]/)[1].matchAll(/'(\w+)'/g)].map((m) => m[1]), 'the same three choices as the application');
+  assert.deepEqual(GPU_CHOICES.map((c) => c.label), ['تلقائي', 'الأقوى', 'الموفّرة للطاقة']);
+  assert.deepEqual(PERFORMANCE_CHOICES.map((c) => c.value), [...PERFORMANCE]);
+  assert.deepEqual(PERFORMANCE_CHOICES.map((c) => c.label), ['تلقائي', 'أخف على الجهاز', 'أقصى ما يقدر عليه الجهاز']);
+});
+
+test('D9: a measurement in «التفاصيل»: figures in Arabic, what the device cannot do, and the plan', async () => {
+  const { knobLines, profileLines, profileSummary, fps } = await import('../src/lib/native/device.ts');
+  const { plan } = await import('../src/lib/studio/scale.ts');
+  const entry = {
+    at: Date.UTC(2026, 10, 3, 12),
+    key: { app: '0.7.0', chrome: '152.0.7977.130', switch: 'high', power: 'ac', chip: { vendorId: 4318, deviceId: 9634, vendor: 'NVIDIA', name: 'NVIDIA GeForce RTX 3050 Laptop GPU', driver: '32.0.16.1091' } },
+    numbers: { v: 1, encode: { h264_1080: { hw: 87.7, sw: 43 }, h264_2160: { hw: 22.8, sw: 13.5 } }, decode: { h264_2160: { hw: 101.7, sw: 95.7 } }, lanes: [79.7, 184.8, 186.5], compose: { plain: 1.2, text: 3.1, effects: 7.4 }, exportFps: 70, support: { hevcEncode: false, av1Encode: true, tenBitEncode: false, hevcDecode: true, av1Decode: true }, runs: 3, spread: 4.5, seconds: 31, renderer: 'ANGLE (NVIDIA)' },
+  };
+  assert.equal(fps(87.71), '87.7 إطار/ث');
+  assert.equal(fps(null), 'غير متاح');
+  assert.match(profileSummary(entry), /^سرعة التصدير المرجعية 70 إطار\/ث \(1080p\) على NVIDIA GeForce RTX 3050 Laptop GPU\.$/);
+  const lines = profileLines(entry);
+  assert.ok(lines.find((l) => l.label === 'قيس على').value.includes('(الأقوى)'));
+  assert.equal(lines.find((l) => l.label === 'ثبات القياس').ok, true);
+  assert.equal(lines.find((l) => l.label === 'لا يقدر عليه هذا الجهاز').value, 'ترميز HEVC، ترميز 10 بت');
+  const knobs = knobLines(plan(entry.numbers, { cores: 12, memory: 16e9 }));
+  assert.deepEqual(knobs.map((l) => l.label), ['دقة المعاينة عند البدء', 'ذاكرة الإطارات للتنقل', 'مسارات التصدير معاً', 'النسخ الخفيفة معاً', 'عمّال تعديل الصور']);
+  for (const l of [...lines, ...knobs]) assert.equal(/\p{Extended_Pictographic}/u.test(l.value), false, l.label);
+});
+
+test('D9: the panel offers the chip, the measurement and the plan only inside an application that has them', async () => {
+  const fs = await import('node:fs');
+  const ui = fs.readFileSync('src/components/native/device-info.tsx', 'utf8');
+  assert.match(ui, /const tuning = n\.has\('gpu'\) && n\.has\('profile'\);/);
+  assert.match(ui, /\{tuning && <DeviceTuning facts=\{facts\} \/>\}/);
+  assert.match(ui, /await import\('@\/lib\/studio\/bench'\)/, 'the measurement is loaded only when asked for');
+  assert.ok(ui.includes('قياس قدرة الجهاز') && ui.includes('التفاصيل') && ui.includes('إعادة التشغيل الآن'));
+  assert.equal(/\p{Extended_Pictographic}/u.test(ui), false);
+});

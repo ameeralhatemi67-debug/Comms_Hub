@@ -13,8 +13,11 @@ import { ALLOWED, DEV, FFMPEG_TAG, QA, UPDATE_FEED, VERSION } from './compiled.t
 import { saveDialogFor } from './downloads.ts';
 import { dataFolderName, PRODUCT_NAME, productNameFor, userAgentFor, windowsAppId } from './identity.ts';
 import { keyAction, nextZoom, type KeyAction } from './keys.ts';
+import { givenSwitch, measuredPick, switchFor, SWITCH_NAMES } from './gpu.ts';
 import { startNative, type Native } from './native.ts';
 import { startFiles } from './native-files.ts';
+import { ProfileStore } from './profile.ts';
+import { parseSettings } from './settings.ts';
 import { startMedia } from './native-media.ts';
 import { startWindows } from './native-windows.ts';
 import { SCHEME } from './files.ts';
@@ -43,6 +46,21 @@ const devData = __COMMS_HUB_DEV__ ? process.env.COMMS_HUB_DEV_DATA : undefined;
 app.setPath('userData', devData && path.isAbsolute(devData) ? devData : path.join(app.getPath('appData'), dataFolderName(DEV, QA)));
 app.setName(productNameFor(DEV, QA));
 if (process.platform === 'win32') app.setAppUserModelId(windowsAppId(DEV, QA));
+
+// 3. The graphics chip (Desktop_Power_Ideas.md P-01, D9). Chromium reads its switch only before it is ready,
+// so the person's choice, and «تلقائي»'s measured pick, take effect from the next start. A switch given on the
+// command line (a check of a weaker machine) is kept as it is.
+const profiles = new ProfileStore(path.join(app.getPath('userData'), 'profile.json'));
+const startSettings = (() => {
+  try {
+    return parseSettings(JSON.parse(fs.readFileSync(path.join(app.getPath('userData'), 'settings.json'), 'utf8')));
+  } catch {
+    return parseSettings(null);
+  }
+})();
+const given = givenSwitch((name) => app.commandLine.hasSwitch(name));
+const gpuSwitch = given ?? switchFor({ choice: startSettings.gpu, pick: measuredPick(profiles.entries(), process.versions.chrome), power: startSettings.lastPower });
+if (!given && gpuSwitch !== 'none') app.commandLine.appendSwitch(SWITCH_NAMES[gpuSwitch]);
 
 // The application's own read-only addresses for files used in place and the cache folder (D4); they must be
 // declared before the application is ready, and are answered on the site's profile only (native-files.ts).
@@ -312,7 +330,7 @@ if (lock && !refused) {
     // No native menu bar (11.1): the site and the studio keep their own menus and keys.
     Menu.setApplicationMenu(null);
     prepareSession();
-    native = startNative({ allowed: ALLOWED, windows: () => siteWindows, mainWindow: () => main, version: VERSION, iconPath: pagePath('icon.png'), feed: UPDATE_FEED, qa: QA, dev: DEV });
+    native = startNative({ allowed: ALLOWED, windows: () => siteWindows, mainWindow: () => main, version: VERSION, iconPath: pagePath('icon.png'), feed: UPDATE_FEED, qa: QA, dev: DEV, gpu: { active: gpuSwitch, given: given !== null }, profiles });
     const stores = startFiles({
       handle: native.handle,
       site: session.fromPartition(PARTITION),
@@ -322,6 +340,8 @@ if (lock && !refused) {
         for (const w of BrowserWindow.getAllWindows()) if (siteWindows.has(w.webContents.id)) void w.webContents.loadURL(startAddress());
       },
     });
+    // «مسح بيانات هذا الجهاز» also removes the device profile (D9).
+    stores.onClear(() => void profiles.clear());
     // FFmpeg is packaged beside the application (resources/ffmpeg); unpacked, it is the fetched copy in vendor/.
     const tools = app.isPackaged ? path.join(process.resourcesPath, 'ffmpeg') : path.join(__dirname, '..', 'vendor', 'ffmpeg');
     startMedia({ handle: native.handle, ...stores, tools: { ffmpeg: path.join(tools, 'ffmpeg.exe'), ffprobe: path.join(tools, 'ffprobe.exe'), tag: FFMPEG_TAG }, worker: pagePath('media-worker.js') });

@@ -9,7 +9,8 @@ export type Platform = 'web' | 'desktop' | 'android' | 'ios';
 
 /**
  * What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3),
- * files, cache and clearData from 3 (D4), media from 4 (D5), windows from 5 (D6). The Android application
+ * files, cache and clearData from 3 (D4), media from 4 (D5), windows from 5 (D6), gpu and profile from 6 (D9,
+ * Desktop_Power_Ideas.md P-01 and P-33). The Android application
  * offers its own: appUpdate (A3), download and share (A4), push (A5), links and lock (A6), capture,
  * incoming and upload (A7), and in Google Play's copy playUpdate instead of appUpdate (A8).
  */
@@ -25,6 +26,8 @@ export type Feature =
   | 'clearData'
   | 'media'
   | 'windows'
+  | 'gpu'
+  | 'profile'
   | 'appUpdate'
   | 'download'
   | 'share'
@@ -63,6 +66,29 @@ export type NativeProbe = {
   heavy: boolean;
 };
 
+/** «بطاقة الرسوميات للاستوديو» (D9): the person's choice, and the switch Chromium started with and will start with next. */
+export type GpuChoice = 'auto' | 'strong' | 'saving';
+export type GpuSwitch = 'high' | 'low' | 'none';
+export type NativeGpuState = { choice: GpuChoice; active: GpuSwitch; given: boolean; pick: 'high' | 'low' | null; power: 'ac' | 'battery'; next: GpuSwitch; restart: boolean };
+/** A device profile's numbers (src/lib/studio/bench.ts measures them; desktop/src/profile.ts keeps them). */
+export type ProfileRate = { hw: number | null; sw: number | null };
+export type ProfileNumbers = {
+  v: 1;
+  encode: { h264_1080: ProfileRate; h264_2160: ProfileRate };
+  decode: { h264_2160: ProfileRate };
+  lanes: number[];
+  compose: { plain: number; text: number; effects: number };
+  exportFps: number;
+  support: { hevcEncode: boolean; av1Encode: boolean; tenBitEncode: boolean; hevcDecode: boolean; av1Decode: boolean };
+  runs: number;
+  spread: number;
+  seconds: number;
+  renderer: string;
+};
+/** What a measurement is true for, as the desktop application itself records it: never what a page says. */
+export type ProfileKey = { app: string; chrome: string; chip: { vendorId: number; deviceId: number; vendor: string; name: string; driver: string }; switch: GpuSwitch; power: 'ac' | 'battery' };
+export type ProfileEntry = { at: number; key: ProfileKey; numbers: ProfileNumbers };
+
 export type Reason = 'export' | 'upload';
 export type NativeNotice = { title: string; body?: string; go?: string | null };
 
@@ -99,6 +125,15 @@ type Bridge = {
     screens?: () => Promise<NativeScreen[]>;
     popOut?: (ask: { panel: 'preview'; project: string; screen?: number; full?: boolean }) => Promise<{ screen: number; full: boolean }>;
     close?: (panel: 'preview') => Promise<boolean>;
+  };
+  gpu?: {
+    state?: () => Promise<NativeGpuState>;
+    choose?: (choice: GpuChoice) => Promise<NativeGpuState>;
+    restart?: () => Promise<'restart' | 'busy' | 'nothing'>;
+  };
+  profile?: {
+    read?: () => Promise<{ current: ProfileKey; entries: ProfileEntry[] }>;
+    save?: (numbers: ProfileNumbers) => Promise<ProfileEntry>;
   };
   media?: {
     probe?: (source: NativeMediaRef) => Promise<NativeProbe>;
@@ -154,6 +189,8 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   clearData: ['data.clear'],
   media: ['media.probe', 'media.copies', 'media.proxy', 'media.convert', 'media.cancel', 'media.onProgress'],
   windows: ['windows.screens', 'windows.popOut', 'windows.close'],
+  gpu: ['gpu.state', 'gpu.choose', 'gpu.restart'],
+  profile: ['profile.read', 'profile.save'],
   appUpdate: ['appUpdate.status', 'appUpdate.start'],
   download: ['download.save', 'download.open'],
   share: ['share.file'],

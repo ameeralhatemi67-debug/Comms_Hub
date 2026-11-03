@@ -50,6 +50,26 @@ export function gpuSummary(info: unknown): GpuSummary {
   return { chips, active, software };
 }
 
+/**
+ * The chip Chromium draws on, with its driver, from app.getGPUInfo('complete'): what a device profile's
+ * measurement is true for (profile.ts). Null when no chip is active, or only Windows' software renderer.
+ */
+export function activeChip(info: unknown): { vendorId: number; deviceId: number; vendor: string; name: string; driver: string } | null {
+  const devices = info && typeof info === 'object' && Array.isArray((info as { gpuDevice?: unknown }).gpuDevice) ? (info as { gpuDevice: unknown[] }).gpuDevice : [];
+  for (const raw of devices) {
+    if (!raw || typeof raw !== 'object') continue;
+    const d = raw as { vendorId?: unknown; deviceId?: unknown; deviceString?: unknown; driverVersion?: unknown; active?: unknown };
+    if (d.active !== true) continue;
+    const vendorId = typeof d.vendorId === 'number' ? d.vendorId : 0;
+    const deviceId = typeof d.deviceId === 'number' ? d.deviceId : 0;
+    const vendor = VENDORS[vendorId] ?? `0x${vendorId.toString(16).padStart(4, '0')}`;
+    const name = tidy(d.deviceString) || `${vendor} 0x${deviceId.toString(16).padStart(4, '0')}`;
+    if (isSoftware(vendorId, name)) return null;
+    return { vendorId, deviceId, vendor, name, driver: tidy(d.driverVersion, 40) };
+  }
+  return null;
+}
+
 /** Free bytes from fs.statfsSync, or null when the system did not say. */
 export function freeBytes(stat: { bavail?: number | bigint; bsize?: number | bigint } | null | undefined): number | null {
   if (!stat || stat.bavail === undefined || stat.bsize === undefined) return null;

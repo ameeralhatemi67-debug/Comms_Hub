@@ -4,6 +4,8 @@
 // measured the same way in both. Where a laptop has two graphics chips, the guide says how to give the
 // application the stronger one. Pure: the panel gathers the facts.
 import { formatBytes } from '../studio/support.ts';
+import type { GpuChoice, ProfileEntry } from './index.ts';
+import type { Knobs, Performance } from '../studio/scale.ts';
 
 export type GpuChip = { name: string; vendor: string; active: boolean };
 
@@ -82,4 +84,74 @@ export function deviceLines(f: DeviceFacts): DeviceLine[] {
     lines.push({ label: 'ترميز الفيديو بالعتاد', value: f.hardwareEncoder ? 'متاح: يُرمَّز التصدير ببطاقة الرسوميات' : 'غير متاح: يُرمَّز التصدير بالمعالج، وهو أبطأ', ok: f.hardwareEncoder });
   }
   return lines;
+}
+
+// --- D9: the graphics chip's choice, «قياس قدرة الجهاز» and «الأداء» (Desktop_Power_Ideas.md P-01, P-33, P-36) ----
+
+export const GPU_CHOICES: { value: GpuChoice; label: string }[] = [
+  { value: 'auto', label: 'تلقائي' },
+  { value: 'strong', label: 'الأقوى' },
+  { value: 'saving', label: 'الموفّرة للطاقة' },
+];
+export const GPU_AUTO_HINT = 'تلقائي: بعد قياس البطاقتين يختار التطبيق الأسرع منهما في التصدير عند التوصيل بالكهرباء، ويترك اختيار Windows على البطارية.';
+export const GPU_MEASURE_OTHER = 'لقياس البطاقة الأخرى: اخترها، ثم أعد تشغيل التطبيق، ثم «قياس قدرة الجهاز» مرة أخرى.';
+export const GPU_RESTART = 'تُطبَّق بعد إعادة تشغيل التطبيق.';
+export const GPU_BUSY = 'لا يُعاد تشغيل التطبيق أثناء التصدير. أعد تشغيله بعد انتهائه.';
+export const MEASURE_HINT = 'يقيس التطبيق ما يقدر عليه هذا الجهاز في نحو نصف دقيقة. لا يُرسل شيء خارج الجهاز.';
+export const PLAN_NOTE = 'هذه القيم خطة المراحل القادمة للاستوديو على هذا الجهاز، ولا تغيّر شيئاً في المعاينة أو التصدير الآن.';
+
+export const PERFORMANCE_CHOICES: { value: Performance; label: string }[] = [
+  { value: 'auto', label: 'تلقائي' },
+  { value: 'light', label: 'أخف على الجهاز' },
+  { value: 'max', label: 'أقصى ما يقدر عليه الجهاز' },
+];
+
+/** A rate as the panel writes it: «76.4 إطار/ث». */
+export const fps = (n: number | null | undefined) => (typeof n === 'number' && n > 0 ? `${Math.round(n * 10) / 10} إطار/ث` : 'غير متاح');
+const ms = (n: number) => `${Math.round(n * 10) / 10} ملّي ثانية`;
+const switchName = (s: string) => (s === 'high' ? 'الأقوى' : s === 'low' ? 'الموفّرة للطاقة' : 'اختيار Windows');
+
+/** The one line the panel shows after a measurement. */
+export function profileSummary(e: ProfileEntry): string {
+  return `سرعة التصدير المرجعية ${fps(e.numbers.exportFps)} (1080p) على ${e.key.chip.name}.`;
+}
+
+/** The measurement's figures, for «التفاصيل». */
+export function profileLines(e: ProfileEntry): DeviceLine[] {
+  const n = e.numbers;
+  const missing = [
+    !n.support.hevcEncode && 'ترميز HEVC',
+    !n.support.tenBitEncode && 'ترميز 10 بت',
+    !n.support.av1Encode && 'ترميز AV1',
+    !n.support.hevcDecode && 'فك ترميز HEVC',
+    !n.support.av1Decode && 'فك ترميز AV1',
+  ].filter(Boolean) as string[];
+  const lines: DeviceLine[] = [
+    { label: 'قيس على', value: `${e.key.chip.name} (${switchName(e.key.switch)})، ${e.key.power === 'ac' ? 'موصول بالكهرباء' : 'على البطارية'}، ${new Date(e.at).toLocaleString('ar-SA-u-nu-latn', { dateStyle: 'medium', timeStyle: 'short' })}` },
+    { label: 'سرعة التصدير المرجعية', value: `${fps(n.exportFps)} (مستند المؤثرات بمقاس 1080p)` },
+    { label: 'ترميز H.264 بمقاس 1080p', value: `${fps(n.encode.h264_1080.hw)} بالبطاقة، ${fps(n.encode.h264_1080.sw)} بالمعالج` },
+    { label: 'ترميز H.264 بمقاس 4K', value: `${fps(n.encode.h264_2160.hw)} بالبطاقة، ${fps(n.encode.h264_2160.sw)} بالمعالج` },
+    { label: 'فك ترميز H.264 بمقاس 4K', value: `${fps(n.decode.h264_2160.hw)} بالبطاقة، ${fps(n.decode.h264_2160.sw)} بالمعالج` },
+    { label: 'مرمّزات تعمل معاً (1080p)', value: n.lanes.map((v, i) => `${i + 1}: ${fps(v)}`).join('، ') },
+    { label: 'رسم إطار 1080p', value: `بسيط ${ms(n.compose.plain)}، نصوص ${ms(n.compose.text)}، مؤثرات ${ms(n.compose.effects)}` },
+    {
+      label: 'ثبات القياس',
+      value: `${n.runs} مرات، أكبر تفاوت ${Math.round(n.spread * 10) / 10}٪ في الأرقام التي تُبنى عليها الخطة${n.spread > 10 ? '، فأعد القياس حين لا يعمل على الجهاز شيء ثقيل' : ''}`,
+      ok: n.spread <= 10,
+    },
+  ];
+  if (missing.length) lines.push({ label: 'لا يقدر عليه هذا الجهاز', value: missing.join('، ') });
+  return lines;
+}
+
+/** The plan of scale.ts, for «التفاصيل». */
+export function knobLines(k: Knobs): DeviceLine[] {
+  const share = (v: number) => (v >= 1 ? 'كاملة' : `1/${Math.round(1 / v)}`);
+  return [
+    { label: 'دقة المعاينة عند البدء', value: share(k.previewStart) },
+    { label: 'ذاكرة الإطارات للتنقل', value: k.frameCacheMB ? formatBytes(k.frameCacheMB * 1e6) : 'لا شيء' },
+    { label: 'مسارات التصدير معاً', value: String(k.exportLanes) },
+    { label: 'النسخ الخفيفة معاً', value: String(k.copiesAtOnce) },
+    { label: 'عمّال تعديل الصور', value: String(k.photoWorkers) },
+  ];
 }

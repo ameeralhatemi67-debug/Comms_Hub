@@ -2652,3 +2652,97 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - Facebook is switched off in the platform list, the Meta app is not entered, and no Page is connected.
   - Whether the Page use case sits on the same Meta app as Instagram's (the guide's first step) is the first unknown.
 - **Not done, said plainly.** The migration is not applied to comms-hub, and nothing is pushed or deployed.
+
+### 2026-11-03: the desktop application, D9: measuring the device and choosing the graphics chip
+
+- **Owner direction.** The owner asked for ideas to use a stronger laptop's power without hard limits; the answer is
+  `Desktop_Power_Ideas.md` (an audit, 38 ideas, phases D9 to D13). The owner chose "Build D9 first". Built locally, not
+  pushed, no release published.
+- **What changed, in the application** (`desktop/`, version 0.7.0, bridge version 6; `MVP_draft.md` 63.6):
+  - **The graphics chip** (`src/gpu.ts`). «تلقائي», «الأقوى», «الموفّرة للطاقة» become Chromium's `force_high_performance_gpu`
+    or `force_low_power_gpu`, appended in `main.ts` before Chromium is ready, from `settings.json` (new fields `gpu` and
+    `lastPower`). «تلقائي» uses `measuredPick`: on mains power only, the newest measurement under each switch for this
+    Chromium, two different chips, the faster at least 1.1 times the other. A switch given on the command line is kept.
+  - **The profile** (`src/profile.ts`). `profileOf` keeps numbers in one fixed shape and nothing else; `ProfileStore` keeps
+    `profile.json`, one measurement per key, at most twelve. The key is the main process's own: its version, Chromium's,
+    the active chip with its driver (`activeChip` in `src/device.ts`), the switch, mains or battery.
+  - **Bridge version 6**: `gpu.state`, `gpu.choose` (a word from the list), `gpu.restart` ('busy' during an export,
+    'nothing' when it would not change the chip), `profile.read`, `profile.save`; every handler through `guard()`.
+  - «مسح بيانات هذا الجهاز» also removes the profile.
+- **What changed, in the site** (inside the application only; a browser shows what it did before):
+  - `src/lib/native/`: the features `gpu` and `profile`, their types, and the panel's words in `device.ts`.
+  - `src/lib/studio/bench-docs.ts`: eight reference documents built with the studio's own timeline functions, their video
+    and picture sources synthetic, painted from integer arithmetic so every machine starts from the same pixels.
+  - `src/lib/studio/bench.ts`: «قياس قدرة الجهاز», loaded only when asked: an untimed warm-up, then three timed runs of
+    H.264 encoding (1080p, 4K, chip and processor), 4K decoding, one to three export lanes each drawing and encoding the
+    effects document, and the compositor drawing three documents.
+  - `src/lib/studio/scale.ts`: the plan from the numbers, today's behaviour as its floor (no profile, a browser), «الأداء».
+  - `src/components/native/device-info.tsx` and `studio.css`: the chip's choice on a laptop with two chips, the measurement,
+    and «التفاصيل» with the figures, «الأداء» and the plan. Nothing reads the plan yet; D10 and D11 will.
+- **Where it differs from `Desktop_Power_Ideas.md` section 9, with reasons.**
+  - One check, `qa/desktop-profile.cjs`, covers what the plan named as two (the profile and the chip's choice).
+  - **No export report in the database.** Recording the engine, chip and encoder with each export in `studio_exports` needs
+    a migration and the owner's approval to apply it; the proof records them in its own JSON instead.
+  - **The spread gate covers the figures something decides on** (`DECIDING` in `bench.ts`: export lanes, 4K decoding, the
+    effects drawing), not every figure. Measured on the RTX run: processor-only 1080p encoding gave 64.7, 43.0 and 28.8
+    frames a second in three runs as the laptop warmed, and a two-millisecond drawing is too short to time steadily. Every
+    figure and its spread is still in the JSON and on the panel.
+  - **Lanes include their drawing.** The ideas document's lane figures fed every encoder one drawn frame. In the first run of
+    the check that flattered a machine drawing on its processor: the emulated weak machine planned three lanes, more than
+    the RTX. Each lane now draws its own frames.
+  - **The cross-device tolerance stayed strict** (PSNR at least 50 dB, at most 0.1% of channels more than 2 levels apart)
+    and is checked document by document, so the failures below name what depends on the machine.
+- **Verified, numbers.**
+  - **`desktop/`:** `npm run typecheck` clean; `npm test` **135 of 135** (twelve new, in `tests/gpu.test.mjs` and `tests/profile.test.mjs`).
+  - **The site:** `npm run typecheck` clean; `npm test` **774 of 774** (764 before; new `tests/scale.test.mjs`, four D9 tests in
+    `tests/native.test.mjs`); `npm run build` passes.
+  - **`qa/desktop-device-panel.cjs` 10 of 10.** In Edge the panel is as before. In the development package on a fresh profile:
+    the choice with «تلقائي», its hints, «قياس قدرة الجهاز» followed to «سرعة التصدير المرجعية 71.7 إطار/ث (1080p) على NVIDIA
+    GeForce RTX 3050 Laptop GPU.», «التفاصيل» with every figure, «الأداء» remembered, «الأقوى» asking for a restart. Pictures in
+    `qa/artifacts/desktop-device-panel`.
+  - **`qa/desktop-native.cjs` 37 of 37** against bridge version 6.
+  - **`qa/desktop-profile.cjs` 12 of 14** (last of four runs; the earlier three led to the warm-up, the lanes with their
+    drawing and `DECIDING` above):
+    - Edge and the application on each chip measure through the studio's own modules; `settings.json`'s `gpu` puts Chromium
+      on the AMD chip («الموفّرة للطاقة») and on the RTX («الأقوى»), each confirmed by the application and by WebGL;
+    - each measurement is kept under the application's own key (0.7.0, Chromium 152.0.7977.130, the chip and its driver,
+      the switch); the bridge refuses five malformed requests and keeps nothing beyond the shape;
+    - the reference export of the effects document: **39.8 frames a second on the AMD chip, 76.7 on the RTX** (Edge 40.0);
+      «تلقائي» then started on the RTX, as the rule says (mains power, 1.9 times);
+    - a restart for the chip is refused during an export and relaunches when idle; «مسح بيانات هذا الجهاز» removes the profile;
+    - the emulated weak machine measured 1.8 frames a second and planned nothing above the strong chip;
+    - **failed: the spread gate on both chips** (36.6% and 21.8%, with 4K decoding on the processor and the one-lane export
+      the widest). The processor was at 94% to 100% before and after those measurements, from other work on the laptop.
+      The gate stays as it is, to be run on an idle laptop; the panel says «فأعد القياس حين لا يعمل على الجهاز شيء ثقيل» in
+      this case.
+  - **`qa/studio-crossdevice.cjs` 29 of 39**, every failure a measured property of the studio as it was before D9:
+    - every engine draws every one of the 54 frames identically in a second, shuffled pass (Edge, the application on the AMD
+      chip, on the RTX, and with no graphics chip);
+    - the application on the AMD chip: **all 54 frames identical to Edge's, byte for byte**, across Chromium 152 and 156;
+    - on the RTX: 7 of 8 documents within the tolerance; «effects» is not (worst frame 40.5 dB, up to 112 levels);
+    - with no graphics chip: 2 of 8 within it; differences of up to 4 levels on most documents, up to 53 on scaled pictures;
+    - the real three-second export: structure exact everywhere (codec, profile, size, pixel format, rate, all 90 timestamps,
+      sound); 42.1 dB from its source in Edge, 42.3 on either chip, **39.1 with no chip**.
+- **Found, and left as they are (each is the studio before D9, now measured).**
+  - **«إخفاء بالمربعات» depends on the chip.** A diagnostic in the session's scratch folder took the effects document apart:
+    the squares cover differs by up to 76 levels on about 1% of channels on the RTX; colour adjustments, the blur cover, the
+    blurred cross, the text and the 4K scaling are within 3 levels (62 to 68 dB). The squares are made by shrinking without
+    smoothing, and each chip picks a different source pixel for each square.
+  - **With no graphics chip the export changes colour.** The file is written as BT.601 (`smpte170m`) instead of BT.709, 40%
+    smaller, 39.1 dB from its source.
+  - **The browser and the application describe colour differently.** Edge 156 writes the transfer as `iec61966-2-1`, the
+    application's Chromium 152 as `bt709`.
+  - **The default chip is per program.** With no switch, the development package started on the RTX on this laptop; Edge 156
+    starts on the AMD chip. `Desktop_Power_Ideas.md` A-03 is corrected.
+  - **Lanes on one thread gain little** for the effects document: 71.7, 76.6 and 83.1 frames a second for one, two and three
+    lanes on the RTX, under load. Lanes will need their drawing in workers (P-07). `Desktop_Power_Ideas.md` section 3 is
+    corrected.
+- **Not verified, said plainly.**
+  - Nothing was seen signed in: the panel was seen on a fixture, with the real component and the real bridge.
+  - The restart for the chip was recorded in the main process (`relaunch` and `quit` replaced by recorders), not performed.
+  - The laptop was busy with other work during every run (a Gradle daemon and Docker; the processor at 54% to 85% with
+    nothing of this check running), so the speed figures are those of a loaded laptop.
+  - The weak machine is emulated (`--disable-gpu`, the page's thread slowed four times); no real weak laptop was tried.
+  - `qa/desktop-shell.cjs` (D1's install check) was updated for bridge version 6 and not re-run: it needs the release package
+    and an install on this laptop.
+- **Not done.** Nothing pushed, no release published.

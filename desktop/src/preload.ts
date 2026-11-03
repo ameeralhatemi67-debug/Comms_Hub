@@ -4,7 +4,8 @@
 // application's own Arabic screens get nothing. Version 1 (D2) adds `info`, `power`, `life` and
 // `notify`; version 2 (D3) adds `update`; version 3 (D4) adds `files`, `cache` and `data`; version 4 (D5)
 // adds `media`, which names a source by its token or library version, never by a path; version 5 (D6) adds
-// `windows`, which names a panel and its project, never an address. Each method only
+// `windows`, which names a panel and its project, never an address; version 6 (D9) adds `gpu`, which takes a
+// word from a fixed list, and `profile`, which takes measured numbers in a fixed shape. Each method only
 // sends a message; its main-process handler checks the sender again (sender.ts) and every argument. No
 // method takes a file path, a command or another address: `files.fromDropped` takes a File the person
 // chose, and only here, in the preload, is the path Chromium attached to it read (webUtils).
@@ -87,6 +88,15 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
         onProgress: (fn: unknown) => {
           mediaProgress = typeof fn === 'function' ? (fn as (p: unknown) => void) : null;
         },
+      }),
+      gpu: Object.freeze({
+        state: () => call(CHANNEL.gpuState),
+        choose: (choice: unknown) => call(CHANNEL.gpuChoose, choice),
+        restart: () => call(CHANNEL.gpuRestart),
+      }),
+      profile: Object.freeze({
+        read: () => call(CHANNEL.profileRead),
+        save: (numbers: unknown) => call(CHANNEL.profileSave, numbers),
       }),
     }),
   );

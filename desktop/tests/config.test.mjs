@@ -88,7 +88,7 @@ test('the development package differs only in its folder, its unpacked form, its
 });
 
 test('every tool is pinned exactly and the application ships no dependency', () => {
-  assert.equal(pkg.version, '0.6.0');
+  assert.equal(pkg.version, '0.7.0');
   assert.equal(pkg.dependencies, undefined, 'esbuild bundles everything into build/');
   assert.equal(pkg.devDependencies.electron, '44.5.1');
   for (const [name, version] of Object.entries(pkg.devDependencies)) {

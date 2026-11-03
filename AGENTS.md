@@ -401,6 +401,25 @@ The preview on a second screen (D6, `MVP_draft.md` 63.5): bridge version 5 adds 
   (`isPanelWindow`), so notices are never raised from it.
 - `qa/desktop-windows.cjs` holds the playhead within one frame.
 
+Measuring the device and choosing the graphics chip (D9, `MVP_draft.md` 63.6, `Desktop_Power_Ideas.md`, by the owner's
+choice of 2026-11-03): bridge version 6 adds `gpu` and `profile`.
+- **Speed, never the video.** A knob a machine may change is a speed knob (`src/lib/studio/scale.ts`); codec, size,
+  frame rate, quality and pictures are fixed by the project and the export settings. Every knob's floor is today's
+  behaviour, which is also the answer with no profile and in a browser. `qa/studio-crossdevice.cjs` holds it: the
+  same machine draws every frame of the corpus (`src/lib/studio/bench-docs.ts`) identically in any order, other
+  machines within a stated tolerance, and a real export has the same structure everywhere.
+- **The chip** is one of Chromium's two switches, chosen before it is ready (`desktop/src/gpu.ts`), so a choice takes
+  effect at the next start. The page sends a word from `GPU_CHOICES`; «تلقائي» picks only from measurements on mains
+  power, and a switch given on the command line is kept. A restart for the chip waits for an export.
+- **The profile** (`desktop/src/profile.ts`) keeps numbers in a fixed shape (`profileOf`). What they are true for (the
+  application's and Chromium's versions, the chip and its driver, the switch, the power) is the main process's own
+  record, never the page's. It is never project data, never leaves the laptop, and goes with «مسح بيانات هذا الجهاز».
+- **The measurement** is `src/lib/studio/bench.ts`, loaded only when asked, run only when asked. Its synthetic sources
+  are painted from integer arithmetic, never through a filter or a decoder, so every machine starts from the same pixels.
+  The spread it reports is that of the figures something decides on (`DECIDING`).
+- `qa/desktop-profile.cjs` measures on both chips through the real bridge and records the processor's load beside each
+  measurement, since a busy laptop measures badly.
+
 The Android application is being built, by owner directive of 2026-10-26 (`Android_Build_Plan.md`,
 `MVP_draft.md` section 64, recorded in `progress.md`). It is a Capacitor 8 application in `mobile/`, with its
 own `package.json` and lockfile like `desktop/`, outside the site's typecheck and build, id `sa.commshub.app`.

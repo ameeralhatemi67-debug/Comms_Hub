@@ -456,6 +456,13 @@ computer exists.
 - Watch folders, or import from a camera card.
 - `commshub://` links that open the application at a work or a project.
 
+### D9 to D13. The machine's strength, measured (added 2026-11-03)
+
+The phases that use a stronger laptop's real power, without making a project or an export depend on it, are planned in
+`Desktop_Power_Ideas.md` sections 9 and 11. D9 («قياس الجهاز»: the graphics chip's choice, the device profile, the
+plan's policy and the cross-device proof) is built, `MVP_draft.md` 63.6. D10 (preview), D11 (export lanes), D12
+(workflow) and D13 (gated items) are not.
+
 ---
 
 ## 9. Security

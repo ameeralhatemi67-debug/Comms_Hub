@@ -1,15 +1,18 @@
 // The native layer of phase D2 (Desktop_App_Plan.md 5.2, bridge version 1; decision D-10), wired to
 // Electron: the bridge's handlers, each registered through sender.ts's guard(); the tray and its Arabic
 // menu; native notices; the taskbar badge; the laptop kept awake; a busy window hidden on close, and a
-// question before quitting during work. The rules are the pure modules it imports.
+// question before quitting during work. From D9 (Desktop_Power_Ideas.md P-01, P-33) also the graphics chip's
+// choice and the device profile. The rules are the pure modules it imports.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, Notification, powerSaveBlocker, Tray } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, Notification, powerMonitor, powerSaveBlocker, Tray } from 'electron';
 import type { IpcMainInvokeEvent, NativeImage } from 'electron';
 import { badgeBitmap, withDot } from './badge.ts';
 import { badgeOf, holdIdOf, noticeOf, reasonOf, type NoticeRequest, type Reason } from './bridge.ts';
-import { deviceInfo, freeBytes } from './device.ts';
+import { activeChip, deviceInfo, freeBytes } from './device.ts';
+import { gpuChoiceOf, measuredPick, switchFor, type GpuSwitch, type Power } from './gpu.ts';
+import { profileOf, type ProfileKey, type ProfileStore } from './profile.ts';
 import { PRODUCT_NAME } from './identity.ts';
 import { BRIDGE_VERSION, CHANNEL } from './ipc.ts';
 import { closeAction, quitAction, Registry, shouldNotify } from './life.ts';
@@ -32,6 +35,10 @@ export type NativeOptions = {
   qa: boolean;
   /** A development build never updates itself: it is the working copy, and it would share the real updater's folder. */
   dev: boolean;
+  /** The graphics chip's switch Chromium started with (main.ts), and whether it came from the command line. */
+  gpu: { active: GpuSwitch; given: boolean };
+  /** The device profile (profile.ts), kept by main.ts, which also reads it before Chromium is ready. */
+  profiles: ProfileStore;
 };
 
 export type Handle = <A extends unknown[]>(channel: string, handler: (event: IpcMainInvokeEvent, ...args: A) => unknown) => void;
@@ -326,6 +333,63 @@ export function startNative(o: NativeOptions): Native {
 
   handle(CHANNEL.updateStatus, () => ({ ...(updates ? updates.status() : START) }));
   handle(CHANNEL.updateRestart, () => restartForUpdate());
+
+  // --- the graphics chip and the device profile (D9) ---------------------------------------------
+  // Chromium's switch is chosen before the power state can be read, so the last state seen is kept.
+  const powerNow = (): Power => (powerMonitor.isOnBatteryPower() ? 'battery' : 'ac');
+  function notePower() {
+    const power = powerNow();
+    if (settings.lastPower === power) return;
+    settings = { ...settings, lastPower: power };
+    writeSettings();
+  }
+  notePower();
+  powerMonitor.on('on-ac', notePower);
+  powerMonitor.on('on-battery', notePower);
+
+  function gpuState() {
+    const pick = measuredPick(o.profiles.entries(), process.versions.chrome);
+    const power = powerNow();
+    const next = o.gpu.given ? o.gpu.active : switchFor({ choice: settings.gpu, pick, power });
+    return { choice: settings.gpu, active: o.gpu.active, given: o.gpu.given, pick, power, next, restart: next !== o.gpu.active };
+  }
+  handle(CHANNEL.gpuState, () => gpuState());
+  handle(CHANNEL.gpuChoose, (_event, value: unknown) => {
+    const choice = gpuChoiceOf(value);
+    if (!choice) throw refused();
+    if (choice !== settings.gpu) {
+      settings = { ...settings, gpu: choice };
+      writeSettings();
+    }
+    return gpuState();
+  });
+  // A restart for the chip: never during work, and only when it would change the chip.
+  handle(CHANNEL.gpuRestart, () => {
+    if (registry.busyReason() !== null) return 'busy';
+    if (!gpuState().restart) return 'nothing';
+    quitting = true;
+    app.relaunch();
+    app.quit();
+    return 'restart';
+  });
+
+  /** What a measurement taken now is true for: never anything the page says. */
+  async function currentKey(): Promise<ProfileKey> {
+    let gpu: unknown = null;
+    try {
+      gpu = await app.getGPUInfo('complete');
+    } catch {
+      gpu = null;
+    }
+    const chip = activeChip(gpu) ?? { vendorId: 0, deviceId: 0, vendor: 'software', name: 'software', driver: '' };
+    return { app: o.version, chrome: process.versions.chrome, chip, switch: o.gpu.active, power: powerNow() };
+  }
+  handle(CHANNEL.profileRead, async () => ({ current: await currentKey(), entries: o.profiles.entries() }));
+  handle(CHANNEL.profileSave, async (_event, value: unknown) => {
+    const numbers = profileOf(value);
+    if (!numbers) throw refused();
+    return o.profiles.save(await currentKey(), numbers);
+  });
 
   return { attachWindow, reveal, handle };
 }

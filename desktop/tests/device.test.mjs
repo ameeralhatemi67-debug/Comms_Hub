@@ -45,7 +45,7 @@ test('free disk from statfs, and the assembled answer', () => {
 });
 
 test('settings: «إبقاء التطبيق في شريط المهام» is off unless it was turned on', () => {
-  assert.deepEqual(parseSettings(null), { keepInTray: false });
-  assert.deepEqual(parseSettings({ keepInTray: 'yes' }), { keepInTray: false });
-  assert.deepEqual(parseSettings({ keepInTray: true, other: 1 }), { keepInTray: true });
+  assert.equal(parseSettings(null).keepInTray, false);
+  assert.equal(parseSettings({ keepInTray: 'yes' }).keepInTray, false);
+  assert.deepEqual(parseSettings({ keepInTray: true, other: 1 }), { keepInTray: true, gpu: 'auto', lastPower: null });
 });

@@ -96,16 +96,16 @@ async function partOne(state) {
     return {
       keys: Object.keys(n),
       fields: { platform: n.platform, shell: n.shell, version: n.version, bridge: n.bridge },
-      groups: { power: Object.keys(n.power), life: Object.keys(n.life), notify: Object.keys(n.notify), update: Object.keys(n.update), files: Object.keys(n.files), cache: Object.keys(n.cache), data: Object.keys(n.data), windows: Object.keys(n.windows), media: Object.keys(n.media) },
-      frozen: [n, n.power, n.life, n.notify, n.update, n.files, n.cache, n.data, n.windows, n.media].every((o) => Object.isFrozen(o)),
+      groups: { power: Object.keys(n.power), life: Object.keys(n.life), notify: Object.keys(n.notify), update: Object.keys(n.update), files: Object.keys(n.files), cache: Object.keys(n.cache), data: Object.keys(n.data), windows: Object.keys(n.windows), media: Object.keys(n.media), gpu: Object.keys(n.gpu), profile: Object.keys(n.profile) },
+      frozen: [n, n.power, n.life, n.notify, n.update, n.files, n.cache, n.data, n.windows, n.media, n.gpu, n.profile].every((o) => Object.isFrozen(o)),
       fns: [n.info, n.power.keepAwake, n.power.release, n.life.busy, n.life.idle, n.notify.show, n.notify.badge, n.notify.onOpen].every((f) => typeof f === 'function'),
     };
   });
   check(
-    'the bridge is version 5: who the application is, then info, power, life, notify, update, files, cache, data, windows and media',
-    JSON.stringify(shape.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify', 'update', 'files', 'cache', 'data', 'windows', 'media']) &&
-      JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: 5 }) &&
-      JSON.stringify(shape.groups) === JSON.stringify({ power: ['keepAwake', 'release'], life: ['busy', 'idle'], notify: ['show', 'badge', 'onOpen'], update: ['status', 'restart'], files: ['pick', 'fromDropped', 'check', 'forget'], cache: ['library', 'cancel', 'has', 'usage', 'choose', 'useDefault', 'limit', 'sweep', 'clear', 'onProgress'], data: ['clear'], windows: ['screens', 'popOut', 'close'], media: ['probe', 'copies', 'proxy', 'convert', 'cancel', 'onProgress'] }) &&
+    'the bridge is version 6: who the application is, then info, power, life, notify, update, files, cache, data, windows, media, gpu and profile',
+    JSON.stringify(shape.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify', 'update', 'files', 'cache', 'data', 'windows', 'media', 'gpu', 'profile']) &&
+      JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: 6 }) &&
+      JSON.stringify(shape.groups) === JSON.stringify({ power: ['keepAwake', 'release'], life: ['busy', 'idle'], notify: ['show', 'badge', 'onOpen'], update: ['status', 'restart'], files: ['pick', 'fromDropped', 'check', 'forget'], cache: ['library', 'cancel', 'has', 'usage', 'choose', 'useDefault', 'limit', 'sweep', 'clear', 'onProgress'], data: ['clear'], windows: ['screens', 'popOut', 'close'], media: ['probe', 'copies', 'proxy', 'convert', 'cancel', 'onProgress'], gpu: ['state', 'choose', 'restart'], profile: ['read', 'save'] }) &&
       shape.fns,
     shape,
   );
