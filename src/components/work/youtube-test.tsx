@@ -363,17 +363,18 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
                 </div>
               ) : (
                 <div className="pf-acts">
-                  <button
-                    type="button"
-                    className="pf-btn pri"
-                    data-yt="send"
-                    disabled={Boolean(problem)}
-                    data-hold={privacy === 'public' ? HOLD.platformTestPublic : undefined}
-                    onClick={() => void send()}
-                  >
-                    <Upload aria-hidden="true" />
-                    {privacy === 'public' ? 'نشر التجربة للعموم' : 'نشر التجربة'}
-                  </button>
+                  {/* A public test asks for a long press; a private one does not. */}
+                  {privacy === 'public' ? (
+                    <button type="button" className="pf-btn pri" data-yt="send" disabled={Boolean(problem)} data-hold={HOLD.platformTestPublic} onClick={() => void send()}>
+                      <Upload aria-hidden="true" />
+                      نشر التجربة للعموم
+                    </button>
+                  ) : (
+                    <button type="button" className="pf-btn pri" data-yt="send" disabled={Boolean(problem)} onClick={() => void send()}>
+                      <Upload aria-hidden="true" />
+                      نشر التجربة
+                    </button>
+                  )}
                   <button type="button" className="pf-btn ghost" onClick={() => setOpen(false)}>
                     إغلاق
                   </button>
