@@ -11,6 +11,7 @@ import { composeFrame, type Resolver } from './compose.ts';
 import type { MediaPool } from './media.ts';
 import type { MotionRenderer } from './motion-adapter.ts';
 import { wallNow, type Clock } from './preview-link.ts';
+import { needOf } from './scrub.ts';
 
 export const DRIFT = 0.12;
 
@@ -58,11 +59,33 @@ export class Player {
     };
   }
 
+  /** The document and scale the pool was last told the sizes for (D10, its kept frames are no larger than drawn). */
+  private told: { doc: ProjectDoc | null; scale: number } = { doc: null, scale: 0 };
+
+  private tellSizes(doc: ProjectDoc, scale: number) {
+    if (this.told.doc === doc && this.told.scale === scale) return;
+    let all = true;
+    for (const s of doc.sources) {
+      if (s.media !== 'video') continue;
+      const info = this.o.pool.info(s.id);
+      if (!info?.w || !info.h) {
+        all = false;
+        continue;
+      }
+      const n = needOf(doc, s.id, info.w, info.h, scale);
+      this.o.pool.setNeed(s.id, n.w, n.h);
+    }
+    // told again at the next draw while a source is still being made ready
+    if (all) this.told = { doc, scale };
+  }
+
   draw() {
     const ctx = this.o.canvas.getContext('2d');
     if (!ctx) return;
     const scale = this.o.scale();
-    const keep = composeFrame(ctx, this.o.getDoc(), this.t, this.resolver(), { scale });
+    const doc = this.o.getDoc();
+    this.tellSizes(doc, scale);
+    const keep = composeFrame(ctx, doc, this.t, this.resolver(), { scale });
     this.o.motion.forget(keep);
     this.o.overlay?.(ctx, scale);
   }
@@ -77,6 +100,7 @@ export class Player {
     if (end <= 0) return;
     if (this.t >= end) this.t = 0;
     this.playing = true;
+    this.o.pool.setPlaying(true);
     this.startPerf = performance.now();
     this.startT = this.t;
     this.sync(true);
@@ -88,6 +112,7 @@ export class Player {
 
   pause() {
     this.playing = false;
+    this.o.pool.setPlaying(false);
     this.live = new Set();
     cancelAnimationFrame(this.raf);
     this.o.pool.pauseExcept(new Set());

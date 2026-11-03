@@ -9,10 +9,15 @@
 // the preview reads in its place (paused frames and playback), while the export and stills read the
 // original; and a source the browser cannot decode may be converted into an editable copy, which is then
 // read for everything. A light copy's frames are matched to the original's by their first timestamps, so a
-// cut lands on the same frame in both. Browser only.
-import type { CanvasSink, Input, WrappedCanvas } from 'mediabunny';
+// cut lands on the same frame in both.
+// When the plan gives the paused preview memory (D10, «ذاكرة الإطارات للتنقل», scrub.ts), the paused frames come from a
+// decoder of their own that keeps the frames it passes, at the size the preview draws them; the export's decoders
+// (sink for frameAt, passSink for frames) are never that one. With no memory given, paused frames are decoded as
+// they always were. Browser only.
+import type { CanvasSink, EncodedPacketSink, Input, VideoSample, VideoSampleSink, WrappedCanvas } from 'mediabunny';
 import { US, type Micros, type ProjectDoc, type Source } from './schema.ts';
 import { DeviceCache } from './cache.ts';
+import { divisorFor, EPS, FrameStore, type Kept } from './scrub.ts';
 import { PEAKS_PER_SECOND, peaksKey, reduceInto } from './peaks.ts';
 import type { NativeCopies, NativeMediaRef } from '../native/index.ts';
 
@@ -29,6 +34,25 @@ export type MediaTools = { heavy: boolean; audioUnsupported: boolean; convertibl
 const UNDECODABLE = 'هذا المتصفح لا يفك ترميز هذا الفيديو.';
 
 export const contentUrl = (asset: string, version: number) => `/api/media/${asset}/content?v=${version}`;
+
+type Canvas = HTMLCanvasElement | OffscreenCanvas;
+/** Seconds of frames kept behind a moment that had to be decoded (a step back is then drawn at once). */
+export const SCRUB_BEHIND = 0.5;
+/** Seconds read ahead of where the person is, while nothing plays, at most a quarter of the frames the memory holds. */
+export const SCRUB_AHEAD = 2;
+
+/** The paused preview's own decoder (D10): the light copy's when there is one, its key frames, and the stretch it is reading. */
+type Scrub = {
+  sink: VideoSampleSink;
+  keys: EncodedPacketSink;
+  /** How far the frame source's times are from the original's (a light copy, media.ts elementOffset). */
+  off: number;
+  w: number;
+  h: number;
+  run: Run | null;
+};
+/** One forward pass of the decoder: where it is (the last frame read, in its own times) and the frame before. */
+type Run = { it: AsyncGenerator<VideoSample, void, unknown>; d: number; pos: number; prev: Kept<Canvas> | null; done: boolean; frame: number };
 
 type Loaded = {
   source: Source;
@@ -54,6 +78,15 @@ type Loaded = {
   /** The editable copy read for everything, when the browser cannot decode the original (D5). */
   converted?: string;
   audioUnsupported?: boolean;
+  /** D10: the paused preview's own decoder, the frame on screen, the newest time asked (seconds) and where the person is. */
+  scrub?: Promise<Scrub>;
+  shown?: Kept<Canvas> | null;
+  want?: number | null;
+  anchor?: number;
+  scrubbing?: boolean;
+  /** The kept frames failed for this source once: it is decoded as it always was from then on. */
+  scrubFailed?: boolean;
+  scrubReady?: Scrub;
 };
 
 /** What the application's tools know of a source: how it is named, its copies, and the work on them. */
@@ -210,6 +243,7 @@ export class MediaPool {
       this.elements.delete(clipId);
     }
     l?.image?.close();
+    if (l) void this.resetScrub(l);
     this.loaded.delete(id);
   }
 
@@ -222,6 +256,8 @@ export class MediaPool {
     const offset = original ? (await original.getFirstTimestamp()) - (await v.getFirstTimestamp()) : 0;
     l.preview = { input, sink: new mb.CanvasSink(v), url, name, height, offset };
     l.last = undefined;
+    // the kept frames were the original's; the light copy's are read from now on
+    await this.resetScrub(l);
     // elements playing the original now play the light copy
     for (const [clipId, el] of this.elements) if (el.dataset.source === l.source.id) {
       el.pause();
@@ -360,6 +396,7 @@ export class MediaPool {
   frameNear(id: string, at: Micros): CanvasImageSource | null {
     const l = this.loaded.get(id);
     if (!l?.sink && !l?.preview) return null;
+    if (this.store && !l.scrubFailed && this.fits(l)) return this.keptNear(l, at / US);
     const s = at / US;
     if (l.last && s >= l.last.from - 1e-4 && s < l.last.to - 1e-4) return l.last.canvas as CanvasImageSource;
     if (l.pending !== at) {
@@ -387,6 +424,297 @@ export class MediaPool {
     } finally {
       l.decoding = false;
     }
+  }
+
+  // ------------------------------------------------------------ D10: the frames kept for the paused preview
+
+  private store: FrameStore<Canvas> | null = null;
+  /** Canvases of frames let go, ready for the next frames of the same size. */
+  private spare: Canvas[] = [];
+  private scratch = new Map<string, Canvas>();
+  /** Preview pixels each source is drawn at, at most (preview.ts, scrub.ts needOf). */
+  private needs = new Map<string, { w: number; h: number }>();
+  private playing = false;
+  /** The source asked last: the only one whose decoder stays open between asks. */
+  private latest: Loaded | null = null;
+
+  /**
+   * «ذاكرة الإطارات للتنقل» (scale.ts frameCacheMB): megabytes of decoded frames the paused preview may keep.
+   * 0 is the floor: paused frames are decoded one at a time, as they always were.
+   */
+  setFrameCache(mb: number) {
+    const bytes = Math.max(0, Math.floor(mb || 0)) * 1024 * 1024;
+    if (!bytes) {
+      if (!this.store) return;
+      this.store = null;
+      for (const l of this.loaded.values()) void this.resetScrub(l);
+      this.spare = [];
+      this.scratch.clear();
+      if (!this.disposed) this.opts.onChange();
+      return;
+    }
+    if (!this.store) this.store = new FrameStore<Canvas>(bytes, (c) => this.letGo(c));
+    this.store.budget = bytes;
+    this.store.evict(this.onScreen());
+  }
+
+  /** Where the frame frameNear gives for a source now starts and ends (seconds), and whether a newer ask is still read (for the checks). */
+  shownSpan(id: string): { from: number; to: number; busy: boolean } | null {
+    const l = this.loaded.get(id);
+    if (!l) return null;
+    if (this.store && !l.scrubFailed && this.fits(l)) return l.shown ? { from: l.shown.from, to: l.shown.to, busy: l.want != null } : null;
+    return l.last ? { from: l.last.from, to: l.last.to, busy: l.pending != null } : null;
+  }
+
+  /** What the frame cache holds now (for the checks). */
+  frameCache(): { budget: number; bytes: number; frames: number } {
+    return { budget: this.store?.budget ?? 0, bytes: this.store?.bytes ?? 0, frames: this.store?.count() ?? 0 };
+  }
+
+  /** The largest size, in preview pixels, at which a source is drawn now (preview.ts): its frames are kept no larger. */
+  setNeed(id: string, w: number, h: number) {
+    this.needs.set(id, { w, h });
+  }
+
+  /** While playing nothing is read ahead, and no decoder is kept open for it. */
+  setPlaying(p: boolean) {
+    this.playing = p;
+    if (p) for (const l of this.loaded.values()) if (!l.scrubbing) void this.endRun(l);
+  }
+
+  private onScreen(): Set<Canvas> {
+    const s = new Set<Canvas>();
+    for (const l of this.loaded.values()) if (l.shown) s.add(l.shown.canvas);
+    return s;
+  }
+
+  /** A kept frame let go: its canvas serves the next frame of its size, unless it is still on screen. */
+  private letGo(c: Canvas) {
+    if (this.onScreen().has(c)) return;
+    if (this.spare.length < 12) this.spare.push(c);
+    else c.width = 0;
+  }
+
+  private canvas(w: number, h: number): Canvas {
+    const i = this.spare.findIndex((c) => c.width === w && c.height === h);
+    if (i >= 0) return this.spare.splice(i, 1)[0];
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    return c;
+  }
+
+  /** The share of its size a source's frames are kept at; 0 when fewer than eight of them would fit (then the floor). */
+  private shareOf(l: Loaded, sc: Scrub): number {
+    const need = this.needs.get(l.source.id);
+    const d = need ? divisorFor(sc.w, sc.h, need.w, need.h) : 1;
+    const bytes = (sc.w / d) * (sc.h / d) * 4;
+    return this.store && bytes * 8 <= this.store.budget ? d : 0;
+  }
+
+  /** Whether a source's frames are kept: its decoder is not open yet, or its frames fit the memory given. */
+  private fits(l: Loaded): boolean {
+    return !l.scrubReady || this.shareOf(l, l.scrubReady) > 0;
+  }
+
+  private scrubOf(l: Loaded): Promise<Scrub> {
+    return (l.scrub ??= (async () => {
+      const mb = await mediabunny();
+      const p = l.preview;
+      const track = (await (p?.input ?? l.input!).getPrimaryVideoTrack())!;
+      return { sink: new mb.VideoSampleSink(track), keys: new mb.EncodedPacketSink(track), off: p?.offset ?? 0, w: await track.getDisplayWidth(), h: await track.getDisplayHeight(), run: null };
+    })());
+  }
+
+  private async endRun(l: Loaded) {
+    const sc = l.scrubReady;
+    const r = sc?.run;
+    if (!sc || !r) return;
+    sc.run = null;
+    await r.it.return(undefined).catch(() => undefined);
+  }
+
+  /** The kept frames of a source are let go and its decoder closed (a light copy opened, the source forgotten). */
+  private async resetScrub(l: Loaded) {
+    const sc = l.scrubReady;
+    l.scrub = undefined;
+    l.scrubReady = undefined;
+    l.want = null;
+    l.shown = null;
+    this.store?.drop(l.source.id);
+    const r = sc?.run;
+    if (sc) sc.run = null;
+    if (r) await r.it.return(undefined).catch(() => undefined);
+  }
+
+  /** frameNear with kept frames: the kept frame for `s` (seconds) when there is one, else the one on screen while it is read. */
+  private keptNear(l: Loaded, s: number): CanvasImageSource | null {
+    const sc = l.scrubReady;
+    const d = sc ? this.shareOf(l, sc) : 0;
+    const f = d ? this.store!.find(l.source.id, s, d) : null;
+    if (f) {
+      l.shown = f;
+      l.want = null;
+      l.anchor = s;
+      // nothing to decode: read on ahead while nothing plays
+      if (!l.scrubbing && !this.playing) void this.scrubLoop(l);
+      return f.canvas as CanvasImageSource;
+    }
+    if (l.want !== s) {
+      l.want = s;
+      if (!l.scrubbing) void this.scrubLoop(l);
+    }
+    return (l.shown?.canvas as CanvasImageSource) ?? null;
+  }
+
+  private async scrubLoop(l: Loaded) {
+    l.scrubbing = true;
+    const id = l.source.id;
+    try {
+      const sc = await this.scrubOf(l);
+      if (!l.scrub) return;
+      l.scrubReady = sc;
+      while (!this.disposed && this.store && !l.scrubFailed && this.loaded.get(id) === l && l.scrubReady === sc) {
+        const d = this.shareOf(l, sc);
+        if (!d) {
+          // its frames are too large for the memory given: decoded as they always were, from the next ask
+          await this.endRun(l);
+          l.want = null;
+          if (!this.disposed) this.opts.onChange();
+          break;
+        }
+        if (sc.run && sc.run.d !== d) {
+          await this.endRun(l);
+          this.store.drop(id, d);
+        }
+        const want = l.want;
+        if (want != null) {
+          this.latest = l;
+          for (const o of this.loaded.values()) if (o !== l && !o.scrubbing) void this.endRun(o);
+          await this.readTo(l, sc, want, d);
+          continue;
+        }
+        if (this.playing || !(await this.readAhead(l, sc, d))) break;
+      }
+      if (this.latest !== l || this.playing) await this.endRun(l);
+    } catch {
+      // a decoder that fails here leaves this source to the decoder of old
+      l.scrubFailed = true;
+      l.want = null;
+      await this.endRun(l).catch(() => undefined);
+      if (!this.disposed) this.opts.onChange();
+    } finally {
+      l.scrubbing = false;
+    }
+  }
+
+  /** Reads until the frame for `want` (seconds, the original's time) is kept and known, or something newer is asked. */
+  private async readTo(l: Loaded, sc: Scrub, want: number, d: number) {
+    const id = l.source.id;
+    const done = (f: Kept<Canvas> | null) => {
+      if (f) l.shown = f;
+      if (l.want === want) l.want = null;
+      l.anchor = want;
+      if (!this.disposed) this.opts.onChange();
+    };
+    const kept = this.store!.find(id, want, d);
+    if (kept) return done(kept);
+    const ts = Math.max(0, want - sc.off);
+    const keyAt = async () => (await sc.keys.getKeyPacket(ts, { metadataOnly: true }))?.timestamp ?? 0;
+    let run = sc.run;
+    // the pass under way goes on when it has already passed the key frame `want` needs; otherwise a new one starts there
+    if (run && (run.done || ts + EPS < run.pos || (await keyAt()) > run.pos + EPS)) {
+      await this.endRun(l);
+      run = null;
+    }
+    if (!run) {
+      const key = await keyAt();
+      run = sc.run = { it: sc.sink.samples(Math.max(key, ts - SCRUB_BEHIND)), d, pos: -Infinity, prev: null, done: false, frame: 1 / 30 };
+    }
+    while (l.want === want && !this.disposed && this.store && sc.run === run) {
+      const f = await this.pull(l, sc, run, d);
+      const hit = this.store?.find(id, want, d) ?? null;
+      if (!f) return done(hit);
+      if (hit && !hit.open) return done(hit);
+    }
+  }
+
+  /** One more frame ahead of where the person is, while nothing plays; false when far enough or nothing to read. */
+  private async readAhead(l: Loaded, sc: Scrub, d: number): Promise<boolean> {
+    const run = sc.run;
+    if (!run || run.done || run.d !== d || !this.store) return false;
+    const frames = Math.max(8, Math.floor(this.store.budget / ((sc.w / d) * (sc.h / d) * 4) / 4));
+    const ahead = Math.min(SCRUB_AHEAD, frames * run.frame);
+    if (run.pos >= (l.anchor ?? 0) - sc.off + ahead) return false;
+    return !!(await this.pull(l, sc, run, d));
+  }
+
+  /** The next frame of a pass, kept (painted once at its share of the size); null at the end of the source. */
+  private async pull(l: Loaded, sc: Scrub, run: Run, d: number): Promise<Kept<Canvas> | null> {
+    const r = await run.it.next();
+    if (sc.run !== run) {
+      // ended from elsewhere: what it read last is not the source's end
+      if (!r.done) r.value.close();
+      return null;
+    }
+    if (r.done) {
+      run.done = true;
+      if (run.prev) this.store?.close(run.prev, Infinity);
+      return null;
+    }
+    const sample = r.value;
+    try {
+      const store = this.store;
+      if (!store) return null;
+      const from = sample.timestamp + sc.off;
+      if (run.prev) store.close(run.prev, from);
+      let f = store.get(l.source.id, from, d);
+      if (!f) {
+        const c = this.paint(sample, sc.w / d, sc.h / d, d);
+        f = store.put(l.source.id, { from, to: from + (sample.duration || run.frame), canvas: c, bytes: c.width * c.height * 4, d });
+        const keep = this.onScreen();
+        keep.add(c);
+        store.evict(keep);
+      }
+      run.prev = f;
+      run.pos = sample.timestamp;
+      if (sample.duration > 0) run.frame = sample.duration;
+      return f;
+    } finally {
+      sample.close();
+    }
+  }
+
+  /** A decoded frame on a canvas of w x h: drawn at half the source's size first, then halved, so no pixel is skipped. */
+  private paint(sample: VideoSample, w: number, h: number, d: number): Canvas {
+    const c = this.canvas(w, h);
+    const g = c.getContext('2d', { alpha: false }) as CanvasRenderingContext2D;
+    if (d <= 2) {
+      sample.drawWithFit(g, { fit: 'fill' });
+      return c;
+    }
+    let src: Canvas | null = null;
+    for (let k = 2; k < d; k *= 2) {
+      const step = this.scratchOf(w * (d / k), h * (d / k));
+      const sg = step.getContext('2d', { alpha: false }) as CanvasRenderingContext2D;
+      if (!src) sample.drawWithFit(sg, { fit: 'fill' });
+      else sg.drawImage(src, 0, 0, step.width, step.height);
+      src = step;
+    }
+    g.drawImage(src!, 0, 0, w, h);
+    return c;
+  }
+
+  private scratchOf(w: number, h: number): Canvas {
+    const key = `${w}x${h}`;
+    let c = this.scratch.get(key);
+    if (!c) {
+      c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      this.scratch.set(key, c);
+    }
+    return c;
   }
 
   /** The exact frame at `at`, waited for (the export, and a still). The canvas may be reused by the next call. */
@@ -485,7 +813,11 @@ export class MediaPool {
     const urls = [...this.blobUrls.values()];
     this.blobUrls.clear();
     setTimeout(() => urls.forEach((u) => URL.revokeObjectURL(u)), 3000);
-    for (const l of this.loaded.values()) l.image?.close();
+    for (const l of this.loaded.values()) {
+      l.image?.close();
+      void this.resetScrub(l);
+    }
+    this.store = null;
     this.loaded.clear();
   }
 }
