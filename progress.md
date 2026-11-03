@@ -2435,3 +2435,26 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   for the routes. YouTube's answer to a piece without CORS is not involved (the server sends every piece). Signed in on the real site.
 - **Not done, said plainly.** The migration is not applied to comms-hub, nothing is pushed or deployed. The Hedayh channel was
   connected before 2026-11-03, so it uploads at once after deployment but deletes only after one reconnect.
+
+### 2026-11-03: «تجربة النشر» live, with the checks
+
+- **Owner direction.** "Yes, put it live": apply the migration to comms-hub, then deploy.
+- **Database.** `20261103120000_platform_tests.sql` applied to comms-hub (recorded as `platform_tests`) with the owner's approval,
+  after checking that every function it relies on was there. Read back on comms-hub: row level security on; `authenticated` may
+  select `title` but not `upload_url`, and may not insert or update; `anon` has nothing; seven functions, all security definer with
+  an empty search path; 0 rows. The one YouTube account (Hedayh) has no `youtube.force-ssl` in its scopes, as expected. Supabase's
+  security advisor lists the seven functions only under the project-wide notice that signed-in callers may run security-definer
+  functions (316 entries, this project's design), and none under the signed-out or missing-policy notices.
+- **Deployed from a worktree off `origin/main`**, because local `main` is 8 commits ahead (the «إنشاء» work, whose migrations are not
+  applied) and 3 behind. The feature was cherry-picked as `07ff75f`; the three record files were resolved as GitHub's text plus this
+  section. In that tree the hold test is stricter than local `main`'s (it wants `data-hold={HOLD.x}` written out) and failed on the
+  public test button; fixed by two literal buttons (`267e88f`, and `ba68f4b` on local `main`). Checks in that tree: typecheck clean,
+  `npm test` **728 of 728**, build clean, `qa/youtube-test-flow.cjs` **49 of 49**, `qa/platforms-flow.cjs` **121 of 121**.
+- **Live.** Pushed `0e15a54..267e88f`; Vercel production `dpl_H25DpBsbZfEZCeuzPzJPyuoaCPCN`, serving after about 50 seconds. On
+  `https://comms-hub-three.vercel.app`: `privacy.html` dated 3 November 2026 in both languages and naming `youtube.force-ssl`;
+  `POST /api/platforms/test` from another site 403 and signed out 401; `PUT` and `DELETE` on a test signed out 401; signed out, the
+  REST call to `platform_test_start` and a select of `platform_tests` (and of `upload_url`) are refused with `42501`. No runtime errors
+  in the 30 minutes after.
+- **Not verified.** A signed-in test on the real site and a real upload to YouTube (an agent does not sign in). Delete on Hedayh waits
+  for one reconnect. `3d07b0f` (the look of a setup step) is still on local `main` only, not deployed.
+- **Next.** The owner opens Hedayh's sheet in «حسابات المنصات», runs one private test, reconnects the channel once, and deletes the test.
