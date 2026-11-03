@@ -2819,3 +2819,36 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     three seconds), so the file stays 39.3 dB from its source, under the check's 40. That is quality, not colour.
   - Edge 156 labels the transfer `iec61966-2-1` and the application's Chromium 152 `bt709`; the matrix and primaries agree.
 - **Not done.** Nothing pushed.
+
+### 2026-11-04: the desktop application on Electron 45 (Desktop Power, Fork 3, item 1)
+
+- **Direction.** The Desktop Power stage's manager session assigned the upkeep: `Desktop_App_Plan.md` 4.2 moves the application to
+  45 once it has been out fourteen days, and `Desktop_Power_Ideas.md` section 12 found it due. Built in the worktree branch
+  `claude/power-desktop-5fba9d`, local only.
+- **What changed.** `desktop/package.json` pins **Electron 45.0.0** (was 44.5.1), with Chromium 156.0.8078.48 and Node.js 24.22.0;
+  the desktop version is **0.7.1**; the bridge stays at version 6 (no call changed). `THIRD_PARTY_NOTICES.md` names the new
+  version. `qa/desktop-windows.cjs` asked for bridge version exactly 5, stale since D9; it now asks for 5 or later.
+- **Which release, said plainly.** npm records 45.0.0 at 2026-10-21 06:03 UTC (2026-10-20 on Electron's calendar), so by UTC
+  it was 13 days and some hours old at the move. 45.1.0 (2026-10-27) and 45.2.1 (2026-10-31) are newer and younger than
+  fourteen days; 45.2.1 is due from 2026-11-14.
+- **What Electron 45 changes for this application** (its `breaking-changes.md`): sandboxed preloads lose the `events`, `timers`
+  and `url` shims and the `Buffer` and `setImmediate` globals. The built preload requires only `electron` and uses none of
+  them. `window.open` children of an unsandboxed window get a process of their own; every window here is sandboxed.
+- **Verified, numbers.**
+  - `desktop/`: `npm run typecheck` clean; `npm test` **135 of 135** (the same 135 on 44.5.1 before the move).
+  - The site: `npm run typecheck` clean; `npm run build` passes; `npm test` **783 of 783**.
+  - **The chip switches** (a scratch probe on Electron 45, `getGPUInfo` and WebGL's renderer): no switch starts on the RTX 3050,
+    `force_high_performance_gpu` on the RTX, `force_low_power_gpu` on the AMD chip. Chromium 156 still honours both.
+  - **The profile's key** reads `process.versions.chrome`, now 156.0.8078.48, so the measurements taken under 152 no longer drive
+    «تلقائي» until the laptop is measured again; that is the design (a measurement is true for its Chromium).
+  - `qa/desktop-shell.cjs` **68 of 68**, including the six release fuses read back from the packaged 0.7.1 and the development
+    package differing in the inspector fuse only. **Its install, run and uninstall were skipped**: this laptop already has an
+    installation in `%LOCALAPPDATA%\Programs\sa.commshub.desktop` and its profile, which the check never touches.
+  - `qa/desktop-native.cjs` **37 of 37**; `qa/desktop-studio-parity.cjs --parity-only` **12 of 12** (`studio-engine` and
+    `studio-export` the same in Edge and inside the application); `qa/desktop-csp.cjs` **13 of 13**; `qa/desktop-files.cjs`
+    **16 of 16** (the protocol, the cache folder, a file over 4 GB read in place); `qa/desktop-media.cjs` **52 of 52** (the same
+    frame at 48 times from every light copy); `qa/desktop-windows.cjs` **13 of 13** (12 of 13 before the stale assertion was fixed).
+- **Not run.** `qa/desktop-profile.cjs`, `qa/desktop-device-panel.cjs` and `qa/studio-crossdevice.cjs` (speed figures need a quiet
+  window; the proof is the manager's). Chromium 156 is Edge 156's version, so the transfer label that differed between Edge and the
+  application (`iec61966-2-1` against `bt709`) may now agree; not checked here.
+- **Not done.** Nothing pushed, no release published.
