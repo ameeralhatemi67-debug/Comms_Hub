@@ -3413,3 +3413,58 @@ The button in the top bar undoes the person's own library edits and nothing else
 checklist and platforms, a stage move that is not a decision, and a folder's name, lock, restriction and access. It works for an hour
 and on the last 15 actions. It works on the newest action it can still undo and skips one that is refused, so an old refusal never
 blocks what came before it. Mail, the studio and the writing sheet have their own undo.
+
+# 71. «تجربة النشر» on a YouTube account, 2026-11-03
+
+By owner directive of 2026-11-03: in «حسابات المنصات», the sheet of a really-connected YouTube channel lets the people who run it
+publish a real test to the channel, choose its privacy and its file, and delete it again. It proves that publishing reaches the
+channel. Publishing works stays a simulation; this is the one real upload, and it is not a work: no review, no approval, no
+schedule, no copy, nothing in the calendar.
+
+## 71.1 Where it is, and who sees it
+
+- In the sheet's «الربط» column, under «فحص الاتصال» and «إعادة الربط عبر المنصة», above «خيارات أخرى».
+- Two links first: «القناة على يوتيوب» (by its handle, else by its id) and «YouTube Studio». Both open in a new tab.
+- Then «تجربة النشر», a line saying what it does, and the button «بدء تجربة». The form stays folded until it is pressed.
+- **Who:** the director, the assistant, a holder of «إدارة المنصات وتطبيقاتها», and the account's own publishers. Administrators act
+  as any role. A publisher who is not on the account does not see it. The database decides (`platform_test_may`).
+- A channel that is stopped or needs reconnecting says so and offers no test.
+
+## 71.2 The form
+
+- **النوع:** «فيديو» (the default) or «منشور مجتمع».
+- **الخصوصية:** «خاص» (the default) or «عام», with one line under it saying who sees it. «غير مدرج» is not offered.
+- **الملف:** «من المكتبة» opens the library picker with videos only; «من هذا الجهاز» opens the device's file chooser for a video. The
+  chosen file shows as one line with its name and where it came from (its size, or its version), and a button to remove it.
+- **العنوان** (filled with «تجربة نشر», up to 100 characters) and **الوصف** (optional, up to 5000 bytes). YouTube refuses `<` and
+  `>` in both, so the form says so before sending.
+- **«نشر التجربة»**, or «نشر التجربة للعموم» when public. A public test asks for a long press: «المقطع العام يراه كل من يزور القناة
+  فور رفعه.»
+- While it sends: a progress bar, «جارٍ الرفع N٪» and «إلغاء». A piece lost on the way is resumed by asking YouTube where the upload
+  stands, up to three times in a row.
+- At the end: «وصل المقطع إلى القناة (خاص)», that YouTube may need minutes to process it, and «مشاهدة على يوتيوب». When public was asked
+  and YouTube kept it private, the result says so and points to YouTube Studio.
+- Subscribers are never notified of a test, whatever its privacy.
+
+## 71.3 A community post
+
+YouTube's API has no method that creates a community post, for any outside application (YouTube Data API reference and revision
+history, read 2026-11-03). Choosing «منشور مجتمع» says this plainly, keeps a text box, and offers «نسخ النص وفتح يوتيوب»: the text is
+copied and the channel's posts page opens, where the person posts it and attaches a picture. Nothing is sent to the site or recorded.
+
+## 71.4 «آخر التجارب» and deleting
+
+- The last five tests of the channel: title, state («منشور · خاص»، «حُذف من يوتيوب»، «يُرفع الآن»، «لم يكتمل: …»), time and who.
+- A published test has «مشاهدة» and «حذف». Delete asks for a long press: «يُحذف المقطع من القناة على يوتيوب نهائياً، ولا يُسترجع.»
+  Anyone who may test the channel may delete a test, not only its sender.
+- Only a test is deleted, by the id YouTube returned when it arrived, and only when that video was on this channel.
+- Deleting needs Google's permission to manage the channel's videos (`youtube.force-ssl`), asked from 2026-11-03. A channel connected
+  before that shows «في Studio» instead of «حذف», and one line asking to reconnect once, with «إعادة الربط».
+
+## 71.5 How the file travels
+
+- The page never holds the account's token or YouTube's upload address. The site's server checks the channel with the token from
+  the vault, opens the upload at YouTube, keeps the address in a column no page can read, and relays the file.
+- A file from this device is sent through the site in 3 MiB pieces (under the host's 4.5 MB body limit). A library file is named by
+  its id and read by the server from wherever it is kept, in 16 MiB pieces, under the person's own folder permissions.
+- A test is at most 1 GB. A channel takes ten tests a day; YouTube allows the project 100 uploads a day.

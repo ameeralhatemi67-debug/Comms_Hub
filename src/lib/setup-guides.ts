@@ -64,6 +64,8 @@ export type Guide = {
 const DEV_FACTS = 'المعلومات هنا من وثائق المنصة الرسمية كما قُرئت في 2026-10-15، وتتغير. راجع صفحة المنصة نفسها عند التسجيل.';
 const PLATFORM_FACTS = 'المعلومات هنا من وثائق المنصة الرسمية كما قُرئت في 2026-11-01، وتتغير. راجع صفحة المنصة نفسها عند التسجيل.';
 const SIMULATION = 'النشر نفسه ما زال محاكاة في كل الحالات. هذه الخطوات تجهّز الربط والفحص فقط.';
+/** YouTube alone has a real test upload (MVP_draft.md section 71). */
+const SIMULATION_YT = 'نشر الأعمال ما زال محاكاة. وحدها «تجربة النشر» في بطاقة القناة من «حسابات المنصات» ترفع مقطعاً حقيقياً، ولها أن تحذفه.';
 const META_APPS = { href: 'https://developers.facebook.com/apps/', label: 'Meta for Developers' };
 const META_PORTFOLIO = { href: 'https://business.facebook.com/settings', label: 'إعدادات حافظة الأعمال' };
 const TIKTOK_APPS = { href: 'https://developers.tiktok.com/apps/', label: 'TikTok for Developers' };
@@ -351,7 +353,7 @@ export const GUIDES: Record<string, Guide> = {
       'حد الرفع 100 مقطع في اليوم، وبقية الطلبات 10000 وحدة في اليوم.',
       'Drive: يرى الموقع الملفات التي أنشأها وحده فقط، لا بقية ملفات الحساب.',
       'ترتيب شاشات «Get started» من وثائق Google الرسمية كما قُرئت في 2026-11-02.',
-      SIMULATION,
+      SIMULATION_YT,
       PLATFORM_FACTS,
     ],
     link: { href: 'https://console.cloud.google.com/', label: 'Google Cloud Console' },
@@ -401,7 +403,7 @@ export const GUIDES: Record<string, Guide> = {
     steps: [
       { t: 'اضغط «ربط عبر Google (يوتيوب)»', b: 'تنتقل إلى صفحة Google. ولا يطلب الموقع كلمة مرورك أبداً.' },
       { t: 'اختر الحساب ثم القناة', b: 'سجّل الدخول بحساب Google الذي يملك القناة أو يديرها. وإن كانت القناة لحساب علامة تجارية فاختره حين تعرضه Google.' },
-      { t: 'وافق على الصلاحيتين', b: 'رفع الفيديو، وقراءة القنوات التي تملكها.' },
+      { t: 'وافق على الصلاحيات الثلاث', b: 'رفع الفيديو، وقراءة القنوات التي تملكها، وإدارة مقاطعها: بها يحذف الموقع مقطع «تجربة النشر».' },
       { t: 'عُد إلى الموقع', b: 'تظهر القناة باسمها، فحدّد من ينشر عليها.' },
       { t: 'تأكد من الحالة', b: '«ربط حقيقي» وتاريخ التفويض. يُجدَّد التفويض مع كل فحص ناجح.' },
     ],
@@ -409,7 +411,8 @@ export const GUIDES: Record<string, Guide> = {
       'لكل قناة دخول مستقل: لربط قناة أخرى أعد الخطوات واخترها عند Google.',
       'إن قالت Google «التطبيق لم يتحقق منه» أو لم يُسمح لك بالدخول فأضف بريدك ضمن «Test users» في شاشة الموافقة، أو انشر التطبيق.',
       'إن لم يصل رمز تجديد فأزل وصول «Comms Hub» من حسابك على Google ثم أعد الربط.',
-      SIMULATION,
+      'القناة المربوطة قبل 2026-11-03 لم تأذن بإدارة مقاطعها: ترفع مقطع التجربة ولا تحذفه حتى يُعاد ربطها مرة واحدة.',
+      SIMULATION_YT,
     ],
     link: { href: 'https://myaccount.google.com/permissions', label: 'التطبيقات التي لها وصول إلى حساب Google' },
   },

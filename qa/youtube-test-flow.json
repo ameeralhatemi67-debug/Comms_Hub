@@ -1,0 +1,255 @@
+{
+  "script": "qa/youtube-test-flow.cjs",
+  "run": "2026-11-03T06:21:23.495Z",
+  "checks": [
+    {
+      "name": "a link to the channel on YouTube, by its handle, in a new tab",
+      "pass": true,
+      "detail": "[[\"channel\",\"https://www.youtube.com/@hedayh\",\"_blank\",\"noopener noreferrer\"],[\"studio\",\"https://studio.youtube.com/channel/UCfixturechannel000000/videos\",\"_blank\",\"noopener noreferrer\"]]"
+    },
+    {
+      "name": "and one to its YouTube Studio",
+      "pass": true,
+      "detail": "[[\"channel\",\"https://www.youtube.com/@hedayh\",\"_blank\",\"noopener noreferrer\"],[\"studio\",\"https://studio.youtube.com/channel/UCfixturechannel000000/videos\",\"_blank\",\"noopener noreferrer\"]]"
+    },
+    {
+      "name": "the panel says what a test is",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "folded until asked for",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a video, private, by default",
+      "pass": true,
+      "detail": "[\"فيديو\",\"خاص\"]"
+    },
+    {
+      "name": "the title starts filled",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing is sent without a video",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the file input itself is never shown, only the two buttons",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a community post is said plainly to be impossible for any outside application",
+      "pass": true,
+      "detail": "لا تتيح واجهة يوتيوب البرمجية لأي تطبيق خارجي نشر منشور مجتمع، فلا يستطيع الموقع إرساله. اكتب النص هنا، ثم انسخه وانشره من صفحة منشورات القناة في يوتيوب، وأرفق الصورة هناك."
+    },
+    {
+      "name": "it opens the channel's posts on YouTube, in a new tab",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "not before there is text",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the text is copied",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and YouTube's posts page opened",
+      "pass": true,
+      "detail": "https://www.youtube.com/@hedayh/posts"
+    },
+    {
+      "name": "nothing was sent to the site for a post",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the chosen file is named with its size",
+      "pass": true,
+      "detail": "clip.mp4\nمن هذا الجهاز · 0.7 ميغابايت"
+    },
+    {
+      "name": "a title YouTube refuses is caught before sending",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the private button carries no hold",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the start names the account, the file's size and type, and the words",
+      "pass": true,
+      "detail": "{\"account\":\"a-yt\",\"privacy\":\"private\",\"title\":\"تجربة من الجهاز\",\"description\":\"وصف قصير للتجربة.\",\"source\":\"device\",\"size\":716800,\"mime\":\"video/mp4\"}"
+    },
+    {
+      "name": "the file goes in the agreed pieces, each from where the last ended",
+      "pass": true,
+      "detail": "[[\"/api/platforms/test/00000000-0000-4000-8000-000000000001?from=0\",262144],[\"/api/platforms/test/00000000-0000-4000-8000-000000000001?from=262144\",262144],[\"/api/platforms/test/00000000-0000-4000-8000-000000000001?from=524288\",192512]]"
+    },
+    {
+      "name": "the result says it arrived, private, and that YouTube may need minutes",
+      "pass": true,
+      "detail": "وصل المقطع إلى القناة (خاص). قد يحتاج يوتيوب دقائق لمعالجته قبل أن يُشاهَد.\nمشاهدة على يوتيوب"
+    },
+    {
+      "name": "with a link to watch it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the list shows the test, published and private, by whom",
+      "pass": true,
+      "detail": "تجربة من الجهاز\nمنشور · خاص · 03‏/11‏/2026، 9:21 ص · مدير الفحص\nمشاهدة\nحذف"
+    },
+    {
+      "name": "its delete asks for a hold, with the reason",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "public says who sees it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the library offers videos only",
+      "pass": true,
+      "detail": "[\"مقطع الحملة.mp4\\n· الإصدار 3\"]"
+    },
+    {
+      "name": "and says the server reads the file where it is",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the library file is named with its version",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a public test says so and asks for a hold",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a library file is named by its id, never sent by the page",
+      "pass": true,
+      "detail": "{\"account\":\"a-yt\",\"privacy\":\"public\",\"title\":\"تجربة من المكتبة\",\"description\":\"وصف قصير للتجربة.\",\"source\":\"library\",\"asset\":\"f-video\"}"
+    },
+    {
+      "name": "three pieces, read by the server",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "asked public and kept private by YouTube: said, with where to change it",
+      "pass": true,
+      "detail": "وصل المقطع إلى القناة (خاص). قد يحتاج يوتيوب دقائق لمعالجته قبل أن يُشاهَد.\nطلبت «عام» فأبقاه يوتيوب «خاص». غيّر خصوصيته من YouTube Studio إن شئت.\nمشاهدة على يوتيوب"
+    },
+    {
+      "name": "a test is deleted from YouTube through the site, by its id",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and the list says so",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "said once",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing was loaded from outside the fixture except the posts page opened on purpose",
+      "pass": true,
+      "detail": "[\"https://www.youtube.com/@hedayh/posts\"]"
+    },
+    {
+      "name": "a lost piece: asked, then sent again from the same byte, and the upload completes",
+      "pass": true,
+      "detail": "[\"from=0\",\"from=262144\",\"from=262144&ask=1\",\"from=262144\",\"from=524288\"]"
+    },
+    {
+      "name": "the progress is shown with a way to cancel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a cancel stops the pieces and closes the test",
+      "pass": true,
+      "detail": "[\"POST /api/platforms/check\",\"POST /api/platforms/test\",\"PUT /api/platforms/test/00000000-0000-4000-8000-000000000001?from=0\",\"DELETE /api/platforms/test/00000000-0000-4000-8000-000000000001\"]"
+    },
+    {
+      "name": "without the permission there is no delete, only YouTube Studio",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and it says why, with a reconnect",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reconnect goes through Google's sign-in",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a refusal is said in words, with a reconnect where that is the cure",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the account's own publisher sees the panel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a publisher who is not on the account does not",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a channel that needs reconnecting is not tested",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing sideways with the form open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: the send button is a comfortable size",
+      "pass": true,
+      "detail": "{\"x\":236.796875,\"y\":756.71875,\"width\":117.203125,\"height\":42}"
+    },
+    {
+      "name": "evening: the result is readable on its own ground",
+      "pass": true,
+      "detail": "rgb(16, 48, 31) / rgb(111, 209, 155)"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 49,
+  "passed": 49,
+  "failed": 0
+}

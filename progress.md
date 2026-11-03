@@ -2416,3 +2416,58 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - `npm run build` clean (exit 0).
 - **Not verified.** Signed in on the real site (the fixture uses the real components with stand-ins for the database). The look on a real phone. The circled "!" shows the copy buttons and picture notes but was checked only through `qa/guide-modal.cjs`.
 - **Not done, said plainly.** Not committed, not pushed, not deployed.
+
+### 2026-11-03: «تجربة النشر» on a YouTube account, the one real upload
+
+- **Owner direction.** In «حسابات المنصات», a connected YouTube channel's sheet should offer a quick test of the connection: a video
+  upload or a community post, a public or private choice, media from the library (Google Drive) or from the person's own files, a
+  title and description or a post's text, a button that publishes the test, a button that deletes it, and a link to the channel.
+  This is a deliberate exception to "publishing is a simulation", recorded here and in `AGENTS.md`; publishing works stays a simulation.
+- **Read first, from Google's own pages on 2026-11-03.** `videos.insert` (one call of the "Video Uploads" quota, 100 a day; the page
+  now says uploads from unverified projects are not restricted to private), the resumable upload protocol (pieces in 256 KiB
+  multiples, 308 with `Range`, 201 with the video), `videos.delete` (50 units; needs `youtube.force-ssl`, `youtube` or
+  `youtubepartner`, not `youtube.upload`), and the revision history: no method creates a community post, and channel discussions
+  were withdrawn on 2024-04-30.
+- **Decided, and why.**
+  - A community post is not sent: the API cannot. The panel says so, keeps the text box, copies the text and opens the channel's
+    posts page on YouTube. No picture is asked for there, because it would go nowhere; it is attached on YouTube.
+  - Delete needs a wider Google permission, so the sign-in now asks for `youtube.force-ssl` beside the two it asked. Upload works on
+    a channel connected before; delete there shows «في Studio» and asks for one reconnect.
+  - The file travels through the site, not straight from the browser to YouTube: Google's documented upload sends the token with
+    every piece, and the page must never hold a token or the upload's address. A device file goes in 3 MiB pieces (under the host's
+    4.5 MB body limit), a library file is read by the server from Drive in 16 MiB pieces under the person's own folder permissions.
+  - Privacy is «خاص» (the default) or «عام», as asked; subscribers are never notified of a test; at most 1 GB and ten tests a day.
+  - Who: those who manage accounts and the account's own publishers (`platform_test_may`). Anyone of them may delete a test.
+- **Built (`MVP_draft.md` section 71).**
+  - `supabase/migrations/20261103120000_platform_tests.sql`: the table `platform_tests`, readable by row level security with every
+    column but `upload_url`; `platform_test_start` (rights, account state, the same limits as TypeScript, one open upload per person
+    and account, ten a day), and the server-key steps `platform_test_get`, `_session`, `_done` (a video on another channel is
+    recorded as failed, never as this account's), `_failed`, `_deleted`.
+  - `src/lib/platforms/youtube.ts` (open an upload, send a piece or ask where it stands, delete; errors as short codes),
+    `test-rules.ts` (limits, links, words), `test-server.ts` (the token from the vault, renewed or refused as a check records it;
+    a library piece), and the routes `src/app/api/platforms/test/route.ts` (start) and `[id]/route.ts` (PUT a piece, DELETE).
+    `googleAccess` was taken out of `googleAccountHealth` in `oauth2.ts`, which keeps its behaviour.
+  - `src/components/work/youtube-test.tsx` in the sheet's «الربط» column: the two links, the folded form, the progress with
+    «إلغاء» and a resume after a lost piece, the result, «آخر التجارب» with «مشاهدة» and «حذف». Two long-press reasons
+    (`platformTestPublic`, `platformTestDelete`). `LibraryPicker` takes `only` and `note`, and `libraryFiles` a kind.
+  - Words: the simulation line on the page, the chooser, the help card Z01 (and `Help_Content_Matrix.md`), the page help, the
+    Google guides (three permissions; the test as the one exception), and `public/privacy.html` in both languages (the third scope,
+    what a test uploads and deletes; dated 3 November 2026).
+- **Verified, numbers.**
+  - `npm run typecheck` clean. `npm test` **734 of 734** (eleven new in `tests/youtube-test.test.mjs`: the calls against a fake
+    YouTube, the rules, the links, the same limits in the migration, the hidden column, every refusal worded, no token or address
+    in the page, no log; three existing tests updated for what changed: the scopes the policy names, the policy's date, the hold
+    buttons' files).
+  - `supabase/tests/platform_tests_rules.sql` **75 of 75** on a private Docker container with every migration replayed, nothing
+    touching comms-hub (`qa/platform-tests-rules.json`). Its first run stopped on its own check reading `upload_url` as a signed-in
+    person, which the database refused as it should; that check was moved to the administrator's side.
+  - `qa/youtube-test-flow.cjs` **49 of 49** in Edge on a fixture of the real page, sheet and panel: links, post (text copied, posts
+    page opened, nothing sent), device upload in exact pieces, library upload named by id, asked public kept private, delete, a lost
+    piece resumed, a cancel half way, no delete without the permission, a refusal with its cure, who sees the panel, a channel that
+    needs reconnecting, phone and evening. One defect found by looking at the screenshots, not by a check: the hidden file input
+    showed «Choose File» because a page rule on inputs beat `hidden`; fixed in `work.css` and a check added.
+  - `qa/platforms-flow.cjs` **131 of 131** (no regression on the two platform pages). `npm run build` clean (exit 0).
+- **Not verified.** A real upload to a real channel: nothing was sent to YouTube in this work, and the browser's fixture stands in
+  for the routes. YouTube's answer to a piece without CORS is not involved (the server sends every piece). Signed in on the real site.
+- **Not done, said plainly.** The migration is not applied to comms-hub, nothing is pushed or deployed. The Hedayh channel was
+  connected before 2026-11-03, so it uploads at once after deployment but deletes only after one reconnect.

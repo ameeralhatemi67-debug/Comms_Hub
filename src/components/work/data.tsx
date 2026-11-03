@@ -344,9 +344,10 @@ export function useWorkDocs(on: boolean) {
 
 /** Files this person can reach in the library, newest first, for the pickers. */
 export type LibraryFile = { id: string; name: string; kind: string; current_version: number; stage: string };
-export async function libraryFiles(q: string): Promise<LibraryFile[]> {
+export async function libraryFiles(q: string, kind?: string): Promise<LibraryFile[]> {
   let query = supabase().from('media_files').select('id,name,kind,current_version,stage').order('created_at', { ascending: false }).limit(60);
   if (q.trim()) query = query.ilike('name', `%${q.trim()}%`);
+  if (kind) query = query.eq('kind', kind);
   const { data } = await query;
   return (data ?? []) as LibraryFile[];
 }

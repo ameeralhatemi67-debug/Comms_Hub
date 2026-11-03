@@ -132,21 +132,21 @@ export function Modal({ title, wide, onClose, children }: { title: string; wide?
   );
 }
 
-/** Pick a file from the library: only files in folders this person can reach. */
-export function LibraryPicker({ have, onPick, onClose }: { have: string[]; onPick: (f: LibraryFile) => void; onClose: () => void }) {
+/** Pick a file from the library: only files in folders this person can reach, and of one kind when `only` says so. */
+export function LibraryPicker({ have, only, note, onPick, onClose }: { have: string[]; only?: string; note?: string; onPick: (f: LibraryFile) => void; onClose: () => void }) {
   const [q, setQ] = useState('');
   const [files, setFiles] = useState<LibraryFile[] | null>(null);
   useEffect(() => {
     let live = true;
-    const t = setTimeout(() => void libraryFiles(q).then((f) => live && setFiles(f)), q ? 250 : 0);
+    const t = setTimeout(() => void libraryFiles(q, only).then((f) => live && setFiles(only ? f.filter((x) => x.kind === only) : f)), q ? 250 : 0);
     return () => {
       live = false;
       clearTimeout(t);
     };
-  }, [q]);
+  }, [q, only]);
   return (
     <Modal title="اختر من مكتبة الوسائط" onClose={onClose}>
-      <Hint i={FolderOpen}>تظهر الملفات التي تملك الوصول إلى مجلداتها فقط. الملف يبقى في مجلده بصلاحياته، والعمل يشير إليه.</Hint>
+      <Hint i={FolderOpen}>{note ?? 'تظهر الملفات التي تملك الوصول إلى مجلداتها فقط. الملف يبقى في مجلده بصلاحياته، والعمل يشير إليه.'}</Hint>
       <label className="wk-field">
         <Ic i={Search} />
         <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="ابحث باسم الملف…" aria-label="ابحث باسم الملف" />

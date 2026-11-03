@@ -241,6 +241,22 @@ and since 2026-10-15 (C4) the database refuses it too (`work_copy_issues`, calle
 held equal by `tests/limits-parity.test.mjs` and `supabase/tests/limits_rules.sql`). Never put a token, an app secret or a
 platform's response body in a log, a URL, an event or a notification.
 
+A test upload to YouTube is real, by owner directive of 2026-11-03 (`MVP_draft.md` section 71, recorded in `progress.md`). It is
+the one real publish, and it is not a work: «تجربة النشر» in a connected channel's sheet (`src/components/work/youtube-test.tsx`)
+uploads a video the person chose, with their title, description and privacy («خاص» or «عام», never notifying subscribers), and
+deletes only what a test uploaded. Publishing works stays a simulation.
+- **Who** is the database's (`platform_test_may` in `supabase/migrations/*platform_tests*`): those who manage accounts and the
+  account's own publishers. Every server step needs `MAIL_SERVER_KEY`.
+- **The page never holds a token or YouTube's upload address.** The server opens the upload (`src/app/api/platforms/test/`),
+  keeps the address in `platform_tests.upload_url`, which no page may select, and relays the file: the device's bytes in 3 MiB
+  pieces, or a library file read by the server itself. A piece goes only to an address under `UPLOAD_PREFIX`.
+- **A delete** uses the id YouTube returned, recorded only when the video was on the account's channel. It needs
+  `youtube.force-ssl`, asked by the Google sign-in since 2026-11-03; a channel connected earlier reconnects once to delete.
+- **A community post** cannot be created through YouTube's API by any outside application. The panel copies the text and opens
+  the channel's posts page; never imitate a post through another route.
+- The limits exist once in `src/lib/platforms/test-rules.ts` and once in SQL, held equal by `tests/youtube-test.test.mjs`. The rules
+  are held by `supabase/tests/platform_tests_rules.sql`, and `qa/youtube-test-flow.cjs` clicks through the panel on a fixture.
+
 Integrations, storage providers and backups are real, by owner directive of 2026-10-14
 (`Settings_Integrations_Plan.md`, decisions E-1 to E-7, recorded in `progress.md`). Every
 connection (storage provider, platform app, messaging) is a row of one integrations core

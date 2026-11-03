@@ -220,7 +220,7 @@ export function ConnectChooser({ provider, offer, onClose, onDone }: { provider:
               )}
               <p className="wk-simnote">
                 <Ic i={TriangleAlert} />
-                <span>الربط حقيقي، أما النشر نفسه فما زال محاكاة: لا يصل شيء إلى المنصة بعد.</span>
+                <span>الربط حقيقي، أما نشر الأعمال فما زال محاكاة: لا يصل منها شيء إلى المنصة بعد.</span>
               </p>
             </>
           )}

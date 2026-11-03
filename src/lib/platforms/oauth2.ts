@@ -78,8 +78,15 @@ export async function appCheck(f: Fetch, url: string, form: Record<string, strin
 const GOOGLE_AUTH = 'https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_TOKEN = 'https://oauth2.googleapis.com/token';
 const YT = 'https://www.googleapis.com/youtube/v3';
-/** Upload videos, and read which channels the person owns (to list them and to check the token). */
-export const GOOGLE_SCOPES = ['https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtube.readonly'] as const;
+/**
+ * Upload videos, read which channels the person owns (to list them and to check the token), and manage the channel's
+ * videos, which deleting a test video needs (MVP_draft.md section 71): youtube.upload alone cannot delete.
+ */
+export const GOOGLE_SCOPES = [
+  'https://www.googleapis.com/auth/youtube.upload',
+  'https://www.googleapis.com/auth/youtube.readonly',
+  'https://www.googleapis.com/auth/youtube.force-ssl',
+] as const;
 
 export function googleAuthUrl(a: { clientId: string; redirectUri: string; state: string; scopes?: readonly string[] }): string {
   // access_type=offline asks for a refresh token; prompt=consent makes Google return one again on a re-connection.
@@ -141,23 +148,29 @@ export async function googleChannels(f: Fetch, access: string): Promise<YouTubeC
     });
 }
 
+/** A working access token of a YouTube account: the stored one while it lasts, else a refreshed one with the secret to keep in its place. */
+export async function googleAccess(f: Fetch, a: { clientId: string; secret: string; packed: string; now?: number }): Promise<{ access: string; newSecret: string | null } | { error: string }> {
+  const now = a.now ?? Date.now();
+  const t = unpackTokens(a.packed);
+  if (!t || !t.refresh) return { error: 'NOT_CONNECTED' };
+  if (t.accessExpiresAt && Date.parse(t.accessExpiresAt) - 60_000 > now) return { access: t.access, newSecret: null };
+  const r = await googleRefresh(f, { clientId: a.clientId, secret: a.secret, refresh: t.refresh, now });
+  if ('error' in r) return { error: r.error === 'TOKEN_REFUSED' ? 'TOKEN_EXPIRED' : r.error };
+  return { access: r.access, newSecret: packTokens({ ...t, access: r.access, accessExpiresAt: r.accessExpiresAt, refreshExpiresAt: rolling(now) }) };
+}
+
+/** The expiry a good check of a YouTube account records. */
+export const googleRolling = (now = Date.now()) => rolling(now);
+
 /** One check of a YouTube account: refresh when the access token has ended, then ask which channels it owns. */
 export async function googleAccountHealth(f: Fetch, a: { clientId: string; secret: string; packed: string; externalId: string | null; now?: number }): Promise<Health> {
   const now = a.now ?? Date.now();
-  const t = unpackTokens(a.packed);
-  if (!t || !t.refresh) return bad;
-  let access = t.access;
-  let newSecret: string | null = null;
-  if (!t.accessExpiresAt || Date.parse(t.accessExpiresAt) - 60_000 <= now) {
-    const r = await googleRefresh(f, { clientId: a.clientId, secret: a.secret, refresh: t.refresh, now });
-    if ('error' in r) return fail(r.error === 'TOKEN_REFUSED' ? 'TOKEN_EXPIRED' : r.error);
-    access = r.access;
-    newSecret = packTokens({ ...t, access: r.access, accessExpiresAt: r.accessExpiresAt, refreshExpiresAt: rolling(now) });
-  }
-  const ch = await googleChannels(f, access);
+  const got = await googleAccess(f, { clientId: a.clientId, secret: a.secret, packed: a.packed, now });
+  if ('error' in got) return got.error === 'NOT_CONNECTED' ? bad : fail(got.error);
+  const ch = await googleChannels(f, got.access);
   if ('error' in ch) return fail(ch.error);
   if (a.externalId && !ch.some((c) => c.id === a.externalId)) return fail('PERMISSION_REVOKED');
-  return { ok: true, error: null, expiresAt: rolling(now), scopes: [], newSecret };
+  return { ok: true, error: null, expiresAt: rolling(now), scopes: [], newSecret: got.newSecret };
 }
 
 // ---------------------------------------------------------------------------

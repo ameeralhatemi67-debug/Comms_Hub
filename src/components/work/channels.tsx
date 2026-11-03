@@ -6,7 +6,8 @@
 // An account is added through the platform's own sign-in, and the site never asks for a password. A simulated account
 // connects to nothing, for trying a platform that is not set up, and an authorisation runs 60 days. Approval binds to
 // the account and its handle, so renaming a handle re-opens «المنصات والحسابات» (account_save), and an account in use by
-// approved, scheduled or in-review work cannot be stopped or deleted. Publishing itself is a simulation.
+// approved, scheduled or in-review work cannot be stopped or deleted. Publishing works is a simulation; a YouTube account's
+// sheet alone uploads a real test video (youtube-test.tsx, MVP_draft.md section 71).
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SetupGuide } from '../setup-guide';
@@ -24,6 +25,7 @@ import { useWork, useWorkList, type ListItem } from './data';
 import { ConnectChooser, RECONNECT_KEY, connLine, defaultPublishers } from './connect';
 import { Empty, Hint, Ic, Modal } from './parts';
 import { staffOf } from './plan';
+import { YouTubeTest } from './youtube-test';
 
 const LOCKING = ['APPROVED', 'SCHEDULED', 'IN_REVIEW'];
 /** A platform's own state, beside its name, when it is not simply working. */
@@ -179,7 +181,7 @@ export function ChannelsPage({ initialOpen }: { /** Draws an account's sheet wit
       </div>
       <p className="wk-simnote">
         <Ic i={TriangleAlert} />
-        <span>الربط حقيقي، أما النشر نفسه فما زال محاكاة: لا يصل شيء إلى المنصة بعد.</span>
+        <span>الربط حقيقي، أما نشر الأعمال فما زال محاكاة: لا يصل منها شيء إلى المنصة بعد. وحدها «تجربة النشر» في قناة يوتيوب ترفع مقطعاً حقيقياً.</span>
       </p>
       {connNote && (
         <p className={connNote.ok ? 'wk-simnote' : 'wk-err'} role="status">
@@ -453,6 +455,7 @@ function AccountSheet({
               </button>
             </div>
           )}
+          {a.platform === 'youtube' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <YouTubeTest a={a} onReconnect={onReconnect} />}
           {mgr && !a.fixed && (
             <details className="pf-more">
               <summary>خيارات أخرى</summary>
