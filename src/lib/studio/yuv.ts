@@ -3,7 +3,8 @@
 // canvas's RGB instead, the processor-only encoders wrote BT.601 (measured on 2026-11-03 with no graphics chip:
 // `smpte170m`, and green at 19.6 dB when the file is read as BT.709, as many players read HD video), while the
 // graphics chips' encoders write BT.709. Fixed-point coefficients scaled by 2^16, rounded so that every grey stays
-// exactly neutral; chroma is the rounded average of each 2 by 2 block. Pure.
+// exactly neutral; chroma is the rounded average of each 2 by 2 block. The conversion itself (i420Into) names
+// nothing outside its own text, so the export's workers are made from it (yuv-pipe.ts) and give the same bytes. Pure.
 
 /** BT.709 limited range: Y = 16 + 219/255 (0.2126 R + 0.7152 G + 0.0722 B), Cb and Cr 128 + 224/255 of their differences. */
 export const BT709 = Object.freeze({
@@ -15,14 +16,6 @@ export const BT709 = Object.freeze({
 /** The colour space a frame made by rgbaToI420 carries, and the encoder writes into the file. */
 export const BT709_SPACE = Object.freeze({ primaries: 'bt709', transfer: 'bt709', matrix: 'bt709', fullRange: false } as const);
 
-const HALF = 1 << 15;
-const [YR, YG, YB] = BT709.y;
-const [UR, UG, UB] = BT709.cb;
-const [VR, VG, VB] = BT709.cr;
-/** Each pixel is read once as a 32-bit word where the bytes are in that order (every desktop and phone processor). */
-const LITTLE = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
-const luma = (r: number, g: number, b: number) => 16 + ((YR * r + YG * g + YB * b + HALF) >> 16);
-
 /**
  * RGBA pixels, w by h (both even), as I420: the Y plane (w x h), then U and V (w/2 x h/2 each). Alpha is ignored: an
  * exported frame is opaque. One pass over each 2 by 2 block: its four Y values, then its chroma from the block's
@@ -32,7 +25,23 @@ export function rgbaToI420(rgba: Uint8ClampedArray, w: number, h: number, out?: 
   if (w % 2 || h % 2) throw new Error('even sizes only');
   const size = w * h;
   const dst = out && out.length === (size * 3) / 2 ? out : new Uint8Array((size * 3) / 2);
-  const words = LITTLE && rgba.byteOffset % 4 === 0 ? new Uint32Array(rgba.buffer, rgba.byteOffset, size) : null;
+  i420Into(rgba, w, h, dst);
+  return dst;
+}
+
+/**
+ * rgbaToI420's arithmetic, into `dst` (w * h * 3 / 2 bytes), with every constant written inside it (BT709 above, held
+ * equal by tests/studio-colour.test.mjs): a worker is made from this function's text. Each pixel is read once as a
+ * 32-bit word where the bytes are in that order (every desktop and phone processor) and the pixels start on a word.
+ */
+export function i420Into(rgba: Uint8ClampedArray | Uint8Array, w: number, h: number, dst: Uint8Array): void {
+  const YR = 11966, YG = 40254, YB = 4064;
+  const UR = -6596, UG = -22189, UB = 28785;
+  const VR = 28785, VG = -26145, VB = -2640;
+  const HALF = 32768;
+  const size = w * h;
+  const little = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1;
+  const words = little && rgba.byteOffset % 4 === 0 ? new Uint32Array(rgba.buffer, rgba.byteOffset, size) : null;
   let u = size;
   let v = size + (size >> 2);
   for (let y = 0; y < h; y += 2) {
@@ -57,10 +66,10 @@ export function rgbaToI420(rgba: Uint8ClampedArray, w: number, h: number, out?: 
         r2 = rgba[c]; g2 = rgba[c + 1]; b2 = rgba[c + 2];
         r3 = rgba[c + 4]; g3 = rgba[c + 5]; b3 = rgba[c + 6];
       }
-      dst[top + x] = luma(r0, g0, b0);
-      dst[top + x + 1] = luma(r1, g1, b1);
-      dst[bottom + x] = luma(r2, g2, b2);
-      dst[bottom + x + 1] = luma(r3, g3, b3);
+      dst[top + x] = 16 + ((YR * r0 + YG * g0 + YB * b0 + HALF) >> 16);
+      dst[top + x + 1] = 16 + ((YR * r1 + YG * g1 + YB * b1 + HALF) >> 16);
+      dst[bottom + x] = 16 + ((YR * r2 + YG * g2 + YB * b2 + HALF) >> 16);
+      dst[bottom + x + 1] = 16 + ((YR * r3 + YG * g3 + YB * b3 + HALF) >> 16);
       const R = (r0 + r1 + r2 + r3 + 2) >> 2;
       const G = (g0 + g1 + g2 + g3 + 2) >> 2;
       const B = (b0 + b1 + b2 + b3 + 2) >> 2;
@@ -68,5 +77,4 @@ export function rgbaToI420(rgba: Uint8ClampedArray, w: number, h: number, out?: 
       dst[v] = 128 + ((VR * R + VG * G + VB * B + HALF) >> 16);
     }
   }
-  return dst;
 }
