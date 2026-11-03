@@ -232,6 +232,16 @@ const sides = (t) =>
     check('a connected platform opens its summary, with the rest folded under «خيارات متقدمة»', text.includes('إنستغرام جاهزة') && text.includes('في الخزنة') && text.includes('حدود المنشور') && text.includes('تعديل') && text.includes('سجل المنصة'));
     await sheet(t).locator('.st-info > summary').click();
     check('the facts say when they were read from the platform', (await sheet(t).locator('.st-info').innerText()).includes('روجعت من وثائق المنصة الرسمية في 2026-11-01'));
+    // The keys step of the Instagram guide carries its own pictures (MVP_draft.md section 67.7), drawn inside the keys card.
+    await sheet(t).getByRole('button', { name: 'استبدال السر' }).click();
+    await t.waitForFunction(() => document.querySelectorAll('dialog[open] .pf-card .gd-shot img').length === 3);
+    await t.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
+    const keys = await t.evaluate(() => {
+      const c = document.querySelector('dialog[open] .pf-input .pf-card');
+      const imgs = [...c.querySelectorAll('.gd-shot img')];
+      return { todo: c.querySelectorAll('.gd-todo li').length, imgs: imgs.length, loaded: imgs.every((e) => e.naturalWidth > 0 && e.naturalWidth === Number(e.getAttribute('width'))), marks: [...c.querySelectorAll('.gd-seen')].map((e) => e.innerText.trim()), fields: c.querySelectorAll('input').length };
+    });
+    check('the keys step of Instagram lists five actions with its three pictures, and still asks for the three values', keys.todo === 5 && keys.imgs === 3 && keys.loaded && keys.marks.join('|') === 'في الصورة 1|في الصورة 2|في الصورة 2|في الصورة 3' && keys.fields >= 3, JSON.stringify(keys));
     await t.keyboard.press('Escape');
     await t.locator('dialog.pf-sheet').waitFor({ state: 'detached' });
 

@@ -1,6 +1,6 @@
 {
   "script": "qa/platforms-flow.cjs",
-  "run": "2026-11-03T05:35:38.447Z",
+  "run": "2026-11-03T07:50:38.598Z",
   "checks": [
     {
       "name": "every platform has one state, worked out from what is stored",
@@ -115,7 +115,7 @@
     {
       "name": "an address to copy is filled in from the site, whole",
       "pass": true,
-      "detail": "http://127.0.0.1:49989/api/platforms/callback/tiktok"
+      "detail": "http://127.0.0.1:55035/api/platforms/callback/tiktok"
     },
     {
       "name": "Escape closes the sheet",
@@ -173,6 +173,11 @@
       "detail": ""
     },
     {
+      "name": "the keys step of Instagram lists five actions with its three pictures, and still asks for the three values",
+      "pass": true,
+      "detail": "{\"todo\":5,\"imgs\":3,\"loaded\":true,\"marks\":[\"في الصورة 1\",\"في الصورة 2\",\"في الصورة 2\",\"في الصورة 3\"],\"fields\":4}"
+    },
+    {
       "name": "a save that fails says so at once",
       "pass": true,
       "detail": ""
@@ -195,7 +200,7 @@
     {
       "name": "what needs attention comes first, with why and what depends on it",
       "pass": true,
-      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-06 08:35\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
+      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-06 10:50\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
     },
     {
       "name": "accounts are grouped by platform, each one line",
@@ -280,7 +285,7 @@
     {
       "name": "a handle equal to the name is not printed twice",
       "pass": true,
-      "detail": "ربط حسابات عبر Meta (فيسبوك وإنستغرام)\nسجّلت الدخول عند المنصة نفسها. بقي أن تختار.\nإغلاق\nالخطوة 3 من 3\nاختر المنصة\nسجّل الدخول عند المنصة\n3\nاختر الحسابات\n\nيُحفظ رمز كل حساب في خزنة الأسرار على الخادم وحده، ولا يظهر هنا ولا في أي صفحة. صلاحية الربط تأتي من المنصة وتنتهي بانتهاء رمزها.\n\nالخطوة الأخيرة\nاختر ما يُربط\n\nلم تظهر هنا فيسبوك: لا تُربط قبل أن تُضاف وتُفعّل من «المنصات».\n\nإنستغرام ·\n@org_news\nإنستغرام ·\n@org_campaigns\nمن ينشر عليها\nناشر الفحص\nعند الموعد\nنشر تلقائي\nتغيير هذه الخيارات\n\nالربط حقيقي، أما النشر نفسه فما زال محاكاة: لا يصل شيء إلى المنصة بعد.\n\nتراجع\nربط"
+      "detail": "ربط حسابات عبر Meta (فيسبوك وإنستغرام)\nسجّلت الدخول عند المنصة نفسها. بقي أن تختار.\nإغلاق\nالخطوة 3 من 3\nاختر المنصة\nسجّل الدخول عند المنصة\n3\nاختر الحسابات\n\nيُحفظ رمز كل حساب في خزنة الأسرار على الخادم وحده، ولا يظهر هنا ولا في أي صفحة. صلاحية الربط تأتي من المنصة وتنتهي بانتهاء رمزها.\n\nالخطوة الأخيرة\nاختر ما يُربط\n\nلم تظهر هنا فيسبوك: لا تُربط قبل أن تُضاف وتُفعّل من «المنصات».\n\nإنستغرام ·\n@org_news\nإنستغرام ·\n@org_campaigns\nمن ينشر عليها\nناشر الفحص\nعند الموعد\nنشر تلقائي\nتغيير هذه الخيارات\n\nالربط حقيقي، أما نشر الأعمال فما زال محاكاة: لا يصل منها شيء إلى المنصة بعد.\n\nتراجع\nربط"
     },
     {
       "name": "a platform the site does not have yet is named and cannot be picked: no raw key",
@@ -659,7 +664,7 @@
     }
   ],
   "notes": [],
-  "total": 131,
-  "passed": 131,
+  "total": 132,
+  "passed": 132,
   "failed": 0
 }

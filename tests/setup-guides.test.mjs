@@ -48,7 +48,7 @@ test('the platform guides say plainly that publishing is still a simulation, and
 test('no guide asks for a secret to be sent anywhere but its own form, and none carries a value', () => {
   const all = JSON.stringify(GUIDES);
   assert.doesNotMatch(all, /AKIA[A-Z0-9]{8}|sk_live|secret=/);
-  assert.match(JSON.stringify(GUIDES.meta), /ولا ترسلهما إلى أحد/);
+  assert.match(JSON.stringify(GUIDES.meta), /ولا ترسل(?:ها|هما|ه) إلى أحد/);
 });
 
 test('every place that draws a guide names one that exists, and the icon is the icon set\'s, not an emoji', () => {
@@ -167,4 +167,28 @@ test('a ring in a picture points at an action that exists in its step, and a ste
   }
   const rings = GUIDES.google.steps.flatMap((s) => (s.shots ?? []).map((x) => (x.rings ?? []).join('')));
   assert.deepEqual(rings, ['', '12x', '', '2', '34', '1', '2', '23', '13'], 'the rings match the ones drawn in the pictures (scripts/guide-shots.mjs)');
+});
+
+test('the pictures of the Instagram guide are the files in public/guides/meta, whole, small, never an original, and hold nothing private', () => {
+  const dir = 'public/guides/meta';
+  const used = new Set();
+  const g = GUIDES.meta;
+  assert.deepEqual(g.steps.map((s) => s.id), ['accounts', 'ig_add', 'app', 'usecase', 'config', 'redirect', 'skip', 'roles', 'keys']);
+  // Steps that existed keep their names; the one added is proved by the stored secret, so a connected app reads as connected.
+  assert.ok(g.steps.filter((s) => s.id !== 'keys').every((s) => s.implied), 'every step before the keys is implied');
+  for (const s of g.steps) {
+    for (const h of s.shots ?? []) {
+      assert.match(h.src, /^\/guides\/meta\/[a-z-]+\.png$/, h.src);
+      used.add(h.src.split('/').pop());
+      const d = png(`public${h.src}`);
+      assert.deepEqual([d.w, d.h], [h.w, h.h], `${h.src} is ${d.w} x ${d.h}`);
+      assert.ok(d.bytes < 120_000, `${h.src}: ${d.bytes} bytes`);
+      assert.ok(h.alt.length > 15 && h.w <= 1000, h.src);
+    }
+  }
+  assert.equal(used.size, 22);
+  assert.deepEqual(readdirSync(dir).sort(), [...used].sort(), 'no file in the folder is left unused, and no original screenshot is kept');
+  // The handle and the portfolio's name in the originals are nowhere in the words, and the script that makes the pictures names no original but its inputs.
+  assert.doesNotMatch(JSON.stringify(GUIDES), /polkeruoo|17951132926087090|2617091465408415/);
+  assert.doesNotMatch(readFileSync('scripts/guide-shots.mjs', 'utf8'), /polkeruoo|17951132926087090/);
 });

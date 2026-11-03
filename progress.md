@@ -2472,6 +2472,15 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not done, said plainly.** The migration is not applied to comms-hub, nothing is pushed or deployed. The Hedayh channel was
   connected before 2026-11-03, so it uploads at once after deployment but deletes only after one reconnect.
 
+### 2026-11-03: the Instagram guide, first pictures
+
+- **Owner direction.** The owner followed the Instagram steps of «المنصات» on a real Meta account, sent six screenshots (the business portfolio's pages) and asked for them to be cropped, blurred and added.
+- **Built (`MVP_draft.md` section 67.7).** `scripts/guide-shots.mjs` takes a set (`google` or `meta`) and makes six pictures in `public/guides/meta/`: the portfolio's name, the account's handle and picture blurred, Instagram's address bar and bottom bar cut out. The first Instagram step became two (`accounts` kept, `ig_add` new and `implied`), each with a numbered list of actions, so the guide has 7 steps.
+- **What the pages showed that the old text did not say.** The portfolio's home may open before the settings; Meta warns that a personal account is switched to professional; Instagram asks Creator or Business; the closing window offers a switch to manage the account's users, which the steps tell the reader to leave off. That last piece of advice is the author's reading of Meta's own sentence, not a Meta instruction.
+- **Verified, numbers.** `npm run typecheck` and `npm run build` clean; `npm test` **735 of 735** (one new test for the Meta pictures and the seven ids; the count of steps in the add-platform menu changed from 6 to 7). `qa/guide-modal.cjs` **16 of 16** (six new: the seven steps, the six pictures loaded at their size and inside the dialog, the picture markers and numbering, the red-ring legend, no sideways scroll, on a phone). `qa/platforms-flow.cjs` 131 of 131. A screenshot of the modal was looked at.
+- **Not verified.** Following the new two steps on a fresh portfolio; the rest of the Instagram steps (app, configuration, return address, roles, keys) are still the old one-sentence steps with no pictures. The setup sheet itself was not run for Instagram (its row is connected in the fixture); the circled "!" draws the same steps.
+- **Not done, said plainly.** Not committed, not pushed.
+
 ### 2026-11-03: «تجربة النشر» live, with the checks
 
 - **Owner direction.** "Yes, put it live": apply the migration to comms-hub, then deploy.
@@ -2494,3 +2503,37 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** A signed-in test on the real site and a real upload to YouTube (an agent does not sign in). Delete on Hedayh waits
   for one reconnect. `3d07b0f` (the look of a setup step) is still on local `main` only, not deployed.
 - **Next.** The owner opens Hedayh's sheet in «حسابات المنصات», runs one private test, reconnects the channel once, and deletes the test.
+
+### 2026-11-03: the Instagram guide, the app steps
+
+- **Owner direction.** The owner went on following the Instagram steps on developers.facebook.com and sent five more screenshots (the apps page, the new app's name and email, the use cases listed as featured and as content management, the dashboard), asking that every screenshot be saved into the guide's steps.
+- **Built (`MVP_draft.md` section 67.7).** Five more pictures in `public/guides/meta/` (11 in all; `scripts/guide-shots.mjs` gained a `width` that scales a wide crop after cropping, and the email is blurred). `app` now lists its actions with two pictures; a new `implied` step `usecase` carries the use-case choice with two pictures; `config` starts from the dashboard picture. The guide has 8 steps.
+- **What the screens showed that the text did not say.** Instagram's use case is not among «Featured» but under «Content management»; the Page use case sits beside it and was not disabled after ticking Instagram.
+- **Verified, numbers.** `npm run typecheck` and `npm run build` clean; `npm test` **735 of 735** (the Meta test now holds eight ids and eleven files; the add-platform hint counts 8 steps). `qa/guide-modal.cjs` **16 of 16** (the Instagram checks now expect eight steps, eleven pictures, fourteen picture markers). `qa/platforms-flow.cjs` 131 of 131. A screenshot of the modal was looked at.
+- **Not verified.** Whether the Instagram and Page use cases can be ticked together; the «Business», «Requirements» and «Overview» screens (never photographed, described from the tab names); the steps after the dashboard (configuration, return address, roles, keys), still unchanged and without pictures.
+- **Not done, said plainly.** Not committed, not pushed.
+
+### 2026-11-03: the Instagram guide, the configuration and the return address
+
+- **Owner direction.** The owner reached the use case's page and sent three more screenshots (the page, the confirmation window, the created configuration with the return address field).
+- **Built (`MVP_draft.md` section 67.7).** Five more pictures (16 in all): the use case's menu, the configuration table, the confirmation window, the configuration (its ID blurred) and the return address field. `config` now lists five actions with five pictures, `redirect` three actions with a picture. The guide still has 8 steps and no id changed.
+- **What the screens showed that the text did not say.** A banner says the older «API setup with Instagram login» is not available for newer apps; the configuration is made from Meta's template with a system-user token that never expires and the permissions ads_management, ads_read, instagram_basic, instagram_content_publish, instagram_manage_comments and instagram_manage_messages; the Configuration ID is shown with a copy button in the configuration's row. This is the first sight of the Unified Login screens, which the notes of 2026-11-01 called untested.
+- **Verified, numbers.** `npm run typecheck` and `npm run build` clean; `npm test` **735 of 735** (the Meta test holds sixteen files and rejects the configuration ID in any word); `qa/guide-modal.cjs` **16 of 16** (eight steps, sixteen pictures, twenty markers); `qa/platforms-flow.cjs` 131 of 131.
+- **Not verified.** The steps after the return address (roles, the App ID and App Secret) are still the old text without pictures; whether the connection through the site works with this configuration has not been tried (nothing was entered in the site).
+- **Not done, said plainly.** Not committed, not pushed.
+
+### 2026-11-03: the Instagram guide, what to leave alone
+
+- **Owner direction.** The owner saved the return address and asked where to go next, sending three more screenshots (the sections under the configuration, and the saved address).
+- **Built (`MVP_draft.md` section 67.7).** Three more pictures (19 in all). A new `implied` step `skip` («اترك الأقسام التي تحت الإعداد») says to leave «Generate access tokens», «Configure webhooks» and «Complete App Review» alone, with red rings; `redirect` gains the picture of the saved address. The guide has 9 steps; no id changed.
+- **Reasoning, said plainly.** The step's advice follows Meta's own page for review («you can skip this step if you are a direct developer who only builds for your own Instagram businesses») and the site's design (the token comes from the sign-in; the site has no webhook address). That webhooks can be left empty without Meta blocking the sign-in is not yet proven: no connection has been tried.
+- **Verified, numbers.** `npm run typecheck` and `npm run build` clean; `npm test` **735 of 735**; `qa/guide-modal.cjs` **16 of 16** (nine steps, nineteen pictures, three red-ring legends); `qa/platforms-flow.cjs` 131 of 131.
+- **Not verified.** The roles and keys steps remain the old text without pictures; no connection through the site has been tried.
+- **Not done, said plainly.** Not committed, not pushed.
+
+### 2026-11-03: the Instagram guide, finished
+
+- **Owner direction.** The owner finished the walk (the Basic page, the configuration's ID) and asked for the last pictures, then for the whole to be checked, committed, pushed and deployed, so that their manager can follow the steps. Replies to the owner are in English from this point, at their request.
+- **Built (`MVP_draft.md` section 67.7).** Three more pictures (22 in all) and the keys step with five actions; the keys card of the sheet now draws the step's pictures (`KeysPanel` renders `GuideShots`). The old test line that asked the Instagram guide to say «ولا ترسلهما إلى أحد» now accepts the three forms of that sentence.
+- **Verified, numbers.** `npm run typecheck` clean; `npm test` **735 of 735**; `qa/guide-modal.cjs` **16 of 16** (nine steps, twenty-two pictures, twenty-four markers); `qa/platforms-flow.cjs` **132 of 132** (one new: the keys step of Instagram opened from the connected platform's summary draws five actions and three loaded pictures beside the three fields).
+- **Not verified.** A real connection through the site with this app: the owner has not entered the keys in the site. The steps for «Business», «Requirements» and «Overview» were never photographed.

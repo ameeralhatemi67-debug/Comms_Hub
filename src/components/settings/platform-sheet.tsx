@@ -355,6 +355,7 @@ function KeysPanel({ provider, step, n, done, app, fields, problem, canSecrets, 
       }
     >
       {step.todo && step.todo.length > 0 && <GuideTodo items={step.todo} shots={step.shots} />}
+      {step.shots && step.shots.length > 0 && <GuideShots shots={step.shots} />}
       {problem && !tail && <p className="pf-note bad">{expiry.state === 'expired' ? expiryLineAr(expiry) : 'رفضت المنصة المعرّف أو السر المحفوظ. أدخلهما من جديد.'}</p>}
       {have && !problem && (
         <p className="pf-note ok">

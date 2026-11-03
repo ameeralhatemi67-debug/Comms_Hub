@@ -46,7 +46,8 @@ From the owner's note after the YouTube steps were called right (`MVP_draft.md` 
 - **Done.** The names in the «Clients» picture are blurred. The setup sheet has a strip of one segment per step with «أُنجز … وبقي …», one card per step with its button kept in view, a copy button on every value to type, pictures numbered and their rings explained, and the steps still to do dimmed.
 - **Evidence.** `npm test` 723 of 723, typecheck clean. `qa/platforms-flow.cjs` 131 of 131 (was 121), `qa/guide-modal.cjs` 10 of 10. Build clean.
 - **Not verified.** Signed in on the real site, and on a real phone.
-- **Next.** Rewrite the next platform's steps (the Meta app for Instagram, then Facebook, which shares it) one action to a step with pictures, from the owner's screenshots.
+- **Instagram guide, steps 1 to 4 and the start of 5.** Nine steps and twenty-two pictures from the owner's screenshots, from the portfolio to the three keys (`MVP_draft.md` section 67.7). `npm test` 735 of 735, `qa/guide-modal.cjs` 16 of 16.
+- **Next.** Try the Instagram connection through the site with the real keys (nobody has yet), then rewrite Facebook's steps, which share the same Meta app. The owner has finished the walk through Meta's pages.
 
 ## The YouTube setup guide rewritten, live 2026-11-02
 

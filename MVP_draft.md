@@ -3223,6 +3223,32 @@ gets the copy buttons and the picture notes only.
 - **Also.** The names of the clients in the picture of the «Clients» page are blurred (they were examples; now unreadable).
 - **Unchanged.** Saved progress, the ids, what is `implied`, every rule of the database. Nothing but how a step is drawn.
 
+## 67.7 The Instagram guide, first pictures, 2026-11-03
+
+The owner followed the Instagram steps of «المنصات» on a real Meta account and sent six screenshots of the first part (the business portfolio's pages).
+The pictures are in `public/guides/meta/`, made by `node scripts/guide-shots.mjs <folder> meta` (the originals are not kept). The guide was rewritten in four sets the same day, from the owner's walk through a real Meta app; the final form is below.
+
+- **Two steps instead of one.** «افتح حسابات إنستغرام في الحافظة» (id `accounts`, kept) and «أضف حساب إنستغرام إلى الحافظة» (`ig_add`, new and `implied`),
+  each with a numbered list of actions. The guide has 7 steps; the ids of the others are unchanged.
+- **What the steps now say, from what the pages showed.** The portfolio's home opens first and the button «Go to Business settings» goes on; the menu is
+  «Accounts» then «Instagram accounts»; «Add» warns that only professional accounts can be added and that a personal one is switched to professional;
+  Instagram's own window asks «Which best describes you?» (Creator or Business); the last window offers a switch to manage the account's users, which the
+  steps say to leave off (red ring).
+- **Pictures.** Six: the home page, the menu, the top bar of the accounts page, the warning window, Instagram's question and the closing window. Cropped to
+  the part that matters; the portfolio's name and the account's handle and picture are blurred (pixelated, then blurred); Instagram's address bar and
+  bottom bar are cut out. They use the same rings, order and legend as 67.6.
+- **The app, from the owner's second set (same day).** «أنشئ التطبيق» (`app`) now lists its actions with two pictures (the apps page, the name and
+  contact email, the email blurred), and a new `implied` step «اختر حالة الاستخدام» (`usecase`) says that Instagram is not in «Featured» but under
+  «Content management», that only «Manage messaging & content on Instagram» is ticked, and what follows (Business, Requirements, Overview). The step
+  `config` starts from the dashboard picture. The guide has 8 steps and 11 pictures. «Business», «Requirements» and «Overview» were not photographed, and the
+  steps after the dashboard (the configuration, the return address, roles, keys) are still the old text.
+- **The configuration and the return address (third set).** `config` lists five actions with five pictures (dashboard, the use case's menu, the table, the confirmation window, the created configuration with its ID blurred); `redirect` three actions with a picture of the field. 16 pictures in all.
+- **What to leave alone (fourth set).** A new `implied` step `skip` says to leave the three sections under the configuration (access tokens, webhooks, app review) alone, with red rings; `redirect` gains the picture of the saved address. 9 steps and 19 pictures.
+- **The keys (fifth set, the last).** `keys` lists five actions with three pictures (the app's menu, the Basic page with the App ID and the hidden secret, the configuration's ID with its copy button; the IDs are blurred), drawn inside the keys card of the sheet. The guide is complete: 9 steps and 22 pictures, from the portfolio's Instagram accounts to pasting the three values. The owner confirmed that nothing after the return address is needed for the connection.
+- **Seen on the owner's screen.** Ticking the Instagram use case left «Manage everything on your Page» unticked and not visibly disabled; whether both can be
+  ticked in one app is still untested.
+- **Unchanged.** Saved progress and every rule of the database.
+
 ---
 
 # 68. «ورقة الكتابة» and the writing documents, 2026-11-02
