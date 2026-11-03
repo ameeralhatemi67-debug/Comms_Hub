@@ -257,6 +257,20 @@ deletes only what a test uploaded. Publishing works stays a simulation.
 - The limits exist once in `src/lib/platforms/test-rules.ts` and once in SQL, held equal by `tests/youtube-test.test.mjs`. The rules
   are held by `supabase/tests/platform_tests_rules.sql`, and `qa/youtube-test-flow.cjs` clicks through the panel on a fixture.
 
+A test on Instagram is real too, by the same day's directive (`MVP_draft.md` section 72, `Instagram_Test_Plan.md`): a Story (the
+default, gone after 24 hours), a picture post or a Reel, from `src/components/work/instagram-test.tsx`. Instagram has no private
+post, and both send buttons ask for a long press.
+- **Meta fetches the file.** The site serves it at `/api/platforms/test/file/<token>`: 32 random bytes, only the sha256 kept
+  (`link_hash`), at most 30 minutes, ended as soon as Meta has it. `platform_test_fetch` is the one function that runs with the
+  server key and no session. Never log the token, and never serve anything there but that test's one file.
+- **A picture is JPEG, redrawn in the browser,** library pictures included. A file from the device goes to the Drive folder
+  «تجارب النشر» under a name the server chose, is accepted only if Drive shows that name, folder, uploader and size, and goes to
+  Drive's trash after publishing. A library video is read where it is.
+- **Publishing waits for Meta.** The open page asks (`step: 'advance'`) until the container is ready. Nothing runs in the background.
+- **Delete** needs `instagram_manage_contents` in the Meta configuration; without it the panel says to delete in the app.
+- The server half is `src/lib/platforms/instagram.ts` and `test-instagram.ts`. The rules are held by
+  `supabase/tests/platform_tests_instagram_rules.sql`, `tests/instagram-test.test.mjs` and `qa/instagram-test-flow.cjs`.
+
 Integrations, storage providers and backups are real, by owner directive of 2026-10-14
 (`Settings_Integrations_Plan.md`, decisions E-1 to E-7, recorded in `progress.md`). Every
 connection (storage provider, platform app, messaging) is a row of one integrations core

@@ -3454,3 +3454,60 @@ copied and the channel's posts page opens, where the person posts it and attache
 - A file from this device is sent through the site in 3 MiB pieces (under the host's 4.5 MB body limit). A library file is named by
   its id and read by the server from wherever it is kept, in 16 MiB pieces, under the person's own folder permissions.
 - A test is at most 1 GB. A channel takes ten tests a day; YouTube allows the project 100 uploads a day.
+
+# 72. «تجربة النشر» on an Instagram account, 2026-11-03
+
+By owner directive of 2026-11-03 (`Instagram_Test_Plan.md`, with its six recommended answers). The sheet of a really-connected
+Instagram account offers the same test as YouTube's (section 71), shaped by what Instagram allows. It is not a work, and
+publishing works stays a simulation.
+
+## 72.1 What is different from YouTube
+
+- **No private post.** Instagram has none, so there is no «خاص / عام». The quiet choice is a Story, gone after 24 hours, and it
+  is the default. The panel says plainly that nothing on Instagram is private.
+- **Meta fetches the file.** The site serves it for at most 30 minutes at an address made of 32 random bytes (only its hash is
+  kept), which ends as soon as Meta has the file.
+- **Publishing waits.** Meta prepares the file before it can be published. The page asks every five seconds, for up to ten
+  minutes, and says to keep it open.
+- **Delete needs `instagram_manage_contents`,** which the Meta configuration may or may not hold. Without it the list says
+  «احذفه من التطبيق» and asks for one reconnect.
+
+## 72.2 Where it is, and who sees it
+
+- In the sheet's «الربط» column, as YouTube's: «الحساب على إنستغرام» (by its username), then «تجربة النشر», folded until
+  «بدء تجربة».
+- The same people: those who manage accounts and the account's own publishers (`platform_test_may`). An account that is
+  stopped or needs reconnecting says so and offers no test.
+
+## 72.3 The form
+
+- **النوع:** «قصة» (the default), «منشور صورة» or «ريلز», with one line on what each is and its limits.
+- **الملف:** «من المكتبة» or «من هذا الجهاز». A Story takes a picture or a video, a post a picture, a Reel a video.
+  - A picture, from the device or the library, is redrawn here to JPEG, at most 1440 pixels wide, on white. This also drops its
+    metadata. It then goes to the site's Drive folder «تجارب النشر», never into the library, and to Drive's trash once Meta has it.
+  - A library video is read by the server where it is; the page never sends it.
+  - The chosen file shows its name, where it came from, JPEG, length and size.
+- **الشرح,** for a post or a Reel, with counters for 2,200 characters, 30 hashtags and 20 mentions. A Story takes none.
+- **النص البديل,** for a picture post, optional, up to 1,000 characters.
+- **«يظهر في شبكة الحساب أيضاً»,** for a Reel, off by default. Its note says Instagram may still show it in the Reels tab alone.
+- **Checked before sending:** a picture post's shape (4:5 to 1.91:1), a Story video's length (3 to 60 seconds), a Reel's (3
+  seconds to 15 minutes), and the sizes (picture 8 MB, video 100 MB for a test).
+- **The send button** always asks for a long press, because every test is seen by others:
+  - «نشر القصة التجريبية»: «يراها كل من يتابع الحساب 24 ساعة، ثم تختفي.»
+  - «نشر التجربة للعموم»: «يراه كل من يزور الحساب فور نشره ويبقى حتى يُحذف. لا يوجد على إنستغرام نشر خاص.»
+- **While it works:** «يُرفع الملف N٪», then «إنستغرام يجلب الملف ويجهّزه» with the time elapsed, and «إلغاء».
+- **The result:** «نُشرت القصة على الحساب، وتختفي بعد 24 ساعة.» or «نُشرت التجربة على الحساب.», with «فتح على إنستغرام» when Meta
+  gives a link. Under it, how many of Meta's daily posts through applications the account has used, as Meta counts them.
+
+## 72.4 «آخر التجارب»
+
+- The last five tests: title (the caption's first line, else «تجربة قصة» and so on), state, time and who. A Story says when it
+  disappears, or that it has.
+- A published test has «فتح» and «حذف». Delete asks for a long press: «يُحذف المنشور من الحساب على إنستغرام نهائياً، ولا يُسترجع.»
+- Without the permission, «احذفه من التطبيق» replaces «حذف», with one line naming the permission and «إعادة الربط».
+
+## 72.5 Limits
+
+Ten tests per account a day, as YouTube's, beside Meta's own quota, read live. Meta's refusals are worded by its publishing error
+codes: the file could not be fetched, the file or its shape or caption was refused, the daily quota, a restricted account, and
+suspected spam.

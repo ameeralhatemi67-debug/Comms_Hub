@@ -1,0 +1,225 @@
+{
+  "script": "qa/instagram-test-flow.cjs",
+  "run": "2026-11-03T08:46:16.532Z",
+  "checks": [
+    {
+      "name": "a link to the account on Instagram, by its username, in a new tab",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says plainly that Instagram has no private post, and what disappears",
+      "pass": true,
+      "detail": "ينشر على الحساب شيئاً حقيقياً ليتأكد أن النشر يصل. لا يمر بالمراجعة ولا يُعدّ عملاً. لا يوجد على إنستغرام نشر خاص: القصة تختفي بعد 24 ساعة، والمنشور والريلز يبقيان حتى يُحذفا."
+    },
+    {
+      "name": "folded until asked for",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a Story by default, the quiet choice",
+      "pass": true,
+      "detail": "[\"قصة\"]"
+    },
+    {
+      "name": "a Story says it lasts 24 hours and takes no caption",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing is sent without a file",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the file input itself is never shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a picture is redrawn to JPEG before it goes",
+      "pass": true,
+      "detail": "لقطة.png\nمن هذا الجهاز · JPEG · 0.0 ميغابايت"
+    },
+    {
+      "name": "a Story asks for its own long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the start names a picture Story as JPEG, its size, and no caption",
+      "pass": true,
+      "detail": "{\"account\":\"a-ig\",\"kind\":\"story_image\",\"source\":\"device\",\"size\":26807,\"mime\":\"image/jpeg\",\"caption\":\"\",\"alt\":\"\"}"
+    },
+    {
+      "name": "the file went to the Drive upload the site opened, whole",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "then the page registered Drive's id for it",
+      "pass": true,
+      "detail": "{\"step\":\"uploaded\",\"ref\":\"drivefileFIXTURE1x\",\"caption\":\"\",\"alt\":\"\"}"
+    },
+    {
+      "name": "and asked how Meta was getting on until it was published",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the result says the Story is up and disappears after 24 hours",
+      "pass": true,
+      "detail": "نُشرت القصة على الحساب، وتختفي بعد 24 ساعة."
+    },
+    {
+      "name": "the day's quota is shown as Meta counts it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the list shows the Story and when it disappears",
+      "pass": true,
+      "detail": "تجربة قصة\nقصة · تختفي 04‏/11‏/2026، 11:46 ص · 03‏/11‏/2026، 11:46 ص · مدير الفحص\nحذف"
+    },
+    {
+      "name": "a post asks for a caption with counters, and alt text",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a picture too tall for a post is caught before sending",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the counters follow the caption",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a post says it is public and asks for its own long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the start names a picture post with its caption and alt text",
+      "pass": true,
+      "detail": "{\"account\":\"a-ig\",\"kind\":\"image\",\"source\":\"device\",\"size\":57792,\"mime\":\"image/jpeg\",\"caption\":\"شرح التجربة #تجربة @صديق\",\"alt\":\"صورة لقائمة الصلاحيات\"}"
+    },
+    {
+      "name": "and the registration carries them too",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the result links the post",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "for a Reel the library offers videos only",
+      "pass": true,
+      "detail": "[\"مقطع الحملة.mp4\\n· الإصدار 3\"]"
+    },
+    {
+      "name": "the library video is named with where it is",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a library Reel is named by its id with the feed choice, never uploaded by the page",
+      "pass": true,
+      "detail": "{\"account\":\"a-ig\",\"kind\":\"reel\",\"source\":\"library\",\"asset\":\"f-video\",\"caption\":\"شرح التجربة #تجربة @صديق\",\"alt\":\"\",\"share_to_feed\":true}"
+    },
+    {
+      "name": "for a Story the library offers pictures and videos",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a library picture is redrawn to JPEG here too",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a published test can be deleted, with a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "deleted through the site, and the list says so",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing was loaded from outside the fixture",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "without the permission there is no delete, only the app",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and it says which permission, with a reconnect",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reconnect goes through Meta's sign-in",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a failed fetch is said in words",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the wait says what is happening and that the page must stay open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a cancel closes the test",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the account's own publisher sees the panel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a publisher who is not on the account does not",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an account that needs reconnecting is not tested",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing sideways with the form open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: the result is readable on its own ground",
+      "pass": true,
+      "detail": "rgb(16, 48, 31) / rgb(111, 209, 155)"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 43,
+  "passed": 43,
+  "failed": 0
+}

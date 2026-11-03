@@ -1,6 +1,6 @@
 {
   "script": "qa/youtube-test-flow.cjs",
-  "run": "2026-11-03T06:36:14.812Z",
+  "run": "2026-11-03T08:47:31.653Z",
   "checks": [
     {
       "name": "a link to the channel on YouTube, by its handle, in a new tab",
@@ -110,7 +110,7 @@
     {
       "name": "the list shows the test, published and private, by whom",
       "pass": true,
-      "detail": "تجربة من الجهاز\nمنشور · خاص · 03‏/11‏/2026، 9:36 ص · مدير الفحص\nمشاهدة\nحذف"
+      "detail": "تجربة من الجهاز\nمنشور · خاص · 03‏/11‏/2026، 11:47 ص · مدير الفحص\nمشاهدة\nحذف"
     },
     {
       "name": "its delete asks for a hold, with the reason",
@@ -190,7 +190,7 @@
     {
       "name": "a cancel stops the pieces and closes the test",
       "pass": true,
-      "detail": "[\"POST /api/platforms/check\",\"POST /api/platforms/test\",\"PUT /api/platforms/test/00000000-0000-4000-8000-000000000001?from=0\",\"PUT /api/platforms/test/00000000-0000-4000-8000-000000000001?from=262144\",\"DELETE /api/platforms/test/00000000-0000-4000-8000-000000000001\"]"
+      "detail": "[\"POST /api/platforms/check\",\"POST /api/platforms/test\",\"PUT /api/platforms/test/00000000-0000-4000-8000-000000000001?from=0\",\"DELETE /api/platforms/test/00000000-0000-4000-8000-000000000001\"]"
     },
     {
       "name": "without the permission there is no delete, only YouTube Studio",

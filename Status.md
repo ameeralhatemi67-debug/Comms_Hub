@@ -26,6 +26,18 @@ related:
 
 # Communication Department Hub — Current Status
 
+## «تجربة النشر» on Instagram, built 2026-11-03
+
+From the owner's request after the Instagram guide went live (`MVP_draft.md` section 72, `Instagram_Test_Plan.md`, `progress.md`).
+
+- **Done.** A Story (the default), a picture post or a Reel, from the library or the device, with progress, cancel, the result
+  and its link, Meta's daily quota, the last five tests and delete. Meta fetches the file from a short-lived address on the site.
+- **Evidence.** `npm test` 741 of 741, typecheck and build clean, rules 62 of 62 (and YouTube's 75 of 75) on a private container,
+  `qa/instagram-test-flow.cjs` 43 of 43, `qa/youtube-test-flow.cjs` 49 of 49, `qa/platforms-flow.cjs` 132 of 132.
+- **Not verified.** Anything against Meta: no Instagram account is connected yet.
+- **Next.** The owner finishes the Meta app, connects the department's Instagram account (adding `instagram_manage_contents` to
+  the configuration to allow deleting), then publishes one test Story.
+
 ## The Instagram guide and the look of a setup step, live 2026-11-03 (6d75aab)
 
 From the owner's walk through a real Meta app and their note that the YouTube steps were right and the look should follow (`MVP_draft.md` sections 67.6 and 67.7, `progress.md`).

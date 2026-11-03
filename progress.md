@@ -2522,3 +2522,45 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **On the tree that was pushed** (a clean worktree on `origin/main`, because local `main` holds the «إنشاء» commits whose migrations are not applied): `npm run typecheck` clean; `npm test` **730 of 730** (the local count of 735 includes tests of those other commits); `npm run build` clean; `qa/guide-modal.cjs` 16 of 16, `qa/platforms-flow.cjs` 132 of 132, `qa/youtube-test-flow.cjs` 49 of 49 (unchanged by this work). No migration, route, secret or database function was touched.
 - **Deployed.** Pushed as `6d75aab` to `main`; Vercel deployment `dpl_GutEjueopLWtBXBs9ptj8RbGdbuB` READY about a minute later. No runtime errors in the first hour. Six of the new pictures were fetched from production and are byte-identical (sha256) to the files; the home page answers 200. Nothing signed in was checked on the real site.
 - **Remark.** The test that keeps private strings out of the guides names three of them in its pattern (an Instagram handle, an Instagram app number in a URL, a configuration ID), so those three now exist in the repository. They are identifiers of the owner's own test account.
+
+### 2026-11-03: «تجربة النشر» on Instagram, built
+
+- **Owner direction.** "Check the new commits to connecting Meta for Instagram; if all is good, implement the Instagram test,
+  commit, push and deploy." The six recommended answers of `Instagram_Test_Plan.md` were taken as given.
+- **The review first.** The new commits (`6d75aab`, `3143604` on GitHub; `e8acfd1` on local `main`) are the Instagram setup
+  guide (nine steps, 22 pictures) and the setup-step look. They change no connection code. The guide's configuration comes from
+  Meta's Unified-login template, which lists `instagram_content_publish`, and the keys it collects (app id, secret, configuration
+  id) are what the existing connection reads. GitHub's `main` was green before building on it: typecheck clean, `npm test`
+  **730 of 730**. One gap for this work: the template's picture does not show `instagram_manage_contents`, so a note was added
+  to the guide (not a step, so no saved progress moves) and the panel falls back when the permission is missing.
+- **Built (`MVP_draft.md` section 72).**
+  - `supabase/migrations/20261103180000_platform_tests_instagram.sql`: `platform_tests` gains `kind`, `container_id`,
+    `post_url`, `share_to_feed`, `temp_ref`, `link_hash` and `link_until`; `privacy` is YouTube's alone; type and size are checked
+    per kind. `platform_test_may` and `platform_test_start` accept Instagram. New server-key steps `platform_test_temp`, `_link`,
+    `_container` and `platform_test_fetch`, the one function that runs with the server key and no session (Meta has none).
+    `platform_test_done` takes the post's link and keeps YouTube's five-part call.
+  - `src/lib/platforms/instagram.ts` (container, status, publish, the post's link and owner, delete, quota; Meta's error
+    subcodes as short codes; the token in a header only) and `test-instagram.ts` (start, the Drive check of a device file,
+    the temporary address, the steps, delete, and serving the file). Routes: `POST /api/platforms/test` branches by platform,
+    `POST /api/platforms/test/[id]` takes `uploaded` and `advance`, and `GET`/`HEAD /api/platforms/test/file/[token]` is new.
+  - `src/components/work/instagram-test.tsx`, with the helpers both panels share in `test-kit.ts`. Three long-press reasons.
+    The words of the simulation line, help card Z01 (and `Help_Content_Matrix.md`), the page help, the Meta guides' notes, and
+    `public/privacy.html` in both languages.
+- **Where it differs from the plan.** `advance` is a POST with a step, because a GET must not change anything. The page asks
+  every five seconds for up to ten minutes; Meta suggests once a minute, so this is quicker for pictures and still far under any
+  rate limit for a test. The start also refuses when Meta's quota is used up.
+- **Verified, numbers (on the tree that is pushed).**
+  - `npm run typecheck` clean; `npm test` **741 of 741** (eleven new in `tests/instagram-test.test.mjs`); `npm run build` clean,
+    with `/api/platforms/test/file/[token]` among the routes.
+  - On a private Docker container with every migration replayed, nothing touching comms-hub:
+    `platform_tests_instagram_rules.sql` **62 of 62**, and YouTube's `platform_tests_rules.sql` still **75 of 75**.
+  - `qa/instagram-test-flow.cjs` **43 of 43**: a picture Story redrawn to JPEG, uploaded to Drive, registered, waited on and
+    published; a picture post with counters and alt text, and a too-tall picture caught first; a library Reel never uploaded by
+    the page; a library picture redrawn; delete; no delete without the permission; a failed fetch; a cancel while Meta prepares;
+    who sees it; phone and evening. Two things were fixed from its screenshots, not its checks: the quota line sat on the form's
+    border, and a post read «منشور · منشور صورة».
+  - `qa/youtube-test-flow.cjs` **49 of 49**; `qa/platforms-flow.cjs` **132 of 132** after its database stand-in learned
+    `eq` and `limit` (its Instagram accounts are connected for real, so their sheets now draw the panel).
+- **Not verified.** Anything against Meta itself: no Instagram account is connected on comms-hub yet, and the Meta app is not
+  entered. In particular: Meta fetching the file from the site within the function's 60 seconds, whether the Unified-login token
+  may delete, and Meta's real daily quota. The first real Story is the proof.

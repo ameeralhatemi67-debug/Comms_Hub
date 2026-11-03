@@ -1,6 +1,6 @@
 {
   "script": "qa/platforms-flow.cjs",
-  "run": "2026-11-03T07:56:04.456Z",
+  "run": "2026-11-03T08:49:11.467Z",
   "checks": [
     {
       "name": "every platform has one state, worked out from what is stored",
@@ -115,7 +115,7 @@
     {
       "name": "an address to copy is filled in from the site, whole",
       "pass": true,
-      "detail": "http://127.0.0.1:63906/api/platforms/callback/tiktok"
+      "detail": "http://127.0.0.1:57977/api/platforms/callback/tiktok"
     },
     {
       "name": "Escape closes the sheet",
@@ -200,7 +200,7 @@
     {
       "name": "what needs attention comes first, with why and what depends on it",
       "pass": true,
-      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-06 10:56\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
+      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-06 11:49\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
     },
     {
       "name": "accounts are grouped by platform, each one line",

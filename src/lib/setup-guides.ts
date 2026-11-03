@@ -66,6 +66,8 @@ const PLATFORM_FACTS = 'المعلومات هنا من وثائق المنصة �
 const SIMULATION = 'النشر نفسه ما زال محاكاة في كل الحالات. هذه الخطوات تجهّز الربط والفحص فقط.';
 /** YouTube alone has a real test upload (MVP_draft.md section 71). */
 const SIMULATION_YT = 'نشر الأعمال ما زال محاكاة. وحدها «تجربة النشر» في بطاقة القناة من «حسابات المنصات» ترفع مقطعاً حقيقياً، ولها أن تحذفه.';
+/** Instagram's real test (MVP_draft.md section 72). */
+const SIMULATION_IG = 'نشر الأعمال ما زال محاكاة. وحدها «تجربة النشر» في بطاقة الحساب من «حسابات المنصات» تنشر قصة أو منشوراً حقيقياً، ولها أن تحذفه.';
 const META_APPS = { href: 'https://developers.facebook.com/apps/', label: 'Meta for Developers' };
 const META_PORTFOLIO = { href: 'https://business.facebook.com/settings', label: 'إعدادات حافظة الأعمال' };
 const TIKTOK_APPS = { href: 'https://developers.tiktok.com/apps/', label: 'TikTok for Developers' };
@@ -242,7 +244,8 @@ export const GUIDES: Record<string, Guide> = {
       'تذكر Meta عنوان Webhooks ضمن متطلبات هذا المسار، ولا يملك الموقع عنواناً لها بعد. إن منعك ذلك من المتابعة فأخبر مسؤول النظام.',
       'الصور من حساب Meta تجريبي: الأسماء والحسابات والبريد فيها محجوبة. قد يختلف شكل صفحات Meta قليلاً بحسب لغة حسابك وتحديثاتها، فاعتمد على أسماء الأزرار.',
       'أفاد مطوّرون في 2026-11-01 أن الخطأ 100/33 زال بإضافة business_management إلى الإعداد من «Facebook Login for Business» ثم «Configurations». ليس هذا من وثائق Meta.',
-      SIMULATION,
+      'ليحذف الموقع منشور «تجربة النشر» من إنستغرام يحتاج الإعداد صلاحية instagram_manage_contents. إن لم تكن في قائمته فأضفها ثم أعد ربط الحساب. بدونها ينشر الموقع ولا يحذف.',
+      SIMULATION_IG,
       PLATFORM_FACTS,
     ],
     link: META_APPS,
@@ -297,7 +300,7 @@ export const GUIDES: Record<string, Guide> = {
     notes: [
       'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فالتطبيق لم يُجهَّز بعد: يجهّزه المدير من «الإعدادات» ثم «المنصات».',
       'إن قال Meta إن التطبيق في وضع التطوير فاطلب من المدير أن يعطيك دوراً على التطبيق.',
-      SIMULATION,
+      SIMULATION_IG,
     ],
   },
   connect_tiktok: {

@@ -1,10 +1,17 @@
-// «تجربة النشر» on a YouTube account's sheet (MVP_draft.md section 71): the limits, the links and the words the page, the
-// routes and the tests share. Client-safe: no token, no fetch. The database holds the same limits
-// (supabase/migrations/20261103120000_platform_tests.sql), and tests/youtube-test.test.mjs keeps the two equal.
+// «تجربة النشر» on a YouTube channel's or an Instagram account's sheet (MVP_draft.md sections 71 and 72): the limits, the
+// links and the words the pages, the routes and the tests share. Client-safe: no token, no fetch. The database holds the
+// same limits (supabase/migrations/*platform_tests*), and tests/youtube-test.test.mjs and tests/instagram-test.test.mjs keep
+// them equal.
 //
 // From Google's documentation as read on 2026-11-03: a title is at most 100 characters and a description 5000 bytes,
 // neither may hold < or >; an upload is sent in pieces that are multiples of 256 KiB; deleting a video needs the
 // youtube.force-ssl scope (or youtube), which youtube.upload does not give. The API cannot create a community post.
+//
+// From Meta's documentation as read on 2026-11-03: pictures are JPEG only, at most 8 MB, 4:5 to 1.91:1 for a post; a Story
+// video is MP4 or MOV, 3 to 60 seconds, at most 100 MB; a Reel 3 seconds to 15 minutes, at most 300 MB (100 MB for a test
+// here); a caption has at most 2200 characters, 30 hashtags and 20 mentions, and a Story none; alt text 1000 characters,
+// picture posts only. Deleting needs instagram_manage_contents. Instagram has no private post.
+import { copyStats } from './limits.ts';
 
 /** The largest file a test sends. A test needs a short clip, and a file from this device goes through the site in pieces. */
 export const TEST_MAX_BYTES = 1024 * 1024 * 1024;
@@ -24,8 +31,11 @@ export type TestPrivacy = 'private' | 'public';
 export type TestState = 'uploading' | 'published' | 'failed' | 'deleted';
 export type TestRow = {
   id: string;
-  privacy: TestPrivacy;
+  privacy: TestPrivacy | null;
   title: string;
+  kind?: TestKind;
+  post_url?: string | null;
+  done_at?: string | null;
   state: TestState;
   video_id: string | null;
   shown_privacy: 'private' | 'public' | 'unlisted' | null;
@@ -74,12 +84,12 @@ export const PRIVACY_AR: Record<string, string> = { private: 'خاص', public: '
 
 /** The codes of the test routes, in words. A connection code falls through to the connection's words. */
 export const TEST_ERROR_AR: Record<string, string> = {
-  FORBIDDEN: 'تجربة النشر لمن يدير الحسابات ولمن ينشر على هذه القناة.',
+  FORBIDDEN: 'تجربة النشر لمن يدير الحسابات ولمن ينشر على هذا الحساب.',
   ACCOUNT_OFF: 'الحساب موقوف. فعّله أولاً.',
-  NOT_CONNECTED: 'القناة غير مربوطة الآن. أعد ربطها ثم جرّب.',
+  NOT_CONNECTED: 'الحساب غير مربوط الآن. أعد ربطه ثم جرّب.',
   TEST_INVALID: 'بيانات التجربة ناقصة أو غير صالحة.',
-  TEST_LIMIT: `بلغت القناة ${TESTS_PER_DAY} تجارب في يوم. جرّب غداً.`,
-  SCOPE_MISSING: 'لم يأذن Google للموقع بهذا بعد. أعد ربط القناة مرة واحدة ووافق على كل الصلاحيات.',
+  TEST_LIMIT: `بلغ الحساب ${TESTS_PER_DAY} تجارب في يوم. جرّب غداً.`,
+  SCOPE_MISSING: 'لم تأذن المنصة للموقع بهذا بعد. أعد ربط الحساب مرة واحدة ووافق على كل الصلاحيات.',
   UPLOAD_LIMIT: 'بلغ تطبيق Google حد الرفع اليومي عند يوتيوب. جرّب بعد يوم.',
   UPLOAD_EXPIRED: 'انتهت مهلة هذا الرفع عند يوتيوب. ابدأ التجربة من جديد.',
   VIDEO_REFUSED: 'رفض يوتيوب المقطع أو بياناته.',
@@ -88,5 +98,88 @@ export const TEST_ERROR_AR: Record<string, string> = {
   ABANDONED: 'تُرك الرفع قبل أن يكتمل.',
   CANCELLED: 'أُلغي الرفع.',
   FILE_UNREADABLE: 'تعذّرت قراءة الملف من المكتبة.',
-  FORBIDDEN_BY_PLATFORM: 'رفض يوتيوب الطلب.',
+  FORBIDDEN_BY_PLATFORM: 'رفضت المنصة الطلب.',
+  // Instagram
+  MEDIA_FETCH_FAILED: 'لم يستطع إنستغرام جلب الملف من الموقع. أعد المحاولة بعد قليل.',
+  MEDIA_REFUSED: 'رفض إنستغرام الملف: تحقق من نوعه ومقاسه ومدته.',
+  RATIO_REFUSED: 'نسبة الصورة خارج ما يقبله إنستغرام للمنشور (من 4:5 إلى 1.91:1).',
+  CAPTION_REFUSED: 'رفض إنستغرام الشرح: 2200 حرف و30 وسماً و20 إشارة على الأكثر.',
+  QUOTA_REACHED: 'بلغ الحساب حد إنستغرام اليومي للنشر عبر التطبيقات. جرّب غداً.',
+  ACCOUNT_RESTRICTED: 'إنستغرام يقيّد هذا الحساب الآن. افتح تطبيق إنستغرام وأكمل ما يطلبه.',
+  SPAM_SUSPECTED: 'أوقف إنستغرام النشر لاشتباهه بإزعاج. انتظر قليلاً قبل تجربة أخرى.',
+  PROCESSING_FAILED: 'تعذّر على إنستغرام تجهيز الملف. جرّب ملفاً آخر.',
+  CONTAINER_EXPIRED: 'انتهت مهلة تجهيز المنشور عند إنستغرام. ابدأ التجربة من جديد.',
+  WAIT_TOO_LONG: 'أطال إنستغرام تجهيز الملف. ابدأ التجربة من جديد بملف أقصر.',
+  TEMP_UPLOAD_FAILED: 'تعذّر رفع الملف إلى المساحة المؤقتة في Google Drive.',
+  TEMP_MISMATCH: 'الملف المرفوع لا يطابق هذه التجربة.',
+  DRIVE_NOT_CONNECTED: 'لم يُربط Google Drive بعد، وفيه يُحفظ الملف مؤقتاً.',
 };
+
+// ---------------------------------------------------------------------------
+// Instagram (MVP_draft.md section 72)
+// ---------------------------------------------------------------------------
+export type TestKind = 'video' | 'story_image' | 'story_video' | 'image' | 'reel';
+/** What the person chooses; a Story becomes a picture or a video Story by its file. */
+export type IgChoice = 'story' | 'image' | 'reel';
+export const IG_PICTURE_MAX = 8 * 1024 * 1024;
+export const IG_VIDEO_MAX = 100 * 1024 * 1024;
+export const IG_CAPTION_MAX = 2200;
+export const IG_HASHTAGS_MAX = 30;
+export const IG_MENTIONS_MAX = 20;
+export const IG_ALT_MAX = 1000;
+/** Seconds a Story video and a Reel may last. */
+export const IG_SECONDS: Record<'story_video' | 'reel', [number, number]> = { story_video: [3, 60], reel: [3, 15 * 60] };
+/** The widest and the tallest a picture post may be (width over height). */
+export const IG_RATIO: [number, number] = [4 / 5, 1.91];
+/** A picture is redrawn no wider than this: Instagram scales anything wider down. */
+export const IG_PICTURE_WIDTH = 1440;
+export const IG_VIDEO_TYPES = ['video/mp4', 'video/quicktime'] as const;
+/** The permission that lets the site delete a post. Publishing needs instagram_content_publish. */
+export const IG_MANAGE_SCOPE = 'instagram_manage_contents';
+/** How long Meta has to fetch the file from the site's temporary address. */
+export const IG_LINK_MINUTES = 30;
+/** The page asks Meta again this often while the post is being prepared, and gives up after this long. */
+export const IG_POLL_MS = 5000;
+export const IG_WAIT_MS = 10 * 60 * 1000;
+
+export const IG_KIND_AR: Record<string, string> = { story_image: 'قصة', story_video: 'قصة', image: 'منشور صورة', reel: 'ريلز', video: 'فيديو' };
+export const kindOf = (choice: IgChoice, mime: string): TestKind | null =>
+  choice === 'image' ? (mime === 'image/jpeg' ? 'image' : null)
+  : choice === 'reel' ? ((IG_VIDEO_TYPES as readonly string[]).includes(mime) ? 'reel' : null)
+  : mime === 'image/jpeg' ? 'story_image' : (IG_VIDEO_TYPES as readonly string[]).includes(mime) ? 'story_video' : null;
+export const isPictureKind = (k: TestKind) => k === 'story_image' || k === 'image';
+
+/** What is wrong with an Instagram test before it is sent, in words, or null. The database checks the same and more. */
+export function igProblem(t: { kind: TestKind; size: number; mime: string; caption: string; alt: string; seconds?: number | null; ratio?: number | null }): string | null {
+  const picture = isPictureKind(t.kind);
+  if (picture ? t.mime !== 'image/jpeg' : !(IG_VIDEO_TYPES as readonly string[]).includes(t.mime)) return picture ? 'الصورة تُرسل JPEG.' : 'يقبل إنستغرام الفيديو MP4 أو MOV.';
+  if (!Number.isInteger(t.size) || t.size < 1) return 'الملف فارغ.';
+  if (t.size > (picture ? IG_PICTURE_MAX : IG_VIDEO_MAX)) return picture ? 'الصورة أكبر من 8 ميغابايت.' : 'التجربة تقبل مقطعاً حتى 100 ميغابايت.';
+  if (t.kind === 'image' && t.ratio != null && (t.ratio < IG_RATIO[0] - 0.005 || t.ratio > IG_RATIO[1] + 0.005))
+    return 'نسبة الصورة خارج ما يقبله إنستغرام للمنشور (من 4:5 إلى 1.91:1). اقصصها، أو انشرها قصة.';
+  if ((t.kind === 'story_video' || t.kind === 'reel') && t.seconds != null) {
+    const [min, max] = IG_SECONDS[t.kind];
+    if (t.seconds < min) return `المقطع أقصر من ${min} ثوانٍ.`;
+    if (t.seconds > max) return t.kind === 'reel' ? 'الريلز حتى 15 دقيقة.' : 'فيديو القصة حتى 60 ثانية.';
+  }
+  if (t.kind === 'story_image' || t.kind === 'story_video') return null;
+  const s = copyStats(t.caption);
+  if (s.chars > IG_CAPTION_MAX) return `الشرح أطول من ${IG_CAPTION_MAX} حرف.`;
+  if (s.hashtags > IG_HASHTAGS_MAX) return `أكثر من ${IG_HASHTAGS_MAX} وسماً.`;
+  if (s.mentions > IG_MENTIONS_MAX) return `أكثر من ${IG_MENTIONS_MAX} إشارة.`;
+  if (t.kind === 'image' && [...t.alt].length > IG_ALT_MAX) return `النص البديل أطول من ${IG_ALT_MAX} حرف.`;
+  return null;
+}
+
+/** The list's title for an Instagram test: the caption's first line, else the kind. Never holds < or >. */
+export function igTitle(kind: TestKind, caption: string): string {
+  const line = caption.split(/\r?\n/).find((l) => l.trim())?.trim().replace(/[<>]/g, '') ?? '';
+  const t = [...line].slice(0, TITLE_MAX).join('');
+  return t || `تجربة ${IG_KIND_AR[kind] ?? ''}`.trim();
+}
+
+const isIgName = (h: string | null | undefined): h is string => typeof h === 'string' && /^@?[A-Za-z0-9._]{1,30}$/.test(h);
+/** The account on Instagram, by its username. */
+export const igProfileUrl = (handle: string | null | undefined) => (isIgName(handle) ? `https://www.instagram.com/${encodeURIComponent(handle.replace(/^@/, ''))}/` : null);
+/** A Story is gone 24 hours after it was published. */
+export const storyEnds = (doneAt: string | null | undefined) => (doneAt ? new Date(Date.parse(doneAt) + 24 * 3600e3).toISOString() : null);
