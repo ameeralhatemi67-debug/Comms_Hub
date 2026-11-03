@@ -10,7 +10,7 @@ export type Platform = 'web' | 'desktop' | 'android' | 'ios';
 /**
  * What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3),
  * files, cache and clearData from 3 (D4), media from 4 (D5), windows from 5 (D6), gpu and profile from 6 (D9,
- * Desktop_Power_Ideas.md P-01 and P-33). The Android application
+ * Desktop_Power_Ideas.md P-01 and P-33), activity and copyQueue from 7 (D12, P-30 and P-08). The Android application
  * offers its own: appUpdate (A3), download and share (A4), push (A5), links and lock (A6), capture,
  * incoming and upload (A7), and in Google Play's copy playUpdate instead of appUpdate (A8).
  */
@@ -28,6 +28,8 @@ export type Feature =
   | 'windows'
   | 'gpu'
   | 'profile'
+  | 'activity'
+  | 'copyQueue'
   | 'appUpdate'
   | 'download'
   | 'share'
@@ -89,6 +91,14 @@ export type ProfileNumbers = {
 export type ProfileKey = { app: string; chrome: string; chip: { vendorId: number; deviceId: number; vendor: string; name: string; driver: string }; switch: GpuSwitch; power: 'ac' | 'battery' };
 export type ProfileEntry = { at: number; key: ProfileKey; numbers: ProfileNumbers };
 
+/** What a page tells the desktop application it is doing, so the laptop's background work waits (D12, P-30). */
+export type Activity = 'none' | 'playing' | 'scrubbing' | 'measuring';
+/** Why the light copies made in idle time wait (desktop/src/idle.ts HOLDS). */
+export type CopyHold = 'battery' | 'throttled' | 'export' | 'upload' | 'measuring' | 'playing' | 'scrubbing' | 'asked' | 'input';
+/** One source of a window's project in the application's queue of light copies: its copy's name and how far it is. */
+export type NativeQueueItem = { name: string; state: 'probing' | 'waiting' | 'running' | 'paused' | 'ready' | 'light' | 'failed' | 'missing'; done: number; total: number; why: string | null };
+export type NativeQueueState = { hold: CopyHold | null; width: number; items: NativeQueueItem[] };
+
 export type Reason = 'export' | 'upload';
 export type NativeNotice = { title: string; body?: string; go?: string | null };
 
@@ -99,7 +109,7 @@ type Bridge = {
   bridge: number;
   info?: () => Promise<unknown>;
   power?: { keepAwake?: (reason: Reason) => Promise<number>; release?: (id: number) => Promise<boolean> };
-  life?: { busy?: (reason: Reason) => Promise<boolean>; idle?: () => Promise<boolean> };
+  life?: { busy?: (reason: Reason) => Promise<boolean>; idle?: () => Promise<boolean>; activity?: (kind: Activity) => Promise<boolean> };
   notify?: { show?: (n: NativeNotice) => Promise<boolean>; badge?: (n: number) => Promise<boolean>; onOpen?: (fn: ((go: string) => void) | null) => void };
   update?: { status?: () => Promise<unknown>; restart?: () => Promise<'restart' | 'busy' | 'nothing'> };
   files?: {
@@ -142,6 +152,9 @@ type Bridge = {
     convert?: (source: NativeMediaRef, inUse: string[]) => Promise<NativeCopy>;
     cancel?: (name: string) => Promise<boolean>;
     onProgress?: (fn: ((p: { name: string; done: number; total: number }) => void) | null) => void;
+    queue?: (ask: { items: NativeMediaRef[]; width: number; inUse?: string[] }) => Promise<NativeQueueState>;
+    queued?: () => Promise<NativeQueueState>;
+    onQueue?: (fn: ((s: NativeQueueState) => void) | null) => void;
   };
   // --- the Android application (Android_Build_Plan.md) ---
   appUpdate?: { status?: () => Promise<unknown>; start?: (release: NativeApkRelease) => Promise<'started' | 'busy' | 'permission' | 'refused'> };
@@ -191,6 +204,8 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   windows: ['windows.screens', 'windows.popOut', 'windows.close'],
   gpu: ['gpu.state', 'gpu.choose', 'gpu.restart'],
   profile: ['profile.read', 'profile.save'],
+  activity: ['life.activity'],
+  copyQueue: ['media.queue', 'media.queued', 'media.onQueue'],
   appUpdate: ['appUpdate.status', 'appUpdate.start'],
   download: ['download.save', 'download.open'],
   share: ['share.file'],
@@ -312,4 +327,14 @@ export function onNoticeOpen(fn: (go: string) => void): () => void {
   if (typeof open !== 'function') return () => undefined;
   open(fn);
   return () => open(null);
+}
+
+/**
+ * Tells the desktop application what this page is doing (D12, P-30): «playing», «scrubbing» or «measuring» hold the
+ * laptop's background work (light copies made in idle time) until `none`. Nothing in a browser or an older application.
+ */
+export async function setActivity(kind: Activity): Promise<void> {
+  const n = native();
+  if (!n.has('activity')) return;
+  await n.raw!.life!.activity!(kind).catch(() => undefined);
 }

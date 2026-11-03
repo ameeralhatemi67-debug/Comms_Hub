@@ -15,7 +15,12 @@
 // application's own addresses; a "place" is a File in a browser and such an address in the application.
 // The application also makes light copies for the preview and editable copies of what the browser cannot
 // decode (D5, MVP_draft.md 63.4), in the same folder; the media pool (media.ts) asks for them through here.
-import { native, type NativeCacheUsage, type NativeCopies, type NativeCopy, type NativeMediaRef, type NativeProbe } from '../native/index.ts';
+// From D12 (MVP_draft.md 63.9, Desktop_Power_Ideas.md P-08) every video source the pool opens is also named to the
+// application's queue, which makes the light copies the sources need on this machine while the laptop is free, as
+// many at once as scale.ts's plan says (copiesAtOnce).
+import { currentEntry } from '../native/device.ts';
+import { native, type NativeCacheUsage, type NativeCopies, type NativeCopy, type NativeMediaRef, type NativeProbe, type NativeQueueState } from '../native/index.ts';
+import { isPerformance, plan } from './scale.ts';
 import type { Source } from './schema.ts';
 
 export const CACHE_DIR = 'studio-cache';
@@ -81,6 +86,26 @@ export async function fingerprint(file: File): Promise<string> {
 type Fetcher = (url: string, init: RequestInit) => Promise<Response>;
 type Bridge = NonNullable<ReturnType<typeof native>['raw']>;
 
+/** «الأداء» as the studio keeps it (components/studio/prefs.ts), read outside React; «تلقائي» when there is none. */
+function performancePref() {
+  try {
+    const v = JSON.parse(localStorage.getItem('studio.pref.performance') ?? 'null') as unknown;
+    return isPerformance(v) ? v : 'auto';
+  } catch {
+    return 'auto';
+  }
+}
+
+/** How many light copies the application makes at once on this machine: scale.ts's copiesAtOnce, from the profile. */
+export async function copyWidth(): Promise<number> {
+  const n = native();
+  if (!n.has('profile') || !n.has('info')) return plan(null).copiesAtOnce;
+  const [p, info] = await Promise.all([n.raw!.profile!.read!().catch(() => null), n.raw!.info!().catch(() => null)]);
+  const facts = (info ?? {}) as { cores?: unknown; memory?: unknown };
+  const machine = { cores: typeof facts.cores === 'number' ? facts.cores : null, memory: typeof facts.memory === 'number' ? facts.memory : null };
+  return plan(currentEntry(p)?.numbers ?? null, machine, performancePref()).copiesAtOnce;
+}
+
 export class DeviceCache {
   private root!: FileSystemDirectoryHandle;
   private cache!: FileSystemDirectoryHandle;
@@ -97,6 +122,14 @@ export class DeviceCache {
   /** The application's media tools (D5), when it offers them. */
   private mediaTools: Bridge['media'] | null = null;
   private mediaProgress = new Map<string, (done: number, total: number) => void>();
+  /** The application's queue of light copies made in idle time (D12), when it offers one. */
+  private copyQueue: Bridge['media'] | null = null;
+  private queueNow: NativeQueueState | null = null;
+  private queueListeners = new Set<(s: NativeQueueState) => void>();
+  /** The video sources the pool opened, in the order it opened them, and the copies' width on this machine. */
+  private wanted = new Map<string, NativeMediaRef>();
+  private width = 1;
+  private sending: ReturnType<typeof setTimeout> | null = null;
 
   /** The cache, or null where the browser has no private storage (some private windows, older Safari). */
   static async open(): Promise<DeviceCache | null> {
@@ -124,6 +157,14 @@ export class DeviceCache {
       if (n.has('media')) {
         c.mediaTools = n.raw!.media!;
         c.mediaTools.onProgress!((p) => c.mediaProgress.get(p.name)?.(p.done, p.total));
+      }
+      if (n.has('copyQueue')) {
+        c.copyQueue = n.raw!.media!;
+        c.copyQueue.onQueue!((st) => {
+          c.queueNow = st;
+          for (const fn of c.queueListeners) fn(st);
+        });
+        c.width = await copyWidth().catch(() => 1);
       }
       return c;
     } catch {
@@ -174,6 +215,8 @@ export class DeviceCache {
     try {
       const r = await this.folderCache.library!({ asset, version, label: opts.label });
       void this.refreshFolder();
+      // a source waiting for its library copy can be looked at by the queue now
+      if (this.wanted.size) this.sendQueue();
       return { url: r.url };
     } catch (e) {
       const m = (e as Error).message ?? '';
@@ -319,7 +362,54 @@ export class DeviceCache {
   }
 
   async copies(ref: NativeMediaRef): Promise<NativeCopies | null> {
+    if (this.copyQueue) this.want(ref);
     return this.mediaTools ? this.mediaTools.copies!(ref).catch(() => null) : null;
+  }
+
+  /** The application makes light copies in idle time (D12): the open project's video sources are named to it. */
+  get hasCopyQueue(): boolean {
+    return !!this.copyQueue;
+  }
+
+  /** The queue as the application last told it (null in a browser or an older application). */
+  get queued(): NativeQueueState | null {
+    return this.queueNow;
+  }
+
+  onQueue(fn: (s: NativeQueueState) => void): () => void {
+    this.queueListeners.add(fn);
+    return () => void this.queueListeners.delete(fn);
+  }
+
+  private want(ref: NativeMediaRef) {
+    const key = 'token' in ref ? `t:${ref.token}` : `a:${ref.asset}:${ref.version}`;
+    if (this.wanted.has(key)) return;
+    this.wanted.set(key, ref);
+    this.sendQueue();
+  }
+
+  /** Names the wanted sources to the application, a moment after the last change (a project opens many at once). */
+  private sendQueue() {
+    if (!this.copyQueue || this.sending) return;
+    this.sending = setTimeout(() => {
+      this.sending = null;
+      const items = [...this.wanted.values()].slice(0, 200);
+      void this.copyQueue!.queue!({ items, width: this.width })
+        .then((st) => {
+          this.queueNow = st;
+          for (const fn of this.queueListeners) fn(st);
+        })
+        .catch(() => undefined);
+    }, 150);
+  }
+
+  /** The open project is closed: the application stops making its copies (nothing of an unfinished copy is kept). */
+  stopQueue() {
+    if (!this.copyQueue) return;
+    this.wanted.clear();
+    if (this.sending) clearTimeout(this.sending);
+    this.sending = null;
+    void this.copyQueue.queue!({ items: [], width: this.width }).catch(() => undefined);
   }
 
   async probe(ref: NativeMediaRef): Promise<NativeProbe | null> {

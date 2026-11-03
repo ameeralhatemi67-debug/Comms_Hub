@@ -7,7 +7,7 @@ import { CopyQueue, MAX_WANTED } from '../src/copy-queue.ts';
 import { HOLDS, holdOf, isWork, MAX_WIDTH, QUIET_MS, quietAt, STOP_AFTER_MS, stepsFor } from '../src/idle.ts';
 import { copiesLine, trayTooltip } from '../src/words.ts';
 
-const free = { power: 'ac', speedLimit: 100, busy: null, activities: [], asked: false, lastInput: 0, now: 1_000_000 };
+const free = { power: 'ac', speedLimit: 100, busy: null, activities: [], audible: false, asked: false, lastInput: 0, now: 1_000_000 };
 const token = 'A'.repeat(43);
 const asset = '0a1b2c3d-0000-4000-8000-00000000abcd';
 
@@ -19,6 +19,7 @@ test('background work runs only on mains power, at full speed, with nothing expo
   assert.equal(holdOf({ ...free, busy: 'upload' }), 'upload');
   for (const a of ['playing', 'scrubbing', 'measuring']) assert.equal(holdOf({ ...free, activities: ['none', a] }), a);
   assert.equal(holdOf({ ...free, activities: ['none'] }), null, '«none» holds nothing');
+  assert.equal(holdOf({ ...free, audible: true }), 'playing', 'a window making sound is playing, whether or not its page said so');
   assert.equal(holdOf({ ...free, asked: true }), 'asked', 'a copy the person asked for comes first');
   assert.equal(holdOf({ ...free, lastInput: free.now - QUIET_MS + 1 }), 'input');
   assert.equal(holdOf({ ...free, lastInput: free.now - QUIET_MS }), null, 'a few seconds after the last key or click');

@@ -427,6 +427,22 @@ choice of 2026-11-03): bridge version 6 adds `gpu` and `profile`.
   encoders then write BT.601. `export.ts` sends them BT.709 YUV made by `src/lib/studio/yuv.ts`, and restarts on that path
   if a chip's encoder reports any other matrix.
 
+Light copies in idle time (D12, `MVP_draft.md` 63.9, `Desktop_Power_Ideas.md` P-30 and P-08): bridge version 7 adds
+`life.activity` and `media.queue`, `queued` and `onQueue`.
+- **The broker's rules** are `desktop/src/idle.ts` (when background work may run, what each job does) and `copy-queue.ts`
+  (which copies each window wants); `native-media.ts` runs them. Background work runs only on mains power, at the processor's
+  full speed limit, with nothing busy, playing (said, or a window heard), scrubbing, measuring or asked for, and a few seconds
+  after the last key or click. Nothing is scheduled in the site.
+- **A held copy pauses, it is not lost:** the utility process serves the copy's source to FFmpeg over loopback
+  (`loopback.ts`) and stops the bytes. The server listens on 127.0.0.1 only, answers GET and HEAD of one 32-byte token per
+  running job, checks the Host header and sends no CORS header. Never serve anything else there, and never give it a path from
+  a page. A copy held for minutes, or wanted by no window, is stopped and leaves no part file.
+- **Which sources need a copy** is `heavyOn` in `media-jobs.ts`: the device profile's 4K decoding rate, today's `heavy()`
+  without one. A copy feeds the preview only; the recipe stays `RECIPE`, since FFmpeg reads the same bytes.
+- **The page's half** is `src/lib/studio/cache.ts`: every video source the pool opens is named to the queue, with
+  `copiesAtOnce` of `scale.ts` as the width. `tests/media-worker.test.mjs` holds the pause with the pinned FFmpeg, and
+  `qa/desktop-idle.cjs` the holds, the copies' frames, a cancel and a quit (`--speed` for frame times, in a quiet window).
+
 The Android application is being built, by owner directive of 2026-10-26 (`Android_Build_Plan.md`,
 `MVP_draft.md` section 64, recorded in `progress.md`). It is a Capacitor 8 application in `mobile/`, with its
 own `package.json` and lockfile like `desktop/`, outside the site's typecheck and build, id `sa.commshub.app`.

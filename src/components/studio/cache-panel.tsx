@@ -4,16 +4,18 @@
 // المعاينة المؤقتة» for the library copies (long press; no original or project is touched), and the
 // files kept from «هذا الجهاز», each removable by long press. In the desktop application (63.3) it also
 // shows the cache folder, its free space and its size limit, and a file used where it is is only let go
-// of: the file itself stays where it is.
-import { useState } from 'react';
+// of: the file itself stays where it is. From D12 (63.9) it also says how far the light copies made in idle time are.
+import { useEffect, useState } from 'react';
 import { FolderOpen, HardDrive, Trash2 } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
+import { copyQueueLine } from '@/lib/native/copies';
 import type { DeviceCache } from '@/lib/studio/cache';
 import { formatBytes } from '@/lib/studio/support';
 
 export function CachePanel({ cache, inUse, onChanged }: { cache: DeviceCache | null; inUse: Set<string>; onChanged: () => void }) {
   const [, setTick] = useState(0);
   const [note, setNote] = useState<string | null>(null);
+  useEffect(() => cache?.onQueue(() => setTick((x) => x + 1)), [cache]);
   if (!cache)
     return (
       <details className="st-sec">
@@ -40,6 +42,11 @@ export function CachePanel({ cache, inUse, onChanged }: { cache: DeviceCache | n
           {u.inPlace > 0 && <> · مستعملة من مكانها: {formatBytes(u.inPlace)}</>}
         </p>
         <p className="st-hint">تُحذف نسخ المكتبة تلقائياً بعد عشرة أيام من آخر استعمال، عند فتح الاستوديو.</p>
+        {copyQueueLine(cache.queued) && (
+          <p className="st-hint" role="status" data-copy-queue>
+            {copyQueueLine(cache.queued)}
+          </p>
+        )}
         {folder && (
           <div className="st-cache-folder">
             <p className="st-hint">

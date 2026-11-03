@@ -80,6 +80,7 @@ export function startNative(o: NativeOptions): Native {
   let updates: Updates | null = null;
   // --- what the idle-time broker reads (D12, P-30) ------------------------------------------------
   const activities = new Map<number, Activity>();
+  const audible = new Set<number>();
   let lastInput = 0;
   let speedLimit = 100;
   const idleListeners: (() => void)[] = [];
@@ -204,9 +205,10 @@ export function startNative(o: NativeOptions): Native {
     const { blockers, wasBusy } = registry.releaseAll(id);
     for (const blocker of blockers) powerSaveBlocker.stop(blocker);
     told.delete(id);
-    const had = activities.delete(id);
+    const said = activities.delete(id);
+    const heard = audible.delete(id);
     if (wasBusy || blockers.length) refreshTray();
-    if (wasBusy || had) idleChanged();
+    if (wasBusy || said || heard) idleChanged();
   }
 
   function attachWindow(win: BrowserWindow, isMain: boolean) {
@@ -220,6 +222,12 @@ export function startNative(o: NativeOptions): Native {
       hiddenForWork.delete(win);
     });
     // A key or a click in any window of the site holds background work for a few seconds (idle.ts); only the time is kept.
+    contents.on('audio-state-changed', (event) => {
+      if (event.audible === audible.has(id)) return;
+      if (event.audible) audible.add(id);
+      else audible.delete(id);
+      idleChanged();
+    });
     contents.on('input-event', (_event, input) => {
       if (!isWork(input)) return;
       const was = lastInput;
@@ -394,7 +402,7 @@ export function startNative(o: NativeOptions): Native {
     idleChanged();
   });
   const idle: IdleFacts = {
-    facts: () => ({ power: powerNow(), speedLimit, busy: registry.busyReason(), activities: [...activities.values()], lastInput }),
+    facts: () => ({ power: powerNow(), speedLimit, busy: registry.busyReason(), activities: [...activities.values()], audible: audible.size > 0, lastInput }),
     onChange: (fn) => void idleListeners.push(fn),
   };
   function background(state: { making: number; waiting: number; hold: Hold | null }) {

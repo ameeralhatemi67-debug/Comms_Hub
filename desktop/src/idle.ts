@@ -2,7 +2,8 @@
 // run. Background work is the fixed jobs nobody is waiting for: today the light copies made automatically (P-08).
 // It runs only while the application is open, on mains power, with the processor at its full advertised speed
 // (Windows lowers that limit when the laptop is too hot or saving power), when no window is exporting, uploading,
-// playing, scrubbing or measuring, when no copy the person asked for is being made, and when nobody pressed a key or
+// playing (said by the page, or heard: a window making sound), scrubbing or measuring, when no copy the person asked
+// for is being made, and when nobody pressed a key or
 // a button in the application for a few seconds. Moving the pointer and scrolling are reading, and hold nothing;
 // dragging with a button held is working. Held, a running job is paused, not lost; held for minutes, it is stopped
 // and starts again later, so a paused job never keeps its memory long. Nothing here is scheduled in the site (E-1):
@@ -27,6 +28,8 @@ export type Facts = {
   speedLimit: number;
   busy: Reason | null;
   activities: Iterable<Activity>;
+  /** A window of the site is making sound (the studio playing, a video in the library). */
+  audible: boolean;
   /** A copy the person asked for is being made now. */
   asked: boolean;
   lastInput: number;
@@ -38,7 +41,9 @@ export function holdOf(f: Facts): Hold | null {
   if (f.speedLimit < 100) return 'throttled';
   if (f.busy) return f.busy;
   const doing = new Set(f.activities);
-  for (const a of ['measuring', 'playing', 'scrubbing'] as const) if (doing.has(a)) return a;
+  if (doing.has('measuring')) return 'measuring';
+  if (doing.has('playing') || f.audible) return 'playing';
+  if (doing.has('scrubbing')) return 'scrubbing';
   if (f.asked) return 'asked';
   if (f.now - f.lastInput < QUIET_MS) return 'input';
   return null;

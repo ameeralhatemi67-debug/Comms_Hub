@@ -2887,6 +2887,43 @@ While it works: «جارٍ القياس …٪…» with «إلغاء». Afterwar
   proof is `qa/studio-crossdevice.cjs`.
 - Nothing is scheduled: the measurement runs when the person asks.
 
+## 63.9 Work around the editor (D12), 2026-11-04
+
+Phase D12 of `Desktop_Power_Ideas.md`, ideas P-30 and P-08, from version 0.8.0 (bridge version 7). Everything here exists
+only inside the application; in a browser the studio is as before. The light copies feed the preview only: the export
+always reads the originals, so nothing here changes what is exported.
+
+**Light copies made while the laptop is free.** When a project opens, the application looks at each of its videos and
+makes the light copy («نسخة خفيفة للمعاينة», 63.4) of those that need one on this laptop, without being asked.
+- Which need one follows «قياس قدرة الجهاز» (63.6): a source needs a copy when three of it at once would decode slower than
+  this laptop decodes 4K H.264; ProRes, DNxHR and CineForm always do; before a measurement, and for what the measurement does
+  not cover, the rule of 63.4 stands (above 1080p, above 50 Mbit/s, or an intermediate codec). A strong laptop makes fewer
+  copies, a weak one more.
+- They are made one at a time, or as many as the plan of 63.6 says («النسخ الخفيفة معاً»), the videos first opened first.
+- They are made only while the laptop is free: on mains power, with the processor at its full speed, with nothing exporting,
+  uploading, playing (a window making sound counts), scrubbing or measuring, while no copy the person asked for is being made,
+  and a few seconds after the last key or click in the application. Moving the pointer and scrolling hold nothing.
+- Held, a copy pauses within a second and goes on later from where it was. A copy held for three minutes is stopped and made
+  again later. Nothing of an unfinished copy is kept: closing the project, quitting the application or «حذف ملفات المعاينة
+  المؤقتة» leaves no part of one behind.
+- A copy the person asks for with «إنشاء نسخة خفيفة للمعاينة» is made at once and never held; the others wait for it.
+
+**What is said.**
+- «التخزين على هذا الجهاز» says, while copies remain: «يُنشئ التطبيق نسخاً خفيفة للمعاينة حين يكون الجهاز متفرغاً: … جاهزة
+  من …», then «، وتُنشأ … الآن.» or «، والباقي …» with why: «ينتظر التوصيل بالكهرباء», «ينتظر حتى يعود المعالج إلى سرعته»,
+  «ينتظر انتهاء التصدير», «ينتظر انتهاء الرفع», «ينتظر انتهاء القياس», «ينتظر انتهاء التشغيل», «ينتظر انتهاء التمرير»,
+  «ينتظر النسخة التي طلبتها», «ينتظر لحظات من التوقف عن العمل». Once all are made: «النسخ الخفيفة للمعاينة جاهزة على هذا
+  الجهاز: …».
+- The tray's tooltip adds a line: «نسخ خفيفة للمعاينة: تُنشأ … من … في وقت فراغ الجهاز», or «نسخ خفيفة للمعاينة: … تنتظر …».
+
+**Boundaries.**
+- The page names its sources as the media tools already do (a device file's token or a library version) and a width of one to
+  three; it says what it is doing with a word of a fixed list (playing, scrubbing, measuring, none). No path, program or
+  argument is ever sent.
+- The application reads each source to FFmpeg through its own loopback address while a copy is made, so a copy can pause; the
+  address answers that copy's one file only, while it is made.
+- Nothing is scheduled in the site: this happens on the laptop while the application is open.
+
 # 64. The Android application «مركز الاتصال المؤسسي», 2026-10-26
 
 Owner decisions of 2026-10-26: `Android_Build_Plan.md`, accepted and recorded in `progress.md`. An application for Android phones that opens the live site in its own window, as the desktop application does on Windows (63). It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a phone browser remains a full client. The studio is left out of this application for now (below). This section describes phases A1 and A2; the later phases add 64.1 onward.

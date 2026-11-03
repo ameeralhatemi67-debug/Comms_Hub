@@ -102,10 +102,10 @@ async function partOne(state) {
     };
   });
   check(
-    'the bridge is version 6: who the application is, then info, power, life, notify, update, files, cache, data, windows, media, gpu and profile',
+    'the bridge is version 7: who the application is, then info, power, life (with activity), notify, update, files, cache, data, windows, media (with the queue), gpu and profile',
     JSON.stringify(shape.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify', 'update', 'files', 'cache', 'data', 'windows', 'media', 'gpu', 'profile']) &&
-      JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: 6 }) &&
-      JSON.stringify(shape.groups) === JSON.stringify({ power: ['keepAwake', 'release'], life: ['busy', 'idle'], notify: ['show', 'badge', 'onOpen'], update: ['status', 'restart'], files: ['pick', 'fromDropped', 'check', 'forget'], cache: ['library', 'cancel', 'has', 'usage', 'choose', 'useDefault', 'limit', 'sweep', 'clear', 'onProgress'], data: ['clear'], windows: ['screens', 'popOut', 'close'], media: ['probe', 'copies', 'proxy', 'convert', 'cancel', 'onProgress'], gpu: ['state', 'choose', 'restart'], profile: ['read', 'save'] }) &&
+      JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: 7 }) &&
+      JSON.stringify(shape.groups) === JSON.stringify({ power: ['keepAwake', 'release'], life: ['busy', 'idle', 'activity'], notify: ['show', 'badge', 'onOpen'], update: ['status', 'restart'], files: ['pick', 'fromDropped', 'check', 'forget'], cache: ['library', 'cancel', 'has', 'usage', 'choose', 'useDefault', 'limit', 'sweep', 'clear', 'onProgress'], data: ['clear'], windows: ['screens', 'popOut', 'close'], media: ['probe', 'copies', 'proxy', 'convert', 'cancel', 'onProgress', 'queue', 'queued', 'onQueue'], gpu: ['state', 'choose', 'restart'], profile: ['read', 'save'] }) &&
       shape.fns,
     shape,
   );

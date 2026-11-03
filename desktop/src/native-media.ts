@@ -33,8 +33,11 @@ const MAX_IN_USE = 2000;
 const AUTO_HEIGHT = PROXY_HEIGHTS[0];
 type Source = { input: string; id: string; label: string };
 type Waiter = { resolve: (stdout: string) => void; reject: (e: Error) => void; progress?: (seconds: number) => void };
-/** A copy being made: in idle time or asked for, paused, whether it can pause at all, and whether the broker is stopping it. */
-type Live = { background: boolean; paused: boolean; pausable: boolean; stopping: boolean };
+/**
+ * A copy being made: in idle time or asked for, paused, whether FFmpeg has started on it, whether it can pause at all
+ * (its source served over loopback), and whether the broker is stopping it.
+ */
+type Live = { background: boolean; paused: boolean; started: boolean; pausable: boolean; stopping: boolean };
 
 function inUseOf(value: unknown): Set<string> {
   if (value === undefined) return new Set();
@@ -180,7 +183,7 @@ export function startMedia(o: {
       if (!background) promote(name);
       return running;
     }
-    live.set(name, { background, paused: false, pausable: false, stopping: false });
+    live.set(name, { background, paused: false, started: false, pausable: false, stopping: false });
     const work = (async () => {
       const p = await probe(s);
       if (!p.video) throw new Error('decode');
@@ -199,7 +202,15 @@ export function startMedia(o: {
       const at = kind === 'proxy' ? await port : 0;
       const token = at ? newToken(crypto.randomBytes(32)) : null;
       const job = live.get(name);
-      if (job) job.pausable = !!token;
+      // held or stopped while it was being looked at: it waits again without starting, unless it can start paused
+      if (job?.stopping || (job?.paused && !token)) {
+        if (job.background) stopped.add(name);
+        throw new Error('cancelled');
+      }
+      if (job) {
+        job.pausable = !!token;
+        job.started = true;
+      }
       const args = kind === 'proxy' ? proxyArgs(token ? servedUrl(at, token) : s.input, part, height, keep) : convertArgs(s.input, part, p.video.height, keep);
       try {
         const ran = run(
@@ -213,7 +224,7 @@ export function startMedia(o: {
           },
           { background: live.get(name)?.background ?? false, serve: token ? { token, file: s.input } : undefined },
         );
-        // held while it was being probed: it starts paused
+        // held while it was being looked at: it starts paused
         if (live.get(name)?.paused) worker?.postMessage({ type: 'pause', id: name });
         await ran;
         fs.renameSync(part, o.cache.pathOf(name));
@@ -343,16 +354,19 @@ export function startMedia(o: {
     const j = live.get(name);
     if (!j?.background || j.stopping) return;
     // without loopback FFmpeg reads the file and cannot wait: stopping is the only way to hold it
-    if (!j.pausable) return stop(name);
+    if (j.started && !j.pausable) return stop(name);
     j.paused = true;
-    worker?.postMessage({ type: 'pause', id: name });
+    if (j.started) worker?.postMessage({ type: 'pause', id: name });
     queue.set(name, { state: 'paused', pausedAt: Date.now() });
+  }
+  function unpause(j: Live, name: string) {
+    j.paused = false;
+    if (j.started) worker?.postMessage({ type: 'resume', id: name });
   }
   function resume(name: string) {
     const j = live.get(name);
     if (!j?.paused) return;
-    j.paused = false;
-    worker?.postMessage({ type: 'resume', id: name });
+    unpause(j, name);
     queue.set(name, { state: 'running' });
   }
   /** Ends a copy made in idle time; nothing of it is kept, and it waits again if a window still wants it. */
@@ -364,17 +378,14 @@ export function startMedia(o: {
     }
     j.stopping = true;
     stopped.add(name);
-    worker?.postMessage({ type: 'cancel', id: name });
+    if (j.started) worker?.postMessage({ type: 'cancel', id: name });
   }
   /** The person asked for a copy already being made in idle time: it is theirs now, and never paused. */
   function promote(name: string) {
     const j = live.get(name);
     if (!j?.background) return;
     j.background = false;
-    if (j.paused) {
-      j.paused = false;
-      worker?.postMessage({ type: 'resume', id: name });
-    }
+    if (j.paused) unpause(j, name);
     queue.set(name, { state: 'running' });
   }
 
@@ -436,7 +447,8 @@ export function startMedia(o: {
     for (const e of dropped) if (live.get(e.name)?.background) stop(e.name);
     for (const it of items) {
       const e = queue.get(it.name);
-      if (!e || !(added.includes(e) || e.state === 'missing')) continue;
+      // a new source, one whose library copy was not there yet, or a copy removed from the folder since
+      if (!e || !(added.includes(e) || e.state === 'missing' || (e.state === 'ready' && !copyOf(e.name)))) continue;
       queue.set(e.name, { state: 'probing', why: undefined });
       probeLater(e.name);
     }
