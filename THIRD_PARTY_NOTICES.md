@@ -68,7 +68,7 @@ None of them is modified. Each is pinned: Electron and the bundled packages in `
 
 ### Electron and Chromium
 
-- Electron 44.5.1 (MIT licence), which contains Chromium and Node.js under their own licences.
+- Electron 45.0.0 (MIT licence), which contains Chromium 156 and Node.js 24 under their own licences.
 - The package carries their notices as Electron ships them: `LICENSE.electron.txt` and
   `LICENSES.chromium.html`, in the application's folder.
 

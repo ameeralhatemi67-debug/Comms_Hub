@@ -1,6 +1,6 @@
 {
   "name": "sa.commshub.desktop",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "description": "مركز الاتصال المؤسسي",
   "author": "مركز الاتصال المؤسسي",
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@electron/fuses": "2.1.3",
-    "electron": "44.5.1",
+    "electron": "45.0.0",
     "electron-builder": "26.17.0",
     "electron-updater": "6.8.10",
     "esbuild": "0.28.2",
