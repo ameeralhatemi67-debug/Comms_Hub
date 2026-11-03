@@ -2852,3 +2852,54 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   window; the proof is the manager's). Chromium 156 is Edge 156's version, so the transfer label that differed between Edge and the
   application (`iec61966-2-1` against `bt709`) may now agree; not checked here.
 - **Not done.** Nothing pushed, no release published.
+
+### 2026-11-04: the export's rate, its BT.709 conversion off the page, BT.709 named everywhere, and the loudness ahead (Desktop Power, Fork 1, items 1 to 4)
+
+- **Owner direction.** The Desktop Power stage (`Desktop_Power_Ideas.md`), run by a manager session as parallel forks; this is Fork 1
+  (`power-export`), items 1 to 3 of its list and P-15. Built on branch `claude/power-export-821809`, local only.
+- **Item 1, the processor encoder's rate (`export.ts`).** Read in Mediabunny 1.61.2: its high quality asks an H.264 encoder for quantizer
+  22 and, where the encoder takes no quantizer, falls back to about 6.1 Mbit/s at 1080p. The graphics chips take the quantizer (10.5
+  Mbit/s for the proof's source); the processor's encoder does not, hence 6 Mbit/s and 39.3 dB. H.264 now asks for quantizer 22 with the
+  export's own stated rate as the fallback (`videoQuality`, `aimMbps`: 5, 10 and 35 Mbit/s at 720p, 1080p and 4K, half as much again
+  above 30 frames). With no chip the proof file is now 41.2 dB from its source at 10.1 Mbit/s, in Edge and in the application. The chips'
+  files carry the same video packets as before (framemd5 of every packet, as it is against as it was at 998ef0c), on Edge's AMD chip and
+  on the application's two chips; a test holds the codec string, and so the level, equal in every shape, size and rate. WebM is unchanged.
+- **Item 2, the BT.709 conversion off the page (`yuv-pipe.ts`, `yuv-simd.ts`, `yuv.ts`).** Each composed frame leaves the page as a
+  VideoFrame of the canvas; two workers read it (`VideoFrame.copyTo`) and convert it. The arithmetic is yuv.ts's, as WebAssembly with
+  128-bit lanes built instruction by instruction at run time (`simdModule`), four pixels at a time; `i420Into` does the last columns of
+  a width that is not a multiple of 16, and everything where the lanes are missing. A failed worker starts the export again on the page,
+  the old way. Same bytes everywhere checked:
+  - the corpus's 54 composed frames converted by the workers equal the page's conversion byte for byte, from the bundle and from a
+    minified bundle, in Edge with and without its chip and in the application with no chip, on the saving chip and on the strong chip;
+  - a real export with the workers and with the page's conversion carry the same 90 video packets;
+  - in Node, the WebAssembly conversion equals `i420Into` in every shape at 720p and 1080p, plus a 40-pixel width.
+  The conversion of a 1080p frame: about 2.9 ms with WebAssembly, 12 to 14 ms in plain code (Node, this laptop, under load).
+- **Item 3, the transfer named BT.709 (`export.ts` `asBt709`).** Edge 156's chip encoder labels the transfer `iec61966-2-1`. Its H.264
+  headers leave colour unspecified (primaries and transfer 0), so the label is only in the MP4's `colr` box, written by Mediabunny from
+  the encoder's description. The export now names the transfer `bt709` there when the encoder converted with BT.709 into limited range,
+  and changes nothing else. After the merge of Electron 45 (Chromium 156) the application's chips also wrote `iec61966-2-1` under the
+  old code; with this change every engine, chip or none, writes bt709/bt709/bt709/tv (`qa/studio-export-yuv.cjs`).
+- **Item 4, P-15, the loudness worked out ahead (`loudness-ahead.ts`, `export-panel.tsx`).** While the export panel is open, a moment
+  after the last change and once every source heard is ready, the mix's loudness is measured the export's way in the browser's idle time
+  and kept under a key of everything the mix depends on (every clip field but those that move only the picture). «قياس المستوى» and
+  «توحيد مستوى الصوت» use it; the panel says «قيس مستوى الصوت مسبقاً: … LUFS، فيبدأ التصدير الموحَّد دون انتظار القياس.». The sources'
+  waveforms are asked for at the same time. Nothing drawn in the timeline changed.
+- **Verified, numbers.**
+  - `npm run typecheck` clean; `npm test` **790 of 790** (new `tests/studio-export-power.test.mjs`, seven tests).
+  - **`qa/studio-export-yuv.cjs` 28 of 28** on Electron 45 (Chromium 156.0.8078.48) and Edge 156.0.4314.58 (untimed run).
+  - **`qa/studio-loudness-ahead.cjs` 8 of 8** in Edge: on a two-minute project the figure worked out ahead equals the export's own
+    measurement exactly (-11.17 LUFS, peak -9.89 dB); from pressing export to the first encoded frame with «توحيد مستوى الصوت», 7270 ms
+    measured first against 470 ms with the figure ahead (laptop at 57 to 58% load); a volume halved is measured again (6.02 LU quieter),
+    a picture moved keeps the figure; in the real panel the figure appears by itself, the export shows no «جارٍ قياس مستوى الصوت», and
+    the file is at -14 LUFS within 1 LU by ffmpeg.
+  - **Speed of item 2, in the manager's quiet window, before the WebAssembly lanes** (mean load 34% before timing with nothing of this
+    fork running; 24 to 39% around the application's runs, 64 to 71% around Edge's; the stray `find.exe` was stopped by the owner during
+    the run). Medians of three interleaved rounds of the proof's three-second export with no chip: the application 1723 ms by the canvas
+    (996a9b5), 4521 ms by the page's BT.709 conversion (998ef0c), 2729 ms with workers in plain code: **1.58 times, the target 1.2 not
+    met**. Edge with `--disable-gpu`: 1574, 3837 and 2552 ms, 1.62 times. A stage profile then showed the conversion competing for the
+    processor, which led to the WebAssembly lanes.
+  - **After the WebAssembly lanes, not in a quiet window:** Edge with `--disable-gpu`, load 48 to 52%: 2158 ms by the canvas, 3697 ms by
+    the page's conversion, 1954 ms now: **0.91 times**. To be timed again in a quiet window, on the application too.
+- **Not verified, said plainly.** Nothing signed in: the panel was seen on the studio's fixture with the real component. A WebM export
+  was not timed (VP9 has no chip encoder here, so it always takes the BT.709 path).
+- **Not done.** Nothing pushed.

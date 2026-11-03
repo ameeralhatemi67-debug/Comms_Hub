@@ -110,3 +110,31 @@ test('the workers are offered and the page stays the way where they cannot be ma
   assert.match(pipe, /const i420Into = \$\{i420Into\.toString\(\)\}/);
   assert.match(pipe, /format: 'RGBA', colorSpace: 'srgb'/);
 });
+
+test('the sound\'s key (P-15) changes with everything the mix depends on and not with what moves only the picture', async () => {
+  const { soundKey } = await import('../src/lib/studio/loudness-ahead.ts');
+  const tl = await import('../src/lib/studio/timeline.ts');
+  const { US } = await import('../src/lib/studio/schema.ts');
+  let doc = newVideoDoc('16:9', 30);
+  const a = tl.addSource(doc, { kind: 'library', asset: 'aaaaaaaa-0000-4000-8000-000000000001', version: 1, name: 'a.mp4', media: 'video', duration: 10 * US, w: 1920, h: 1080 });
+  const placed = tl.addClip(a.doc, { source: a.id, start: 0, length: 4 * US, in: 0 });
+  doc = placed.doc;
+  const clip = placed.clipId;
+  const key = soundKey(doc);
+  const same = (d, what) => assert.equal(soundKey(d), key, `${what} leaves the key`);
+  const changed = (d, what) => assert.notEqual(soundKey(d), key, `${what} changes the key`);
+  same(tl.updateClip(doc, clip, { transform: { x: 10, y: 20, scale: 0.5, rotation: 3, opacity: 0.5 } }), 'moving the picture');
+  same(tl.updateClip(doc, clip, { crop: { l: 0.1, t: 0, r: 0, b: 0 }, adjust: { brightness: 10, contrast: 0, saturation: 0 }, fit: 'cover' }), 'cropping and adjusting');
+  same(tl.updateClip(doc, clip, { animIn: { kind: 'fade', length: US } }), 'an entry movement');
+  same(tl.addClip(doc, { text: { content: 'عنوان' }, start: 0, length: US }).doc, 'a text inside the length');
+  changed(tl.updateClip(doc, clip, { volume: 0.5 }), 'the volume');
+  changed(tl.updateClip(doc, clip, { mute: true }), 'muting the clip');
+  changed(tl.updateClip(doc, clip, { fadeIn: US / 2 }), 'a fade');
+  changed(tl.updateClip(doc, clip, { in: US }), 'where it starts in its source');
+  changed(tl.moveClip(doc, clip, US), 'where it sits in time');
+  changed(tl.setSpeed(doc, clip, 2), 'its speed');
+  changed(tl.setTrack(doc, doc.video.tracks.find((t) => t.clips.length).id, { muted: true }), 'muting its track');
+  changed(tl.setTrackSound(doc, doc.video.tracks.find((t) => t.clips.length).id, { role: 'music', duck: 6 }), 'the track\'s role and lowering');
+  changed({ ...doc, sources: doc.sources.map((s) => ({ ...s, version: 2 })) }, 'a new version of the source');
+  changed(tl.addClip(doc, { text: { content: 'بعد' }, start: 6 * US, length: US }).doc, 'a text that makes the project longer');
+});

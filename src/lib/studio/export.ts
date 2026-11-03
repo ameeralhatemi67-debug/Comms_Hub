@@ -113,14 +113,16 @@ function audioReader(pool: MediaPool, mb: typeof import('mediabunny')): AudioSou
 
 /**
  * The loudness of the project's sound (MVP_draft.md 62.9): the same windows the export mixes, measured by
- * BS.1770 (loudness.ts). «قياس المستوى», and the first pass of «توحيد مستوى الصوت».
+ * BS.1770 (loudness.ts). «قياس المستوى», and the first pass of «توحيد مستوى الصوت», unless it was worked out ahead
+ * (loudness-ahead.ts, which waits for the browser's idle time between windows: `between`).
  */
-export async function measureLoudness(doc: ProjectDoc, pool: MediaPool, opts: { onProgress?: (f: number) => void; signal?: AbortSignal } = {}): Promise<LoudnessResult> {
+export async function measureLoudness(doc: ProjectDoc, pool: MediaPool, opts: { onProgress?: (f: number) => void; signal?: AbortSignal; between?: () => Promise<void> } = {}): Promise<LoudnessResult> {
   const mb = await import('mediabunny');
   const read = audioReader(pool, mb);
   const meter = new LoudnessMeter();
   const wins = windows(durationOf(doc));
   for (let i = 0; i < wins.length; i++) {
+    if (opts.between) await opts.between();
     if (opts.signal?.aborted) throw new ExportError('ABORTED');
     const b = await mixWindow(doc, wins[i], read);
     meter.push([b.getChannelData(0), b.getChannelData(1)]);
