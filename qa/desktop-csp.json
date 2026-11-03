@@ -1,27 +1,27 @@
 {
   "script": "qa/desktop-csp.cjs",
-  "run": "2026-10-26T07:51:24.741Z",
-  "version": "0.6.0",
+  "run": "2026-11-03T21:02:35.596Z",
+  "version": "0.7.1",
   "checks": [
     {
       "name": "Edge: the page carries the policy, scripts only with the nonce or the theme script's hash, no inline script or eval",
       "pass": true,
-      "detail": "default-src 'self'; script-src 'self' 'nonce-NEW64l6rryzyxr5vN3Tp9w==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+      "detail": "default-src 'self'; script-src 'self' 'nonce-PGCsv9ZbfoWMFD9PVMP2Hg==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
     },
     {
       "name": "Edge: every script Next.js wrote carries this request's nonce; the only other one is the theme's",
       "pass": true,
-      "detail": "{\"scripts\":19,\"unmarked\":[]}"
+      "detail": "{\"scripts\":23,\"unmarked\":[]}"
     },
     {
       "name": "Edge: a fresh nonce on every request",
       "pass": true,
-      "detail": "{\"nonce\":\"NEW64l6rryzyxr5vN3Tp9w==\",\"nonce2\":\"SkNlQdi3LjCKok8ZoK0uVQ==\"}"
+      "detail": "{\"nonce\":\"PGCsv9ZbfoWMFD9PVMP2Hg==\",\"nonce2\":\"AzfxXrgfg3FNe1hmsQzcSQ==\"}"
     },
     {
       "name": "Edge: the page loads with no violation, renders, and the theme script ran",
       "pass": true,
-      "detail": "{\"violations\":[],\"state\":{\"theme\":\"light\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبري\",\"buttons\":5}}"
+      "detail": "{\"violations\":[],\"state\":{\"theme\":\"light\",\"text\":\"الاتصال بالحسابات غير مضبوط\\n\\nلم تُضبط متغيرات Supabase لهذا التشغيل، ولذلك لا يُ\",\"buttons\":0}}"
     },
     {
       "name": "Edge: an inline event handler slipped into the page does not run, and the browser reports it",
@@ -41,22 +41,22 @@
     {
       "name": "in the application: the page carries the policy, scripts only with the nonce or the theme script's hash, no inline script or eval",
       "pass": true,
-      "detail": "default-src 'self'; script-src 'self' 'nonce-8e7YUdFFE4QczDxsTUWInQ==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+      "detail": "default-src 'self'; script-src 'self' 'nonce-2SKtI757EQGWEoYZYFqdew==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
     },
     {
       "name": "in the application: every script Next.js wrote carries this request's nonce; the only other one is the theme's",
       "pass": true,
-      "detail": "{\"scripts\":19,\"unmarked\":[]}"
+      "detail": "{\"scripts\":23,\"unmarked\":[]}"
     },
     {
       "name": "in the application: a fresh nonce on every request",
       "pass": true,
-      "detail": "{\"nonce\":\"8e7YUdFFE4QczDxsTUWInQ==\",\"nonce2\":\"9u9mVdLk1S8fSkB8CNgRgw==\"}"
+      "detail": "{\"nonce\":\"2SKtI757EQGWEoYZYFqdew==\",\"nonce2\":\"Q9H56vyEKTXRg2cBniIQEw==\"}"
     },
     {
       "name": "in the application: the page loads with no violation, renders, and the theme script ran",
       "pass": true,
-      "detail": "{\"violations\":[],\"state\":{\"theme\":\"light\",\"text\":\"مركز الاتصال\\nCOMMUNICATION HUB\\nتسجيل الدخول\\nأول دخول\\nطلب وصول\\nتسجيل الدخول\\nالبري\",\"buttons\":5}}"
+      "detail": "{\"violations\":[],\"state\":{\"theme\":\"light\",\"text\":\"الاتصال بالحسابات غير مضبوط\\n\\nلم تُضبط متغيرات Supabase لهذا التشغيل، ولذلك لا يُ\",\"buttons\":0}}"
     },
     {
       "name": "in the application: an inline event handler slipped into the page does not run, and the browser reports it",
@@ -66,21 +66,21 @@
     {
       "name": "in the application: the bridge is there, and its own address is allowed by the policy (answered 404 for an unknown token, not blocked)",
       "pass": true,
-      "detail": "{\"bridge\":\"object\",\"version\":5,\"status\":404,\"violations\":[]}"
+      "detail": "{\"bridge\":\"object\",\"version\":6,\"status\":404,\"violations\":[]}"
     }
   ],
   "notes": [],
   "restoreThemeLength": 162,
   "edge": {
-    "policy": "default-src 'self'; script-src 'self' 'nonce-NEW64l6rryzyxr5vN3Tp9w==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
-    "scripts": 19
+    "policy": "default-src 'self'; script-src 'self' 'nonce-PGCsv9ZbfoWMFD9PVMP2Hg==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+    "scripts": 23
   },
   "edgeConsole": [
-    "Executing inline event handler violates the following Content Security Policy directive 'script-src 'self' 'nonce-SkNlQdi3LjCKok8ZoK0uVQ==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval''. Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
+    "Executing inline event handler violates the following Content Security Policy directive 'script-src 'self' 'nonce-AzfxXrgfg3FNe1hmsQzcSQ==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval''. Either the 'unsafe-inline' keyword, a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable inline execution. Note that hashes do not apply to event handlers, style attributes and javascript: navigations unless the 'unsafe-hashes' keyword is present. The action has been blocked."
   ],
   "app": {
-    "policy": "default-src 'self'; script-src 'self' 'nonce-8e7YUdFFE4QczDxsTUWInQ==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
-    "scripts": 19
+    "policy": "default-src 'self'; script-src 'self' 'nonce-2SKtI757EQGWEoYZYFqdew==' 'sha256-p1nbi8+MdvLdItN9aDr/fHbQaQ8jj5d+HkTzVwLQVdY=' 'strict-dynamic' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: commshub-file:; media-src 'self' data: blob: https: commshub-file:; connect-src 'self' https: wss: commshub-file:; font-src 'self' data:; worker-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+    "scripts": 23
   },
   "total": 13,
   "passed": 13,
