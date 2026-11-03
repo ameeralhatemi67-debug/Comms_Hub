@@ -2914,3 +2914,29 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified, said plainly.** Nothing signed in: the panel was seen on the studio's fixture with the real component. A WebM export
   was not timed (VP9 has no chip encoder here, so it always takes the BT.709 path).
 - **Not done.** Nothing pushed.
+
+### 2026-11-04: the export's drawing in workers (P-07), built, proven where it is exact, and kept off (Desktop Power, Fork 1)
+
+- **What was built.** `src/lib/studio/export-draw.ts` is an export drawing worker: it composes frames with the studio's own
+  compositor, `compose.ts`, unchanged, on an OffscreenCanvas. `draw-shim.ts` gives the compositor's modules the little of a page they
+  use: a canvas element is an OffscreenCanvas, `document.fonts` is the worker's own set, and `new Image()` loads a picture into an
+  OffscreenCanvas. `drawers.ts` is the page's half. It mirrors the font faces the page has loaded (each with its own file and range,
+  read from the page's style sheets, so text falls back from font to font as on the page), and sends the project's pictures and,
+  frame by frame, the decoded frames as ImageBitmaps. `export.ts` takes `drawers` (default 0) and encodes the workers' frames as it
+  encodes its own canvas. A worker that cannot start or fails starts the export again on the page (`steps: ['DRAW_WORKER']`).
+- **Measured (`qa/studio-export-draw.cjs`, Edge 156 with and without its chip, `qa/studio-export-draw-edge.json`, 6 of 8).**
+  - An export with an Arabic title drawn by two workers carries exactly the page's 90 video packets, on both engines.
+  - Where the workers cannot start, the export draws on the page, says so, and carries the same packets.
+  - **The corpus is not exact everywhere.** With the AMD chip: plain, 2 frames (38 to 95 pixels, 1 level) and brand, 5 frames (5 to
+    67 pixels, 1 level). The page's canvas element and an OffscreenCanvas on the page agree there; the worker thread's raster differs
+    by one level on shape and brand-mark edges. With `--disable-gpu`: effects, 6 frames (up to 3394 pixels, 50 levels); covers, 6
+    frames (up to 144137 pixels, 27 levels); transitions, 1 frame (3431 pixels, 108 levels). Here the cause is the kind of canvas,
+    not the thread: an OffscreenCanvas on the page already differs from the canvas element in those blur and filter paths, and the
+    worker equals the page's OffscreenCanvas exactly (a diagnostic in the session's scratch folder).
+- **Decision (the manager, (A)).** The drawing in workers stays in the code, off by default; nothing in `scale.ts` or the export panel
+  turns it on in this stage, and the floor stays the page's canvas element, today's frames. Once Fork 4's whole-number blur and
+  filters are on main, the corpus in workers is to be run again on every engine; the AMD chip's one-level edges may remain, so any
+  later switch-on is per engine and proven by this check. Making the floor itself draw in a worker (B) goes to the owner as a choice.
+- **Verified.** `npm run typecheck` clean; `tests/studio-export-power.test.mjs` and `tests/studio-colour.test.mjs` 12 of 12. The
+  application's engines (no chip, both chips) wait for the port-3000 lock.
+- **Not done.** Nothing pushed; drawing in workers not switched on anywhere.
