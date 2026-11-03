@@ -41,7 +41,9 @@ import { Player } from '@/lib/studio/preview';
 import { frameUs } from '@/lib/studio/time';
 import { matchShortcut, keysOf, typingTarget } from '@/lib/studio/shortcuts';
 import { DEFAULT_TRANSITION, animLabel, entryPatch, transitionLabel, type AnimKind, type TransitionKind } from '@/lib/studio/transitions';
-import { RESOLUTIONS } from '@/lib/studio/handles';
+import { AUTO, PLAY_RESOLUTIONS, RESOLUTIONS } from '@/lib/studio/handles';
+import { AutoLevel, stepOf, streamBudget } from '@/lib/studio/playback';
+import { PREVIEW_STEPS } from '@/lib/studio/scale';
 import { Modal } from '../ui';
 import { Bin, GraphicsPane, MediaPane, TemplatesPane, type AddDrop, type LibraryItem } from './bin';
 import { CachePanel } from './cache-panel';
@@ -69,6 +71,7 @@ import { previewWindowItems, usePreviewLink } from './preview-window';
 import { EditorFrame, panelSpecs, useEditorFrame } from './editor-frame';
 import type { Menu } from './menubar';
 import { usePref } from './prefs';
+import { useStudioPlan } from './plan';
 import '../motion-studio.css';
 import './editor.css';
 import './workspace.css';
@@ -221,7 +224,8 @@ export const studioClipboard = {
   },
 };
 
-const isResolution = (v: unknown): v is Resolution => !!v && typeof v === 'object' && RESOLUTIONS.some((r) => r.value === (v as Resolution).play) && RESOLUTIONS.some((r) => r.value === (v as Resolution).pause);
+const isResolution = (v: unknown): v is Resolution | null => v === null || (!!v && typeof v === 'object' && PLAY_RESOLUTIONS.some((r) => r.value === (v as Resolution).play) && RESOLUTIONS.some((r) => r.value === (v as Resolution).pause));
+const isShares = (v: unknown): v is Record<string, number> => !!v && typeof v === 'object' && Object.values(v).every((x) => PREVIEW_STEPS.includes(x as number));
 const isChrome = (v: unknown): v is 'dark' | 'light' => v === 'dark' || v === 'light';
 
 export function VideoEditor(p: EditorProps) {
@@ -247,7 +251,13 @@ export function VideoEditor(p: EditorProps) {
   const [tool, setTool] = useState<Tool>('select');
   const [snap, setSnap] = usePref<boolean>('snap', true);
   const [fitSignal, setFitSignal] = useState(0);
-  const [resolution, setResolution] = usePref<Resolution>('resolution', { play: 1, pause: 1 }, isResolution);
+  // the plan of this computer (D10): with a measured profile the preview plays at «تلقائية» unless the person chose
+  // otherwise; in a browser, or before a measurement, «كاملة» as before
+  const studioPlan = useStudioPlan();
+  const [chosenResolution, setResolution] = usePref<Resolution | null>('resolution', null, isResolution);
+  const resolution: Resolution = chosenResolution ?? (studioPlan ? { play: AUTO, pause: 1 } : { play: 1, pause: 1 });
+  const [autoShare, setAutoShare] = useState(1);
+  const [autoShares, setAutoShares] = usePref<Record<string, number>>('auto-resolution', {}, isShares);
   const [chrome, setChrome] = usePref<'dark' | 'light'>('chrome', 'dark', isChrome);
   const [full, setFull] = usePref<boolean>('full-window', false);
   const [fxLength, setFxLength] = usePref<number>('effect-length', DEFAULT_TRANSITION.length);
@@ -295,6 +305,33 @@ export function VideoEditor(p: EditorProps) {
     setPlayer(pl);
     return () => pl.dispose();
   }, [pool, motion]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // D10: the memory the paused preview keeps frames in, and the decoding the playing streams may count on
+  useEffect(() => {
+    pool?.setFrameCache(studioPlan?.knobs.frameCacheMB ?? 0);
+    if (player) player.budget = () => streamBudget(studioPlan?.numbers ?? null);
+  }, [pool, player, studioPlan]);
+  // «تلقائية»: the level starts where the last play of this shape ended on this device, else at the plan's start
+  const ratio = doc.video?.ratio ?? '9:16';
+  const shares = useRef(autoShares);
+  shares.current = autoShares;
+  const previewStart = studioPlan?.knobs.previewStart ?? 1;
+  useEffect(() => {
+    if (!player) return;
+    if (resolution.play !== AUTO) {
+      player.auto = null;
+      player.onAuto = null;
+      return;
+    }
+    const a = new AutoLevel(PREVIEW_STEPS, stepOf(PREVIEW_STEPS, shares.current[ratio] ?? previewStart));
+    player.auto = a;
+    player.onAuto = setAutoShare;
+    setAutoShare(a.value);
+  }, [player, resolution.play, ratio, previewStart]);
+  useEffect(() => {
+    const a = player?.auto;
+    if (!playing && a && shares.current[ratio] !== a.value) setAutoShares({ ...shares.current, [ratio]: a.value });
+  }, [playing, player, ratio, setAutoShares]);
 
   useEffect(() => {
     if (player && !player.playing) player.draw();
@@ -726,6 +763,7 @@ export function VideoEditor(p: EditorProps) {
       note={missing ? `${missing} من ملفات المشروع غير متاح هنا، ويبقى في المشروع.` : null}
       resolution={resolution}
       onResolution={setResolution}
+      autoShare={autoShare}
       tool={tool}
       onTextAt={(x, y) => {
         addText('body', {}, { x, y });
@@ -1008,7 +1046,7 @@ export function VideoEditor(p: EditorProps) {
       id: 'view',
       label: 'عرض',
       items: [
-        { label: 'دقة المعاينة أثناء التشغيل', items: RESOLUTIONS.map((r) => ({ label: r.label, checked: resolution.play === r.value, onSelect: () => setResolution({ ...resolution, play: r.value }) })) },
+        { label: 'دقة المعاينة أثناء التشغيل', items: PLAY_RESOLUTIONS.map((r) => ({ label: r.label, checked: resolution.play === r.value, onSelect: () => setResolution({ ...resolution, play: r.value }) })) },
         { label: 'دقة المعاينة عند الإيقاف', items: RESOLUTIONS.map((r) => ({ label: r.label, checked: resolution.pause === r.value, onSelect: () => setResolution({ ...resolution, pause: r.value }) })) },
         { label: 'مناطق Reels الآمنة', icon: <ScanLine aria-hidden="true" />, keys: keysOf('safe-zones'), checked: safe, disabled: doc.video?.ratio !== '9:16', onSelect: () => setSafe(!safe) },
         { label: 'الالتقاط على الخط الزمني', icon: <Magnet aria-hidden="true" />, keys: keysOf('snap'), checked: snap, onSelect: () => setSnap(!snap) },

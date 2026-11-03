@@ -7,12 +7,43 @@
 //     drawn at on the preview (so the layout of compose.ts is the same, to the bit, as with the full frame);
 //   - how many: as many as the plan's megabytes hold (scale.ts frameCacheMB), the least recently shown let go first.
 // A budget of 0 is the floor: media.ts then decodes as it always did. Pure: no canvas is made here (C is the canvas).
-import { canvasOf, type ProjectDoc } from './schema.ts';
+// Two tiers share the memory: the frames near the playhead at the size the preview draws them, and, filled while
+// nothing else is read, every frame of the stretch the timeline uses at a small size (THUMB_WIDTH), so a jump shows
+// the right frame at once and its sharp version follows.
+import { canvasOf, US, type ProjectDoc } from './schema.ts';
+import { sourceTime } from './speed.ts';
 
 /** A time takes the last frame starting at most this long after it, in seconds (export.ts frameFor). */
 export const EPS = 1e-6;
 /** Shares of a source's size a frame may be kept at. */
 export const DIVISORS = Object.freeze([8, 4, 2, 1]);
+/** The small frames of the second tier are at most this wide. */
+export const THUMB_WIDTH = 480;
+/** The share of the memory the small frames may take. */
+export const THUMB_PART = 1 / 3;
+
+/** The share of its size a source's small frames are kept at: the largest frame at most THUMB_WIDTH wide (else 8). */
+export function thumbShare(w: number, h: number): number {
+  for (const d of [...DIVISORS].reverse()) if (!(w % d) && !(h % d) && w / d <= THUMB_WIDTH) return d;
+  for (const d of DIVISORS) if (!(w % d) && !(h % d)) return d;
+  return 1;
+}
+
+/** The stretch of a source the timeline uses, in seconds of the source (every clip of it, stills included), or null. */
+export function rangeOf(doc: ProjectDoc, sourceId: string): [number, number] | null {
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (const track of doc.video?.tracks ?? []) {
+    for (const c of track.clips) {
+      if (c.source !== sourceId) continue;
+      for (const t of [sourceTime(c, c.start), sourceTime(c, c.start + c.length)]) {
+        lo = Math.min(lo, t / US);
+        hi = Math.max(hi, t / US);
+      }
+    }
+  }
+  return lo <= hi ? [lo, hi] : null;
+}
 /** The most an entry or exit movement, or a transition, enlarges a clip (transitions.ts: «تكبير» from 1.6). */
 export const MOVEMENT_HEADROOM = 1.6;
 
@@ -142,6 +173,19 @@ export class FrameStore<C> {
     } else list.splice(i + 1, 0, kept);
     this.total += f.bytes;
     return kept;
+  }
+
+  /**
+   * From `s`, where the stretch of frames kept at share d without a gap ends (each frame closed by the next): `s` when
+   * `s` itself is not kept, the start of the last frame when its next is not known yet, Infinity at the source's end.
+   */
+  coveredUntil(id: string, s: number, d: number): number {
+    const list = this.lists.get(id);
+    if (!list) return s;
+    let i = this.at(list, s);
+    if (i < 0 || list[i].d !== d || !(s + EPS < list[i].to)) return s;
+    while (!list[i].open && i + 1 < list.length && list[i + 1].d === d && Math.abs(list[i + 1].from - list[i].to) < 1e-9) i++;
+    return list[i].open ? Math.max(s, list[i].from) : list[i].to;
   }
 
   /** The frame after `f` in the same decoded run starts at `next` (Infinity: `f` is the source's last frame). */

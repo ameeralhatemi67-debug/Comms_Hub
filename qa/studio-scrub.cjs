@@ -19,6 +19,7 @@ const esbuild = require('esbuild');
 const { dependency, launchOptions } = require('./runtime.cjs');
 const { chromium } = dependency('playwright');
 const h = require('./desktop-helpers.cjs');
+const { make4k } = require('./studio-4k.cjs');
 
 const { check, note, result, finish } = h.record('qa/studio-scrub.cjs');
 const out = path.join(__dirname, 'artifacts', 'studio-scrub');
@@ -29,13 +30,6 @@ const LOCK = path.join(process.env.TEMP || require('node:os').tmpdir(), 'comms-h
 const CACHE_MB = 1024;
 const SEEKS = quick ? 40 : 200;
 const STEPS = quick ? 20 : 60;
-const SECONDS = 20;
-const BITS = 12;
-
-const grayBoxes = Array.from({ length: BITS }, (_, k) => {
-  const p = 2 ** k;
-  return `drawbox=x=iw*${k + 2}/16:y=ih*7/16:w=iw/16-4:h=ih/8:color=white:t=fill:enable='eq(mod(floor(n/${p})+floor(n/${2 * p}),2),1)'`;
-}).join(',');
 const FIXTURES = [
   { name: 'gop2.mp4', gop: 60 },
   { name: 'gop10.mp4', gop: 300 },
@@ -43,14 +37,7 @@ const FIXTURES = [
 
 function makeFixtures() {
   fs.mkdirSync(out, { recursive: true });
-  for (const f of FIXTURES) {
-    const file = path.join(out, f.name);
-    if (fs.existsSync(file) && fs.statSync(file).size > 1e8) continue;
-    const r = spawnSync('ffmpeg', ['-hide_banner', '-y', '-loglevel', 'error', '-f', 'lavfi', '-i', `testsrc2=s=3840x2160:r=30:d=${SECONDS}`,
-      '-vf', `drawbox=x=0:y=ih*6/16:w=iw:h=ih*4/16:color=black:t=fill,${grayBoxes}`,
-      '-c:v', 'libx264', '-preset', 'veryfast', '-b:v', '60M', '-maxrate', '60M', '-bufsize', '120M', '-pix_fmt', 'yuv420p', '-g', String(f.gop), '-keyint_min', String(f.gop), '-sc_threshold', '0', '-an', file], { encoding: 'utf8' });
-    if (r.status !== 0) throw new Error(`ffmpeg: ${r.stderr}`);
-  }
+  for (const f of FIXTURES) make4k(path.join(out, f.name), f.gop);
 }
 const probe = (file) => JSON.parse(spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=codec_name,profile,width,height,r_frame_rate,bit_rate,nb_frames:format=duration,bit_rate', '-of', 'json', file], { encoding: 'utf8' }).stdout);
 const keyFrames = (file) => spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-skip_frame', 'nokey', '-show_entries', 'frame=pts_time', '-of', 'csv=p=0', file], { encoding: 'utf8' }).stdout.trim().split(/\s+/).map(Number);
@@ -95,11 +82,15 @@ async function runIn(page) {
     for (const [mode, cacheMB] of [['floor', 0], ['kept', CACHE_MB]]) {
       const before = load();
       const opened = await page.evaluate((o) => window.scrub.open(o), { file: f.name, cacheMB, ratio: '16:9', canvasW: 1280 });
+      // cold: jumps as soon as the project opens; then the preview left open on the clip (the small frames fill), then
+      // the frames checked, then other jumps (warm), then steps
+      const cold = await page.evaluate((o) => window.scrub.random(o), { count: SEEKS, seed: 20261104, pause: 0 });
+      const settled = await page.evaluate((o) => window.scrub.settle(o), { ms: 60000 });
       const identity = await page.evaluate(() => window.scrub.identity());
-      const random = await page.evaluate((o) => window.scrub.random(o), { count: SEEKS, seed: 20261104, pause: 0 });
+      const random = await page.evaluate((o) => window.scrub.random(o), { count: SEEKS, seed: 1104, pause: 0 });
       const steps = await page.evaluate((o) => window.scrub.steps(o), { count: STEPS, seed: 7, pause: 0 });
-      r[mode] = { opened, identity, random, steps, load: { before, after: load() } };
-      console.log(`${f.name} ${mode}: random median ${random.median} ms (p95 ${random.p95}), steps forward ${steps.forward.median}, back ${steps.back.median}; load ${before} -> ${r[mode].load.after}`);
+      r[mode] = { opened, cold, settled, identity, random, steps, load: { before, after: load() } };
+      console.log(`${f.name} ${mode}: cold median ${cold.median} (sharp ${cold.sharp.median}); settled ${settled.ms} ms; warm median ${random.median} (sharp ${random.sharp.median}, p95 ${random.p95}); steps forward ${steps.forward.median}, back ${steps.back.median}; load ${before} -> ${r[mode].load.after}`);
     }
     run.fixtures[f.name] = r;
   }
@@ -174,11 +165,13 @@ function takeLock() {
         const fl = f.floor.random;
         const kp = f.kept.random;
         const ratio = Math.round((fl.median / Math.max(0.1, kp.median)) * 10) / 10;
-        f.ratio = ratio;
-        check(`${engine}, ${name}: the median of ${SEEKS} random seeks is at least three times faster with the frame memory (${fl.median} ms against ${kp.median} ms, ${ratio} times)`, ratio >= 3 && !fl.timeouts && !kp.timeouts, { floor: fl, kept: kp, load: [f.floor.load, f.kept.load] });
+        f.ratio = { right: ratio, sharp: Math.round((fl.sharp.median / Math.max(0.1, kp.sharp.median)) * 10) / 10, cold: Math.round((f.floor.cold.median / Math.max(0.1, f.kept.cold.median)) * 10) / 10 };
+        check(`${engine}, ${name}: the median of ${SEEKS} random seeks to the right frame is at least three times faster with the frame memory, the preview having been open on the clip (${fl.median} ms against ${kp.median} ms, ${ratio} times; the sharp frame ${fl.sharp.median} against ${kp.sharp.median}; just opened ${f.floor.cold.median} against ${f.kept.cold.median})`, ratio >= 3 && !fl.timeouts && !kp.timeouts, { floor: fl, kept: kp, cold: [f.floor.cold, f.kept.cold], settled: f.kept.settled, load: [f.floor.load, f.kept.load] });
         const id = f.kept.identity;
         const same = id.rows.filter((x) => x.shown === x.decoder && x.shown === x.expected).length;
         check(`${engine}, ${name}: at 48 times the kept frame is the frame the decoder gives and the time names (${same} of ${id.rows.length})`, same === 48 && id.rows.length === 48, id.rows.filter((x) => !(x.shown === x.decoder && x.shown === x.expected)));
+        const smalls = id.rows.filter((x) => x.small !== null);
+        check(`${engine}, ${name}: at the same times the small kept frame, shown first after a jump, is the same frame (${smalls.filter((x) => x.small === x.expected).length} of ${smalls.length} kept)`, smalls.length === 48 && smalls.every((x) => x.small === x.expected), smalls.filter((x) => x.small !== x.expected));
         const edges = id.edges.filter((x) => x.shown === x.expected).length;
         check(`${engine}, ${name}: at a frame's first microsecond and just before it, the kept frame is the one the export takes (${edges} of ${id.edges.length})`, edges === id.edges.length, id.edges.filter((x) => x.shown !== x.expected));
         const flid = f.floor.identity.rows.filter((x) => x.shown === x.decoder && x.shown === x.expected).length;

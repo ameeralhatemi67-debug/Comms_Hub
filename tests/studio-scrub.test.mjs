@@ -4,7 +4,7 @@
 // and the budget (the least recently shown let go first, never the frame on screen).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { divisorFor, EPS, FrameStore, MOVEMENT_HEADROOM, needOf } from '../src/lib/studio/scrub.ts';
+import { divisorFor, EPS, FrameStore, MOVEMENT_HEADROOM, needOf, rangeOf, thumbShare, THUMB_WIDTH } from '../src/lib/studio/scrub.ts';
 import { newVideoDoc } from '../src/lib/studio/schema.ts';
 import { addClip, addSource } from '../src/lib/studio/timeline.ts';
 
@@ -128,4 +128,48 @@ test('a frame kept again at the same start replaces the old one; drop keeps the 
   s.drop('a', 4);
   assert.equal(s.count('a'), 1);
   assert.equal(s.get('a', 0, 4).canvas, 'y');
+});
+
+test('the small frames: the largest share at most THUMB_WIDTH wide that divides the frame exactly', () => {
+  assert.equal(THUMB_WIDTH, 480);
+  assert.equal(thumbShare(3840, 2160), 8);
+  assert.equal(thumbShare(1920, 1080), 4);
+  assert.equal(thumbShare(1280, 720), 4);
+  assert.equal(thumbShare(480, 270), 1);
+  assert.equal(thumbShare(2160, 3840), 8);
+  // 7680 / 8 is still wider than 480: the smallest share there is
+  assert.equal(thumbShare(7680, 4320), 8);
+  assert.equal(thumbShare(1366, 768), 2);
+});
+
+test('the stretch of a source the timeline uses: every clip of it, from its first to its last source time', () => {
+  let { doc, id } = docWith({ in: 2 * US, length: 3 * US });
+  assert.deepEqual(rangeOf(doc, id), [2, 5]);
+  doc = addClip(doc, { source: id, start: 6 * US, length: US, in: 8 * US }).doc;
+  assert.deepEqual(rangeOf(doc, id), [2, 9]);
+  ({ doc, id } = docWith({ in: US, length: 2 * US, speed: 2 }));
+  assert.deepEqual(rangeOf(doc, id), [1, 5]);
+  assert.equal(rangeOf(doc, 'none'), null);
+});
+
+test('the covered stretch: kept frames without a gap from a time, to the start of an open last one or the end', () => {
+  const s = new FrameStore(1e9, () => undefined);
+  filled(s, 'a', 10);
+  assert.equal(s.coveredUntil('a', frame(2), 2), frame(9));
+  assert.equal(s.coveredUntil('a', frame(20), 2), frame(20));
+  assert.equal(s.coveredUntil('a', frame(2), 4), frame(2));
+  const s2 = new FrameStore(1e9, () => undefined);
+  const last = filled(s2, 'a', 10);
+  s2.close(last, Infinity);
+  assert.equal(s2.coveredUntil('a', 0, 2), Infinity);
+  // a hole at frame 5
+  const s3 = new FrameStore(1e9, () => undefined);
+  filled(s3, 'a', 5);
+  let prev = null;
+  for (let i = 6; i < 9; i++) {
+    if (prev) s3.close(prev, frame(i));
+    prev = s3.put('a', { from: frame(i), to: frame(i + 1), canvas: i, bytes: 1, d: 2 });
+  }
+  assert.equal(s3.coveredUntil('a', 0, 2), frame(4));
+  assert.equal(s3.coveredUntil('a', frame(6), 2), frame(8));
 });

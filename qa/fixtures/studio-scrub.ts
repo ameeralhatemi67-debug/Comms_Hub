@@ -69,45 +69,74 @@ async function open(o: { file: string; cacheMB: number; ratio: schema.Ratio; can
   return { state: pool.state(r.id), info, canvas: [canvas.width, canvas.height], cache: pool.frameCache() };
 }
 
-/** Seeks the player to `s` seconds and waits until the pool shows the frame for it; milliseconds, or null on time out. */
-async function seekAndWait(s: number, limit = 20000): Promise<number | null> {
+/**
+ * Seeks the player to `s` seconds and waits until the pool shows the frame for it (`right`, at any size: a small kept
+ * frame counts) and until it shows it at the preview's size with nothing more to read (`sharp`); milliseconds each,
+ * null on time out.
+ */
+async function seekAndWait(s: number, limit = 20000): Promise<{ right: number | null; sharp: number | null }> {
   const o = cur!;
   const at = Math.round(s * US);
   const t0 = performance.now();
-  const shows = () => {
+  let right: number | null = null;
+  const look = () => {
     const sp = o.pool.shownSpan(o.id);
     // the frame for `at`: the floor's frame by its own rule (it may take the next frame within 0.1 ms), the kept one by the export's
-    return !!sp && !sp.busy && sp.from <= at / US + 1e-4 && at / US < sp.to + 1e-4;
+    const covers = !!sp && sp.from <= at / US + 1e-4 && at / US < sp.to + 1e-4;
+    if (covers && right === null) right = performance.now() - t0;
+    return covers && sp!.sharp && !sp!.busy;
   };
   while (performance.now() - t0 < limit) {
     const wait = o.changed();
     o.player.seek(at);
-    if (shows()) return performance.now() - t0;
+    if (look()) return { right, sharp: performance.now() - t0 };
     await Promise.race([wait, sleep(250)]);
-    if (shows()) return performance.now() - t0;
+    if (look()) return { right, sharp: performance.now() - t0 };
   }
-  return null;
+  return { right, sharp: null };
 }
 
 const stats = (ms: number[]) => {
+  if (!ms.length) return { n: 0, median: null, p95: null, max: null, mean: null };
   const a = [...ms].sort((x, y) => x - y);
   const q = (p: number) => Math.round(a[Math.min(a.length - 1, Math.floor(p * a.length))] * 10) / 10;
   return { n: a.length, median: q(0.5), p95: q(0.95), max: Math.round(a[a.length - 1] * 10) / 10, mean: Math.round((a.reduce((x, y) => x + y, 0) / a.length) * 10) / 10 };
 };
 
+/**
+ * The paused preview left on the clip's first frame until its small frames stop growing (the editor open on the
+ * project), at most `ms`: how long that took and what was kept.
+ */
+async function settle(o: { ms: number }) {
+  const t0 = performance.now();
+  await seekAndWait(0);
+  let last = -1;
+  let still = 0;
+  while (performance.now() - t0 < o.ms) {
+    await sleep(250);
+    const n = cur!.pool.frameCache().small.frames;
+    still = n === last ? still + 1 : 0;
+    last = n;
+    if (still >= 6) break;
+  }
+  return { ms: Math.round(performance.now() - t0), cache: cur!.pool.frameCache() };
+}
+
 /** `count` random seeks over the whole source (seeded), with `pause` ms between them, as a person jumping about. */
 async function random(o: { count: number; seed: number; pause: number }) {
   const r = rng(o.seed);
-  const ms: number[] = [];
+  const right: number[] = [];
+  const sharp: number[] = [];
   let timeouts = 0;
   for (let i = 0; i < o.count; i++) {
     const s = r() * (cur!.duration - 0.2);
     const t = await seekAndWait(s);
-    if (t === null) timeouts++;
-    else ms.push(t);
+    if (t.right === null || t.sharp === null) timeouts++;
+    if (t.right !== null) right.push(t.right);
+    if (t.sharp !== null) sharp.push(t.sharp);
     if (o.pause) await sleep(o.pause);
   }
-  return { ...stats(ms), timeouts, cache: cur!.pool.frameCache() };
+  return { ...stats(right), sharp: stats(sharp), timeouts, cache: cur!.pool.frameCache() };
 }
 
 /** From a random place, `count` steps of one frame forward, then as many back, as the arrow keys do. */
@@ -119,14 +148,14 @@ async function steps(o: { count: number; seed: number; pause: number }) {
   let timeouts = 0;
   for (let i = 0; i <= o.count; i++) {
     const t = await seekAndWait((n0 + i + 0.5) / 30);
-    if (t === null) timeouts++;
-    else if (i) fwd.push(t);
+    if (t.sharp === null) timeouts++;
+    else if (i) fwd.push(t.sharp);
     if (o.pause) await sleep(o.pause);
   }
   for (let i = o.count - 1; i >= 0; i--) {
     const t = await seekAndWait((n0 + i + 0.5) / 30);
-    if (t === null) timeouts++;
-    else back.push(t);
+    if (t.sharp === null) timeouts++;
+    else back.push(t.sharp);
     if (o.pause) await sleep(o.pause);
   }
   return { forward: stats(fwd), back: stats(back), timeouts };
@@ -144,13 +173,15 @@ async function identity() {
     const n = Math.floor(((i + 0.5) / 16) * (o.duration - 0.5) * o.fps);
     times.push((n + 0.5) / o.fps, n / o.fps + 0.002, (n + 1) / o.fps - 0.002);
   }
-  const rows: { s: number; expected: number; shown: number | null; decoder: number | null }[] = [];
+  const rows: { s: number; expected: number; shown: number | null; decoder: number | null; small: number | null }[] = [];
   for (const s of times) {
-    await seekAndWait(s);
     const at = Math.round(s * US);
+    // the small frame kept for that time, if the stretch was filled (it is what a jump shows first)
+    const small = o.pool.keptAt(o.id, at / US).small;
+    await seekAndWait(s);
     const shown = o.pool.frameNear(o.id, at);
     const dec = await o.pool.frameAt(o.id, at);
-    rows.push({ s, expected: Math.floor((at / US + EPS) * o.fps), shown: shown ? readGray(shown) : null, decoder: dec ? readGray(dec) : null });
+    rows.push({ s, expected: Math.floor((at / US + EPS) * o.fps), shown: shown ? readGray(shown) : null, decoder: dec ? readGray(dec) : null, small: small ? readGray(small) : null });
   }
   const edges: { us: number; expected: number; shown: number | null }[] = [];
   for (let i = 0; i < 12; i++) {
@@ -170,4 +201,4 @@ function renderer() {
   return gl && ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : null;
 }
 
-(window as unknown as { scrub: unknown }).scrub = { open, random, steps, identity, renderer };
+(window as unknown as { scrub: unknown }).scrub = { open, settle, random, steps, identity, renderer };

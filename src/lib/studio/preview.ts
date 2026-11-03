@@ -3,15 +3,18 @@
 // 0.12 s) and drawn onto the canvas; its sound plays at the clip's gain. While paused, frames come from
 // Mediabunny, the decoder the export uses, so a paused frame is the exported frame. A clip at another speed
 // plays its element at that rate (a ramp changes the rate every frame), silently; a reversed clip and a
-// still draw from the decoder while playing too (an element cannot play backwards). Browser only.
-import { durationOf, type Micros, type ProjectDoc } from './schema.ts';
+// still draw from the decoder while playing too (an element cannot play backwards).
+// D10 (playback.ts): under «تلقائية» each project frame is drawn once and the frames missed set the preview's level;
+// with a stream budget the largest streams play their source and the rest their light copy. Browser only.
+import { canvasOf, durationOf, type Clip, type Micros, type ProjectDoc } from './schema.ts';
 import { audibleAt, mixGain, visibleAt } from './timeline.ts';
 import { isHold, retimed, sourceTime, speedAt } from './speed.ts';
-import { composeFrame, type Resolver } from './compose.ts';
+import { composeFrame, fitSize, transformAt, type Resolver } from './compose.ts';
 import type { MediaPool } from './media.ts';
 import type { MotionRenderer } from './motion-adapter.ts';
 import { wallNow, type Clock } from './preview-link.ts';
-import { needOf } from './scrub.ts';
+import { needOf, rangeOf } from './scrub.ts';
+import { streamPlan, type AutoLevel, type Stream } from './playback.ts';
 
 export const DRIFT = 0.12;
 
@@ -39,6 +42,17 @@ export class Player {
   private live = new Set<string>();
   /** Told whenever the playhead starts, stops or jumps, with the moment it did: a preview window keeps in step (preview-link.ts). */
   onClock: ((c: Clock) => void) | null = null;
+  /** «تلقائية» (playback.ts AutoLevel): the level judged from the frames missed while playing; null at a fixed resolution. */
+  auto: AutoLevel | null = null;
+  /** Told when «تلقائية» moves the preview to another share of its size. */
+  onAuto: ((share: number) => void) | null = null;
+  /** The stream budget (playback.ts streamBudget); null, or no budget, plays every light copy as before. */
+  budget: (() => number | null) | null = null;
+  /** The clips playing their light copy, as the budget decided at play start or the last seek. */
+  private copies = new Set<string>();
+  /** The play so far: project frames due, draws, frames not drawn in time, elements put back in step, milliseconds. */
+  stats = { due: 0, drawn: 0, missed: 0, reseeks: 0, ms: 0 };
+  private lastN = -1;
   private readonly o: PlayerOptions;
 
   constructor(o: PlayerOptions) {
@@ -51,7 +65,7 @@ export class Player {
       image: (id) => this.o.pool.image(id),
       videoFrame: (id, at, clipId) => {
         if (this.playing && clipId && this.live.has(clipId)) {
-          const el = this.o.pool.element(clipId, id) as HTMLVideoElement | null;
+          const el = this.o.pool.elementOf(clipId) as HTMLVideoElement | null;
           if (el && el.readyState >= 2 && el.videoWidth) return el;
         }
         return this.o.pool.frameNear(id, at);
@@ -73,7 +87,7 @@ export class Player {
         continue;
       }
       const n = needOf(doc, s.id, info.w, info.h, scale);
-      this.o.pool.setNeed(s.id, n.w, n.h);
+      this.o.pool.setNeed(s.id, n.w, n.h, rangeOf(doc, s.id));
     }
     // told again at the next draw while a source is still being made ready
     if (all) this.told = { doc, scale };
@@ -103,6 +117,9 @@ export class Player {
     this.o.pool.setPlaying(true);
     this.startPerf = performance.now();
     this.startT = this.t;
+    this.stats = { due: 0, drawn: 0, missed: 0, reseeks: 0, ms: 0 };
+    this.lastN = -1;
+    this.auto?.start(this.startPerf);
     this.sync(true);
     cancelAnimationFrame(this.raf);
     this.raf = requestAnimationFrame(this.loop);
@@ -132,6 +149,8 @@ export class Player {
     if (this.playing) {
       this.startT = this.t;
       this.startPerf = performance.now();
+      // the frames are counted from the jump (a jump back would otherwise wait for the frame it left)
+      this.lastN = -1;
       this.sync(true);
     }
     this.draw();
@@ -149,7 +168,21 @@ export class Player {
       return;
     }
     this.sync(false);
-    this.draw();
+    const n = Math.floor((this.t * (this.o.getDoc().video?.fps ?? 30)) / 1e6 + 1e-9);
+    const due = this.lastN < 0 ? 1 : Math.max(0, n - this.lastN);
+    const missed = this.lastN < 0 ? 0 : Math.max(0, due - 1);
+    if (due) {
+      this.stats.due += due;
+      this.stats.missed += missed;
+      this.lastN = n;
+    }
+    this.stats.ms = now - this.startPerf;
+    // under «تلقائية» each project frame is drawn once; otherwise at every refresh, as before
+    if (!this.auto || due) {
+      this.stats.drawn++;
+      this.draw();
+    }
+    if (this.auto && due && this.auto.frame(now, due, missed) !== null) this.onAuto?.(this.auto.value);
     this.o.onTime(this.t, true);
     this.raf = requestAnimationFrame(this.loop);
   };
@@ -162,15 +195,18 @@ export class Player {
     for (const { track, clip } of audibleAt(doc, this.t)) heard.set(clip.id, this.muted ? 0 : Math.max(0, Math.min(1, mixGain(doc, track, clip, this.t))));
     // reversed clips and stills are drawn from the decoder (frameNear), not from an element
     const seen = visibleAt(doc, this.t).filter(({ clip }) => clip.source && !clip.reverse && !isHold(clip) && doc.sources.find((s) => s.id === clip.source)?.media === 'video');
+    // which streams play their light copy is decided where playing starts or jumps, never in the middle (playback.ts)
+    if (force) this.copies = streamPlan(this.streams(doc, seen.map((v) => v.clip)), this.budget?.() ?? null);
     const clips = new Map<string, (typeof seen)[number]['clip']>();
     for (const v of seen) clips.set(v.clip.id, v.clip);
     for (const { clip } of audibleAt(doc, this.t)) clips.set(clip.id, clip);
     for (const clip of clips.values()) {
-      const el = this.o.pool.element(clip.id, clip.source!);
+      // a clip only heard plays its light copy, as before
+      const el = this.o.pool.element(clip.id, clip.source!, this.copies.has(clip.id) || !seen.some((v) => v.clip.id === clip.id));
       if (!el) continue;
       keep.add(clip.id);
       // a light copy may start at another time than its original (media.ts elementOffset)
-      const want = sourceTime(clip, this.t) / 1e6 - this.o.pool.elementOffset(clip.source!);
+      const want = sourceTime(clip, this.t) / 1e6 - this.o.pool.elementOffset(clip.source!, clip.id);
       const rate = retimed(clip) ? speedAt(clip, this.t - clip.start) : 1;
       if (Math.abs(el.playbackRate - rate) > 1e-3) {
         try {
@@ -180,6 +216,7 @@ export class Player {
         }
       }
       if (force || Math.abs(el.currentTime - want) > DRIFT) {
+        if (!force) this.stats.reseeks++;
         try {
           el.currentTime = want;
         } catch {
@@ -193,6 +230,34 @@ export class Player {
     }
     this.o.pool.pauseExcept(keep);
     this.live = keep;
+  }
+
+  /** The video streams at the playhead, for the budget: their pixels a second, their share of the canvas, their copy. */
+  private streams(doc: ProjectDoc, clips: Clip[]): Stream[] {
+    const { w: W, h: H } = canvasOf(doc);
+    const out: Stream[] = [];
+    for (const clip of clips) {
+      const info = this.o.pool.info(clip.source!);
+      if (!info?.w || !info.h) continue;
+      const rate = retimed(clip) ? speedAt(clip, this.t - clip.start) : 1;
+      const box = fitSize(info.w, info.h, W, H, clip.fit);
+      const k = transformAt(clip, this.t, W, H).scale;
+      out.push({ clip: clip.id, pixels: info.w * info.h * 30 * Math.abs(rate), area: Math.min(1, (box.w * k * box.h * k) / (W * H)), copy: this.o.pool.hasCopy(clip.source!) });
+    }
+    return out;
+  }
+
+  /** What the playing elements say of their own frames: decoded and dropped since they started (for the checks). */
+  quality(): { total: number; dropped: number } {
+    let total = 0;
+    let dropped = 0;
+    for (const id of this.live) {
+      const q = (this.o.pool.elementOf(id) as HTMLVideoElement | null)?.getVideoPlaybackQuality?.();
+      if (!q) continue;
+      total += q.totalVideoFrames;
+      dropped += q.droppedVideoFrames;
+    }
+    return { total, dropped };
   }
 
   dispose() {

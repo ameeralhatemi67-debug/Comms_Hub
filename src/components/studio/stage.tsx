@@ -2,14 +2,15 @@
 
 // The studio's preview, «المعاينة» (MVP_draft.md 62, 62.5): the project's frame drawn by the shared
 // compositor, at the preview resolution chosen for playing and for pausing (full down to 1/32, as in
-// desktop editors, so a slow computer plays smoothly); the transport; Reels safe zones; the selected
+// desktop editors, so a slow computer plays smoothly, or «تلقائية» while playing: the share the player's
+// AutoLevel sets from the frames it misses, D10); the transport; Reels safe zones; the selected
 // clip's outline with handles to move it, scale it from a corner and turn it; the text tool (a click adds
 // a text there); things dragged from the other windows are dropped here at the playhead.
 import { useEffect, useRef, useState, type DragEvent, type PointerEvent as RPointerEvent } from 'react';
 import { ChevronsLeft, ChevronsRight, Gauge, Pause, Play, ScanLine, SkipBack, SkipForward, StepBack, StepForward } from 'lucide-react';
 import { RATIOS, canvasOf, durationOf, type Clip, type Layer, type Micros, type ProjectDoc, type Ratio, type Transform } from '@/lib/studio/schema';
 import { boxOf, pick, transformAt, type Resolver } from '@/lib/studio/compose';
-import { canvasWidth, dragHandle, handleAt, resolutionLabel, RESOLUTIONS, snapCentre, ROTATE_GAP_PX, HANDLE_PX, type Handle } from '@/lib/studio/handles';
+import { AUTO, canvasWidth, dragHandle, handleAt, PLAY_RESOLUTIONS, resolutionLabel, RESOLUTIONS, snapCentre, ROTATE_GAP_PX, HANDLE_PX, type Handle } from '@/lib/studio/handles';
 import { withKeys } from '@/lib/studio/shortcuts';
 import { frameUs, timecode } from '@/lib/studio/time';
 import { drawSafeZones } from '@/lib/motion/preview.js';
@@ -84,7 +85,7 @@ export function ResolutionMenu({ value, onChange, photo }: { value: Resolution; 
       window.removeEventListener('keydown', esc);
     };
   }, [open]);
-  const lowered = value.play < 1 || value.pause < 1;
+  const lowered = (value.play !== AUTO && value.play < 1) || value.pause < 1;
   return (
     <div className="st-res" ref={ref}>
       <button type="button" className="st-mon-btn" data-on={lowered ? 'yes' : 'no'} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((v) => !v)} title="دقة المعاينة: أقل يعني تشغيلاً أسلس على الأجهزة البطيئة، والتصدير بدقته الكاملة دائماً">
@@ -97,7 +98,7 @@ export function ResolutionMenu({ value, onChange, photo }: { value: Resolution; 
             <>
               <span className="st-menu-label">أثناء التشغيل</span>
               <div className="st-res-row" role="radiogroup" aria-label="الدقة أثناء التشغيل">
-                {RESOLUTIONS.map((r) => (
+                {PLAY_RESOLUTIONS.map((r) => (
                   <button key={r.label} type="button" role="radio" aria-checked={Math.abs(value.play - r.value) < 1e-6} data-on={Math.abs(value.play - r.value) < 1e-6 ? 'yes' : 'no'} onClick={() => onChange({ ...value, play: r.value })}>
                     {r.label}
                   </button>
@@ -113,6 +114,7 @@ export function ResolutionMenu({ value, onChange, photo }: { value: Resolution; 
               </button>
             ))}
           </div>
+          {!photo && value.play === AUTO && <p className="st-hint">تلقائية: تنزل دقة المعاينة أثناء التشغيل حين تفوتها إطارات، وتعود حين يستقر التشغيل.</p>}
           <p className="st-hint">المعاينة وحدها تتأثر؛ التصدير يُرسم بدقته الكاملة.</p>
         </div>
       )}
@@ -121,7 +123,7 @@ export function ResolutionMenu({ value, onChange, photo }: { value: Resolution; 
 }
 
 export function Stage({
-  doc, player, canvasRef, t, playing, safe, onSafe, selected, readOnly, onSelect, onPlace, onTransform, ready, note, resolution, onResolution, tool, onTextAt, onDropAdd, onDropEffect, shapes, onShape,
+  doc, player, canvasRef, t, playing, safe, onSafe, selected, readOnly, onSelect, onPlace, onTransform, ready, note, resolution, onResolution, autoShare = 1, tool, onTextAt, onDropAdd, onDropEffect, shapes, onShape,
 }: {
   doc: ProjectDoc;
   player: Player | null;
@@ -141,6 +143,8 @@ export function Stage({
   note: string | null;
   resolution: Resolution;
   onResolution: (r: Resolution) => void;
+  /** «تلقائية»: the share the player plays at now. */
+  autoShare?: number;
   tool: Tool;
   onTextAt: (x: number, y: number) => void;
   onDropAdd: (d: AddDrop) => void;
@@ -174,7 +178,8 @@ export function Stage({
   }, [W, H]);
 
   // its pixels: the share of its size on screen chosen for playing or pausing
-  const frac = playing ? resolution.play : resolution.pause;
+  const auto = playing && resolution.play === AUTO;
+  const frac = playing ? (auto ? autoShare : resolution.play) : resolution.pause;
   useEffect(() => {
     const c = canvasRef.current;
     if (!c) return;
@@ -302,7 +307,7 @@ export function Stage({
           aria-label={`معاينة المشروع ${W} في ${H}`}
           role="img"
         />
-        {frac < 1 && <span className="st-res-badge" aria-hidden="true">{resolutionLabel(frac)}</span>}
+        {frac < 1 && <span className="st-res-badge" aria-hidden="true">{auto ? `تلقائية: ${resolutionLabel(frac)}` : resolutionLabel(frac)}</span>}
         {!ready && <div className="st-stage-wait" role="status">جارٍ تجهيز القوالب والخطوط…</div>}
         {note && <div className="st-stage-note" role="status">{note}</div>}
         {tool === 'text' && !readOnly && <div className="st-stage-tip">أداة النص: انقر حيث تريد العنوان.</div>}

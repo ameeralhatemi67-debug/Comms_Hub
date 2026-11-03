@@ -2887,6 +2887,36 @@ While it works: «جارٍ القياس …٪…» with «إلغاء». Afterwar
   proof is `qa/studio-crossdevice.cjs`.
 - Nothing is scheduled: the measurement runs when the person asks.
 
+## 63.7 A faster preview (D10), 2026-11-04
+
+Phase D10 of `Desktop_Power_Ideas.md` (ideas P-02, P-03 and P-04). Speed only: the preview shows the same project at the same
+moments, and the export reads none of this. Inside the application before a measurement, and in a browser, the preview is
+as it was in 62.5 and 63.4.
+
+**«ذاكرة الإطارات للتنقل».** Once the device is measured, the paused preview keeps the frames it decodes, in the memory the plan
+of 63.6 gives (64 MB a gigabyte of the computer's memory, at most 3 GB; «أخف على الجهاز» half, «أقصى ما يقدر عليه الجهاز» twice).
+- The frames near the playhead, at the size the preview draws them: a step back or forward, or a return to a moment, is drawn
+  at once. A source that is enlarged on the canvas (a larger size, a key, a crop, an entry or exit movement) keeps larger
+  frames.
+- Every frame of the stretch of each source the timeline uses, small (at most 480 pixels wide), in a third of the memory,
+  filled while the preview is paused and nothing else is read: after a jump the right frame appears at once, small, and its
+  sharp version replaces it.
+- A time shows the frame the export takes for it. Nothing is read ahead while playing.
+
+**«تلقائية».** A first choice in «أثناء التشغيل», in the preview's menu and in «عرض». While playing, the preview draws each project
+frame once and counts those it could not draw in time:
+- a quarter of a second with two or more missed lowers it one step (كاملة، 1/2، 1/4);
+- four calm seconds raise it one step, never back to a step that missed during the same play;
+- a play starts where the last play of the same shape ended on this device, else at «دقة المعاينة عند البدء» of the plan.
+
+The badge reads «تلقائية: 1/2» while lowered, and the menu says «تلقائية: تنزل دقة المعاينة أثناء التشغيل حين تفوتها إطارات، وتعود حين
+يستقر التشغيل.». Once the device is measured «تلقائية» is the default while playing, unless the person chose otherwise; in a browser
+«كاملة» stays the default, and «تلقائية» can be chosen. «عند الإيقاف» is unchanged.
+
+**The streams played at once.** Where playing starts or jumps, the videos at the playhead are weighed by their pixels against
+the 4K decoding the device measured (three quarters of it, less when drawing is slow). The largest on the canvas play their
+own file and the rest their light copy (63.4) where one exists. Before a measurement every light copy plays, as before.
+
 # 64. The Android application «مركز الاتصال المؤسسي», 2026-10-26
 
 Owner decisions of 2026-10-26: `Android_Build_Plan.md`, accepted and recorded in `progress.md`. An application for Android phones that opens the live site in its own window, as the desktop application does on Windows (63). It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a phone browser remains a full client. The studio is left out of this application for now (below). This section describes phases A1 and A2; the later phases add 64.1 onward.

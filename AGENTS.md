@@ -427,6 +427,15 @@ choice of 2026-11-03): bridge version 6 adds `gpu` and `profile`.
   encoders then write BT.601. `export.ts` sends them BT.709 YUV made by `src/lib/studio/yuv.ts`, and restarts on that path
   if a chip's encoder reports any other matrix.
 
+The faster preview (D10, `MVP_draft.md` 63.7) reads the plan through `src/components/studio/plan.ts` and is speed only.
+- **The paused preview's frame memory** (`src/lib/studio/scrub.ts`, `media.ts` `setFrameCache`): its own decoder, never the
+  export's (`sink` for `frameAt`, `passSink` for `frames`). A time takes the frame the export takes (`EPS`), and a kept frame
+  answers only while its next frame is known to start later. Frames are kept at a power-of-two share of the source, never
+  smaller than drawn (`needOf`), so the layout is the full frame's to the bit. A budget of 0 is today's decoder, unchanged.
+- **«تلقائية» and the stream budget** (`src/lib/studio/playback.ts`) change only the preview canvas's size and which copy an
+  element plays. Without a plan every light copy plays as D5 made it, and «كاملة» stays the browser's default.
+- The proofs are `qa/studio-scrub.cjs` (identity at 48 times, the small frames included) and `qa/studio-autores.cjs`.
+
 The Android application is being built, by owner directive of 2026-10-26 (`Android_Build_Plan.md`,
 `MVP_draft.md` section 64, recorded in `progress.md`). It is a Capacitor 8 application in `mobile/`, with its
 own `package.json` and lockfile like `desktop/`, outside the site's typecheck and build, id `sa.commshub.app`.
