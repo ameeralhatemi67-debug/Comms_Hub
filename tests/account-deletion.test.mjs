@@ -71,10 +71,11 @@ test('the panel asks with a long press, tells the phones, and points to the publ
 });
 
 test('the privacy policy and the deletion page: public, without scripts, dated, and saying what the code asks', async () => {
-  for (const html of [page, privacy]) {
+  // Each page carries the date it last changed: the deletion page 28 October, the policy 3 November (the YouTube test).
+  for (const [html, en, ar] of [[page, '28 October 2026', '28 أكتوبر 2026'], [privacy, '3 November 2026', '3 نوفمبر 2026']]) {
     assert.doesNotMatch(html, /<script/i);
-    assert.match(html, /Last updated: 28 October 2026/);
-    assert.match(html, /آخر تحديث: 28 أكتوبر 2026/);
+    assert.match(html, new RegExp(`Last updated: ${en}`));
+    assert.match(html, new RegExp(`آخر تحديث: ${ar}`));
     assert.match(html, /<div class="ar" lang="ar" dir="rtl">/);
   }
   assert.match(privacy, /href="\/account-deletion\.html"/);
@@ -83,7 +84,7 @@ test('the privacy policy and the deletion page: public, without scripts, dated, 
   const { GOOGLE_SCOPES } = await import('../src/lib/platforms/oauth2.ts');
   const drive = /export const DRIVE_SCOPE = '([^']+)';/.exec(read('src/lib/drive/google.ts'))[1];
   const asked = new Set([...GOOGLE_SCOPES, drive]);
-  assert.equal(asked.size, 3);
+  assert.equal(asked.size, 4);
   for (const s of asked) assert.ok(privacy.includes(s.replace('https://www.googleapis.com/auth/', '')), s);
   assert.match(privacy, /Google API Services User Data Policy/);
   assert.match(privacy, /Limited Use/);

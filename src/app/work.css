@@ -951,6 +951,39 @@ p.pf-note.info{background:var(--surface-2);border:1px solid var(--line);color:va
 .pf-more{margin-top:14px;border-top:1px solid var(--line);padding-top:4px}
 .pf-more>summary{min-height:42px;display:flex;align-items:center;font-weight:600;color:var(--green-text);cursor:pointer;width:fit-content}
 .pf-sheet .ytn{display:flex;gap:8px;margin:0 0 12px;padding:8px 10px;border-radius:8px;background:var(--surface-2);font-size:12.5px;color:var(--muted)}
+/* «تجربة النشر» in a YouTube account's sheet (MVP_draft.md section 71). */
+.yt-test{margin-top:16px;padding-top:10px;border-top:1px solid var(--line)}
+.yt-test h4{margin:4px 0 4px;font-size:15px;font-weight:600}
+.yt-test h5{margin:0 0 4px;font-size:13px;font-weight:600;color:var(--muted)}
+.yt-lead{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+.yt-links{margin:0 0 4px}
+.yt-form{display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.yt-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.yt-lbl{min-width:64px;font-size:13px;font-weight:500}
+.yt-sub{margin:-4px 0 0;font-size:12px;color:var(--muted)}
+.yt-sub.warn{margin:0;color:var(--st-warn-fg)}
+.yt-f{margin:0}
+.yt-f textarea{display:block;width:100%;min-height:72px;margin-top:6px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px;resize:vertical}
+.yt-file input[type=file]{display:none}
+.yt-chip{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
+.yt-chip b{flex:1 1 auto;min-width:0;font-size:13px;font-weight:600;overflow-wrap:anywhere}
+.yt-chip small{font-size:12px;color:var(--muted)}
+.yt-progress{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:13px}
+.yt-bar{flex:1 1 160px;height:8px;border-radius:4px;background:var(--chip-bg);overflow:hidden}
+.yt-bar i{display:block;height:100%;background:var(--green);transition:width .3s}
+.yt-test div.pf-note{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 0;padding:10px 13px;border-radius:8px;font-size:13px}
+.yt-test div.pf-note.ok{background:var(--st-success-bg);color:var(--st-success-fg)}
+.yt-test div.pf-note.bad{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.yt-test .yt-form p.pf-note{margin:0}
+.yt-done{display:grid!important;gap:4px}
+.yt-list{display:grid;gap:2px;margin-top:14px}
+.yt-item{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.yt-item-text{display:grid;flex:1 1 180px;gap:2px;min-width:0}
+.yt-item-text b{font-size:13px;font-weight:600;overflow-wrap:anywhere}
+.yt-item-text small{font-size:12px;color:var(--muted)}
+.yt-item-acts{display:flex;flex-wrap:wrap;gap:6px}
+.yt-item[data-state="deleted"] b,.yt-item[data-state="failed"] b{font-weight:500;color:var(--muted)}
+.pf-btn.off{opacity:.5;pointer-events:none}
 /* The words and pictures of a setup guide (src/components/guide-text.tsx; MVP_draft.md section 67.5). Tokens only. */
 .gd-ui,.gd-val{display:inline-block;max-width:100%;padding:1px 7px;border-radius:6px;font-weight:600;color:var(--ink);-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .gd-ui{background:var(--chip-bg);border:1px solid var(--line)}

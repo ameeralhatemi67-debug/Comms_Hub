@@ -26,6 +26,19 @@ related:
 
 # Communication Department Hub — Current Status
 
+## «تجربة النشر» on a YouTube account, built 2026-11-03, not live
+
+From the owner's request for a quick test in a connected YouTube channel's sheet (`MVP_draft.md` section 71, `progress.md`).
+
+- **Done.** A real test video from the library or the device, private or public, with title and description; progress, cancel and
+  resume; the result with its link; the last five tests with «مشاهدة» and «حذف»; links to the channel and Studio. A community post
+  is copied and opened on YouTube, because YouTube's API cannot create one.
+- **Evidence.** `npm test` 734 of 734, typecheck and build clean, rules 75 of 75 on a private container, `qa/youtube-test-flow.cjs`
+  49 of 49, `qa/platforms-flow.cjs` 131 of 131.
+- **Not verified.** A real upload to YouTube; signed in on the real site.
+- **Next.** The owner approves applying `20261103120000_platform_tests.sql` to comms-hub and a deployment; then one private test on
+  the Hedayh channel, and one reconnect of it so «حذف» works.
+
 ## The YouTube setup guide rewritten, live 2026-11-02
 
 From the director's note that the steps were still hard to follow (`MVP_draft.md` section 67.5, `progress.md`). Live on production since 2026-11-02 as `8133276`; no migration, nothing in the database changed.

@@ -30,6 +30,10 @@ export const HOLD = {
   accountDelete: 'حذف الحساب يفصله عن المركز ويحذف مفاتيحه.',
   /** «حسابات المنصات»: disconnect a really-connected account. */
   accountDisconnect: 'الفصل يدمّر رمز الحساب وينهي تفويضه فوراً، فلا يُنشر عليه حتى يُعاد ربطه.',
+  /** «حسابات المنصات»: a public test video on YouTube (MVP_draft.md section 71). */
+  platformTestPublic: 'المقطع العام يراه كل من يزور القناة فور رفعه.',
+  /** «حسابات المنصات»: delete a test video from YouTube. */
+  platformTestDelete: 'يُحذف المقطع من القناة على يوتيوب نهائياً، ولا يُسترجع.',
   // Permissions (Permissions_Plan.md 10, «New hold buttons»).
   /** «الحسابات»: remove a member. */
   removeMember: 'إزالة العضو تفصله عن المركز وتبقي أعماله لدى من يُسند إليه.',
