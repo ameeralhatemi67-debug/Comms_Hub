@@ -4,7 +4,7 @@
 // question before quitting during work. From D9 (Desktop_Power_Ideas.md P-01, P-33) also the graphics chip's
 // choice and the device profile. From D12 (P-30) also what the idle-time broker reads: what each window says it is
 // doing, the last key or click, mains or battery and the processor's speed limit; native-media.ts runs the jobs. The
-// rules are the pure modules it imports.
+// rules are the pure modules it imports. Also from D12 (P-26) the progress of a page's work on the taskbar button.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -20,6 +20,7 @@ import { PRODUCT_NAME } from './identity.ts';
 import { BRIDGE_VERSION, CHANNEL } from './ipc.ts';
 import { closeAction, quitAction, Registry, shouldNotify } from './life.ts';
 import { guard } from './sender.ts';
+import { progressBar, progressOf } from './taskbar.ts';
 import { parseSettings, type Settings } from './settings.ts';
 import { feedAllowed, START } from './update.ts';
 import { startUpdates, type Updates } from './updater.ts';
@@ -88,6 +89,8 @@ export function startNative(o: NativeOptions): Native {
     for (const fn of idleListeners) fn();
   };
   let copies: { making: number; waiting: number; hold: Hold | null } = { making: 0, waiting: 0, hold: null };
+  /** The taskbar button's bar, per window (P-26): the last fraction shown, and whether it is red. */
+  const shown = new Map<number, { value: number; failed: boolean }>();
 
   function readSettings(): Settings {
     try {
@@ -221,6 +224,16 @@ export function startNative(o: NativeOptions): Native {
       drop(id);
       hiddenForWork.delete(win);
     });
+    // The taskbar's bar ends with the document that set it; a red one, once the person has looked at the window.
+    const clearBar = () => {
+      if (!shown.delete(id) || win.isDestroyed()) return;
+      win.setProgressBar(-1, { mode: 'none' });
+    };
+    contents.on('did-navigate', clearBar);
+    contents.on('render-process-gone', clearBar);
+    win.on('focus', () => {
+      if (shown.get(id)?.failed) clearBar();
+    });
     // A key or a click in any window of the site holds background work for a few seconds (idle.ts); only the time is kept.
     contents.on('audio-state-changed', (event) => {
       if (event.audible === audible.has(id)) return;
@@ -348,6 +361,19 @@ export function startNative(o: NativeOptions): Native {
     refreshTray();
     idleChanged();
     return was;
+  });
+  // How far a page's work is, on the taskbar button (D12, P-26): a number from 0 to 1, «done» or «failed» (red).
+  handle(CHANNEL.progress, (event, state: unknown) => {
+    const p = progressOf(state);
+    if (!p) throw refused();
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win) return false;
+    const id = event.sender.id;
+    const bar = progressBar(p, shown.get(id)?.value ?? 0);
+    if (p.mode === 'none') shown.delete(id);
+    else shown.set(id, { value: bar.value, failed: p.mode === 'error' });
+    win.setProgressBar(bar.value, { mode: bar.mode });
+    return true;
   });
   // What a page says it is doing (D12, P-30): a word from a fixed list, kept for its window until `none`, another
   // document or the window's end.

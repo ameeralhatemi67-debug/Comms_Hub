@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { FEATURES, nativeOf, setActivity } from '../src/lib/native/index.ts';
+import { dragOutFile, FEATURES, fileToken, nativeOf, setActivity, setTaskbarProgress } from '../src/lib/native/index.ts';
 import { COPY_WAITS, copyQueueLine } from '../src/lib/native/copies.ts';
 import { currentEntry } from '../src/lib/native/device.ts';
 import { DeviceCache, copyWidth } from '../src/lib/studio/cache.ts';
@@ -156,4 +156,63 @@ test('D12: no emoji and no raw state word in the studio\'s new text', () => {
   const text = fs.readFileSync('src/lib/native/copies.ts', 'utf8') + fs.readFileSync('desktop/src/words.ts', 'utf8');
   assert.equal(/\p{Extended_Pictographic}/u.test(text), false);
   for (const s of ['paused', 'waiting', 'running']) assert.equal(copyQueueLine({ hold: null, width: 1, items: [{ name: 'p.mp4', state: s, done: 0, total: 0, why: null }] }).includes(s), false, s);
+});
+
+test('D12, P-26: the taskbar shows how far the work is, a hundredth at a time, «done» and «failed»; nothing elsewhere', async () => {
+  const log = [];
+  const b = v7(log).bridge;
+  b.bridge = 8;
+  b.life.progress = async (st) => (log.push(['progress', st]), true);
+  assert.equal(nativeOf(b).has('taskbar'), true);
+  assert.equal(nativeOf(v7().bridge).has('taskbar'), false, 'version 7 has no taskbar');
+  inApp(b);
+  for (const v of [0, 0.001, 0.004, 0.25, 0.251, 0.5, 2, Number.NaN]) await setTaskbarProgress(v);
+  await setTaskbarProgress('failed');
+  await setTaskbarProgress(0.25);
+  await setTaskbarProgress('done');
+  assert.deepEqual(log.filter((x) => x[0] === 'progress').map((x) => x[1]), [0, 0.25, 0.5, 1, 'failed', 0.25, 'done'], 'each hundredth once, at most 1, never NaN; after a word the fraction is sent again');
+  inApp(undefined);
+  await setTaskbarProgress(0.5);
+  const refusing = { ...b, life: { ...b.life, progress: async () => Promise.reject(new Error('refused')) } };
+  inApp(refusing);
+  await setTaskbarProgress(0.9);
+});
+
+test('D12, P-22: a file on this laptop gets a token and is dragged out by it; a handle gives its own file; nothing elsewhere', async () => {
+  const log = [];
+  const b = v7(log).bridge;
+  b.bridge = 8;
+  b.files = {
+    pick: async () => [],
+    fromDropped: async (f) => (log.push(['fromDropped', f.name]), f.name === 'export.mp4' ? { token, name: f.name } : null),
+    check: async () => ({ ok: true }),
+    forget: async () => true,
+    dragOut: async (t) => (log.push(['dragOut', t]), t === token),
+  };
+  assert.equal(nativeOf(b).has('dragOut'), true);
+  inApp(b);
+  const file = new File(['x'], 'export.mp4');
+  assert.equal(await fileToken(file), token);
+  const handle = { getFile: async () => file };
+  assert.equal(await fileToken(handle), token, "the saved handle's own file");
+  assert.equal(await fileToken(new File(['x'], 'bytes.bin')), null, 'not a file the application can name');
+  assert.equal(await dragOutFile(token), true);
+  assert.equal(await dragOutFile('B'.repeat(43)), false);
+  b.files.dragOut = async () => Promise.reject(new Error('refused'));
+  assert.equal(await dragOutFile(token), false, 'a refusal drags nothing and throws nothing');
+  inApp(undefined);
+  assert.equal(await fileToken(file), null);
+  assert.equal(await dragOutFile(token), false);
+});
+
+test('D12: the cache folder is shown by its label; an older application\'s path shows only its last name', async () => {
+  const { folderLabelOf } = await import('../src/lib/studio/cache.ts');
+  assert.equal(folderLabelOf({ folder: 'المجلد الافتراضي', isDefault: true }), 'المجلد الافتراضي');
+  assert.equal(folderLabelOf({ folder: 'Shoots', isDefault: false }), 'Shoots');
+  const win = (...parts) => parts.join(String.fromCharCode(92));
+  assert.equal(folderLabelOf({ folder: win('C:', 'Users', 'someone', 'AppData', 'Roaming', 'sa.commshub.desktop', 'StudioCache'), isDefault: true }), 'المجلد الافتراضي', "an older application's default path");
+  assert.equal(folderLabelOf({ folder: win('D:', 'Media', 'Shoots', 'CommsHub Studio Cache'), isDefault: false }), 'Shoots', "an older application's chosen path");
+  const ui = fs.readFileSync('src/components/studio/cache-panel.tsx', 'utf8');
+  assert.match(ui, /folderLabelOf\(folder\)/);
+  assert.equal(/\{folder\.folder\}/.test(ui), false);
 });

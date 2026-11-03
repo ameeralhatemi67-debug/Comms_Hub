@@ -6,7 +6,9 @@
 // adds `media`, which names a source by its token or library version, never by a path; version 5 (D6) adds
 // `windows`, which names a panel and its project, never an address; version 6 (D9) adds `gpu`, which takes a
 // word from a fixed list, and `profile`, which takes measured numbers in a fixed shape; version 7 (D12) adds
-// `life.activity`, a word from a fixed list, and `media.queue`, which names sources as `media` does. Each method only
+// `life.activity`, a word from a fixed list, and `media.queue`, which names sources as `media` does; version 8 adds
+// `life.progress`, a number from 0 to 1 or a word of a fixed list, and `files.dragOut`, which takes a token.
+// Each method only
 // sends a message; its main-process handler checks the sender again (sender.ts) and every argument. No
 // method takes a file path, a command or another address: `files.fromDropped` takes a File the person
 // chose, and only here, in the preload, is the path Chromium attached to it read (webUtils).
@@ -39,7 +41,7 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
       bridge: BRIDGE_VERSION,
       info: () => call(CHANNEL.info),
       power: Object.freeze({ keepAwake: (reason: unknown) => call(CHANNEL.keepAwake, reason), release: (id: unknown) => call(CHANNEL.release, id) }),
-      life: Object.freeze({ busy: (reason: unknown) => call(CHANNEL.busy, reason), idle: () => call(CHANNEL.idle), activity: (kind: unknown) => call(CHANNEL.activity, kind) }),
+      life: Object.freeze({ busy: (reason: unknown) => call(CHANNEL.busy, reason), idle: () => call(CHANNEL.idle), activity: (kind: unknown) => call(CHANNEL.activity, kind), progress: (state: unknown) => call(CHANNEL.progress, state) }),
       notify: Object.freeze({
         show: (notice: unknown) => call(CHANNEL.notify, notice),
         badge: (count: unknown) => call(CHANNEL.badge, count),
@@ -61,6 +63,7 @@ if (window.top === window && isAllowed(window.location.href, ALLOWED)) {
         },
         check: (token: unknown) => call(CHANNEL.filesCheck, token),
         forget: (token: unknown) => call(CHANNEL.filesForget, token),
+        dragOut: (token: unknown) => call(CHANNEL.filesDragOut, token),
       }),
       cache: Object.freeze({
         library: (ask: unknown) => call(CHANNEL.cacheLibrary, ask),

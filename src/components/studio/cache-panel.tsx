@@ -4,12 +4,14 @@
 // المعاينة المؤقتة» for the library copies (long press; no original or project is touched), and the
 // files kept from «هذا الجهاز», each removable by long press. In the desktop application (63.3) it also
 // shows the cache folder, its free space and its size limit, and a file used where it is is only let go
-// of: the file itself stays where it is. From D12 (63.9) it also says how far the light copies made in idle time are.
+// of: the file itself stays where it is. From D12 (63.9) it also says how far the light copies made in idle time are,
+// and a file used where it is can be dragged out into another program.
 import { useEffect, useState } from 'react';
 import { FolderOpen, HardDrive, Trash2 } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { copyQueueLine } from '@/lib/native/copies';
-import type { DeviceCache } from '@/lib/studio/cache';
+import { dragOutFile, native } from '@/lib/native';
+import { folderLabelOf, type DeviceCache } from '@/lib/studio/cache';
 import { formatBytes } from '@/lib/studio/support';
 
 export function CachePanel({ cache, inUse, onChanged }: { cache: DeviceCache | null; inUse: Set<string>; onChanged: () => void }) {
@@ -27,6 +29,7 @@ export function CachePanel({ cache, inUse, onChanged }: { cache: DeviceCache | n
     );
   const u = cache.usage();
   const locals = cache.entries.filter((e) => e.kind === 'local');
+  const canDrag = native().has('dragOut');
   const folder = cache.folder;
   const changed = () => {
     setTick((x) => x + 1);
@@ -51,7 +54,7 @@ export function CachePanel({ cache, inUse, onChanged }: { cache: DeviceCache | n
           <div className="st-cache-folder">
             <p className="st-hint">
               <FolderOpen aria-hidden="true" />
-              مجلد التخزين المؤقت: <bdi dir="ltr">{folder.folder}</bdi>
+              مجلد التخزين المؤقت: <bdi>{folderLabelOf(folder)}</bdi>
               {folder.free !== null && <> · المساحة الحرة: {formatBytes(folder.free)}</>}
             </p>
             <div className="actions">
@@ -98,7 +101,18 @@ export function CachePanel({ cache, inUse, onChanged }: { cache: DeviceCache | n
             <ul className="st-locals">
               {locals.map((e) => (
                 <li key={e.name}>
-                  <span dir="auto">{e.label ?? e.name}</span>
+                  <span
+                    dir="auto"
+                    draggable={canDrag && !!e.token}
+                    title={canDrag && e.token ? 'اسحبه إلى برنامج آخر أو إلى مجلد' : undefined}
+                    onDragStart={(ev) => {
+                      if (!canDrag || !e.token) return;
+                      ev.preventDefault();
+                      void dragOutFile(e.token);
+                    }}
+                  >
+                    {e.label ?? e.name}
+                  </span>
                   <small>
                     {formatBytes(e.bytes)}
                     {e.token ? ' · من مكانه' : ''}

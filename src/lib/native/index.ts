@@ -10,7 +10,9 @@ export type Platform = 'web' | 'desktop' | 'android' | 'ios';
 /**
  * What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3),
  * files, cache and clearData from 3 (D4), media from 4 (D5), windows from 5 (D6), gpu and profile from 6 (D9,
- * Desktop_Power_Ideas.md P-01 and P-33), activity and copyQueue from 7 (D12, P-30 and P-08). The Android application
+ * Desktop_Power_Ideas.md P-01 and P-33), activity and copyQueue from 7 (D12, P-30 and P-08), taskbar and dragOut from 8
+ * (D12, P-26 and P-22).
+ * The Android application
  * offers its own: appUpdate (A3), download and share (A4), push (A5), links and lock (A6), capture,
  * incoming and upload (A7), and in Google Play's copy playUpdate instead of appUpdate (A8).
  */
@@ -30,6 +32,8 @@ export type Feature =
   | 'profile'
   | 'activity'
   | 'copyQueue'
+  | 'taskbar'
+  | 'dragOut'
   | 'appUpdate'
   | 'download'
   | 'share'
@@ -51,6 +55,7 @@ export type NativeHeldFile = { token: string; name: string; size: number; type: 
 /** A file from «هذا الجهاز» as the desktop application names it: never its path. */
 export type NativeFile = { token: string; name: string; size: number; type: string; media: 'video' | 'audio' | 'image'; modified: number };
 export type NativeCacheEntry = { name: string; kind: 'library' | 'proxy' | 'convert'; bytes: number; complete: boolean; lastUsed: number; label: string | null };
+/** `folder` is the folder's label (D12): «المجلد الافتراضي» or the chosen folder's last name. An application before 0.8.1 sent its path. */
 export type NativeCacheUsage = { library: number; proxy: number; files: number; limit: number; limits: number[]; free: number | null; folder: string; isDefault: boolean; entries: NativeCacheEntry[] };
 /** How the desktop application's media tools name a source: a device file's token, or a library version already in its folder. Never a path. */
 export type NativeMediaRef = { token: string } | { asset: string; version: number };
@@ -109,7 +114,7 @@ type Bridge = {
   bridge: number;
   info?: () => Promise<unknown>;
   power?: { keepAwake?: (reason: Reason) => Promise<number>; release?: (id: number) => Promise<boolean> };
-  life?: { busy?: (reason: Reason) => Promise<boolean>; idle?: () => Promise<boolean>; activity?: (kind: Activity) => Promise<boolean> };
+  life?: { busy?: (reason: Reason) => Promise<boolean>; idle?: () => Promise<boolean>; activity?: (kind: Activity) => Promise<boolean>; progress?: (state: number | 'done' | 'failed') => Promise<boolean> };
   notify?: { show?: (n: NativeNotice) => Promise<boolean>; badge?: (n: number) => Promise<boolean>; onOpen?: (fn: ((go: string) => void) | null) => void };
   update?: { status?: () => Promise<unknown>; restart?: () => Promise<'restart' | 'busy' | 'nothing'> };
   files?: {
@@ -117,6 +122,7 @@ type Bridge = {
     fromDropped?: (file: File) => Promise<NativeFile | null>;
     check?: (token: string) => Promise<{ ok: boolean; url?: string; why?: string }>;
     forget?: (token: string) => Promise<boolean>;
+    dragOut?: (token: string) => Promise<boolean>;
   };
   cache?: {
     library?: (ask: { asset: string; version: number; label?: string; inUse?: string[] }) => Promise<{ name: string; url: string; bytes: number }>;
@@ -206,6 +212,8 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   profile: ['profile.read', 'profile.save'],
   activity: ['life.activity'],
   copyQueue: ['media.queue', 'media.queued', 'media.onQueue'],
+  taskbar: ['life.progress'],
+  dragOut: ['files.fromDropped', 'files.dragOut'],
   appUpdate: ['appUpdate.status', 'appUpdate.start'],
   download: ['download.save', 'download.open'],
   share: ['share.file'],
@@ -337,4 +345,51 @@ export async function setActivity(kind: Activity): Promise<void> {
   const n = native();
   if (!n.has('activity')) return;
   await n.raw!.life!.activity!(kind).catch(() => undefined);
+}
+
+let lastProgress: number | null = null;
+
+/**
+ * How far this page's work is, on the desktop application's taskbar button (D12, P-26): a fraction from 0 to 1, «done»
+ * when it ended (the bar goes) or «failed» (the bar turns red until the window is looked at). A fraction is sent only when
+ * it moved by a hundredth, so an export may call this for every frame. Nothing in a browser or an older application.
+ */
+export async function setTaskbarProgress(state: number | 'done' | 'failed'): Promise<void> {
+  const n = native();
+  if (!n.has('taskbar')) return;
+  let send: number | 'done' | 'failed' = state;
+  if (typeof state === 'number') {
+    if (!Number.isFinite(state)) return;
+    const v = Math.round(Math.max(0, Math.min(1, state)) * 100) / 100;
+    if (v === lastProgress) return;
+    lastProgress = v;
+    send = v;
+  } else lastProgress = null;
+  await n.raw!.life!.progress!(send).catch(() => undefined);
+}
+
+/**
+ * A token for a file on this laptop, so it can be dragged out (D12, P-22): a File the person chose, or the handle an
+ * export was saved to (its own File, not a copy of its bytes). Null in a browser, an older application, or for bytes
+ * that are not a file on the disk.
+ */
+export async function fileToken(file: File | FileSystemFileHandle): Promise<string | null> {
+  const n = native();
+  if (!n.has('dragOut')) return null;
+  try {
+    const f = file instanceof File ? file : await file.getFile();
+    return (await n.raw!.files!.fromDropped!(f))?.token ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Drags a file the application gave a token for into another program (Explorer, a messenger). Call it from the
+ * element's dragstart, after event.preventDefault(): Windows carries the drag from there. False when nothing is dragged.
+ */
+export async function dragOutFile(token: string): Promise<boolean> {
+  const n = native();
+  if (!n.has('dragOut')) return false;
+  return (await n.raw!.files!.dragOut!(token).catch(() => false)) === true;
 }

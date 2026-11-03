@@ -3,10 +3,11 @@
 // folder (cache-store.ts), both read by the page at commshub-file:// (protocol.ts), and «مسح بيانات هذا
 // الجهاز». Every handler goes through the same guard() as the rest of the bridge; every argument is checked
 // here. The page never sends a path: `files.pick` opens the system's own dialog, and a dropped or chosen
-// File reaches the main process only as the path Chromium attached to it, read in the preload.
+// File reaches the main process only as the path Chromium attached to it, read in the preload. From D12 (P-22) a file
+// the application gave a token for can be dragged out of the window into another program, by its token.
 import fs from 'node:fs';
 import path from 'node:path';
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow, dialog, nativeImage } from 'electron';
 import type { IpcMainInvokeEvent, Session } from 'electron';
 import { CacheStore, LIMITS, libraryName } from './cache-store.ts';
 import { freeBytes } from './device.ts';
@@ -27,7 +28,7 @@ function inUseOf(value: unknown): Set<string> {
   return new Set(value.filter((n): n is string => typeof n === 'string' && CACHE_NAME.test(n)));
 }
 
-export function startFiles(o: { handle: Handle; site: Session; allowed: readonly string[]; reload: () => void }) {
+export function startFiles(o: { handle: Handle; site: Session; allowed: readonly string[]; reload: () => void; icon: string }) {
   const profile = app.getPath('userData');
   const files = new FileStore(path.join(profile, 'files.json'));
   const cache = new CacheStore(path.join(profile, 'cache.json'), path.join(profile, 'StudioCache'));
@@ -61,6 +62,15 @@ export function startFiles(o: { handle: Handle; site: Session; allowed: readonly
   o.handle(CHANNEL.filesForget, (_event, token: unknown) => {
     if (typeof token !== 'string' || !TOKEN.test(token)) throw refused();
     return files.forget(token);
+  });
+  // Dragging a file out into another program (P-22): the page calls this as its drag starts; Windows does the rest.
+  const dragIcon = nativeImage.createFromPath(o.icon).resize({ width: 32, height: 32, quality: 'best' });
+  o.handle(CHANNEL.filesDragOut, (event, token: unknown) => {
+    if (typeof token !== 'string' || !TOKEN.test(token)) throw refused();
+    const file = files.dragPath(token);
+    if (!file) return false;
+    event.sender.startDrag({ file, icon: dragIcon });
+    return true;
   });
 
   // --- cache ---------------------------------------------------------------------------------------
@@ -108,7 +118,8 @@ export function startFiles(o: { handle: Handle; site: Session; allowed: readonly
     } catch {
       free = null;
     }
-    return { ...cache.usage(), free, folder: cache.folder(), isDefault: cache.isDefault(), limits: [...LIMITS], entries: cache.entries().map((e) => ({ name: e.name, kind: e.kind, bytes: e.bytes, complete: e.complete, lastUsed: e.lastUsed, label: e.label ?? null })) };
+    // the folder's label, never its path: the default one lives under the Windows user's name
+    return { ...cache.usage(), free, folder: cache.label(), isDefault: cache.isDefault(), limits: [...LIMITS], entries: cache.entries().map((e) => ({ name: e.name, kind: e.kind, bytes: e.bytes, complete: e.complete, lastUsed: e.lastUsed, label: e.label ?? null })) };
   };
   o.handle(CHANNEL.cacheUsage, () => usage());
   o.handle(CHANNEL.cacheChoose, async (event) => {

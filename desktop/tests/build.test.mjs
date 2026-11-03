@@ -31,12 +31,12 @@ test('a release build has no way to the local site, no test variables and no dev
   assert.ok(read(dev, 'main.js').includes('127.0.0.1') && read(dev, 'preload.js').includes('127.0.0.1'), 'the development build does open the local site');
 });
 
-test('the bridge carries who the application is and the groups of version 7, and only messages', () => {
+test('the bridge carries who the application is and the groups of version 8, and only messages', () => {
   const preload = read(release, 'preload.js');
   assert.match(preload, /exposeInMainWorld\(\s*"commsHubNative",\s*Object\.freeze\(\{/, 'the bridge is exposed in one place, frozen');
-  assert.match(preload, /platform: "desktop",\s*shell: "electron",\s*version: VERSION,\s*bridge: (BRIDGE_VERSION|7),\s*info:/);
-  assert.match(preload, /BRIDGE_VERSION = 7/);
-  for (const method of ['activity: (kind)', 'queue: (ask)', 'queued: ()', 'onQueue: (fn)']) assert.ok(preload.includes(method), method);
+  assert.match(preload, /platform: "desktop",\s*shell: "electron",\s*version: VERSION,\s*bridge: (BRIDGE_VERSION|8),\s*info:/);
+  assert.match(preload, /BRIDGE_VERSION = 8/);
+  for (const method of ['activity: (kind)', 'progress: (state)', 'dragOut: (token)', 'queue: (ask)', 'queued: ()', 'onQueue: (fn)']) assert.ok(preload.includes(method), method);
   for (const group of ['power: Object.freeze', 'life: Object.freeze', 'notify: Object.freeze', 'update: Object.freeze', 'files: Object.freeze', 'cache: Object.freeze', 'data: Object.freeze', 'windows: Object.freeze', 'media: Object.freeze', 'gpu: Object.freeze', 'profile: Object.freeze']) assert.ok(preload.includes(group), group);
   assert.ok(preload.includes(`VERSION = "${version}"`));
   assert.match(preload, /window\.top === window && isAllowed\(window\.location\.href, ALLOWED\)/, 'top-level page on the list only');

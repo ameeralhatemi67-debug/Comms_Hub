@@ -7,7 +7,7 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { CacheStore, dueForSweep, FOLDER_NAME, libraryName, MAX_RANGES, overLimit, PART, RANGES, TEN_DAYS } from '../src/cache-store.ts';
+import { CacheStore, DEFAULT_LABEL, dueForSweep, folderLabel, FOLDER_NAME, libraryName, MAX_RANGES, overLimit, PART, RANGES, TEN_DAYS } from '../src/cache-store.ts';
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'comms-hub-cache-'));
 const asset = '0a1b2c3d-0000-4000-8000-00000000abcd';
@@ -226,4 +226,23 @@ test('a light copy (D5): written as a .part never served, held while it is made,
   store.record(older);
   store.setLimit(10e9);
   assert.equal(store.entries().length, 2);
+});
+
+test('the page is told the folder\'s label, never its path: «المجلد الافتراضي» or the chosen folder\'s last name', () => {
+  assert.equal(folderLabel(null), DEFAULT_LABEL);
+  assert.equal(DEFAULT_LABEL, 'المجلد الافتراضي');
+  assert.equal(folderLabel(path.join('D:/', 'Media', 'Shoots', FOLDER_NAME)), 'Shoots');
+  assert.equal(folderLabel(path.join('E:/', FOLDER_NAME)), 'E:', 'a drive by its letter');
+  const store = new CacheStore(path.join(dir, 'label.json'), path.join(os.homedir(), 'AppData', 'Roaming', 'x', 'StudioCache'));
+  assert.equal(store.label(), DEFAULT_LABEL);
+  store.setFolder(path.join(dir, 'chosen'));
+  assert.equal(store.label(), 'chosen');
+  for (const l of [folderLabel(null), store.label()]) {
+    assert.equal(/[\/]/.test(l), false, `no separator: ${l}`);
+    assert.equal(l.includes(os.userInfo().username), false, 'no Windows user name');
+  }
+  // the bridge's usage sends the label
+  const src = fs.readFileSync(new URL('../src/native-files.ts', import.meta.url), 'utf8');
+  assert.match(src, /folder: cache\.label\(\)/);
+  assert.equal(/folder: cache\.folder\(\)/.test(src), false, 'the path no longer reaches the page');
 });

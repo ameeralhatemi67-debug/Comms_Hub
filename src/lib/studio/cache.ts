@@ -43,6 +43,18 @@ export type Entry = {
 /** Where a source is read from: a File in a browser, one of the application's own addresses in the desktop application. */
 export type Place = { file: File; url?: undefined } | { url: string; file?: undefined };
 
+/**
+ * The cache folder as the studio shows it: «المجلد الافتراضي», or the chosen folder's last name. An application before
+ * 0.8.1 sent the folder's path, so only its last part is ever shown (desktop/src/cache-store.ts folderLabel).
+ */
+export function folderLabelOf(u: Pick<NativeCacheUsage, 'folder' | 'isDefault'>): string {
+  if (u.isDefault) return 'المجلد الافتراضي';
+  // the chosen folder is the parent of the application's own «CommsHub Studio Cache»
+  const parts = u.folder.split(/[\\/]+/).filter(Boolean);
+  if (parts.length > 1 && parts[parts.length - 1] === 'CommsHub Studio Cache') parts.pop();
+  return parts[parts.length - 1] ?? u.folder;
+}
+
 /** The application's name for a library copy (desktop/src/cache-store.ts libraryName); a light or converted copy already has its name. */
 export const folderName = (name: string) => (/\.(bin|mp4)$/.test(name) ? name : `${name}.bin`);
 export type Manifest = { v: 1; entries: Record<string, Entry> };

@@ -20,6 +20,18 @@ export const MAX_RANGES = 4;
 /** The folder made inside a chosen folder; only its own files are ever removed. */
 export const FOLDER_NAME = 'CommsHub Studio Cache';
 export const LIMITS = Object.freeze([0, 10e9, 25e9, 50e9, 100e9, 250e9]);
+/** What the page is told of the default folder, which lives in the profile under the Windows user's name. */
+export const DEFAULT_LABEL = 'المجلد الافتراضي';
+
+/**
+ * The cache folder as the page may show it: «المجلد الافتراضي», or the last name of the folder the person chose (a
+ * drive's letter for a drive), never a path (Desktop_Power_Ideas.md section 12).
+ */
+export function folderLabel(chosen: string | null): string {
+  if (chosen === null) return DEFAULT_LABEL;
+  const parent = path.dirname(chosen);
+  return path.basename(parent) || parent.replace(/[\\/]+$/, '') || DEFAULT_LABEL;
+}
 
 export type CacheKind = 'library' | 'proxy' | 'convert';
 export type CacheEntry = { name: string; kind: CacheKind; bytes: number; total: number; complete: boolean; lastUsed: number; label?: string };
@@ -104,6 +116,11 @@ export class CacheStore {
 
   isDefault(): boolean {
     return this.state.folder === null;
+  }
+
+  /** The folder's name for the page (folderLabel): never its path. */
+  label(): string {
+    return folderLabel(this.state.folder);
   }
 
   private ensureFolder() {
