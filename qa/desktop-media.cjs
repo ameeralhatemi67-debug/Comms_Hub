@@ -12,6 +12,8 @@
 //   A light copy cancelled leaves nothing; quitting mid-copy leaves no FFmpeg running and no .part file.
 //   DT-13: the licence audit of the FFmpeg the package carries: LGPL v3, no GPL or nonfree part, its configure
 //   line recorded, the encoders the jobs name present.
+// From D12 the application also makes light copies of heavy sources by itself while the laptop is free (P-08); this check
+// is of the copies asked for, so it holds that broker (a simulated speed limit), and qa/desktop-idle.cjs checks the rest.
 // Usage: node qa/desktop-media.cjs   (writes qa/desktop-media.json)   Needs: npm run pack:dev, a local ffmpeg with
 // libx264, libx265, prores_ks, dnxhd, mpeg2video and ac3 (fixtures only).
 const fs = require('node:fs');
@@ -130,6 +132,8 @@ const ffmpegLeft = () => h.ps(`@(Get-Process ffmpeg,ffprobe -ErrorAction Silentl
     await h.listen(site.server, 3000);
 
     const { app, win, data } = await h.launchDev('media');
+    // the copies made in idle time wait (D12): this check makes its copies by asking
+    await app.evaluate(({ powerMonitor }) => void powerMonitor.emit('speed-limit-change', { limit: 50 }));
     await h.until(() => win.url() === 'http://127.0.0.1:3000/', 20000);
     await win.waitForLoadState('load');
     await win.waitForFunction(() => typeof window.openCorpus === 'function');
@@ -235,6 +239,7 @@ const ffmpegLeft = () => h.ps(`@(Get-Process ffmpeg,ffprobe -ErrorAction Silentl
     const runningAfter = Number(ffmpegLeft());
     check('quitting while a light copy is made leaves no FFmpeg of the application running', long.making && partWhile.length === 1 && runningWhile >= 1 && runningAfter === 0, { long, partWhile, runningWhile, runningAfter });
     const again = await h.launchDev('media');
+    await again.app.evaluate(({ powerMonitor }) => void powerMonitor.emit('speed-limit-change', { limit: 50 }));
     await h.until(() => again.win.url() === 'http://127.0.0.1:3000/', 20000);
     await h.sleep(1000);
     const partsAfter = fs.readdirSync(folder).filter((f) => f.endsWith('.part'));

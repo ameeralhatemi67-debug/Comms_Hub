@@ -442,6 +442,13 @@ Light copies in idle time (D12, `MVP_draft.md` 63.9, `Desktop_Power_Ideas.md` P-
 - **The page's half** is `src/lib/studio/cache.ts`: every video source the pool opens is named to the queue, with
   `copiesAtOnce` of `scale.ts` as the width. `tests/media-worker.test.mjs` holds the pause with the pinned FFmpeg, and
   `qa/desktop-idle.cjs` the holds, the copies' frames, a cancel and a quit (`--speed` for frame times, in a quiet window).
+- **The rest of D12.** `CacheStore.copy` fetches `RANGES` (2) parts at once and keeps only the unbroken start (P-29). Bridge
+  version 8 adds `life.progress` (a fraction, «done» or «failed», `desktop/src/taskbar.ts`) and `files.dragOut` (a token of
+  `FileStore`, `dragPath`); the jump list's starts carry `--commshub-go=` and a word of `JUMPS`, never an address (P-26, P-22).
+  Bridge version 9 adds the camera card (`card.ts`, `card-copy.ts`; P-20): no link or junction is followed out of the card, a
+  copy is a `.part` until its SHA-256 read back matches what was read, and the page gets keys and tokens, never a path.
+  `cache.usage` returns the folder's label (`folderLabel`), never its path, since the default path holds the Windows user name.
+  `qa/desktop-taskbar.cjs` and `qa/desktop-card-import.cjs` hold them.
 
 The Android application is being built, by owner directive of 2026-10-26 (`Android_Build_Plan.md`,
 `MVP_draft.md` section 64, recorded in `progress.md`). It is a Capacitor 8 application in `mobile/`, with its

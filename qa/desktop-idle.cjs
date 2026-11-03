@@ -1,17 +1,22 @@
 // Application check of the idle-time broker and the light copies it makes (Desktop_Power_Ideas.md P-30 and P-08, phase
 // D12; MVP_draft.md 63.9). It drives the development package on a fixture page at 127.0.0.1:3000 with the studio's own
-// cache, media pool and player (qa/fixtures/desktop-idle.ts):
-//   - the four 4K sources of a project are named to the application's queue by the device cache on its own, and their
-//     light copies are made while nothing happens;
-//   - a running copy pauses within a second of a click, of an export («busy»), of the page saying «playing», of the
-//     window making sound, of the laptop going on battery and of Windows lowering the processor's speed limit, makes
-//     no progress while held, and goes on from where it was once released (a click: three seconds later);
-//   - a copy the person asks for is never held and holds the rest; the tray says what is being made;
-//   - every copy keeps every frame of its source in order (the 12-bit gray code each source carries);
+// cache, media pool and player (qa/fixtures/desktop-idle.ts). The corpus is four 4K sources of 30 s: two with grain, at
+// the bitrate a camera writes (about 30 Mbit/s), and two still pictures that compress to almost nothing.
+//   - the sources of a project are named to the application's queue by the device cache on its own, and their light
+//     copies are made while nothing happens;
+//   - a copy the person asks for is made at once, is never held, and holds the rest;
+//   - a running copy of a grainy source pauses within a second of a click, of an export («busy»), of the page saying
+//     «playing», of the window making sound, of the laptop going on battery and of Windows lowering the processor's speed
+//     limit, makes no progress from a second on, and goes on from where it was once released (a click: three seconds
+//     later);
+//   - a copy of a still source, which FFmpeg reads whole before any pause can hold it, is stopped instead within about a
+//     second and a half, no FFmpeg left, and made again once released;
+//   - every copy keeps every frame of its source in order (the 12-bit gray code each source carries); the tray says what
+//     is being made;
 //   - a project that wants nothing any more, and quitting, leave no FFmpeg running and no part file.
 // With --speed (only in a quiet window, the laptop otherwise idle): the stage's frame times while the project plays,
 // with nothing to make, with copies to make but held, and, for contrast, with copies running; and the time to make
-// every copy one, two and three at a time. The processor's load is recorded beside every figure.
+// the copies one, two and three at a time. The processor's load is recorded beside every figure.
 // Usage: node qa/desktop-idle.cjs [--speed]   (writes qa/desktop-idle.json)   Needs: npm run pack:dev in desktop/, a
 // local ffmpeg with libx264 (fixtures only), port 3000 free.
 const fs = require('node:fs');
@@ -26,18 +31,28 @@ const SPEED = process.argv.includes('--speed');
 const SECONDS = 30;
 const FPS = 25;
 const BITS = 12;
-const NAMES = ['shoot-1.mp4', 'shoot-2.mp4', 'shoot-3.mp4', 'shoot-4.mp4'];
+const CORPUS = [
+  { name: 'grain-1.mp4', grain: true },
+  { name: 'grain-2.mp4', grain: true },
+  { name: 'still-3.mp4', grain: false },
+  { name: 'still-4.mp4', grain: false },
+];
+const NAMES = CORPUS.map((c) => c.name);
 
 const grayBoxes = Array.from({ length: BITS }, (_, k) => {
   const p = 2 ** k;
   return `drawbox=x=iw*${k + 2}/16:y=ih*7/16:w=iw/16-4:h=ih/8:color=white:t=fill:enable='eq(mod(floor(n/${p})+floor(n/${2 * p}),2),1)'`;
 }).join(',');
+/** The corpus's ffmpeg arguments; exported for the scratch script that makes it ahead at idle priority. */
+function corpusArgs(c, i, file) {
+  return ['-hide_banner', '-y', '-loglevel', 'error', '-f', 'lavfi', '-i', `color=c=black:s=3840x2160:r=${FPS}:d=${SECONDS}`, '-f', 'lavfi', '-i', `sine=frequency=${330 + 110 * i}:sample_rate=48000:duration=${SECONDS}`, '-vf', c.grain ? `noise=alls=24:allf=t,${grayBoxes}` : grayBoxes, '-shortest', '-c:v', 'libx264', '-preset', 'veryfast', '-b:v', '30M', '-pix_fmt', 'yuv420p', '-g', '25', '-c:a', 'aac', '-b:a', '128k', file];
+}
 function makeCorpus() {
   fs.mkdirSync(out, { recursive: true });
-  NAMES.forEach((name, i) => {
-    const file = path.join(out, name);
+  CORPUS.forEach((c, i) => {
+    const file = path.join(out, c.name);
     if (fs.existsSync(file) && fs.statSync(file).size > 0) return;
-    const r = spawnSync('ffmpeg', ['-hide_banner', '-y', '-loglevel', 'error', '-f', 'lavfi', '-i', `color=c=black:s=3840x2160:r=${FPS}:d=${SECONDS}`, '-f', 'lavfi', '-i', `sine=frequency=${330 + 110 * i}:sample_rate=48000:duration=${SECONDS}`, '-vf', grayBoxes, '-shortest', '-c:v', 'libx264', '-preset', 'veryfast', '-b:v', '30M', '-pix_fmt', 'yuv420p', '-g', '25', '-c:a', 'aac', '-b:a', '128k', file], { encoding: 'utf8', maxBuffer: 1 << 24 });
+    const r = spawnSync('ffmpeg', corpusArgs(c, i, file), { encoding: 'utf8', maxBuffer: 1 << 24 });
     if (r.status !== 0) throw new Error(`ffmpeg: ${r.stderr}`);
   });
 }
@@ -58,14 +73,15 @@ function grayFrames(file) {
 const ffmpegLeft = () => Number(h.ps(`@(Get-Process ffmpeg,ffprobe -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '*${h.desktop.replace(/'/g, "''")}*' }).Count`));
 const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average')) || null;
 
-(async () => {
+async function main() {
   let site = null;
   try {
     if (!fs.existsSync(h.devExe)) throw new Error(`the development package is missing: ${h.devExe} (npm run pack:dev in desktop/)`);
     if (await h.portAnswers(3000)) throw new Error('something already answers on 127.0.0.1:3000; stop it and run again');
     const t0 = Date.now();
     makeCorpus();
-    note(`The corpus (four 4K H.264 sources of ${SECONDS} s at ${FPS} frames a second, 30 Mbit/s, each with its frame numbers) took ${Math.round((Date.now() - t0) / 1000)} s to make or was kept.`);
+    result.corpus = Object.fromEntries(NAMES.map((n) => [n, Math.round(fs.statSync(path.join(out, n)).size / 1e5) / 10]));
+    note(`The corpus (four 4K H.264 sources of ${SECONDS} s at ${FPS} frames a second, each with its frame numbers; megabytes ${JSON.stringify(result.corpus)}) took ${Math.round((Date.now() - t0) / 1000)} s to make or was kept.`);
 
     await esbuild.build({ entryPoints: [path.join(__dirname, 'fixtures', 'desktop-idle.ts')], bundle: true, format: 'esm', platform: 'browser', target: 'es2022', outfile: path.join(out, 'idle.js'), logLevel: 'silent', absWorkingDir: h.root });
     const page = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>نسخ في وقت الفراغ</title></head><body>
@@ -73,8 +89,12 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
     site = h.pages({ '/': ['text/html; charset=utf-8', page], '/idle.js': ['text/javascript; charset=utf-8', fs.readFileSync(path.join(out, 'idle.js'), 'utf8')] });
     await h.listen(site.server, 3000);
 
-    let { app, win, mainId, data } = await h.launchDev('idle');
+    const { app, win, mainId, data } = await h.launchDev('idle');
     await h.instrument(app);
+    await app.evaluate(({ BrowserWindow }, id) => {
+      globalThis.__audible = [];
+      BrowserWindow.fromId(id).webContents.on('audio-state-changed', (e) => globalThis.__audible.push({ at: Date.now(), audible: e.audible }));
+    }, mainId);
     await h.until(() => win.url() === 'http://127.0.0.1:3000/', 20000);
     await win.waitForLoadState('load');
     await win.waitForFunction(() => typeof window.openCorpus === 'function');
@@ -83,6 +103,7 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
     const folder = path.join(data, 'StudioCache');
     const q = () => win.evaluate(() => window.queued());
     const parts = () => (fs.existsSync(folder) ? fs.readdirSync(folder).filter((f) => f.endsWith('.part')) : []);
+    const clearCopies = () => win.evaluate(() => window.clearCopies());
 
     await win.setInputFiles('#corpus', NAMES.map((n) => path.join(out, n)));
     const opened = await win.evaluate(() => window.openCorpus());
@@ -92,19 +113,37 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
       return s.items.length === NAMES.length && s.items.every((i) => i.state !== 'probing') ? s : null;
     }, 30000, 200);
     check('the studio named its four video sources to the queue on its own, and the application found each needs a light copy here (4K, no profile)', !!named && named.items.every((i) => ['waiting', 'running', 'ready'].includes(i.state)), { opened, named });
+    const fileOf = await win.evaluate(() => window.copyNames());
+    const nameOf = Object.fromEntries(Object.entries(fileOf).map(([copy, file]) => [file, copy]));
 
-    /** A copy running now, a second or more into its work. */
-    const runningCopy = () =>
+    // a copy the person asks for: made at once, never held, and it holds the rest
+    const runningOne = await h.until(async () => (await q()).items.find((i) => i.state === 'running' && i.done > 0.5) ?? null, 60000, 100);
+    const askedName = nameOf['still-4.mp4'];
+    const waitingNow = (await q()).items.find((i) => i.name === askedName)?.state;
+    if (runningOne && waitingNow === 'waiting') {
+      const asked = win.evaluate(() => window.ask('still-4.mp4'));
+      const during = await h.until(async () => {
+        const s = await q();
+        return s.hold === 'asked' && s.items.find((i) => i.name === runningOne.name)?.state === 'paused' ? s : null;
+      }, 5000, 50);
+      const r = await asked;
+      const after = await q();
+      check('a copy the person asks for is made at once and holds the copies made in idle time («asked»)', !!during && after.items.find((i) => i.name === askedName)?.state === 'ready' && r.tools?.proxy?.kind === 'ready', { during: during && { hold: during.hold, states: during.items.map((i) => i.state) }, ms: r.ms, after: after.items.map((i) => i.state) });
+    } else check('a copy was being made and «still-4» was waiting when the person asked', false, { runningOne, waitingNow });
+
+    /** A copy of a grainy source running now, a second or more into its work. */
+    const grainy = new Set([nameOf['grain-1.mp4'], nameOf['grain-2.mp4']]);
+    const runningCopy = (names = grainy) =>
       h.until(async () => {
         const s = await q();
-        return s.items.find((i) => i.state === 'running' && i.done >= 1) ?? null;
+        return s.items.find((i) => names.has(i.name) && i.state === 'running' && i.done >= 1) ?? null;
       }, 180000, 150);
     const doneOf = async (name) => (await q()).items.find((i) => i.name === name)?.done ?? null;
     result.holds = {};
-    /** Holds a running copy one way, and releases it. */
+    /** Holds a running copy one way, and releases it: paused within a second, no progress from a second on, then on again. */
     async function held(label, hold, release, want, since = null) {
       const it = await runningCopy();
-      if (!it) return check(`${label}: a copy was being made`, false, await q());
+      if (!it) return check(`${label}: a copy of a grainy source was being made`, false, await q());
       let start = Date.now();
       await hold();
       // a hold that starts later than asked (sound starts once the element plays) is timed from its own moment
@@ -118,6 +157,7 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
       const a = await doneOf(it.name);
       await h.sleep(1500);
       const b = await doneOf(it.name);
+      const state = (await q()).items.find((i) => i.name === it.name)?.state;
       const released = Date.now();
       await release();
       const goes = await h.until(async () => {
@@ -127,8 +167,8 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
       }, 15000, 50);
       const resumedMs = Date.now() - released;
       const sinceHold = Date.now() - start;
-      result.holds[label] = { name: it.name.replace(/[0-9a-f]{40}/, '<fingerprint>'), at: it.done, pausedMs, hold: paused?.hold ?? null, progressHeld: [a, b], resumedMs, sinceHold, after: goes?.done ?? null };
-      check(`${label}: the running copy pauses within a second (${pausedMs} ms), the hold is «${want}», and it makes no progress from a second on (${a} s, then ${b} s)`, !!paused && paused.hold === want && pausedMs <= 1000 && a !== null && b === a, result.holds[label]);
+      result.holds[label] = { name: it.name.replace(/[0-9a-f]{40}/, '<fingerprint>'), at: it.done, pausedMs, hold: paused?.hold ?? null, progressHeld: [a, b], state, resumedMs, sinceHold, after: goes?.done ?? null };
+      check(`${label}: the running copy pauses within a second (${pausedMs} ms), the hold is «${want}», and it makes no progress from a second on (${a} s, then ${b} s)`, !!paused && paused.hold === want && pausedMs <= 1000 && a !== null && b === a && state === 'paused', result.holds[label]);
       check(`${label}: released, it goes on from where it was (${resumedMs} ms)`, !!goes && goes.done >= b, result.holds[label]);
       return result.holds[label];
     }
@@ -139,25 +179,24 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
       wc.sendInputEvent({ type: 'mouseUp', x: 20, y: 20, button: 'left', clickCount: 1 });
     }, mainId);
     const input = await held('a click', click, async () => undefined, 'input');
-    check(`a click holds only a few seconds: the copy goes on by itself ${input.sinceHold} ms after it (three seconds of quiet)`, input.sinceHold >= 3000 && input.sinceHold <= 5000, input);
+    if (input) check(`a click holds only a few seconds: the copy goes on by itself ${input.sinceHold} ms after it (three seconds of quiet)`, input.sinceHold >= 3000 && input.sinceHold <= 5000, input);
     await held('an export (busy)', () => win.evaluate(() => window.busy(true)), () => win.evaluate(() => window.busy(false)), 'export');
     await held('the page says «playing»', () => win.evaluate(() => window.activity('playing')), () => win.evaluate(() => window.activity('none')), 'playing');
     let playing = null;
-    await app.evaluate(({ BrowserWindow }, id) => {
-      globalThis.__audible = [];
-      BrowserWindow.fromId(id).webContents.on('audio-state-changed', (e) => globalThis.__audible.push({ at: Date.now(), audible: e.audible }));
-    }, mainId);
-    await held(
+    const sound = await held(
       'the window makes sound (the studio playing, not saying so)',
       async () => {
+        await app.evaluate(() => (globalThis.__audible = []));
         playing = win.evaluate(() => window.play(6, {}));
       },
       async () => {
-        await playing;
+        result.soundPlay = await playing;
       },
       'playing',
       () => app.evaluate(() => globalThis.__audible.find((x) => x.audible)?.at ?? null),
     );
+    result.audible = await app.evaluate(() => globalThis.__audible.slice());
+    if (sound) note(`While the studio played with sound the window was heard: ${JSON.stringify(result.audible.map((x) => x.audible))}; the playing element: ${JSON.stringify(result.soundPlay && result.soundPlay.element)}.`);
     await held(
       'on battery (simulated in the main process)',
       () => app.evaluate(({ powerMonitor }) => {
@@ -178,47 +217,48 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
       'throttled',
     );
 
-    // a copy the person asks for: never held, and it holds the rest
-    const fileOf = await win.evaluate(() => window.copyNames());
-    const before = await q();
-    const waitingOne = before.items.find((i) => i.state === 'waiting');
-    const runningOne = before.items.find((i) => i.state === 'running');
-    if (waitingOne && runningOne) {
-      const which = fileOf[waitingOne.name];
-      const asked = win.evaluate((n) => window.ask(n), which);
-      const during = await h.until(async () => {
-        const s = await q();
-        return s.hold === 'asked' && s.items.find((i) => i.name === runningOne.name)?.state === 'paused' ? s : null;
-      }, 5000, 50);
-      await click();
-      const clicked = await h.until(async () => {
-        const s = await q();
-        return s.items.find((i) => i.name === waitingOne.name)?.state === 'running' ? s : null;
-      }, 2000, 100);
-      const r = await asked;
-      const after = await q();
-      check('a copy the person asks for is made at once and holds the copies made in idle time («asked»); a click does not hold it', !!during && !!clicked && after.items.find((i) => i.name === waitingOne.name)?.state === 'ready' && r.tools?.proxy?.kind === 'ready', { during: during && { hold: during.hold, states: during.items.map((i) => i.state) }, ms: r.ms, after: after.items.map((i) => i.state) });
-    } else note(`No copy was waiting when the asked copy was tried: ${JSON.stringify(before.items.map((i) => i.state))}; that check was skipped.`);
+    // a still source: FFmpeg reads it whole at once, so a pause cannot hold it; it is stopped instead and made again later
+    await win.evaluate(() => window.stopQueue());
+    await h.until(async () => (ffmpegLeft() === 0 ? true : null), 10000, 200);
+    await clearCopies();
+    const still = nameOf['still-3.mp4'];
+    await win.evaluate(() => window.queueOnly(['still-3.mp4'], 1));
+    const runningStill = await runningCopy(new Set([still]));
+    if (runningStill) {
+      const start = Date.now();
+      await win.evaluate(() => window.activity('playing'));
+      const stopped = await h.until(async () => ((await q()).items.find((i) => i.name === still)?.state === 'waiting' ? Date.now() - start : null), 5000, 25);
+      await h.sleep(500);
+      const left = ffmpegLeft();
+      const meanwhile = (await q()).items.find((i) => i.name === still);
+      await win.evaluate(() => window.activity('none'));
+      const again = await h.until(async () => {
+        const x = (await q()).items.find((i) => i.name === still);
+        return x && (x.state === 'running' || x.state === 'ready') ? x : null;
+      }, 15000, 50);
+      result.readAhead = { at: runningStill.done, stoppedMs: stopped, left, meanwhile, again };
+      check(`a copy of a still source, which FFmpeg had read whole, is stopped when held (${stopped} ms), no FFmpeg left and no part file, and made again once released`, stopped !== null && stopped <= 2000 && left === 0 && parts().length === 0 && meanwhile?.state === 'waiting' && !!again, result.readAhead);
+    } else check('a copy of a still source was being made', false, await q());
 
-    const tips = (await h.recorded(app)).tips;
-    check('the tray says what is being made in idle time, and why it waits when it does', tips.some((t) => /نسخ خفيفة للمعاينة: تُنشأ \d+ من \d+ في وقت فراغ الجهاز/.test(t)) && tips.some((t) => /نسخ خفيفة للمعاينة: \d+ تنتظر/.test(t)), tips.filter((t) => t.includes('نسخ')).slice(-6));
-
+    // every copy, made in the end
+    await win.evaluate(() => window.queueWith(1));
     const all = await h.until(async () => {
       const s = await q();
-      return s.items.every((i) => i.state === 'ready') ? s : null;
-    }, 600000, 500);
+      return s.items.length === NAMES.length && s.items.every((i) => i.state === 'ready') ? s : null;
+    }, 900000, 500);
     check('every light copy was made', !!all, await q());
+    const tips = (await h.recorded(app)).tips;
+    check('the tray says what is being made in idle time, and why it waits when it does', tips.some((t) => /نسخ خفيفة للمعاينة: تُنشأ \d+ من \d+ في وقت فراغ الجهاز/.test(t)) && tips.some((t) => /نسخ خفيفة للمعاينة: \d+ تنتظر/.test(t)), tips.filter((t) => t.includes('نسخ')).slice(-6));
     const copies = fs.readdirSync(folder).filter((f) => /^proxy-.*-720-r1-.*\.mp4$/.test(f));
     note(`The copies, by source: ${JSON.stringify(Object.fromEntries(copies.map((f) => [f.replace(/[0-9a-f]{40}/, '<fingerprint>'), fileOf[f]])))}`);
     const frames = copies.map((f) => grayFrames(path.join(folder, f)));
     check(`each of the ${copies.length} copies keeps every frame of its source, in order (${SECONDS * FPS} frames)`, copies.length === NAMES.length && frames.every((g) => g.length === SECONDS * FPS && g.every((n, i) => n === i)), frames.map((g) => ({ frames: g.length, wrong: g.filter((n, i) => n !== i).length })));
     check('no part file is left in the folder', parts().length === 0, parts());
 
-    // what a cancel and a quit leave
-    const clearCopies = () => win.evaluate(() => window.clearCopies());
+    // what a project that wants nothing leaves
     await clearCopies();
     await win.evaluate(() => window.queueWith(1));
-    const again = await runningCopy();
+    const again = await runningCopy(new Set(Object.keys(fileOf)));
     const partWhile = parts();
     const ffWhile = ffmpegLeft();
     await win.evaluate(() => window.stopQueue());
@@ -234,7 +274,7 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
       // the elements warm up once
       await win.evaluate(() => window.play(3, {}));
       await win.evaluate(() => window.stopQueue());
-      await h.until(async () => ffmpegLeft() === 0, 10000, 200);
+      await h.until(async () => (ffmpegLeft() === 0 ? true : null), 10000, 200);
       await clearCopies();
       loaded('nothing to make');
       result.speed.nothing = await win.evaluate(() => window.play(12, {}));
@@ -244,7 +284,7 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
       result.speed.held = await win.evaluate(() => window.play(12, { say: true }));
       const s = await q();
       result.speed.heldStates = s.items.map((i) => i.state);
-      await runningCopy();
+      await runningCopy(new Set(Object.keys(fileOf)));
       loaded('copies running (contrast)');
       result.speed.running = await win.evaluate(() => window.play(12, { muted: true }));
       loaded('after the plays');
@@ -253,7 +293,7 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
       result.speed.widths = {};
       for (const width of [1, 2, 3]) {
         await win.evaluate(() => window.stopQueue());
-        await h.until(async () => ffmpegLeft() === 0, 10000, 200);
+        await h.until(async () => (ffmpegLeft() === 0 ? true : null), 10000, 200);
         await clearCopies();
         const l = load();
         const start = Date.now();
@@ -267,7 +307,7 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
 
     await clearCopies();
     await win.evaluate(() => window.queueWith(1));
-    const long = await runningCopy();
+    const long = await runningCopy(new Set(Object.keys(fileOf)));
     const partQuit = parts();
     await Promise.race([app.close(), h.sleep(20000)]);
     await h.sleep(1500);
@@ -285,4 +325,7 @@ const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Objec
   }
   const failed = finish(path.join(__dirname, 'desktop-idle.json'));
   process.exit(failed ? 1 : 0);
-})();
+}
+
+if (require.main === module) void main();
+module.exports = { CORPUS, corpusArgs, out };

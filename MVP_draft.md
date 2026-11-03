@@ -2899,7 +2899,9 @@ makes the light copy («نسخة خفيفة للمعاينة», 63.4) of those t
   this laptop decodes 4K H.264; ProRes, DNxHR and CineForm always do; before a measurement, and for what the measurement does
   not cover, the rule of 63.4 stands (above 1080p, above 50 Mbit/s, or an intermediate codec). A strong laptop makes fewer
   copies, a weak one more.
-- They are made one at a time, or as many as the plan of 63.6 says («النسخ الخفيفة معاً»), the videos first opened first.
+- They are made one at a time, or as many as the plan of 63.6 says («النسخ الخفيفة معاً»), the videos first opened first. The
+  note under that plan now reads «هذه القيم خطة الاستوديو على هذا الجهاز: تتبعها «النسخ الخفيفة معاً» الآن، والبقية في المراحل
+  القادمة، ولا تغيّر شيئاً فيما يُصدَّر.».
 - They are made only while the laptop is free: on mains power, with the processor at its full speed, with nothing exporting,
   uploading, playing (a window making sound counts), scrubbing or measuring, while no copy the person asked for is being made,
   and a few seconds after the last key or click in the application. Moving the pointer and scrolling hold nothing.
@@ -2916,12 +2918,44 @@ makes the light copy («نسخة خفيفة للمعاينة», 63.4) of those t
   الجهاز: …».
 - The tray's tooltip adds a line: «نسخ خفيفة للمعاينة: تُنشأ … من … في وقت فراغ الجهاز», or «نسخ خفيفة للمعاينة: … تنتظر …».
 
+**A library file's first copy** to this laptop is fetched two parts at a time (P-29), so a large video is ready sooner over a slow
+connection; an interrupted copy resumes from its first missing part. Nothing else changes.
+
+**The taskbar button** (P-26, from version 0.8.0, bridge version 8).
+- While a page's work runs, the button shows how far it is; red when it failed, until the window is looked at; gone when it
+  ends or the page goes. (The export shows its progress there once the export panel says it.)
+- Its jump list offers «الاستوديو» and «يحتاج قرارك» (the home page, which leads a director or an assistant with «يحتاج قرارك أو
+  متابعتك»). Chosen while the application is open, it moves the open window there.
+
+**Dragging a file out** (P-22). A file of «ملفات على هذا الجهاز فقط» used where it is can be dragged from «التخزين على هذا الجهاز»
+into another program or a folder: «اسحبه إلى برنامج آخر أو إلى مجلد». The application lends Windows the file itself; nothing is
+copied. A finished export can be dragged the same way once the export panel offers it.
+
+**«مجلد التخزين المؤقت»** names the folder «المجلد الافتراضي», or by the last name of the folder chosen: never its whole path, which
+holds the person's Windows name.
+
+**«استيراد من بطاقة الكاميرا»** (P-20, bridge version 9), in «التخزين على هذا الجهاز».
+- The person picks the card, or a folder of it, in Windows' dialog. The application lists what the studio takes inside it: «في
+  «…»: … ملفات (…).», one line a recording with its size, all ticked. A recording the camera split in parts (AVCHD) is one line
+  with «تسجيل واحد من أجزاء (…)». Nothing hidden, nothing of Windows' own, and nothing outside the card through a link is listed.
+  An empty card says «لا توجد في هذا المجلد ملفات فيديو أو صوت أو صور يأخذها الاستوديو.».
+- «نسخ الملفات والتحقق منها» asks for the folder to copy into, then «تُنسخ الملفات ويُتحقَّق منها قبل استعمالها (…٪)…» with
+  «إلغاء». Each copy is read back and compared with what was read from the card before it takes its name; a split recording
+  becomes one file.
+- Then: «نُسخ … ملفات إلى «…» وتُحقِّق منها. أضفها إلى المشروع من «هذا الجهاز»، وتُنشأ نسخها الخفيفة حين يكون الجهاز متفرغاً.»,
+  and for any that failed, its name with why: «تغيّر الملف أثناء نسخه», «لم تطابق النسخة الأصل عند التحقق», «لم يعد الملف في
+  البطاقة (أُخرجت البطاقة؟)», «لا تتسع مساحة القرص», «أُلغي», «لا تُنسخ الملفات إلى البطاقة نفسها», «تعذّر نسخه». A card pulled out,
+  a cancel or a failed check leaves nothing half-made in the folder.
+
 **Boundaries.**
 - The page names its sources as the media tools already do (a device file's token or a library version) and a width of one to
   three; it says what it is doing with a word of a fixed list (playing, scrubbing, measuring, none). No path, program or
   argument is ever sent.
 - The application reads each source to FFmpeg through its own loopback address while a copy is made, so a copy can pause; the
   address answers that copy's one file only, while it is made.
+- The taskbar takes a fraction or one of two words; the jump list starts the application with a word of its own list, never an
+  address. A drag names a file by the token the application gave it. A card's recordings are named by the keys of one listing;
+  the card's and the folders' places stay in the application.
 - Nothing is scheduled in the site: this happens on the laptop while the application is open.
 
 # 64. The Android application «مركز الاتصال المؤسسي», 2026-10-26

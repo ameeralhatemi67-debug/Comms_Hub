@@ -155,3 +155,32 @@ test('a light copy read over loopback is the copy read from the file; paused, it
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('a paused copy whose source FFmpeg read whole before the pause is ended as held, to be made again later', { skip: !shipped && 'vendor/ffmpeg not fetched', timeout: 180000 }, async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'comms-hub-held-'));
+  const w = startWorker();
+  try {
+    // a still picture compresses to almost nothing: the whole file is read at once
+    const src = path.join(dir, 'still.mpg');
+    const made = spawnSync(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=black:s=3840x2160:rate=25:duration=60', '-c:v', 'mpeg2video', '-q:v', '31', '-f', 'mpeg', src], { encoding: 'utf8' });
+    assert.equal(made.status, 0, made.stderr);
+    assert.ok(fs.statSync(src).size < 8 * 1024 * 1024, `small for its length: ${fs.statSync(src).size} bytes`);
+    const { port } = await w.next((m) => m.type === 'listening', 10000);
+    const t = token();
+    w.send({ type: 'run', id: 'still', exe: ffmpeg, args: proxyArgs(servedUrl(port, t), path.join(dir, 'still.part'), 720), encode: true, background: true, serve: { token: t, file: src } });
+    await w.next((m) => m.type === 'progress' && m.id === 'still' && m.seconds > 1, 60000);
+    const at = Date.now();
+    w.send({ type: 'pause', id: 'still' });
+    const done = await w.next((m) => m.type === 'done' && m.id === 'still', 20000);
+    const ms = Date.now() - at;
+    assert.equal(done.ok, false, 'it did not run on to the end');
+    assert.equal(done.why, 'held');
+    assert.ok(ms <= 2500, `ended ${ms} ms after the pause`);
+    console.log(`# a still source's copy went on after the pause and was ended ${ms} ms later`);
+  } finally {
+    w.send({ type: 'stop' });
+    await new Promise((r) => setTimeout(r, 300));
+    w.child.kill();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

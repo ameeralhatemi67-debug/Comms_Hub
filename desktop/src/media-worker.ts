@@ -6,7 +6,9 @@
 // at once. From D12 (Desktop_Power_Ideas.md P-08, P-30) a copy's source is served to FFmpeg over loopback
 // (loopback.ts), so the main process can pause a job by stopping its bytes and resume it later with nothing lost;
 // the copies made in idle time start when the main process says, outside that one-at-a-time line, because the
-// main process keeps their number. FFmpeg's error lines stay here: the main process is told the kind of failure only.
+// main process keeps their number. A source small for its length (a still scene, a low rate) can be read whole before
+// the pause, so FFmpeg would go on: a paused job still making progress after HELD_MS is ended, as 'held', and the main
+// process makes it again later. FFmpeg's error lines stay here: the main process is told the kind of failure only.
 import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs';
 import http from 'node:http';
@@ -23,7 +25,7 @@ export type Out =
   | { type: 'started'; id: string; pid: number }
   | { type: 'progress'; id: string; seconds: number }
   | { type: 'done'; id: string; ok: true; stdout: string }
-  | { type: 'done'; id: string; ok: false; why: 'space' | 'decode' | 'encode' | 'failed' | 'cancelled' };
+  | { type: 'done'; id: string; ok: false; why: 'space' | 'decode' | 'encode' | 'failed' | 'cancelled' | 'held' };
 
 const port = (process as unknown as { parentPort: { on(e: 'message', fn: (m: { data: In }) => void): void; postMessage(m: Out): void } }).parentPort;
 const children = new Map<string, ChildProcess>();
@@ -34,7 +36,14 @@ const MAX_STDOUT = 4 * 1024 * 1024;
 
 // --- the loopback server ---------------------------------------------------------------------------
 const CHUNK = 256 * 1024;
-type Served = { id: string; file: string; size: number; paused: boolean; ended: boolean; wake: (() => void)[]; sockets: Set<Socket> };
+/** How long a paused job may still make progress (what FFmpeg had read before the pause) before it is ended. */
+const HELD_MS = 1700;
+const SETTLE_MS = 1000;
+type Served = { id: string; file: string; size: number; paused: boolean; ended: boolean; wake: (() => void)[]; sockets: Set<Socket>; timers: NodeJS.Timeout[] };
+/** The output time FFmpeg last said, per job. */
+const lastSeconds = new Map<string, number>();
+/** Jobs ended because they went on while paused. */
+const held = new Set<string>();
 const served = new Map<string, Served>();
 const servedOf = new Map<string, string>();
 let listening = 0;
@@ -119,7 +128,7 @@ function serve(job: Run) {
   } catch {
     size = 0;
   }
-  served.set(job.serve.token, { id: job.id, file: job.serve.file, size, paused: false, ended: false, wake: [], sockets: new Set() });
+  served.set(job.serve.token, { id: job.id, file: job.serve.file, size, paused: false, ended: false, wake: [], sockets: new Set(), timers: [] });
   servedOf.set(job.id, job.serve.token);
 }
 
@@ -130,6 +139,7 @@ function unserve(id: string) {
   if (!s || !token) return;
   served.delete(token);
   s.ended = true;
+  for (const t of s.timers.splice(0)) clearTimeout(t);
   wakeAll(s);
   for (const socket of s.sockets) socket.destroy();
 }
@@ -139,7 +149,20 @@ function setPaused(id: string, paused: boolean) {
   const s = token ? served.get(token) : undefined;
   if (!s) return;
   s.paused = paused;
-  if (!paused) wakeAll(s);
+  for (const t of s.timers.splice(0)) clearTimeout(t);
+  if (!paused) return wakeAll(s);
+  // what FFmpeg holds already may carry it on a little; if it still goes on, it read too far ahead to wait
+  let mark = -1;
+  s.timers.push(
+    setTimeout(() => (mark = lastSeconds.get(id) ?? -1), SETTLE_MS),
+    setTimeout(() => {
+      const now = lastSeconds.get(id) ?? -1;
+      const child = children.get(id);
+      if (!s.paused || !child || mark < 0 || now <= mark) return;
+      held.add(id);
+      child.kill();
+    }, HELD_MS),
+  );
 }
 
 // --- the programs ----------------------------------------------------------------------------------
@@ -174,6 +197,7 @@ function start(job: Run) {
     const p = readProgress(pending.slice(0, cut));
     pending = pending.slice(cut + 1);
     const now = Date.now();
+    if (p.seconds !== null) lastSeconds.set(job.id, p.seconds);
     if (p.seconds !== null && now - told > 250) {
       told = now;
       port.postMessage({ type: 'progress', id: job.id, seconds: p.seconds });
@@ -188,7 +212,9 @@ function start(job: Run) {
     ended = true;
     children.delete(job.id);
     unserve(job.id);
-    if (cancelled.delete(job.id)) port.postMessage({ type: 'done', id: job.id, ok: false, why: 'cancelled' });
+    lastSeconds.delete(job.id);
+    if (held.delete(job.id)) port.postMessage({ type: 'done', id: job.id, ok: false, why: 'held' });
+    else if (cancelled.delete(job.id)) port.postMessage({ type: 'done', id: job.id, ok: false, why: 'cancelled' });
     else if (code === 0) port.postMessage({ type: 'done', id: job.id, ok: true, stdout: out });
     else port.postMessage({ type: 'done', id: job.id, ok: false, why: failureOf(err) });
     if (job.encode && !job.background) {

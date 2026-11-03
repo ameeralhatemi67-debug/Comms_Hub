@@ -56,6 +56,11 @@ export function refs() {
   return doc.sources.map((s) => dc.mediaRef(s)).filter(Boolean);
 }
 export const queueWith = (width: number) => bridge().media.queue({ items: refs(), width });
+/** A queue of these files only, in this order. */
+export function queueOnly(files: string[], width: number) {
+  const items = files.map((f) => doc.sources.find((s) => s.id === ids.find((x) => x.name === f)!.id)!).map((s) => dc.mediaRef(s)).filter(Boolean);
+  return bridge().media.queue({ items, width });
+}
 /** Which file each light copy is of: the names the application gives them (media.copies). */
 export async function copyNames() {
   const out: Record<string, string> = {};
@@ -104,7 +109,12 @@ export async function play(seconds: number, o: { muted?: boolean; say?: boolean 
   pl.seek(0);
   pl.play();
   requestAnimationFrame(tick);
-  await sleep(seconds * 1000);
+  // the clip playing a moment in: whether its element plays, and with sound
+  await sleep(1500);
+  const clip = doc.video?.tracks.flatMap((t) => t.clips).find((c) => c.start === 0);
+  const el = clip ? pool.element(clip.id, clip.source) : null;
+  const element = el ? { paused: el.paused, muted: el.muted, volume: el.volume, readyState: el.readyState, time: Math.round(el.currentTime * 100) / 100 } : null;
+  await sleep(Math.max(0, seconds * 1000 - 1500));
   on = false;
   pl.pause();
   if (o.say) await setActivity('none');
@@ -112,7 +122,7 @@ export async function play(seconds: number, o: { muted?: boolean; say?: boolean 
   // the first half second settles the elements
   const kept = gaps.slice(Math.min(gaps.length - 1, 30)).sort((a, b) => a - b);
   const q = (p: number) => Math.round(kept[Math.min(kept.length - 1, Math.floor(p * kept.length))] * 100) / 100;
-  return { frames: kept.length, p50: q(0.5), p95: q(0.95), max: Math.round(kept[kept.length - 1] * 100) / 100 };
+  return { frames: kept.length, p50: q(0.5), p95: q(0.95), max: Math.round(kept[kept.length - 1] * 100) / 100, element };
 }
 
 declare global {
@@ -120,4 +130,4 @@ declare global {
     [k: string]: unknown;
   }
 }
-Object.assign(window, { openCorpus, queued, heardStates, refs, queueWith, copyNames, clearCopies, stopQueue, activity, busy, ask, play });
+Object.assign(window, { openCorpus, queued, heardStates, refs, queueWith, queueOnly, copyNames, clearCopies, stopQueue, activity, busy, ask, play });

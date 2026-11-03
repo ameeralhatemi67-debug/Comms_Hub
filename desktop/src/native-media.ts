@@ -8,8 +8,9 @@
 // From D12 (Desktop_Power_Ideas.md P-08, P-30) the idle-time broker: a window names the sources of its project
 // (`media.queue`), the main process works out which need a light copy on this machine (heavyOn, with the device
 // profile), and makes them while the laptop is free (idle.ts), as many at once as the page's plan says. Held, a
-// copy is paused (its source is served over loopback, loopback.ts); held for minutes, or wanted by no window any
-// more, it is stopped and leaves nothing behind. A copy the person asks for is never paused, and holds the rest.
+// copy is paused (its source is served over loopback, loopback.ts); one that read its source too far ahead to wait,
+// held for minutes, or wanted by no window any more, is stopped and leaves nothing behind, and waits to be made again.
+// A copy the person asks for is never paused, and holds the rest.
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { app, utilityProcess, webContents as allContents } from 'electron';
@@ -343,7 +344,8 @@ export function startMedia(o: {
       () => undefined,
       (err: Error) => {
         const why = err?.message || 'failed';
-        if (stopped.delete(name)) queue.set(name, { state: 'waiting', done: 0 });
+        // stopped by the broker, or by the worker because it would not wait: it is made again later
+        if (stopped.delete(name) || why === 'held') queue.set(name, { state: 'waiting', done: 0 });
         else queue.set(name, { state: 'failed', why });
         tell();
       },
