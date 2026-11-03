@@ -11,8 +11,9 @@
 // (63.3), with no second copy. A video project exports in
 // each shape ticked (MVP_draft.md 62.10), one file each; the platforms it is meant for are checked first;
 // a download may carry the «مسودة» mark (never a library file: what is approved there is what is
-// published); a text track can be written out as SRT captions.
-import { useEffect, useRef, useState } from 'react';
+// published); a text track can be written out as SRT captions. While the panel is open and idle, the
+// sound's loudness is measured ahead (loudness-ahead.ts), so «توحيد مستوى الصوت» starts at once.
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Download, Film, Image as ImageIcon, Library, Send, Subtitles, X } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
@@ -22,7 +23,8 @@ import { exportChecks, hasStop } from '@/lib/studio/checks';
 import { openSlots } from '@/lib/studio/slot';
 import { toSrt } from '@/lib/studio/text';
 import { factsOf, usePlatforms } from './platforms';
-import { EXPORT_ERRORS, ExportError, SHORT_LABELS, estimateBytes, exportStill, exportVideo, fileName, measureLoudness, outputSize, type ExportProgress, type Short, type VideoFormat } from '@/lib/studio/export';
+import { EXPORT_ERRORS, ExportError, SHORT_LABELS, estimateBytes, exportStill, exportVideo, fileName, outputSize, type ExportProgress, type Short, type VideoFormat } from '@/lib/studio/export';
+import { loudnessOf, soundReady, storedLoudness, workAhead } from '@/lib/studio/loudness-ahead';
 import { LOUDNESS_TARGET, lufsText, normalizeGain } from '@/lib/studio/loudness';
 import { hasSound } from '@/lib/studio/audio';
 import { download } from '@/lib/studio/target';
@@ -106,6 +108,7 @@ export function ExportPanel({
   const [linkNote, setLinkNote] = useState<string | null>(null);
   const [normalize, setNormalize] = useState(false);
   const [level, setLevel] = useState<string | null>(null);
+  const [aheadTick, setAheadTick] = useState(0);
   const abort = useRef<AbortController | null>(null);
   const lastUrls = useRef<string[]>([]);
   const inApp = useNativeFeature('busy');
@@ -144,6 +147,21 @@ export function ExportPanel({
   useEffect(() => () => {
     for (const u of lastUrls.current) URL.revokeObjectURL(u);
   }, []);
+  // the sound's loudness worked out ahead, a moment after the last change, once its sources are ready
+  const exporting = !!progress;
+  useEffect(() => {
+    if (photo || exporting || !pool || !hasSound(doc) || storedLoudness(doc)) return;
+    const ctl = new AbortController();
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    void (async () => {
+      await wait(1500);
+      while (!ctl.signal.aborted && !soundReady(doc, pool)) await wait(2000);
+      if (ctl.signal.aborted) return;
+      if (await workAhead(doc, pool, ctl.signal)) setAheadTick((x) => x + 1);
+    })();
+    return () => ctl.abort();
+  }, [doc, pool, photo, exporting]);
+  const ahead = useMemo(() => (photo || !hasSound(doc) ? null : storedLoudness(doc)), [doc, photo, aheadTick]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!progress) return;
     const onVis = () => setHidden(document.visibilityState === 'hidden');
@@ -191,7 +209,7 @@ export function ExportPanel({
       // «توحيد مستوى الصوت»: measured first, then one gain for the whole sound (the same in every shape)
       let gain = 1;
       if (what === 'video' && normalize && hasSound(doc)) {
-        const m = await measureLoudness(doc, pool, { signal: ctl.signal, onProgress: (f) => setProgress({ label: `جارٍ قياس مستوى الصوت ${Math.round(f * 100)}٪`, f }) });
+        const m = await loudnessOf(doc, pool, { signal: ctl.signal, onProgress: (f) => setProgress({ label: `جارٍ قياس مستوى الصوت ${Math.round(f * 100)}٪`, f }) });
         gain = normalizeGain(m);
         const after = m.integrated + 20 * Math.log10(gain);
         setLevel(`كان الصوت ${lufsText(m.integrated)}، وصار في الملف نحو ${lufsText(after)}${after < LOUDNESS_TARGET - 0.5 ? ' (أوقفته القمم عند -1 ديسيبل)' : ''}.`);
@@ -400,7 +418,8 @@ export function ExportPanel({
               if (!pool) return;
               setLevel('جارٍ القياس…');
               try {
-                const m = await measureLoudness(doc, pool);
+                const m = await loudnessOf(doc, pool);
+                setAheadTick((x) => x + 1);
                 setLevel(`مستوى صوت المشروع ${lufsText(m.integrated)}، وأعلى قمة ${Number.isFinite(m.peakDb) ? `${m.peakDb.toFixed(1)} ديسيبل` : 'لا شيء'}.`);
               } catch {
                 setLevel('تعذّر القياس.');
@@ -410,6 +429,7 @@ export function ExportPanel({
             قياس المستوى
           </button>
           {level && <p className="st-hint" role="status">{level}</p>}
+          {!level && ahead && <p className="st-hint">قيس مستوى الصوت مسبقاً: {lufsText(ahead.integrated)}، فيبدأ التصدير الموحَّد دون انتظار القياس.</p>}
         </div>
       )}
       <fieldset className="st-checks">

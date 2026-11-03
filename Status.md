@@ -26,6 +26,22 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, merge 2: the export with no graphics chip, and loudness ahead, 2026-11-04
+
+- **Done.** Fork 1 (`power-export`) items 1 to 3 and P-15 (`786f30b`, merged as `dcb2d80`), every client:
+  - **Rate:** an export whose encoder runs on the processor now aims at the chips' rate, 10.1 Mbit/s and 41.2 dB from source, where before it was 6 Mbit/s and 39.3 dB. Chip-encoded files are the same packets as before.
+  - **Speed:** the BT.709 conversion now runs in workers, in WebAssembly lanes with a plain-code fallback, giving the same bytes as `yuv.ts`.
+  - **Colour label:** every engine names the file `bt709`.
+  - **P-15:** «توحيد مستوى الصوت» uses a loudness figure worked out ahead.
+- **Evidence, re-run by the manager.**
+  - Typecheck clean; `npm test` 790 of 790; build passes.
+  - `qa/studio-export-yuv.cjs` 32 of 32. This covers Edge and the application, the site's real Content-Security-Policy, and that policy without `'wasm-unsafe-eval'` falling back to the same bytes.
+  - `qa/studio-loudness-ahead.cjs` 8 of 8.
+  - `qa/studio-crossdevice.cjs` 37 of 43 (35 before). All six failures are no-chip composed frames, up to 53 levels on scaled pictures, unchanged and for Fork 4. Its JSON from this run was not kept; the next run records it.
+  - Timed by the fork in two quiet windows: 1.19 times the canvas path in the application, 1.14 in Edge, at 5 to 22% load (target 1.2). The first figure is close.
+- **Decided.** P-07 (drawing in workers) stays off. In workers, frames differ by 1 level on the AMD chip and in blur and filters with no chip, so turning workers on would change frames on one machine. A floor that always draws in a worker, changing today's frames once, is left to the owner.
+- **Next.** Fork 3's bridge 7 and 8 (light copies in idle time, parallel ranges, taskbar progress, drag out, the cache label), then Fork 2's D10 gate in a 65-minute quiet window. Nothing pushed.
+
 ## Desktop Power, merge 1: the desktop application on Electron 45, 2026-11-04
 
 The owner's stage after D9: use a stronger computer's power without the video depending on it, run as four parallel forks
