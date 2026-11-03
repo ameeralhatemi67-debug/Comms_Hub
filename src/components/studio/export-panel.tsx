@@ -25,6 +25,7 @@ import { toSrt } from '@/lib/studio/text';
 import { factsOf, usePlatforms } from './platforms';
 import { EXPORT_ERRORS, ExportError, SHORT_LABELS, estimateBytes, exportStill, exportVideo, fileName, outputSize, type ExportProgress, type Short, type VideoFormat } from '@/lib/studio/export';
 import { loudnessOf, soundReady, storedLoudness, workAhead } from '@/lib/studio/loudness-ahead';
+import { exportLanes, rememberExport } from '@/lib/studio/export-plan';
 import { LOUDNESS_TARGET, lufsText, normalizeGain } from '@/lib/studio/loudness';
 import { hasSound } from '@/lib/studio/audio';
 import { download } from '@/lib/studio/target';
@@ -106,6 +107,7 @@ export function ExportPanel({
   const [hidden, setHidden] = useState(false);
   const [linkWork, setLinkWork] = useState(true);
   const [linkNote, setLinkNote] = useState<string | null>(null);
+  const [slower, setSlower] = useState(false);
   const [normalize, setNormalize] = useState(false);
   const [level, setLevel] = useState<string | null>(null);
   const [aheadTick, setAheadTick] = useState(0);
@@ -192,6 +194,7 @@ export function ExportPanel({
     if (!pool) return;
     setError(null);
     setDone(null);
+    setSlower(false);
     const ctl = new AbortController();
     abort.current = ctl;
     let awake: (() => Promise<void>) | null = null;
@@ -230,6 +233,8 @@ export function ExportPanel({
           file = await exportStill(d, pool, { t, name, type: stillType, short: photo ? undefined : short, adjusted, watermark });
         } else {
           const saveTo = !toLibrary && saveInPlace ? await chooseSaveFile(name, format) : undefined;
+          // lanes as this computer's measured plan allows (one in a browser), after the ladder's memory
+          const { lanes } = await exportLanes();
           const r = await exportVideo(d, pool, {
             short,
             format,
@@ -237,10 +242,13 @@ export function ExportPanel({
             gain,
             watermark,
             saveTo,
+            lanes,
             signal: ctl.signal,
             onProgress: (p: ExportProgress) => setProgress({ label: p.phase === 'prepare' ? `جارٍ التجهيز${of}…` : p.phase === 'finish' ? `جارٍ إنهاء الملف${of}…` : `جارٍ التصدير${of} ${Math.round((p.done / p.total) * 100)}٪`, f: p.done / Math.max(1, p.total) }),
           });
           file = r.file;
+          rememberExport(r);
+          if (r.steps.length) setSlower(true);
           if (saveTo) {
             results.push({ kind: 'device', name: file.name, bytes: file.size, url: '', saved: true });
             continue;
@@ -487,6 +495,7 @@ export function ExportPanel({
       )}
       {empty && <p className="st-hint">أضف مقطعاً قبل التصدير.</p>}
       {error && <p className="warning" role="alert">{error}</p>}
+      {slower && <p className="st-hint" role="status">تعذّر التصدير المتوازي على هذا الجهاز، فأُكمل بالطريقة المعتادة.</p>}
       {done?.map((d) =>
         d.kind === 'device' && d.saved ? (
           <p key={`saved:${d.name}`} className="st-done" role="status">

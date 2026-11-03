@@ -138,3 +138,40 @@ test('the sound\'s key (P-15) changes with everything the mix depends on and not
   changed({ ...doc, sources: doc.sources.map((s) => ({ ...s, version: 2 })) }, 'a new version of the source');
   changed(tl.addClip(doc, { text: { content: 'بعد' }, start: 6 * US, length: US }).doc, 'a text that makes the project longer');
 });
+
+test('lanes (P-06): segments start on one lane\'s key frames, as equal as whole groups allow, never more than the groups', async () => {
+  const { segmentsOf } = await import('../src/lib/studio/segments.ts');
+  for (const [total, fps, lanes] of [[90, 30, 2], [18000, 30, 3], [18000, 30, 4], [100, 30, 4], [30, 30, 3], [1441, 24, 3], [36000, 60, 2]]) {
+    const segs = segmentsOf(total, fps, lanes);
+    const group = fps * 2;
+    assert.ok(segs.length >= 1 && segs.length <= lanes && segs.length <= Math.ceil(total / group), `${total}/${fps}/${lanes}`);
+    assert.equal(segs[0].from, 0);
+    assert.equal(segs.at(-1).to, total);
+    segs.forEach((s, i) => {
+      assert.equal(s.from % group, 0, 'each segment starts on a key frame');
+      assert.ok(s.to > s.from);
+      if (i) assert.equal(s.from, segs[i - 1].to, 'contiguous');
+    });
+    const sizes = segs.map((s) => Math.ceil((s.to - s.from) / group));
+    assert.ok(Math.max(...sizes) - Math.min(...sizes) <= 1, 'as equal as whole groups allow');
+  }
+  assert.equal(segmentsOf(60, 30, 3).length, 1, 'one group is one segment');
+});
+
+test('the ladder\'s memory (P-35): a lane failure caps the next exports at what finished, for a few exports only', async () => {
+  const { REMEMBER, ladderLanes, readLadder, rememberExport } = await import('../src/lib/studio/export-plan.ts');
+  const box = new Map();
+  const s = { getItem: (k) => box.get(k) ?? null, setItem: (k, v) => box.set(k, v) };
+  assert.equal(ladderLanes(3, readLadder(s)), 3, 'nothing remembered: the plan');
+  rememberExport({ lanes: 2, steps: ['LANE:ENCODER'] }, s, 1);
+  assert.equal(ladderLanes(3, readLadder(s)), 2, 'after a step down, at most what finished');
+  assert.equal(ladderLanes(1, readLadder(s)), 1, 'never above the plan');
+  for (let i = 0; i < REMEMBER - 1; i++) rememberExport({ lanes: 2, steps: [] }, s);
+  assert.equal(ladderLanes(3, readLadder(s)), 2, `still capped after ${REMEMBER - 1} more exports`);
+  rememberExport({ lanes: 2, steps: [] }, s);
+  assert.equal(ladderLanes(3, readLadder(s)), 3, `back to the plan after ${REMEMBER}`);
+  assert.equal(readLadder(s).events.length, 1, 'the event is kept');
+  assert.deepEqual(readLadder({ getItem: () => '{broken', setItem() {} }), { lanes: null, events: [] }, 'unreadable memory is no memory');
+  rememberExport({ lanes: 1, steps: ['DRAW_WORKER'] }, s);
+  assert.equal(ladderLanes(3, readLadder(s)), 3, 'a worker failure is not a lane failure');
+});
