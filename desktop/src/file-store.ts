@@ -100,6 +100,16 @@ export class FileStore {
     return unchanged(record, { size: stat.size, mtimeMs: stat.mtimeMs, isFile: stat.isFile() }) ? { record } : { missing: 'changed' };
   }
 
+  /**
+   * The file to drag out of the application for a token (D12, P-22): only a token this store gave, for a file still
+   * as it was chosen. Anything else, a forgotten token included, drags nothing.
+   */
+  dragPath(token: unknown): string | null {
+    if (typeof token !== 'string' || !TOKEN.test(token)) return null;
+    const found = this.lookup(token);
+    return 'record' in found ? found.record.path : null;
+  }
+
   forget(token: string): boolean {
     const had = this.records.delete(token);
     if (had) this.save();

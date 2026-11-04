@@ -122,6 +122,32 @@ export function heavy(p: Probe | null): boolean {
   return p.video.height > 1080 || (p.bitRate ?? 0) > 50e6 || ['prores', 'dnxhd', 'cfhd'].includes(p.video.codec);
 }
 
+const INTERMEDIATE = ['prores', 'dnxhd', 'cfhd'];
+/** Room the preview needs on a machine: this many tracks of a source at once (D10's gate plays three 4K tracks). */
+export const TRACKS = 3;
+
+/**
+ * Whether a source needs a light copy on this machine (D12, Desktop_Power_Ideas.md P-08). With the device profile's
+ * 4K H.264 decoding rate, an 8-bit H.264 source needs one when three of it at once would decode slower than that, so
+ * a strong machine makes fewer copies and a weak one more; an intermediate codec always does; anything the profile
+ * did not measure, and every source without a profile, follows heavy(), today's rule. A copy feeds the preview only.
+ */
+export function heavyOn(p: Probe | null, decode4k: number | null): boolean {
+  if (!p?.video) return false;
+  if (!decode4k || !(decode4k > 0)) return heavy(p);
+  if (INTERMEDIATE.includes(p.video.codec)) return true;
+  if (p.video.codec !== 'h264' || p.video.bitDepth > 8) return heavy(p);
+  const pixelsPerSecond = p.video.width * p.video.height * (p.video.fps ?? 30);
+  return pixelsPerSecond * TRACKS > 3840 * 2160 * decode4k;
+}
+
+// a still picture read as a one-frame video, never something to copy
+const STILLS = /^(image2|\w+_pipe|gif|apng)$/;
+/** A probe of a moving picture: a video stream that lasts, in a container other than a still picture's. */
+export function isMovie(p: Probe | null): boolean {
+  return !!p?.video && (p.duration ?? 0) > 0 && !p.container.split(',').some((c) => STILLS.test(c.trim()));
+}
+
 /** About how many bytes a copy will take, with room to spare, so a job never starts on a disk that cannot hold it. */
 export function estimateBytes(kind: 'proxy' | 'convert', height: number, p: Probe): number {
   const seconds = p.duration ?? 0;

@@ -1,7 +1,7 @@
 {
   "script": "qa/desktop-files.cjs",
-  "run": "2026-11-03T21:02:53.754Z",
-  "version": "0.7.1",
+  "run": "2026-11-04T02:03:11.291Z",
+  "version": "0.8.0",
   "checks": [
     {
       "name": "DT-11: the file is over 4 GB",
@@ -11,7 +11,7 @@
     {
       "name": "DT-11: chosen in the page, it is given a token (43 characters), not copied",
       "pass": true,
-      "detail": "{\"token\":true,\"place\":\"commshub-file://local/dqGJj4qxJZ8L99gyLNth3Zzkhhvp3bqkAT6jw1KS_jA\"}"
+      "detail": "{\"token\":true,\"place\":\"commshub-file://local/EwwQKLvYRsw2FWSaUqwWcHL1qKur76BY7lRKTRtZ64Y\"}"
     },
     {
       "name": "DT-11: the media pool reads it where it is and is ready",
@@ -31,7 +31,7 @@
     {
       "name": "DT-11: no copy was made: the private storage grew by the export's own file only, and the profile on disk far less than the source",
       "pass": true,
-      "detail": "{\"opfsBefore\":0,\"opfsAfter\":2864643,\"exportBytes\":2864294,\"diskBefore\":3298483,\"diskAfter\":11057434,\"source\":4503664011}"
+      "detail": "{\"opfsBefore\":0,\"opfsAfter\":2864643,\"exportBytes\":2864294,\"diskBefore\":3860583,\"diskAfter\":14207886,\"source\":4503664011}"
     },
     {
       "name": "a file changed after it was chosen is no longer served (410), the studio sees it as gone from this device",
@@ -85,11 +85,11 @@
     }
   ],
   "notes": [
-    "DT-11: profile on disk 3298483 bytes before, 11057434 after, for a 4503664011-byte source; the export took 5516 ms."
+    "DT-11: profile on disk 3860583 bytes before, 14207886 after, for a 4503664011-byte source; the export took 5281 ms."
   ],
   "media": {
     "big": 4503664011,
-    "seconds": 36
+    "seconds": 0
   },
   "inPlace": {
     "key": "420f707bada1419782167fcb4f1f59fc97bcef9a29824debf0de2827a27fd0bb",
@@ -99,14 +99,14 @@
     "state": {
       "kind": "ready"
     },
-    "place": "commshub-file://local/dqGJj4qxJZ8L99gyLNth3Zzkhhvp3bqkAT6jw1KS_jA",
+    "place": "commshub-file://local/EwwQKLvYRsw2FWSaUqwWcHL1qKur76BY7lRKTRtZ64Y",
     "frame": [
       127,
       127,
       127
     ],
     "frames": 150,
-    "exportMs": 5516,
+    "exportMs": 5281,
     "uploaded": 200,
     "opfsBefore": 0,
     "opfsAfter": 2864643,
@@ -117,8 +117,8 @@
       "inPlace": 4503664011,
       "files": 1
     },
-    "diskBefore": 3298483,
-    "diskAfter": 11057434,
+    "diskBefore": 3860583,
+    "diskAfter": 14207886,
     "reference": [
       124,
       132,

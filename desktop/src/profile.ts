@@ -108,6 +108,18 @@ const entryOf = (raw: unknown): ProfileEntry | null => {
   };
 };
 
+/**
+ * 4K H.264 frames a second the page decodes on this Chromium and this chip's switch (the faster of the chip's
+ * decoder and the processor's), from the newest such measurement; null without one, so the rules fall back to
+ * today's (D12, P-08: which sources need a light copy).
+ */
+export function decodeCapacity(entries: readonly ProfileEntry[], chrome: string, sw: GpuSwitch): number | null {
+  const e = entries.filter((x) => x.key.chrome === chrome && x.key.switch === sw).sort((a, b) => b.at - a.at)[0];
+  if (!e) return null;
+  const best = Math.max(e.numbers.decode.h264_2160.hw ?? 0, e.numbers.decode.h264_2160.sw ?? 0);
+  return best > 0 ? best : null;
+}
+
 export class ProfileStore {
   private list: ProfileEntry[] = [];
   private readonly file: string;

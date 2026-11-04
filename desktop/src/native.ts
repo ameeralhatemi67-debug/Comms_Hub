@@ -2,21 +2,25 @@
 // Electron: the bridge's handlers, each registered through sender.ts's guard(); the tray and its Arabic
 // menu; native notices; the taskbar badge; the laptop kept awake; a busy window hidden on close, and a
 // question before quitting during work. From D9 (Desktop_Power_Ideas.md P-01, P-33) also the graphics chip's
-// choice and the device profile. The rules are the pure modules it imports.
+// choice and the device profile. From D12 (P-30) also what the idle-time broker reads: what each window says it is
+// doing, the last key or click, mains or battery and the processor's speed limit; native-media.ts runs the jobs. The
+// rules are the pure modules it imports. Also from D12 (P-26) the progress of a page's work on the taskbar button.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, Notification, powerMonitor, powerSaveBlocker, Tray } from 'electron';
 import type { IpcMainInvokeEvent, NativeImage } from 'electron';
 import { badgeBitmap, withDot } from './badge.ts';
-import { badgeOf, holdIdOf, noticeOf, reasonOf, type NoticeRequest, type Reason } from './bridge.ts';
+import { activityOf, badgeOf, holdIdOf, noticeOf, reasonOf, type Activity, type NoticeRequest, type Reason } from './bridge.ts';
 import { activeChip, deviceInfo, freeBytes } from './device.ts';
 import { gpuChoiceOf, measuredPick, switchFor, type GpuSwitch, type Power } from './gpu.ts';
+import { isWork, type Facts, type Hold } from './idle.ts';
 import { profileOf, type ProfileKey, type ProfileStore } from './profile.ts';
 import { PRODUCT_NAME } from './identity.ts';
 import { BRIDGE_VERSION, CHANNEL } from './ipc.ts';
 import { closeAction, quitAction, Registry, shouldNotify } from './life.ts';
 import { guard } from './sender.ts';
+import { progressBar, progressOf } from './taskbar.ts';
 import { parseSettings, type Settings } from './settings.ts';
 import { feedAllowed, START } from './update.ts';
 import { startUpdates, type Updates } from './updater.ts';
@@ -43,6 +47,9 @@ export type NativeOptions = {
 
 export type Handle = <A extends unknown[]>(channel: string, handler: (event: IpcMainInvokeEvent, ...args: A) => unknown) => void;
 
+/** What the idle-time broker reads (idle.ts), and a call whenever any of it changes. */
+export type IdleFacts = { facts(): Omit<Facts, 'asked' | 'now'>; onChange(fn: () => void): void };
+
 export type Native = {
   /** Every site window passes through here once: closing it may hide it, and its holds end with it. */
   attachWindow(win: BrowserWindow, isMain: boolean): void;
@@ -50,6 +57,9 @@ export type Native = {
   reveal(win: BrowserWindow): void;
   /** Registers a bridge handler through guard(), for the other groups (native-files.ts). */
   handle: Handle;
+  idle: IdleFacts;
+  /** The light copies made in idle time, for the tray's tooltip (native-media.ts). */
+  background(state: { making: number; waiting: number; hold: Hold | null }): void;
 };
 
 // Notices Windows has not shown or dismissed yet are kept referenced, or their click would be lost.
@@ -69,6 +79,18 @@ export function startNative(o: NativeOptions): Native {
   const live = new Set<Notification>();
   /** Set once the tray exists (updates, D3); the tray's menu reads it. */
   let updates: Updates | null = null;
+  // --- what the idle-time broker reads (D12, P-30) ------------------------------------------------
+  const activities = new Map<number, Activity>();
+  const audible = new Set<number>();
+  let lastInput = 0;
+  let speedLimit = 100;
+  const idleListeners: (() => void)[] = [];
+  const idleChanged = () => {
+    for (const fn of idleListeners) fn();
+  };
+  let copies: { making: number; waiting: number; hold: Hold | null } = { making: 0, waiting: 0, hold: null };
+  /** The taskbar button's bar, per window (P-26): the last fraction shown, and whether it is red. */
+  const shown = new Map<number, { value: number; failed: boolean }>();
 
   function readSettings(): Settings {
     try {
@@ -108,7 +130,7 @@ export function startNative(o: NativeOptions): Native {
   // --- the tray ------------------------------------------------------------------------------------
   const tray = new Tray(trayImage(false));
   function refreshTray() {
-    tray.setToolTip(trayTooltip(registry.busyReason(), decisions));
+    tray.setToolTip(trayTooltip(registry.busyReason(), decisions, copies));
     tray.setContextMenu(
       Menu.buildFromTemplate([
         { label: TRAY_OPEN, click: () => revealAll() },
@@ -186,7 +208,10 @@ export function startNative(o: NativeOptions): Native {
     const { blockers, wasBusy } = registry.releaseAll(id);
     for (const blocker of blockers) powerSaveBlocker.stop(blocker);
     told.delete(id);
+    const said = activities.delete(id);
+    const heard = audible.delete(id);
     if (wasBusy || blockers.length) refreshTray();
+    if (wasBusy || said || heard) idleChanged();
   }
 
   function attachWindow(win: BrowserWindow, isMain: boolean) {
@@ -198,6 +223,29 @@ export function startNative(o: NativeOptions): Native {
     contents.once('destroyed', () => {
       drop(id);
       hiddenForWork.delete(win);
+    });
+    // The taskbar's bar ends with the document that set it; a red one, once the person has looked at the window.
+    const clearBar = () => {
+      if (!shown.delete(id) || win.isDestroyed()) return;
+      win.setProgressBar(-1, { mode: 'none' });
+    };
+    contents.on('did-navigate', clearBar);
+    contents.on('render-process-gone', clearBar);
+    win.on('focus', () => {
+      if (shown.get(id)?.failed) clearBar();
+    });
+    // A key or a click in any window of the site holds background work for a few seconds (idle.ts); only the time is kept.
+    contents.on('audio-state-changed', (event) => {
+      if (event.audible === audible.has(id)) return;
+      if (event.audible) audible.add(id);
+      else audible.delete(id);
+      idleChanged();
+    });
+    contents.on('input-event', (_event, input) => {
+      if (!isWork(input)) return;
+      const was = lastInput;
+      lastInput = Date.now();
+      if (lastInput - was > 250) idleChanged();
     });
     win.on('close', (event) => {
       const action = closeAction({ quitting, busy: registry.isBusy(id), isMain, keepInTray: settings.keepInTray });
@@ -303,6 +351,7 @@ export function startNative(o: NativeOptions): Native {
     // While busy the window is never throttled: an export runs at full speed minimised or hidden.
     event.sender.setBackgroundThrottling(false);
     refreshTray();
+    idleChanged();
     return true;
   });
   handle(CHANNEL.idle, (event) => {
@@ -310,7 +359,32 @@ export function startNative(o: NativeOptions): Native {
     event.sender.setBackgroundThrottling(true);
     told.delete(event.sender.id);
     refreshTray();
+    idleChanged();
     return was;
+  });
+  // How far a page's work is, on the taskbar button (D12, P-26): a number from 0 to 1, «done» or «failed» (red).
+  handle(CHANNEL.progress, (event, state: unknown) => {
+    const p = progressOf(state);
+    if (!p) throw refused();
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win) return false;
+    const id = event.sender.id;
+    const bar = progressBar(p, shown.get(id)?.value ?? 0);
+    if (p.mode === 'none') shown.delete(id);
+    else shown.set(id, { value: bar.value, failed: p.mode === 'error' });
+    win.setProgressBar(bar.value, { mode: bar.mode });
+    return true;
+  });
+  // What a page says it is doing (D12, P-30): a word from a fixed list, kept for its window until `none`, another
+  // document or the window's end.
+  handle(CHANNEL.activity, (event, kind: unknown) => {
+    const a = activityOf(kind);
+    if (!a) throw refused();
+    const id = event.sender.id;
+    if (a === 'none' ? !activities.delete(id) : activities.get(id) === a) return true;
+    if (a !== 'none') activities.set(id, a);
+    idleChanged();
+    return true;
   });
 
   handle(CHANNEL.notify, (event, value: unknown) => {
@@ -344,8 +418,24 @@ export function startNative(o: NativeOptions): Native {
     writeSettings();
   }
   notePower();
-  powerMonitor.on('on-ac', notePower);
-  powerMonitor.on('on-battery', notePower);
+  powerMonitor.on('on-ac', () => (notePower(), idleChanged()));
+  powerMonitor.on('on-battery', () => (notePower(), idleChanged()));
+  // Windows' advertised speed limit for the processor: below 100 when it is held back for heat or power.
+  powerMonitor.on('speed-limit-change', (details) => {
+    const limit = Number((details as { limit?: unknown }).limit);
+    if (!Number.isFinite(limit) || limit === speedLimit) return;
+    speedLimit = limit;
+    idleChanged();
+  });
+  const idle: IdleFacts = {
+    facts: () => ({ power: powerNow(), speedLimit, busy: registry.busyReason(), activities: [...activities.values()], audible: audible.size > 0, lastInput }),
+    onChange: (fn) => void idleListeners.push(fn),
+  };
+  function background(state: { making: number; waiting: number; hold: Hold | null }) {
+    if (state.making === copies.making && state.waiting === copies.waiting && state.hold === copies.hold) return;
+    copies = state;
+    refreshTray();
+  }
 
   function gpuState() {
     const pick = measuredPick(o.profiles.entries(), process.versions.chrome);
@@ -391,5 +481,5 @@ export function startNative(o: NativeOptions): Native {
     return o.profiles.save(await currentKey(), numbers);
   });
 
-  return { attachWindow, reveal, handle };
+  return { attachWindow, reveal, handle, idle, background };
 }
