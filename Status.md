@@ -26,6 +26,16 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, merge 8: effects identical on every chip, 2026-11-05
+
+- **Done.** Fork 4's P-09 and P-17, merged as `be802d8`. Colour, covers and blur are whole-number arithmetic: the same bytes on the chip, in plain code and in WebAssembly lanes. Blurs follow the frame's own size. Photo adjustments run in tiles.
+- **Evidence, the fork's slot** (01:40 to 02:00 at `789a53e`):
+  - Export speed within 3% of before on every engine: Edge +2.9%, AMD -1.3%, RTX +4.6%, no chip +4.8%.
+  - `qa/studio-effects-parity.cjs` 19 of 19: chip, plain code and WebAssembly equal in 90 of 90 cases, one hash for the 54 corpus frames.
+  - Photo tiles 9 of 9, frames 2 of 2, studio-engine 41 of 41.
+- **Evidence, re-run by the manager** on the merge: typecheck clean, `npm test` 870 of 870, `next build`. The qa checks are rerun in the final regression before the push.
+- **Open.** `qa/studio-crossdevice.cjs` is 38 of 43. The five failures are the no-chip engine against the chips (effects, transitions, keys, brand, landscape-keys), mostly at edges and text. The tolerance is decided after P-07 option B's numbers.
+
 ## Desktop Power, the owner's decisions of 2026-11-05
 
 - **P-28** «فتح بالبرنامج الافتراضي»: build it (Fork 3, bridge 10).
