@@ -26,6 +26,18 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, the owner's decisions of 2026-11-05
+
+- **P-28** «فتح بالبرنامج الافتراضي»: build it (Fork 3, bridge 10).
+- **P-07 option B**: yes. The export always draws in a worker, so every lane count gives the same frames. Today's frames change once (Fork 1, after Fork 4's effects).
+- **Fork 4's effects (P-09, P-17)** are to be finished, not parked.
+- **The old check profiles on drive C** stay; no cleanup.
+- **Push and deploy at the end**, once everything is done and tested. Then the Windows download on «الحساب» offers the new release, and its card says the desktop application is the stronger, more capable version than the website.
+  - Publishing the installer stays the owner's (`desktop/README.md`): the agent builds and checks the three files, and the owner uploads them to `desktop-releases/windows-x64/`.
+- **Found before the push.**
+  - `origin/main` has 13 deploy commits that main lacks (Fork 5 merges them on a branch).
+  - Three migrations on main are not applied to comms-hub: `20261102200000_create_access`, `20261102210000_work_cancel`, `20261103200000_platform_tests_facebook`. Pushing main ships code that needs them.
+
 ## Desktop Power, merge 7: whole-frame steps and the idle-time copy check, 2026-11-05
 
 - **Done.** Fork 2's follow-ups, merged as `da52a3f`.
