@@ -3143,8 +3143,9 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   3.2 idea 1). **Not run yet:** port 3000 is Fork 1's for its D11 rows. It drives the real editor in the development package with
   no profile, on the D10 4K fixture added from «هذا الجهاز». It reads the application's hold while the editor plays («playing», the
   source silent and «تشغيل» pressed from the page) and while the ruler is dragged («scrubbing»), and that nothing is held after.
-  It then checks the paused frame's identity across the take-up, the next play's element and frames, and the copy's element at
-  four times. By design (`media.ts` `copiesReady`) a copy is taken up only while paused, never in the middle of a play, so the swap
-  is checked at the pause. A copy that becomes ready during a play (`readyWhilePlaying`) is not driven: the broker holds every
-  copy while the page plays, so that only happens in a race.
+  The copy is taken up at the pause, and the next play runs from the copy: the check reads the paused frame's identity across the
+  take-up, the next play's element and frames, and the copy's element at four times. This is D10's design (`media.ts`
+  `copiesReady`): a copy is taken up only while paused, and there is no swap in mid-play (the manager accepted it on 2026-11-04). A
+  copy that becomes ready during a play (`readyWhilePlaying`) is not driven: the broker holds every copy while the page plays, so
+  that only happens in a race.
 - **Not done.** Nothing pushed.

@@ -7,7 +7,8 @@
 //   The broker's words: the page plays (the check presses «تشغيل» from inside the page, so no input is counted and the
 //   source is silent, so «playing» can only be the page's own word) and scrubs (a real drag on the ruler); the queue's
 //   hold is read from the application while it happens and after.
-//   The swap: media.ts takes a copy up only while paused (copiesReady, never in the middle of a play). So the paused
+//   Taken up at the pause; the next play runs from the copy. This is D10's design: media.ts takes a copy up only while
+//   paused (copiesReady, never in the middle of a play; there is no swap in mid-play). So the paused
 //   frame at 4 s is read from the original, the copy is made while nothing happens, and the paused frames at the same
 //   times are read again from the copy; then the next play's element is the copy's, its frames are checked against
 //   the player's clock, and the copy's element is shown to give the original's frame at every time it is sent to.
@@ -258,7 +259,7 @@ function judgePlay(p, label) {
     await win.waitForLoadState('load');
     await d10.toFront(app, win);
     const bridge = await win.evaluate(() => ({ bridge: window.commsHubNative.bridge, profile: !!window.commsHubNative.profile }));
-    check('the application\'s bridge is version 7 or later (life.activity and the copy queue)', bridge.bridge >= 7, bridge);
+    check('the application\'s bridge is version 9, as main has it (life.activity and the copy queue from 7)', bridge.bridge >= 9, bridge);
 
     // --- the editor, on a 4K source from this device --------------------------------------------------
     await win.goto(base + '/motion/studio');
@@ -354,7 +355,7 @@ function judgePlay(p, label) {
     const freeB = afterB.find((x) => x.hold === null);
     check(`and nothing is held once the drag's own input is ${QUIET_MS / 1000} s old`, !!freeB && freeB.ms <= QUIET_MS + 1000 && afterB.filter((x) => x.ms >= freeB.ms).every((x) => x.hold === null), { freeAt: freeB?.ms ?? null, after: afterB });
 
-    // --- the copy made in idle time, and the swap at the pause -------------------------------------------
+    // --- the copy made in idle time, taken up at the pause ----------------------------------------------
     await at('إلى البداية');
     for (let i = 0; i < AT; i++) await at('تقدم ثانية');
     await win.evaluate(() => window.__swap.settled());
@@ -363,7 +364,7 @@ function judgePlay(p, label) {
     const madeMs = Date.now() - t0;
     const takenUp = await h.until(async () => ((await win.evaluate(() => window.__swap.reads())).copy > 0 ? true : null), 15000, 100);
     const readsAt = await win.evaluate(() => window.__swap.reads());
-    check('the light copy was made while nothing happened, with nothing asked, and the paused editor took it up (its decoder reads the copy)', !!ready && !!takenUp, { madeMs, readsAt, item: mask(JSON.stringify(await item())) });
+    check('the light copy was made while nothing happened, with nothing asked, and taken up at the pause (the paused editor\'s decoder reads the copy)', !!ready && !!takenUp, { madeMs, readsAt, item: mask(JSON.stringify(await item())) });
     const still = await win.evaluate(() => window.__swap.settled(3000));
     await at('تقدم ثانية');
     const next = await win.evaluate(() => window.__swap.settled());
@@ -376,10 +377,10 @@ function judgePlay(p, label) {
     await at('إطار للخلف');
     const back = await win.evaluate(() => window.__swap.settled());
     const readsAfter = await win.evaluate(() => window.__swap.reads());
-    result.swap = { before, still, next, again, two, back, readsAt, readsAfter, madeMs };
+    result.takenUpAtPause = { before, still, next, again, two, back, readsAt, readsAfter, madeMs };
     // the seeks after the take-up are the copy's: it was read for them, or the original was not (its reads may be cached)
     const fromCopy = readsAfter.copy > readsAt.copy || readsAfter.original === readsAt.original;
-    check(`across the swap the paused frame keeps its identity: frame ${AT * FPS} from the original, and from the copy frame ${AT * FPS} again (${again.shown}), ${(AT + 1) * FPS} a second on (${next.shown}) and ${AT * FPS + 2} two frames on (${two.shown})`, still.shown === AT * FPS && again.shown === AT * FPS && next.shown === (AT + 1) * FPS && two.shown === AT * FPS + 2 && back.shown === AT * FPS && fromCopy, result.swap);
+    check(`taken up at the pause, the paused frame keeps its identity: frame ${AT * FPS} from the original, and from the copy frame ${AT * FPS} again (${again.shown}), ${(AT + 1) * FPS} a second on (${next.shown}) and ${AT * FPS + 2} two frames on (${two.shown})`, still.shown === AT * FPS && again.shown === AT * FPS && next.shown === (AT + 1) * FPS && two.shown === AT * FPS + 2 && back.shown === AT * FPS && fromCopy, result.takenUpAtPause);
 
     // --- the next play: the copy's element ---------------------------------------------------------
     await d10.assertDrawing(win, 'the editor');
@@ -388,7 +389,7 @@ function judgePlay(p, label) {
     const holdE = (await queued()).hold;
     const e = judgePlay(await playE, 'the copy');
     result.copyPlay = { hold: holdE, play: e };
-    check('the next play\'s element is the light copy\'s, and no element of the original is made for it', e.made.length >= 1 && e.made.every((m) => m.place === 'copy' && m.copy === '1') && e.element?.place === 'copy', { made: e.made, element: e.element });
+    check('the next play runs from the copy: its element is the light copy\'s, and no element of the original is made for it',e.made.length >= 1 && e.made.every((m) => m.place === 'copy' && m.copy === '1') && e.element?.place === 'copy', { made: e.made, element: e.element });
     check(`its frames keep their identity: once in step (${e.inStepMs} ms after the press) every drawn frame is within the player's own rule of the clock (${IN_RULE} frames, preview.ts DRIFT), the median within one, none going back`, e.inStepMs !== null && e.inStepMs <= 1000 && e.outside === 0 && e.medianOff !== null && e.medianOff <= 1 && e.back === 0, e);
     check('it plays at the same frame of the clock as the original\'s play did, or nearer (median offset, frames)', a.medianOff === null || (e.medianOff !== null && e.medianOff <= Math.max(1, a.medianOff)), { original: a.medianOff, copy: e.medianOff });
     note(`The press to the element in step: the original ${a.inStepMs} ms (warm-up offsets ${JSON.stringify(a.warmup)}), the copy ${e.inStepMs} ms (${JSON.stringify(e.warmup)}); frames drawn ${a.drawn} and ${e.drawn}; the elements' own count ${JSON.stringify(a.quality)} and ${JSON.stringify(e.quality)}. A play starts its element as it starts, from the original or the copy alike; until then the stage shows the paused decoder's frame.`);
