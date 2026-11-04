@@ -3318,7 +3318,7 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     studio tab bar's own check, says the studio opens. Export lanes are left out (planned, not used by the export yet), and so is the
     taskbar's progress (no page sends it yet); dragging files out is in the studio line, since only the studio's storage panel offers it.
   - `MVP_draft.md` 63.2 and 63.10; `AGENTS.md`'s bridge 10 paragraph.
-- **Verification & evidence**, in the manager's slot (02:23 to about 02:45), TEMP and TMP in this worktree's `qa/artifacts/tmp`, the port's
+- **Verification & evidence**, in the manager's slot (02:23 to 02:34), TEMP and TMP in this worktree's `qa/artifacts/tmp`, the port's
   lock held by this branch:
   - `npm run typecheck` clean (22 s; 10 s again on the final code); `desktop` typecheck clean.
   - `npm test`: **854 of 855** on the first run. `tests/studio-access.test.mjs` pinned the studio tab's old line, which `useStudioTab`
