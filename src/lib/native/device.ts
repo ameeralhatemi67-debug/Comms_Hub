@@ -16,7 +16,7 @@ export type DeviceFacts = {
   appKind?: 'desktop' | 'android';
   cores: number | null;
   cpu: string | null;
-  /** Bytes; a browser rounds it and stops at 8 GB. */
+  /** Bytes; a browser rounds it to a power of two and caps it (older Chromium at 8 GB; Edge 156 reported 16 on a 16.3 GB laptop). */
   memory: number | null;
   memoryAtLeast: boolean;
   freeDisk: number | null;
