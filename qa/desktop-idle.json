@@ -1,0 +1,288 @@
+{
+  "script": "qa/desktop-idle.cjs",
+  "run": "2026-11-04T02:06:39.114Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "the bridge is version 7 or later, with life.activity and media.queue, queued and onQueue",
+      "pass": true,
+      "detail": "{\"bridge\":9,\"life\":[\"busy\",\"idle\",\"activity\",\"progress\"],\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\",\"queue\",\"queued\",\"onQueue\"]}"
+    },
+    {
+      "name": "the studio named its four video sources to the queue on its own, and the application found each needs a light copy here (4K, no profile)",
+      "pass": true,
+      "detail": "{\"opened\":{\"names\":[\"grain-1.mp4\",\"grain-2.mp4\",\"still-3.mp4\",\"still-4.mp4\"],\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"width\":null},\"named\":{\"hold\":null,\"width\":1,\"items\":[{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fbe1befe212d8ade024766b581f0555c823936bf0-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fc12d8c4218d1c56813e56b8816a9ad630787974f-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null}]}}"
+    },
+    {
+      "name": "a copy the person asks for is made at once and holds the copies made in idle time («asked»)",
+      "pass": true,
+      "detail": "{\"during\":{\"hold\":\"asked\",\"states\":[\"paused\",\"waiting\",\"waiting\",\"waiting\"]},\"ms\":5469,\"after\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]}"
+    },
+    {
+      "name": "a click: the running copy pauses within a second (9 ms), the hold is «input», and it makes no progress from a second on (4.949334 s, then 4.949334 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":3.669334,\"pausedMs\":9,\"hold\":\"input\",\"progressHeld\":[4.949334,4.949334],\"state\":\"paused\",\"resumedMs\":934,\"sinceHold\":3460,\"after\":7.125334}"
+    },
+    {
+      "name": "a click: released, it goes on from where it was (934 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":3.669334,\"pausedMs\":9,\"hold\":\"input\",\"progressHeld\":[4.949334,4.949334],\"state\":\"paused\",\"resumedMs\":934,\"sinceHold\":3460,\"after\":7.125334}"
+    },
+    {
+      "name": "a click holds only a few seconds: the copy goes on by itself 3460 ms after it (three seconds of quiet)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":3.669334,\"pausedMs\":9,\"hold\":\"input\",\"progressHeld\":[4.949334,4.949334],\"state\":\"paused\",\"resumedMs\":934,\"sinceHold\":3460,\"after\":7.125334}"
+    },
+    {
+      "name": "an export (busy): the running copy pauses within a second (9 ms), the hold is «export», and it makes no progress from a second on (8.597334 s, then 8.597334 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":7.125334,\"pausedMs\":9,\"hold\":\"export\",\"progressHeld\":[8.597334,8.597334],\"state\":\"paused\",\"resumedMs\":512,\"sinceHold\":3035,\"after\":11.392}"
+    },
+    {
+      "name": "an export (busy): released, it goes on from where it was (512 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":7.125334,\"pausedMs\":9,\"hold\":\"export\",\"progressHeld\":[8.597334,8.597334],\"state\":\"paused\",\"resumedMs\":512,\"sinceHold\":3035,\"after\":11.392}"
+    },
+    {
+      "name": "the page says «playing»: the running copy pauses within a second (8 ms), the hold is «playing», and it makes no progress from a second on (12.586667 s, then 12.586667 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":11.392,\"pausedMs\":8,\"hold\":\"playing\",\"progressHeld\":[12.586667,12.586667],\"state\":\"paused\",\"resumedMs\":639,\"sinceHold\":3162,\"after\":15.04}"
+    },
+    {
+      "name": "the page says «playing»: released, it goes on from where it was (639 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":11.392,\"pausedMs\":8,\"hold\":\"playing\",\"progressHeld\":[12.586667,12.586667],\"state\":\"paused\",\"resumedMs\":639,\"sinceHold\":3162,\"after\":15.04}"
+    },
+    {
+      "name": "the window makes sound (the studio playing, not saying so): the running copy pauses within a second (20 ms), the hold is «playing», and it makes no progress from a second on (16.32 s, then 16.32 s)",
+      "pass": false,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":15.04,\"pausedMs\":20,\"hold\":\"throttled\",\"progressHeld\":[16.32,16.32],\"state\":\"paused\",\"resumedMs\":16470,\"sinceHold\":18994,\"after\":null}"
+    },
+    {
+      "name": "the window makes sound (the studio playing, not saying so): released, it goes on from where it was (16470 ms)",
+      "pass": false,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":15.04,\"pausedMs\":20,\"hold\":\"throttled\",\"progressHeld\":[16.32,16.32],\"state\":\"paused\",\"resumedMs\":16470,\"sinceHold\":18994,\"after\":null}"
+    },
+    {
+      "name": "on battery (simulated in the main process): the running copy pauses within a second (9 ms), the hold is «battery», and it makes no progress from a second on (18.026667 s, then 18.026667 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":16.32,\"pausedMs\":9,\"hold\":\"battery\",\"progressHeld\":[18.026667,18.026667],\"state\":\"paused\",\"resumedMs\":637,\"sinceHold\":3154,\"after\":20.629334}"
+    },
+    {
+      "name": "on battery (simulated in the main process): released, it goes on from where it was (637 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":16.32,\"pausedMs\":9,\"hold\":\"battery\",\"progressHeld\":[18.026667,18.026667],\"state\":\"paused\",\"resumedMs\":637,\"sinceHold\":3154,\"after\":20.629334}"
+    },
+    {
+      "name": "Windows lowers the processor's speed limit (simulated): the running copy pauses within a second (6 ms), the hold is «throttled», and it makes no progress from a second on (22.784 s, then 22.784 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":20.629334,\"pausedMs\":6,\"hold\":\"throttled\",\"progressHeld\":[22.784,22.784],\"state\":\"paused\",\"resumedMs\":557,\"sinceHold\":3077,\"after\":25.344}"
+    },
+    {
+      "name": "Windows lowers the processor's speed limit (simulated): released, it goes on from where it was (557 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":20.629334,\"pausedMs\":6,\"hold\":\"throttled\",\"progressHeld\":[22.784,22.784],\"state\":\"paused\",\"resumedMs\":557,\"sinceHold\":3077,\"after\":25.344}"
+    },
+    {
+      "name": "a copy of a still source, which FFmpeg had read whole, is stopped when held (1792 ms), no FFmpeg left and no part file, and made again once released",
+      "pass": true,
+      "detail": "{\"at\":3.690667,\"stoppedMs\":1792,\"left\":0,\"meanwhile\":{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},\"again\":{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":0,\"total\":30,\"why\":null}}"
+    },
+    {
+      "name": "every light copy was made",
+      "pass": true,
+      "detail": "{\"hold\":null,\"width\":1,\"items\":[{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":28.794667,\"total\":30,\"why\":null},{\"name\":\"proxy-fbe1befe212d8ade024766b581f0555c823936bf0-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":29.653333,\"total\":30,\"why\":null},{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":26.816,\"total\":30,\"why\":null},{\"name\":\"proxy-fc12d8c4218d1c56813e56b8816a9ad630787974f-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":0,\"total\":0,\"why\":null}]}"
+    },
+    {
+      "name": "the tray says what is being made in idle time, and why it waits when it does",
+      "pass": true,
+      "detail": "[\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 2 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: 2 تنتظر حتى يعود المعالج إلى سرعته\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 2 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 1 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: 1 تنتظر حتى يعود المعالج إلى سرعته\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 1 في وقت فراغ الجهاز\"]"
+    },
+    {
+      "name": "each of the 4 copies keeps every frame of its source, in order (750 frames)",
+      "pass": true,
+      "detail": "[{\"frames\":750,\"wrong\":0},{\"frames\":750,\"wrong\":0},{\"frames\":750,\"wrong\":0},{\"frames\":750,\"wrong\":0}]"
+    },
+    {
+      "name": "no part file is left in the folder",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "a project that wants nothing any more stops its copy: no FFmpeg running and no part file a moment later",
+      "pass": true,
+      "detail": "{\"again\":{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":2.389334,\"total\":30,\"why\":null},\"partWhile\":[\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4.part\"],\"ffWhile\":1,\"now\":0,\"parts\":[],\"items\":0}"
+    },
+    {
+      "name": "quitting while a copy is made in idle time leaves no FFmpeg running, and the next start removes its part file",
+      "pass": true,
+      "detail": "{\"long\":{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":1.024,\"total\":30,\"why\":null},\"partQuit\":[\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4.part\"],\"ffAfter\":0,\"parts\":[]}"
+    }
+  ],
+  "notes": [
+    "The corpus (four 4K H.264 sources of 30 s at 25 frames a second, each with its frame numbers; megabytes {\"grain-1.mp4\":140.4,\"grain-2.mp4\":140.4,\"still-3.mp4\":0.8,\"still-4.mp4\":0.8}) took 0 s to make or was kept.",
+    "While the studio played with sound the window was heard: [true,false]; the playing element: {\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.38}.",
+    "The copies, by source: {\"proxy-<fingerprint>3-720-r1-ff902.mp4\":\"grain-1.mp4\",\"proxy-<fingerprint>0-720-r1-ff902.mp4\":\"grain-2.mp4\",\"proxy-<fingerprint>f-720-r1-ff902.mp4\":\"still-4.mp4\",\"proxy-<fingerprint>1-720-r1-ff902.mp4\":\"still-3.mp4\"}",
+    "Speed figures not taken (run with --speed in a quiet window)."
+  ],
+  "corpus": {
+    "grain-1.mp4": 140.4,
+    "grain-2.mp4": 140.4,
+    "still-3.mp4": 0.8,
+    "still-4.mp4": 0.8
+  },
+  "opened": {
+    "names": [
+      "grain-1.mp4",
+      "grain-2.mp4",
+      "still-3.mp4",
+      "still-4.mp4"
+    ],
+    "states": [
+      {
+        "kind": "ready"
+      },
+      {
+        "kind": "ready"
+      },
+      {
+        "kind": "ready"
+      },
+      {
+        "kind": "ready"
+      }
+    ],
+    "width": null
+  },
+  "holds": {
+    "a click": {
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 3.669334,
+      "pausedMs": 9,
+      "hold": "input",
+      "progressHeld": [
+        4.949334,
+        4.949334
+      ],
+      "state": "paused",
+      "resumedMs": 934,
+      "sinceHold": 3460,
+      "after": 7.125334
+    },
+    "an export (busy)": {
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 7.125334,
+      "pausedMs": 9,
+      "hold": "export",
+      "progressHeld": [
+        8.597334,
+        8.597334
+      ],
+      "state": "paused",
+      "resumedMs": 512,
+      "sinceHold": 3035,
+      "after": 11.392
+    },
+    "the page says «playing»": {
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 11.392,
+      "pausedMs": 8,
+      "hold": "playing",
+      "progressHeld": [
+        12.586667,
+        12.586667
+      ],
+      "state": "paused",
+      "resumedMs": 639,
+      "sinceHold": 3162,
+      "after": 15.04
+    },
+    "the window makes sound (the studio playing, not saying so)": {
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 15.04,
+      "pausedMs": 20,
+      "hold": "throttled",
+      "progressHeld": [
+        16.32,
+        16.32
+      ],
+      "state": "paused",
+      "resumedMs": 16470,
+      "sinceHold": 18994,
+      "after": null
+    },
+    "on battery (simulated in the main process)": {
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 16.32,
+      "pausedMs": 9,
+      "hold": "battery",
+      "progressHeld": [
+        18.026667,
+        18.026667
+      ],
+      "state": "paused",
+      "resumedMs": 637,
+      "sinceHold": 3154,
+      "after": 20.629334
+    },
+    "Windows lowers the processor's speed limit (simulated)": {
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 20.629334,
+      "pausedMs": 6,
+      "hold": "throttled",
+      "progressHeld": [
+        22.784,
+        22.784
+      ],
+      "state": "paused",
+      "resumedMs": 557,
+      "sinceHold": 3077,
+      "after": 25.344
+    }
+  },
+  "soundPlay": {
+    "frames": 247,
+    "p50": 16.7,
+    "p95": 16.8,
+    "max": 66.7,
+    "element": {
+      "paused": false,
+      "muted": false,
+      "volume": 1,
+      "readyState": 1,
+      "time": 1.38
+    }
+  },
+  "audible": [
+    {
+      "at": 1793758045484,
+      "audible": true
+    },
+    {
+      "at": 1793758049763,
+      "audible": false
+    }
+  ],
+  "readAhead": {
+    "at": 3.690667,
+    "stoppedMs": 1792,
+    "left": 0,
+    "meanwhile": {
+      "name": "proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4",
+      "state": "waiting",
+      "done": 0,
+      "total": 30,
+      "why": null
+    },
+    "again": {
+      "name": "proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4",
+      "state": "running",
+      "done": 0,
+      "total": 30,
+      "why": null
+    }
+  },
+  "total": 23,
+  "passed": 21,
+  "failed": 2
+}

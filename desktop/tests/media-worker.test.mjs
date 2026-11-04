@@ -162,7 +162,7 @@ test('a paused copy whose source FFmpeg read whole before the pause is ended as 
   try {
     // a still picture compresses to almost nothing: the whole file is read at once
     const src = path.join(dir, 'still.mpg');
-    const made = spawnSync(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=black:s=3840x2160:rate=25:duration=60', '-c:v', 'mpeg2video', '-q:v', '31', '-f', 'mpeg', src], { encoding: 'utf8' });
+    const made = spawnSync(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=black:s=3840x2160:rate=25:duration=60', '-c:v', 'mpeg2video', '-q:v', '31', '-g', '600', '-f', 'mpeg', src], { encoding: 'utf8' });
     assert.equal(made.status, 0, made.stderr);
     assert.ok(fs.statSync(src).size < 8 * 1024 * 1024, `small for its length: ${fs.statSync(src).size} bytes`);
     const { port } = await w.next((m) => m.type === 'listening', 10000);
