@@ -2741,8 +2741,14 @@ Phase D3 of `Desktop_App_Plan.md`, without signing: the pilot stays unsigned (de
 **The application keeps itself up to date.** It looks for a newer version when it starts and every four hours while it is open, downloads it in the background, and checks that the file is exactly the one the release names. The update is installed when the person quits the application, or at once with «إعادة التشغيل للتحديث». That item appears in the tray's menu once an update is ready, and on «الحساب». When an update is ready and the window is not in front, a notice says «تحديث جاهز»: «الإصدار … جاهز، ويُثبَّت عند إنهاء التطبيق. للتثبيت الآن اختر «إعادة التشغيل للتحديث».»; clicking it opens «الحساب». It never restarts during an export: «إعادة التشغيل للتحديث» then says «التحديث ينتظر»: «لا يُعاد تشغيل التطبيق أثناء العمل. يُثبَّت التحديث عند إنهاء التطبيق بعد انتهائه.». An update keeps the session and the application's data.
 
 **«تطبيق سطح المكتب» on «الحساب».** Every signed-in person sees it.
-- **In a browser:** first one line, by owner request of 2026-11-05, saying what the application adds over the browser and
-  naming only what it really does: «تطبيق سطح المكتب أقوى من المتصفح: يقيس قدرة الجهاز، ويسرّع المعاينة، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية.» (export lanes are planned but not used by the export yet, so it does not name them). Then «تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.», then «تنزيل التطبيق» with the version and its size, and: «يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».». Before the first release is published: «لم يُنشر إصدار للتنزيل بعد.».
+- **In a browser:** first, by owner request of 2026-11-05, what the application adds over the browser, naming only what it
+  really does today:
+  - for every member, one line: «تطبيق سطح المكتب أقوى من المتصفح: تصل إشعارات «يحتاج قرارك» إلى الجهاز ويظهر عددها على شريط المهام، وتُفتح المستندات والصور والمقاطع التي تنزّلها في برامجها.»;
+  - for a person whose access opens the studio (its tab bar's own check, the Admin and the director), a second line:
+    «وفي الاستوديو يقيس قدرة الجهاز، ويسرّع المعاينة، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية، وتُسحب منه ملفات هذا الجهاز إلى البرامج الأخرى.».
+
+  Export lanes are planned but not used by the export yet, and no page sends its progress to the taskbar yet, so neither is
+  named. Then «تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.», then «تنزيل التطبيق» with the version and its size, and: «يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».». Before the first release is published: «لم يُنشر إصدار للتنزيل بعد.».
 - **Inside the application:** «تعمل الآن في تطبيق سطح المكتب، الإصدار …», then where its update stands:
   - «جارٍ البحث عن تحديث…»;
   - «هذا أحدث إصدار.»;

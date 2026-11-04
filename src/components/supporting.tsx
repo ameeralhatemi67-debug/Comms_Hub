@@ -23,6 +23,7 @@ import { PlatformsTab } from './settings/platforms';
 import { ConnectionsTab } from './settings/connections';
 import { FeedbackTab, MyNotes } from './feedback';
 import { DesktopAppPanel } from './native/desktop-app';
+import { useStudioTab } from './studio/motion-tabs';
 import { useNativePlatform } from './native/use-native';
 import { PhoneAppPanel } from './native/phone-app';
 import { MyDevicesPanels } from './native/devices';
@@ -65,6 +66,8 @@ export function Supporting({ page }: { page: string }) {
   const actor = roles[state.role];
   const account = useAccount();
   const platform = useNativePlatform();
+  // «تطبيق سطح المكتب» names the studio's gains only to those the studio opens to.
+  const studio = useStudioTab();
   const [sessionNote, setSessionNote] = useState('');
   // «/settings?tab=general» opens a tab directly (the Drive connection returns there).
   const [settingsTab, setSettingsTab] = useState(() => {
@@ -137,7 +140,7 @@ export function Supporting({ page }: { page: string }) {
         </Panel>
         {platform !== 'android' && (
           <Panel title="تطبيق سطح المكتب">
-            <DesktopAppPanel />
+            <DesktopAppPanel studio={studio} />
           </Panel>
         )}
         {platform !== 'desktop' && (

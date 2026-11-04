@@ -348,13 +348,29 @@ test('P-28: a saved download is heard and acted on by its id; what the notice sa
   assert.match(shell, /<DesktopDownloads \/>/, 'the shell carries the notice on every page');
 });
 
-test('the account card says in one line what the desktop application adds over the browser, and only what it really does', () => {
+test('the account card says in one line what the application adds for every member, and in a second the studio\'s gains to those the studio opens to', () => {
   const card = fs.readFileSync(new URL('../src/components/native/desktop-app.tsx', import.meta.url), 'utf8');
-  const line = 'تطبيق سطح المكتب أقوى من المتصفح: يقيس قدرة الجهاز، ويسرّع المعاينة، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية.';
-  assert.ok(card.includes(`<p data-desktop-strength>${line}</p>`), 'the line, once');
-  assert.equal(card.split(line).length, 2);
-  // export lanes are planned (scale.ts) but the export does not use them yet, so the line does not name them
-  assert.equal(/مسارات التصدير/.test(line), false);
+  const everyone = 'تطبيق سطح المكتب أقوى من المتصفح: تصل إشعارات «يحتاج قرارك» إلى الجهاز ويظهر عددها على شريط المهام، وتُفتح المستندات والصور والمقاطع التي تنزّلها في برامجها.';
+  const studio = 'وفي الاستوديو يقيس قدرة الجهاز، ويسرّع المعاينة، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية، وتُسحب منه ملفات هذا الجهاز إلى البرامج الأخرى.';
+  assert.ok(card.includes(`<p data-desktop-strength>${everyone}</p>`), 'every member\'s line, unconditioned');
+  assert.ok(card.includes(`{studio && <p data-desktop-strength="studio">${studio}</p>}`), 'the studio\'s line only with studio access');
+  assert.equal(card.split(everyone).length, 2);
+  assert.equal(card.split(studio).length, 2);
+  // every member's line names nothing of the studio
+  for (const w of ['الاستوديو', 'المعاينة', 'النسخ الخفيفة', 'قدرة الجهاز', 'شاشة ثانية', 'تُسحب']) assert.equal(everyone.includes(w), false, w);
+  // export lanes are planned (scale.ts) but the export does not use them yet; no page sends the taskbar's progress yet
+  for (const line of [everyone, studio]) {
+    assert.equal(/مسارات التصدير|أسرع في التصدير|يصدّر أسرع/.test(line), false);
+    assert.equal(/تقدّم/.test(line), false);
+    assert.equal(/\p{Extended_Pictographic}/u.test(line), false);
+  }
+  // «الحساب» asks the studio tab's own check
+  const page = fs.readFileSync(new URL('../src/components/supporting.tsx', import.meta.url), 'utf8');
+  assert.match(page, /const studio = useStudioTab\(\);/);
+  assert.match(page, /<DesktopAppPanel studio=\{studio\} \/>/);
+  const tabs = fs.readFileSync(new URL('../src/components/studio/motion-tabs.tsx', import.meta.url), 'utf8');
+  assert.match(tabs, /if \(!useStudioTab\(\)\) return null;/, 'the tab bar asks the same');
+  assert.match(tabs, /return studioTabVisible\(account, \{ viewAs: state\.role, hasCap: caps\.has \}\);/);
   const spec = fs.readFileSync(new URL('../MVP_draft.md', import.meta.url), 'utf8');
-  assert.ok(spec.includes(`«${line}»`), 'MVP_draft.md 63.2 holds the same words');
+  assert.ok(spec.includes(`«${everyone}»`) && spec.includes(`«${studio}»`), 'MVP_draft.md 63.2 holds the same words');
 });

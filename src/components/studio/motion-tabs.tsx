@@ -14,11 +14,16 @@ import './motion-tabs.css';
  * administrator viewing as one of them); everyone else sees the page exactly as before.
  */
 export function MotionTabs({ active }: { active: 'templates' | 'studio' }) {
+  if (!useStudioTab()) return null;
+  return <MotionTabBar active={active} />;
+}
+
+/** Whether this person's access opens the studio, as its tab bar decides; «الحساب» asks the same before naming the studio. */
+export function useStudioTab(): boolean {
   const account = useAccount();
   const { state } = useHub();
   const caps = useCaps();
-  if (!studioTabVisible(account, { viewAs: state.role, hasCap: caps.has })) return null;
-  return <MotionTabBar active={active} />;
+  return studioTabVisible(account, { viewAs: state.role, hasCap: caps.has });
 }
 
 export function MotionTabBar({ active }: { active: 'templates' | 'studio' }) {
