@@ -319,9 +319,27 @@ export async function markBusy(reason: Reason): Promise<Release> {
   } catch {
     return nothing;
   }
+  setBusy(1);
+  let ended = false;
   return async () => {
+    if (!ended) setBusy(-1);
+    ended = true;
     await n.raw!.life!.idle!().catch(() => undefined);
   };
+}
+
+// Whether this page told the application it is working (an export, an upload), for what waits meanwhile (63.6.1).
+let busyCount = 0;
+const busyListeners = new Set<() => void>();
+function setBusy(by: number) {
+  busyCount = Math.max(0, busyCount + by);
+  for (const fn of busyListeners) fn();
+}
+/** True while this page is marked busy in the desktop application; always false elsewhere. */
+export const pageBusy = () => busyCount > 0;
+export function onPageBusy(fn: () => void): () => void {
+  busyListeners.add(fn);
+  return () => void busyListeners.delete(fn);
 }
 
 /** A native notice; the application shows it only when its window is not in front. False elsewhere. */
