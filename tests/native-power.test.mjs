@@ -313,3 +313,83 @@ test('63.6.1: the page knows it is busy while it told the application so, and st
   await markBusy('export');
   assert.equal(pageBusy(), false, 'a browser is never busy for the application');
 });
+
+test('P-28: a saved download is heard and acted on by its id; what the notice says; a browser and version 9 have none', async () => {
+  const { actOnDownload, downloadOf, onDownloadDone } = await import('../src/lib/native/index.ts');
+  const { downloadLine, NEVER_OPENS, OPEN_LABEL, SHOW_LABEL, WHY_LINE } = await import('../src/lib/native/downloads.ts');
+  const log = [];
+  let done = null;
+  const answers = { open: { ok: false, why: 'unmarked' }, show: { ok: true } };
+  const b = {
+    ...v7().bridge,
+    bridge: 10,
+    downloads: {
+      open: async (id) => (log.push(['open', id]), answers.open),
+      show: async (id) => (log.push(['show', id]), answers.show),
+      onDone: (fn) => (done = fn),
+    },
+  };
+  assert.deepEqual(FEATURES.openDownload, ['downloads.open', 'downloads.show', 'downloads.onDone']);
+  assert.equal(nativeOf(b).has('openDownload'), true);
+  assert.equal(nativeOf({ ...b, bridge: 9, downloads: undefined }).has('openDownload'), false, 'version 9 has none');
+  assert.equal(nativeOf({ ...b, downloads: { ...b.downloads, onDone: undefined } }).has('openDownload'), false, 'every method of the feature');
+  inApp(b);
+  const heard = [];
+  const stop = onDownloadDone((d) => heard.push(d));
+  done({ id: token, name: 'تقرير.pdf', kind: 'document' });
+  done({ id: token, name: 'tool.exe', kind: null });
+  for (const bad of [null, {}, { id: 'short', name: 'x', kind: null }, { id: token, name: '', kind: null }, { id: token, name: 'x', kind: 'program' }, { id: token, name: 'x'.repeat(201), kind: null }]) done(bad);
+  done({ id: token, name: 'x', kind: 'document', path: 'C:/x' });
+  assert.deepEqual(heard, [{ id: token, name: 'تقرير.pdf', kind: 'document' }, { id: token, name: 'tool.exe', kind: null }, { id: token, name: 'x', kind: 'document' }], 'only well-formed downloads, and nothing more than id, name and kind');
+  assert.equal(downloadOf({ id: token, name: 'x', kind: 'document', path: 'C:/x' }).path, undefined);
+  stop();
+  assert.equal(done, null, 'stops listening');
+  assert.deepEqual(await actOnDownload('open', token), { ok: false, why: 'unmarked' });
+  assert.deepEqual(await actOnDownload('show', token), { ok: true });
+  answers.open = { ok: false, why: 'something else' };
+  assert.deepEqual(await actOnDownload('open', token), { ok: false, why: 'failed' }, 'an unknown reason is a failure');
+  b.downloads.open = async () => Promise.reject(new Error('refused'));
+  assert.deepEqual(await actOnDownload('open', token), { ok: false, why: 'failed' });
+  assert.deepEqual(log, [['open', token], ['show', token], ['open', token]]);
+  inApp(undefined);
+  assert.deepEqual(await actOnDownload('open', token), { ok: false, why: 'gone' }, 'a browser opens nothing');
+  assert.equal(typeof onDownloadDone(() => undefined), 'function');
+
+  assert.equal(downloadLine({ id: token, name: 'تقرير.pdf', kind: 'document' }), 'حُفظ «تقرير.pdf».');
+  assert.equal(OPEN_LABEL, 'فتح بالبرنامج الافتراضي');
+  assert.equal(SHOW_LABEL, 'إظهار في المجلد');
+  assert.equal(WHY_LINE.kind, NEVER_OPENS);
+  assert.deepEqual(Object.keys(WHY_LINE).sort(), ['failed', 'gone', 'kind', 'unmarked']);
+  for (const t of [OPEN_LABEL, SHOW_LABEL, NEVER_OPENS, ...Object.values(WHY_LINE)]) assert.equal(/\p{Extended_Pictographic}/u.test(t), false, t);
+  const notice = fs.readFileSync(new URL('../src/components/native/desktop-downloads.tsx', import.meta.url), 'utf8');
+  assert.match(notice, /\{SAVED_BEFORE\}\s*<bdi>\{last\.name\}<\/bdi>\s*\{SAVED_AFTER\}/, 'the name is isolated, so a Latin ending keeps the marks in place');
+  const shell = fs.readFileSync(new URL('../src/components/shell.tsx', import.meta.url), 'utf8');
+  assert.match(shell, /<DesktopDownloads \/>/, 'the shell carries the notice on every page');
+});
+
+test('the account card says in one line what the application adds for every member, and in a second the studio\'s gains to those the studio opens to', () => {
+  const card = fs.readFileSync(new URL('../src/components/native/desktop-app.tsx', import.meta.url), 'utf8');
+  const everyone = 'تطبيق سطح المكتب أقوى من المتصفح: تصل إشعارات «يحتاج قرارك» إلى الجهاز ويظهر عددها على شريط المهام، وتُفتح المستندات والصور والمقاطع التي تنزّلها في برامجها.';
+  const studio = 'وفي الاستوديو يقيس قدرة الجهاز، ويسرّع المعاينة، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية، وتُسحب منه ملفات هذا الجهاز إلى البرامج الأخرى.';
+  assert.ok(card.includes(`<p data-desktop-strength>${everyone}</p>`), 'every member\'s line, unconditioned');
+  assert.ok(card.includes(`{studio && <p data-desktop-strength="studio">${studio}</p>}`), 'the studio\'s line only with studio access');
+  assert.equal(card.split(everyone).length, 2);
+  assert.equal(card.split(studio).length, 2);
+  // every member's line names nothing of the studio
+  for (const w of ['الاستوديو', 'المعاينة', 'النسخ الخفيفة', 'قدرة الجهاز', 'شاشة ثانية', 'تُسحب']) assert.equal(everyone.includes(w), false, w);
+  // export lanes are planned (scale.ts) but the export does not use them yet; no page sends the taskbar's progress yet
+  for (const line of [everyone, studio]) {
+    assert.equal(/مسارات التصدير|أسرع في التصدير|يصدّر أسرع/.test(line), false);
+    assert.equal(/تقدّم/.test(line), false);
+    assert.equal(/\p{Extended_Pictographic}/u.test(line), false);
+  }
+  // «الحساب» asks the studio tab's own check
+  const page = fs.readFileSync(new URL('../src/components/supporting.tsx', import.meta.url), 'utf8');
+  assert.match(page, /const studio = useStudioTab\(\);/);
+  assert.match(page, /<DesktopAppPanel studio=\{studio\} \/>/);
+  const tabs = fs.readFileSync(new URL('../src/components/studio/motion-tabs.tsx', import.meta.url), 'utf8');
+  assert.match(tabs, /if \(!useStudioTab\(\)\) return null;/, 'the tab bar asks the same');
+  assert.match(tabs, /return studioTabVisible\(account, \{ viewAs: state\.role, hasCap: caps\.has \}\);/);
+  const spec = fs.readFileSync(new URL('../MVP_draft.md', import.meta.url), 'utf8');
+  assert.ok(spec.includes(`«${everyone}»`) && spec.includes(`«${studio}»`), 'MVP_draft.md 63.2 holds the same words');
+});

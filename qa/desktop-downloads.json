@@ -1,0 +1,77 @@
+{
+  "script": "qa/desktop-downloads.cjs",
+  "run": "2026-11-04T23:27:54.687Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "in a browser the download is the browser's, and there is no notice",
+      "pass": true,
+      "detail": "{\"file\":\"تقرير الحملة.pdf\"}"
+    },
+    {
+      "name": "the bridge is version 10 or later, with downloads.open, show and onDone",
+      "pass": true,
+      "detail": "{\"bridge\":10,\"downloads\":[\"open\",\"show\",\"onDone\"]}"
+    },
+    {
+      "name": "a library, a mail and a messaging download are each heard once saved: an id of 43 characters, the saved name and the kind, nothing else",
+      "pass": true,
+      "detail": "[{\"id\":\"UxxjeB4z8X6IhZGZuUQ-Zn_FTMloIE63IzY27BKCjU8\",\"name\":\"تقرير الحملة.pdf\",\"kind\":\"document\"},{\"id\":\"PZ03LfLvaHdHWXKTDlfTmUp-3_mVatbvB0Bzln4hWoA\",\"name\":\"ملاحظات.txt\",\"kind\":\"document\"},{\"id\":\"wk2A_nKXp3pMZCcXPJB03YubcXN0mDlgKxJuDrFi9jU\",\"name\":\"tool.exe\",\"kind\":null}]"
+    },
+    {
+      "name": "every saved download carries Windows' Zone.Identifier in the internet zone, the PDF, the text file and tool.exe alike",
+      "pass": true,
+      "detail": "{\"marks\":{\"تقرير الحملة.pdf\":\"[ZoneTransfer]\\r\\nZoneId=3\\r\\nReferrerUrl=http://127.0.0.1:3000/\\r\\nHostUrl=http://127.0.0.1:3000/api/media/aaaaaaaa-0000-4000-8000-000000000001/content?download=1\\r\\n\",\"ملاحظات.txt\":\"[ZoneTransfer]\\r\\nZoneId=3\\r\\nReferrerUrl=http://127.0.0.1:3000/\\r\\nHostUrl=http://127.0.0.1:3000/api/mail/file/aaaaaaaa-0000-4000-8000-000000000002\\r\\n\",\"tool.exe\":\"[ZoneTransfer]\\r\\nZoneId=3\\r\\nReferrerUrl=http://127.0.0.1:3000/\\r\\nHostUrl=http://127.0.0.1:3000/api/chat/file/aaaaaaaa-0000-4000-8000-000000000003\\r\\n\"},\"by\":{\"تقرير الحملة.pdf\":\"Chromium\",\"ملاحظات.txt\":\"Chromium\",\"tool.exe\":\"Chromium\"}}"
+    },
+    {
+      "name": "the PDF opens in its program and shows in its folder, by its id",
+      "pass": true,
+      "detail": "{\"opened\":{\"ok\":true},\"shown\":{\"ok\":true},\"r\":{\"opened\":1,\"shown\":1}}"
+    },
+    {
+      "name": "tool.exe is refused for its kind and never handed to Windows; it can still be shown in its folder",
+      "pass": true,
+      "detail": "{\"exeOpen\":{\"ok\":false,\"why\":\"kind\"},\"exeShow\":{\"ok\":true},\"opened\":[\"D:\\\\Agents\\\\main\\\\projects\\\\ideas\\\\Comms_Hub\\\\.claude\\\\worktrees\\\\power-desktop-5fba9d\\\\qa\\\\artifacts\\\\tmp\\\\comms-hub-desktop-qa-lm0rsG\\\\saved\\\\plain\\\\تقرير الحملة.pdf\"]}"
+    },
+    {
+      "name": "a PDF whose mark of the web was taken off is no longer opened",
+      "pass": true,
+      "detail": "{\"ok\":false,\"why\":\"unmarked\"}"
+    },
+    {
+      "name": "an unknown id is «gone»; a number or a path in place of an id is refused by the bridge",
+      "pass": true,
+      "detail": "{\"unknown\":{\"ok\":false,\"why\":\"gone\"},\"notAnId\":{\"threw\":\"Error invoking remote method 'commshub:downloads.open': Error: refused\"},\"aPath\":{\"threw\":\"Error invoking remote method 'commshub:downloads.open': Error: refused\"}}"
+    },
+    {
+      "name": "a download from an address that is not one of the site's file routes is saved and not offered",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the notice says «حُفظ «تقرير الحملة.pdf».» with «فتح بالبرنامج الافتراضي» and «إظهار في المجلد», and its open button opens the file",
+      "pass": true,
+      "detail": "{\"t1\":\"حُفظ «تقرير الحملة.pdf».\\n\\nفتح بالبرنامج الافتراضي\\nإظهار في المجلد\",\"b1\":[\"فتح بالبرنامج الافتراضي\",\"إظهار في المجلد\"],\"last\":\"D:\\\\Agents\\\\main\\\\projects\\\\ideas\\\\Comms_Hub\\\\.claude\\\\worktrees\\\\power-desktop-5fba9d\\\\qa\\\\artifacts\\\\tmp\\\\comms-hub-desktop-qa-lm0rsG\\\\saved\\\\notice\\\\تقرير الحملة.pdf\"}"
+    },
+    {
+      "name": "for tool.exe the notice has no open button, says it never opens, and shows it in its folder",
+      "pass": true,
+      "detail": "{\"t2\":\"حُفظ «tool.exe».\\n\\nلا يُفتح هذا النوع من الملفات من داخل التطبيق، ويمكن إظهاره في مجلده.\\n\\nإظهار في المجلد\",\"b2\":[\"إظهار في المجلد\"]}"
+    },
+    {
+      "name": "no emoji in what the notice shows",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "marks": {
+    "تقرير الحملة.pdf": "[ZoneTransfer]\r\nZoneId=3\r\nReferrerUrl=http://127.0.0.1:3000/\r\nHostUrl=http://127.0.0.1:3000/api/media/aaaaaaaa-0000-4000-8000-000000000001/content?download=1\r\n",
+    "ملاحظات.txt": "[ZoneTransfer]\r\nZoneId=3\r\nReferrerUrl=http://127.0.0.1:3000/\r\nHostUrl=http://127.0.0.1:3000/api/mail/file/aaaaaaaa-0000-4000-8000-000000000002\r\n",
+    "tool.exe": "[ZoneTransfer]\r\nZoneId=3\r\nReferrerUrl=http://127.0.0.1:3000/\r\nHostUrl=http://127.0.0.1:3000/api/chat/file/aaaaaaaa-0000-4000-8000-000000000003\r\n"
+  },
+  "markWrittenBy": "Chromium",
+  "total": 12,
+  "passed": 12,
+  "failed": 0
+}

@@ -71,7 +71,9 @@ test('the template tab changes by one line: the tab bar in its title row', () =>
   assert.equal(ms.split('<MotionTabs ').length - 1, 1);
   assert.match(ms, /<MotionTabs active="templates" \/>/);
   const tabs = readFileSync('src/components/studio/motion-tabs.tsx', 'utf8');
-  assert.match(tabs, /if \(!studioTabVisible\(account, \{ viewAs: state\.role, hasCap: caps\.has \}\)\) return null;/);
+  // the check lives in useStudioTab, which «الحساب» shares (MVP_draft.md 63.2)
+  assert.match(tabs, /if \(!useStudioTab\(\)\) return null;/);
+  assert.match(tabs, /return studioTabVisible\(account, \{ viewAs: state\.role, hasCap: caps\.has \}\);/);
   assert.match(tabs, /href="\/motion"/);
   assert.match(tabs, /href="\/motion\/studio"/);
 });

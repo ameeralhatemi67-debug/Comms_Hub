@@ -477,6 +477,20 @@ Light copies in idle time (D12, `MVP_draft.md` 63.9, `Desktop_Power_Ideas.md` P-
   `cache.usage` returns the folder's label (`folderLabel`), never its path, since the default path holds the Windows user name.
   `qa/desktop-taskbar.cjs` and `qa/desktop-card-import.cjs` hold them.
 
+Opening a download in its program (P-28, `MVP_draft.md` 63.10, by the owner's yes of 2026-11-05): bridge version 10 adds
+`downloads.open`, `show` and `onDone`.
+- **An id, never a path.** Only a download from the site's file routes (`DOWNLOAD_ROUTES` in `desktop/src/downloads.ts`, held
+  equal to `src/lib/native/files.ts`) started by a page on the compiled list gets an id at `will-download`
+  (`desktop/src/download-store.ts`, 32 random bytes, the newest twenty, in memory, forgotten with «مسح بيانات هذا الجهاز»). The page
+  hears the id, the saved name and the kind; never the folder.
+- **What opens is a fixed list** (`OPEN_KINDS`): documents, pictures, sound and video, by the saved name's last extension. Never a
+  program, installer, shortcut, script, web page, SVG, Office file with macros or archive; never widen it to those. Showing in the
+  folder is allowed for any saved download, since it runs nothing.
+- **The mark of the web stays.** A saved download keeps Chromium's Zone.Identifier, or gets the application's own (zone 3, the site's
+  origin only), and opens only while a zone 3 or stricter mark is on it. Never strip or lower it.
+- `desktop/tests/downloads.test.mjs` holds the list, the routes, the mark and the ids; `qa/desktop-downloads.cjs` the saved file's
+  mark and the refusal of a forbidden kind in the packaged application.
+
 The Android application is being built, by owner directive of 2026-10-26 (`Android_Build_Plan.md`,
 `MVP_draft.md` section 64, recorded in `progress.md`). It is a Capacitor 8 application in `mobile/`, with its
 own `package.json` and lockfile like `desktop/`, outside the site's typecheck and build, id `sa.commshub.app`.

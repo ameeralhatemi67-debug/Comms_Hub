@@ -2749,7 +2749,14 @@ Phase D3 of `Desktop_App_Plan.md`, without signing: the pilot stays unsigned (de
 **The application keeps itself up to date.** It looks for a newer version when it starts and every four hours while it is open, downloads it in the background, and checks that the file is exactly the one the release names. The update is installed when the person quits the application, or at once with «إعادة التشغيل للتحديث». That item appears in the tray's menu once an update is ready, and on «الحساب». When an update is ready and the window is not in front, a notice says «تحديث جاهز»: «الإصدار … جاهز، ويُثبَّت عند إنهاء التطبيق. للتثبيت الآن اختر «إعادة التشغيل للتحديث».»; clicking it opens «الحساب». It never restarts during an export: «إعادة التشغيل للتحديث» then says «التحديث ينتظر»: «لا يُعاد تشغيل التطبيق أثناء العمل. يُثبَّت التحديث عند إنهاء التطبيق بعد انتهائه.». An update keeps the session and the application's data.
 
 **«تطبيق سطح المكتب» on «الحساب».** Every signed-in person sees it.
-- **In a browser:** «تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.», then «تنزيل التطبيق» with the version and its size, and: «يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».». Before the first release is published: «لم يُنشر إصدار للتنزيل بعد.».
+- **In a browser:** first, by owner request of 2026-11-05, what the application adds over the browser, naming only what it
+  really does today:
+  - for every member, one line: «تطبيق سطح المكتب أقوى من المتصفح: تصل إشعارات «يحتاج قرارك» إلى الجهاز ويظهر عددها على شريط المهام، وتُفتح المستندات والصور والمقاطع التي تنزّلها في برامجها.»;
+  - for a person whose access opens the studio (its tab bar's own check, the Admin and the director), a second line:
+    «وفي الاستوديو يقيس قدرة الجهاز، ويسرّع المعاينة، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية، وتُسحب منه ملفات هذا الجهاز إلى البرامج الأخرى.».
+
+  Export lanes are planned but not used by the export yet, and no page sends its progress to the taskbar yet, so neither is
+  named. Then «تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.», then «تنزيل التطبيق» with the version and its size, and: «يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».». Before the first release is published: «لم يُنشر إصدار للتنزيل بعد.».
 - **Inside the application:** «تعمل الآن في تطبيق سطح المكتب، الإصدار …», then where its update stands:
   - «جارٍ البحث عن تحديث…»;
   - «هذا أحدث إصدار.»;
@@ -3031,6 +3038,39 @@ holds the person's Windows name.
   address. A drag names a file by the token the application gave it. A card's recordings are named by the keys of one listing;
   the card's and the folders' places stay in the application.
 - Nothing is scheduled in the site: this happens on the laptop while the application is open.
+
+## 63.10 Opening a downloaded file in its program (P-28), 2026-11-05
+
+`Desktop_Power_Ideas.md` P-28, on the owner's yes of 2026-11-05, bridge version 10. Inside the application only; in a browser a
+download is the browser's, as before.
+
+**After a download.** When a library file, a mail attachment (sent or received) or a file in «المراسلة» has been saved where the
+person chose in the save dialog, a small notice at the foot of the page says «حُفظ «…».», with:
+- «فتح بالبرنامج الافتراضي», which opens it in the program Windows has for its kind;
+- «إظهار في المجلد», which opens its folder with the file selected;
+- «إغلاق».
+
+The next download replaces the notice. Nothing else is downloaded or opened by itself. No Windows notice is raised for a
+download, since only «يحتاج قرارك» items become Windows notices (63.1).
+
+**What opens.** Only documents (PDF, text, CSV, RTF, Word, Excel, PowerPoint and their OpenDocument kin), pictures, sound and video,
+of a fixed list, read from the name the file was saved under. Never a program, an installer, a shortcut, a script, a web page, an
+SVG picture, an Office file with macros or an archive. For any other kind the notice says «لا يُفتح هذا النوع من الملفات من داخل
+التطبيق، ويمكن إظهاره في مجلده.» and offers «إظهار في المجلد» only.
+
+**Windows' mark of the web.** A saved download carries Windows' Zone.Identifier saying it came from the internet, as a file from a
+browser does, so Windows and the program that opens it (Office's Protected View, for one) treat it so. If Chromium left none, the
+application writes it, naming the site's address only. A file opens from the notice only while the mark is still on it:
+otherwise «لم يعد الملف يحمل علامة Windows للملفات القادمة من الإنترنت، فلا يفتحه التطبيق. يمكنك فتحه من مجلده.». A file moved
+or removed since: «لم يعد الملف في المكان الذي حُفظ فيه.»; a refusal by Windows: «تعذّر فتح الملف.».
+
+**Boundaries.**
+- The page knows a download by an id the application gave it when the download began (32 random bytes), and hears only its name
+  and kind, never its folder or path. The application remembers the newest twenty, in memory only; «مسح بيانات هذا الجهاز»
+  forgets them, and the files stay where they were saved.
+- Only downloads from the site's own file routes, started by a page of the compiled address list, get an id; a studio export or a
+  file made inside a page does not.
+- The save dialog is unchanged: the person still chooses where the file goes and under what name.
 
 # 64. The Android application «مركز الاتصال المؤسسي», 2026-10-26
 

@@ -11,7 +11,7 @@ export type Platform = 'web' | 'desktop' | 'android' | 'ios';
  * What a shell may offer. The desktop bridge offers the first five from version 1 (D2), update from 2 (D3),
  * files, cache and clearData from 3 (D4), media from 4 (D5), windows from 5 (D6), gpu and profile from 6 (D9,
  * Desktop_Power_Ideas.md P-01 and P-33), activity and copyQueue from 7 (D12, P-30 and P-08), taskbar and dragOut from 8
- * (D12, P-26 and P-22), cardImport from 9 (D12, P-20).
+ * (D12, P-26 and P-22), cardImport from 9 (D12, P-20), openDownload from 10 (P-28).
  * The Android application
  * offers its own: appUpdate (A3), download and share (A4), push (A5), links and lock (A6), capture,
  * incoming and upload (A7), and in Google Play's copy playUpdate instead of appUpdate (A8).
@@ -35,6 +35,7 @@ export type Feature =
   | 'taskbar'
   | 'dragOut'
   | 'cardImport'
+  | 'openDownload'
   | 'appUpdate'
   | 'download'
   | 'share'
@@ -112,6 +113,15 @@ export type NativeCard = { id: string; label: string; items: NativeCardItem[] };
 export type CardWhy = 'changed' | 'mismatch' | 'gone' | 'space' | 'cancelled' | 'inside' | 'failed';
 export type NativeCardCopy = { folder: string; results: ({ key: string; ok: true; file: NativeFile } | { key: string; ok: false; why: CardWhy })[] };
 
+/**
+ * A library, mail or messaging download the desktop application saved (P-28): an id it gave, the name the person saved it
+ * under, and the kind it opens as (null: it never opens from the application). Never its folder.
+ */
+export type NativeDownload = { id: string; name: string; kind: 'document' | 'picture' | 'sound' | 'video' | null };
+/** Why a download did not open: no longer where it was, a kind that never opens, no mark of the web, or Windows refused. */
+export type DownloadWhy = 'gone' | 'kind' | 'unmarked' | 'failed';
+export type DownloadAnswer = { ok: true } | { ok: false; why: DownloadWhy };
+
 export type Reason = 'export' | 'upload';
 export type NativeNotice = { title: string; body?: string; go?: string | null };
 
@@ -162,6 +172,11 @@ type Bridge = {
   profile?: {
     read?: () => Promise<{ current: ProfileKey; entries: ProfileEntry[] }>;
     save?: (numbers: ProfileNumbers) => Promise<ProfileEntry>;
+  };
+  downloads?: {
+    open?: (id: string) => Promise<DownloadAnswer>;
+    show?: (id: string) => Promise<DownloadAnswer>;
+    onDone?: (fn: ((d: NativeDownload) => void) | null) => void;
   };
   media?: {
     probe?: (source: NativeMediaRef) => Promise<NativeProbe>;
@@ -227,6 +242,7 @@ export const FEATURES: Readonly<Record<Feature, readonly string[]>> = Object.fre
   taskbar: ['life.progress'],
   dragOut: ['files.fromDropped', 'files.dragOut'],
   cardImport: ['files.importCard', 'files.copyCard', 'files.cancelCard', 'files.onCard'],
+  openDownload: ['downloads.open', 'downloads.show', 'downloads.onDone'],
   appUpdate: ['appUpdate.status', 'appUpdate.start'],
   download: ['download.save', 'download.open'],
   share: ['share.file'],
@@ -423,4 +439,45 @@ export async function dragOutFile(token: string): Promise<boolean> {
   const n = native();
   if (!n.has('dragOut')) return false;
   return (await n.raw!.files!.dragOut!(token).catch(() => false)) === true;
+}
+
+const KINDS = ['document', 'picture', 'sound', 'video'];
+const WHYS: readonly DownloadWhy[] = ['gone', 'kind', 'unmarked', 'failed'];
+
+/** A saved download as the page may trust it, or null for anything else. */
+export function downloadOf(value: unknown): NativeDownload | null {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as Record<string, unknown>;
+  if (typeof v.id !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(v.id)) return null;
+  if (typeof v.name !== 'string' || !v.name || v.name.length > 200) return null;
+  if (v.kind !== null && !KINDS.includes(v.kind as string)) return null;
+  return { id: v.id, name: v.name, kind: v.kind as NativeDownload['kind'] };
+}
+
+/**
+ * Hears each library, mail or messaging download the desktop application saved (P-28); returns the function that stops
+ * listening. Nothing in a browser or an older application.
+ */
+export function onDownloadDone(fn: (d: NativeDownload) => void): () => void {
+  const n = native();
+  if (!n.has('openDownload')) return () => undefined;
+  const on = n.raw!.downloads!.onDone!;
+  on((d) => {
+    const ok = downloadOf(d);
+    if (ok) fn(ok);
+  });
+  return () => on(null);
+}
+
+/** Opens a saved download in its program («فتح بالبرنامج الافتراضي») or shows it in its folder, by its id. */
+export async function actOnDownload(action: 'open' | 'show', id: string): Promise<DownloadAnswer> {
+  const n = native();
+  if (!n.has('openDownload')) return { ok: false, why: 'gone' };
+  try {
+    const a = await n.raw!.downloads![action]!(id);
+    if (a && a.ok === true) return { ok: true };
+    return { ok: false, why: a && WHYS.includes(a.why) ? a.why : 'failed' };
+  } catch {
+    return { ok: false, why: 'failed' };
+  }
 }

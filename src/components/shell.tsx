@@ -39,6 +39,7 @@ import { isPanelWindow } from '@/lib/studio/preview-link';
 import { useCaps } from './caps';
 import { MaintenanceBanner } from './settings/maintenance-banner';
 import { DesktopUpdateBanner } from './native/desktop-app';
+import { DesktopDownloads } from './native/desktop-downloads';
 import { AppUpdateWindow } from './native/phone-app';
 import { PhonePush } from './native/phone-push';
 import { PhoneLockOffer } from './native/phone-lock';
@@ -247,6 +248,7 @@ function FullShell({ children }: { children: ReactNode }) {
           <PhonePush />
           <PhoneLockOffer />
           <PhoneUploads />
+          <DesktopDownloads />
           {/* The page guide opens here, in place of the page (src/lib/kit/guide.ts). */}
           <div id="guide-view" hidden />
           {children}
