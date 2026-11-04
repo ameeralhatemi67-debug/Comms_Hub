@@ -113,6 +113,55 @@ function takeLock() {
   }
 }
 
+/** The gate, judged on whatever engines ran (a run that stopped early still has its others judged). */
+function judge(runs) {
+  for (const [engine, r] of Object.entries(runs)) {
+    for (const [name, f] of Object.entries(r.fixtures)) {
+      const fl = f.floor.random;
+      const kp = f.kept.random;
+      const ratio = Math.round((fl.median / Math.max(0.1, kp.median)) * 10) / 10;
+      f.ratio = { right: ratio, sharp: Math.round((fl.sharp.median / Math.max(0.1, kp.sharp.median)) * 10) / 10, cold: Math.round((f.floor.cold.median / Math.max(0.1, f.kept.cold.median)) * 10) / 10 };
+      check(`${engine}, ${name}: the median of ${SEEKS} random seeks to the right frame is at least three times faster with the frame memory, the preview having been open on the clip (${fl.median} ms against ${kp.median} ms, ${ratio} times; the sharp frame ${fl.sharp.median} against ${kp.sharp.median}; just opened ${f.floor.cold.median} against ${f.kept.cold.median})`, ratio >= 3 && !fl.timeouts && !kp.timeouts, { floor: fl, kept: kp, cold: [f.floor.cold, f.kept.cold], settled: f.kept.settled, load: [f.floor.load, f.kept.load] });
+      // the person sees the sharp frame: it must not come later than today's (10% and 5 ms for noise and the timer)
+      const notLater = (kept, floor) => kept <= floor * 1.1 + 5;
+      check(`${engine}, ${name}: the sharp frame after a jump comes no later than today's (${kp.sharp.median} ms against ${fl.sharp.median})`, notLater(kp.sharp.median, fl.sharp.median), { kept: kp.sharp, floor: fl.sharp });
+      check(`${engine}, ${name}: a jump right after the project opens comes no later than today's (${f.kept.cold.median} ms against ${f.floor.cold.median})`, notLater(f.kept.cold.median, f.floor.cold.median), { kept: f.kept.cold, floor: f.floor.cold });
+      const id = f.kept.identity;
+      const same = id.rows.filter((x) => x.shown === x.decoder && x.shown === x.expected).length;
+      check(`${engine}, ${name}: at 48 times the kept frame is the frame the decoder gives and the time names (${same} of ${id.rows.length})`, same === 48 && id.rows.length === 48, id.rows.filter((x) => !(x.shown === x.decoder && x.shown === x.expected)));
+      const smalls = id.rows.filter((x) => x.small !== null);
+      check(`${engine}, ${name}: at the same times the small kept frame, shown first after a jump, is the same frame (${smalls.filter((x) => x.small === x.expected).length} of ${smalls.length} kept)`, smalls.length === 48 && smalls.every((x) => x.small === x.expected), smalls.filter((x) => x.small !== x.expected));
+      const edges = id.edges.filter((x) => x.shown === x.expected).length;
+      check(`${engine}, ${name}: at a frame's first microsecond and just before it, the kept frame is the one the export takes (${edges} of ${id.edges.length})`, edges === id.edges.length, id.edges.filter((x) => x.shown !== x.expected));
+      const flid = f.floor.identity.rows.filter((x) => x.shown === x.decoder && x.shown === x.expected).length;
+      note(`${engine}, ${name}, the floor: ${flid} of 48 identity times; frame starts to the microsecond ${f.floor.identity.edges.filter((x) => x.shown === x.expected).length} of ${f.floor.identity.edges.length}. Steps forward ${f.floor.steps.forward.median} -> ${f.kept.steps.forward.median} ms, back ${f.floor.steps.back.median} -> ${f.kept.steps.back.median} ms. Memory held ${Math.round(kp.cache.bytes / 1048576)} MB in ${kp.cache.frames} frames.`);
+    }
+  }
+}
+
+/**
+ * --judge=qa/a.json,qa/b.json: the runs recorded in those files (a later file's engines over an earlier one's), judged
+ * again without timing anything, written to --out. For a record made of two runs in one window.
+ */
+const judgeFrom = (process.argv.find((a) => a.startsWith('--judge=')) || '').slice(8).split(',').filter(Boolean);
+if (judgeFrom.length) {
+  const runs = {};
+  const from = [];
+  for (const f of judgeFrom) {
+    const j = JSON.parse(fs.readFileSync(path.resolve(h.root, f), 'utf8'));
+    Object.assign(runs, j.runs);
+    from.push({ file: f, run: j.run, engines: Object.keys(j.runs) });
+    result.fixtures ??= j.fixtures;
+    result.settings ??= j.settings;
+  }
+  result.judgedFrom = from;
+  note(`Judged from ${from.map((x) => `${x.file} (run ${x.run}: ${x.engines.join(', ')})`).join(' and ')}; nothing timed again.`);
+  judge(runs);
+  result.runs = runs;
+  process.exitCode = finish(outFile) ? 1 : 0;
+  return;
+}
+
 (async () => {
   const runs = {};
   let server = null;
@@ -156,46 +205,31 @@ function takeLock() {
       for (const [engine, settings, args] of apps) {
         const { app, win } = await h.launchDev(`scrub-${engine}`, { settings, args });
         try {
+          // an engine whose page stops is recorded as such; the others still run
           await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
           await win.waitForLoadState('load');
           const versions = await app.evaluate(() => ({ electron: process.versions.electron, chrome: process.versions.chrome }));
           runs[engine] = { engine: versions, ...(await runIn(win)) };
           runs[engine].memory = await app.evaluate(({ app: a }) => a.getAppMetrics().map((m) => ({ type: m.type, mb: Math.round(m.memory.workingSetSize / 1024) })));
+        } catch (e) {
+          check(`${engine}: the run went to the end`, false, e.message || String(e));
         } finally {
           await h.closeAll();
         }
       }
     }
 
-    // --- the checks ------------------------------------------------------------------------------------
-    for (const [engine, r] of Object.entries(runs)) {
-      for (const [name, f] of Object.entries(r.fixtures)) {
-        const fl = f.floor.random;
-        const kp = f.kept.random;
-        const ratio = Math.round((fl.median / Math.max(0.1, kp.median)) * 10) / 10;
-        f.ratio = { right: ratio, sharp: Math.round((fl.sharp.median / Math.max(0.1, kp.sharp.median)) * 10) / 10, cold: Math.round((f.floor.cold.median / Math.max(0.1, f.kept.cold.median)) * 10) / 10 };
-        check(`${engine}, ${name}: the median of ${SEEKS} random seeks to the right frame is at least three times faster with the frame memory, the preview having been open on the clip (${fl.median} ms against ${kp.median} ms, ${ratio} times; the sharp frame ${fl.sharp.median} against ${kp.sharp.median}; just opened ${f.floor.cold.median} against ${f.kept.cold.median})`, ratio >= 3 && !fl.timeouts && !kp.timeouts, { floor: fl, kept: kp, cold: [f.floor.cold, f.kept.cold], settled: f.kept.settled, load: [f.floor.load, f.kept.load] });
-        // the person sees the sharp frame: it must not come later than today's (10% and 5 ms for noise and the timer)
-        const notLater = (kept, floor) => kept <= floor * 1.1 + 5;
-        check(`${engine}, ${name}: the sharp frame after a jump comes no later than today's (${kp.sharp.median} ms against ${fl.sharp.median})`, notLater(kp.sharp.median, fl.sharp.median), { kept: kp.sharp, floor: fl.sharp });
-        check(`${engine}, ${name}: a jump right after the project opens comes no later than today's (${f.kept.cold.median} ms against ${f.floor.cold.median})`, notLater(f.kept.cold.median, f.floor.cold.median), { kept: f.kept.cold, floor: f.floor.cold });
-        const id = f.kept.identity;
-        const same = id.rows.filter((x) => x.shown === x.decoder && x.shown === x.expected).length;
-        check(`${engine}, ${name}: at 48 times the kept frame is the frame the decoder gives and the time names (${same} of ${id.rows.length})`, same === 48 && id.rows.length === 48, id.rows.filter((x) => !(x.shown === x.decoder && x.shown === x.expected)));
-        const smalls = id.rows.filter((x) => x.small !== null);
-        check(`${engine}, ${name}: at the same times the small kept frame, shown first after a jump, is the same frame (${smalls.filter((x) => x.small === x.expected).length} of ${smalls.length} kept)`, smalls.length === 48 && smalls.every((x) => x.small === x.expected), smalls.filter((x) => x.small !== x.expected));
-        const edges = id.edges.filter((x) => x.shown === x.expected).length;
-        check(`${engine}, ${name}: at a frame's first microsecond and just before it, the kept frame is the one the export takes (${edges} of ${id.edges.length})`, edges === id.edges.length, id.edges.filter((x) => x.shown !== x.expected));
-        const flid = f.floor.identity.rows.filter((x) => x.shown === x.decoder && x.shown === x.expected).length;
-        note(`${engine}, ${name}, the floor: ${flid} of 48 identity times; frame starts to the microsecond ${f.floor.identity.edges.filter((x) => x.shown === x.expected).length} of ${f.floor.identity.edges.length}. Steps forward ${f.floor.steps.forward.median} -> ${f.kept.steps.forward.median} ms, back ${f.floor.steps.back.median} -> ${f.kept.steps.back.median} ms. Memory held ${Math.round(kp.cache.bytes / 1048576)} MB in ${kp.cache.frames} frames.`);
-      }
-    }
   } catch (e) {
     check('the check ran to the end', false, e.stack || String(e));
   } finally {
     await h.closeAll();
     if (server) server.close();
     if (locked) fs.rmSync(LOCK, { force: true });
+    try {
+      judge(runs);
+    } catch (e) {
+      check('the runs could be judged', false, e.stack || String(e));
+    }
     result.runs = runs;
     process.exitCode = finish(outFile) ? 1 : 0;
   }
