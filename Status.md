@@ -26,6 +26,23 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, merge 6: the studio says when the device is not measured, 2026-11-04
+
+- **Resumed.** The owner resumed the stage at about 19:10 under a new manager session, with these instructions: finish what is left, and add a prompt when the measurement is missing or stale. P-25 is parked: with the file unchanged, nothing can reach Google Drive before the export ends (`qa/studio-export-writes.mjs`, on `claude/power-upload-b13ac1`, to be merged after D11).
+- **Done.** Fork 3's measurement note (`MVP_draft.md` 63.6.1), merged as `a4159d2`. It appears in the desktop application only, on the studio's home and in the editors' frame.
+  - It shows when the device was never measured, or when the measurement is stale. A stale note gives one reason: «تغيّر إصدار التطبيق», «تغيّرت بطاقة الرسوميات» or «تغيّر برنامج تشغيل البطاقة».
+  - «قياس قدرة الجهاز» opens «معلومات الجهاز» at the measurement. «لاحقاً» hides the note for the current key only.
+  - It never measures by itself, and it is hidden while the page exports and in the preview's window. «معلومات الجهاز» gives the same reason beside its button.
+- **Evidence, re-run by the manager** at `3bd4c2e` in `verify-e3cab67`: typecheck clean, `npm test` 826 of 826, `next build`, `qa/desktop-measure-note.cjs` 12 of 12. The fork's own run was the same.
+- **Not verified.**
+  - Nothing signed in: the note's place in the studio's home and the editors' frame was checked in the diff and the build only.
+  - The preview window and the send-for-review hide were not driven.
+  - A save of fixed numbers stood in for a real measurement.
+- **Next.**
+  - Fork 2 reruns its corrected copy-swap check, after its «تقدم ثانية» fix.
+  - Then the quiet window: Fork 1's D11 timing on the app engines, then Fork 4's last speed slot.
+  - Then the D11 verification and merge. Nothing pushed.
+
 ## Desktop Power, paused by the owner, 2026-11-04
 
 - **Where it stands.** About three quarters of the stage is merged: Electron 45, the no-chip export and loudness ahead, D10 and D12. Every fork stopped at a safe point, with no process running, no lock held and clean trees. Nothing pushed, released or migrated.

@@ -1,0 +1,95 @@
+{
+  "script": "qa/desktop-measure-note.cjs",
+  "run": "2026-11-04T20:24:08.054Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "in a browser there is no note",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "never measured: the note says so, in one line",
+      "pass": true,
+      "detail": "لم يُقَس هذا الجهاز بعد، فيعمل الاستوديو بأبسط إعداداته. القياس نحو نصف دقيقة، ولا يُرسل شيء خارج الجهاز."
+    },
+    {
+      "name": "«قياس قدرة الجهاز» opens «معلومات الجهاز» at the measurement, its button ready",
+      "pass": true,
+      "detail": "قياس قدرة الجهاز"
+    },
+    {
+      "name": "while the page exports the note is not shown, and it comes back after",
+      "pass": true,
+      "detail": "{\"during\":false,\"after\":true}"
+    },
+    {
+      "name": "«لاحقاً» hides it, and it stays hidden after a reload",
+      "pass": true,
+      "detail": "{\"afterReload\":0}"
+    },
+    {
+      "name": "never measured, «لاحقاً» given, then started with --force_low_power_gpu (another key): the note shows again",
+      "pass": true,
+      "detail": "{\"again\":\"لم يُقَس هذا الجهاز بعد، فيعمل الاستوديو بأبسط إعداداته. القياس نحو نصف دقيقة، ولا يُرسل شيء خارج الجهاز.\",\"other\":{\"switch\":\"low\",\"chip\":\"AMD Radeon(TM) Graphics\"}}"
+    },
+    {
+      "name": "stale, app: the note says «تغيّر إصدار التطبيق…», and «معلومات الجهاز» says the same beside its button",
+      "pass": true,
+      "detail": "{\"line\":\"تغيّر إصدار التطبيق منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.\",\"beside\":\"تغيّر إصدار التطبيق منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.\"}"
+    },
+    {
+      "name": "stale, chip: the note says «تغيّرت بطاقة الرسوميات…», and «معلومات الجهاز» says the same beside its button",
+      "pass": true,
+      "detail": "{\"line\":\"تغيّرت بطاقة الرسوميات منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.\",\"beside\":\"تغيّرت بطاقة الرسوميات منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.\"}"
+    },
+    {
+      "name": "stale, driver: the note says «تغيّر برنامج تشغيل البطاقة…», and «معلومات الجهاز» says the same beside its button",
+      "pass": true,
+      "detail": "{\"line\":\"تغيّر برنامج تشغيل البطاقة منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.\",\"beside\":\"تغيّر برنامج تشغيل البطاقة منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.\"}"
+    },
+    {
+      "name": "only the other chip measured (one entry for the default start, the application started with --force_low_power_gpu): no entry for the running chip, and the note and «معلومات الجهاز» say «تغيّرت بطاقة الرسوميات…»",
+      "pass": true,
+      "detail": "{\"otherLine\":\"تغيّرت بطاقة الرسوميات منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.\",\"otherBeside\":\"تغيّرت بطاقة الرسوميات منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.\",\"entries\":1,\"onRunning\":0,\"flag\":\"--force_low_power_gpu\",\"measured\":{\"switch\":\"none\",\"chip\":\"NVIDIA GeForce RTX 3050 Laptop GPU\"},\"running\":{\"switch\":\"low\",\"chip\":\"AMD Radeon(TM) Graphics\"}}"
+    },
+    {
+      "name": "with a measurement for the current key there is no note",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "once a measurement is saved the note goes at once, nothing measured by itself",
+      "pass": true,
+      "detail": "{\"before\":\"لم يُقَس هذا الجهاز بعد، فيعمل الاستوديو بأبسط إعداداته. القياس نحو نصف دقيقة، ولا يُرسل شيء خارج الجهاز.\"}"
+    }
+  ],
+  "notes": [],
+  "key": {
+    "app": "0.8.0",
+    "chrome": "156.0.8078.48",
+    "chip": {
+      "vendorId": 4318,
+      "deviceId": 9634,
+      "vendor": "NVIDIA",
+      "name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+      "driver": "32.0.16.1091"
+    },
+    "switch": "none",
+    "power": "ac"
+  },
+  "otherChip": {
+    "flag": "--force_low_power_gpu",
+    "measured": {
+      "switch": "none",
+      "chip": "NVIDIA GeForce RTX 3050 Laptop GPU"
+    },
+    "running": {
+      "switch": "low",
+      "chip": "AMD Radeon(TM) Graphics"
+    }
+  },
+  "total": 12,
+  "passed": 12,
+  "failed": 0
+}

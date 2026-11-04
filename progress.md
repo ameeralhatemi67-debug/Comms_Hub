@@ -3198,3 +3198,51 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **The D10 checks' port lock** is `%LOCALAPPDATA%\Temp\comms-hub-port3000.lock` always (`9a3db90`, `qa/studio-d10.cjs`, the line
   Fork 1's branch has). With TEMP moved for a run's files, the lock followed TEMP, so two checks could each hold "the" lock.
 - **Not done.** Nothing pushed.
+
+### 2026-11-04: the studio says when this device is not measured, or its measurement is stale (Desktop Power, Fork 3, 63.6.1)
+
+- **Asked.** By Desktop Power's new manager at the resumption of 2026-11-04: inside the desktop application only, a quiet line
+  when the studio runs at its floor because no measurement fits this device as it is now. A browser and an older application
+  show nothing. P-28 stays waiting and was not built.
+- **Built** (`81aec83`, `2e7becd`, `1e50612`, on main merged at `ea72695`):
+  - `measureState` in `src/lib/native/device.ts`: measured, never measured, or stale with one reason, the first that differs
+    from the newest measurement on the same chip (or the newest of all): the application or Chromium, then the chip or its
+    switch, then the driver; mains or battery aside, as `currentEntry`. `measureLine` gives the words, each reason its own
+    whole phrase after the manager's review: «تغيّر إصدار التطبيق», «تغيّرت بطاقة الرسوميات», «تغيّر برنامج تشغيل البطاقة».
+  - `src/components/native/measure-note.tsx`, on the studio's home above the projects and under the editors' menus
+    (`studio-page.tsx`, `editor-frame.tsx`). «قياس قدرة الجهاز» opens «معلومات الجهاز» with its own button in view and focused;
+    the note never measures by itself. «لاحقاً» is kept on this device for the present key only (`studio.pref.measureLater`,
+    through `usePref`, so a failed storage read shows the note). Hidden while the page is busy and in the preview's window
+    (`isPanelWindow`); gone as soon as a measurement is saved (`PROFILE_SAVED`).
+  - `src/lib/native/index.ts` counts the page's busy reasons (`pageBusy`, `onPageBusy`): an export and a send for review both
+    hide the note.
+  - «معلومات الجهاز» shows the stale line under «قياس قدرة الجهاز» (`data-measure-why`). The note under the plan
+    (`PLAN_NOTE`) now names what D10 follows too, as the D10 entry found.
+  - `MVP_draft.md` 63.6.1 holds the words and rules; `AGENTS.md`'s D9 paragraph gains one bullet.
+- **Verification & evidence**, in the manager's slot, with TEMP and TMP in this worktree's `qa/artifacts/tmp` and the port's
+  lock (`%LOCALAPPDATA%\Temp\comms-hub-port3000.lock`) held by this branch for the whole slot:
+  - `npm run typecheck` clean.
+  - `next build` clean: compiled in 25.8 s, 43 of 43 static pages, about 60 s in all.
+  - `npm test` **826 of 826** (12.7 s). Before the slot, single files: `tests/native-power.test.mjs` 14 of 14 (two new tests: the
+    reasons, their order, power aside, the same-chip preference, the words and the key; the busy count), `tests/native.test.mjs`
+    68 of 68, `tests/scale.test.mjs` 6 of 6, `tests/help-tours.test.mjs` 5 of 5.
+  - `qa/desktop-measure-note.cjs` **12 of 12** in 34 s, run once, on the development package 0.8.0 (Electron 45, Chromium
+    156.0.8078.48), this laptop's RTX 3050 and AMD Radeon. The real component on a fixture page:
+    - in Edge, no note;
+    - on a fresh profile the never-measured line, its button opening «معلومات الجهاز» with «قياس قدرة الجهاز» focused, the note
+      gone during `markBusy('export')` and back after;
+    - «لاحقاً» kept across a reload, and the note back when the same profile started with `--force_low_power_gpu` (another key);
+    - each stale reason from a `profile.json` written before the start, with the same line in «معلومات الجهاز»;
+    - only the other chip measured: one entry for the default start (switch «none», the RTX), the application started with
+      `--force_low_power_gpu` (the AMD chip), no entry for the running chip, and «تغيّرت بطاقة الرسوميات…» in both places;
+    - no note with an entry for the current key, and the note gone at once after a save through the bridge.
+
+    Results in `qa/desktop-measure-note.json`; pictures in `qa/artifacts/desktop-measure-note/`.
+- **Not verified, said plainly.**
+  - Nothing signed in. The studio's home and the editors need a signed-in person, so the check renders the same component on a
+    fixture page; its place in `studio-page.tsx` and `editor-frame.tsx` was checked in the diff and the build, not seen.
+  - The preview window's rule (`isPanelWindow`) and the hide during a send for review were not driven by the check; the second
+    is the same busy count as the export.
+  - No real measurement ran in the check: a save of fixed numbers through the real bridge stood in for it.
+  - One laptop, with two chips. On a laptop with one chip a switch change counts as a chip change by rule (unit-tested), not seen.
+- **Not done.** Nothing pushed.
