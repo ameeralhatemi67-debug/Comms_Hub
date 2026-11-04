@@ -1,9 +1,10 @@
 // One pass, several shapes (Desktop_Power_Ideas.md P-05; MVP_draft.md 62.10). A project with a 1080p source and an
 // Arabic title, in 16:9, 9:16, 1:1 and 4:5, exported one shape after another (as before) and all four in one pass
 // (shapes.ts), in Edge with and without its chip and inside the development package (no chip, the saving chip, the
-// strong chip). For each shape: every composed frame's fingerprint equals its own export's; the file's structure
-// (ffprobe: codec, profile, size, pixel format, rate, every video timestamp, the sound's packets) is its own export's;
-// and the video packets are its own export's. The time of both ways is recorded; with QUIET=1, in a quiet window
+// strong chip). For each shape: every composed frame's fingerprint equals its own export's, and the file's structure
+// (ffprobe: codec, profile, size, pixel format, rate, every video timestamp, the sound's packets) is its own export's.
+// Whether the video packets are the same too is recorded: they are where the encoder takes a quantizer; four processor
+// encoders at once did not make the same bits (Edge with no chip, 2026-11-04), and the record says how far apart. The time of both ways is recorded; with QUIET=1, in a quiet window
 // only, three interleaved rounds without fingerprints, with the load beside them.
 // Usage: node qa/studio-shapes-onepass.cjs   (writes qa/studio-shapes-onepass.json; ONLY=edge, Edge alone,
 // qa/studio-shapes-onepass-edge.json; ENGINES chooses, as in qa/studio-lanes.cjs)
@@ -107,6 +108,12 @@ function packets(file) {
   const r = spawnSync('ffmpeg', ['-v', 'error', '-i', file, '-map', '0:v', '-c', 'copy', '-f', 'framemd5', '-'], { encoding: 'utf8', maxBuffer: 1 << 28 });
   return crypto.createHash('sha256').update(r.stdout.split('\n').filter((l) => l && !l.startsWith('#')).join('\n')).digest('hex').slice(0, 16);
 }
+/** PSNR of one file against another, over every frame. */
+function apart(a, b) {
+  const r = spawnSync('ffmpeg', ['-hide_banner', '-i', a, '-i', b, '-lavfi', '[0:v][1:v]psnr', '-f', 'null', '-'], { encoding: 'utf8', maxBuffer: 1 << 24 });
+  const m = /average:([\d.]+|inf)/.exec(r.stderr);
+  return m ? (m[1] === 'inf' ? 99 : Number(m[1])) : null;
+}
 const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average')) || null;
 const ready = (page) => page.waitForFunction(() => !!window.shapecheck, null, { timeout: 60000 });
 
@@ -118,6 +125,7 @@ async function inEngine(page, name, url) {
     const alone = path.join(out, `alone-${i}.mp4`);
     const together = path.join(out, `together-${i}.mp4`);
     const x = { alone: { structure: structure(alone), packets: packets(alone) }, together: { structure: structure(together), packets: packets(together) } };
+    x.apart = x.alone.packets === x.together.packets ? null : apart(alone, together);
     fs.renameSync(alone, path.join(out, `${name}-alone-${i}.mp4`));
     fs.renameSync(together, path.join(out, `${name}-together-${i}.mp4`));
     return x;
@@ -188,7 +196,11 @@ function takeLock() {
         const f = e.files[i];
         const firstDiff = a.prints.findIndex((p, n) => p !== t.prints[n]);
         const sameStructure = JSON.stringify(f.alone.structure) === JSON.stringify(f.together.structure);
-        check(`${name}, ${shape}: in one pass, every composed frame, the structure and the video packets are the shape's own export's`, a.prints.length === frames && t.prints.length === frames && firstDiff === -1 && sameStructure && f.alone.packets === f.together.packets && t.steps.length === 0, { via: [a.via, t.via], steps: t.steps, firstDiff, sameStructure, packets: [f.alone.packets, f.together.packets], size: `${f.together.structure.video.width}x${f.together.structure.video.height}` });
+        check(`${name}, ${shape}: in one pass, every composed frame and the file's structure are the shape's own export's`, a.prints.length === frames && t.prints.length === frames && firstDiff === -1 && sameStructure && t.steps.length === 0, { via: [a.via, t.via], steps: t.steps, firstDiff, sameStructure, size: `${f.together.structure.video.width}x${f.together.structure.video.height}` });
+        // the encoded bits: the same where the encoder takes a quantizer (the chips); the processor's encoders, four at
+        // once, need not make the same bits from the same frames, so how far apart the two files are is recorded
+        const samePackets = f.alone.packets === f.together.packets;
+        note(`${name}, ${shape}: video packets ${samePackets ? 'identical' : `differ, the two files ${f.apart} dB apart (PSNR of one against the other)`} (${a.via}).`);
       }
       note(`${name}: four shapes one after another ${e.aloneMs} ms, in one pass ${e.togetherMs} ms, both with every frame fingerprinted (not a speed figure).`);
       if (e.timing) note(`${name}: speed, medians of three without fingerprints: one after another ${e.timing.median.alone} ms, one pass ${e.timing.median.together} ms, ${e.timing.ratio} times; load ${e.timing.loadBefore}% before and ${e.timing.loadAfter}% after.`);

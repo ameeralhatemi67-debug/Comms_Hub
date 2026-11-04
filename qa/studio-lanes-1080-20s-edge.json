@@ -1,17 +1,17 @@
 {
   "script": "qa/studio-lanes.cjs",
-  "run": "2026-11-03T22:37:55.431Z",
-  "version": "0.7.1",
+  "run": "2026-11-04T07:57:01.407Z",
+  "version": "0.8.0",
   "checks": [
     {
       "name": "edge: one lane is the floor (600 frames, every one fingerprinted)",
       "pass": true,
-      "detail": "{\"via\":\"canvas\",\"ms\":20954}"
+      "detail": "{\"via\":\"canvas\",\"ms\":20039,\"printed\":600}"
     },
     {
       "name": "edge, 2 lanes: every composed frame is one lane's, the structure is one lane's exactly",
       "pass": true,
-      "detail": "{\"lanes\":2,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[20954,21633]}"
+      "detail": "{\"lanes\":2,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[20039,24088]}"
     },
     {
       "name": "edge, 2 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
@@ -21,7 +21,7 @@
     {
       "name": "edge, 3 lanes: every composed frame is one lane's, the structure is one lane's exactly",
       "pass": true,
-      "detail": "{\"lanes\":3,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[20954,25059]}"
+      "detail": "{\"lanes\":3,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[20039,23943]}"
     },
     {
       "name": "edge, 3 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
@@ -46,12 +46,12 @@
     {
       "name": "edge-nochip: one lane is the floor (600 frames, every one fingerprinted)",
       "pass": true,
-      "detail": "{\"via\":\"yuv\",\"ms\":17357}"
+      "detail": "{\"via\":\"yuv\",\"ms\":21060,\"printed\":600}"
     },
     {
       "name": "edge-nochip, 2 lanes: every composed frame is one lane's, the structure is one lane's exactly",
       "pass": true,
-      "detail": "{\"lanes\":2,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[17357,17348]}"
+      "detail": "{\"lanes\":2,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[21060,24608]}"
     },
     {
       "name": "edge-nochip, 2 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
@@ -61,7 +61,7 @@
     {
       "name": "edge-nochip, 3 lanes: every composed frame is one lane's, the structure is one lane's exactly",
       "pass": true,
-      "detail": "{\"lanes\":3,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[17357,19768]}"
+      "detail": "{\"lanes\":3,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[21060,22152]}"
     },
     {
       "name": "edge-nochip, 3 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
@@ -88,7 +88,16 @@
   "fixture": {
     "seconds": 20,
     "size": "1920x1080",
-    "short": 1080
+    "short": 1080,
+    "engines": [
+      "edge",
+      "edge-nochip",
+      "app-nochip",
+      "app-saving",
+      "app-strong"
+    ],
+    "faults": true,
+    "fingerprinted": "every frame"
   },
   "engines": {
     "edge": {
@@ -113,7 +122,7 @@
         "one": {
           "lanes": 1,
           "steps": [],
-          "ms": 20954,
+          "ms": 20039,
           "bytes": 26721544,
           "via": "canvas",
           "keys": 10,
@@ -122,7 +131,7 @@
         "two": {
           "lanes": 2,
           "steps": [],
-          "ms": 21633,
+          "ms": 24088,
           "bytes": 26721544,
           "via": "canvas",
           "keys": 10,
@@ -131,7 +140,7 @@
         "three": {
           "lanes": 3,
           "steps": [],
-          "ms": 25059,
+          "ms": 23943,
           "bytes": 26721544,
           "via": "canvas",
           "keys": 10,
@@ -142,7 +151,7 @@
           "steps": [
             "LANE:LANES"
           ],
-          "ms": 40145,
+          "ms": 26353,
           "bytes": 26721544,
           "via": "canvas",
           "keys": 10,
@@ -153,7 +162,7 @@
           "steps": [
             "ENCODER"
           ],
-          "ms": 24094,
+          "ms": 24901,
           "bytes": 26721544,
           "via": "canvas",
           "keys": 10,
@@ -164,7 +173,7 @@
           "steps": [
             "LANE:ENCODER"
           ],
-          "ms": 37863,
+          "ms": 33289,
           "bytes": 26721544,
           "via": "canvas",
           "keys": 10,
@@ -194,7 +203,7 @@
         "one": {
           "lanes": 1,
           "steps": [],
-          "ms": 17357,
+          "ms": 21060,
           "bytes": 25359421,
           "via": "yuv",
           "keys": 10,
@@ -203,7 +212,7 @@
         "two": {
           "lanes": 2,
           "steps": [],
-          "ms": 17348,
+          "ms": 24608,
           "bytes": 25359417,
           "via": "yuv",
           "keys": 10,
@@ -212,7 +221,7 @@
         "three": {
           "lanes": 3,
           "steps": [],
-          "ms": 19768,
+          "ms": 22152,
           "bytes": 25357779,
           "via": "yuv",
           "keys": 10,
@@ -223,7 +232,7 @@
           "steps": [
             "LANE:LANES"
           ],
-          "ms": 38157,
+          "ms": 21861,
           "bytes": 25359421,
           "via": "yuv",
           "keys": 10,
@@ -234,7 +243,7 @@
           "steps": [
             "ENCODER"
           ],
-          "ms": 19730,
+          "ms": 20444,
           "bytes": 25357779,
           "via": "yuv",
           "keys": 10,
@@ -245,7 +254,7 @@
           "steps": [
             "LANE:ENCODER"
           ],
-          "ms": 30688,
+          "ms": 20056,
           "bytes": 25359417,
           "via": "yuv",
           "keys": 10,
