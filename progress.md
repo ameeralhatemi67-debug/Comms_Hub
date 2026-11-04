@@ -2929,7 +2929,14 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
       136 speed-limit events, the lowest 34%.
     - **The sound alone holds a copy**, with Windows' speed-limit events kept out: the hold was «playing», 22 ms after the window was
       heard. That run's check still failed, because the 4K grainy clip stalled (`readyState` 1) and the window was heard 0.3 s only,
-      after which the copy went on, as it should. The check now plays the still clip for the sound case; RERUN.
+      after which the copy went on, as it should.
+    - **The sound case again, at `afbde46`, 21 of 23.** The hold was «playing» 23 ms after the window was heard, the reason proven
+      again. But the studio's player in the fixture was heard only in two bursts of about 0.23 s, its element stalling (`readyState`
+      1), so the copy went on between them. The export case paused in 12 ms and did not resume within 15 s of the release, since
+      Windows lowered its own speed limit meanwhile. Both are the fixture's conditions, not the broker's rules.
+    - **`2903ecc`** holds the sound rule with a steady tone from the page and checks the player's own sound apart, and keeps
+      Windows' speed-limit events out of every hold case but the simulated one. The manager ran it in his verification worktree;
+      its result is the manager's record of the merge.
 - **Decisions on the way** (the manager, 2026-11-04): keep the speed-limit hold as built, so copies never push the laptop into its
   limit; do not raise `copiesAtOnce` above 1 without a measured gain.
 - **On the way.**
