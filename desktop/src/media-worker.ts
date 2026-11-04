@@ -150,6 +150,15 @@ function setPaused(id: string, paused: boolean) {
   if (!s) return;
   s.paused = paused;
   for (const t of s.timers.splice(0)) clearTimeout(t);
+  // while it drains what it read already, a paused job takes only what the rest of the laptop leaves (idle priority)
+  const pid = children.get(id)?.pid;
+  if (pid) {
+    try {
+      os.setPriority(pid, paused ? os.constants.priority.PRIORITY_LOW : os.constants.priority.PRIORITY_BELOW_NORMAL);
+    } catch {
+      // the priority is a courtesy; the pause holds either way
+    }
+  }
   if (!paused) return wakeAll(s);
   // what FFmpeg holds already may carry it on a little; if it still goes on, it read too far ahead to wait
   let mark = -1;

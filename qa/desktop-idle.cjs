@@ -91,6 +91,11 @@ async function main() {
 
     const { app, win, mainId, data } = await h.launchDev('idle');
     await h.instrument(app);
+    // Windows' own speed limit for the processor, as the application hears it (a hot laptop lowers it)
+    await app.evaluate(({ powerMonitor }) => {
+      globalThis.__limits = [];
+      powerMonitor.on('speed-limit-change', (d) => globalThis.__limits.push({ at: Date.now(), limit: d.limit }));
+    });
     await app.evaluate(({ BrowserWindow }, id) => {
       globalThis.__audible = [];
       BrowserWindow.fromId(id).webContents.on('audio-state-changed', (e) => globalThis.__audible.push({ at: Date.now(), audible: e.audible }));
@@ -98,6 +103,23 @@ async function main() {
     await h.until(() => win.url() === 'http://127.0.0.1:3000/', 20000);
     await win.waitForLoadState('load');
     await win.waitForFunction(() => typeof window.openCorpus === 'function');
+    /** Keeps Windows' own speed-limit changes away from the application (the limit held at 100), or lets them through again. */
+    const realLimits = (on) =>
+      app.evaluate(({ powerMonitor }, pass) => {
+        if (!globalThis.__emit) {
+          globalThis.__emit = powerMonitor.emit;
+          powerMonitor.emit = function emit(name, ...args) {
+            if (name === 'speed-limit-change' && globalThis.__blockLimits && !globalThis.__ours) return false;
+            return globalThis.__emit.call(this, name, ...args);
+          };
+        }
+        globalThis.__blockLimits = !pass;
+        if (!pass) {
+          globalThis.__ours = true;
+          powerMonitor.emit('speed-limit-change', { limit: 100 });
+          globalThis.__ours = false;
+        }
+      }, on);
     const bridge = await win.evaluate(() => ({ bridge: window.commsHubNative.bridge, life: Object.keys(window.commsHubNative.life), media: Object.keys(window.commsHubNative.media) }));
     check('the bridge is version 7 or later, with life.activity and media.queue, queued and onQueue', bridge.bridge >= 7 && bridge.life.includes('activity') && ['queue', 'queued', 'onQueue'].every((m) => bridge.media.includes(m)), bridge);
     const folder = path.join(data, 'StudioCache');
@@ -186,11 +208,14 @@ async function main() {
     const sound = await held(
       'the window makes sound (the studio playing, not saying so)',
       async () => {
+        // the sound alone holds it: Windows' own speed-limit changes are kept out meanwhile
+        await realLimits(false);
         await app.evaluate(() => (globalThis.__audible = []));
         playing = win.evaluate(() => window.play(6, {}));
       },
       async () => {
         result.soundPlay = await playing;
+        await realLimits(true);
       },
       'playing',
       () => app.evaluate(() => globalThis.__audible.find((x) => x.audible)?.at ?? null),
@@ -277,33 +302,62 @@ async function main() {
       await h.until(async () => (ffmpegLeft() === 0 ? true : null), 10000, 200);
       await clearCopies();
       loaded('nothing to make');
-      result.speed.nothing = await win.evaluate(() => window.play(12, {}));
-      await win.evaluate(() => window.queueWith(1));
-      await h.until(async () => (await q()).items.some((i) => i.state === 'waiting' || i.state === 'running'), 30000, 200);
-      loaded('copies to make, held');
-      result.speed.held = await win.evaluate(() => window.play(12, { say: true }));
-      const s = await q();
-      result.speed.heldStates = s.items.map((i) => i.state);
-      await runningCopy(new Set(Object.keys(fileOf)));
-      loaded('copies running (contrast)');
-      result.speed.running = await win.evaluate(() => window.play(12, { muted: true }));
-      loaded('after the plays');
-      const { nothing, held: heldPlay, running } = result.speed;
-      check(`the stage's 95th-percentile frame time while copies wait is that of a stage with nothing to make (${heldPlay.p95} ms against ${nothing.p95} ms, within 10%; with copies running instead: ${running.p95} ms)`, heldPlay.p95 <= nothing.p95 * 1.1, result.speed);
-      result.speed.widths = {};
-      for (const width of [1, 2, 3]) {
+      // three rounds, each of: nothing to make; copies held at widths 1 and 3; a copy running. Windows' own speed limit is
+      // kept out while a copy runs for contrast, so it runs throughout.
+      const ROUND = 8;
+      const prepare = async (width) => {
         await win.evaluate(() => window.stopQueue());
         await h.until(async () => (ffmpegLeft() === 0 ? true : null), 10000, 200);
         await clearCopies();
+        if (width) {
+          await win.evaluate((w) => window.queueWith(w), width);
+          await runningCopy(new Set(Object.keys(fileOf)));
+        }
+      };
+      result.speed.rounds = [];
+      for (let round = 1; round <= 3; round++) {
+        const row = { round };
+        await prepare(0);
+        loaded(`round ${round}: nothing to make`);
+        row.nothing = await win.evaluate((n) => window.play(n, {}), ROUND);
+        for (const width of [1, 3]) {
+          await prepare(width);
+          loaded(`round ${round}: copies at width ${width}, held`);
+          row[`held${width}`] = await win.evaluate((n) => window.play(n, { say: true }), ROUND);
+          row[`held${width}`].states = (await q()).items.map((i) => i.state);
+        }
+        await prepare(1);
+        await realLimits(false);
+        loaded(`round ${round}: a copy running (contrast)`);
+        row.running = await win.evaluate((n) => window.play(n, { muted: true }), ROUND);
+        row.running.states = (await q()).items.map((i) => i.state);
+        await realLimits(true);
+        result.speed.rounds.push(row);
+      }
+      loaded('after the rounds');
+      const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
+      const p95 = (k) => median(result.speed.rounds.map((r) => r[k].p95));
+      result.speed.medians = { nothing: p95('nothing'), held1: p95('held1'), held3: p95('held3'), running: p95('running') };
+      const m = result.speed.medians;
+      note(`The stage's 95th-percentile frame time, median of three ${ROUND} s plays each: nothing to make ${m.nothing} ms, copies held at width 1 ${m.held1} ms and at width 3 ${m.held3} ms, a copy running ${m.running} ms; every play: ${JSON.stringify(result.speed.rounds.map((r) => [r.nothing.p95, r.held1.p95, r.held3.p95, r.running.p95]))}.`);
+      for (const width of [1, 3]) check(`width ${width}: the stage's 95th-percentile frame time while copies wait is that of a stage with nothing to make (median ${m[`held${width}`]} ms against ${m.nothing} ms, within 10%; a copy running: ${m.running} ms)`, m[`held${width}`] <= m.nothing * 1.1, result.speed);
+      // the time to make the copies at each width, Windows' own speed limit kept out: what a width can give on this laptop
+      result.speed.widths = {};
+      await realLimits(false);
+      for (const width of [1, 2, 3]) {
+        await prepare(0);
         const l = load();
         const start = Date.now();
         await win.evaluate((w) => window.queueWith(w), width);
         const done = await h.until(async () => ((await q()).items.every((i) => i.state === 'ready') ? true : null), 900000, 250);
         result.speed.widths[width] = { ms: Date.now() - start, loadBefore: l, loadAfter: load(), done: !!done };
       }
+      await realLimits(true);
       note(`Time to make the copies not in use (${SECONDS} s of 4K each), one, two and three at a time: ${JSON.stringify(result.speed.widths)}`);
       check('every width made every copy', Object.values(result.speed.widths).every((w) => w.done), result.speed.widths);
     } else note('Speed figures not taken (run with --speed in a quiet window).');
+    result.speedLimits = await app.evaluate(() => globalThis.__limits.slice());
+    note(`Windows' speed limit for the processor during the run, as the application heard it: ${result.speedLimits.length ? JSON.stringify(result.speedLimits.map((x) => x.limit)) : 'no change (100%)'}.`);
 
     await clearCopies();
     await win.evaluate(() => window.queueWith(1));
