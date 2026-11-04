@@ -3250,3 +3250,50 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - With no chip, the application at 4K saturates the processor and its window falls to about one frame a second (the manager's
     finding): its 1080p run may crawl; stop it if the first export takes far longer than about 12 minutes.
 - **Not done.** Nothing pushed; drawing in workers (P-07) not switched on anywhere.
+
+### 2026-11-04 (evening): D11's gate rows 1 to 4 after the owner resumed Desktop Power (Desktop Power, Fork 1)
+
+- **Before the rows.** Merged `main` (85e642a, 5a442e6, ea72695) into the branch (6780c40). `desktop/` had not changed, so the
+  development package was not rebuilt. `npm run typecheck` clean; `npm test` 828 of 828.
+- **How they ran.** One engine at a time on port 3000, each run taking and freeing the lock itself; TEMP and TMP on
+  `qa/artifacts/tmp` in this worktree (drive D) for every command; each run removed its profile when its engine closed (two empty
+  folders were left each time and removed by hand). Nothing of tonight's runs was written to drive C. The application was the
+  development package 0.8.0 (Electron 45.0.0, Chromium 156.0.8078.48), started with `--disable-features=CalculateNativeWinOcclusion`
+  and its window in front. The times are with fingerprints and are not speed figures; the time ratio is (d), below.
+- **Row 1, the strong chip (RTX 3050), ten minutes at 4K, every 15th frame and 30 each side of every boundary fingerprinted
+  (1368 frames): 5 of 5** (`qa/studio-lanes-2160-600s-app-strong.json`, which replaces the record of the run the full drive
+  stopped; that one is at f155ca8).
+  - One, two and three lanes: 445.9, 366.9 and 386.9 s (40.4, 49.1 and 46.5 frames a second), the processor at 46%, 5 then 5%,
+    4 then 2%.
+  - Every fingerprinted composed frame is one lane's, the structure is one lane's exactly (18000 frames, 300 key frames).
+  - The frames at the boundaries are 0.00 dB from one lane's: 43.48 and 43.57 dB at 8999 and 9000; 43.00, 43.09, 43.08 and
+    43.12 dB at 5999, 6000, 11999 and 12000.
+  - The files: 3,431,240,009, 3,430,985,206 and 3,430,894,885 bytes (section 5.2's third level, as above).
+- **Row 2, no graphics chip in the application, 20 s at 1080p with the forced faults, every frame fingerprinted: 8 of 8**
+  (`qa/studio-lanes-1080-20s-app-nochip.json`).
+  - One, two and three lanes: 17.7, 18.7 and 19.8 s (33.9, 32.1 and 30.3 frames a second, so the window was not throttled).
+  - Frames and structure exact; boundary frames 0.00 dB from one lane's (41.84 and 42.90 dB at 299 and 300; 41.51, 42.88,
+    41.93 and 42.92 dB at 239, 240, 419 and 420).
+  - The guard refused a lane with another H.264 profile and one lane made the file (21.6 s); a lane failing once mid-segment
+    had its segment run again on the lanes left (three lanes, 20.1 s); the first segment's lane failing ran the export again
+    with two lanes (18.2 s); every file exact.
+- **Row 3, no graphics chip, one pass for four shapes: 4 of 4** (`qa/studio-shapes-onepass-app-nochip.json`). Every shape's
+  composed frames and structure equal its own export's. The packets are identical for 16:9 and 9:16; for 1:1 and 4:5 they
+  differ, the two files 56.84 and 55.98 dB apart, recorded as a note, as with the saving chip (section 5.2's third level). Four
+  shapes one after another 20.0 s, in one pass 15.2 s, with fingerprints.
+- **Row 4, no graphics chip, ten minutes at 1080p, every one of the 18000 frames fingerprinted: 5 of 5**
+  (`qa/studio-lanes-1080-600s-app-nochip.json`).
+  - It did not crawl: one, two and three lanes 492.9, 488.6 and 550.3 s (36.5, 36.8 and 32.7 frames a second), the processor
+    at 20%, 14 then 2%, 1%.
+  - Frames and structure exact (300 key frames); boundary frames 0.00 dB from one lane's (41.62 and 42.79 dB at 8999 and 9000;
+    41.65, 42.80, 41.57 and 42.78 dB at 5999, 6000, 11999 and 12000).
+  - The files: 761,761,518, 761,760,931 and 761,765,326 bytes.
+- **Still not run, said plainly.** (d), the time ratio for each chip, waits for a quiet window from the manager (two-minute 1080p
+  and 4K fixtures, three interleaved rounds of one, two and three lanes, `QUIET=1`). Without it no lane count is promised as
+  faster: tonight two lanes were quicker than one on the strong chip at 4K and three lanes slower than one with no chip at 1080p,
+  with fingerprints and a processor shared with other sessions. Still not verified: a renderer killed mid-segment; nothing signed
+  in (the panel's lanes and one pass were not clicked through); `exportLanes` on a measured profile in the application.
+- **Found on the way, not touched.** Drive C holds 268 older check profiles (`%LOCALAPPDATA%\Temp\comms-hub-desktop-qa-*`, about
+  7.5 GB in all, none written tonight), from runs of several sessions before the checks removed their profiles; which session
+  made each cannot be told from the folder, so none was removed.
+- **Not done.** Nothing pushed; drawing in workers (P-07) not switched on anywhere.
