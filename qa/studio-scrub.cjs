@@ -9,7 +9,8 @@
 //   Identity: at 48 times (DT-12's: frame middles and 2 ms inside each edge) the shown frame is the frame the decoder
 //   gives and the frame the time names; at frame starts to the microsecond, the export's rule. Gate: 48 of 48.
 //   The processor's load is recorded before and after each run, since a busy laptop measures badly.
-// Usage: node qa/studio-scrub.cjs [--only=edge|app-saving|app-strong|app-software] [--quick] [--out=qa/<name>.json]
+// Usage: node qa/studio-scrub.cjs [--only=edge|app-saving|app-strong|app-software[,...]] [--fixture=gop2|gop10] [--quick]
+//   [--out=qa/<name>.json]
 //   (writes qa/studio-scrub.json, or the file named)
 // Needs: ffmpeg with libx264; for the application, npm run pack:dev in desktop/ and 127.0.0.1:3000 free (the lock).
 const fs = require('node:fs');
@@ -24,7 +25,9 @@ const { make4k } = require('./studio-4k.cjs');
 
 const { check, note, result, finish } = h.record('qa/studio-scrub.cjs');
 const out = path.join(__dirname, 'artifacts', 'studio-scrub');
-const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7);
+const onlyList = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
+const wanted = (engine) => !onlyList.length || onlyList.includes(engine);
+const fixtureOnly = (process.argv.find((a) => a.startsWith('--fixture=')) || '').slice(10);
 const quick = process.argv.includes('--quick');
 const outFile = path.resolve(h.root, (process.argv.find((a) => a.startsWith('--out=')) || '--out=qa/studio-scrub.json').slice(6));
 const LOCK = path.join(process.env.TEMP || require('node:os').tmpdir(), 'comms-hub-port3000.lock');
@@ -79,7 +82,7 @@ async function serve(port) {
 async function runIn(page) {
   await page.waitForFunction(() => !!window.scrub, null, { timeout: 60000 });
   const run = { renderer: await page.evaluate(() => window.scrub.renderer()), fixtures: {} };
-  for (const f of FIXTURES) {
+  for (const f of FIXTURES.filter((x) => !fixtureOnly || x.name === `${fixtureOnly}.mp4`)) {
     const r = {};
     for (const [mode, cacheMB] of [['floor', 0], ['kept', CACHE_MB]]) {
       const before = load();
@@ -124,7 +127,7 @@ function takeLock() {
     }));
     result.settings = { cacheMB: CACHE_MB, seeks: SEEKS, steps: STEPS, project: '16:9, a 4K clip contained, stage canvas 1280 x 720', pauseBetweenSeeksMs: 0 };
 
-    if (!only || only === 'edge') {
+    if (wanted('edge')) {
       server = await serve(3102);
       const browser = await chromium.launch(launchOptions);
       try {
@@ -142,7 +145,7 @@ function takeLock() {
       ['app-saving', { keepInTray: false, gpu: 'saving' }, []],
       ['app-strong', { keepInTray: false, gpu: 'strong' }, []],
       ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu']],
-    ].filter(([n]) => !only || only === n);
+    ].filter(([n]) => wanted(n));
     if (apps.length) {
       if (!fs.existsSync(h.devExe)) throw new Error(`the development package is missing: ${h.devExe} (npm run pack:dev in desktop/)`);
       const lock = takeLock();
