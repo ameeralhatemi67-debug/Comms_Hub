@@ -3155,3 +3155,72 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     quiet moment (the row's media let go, the best of three probes). `qa/studio-preview-ui.cjs` stopped at 4 of 5 on «saved is
     not a function»: the new save wait shared its name with the profile's result. Both fixed after; not yet rerun.
 - **Not done.** Nothing pushed.
+
+### 2026-11-04: export lanes (P-06), the step-down ladder (P-35) and one pass for several shapes (P-05) (Desktop Power, Fork 1, D11)
+
+- **Lanes (`segments.ts`, `lanes.ts`, `export.ts`).** The frames are cut into contiguous segments on one lane's key frames
+  (every two seconds), as equal as whole groups allow. Each lane runs its segment on the page's own canvases (the floor's
+  kind, so composed frames are one lane's): its own decoders, made with the media pool's sink settings, and its own
+  Mediabunny encoder from one lane's settings, into an output that keeps nothing. The first segment's packets go into the
+  file as they come; the others wait in the browser's private storage (`studio-lanes`) and follow in order. The sound is
+  mixed once and kept one window ahead, as with one lane.
+  - **The join's guard.** Every lane's decoder description (codec string, parameter sets, colour) is compared with the first
+    segment's as it arrives; on a difference every lane stops, the attempt's file is thrown away, and the export runs
+    again with one lane, so no mixed file is ever kept. (Section 9 said "before writing anything": the first segment's
+    packets reach the attempt's file before the other lanes report, and that file is discarded; holding them instead
+    could hold a whole segment in memory when a later lane starts late.)
+  - **Warming a later lane.** Started cold at its segment, the processor's encoder made a later segment's first frame about
+    1.5 dB worse than one lane (Edge with no chip, 20 s fixture: 41.36 against 42.90 dB). A lane after the first now encodes
+    the two seconds before its segment first and drops those packets: the boundary frames then equal one lane's to 0.00 dB.
+- **The ladder (P-35; `lanes.ts`, `export.ts`, `export-plan.ts`).** A later segment whose lane fails is run again on the
+  lanes left (the last lane running takes it itself; twice at most); a failure of the first segment, a refused join, or
+  repeated failures end the attempt and the export runs again with a lane fewer; a drawing or BT.709 worker's failure runs it
+  again without that worker. After a step down, the next five exports on this device start at most at the lanes that
+  finished (`rememberExport`, kept beside the studio's preferences). The panel says «تعذّر التصدير المتوازي على هذا الجهاز،
+  فأُكمل بالطريقة المعتادة.» when an export finished a slower way. A renderer killed mid-segment is not covered: it ends the
+  page and the export with it, as it always did; resuming across it is outside this stage.
+- **Where lanes come from.** The panel asks `exportLanes()`: the device's measured plan (`scale.ts`, the D9 measurement for this
+  application, Chromium, chip, driver and switch), then the ladder's memory. With no measurement, in a browser or on a phone,
+  it is one lane: today's export. Drawing in workers is not turned on anywhere (P-07, decision (A)).
+- **One pass, several shapes (P-05; `shapes.ts`).** With more than one lane and two to four shapes ticked, as many shapes as
+  lanes are made together: each source decoded once (a shape moves where a clip sits, never which frame it shows), every
+  shape composed on its own canvas and encoded by its own encoder into its own file, the sound mixed once for all. Any
+  failure but a cancel makes the shapes again one after another, as before (`steps: ['ONE_PASS']`), so nothing is lost.
+- **Verified, numbers.** `npm run typecheck` clean; `npm test` 806 of 806. `qa/studio-lanes.cjs` with one lane (the floor),
+  two and three, the application started with `--disable-features=CalculateNativeWinOcclusion` and its window in front (a
+  covered window draws about once a second, Fork 2's finding); the times are with fingerprints and are not speed figures.
+  - **Edge 156, with and without its chip, 20 s at 1080p:** 16 of 16 (`qa/studio-lanes-1080-20s-edge.json`).
+  - **The application on the saving chip (AMD):**
+    - 20 s with the forced faults, 8 of 8: the guard refused a lane with another H.264 profile and one lane made the file;
+      a lane failing once mid-segment had its segment run again by the lanes left; the first segment's lane failing ran the
+      export again with two lanes; every file exact (`qa/studio-lanes-1080-20s-app-saving.json`).
+    - Ten minutes at 1080p, every one of the 18000 composed frames fingerprinted, 5 of 5: two and three lanes give one
+      lane's frames and structure (300 key frames); the frames at the boundaries 0.00 dB from one lane's at frame 9000, and
+      0.00, 0.00 and +0.04 dB at 6000 and 12000. 644, 656 and 695 s (28.0, 27.4 and 25.9 frames a second), the processor at
+      13 then 32%, 30 then 41%, 40 then 85% (`qa/studio-lanes-1080-600s-app-saving.json`).
+    - Ten minutes at 4K, 1368 frames fingerprinted (sampled, below), 5 of 5: frames and structure exact; boundary frames
+      0.00 dB at 9000, and 0.00, 0.00 and +0.01 dB at 6000 and 12000. 738, 610 and 589 s (24.4, 29.5 and 30.5 frames a
+      second), the processor at 54 then 85%, 40 then 31%, 73 then 14% (`qa/studio-lanes-2160-600s-app-saving.json`).
+  - **(the application on the strong chip and with no chip: to fill)**
+  - **The encoded bytes are not the same, and section 5.2 does not ask them to be.** On the AMD chip the files of one, two
+    and three lanes differ by some tens of kilobytes (1080p: 828,060,193, 828,040,925 and 828,060,326 bytes); four processor
+    encoders run at once for P-05 made two shapes' bits differ, the files 56.3 and 56.9 dB apart. In both, section 5.2's
+    first level (structure, exact) and second level (composed frames exactly equal on one machine for every knob setting)
+    hold; the encoded file is its third level, quality against its own frames, where byte-equality is not asked, as hardware
+    encoders do not give it (DT-06).
+  - **One pass, several shapes (`qa/studio-shapes-onepass.cjs`):** Edge with and without its chip 8 of 8, the saving chip 4 of 4;
+    every shape's composed frames and structure are its own export's; the packets are recorded (identical with a chip, as
+    above without one).
+- **Found and fixed on the way (a04d40c).** In the Edge run before the long ones, a first segment whose lane failed before its
+  encoder had described itself made the export run again with one lane instead of one fewer: the missing description was taken
+  for a refused join. A lane's own failure is now read before the descriptions are compared; Edge then passed 16 of 16.
+- **Deviations from `Desktop_Power_Ideas.md` section 9, with reasons (the manager's approval of 2026-11-04).**
+  - The 4K ten-minute fixture fingerprints every 15th composed frame and the 30 on each side of every boundary, not every
+    frame: fingerprinting every 4K frame would hold port 3000, which all forks share, for hours more.
+  - No ten-minute 4K run with no graphics chip: about 80 minutes for each lane count.
+  - The time ratios are of two-minute fixtures in a quiet window: ten-minute runs do not fit in one.
+- **Not verified, said plainly.**
+  - The application on the strong chip and with no chip: waiting for their turn on port 3000.
+  - The time ratio for each chip: waiting for its quiet window.
+  - A renderer killed mid-segment (above). Nothing signed in: the panel's lanes and one pass were not clicked through.
+- **Not done.** Nothing pushed.
