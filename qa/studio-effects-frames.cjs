@@ -99,7 +99,7 @@ async function runIn(page, reference) {
       ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu']],
       ['app-strong', { keepInTray: false, gpu: 'strong' }, []],
     ]) {
-      const { app, win } = await h.launchDev(`frames-${engine}`, { settings, args });
+      const { app, win, data } = await h.launchDev(`frames-${engine}`, { settings, args });
       try {
         await h.instrument(app);
         await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
@@ -108,6 +108,8 @@ async function runIn(page, reference) {
         runs[engine] = { engine: versions, ...(await runIn(win, false)) };
       } finally {
         await h.closeAll();
+        // the profile goes with its engine: the drive it lies on ran short (2026-11-04)
+        fs.rmSync(data, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
       }
     }
     for (const engine of ['app-software', 'app-strong']) {

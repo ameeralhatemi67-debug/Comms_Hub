@@ -135,7 +135,7 @@ const median = (xs) => {
         ['app-saving', { keepInTray: false, gpu: 'saving' }, [NO_OCCLUSION], true],
         ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu', NO_OCCLUSION], false],
       ]) {
-        const { app, win } = await h.launchDev(`profile-${engine}`, { settings, args });
+        const { app, win, data } = await h.launchDev(`profile-${engine}`, { settings, args });
         try {
           await h.instrument(app);
           await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
@@ -143,6 +143,8 @@ const median = (xs) => {
           runs[engine] = await profileIn(win, encode);
         } finally {
           await h.closeAll();
+          // the profile goes with its engine: the drive it lies on ran short (2026-11-04)
+          fs.rmSync(data, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
         }
       }
       check('the profile ran on the saving chip and with no chip', !!runs['app-saving'] && !!runs['app-software'], runs);
@@ -165,7 +167,7 @@ const median = (xs) => {
       ['app-strong', { keepInTray: false, gpu: 'strong' }, [NO_OCCLUSION]],
       ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu', NO_OCCLUSION]],
     ]) {
-      const { app, win } = await h.launchDev(`speed-${engine}`, { settings, args });
+      const { app, win, data } = await h.launchDev(`speed-${engine}`, { settings, args });
       try {
         await h.instrument(app);
         await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
@@ -174,6 +176,8 @@ const median = (xs) => {
         runs[engine] = { engine: versions, ...(await runIn(win)) };
       } finally {
         await h.closeAll();
+        // the profile goes with its engine: the drive it lies on ran short (2026-11-04)
+        fs.rmSync(data, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
       }
     }
     for (const [engine, r] of Object.entries(runs)) {
