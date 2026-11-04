@@ -3203,12 +3203,16 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     add a rounded frame length (`frameUs`, 33,333 µs at 30 frames a second) at each press. They now move by whole frames from the
     frame shown, to the start an export gives that frame (`time.ts` `stepFrames`, `frameStart`).
   - **Which frame a time shows** follows the export's rule (`frameShown`, a microsecond as `scrub.ts` `EPS`). A second is whole
-    frames: the rate, and 30 at 29.97. The editor's second keys add exactly one second, which keeps a frame start on its frame
-    at every project rate, so they are unchanged.
+    frames: the rate, and 30 at 29.97. The editor's second keys were first left adding a real second, which is exact at every
+    project rate. At 29.97 that lands mid-frame and a frame short of the button whose title shows the same key, so they now step
+    the same whole frames (`7364254`, the manager's follow-up of 2026-11-05).
   - `tests/studio-step.test.mjs`, 15 tests: 100 presses each way of a frame and of a second at 24, 25, 30, 29.97 and 60, each on
     its exact frame. With the old step put back, 9 of the 15 fail.
+  - Two more with the keys (`7364254`). Each step key, read from `editor.tsx`, lands where the stage button whose title names
+    that key lands, at the five rates and from seven starting times. With the old keys, or a key of `Math.floor(fps)` frames, it
+    fails.
   - `npm run typecheck` clean. The full `npm test` and `npm run build` waited for the manager's go (Fork 3 was building), and
-    were run after the check's rerun, with the time fix in (the last bullet of this entry).
+    were run after the check's rerun, with the time fix in (the suites bullet below).
   - Found after it: the transport's time still took its frame with `frameAt`, fixed in the next bullet.
 - **The transport's time reads the frame the stage shows** (`bae0e13`, approved by the manager on 2026-11-05).
   - **What changed.** `timecode` took its frame with `frameAt`. At 30 frames a second a start that rounds down (frames 1, 4, 7
@@ -3218,11 +3222,15 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - `tests/studio-timecode.test.mjs`, 10 tests: after n presses of «إطار للأمام» from 0, n = 0 to 100, at 24, 25, 30, 29.97
     and 60, the time reads frame n. With the old `timecode`, 7 of the 10 fail; 25 reads right either way, its frames being
     whole microseconds.
+  - **At 29.97 the time counts 30 frames to a second** (a timecode without dropped frames). So it reads behind the ruler's real
+    seconds by 0.1%: about 2 frames at the end of a 60 s video (00:59.28 at 60 s). This is accepted, not a fault. Projects offer
+    24, 25, 30 and 60 today (`schema.ts` `FPS_CHOICES`).
   - **The review player is unchanged.** It shows tenths of a second of its element's time (`review-keys.ts` `playerTime`), not
     frames, with 100 µs of room for a seek that lands early. A test holds that each of those frame starts shows its own tenth.
 - **The suites, at `bae0e13` with the rerun done** (2026-11-05, one after another): `npm run typecheck` clean (20 s);
   `npm test` **851 of 851** (00:44:25 to 00:44:38); `npm run build` passes, compiled in 22.0 s, 43 of 43 pages, no warning
-  (00:44:53 to 00:45:42).
+  (00:44:53 to 00:45:42). At `7364254`, the second keys in: `npm run typecheck` clean (00:49:28 to 00:49:40); `npm test`
+  **853 of 853** (00:49:41 to 00:49:56). The build and the qa checks were not run there; the manager runs them.
 - **The D10 checks' port lock** is `%LOCALAPPDATA%\Temp\comms-hub-port3000.lock` always (`9a3db90`, `qa/studio-d10.cjs`, the line
   Fork 1's branch has). With TEMP moved for a run's files, the lock followed TEMP, so two checks could each hold "the" lock.
 - **Not done.** Nothing pushed.
