@@ -3247,6 +3247,41 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - At `5453009` (the second keys in) with the fixed check: typecheck clean, `npm test` **853 of 853**, build passes, then
     `qa/studio-copy-swap.cjs` **18 of 18** (00:53:13 to 00:53:54). Windows did not change the limit during that run, so the
     new guard has not yet met a real change.
+- **The idle check's guard** (`59733bf`, the manager's item of 2026-11-05). `qa/desktop-idle.cjs` also replaced
+  `powerMonitor.emit`, which holds nothing back (above). It now wraps the application's speed-limit listeners.
+  - Held (`realLimits(false)`), only the check's own limits reach them, told 100 once. Let through (`realLimits(true)`),
+    Windows' changes reach them as before. The check's own 70 and 100 (`__sayLimit`) reach them either way.
+  - Windows' changes are recorded apart (`windowsLimits`, each held or let through); `speedLimits` is what the application heard.
+  - **Checked only off the port.** The check's own guard code was run against an `EventEmitter` whose native side calls a copy
+    of `emit` bound beforehand, as Electron's does. Held, Windows' 60 was kept out and the check's 100, 70 and 100 arrived; let
+    through, Windows' 80 arrived. The old guard let the 60 through.
+  - **The port run: 21 of 24** (`qa/desktop-idle.json`, 2026-11-05 02:02:39 to 02:20:13, 1054 s, at `2a62233`). It ran in the
+    manager's slot, relayed by Fork 4, on the development package (bridge 9), on Fork 3's corpus copied in (hashes equal, made
+    after the recipe's last change). TEMP was in `qa/artifacts/tmp`, and the shared lock was taken by me around the run, since
+    this check does not take it itself.
+  - **The guard held.** Windows changed the limit 85 times, from 35% to 78%. While held (18 to 55 s), all 29 of its changes
+    were kept out, and the application heard only the check's own 100. Let through from the simulated case on (55 s), they
+    reached the application, as the check intends. Its last change, at 138 s, was back to 100.
+  - **Passed:**
+    - the asked copy;
+    - a click (47 ms, on by itself 3.57 s after);
+    - «playing» (8 ms);
+    - the window's sound (33 ms);
+    - battery (9 ms);
+    - the simulated limit (7 ms, «throttled»);
+    - the still source stopped (1757 ms) and made again;
+    - the tray's words;
+    - a project that wants nothing;
+    - quitting.
+  - **Failed (3 rows), not caused by the guard:**
+    - **An export (busy):** paused in 11 ms with «export», but 1 s on the copy had advanced from 7.72 to 8.77 s, and 1.5 s
+      later it was waiting at 0. It was a grainy source. The record fits the worker's rule for a job that would not wait,
+      stopped and made again (`native-media.ts`, `why === 'held'`). No limit reached the application during that case.
+    - **Every light copy was made:** at the end the queue held one item, still-3's copy, ready, with nothing held, so the
+      wait ran out after 900 s. That is why the run took 17.5 minutes. The check throws away the answer of
+      `queueWith(1)`, so whether the application refused it is not known.
+    - **Each copy keeps every frame:** only 2 copies existed, the two stills. Both kept 750 of 750 frames in order.
+  - Not rerun, as instructed.
 - **Not done.** Nothing pushed.
 
 ### 2026-11-04: the studio says when this device is not measured, or its measurement is stale (Desktop Power, Fork 3, 63.6.1)

@@ -1,6 +1,6 @@
 {
   "script": "qa/desktop-idle.cjs",
-  "run": "2026-11-04T02:49:29.162Z",
+  "run": "2026-11-04T23:02:41.176Z",
   "version": "0.8.0",
   "checks": [
     {
@@ -11,97 +11,102 @@
     {
       "name": "the studio named its four video sources to the queue on its own, and the application found each needs a light copy here (4K, no profile)",
       "pass": true,
-      "detail": "{\"opened\":{\"names\":[\"grain-1.mp4\",\"grain-2.mp4\",\"still-3.mp4\",\"still-4.mp4\"],\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"width\":null},\"named\":{\"hold\":null,\"width\":1,\"items\":[{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fbe1befe212d8ade024766b581f0555c823936bf0-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fc12d8c4218d1c56813e56b8816a9ad630787974f-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null}]}}"
+      "detail": "{\"opened\":{\"names\":[\"grain-1.mp4\",\"grain-2.mp4\",\"still-3.mp4\",\"still-4.mp4\"],\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"width\":1},\"named\":{\"hold\":null,\"width\":1,\"items\":[{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fbe1befe212d8ade024766b581f0555c823936bf0-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fc12d8c4218d1c56813e56b8816a9ad630787974f-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null}]}}"
     },
     {
       "name": "a copy the person asks for is made at once and holds the copies made in idle time («asked»)",
       "pass": true,
-      "detail": "{\"during\":{\"hold\":\"asked\",\"states\":[\"paused\",\"waiting\",\"waiting\",\"waiting\"]},\"ms\":5680,\"after\":[\"waiting\",\"waiting\",\"waiting\",\"ready\"]}"
+      "detail": "{\"during\":{\"hold\":\"asked\",\"states\":[\"paused\",\"waiting\",\"waiting\",\"waiting\"]},\"ms\":5978,\"after\":[\"waiting\",\"waiting\",\"waiting\",\"ready\"]}"
     },
     {
-      "name": "a click: the running copy pauses within a second (11 ms), the hold is «input», and it makes no progress from a second on (4.608 s, then 4.608 s)",
+      "name": "a click: the running copy pauses within a second (47 ms), the hold is «input», and it makes no progress from a second on (5.312 s, then 5.312 s)",
       "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":1.237333,\"pausedMs\":11,\"hold\":\"input\",\"progressHeld\":[4.608,4.608],\"state\":\"paused\",\"resumedMs\":1060,\"sinceHold\":3588,\"after\":7.509333}"
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":3.370667,\"pausedMs\":47,\"hold\":\"input\",\"progressHeld\":[5.312,5.312],\"state\":\"paused\",\"resumedMs\":1039,\"sinceHold\":3565,\"after\":7.722667}"
     },
     {
-      "name": "a click: released, it goes on from where it was (1060 ms)",
+      "name": "a click: released, it goes on from where it was (1039 ms)",
       "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":1.237333,\"pausedMs\":11,\"hold\":\"input\",\"progressHeld\":[4.608,4.608],\"state\":\"paused\",\"resumedMs\":1060,\"sinceHold\":3588,\"after\":7.509333}"
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":3.370667,\"pausedMs\":47,\"hold\":\"input\",\"progressHeld\":[5.312,5.312],\"state\":\"paused\",\"resumedMs\":1039,\"sinceHold\":3565,\"after\":7.722667}"
     },
     {
-      "name": "a click holds only a few seconds: the copy goes on by itself 3588 ms after it (three seconds of quiet)",
+      "name": "a click holds only a few seconds: the copy goes on by itself 3565 ms after it (three seconds of quiet)",
       "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":1.237333,\"pausedMs\":11,\"hold\":\"input\",\"progressHeld\":[4.608,4.608],\"state\":\"paused\",\"resumedMs\":1060,\"sinceHold\":3588,\"after\":7.509333}"
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":3.370667,\"pausedMs\":47,\"hold\":\"input\",\"progressHeld\":[5.312,5.312],\"state\":\"paused\",\"resumedMs\":1039,\"sinceHold\":3565,\"after\":7.722667}"
     },
     {
-      "name": "an export (busy): the running copy pauses within a second (10 ms), the hold is «export», and it makes no progress from a second on (8.32 s, then 8.32 s)",
-      "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":7.509333,\"pausedMs\":10,\"hold\":\"export\",\"progressHeld\":[8.32,8.32],\"state\":\"paused\",\"resumedMs\":563,\"sinceHold\":3080,\"after\":10.794667}"
-    },
-    {
-      "name": "an export (busy): released, it goes on from where it was (563 ms)",
-      "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":7.509333,\"pausedMs\":10,\"hold\":\"export\",\"progressHeld\":[8.32,8.32],\"state\":\"paused\",\"resumedMs\":563,\"sinceHold\":3080,\"after\":10.794667}"
-    },
-    {
-      "name": "the page says «playing»: the running copy pauses within a second (8 ms), the hold is «playing», and it makes no progress from a second on (12.309333 s, then 12.309333 s)",
-      "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":10.794667,\"pausedMs\":8,\"hold\":\"playing\",\"progressHeld\":[12.309333,12.309333],\"state\":\"paused\",\"resumedMs\":575,\"sinceHold\":3097,\"after\":15.018667}"
-    },
-    {
-      "name": "the page says «playing»: released, it goes on from where it was (575 ms)",
-      "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":10.794667,\"pausedMs\":8,\"hold\":\"playing\",\"progressHeld\":[12.309333,12.309333],\"state\":\"paused\",\"resumedMs\":575,\"sinceHold\":3097,\"after\":15.018667}"
-    },
-    {
-      "name": "the window makes sound (the studio playing, not saying so): the running copy pauses within a second (22 ms), the hold is «playing», and it makes no progress from a second on (28.272 s, then 29.568 s)",
+      "name": "an export (busy): the running copy pauses within a second (11 ms), the hold is «export», and it makes no progress from a second on (8.768 s, then 0 s)",
       "pass": false,
-      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":15.018667,\"pausedMs\":22,\"hold\":\"playing\",\"progressHeld\":[28.272,29.568],\"state\":\"ready\",\"resumedMs\":4,\"sinceHold\":2530,\"after\":29.568}"
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":7.722667,\"pausedMs\":11,\"hold\":\"export\",\"progressHeld\":[8.768,0],\"state\":\"waiting\",\"resumedMs\":4315,\"sinceHold\":6838,\"after\":0.405333}"
     },
     {
-      "name": "the window makes sound (the studio playing, not saying so): released, it goes on from where it was (4 ms)",
+      "name": "an export (busy): released, it goes on from where it was (4315 ms)",
       "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":15.018667,\"pausedMs\":22,\"hold\":\"playing\",\"progressHeld\":[28.272,29.568],\"state\":\"ready\",\"resumedMs\":4,\"sinceHold\":2530,\"after\":29.568}"
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":7.722667,\"pausedMs\":11,\"hold\":\"export\",\"progressHeld\":[8.768,0],\"state\":\"waiting\",\"resumedMs\":4315,\"sinceHold\":6838,\"after\":0.405333}"
     },
     {
-      "name": "on battery (simulated in the main process): the running copy pauses within a second (11 ms), the hold is «battery», and it makes no progress from a second on (5.056 s, then 5.056 s)",
+      "name": "the page says «playing»: the running copy pauses within a second (8 ms), the hold is «playing», and it makes no progress from a second on (5.952 s, then 5.952 s)",
       "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>0-720-r1-ff902.mp4\",\"at\":2.645334,\"pausedMs\":11,\"hold\":\"battery\",\"progressHeld\":[5.056,5.056],\"state\":\"paused\",\"resumedMs\":448,\"sinceHold\":2968,\"after\":7.616}"
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":3.669333,\"pausedMs\":8,\"hold\":\"playing\",\"progressHeld\":[5.952,5.952],\"state\":\"paused\",\"resumedMs\":493,\"sinceHold\":3015,\"after\":8.469333}"
     },
     {
-      "name": "on battery (simulated in the main process): released, it goes on from where it was (448 ms)",
+      "name": "the page says «playing»: released, it goes on from where it was (493 ms)",
       "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>0-720-r1-ff902.mp4\",\"at\":2.645334,\"pausedMs\":11,\"hold\":\"battery\",\"progressHeld\":[5.056,5.056],\"state\":\"paused\",\"resumedMs\":448,\"sinceHold\":2968,\"after\":7.616}"
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":3.669333,\"pausedMs\":8,\"hold\":\"playing\",\"progressHeld\":[5.952,5.952],\"state\":\"paused\",\"resumedMs\":493,\"sinceHold\":3015,\"after\":8.469333}"
     },
     {
-      "name": "Windows lowers the processor's speed limit (simulated): the running copy pauses within a second (6 ms), the hold is «throttled», and it makes no progress from a second on (8.64 s, then 8.64 s)",
+      "name": "the window makes sound (a steady tone; the page says nothing): the running copy pauses within a second (33 ms), the hold is «playing», and it makes no progress from a second on (15.317333 s, then 15.317333 s)",
       "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>0-720-r1-ff902.mp4\",\"at\":7.616,\"pausedMs\":6,\"hold\":\"throttled\",\"progressHeld\":[8.64,8.64],\"state\":\"paused\",\"resumedMs\":74,\"sinceHold\":2599,\"after\":9.130667}"
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":8.469333,\"pausedMs\":33,\"hold\":\"playing\",\"progressHeld\":[15.317333,15.317333],\"state\":\"paused\",\"resumedMs\":3334,\"sinceHold\":5863,\"after\":17.408}"
     },
     {
-      "name": "Windows lowers the processor's speed limit (simulated): released, it goes on from where it was (74 ms)",
+      "name": "the window makes sound (a steady tone; the page says nothing): released, it goes on from where it was (3334 ms)",
       "pass": true,
-      "detail": "{\"name\":\"proxy-<fingerprint>0-720-r1-ff902.mp4\",\"at\":7.616,\"pausedMs\":6,\"hold\":\"throttled\",\"progressHeld\":[8.64,8.64],\"state\":\"paused\",\"resumedMs\":74,\"sinceHold\":2599,\"after\":9.130667}"
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":8.469333,\"pausedMs\":33,\"hold\":\"playing\",\"progressHeld\":[15.317333,15.317333],\"state\":\"paused\",\"resumedMs\":3334,\"sinceHold\":5863,\"after\":17.408}"
     },
     {
-      "name": "a copy of a still source, which FFmpeg had read whole, is stopped when held (1760 ms), no FFmpeg left and no part file, and made again once released",
+      "name": "the studio's player playing with sound makes the window heard",
       "pass": true,
-      "detail": "{\"at\":3.989333,\"stoppedMs\":1760,\"left\":0,\"meanwhile\":{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},\"again\":{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":0,\"total\":30,\"why\":null}}"
+      "detail": "[{\"at\":1793833410131,\"audible\":true},{\"at\":1793833410521,\"audible\":false},{\"at\":1793833410831,\"audible\":true},{\"at\":1793833411143,\"audible\":false},{\"at\":1793833411844,\"audible\":true},{\"at\":1793833412156,\"audible\":false},{\"at\":1793833412776,\"audible\":true},{\"at\":1793833413164,\"audible\":false}]"
+    },
+    {
+      "name": "on battery (simulated in the main process): the running copy pauses within a second (9 ms), the hold is «battery», and it makes no progress from a second on (19.285333 s, then 19.285333 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":18.24,\"pausedMs\":9,\"hold\":\"battery\",\"progressHeld\":[19.285333,19.285333],\"state\":\"paused\",\"resumedMs\":199,\"sinceHold\":2722,\"after\":20.202667}"
+    },
+    {
+      "name": "on battery (simulated in the main process): released, it goes on from where it was (199 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":18.24,\"pausedMs\":9,\"hold\":\"battery\",\"progressHeld\":[19.285333,19.285333],\"state\":\"paused\",\"resumedMs\":199,\"sinceHold\":2722,\"after\":20.202667}"
+    },
+    {
+      "name": "Windows lowers the processor's speed limit (simulated): the running copy pauses within a second (7 ms), the hold is «throttled», and it makes no progress from a second on (21.077333 s, then 21.077333 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":20.202667,\"pausedMs\":7,\"hold\":\"throttled\",\"progressHeld\":[21.077333,21.077333],\"state\":\"paused\",\"resumedMs\":557,\"sinceHold\":3082,\"after\":23.317333}"
+    },
+    {
+      "name": "Windows lowers the processor's speed limit (simulated): released, it goes on from where it was (557 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":20.202667,\"pausedMs\":7,\"hold\":\"throttled\",\"progressHeld\":[21.077333,21.077333],\"state\":\"paused\",\"resumedMs\":557,\"sinceHold\":3082,\"after\":23.317333}"
+    },
+    {
+      "name": "a copy of a still source, which FFmpeg had read whole, is stopped when held (1757 ms), no FFmpeg left and no part file, and made again once released",
+      "pass": true,
+      "detail": "{\"at\":3.946667,\"stoppedMs\":1757,\"left\":0,\"meanwhile\":{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},\"again\":{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":0,\"total\":30,\"why\":null}}"
     },
     {
       "name": "every light copy was made",
-      "pass": true,
-      "detail": "{\"hold\":null,\"width\":1,\"items\":[{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":29.525333,\"total\":30,\"why\":null},{\"name\":\"proxy-fbe1befe212d8ade024766b581f0555c823936bf0-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":29.525333,\"total\":30,\"why\":null},{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":27.157334,\"total\":30,\"why\":null},{\"name\":\"proxy-fc12d8c4218d1c56813e56b8816a9ad630787974f-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":0,\"total\":0,\"why\":null}]}"
+      "pass": false,
+      "detail": "{\"hold\":null,\"width\":1,\"items\":[{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":27.157333,\"total\":30,\"why\":null}]}"
     },
     {
       "name": "the tray says what is being made in idle time, and why it waits when it does",
       "pass": true,
-      "detail": "[\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: 3 تنتظر حتى يعود المعالج إلى سرعته\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 3 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 2 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 1 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: 1 تنتظر حتى يعود المعالج إلى سرعته\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 1 في وقت فراغ الجهاز\"]"
+      "detail": "[\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 1 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: 1 تنتظر انتهاء التشغيل\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 1 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 4 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 3 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 2 في وقت فراغ الجهاز\"]"
     },
     {
-      "name": "each of the 4 copies keeps every frame of its source, in order (750 frames)",
-      "pass": true,
-      "detail": "[{\"frames\":750,\"wrong\":0},{\"frames\":750,\"wrong\":0},{\"frames\":750,\"wrong\":0},{\"frames\":750,\"wrong\":0}]"
+      "name": "each of the 2 copies keeps every frame of its source, in order (750 frames)",
+      "pass": false,
+      "detail": "[{\"frames\":750,\"wrong\":0},{\"frames\":750,\"wrong\":0}]"
     },
     {
       "name": "no part file is left in the folder",
@@ -111,36 +116,20 @@
     {
       "name": "a project that wants nothing any more stops its copy: no FFmpeg running and no part file a moment later",
       "pass": true,
-      "detail": "{\"again\":{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":1.664,\"total\":30,\"why\":null},\"partWhile\":[\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4.part\"],\"ffWhile\":1,\"now\":0,\"parts\":[],\"items\":0}"
-    },
-    {
-      "name": "width 1: the stage's 95th-percentile frame time while copies wait is that of a stage with nothing to make (median 50.1 ms against 49.9 ms, within 10%; a copy running: 33.3 ms)",
-      "pass": true,
-      "detail": "{\"load\":[{\"label\":\"before\",\"percent\":16},{\"label\":\"nothing to make\",\"percent\":20},{\"label\":\"round 1: nothing to make\",\"percent\":16},{\"label\":\"round 1: copies at width 1, held\",\"percent\":99},{\"label\":\"round 1: copies at width 3, held\",\"percent\":100},{\"label\":\"round 1: a copy running (contrast)\",\"percent\":96},{\"label\":\"round 2: nothing to make\",\"percent\":34},{\"label\":\"round 2: copies at width 1, held\",\"percent\":100},{\"label\":\"round 2: copies at width 3, held\",\"percent\":100},{\"label\":\"round 2: a copy running (contrast)\",\"percent\":100},{\"label\":\"round 3: nothing to make\",\"percent\":24},{\"label\":\"round 3: copies at width 1, held\",\"percent\":97},{\"label\":\"round 3: copies at width 3, held\",\"percent\":100},{\"label\":\"round 3: a copy running (contrast)\",\"percent\":96},{\"label\":\"after the rounds\",\"percent\":43}],\"rounds\":[{\"round\":1,\"nothing\":{\"frames\":284,\"p50\":16.7,\"p95\":50.2,\"max\":133.3,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.35}},\"held1\":{\"frames\":271,\"p50\":16.7,\"p95\":66.7,\"max\":217,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.44},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":295,\"p50\":16.7,\"p95\":50.1,\"max\":100.1,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.42},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":343,\"p50\":16.7,\"p95\":33.3,\"max\":116.7,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.41},\"states\":[\"running\",\"waiting\",\"waiting\",\"ready\"]}},{\"round\":2,\"nothing\":{\"frames\":330,\"p50\":16.7,\"p95\":49.9,\"max\":99.5,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.4}},\"held1\":{\"frames\":284,\"p50\":16.7,\"p95\":50.1,\"max\":83.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.44},\"states\":[\"running\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":262,\"p50\":16.7,\"p95\":66.7,\"max\":116.8,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.4},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":361,\"p50\":16.7,\"p95\":16.8,\"max\":83.5,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.34},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]}},{\"round\":3,\"nothing\":{\"frames\":317,\"p50\":16.7,\"p95\":49.9,\"max\":233.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.41}},\"held1\":{\"frames\":374,\"p50\":16.7,\"p95\":16.8,\"max\":66.7,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.47},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":356,\"p50\":16.7,\"p95\":16.9,\"max\":83.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.45},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":343,\"p50\":16.7,\"p95\":33.3,\"max\":83.5,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.4},\"states\":[\"ready\",\"running\",\"waiting\",\"ready\"]}}],\"medians\":{\"nothing\":49.9,\"held1\":50.1,\"held3\":50.1,\"running\":33.3}}"
-    },
-    {
-      "name": "width 3: the stage's 95th-percentile frame time while copies wait is that of a stage with nothing to make (median 50.1 ms against 49.9 ms, within 10%; a copy running: 33.3 ms)",
-      "pass": true,
-      "detail": "{\"load\":[{\"label\":\"before\",\"percent\":16},{\"label\":\"nothing to make\",\"percent\":20},{\"label\":\"round 1: nothing to make\",\"percent\":16},{\"label\":\"round 1: copies at width 1, held\",\"percent\":99},{\"label\":\"round 1: copies at width 3, held\",\"percent\":100},{\"label\":\"round 1: a copy running (contrast)\",\"percent\":96},{\"label\":\"round 2: nothing to make\",\"percent\":34},{\"label\":\"round 2: copies at width 1, held\",\"percent\":100},{\"label\":\"round 2: copies at width 3, held\",\"percent\":100},{\"label\":\"round 2: a copy running (contrast)\",\"percent\":100},{\"label\":\"round 3: nothing to make\",\"percent\":24},{\"label\":\"round 3: copies at width 1, held\",\"percent\":97},{\"label\":\"round 3: copies at width 3, held\",\"percent\":100},{\"label\":\"round 3: a copy running (contrast)\",\"percent\":96},{\"label\":\"after the rounds\",\"percent\":43}],\"rounds\":[{\"round\":1,\"nothing\":{\"frames\":284,\"p50\":16.7,\"p95\":50.2,\"max\":133.3,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.35}},\"held1\":{\"frames\":271,\"p50\":16.7,\"p95\":66.7,\"max\":217,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.44},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":295,\"p50\":16.7,\"p95\":50.1,\"max\":100.1,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.42},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":343,\"p50\":16.7,\"p95\":33.3,\"max\":116.7,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.41},\"states\":[\"running\",\"waiting\",\"waiting\",\"ready\"]}},{\"round\":2,\"nothing\":{\"frames\":330,\"p50\":16.7,\"p95\":49.9,\"max\":99.5,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.4}},\"held1\":{\"frames\":284,\"p50\":16.7,\"p95\":50.1,\"max\":83.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.44},\"states\":[\"running\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":262,\"p50\":16.7,\"p95\":66.7,\"max\":116.8,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.4},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":361,\"p50\":16.7,\"p95\":16.8,\"max\":83.5,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.34},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]}},{\"round\":3,\"nothing\":{\"frames\":317,\"p50\":16.7,\"p95\":49.9,\"max\":233.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.41}},\"held1\":{\"frames\":374,\"p50\":16.7,\"p95\":16.8,\"max\":66.7,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.47},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":356,\"p50\":16.7,\"p95\":16.9,\"max\":83.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.45},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":343,\"p50\":16.7,\"p95\":33.3,\"max\":83.5,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.4},\"states\":[\"ready\",\"running\",\"waiting\",\"ready\"]}}],\"medians\":{\"nothing\":49.9,\"held1\":50.1,\"held3\":50.1,\"running\":33.3}}"
-    },
-    {
-      "name": "every width made every copy",
-      "pass": true,
-      "detail": "{\"1\":{\"ms\":30433,\"loadBefore\":18,\"loadAfter\":5,\"done\":true},\"2\":{\"ms\":33635,\"loadBefore\":9,\"loadAfter\":19,\"done\":true},\"3\":{\"ms\":28852,\"loadBefore\":12,\"loadAfter\":8,\"done\":true}}"
+      "detail": "{\"again\":{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":3.434667,\"total\":30,\"why\":null},\"partWhile\":[\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4.part\"],\"ffWhile\":1,\"now\":0,\"parts\":[],\"items\":0}"
     },
     {
       "name": "quitting while a copy is made in idle time leaves no FFmpeg running, and the next start removes its part file",
       "pass": true,
-      "detail": "{\"long\":{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":2.858667,\"total\":30,\"why\":null},\"partQuit\":[\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4.part\"],\"ffAfter\":0,\"parts\":[]}"
+      "detail": "{\"long\":{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":3.114667,\"total\":30,\"why\":null},\"partQuit\":[\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4.part\"],\"ffAfter\":0,\"parts\":[]}"
     }
   ],
   "notes": [
     "The corpus (four 4K H.264 sources of 30 s at 25 frames a second, each with its frame numbers; megabytes {\"grain-1.mp4\":140.4,\"grain-2.mp4\":140.4,\"still-3.mp4\":0.8,\"still-4.mp4\":0.8}) took 0 s to make or was kept.",
-    "While the studio played with sound the window was heard: [true,false]; the playing element: {\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.43}.",
-    "The copies, by source: {\"proxy-<fingerprint>3-720-r1-ff902.mp4\":\"grain-1.mp4\",\"proxy-<fingerprint>0-720-r1-ff902.mp4\":\"grain-2.mp4\",\"proxy-<fingerprint>f-720-r1-ff902.mp4\":\"still-4.mp4\",\"proxy-<fingerprint>1-720-r1-ff902.mp4\":\"still-3.mp4\"}",
-    "The stage's 95th-percentile frame time, median of three 8 s plays each: nothing to make 49.9 ms, copies held at width 1 50.1 ms and at width 3 50.1 ms, a copy running 33.3 ms; every play: [[50.2,66.7,50.1,33.3],[49.9,50.1,66.7,16.8],[49.9,16.8,16.9,33.3]].",
-    "Time to make the copies not in use (30 s of 4K each), one, two and three at a time: {\"1\":{\"ms\":30433,\"loadBefore\":18,\"loadAfter\":5,\"done\":true},\"2\":{\"ms\":33635,\"loadBefore\":9,\"loadAfter\":19,\"done\":true},\"3\":{\"ms\":28852,\"loadBefore\":12,\"loadAfter\":8,\"done\":true}}",
-    "Windows' speed limit for the processor during the run, as the application heard it: [45,46,45,47,52,55,100,100,41,42,41,100,70,100,49,50,51,100,47,45,44,100,47,100,52,100,55,56,58,59,56,52,54,57,56,54,52,54,52,53,58,100,48,49,47,49,53,58,61,62,63,65,67,70,100,45,48,52,56,60,100,100,46,50,55,100,70,67,66,67,100,66,63,62,63,62,100,45,49,50,51,52,56,62,100,100,47,48,46,52,53,58,63,65,69,73,72,73,72,70,66,100,61,60,56,59,60,66,68,100,100,42,43,100,100,36,34,100,51,52,53,57,100,35,34,38,42,46,100,60,100,37,100,41,44,100]."
+    "The tone was heard: [true,false]. The studio's player, playing with sound, was heard too: [true,false,true,false,true,false,true,false]; its element {\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.49}.",
+    "The copies, by source: {\"proxy-<fingerprint>f-720-r1-ff902.mp4\":\"still-4.mp4\",\"proxy-<fingerprint>1-720-r1-ff902.mp4\":\"still-3.mp4\"}",
+    "Speed figures not taken (run with --speed in a quiet window).",
+    "The processor's speed limit as the application heard it (its listeners wrapped: 1):[\"42 (Windows)\",\"41 (Windows)\",100,70,\"50 (Windows)\",\"49 (Windows)\",\"48 (Windows)\",100,\"49 (Windows)\",\"50 (Windows)\",\"54 (Windows)\",\"56 (Windows)\",\"57 (Windows)\",\"54 (Windows)\",\"53 (Windows)\",\"51 (Windows)\",\"53 (Windows)\",\"52 (Windows)\",\"51 (Windows)\",\"53 (Windows)\",\"56 (Windows)\",\"57 (Windows)\",\"60 (Windows)\",\"62 (Windows)\",\"65 (Windows)\",\"67 (Windows)\",\"68 (Windows)\",\"67 (Windows)\",\"64 (Windows)\",\"61 (Windows)\",\"62 (Windows)\",\"63 (Windows)\",\"64 (Windows)\",\"69 (Windows)\",\"73 (Windows)\",\"76 (Windows)\",\"78 (Windows)\",\"74 (Windows)\",\"73 (Windows)\",\"72 (Windows)\",\"71 (Windows)\",\"69 (Windows)\",\"64 (Windows)\",\"61 (Windows)\",\"59 (Windows)\",\"57 (Windows)\",\"60 (Windows)\",\"64 (Windows)\",\"69 (Windows)\",\"71 (Windows)\",\"72 (Windows)\",\"74 (Windows)\",\"73 (Windows)\",\"75 (Windows)\",\"100 (Windows)\",\"42 (Windows)\",\"47 (Windows)\",\"52 (Windows)\",\"100 (Windows)\"]. Windows changed the limit 85 times during the run (42, let through; 41, let through; 38, held; 37, held; 35, held; 36, held; 38, held; 41, held; 46, held; 47, held; 46, held; 45, held; 48, held; 51, held; 53, held; 54, held; 50, held; 45, held; 47, held; 51, held; 48, held; 50, held; 51, held; 53, held; 56, held; 59, held; 55, held; 54, held; 56, held; 53, held; 52, held; 50, let through; 49, let through; 48, let through; 49, let through; 50, let through; 54, let through; 56, let through; 57, let through; 54, let through; 53, let through; 51, let through; 53, let through; 52, let through; 51, let through; 53, let through; 56, let through; 57, let through; 60, let through; 62, let through; 65, let through; 67, let through; 68, let through; 67, let through; 64, let through; 61, let through; 62, let through; 63, let through; 64, let through; 69, let through; 73, let through; 76, let through; 78, let through; 74, let through; 73, let through; 72, let through; 71, let through; 69, let through; 64, let through; 61, let through; 59, let through; 57, let through; 60, let through; 64, let through; 69, let through; 71, let through; 72, let through; 74, let through; 73, let through; 75, let through; 100, let through; 42, let through; 47, let through; 52, let through; 100, let through)."
   ],
   "corpus": {
     "grain-1.mp4": 140.4,
@@ -148,6 +137,7 @@
     "still-3.mp4": 0.8,
     "still-4.mp4": 0.8
   },
+  "limitListeners": 1,
   "opened": {
     "names": [
       "grain-1.mp4",
@@ -169,120 +159,154 @@
         "kind": "ready"
       }
     ],
-    "width": null
+    "width": 1
   },
   "holds": {
     "a click": {
       "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
-      "at": 1.237333,
-      "pausedMs": 11,
+      "at": 3.370667,
+      "pausedMs": 47,
       "hold": "input",
       "progressHeld": [
-        4.608,
-        4.608
+        5.312,
+        5.312
       ],
       "state": "paused",
-      "resumedMs": 1060,
-      "sinceHold": 3588,
-      "after": 7.509333
+      "resumedMs": 1039,
+      "sinceHold": 3565,
+      "after": 7.722667
     },
     "an export (busy)": {
       "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
-      "at": 7.509333,
-      "pausedMs": 10,
+      "at": 7.722667,
+      "pausedMs": 11,
       "hold": "export",
       "progressHeld": [
-        8.32,
-        8.32
+        8.768,
+        0
       ],
-      "state": "paused",
-      "resumedMs": 563,
-      "sinceHold": 3080,
-      "after": 10.794667
+      "state": "waiting",
+      "resumedMs": 4315,
+      "sinceHold": 6838,
+      "after": 0.405333
     },
     "the page says «playing»": {
       "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
-      "at": 10.794667,
+      "at": 3.669333,
       "pausedMs": 8,
       "hold": "playing",
       "progressHeld": [
-        12.309333,
-        12.309333
+        5.952,
+        5.952
       ],
       "state": "paused",
-      "resumedMs": 575,
-      "sinceHold": 3097,
-      "after": 15.018667
+      "resumedMs": 493,
+      "sinceHold": 3015,
+      "after": 8.469333
     },
-    "the window makes sound (the studio playing, not saying so)": {
+    "the window makes sound (a steady tone; the page says nothing)": {
       "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
-      "at": 15.018667,
-      "pausedMs": 22,
+      "at": 8.469333,
+      "pausedMs": 33,
       "hold": "playing",
       "progressHeld": [
-        28.272,
-        29.568
+        15.317333,
+        15.317333
       ],
-      "state": "ready",
-      "resumedMs": 4,
-      "sinceHold": 2530,
-      "after": 29.568
+      "state": "paused",
+      "resumedMs": 3334,
+      "sinceHold": 5863,
+      "after": 17.408
     },
     "on battery (simulated in the main process)": {
-      "name": "proxy-<fingerprint>0-720-r1-ff902.mp4",
-      "at": 2.645334,
-      "pausedMs": 11,
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 18.24,
+      "pausedMs": 9,
       "hold": "battery",
       "progressHeld": [
-        5.056,
-        5.056
+        19.285333,
+        19.285333
       ],
       "state": "paused",
-      "resumedMs": 448,
-      "sinceHold": 2968,
-      "after": 7.616
+      "resumedMs": 199,
+      "sinceHold": 2722,
+      "after": 20.202667
     },
     "Windows lowers the processor's speed limit (simulated)": {
-      "name": "proxy-<fingerprint>0-720-r1-ff902.mp4",
-      "at": 7.616,
-      "pausedMs": 6,
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 20.202667,
+      "pausedMs": 7,
       "hold": "throttled",
       "progressHeld": [
-        8.64,
-        8.64
+        21.077333,
+        21.077333
       ],
       "state": "paused",
-      "resumedMs": 74,
-      "sinceHold": 2599,
-      "after": 9.130667
+      "resumedMs": 557,
+      "sinceHold": 3082,
+      "after": 23.317333
     }
   },
+  "audible": [
+    {
+      "at": 1793833403754,
+      "audible": true
+    },
+    {
+      "at": 1793833409115,
+      "audible": false
+    }
+  ],
   "soundPlay": {
-    "frames": 215,
+    "frames": 104,
     "p50": 16.7,
-    "p95": 50,
+    "p95": 66.7,
     "max": 83.5,
     "element": {
       "paused": false,
       "muted": false,
       "volume": 1,
       "readyState": 1,
-      "time": 1.43
+      "time": 1.49
     }
   },
-  "audible": [
+  "playerAudible": [
     {
-      "at": 1793760608045,
+      "at": 1793833410131,
       "audible": true
     },
     {
-      "at": 1793760608356,
+      "at": 1793833410521,
+      "audible": false
+    },
+    {
+      "at": 1793833410831,
+      "audible": true
+    },
+    {
+      "at": 1793833411143,
+      "audible": false
+    },
+    {
+      "at": 1793833411844,
+      "audible": true
+    },
+    {
+      "at": 1793833412156,
+      "audible": false
+    },
+    {
+      "at": 1793833412776,
+      "audible": true
+    },
+    {
+      "at": 1793833413164,
       "audible": false
     }
   ],
   "readAhead": {
-    "at": 3.989333,
-    "stoppedMs": 1760,
+    "at": 3.946667,
+    "stoppedMs": 1757,
     "left": 0,
     "meanwhile": {
       "name": "proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4",
@@ -299,864 +323,731 @@
       "why": null
     }
   },
-  "speed": {
-    "load": [
-      {
-        "label": "before",
-        "percent": 16
-      },
-      {
-        "label": "nothing to make",
-        "percent": 20
-      },
-      {
-        "label": "round 1: nothing to make",
-        "percent": 16
-      },
-      {
-        "label": "round 1: copies at width 1, held",
-        "percent": 99
-      },
-      {
-        "label": "round 1: copies at width 3, held",
-        "percent": 100
-      },
-      {
-        "label": "round 1: a copy running (contrast)",
-        "percent": 96
-      },
-      {
-        "label": "round 2: nothing to make",
-        "percent": 34
-      },
-      {
-        "label": "round 2: copies at width 1, held",
-        "percent": 100
-      },
-      {
-        "label": "round 2: copies at width 3, held",
-        "percent": 100
-      },
-      {
-        "label": "round 2: a copy running (contrast)",
-        "percent": 100
-      },
-      {
-        "label": "round 3: nothing to make",
-        "percent": 24
-      },
-      {
-        "label": "round 3: copies at width 1, held",
-        "percent": 97
-      },
-      {
-        "label": "round 3: copies at width 3, held",
-        "percent": 100
-      },
-      {
-        "label": "round 3: a copy running (contrast)",
-        "percent": 96
-      },
-      {
-        "label": "after the rounds",
-        "percent": 43
-      }
-    ],
-    "rounds": [
-      {
-        "round": 1,
-        "nothing": {
-          "frames": 284,
-          "p50": 16.7,
-          "p95": 50.2,
-          "max": 133.3,
-          "element": {
-            "paused": false,
-            "muted": false,
-            "volume": 1,
-            "readyState": 1,
-            "time": 1.35
-          }
-        },
-        "held1": {
-          "frames": 271,
-          "p50": 16.7,
-          "p95": 66.7,
-          "max": 217,
-          "element": {
-            "paused": false,
-            "muted": false,
-            "volume": 1,
-            "readyState": 1,
-            "time": 1.44
-          },
-          "states": [
-            "paused",
-            "waiting",
-            "waiting",
-            "ready"
-          ]
-        },
-        "held3": {
-          "frames": 295,
-          "p50": 16.7,
-          "p95": 50.1,
-          "max": 100.1,
-          "element": {
-            "paused": false,
-            "muted": false,
-            "volume": 1,
-            "readyState": 1,
-            "time": 1.42
-          },
-          "states": [
-            "paused",
-            "paused",
-            "waiting",
-            "ready"
-          ]
-        },
-        "running": {
-          "frames": 343,
-          "p50": 16.7,
-          "p95": 33.3,
-          "max": 116.7,
-          "element": {
-            "paused": false,
-            "muted": true,
-            "volume": 0,
-            "readyState": 1,
-            "time": 1.41
-          },
-          "states": [
-            "running",
-            "waiting",
-            "waiting",
-            "ready"
-          ]
-        }
-      },
-      {
-        "round": 2,
-        "nothing": {
-          "frames": 330,
-          "p50": 16.7,
-          "p95": 49.9,
-          "max": 99.5,
-          "element": {
-            "paused": false,
-            "muted": false,
-            "volume": 1,
-            "readyState": 1,
-            "time": 1.4
-          }
-        },
-        "held1": {
-          "frames": 284,
-          "p50": 16.7,
-          "p95": 50.1,
-          "max": 83.4,
-          "element": {
-            "paused": false,
-            "muted": false,
-            "volume": 1,
-            "readyState": 1,
-            "time": 1.44
-          },
-          "states": [
-            "running",
-            "waiting",
-            "waiting",
-            "ready"
-          ]
-        },
-        "held3": {
-          "frames": 262,
-          "p50": 16.7,
-          "p95": 66.7,
-          "max": 116.8,
-          "element": {
-            "paused": false,
-            "muted": false,
-            "volume": 1,
-            "readyState": 1,
-            "time": 1.4
-          },
-          "states": [
-            "paused",
-            "paused",
-            "waiting",
-            "ready"
-          ]
-        },
-        "running": {
-          "frames": 361,
-          "p50": 16.7,
-          "p95": 16.8,
-          "max": 83.5,
-          "element": {
-            "paused": false,
-            "muted": true,
-            "volume": 0,
-            "readyState": 1,
-            "time": 1.34
-          },
-          "states": [
-            "paused",
-            "waiting",
-            "waiting",
-            "ready"
-          ]
-        }
-      },
-      {
-        "round": 3,
-        "nothing": {
-          "frames": 317,
-          "p50": 16.7,
-          "p95": 49.9,
-          "max": 233.4,
-          "element": {
-            "paused": false,
-            "muted": false,
-            "volume": 1,
-            "readyState": 1,
-            "time": 1.41
-          }
-        },
-        "held1": {
-          "frames": 374,
-          "p50": 16.7,
-          "p95": 16.8,
-          "max": 66.7,
-          "element": {
-            "paused": false,
-            "muted": false,
-            "volume": 1,
-            "readyState": 1,
-            "time": 1.47
-          },
-          "states": [
-            "paused",
-            "waiting",
-            "waiting",
-            "ready"
-          ]
-        },
-        "held3": {
-          "frames": 356,
-          "p50": 16.7,
-          "p95": 16.9,
-          "max": 83.4,
-          "element": {
-            "paused": false,
-            "muted": false,
-            "volume": 1,
-            "readyState": 1,
-            "time": 1.45
-          },
-          "states": [
-            "paused",
-            "paused",
-            "waiting",
-            "ready"
-          ]
-        },
-        "running": {
-          "frames": 343,
-          "p50": 16.7,
-          "p95": 33.3,
-          "max": 83.5,
-          "element": {
-            "paused": false,
-            "muted": true,
-            "volume": 0,
-            "readyState": 1,
-            "time": 1.4
-          },
-          "states": [
-            "ready",
-            "running",
-            "waiting",
-            "ready"
-          ]
-        }
-      }
-    ],
-    "medians": {
-      "nothing": 49.9,
-      "held1": 50.1,
-      "held3": 50.1,
-      "running": 33.3
-    },
-    "widths": {
-      "1": {
-        "ms": 30433,
-        "loadBefore": 18,
-        "loadAfter": 5,
-        "done": true
-      },
-      "2": {
-        "ms": 33635,
-        "loadBefore": 9,
-        "loadAfter": 19,
-        "done": true
-      },
-      "3": {
-        "ms": 28852,
-        "loadBefore": 12,
-        "loadAfter": 8,
-        "done": true
-      }
-    }
-  },
   "speedLimits": [
     {
-      "at": 1793760579752,
-      "limit": 45
+      "at": 1793833375437,
+      "limit": 42,
+      "ours": false
     },
     {
-      "at": 1793760582785,
-      "limit": 46
+      "at": 1793833376443,
+      "limit": 41,
+      "ours": false
     },
     {
-      "at": 1793760584810,
-      "limit": 45
+      "at": 1793833379390,
+      "limit": 100,
+      "ours": true
     },
     {
-      "at": 1793760585823,
-      "limit": 47
+      "at": 1793833416405,
+      "limit": 70,
+      "ours": true
     },
     {
-      "at": 1793760586824,
-      "limit": 52
+      "at": 1793833416850,
+      "limit": 50,
+      "ours": false
     },
     {
-      "at": 1793760587837,
-      "limit": 55
+      "at": 1793833417863,
+      "limit": 49,
+      "ours": false
     },
     {
-      "at": 1793760588852,
-      "limit": 100
+      "at": 1793833418874,
+      "limit": 48,
+      "ours": false
     },
     {
-      "at": 1793760603936,
-      "limit": 100
+      "at": 1793833418930,
+      "limit": 100,
+      "ours": true
     },
     {
-      "at": 1793760610067,
-      "limit": 41
+      "at": 1793833419888,
+      "limit": 49,
+      "ours": false
     },
     {
-      "at": 1793760611082,
-      "limit": 42
+      "at": 1793833420900,
+      "limit": 50,
+      "ours": false
     },
     {
-      "at": 1793760612093,
-      "limit": 41
+      "at": 1793833422920,
+      "limit": 54,
+      "ours": false
     },
     {
-      "at": 1793760614096,
-      "limit": 100
+      "at": 1793833423932,
+      "limit": 56,
+      "ours": false
     },
     {
-      "at": 1793760620132,
-      "limit": 70
+      "at": 1793833424945,
+      "limit": 57,
+      "ours": false
     },
     {
-      "at": 1793760622656,
-      "limit": 100
+      "at": 1793833425958,
+      "limit": 54,
+      "ours": false
     },
     {
-      "at": 1793760629248,
-      "limit": 49
+      "at": 1793833426973,
+      "limit": 53,
+      "ours": false
     },
     {
-      "at": 1793760631275,
-      "limit": 50
+      "at": 1793833427987,
+      "limit": 51,
+      "ours": false
     },
     {
-      "at": 1793760632287,
-      "limit": 51
+      "at": 1793833430013,
+      "limit": 53,
+      "ours": false
     },
     {
-      "at": 1793760633300,
-      "limit": 100
+      "at": 1793833431019,
+      "limit": 52,
+      "ours": false
     },
     {
-      "at": 1793760643419,
-      "limit": 47
+      "at": 1793833432030,
+      "limit": 51,
+      "ours": false
     },
     {
-      "at": 1793760644432,
-      "limit": 45
+      "at": 1793833435069,
+      "limit": 53,
+      "ours": false
     },
     {
-      "at": 1793760645447,
-      "limit": 44
+      "at": 1793833436083,
+      "limit": 56,
+      "ours": false
     },
     {
-      "at": 1793760646462,
-      "limit": 100
+      "at": 1793833437097,
+      "limit": 57,
+      "ours": false
     },
     {
-      "at": 1793760658568,
-      "limit": 47
+      "at": 1793833438112,
+      "limit": 60,
+      "ours": false
     },
     {
-      "at": 1793760660594,
-      "limit": 100
+      "at": 1793833439124,
+      "limit": 62,
+      "ours": false
     },
     {
-      "at": 1793760670708,
-      "limit": 52
+      "at": 1793833441150,
+      "limit": 65,
+      "ours": false
     },
     {
-      "at": 1793760671721,
-      "limit": 100
+      "at": 1793833442162,
+      "limit": 67,
+      "ours": false
     },
     {
-      "at": 1793760681841,
-      "limit": 55
+      "at": 1793833444176,
+      "limit": 68,
+      "ours": false
     },
     {
-      "at": 1793760682854,
-      "limit": 56
+      "at": 1793833445191,
+      "limit": 67,
+      "ours": false
     },
     {
-      "at": 1793760683868,
-      "limit": 58
+      "at": 1793833446205,
+      "limit": 64,
+      "ours": false
     },
     {
-      "at": 1793760687914,
-      "limit": 59
+      "at": 1793833448221,
+      "limit": 61,
+      "ours": false
     },
     {
-      "at": 1793760688930,
-      "limit": 56
+      "at": 1793833450234,
+      "limit": 62,
+      "ours": false
     },
     {
-      "at": 1793760689939,
-      "limit": 52
+      "at": 1793833454273,
+      "limit": 63,
+      "ours": false
     },
     {
-      "at": 1793760690953,
-      "limit": 54
+      "at": 1793833455286,
+      "limit": 64,
+      "ours": false
     },
     {
-      "at": 1793760691965,
-      "limit": 57
+      "at": 1793833456288,
+      "limit": 69,
+      "ours": false
     },
     {
-      "at": 1793760692966,
-      "limit": 56
+      "at": 1793833457288,
+      "limit": 73,
+      "ours": false
     },
     {
-      "at": 1793760694974,
-      "limit": 54
+      "at": 1793833458300,
+      "limit": 76,
+      "ours": false
     },
     {
-      "at": 1793760695986,
-      "limit": 52
+      "at": 1793833459312,
+      "limit": 78,
+      "ours": false
     },
     {
-      "at": 1793760696989,
-      "limit": 54
+      "at": 1793833460323,
+      "limit": 74,
+      "ours": false
     },
     {
-      "at": 1793760697999,
-      "limit": 52
+      "at": 1793833462345,
+      "limit": 73,
+      "ours": false
     },
     {
-      "at": 1793760699012,
-      "limit": 53
+      "at": 1793833464349,
+      "limit": 72,
+      "ours": false
     },
     {
-      "at": 1793760700023,
-      "limit": 58
+      "at": 1793833466376,
+      "limit": 71,
+      "ours": false
     },
     {
-      "at": 1793760701039,
-      "limit": 100
+      "at": 1793833468389,
+      "limit": 69,
+      "ours": false
     },
     {
-      "at": 1793760711149,
-      "limit": 48
+      "at": 1793833469404,
+      "limit": 64,
+      "ours": false
     },
     {
-      "at": 1793760712160,
-      "limit": 49
+      "at": 1793833473441,
+      "limit": 61,
+      "ours": false
     },
     {
-      "at": 1793760714182,
-      "limit": 47
+      "at": 1793833474454,
+      "limit": 59,
+      "ours": false
     },
     {
-      "at": 1793760715192,
-      "limit": 49
+      "at": 1793833475462,
+      "limit": 57,
+      "ours": false
     },
     {
-      "at": 1793760716205,
-      "limit": 53
+      "at": 1793833478494,
+      "limit": 60,
+      "ours": false
     },
     {
-      "at": 1793760718232,
-      "limit": 58
+      "at": 1793833479509,
+      "limit": 64,
+      "ours": false
     },
     {
-      "at": 1793760719233,
-      "limit": 61
+      "at": 1793833480521,
+      "limit": 69,
+      "ours": false
     },
     {
-      "at": 1793760720241,
-      "limit": 62
+      "at": 1793833481534,
+      "limit": 71,
+      "ours": false
     },
     {
-      "at": 1793760722265,
-      "limit": 63
+      "at": 1793833482547,
+      "limit": 72,
+      "ours": false
     },
     {
-      "at": 1793760723275,
-      "limit": 65
+      "at": 1793833483554,
+      "limit": 74,
+      "ours": false
     },
     {
-      "at": 1793760724286,
-      "limit": 67
+      "at": 1793833484566,
+      "limit": 73,
+      "ours": false
     },
     {
-      "at": 1793760725286,
-      "limit": 70
+      "at": 1793833485574,
+      "limit": 75,
+      "ours": false
     },
     {
-      "at": 1793760726300,
-      "limit": 100
+      "at": 1793833486587,
+      "limit": 100,
+      "ours": false
     },
     {
-      "at": 1793760736397,
-      "limit": 45
+      "at": 1793833496673,
+      "limit": 42,
+      "ours": false
     },
     {
-      "at": 1793760737411,
-      "limit": 48
+      "at": 1793833497685,
+      "limit": 47,
+      "ours": false
     },
     {
-      "at": 1793760739427,
-      "limit": 52
+      "at": 1793833498687,
+      "limit": 52,
+      "ours": false
     },
     {
-      "at": 1793760740441,
-      "limit": 56
-    },
-    {
-      "at": 1793760741456,
-      "limit": 60
-    },
-    {
-      "at": 1793760742472,
-      "limit": 100
-    },
-    {
-      "at": 1793760747842,
-      "limit": 100
-    },
-    {
-      "at": 1793760752579,
-      "limit": 46
-    },
-    {
-      "at": 1793760754597,
-      "limit": 50
-    },
-    {
-      "at": 1793760756618,
-      "limit": 55
-    },
-    {
-      "at": 1793760757631,
-      "limit": 100
-    },
-    {
-      "at": 1793760767734,
-      "limit": 70
-    },
-    {
-      "at": 1793760768736,
-      "limit": 67
-    },
-    {
-      "at": 1793760769750,
-      "limit": 66
-    },
-    {
-      "at": 1793760770753,
-      "limit": 67
-    },
-    {
-      "at": 1793760771769,
-      "limit": 100
-    },
-    {
-      "at": 1793760790975,
-      "limit": 66
-    },
-    {
-      "at": 1793760791977,
-      "limit": 63
-    },
-    {
-      "at": 1793760795001,
-      "limit": 62
-    },
-    {
-      "at": 1793760796015,
-      "limit": 63
-    },
-    {
-      "at": 1793760797029,
-      "limit": 62
-    },
-    {
-      "at": 1793760798041,
-      "limit": 100
-    },
-    {
-      "at": 1793760808146,
-      "limit": 45
-    },
-    {
-      "at": 1793760809146,
-      "limit": 49
-    },
-    {
-      "at": 1793760810149,
-      "limit": 50
-    },
-    {
-      "at": 1793760811161,
-      "limit": 51
-    },
-    {
-      "at": 1793760812175,
-      "limit": 52
-    },
-    {
-      "at": 1793760813184,
-      "limit": 56
-    },
-    {
-      "at": 1793760814197,
-      "limit": 62
-    },
-    {
-      "at": 1793760815212,
-      "limit": 100
-    },
-    {
-      "at": 1793760820582,
-      "limit": 100
-    },
-    {
-      "at": 1793760825344,
-      "limit": 47
-    },
-    {
-      "at": 1793760826357,
-      "limit": 48
-    },
-    {
-      "at": 1793760827369,
-      "limit": 46
-    },
-    {
-      "at": 1793760829396,
-      "limit": 52
-    },
-    {
-      "at": 1793760830404,
-      "limit": 53
-    },
-    {
-      "at": 1793760831414,
-      "limit": 58
-    },
-    {
-      "at": 1793760832429,
-      "limit": 63
-    },
-    {
-      "at": 1793760833442,
-      "limit": 65
-    },
-    {
-      "at": 1793760834452,
-      "limit": 69
-    },
-    {
-      "at": 1793760835454,
-      "limit": 73
-    },
-    {
-      "at": 1793760836463,
-      "limit": 72
-    },
-    {
-      "at": 1793760837470,
-      "limit": 73
-    },
-    {
-      "at": 1793760838479,
-      "limit": 72
-    },
-    {
-      "at": 1793760839490,
-      "limit": 70
-    },
-    {
-      "at": 1793760841515,
-      "limit": 66
-    },
-    {
-      "at": 1793760842516,
-      "limit": 100
-    },
-    {
-      "at": 1793760852639,
-      "limit": 61
-    },
-    {
-      "at": 1793760853642,
-      "limit": 60
-    },
-    {
-      "at": 1793760855669,
-      "limit": 56
-    },
-    {
-      "at": 1793760857672,
-      "limit": 59
-    },
-    {
-      "at": 1793760858679,
-      "limit": 60
-    },
-    {
-      "at": 1793760859685,
-      "limit": 66
-    },
-    {
-      "at": 1793760860699,
-      "limit": 68
-    },
-    {
-      "at": 1793760861715,
-      "limit": 100
-    },
-    {
-      "at": 1793760879685,
-      "limit": 100
-    },
-    {
-      "at": 1793760885981,
-      "limit": 42
-    },
-    {
-      "at": 1793760886991,
-      "limit": 43
-    },
-    {
-      "at": 1793760888005,
-      "limit": 100
-    },
-    {
-      "at": 1793760891823,
-      "limit": 100
-    },
-    {
-      "at": 1793760918333,
-      "limit": 36
-    },
-    {
-      "at": 1793760919341,
-      "limit": 34
-    },
-    {
-      "at": 1793760920352,
-      "limit": 100
-    },
-    {
-      "at": 1793760938574,
-      "limit": 51
-    },
-    {
-      "at": 1793760939588,
-      "limit": 52
-    },
-    {
-      "at": 1793760940598,
-      "limit": 53
-    },
-    {
-      "at": 1793760941610,
-      "limit": 57
-    },
-    {
-      "at": 1793760942625,
-      "limit": 100
-    },
-    {
-      "at": 1793760952736,
-      "limit": 35
-    },
-    {
-      "at": 1793760953749,
-      "limit": 34
-    },
-    {
-      "at": 1793760954761,
-      "limit": 38
-    },
-    {
-      "at": 1793760955761,
-      "limit": 42
-    },
-    {
-      "at": 1793760956774,
-      "limit": 46
-    },
-    {
-      "at": 1793760957787,
-      "limit": 100
-    },
-    {
-      "at": 1793760967899,
-      "limit": 60
-    },
-    {
-      "at": 1793760968902,
-      "limit": 100
-    },
-    {
-      "at": 1793760979005,
-      "limit": 37
-    },
-    {
-      "at": 1793760981022,
-      "limit": 100
-    },
-    {
-      "at": 1793760991117,
-      "limit": 41
-    },
-    {
-      "at": 1793760992128,
-      "limit": 44
-    },
-    {
-      "at": 1793760993142,
-      "limit": 100
+      "at": 1793833499695,
+      "limit": 100,
+      "ours": false
     }
   ],
-  "total": 26,
-  "passed": 25,
-  "failed": 1
+  "windowsLimits": [
+    {
+      "at": 1793833375437,
+      "limit": 42,
+      "heard": true
+    },
+    {
+      "at": 1793833376443,
+      "limit": 41,
+      "heard": true
+    },
+    {
+      "at": 1793833379472,
+      "limit": 38,
+      "heard": false
+    },
+    {
+      "at": 1793833380480,
+      "limit": 37,
+      "heard": false
+    },
+    {
+      "at": 1793833381488,
+      "limit": 35,
+      "heard": false
+    },
+    {
+      "at": 1793833382495,
+      "limit": 36,
+      "heard": false
+    },
+    {
+      "at": 1793833386533,
+      "limit": 38,
+      "heard": false
+    },
+    {
+      "at": 1793833388561,
+      "limit": 41,
+      "heard": false
+    },
+    {
+      "at": 1793833389574,
+      "limit": 46,
+      "heard": false
+    },
+    {
+      "at": 1793833390587,
+      "limit": 47,
+      "heard": false
+    },
+    {
+      "at": 1793833391596,
+      "limit": 46,
+      "heard": false
+    },
+    {
+      "at": 1793833392611,
+      "limit": 45,
+      "heard": false
+    },
+    {
+      "at": 1793833393623,
+      "limit": 48,
+      "heard": false
+    },
+    {
+      "at": 1793833394623,
+      "limit": 51,
+      "heard": false
+    },
+    {
+      "at": 1793833395634,
+      "limit": 53,
+      "heard": false
+    },
+    {
+      "at": 1793833396648,
+      "limit": 54,
+      "heard": false
+    },
+    {
+      "at": 1793833398674,
+      "limit": 50,
+      "heard": false
+    },
+    {
+      "at": 1793833399677,
+      "limit": 45,
+      "heard": false
+    },
+    {
+      "at": 1793833400678,
+      "limit": 47,
+      "heard": false
+    },
+    {
+      "at": 1793833401682,
+      "limit": 51,
+      "heard": false
+    },
+    {
+      "at": 1793833403702,
+      "limit": 48,
+      "heard": false
+    },
+    {
+      "at": 1793833404716,
+      "limit": 50,
+      "heard": false
+    },
+    {
+      "at": 1793833405731,
+      "limit": 51,
+      "heard": false
+    },
+    {
+      "at": 1793833406743,
+      "limit": 53,
+      "heard": false
+    },
+    {
+      "at": 1793833407758,
+      "limit": 56,
+      "heard": false
+    },
+    {
+      "at": 1793833408768,
+      "limit": 59,
+      "heard": false
+    },
+    {
+      "at": 1793833410785,
+      "limit": 55,
+      "heard": false
+    },
+    {
+      "at": 1793833411796,
+      "limit": 54,
+      "heard": false
+    },
+    {
+      "at": 1793833413821,
+      "limit": 56,
+      "heard": false
+    },
+    {
+      "at": 1793833414836,
+      "limit": 53,
+      "heard": false
+    },
+    {
+      "at": 1793833415848,
+      "limit": 52,
+      "heard": false
+    },
+    {
+      "at": 1793833416850,
+      "limit": 50,
+      "heard": true
+    },
+    {
+      "at": 1793833417863,
+      "limit": 49,
+      "heard": true
+    },
+    {
+      "at": 1793833418874,
+      "limit": 48,
+      "heard": true
+    },
+    {
+      "at": 1793833419888,
+      "limit": 49,
+      "heard": true
+    },
+    {
+      "at": 1793833420900,
+      "limit": 50,
+      "heard": true
+    },
+    {
+      "at": 1793833422920,
+      "limit": 54,
+      "heard": true
+    },
+    {
+      "at": 1793833423932,
+      "limit": 56,
+      "heard": true
+    },
+    {
+      "at": 1793833424945,
+      "limit": 57,
+      "heard": true
+    },
+    {
+      "at": 1793833425958,
+      "limit": 54,
+      "heard": true
+    },
+    {
+      "at": 1793833426973,
+      "limit": 53,
+      "heard": true
+    },
+    {
+      "at": 1793833427987,
+      "limit": 51,
+      "heard": true
+    },
+    {
+      "at": 1793833430013,
+      "limit": 53,
+      "heard": true
+    },
+    {
+      "at": 1793833431019,
+      "limit": 52,
+      "heard": true
+    },
+    {
+      "at": 1793833432030,
+      "limit": 51,
+      "heard": true
+    },
+    {
+      "at": 1793833435069,
+      "limit": 53,
+      "heard": true
+    },
+    {
+      "at": 1793833436083,
+      "limit": 56,
+      "heard": true
+    },
+    {
+      "at": 1793833437097,
+      "limit": 57,
+      "heard": true
+    },
+    {
+      "at": 1793833438112,
+      "limit": 60,
+      "heard": true
+    },
+    {
+      "at": 1793833439124,
+      "limit": 62,
+      "heard": true
+    },
+    {
+      "at": 1793833441150,
+      "limit": 65,
+      "heard": true
+    },
+    {
+      "at": 1793833442162,
+      "limit": 67,
+      "heard": true
+    },
+    {
+      "at": 1793833444176,
+      "limit": 68,
+      "heard": true
+    },
+    {
+      "at": 1793833445191,
+      "limit": 67,
+      "heard": true
+    },
+    {
+      "at": 1793833446205,
+      "limit": 64,
+      "heard": true
+    },
+    {
+      "at": 1793833448221,
+      "limit": 61,
+      "heard": true
+    },
+    {
+      "at": 1793833450234,
+      "limit": 62,
+      "heard": true
+    },
+    {
+      "at": 1793833454273,
+      "limit": 63,
+      "heard": true
+    },
+    {
+      "at": 1793833455286,
+      "limit": 64,
+      "heard": true
+    },
+    {
+      "at": 1793833456288,
+      "limit": 69,
+      "heard": true
+    },
+    {
+      "at": 1793833457288,
+      "limit": 73,
+      "heard": true
+    },
+    {
+      "at": 1793833458300,
+      "limit": 76,
+      "heard": true
+    },
+    {
+      "at": 1793833459312,
+      "limit": 78,
+      "heard": true
+    },
+    {
+      "at": 1793833460323,
+      "limit": 74,
+      "heard": true
+    },
+    {
+      "at": 1793833462345,
+      "limit": 73,
+      "heard": true
+    },
+    {
+      "at": 1793833464349,
+      "limit": 72,
+      "heard": true
+    },
+    {
+      "at": 1793833466376,
+      "limit": 71,
+      "heard": true
+    },
+    {
+      "at": 1793833468389,
+      "limit": 69,
+      "heard": true
+    },
+    {
+      "at": 1793833469404,
+      "limit": 64,
+      "heard": true
+    },
+    {
+      "at": 1793833473441,
+      "limit": 61,
+      "heard": true
+    },
+    {
+      "at": 1793833474454,
+      "limit": 59,
+      "heard": true
+    },
+    {
+      "at": 1793833475462,
+      "limit": 57,
+      "heard": true
+    },
+    {
+      "at": 1793833478494,
+      "limit": 60,
+      "heard": true
+    },
+    {
+      "at": 1793833479509,
+      "limit": 64,
+      "heard": true
+    },
+    {
+      "at": 1793833480521,
+      "limit": 69,
+      "heard": true
+    },
+    {
+      "at": 1793833481534,
+      "limit": 71,
+      "heard": true
+    },
+    {
+      "at": 1793833482547,
+      "limit": 72,
+      "heard": true
+    },
+    {
+      "at": 1793833483554,
+      "limit": 74,
+      "heard": true
+    },
+    {
+      "at": 1793833484566,
+      "limit": 73,
+      "heard": true
+    },
+    {
+      "at": 1793833485574,
+      "limit": 75,
+      "heard": true
+    },
+    {
+      "at": 1793833486587,
+      "limit": 100,
+      "heard": true
+    },
+    {
+      "at": 1793833496673,
+      "limit": 42,
+      "heard": true
+    },
+    {
+      "at": 1793833497685,
+      "limit": 47,
+      "heard": true
+    },
+    {
+      "at": 1793833498687,
+      "limit": 52,
+      "heard": true
+    },
+    {
+      "at": 1793833499695,
+      "limit": 100,
+      "heard": true
+    }
+  ],
+  "total": 24,
+  "passed": 21,
+  "failed": 3
 }
