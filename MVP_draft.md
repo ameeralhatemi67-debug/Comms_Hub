@@ -2671,7 +2671,7 @@ On «المراجعة» (`/approvals/<id>`), for files of video:
 
 Owner direction of 2026-11-03 (`Desktop_Power_Ideas.md` P-09 and P-17, recorded in `progress.md`): a stronger computer changes speed, never the picture.
 - A clip's «السطوع» and «التباين» and «التشبع», the blur of «تمويه» as a transition or a movement, and «تمويه منطقة» are worked out with whole numbers, on the graphics chip or by the page where there is none, so the same project gives the same picture on every computer. Before, they were the browser's own filters, which each graphics chip drew a little differently.
-- A project saved before shows its colour adjustments within one level of 255 of what it showed in Edge, and its blurs within two levels inside the picture and up to five where a blurred picture fades out at its edge or follows a colour adjustment, no more than the old filters differed between one laptop's own graphics chips.
+- A project saved before shows its colour adjustments within one level of 255 of what it showed in Edge on footage, and two at a picture's soft edges, and its blurs within two levels inside the picture and up to five where a blurred picture fades out at its edge or follows a colour adjustment, no more than the old filters differed between one laptop's own graphics chips.
 - A photo's adjustments («السطوع»، «التباين»، «التشبع»، «الدفء»، «التمويه») are worked out with whole numbers too: without blur on the graphics chip, a part at a time; with blur in bands across as many of the computer's cores as its plan allows (63.6), one at a time without a plan, as before. Every way gives the same picture. A photo saved before may differ by one level in at most a few pixels in a hundred.
 - Nothing changes in the windows.
 

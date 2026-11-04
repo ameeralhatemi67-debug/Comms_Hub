@@ -3233,3 +3233,66 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     canvases), and a pixel read back each frame from the export's own page canvas. With 8 frames kept it still gave 7 to
     21 frames a second, before and after alike; with drawing timed on an OffscreenCanvas and the export's canvas never
     read back, as `export.ts` uses it, 11 to 156. The check now does that.
+- **What changed after the first timing, to bring the cost back** (each held by the identity check and the kernel tests):
+  - a blur of more than 1 and at most 4 pixels is three odd boxes each way (Skia's own on the processor), whose cost in
+    plain code does not grow with the radius;
+  - colour with a blur is folded into the blur's first pass, on the chip and in plain code;
+  - the plain code runs in WebAssembly lanes (`effects/simd.ts`, `effects/blur-simd.ts`, one memory): the colour, see-through
+    pixels included, and the whole blur (reduction, weights, boxes, enlargement, premultiplying and unpremultiplying), the
+    pictures between its steps kept as bytes and its passes down the picture run along the rows; a clip is copied in once and
+    handed to putImageData from there;
+  - a blurred clip cut by the frame's edge keeps only what reaches the frame and the frame pixels it reaches, with the blur's
+    margin transparent around them, when that is less to blur: a full-frame clip blurs at 1920 by 1080, no longer 2132 by 1292;
+  - on the chip a full-size blur with no colour reads the picture where it is and writes its own corner, with no reduction or
+    enlargement pass.
+  The timing of 2026-11-04 09:53 to 10:02, before the last three, still failed: AMD 96.5 against 92.6 frames a second (-4.0%), no
+  chip 11.8 against 6.1. The profile then (each part of the document alone, before the boxes) put the cost in the blurred cross:
+  on the AMD chip 88.9 against 64.2 frames a second, with no chip 175 against 626 ms a frame; colour 45.2 against 51.7 ms and the
+  covers 27.0 against 38.7 ms with no chip.
+- **Verified on 2026-11-05, 01:40 to 02:00**, at `520a441` (main `5c24b55` merged) with the check-only commits `95b2f27` and
+  `c2450b5`, in one slot under the port lock, the laptop otherwise idle (`qa/artifacts/fxdiag/slot5.sh`):
+  - `npm run typecheck` clean; the effects' unit tests 32 of 32 (`tests/studio-effect-kernels.test.mjs` 14,
+    `tests/studio-photo-tiles.test.mjs` 3, with the photo and marker tests).
+  - **Identity**, `qa/studio-effects-parity.cjs`: 19 of 19. On Edge, the AMD chip and the RTX every effect on the chip equals the
+    plain code byte for byte in all 90 cases; the WebAssembly lanes equal the plain code one pixel at a time in 90 of 90 cases on
+    all four engines; the plain code gives Edge's bytes everywhere; the 54 corpus frames have one hash whichever path draws them.
+  - **What a saved project changes**, against Edge's canvas filter (`qa/studio-effects-parity.json`): colour adjustments on
+    footage at most 1 level (PSNR 61.42 dB at worst), on an item with soft edges at most 2 (59.42 dB), no channel more than 2
+    apart; blurs at most 5 levels (49.10 dB at worst, the effects A colour with a blur of 9 pixels on footage; 49.73 dB on the
+    item). The bound is the old filter's own spread between this laptop's engines, 6 levels and 49 dB.
+  - **Timing**, `qa/studio-effects-speed.cjs` (`qa/studio-effects-speed.json`), the effects document at 1080p, median export in
+    frames a second before and after, three runs each, the load before each run in per cent:
+    - Edge 156: 78.7 and 81.0 (+2.9%); load 13, 27, 3 and 8, 18, 47, 2 (round 3 run again for its load);
+    - application, AMD chip: 107.9 and 106.5 (-1.3%); load 11, 13, 31 and 4, 2, 10;
+    - application, RTX: 163.5 and 171.1 (+4.6%); load 6, 2, 31 and 1, 2, 20;
+    - application, no chip: 12.4 and 13.0 (+4.8%); load 7, 3, 20 and 28, 15, 10.
+    Drawing alone went from 10.51 to 6.37 ms a frame in Edge, 7.39 to 6.39 on the AMD chip, 4.66 to 3.22 on the RTX and 76.16 to
+    72.72 with no chip. Every engine is within 3% of before or faster.
+  - **The proof**, `qa/studio-crossdevice.cjs`: 38 of 43, the same five failures as on this branch's last run, all with no chip.
+    - «effects»: 48.54 dB at worst, 0.21% of channels more than 2 apart, against main's 48.21 dB and 0.77% before the effects,
+      and 48.85 dB and 0.18% on this branch before the frame-size blur, which moves the reduction's grid.
+    - «transitions»: 48.77 dB (main 48.90). The frames below show that scaling alone accounts for most of it.
+    - «keys», «brand» and «landscape-keys» are unchanged to the digit (55.04, 50.17 and 53.36 dB), with no effects in them.
+    - «covers» failed on main and passes.
+  - **«transitions» by frame and level**, `qa/studio-effects-frames.cjs` (`qa/studio-effects-frames.json`): frames 0, 13 and
+    15 drawn with no chip and on the RTX, as saved and with every colour adjustment taken out, each against Edge, before and
+    after. With no chip, frame 13:
+    - before: 48.90 dB as saved, 0 levels apart on 39.74% of channels, 1 on 52.58%, 2 on 7.60%, 3 on 0.0834%, 4 on 0.0002%;
+    - before, no colour: 48.61 dB;
+    - after: 48.77 dB as saved, 0 on 38.57%, 1 on 53.31%, 2 on 8.03%, 3 on 0.0895%, never 4;
+    - after, no colour: 48.61 dB, the same as before: the picture's scaling, which neither path changes.
+    Frames 0 and 15 with no chip go from 50.42 and 50.60 dB to 49.35 and 49.55, at most 2 levels after, against 2 and 4 before. On
+    the RTX every frame is at least 54.02 dB after, against 53.83 before.
+  - **Photo tiles**, `qa/studio-photo-tiles.cjs`: 9 of 9. Every way (1, 2, 4 and 10 workers, and the chip where there is one)
+    gives one worker's bytes for every adjustment of the 8000 by 6000 photo and the see-through one, on every engine.
+  - `qa/studio-engine.cjs` in Edge: 41 of 41.
+- **Not verified, said plainly.**
+  - `npm test` and `npm run build` on this tip are not yet run: `npm test` was 841 of 841 at `d7321d9`, and the build waits for
+    a quiet laptop.
+  - One laptop with two chips. The director's laptop (Q1) was not measured.
+  - Nothing was seen signed in, and no real project was opened.
+  - An export in a worker (P-07 option B) is not built yet. The effects use no DOM: WebGL2 on an OffscreenCanvas, WebAssembly
+    and ImageData. Nothing has shown them inside that worker.
+  - The step timing (`--steps`) and the profile (`--profile`) were not run on this tip: the timing passed, so the slot did not
+    need them.
+- **Not done.** Nothing pushed. `squares-gl.ts` still uploads unpremultiplied (found above; not this fork's).
