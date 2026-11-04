@@ -3,7 +3,8 @@
 // copy reduced by a power of two, so the graphics chip (chip.ts) and the plain code (code.ts) do the same arithmetic
 // and give the same bytes on every computer. They follow what the canvas filters drew before 2026-11-04 (compose.ts
 // filterOf): brightness and contrast as Chromium's 8-bit tables, saturation as its matrix, blur as Skia's Gaussian,
-// computed on a copy halved until its radius is at most four pixels. Pure, usable in a worker.
+// computed on a copy halved until its radius is at most four pixels, and from 1 to 4 pixels as three boxes, as Skia's
+// processor path does. Pure, usable in a worker.
 
 /**
  * A colour adjustment on straight (not premultiplied) colour: the table first, then the matrix (rows of 1/65536) with
@@ -21,9 +22,25 @@ export type ColourPlan = {
 /**
  * A blur of `sigma` pixels: the picture reduced `n` times (2^k) by averaging each n by n block, blurred there with
  * `weights` (2 * radius + 1 of them, summing to 65536) across then down, and enlarged back by bilinear weights.
- * `reach` is how far a blurred picture spreads beyond what was drawn, and how far around it the blur reads.
+ * `reach` is how far a blurred picture spreads beyond what was drawn, and how far around it the blur reads. A blur of
+ * more than 1 and at most 4 pixels, worked out at full size, is `boxes` instead: three boxes of those odd widths each
+ * way, each rounded to the nearest, the usual stand-in for a Gaussian (Skia's own on the processor), whose cost in plain
+ * code does not grow with the radius (measured on 2026-11-04: the weights took a frame of the blurred cross to 626 ms
+ * with no graphics chip).
  */
-export type BlurPlan = { sigma: number; n: number; k: number; radius: number; weights: Int32Array; reach: number };
+export type BlurPlan = { sigma: number; n: number; k: number; radius: number; weights: Int32Array; boxes: number[] | null; reach: number };
+
+/** At most this blur, in pixels, keeps its Gaussian weights at full size: below it a box of 3 is already too wide. */
+export const BOX_FROM = 1;
+
+/** Three odd box widths whose variances add up to about sigma squared (W. Jarosz; I. Kutskir). */
+export function boxesFor(sigma: number): number[] {
+  const ideal = Math.sqrt((12 * sigma * sigma) / 3 + 1);
+  let lo = Math.floor(ideal);
+  if (lo % 2 === 0) lo--;
+  const m = Math.round((12 * sigma * sigma - 3 * lo * lo - 12 * lo - 9) / (-4 * lo - 4));
+  return [0, 1, 2].map((i) => (i < m ? lo : lo + 2));
+}
 
 export type EffectPlan = { colour: ColourPlan | null; blur: BlurPlan | null };
 
@@ -145,7 +162,8 @@ export function blurPlan(sigma: number): BlurPlan | null {
   }
   const weights = Int32Array.from(g, (v) => Math.round((v / total) * 65536));
   weights[radius] += 65536 - weights.reduce((x, y) => x + y, 0);
-  return { sigma: s, n, k, radius, weights, reach: Math.ceil(3 * s) + 2 * n };
+  const boxes = n === 1 && s > BOX_FROM ? boxesFor(s) : null;
+  return { sigma: s, n, k, radius, weights, boxes, reach: Math.ceil(3 * s) + 2 * n };
 }
 
 /** The pixels a reduced copy of a w by h picture has: ceil(w / n) by ceil(h / n). */

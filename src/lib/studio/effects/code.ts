@@ -178,7 +178,30 @@ export function blurPixels(px: Uint8ClampedArray, w: number, h: number, plan: Bl
     }
     return dst;
   };
-  const blurred = pass(pass(small, true), false);
+  // or three boxes each way, by running sums: (2 * sum + width) / (2 * width), never an exact half since the width is odd
+  const box = (src: Uint32Array, across: boolean, width: number): Uint32Array => {
+    const dst = new Uint32Array(src.length);
+    const r = (width - 1) >> 1;
+    const len = across ? rw : rh;
+    const lines = across ? rh : rw;
+    const step = across ? 4 : rw * 4;
+    const two = 2 * width;
+    for (let line = 0; line < lines; line++) {
+      const base = across ? line * rw * 4 : line * 4;
+      for (let c = 0; c < 4; c++) {
+        let sum = 0;
+        for (let j = 0; j <= r && j < len; j++) sum += src[base + j * step + c];
+        for (let k = 0; k < len; k++) {
+          dst[base + k * step + c] = ((2 * sum + width) / two) | 0;
+          if (k + r + 1 < len) sum += src[base + (k + r + 1) * step + c];
+          if (k - r >= 0) sum -= src[base + (k - r) * step + c];
+        }
+      }
+    }
+    return dst;
+  };
+  const boxes = plan.boxes;
+  const blurred = boxes ? [true, false].reduce<Uint32Array>((img, across) => boxes.reduce<Uint32Array>((x, wd) => box(x, across, wd), img), small) : pass(pass(small, true), false);
   // 3. enlarge: bilinear weights in 1/(2n) steps, the edge repeated, one rounding over the four
   const out = new Uint8ClampedArray(w * h * 4);
   const two = 2 * n;

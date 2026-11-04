@@ -79,7 +79,7 @@ const COLOURS: [string, schema.Adjust][] = [
   ...([-90, -50, 25, 50, 100] as const).map((v): [string, schema.Adjust] => [`saturation ${v}`, { brightness: 0, contrast: 0, saturation: v }]),
   ['all three', { brightness: 37, contrast: -63, saturation: 81 }],
 ];
-const BLURS = [0.4, 1.5, 4, 4.5, 9, 30, 64, 100];
+const BLURS = [0.4, 1, 1.5, 2.5, 4, 4.5, 9, 30, 64, 100];
 
 type Case = { name: string; plan: EffectPlan; pad: number; filter: string };
 function cases(): Case[] {

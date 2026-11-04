@@ -1,25 +1,25 @@
 {
   "script": "qa/studio-effects-parity.cjs",
-  "run": "2026-11-04T03:26:17.504Z",
-  "version": "0.7.1",
+  "run": "2026-11-04T06:51:51.439Z",
+  "version": "0.8.0",
   "checks": [
     {
       "name": "Edge loaded the fonts and the corpus, and worked out every case",
       "pass": true,
-      "detail": "{\"prepared\":{\"fonts\":true,\"docs\":8},\"cases\":84,\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+      "detail": "{\"prepared\":{\"fonts\":true,\"docs\":8},\"cases\":90,\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
     },
     {
-      "name": "edge: every effect on the graphics chip equals the plain code byte for byte (84 cases)",
+      "name": "edge: every effect on the graphics chip equals the plain code byte for byte (90 cases)",
       "pass": true,
       "detail": "{\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"bad\":[]}"
     },
     {
-      "name": "app-saving: every effect on the graphics chip equals the plain code byte for byte (84 cases)",
+      "name": "app-saving: every effect on the graphics chip equals the plain code byte for byte (90 cases)",
       "pass": true,
       "detail": "{\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"bad\":[]}"
     },
     {
-      "name": "app-strong: every effect on the graphics chip equals the plain code byte for byte (84 cases)",
+      "name": "app-strong: every effect on the graphics chip equals the plain code byte for byte (90 cases)",
       "pass": true,
       "detail": "{\"renderer\":\"ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"bad\":[]}"
     },
@@ -549,6 +549,25 @@
         },
         {
           "picture": "frame",
+          "effect": "blur 1",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 240248,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 58.74
+          }
+        },
+        {
+          "picture": "frame",
           "effect": "blur 1.5",
           "chip": {
             "differing": 0,
@@ -559,11 +578,30 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 241130,
-            "max": 1,
-            "alphaMax": 1,
+            "differing": 692453,
+            "max": 5,
+            "alphaMax": 4,
+            "over2": 0.0256,
+            "psnr": 54.02
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 2.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
             "over2": 0,
-            "psnr": 58.73
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 555733,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.0003,
+            "psnr": 55.21
           }
         },
         {
@@ -578,11 +616,11 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 239982,
-            "max": 1,
-            "alphaMax": 1,
-            "over2": 0,
-            "psnr": 58.82
+            "differing": 500511,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0037,
+            "psnr": 55.66
           }
         },
         {
@@ -1138,6 +1176,25 @@
         },
         {
           "picture": "item",
+          "effect": "blur 1",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 121309,
+            "max": 2,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 60.38
+          }
+        },
+        {
+          "picture": "item",
           "effect": "blur 1.5",
           "chip": {
             "differing": 0,
@@ -1148,11 +1205,30 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 117466,
-            "max": 1,
-            "alphaMax": 1,
+            "differing": 541962,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 0.0881,
+            "psnr": 53.46
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 2.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
             "over2": 0,
-            "psnr": 60.33
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 508077,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0022,
+            "psnr": 54.65
           }
         },
         {
@@ -1167,11 +1243,11 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 120799,
-            "max": 1,
-            "alphaMax": 2,
-            "over2": 0,
-            "psnr": 60.5
+            "differing": 568692,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0976,
+            "psnr": 53.93
           }
         },
         {
@@ -1727,6 +1803,25 @@
         },
         {
           "picture": "ramp",
+          "effect": "blur 1",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 518,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 74.25
+          }
+        },
+        {
+          "picture": "ramp",
           "effect": "blur 1.5",
           "chip": {
             "differing": 0,
@@ -1737,11 +1832,30 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 1212,
-            "max": 1,
-            "alphaMax": 1,
+            "differing": 15035,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0529,
+            "psnr": 57.54
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 2.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
             "over2": 0,
-            "psnr": 71.79
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 21069,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.0025,
+            "psnr": 57.95
           }
         },
         {
@@ -1756,11 +1870,11 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 4835,
-            "max": 1,
-            "alphaMax": 1,
-            "over2": 0,
-            "psnr": 64.72
+            "differing": 30313,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0793,
+            "psnr": 55.87
           }
         },
         {
@@ -2331,6 +2445,25 @@
         },
         {
           "picture": "frame",
+          "effect": "blur 1",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 240248,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 58.74
+          }
+        },
+        {
+          "picture": "frame",
           "effect": "blur 1.5",
           "chip": {
             "differing": 0,
@@ -2341,11 +2474,30 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 241130,
-            "max": 1,
-            "alphaMax": 1,
+            "differing": 692453,
+            "max": 5,
+            "alphaMax": 4,
+            "over2": 0.0256,
+            "psnr": 54.02
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 2.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
             "over2": 0,
-            "psnr": 58.73
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 555733,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.0003,
+            "psnr": 55.21
           }
         },
         {
@@ -2360,11 +2512,11 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 239982,
-            "max": 1,
-            "alphaMax": 1,
-            "over2": 0,
-            "psnr": 58.82
+            "differing": 500511,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0037,
+            "psnr": 55.66
           }
         },
         {
@@ -2920,6 +3072,25 @@
         },
         {
           "picture": "item",
+          "effect": "blur 1",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 121309,
+            "max": 2,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 60.38
+          }
+        },
+        {
+          "picture": "item",
           "effect": "blur 1.5",
           "chip": {
             "differing": 0,
@@ -2930,11 +3101,30 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 117466,
-            "max": 1,
-            "alphaMax": 1,
+            "differing": 541962,
+            "max": 5,
+            "alphaMax": 5,
+            "over2": 0.0881,
+            "psnr": 53.46
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 2.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
             "over2": 0,
-            "psnr": 60.33
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 508077,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0022,
+            "psnr": 54.65
           }
         },
         {
@@ -2949,11 +3139,11 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 120799,
-            "max": 1,
-            "alphaMax": 2,
-            "over2": 0,
-            "psnr": 60.5
+            "differing": 568692,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0976,
+            "psnr": 53.93
           }
         },
         {
@@ -3509,6 +3699,25 @@
         },
         {
           "picture": "ramp",
+          "effect": "blur 1",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 518,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 74.25
+          }
+        },
+        {
+          "picture": "ramp",
           "effect": "blur 1.5",
           "chip": {
             "differing": 0,
@@ -3519,11 +3728,30 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 1212,
-            "max": 1,
-            "alphaMax": 1,
+            "differing": 15035,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0529,
+            "psnr": 57.54
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 2.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
             "over2": 0,
-            "psnr": 71.79
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 21069,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.0025,
+            "psnr": 57.95
           }
         },
         {
@@ -3538,11 +3766,11 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 4835,
-            "max": 1,
-            "alphaMax": 1,
-            "over2": 0,
-            "psnr": 64.72
+            "differing": 30313,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0793,
+            "psnr": 55.87
           }
         },
         {
@@ -4113,6 +4341,25 @@
         },
         {
           "picture": "frame",
+          "effect": "blur 1",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 176380,
+            "max": 1,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 60.08
+          }
+        },
+        {
+          "picture": "frame",
           "effect": "blur 1.5",
           "chip": {
             "differing": 0,
@@ -4123,11 +4370,30 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 176350,
-            "max": 1,
+            "differing": 669386,
+            "max": 5,
+            "alphaMax": 4,
+            "over2": 0.0216,
+            "psnr": 54.18
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 2.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
             "alphaMax": 0,
             "over2": 0,
-            "psnr": 60.08
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 522671,
+            "max": 3,
+            "alphaMax": 2,
+            "over2": 0.0003,
+            "psnr": 55.49
           }
         },
         {
@@ -4142,11 +4408,11 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 176261,
-            "max": 1,
-            "alphaMax": 1,
-            "over2": 0,
-            "psnr": 60.17
+            "differing": 459318,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0031,
+            "psnr": 56.07
           }
         },
         {
@@ -4702,6 +4968,25 @@
         },
         {
           "picture": "item",
+          "effect": "blur 1",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 118753,
+            "max": 2,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 60.49
+          }
+        },
+        {
+          "picture": "item",
           "effect": "blur 1.5",
           "chip": {
             "differing": 0,
@@ -4712,11 +4997,30 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 115524,
-            "max": 1,
-            "alphaMax": 1,
+            "differing": 532234,
+            "max": 4,
+            "alphaMax": 5,
+            "over2": 0.0737,
+            "psnr": 53.61
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 2.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
             "over2": 0,
-            "psnr": 60.39
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 496524,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0016,
+            "psnr": 54.79
           }
         },
         {
@@ -4731,11 +5035,11 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 131194,
-            "max": 1,
-            "alphaMax": 2,
-            "over2": 0,
-            "psnr": 60.18
+            "differing": 547440,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.077,
+            "psnr": 54.2
           }
         },
         {
@@ -5291,6 +5595,25 @@
         },
         {
           "picture": "ramp",
+          "effect": "blur 1",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 618,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 73.42
+          }
+        },
+        {
+          "picture": "ramp",
           "effect": "blur 1.5",
           "chip": {
             "differing": 0,
@@ -5301,11 +5624,30 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 1432,
-            "max": 1,
-            "alphaMax": 1,
+            "differing": 14856,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0493,
+            "psnr": 57.66
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 2.5",
+          "chip": {
+            "differing": 0,
+            "max": 0,
+            "alphaMax": 0,
             "over2": 0,
-            "psnr": 70.73
+            "psnr": 99
+          },
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 19339,
+            "max": 3,
+            "alphaMax": 3,
+            "over2": 0.0025,
+            "psnr": 58.37
           }
         },
         {
@@ -5320,11 +5662,11 @@
           },
           "lanes": null,
           "sinceFilter": {
-            "differing": 5228,
-            "max": 1,
-            "alphaMax": 1,
-            "over2": 0,
-            "psnr": 64.27
+            "differing": 29363,
+            "max": 4,
+            "alphaMax": 4,
+            "over2": 0.0712,
+            "psnr": 56.1
           }
         },
         {
@@ -5775,15 +6117,41 @@
         },
         {
           "picture": "frame",
+          "effect": "blur 1",
+          "chip": null,
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 1364926,
+            "max": 12,
+            "alphaMax": 12,
+            "over2": 0.5962,
+            "psnr": 49.45
+          }
+        },
+        {
+          "picture": "frame",
           "effect": "blur 1.5",
           "chip": null,
           "lanes": null,
           "sinceFilter": {
-            "differing": 470319,
-            "max": 5,
-            "alphaMax": 4,
-            "over2": 0.0172,
-            "psnr": 55.68
+            "differing": 564024,
+            "max": 2,
+            "alphaMax": 0,
+            "over2": 0,
+            "psnr": 55.03
+          }
+        },
+        {
+          "picture": "frame",
+          "effect": "blur 2.5",
+          "chip": null,
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 410965,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 56.41
           }
         },
         {
@@ -5792,11 +6160,11 @@
           "chip": null,
           "lanes": null,
           "sinceFilter": {
-            "differing": 500987,
+            "differing": 650173,
             "max": 8,
-            "alphaMax": 8,
-            "over2": 0.7892,
-            "psnr": 53.61
+            "alphaMax": 9,
+            "over2": 0.9702,
+            "psnr": 52.49
           }
         },
         {
@@ -6196,15 +6564,41 @@
         },
         {
           "picture": "item",
+          "effect": "blur 1",
+          "chip": null,
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 818581,
+            "max": 11,
+            "alphaMax": 12,
+            "over2": 3.8712,
+            "psnr": 47.37
+          }
+        },
+        {
+          "picture": "item",
           "effect": "blur 1.5",
           "chip": null,
           "lanes": null,
           "sinceFilter": {
-            "differing": 416275,
-            "max": 4,
-            "alphaMax": 5,
-            "over2": 0.0713,
-            "psnr": 54.69
+            "differing": 334737,
+            "max": 2,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 55.69
+          }
+        },
+        {
+          "picture": "item",
+          "effect": "blur 2.5",
+          "chip": null,
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 263538,
+            "max": 1,
+            "alphaMax": 2,
+            "over2": 0,
+            "psnr": 56.93
           }
         },
         {
@@ -6213,11 +6607,11 @@
           "chip": null,
           "lanes": null,
           "sinceFilter": {
-            "differing": 720911,
-            "max": 7,
-            "alphaMax": 8,
-            "over2": 3.0359,
-            "psnr": 49.25
+            "differing": 878537,
+            "max": 8,
+            "alphaMax": 9,
+            "over2": 4.2492,
+            "psnr": 47.92
           }
         },
         {
@@ -6617,15 +7011,41 @@
         },
         {
           "picture": "ramp",
+          "effect": "blur 1",
+          "chip": null,
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 13052,
+            "max": 12,
+            "alphaMax": 12,
+            "over2": 3.0599,
+            "psnr": 48.63
+          }
+        },
+        {
+          "picture": "ramp",
           "effect": "blur 1.5",
           "chip": null,
           "lanes": null,
           "sinceFilter": {
-            "differing": 14586,
-            "max": 4,
-            "alphaMax": 4,
-            "over2": 0.0498,
-            "psnr": 57.7
+            "differing": 2029,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 68.82
+          }
+        },
+        {
+          "picture": "ramp",
+          "effect": "blur 2.5",
+          "chip": null,
+          "lanes": null,
+          "sinceFilter": {
+            "differing": 3854,
+            "max": 1,
+            "alphaMax": 1,
+            "over2": 0,
+            "psnr": 65.69
           }
         },
         {
@@ -6634,11 +7054,11 @@
           "chip": null,
           "lanes": null,
           "sinceFilter": {
-            "differing": 38018,
-            "max": 8,
-            "alphaMax": 8,
-            "over2": 4.4378,
-            "psnr": 49.06
+            "differing": 44405,
+            "max": 9,
+            "alphaMax": 9,
+            "over2": 5.4199,
+            "psnr": 48.07
           }
         },
         {

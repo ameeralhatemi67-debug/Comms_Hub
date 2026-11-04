@@ -21,15 +21,26 @@ const made = new Map<string, ReturnType<typeof make>>();
 /**
  * The document, or part of it, to tell the effects' costs apart: 'all'; 'colour', its two adjusted clips and caption
  * without the covers; 'covers', the covers without the adjustments; 'bare', neither; 'cross', all of it during the blurred
- * cross only (1.6 to 2.2 seconds).
+ * cross only (1.6 to 2.2 seconds); 'cross-fade', the same frames with the cross a plain fade (colour, no blur);
+ * 'cross-plain', the blurred cross with no colour adjustments.
  */
-export type Variant = 'all' | 'colour' | 'covers' | 'bare' | 'cross';
+export type Variant = 'all' | 'colour' | 'covers' | 'bare' | 'cross' | 'cross-fade' | 'cross-plain';
+const faded = (d: ProjectDoc): ProjectDoc => ({
+  ...d,
+  video: { ...d.video!, tracks: d.video!.tracks.map((t) => ({ ...t, clips: t.clips.map((c) => (c.transition?.kind === 'blur' ? { ...c, transition: { ...c.transition, kind: 'fade' as const } } : c)) })) },
+});
 const without = (d: ProjectDoc, covers: boolean, adjust: boolean): ProjectDoc => ({
   ...d,
   video: { ...d.video!, tracks: d.video!.tracks.map((t) => ({ ...t, clips: t.clips.filter((c) => !(covers && c.cover)).map((c) => (adjust ? { ...c, adjust: undefined } : c)) })) },
 });
-const docOf = (v: Variant) => (v === 'colour' ? without(effectsDoc(), true, false) : v === 'covers' ? without(effectsDoc(), false, true) : v === 'bare' ? without(effectsDoc(), true, true) : effectsDoc());
-const at = (v: Variant, n: number) => (v === 'cross' ? Math.round(1.6 * US) + frameStart(n % 18, FPS) : frameStart(n, FPS) % (4 * US));
+const docOf = (v: Variant) =>
+  v === 'colour' ? without(effectsDoc(), true, false)
+  : v === 'covers' ? without(effectsDoc(), false, true)
+  : v === 'bare' ? without(effectsDoc(), true, true)
+  : v === 'cross-fade' ? faded(effectsDoc())
+  : v === 'cross-plain' ? without(effectsDoc(), false, true)
+  : effectsDoc();
+const at = (v: Variant, n: number) => (v.startsWith('cross') ? Math.round(1.6 * US) + frameStart(n % 18, FPS) : frameStart(n, FPS) % (4 * US));
 
 /**
  * Two canvases: the export's, a page canvas never read back as export.ts uses it (a page canvas read back each frame is

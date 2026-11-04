@@ -178,3 +178,24 @@ test('the colour in WebAssembly lanes gives the bytes of the plain code, opaque 
     assert.deepEqual([...lanes], [...plain]);
   }
 });
+
+test('a blur of more than 1 and at most 4 pixels is three odd boxes whose spread is the radius asked', async () => {
+  const { boxesFor, BOX_FROM } = await import('../src/lib/studio/effects/plan.ts');
+  assert.equal(blurPlan(BOX_FROM).boxes, null, 'a pixel or less keeps its weights');
+  assert.equal(blurPlan(0.4).boxes, null);
+  assert.equal(blurPlan(4.5).boxes, null, 'a reduced blur keeps its weights');
+  for (const s of [1.01, 1.5, 2, 2.5, 3, 3.7, 4]) {
+    const b = blurPlan(s).boxes;
+    assert.equal(b.length, 3);
+    for (const w of b) assert.equal(w % 2, 1, `odd at ${s}`);
+    const variance = b.reduce((v, w) => v + (w * w - 1) / 12, 0);
+    assert.ok(Math.abs(Math.sqrt(variance) - s) / s < 0.2, `spread ${Math.sqrt(variance)} for ${s}`);
+    assert.ok((b[0] + b[1] + b[2] - 3) / 2 <= blurPlan(s).reach, 'within the reach');
+  }
+  assert.deepEqual(boxesFor(4), [7, 7, 9]);
+  assert.deepEqual(boxesFor(1.5), [3, 3, 3]);
+  // the boxes keep the light: an even opaque picture stays even away from its edges
+  const even = new Uint8ClampedArray(60 * 40 * 4).fill(255);
+  const out = blurPixels(even, 60, 40, blurPlan(3));
+  for (let y = 12; y < 28; y++) for (let x = 12; x < 48; x++) assert.equal(out[(y * 60 + x) * 4 + 3], 255);
+});

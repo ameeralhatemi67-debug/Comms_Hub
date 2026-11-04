@@ -27,7 +27,11 @@ const FRAMES = 240;
 const RUNS = 3;
 /** --profile: the document's parts one at a time (the fixture's Variant), to tell apart what each effect costs. */
 const PROFILE = process.argv.includes('--profile');
-const VARIANTS = ['bare', 'colour', 'covers', 'cross', 'all'];
+/** Two runs of one round whose loads differ by more than this many points are run again. */
+const LOAD_GAP = 25;
+/** Windows may think a window covered and Chromium then draws it about once a second (found by Fork 2, 2026-11-04). */
+const NO_OCCLUSION = '--disable-features=CalculateNativeWinOcclusion';
+const VARIANTS = (process.env.VARIANTS || 'bare,colour,covers,cross,all').split(',');
 const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average')) || null;
 
 /** compose.ts and cover.ts as they were at the base, read from git, imported in place of today's. */
@@ -90,15 +94,26 @@ async function runIn(page) {
   await page.waitForFunction(() => !!window.speedBefore && !!window.speedAfter, null, { timeout: 60000 });
   const renderer = await page.evaluate(() => window.speedAfter.renderer());
   const loadBefore = load();
-  const series = { before: { draw: [], export: [] }, after: { draw: [], export: [] } };
+  const series = { before: { draw: [], export: [], load: [] }, after: { draw: [], export: [], load: [] } };
+  const one = async (which) => {
+    const g = which === 'before' ? 'speedBefore' : 'speedAfter';
+    // the load beside each run, read just before it
+    series[which].load.push(load());
+    series[which].draw.push(await page.evaluate(([n, f]) => window[n].drawOnly(f), [g, FRAMES]));
+    series[which].export.push(await page.evaluate(([n, f]) => window[n].exportLike(f), [g, FRAMES]));
+  };
+  for (let i = 0; i < RUNS; i++) for (const which of i % 2 ? ['after', 'before'] : ['before', 'after']) await one(which);
+  // a round whose two runs saw very different loads is run again, both kept
+  const reruns = [];
   for (let i = 0; i < RUNS; i++) {
-    for (const which of i % 2 ? ['after', 'before'] : ['before', 'after']) {
-      const g = which === 'before' ? 'speedBefore' : 'speedAfter';
-      series[which].draw.push(await page.evaluate(([n, f]) => window[n].drawOnly(f), [g, FRAMES]));
-      series[which].export.push(await page.evaluate(([n, f]) => window[n].exportLike(f), [g, FRAMES]));
+    const a = series.before.load[i];
+    const b = series.after.load[i];
+    if (a !== null && b !== null && Math.abs(a - b) > LOAD_GAP) {
+      reruns.push(i);
+      for (const which of ['before', 'after']) await one(which);
     }
   }
-  return { renderer, series, load: { before: loadBefore, after: load() } };
+  return { renderer, series, reruns, load: { before: loadBefore, after: load() } };
 }
 
 const median = (xs) => {
@@ -117,8 +132,8 @@ const median = (xs) => {
     server = await serve();
     if (PROFILE) {
       for (const [engine, settings, args, encode] of [
-        ['app-saving', { keepInTray: false, gpu: 'saving' }, [], true],
-        ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu'], false],
+        ['app-saving', { keepInTray: false, gpu: 'saving' }, [NO_OCCLUSION], true],
+        ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu', NO_OCCLUSION], false],
       ]) {
         const { app, win } = await h.launchDev(`profile-${engine}`, { settings, args });
         try {
@@ -146,9 +161,9 @@ const median = (xs) => {
       await browser.close();
     }
     for (const [engine, settings, args] of edgeOnly ? [] : [
-      ['app-saving', { keepInTray: false, gpu: 'saving' }, []],
-      ['app-strong', { keepInTray: false, gpu: 'strong' }, []],
-      ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu']],
+      ['app-saving', { keepInTray: false, gpu: 'saving' }, [NO_OCCLUSION]],
+      ['app-strong', { keepInTray: false, gpu: 'strong' }, [NO_OCCLUSION]],
+      ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu', NO_OCCLUSION]],
     ]) {
       const { app, win } = await h.launchDev(`speed-${engine}`, { settings, args });
       try {
@@ -164,7 +179,7 @@ const median = (xs) => {
     for (const [engine, r] of Object.entries(runs)) {
       const m = (w, k) => median(r.series[w][k]);
       r.median = { drawMs: { before: m('before', 'draw'), after: m('after', 'draw') }, exportFps: { before: m('before', 'export'), after: m('after', 'export') } };
-      check(`${engine}: the effects document was timed both ways, ${RUNS} times each (median export ${r.median.exportFps.before?.toFixed(1)} frames a second before, ${r.median.exportFps.after?.toFixed(1)} after; drawing ${r.median.drawMs.before?.toFixed(2)} ms and ${r.median.drawMs.after?.toFixed(2)} ms a frame; processor ${r.load.before}% then ${r.load.after}%)`, r.series.before.draw.length === RUNS && r.series.after.draw.length === RUNS, { renderer: r.renderer, median: r.median, series: r.series, load: r.load });
+      check(`${engine}: the effects document was timed both ways, ${RUNS} times each${r.reruns.length ? ` and round ${r.reruns.map((i) => i + 1).join(', ')} again for its load` : ''} (median export ${r.median.exportFps.before?.toFixed(1)} frames a second before, ${r.median.exportFps.after?.toFixed(1)} after; drawing ${r.median.drawMs.before?.toFixed(2)} ms and ${r.median.drawMs.after?.toFixed(2)} ms a frame; load before each run ${r.series.before.load.join('/')}% and ${r.series.after.load.join('/')}%)`, r.series.before.draw.length >= RUNS && r.series.after.draw.length >= RUNS, { renderer: r.renderer, median: r.median, series: r.series, reruns: r.reruns, load: r.load });
     }
   } catch (e) {
     check('the check ran to its end', false, String((e && e.stack) || e));
@@ -172,7 +187,7 @@ const median = (xs) => {
     await h.closeAll();
     if (server) server.close();
   }
-  result.runs = Object.fromEntries(Object.entries(runs).map(([e, r]) => [e, { engine: r.engine, renderer: r.renderer, median: r.median, series: r.series, load: r.load }]));
+  result.runs = Object.fromEntries(Object.entries(runs).map(([e, r]) => [e, { engine: r.engine, renderer: r.renderer, median: r.median, series: r.series, reruns: r.reruns, load: r.load }]));
   note(`Before is compose.ts and cover.ts of ${BASE}; ${FRAMES} frames a run. The figures mean something only beside the load recorded with them.`);
   const failed = finish(edgeOnly ? path.join(out, 'edge.json') : path.join(__dirname, 'studio-effects-speed.json'));
   process.exit(failed ? 1 : 0);

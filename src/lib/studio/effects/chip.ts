@@ -4,7 +4,7 @@
 // the canvas keeps it (premultiplied, uploaded unchanged) and nothing is read back: the result is a canvas the caller
 // draws. Where WebGL2 is missing, runs without a graphics chip, or its context is lost, it answers null and index.ts
 // takes the plain code. Needs OffscreenCanvas, so it runs in a worker too.
-import { reduced, type BlurPlan, type EffectPlan } from './plan.ts';
+import { reduced, type BlurPlan, type ColourPlan, type EffectPlan } from './plan.ts';
 
 const VERTEX = `#version 300 es
 void main() {
@@ -27,8 +27,9 @@ uvec4 at(ivec2 p) { return uvec4(round(texelFetch(src, p + origin, 0) * 255.0));
 ivec2 here() { ivec2 p = ivec2(gl_FragCoord.xy); if (toCanvas) p.y = flip - 1 - p.y; return p; }
 `;
 
-// A colour plan (code.ts colourPixels): straight colour, the table, the matrix, premultiplied again.
-const COLOUR = `${HEAD}
+// A colour plan (code.ts colourPixels): straight colour, the table, the matrix, premultiplied again. Shared by COLOUR
+// and by REDUCE, which colours each pixel as it reads it when a clip has both colour and a reduced blur.
+const COLOURED = `
 uniform usampler2D table;
 uniform bool useTable;
 uniform bool useMatrix;
@@ -36,10 +37,9 @@ uniform ivec3 m0;
 uniform ivec3 m1;
 uniform ivec3 m2;
 uniform ivec3 offset;
-void main() {
-  uvec4 p = at(here());
+uvec4 coloured(uvec4 p) {
   uint a = p.a;
-  if (a == 0u) { colour = vec4(0.0); return; }
+  if (a == 0u) return uvec4(0u);
   uvec3 c = a == 255u ? p.rgb : min(uvec3(255u), (p.rgb * 255u + (a >> 1u)) / a);
   if (useTable) c = uvec3(texelFetch(table, ivec2(int(c.r), 0), 0).r, texelFetch(table, ivec2(int(c.g), 0), 0).r, texelFetch(table, ivec2(int(c.b), 0), 0).r);
   if (useMatrix) {
@@ -50,15 +50,22 @@ void main() {
     c = uvec3(min(ivec3(255), q));
   }
   uvec3 o = a == 255u ? c : (c * a + 127u) / 255u;
-  colour = vec4(vec3(o), float(a)) / 255.0;
+  return uvec4(o, a);
+}
+`;
+
+const COLOUR = `${HEAD}${COLOURED}
+void main() {
+  colour = vec4(coloured(at(here()))) / 255.0;
 }`;
 
 // The reduction: each n by n block summed (outside the picture transparent), cut to a whole number.
-const REDUCE = `${HEAD}
+const REDUCE = `${HEAD}${COLOURED}
 uniform ivec2 area;
 uniform int n;
 uniform int shift;
 uniform int pad;
+uniform bool colourFirst;
 void main() {
   ivec2 cell = ivec2(gl_FragCoord.xy);
   uvec4 s = uvec4(0u);
@@ -66,7 +73,7 @@ void main() {
     for (int x = 0; x < n; x++) {
       ivec2 q = cell * n + ivec2(x, y) - ivec2(pad);
       if (q.x < 0 || q.y < 0 || q.x >= area.x || q.y >= area.y) continue;
-      s += at(q);
+      s += colourFirst ? coloured(at(q)) : at(q);
     }
   }
   colour = vec4(s >> uint(shift)) / 255.0;
@@ -86,6 +93,22 @@ void main() {
     s += uint(weights[j + radius]) * at(q);
   }
   colour = vec4((s + 32768u) >> 16u) / 255.0;
+}`;
+
+// One box of 2r + 1 pixels in one direction, transparent outside, rounded to the nearest (code.ts blurPixels box).
+const BOX = `${HEAD}
+uniform ivec2 dir;
+uniform int r;
+void main() {
+  ivec2 p = here();
+  uvec4 s = uvec4(0u);
+  for (int j = -r; j <= r; j++) {
+    ivec2 q = p + dir * j;
+    if (q.x < 0 || q.y < 0 || q.x >= size.x || q.y >= size.y) continue;
+    s += at(q);
+  }
+  uint w = uint(2 * r + 1);
+  colour = vec4((2u * s + w) / (2u * w)) / 255.0;
 }`;
 
 // The enlargement: bilinear weights in 1/(2n) steps, the edge repeated, one rounding over the four.
@@ -115,6 +138,7 @@ type Gl = {
   colour: Program;
   reduce: Program;
   weights: Program;
+  box: Program;
   enlarge: Program;
   input: Target;
   out: Room;
@@ -180,6 +204,7 @@ function setup(): Gl | null {
       colour: program(gl, COLOUR),
       reduce: program(gl, REDUCE),
       weights: program(gl, WEIGHTS),
+      box: program(gl, BOX),
       enlarge: program(gl, ENLARGE),
       input: { tex: texture(gl), w: 0, h: 0, cw: 0, ch: 0, over: 0 },
       out: { cw: 1, ch: 1, over: 0 },
@@ -261,7 +286,25 @@ function run(s: Gl, p: Program, from: WebGLTexture, size: [number, number], to: 
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
-function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad: number, origin: [number, number]) {
+/** The colour plan's uniforms on `p` (COLOURED), the table already uploaded. */
+function setColour(s: Gl, p: Program, c: ColourPlan) {
+  const { gl } = s;
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, s.table);
+  gl.uniform1i(p.at('table'), 1);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.uniform1i(p.at('useTable'), c.table ? 1 : 0);
+  gl.uniform1i(p.at('useMatrix'), c.matrix ? 1 : 0);
+  const m = c.matrix ?? new Int32Array(9);
+  gl.uniform3i(p.at('m0'), m[0], m[1], m[2]);
+  gl.uniform3i(p.at('m1'), m[3], m[4], m[5]);
+  gl.uniform3i(p.at('m2'), m[6], m[7], m[8]);
+  const o = c.offset ?? new Int32Array(3);
+  gl.uniform3i(p.at('offset'), o[0], o[1], o[2]);
+}
+
+/** A blur of `from`; with `colour`, each pixel is coloured as the reduction reads it (the blur must reduce). */
+function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad: number, origin: [number, number], colour: ColourPlan | null = null) {
   const { gl } = s;
   const vw = w + 2 * pad;
   const vh = h + 2 * pad;
@@ -276,23 +319,45 @@ function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad:
       gl.uniform1i(s.reduce.at('n'), b.n);
       gl.uniform1i(s.reduce.at('shift'), 2 * b.k);
       gl.uniform1i(s.reduce.at('pad'), pad);
+      gl.uniform1i(s.reduce.at('colourFirst'), colour ? 1 : 0);
+      // the table's sampler always on its own unit: an integer and a float sampler may not share one, used or not
+      if (colour) setColour(s, s.reduce, colour);
+      else {
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, s.table);
+        gl.uniform1i(s.reduce.at('table'), 1);
+        gl.activeTexture(gl.TEXTURE0);
+      }
     }, origin);
     src = small.tex;
   }
-  const weights = (dir: [number, number]) => () => {
-    gl.uniform2i(s.weights.at('dir'), dir[0], dir[1]);
-    gl.uniform1i(s.weights.at('radius'), b.radius);
-    gl.uniform1iv(s.weights.at('weights'), b.weights);
-  };
-  const across = target(s, 2, rw, rh);
-  run(s, s.weights, src, [rw, rh], across, weights([1, 0]), direct ? origin : [0, 0]);
-  if (direct) {
-    run(s, s.weights, across.tex, [rw, rh], null, weights([0, 1]));
-    return;
+  // the passes: the weights across then down, or three boxes across then three down; between two pictures in turn, the
+  // last onto the canvas when nothing is enlarged
+  type Pass = { p: Program; set: () => void };
+  const weights = (dir: [number, number]): Pass => ({
+    p: s.weights,
+    set: () => {
+      gl.uniform2i(s.weights.at('dir'), dir[0], dir[1]);
+      gl.uniform1i(s.weights.at('radius'), b.radius);
+      gl.uniform1iv(s.weights.at('weights'), b.weights);
+    },
+  });
+  const box = (dir: [number, number], width: number): Pass => ({
+    p: s.box,
+    set: () => {
+      gl.uniform2i(s.box.at('dir'), dir[0], dir[1]);
+      gl.uniform1i(s.box.at('r'), (width - 1) >> 1);
+    },
+  });
+  const passes: Pass[] = b.boxes ? [...b.boxes.map((wd) => box([1, 0], wd)), ...b.boxes.map((wd) => box([0, 1], wd))] : [weights([1, 0]), weights([0, 1])];
+  for (let i = 0; i < passes.length; i++) {
+    const last = i === passes.length - 1;
+    const to = last && direct ? null : target(s, 2 + (i % 2), rw, rh);
+    run(s, passes[i].p, src, [rw, rh], to, passes[i].set, i === 0 && direct ? origin : [0, 0]);
+    if (!to) return;
+    src = to.tex;
   }
-  const down = target(s, 3, rw, rh);
-  run(s, s.weights, across.tex, [rw, rh], down, weights([0, 1]));
-  run(s, s.enlarge, down.tex, [w, h], null, () => {
+  run(s, s.enlarge, src, [w, h], null, () => {
     gl.uniform2i(s.enlarge.at('small'), rw, rh);
     gl.uniform1i(s.enlarge.at('n'), b.n);
     gl.uniform1i(s.enlarge.at('sh'), b.k + 1);
@@ -347,33 +412,22 @@ export function effectsOnChip(picture: TexImageSource, w: number, h: number, pla
     let from = s.input.tex;
     let origin = at;
     const c = plan.colour;
-    if (c) {
-      if (c.table) {
-        gl.bindTexture(gl.TEXTURE_2D, s.table);
-        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 1, gl.RED_INTEGER, gl.UNSIGNED_BYTE, c.table);
-        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
-      }
+    if (c?.table) {
+      gl.bindTexture(gl.TEXTURE_2D, s.table);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 1, gl.RED_INTEGER, gl.UNSIGNED_BYTE, c.table);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
+    }
+    // colour and a blur that reduces: each pixel coloured as the reduction reads it, one full-size pass fewer
+    const folded = !!(c && plan.blur && (plan.blur.n > 1 || pad > 0));
+    if (c && !folded) {
       const into = plan.blur ? target(s, 0, w, h) : null;
-      run(s, s.colour, from, [w, h], into, () => {
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, s.table);
-        gl.uniform1i(s.colour.at('table'), 1);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.uniform1i(s.colour.at('useTable'), c.table ? 1 : 0);
-        gl.uniform1i(s.colour.at('useMatrix'), c.matrix ? 1 : 0);
-        const m = c.matrix ?? new Int32Array(9);
-        gl.uniform3i(s.colour.at('m0'), m[0], m[1], m[2]);
-        gl.uniform3i(s.colour.at('m1'), m[3], m[4], m[5]);
-        gl.uniform3i(s.colour.at('m2'), m[6], m[7], m[8]);
-        const o = c.offset ?? new Int32Array(3);
-        gl.uniform3i(s.colour.at('offset'), o[0], o[1], o[2]);
-      }, origin);
+      run(s, s.colour, from, [w, h], into, () => setColour(s, s.colour, c), origin);
       if (!into) return s.canvas;
       from = into.tex;
       origin = [0, 0];
     }
-    if (plan.blur) blur(s, plan.blur, from, w, h, pad, origin);
+    if (plan.blur) blur(s, plan.blur, from, w, h, pad, origin, folded ? c : null);
     return s.canvas;
   } catch {
     return null;
