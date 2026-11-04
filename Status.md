@@ -26,6 +26,44 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, paused by the owner, 2026-11-04
+
+- **Where it stands.** About three quarters of the stage is merged: Electron 45, the no-chip export and loudness ahead, D10 and D12. Every fork stopped at a safe point, with no process running, no lock held and clean trees. Nothing pushed, released or migrated.
+- **Open.**
+  - Fork 1's D11 gate rows: the RTX at 4K, no chip, the lane timing. Its lanes, ladder and one-pass shapes are built on `claude/power-export-821809` (`f155ca8`) and passed on the AMD chip and at 1080p on the RTX.
+  - Fork 4's effects fail the speed gate (AMD -4%, no chip about half), with two more fixes written and not yet run (`claude/power-effects-72ab66`, `50b0916`).
+- **The handoff** is `Desktop_Power_Handoff.md`: each fork's state, the resume commands, the owner's decisions and the traps.
+
+## Desktop Power, merge 5: a closed project stops decoding, 2026-11-04
+
+- **Done.** Fork 2's D10 follow-up, merged as `85e642a`. `MediaPool.dispose()` and `forget()` now dispose the files' Mediabunny inputs. Before, a frame request still under way at close ran on to its frame, up to 300 4K frames on the processor with no graphics chip. The D10 checks now wait for the application to settle after each row and name the busiest processes.
+- **Evidence.** Typecheck clean; `npm test` 824 of 824, including `tests/studio-media-dispose.test.mjs`. The fork removed the two fixed lines on purpose and three of the four tests then failed.
+- **Not verified in the application.** The port checks were refused from 12:40 to 13:09. The package window drew about one frame a second with every process idle while the laptop was in use. The change touches no rendered output.
+- **Next.** Fork 1's D11 engines: the RTX now, then no chip and the timing. Fork 4's last timing slot. Nothing pushed.
+
+## Desktop Power, merge 4: D10 «معاينة أسرع», 2026-11-04
+
+- **Done.** Fork 2 (`power-preview`), merged as `aa9ac18`, every client; a browser and no profile keep today's behaviour.
+  - P-02: the paused preview's frame memory. After a jump the right frame shows at once, and a frame step takes a few milliseconds.
+  - P-03: «تلقائية», the preview's resolution following the frame rate.
+  - P-04: the stream budget, putting tracks on their light copies.
+  - The preview takes up a light copy made in idle time and tells the application when it is scrubbing or playing.
+- **Evidence, the fork's gate runs** (03:06 to 09:21, then the no-chip fix):
+  - `qa/studio-scrub.cjs` 48 of 48. Every frame from the memory is the decoder's own, 48 of 48 on every engine. With the memory, the right frame after a jump takes 0.1 to 0.3 ms, against 171 to 1318 ms today.
+  - `qa/studio-autores.cjs` 9 of 9. Every gated «تلقائية» play with light copies missed 0 to 0.6% of frames.
+  - `qa/studio-preview-ui.cjs` 9 of 9; Edge's `studio-engine` 41 of 41 and `studio-ui` 122 of 122.
+- **Evidence, re-run by the manager:**
+  - Typecheck, 820 of 820 and the build.
+  - The RTX row in full, 6 of 6. The jump right after opening took 179.9 ms against 162.7 today, inside the rule.
+  - `studio-preview-ui` 8 of 9; its one failure is a light project starting at 1/2 right after a run that left the processor saturated.
+  - On the merged tree: 820 of 820.
+- **Not reproduced by the manager: the no-chip rows.** With no graphics chip, the 4K gop10 row of today's code leaves the window at about one frame a second and the processor near 100% after its media is let go. The hardened checks refuse to time it. That is a finding about today's code, now given to Fork 2. The fork's own no-chip records: 12 of 12, with a jump there taking today's path exactly.
+- **Found on the way.**
+  - Chromium throttles a package window that Windows thinks is covered, to about one draw a second. The D10 checks now turn that off and refuse to time a window that does not draw.
+  - The low-latency decoder made no-chip jumps four times slower (1252 against 267 ms), so it is used only where a hardware decoder is offered.
+  - Back-to-back no-chip 10 s forward steps are 1692 ms against 1639.
+- **Next.** Fork 1's D11 gate runs (about 2 hours on port 3000). Fork 4's effects are still 4% slower on the AMD chip and half speed with no chip. Nothing pushed.
+
 ## Desktop Power, merge 3: the desktop application's D12 (0.8.0, bridge 9), 2026-11-04
 
 - **Done.** Fork 3 (`power-desktop`), merged as `411007d`. The desktop application only; a browser keeps today's behaviour.

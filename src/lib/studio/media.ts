@@ -9,12 +9,17 @@
 // the preview reads in its place (paused frames and playback), while the export and stills read the
 // original; and a source the browser cannot decode may be converted into an editable copy, which is then
 // read for everything. A light copy's frames are matched to the original's by their first timestamps, so a
-// cut lands on the same frame in both. Browser only.
-import type { CanvasSink, Input, WrappedCanvas } from 'mediabunny';
+// cut lands on the same frame in both.
+// When the plan gives the paused preview memory (D10, «ذاكرة الإطارات للتنقل», scrub.ts), the paused frames come from a
+// decoder of their own that keeps the frames it passes, at the size the preview draws them; the export's decoders
+// (sink for frameAt, passSink for frames) are never that one. With no memory given, paused frames are decoded as
+// they always were. Browser only.
+import type { CanvasSink, EncodedPacketSink, Input, VideoSample, VideoSampleSink, WrappedCanvas } from 'mediabunny';
 import { US, type Micros, type ProjectDoc, type Source } from './schema.ts';
 import { DeviceCache } from './cache.ts';
+import { divisorFor, EPS, FrameStore, THUMB_PART, thumbShare, type Kept } from './scrub.ts';
 import { PEAKS_PER_SECOND, peaksKey, reduceInto } from './peaks.ts';
-import type { NativeCopies, NativeMediaRef } from '../native/index.ts';
+import type { NativeCopies, NativeMediaRef, NativeQueueState } from '../native/index.ts';
 
 export type SourceState =
   | { kind: 'loading'; done: number; total: number }
@@ -29,6 +34,45 @@ export type MediaTools = { heavy: boolean; audioUnsupported: boolean; convertibl
 const UNDECODABLE = 'هذا المتصفح لا يفك ترميز هذا الفيديو.';
 
 export const contentUrl = (asset: string, version: number) => `/api/media/${asset}/content?v=${version}`;
+
+type Canvas = HTMLCanvasElement | OffscreenCanvas;
+/**
+ * Seconds of frames kept behind where the person is, read while nothing else is (a step back is then drawn at once).
+ * A jump never waits for them: it paints only the frame it asked for, so its sharp frame comes no later than before.
+ */
+export const SCRUB_BEHIND = 0.5;
+/** Seconds read ahead of where the person is, while nothing plays, at most a quarter of the frames the memory holds. */
+export const SCRUB_AHEAD = 2;
+/** Milliseconds with nothing asked before anything is read ahead, behind or small: a drag or a run of jumps waits for nothing. */
+export const SCRUB_IDLE = 150;
+
+/** The paused preview's own decoder (D10): the light copy's when there is one, its key frames, and the stretch it is reading. */
+type Scrub = {
+  sink: VideoSampleSink;
+  /**
+   * The decoder a jump reads with where the graphics chip decodes: asked to give each frame as soon as it is decoded
+   * (WebCodecs optimizeForLatency).
+   */
+  jump: VideoSampleSink;
+  /**
+   * Whether a hardware decoder is offered for this source. Where none is (no graphics chip), a jump takes today's path:
+   * one frame asked for, and the decoder empties itself. Measured on 2026-11-04 with no graphics chip, 2 s key frames: a
+   * pass that is not emptied held the frame back (a jump right after opening at 349 ms against 276 today), and the
+   * low-latency decoder, which decodes on one thread there, was far slower (1252 ms against 267).
+   */
+  hw: boolean;
+  keys: EncodedPacketSink;
+  /** How far the frame source's times are from the original's (a light copy, media.ts elementOffset). */
+  off: number;
+  w: number;
+  h: number;
+  run: Run | null;
+  /** The pass filling the small frames, and what it has filled (their share and the stretch), once filled. */
+  fill: Run | null;
+  filled: string | null;
+};
+/** One forward pass of the decoder: where it is (the last frame read, in its own times) and the frame before. */
+type Run = { it: AsyncGenerator<VideoSample, void, unknown>; d: number; pos: number; prev: Kept<Canvas> | null; done: boolean; frame: number; kept: number };
 
 type Loaded = {
   source: Source;
@@ -54,6 +98,19 @@ type Loaded = {
   /** The editable copy read for everything, when the browser cannot decode the original (D5). */
   converted?: string;
   audioUnsupported?: boolean;
+  /** D10: the paused preview's own decoder, the frame on screen, the newest time asked (seconds) and where the person is. */
+  scrub?: Promise<Scrub>;
+  shown?: Kept<Canvas> | null;
+  /** The frame on screen is a small one, shown while the sharp one is read. */
+  shownSmall?: boolean;
+  /** Wakes the frames' reading from its short wait when something is asked. */
+  wake?: () => void;
+  want?: number | null;
+  anchor?: number;
+  scrubbing?: boolean;
+  /** The kept frames failed for this source once: it is decoded as it always was from then on. */
+  scrubFailed?: boolean;
+  scrubReady?: Scrub;
 };
 
 /** What the application's tools know of a source: how it is named, its copies, and the work on them. */
@@ -84,6 +141,18 @@ export async function probeFile(file: Blob): Promise<{ media: 'video' | 'image' 
   return null;
 }
 
+/** Whether the browser offers a hardware decoder for a track (WebCodecs, prefer-hardware): none with no graphics chip. */
+async function hardwareDecodes(track: { getDecoderConfig(): Promise<VideoDecoderConfig | null> }): Promise<boolean> {
+  try {
+    if (typeof VideoDecoder === 'undefined') return false;
+    const config = await track.getDecoderConfig();
+    if (!config) return false;
+    return (await VideoDecoder.isConfigSupported({ ...config, hardwareAcceleration: 'prefer-hardware' })).supported === true;
+  } catch {
+    return false;
+  }
+}
+
 export class MediaPool {
   private loaded = new Map<string, Loaded>();
   private states = new Map<string, SourceState>();
@@ -95,6 +164,47 @@ export class MediaPool {
 
   constructor(opts: { cache: DeviceCache | null; onChange: () => void; url?: (asset: string, version: number) => string }) {
     this.opts = opts;
+    // D12: a light copy the application made in idle time is read from the moment it is ready
+    this.unqueue = opts.cache?.hasCopyQueue ? opts.cache.onQueue((st) => void this.copiesReady(st)) : null;
+  }
+
+  private unqueue: (() => void) | null = null;
+  /** The light copies already taken up from the queue, by name; and those ready while playing, taken up at the pause. */
+  private takenUp = new Set<string>();
+  private readyWhilePlaying = new Set<string>();
+
+  /** The queue said what it holds: a source whose 720p light copy is now ready reads it (never in the middle of a play). */
+  private async copiesReady(st: NativeQueueState) {
+    for (const item of st.items) {
+      if (item.state !== 'ready' || this.takenUp.has(item.name)) continue;
+      for (const [id, t] of this.tooling) {
+        if (t.copies?.names.proxy['720'] !== item.name) continue;
+        const l = this.loaded.get(id);
+        if (!l || l.preview) {
+          this.takenUp.add(item.name);
+          continue;
+        }
+        if (this.playing) {
+          this.readyWhilePlaying.add(item.name);
+          continue;
+        }
+        this.takenUp.add(item.name);
+        await this.takeUp(l, t);
+      }
+    }
+  }
+
+  private async takeUp(l: Loaded, t: Tooling) {
+    try {
+      const copies = await this.opts.cache?.copies(t.ref);
+      if (this.disposed || !copies?.proxy || l.preview) return;
+      t.copies = copies;
+      await this.openPreview(l, copies.proxy.url, copies.proxy.name, copies.proxy.height);
+      t.proxy = { kind: 'ready', height: copies.proxy.height };
+    } catch {
+      // the preview goes on reading the original
+    }
+    if (!this.disposed) this.opts.onChange();
   }
 
   state(id: string): SourceState | undefined {
@@ -194,8 +304,15 @@ export class MediaPool {
   }
 
   /** How far a playing element's time is from the source's (a light copy that starts elsewhere than its original). */
-  elementOffset(id: string): number {
+  elementOffset(id: string, clipId?: string): number {
+    const el = clipId ? this.elements.get(clipId) : null;
+    if (el && el.dataset.copy === '0') return 0;
     return this.loaded.get(id)?.preview?.offset ?? 0;
+  }
+
+  /** Whether a source has a light copy the preview can play (D5). */
+  hasCopy(id: string): boolean {
+    return !!this.loaded.get(id)?.preview;
   }
 
   private sources = new Map<string, Source>();
@@ -210,6 +327,12 @@ export class MediaPool {
       this.elements.delete(clipId);
     }
     l?.image?.close();
+    if (l) {
+      void this.resetScrub(l);
+      // a decode still under way on these files stops now (Mediabunny checks this in every pass)
+      l.preview?.input.dispose();
+      l.input?.dispose();
+    }
     this.loaded.delete(id);
   }
 
@@ -222,6 +345,8 @@ export class MediaPool {
     const offset = original ? (await original.getFirstTimestamp()) - (await v.getFirstTimestamp()) : 0;
     l.preview = { input, sink: new mb.CanvasSink(v), url, name, height, offset };
     l.last = undefined;
+    // the kept frames were the original's; the light copy's are read from now on
+    await this.resetScrub(l);
     // elements playing the original now play the light copy
     for (const [clipId, el] of this.elements) if (el.dataset.source === l.source.id) {
       el.pause();
@@ -360,6 +485,7 @@ export class MediaPool {
   frameNear(id: string, at: Micros): CanvasImageSource | null {
     const l = this.loaded.get(id);
     if (!l?.sink && !l?.preview) return null;
+    if (this.store && !l.scrubFailed && this.fits(l)) return this.keptNear(l, at / US);
     const s = at / US;
     if (l.last && s >= l.last.from - 1e-4 && s < l.last.to - 1e-4) return l.last.canvas as CanvasImageSource;
     if (l.pending !== at) {
@@ -387,6 +513,479 @@ export class MediaPool {
     } finally {
       l.decoding = false;
     }
+  }
+
+  // ------------------------------------------------------------ D10: the frames kept for the paused preview
+
+  /** The frames near the playhead, at the size the preview draws them. */
+  private store: FrameStore<Canvas> | null = null;
+  /** Every frame of the stretch the timeline uses, small (scrub.ts THUMB_WIDTH), filled while nothing else is read. */
+  private thumbs: FrameStore<Canvas> | null = null;
+  /** Canvases of frames let go, ready for the next frames of the same size. */
+  private spare: Canvas[] = [];
+  private scratch = new Map<string, Canvas>();
+  /** Preview pixels each source is drawn at, at most, and the stretch of it the timeline uses (preview.ts, scrub.ts). */
+  private needs = new Map<string, { w: number; h: number; range: [number, number] | null }>();
+  private playing = false;
+  /** The source asked last: the only one whose decoder stays open between asks. */
+  private latest: Loaded | null = null;
+
+  /**
+   * «ذاكرة الإطارات للتنقل» (scale.ts frameCacheMB): megabytes of decoded frames the paused preview may keep.
+   * 0 is the floor: paused frames are decoded one at a time, as they always were.
+   */
+  setFrameCache(mb: number) {
+    const bytes = Math.max(0, Math.floor(mb || 0)) * 1024 * 1024;
+    if (!bytes) {
+      if (!this.store) return;
+      this.store = null;
+      this.thumbs = null;
+      for (const l of this.loaded.values()) void this.resetScrub(l);
+      this.spare = [];
+      this.scratch.clear();
+      if (!this.disposed) this.opts.onChange();
+      return;
+    }
+    const small = Math.floor(bytes * THUMB_PART);
+    this.store ??= new FrameStore<Canvas>(bytes - small, (c) => this.letGo(c));
+    this.thumbs ??= new FrameStore<Canvas>(small, (c) => this.letGo(c));
+    this.store.budget = bytes - small;
+    this.thumbs.budget = small;
+    this.store.evict(this.onScreen());
+    this.thumbs.evict(this.onScreen());
+  }
+
+  /**
+   * Where the frame frameNear gives for a source now starts and ends (seconds), whether a newer ask is still read, and
+   * whether it is at the preview's size or one of the small frames shown meanwhile (for the checks).
+   */
+  shownSpan(id: string): { from: number; to: number; busy: boolean; sharp: boolean } | null {
+    const l = this.loaded.get(id);
+    if (!l) return null;
+    if (this.store && !l.scrubFailed && this.fits(l)) return l.shown ? { from: l.shown.from, to: l.shown.to, busy: l.want != null, sharp: !l.shownSmall } : null;
+    return l.last ? { from: l.last.from, to: l.last.to, busy: l.pending != null, sharp: true } : null;
+  }
+
+  /** The kept frames that answer `s` (seconds) now, sharp and small, without asking for any (for the checks). */
+  keptAt(id: string, s: number): { sharp: CanvasImageSource | null; small: CanvasImageSource | null } {
+    const l = this.loaded.get(id);
+    const sc = l?.scrubReady;
+    const d = l && sc ? this.shareOf(l, sc) : 0;
+    const td = sc && d ? this.smallOf(sc, d) : 0;
+    const peek = (store: FrameStore<Canvas> | null, share: number) => {
+      const f = store && share ? store.find(id, s, share) : null;
+      return (f?.canvas as CanvasImageSource) ?? null;
+    };
+    return { sharp: peek(this.store, d), small: peek(this.thumbs, td) };
+  }
+
+  /** What the frame memory holds now (for the checks). */
+  frameCache(): { budget: number; bytes: number; frames: number; small: { budget: number; bytes: number; frames: number } } {
+    return {
+      budget: this.store?.budget ?? 0,
+      bytes: this.store?.bytes ?? 0,
+      frames: this.store?.count() ?? 0,
+      small: { budget: this.thumbs?.budget ?? 0, bytes: this.thumbs?.bytes ?? 0, frames: this.thumbs?.count() ?? 0 },
+    };
+  }
+
+  /** The largest size, in preview pixels, a source is drawn at now, and the stretch of it used (preview.ts). */
+  setNeed(id: string, w: number, h: number, range: [number, number] | null = null) {
+    const was = this.needs.get(id);
+    this.needs.set(id, { w, h, range });
+    // a longer stretch is filled again where it was not
+    if (was && (was.range?.[0] !== range?.[0] || was.range?.[1] !== range?.[1])) {
+      const l = this.loaded.get(id);
+      if (l?.scrubReady) l.scrubReady.filled = null;
+    }
+  }
+
+  /** While playing nothing is read ahead, and no decoder is kept open for it; a light copy ready meanwhile is taken up after. */
+  setPlaying(p: boolean) {
+    this.playing = p;
+    if (p) {
+      for (const l of this.loaded.values()) if (!l.scrubbing) void this.endRun(l);
+    } else if (this.readyWhilePlaying.size) {
+      this.readyWhilePlaying.clear();
+      const st = this.opts.cache?.queued;
+      if (st) void this.copiesReady(st);
+    }
+  }
+
+  private onScreen(): Set<Canvas> {
+    const s = new Set<Canvas>();
+    for (const l of this.loaded.values()) if (l.shown) s.add(l.shown.canvas);
+    return s;
+  }
+
+  /** A kept frame let go: its canvas serves the next frame of its size, unless it is still on screen. */
+  private letGo(c: Canvas) {
+    if (this.onScreen().has(c)) return;
+    if (this.spare.length < 12) this.spare.push(c);
+    else c.width = 0;
+  }
+
+  private canvas(w: number, h: number): Canvas {
+    const i = this.spare.findIndex((c) => c.width === w && c.height === h);
+    if (i >= 0) return this.spare.splice(i, 1)[0];
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    return c;
+  }
+
+  /** The share of its size a source's frames are kept at; 0 when fewer than eight of them would fit (then the floor). */
+  private shareOf(l: Loaded, sc: Scrub): number {
+    const need = this.needs.get(l.source.id);
+    const d = need ? divisorFor(sc.w, sc.h, need.w, need.h) : 1;
+    const bytes = (sc.w / d) * (sc.h / d) * 4;
+    return this.store && bytes * 8 <= this.store.budget ? d : 0;
+  }
+
+  /** The share of the small frames, when they are smaller than the frames at the preview's size; else 0 (none kept). */
+  private smallOf(sc: Scrub, d: number): number {
+    const td = thumbShare(sc.w, sc.h);
+    return this.thumbs && td > d ? td : 0;
+  }
+
+  /** Whether a source's frames are kept: its decoder is not open yet, or its frames fit the memory given. */
+  private fits(l: Loaded): boolean {
+    return !l.scrubReady || this.shareOf(l, l.scrubReady) > 0;
+  }
+
+  private scrubOf(l: Loaded): Promise<Scrub> {
+    return (l.scrub ??= (async () => {
+      const mb = await mediabunny();
+      const p = l.preview;
+      const track = (await (p?.input ?? l.input!).getPrimaryVideoTrack())!;
+      return { sink: new mb.VideoSampleSink(track), jump: new mb.VideoSampleSink(track, { optimizeForLatency: true }), hw: await hardwareDecodes(track), keys: new mb.EncodedPacketSink(track), off: p?.offset ?? 0, w: await track.getDisplayWidth(), h: await track.getDisplayHeight(), run: null, fill: null, filled: null };
+    })());
+  }
+
+  private async endRun(l: Loaded) {
+    const sc = l.scrubReady;
+    if (!sc) return;
+    const runs = [sc.run, sc.fill];
+    sc.run = null;
+    sc.fill = null;
+    for (const r of runs) if (r) await r.it.return(undefined).catch(() => undefined);
+  }
+
+  /** The kept frames of a source are let go and its decoder closed (a light copy opened, the source forgotten). */
+  private async resetScrub(l: Loaded) {
+    const sc = l.scrubReady;
+    l.scrub = undefined;
+    l.scrubReady = undefined;
+    l.want = null;
+    l.shown = null;
+    this.store?.drop(l.source.id);
+    this.thumbs?.drop(l.source.id);
+    if (!sc) return;
+    const runs = [sc.run, sc.fill];
+    sc.run = null;
+    sc.fill = null;
+    for (const r of runs) if (r) await r.it.return(undefined).catch(() => undefined);
+  }
+
+  /**
+   * frameNear with kept frames: the kept frame for `s` (seconds) when there is one; else its small frame while the
+   * sharp one is read, or the frame on screen when there is no small one yet.
+   */
+  private keptNear(l: Loaded, s: number): CanvasImageSource | null {
+    const id = l.source.id;
+    const sc = l.scrubReady;
+    const d = sc ? this.shareOf(l, sc) : 0;
+    const f = d ? this.store!.find(id, s, d) : null;
+    if (f) {
+      l.shown = f;
+      l.shownSmall = false;
+      l.want = null;
+      l.anchor = s;
+      // nothing to decode: read on ahead while nothing plays
+      if (!l.scrubbing && !this.playing) void this.scrubLoop(l);
+      return f.canvas as CanvasImageSource;
+    }
+    const td = sc && d ? this.smallOf(sc, d) : 0;
+    const small = td ? this.thumbs!.find(id, s, td) : null;
+    if (small) {
+      l.shown = small;
+      l.shownSmall = true;
+    }
+    if (l.want !== s) {
+      l.want = s;
+      if (!l.scrubbing) void this.scrubLoop(l);
+      else l.wake?.();
+    }
+    return (l.shown?.canvas as CanvasImageSource) ?? null;
+  }
+
+  private async scrubLoop(l: Loaded) {
+    l.scrubbing = true;
+    const id = l.source.id;
+    try {
+      const sc = await this.scrubOf(l);
+      if (!l.scrub) return;
+      l.scrubReady = sc;
+      let asked = performance.now();
+      while (!this.disposed && this.store && !l.scrubFailed && this.loaded.get(id) === l && l.scrubReady === sc) {
+        const d = this.shareOf(l, sc);
+        if (!d) {
+          // its frames are too large for the memory given: decoded as they always were, from the next ask
+          await this.endRun(l);
+          l.want = null;
+          if (!this.disposed) this.opts.onChange();
+          break;
+        }
+        if (sc.run && sc.run.d !== d) {
+          const r = sc.run;
+          sc.run = null;
+          await r.it.return(undefined).catch(() => undefined);
+          this.store.drop(id, d);
+        }
+        const want = l.want;
+        if (want != null) {
+          this.latest = l;
+          for (const o of this.loaded.values()) if (o !== l && !o.scrubbing) void this.endRun(o);
+          await this.readTo(l, sc, want, d);
+          asked = performance.now();
+          continue;
+        }
+        if (this.playing) break;
+        const quiet = performance.now() - asked;
+        if (quiet < SCRUB_IDLE) {
+          // woken at once by an ask (keptNear)
+          await new Promise<void>((r) => {
+            l.wake = r;
+            setTimeout(r, SCRUB_IDLE - quiet);
+          });
+          l.wake = undefined;
+          continue;
+        }
+        // while nothing is asked: the frames just ahead of where the person is, then just behind, then the small ones
+        const anchor = l.anchor ?? 0;
+        const frames = Math.max(8, Math.floor(this.store.budget / ((sc.w / d) * (sc.h / d) * 4) / 4));
+        const span = (secs: number) => Math.min(secs, frames * (sc.run?.frame ?? 1 / 30));
+        if (await this.readSpan(l, sc, d, anchor, anchor + span(SCRUB_AHEAD))) continue;
+        if (await this.readSpan(l, sc, d, Math.max(0, anchor - span(SCRUB_BEHIND)), anchor)) continue;
+        if (await this.fillStep(l, sc, d)) continue;
+        break;
+      }
+      if (this.latest !== l || this.playing) await this.endRun(l);
+    } catch {
+      // a decoder that fails here leaves this source to the decoder of old
+      l.scrubFailed = true;
+      l.want = null;
+      l.shown = null;
+      await this.endRun(l).catch(() => undefined);
+      if (!this.disposed) this.opts.onChange();
+    } finally {
+      l.scrubbing = false;
+    }
+  }
+
+  /** Reads until the frame for `want` (seconds, the original's time) is kept and known, or something newer is asked. */
+  private async readTo(l: Loaded, sc: Scrub, want: number, d: number) {
+    const id = l.source.id;
+    const store = this.store!;
+    const done = (f: Kept<Canvas> | null) => {
+      if (f) {
+        l.shown = f;
+        l.shownSmall = false;
+      }
+      if (l.want === want) l.want = null;
+      l.anchor = want;
+      if (!this.disposed) this.opts.onChange();
+    };
+    const kept = store.find(id, want, d);
+    if (kept) return done(kept);
+    // nothing else decodes beside a jump: the small frames' pass starts again later from where they stop
+    if (sc.fill) {
+      const f = sc.fill;
+      sc.fill = null;
+      await f.it.return(undefined).catch(() => undefined);
+    }
+    const ts = Math.max(0, want - sc.off);
+    const keyAt = async () => (await sc.keys.getKeyPacket(ts + EPS, { metadataOnly: true }))?.timestamp ?? 0;
+    // the frame that answers `want` is known before it is decoded (the packets' own times): shown as soon as it comes
+    const target = (await sc.keys.getPacket(ts + EPS, { metadataOnly: true }))?.timestamp;
+    const targetFrom = target === undefined ? null : target + sc.off;
+    let run = sc.run;
+    // the pass under way goes on when it has already passed the key frame `want` needs; otherwise a new one starts there
+    if (run && (run.done || ts + EPS < run.pos || (await keyAt()) > run.pos + EPS)) {
+      sc.run = null;
+      await run.it.return(undefined).catch(() => undefined);
+      run = null;
+    }
+    if (!run && !sc.hw) {
+      // no hardware decoder: today's path, the one frame the export takes for `want`, nothing else started until idle
+      const sample = await sc.sink.getSample(ts + EPS);
+      if (!sample) return done(null);
+      try {
+        const from = sample.timestamp + sc.off;
+        let f = store.get(id, from, d);
+        if (!f && this.store === store) {
+          const c = this.paint(sample, sc.w / d, sc.h / d, d);
+          f = store.put(id, { from, to: from + (sample.duration || 1 / 30), canvas: c, bytes: c.width * c.height * 4, d });
+          const keep = this.onScreen();
+          keep.add(c);
+          store.evict(keep);
+        }
+        return done(f);
+      } finally {
+        sample.close();
+      }
+    }
+    if (!run) run = sc.run = { it: sc.jump.samples(ts), d, pos: -Infinity, prev: null, done: false, frame: 1 / 30, kept: 0 };
+    while (l.want === want && !this.disposed && this.store === store && sc.run === run) {
+      // the frames before `want` are passed without being painted: the jump waits for its own frame only
+      const f = await this.pull(l, sc, run, d, store, want);
+      if (f === null) return done(store.find(id, want, d));
+      if (f !== 'passed' && targetFrom !== null && Math.abs(f.from - targetFrom) < 1e-6) return done(f);
+      const hit = store.find(id, want, d);
+      if (hit && !hit.open) return done(hit);
+    }
+  }
+
+  /**
+   * One more frame toward keeping [from, to) at the preview's size, while nothing plays: from where the kept frames stop,
+   * by the pass under way when it is there already, else by a new one; false once the stretch is kept.
+   */
+  private async readSpan(l: Loaded, sc: Scrub, d: number, from: number, to: number): Promise<boolean> {
+    const store = this.store;
+    if (!store || to - from < EPS) return false;
+    const id = l.source.id;
+    const gap = store.coveredUntil(id, from, d);
+    if (gap >= to - EPS) return false;
+    const ts = Math.max(0, gap - sc.off);
+    let run = sc.run;
+    if (run && (run.done || run.d !== d || run.pos > ts + EPS || ((await sc.keys.getKeyPacket(ts + EPS, { metadataOnly: true }))?.timestamp ?? 0) > run.pos + EPS)) {
+      sc.run = null;
+      await run.it.return(undefined).catch(() => undefined);
+      run = null;
+    }
+    if (!run) run = sc.run = { it: sc.sink.samples(ts), d, pos: -Infinity, prev: null, done: false, frame: 1 / 30, kept: 0 };
+    const f = await this.pull(l, sc, run, d, store, from);
+    // the source ended before `to`: nothing more to read there
+    return f !== null || !run.done ? true : false;
+  }
+
+  /**
+   * One more small frame of the stretch the timeline uses, from where the person is to its end and then from its start,
+   * while nothing else is read; false once the stretch is kept or the small frames' memory is full.
+   */
+  private async fillStep(l: Loaded, sc: Scrub, d: number): Promise<boolean> {
+    const id = l.source.id;
+    const thumbs = this.thumbs;
+    const td = this.smallOf(sc, d);
+    if (!thumbs || !td) return false;
+    const range = this.needs.get(id)?.range ?? [0, (l.duration ?? 0) / US];
+    const key = `${td}:${range[0]}:${range[1]}`;
+    if (sc.filled === key) return false;
+    const full = () => thumbs.bytes + (sc.w / td) * (sc.h / td) * 4 > thumbs.budget;
+    let run = sc.fill;
+    if (run && (run.done || run.d !== td || run.pos + sc.off > range[1] + EPS)) {
+      sc.fill = null;
+      await run.it.return(undefined).catch(() => undefined);
+      // a pass that kept nothing new would only start again where it did
+      if (!run.kept) {
+        sc.filled = key;
+        return false;
+      }
+      run = null;
+    }
+    if (!run) {
+      const at = Math.min(range[1], Math.max(range[0], l.anchor ?? range[0]));
+      let from = thumbs.coveredUntil(id, at, td);
+      if (from >= range[1] - EPS) from = thumbs.coveredUntil(id, range[0], td);
+      if (from >= range[1] - EPS || full()) {
+        sc.filled = key;
+        return false;
+      }
+      run = sc.fill = { it: sc.sink.samples(Math.max(0, from - sc.off)), d: td, pos: -Infinity, prev: null, done: false, frame: 1 / 30, kept: 0 };
+    }
+    if (full()) {
+      sc.filled = key;
+      return false;
+    }
+    await this.pull(l, sc, run, td, thumbs, range[0] - 1, false);
+    return true;
+  }
+
+  /**
+   * The next frame of a pass. It is kept (painted once at its share of the size) unless it ends before `keepFrom`, when it
+   * is only passed ('passed'); null at the end of the source or when the pass was ended from elsewhere.
+   */
+  private async pull(l: Loaded, sc: Scrub, run: Run, d: number, store: FrameStore<Canvas>, keepFrom: number, evict = true): Promise<Kept<Canvas> | 'passed' | null> {
+    const r = await run.it.next();
+    if (sc.run !== run && sc.fill !== run) {
+      // ended from elsewhere: what it read last is not the source's end
+      if (!r.done) r.value.close();
+      return null;
+    }
+    if (r.done) {
+      run.done = true;
+      if (run.prev) store.close(run.prev, Infinity);
+      return null;
+    }
+    const sample = r.value;
+    try {
+      const id = l.source.id;
+      const from = sample.timestamp + sc.off;
+      if (run.prev) store.close(run.prev, from);
+      run.pos = sample.timestamp;
+      if (sample.duration > 0) run.frame = sample.duration;
+      let f = store.get(id, from, d);
+      if (!f && from + (sample.duration || run.frame) <= keepFrom + EPS) {
+        run.prev = null;
+        return 'passed';
+      }
+      if (!f) {
+        const c = this.paint(sample, sc.w / d, sc.h / d, d);
+        f = store.put(id, { from, to: from + (sample.duration || run.frame), canvas: c, bytes: c.width * c.height * 4, d });
+        run.kept++;
+        if (evict) {
+          const keep = this.onScreen();
+          keep.add(c);
+          store.evict(keep);
+        }
+      }
+      run.prev = f;
+      return f;
+    } finally {
+      sample.close();
+    }
+  }
+
+  /** A decoded frame on a canvas of w x h: drawn at half the source's size first, then halved, so no pixel is skipped. */
+  private paint(sample: VideoSample, w: number, h: number, d: number): Canvas {
+    const c = this.canvas(w, h);
+    const g = c.getContext('2d', { alpha: false }) as CanvasRenderingContext2D;
+    if (d <= 2) {
+      sample.drawWithFit(g, { fit: 'fill' });
+      return c;
+    }
+    let src: Canvas | null = null;
+    for (let k = 2; k < d; k *= 2) {
+      const step = this.scratchOf(w * (d / k), h * (d / k));
+      const sg = step.getContext('2d', { alpha: false }) as CanvasRenderingContext2D;
+      if (!src) sample.drawWithFit(sg, { fit: 'fill' });
+      else sg.drawImage(src, 0, 0, step.width, step.height);
+      src = step;
+    }
+    g.drawImage(src!, 0, 0, w, h);
+    return c;
+  }
+
+  private scratchOf(w: number, h: number): Canvas {
+    const key = `${w}x${h}`;
+    let c = this.scratch.get(key);
+    if (!c) {
+      c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      this.scratch.set(key, c);
+    }
+    return c;
   }
 
   /** The exact frame at `at`, waited for (the export, and a still). The canvas may be reused by the next call. */
@@ -447,18 +1046,30 @@ export class MediaPool {
     return null;
   }
 
-  /** A media element for one playing clip, playing its source from its own place, or its light copy (elementOffset). */
-  element(clipId: string, sourceId: string): HTMLMediaElement | null {
+  /**
+   * A media element for one playing clip, playing its source from its own place, or its light copy (elementOffset).
+   * `copy` false plays the source even when a light copy exists (the stream budget, playback.ts streamPlan).
+   */
+  element(clipId: string, sourceId: string, copy = true): HTMLMediaElement | null {
     const l = this.loaded.get(sourceId);
     if (!l || l.source.media === 'image') return null;
+    const fromCopy = copy && !!l.preview;
     let el = this.elements.get(clipId);
-    if (!el || el.dataset.source !== sourceId) {
-      el?.pause();
+    if (!el || el.dataset.source !== sourceId || (el.dataset.copy === '1') !== fromCopy) {
+      if (el) {
+        el.pause();
+        // another copy of the same source: the old element's decoder is let go at once
+        if (el.dataset.source === sourceId) {
+          el.removeAttribute('src');
+          el.load();
+        }
+      }
       el = document.createElement(l.source.media === 'audio' ? 'audio' : 'video');
       el.preload = 'auto';
       (el as HTMLVideoElement).playsInline = true;
       el.dataset.source = sourceId;
-      const src = l.preview?.url ?? l.url;
+      el.dataset.copy = fromCopy ? '1' : '0';
+      const src = fromCopy ? l.preview!.url : l.url;
       // the application's own addresses are another origin: asked with CORS, which the application answers
       // for the site, so a canvas that draws the playing video can still be read (a frame, the other window)
       if (src.startsWith('commshub-file:')) el.crossOrigin = 'anonymous';
@@ -468,6 +1079,11 @@ export class MediaPool {
     return el;
   }
 
+  /** The element a clip plays from now, if it has one (the drawing reads it; only element() makes one). */
+  elementOf(clipId: string): HTMLMediaElement | null {
+    return this.elements.get(clipId) ?? null;
+  }
+
   /** Stops every element whose clip is not in `keep`. */
   pauseExcept(keep: Set<string>) {
     for (const [id, el] of this.elements) if (!keep.has(id) && !el.paused) el.pause();
@@ -475,6 +1091,9 @@ export class MediaPool {
 
   dispose() {
     this.disposed = true;
+    // the project is closed: the application stops making its light copies (D12)
+    this.unqueue?.();
+    this.opts.cache?.stopQueue();
     for (const el of this.elements.values()) {
       el.pause();
       el.removeAttribute('src');
@@ -485,7 +1104,15 @@ export class MediaPool {
     const urls = [...this.blobUrls.values()];
     this.blobUrls.clear();
     setTimeout(() => urls.forEach((u) => URL.revokeObjectURL(u)), 3000);
-    for (const l of this.loaded.values()) l.image?.close();
+    for (const l of this.loaded.values()) {
+      l.image?.close();
+      void this.resetScrub(l);
+      // the project is closed: a decode still under way stops now instead of running to its frame (on a computer with no
+      // graphics chip that is seconds of the processor), and the files' readers are let go
+      l.preview?.input.dispose();
+      l.input?.dispose();
+    }
+    this.store = null;
     this.loaded.clear();
   }
 }

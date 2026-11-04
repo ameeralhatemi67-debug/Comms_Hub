@@ -2897,6 +2897,42 @@ While it works: «جارٍ القياس …٪…» with «إلغاء». Afterwar
   proof is `qa/studio-crossdevice.cjs`.
 - Nothing is scheduled: the measurement runs when the person asks.
 
+## 63.7 A faster preview (D10), 2026-11-04
+
+Phase D10 of `Desktop_Power_Ideas.md` (ideas P-02, P-03 and P-04). Speed only: the preview shows the same project at the same
+moments, and the export reads none of this. Inside the application before a measurement, and in a browser, the preview is
+as it was in 62.5 and 63.4.
+
+**«ذاكرة الإطارات للتنقل».** Once the device is measured, the paused preview keeps the frames it decodes, in the memory the plan
+of 63.6 gives (64 MB a gigabyte of the computer's memory, at most 3 GB; «أخف على الجهاز» half, «أقصى ما يقدر عليه الجهاز» twice).
+- The frames near the playhead, at the size the preview draws them: a step back or forward, or a return to a moment, is drawn
+  at once. A source that is enlarged on the canvas (a larger size, a key, a crop, an entry or exit movement) keeps larger
+  frames.
+- Every frame of the stretch of each source the timeline uses, small (at most 480 pixels wide), in a third of the memory,
+  filled while the preview is paused and nothing else is read: after a jump the right frame appears at once, small, and its
+  sharp version replaces it.
+- A jump waits for nothing else: it reads only the frame it asks for, so its sharp frame comes as soon as it did before.
+  What is read ahead, behind and small is read only after a moment with nothing asked, and stops at the next ask.
+- A time shows the frame the export takes for it. Nothing is read ahead while playing.
+
+**«تلقائية».** A first choice in «أثناء التشغيل», in the preview's menu and in «عرض». While playing, the preview draws each project
+frame once and counts those it could not draw in time:
+- a quarter of a second with two or more missed lowers it one step (كاملة، 1/2، 1/4);
+- four calm seconds raise it one step, never back to a step that missed during the same play;
+- a play starts where the last play of the same shape ended on this device, else at «دقة المعاينة عند البدء» of the plan, lower
+  when the videos at the playhead are more than the device measured it could decode at once;
+- a video that had to be put back in step counts as a missed frame, so a decoder that cannot keep up never reads as calm.
+
+The badge reads «تلقائية: 1/2» while lowered, and the menu says «تلقائية: تنزل دقة المعاينة أثناء التشغيل حين تفوتها إطارات، وتعود حين
+يستقر التشغيل.». Once the device is measured «تلقائية» is the default while playing, unless the person chose otherwise; in a browser
+«كاملة» stays the default, and «تلقائية» can be chosen. «عند الإيقاف» is unchanged.
+
+**The streams played at once.** Where playing starts or jumps, the videos at the playhead are weighed by their pixels against
+the 4K decoding the device measured (a third of it, less when drawing is slow: several videos played at once carry far less
+than one decoded alone). The largest on the canvas play their own file and the rest their light copy (63.4) where one exists.
+When videos keep falling behind, fewer play their own file for the rest of the session, a change made at the moment one is
+put back in step. A video catching up shows its last frame. Before a measurement every light copy plays, as before.
+
 ## 63.9 Work around the editor (D12), 2026-11-04
 
 Phase D12 of `Desktop_Power_Ideas.md`, ideas P-30 and P-08, from version 0.8.0 (bridge version 7). Everything here exists
@@ -2910,8 +2946,8 @@ makes the light copy («نسخة خفيفة للمعاينة», 63.4) of those t
   not cover, the rule of 63.4 stands (above 1080p, above 50 Mbit/s, or an intermediate codec). A strong laptop makes fewer
   copies, a weak one more.
 - They are made one at a time, or as many as the plan of 63.6 says («النسخ الخفيفة معاً»), the videos first opened first. The
-  note under that plan now reads «هذه القيم خطة الاستوديو على هذا الجهاز: تتبعها «النسخ الخفيفة معاً» الآن، والبقية في المراحل
-  القادمة، ولا تغيّر شيئاً فيما يُصدَّر.».
+  note under that plan now reads «هذه القيم خطة الاستوديو على هذا الجهاز: تتبع المعاينة الآن «دقة المعاينة عند البدء» و«ذاكرة
+  الإطارات للتنقل»، وتتبعها «النسخ الخفيفة معاً»، والبقية في المراحل القادمة، ولا تغيّر شيئاً فيما يُصدَّر.» (since D10).
 - They are made only while the laptop is free: on mains power, with the processor at its full speed, with nothing exporting,
   uploading, playing (a window making sound counts), scrubbing or measuring, while no copy the person asked for is being made,
   and a few seconds after the last key or click in the application. Moving the pointer and scrolling hold nothing.

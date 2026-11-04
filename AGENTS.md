@@ -437,6 +437,19 @@ choice of 2026-11-03): bridge version 6 adds `gpu` and `profile`.
   encoders then write BT.601. `export.ts` sends them BT.709 YUV made by `src/lib/studio/yuv.ts`, and restarts on that path
   if a chip's encoder reports any other matrix.
 
+The faster preview (D10, `MVP_draft.md` 63.7) reads the plan through `src/components/studio/plan.ts` and is speed only.
+- **The paused preview's frame memory** (`src/lib/studio/scrub.ts`, `media.ts` `setFrameCache`): its own decoder, never the
+  export's (`sink` for `frameAt`, `passSink` for `frames`). A time takes the frame the export takes (`EPS`), and a kept frame
+  answers only while its next frame is known to start later. Frames are kept at a power-of-two share of the source, never
+  smaller than drawn (`needOf`), so the layout is the full frame's to the bit. A budget of 0 is today's decoder, unchanged.
+  A jump paints only its own frame and ends every other pass; reading ahead, behind and the small frames waits for
+  `SCRUB_IDLE` with nothing asked. Keep it so: the sharp frame after a jump must never come later than today's.
+  Only where a hardware decoder is offered does a jump read with `optimizeForLatency`; with none it takes today's path
+  (`getSample`), since the low-latency decoder decodes 4K on one thread there (1252 ms against 267, measured 2026-11-04).
+- **«تلقائية» and the stream budget** (`src/lib/studio/playback.ts`) change only the preview canvas's size and which copy an
+  element plays. Without a plan every light copy plays as D5 made it, and «كاملة» stays the browser's default.
+- The proofs are `qa/studio-scrub.cjs` (identity at 48 times, the small frames included) and `qa/studio-autores.cjs`.
+
 Light copies in idle time (D12, `MVP_draft.md` 63.9, `Desktop_Power_Ideas.md` P-30 and P-08): bridge version 7 adds
 `life.activity` and `media.queue`, `queued` and `onQueue`.
 - **The broker's rules** are `desktop/src/idle.ts` (when background work may run, what each job does) and `copy-queue.ts`

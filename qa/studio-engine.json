@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-engine.cjs",
-  "run": "2026-11-03T21:57:32.875Z",
+  "run": "2026-11-04T06:23:13.671Z",
   "checks": [
     {
       "name": "the shipped Arabic fonts load with Arabic sample text",
@@ -60,7 +60,7 @@
     {
       "name": "a covered area (blur, and squares) changes the pixels inside it and leaves the picture and the video outside it as they were",
       "pass": true,
-      "detail": "{\"plain\":[[254,0,253,255],[254,0,253,255],[255,24,0,255]],\"blur\":[[254,10,143,255],[254,0,253,255],[255,24,0,255]],\"blocks\":[[254,11,142,255],[254,0,253,255],[255,24,0,255]]}"
+      "detail": "{\"plain\":[[254,0,253,255],[254,0,253,255],[255,24,0,255]],\"blur\":[[254,11,142,255],[254,0,253,255],[255,24,0,255]],\"blocks\":[[254,11,142,255],[254,0,253,255],[255,24,0,255]]}"
     },
     {
       "name": "a reserved place is drawn as a striped box over the picture, and the video outside it shows as it was",
@@ -200,7 +200,7 @@
     {
       "name": "playing advances the playhead in real time and pause stops it",
       "pass": true,
-      "detail": "3.69 s"
+      "detail": "3.70 s"
     },
     {
       "name": "no page errors",

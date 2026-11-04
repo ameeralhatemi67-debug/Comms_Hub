@@ -1,0 +1,58 @@
+{
+  "script": "qa/studio-preview-ui.cjs",
+  "run": "2026-11-04T05:46:29.875Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "the application keeps the measurement under its own key (this application, Chromium, chip and driver)",
+      "pass": true,
+      "detail": "{\"key\":{\"app\":\"0.8.0\",\"chrome\":\"156.0.8078.48\",\"chip\":{\"vendorId\":4318,\"deviceId\":9634,\"vendor\":\"NVIDIA\",\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"driver\":\"32.0.16.1091\"},\"switch\":\"high\",\"power\":\"ac\"},\"current\":{\"app\":\"0.8.0\",\"chrome\":\"156.0.8078.48\",\"chip\":{\"vendorId\":4318,\"deviceId\":9634,\"vendor\":\"NVIDIA\",\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"driver\":\"32.0.16.1091\"},\"switch\":\"high\",\"power\":\"ac\"},\"entries\":1}"
+    },
+    {
+      "name": "with a measurement the preview plays at «تلقائية» and pauses at «كاملة» unless chosen otherwise",
+      "pass": true,
+      "detail": "{\"label\":\"تلقائية / كاملة\",\"menu\":{\"first\":\"تلقائية\",\"checked\":\"تلقائية\",\"hint\":\"تلقائية: تنزل دقة المعاينة أثناء التشغيل حين تفوتها إطارات، وتعود حين يستقر التشغيل.\"}}"
+    },
+    {
+      "name": "«تلقائية» is the first choice of «أثناء التشغيل», with its words",
+      "pass": true,
+      "detail": "{\"first\":\"تلقائية\",\"checked\":\"تلقائية\",\"hint\":\"تلقائية: تنزل دقة المعاينة أثناء التشغيل حين تفوتها إطارات، وتعود حين يستقر التشغيل.\"}"
+    },
+    {
+      "name": "a light project plays at full under «تلقائية» from the plan's start (no badge)",
+      "pass": true,
+      "detail": "{\"badge\":null,\"width\":510,\"fullW\":510}"
+    },
+    {
+      "name": "a play starts where the last play of the shape ended: «تلقائية: 1/2» and the canvas at half",
+      "pass": true,
+      "detail": "{\"badge\":\"تلقائية: 1/2\",\"width\":255,\"fullW\":510}"
+    },
+    {
+      "name": "paused, the preview is at «كاملة» again",
+      "pass": true,
+      "detail": "{\"back\":510,\"fullW\":510}"
+    },
+    {
+      "name": "a resolution the person chose wins over the plan and is remembered",
+      "pass": true,
+      "detail": "كاملة"
+    },
+    {
+      "name": "in a browser «كاملة» stays the default, and «تلقائية» is offered first",
+      "pass": true,
+      "detail": "{\"label\":\"كاملة\",\"menu\":{\"first\":\"تلقائية\",\"checked\":\"كاملة\",\"hint\":\"المعاينة وحدها تتأثر؛ التصدير يُرسم بدقته الكاملة.\"}}"
+    },
+    {
+      "name": "in a browser «تلقائية» can be chosen",
+      "pass": true,
+      "detail": "تلقائية / كاملة"
+    }
+  ],
+  "notes": [
+    "Inside the application: {\"dpr\":1.25,\"renderer\":\"ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}, the stage canvas 510 pixels wide at «كاملة»."
+  ],
+  "total": 9,
+  "passed": 9,
+  "failed": 0
+}

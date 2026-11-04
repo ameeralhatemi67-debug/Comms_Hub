@@ -61,7 +61,13 @@ export const RESOLUTIONS: { value: number; label: string }[] = [
   { value: 1 / 16, label: '1/16' },
   { value: 1 / 32, label: '1/32' },
 ];
-export const resolutionLabel = (v: number) => RESOLUTIONS.find((r) => Math.abs(r.value - v) < 1e-6)?.label ?? 'كاملة';
+/**
+ * «تلقائية» (D10, Desktop_Power_Ideas.md P-03; playback.ts AutoLevel): while playing, the share follows the frames the
+ * preview manages to draw, through scale.ts PREVIEW_STEPS. Offered for playing only; a paused frame has no frame rate.
+ */
+export const AUTO = 0;
+export const PLAY_RESOLUTIONS: { value: number; label: string }[] = [{ value: AUTO, label: 'تلقائية' }, ...RESOLUTIONS];
+export const resolutionLabel = (v: number) => PLAY_RESOLUTIONS.find((r) => Math.abs(r.value - v) < 1e-6)?.label ?? 'كاملة';
 
 /** The canvas's pixel width for a box this wide on screen, at a resolution, never above the project. */
 export function canvasWidth(projectW: number, screenW: number, dpr: number, resolution: number): number {
