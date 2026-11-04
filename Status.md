@@ -26,6 +26,20 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, merges 9 and 10: P-28, the copy queue fix, and origin's deploys, 2026-11-05
+
+- **Done.**
+  - Fork 2's idle-check guard, and the manager's fix for the copy queue (`45d3cd9`). A copy taken up at the pause only asks, so a stopped queue stays stopped. The idle check waits for Windows' full speed before each hold, else records it as not measured.
+  - Fork 3's P-28 and the account card (`d5a0a44`, bridge 10):
+    - A download from the library, mail or messaging is offered «فتح بالبرنامج الافتراضي» (documents, pictures, sound and video only, with the mark of the web kept) and «إظهار في المجلد».
+    - The card says what the application adds for every member. It adds the studio's gains only for those who open the studio.
+  - origin/main's 13 deploy commits, through Fork 5's resolution (`5f2dbac`). Only the X guide's first steps (`4914ddb`) were missing from main. origin/main is now an ancestor, so the push is a fast-forward.
+- **Evidence, re-run by the manager** in `verify-e3cab67`:
+  - P-28: site typecheck, `npm test` 873 of 873, desktop typecheck, desktop tests 164 of 164, `next build`.
+  - With origin's commits: typecheck, `npm test` 876 of 876, `next build`.
+  - The forks' own runs: `qa/desktop-downloads.cjs` 12 of 12, `qa/desktop-native.cjs` 37 of 37, `qa/desktop-idle.cjs` 21 of 24 before the fix. The idle check is rerun after D11's proof.
+- **Next.** Fork 1 proves P-07 option B on the port, then the D11 merge, the final regression list, the 0.9.0 release, the three migrations (the owner's word), and the push.
+
 ## Desktop Power, merge 8: effects identical on every chip, 2026-11-05
 
 - **Done.** Fork 4's P-09 and P-17, merged as `be802d8`. Colour, covers and blur are whole-number arithmetic: the same bytes on the chip, in plain code and in WebAssembly lanes. Blurs follow the frame's own size. Photo adjustments run in tiles.
