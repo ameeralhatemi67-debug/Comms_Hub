@@ -50,11 +50,17 @@ export const SCRUB_IDLE = 150;
 type Scrub = {
   sink: VideoSampleSink;
   /**
-   * The decoder a jump reads with: asked to give each frame as soon as it is decoded (WebCodecs optimizeForLatency),
-   * because a decoder on the processor otherwise holds a few frames back (measured on 2026-11-04 with no graphics chip:
-   * a jump right after opening at 349 ms against 276 for the decoder of old, which empties itself after one frame).
+   * The decoder a jump reads with where the graphics chip decodes: asked to give each frame as soon as it is decoded
+   * (WebCodecs optimizeForLatency).
    */
   jump: VideoSampleSink;
+  /**
+   * Whether a hardware decoder is offered for this source. Where none is (no graphics chip), a jump takes today's path:
+   * one frame asked for, and the decoder empties itself. Measured on 2026-11-04 with no graphics chip, 2 s key frames: a
+   * pass that is not emptied held the frame back (a jump right after opening at 349 ms against 276 today), and the
+   * low-latency decoder, which decodes on one thread there, was far slower (1252 ms against 267).
+   */
+  hw: boolean;
   keys: EncodedPacketSink;
   /** How far the frame source's times are from the original's (a light copy, media.ts elementOffset). */
   off: number;
@@ -133,6 +139,18 @@ export async function probeFile(file: Blob): Promise<{ media: 'video' | 'image' 
     if (a) return { media: 'audio', duration };
   }
   return null;
+}
+
+/** Whether the browser offers a hardware decoder for a track (WebCodecs, prefer-hardware): none with no graphics chip. */
+async function hardwareDecodes(track: { getDecoderConfig(): Promise<VideoDecoderConfig | null> }): Promise<boolean> {
+  try {
+    if (typeof VideoDecoder === 'undefined') return false;
+    const config = await track.getDecoderConfig();
+    if (!config) return false;
+    return (await VideoDecoder.isConfigSupported({ ...config, hardwareAcceleration: 'prefer-hardware' })).supported === true;
+  } catch {
+    return false;
+  }
 }
 
 export class MediaPool {
@@ -635,7 +653,7 @@ export class MediaPool {
       const mb = await mediabunny();
       const p = l.preview;
       const track = (await (p?.input ?? l.input!).getPrimaryVideoTrack())!;
-      return { sink: new mb.VideoSampleSink(track), jump: new mb.VideoSampleSink(track, { optimizeForLatency: true }), keys: new mb.EncodedPacketSink(track), off: p?.offset ?? 0, w: await track.getDisplayWidth(), h: await track.getDisplayHeight(), run: null, fill: null, filled: null };
+      return { sink: new mb.VideoSampleSink(track), jump: new mb.VideoSampleSink(track, { optimizeForLatency: true }), hw: await hardwareDecodes(track), keys: new mb.EncodedPacketSink(track), off: p?.offset ?? 0, w: await track.getDisplayWidth(), h: await track.getDisplayHeight(), run: null, fill: null, filled: null };
     })());
   }
 
@@ -792,6 +810,25 @@ export class MediaPool {
       sc.run = null;
       await run.it.return(undefined).catch(() => undefined);
       run = null;
+    }
+    if (!run && !sc.hw) {
+      // no hardware decoder: today's path, the one frame the export takes for `want`, nothing else started until idle
+      const sample = await sc.sink.getSample(ts + EPS);
+      if (!sample) return done(null);
+      try {
+        const from = sample.timestamp + sc.off;
+        let f = store.get(id, from, d);
+        if (!f && this.store === store) {
+          const c = this.paint(sample, sc.w / d, sc.h / d, d);
+          f = store.put(id, { from, to: from + (sample.duration || 1 / 30), canvas: c, bytes: c.width * c.height * 4, d });
+          const keep = this.onScreen();
+          keep.add(c);
+          store.evict(keep);
+        }
+        return done(f);
+      } finally {
+        sample.close();
+      }
     }
     if (!run) run = sc.run = { it: sc.jump.samples(ts), d, pos: -Infinity, prev: null, done: false, frame: 1 / 30, kept: 0 };
     while (l.want === want && !this.disposed && this.store === store && sc.run === run) {
