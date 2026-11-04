@@ -384,9 +384,10 @@ export async function encodeLanes(c: LaneContext, segments: Segment[]): Promise<
   try {
     await Promise.allSettled(Array.from({ length: k }, () => runner()));
     if (c.signal?.aborted) throw new LaneError('ABORTED');
-    if (mismatch || first.some((m, i) => i > 0 && !same(m, first[0]))) throw new LaneError('LANES');
+    // a lane's own failure first: a lane that failed before its encoder described itself has no description to compare
     if (fatal) throw fatal instanceof LaneError ? fatal : new LaneError('ENCODER');
     if (queue.length) throw new LaneError('ENCODER');
+    if (mismatch || !first[0] || first.some((m, i) => i > 0 && !same(m, first[0]))) throw new LaneError('LANES');
     await live;
     for (let seg = 1; seg < k; seg++) {
       for await (const p of spills.get(seg)!.replay(c.mb)) {
