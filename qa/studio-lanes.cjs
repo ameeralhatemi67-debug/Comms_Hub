@@ -9,7 +9,10 @@
 //   - forced faults each end in a valid file of exact structure and the same composed frames: a lane given another
 //     H.264 profile (the join's guard refuses it, one lane runs), a lane failing once mid-segment (its segment runs
 //     again on the lanes left), the first segment's lane failing (the export runs again with a lane fewer);
-//   - with QUIET=1, in a quiet window only, each lane count is timed again without fingerprints, with the load beside it.
+//   - with QUIET=1, in a quiet window only, the check is timing only (the manager's decision of 2026-11-04): three
+//     interleaved rounds of one, two and three lanes without fingerprints, the processor's load beside every export, and
+//     no fingerprinted export, since the gate's rows proved the frames and the structure (PROVEN). It needs ENGINES, and
+//     its record ends in -speed, so it never writes over a gate row's.
 // SECONDS (default 20) and SIZE (1080 or 2160) choose the fixture; the gate's are ten minutes at 1080p and at 4K.
 // ENGINES (a comma list of edge, edge-nochip, app-nochip, app-saving, app-strong; default all) chooses where; FAULTS=0
 // leaves out the forced faults; EVERY=n fingerprints every n-th frame and the 30 frames each side of a boundary (default
@@ -46,6 +49,8 @@ const EDGE_ONLY = process.env.ONLY === 'edge';
 const ENGINES = (process.env.ENGINES || 'edge,edge-nochip,app-nochip,app-saving,app-strong').split(',');
 const FAULTS = process.env.FAULTS !== '0';
 const EVERY = Math.max(1, Number(process.env.EVERY || 1));
+/** The commit holding every gate row's record (rows 1 to 4 of 2026-11-04 and the earlier engine rows), named by a timing run. */
+const PROVEN = '29a1a30';
 const W = SIZE === 2160 ? 3840 : 1920;
 const H = SIZE === 2160 ? 2160 : 1080;
 const out = path.join(__dirname, 'artifacts', `studio-lanes-${SIZE}-${SECONDS}s`);
@@ -152,6 +157,27 @@ async function inEngine(page, name, url) {
   // the frames fingerprinted: every EVERY-th, and 30 each side of every boundary of two and three lanes
   const near = new Set([...seg(2), ...seg(3)].filter((b) => b > 0).flatMap((b) => Array.from({ length: 60 }, (_, i) => b - 30 + i)));
   const sample = EVERY === 1 ? null : Array.from({ length: total }, (_, n) => n % EVERY === 0 || near.has(n));
+  r.starts = { two: seg(2), three: seg(3) };
+  if (QUIET) {
+    // timing only: the rounds interleave the lane counts, so a slow spell of the machine falls on all three alike
+    r.timing = { loadBefore: load(), rounds: [] };
+    for (let i = 0; i < 3; i++) {
+      const round = {};
+      for (const k of [1, 2, 3]) {
+        const before = load();
+        const e = await page.evaluate((o) => window.lanecheck.exportWith(o), { tag: `${name}-t${i}-${k}`, seconds: SECONDS, w: W, h: H, short, lanes: k, hash: false, keep: false });
+        const after = load();
+        round[k] = { ms: e.ms, lanes: e.lanes, steps: e.steps, frames: e.frames, via: e.via, load: [before, after] };
+        console.log(`  ${name} round ${i + 1}, ${k} lane(s): ${e.lanes} lane(s), ${e.ms} ms, load ${before}% then ${after}%`);
+      }
+      r.timing.rounds.push(round);
+    }
+    r.timing.loadAfter = load();
+    const med = (k) => r.timing.rounds.map((x) => x[k].ms).sort((a, b) => a - b)[1];
+    r.timing.median = { 1: med(1), 2: med(2), 3: med(3) };
+    r.timing.ratio = { 2: Math.round((med(1) / med(2)) * 100) / 100, 3: Math.round((med(1) / med(3)) * 100) / 100 };
+    return r;
+  }
   const exp = async (tag, lanes, faults, hash = true) => {
     const before = load();
     const e = await page.evaluate((o) => window.lanecheck.exportWith(o), { tag: `${name}-${tag}`, seconds: SECONDS, w: W, h: H, short, lanes, hash, faults, sample });
@@ -167,19 +193,6 @@ async function inEngine(page, name, url) {
     r.runs.guard = await exp('guard', 3, { configOf: 1 });
     r.runs.lateFault = await exp('late', 3, { failAt: seg(3)[1] + 10 });
     r.runs.firstFault = await exp('first', 3, { failAt: 10 });
-  }
-  r.starts = { two: seg(2), three: seg(3) };
-  if (QUIET) {
-    r.timing = { loadBefore: load(), rounds: [] };
-    for (let i = 0; i < 3; i++) {
-      const round = {};
-      for (const k of [1, 2, 3]) round[k] = (await page.evaluate((o) => window.lanecheck.exportWith(o), { tag: `${name}-t${i}-${k}`, seconds: SECONDS, w: W, h: H, short, lanes: k, hash: false })).ms;
-      r.timing.rounds.push(round);
-    }
-    r.timing.loadAfter = load();
-    const med = (k) => [...r.timing.rounds.map((x) => x[k])].sort((a, b) => a - b)[1];
-    r.timing.median = { 1: med(1), 2: med(2), 3: med(3) };
-    r.timing.ratio = { 2: Math.round((med(1) / med(2)) * 100) / 100, 3: Math.round((med(1) / med(3)) * 100) / 100 };
   }
   for (const x of Object.values(r.runs)) fs.rmSync(x.file, { force: true });
   return r;
@@ -197,6 +210,10 @@ function takeLock() {
 }
 
 (async () => {
+  if (QUIET && !process.env.ENGINES) {
+    console.error('QUIET=1 times one engine at a time: name it with ENGINES (app-saving, app-strong or app-nochip)');
+    process.exit(2);
+  }
   fs.rmSync(out, { recursive: true, force: true });
   fs.mkdirSync(out, { recursive: true });
   const servers = [];
@@ -240,6 +257,13 @@ function takeLock() {
 
     // --- the checks ---------------------------------------------------------------------------------
     for (const [name, e] of Object.entries(engines)) {
+      if (QUIET) {
+        const all = e.timing.rounds.flatMap((round) => [1, 2, 3].map((k) => ({ k, ...round[k] })));
+        const wrong = all.filter((x) => x.lanes !== x.k || x.steps.length > 0 || x.frames !== SECONDS * 30);
+        check(`${name}: every timed export ran with its own lane count, stepped down nowhere and made every frame (3 rounds of 1, 2 and 3 lanes)`, all.length === 9 && wrong.length === 0, { wrong, median: e.timing.median });
+        note(`${name}: time with 1, 2 and 3 lanes (medians of three interleaved rounds, ms): ${JSON.stringify(e.timing.median)}, speed-up ${JSON.stringify(e.timing.ratio)}, load ${e.timing.loadBefore}% before and ${e.timing.loadAfter}% after; each export's load is beside it in the record.`);
+        continue;
+      }
       const one = e.runs.one;
       const frames = SECONDS * 30;
       const printed = one.prints.filter(Boolean).length;
@@ -273,11 +297,15 @@ function takeLock() {
     for (const s of servers) s.close();
     if (locked && fs.existsSync(LOCK) && fs.readFileSync(LOCK, 'utf8') === BRANCH) fs.rmSync(LOCK);
   }
-  result.fixture = { seconds: SECONDS, size: `${W}x${H}`, short, engines: ENGINES, faults: FAULTS, fingerprinted: EVERY === 1 ? 'every frame' : `every ${EVERY}th frame and 30 each side of every boundary` };
+  result.fixture = { seconds: SECONDS, size: `${W}x${H}`, short, engines: ENGINES, faults: QUIET ? false : FAULTS, fingerprinted: QUIET ? 'none (timing only)' : EVERY === 1 ? 'every frame' : `every ${EVERY}th frame and 30 each side of every boundary` };
+  if (QUIET) note(`timing only; frames and structure proven by rows 1 to 4 and the earlier engine rows at ${PROVEN}`);
   result.engines = Object.fromEntries(Object.entries(engines).map(([n, e]) => [n, { browser: e.browser, versions: e.versions, engine: e.engine, starts: e.starts, timing: e.timing ?? null, runs: Object.fromEntries(Object.entries(e.runs).map(([k, x]) => [k, { lanes: x.lanes, steps: x.steps, ms: x.ms, fps: x.fps, load: x.load, bytes: x.bytes, via: x.via, keys: x.structure.keys.length, frames: x.structure.pts.length }])) }]));
   if (!EDGE_ONLY) note(`The application started with ${UNCOVERED.join(' ')}, its window in front.`);
   // a run of chosen engines is its own record, so one engine at a time keeps the others'
   const which = process.env.ENGINES ? `-${ENGINES.join('+')}` : '';
-  const failed = finish(path.join(__dirname, `studio-lanes-${SIZE}-${SECONDS}s${which}${EDGE_ONLY ? '-edge' : QUIET ? '-speed' : ''}.json`));
+  // a timing run's record always ends in -speed, and no gate row's does, so a timing run never writes over a gate row
+  const name = `studio-lanes-${SIZE}-${SECONDS}s${which}${EDGE_ONLY ? '-edge' : ''}${QUIET ? '-speed' : ''}.json`;
+  if (QUIET !== name.endsWith('-speed.json')) throw new Error(`the record's name does not say what ran: ${name}`);
+  const failed = finish(path.join(__dirname, name));
   process.exit(failed ? 1 : 0);
 })();

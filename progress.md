@@ -3296,4 +3296,13 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Found on the way, not touched.** Drive C holds 268 older check profiles (`%LOCALAPPDATA%\Temp\comms-hub-desktop-qa-*`, about
   7.5 GB in all, none written tonight), from runs of several sessions before the checks removed their profiles; which session
   made each cannot be told from the folder, so none was removed.
+- **(d) made timing only, before the quiet window (the manager's decision of 2026-11-04).** `QUIET=1` in `qa/studio-lanes.cjs`
+  now runs no fingerprinted export: three interleaved rounds of one, two and three lanes, the processor's load before and after
+  every export in the record, and a check that every timed export ran with its own lane count, stepped down nowhere and made
+  every frame. It refuses to start without `ENGINES`; its record always ends in `-speed` (held by the name's own check), so it
+  never writes over a gate row's; its notes say "timing only; frames and structure proven by rows 1 to 4 and the earlier engine
+  rows at 29a1a30". A timed export's file is not sent to the runner (`keep: false` in `qa/fixtures/studio-lanes.ts`). The window
+  times the strong and the saving chips at 1080p and 4K and no chip at 1080p; **4K with no chip is not timed** (about 16 minutes
+  for each 120 s export, so about 2.4 hours for nine), and nothing is claimed for it. Checked so far: the script parses, the
+  fixture bundles, and `QUIET=1` without `ENGINES` stops before touching anything; the timing path itself has not run yet.
 - **Not done.** Nothing pushed; drawing in workers (P-07) not switched on anywhere.

@@ -27,7 +27,7 @@ async function fingerprint(frame: VideoFrame): Promise<string> {
   return (a >>> 0).toString(16).padStart(8, '0') + (b >>> 0).toString(16).padStart(8, '0');
 }
 
-export async function exportWith(o: { tag: string; seconds: number; w: number; h: number; short: Short; lanes: number; hash: boolean; faults?: { configOf?: number; failAt?: number }; sample?: boolean[] | null }) {
+export async function exportWith(o: { tag: string; seconds: number; w: number; h: number; short: Short; lanes: number; hash: boolean; keep?: boolean; faults?: { configOf?: number; failAt?: number }; sample?: boolean[] | null }) {
   const root = await navigator.storage.getDirectory();
   // the source's copy in the private storage stays between exports (a ten-minute 4K source is gigabytes); the
   // exports and the lanes' spills go
@@ -57,10 +57,11 @@ export async function exportWith(o: { tag: string; seconds: number; w: number; h
       : undefined,
   });
   const ms = Math.round(performance.now() - t0);
-  // the file goes to the server in pieces (a ten-minute 4K file is too large for one request)
+  // the file goes to the server in pieces (a ten-minute 4K file is too large for one request); a timed export
+  // (keep: false) is not read again, so its file stays in the private storage and goes with the next export
   const file = res.file;
   const piece = 64 << 20;
-  for (let at = 0; at < file.size; at += piece) await fetch(`/upload/${o.tag}.mp4?at=${at}`, { method: 'POST', body: file.slice(at, at + piece) });
+  if (o.keep !== false) for (let at = 0; at < file.size; at += piece) await fetch(`/upload/${o.tag}.mp4?at=${at}`, { method: 'POST', body: file.slice(at, at + piece) });
   pool.dispose();
   return { tag: o.tag, frames: res.frames, bytes: res.bytes, ms, via: res.via, lanes: res.lanes, steps: res.steps, prints: o.hash ? prints : null };
 }
