@@ -1,12 +1,12 @@
 {
   "script": "qa/studio-preview-ui.cjs",
-  "run": "2026-11-04T01:58:14.031Z",
-  "version": "0.7.1",
+  "run": "2026-11-04T05:46:29.875Z",
+  "version": "0.8.0",
   "checks": [
     {
       "name": "the application keeps the measurement under its own key (this application, Chromium, chip and driver)",
       "pass": true,
-      "detail": "{\"key\":{\"app\":\"0.7.1\",\"chrome\":\"156.0.8078.48\",\"chip\":{\"vendorId\":4318,\"deviceId\":9634,\"vendor\":\"NVIDIA\",\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"driver\":\"32.0.16.1091\"},\"switch\":\"high\",\"power\":\"ac\"},\"current\":{\"app\":\"0.7.1\",\"chrome\":\"156.0.8078.48\",\"chip\":{\"vendorId\":4318,\"deviceId\":9634,\"vendor\":\"NVIDIA\",\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"driver\":\"32.0.16.1091\"},\"switch\":\"high\",\"power\":\"ac\"},\"entries\":1}"
+      "detail": "{\"key\":{\"app\":\"0.8.0\",\"chrome\":\"156.0.8078.48\",\"chip\":{\"vendorId\":4318,\"deviceId\":9634,\"vendor\":\"NVIDIA\",\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"driver\":\"32.0.16.1091\"},\"switch\":\"high\",\"power\":\"ac\"},\"current\":{\"app\":\"0.8.0\",\"chrome\":\"156.0.8078.48\",\"chip\":{\"vendorId\":4318,\"deviceId\":9634,\"vendor\":\"NVIDIA\",\"name\":\"NVIDIA GeForce RTX 3050 Laptop GPU\",\"driver\":\"32.0.16.1091\"},\"switch\":\"high\",\"power\":\"ac\"},\"entries\":1}"
     },
     {
       "name": "with a measurement the preview plays at «تلقائية» and pauses at «كاملة» unless chosen otherwise",

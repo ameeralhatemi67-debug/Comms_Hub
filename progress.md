@@ -3017,3 +3017,102 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - `qa/desktop-shell.cjs` was not run again after item 1.
   - Nothing was seen signed in.
 - **Not done.** Nothing pushed, no release published.
+
+### 2026-11-04: the desktop application, D10: a faster preview (Desktop Power, Fork 2)
+
+- **Owner direction.** The Desktop Power stage ("Speed, never the video"), phase D10 «معاينة أسرع» of `Desktop_Power_Ideas.md`
+  (P-02, P-03, P-04; P-15 is Fork 1's), built as Fork 2 of the manager's parallel forks from `998ef0c`, brought up to date with
+  Electron 45 (`60335d7`), Fork 1's export work (`dcb2d80`) and Fork 3's D12 (`411007d`). Q1 to Q7 at their recommended answers.
+  Built locally, not pushed. `MVP_draft.md` 63.7, the D10 paragraph of `AGENTS.md`.
+- **What changed** (the studio, inside the application once the device is measured; a browser, and an application not yet
+  measured, keep today's behaviour, held by the Edge checks below).
+  - **«ذاكرة الإطارات للتنقل» (P-02)**, `src/lib/studio/scrub.ts`, `media.ts` `setFrameCache`. The paused preview gets a decoder of its
+    own (Mediabunny's `VideoSampleSink`; the export's `sink` and `passSink` are untouched) and keeps the frames it decodes in the
+    plan's memory (1024 MB on this laptop), in two tiers:
+    - the frames near the playhead at the size the preview draws them: a power-of-two share of the source never smaller than drawn
+      (`needOf`: the fit, the largest scale and key, the crop, room for movements), so compose.ts lays them out exactly as the
+      whole frame; the least recently shown let go first;
+    - every frame of the stretch the timeline uses at most 480 pixels wide (`THUMB_WIDTH`), in a third of the memory, filled while
+      paused: a jump shows the right frame at once, small, and its sharp frame follows.
+    - Which frame: the export's rule (`EPS`, export.ts `frameFor`), the target known from the packets' own times; a kept frame
+      answers a time only while its next frame is known to start later.
+    - A jump ends every other pass and paints only its own frame. With a hardware decoder it reads with a low-latency decoder;
+      without one it takes today's path exactly (`getSample`, the decoder emptied). What lies ahead, behind and small is read only
+      after `SCRUB_IDLE` (150 ms) with nothing asked, and stops at the next ask.
+  - **«تلقائية» (P-03)**, `src/lib/studio/playback.ts` `AutoLevel`, `handles.ts` `AUTO`, `stage.tsx`, `editor.tsx`,
+    `src/components/studio/plan.ts`: the first choice of «أثناء التشغيل», the default once measured; each project frame drawn once,
+    a quarter second with two missed (a re-seek counts as one) steps down, four calm seconds step up, never back to a step that
+    missed in the same play; a first play starts no higher than the measured budget allows (`startLevel`), a remembered or
+    just-ended level is kept; the badge «تلقائية: 1/2».
+  - **The stream budget (P-04)**, `playback.ts` `streamBudget`, `streamPlan`, `preview.ts`, `media.ts` `element`: a third of the
+    measured 4K decoding (less when drawing is slow); the largest on the canvas play their source, the rest their light copy; a
+    run of re-seeks lowers the budget for the session at that jump; a clip catching up keeps its last frame.
+  - **With D12**: a 720p copy the idle-time queue reports ready is read at once when paused, at the next pause when playing;
+    `dispose()` stops the queue; the player says «scrubbing» while a paused playhead moves and «playing» while it plays, never
+    waited for.
+- **On the way, measured** (each led to a change; the first gate run's records are `aee226c`).
+  - **A sized `CanvasSink` is slower, not faster.** In Edge (a loaded laptop) it read 4K at 10.8 frames a second into 1920 and 5.9
+    into 960, against 37.8 at full size: its fine downscaling draws a canvas onto itself. Frames are painted with `drawWithFit` and
+    halved on separate canvases instead.
+  - **The jump path waited for other work.** Painting the half second before a jump's frame, and the small frames' pass decoding
+    beside it, put the sharp frame at 399 ms against 260 today in Edge (2 s key frames). Fixed in `c96e9b5`.
+  - **A pass that is not emptied holds a frame back on the processor.** With no graphics chip, a jump right after opening came at
+    349 ms against 276. The low-latency decoder tried first (`977757b`) **backfired there: 1252 ms against 267, the sharp frame 1043
+    against 288, and the application's page closed during the 10 s row** (the rerun of 06:31 to 08:25). Found and fixed in
+    `b755b25`: the low-latency decoder only where a hardware decoder is offered, today's path where none is.
+  - **A single stream's decoding does not carry several elements.** Three 4K originals fell behind (66 re-seeks in 8 s) on the
+    RTX, measured at four and at six 4K streams decoded alone. The margin is a third, and the session lowers it at a run of
+    re-seeks.
+  - **Starting low cost frames.** On the RTX «تلقائية» with copies missed 2.8% and 2.4% in the two steps back up from a quarter,
+    though «كاملة» held; the first level now follows the measured budget and a known level is kept.
+  - **A frozen picture looked smooth.** Without light copies the elements kept re-seeking and showed no frame while the stage drew
+    on time; «تلقائية» then stepped up. A re-seek now counts as a missed frame, and the playback check counts frames never shown.
+- **Verified, numbers** (2026-11-04, the D10 quiet windows, the other forks paused; the processor's load beside each row).
+  - `npm run typecheck` clean; `npm test` **820 of 820** (new `tests/studio-scrub.test.mjs`, 10, and
+    `tests/studio-playback.test.mjs`, 8); `npm run build` passes.
+  - **`qa/studio-scrub.cjs` 48 of 48**, judged (`--judge`) from the rerun of 06:31 to 08:25 at `18e53a2` for Edge 156 and the
+    development package (Chromium 156) on the AMD chip and the RTX (`qa/studio-scrub-gate.json`), and from 08:48 to 09:21 at
+    `b755b25` with no graphics chip (`qa/studio-scrub-software.json`). 200 random jumps over 20 s of 4K30 at 60 Mbit/s on a
+    1280-wide stage, today / with the frame memory, medians in ms:
+
+    | Engine, key frames | Right frame | Sharp frame | Jump right after opening | Step forward | Step back | Small frames filled | Load % |
+    |---|---|---|---|---|---|---|---|
+    | Edge, 2 s | 261 / 0.1 | 261 / 250 | 247 / 251 | 262 / 3.1 | 259 / 0 | 17.7 s | 12 to 40 |
+    | Edge, 10 s | 1025 / 0.1 | 1025 / 661 | 1078 / 697 | 1322 / 11.7 | 1307 / 0 | 17.4 s | 8 to 23 |
+    | AMD, 2 s | 223 / 0.1 | 223 / 218 | 202 / 217 | 238 / 1.6 | 241 / 0 | 15.6 s | 10 to 31 |
+    | AMD, 10 s | 980 / 0.2 | 980 / 630 | 1006 / 681 | 1312 / 1.3 | 1295 / 0 | 15.3 s | 9 to 39 |
+    | RTX, 2 s | 169 / 0.1 | 169 / 175 | 163 / 177 | 191 / 1.5 | 195 / 0 | 8.1 s | 6 to 21 |
+    | RTX, 10 s | 957 / 0.2 | 957 / 608 | 963 / 661 | 1216 / 1.0 | 1211 / 0 | 7.9 s | 10 to 29 |
+    | No chip, 2 s | 335 / 0.1 | 335 / 260 | 336 / 300 | 322 / 297 | 353 / 0 | 29.8 s | 29 to 62 |
+    | No chip, 10 s | 1318 / 0.3 | 1318 / 1018 | 1255 / 1189 | 1639 / 1692 | 1525 / 0 | 32.0 s | 35 to 100 |
+
+    The gate (median to the right frame at least three times faster) passes on every row. The sharp frame and the jump right
+    after opening are held at no later than today's within 10% and 5 ms: the closest are the RTX's 2 s jump right after opening
+    (177 against 163, 8.4% later) and, in the first run, the no-chip 2 s sharp frame (310 against 278), **inside the rule only just**.
+    Identity: **48 of 48** at DT-12's times, the small frames **48 of 48**, frame starts to the microsecond **36 of 36**, on every row.
+    **With no hardware decoder, steps forward back to back are no faster than today, and with 10 s key frames a little slower: 1692
+    ms against 1639** (2 s: 297 against 322). That path reads nothing ahead until 150 ms of quiet, so each step of a run of steps
+    decodes from its key frame as today; steps back are 0 ms from the kept frames.
+  - **`qa/studio-autores.cjs` 9 of 9** (08:25 to 08:46): three 4K tracks for 18 s with «تلقائية», the budget and light copies, at most
+    2% missed, dropped and not shown: AMD 0% and 0.6%, RTX 0% and 0%, no chip 0% and 0% missed, 0% not shown everywhere. Today's
+    «كاملة» without copies on the same laptop: 67.3%, 25.4% and 7% missed, with 59%, 67% and 100% of the elements' frames not shown;
+    «تلقائية» without copies showed every frame on the AMD chip and the RTX (3.9% and 6.5% missed).
+  - **`qa/studio-preview-ui.cjs` 9 of 9**: inside the application with a measurement saved through the bridge, «تلقائية» is the default
+    and first in the menu with its words, a play starts where the last of the shape ended («تلقائية: 1/2», the canvas at half), the
+    person's choice wins and is remembered; in Edge «كاملة» stays the default and «تلقائية» can be chosen.
+  - In Edge on the final code (`b755b25`), as on main: `qa/studio-engine.cjs` **41 of 41**, `qa/studio-ui.cjs` **122 of 122**.
+  - `qa/studio-crossdevice.cjs` was not rerun: nothing the compositor or the export draws changed.
+- **Found, and left as they are.**
+  - **Without light copies, three 4K tracks freeze in large part at «كاملة»** on the AMD chip, the RTX and with no chip in this run
+    (198, 354 and 390 re-seeks in 18 s; 59%, 67% and 100% of the elements' frames never shown; the RTX had 76 re-seeks and showed
+    most frames in the first run, on a quieter moment). This is today's floor; found, not caused. Light copies end it.
+  - The note under the plan (`src/lib/native/device.ts` `PLAN_NOTE`, Fork 3's) names «النسخ الخفيفة معاً» as followed now; after D10
+    «دقة المعاينة عند البدء» and «ذاكرة الإطارات للتنقل» are followed too.
+  - A play's "load before" is read just after the play before it, so it includes this check's own previous play.
+- **Not verified, said plainly.**
+  - Nothing signed in; the editor was checked on the interface fixture with a measurement saved through the real bridge.
+  - The D12 wiring is not exercised by a check: the playback check keeps the idle-time queue out of its plays, and no check drives a
+    copy made in idle time into an open editor, or reads «scrubbing» and «playing» in the application's broker.
+  - The D6 preview window keeps today's decoder (its own pool, no plan).
+  - One laptop only; the speed rows were taken on it with other work quiet but not absent (loads above).
+- **Not done.** Nothing pushed.

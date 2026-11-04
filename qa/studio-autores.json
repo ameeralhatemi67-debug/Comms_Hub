@@ -1,58 +1,58 @@
 {
   "script": "qa/studio-autores.cjs",
-  "run": "2026-11-04T01:47:32.650Z",
-  "version": "0.7.1",
+  "run": "2026-11-04T05:34:20.193Z",
+  "version": "0.8.0",
   "checks": [
     {
       "name": "app-saving: three 4K sources ready and a light copy of each made by the application",
       "pass": true,
-      "detail": "{\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"copies\":{\"ms\":7027,\"tools\":[{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}}]}}"
+      "detail": "{\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"copies\":{\"ms\":14993,\"tools\":[{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}}]}}"
     },
     {
-      "name": "app-saving, «تلقائية» with the budget and light copies (from the plan's start): at most 2% missed and 2% dropped (0% of 541, 0% of 1630)",
+      "name": "app-saving, «تلقائية» with the budget and light copies (from the plan's start): at most 2% missed, dropped and not shown (0% of 541, 0% of 1628, 0% not shown)",
       "pass": true,
-      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17991.5},\"quality\":{\"total\":1630,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":3,\"after\":18}}"
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17990.20000000001},\"quality\":{\"total\":1628,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":false,\"width\":3840},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":53,\"after\":66}}"
     },
     {
-      "name": "app-saving, «تلقائية» with the budget and light copies (from where the last play ended): at most 2% missed and 2% dropped (0% of 541, 0% of 1629)",
+      "name": "app-saving, «تلقائية» with the budget and light copies (from where the last play ended): at most 2% missed, dropped and not shown (0.6% of 541, 0% of 1631, 0% not shown)",
       "pass": true,
-      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17996.10000001191},\"quality\":{\"total\":1629,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":7,\"after\":19}}"
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":538,\"missed\":3,\"reseeks\":0,\"ms\":17999.800000035757},\"quality\":{\"total\":1631,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":false,\"width\":3840},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":63,\"after\":38}}"
     },
     {
       "name": "app-strong: three 4K sources ready and a light copy of each made by the application",
       "pass": true,
-      "detail": "{\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"copies\":{\"ms\":6748,\"tools\":[{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}}]}}"
+      "detail": "{\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"copies\":{\"ms\":8652,\"tools\":[{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}}]}}"
     },
     {
-      "name": "app-strong, «تلقائية» with the budget and light copies (from the plan's start): at most 2% missed and 2% dropped (2.8% of 541, 0% of 1626)",
-      "pass": false,
-      "detail": "{\"stats\":{\"due\":541,\"drawn\":526,\"missed\":15,\"reseeks\":0,\"ms\":17997.79999999999},\"quality\":{\"total\":1626,\"dropped\":0},\"levels\":[{\"at\":2,\"share\":0.25},{\"at\":5003,\"share\":0.5},{\"at\":9474,\"share\":1}],\"playing\":[{\"source\":0,\"copy\":false,\"width\":3840},{\"source\":1,\"copy\":false,\"width\":3840},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":18,\"after\":22}}"
+      "name": "app-strong, «تلقائية» with the budget and light copies (from the plan's start): at most 2% missed, dropped and not shown (0% of 541, 0% of 1631, 0% not shown)",
+      "pass": true,
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17999.800000023853},\"quality\":{\"total\":1631,\"dropped\":0},\"levels\":[{\"at\":1,\"share\":0.25},{\"at\":4738,\"share\":0.5},{\"at\":9210,\"share\":1}],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":21,\"after\":60}}"
     },
     {
-      "name": "app-strong, «تلقائية» with the budget and light copies (from where the last play ended): at most 2% missed and 2% dropped (2.4% of 542, 0% of 1634)",
-      "pass": false,
-      "detail": "{\"stats\":{\"due\":542,\"drawn\":529,\"missed\":13,\"reseeks\":0,\"ms\":18008.799999988085},\"quality\":{\"total\":1634,\"dropped\":0},\"levels\":[{\"at\":1,\"share\":0.25},{\"at\":4680,\"share\":0.5},{\"at\":9151,\"share\":1}],\"playing\":[{\"source\":0,\"copy\":false,\"width\":3840},{\"source\":1,\"copy\":false,\"width\":3840},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":39,\"after\":8}}"
+      "name": "app-strong, «تلقائية» with the budget and light copies (from where the last play ended): at most 2% missed, dropped and not shown (0% of 541, 0% of 1632, 0% not shown)",
+      "pass": true,
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17992.5},\"quality\":{\"total\":1632,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":51,\"after\":30}}"
     },
     {
       "name": "app-software: three 4K sources ready and a light copy of each made by the application",
       "pass": true,
-      "detail": "{\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"copies\":{\"ms\":7080,\"tools\":[{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}}]}}"
+      "detail": "{\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"copies\":{\"ms\":8934,\"tools\":[{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}}]}}"
     },
     {
-      "name": "app-software, «تلقائية» with the budget and light copies (from the plan's start): at most 2% missed and 2% dropped (0% of 541, 0% of 1629)",
+      "name": "app-software, «تلقائية» with the budget and light copies (from the plan's start): at most 2% missed, dropped and not shown (0% of 541, 0% of 1630, 0% not shown)",
       "pass": true,
-      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17992.899999952322},\"quality\":{\"total\":1629,\"dropped\":0},\"levels\":[{\"at\":4494,\"share\":0.5},{\"at\":9217,\"share\":1}],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":34,\"after\":6}}"
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17992.39999998809},\"quality\":{\"total\":1630,\"dropped\":0},\"levels\":[{\"at\":4500,\"share\":0.5},{\"at\":8971,\"share\":1}],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":31,\"after\":84}}"
     },
     {
-      "name": "app-software, «تلقائية» with the budget and light copies (from where the last play ended): at most 2% missed and 2% dropped (0% of 541, 0% of 1631)",
+      "name": "app-software, «تلقائية» with the budget and light copies (from where the last play ended): at most 2% missed, dropped and not shown (0% of 541, 0% of 1664, 0% not shown)",
       "pass": true,
-      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17993.899999976158},\"quality\":{\"total\":1631,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":8,\"after\":37}}"
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":6,\"ms\":17989.5},\"quality\":{\"total\":1664,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":60,\"after\":38}}"
     }
   ],
   "notes": [
-    "app-saving: «كاملة» with no copies missed 64.7% and dropped 0%; «تلقائية» with no copies 0.7% and null% (levels [{\"at\":10,\"share\":0.25},{\"at\":4738,\"share\":0.5},{\"at\":9208,\"share\":1}]); «كاملة» with copies 0.2% and 0%.",
-    "app-strong: «كاملة» with no copies missed 10.7% and dropped 0%; «تلقائية» with no copies 3% and 0% (levels [{\"at\":4,\"share\":0.25},{\"at\":5315,\"share\":0.5},{\"at\":10036,\"share\":1}]); «كاملة» with copies 0.2% and 0%.",
-    "app-software: «كاملة» with no copies missed 7.9% and dropped null%; «تلقائية» with no copies 0.2% and null% (levels [{\"at\":4476,\"share\":0.5},{\"at\":8950,\"share\":1}]); «كاملة» with copies 0% and 0%."
+    "app-saving: «كاملة» with no copies missed 67.3%, dropped 0%, not shown 59.3% (198 re-seeks); «تلقائية» with no copies 3.9%, 0%, not shown 0% (2 re-seeks, levels [{\"at\":38,\"share\":0.5},{\"at\":557,\"share\":0.25}]); «كاملة» with copies 1.7%, 0.2%, not shown 1.1%.",
+    "app-strong: «كاملة» with no copies missed 25.4%, dropped 0%, not shown 66.7% (354 re-seeks); «تلقائية» with no copies 6.5%, 0%, not shown 0% (55 re-seeks, levels [{\"at\":25,\"share\":0.5},{\"at\":749,\"share\":0.25}]); «كاملة» with copies 1.5%, 0.2%, not shown 1%.",
+    "app-software: «كاملة» with no copies missed 7%, dropped null%, not shown 100% (390 re-seeks); «تلقائية» with no copies 0%, null%, not shown 100% (405 re-seeks, levels []); «كاملة» with copies 0%, 0%, not shown 0%."
   ],
   "settings": {
     "seconds": 18,
@@ -80,22 +80,22 @@
         ],
         "clips": [
           {
-            "source": "sc74d035094",
+            "source": "s9a76f47ae0",
             "start": 0,
             "length": 20000000,
-            "track": "tfb03c75ba1"
+            "track": "t0774b768ff"
           },
           {
-            "source": "s1c5e3a3d29",
+            "source": "s3c95147190",
             "start": 0,
             "length": 20000000,
-            "track": "t97836a2cc7"
+            "track": "t25d6f63996"
           },
           {
-            "source": "s88d1cae5c6",
+            "source": "s4011000d20",
             "start": 0,
             "length": 20000000,
-            "track": "t52bd524876"
+            "track": "te2697de992"
           }
         ],
         "tools": [
@@ -140,7 +140,7 @@
       "plan": {
         "entry": {
           "key": {
-            "app": "0.7.1",
+            "app": "0.8.0",
             "chrome": "156.0.8078.48",
             "chip": {
               "vendorId": 4098,
@@ -154,54 +154,54 @@
           },
           "decode": {
             "h264_2160": {
-              "hw": 194.95,
-              "sw": 87.84
+              "hw": 192.18,
+              "sw": 44.89
             }
           },
           "compose": {
-            "plain": 1.68,
-            "text": 2.84,
-            "effects": 7.51
+            "plain": 3.11,
+            "text": 5.69,
+            "effects": 10.08
           },
-          "spread": 6.71
+          "spread": 41.57
         },
         "knobs": {
           "previewStart": 1,
           "frameCacheMB": 1024,
           "exportLanes": 2,
-          "copiesAtOnce": 2,
+          "copiesAtOnce": 1,
           "photoWorkers": 10
         },
-        "budget": 2.166111111111111,
+        "budget": 2.1353333333333335,
         "numbers": {
           "v": 1,
           "encode": {
             "h264_1080": {
-              "hw": 117.45,
-              "sw": 65.02
+              "hw": 83.4,
+              "sw": 38.98
             },
             "h264_2160": {
-              "hw": 23.78,
-              "sw": 9.7
+              "hw": 13.77,
+              "sw": 4.79
             }
           },
           "decode": {
             "h264_2160": {
-              "hw": 194.95,
-              "sw": 87.84
+              "hw": 192.18,
+              "sw": 44.89
             }
           },
           "lanes": [
-            64.81,
-            84.96,
-            89.61
+            38.53,
+            52.72,
+            46.35
           ],
           "compose": {
-            "plain": 1.68,
-            "text": 2.84,
-            "effects": 7.51
+            "plain": 3.11,
+            "text": 5.69,
+            "effects": 10.08
           },
-          "exportFps": 64.81,
+          "exportFps": 38.53,
           "support": {
             "hevcEncode": true,
             "av1Encode": true,
@@ -210,27 +210,27 @@
             "av1Decode": true
           },
           "runs": 3,
-          "spread": 6.71,
-          "seconds": 51.17,
+          "spread": 41.57,
+          "seconds": 83.38,
           "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)"
         },
         "load": {
-          "before": 48,
-          "after": 12
+          "before": 100,
+          "after": 94
         }
       },
       "plays": [
         {
           "label": "floor",
           "stats": {
-            "due": 538,
-            "drawn": 290,
-            "missed": 348,
-            "reseeks": 201,
-            "ms": 17889.500000023836
+            "due": 542,
+            "drawn": 276,
+            "missed": 365,
+            "reseeks": 198,
+            "ms": 18016.200000047684
           },
           "quality": {
-            "total": 293,
+            "total": 662,
             "dropped": 0
           },
           "levels": [],
@@ -252,41 +252,38 @@
               "width": 3840
             }
           ],
-          "missedPct": 64.7,
+          "missedPct": 67.3,
           "droppedPct": 0,
+          "shortPct": 59.3,
           "load": {
-            "before": 35,
-            "after": 70
+            "before": 99,
+            "after": 100
           }
         },
         {
           "label": "auto",
           "stats": {
-            "due": 540,
-            "drawn": 536,
-            "missed": 4,
-            "reseeks": 402,
-            "ms": 17999.700000035766
+            "due": 541,
+            "drawn": 520,
+            "missed": 21,
+            "reseeks": 2,
+            "ms": 18039.600000000006
           },
           "quality": {
-            "total": 0,
+            "total": 1632,
             "dropped": 0
           },
           "levels": [
             {
-              "at": 10,
-              "share": 0.25
-            },
-            {
-              "at": 4738,
+              "at": 38,
               "share": 0.5
             },
             {
-              "at": 9208,
-              "share": 1
+              "at": 557,
+              "share": 0.25
             }
           ],
-          "end": 1,
+          "end": 0.25,
           "playing": [
             {
               "source": 0,
@@ -304,25 +301,26 @@
               "width": 3840
             }
           ],
-          "missedPct": 0.7,
-          "droppedPct": null,
+          "missedPct": 3.9,
+          "droppedPct": 0,
+          "shortPct": 0,
           "load": {
-            "before": 11,
-            "after": 24
+            "before": 99,
+            "after": 73
           }
         },
         {
           "label": "floor-copies",
           "stats": {
-            "due": 542,
-            "drawn": 1078,
-            "missed": 1,
-            "reseeks": 1,
-            "ms": 18014.000000023836
+            "due": 541,
+            "drawn": 1055,
+            "missed": 9,
+            "reseeks": 9,
+            "ms": 18006.800000023853
           },
           "quality": {
-            "total": 1630,
-            "dropped": 0
+            "total": 1605,
+            "dropped": 3
           },
           "levels": [],
           "end": 1,
@@ -343,11 +341,12 @@
               "width": 1280
             }
           ],
-          "missedPct": 0.2,
-          "droppedPct": 0,
+          "missedPct": 1.7,
+          "droppedPct": 0.2,
+          "shortPct": 1.1,
           "load": {
-            "before": 8,
-            "after": 38
+            "before": 54,
+            "after": 68
           }
         },
         {
@@ -357,10 +356,10 @@
             "drawn": 541,
             "missed": 0,
             "reseeks": 0,
-            "ms": 17991.5
+            "ms": 17990.20000000001
           },
           "quality": {
-            "total": 1630,
+            "total": 1628,
             "dropped": 0
           },
           "levels": [],
@@ -368,8 +367,8 @@
           "playing": [
             {
               "source": 0,
-              "copy": true,
-              "width": 1280
+              "copy": false,
+              "width": 3840
             },
             {
               "source": 1,
@@ -384,22 +383,23 @@
           ],
           "missedPct": 0,
           "droppedPct": 0,
+          "shortPct": 0,
           "load": {
-            "before": 3,
-            "after": 18
+            "before": 53,
+            "after": 66
           }
         },
         {
           "label": "auto-copies-again",
           "stats": {
             "due": 541,
-            "drawn": 541,
-            "missed": 0,
+            "drawn": 538,
+            "missed": 3,
             "reseeks": 0,
-            "ms": 17996.10000001191
+            "ms": 17999.800000035757
           },
           "quality": {
-            "total": 1629,
+            "total": 1631,
             "dropped": 0
           },
           "levels": [],
@@ -407,8 +407,8 @@
           "playing": [
             {
               "source": 0,
-              "copy": true,
-              "width": 1280
+              "copy": false,
+              "width": 3840
             },
             {
               "source": 1,
@@ -421,16 +421,17 @@
               "width": 1280
             }
           ],
-          "missedPct": 0,
+          "missedPct": 0.6,
           "droppedPct": 0,
+          "shortPct": 0,
           "load": {
-            "before": 7,
-            "after": 19
+            "before": 63,
+            "after": 38
           }
         }
       ],
       "copies": {
-        "ms": 7027,
+        "ms": 14993,
         "tools": [
           {
             "heavy": true,
@@ -494,22 +495,22 @@
         ],
         "clips": [
           {
-            "source": "s205fd3aad3",
+            "source": "s41bdc3b5b7",
             "start": 0,
             "length": 20000000,
-            "track": "t2527d7068a"
+            "track": "t6eff7fba36"
           },
           {
-            "source": "s51b89c9619",
+            "source": "sf986fa67eb",
             "start": 0,
             "length": 20000000,
-            "track": "t8abeb64728"
+            "track": "tbd3469c9c6"
           },
           {
-            "source": "s1e2f21b72e",
+            "source": "s656c6e3a08",
             "start": 0,
             "length": 20000000,
-            "track": "t9040876f18"
+            "track": "t424f6905b8"
           }
         ],
         "tools": [
@@ -554,7 +555,7 @@
       "plan": {
         "entry": {
           "key": {
-            "app": "0.7.1",
+            "app": "0.8.0",
             "chrome": "156.0.8078.48",
             "chip": {
               "vendorId": 4318,
@@ -568,16 +569,16 @@
           },
           "decode": {
             "h264_2160": {
-              "hw": 188.38,
-              "sw": 87.48
+              "hw": 156.74,
+              "sw": 67.88
             }
           },
           "compose": {
-            "plain": 1.19,
-            "text": 2.36,
-            "effects": 3.84
+            "plain": 1.67,
+            "text": 3.28,
+            "effects": 5.04
           },
-          "spread": 11.99
+          "spread": 12.92
         },
         "knobs": {
           "previewStart": 1,
@@ -586,36 +587,36 @@
           "copiesAtOnce": 1,
           "photoWorkers": 10
         },
-        "budget": 2.093111111111111,
+        "budget": 1.7415555555555555,
         "numbers": {
           "v": 1,
           "encode": {
             "h264_1080": {
-              "hw": 118.72,
-              "sw": 66.71
+              "hw": 87.48,
+              "sw": 45.73
             },
             "h264_2160": {
-              "hw": 38.2,
-              "sw": 10.3
+              "hw": 30.71,
+              "sw": 6.82
             }
           },
           "decode": {
             "h264_2160": {
-              "hw": 188.38,
-              "sw": 87.48
+              "hw": 156.74,
+              "sw": 67.88
             }
           },
           "lanes": [
-            112.81,
-            114.35,
-            109.85
+            82.67,
+            86.49,
+            86.55
           ],
           "compose": {
-            "plain": 1.19,
-            "text": 2.36,
-            "effects": 3.84
+            "plain": 1.67,
+            "text": 3.28,
+            "effects": 5.04
           },
-          "exportFps": 112.81,
+          "exportFps": 82.67,
           "support": {
             "hevcEncode": true,
             "av1Encode": true,
@@ -624,27 +625,27 @@
             "av1Decode": true
           },
           "runs": 3,
-          "spread": 11.99,
-          "seconds": 39.22,
+          "spread": 12.92,
+          "seconds": 49.42,
           "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)"
         },
         "load": {
-          "before": 18,
-          "after": null
+          "before": 63,
+          "after": 29
         }
       },
       "plays": [
         {
           "label": "floor",
           "stats": {
-            "due": 541,
-            "drawn": 912,
-            "missed": 58,
-            "reseeks": 76,
-            "ms": 17994.199999999997
+            "due": 540,
+            "drawn": 689,
+            "missed": 137,
+            "reseeks": 354,
+            "ms": 17988.899999988076
           },
           "quality": {
-            "total": 1168,
+            "total": 540,
             "dropped": 0
           },
           "levels": [],
@@ -666,41 +667,38 @@
               "width": 3840
             }
           ],
-          "missedPct": 10.7,
+          "missedPct": 25.4,
           "droppedPct": 0,
+          "shortPct": 66.7,
           "load": {
-            "before": 17,
-            "after": 20
+            "before": 34,
+            "after": 99
           }
         },
         {
           "label": "auto",
           "stats": {
-            "due": 540,
-            "drawn": 524,
-            "missed": 16,
-            "reseeks": 0,
-            "ms": 17992.700000011915
+            "due": 541,
+            "drawn": 506,
+            "missed": 35,
+            "reseeks": 55,
+            "ms": 18031.799999976152
           },
           "quality": {
-            "total": 1626,
+            "total": 1739,
             "dropped": 0
           },
           "levels": [
             {
-              "at": 4,
-              "share": 0.25
-            },
-            {
-              "at": 5315,
+              "at": 25,
               "share": 0.5
             },
             {
-              "at": 10036,
-              "share": 1
+              "at": 749,
+              "share": 0.25
             }
           ],
-          "end": 1,
+          "end": 0.25,
           "playing": [
             {
               "source": 0,
@@ -718,25 +716,26 @@
               "width": 3840
             }
           ],
-          "missedPct": 3,
+          "missedPct": 6.5,
           "droppedPct": 0,
+          "shortPct": 0,
           "load": {
-            "before": 18,
-            "after": 29
+            "before": 100,
+            "after": 39
           }
         },
         {
           "label": "floor-copies",
           "stats": {
             "due": 542,
-            "drawn": 1077,
-            "missed": 1,
-            "reseeks": 0,
-            "ms": 18007.700000023848
+            "drawn": 1060,
+            "missed": 8,
+            "reseeks": 9,
+            "ms": 18001.800000023853
           },
           "quality": {
-            "total": 1626,
-            "dropped": 0
+            "total": 1610,
+            "dropped": 3
           },
           "levels": [],
           "end": 1,
@@ -757,76 +756,25 @@
               "width": 1280
             }
           ],
-          "missedPct": 0.2,
-          "droppedPct": 0,
+          "missedPct": 1.5,
+          "droppedPct": 0.2,
+          "shortPct": 1,
           "load": {
-            "before": 18,
-            "after": 52
+            "before": 28,
+            "after": 22
           }
         },
         {
           "label": "auto-copies",
           "stats": {
             "due": 541,
-            "drawn": 526,
-            "missed": 15,
+            "drawn": 541,
+            "missed": 0,
             "reseeks": 0,
-            "ms": 17997.79999999999
+            "ms": 17999.800000023853
           },
           "quality": {
-            "total": 1626,
-            "dropped": 0
-          },
-          "levels": [
-            {
-              "at": 2,
-              "share": 0.25
-            },
-            {
-              "at": 5003,
-              "share": 0.5
-            },
-            {
-              "at": 9474,
-              "share": 1
-            }
-          ],
-          "end": 1,
-          "playing": [
-            {
-              "source": 0,
-              "copy": false,
-              "width": 3840
-            },
-            {
-              "source": 1,
-              "copy": false,
-              "width": 3840
-            },
-            {
-              "source": 2,
-              "copy": true,
-              "width": 1280
-            }
-          ],
-          "missedPct": 2.8,
-          "droppedPct": 0,
-          "load": {
-            "before": 18,
-            "after": 22
-          }
-        },
-        {
-          "label": "auto-copies-again",
-          "stats": {
-            "due": 542,
-            "drawn": 529,
-            "missed": 13,
-            "reseeks": 0,
-            "ms": 18008.799999988085
-          },
-          "quality": {
-            "total": 1634,
+            "total": 1631,
             "dropped": 0
           },
           "levels": [
@@ -835,11 +783,11 @@
               "share": 0.25
             },
             {
-              "at": 4680,
+              "at": 4738,
               "share": 0.5
             },
             {
-              "at": 9151,
+              "at": 9210,
               "share": 1
             }
           ],
@@ -847,13 +795,13 @@
           "playing": [
             {
               "source": 0,
-              "copy": false,
-              "width": 3840
+              "copy": true,
+              "width": 1280
             },
             {
               "source": 1,
-              "copy": false,
-              "width": 3840
+              "copy": true,
+              "width": 1280
             },
             {
               "source": 2,
@@ -861,16 +809,57 @@
               "width": 1280
             }
           ],
-          "missedPct": 2.4,
+          "missedPct": 0,
           "droppedPct": 0,
+          "shortPct": 0,
           "load": {
-            "before": 39,
-            "after": 8
+            "before": 21,
+            "after": 60
+          }
+        },
+        {
+          "label": "auto-copies-again",
+          "stats": {
+            "due": 541,
+            "drawn": 541,
+            "missed": 0,
+            "reseeks": 0,
+            "ms": 17992.5
+          },
+          "quality": {
+            "total": 1632,
+            "dropped": 0
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 1,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 2,
+              "copy": true,
+              "width": 1280
+            }
+          ],
+          "missedPct": 0,
+          "droppedPct": 0,
+          "shortPct": 0,
+          "load": {
+            "before": 51,
+            "after": 30
           }
         }
       ],
       "copies": {
-        "ms": 6748,
+        "ms": 8652,
         "tools": [
           {
             "heavy": true,
@@ -934,22 +923,22 @@
         ],
         "clips": [
           {
-            "source": "s9cd911410f",
+            "source": "sa249669c60",
             "start": 0,
             "length": 20000000,
-            "track": "td2d3f8ff6e"
+            "track": "t11f0c8cfb1"
           },
           {
-            "source": "s6111b7d5e5",
+            "source": "sbd95ed9d91",
             "start": 0,
             "length": 20000000,
-            "track": "tf1954ad18d"
+            "track": "t317d013da4"
           },
           {
-            "source": "s87ce2ad824",
+            "source": "s06cc9472d8",
             "start": 0,
             "length": 20000000,
-            "track": "t01620baa74"
+            "track": "tc84dd08da6"
           }
         ],
         "tools": [
@@ -994,7 +983,7 @@
       "plan": {
         "entry": {
           "key": {
-            "app": "0.7.1",
+            "app": "0.8.0",
             "chrome": "156.0.8078.48",
             "chip": {
               "vendorId": 65535,
@@ -1009,15 +998,15 @@
           "decode": {
             "h264_2160": {
               "hw": null,
-              "sw": 121.44
+              "sw": 109.29
             }
           },
           "compose": {
-            "plain": 0.63,
-            "text": 2.67,
-            "effects": 75.43
+            "plain": 0.66,
+            "text": 2.49,
+            "effects": 75.76
           },
-          "spread": 7.42
+          "spread": 4.07
         },
         "knobs": {
           "previewStart": 0.25,
@@ -1026,36 +1015,36 @@
           "copiesAtOnce": 1,
           "photoWorkers": 10
         },
-        "budget": 0.2146626010871006,
+        "budget": 0.19234424498416047,
         "numbers": {
           "v": 1,
           "encode": {
             "h264_1080": {
               "hw": null,
-              "sw": 54.59
+              "sw": 49.47
             },
             "h264_2160": {
               "hw": null,
-              "sw": 9.4
+              "sw": 7.87
             }
           },
           "decode": {
             "h264_2160": {
               "hw": null,
-              "sw": 121.44
+              "sw": 109.29
             }
           },
           "lanes": [
-            11.64,
-            11.11,
-            10.82
+            11.52,
+            11.03,
+            10.47
           ],
           "compose": {
-            "plain": 0.63,
-            "text": 2.67,
-            "effects": 75.43
+            "plain": 0.66,
+            "text": 2.49,
+            "effects": 75.76
           },
-          "exportFps": 11.64,
+          "exportFps": 11.52,
           "support": {
             "hevcEncode": false,
             "av1Encode": true,
@@ -1064,12 +1053,12 @@
             "av1Decode": true
           },
           "runs": 3,
-          "spread": 7.42,
-          "seconds": 145.04,
+          "spread": 4.07,
+          "seconds": 149.08,
           "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)"
         },
         "load": {
-          "before": 34,
+          "before": 25,
           "after": 16
         }
       },
@@ -1078,10 +1067,10 @@
           "label": "floor",
           "stats": {
             "due": 541,
-            "drawn": 905,
-            "missed": 43,
-            "reseeks": 384,
-            "ms": 17999.899999964226
+            "drawn": 941,
+            "missed": 38,
+            "reseeks": 390,
+            "ms": 17996.999999988067
           },
           "quality": {
             "total": 0,
@@ -1106,37 +1095,29 @@
               "width": 3840
             }
           ],
-          "missedPct": 7.9,
+          "missedPct": 7,
           "droppedPct": null,
+          "shortPct": 100,
           "load": {
-            "before": 8,
-            "after": 60
+            "before": 38,
+            "after": 64
           }
         },
         {
           "label": "auto",
           "stats": {
             "due": 541,
-            "drawn": 540,
-            "missed": 1,
+            "drawn": 541,
+            "missed": 0,
             "reseeks": 405,
-            "ms": 17988.399999999994
+            "ms": 18014.20000000001
           },
           "quality": {
             "total": 0,
             "dropped": 0
           },
-          "levels": [
-            {
-              "at": 4476,
-              "share": 0.5
-            },
-            {
-              "at": 8950,
-              "share": 1
-            }
-          ],
-          "end": 1,
+          "levels": [],
+          "end": 0.25,
           "playing": [
             {
               "source": 0,
@@ -1154,21 +1135,22 @@
               "width": 3840
             }
           ],
-          "missedPct": 0.2,
+          "missedPct": 0,
           "droppedPct": null,
+          "shortPct": 100,
           "load": {
-            "before": 37,
-            "after": 20
+            "before": 43,
+            "after": 9
           }
         },
         {
           "label": "floor-copies",
           "stats": {
             "due": 542,
-            "drawn": 1079,
+            "drawn": 1049,
             "missed": 0,
             "reseeks": 0,
-            "ms": 18000.399999999994
+            "ms": 18017.000000011933
           },
           "quality": {
             "total": 1626,
@@ -1195,9 +1177,10 @@
           ],
           "missedPct": 0,
           "droppedPct": 0,
+          "shortPct": 0,
           "load": {
-            "before": 16,
-            "after": 18
+            "before": 17,
+            "after": 34
           }
         },
         {
@@ -1207,19 +1190,19 @@
             "drawn": 541,
             "missed": 0,
             "reseeks": 0,
-            "ms": 17992.899999952322
+            "ms": 17992.39999998809
           },
           "quality": {
-            "total": 1629,
+            "total": 1630,
             "dropped": 0
           },
           "levels": [
             {
-              "at": 4494,
+              "at": 4500,
               "share": 0.5
             },
             {
-              "at": 9217,
+              "at": 8971,
               "share": 1
             }
           ],
@@ -1243,9 +1226,10 @@
           ],
           "missedPct": 0,
           "droppedPct": 0,
+          "shortPct": 0,
           "load": {
-            "before": 34,
-            "after": 6
+            "before": 31,
+            "after": 84
           }
         },
         {
@@ -1254,11 +1238,11 @@
             "due": 541,
             "drawn": 541,
             "missed": 0,
-            "reseeks": 0,
-            "ms": 17993.899999976158
+            "reseeks": 6,
+            "ms": 17989.5
           },
           "quality": {
-            "total": 1631,
+            "total": 1664,
             "dropped": 0
           },
           "levels": [],
@@ -1282,14 +1266,15 @@
           ],
           "missedPct": 0,
           "droppedPct": 0,
+          "shortPct": 0,
           "load": {
-            "before": 8,
-            "after": 37
+            "before": 60,
+            "after": 38
           }
         }
       ],
       "copies": {
-        "ms": 7080,
+        "ms": 8934,
         "tools": [
           {
             "heavy": true,
@@ -1335,6 +1320,6 @@
     }
   },
   "total": 9,
-  "passed": 7,
-  "failed": 2
+  "passed": 9,
+  "failed": 0
 }

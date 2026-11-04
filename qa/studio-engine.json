@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-engine.cjs",
-  "run": "2026-11-03T22:01:07.994Z",
+  "run": "2026-11-04T06:23:13.671Z",
   "checks": [
     {
       "name": "the shipped Arabic fonts load with Arabic sample text",
