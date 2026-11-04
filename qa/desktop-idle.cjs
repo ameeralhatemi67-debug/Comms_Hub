@@ -91,10 +91,33 @@ async function main() {
 
     const { app, win, mainId, data } = await h.launchDev('idle');
     await h.instrument(app);
-    // Windows' own speed limit for the processor, as the application hears it (a hot laptop lowers it)
-    await app.evaluate(({ powerMonitor }) => {
+    // Windows' own speed limit for the processor (a hot laptop lowers it). Electron hands Windows' events to a copy of emit
+    // bound when the first listener was added, so replacing powerMonitor.emit holds nothing back (found by the copy check on
+    // 2026-11-05). The application's listeners are wrapped instead: while Windows' changes are held (realLimits), only the
+    // check's own limits (__sayLimit) reach them. Every change is recorded, the check's own apart from Windows'.
+    result.limitListeners = await app.evaluate(({ powerMonitor }) => {
+      const EVENT = 'speed-limit-change';
+      const theirs = powerMonitor.listeners(EVENT);
+      powerMonitor.removeAllListeners(EVENT);
       globalThis.__limits = [];
-      powerMonitor.on('speed-limit-change', (d) => globalThis.__limits.push({ at: Date.now(), limit: d.limit }));
+      globalThis.__blockLimits = false;
+      globalThis.__ours = false;
+      const reaches = () => globalThis.__ours || !globalThis.__blockLimits;
+      powerMonitor.on(EVENT, (d) => globalThis.__limits.push({ at: Date.now(), limit: d && d.limit, ours: globalThis.__ours, heard: reaches() }));
+      for (const l of theirs) {
+        powerMonitor.on(EVENT, function (...args) {
+          if (reaches()) return l.apply(this, args);
+        });
+      }
+      globalThis.__sayLimit = (limit) => {
+        globalThis.__ours = true;
+        try {
+          powerMonitor.emit(EVENT, { limit });
+        } finally {
+          globalThis.__ours = false;
+        }
+      };
+      return theirs.length;
     });
     await app.evaluate(({ BrowserWindow }, id) => {
       globalThis.__audible = [];
@@ -103,22 +126,14 @@ async function main() {
     await h.until(() => win.url() === 'http://127.0.0.1:3000/', 20000);
     await win.waitForLoadState('load');
     await win.waitForFunction(() => typeof window.openCorpus === 'function');
-    /** Keeps Windows' own speed-limit changes away from the application (the limit held at 100), or lets them through again. */
+    /**
+     * Keeps Windows' own speed-limit changes away from the application (told 100 once), or lets them through again. The
+     * check's own limits reach it either way.
+     */
     const realLimits = (on) =>
-      app.evaluate(({ powerMonitor }, pass) => {
-        if (!globalThis.__emit) {
-          globalThis.__emit = powerMonitor.emit;
-          powerMonitor.emit = function emit(name, ...args) {
-            if (name === 'speed-limit-change' && globalThis.__blockLimits && !globalThis.__ours) return false;
-            return globalThis.__emit.call(this, name, ...args);
-          };
-        }
+      app.evaluate((_, pass) => {
         globalThis.__blockLimits = !pass;
-        if (!pass) {
-          globalThis.__ours = true;
-          powerMonitor.emit('speed-limit-change', { limit: 100 });
-          globalThis.__ours = false;
-        }
+        if (!pass) globalThis.__sayLimit(100);
       }, on);
     const bridge = await win.evaluate(() => ({ bridge: window.commsHubNative.bridge, life: Object.keys(window.commsHubNative.life), media: Object.keys(window.commsHubNative.media) }));
     check('the bridge is version 7 or later, with life.activity and media.queue, queued and onQueue', bridge.bridge >= 7 && bridge.life.includes('activity') && ['queue', 'queued', 'onQueue'].every((m) => bridge.media.includes(m)), bridge);
@@ -241,8 +256,8 @@ async function main() {
     await realLimits(true);
     await held(
       'Windows lowers the processor\'s speed limit (simulated)',
-      () => app.evaluate(({ powerMonitor }) => void powerMonitor.emit('speed-limit-change', { limit: 70 })),
-      () => app.evaluate(({ powerMonitor }) => void powerMonitor.emit('speed-limit-change', { limit: 100 })),
+      () => app.evaluate(() => void globalThis.__sayLimit(70)),
+      () => app.evaluate(() => void globalThis.__sayLimit(100)),
       'throttled',
     );
 
@@ -360,8 +375,11 @@ async function main() {
       note(`Time to make the copies not in use (${SECONDS} s of 4K each), one, two and three at a time: ${JSON.stringify(result.speed.widths)}`);
       check('every width made every copy', Object.values(result.speed.widths).every((w) => w.done), result.speed.widths);
     } else note('Speed figures not taken (run with --speed in a quiet window).');
-    result.speedLimits = await app.evaluate(() => globalThis.__limits.slice());
-    note(`Windows' speed limit for the processor during the run, as the application heard it: ${result.speedLimits.length ? JSON.stringify(result.speedLimits.map((x) => x.limit)) : 'no change (100%)'}.`);
+    const limits = await app.evaluate(() => globalThis.__limits.slice());
+    result.speedLimits = limits.filter((x) => x.heard).map(({ at, limit, ours }) => ({ at, limit, ours }));
+    result.windowsLimits = limits.filter((x) => !x.ours).map(({ at, limit, heard }) => ({ at, limit, heard }));
+    const win32 = result.windowsLimits;
+    note(`The processor's speed limit as the application heard it (its listeners wrapped: ${result.limitListeners}):${JSON.stringify(result.speedLimits.map((x) => (x.ours ? x.limit : `${x.limit} (Windows)`)))}. ${win32.length ? `Windows changed the limit ${win32.length} times during the run (${win32.map((x) => `${x.limit}, ${x.heard ? 'let through' : 'held'}`).join('; ')}).` : "Windows did not change the processor's speed limit during the run."}`);
 
     await clearCopies();
     await win.evaluate(() => window.queueWith(1));
