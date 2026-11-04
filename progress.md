@@ -3140,7 +3140,7 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - **Not shown in the application:** the manager's port checks that would show the processor settling after a no-chip 4K row were
     refused, the window drawing about one frame a second while the laptop was in use. That is the guard working.
 - **The copy made in idle time, in an open editor** (`qa/studio-copy-swap.cjs`, written after the handoff, `Desktop_Power_Handoff.md`
-  3.2 idea 1). **Not run yet:** port 3000 is Fork 1's for its D11 rows. It drives the real editor in the development package with
+  3.2 idea 1). Run once in the manager's slot. It drives the real editor in the development package with
   no profile, on the D10 4K fixture added from «هذا الجهاز». It reads the application's hold while the editor plays («playing», the
   source silent and «تشغيل» pressed from the page) and while the ruler is dragged («scrubbing»), and that nothing is held after.
   The copy is taken up at the pause, and the next play runs from the copy: the check reads the paused frame's identity across the
@@ -3148,4 +3148,34 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   `copiesReady`): a copy is taken up only while paused, and there is no swap in mid-play (the manager accepted it on 2026-11-04). A
   copy that becomes ready during a play (`readyWhilePlaying`) is not driven: the broker holds every copy while the page plays, so
   that only happens in a race.
+  - **The run: 14 of 17** (`qa/studio-copy-swap.json`, 2026-11-04 23:18:50 to 23:19:33, the other forks idle). It ran at
+    `80e0ac1` on the development package (bridge 9), with no profile, on the RTX 3050, a 510-pixel stage canvas at 1.25 device
+    pixels, TEMP in `qa/artifacts/tmp`, and the shared lock under this branch's name.
+  - **Passed:**
+    - The editor named its source to the queue, and the application found it needs a copy.
+    - While the editor played, the hold read «playing» in every reading. The running copy (1.77 s into its work) paused and made
+      no progress. Paused, nothing was held within 600 ms.
+    - While the ruler was dragged, the hold read «scrubbing». It ended within 800 ms of the last move, and nothing was held from
+      762 ms on.
+    - The copy was made while nothing happened and was taken up at the pause. The editor first read the copy 18.0 s into the page.
+    - The next play ran from the copy: its element was the copy's, and no element of the original was made.
+    - Sent to 4, 5.5, 10 and 15.5 s, the copy's element gave frames 120, 165, 300 and 465.
+    - «playing» was read during that play too, and afterwards nothing was held or being made.
+  - **Failed, the check's own numbers (2 rows).** The check expected frame 120 at 4 s; the stage was at 119.
+    - Cause: «تقدم ثانية» moves 30 times `frameUs(30)`, which is 33,333 µs rounded to whole microseconds. Four presses end 40 µs
+      before 4 s, on frame 119.
+    - Every reading agreed with the playhead (119, 149, 121, 119). Across the take-up the frame was the same: 119 from the
+      original, then 119 from the copy. The identity held; the rows failed on the wrong constant.
+    - That the editor's «تقدم ثانية» lands a frame short after a few presses at 30 fps is existing behaviour, found here and
+      not changed.
+  - **Failed, the copy's play (1 row).**
+    - It was in step 87 ms after the press, with all 163 frames after that inside the player's 5-frame rule and none going back.
+    - The median was 2 frames behind the clock as the check computes it (worst 2), against a limit of one. The check's clock
+      starts from the playhead's frame (119) while the player's time was 3.99996 s, so the element ran about 2 to 3 frames behind
+      the player's clock for the whole play.
+    - The element starts playing when ready, about 87 ms after the clock starts. The player puts it back in step only beyond
+      `DRIFT` (0.12 s, 3.6 frames), so that lag stays for the play.
+    - The original's element did the same (median 2, worst 3), but only after a 1240 ms warm-up of up to 25 frames behind.
+      Dropped frames by the elements' own count: 0 of 131 for the original, 2 of 100 for the copy.
+  - Not rerun, by the manager's instruction.
 - **Not done.** Nothing pushed.
