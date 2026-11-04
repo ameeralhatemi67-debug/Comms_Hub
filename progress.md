@@ -3233,6 +3233,20 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   **853 of 853** (00:49:41 to 00:49:56). The build and the qa checks were not run there; the manager runs them.
 - **The D10 checks' port lock** is `%LOCALAPPDATA%\Temp\comms-hub-port3000.lock` always (`9a3db90`, `qa/studio-d10.cjs`, the line
   Fork 1's branch has). With TEMP moved for a run's files, the lock followed TEMP, so two checks could each hold "the" lock.
+- **The manager's check before the merge** (2026-11-05, in the detached worktree `verify-e3cab67` with its own `npm ci`).
+  - At `d85de58`: `npm run typecheck` clean, `npm test` **851 of 851**, `npm run build` passes (43 of 43 pages). Then
+    `qa/studio-copy-swap.cjs` got **16 of 18**, run right after that build on a warm laptop. In two rows the hold read «throttled»
+    for a few readings: during the play (797 to 1419 ms) and 5.2 s after the drag. Every identity row passed.
+  - **Why: the check's guard held nothing back.** It replaced `powerMonitor.emit` to keep Windows' speed limit at 100. But
+    Electron hands Windows' own events to a copy of `emit` bound when the first listener was added. The application's listener is
+    the only thing that lowers its limit, and the check sent only 100, so a real lower limit had reached it. The application did
+    the right thing with it (a held processor holds background copies).
+  - **The fix** is in the check only. It takes the application's speed-limit listeners off, tells them 100 once, and records
+    Windows' own changes in the result (`windowsLimits`) with a note. `qa/desktop-idle.cjs` has the same guard. It is fixed
+    and rerun at its next port slot, after this stage's timing.
+  - At `5453009` (the second keys in) with the fixed check: typecheck clean, `npm test` **853 of 853**, build passes, then
+    `qa/studio-copy-swap.cjs` **18 of 18** (00:53:13 to 00:53:54). Windows did not change the limit during that run, so the
+    new guard has not yet met a real change.
 - **Not done.** Nothing pushed.
 
 ### 2026-11-04: the studio says when this device is not measured, or its measurement is stale (Desktop Power, Fork 3, 63.6.1)

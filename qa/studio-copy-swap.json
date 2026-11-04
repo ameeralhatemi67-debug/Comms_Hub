@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-copy-swap.cjs",
-  "run": "2026-11-04T21:42:13.151Z",
+  "run": "2026-11-04T21:53:14.448Z",
   "version": "0.8.0",
   "checks": [
     {
@@ -11,77 +11,77 @@
     {
       "name": "the editor named its 4K source to the application's queue on its own, and the application found it needs a light copy here (no profile)",
       "pass": true,
-      "detail": "{\"hold\":\"input\",\"width\":1,\"items\":[{\"name\":\"proxy-<fingerprint>4-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":20,\"why\":null}]}"
+      "detail": "{\"hold\":\"input\",\"width\":1,\"items\":[{\"name\":\"proxy-<fingerprint>f-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":20,\"why\":null}]}"
     },
     {
       "name": "paused at the playhead, the stage shows the playhead's frame (120) from the original (no read of a copy yet)",
       "pass": true,
-      "detail": "{\"before\":{\"shown\":120,\"playhead\":120,\"ms\":652},\"readsBefore\":{\"original\":8,\"copy\":0,\"blob\":0,\"firstCopy\":null},\"stateBefore\":\"waiting\"}"
+      "detail": "{\"before\":{\"shown\":120,\"playhead\":120,\"ms\":633},\"readsBefore\":{\"original\":8,\"copy\":0,\"blob\":0,\"firstCopy\":null},\"stateBefore\":\"waiting\"}"
     },
     {
       "name": "four presses of «تقدم ثانية» from the start land on frame 120 (whole frames, time.ts stepFrames)",
       "pass": true,
-      "detail": "{\"shown\":120,\"playhead\":120,\"ms\":652}"
+      "detail": "{\"shown\":120,\"playhead\":120,\"ms\":633}"
     },
     {
       "name": "while the editor plays, the application reads «playing» (the page's own word: the source is silent and «تشغيل» was pressed from the page)",
       "pass": true,
-      "detail": "[{\"ms\":86,\"hold\":\"playing\",\"state\":\"paused\",\"done\":1.966667},{\"ms\":351,\"hold\":\"playing\",\"state\":\"paused\",\"done\":1.966667},{\"ms\":617,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":951,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":1233,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":1506,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":1798,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":2067,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":2417,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":2711,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3}]"
+      "detail": "[{\"ms\":57,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.033333},{\"ms\":359,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.033333},{\"ms\":668,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":988,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":1261,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":1499,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":1758,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":2013,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":2359,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":2636,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333}]"
     },
     {
       "name": "the copy being made in idle time is paused while the editor plays, and makes no progress from a second on",
       "pass": true,
-      "detail": "[{\"ms\":86,\"hold\":\"playing\",\"state\":\"paused\",\"done\":1.966667},{\"ms\":351,\"hold\":\"playing\",\"state\":\"paused\",\"done\":1.966667},{\"ms\":617,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":951,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":1233,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":1506,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":1798,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":2067,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":2417,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3},{\"ms\":2711,\"hold\":\"playing\",\"state\":\"paused\",\"done\":3}]"
+      "detail": "[{\"ms\":57,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.033333},{\"ms\":359,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.033333},{\"ms\":668,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":988,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":1261,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":1499,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":1758,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":2013,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":2359,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333},{\"ms\":2636,\"hold\":\"playing\",\"state\":\"paused\",\"done\":2.733333}]"
     },
     {
       "name": "once paused, nothing is held (no input was counted: the play and the pause were pressed from the page)",
       "pass": true,
-      "detail": "[{\"ms\":25,\"hold\":null,\"state\":\"running\"},{\"ms\":140,\"hold\":null,\"state\":\"running\"},{\"ms\":250,\"hold\":null,\"state\":\"running\"},{\"ms\":358,\"hold\":null,\"state\":\"running\"},{\"ms\":468,\"hold\":null,\"state\":\"running\"},{\"ms\":577,\"hold\":null,\"state\":\"running\"},{\"ms\":688,\"hold\":null,\"state\":\"running\"},{\"ms\":798,\"hold\":null,\"state\":\"running\"},{\"ms\":909,\"hold\":null,\"state\":\"running\"},{\"ms\":1017,\"hold\":null,\"state\":\"running\"},{\"ms\":1126,\"hold\":null,\"state\":\"running\"}]"
+      "detail": "[{\"ms\":37,\"hold\":null,\"state\":\"running\"},{\"ms\":143,\"hold\":null,\"state\":\"running\"},{\"ms\":260,\"hold\":null,\"state\":\"running\"},{\"ms\":370,\"hold\":null,\"state\":\"running\"},{\"ms\":477,\"hold\":null,\"state\":\"running\"},{\"ms\":587,\"hold\":null,\"state\":\"running\"},{\"ms\":696,\"hold\":null,\"state\":\"running\"},{\"ms\":808,\"hold\":null,\"state\":\"running\"},{\"ms\":916,\"hold\":null,\"state\":\"running\"},{\"ms\":1024,\"hold\":null,\"state\":\"running\"},{\"ms\":1133,\"hold\":null,\"state\":\"running\"}]"
     },
     {
       "name": "that play was the original's element",
       "pass": true,
-      "detail": "{\"place\":\"original\",\"copy\":\"0\",\"ready\":4,\"time\":6.957}"
+      "detail": "{\"place\":\"original\",\"copy\":\"0\",\"ready\":4,\"time\":6.936}"
     },
     {
       "name": "while the ruler is dragged, the application reads «scrubbing» (above the input the drag also is)",
       "pass": true,
-      "detail": "[{\"ms\":118,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":242,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":354,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":462,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":712,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":832,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":947,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1049,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1197,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1304,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1422,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1540,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1663,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1835,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1944,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":2052,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":2179,\"hold\":\"scrubbing\",\"state\":\"paused\"}]"
+      "detail": "[{\"ms\":107,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":218,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":342,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":450,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":575,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":703,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":807,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":918,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1043,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1152,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1268,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1369,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1509,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1729,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1837,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":1953,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":2073,\"hold\":\"scrubbing\",\"state\":\"paused\"}]"
     },
     {
       "name": "the drag stopped, «scrubbing» ends within 800 ms (the page says «none» 400 ms after the last move)",
       "pass": true,
-      "detail": "[{\"ms\":2,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":113,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":230,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":340,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":449,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":558,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":666,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":775,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":882,\"hold\":null,\"state\":\"running\"},{\"ms\":991,\"hold\":null,\"state\":\"running\"},{\"ms\":1099,\"hold\":null,\"state\":\"running\"},{\"ms\":1208,\"hold\":null,\"state\":\"running\"},{\"ms\":1319,\"hold\":null,\"state\":\"running\"},{\"ms\":1429,\"hold\":null,\"state\":\"running\"},{\"ms\":1540,\"hold\":null,\"state\":\"running\"},{\"ms\":1650,\"hold\":null,\"state\":\"running\"},{\"ms\":1759,\"hold\":null,\"state\":\"running\"},{\"ms\":1869,\"hold\":null,\"state\":\"running\"},{\"ms\":1978,\"hold\":null,\"state\":\"running\"},{\"ms\":2088,\"hold\":null,\"state\":\"running\"},{\"ms\":2198,\"hold\":null,\"state\":\"running\"},{\"ms\":2308,\"hold\":null,\"state\":\"running\"},{\"ms\":2416,\"hold\":null,\"state\":\"running\"},{\"ms\":2525,\"hold\":null,\"state\":\"running\"},{\"ms\":2634,\"hold\":null,\"state\":\"running\"},{\"ms\":2744,\"hold\":null,\"state\":\"running\"},{\"ms\":2854,\"hold\":null,\"state\":\"running\"},{\"ms\":2963,\"hold\":null,\"state\":\"running\"},{\"ms\":3074,\"hold\":null,\"state\":\"running\"},{\"ms\":3182,\"hold\":null,\"state\":\"running\"},{\"ms\":3291,\"hold\":null,\"state\":\"running\"},{\"ms\":3401,\"hold\":null,\"state\":\"ready\"},{\"ms\":3510,\"hold\":null,\"state\":\"ready\"},{\"ms\":3619,\"hold\":null,\"state\":\"ready\"},{\"ms\":3729,\"hold\":null,\"state\":\"ready\"},{\"ms\":3839,\"hold\":null,\"state\":\"ready\"},{\"ms\":3951,\"hold\":null,\"state\":\"ready\"},{\"ms\":4061,\"hold\":null,\"state\":\"ready\"},{\"ms\":4170,\"hold\":null,\"state\":\"ready\"},{\"ms\":4280,\"hold\":null,\"state\":\"ready\"},{\"ms\":4390,\"hold\":null,\"state\":\"ready\"},{\"ms\":4499,\"hold\":null,\"state\":\"ready\"},{\"ms\":4608,\"hold\":null,\"state\":\"ready\"},{\"ms\":4717,\"hold\":null,\"state\":\"ready\"},{\"ms\":4825,\"hold\":null,\"state\":\"ready\"},{\"ms\":4935,\"hold\":null,\"state\":\"ready\"},{\"ms\":5043,\"hold\":null,\"state\":\"ready\"},{\"ms\":5153,\"hold\":null,\"state\":\"ready\"},{\"ms\":5263,\"hold\":null,\"state\":\"ready\"},{\"ms\":5372,\"hold\":null,\"state\":\"ready\"},{\"ms\":5482,\"hold\":null,\"state\":\"ready\"}]"
+      "detail": "[{\"ms\":2,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":109,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":217,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":327,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":435,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":545,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":656,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":765,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":873,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":981,\"hold\":null,\"state\":\"running\"},{\"ms\":1090,\"hold\":null,\"state\":\"running\"},{\"ms\":1198,\"hold\":null,\"state\":\"running\"},{\"ms\":1308,\"hold\":null,\"state\":\"running\"},{\"ms\":1418,\"hold\":null,\"state\":\"running\"},{\"ms\":1528,\"hold\":null,\"state\":\"running\"},{\"ms\":1631,\"hold\":null,\"state\":\"running\"},{\"ms\":1746,\"hold\":null,\"state\":\"running\"},{\"ms\":1854,\"hold\":null,\"state\":\"running\"},{\"ms\":1964,\"hold\":null,\"state\":\"running\"},{\"ms\":2073,\"hold\":null,\"state\":\"running\"},{\"ms\":2182,\"hold\":null,\"state\":\"running\"},{\"ms\":2292,\"hold\":null,\"state\":\"running\"},{\"ms\":2400,\"hold\":null,\"state\":\"running\"},{\"ms\":2509,\"hold\":null,\"state\":\"running\"},{\"ms\":2619,\"hold\":null,\"state\":\"running\"},{\"ms\":2728,\"hold\":null,\"state\":\"running\"},{\"ms\":2837,\"hold\":null,\"state\":\"running\"},{\"ms\":2945,\"hold\":null,\"state\":\"running\"},{\"ms\":3055,\"hold\":null,\"state\":\"running\"},{\"ms\":3165,\"hold\":null,\"state\":\"running\"},{\"ms\":3272,\"hold\":null,\"state\":\"running\"},{\"ms\":3383,\"hold\":null,\"state\":\"running\"},{\"ms\":3490,\"hold\":null,\"state\":\"running\"},{\"ms\":3598,\"hold\":null,\"state\":\"running\"},{\"ms\":3707,\"hold\":null,\"state\":\"running\"},{\"ms\":3827,\"hold\":null,\"state\":\"ready\"},{\"ms\":3941,\"hold\":null,\"state\":\"ready\"},{\"ms\":4050,\"hold\":null,\"state\":\"ready\"},{\"ms\":4159,\"hold\":null,\"state\":\"ready\"},{\"ms\":4267,\"hold\":null,\"state\":\"ready\"},{\"ms\":4377,\"hold\":null,\"state\":\"ready\"},{\"ms\":4487,\"hold\":null,\"state\":\"ready\"},{\"ms\":4597,\"hold\":null,\"state\":\"ready\"},{\"ms\":4706,\"hold\":null,\"state\":\"ready\"},{\"ms\":4816,\"hold\":null,\"state\":\"ready\"},{\"ms\":4926,\"hold\":null,\"state\":\"ready\"},{\"ms\":5035,\"hold\":null,\"state\":\"ready\"},{\"ms\":5146,\"hold\":null,\"state\":\"ready\"},{\"ms\":5255,\"hold\":null,\"state\":\"ready\"},{\"ms\":5364,\"hold\":null,\"state\":\"ready\"},{\"ms\":5473,\"hold\":null,\"state\":\"ready\"}]"
     },
     {
       "name": "and nothing is held once the drag's own input is 3 s old",
       "pass": true,
-      "detail": "{\"freeAt\":882,\"after\":[{\"ms\":2,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":113,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":230,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":340,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":449,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":558,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":666,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":775,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":882,\"hold\":null,\"state\":\"running\"},{\"ms\":991,\"hold\":null,\"state\":\"running\"},{\"ms\":1099,\"hold\":null,\"state\":\"running\"},{\"ms\":1208,\"hold\":null,\"state\":\"running\"},{\"ms\":1319,\"hold\":null,\"state\":\"running\"},{\"ms\":1429,\"hold\":null,\"state\":\"running\"},{\"ms\":1540,\"hold\":null,\"state\":\"running\"},{\"ms\":1650,\"hold\":null,\"state\":\"running\"},{\"ms\":1759,\"hold\":null,\"state\":\"running\"},{\"ms\":1869,\"hold\":null,\"state\":\"running\"},{\"ms\":1978,\"hold\":null,\"state\":\"running\"},{\"ms\":2088,\"hold\":null,\"state\":\"running\"},{\"ms\":2198,\"hold\":null,\"state\":\"running\"},{\"ms\":2308,\"hold\":null,\"state\":\"running\"},{\"ms\":2416,\"hold\":null,\"state\":\"running\"},{\"ms\":2525,\"hold\":null,\"state\":\"running\"},{\"ms\":2634,\"hold\":null,\"state\":\"running\"},{\"ms\":2744,\"hold\":null,\"state\":\"running\"},{\"ms\":2854,\"hold\":null,\"state\":\"running\"},{\"ms\":2963,\"hold\":null,\"state\":\"running\"},{\"ms\":3074,\"hold\":null,\"state\":\"running\"},{\"ms\":3182,\"hold\":null,\"state\":\"running\"},{\"ms\":3291,\"hold\":null,\"state\":\"running\"},{\"ms\":3401,\"hold\":null,\"state\":\"ready\"},{\"ms\":3510,\"hold\":null,\"state\":\"ready\"},{\"ms\":3619,\"hold\":null,\"state\":\"ready\"},{\"ms\":3729,\"hold\":null,\"state\":\"ready\"},{\"ms\":3839,\"hold\":null,\"state\":\"ready\"},{\"ms\":3951,\"hold\":null,\"state\":\"ready\"},{\"ms\":4061,\"hold\":null,\"state\":\"ready\"},{\"ms\":4170,\"hold\":null,\"state\":\"ready\"},{\"ms\":4280,\"hold\":null,\"state\":\"ready\"},{\"ms\":4390,\"hold\":null,\"state\":\"ready\"},{\"ms\":4499,\"hold\":null,\"state\":\"ready\"},{\"ms\":4608,\"hold\":null,\"state\":\"ready\"},{\"ms\":4717,\"hold\":null,\"state\":\"ready\"},{\"ms\":4825,\"hold\":null,\"state\":\"ready\"},{\"ms\":4935,\"hold\":null,\"state\":\"ready\"},{\"ms\":5043,\"hold\":null,\"state\":\"ready\"},{\"ms\":5153,\"hold\":null,\"state\":\"ready\"},{\"ms\":5263,\"hold\":null,\"state\":\"ready\"},{\"ms\":5372,\"hold\":null,\"state\":\"ready\"},{\"ms\":5482,\"hold\":null,\"state\":\"ready\"}]}"
+      "detail": "{\"freeAt\":981,\"after\":[{\"ms\":2,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":109,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":217,\"hold\":\"scrubbing\",\"state\":\"paused\"},{\"ms\":327,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":435,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":545,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":656,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":765,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":873,\"hold\":\"input\",\"state\":\"paused\"},{\"ms\":981,\"hold\":null,\"state\":\"running\"},{\"ms\":1090,\"hold\":null,\"state\":\"running\"},{\"ms\":1198,\"hold\":null,\"state\":\"running\"},{\"ms\":1308,\"hold\":null,\"state\":\"running\"},{\"ms\":1418,\"hold\":null,\"state\":\"running\"},{\"ms\":1528,\"hold\":null,\"state\":\"running\"},{\"ms\":1631,\"hold\":null,\"state\":\"running\"},{\"ms\":1746,\"hold\":null,\"state\":\"running\"},{\"ms\":1854,\"hold\":null,\"state\":\"running\"},{\"ms\":1964,\"hold\":null,\"state\":\"running\"},{\"ms\":2073,\"hold\":null,\"state\":\"running\"},{\"ms\":2182,\"hold\":null,\"state\":\"running\"},{\"ms\":2292,\"hold\":null,\"state\":\"running\"},{\"ms\":2400,\"hold\":null,\"state\":\"running\"},{\"ms\":2509,\"hold\":null,\"state\":\"running\"},{\"ms\":2619,\"hold\":null,\"state\":\"running\"},{\"ms\":2728,\"hold\":null,\"state\":\"running\"},{\"ms\":2837,\"hold\":null,\"state\":\"running\"},{\"ms\":2945,\"hold\":null,\"state\":\"running\"},{\"ms\":3055,\"hold\":null,\"state\":\"running\"},{\"ms\":3165,\"hold\":null,\"state\":\"running\"},{\"ms\":3272,\"hold\":null,\"state\":\"running\"},{\"ms\":3383,\"hold\":null,\"state\":\"running\"},{\"ms\":3490,\"hold\":null,\"state\":\"running\"},{\"ms\":3598,\"hold\":null,\"state\":\"running\"},{\"ms\":3707,\"hold\":null,\"state\":\"running\"},{\"ms\":3827,\"hold\":null,\"state\":\"ready\"},{\"ms\":3941,\"hold\":null,\"state\":\"ready\"},{\"ms\":4050,\"hold\":null,\"state\":\"ready\"},{\"ms\":4159,\"hold\":null,\"state\":\"ready\"},{\"ms\":4267,\"hold\":null,\"state\":\"ready\"},{\"ms\":4377,\"hold\":null,\"state\":\"ready\"},{\"ms\":4487,\"hold\":null,\"state\":\"ready\"},{\"ms\":4597,\"hold\":null,\"state\":\"ready\"},{\"ms\":4706,\"hold\":null,\"state\":\"ready\"},{\"ms\":4816,\"hold\":null,\"state\":\"ready\"},{\"ms\":4926,\"hold\":null,\"state\":\"ready\"},{\"ms\":5035,\"hold\":null,\"state\":\"ready\"},{\"ms\":5146,\"hold\":null,\"state\":\"ready\"},{\"ms\":5255,\"hold\":null,\"state\":\"ready\"},{\"ms\":5364,\"hold\":null,\"state\":\"ready\"},{\"ms\":5473,\"hold\":null,\"state\":\"ready\"}]}"
     },
     {
       "name": "the light copy was made while nothing happened, with nothing asked, and taken up at the pause (the paused editor's decoder reads the copy)",
       "pass": true,
-      "detail": "{\"madeMs\":2,\"readsAt\":{\"original\":36,\"copy\":5,\"blob\":0,\"firstCopy\":17985.19999998808},\"item\":\"{\\\"name\\\":\\\"proxy-<fingerprint>4-720-r1-ff902.mp4\\\",\\\"state\\\":\\\"ready\\\",\\\"done\\\":17.066667,\\\"total\\\":20,\\\"why\\\":null}\"}"
+      "detail": "{\"madeMs\":2,\"readsAt\":{\"original\":36,\"copy\":4,\"blob\":0,\"firstCopy\":17493.5},\"item\":\"{\\\"name\\\":\\\"proxy-<fingerprint>f-720-r1-ff902.mp4\\\",\\\"state\\\":\\\"ready\\\",\\\"done\\\":19.833333,\\\"total\\\":20,\\\"why\\\":null}\"}"
     },
     {
       "name": "taken up at the pause, the paused frame keeps its identity: frame 120 from the original, and from the copy 120 again, 150 a second on and 122 two frames on, each the playhead's",
       "pass": true,
-      "detail": "{\"before\":{\"shown\":120,\"playhead\":120,\"ms\":652},\"still\":{\"shown\":120,\"playhead\":120,\"ms\":429},\"next\":{\"shown\":150,\"playhead\":150,\"ms\":421},\"again\":{\"shown\":120,\"playhead\":120,\"ms\":443},\"two\":{\"shown\":122,\"playhead\":122,\"ms\":428},\"back\":{\"shown\":120,\"playhead\":120,\"ms\":418},\"readsAt\":{\"original\":36,\"copy\":5,\"blob\":0,\"firstCopy\":17985.19999998808},\"readsAfter\":{\"original\":36,\"copy\":7,\"blob\":0,\"firstCopy\":17985.19999998808},\"madeMs\":2}"
+      "detail": "{\"before\":{\"shown\":120,\"playhead\":120,\"ms\":633},\"still\":{\"shown\":120,\"playhead\":120,\"ms\":427},\"next\":{\"shown\":150,\"playhead\":150,\"ms\":411},\"again\":{\"shown\":120,\"playhead\":120,\"ms\":405},\"two\":{\"shown\":122,\"playhead\":122,\"ms\":429},\"back\":{\"shown\":120,\"playhead\":120,\"ms\":424},\"readsAt\":{\"original\":36,\"copy\":4,\"blob\":0,\"firstCopy\":17493.5},\"readsAfter\":{\"original\":36,\"copy\":5,\"blob\":0,\"firstCopy\":17493.5},\"madeMs\":2}"
     },
     {
       "name": "the next play runs from the copy: its element is the light copy's, and no element of the original is made for it",
       "pass": true,
-      "detail": "{\"made\":[{\"place\":\"copy\",\"copy\":\"1\",\"ready\":4,\"time\":6.952}],\"element\":{\"place\":\"copy\",\"copy\":\"1\",\"ready\":4,\"time\":6.952}}"
+      "detail": "{\"made\":[{\"place\":\"copy\",\"copy\":\"1\",\"ready\":4,\"time\":6.97}],\"element\":{\"place\":\"copy\",\"copy\":\"1\",\"ready\":4,\"time\":6.97}}"
     },
     {
-      "name": "its frames keep their identity by the player's own rule: in step 64.4 ms after the press, then every drawn frame within 5 frames of the clock (preview.ts DRIFT 0.12 s) and none going back; median 2 and worst 3 frames off (the original: 3 and 6, in step after 2237 ms)",
+      "name": "its frames keep their identity by the player's own rule: in step 64.1 ms after the press, then every drawn frame within 5 frames of the clock (preview.ts DRIFT 0.12 s) and none going back; median 1 and worst 2 frames off (the original: 4 and 8, in step after 2165.4 ms)",
       "pass": true,
-      "detail": "{\"copy\":{\"label\":\"the copy\",\"start\":120,\"first\":{\"shown\":120,\"lo\":120,\"hi\":120,\"ready\":0},\"inStepMs\":64.4,\"warmup\":[0,0,-1],\"drawn\":150,\"after\":147,\"medianOff\":2,\"worstOff\":3,\"outside\":0,\"back\":0,\"element\":{\"place\":\"copy\",\"copy\":\"1\",\"ready\":4,\"time\":6.952},\"made\":[{\"place\":\"copy\",\"copy\":\"1\",\"ready\":4,\"time\":6.952}],\"quality\":{\"total\":96,\"dropped\":0},\"press\":0.7},\"original\":{\"inStepMs\":2237,\"medianOff\":3,\"worstOff\":6,\"outside\":1,\"back\":0}}"
+      "detail": "{\"copy\":{\"label\":\"the copy\",\"start\":120,\"first\":{\"shown\":120,\"lo\":120,\"hi\":120,\"ready\":1},\"inStepMs\":64.1,\"warmup\":[0,0,-1],\"drawn\":166,\"after\":163,\"medianOff\":1,\"worstOff\":2,\"outside\":0,\"back\":0,\"element\":{\"place\":\"copy\",\"copy\":\"1\",\"ready\":4,\"time\":6.97},\"made\":[{\"place\":\"copy\",\"copy\":\"1\",\"ready\":4,\"time\":6.97}],\"quality\":{\"total\":97,\"dropped\":0},\"press\":0.5},\"original\":{\"inStepMs\":2165.4,\"medianOff\":4,\"worstOff\":8,\"outside\":2,\"back\":0}}"
     },
     {
       "name": "it plays at the same frame of the clock as the original's play did, or nearer (median offset, frames)",
       "pass": true,
-      "detail": "{\"original\":3,\"copy\":2}"
+      "detail": "{\"original\":4,\"copy\":1}"
     },
     {
       "name": "the copy's element gives the original's frame at every time it is sent to (its timestamps are the original's)",
@@ -91,133 +91,134 @@
     {
       "name": "the application read «playing» during that play too, and after it nothing is held and nothing is being made",
       "pass": true,
-      "detail": "{\"hold\":\"playing\",\"after\":[{\"ms\":3,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":114,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":223,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":332,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":442,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":551,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":660,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":769,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":878,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":988,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":1097,\"hold\":null,\"items\":[\"ready\"]}]}"
+      "detail": "{\"hold\":\"playing\",\"after\":[{\"ms\":3,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":118,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":225,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":333,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":441,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":552,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":663,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":770,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":878,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":988,\"hold\":null,\"items\":[\"ready\"]},{\"ms\":1097,\"hold\":null,\"items\":[\"ready\"]}]}"
     }
   ],
   "notes": [
-    "The press to the element in step: the original 2237 ms (warm-up offsets [0,0,-1,-2,-4,-4,-6,-7,-4,-7,-9,-10,-9,-15,-18,-19,-24,-26,-28,-23,-24,-26,-28,-30,-31,-34,-35,-37,-40,-41,-44,-46,-47]), the copy 64.4 ms ([0,0,-1]); frames drawn 47 and 150; the elements' own count {\"total\":170,\"dropped\":0} and {\"total\":96,\"dropped\":0}. A play starts its element as it starts, from the original or the copy alike; until then the stage shows the paused decoder's frame.",
-    "Inside the development package with no device profile: {\"dpr\":1.25,\"canvas\":421,\"renderer\":\"ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}; the copy proxy-<fingerprint>4-720-r1-ff902.mp4, made in 2 ms after the editor was left alone at 4 s."
+    "The press to the element in step: the original 2165.4 ms (warm-up offsets [0,0,-1,-1,-2,-4,-4,-8,-9,-8,-12,-14,-16,-17,-18,-20,-23,-24,-27,-28,-31,-32,-23,-25,-26,-28,-30,-31,-33,-35,-36,-38,-40,-42]), the copy 64.1 ms ([0,0,-1]); frames drawn 48 and 166; the elements' own count {\"total\":181,\"dropped\":0} and {\"total\":97,\"dropped\":0}. A play starts its element as it starts, from the original or the copy alike; until then the stage shows the paused decoder's frame.",
+    "Inside the development package with no device profile: {\"dpr\":1.25,\"canvas\":421,\"renderer\":\"ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}; the copy proxy-<fingerprint>f-720-r1-ff902.mp4, made in 2 ms after the editor was left alone at 4 s.",
+    "Windows did not change the processor's speed limit during the run."
   ],
   "playing": {
     "copyBefore": {
       "state": "running",
-      "done": 1.966667
+      "done": 2.033333
     },
     "during": [
       {
-        "ms": 86,
+        "ms": 57,
         "hold": "playing",
         "state": "paused",
-        "done": 1.966667
+        "done": 2.033333
       },
       {
-        "ms": 351,
+        "ms": 359,
         "hold": "playing",
         "state": "paused",
-        "done": 1.966667
+        "done": 2.033333
       },
       {
-        "ms": 617,
+        "ms": 668,
         "hold": "playing",
         "state": "paused",
-        "done": 3
+        "done": 2.733333
       },
       {
-        "ms": 951,
+        "ms": 988,
         "hold": "playing",
         "state": "paused",
-        "done": 3
+        "done": 2.733333
       },
       {
-        "ms": 1233,
+        "ms": 1261,
         "hold": "playing",
         "state": "paused",
-        "done": 3
+        "done": 2.733333
       },
       {
-        "ms": 1506,
+        "ms": 1499,
         "hold": "playing",
         "state": "paused",
-        "done": 3
+        "done": 2.733333
       },
       {
-        "ms": 1798,
+        "ms": 1758,
         "hold": "playing",
         "state": "paused",
-        "done": 3
+        "done": 2.733333
       },
       {
-        "ms": 2067,
+        "ms": 2013,
         "hold": "playing",
         "state": "paused",
-        "done": 3
+        "done": 2.733333
       },
       {
-        "ms": 2417,
+        "ms": 2359,
         "hold": "playing",
         "state": "paused",
-        "done": 3
+        "done": 2.733333
       },
       {
-        "ms": 2711,
+        "ms": 2636,
         "hold": "playing",
         "state": "paused",
-        "done": 3
+        "done": 2.733333
       }
     ],
     "after": [
       {
-        "ms": 25,
+        "ms": 37,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 140,
+        "ms": 143,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 250,
+        "ms": 260,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 358,
+        "ms": 370,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 468,
+        "ms": 477,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 577,
+        "ms": 587,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 688,
+        "ms": 696,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 798,
+        "ms": 808,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 909,
+        "ms": 916,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1017,
+        "ms": 1024,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1126,
+        "ms": 1133,
         "hold": null,
         "state": "running"
       }
@@ -231,153 +232,154 @@
         "hi": 120,
         "ready": 0
       },
-      "inStepMs": 2237,
+      "inStepMs": 2165.4,
       "warmup": [
         0,
         0,
         -1,
+        -1,
         -2,
         -4,
         -4,
-        -6,
-        -7,
-        -4,
-        -7,
+        -8,
         -9,
-        -10,
-        -9,
-        -15,
+        -8,
+        -12,
+        -14,
+        -16,
+        -17,
         -18,
-        -19,
-        -24,
-        -26,
-        -28,
+        -20,
         -23,
         -24,
+        -27,
+        -28,
+        -31,
+        -32,
+        -23,
+        -25,
         -26,
         -28,
         -30,
         -31,
-        -34,
+        -33,
         -35,
-        -37,
+        -36,
+        -38,
         -40,
-        -41,
-        -44,
-        -46,
-        -47
+        -42
       ],
-      "drawn": 47,
+      "drawn": 48,
       "after": 14,
-      "medianOff": 3,
-      "worstOff": 6,
-      "outside": 1,
+      "medianOff": 4,
+      "worstOff": 8,
+      "outside": 2,
       "back": 0,
       "element": {
         "place": "original",
         "copy": "0",
         "ready": 4,
-        "time": 6.957
+        "time": 6.936
       },
       "made": [
         {
           "place": "original",
           "copy": "0",
           "ready": 4,
-          "time": 6.957
+          "time": 6.936
         }
       ],
       "quality": {
-        "total": 170,
+        "total": 181,
         "dropped": 0
       },
-      "press": 11.6
+      "press": 2.9
     }
   },
   "scrubbing": {
     "during": [
       {
-        "ms": 118,
+        "ms": 107,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 242,
+        "ms": 218,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 354,
+        "ms": 342,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 462,
+        "ms": 450,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 712,
+        "ms": 575,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 832,
+        "ms": 703,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 947,
+        "ms": 807,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 1049,
+        "ms": 918,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 1197,
+        "ms": 1043,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 1304,
+        "ms": 1152,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 1422,
+        "ms": 1268,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 1540,
+        "ms": 1369,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 1663,
+        "ms": 1509,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 1835,
+        "ms": 1729,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 1944,
+        "ms": 1837,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 2052,
+        "ms": 1953,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 2179,
+        "ms": 2073,
         "hold": "scrubbing",
         "state": "paused"
       }
@@ -389,252 +391,252 @@
         "state": "paused"
       },
       {
-        "ms": 113,
+        "ms": 109,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 230,
+        "ms": 217,
         "hold": "scrubbing",
         "state": "paused"
       },
       {
-        "ms": 340,
+        "ms": 327,
         "hold": "input",
         "state": "paused"
       },
       {
-        "ms": 449,
+        "ms": 435,
         "hold": "input",
         "state": "paused"
       },
       {
-        "ms": 558,
+        "ms": 545,
         "hold": "input",
         "state": "paused"
       },
       {
-        "ms": 666,
+        "ms": 656,
         "hold": "input",
         "state": "paused"
       },
       {
-        "ms": 775,
+        "ms": 765,
         "hold": "input",
         "state": "paused"
       },
       {
-        "ms": 882,
+        "ms": 873,
+        "hold": "input",
+        "state": "paused"
+      },
+      {
+        "ms": 981,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 991,
+        "ms": 1090,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1099,
+        "ms": 1198,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1208,
+        "ms": 1308,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1319,
+        "ms": 1418,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1429,
+        "ms": 1528,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1540,
+        "ms": 1631,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1650,
+        "ms": 1746,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1759,
+        "ms": 1854,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1869,
+        "ms": 1964,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 1978,
+        "ms": 2073,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 2088,
+        "ms": 2182,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 2198,
+        "ms": 2292,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 2308,
+        "ms": 2400,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 2416,
+        "ms": 2509,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 2525,
+        "ms": 2619,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 2634,
+        "ms": 2728,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 2744,
+        "ms": 2837,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 2854,
+        "ms": 2945,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 2963,
+        "ms": 3055,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 3074,
+        "ms": 3165,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 3182,
+        "ms": 3272,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 3291,
+        "ms": 3383,
         "hold": null,
         "state": "running"
       },
       {
-        "ms": 3401,
+        "ms": 3490,
+        "hold": null,
+        "state": "running"
+      },
+      {
+        "ms": 3598,
+        "hold": null,
+        "state": "running"
+      },
+      {
+        "ms": 3707,
+        "hold": null,
+        "state": "running"
+      },
+      {
+        "ms": 3827,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 3510,
+        "ms": 3941,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 3619,
+        "ms": 4050,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 3729,
+        "ms": 4159,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 3839,
+        "ms": 4267,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 3951,
+        "ms": 4377,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 4061,
+        "ms": 4487,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 4170,
+        "ms": 4597,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 4280,
+        "ms": 4706,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 4390,
+        "ms": 4816,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 4499,
+        "ms": 4926,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 4608,
+        "ms": 5035,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 4717,
+        "ms": 5146,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 4825,
+        "ms": 5255,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 4935,
+        "ms": 5364,
         "hold": null,
         "state": "ready"
       },
       {
-        "ms": 5043,
-        "hold": null,
-        "state": "ready"
-      },
-      {
-        "ms": 5153,
-        "hold": null,
-        "state": "ready"
-      },
-      {
-        "ms": 5263,
-        "hold": null,
-        "state": "ready"
-      },
-      {
-        "ms": 5372,
-        "hold": null,
-        "state": "ready"
-      },
-      {
-        "ms": 5482,
+        "ms": 5473,
         "hold": null,
         "state": "ready"
       }
@@ -644,44 +646,44 @@
     "before": {
       "shown": 120,
       "playhead": 120,
-      "ms": 652
+      "ms": 633
     },
     "still": {
       "shown": 120,
       "playhead": 120,
-      "ms": 429
+      "ms": 427
     },
     "next": {
       "shown": 150,
       "playhead": 150,
-      "ms": 421
+      "ms": 411
     },
     "again": {
       "shown": 120,
       "playhead": 120,
-      "ms": 443
+      "ms": 405
     },
     "two": {
       "shown": 122,
       "playhead": 122,
-      "ms": 428
+      "ms": 429
     },
     "back": {
       "shown": 120,
       "playhead": 120,
-      "ms": 418
+      "ms": 424
     },
     "readsAt": {
       "original": 36,
-      "copy": 5,
+      "copy": 4,
       "blob": 0,
-      "firstCopy": 17985.19999998808
+      "firstCopy": 17493.5
     },
     "readsAfter": {
       "original": 36,
-      "copy": 7,
+      "copy": 5,
       "blob": 0,
-      "firstCopy": 17985.19999998808
+      "firstCopy": 17493.5
     },
     "madeMs": 2
   },
@@ -694,39 +696,39 @@
         "shown": 120,
         "lo": 120,
         "hi": 120,
-        "ready": 0
+        "ready": 1
       },
-      "inStepMs": 64.4,
+      "inStepMs": 64.1,
       "warmup": [
         0,
         0,
         -1
       ],
-      "drawn": 150,
-      "after": 147,
-      "medianOff": 2,
-      "worstOff": 3,
+      "drawn": 166,
+      "after": 163,
+      "medianOff": 1,
+      "worstOff": 2,
       "outside": 0,
       "back": 0,
       "element": {
         "place": "copy",
         "copy": "1",
         "ready": 4,
-        "time": 6.952
+        "time": 6.97
       },
       "made": [
         {
           "place": "copy",
           "copy": "1",
           "ready": 4,
-          "time": 6.952
+          "time": 6.97
         }
       ],
       "quality": {
-        "total": 96,
+        "total": 97,
         "dropped": 0
       },
-      "press": 0.7
+      "press": 0.5
     }
   },
   "copyElement": {
@@ -766,49 +768,49 @@
         ]
       },
       {
-        "ms": 114,
+        "ms": 118,
         "hold": null,
         "items": [
           "ready"
         ]
       },
       {
-        "ms": 223,
+        "ms": 225,
         "hold": null,
         "items": [
           "ready"
         ]
       },
       {
-        "ms": 332,
+        "ms": 333,
         "hold": null,
         "items": [
           "ready"
         ]
       },
       {
-        "ms": 442,
+        "ms": 441,
         "hold": null,
         "items": [
           "ready"
         ]
       },
       {
-        "ms": 551,
+        "ms": 552,
         "hold": null,
         "items": [
           "ready"
         ]
       },
       {
-        "ms": 660,
+        "ms": 663,
         "hold": null,
         "items": [
           "ready"
         ]
       },
       {
-        "ms": 769,
+        "ms": 770,
         "hold": null,
         "items": [
           "ready"
@@ -837,6 +839,7 @@
       }
     ]
   },
+  "windowsLimits": [],
   "total": 18,
   "passed": 18,
   "failed": 0

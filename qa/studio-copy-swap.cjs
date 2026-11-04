@@ -243,18 +243,18 @@ function judgePlay(p, label) {
     // a «leave with unsaved changes?» prompt is answered, never left to the driver
     win.on('dialog', (d) => void d.accept().catch(() => undefined));
     await win.addInitScript(watch);
-    // mains power and Windows' full speed limit for the run: the holds of D12's own check stay out of this one
+    // mains power and Windows' full speed limit for the run: the holds of D12's own check stay out of this one.
+    // Electron hands Windows' own events to a copy of emit bound when the first listener was added, so replacing
+    // powerMonitor.emit holds nothing back (a hot laptop's real limit reached the application on 2026-11-05). The
+    // application's listeners are taken off instead, told 100 once, and Windows' own changes are only recorded.
     await app.evaluate(({ powerMonitor }) => {
       powerMonitor.isOnBatteryPower = () => false;
-      const emit = powerMonitor.emit;
-      powerMonitor.emit = function (name, ...args) {
-        if (name === 'speed-limit-change' && !globalThis.__ours) return false;
-        return emit.call(this, name, ...args);
-      };
-      globalThis.__ours = true;
-      powerMonitor.emit('speed-limit-change', { limit: 100 });
+      const theirs = powerMonitor.listeners('speed-limit-change');
+      powerMonitor.removeAllListeners('speed-limit-change');
+      globalThis.__limits = [];
+      powerMonitor.on('speed-limit-change', (d) => globalThis.__limits.push({ at: Date.now(), limit: d && d.limit }));
+      for (const l of theirs) l.call(powerMonitor, { limit: 100 });
       powerMonitor.emit('on-ac');
-      globalThis.__ours = false;
     });
     await h.until(() => win.url().startsWith(base), 30000);
     await win.waitForLoadState('load');
@@ -415,6 +415,9 @@ function judgePlay(p, label) {
     check('the application read «playing» during that play too, and after it nothing is held and nothing is being made', holdE === 'playing' && afterE.slice(-5).every((x) => x.hold === null && x.items.every((s) => s === 'ready')), result.end);
     const sys = await win.evaluate(() => ({ dpr: window.devicePixelRatio, canvas: document.querySelector('.st-canvas').width, renderer: (() => { const g = document.createElement('canvas').getContext('webgl'); const x = g?.getExtension('WEBGL_debug_renderer_info'); return g && x ? g.getParameter(x.UNMASKED_RENDERER_WEBGL) : null; })() }));
     note(`Inside the development package with no device profile: ${JSON.stringify(sys)}; the copy ${mask(copyName)}, made in ${madeMs} ms after the editor was left alone at ${AT} s.`);
+    const limits = await app.evaluate(() => globalThis.__limits.map((x) => x.limit));
+    result.windowsLimits = limits;
+    note(limits.length ? `Windows changed the processor's speed limit ${limits.length} times during the run (${limits.join(', ')}); the application was kept at 100.` : "Windows did not change the processor's speed limit during the run.");
   } catch (e) {
     check('the check ran to the end', false, e.stack || String(e));
   } finally {
