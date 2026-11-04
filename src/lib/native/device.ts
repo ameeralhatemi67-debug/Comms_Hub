@@ -185,13 +185,14 @@ export function measureState(p: { current: ProfileKey; entries: ProfileEntry[] }
   return { kind: 'stale', why: 'driver' };
 }
 
-const CHANGED: Record<'app' | 'chip' | 'driver', string> = { app: 'إصدار التطبيق', chip: 'بطاقة الرسوميات', driver: 'برنامج تشغيل البطاقة' };
+// each reason is its own whole phrase, so the verb agrees with its subject
+const CHANGED: Record<'app' | 'chip' | 'driver', string> = { app: 'تغيّر إصدار التطبيق', chip: 'تغيّرت بطاقة الرسوميات', driver: 'تغيّر برنامج تشغيل البطاقة' };
 
 /** What the studio says of a missing or stale measurement, or null when there is nothing to say. */
 export function measureLine(s: MeasureState | null): string | null {
   if (!s || s.kind === 'measured') return null;
   if (s.kind === 'never') return 'لم يُقَس هذا الجهاز بعد، فيعمل الاستوديو بأبسط إعداداته. القياس نحو نصف دقيقة، ولا يُرسل شيء خارج الجهاز.';
-  return `تغيّر ${CHANGED[s.why]} منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.`;
+  return `${CHANGED[s.why]} منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.`;
 }
 
 /** The page's event after a measurement is saved, so the studio's note reads the profile again. */

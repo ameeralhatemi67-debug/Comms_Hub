@@ -2900,9 +2900,10 @@ behaviour (63.6 «Boundaries»). The studio says so, quietly:
 - **The note.** One line on the studio's home, above the projects, and under the menus of every editor:
   - never measured: «لم يُقَس هذا الجهاز بعد، فيعمل الاستوديو بأبسط إعداداته. القياس نحو نصف دقيقة، ولا يُرسل شيء خارج
     الجهاز.»;
-  - measured for another key: «تغيّر … منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.», naming one
-    reason only, the first that differs from the newest measurement on the same chip (or the newest of all): «إصدار التطبيق»
-    (the application or Chromium), then «بطاقة الرسوميات» (the chip or its switch), then «برنامج تشغيل البطاقة».
+  - measured for another key: «… منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.», opened by one
+    reason only, the first that differs from the newest measurement on the same chip (or the newest of all), each its own
+    whole phrase: «تغيّر إصدار التطبيق» (the application or Chromium), then «تغيّرت بطاقة الرسوميات» (the chip or its switch,
+    so also a laptop where only the other chip was measured), then «تغيّر برنامج تشغيل البطاقة».
 - **Its buttons.** «قياس قدرة الجهاز» opens «معلومات الجهاز» with its own button of that name in view and ready: the note never
   measures by itself. «لاحقاً» hides it on this device for the present key only, so a new version, chip or driver brings it back.
 - **When it is not shown.** While the page exports or sends a file for review, and in the preview's own window on a second

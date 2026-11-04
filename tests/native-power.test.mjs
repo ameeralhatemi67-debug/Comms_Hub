@@ -269,8 +269,8 @@ test('63.6.1: a device is measured, never measured, or stale for the first reaso
   assert.equal(measureLine(null), null);
   assert.equal(measureLine({ kind: 'never' }), 'لم يُقَس هذا الجهاز بعد، فيعمل الاستوديو بأبسط إعداداته. القياس نحو نصف دقيقة، ولا يُرسل شيء خارج الجهاز.');
   assert.equal(measureLine({ kind: 'stale', why: 'app' }), 'تغيّر إصدار التطبيق منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.');
-  assert.match(measureLine({ kind: 'stale', why: 'chip' }), /^تغيّر بطاقة الرسوميات منذ آخر قياس/);
-  assert.match(measureLine({ kind: 'stale', why: 'driver' }), /^تغيّر برنامج تشغيل البطاقة منذ آخر قياس/);
+  assert.equal(measureLine({ kind: 'stale', why: 'chip' }), 'تغيّرت بطاقة الرسوميات منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.');
+  assert.equal(measureLine({ kind: 'stale', why: 'driver' }), 'تغيّر برنامج تشغيل البطاقة منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.');
   assert.equal(/\p{Extended_Pictographic}/u.test(measureLine({ kind: 'never' }) + measureLine({ kind: 'stale', why: 'driver' })), false);
   // «لاحقاً» is kept for one key: any change of application, Chromium, switch, chip or driver is another key; power is not
   const id = measureKeyId(key);

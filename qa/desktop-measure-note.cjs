@@ -6,7 +6,8 @@
 //     measurement, the note hidden while the page is busy, «لاحقاً» kept across a reload and shown again under another
 //     chip switch (a new key);
 //   - with a profile measured under another key: the stale note for each reason (the application, the chip, the driver), and
-//     the same words in «معلومات الجهاز» beside its button;
+//     the same words in «معلومات الجهاز» beside its button; and a laptop where only the other chip was measured (the
+//     application started on the other switch, with no entry for the chip it runs on);
 //   - with a measurement for the current key, or once one is saved: no note.
 // Usage: node qa/desktop-measure-note.cjs   (writes qa/desktop-measure-note.json)   Needs: npm run pack:dev in desktop/.
 const fs = require('node:fs');
@@ -29,7 +30,7 @@ const fontCss = [['ibm-plex-sans-arabic', '400'], ['ibm-plex-sans-arabic', '600'
 const page = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>الاستوديو</title><style>${fontCss}\n${css}\nbody{font-family:"IBM Plex Sans Arabic",sans-serif}</style></head><body><div id="root"></div><script type="module" src="/note.js"></script></body></html>`;
 
 const NEVER = 'لم يُقَس هذا الجهاز بعد، فيعمل الاستوديو بأبسط إعداداته. القياس نحو نصف دقيقة، ولا يُرسل شيء خارج الجهاز.';
-const STALE = (what) => `تغيّر ${what} منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.`;
+const STALE = (reason) => `${reason} منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.`;
 const numbers = {
   v: 1,
   encode: { h264_1080: { hw: 300, sw: 60 }, h264_2160: { hw: 90, sw: 15 } },
@@ -119,6 +120,8 @@ const close = (run) => Promise.race([run.app.close().catch(() => undefined), h.s
     await picture(run.win, 'never.png');
     const current = (await run.win.evaluate(() => window.commsHubNative.profile.read())).current;
     result.key = current;
+    // the other chip's switch, as «الأقوى» or «الموفّرة للطاقة» starts it
+    const otherFlag = current.switch === 'low' ? '--force_high_performance_gpu' : '--force_low_power_gpu';
     await run.win.click('[data-measure-note] button:has-text("قياس قدرة الجهاز")');
     const focused = await h.until(() => run.win.evaluate(() => (document.activeElement && document.activeElement.hasAttribute('data-measure') ? document.activeElement.textContent.trim() : null)), 20000);
     check('«قياس قدرة الجهاز» opens «معلومات الجهاز» at the measurement, its button ready', focused === 'قياس قدرة الجهاز', focused);
@@ -143,18 +146,18 @@ const close = (run) => Promise.race([run.app.close().catch(() => undefined), h.s
     check('«لاحقاً» hides it, and it stays hidden after a reload', !!hidden && afterReload === 0, { afterReload });
     await close(run);
     // the same device under another chip switch: another key, so the note comes back
-    run = await open('note-never', ['--force_low_power_gpu']);
+    run = await open('note-never', [otherFlag]);
     const again = await h.until(() => noteText(run.win), 15000);
     const other = (await run.win.evaluate(() => window.commsHubNative.profile.read())).current;
-    check('under another key (the other chip) the note shows again', !!again && JSON.stringify(other) !== JSON.stringify(current), { again, other: { switch: other.switch, chip: other.chip.name } });
+    check(`never measured, «لاحقاً» given, then started with ${otherFlag} (another key): the note shows again`, again === NEVER && JSON.stringify(other) !== JSON.stringify(current), { again, other: { switch: other.switch, chip: other.chip.name } });
     await close(run);
 
     // a profile measured under another key: the stale note, each reason, and the same words in «معلومات الجهاز»
     const amd = { vendorId: 4098, deviceId: 5761, vendor: 'AMD', name: 'AMD Radeon(TM) Graphics', driver: '31.0.12044.3' };
     const cases = [
-      ['app', 'إصدار التطبيق', { ...current, app: '0.7.1' }],
-      ['chip', 'بطاقة الرسوميات', { ...current, switch: current.switch === 'low' ? 'high' : 'low', chip: current.chip.vendorId === amd.vendorId ? { ...amd, vendorId: 4318, deviceId: 9634, vendor: 'NVIDIA', name: 'NVIDIA GeForce RTX 3050 Laptop GPU' } : amd }],
-      ['driver', 'برنامج تشغيل البطاقة', { ...current, chip: { ...current.chip, driver: '1.0.0.0' } }],
+      ['app', 'تغيّر إصدار التطبيق', { ...current, app: '0.7.1' }],
+      ['chip', 'تغيّرت بطاقة الرسوميات', { ...current, switch: current.switch === 'low' ? 'high' : 'low', chip: current.chip.vendorId === amd.vendorId ? { ...amd, vendorId: 4318, deviceId: 9634, vendor: 'NVIDIA', name: 'NVIDIA GeForce RTX 3050 Laptop GPU' } : amd }],
+      ['driver', 'تغيّر برنامج تشغيل البطاقة', { ...current, chip: { ...current.chip, driver: '1.0.0.0' } }],
     ];
     for (const [why, what, key] of cases) {
       profileWith(`note-stale-${why}`, key);
@@ -162,10 +165,27 @@ const close = (run) => Promise.race([run.app.close().catch(() => undefined), h.s
       const line = await h.until(() => noteText(run.win), 15000);
       await run.win.click('[data-measure-note] button:has-text("قياس قدرة الجهاز")');
       const beside = await h.until(() => run.win.evaluate(() => document.querySelector('[data-measure-why]')?.textContent ?? null), 20000);
-      check(`stale, ${why}: the note says «تغيّر ${what}…», and «معلومات الجهاز» says the same beside its button`, line === STALE(what) && beside === STALE(what), { line, beside });
+      check(`stale, ${why}: the note says «${what}…», and «معلومات الجهاز» says the same beside its button`, line === STALE(what) && beside === STALE(what), { line, beside });
       if (why === 'app') await picture(run.win, 'stale-app.png');
       await close(run);
     }
+
+    // a laptop where only the other chip was measured: one measurement of the chip the application starts on by default, and
+    // the application started on the other switch, as «الأقوى» or «الموفّرة للطاقة» does at the next start
+    profileWith('note-other-chip', current);
+    run = await open('note-other-chip', [otherFlag]);
+    const otherLine = await h.until(() => noteText(run.win), 15000);
+    const running = await run.win.evaluate(() => window.commsHubNative.profile.read());
+    const onRunning = running.entries.filter((e) => e.key.switch === running.current.switch && e.key.chip.vendorId === running.current.chip.vendorId && e.key.chip.deviceId === running.current.chip.deviceId);
+    await run.win.click('[data-measure-note] button:has-text("قياس قدرة الجهاز")');
+    const otherBeside = await h.until(() => run.win.evaluate(() => document.querySelector('[data-measure-why]')?.textContent ?? null), 20000);
+    result.otherChip = { flag: otherFlag, measured: { switch: current.switch, chip: current.chip.name }, running: { switch: running.current.switch, chip: running.current.chip.name } };
+    check(
+      `only the other chip measured (one entry for the default start, the application started with ${otherFlag}): no entry for the running chip, and the note and «معلومات الجهاز» say «تغيّرت بطاقة الرسوميات…»`,
+      running.entries.length === 1 && onRunning.length === 0 && otherLine === STALE('تغيّرت بطاقة الرسوميات') && otherBeside === otherLine,
+      { otherLine, otherBeside, entries: running.entries.length, onRunning: onRunning.length, ...result.otherChip },
+    );
+    await close(run);
 
     // a measurement for the current key: no note; and saving one takes the note away at once
     profileWith('note-measured', current);
