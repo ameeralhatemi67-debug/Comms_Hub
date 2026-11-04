@@ -327,7 +327,12 @@ export class MediaPool {
       this.elements.delete(clipId);
     }
     l?.image?.close();
-    if (l) void this.resetScrub(l);
+    if (l) {
+      void this.resetScrub(l);
+      // a decode still under way on these files stops now (Mediabunny checks this in every pass)
+      l.preview?.input.dispose();
+      l.input?.dispose();
+    }
     this.loaded.delete(id);
   }
 
@@ -1102,6 +1107,10 @@ export class MediaPool {
     for (const l of this.loaded.values()) {
       l.image?.close();
       void this.resetScrub(l);
+      // the project is closed: a decode still under way stops now instead of running to its frame (on a computer with no
+      // graphics chip that is seconds of the processor), and the files' readers are let go
+      l.preview?.input.dispose();
+      l.input?.dispose();
     }
     this.store = null;
     this.loaded.clear();

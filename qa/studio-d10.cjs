@@ -115,6 +115,29 @@ async function quietDrawRate(page, tries = 3) {
   return best;
 }
 
+/**
+ * Waits, up to `ms`, until the application's processes together use less than one core (two readings in a row), and
+ * says how long that took and which processes were busiest at the start. After a 4K row with no graphics chip one process
+ * kept about eight cores busy for seconds (2026-11-04), so the draw rate is read only after this.
+ */
+async function settle(app, ms = 30000) {
+  const read = () => app.evaluate(({ app: a }) => a.getAppMetrics().map((m) => ({ type: m.type, pid: m.pid, cpu: Math.round(m.cpu.percentCPUUsage) })));
+  await read();
+  const t0 = Date.now();
+  let first = null;
+  let calm = 0;
+  let last = [];
+  while (Date.now() - t0 < ms) {
+    await new Promise((r) => setTimeout(r, 500));
+    last = await read();
+    first ??= [...last].sort((x, y) => y.cpu - x.cpu).slice(0, 3);
+    const total = last.reduce((n, m) => n + m.cpu, 0);
+    calm = total < 100 ? calm + 1 : 0;
+    if (calm >= 2) break;
+  }
+  return { ms: Date.now() - t0, settled: calm >= 2, busiest: first, last: [...last].sort((x, y) => y.cpu - x.cpu).slice(0, 3) };
+}
+
 /** Throws, with what to do, when the window does not draw at the display's rate at a quiet moment; returns the rate otherwise. */
 async function assertDrawing(page, label) {
   const rate = await quietDrawRate(page);
@@ -124,4 +147,4 @@ async function assertDrawing(page, label) {
   return rate;
 }
 
-module.exports = { LOCK, VISIBLE_ARGS, MIN_DRAW_RATE, branch, portLock, toFront, drawRate, quietDrawRate, assertDrawing };
+module.exports = { LOCK, VISIBLE_ARGS, MIN_DRAW_RATE, branch, portLock, toFront, drawRate, quietDrawRate, assertDrawing, settle };
