@@ -9,7 +9,8 @@
 //   Identity: at 48 times (DT-12's: frame middles and 2 ms inside each edge) the shown frame is the frame the decoder
 //   gives and the frame the time names; at frame starts to the microsecond, the export's rule. Gate: 48 of 48.
 //   The processor's load is recorded before and after each run, since a busy laptop measures badly.
-// Usage: node qa/studio-scrub.cjs [--only=edge|app-saving|app-strong|app-software] [--quick]   (writes qa/studio-scrub.json)
+// Usage: node qa/studio-scrub.cjs [--only=edge|app-saving|app-strong|app-software] [--quick] [--out=qa/<name>.json]
+//   (writes qa/studio-scrub.json, or the file named)
 // Needs: ffmpeg with libx264; for the application, npm run pack:dev in desktop/ and 127.0.0.1:3000 free (the lock).
 const fs = require('node:fs');
 const path = require('node:path');
@@ -25,6 +26,7 @@ const { check, note, result, finish } = h.record('qa/studio-scrub.cjs');
 const out = path.join(__dirname, 'artifacts', 'studio-scrub');
 const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7);
 const quick = process.argv.includes('--quick');
+const outFile = path.resolve(h.root, (process.argv.find((a) => a.startsWith('--out=')) || '--out=qa/studio-scrub.json').slice(6));
 const LOCK = path.join(process.env.TEMP || require('node:os').tmpdir(), 'comms-hub-port3000.lock');
 /** The pilot laptop's plan: 16 GB at 64 MB a gigabyte (scale.ts plan, «تلقائي»). */
 const CACHE_MB = 1024;
@@ -192,6 +194,6 @@ function takeLock() {
     if (server) server.close();
     if (locked) fs.rmSync(LOCK, { force: true });
     result.runs = runs;
-    process.exitCode = finish(path.join(__dirname, 'studio-scrub.json')) ? 1 : 0;
+    process.exitCode = finish(outFile) ? 1 : 0;
   }
 })();
