@@ -272,6 +272,7 @@ function drawEffected(ctx: CanvasRenderingContext2D, plan: EffectPlan, box: { w:
   let y0 = -reach;
   let x1 = cw + reach;
   let y1 = ch + reach;
+  let pad = 0;
   if (box) {
     const xs: number[] = [];
     const ys: number[] = [];
@@ -281,10 +282,30 @@ function drawEffected(ctx: CanvasRenderingContext2D, plan: EffectPlan, box: { w:
       xs.push(m.a * x + m.c * y + m.e);
       ys.push(m.b * x + m.d * y + m.f);
     }
-    x0 = Math.max(x0, Math.floor(Math.min(...xs)) - reach);
-    y0 = Math.max(y0, Math.floor(Math.min(...ys)) - reach);
-    x1 = Math.min(x1, Math.ceil(Math.max(...xs)) + reach);
-    y1 = Math.min(y1, Math.ceil(Math.max(...ys)) + reach);
+    const bx0 = Math.floor(Math.min(...xs));
+    const by0 = Math.floor(Math.min(...ys));
+    const bx1 = Math.ceil(Math.max(...xs));
+    const by1 = Math.ceil(Math.max(...ys));
+    x0 = Math.max(x0, bx0 - reach);
+    y0 = Math.max(y0, by0 - reach);
+    x1 = Math.min(x1, bx1 + reach);
+    y1 = Math.min(y1, by1 + reach);
+    // or only what of the box can reach the canvas and the canvas pixels it reaches, with the blur's margin (`pad`)
+    // left transparent around them, when that is less to blur: a full-frame clip then keeps the frame's own size
+    // (measured on 2026-11-04: the frame and the reach on every side made the blurred cross a quarter larger to draw,
+    // read and lay down)
+    if (reach) {
+      const t0 = Math.min(Math.max(-reach, bx0), Math.max(0, bx0 - reach));
+      const u0 = Math.min(Math.max(-reach, by0), Math.max(0, by0 - reach));
+      const t1 = Math.max(Math.min(cw + reach, bx1), Math.min(cw, bx1 + reach));
+      const u1 = Math.max(Math.min(ch + reach, by1), Math.min(ch, by1 + reach));
+      // none of it reaches the canvas
+      if (t1 <= t0 || u1 <= u0) return;
+      if ((t1 - t0 + 2 * reach) * (u1 - u0 + 2 * reach) <= (x1 - x0) * (y1 - y0)) {
+        [x0, y0, x1, y1] = [t0, u0, t1, u1];
+        pad = reach;
+      }
+    }
   }
   // nothing drawn beyond the canvas is seen without a blur to bring it in
   if (!reach) {
@@ -307,7 +328,7 @@ function drawEffected(ctx: CanvasRenderingContext2D, plan: EffectPlan, box: { w:
   g.restore();
   let out: CanvasImageSource = canvas;
   try {
-    out = applyEffect(canvas, bw, bh, plan) ?? canvas;
+    out = applyEffect(canvas, bw, bh, plan, { pad }) ?? canvas;
   } catch {
     // an effect that cannot be worked out leaves the item as drawn
   }

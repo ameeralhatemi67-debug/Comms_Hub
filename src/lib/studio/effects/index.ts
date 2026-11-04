@@ -5,7 +5,7 @@
 // back costs little: on a chip the composed picture is never read back. Before 2026-11-04 these were the canvas's own
 // filters, drawn differently by each graphics chip. No DOM: usable in a worker, on an OffscreenCanvas.
 import { effectsOnChip, fitted, type Room } from './chip.ts';
-import { blurPixels, colourStraight, toPremultiplied, toStraight } from './code.ts';
+import { blurStraight, colourStraight } from './code.ts';
 import type { EffectPlan } from './plan.ts';
 
 export { blurPlan, colourPlan, effectOf, photoColourPlan, type BlurPlan, type ColourPlan, type EffectPlan } from './plan.ts';
@@ -54,19 +54,11 @@ function onCode(canvas: Scratch, w: number, h: number, plan: EffectPlan, pad: nu
   const img = (canvas.getContext('2d') as Ctx2D).getImageData(at[0], at[1], w, h);
   const ctx = into.getContext('2d') as Ctx2D;
   const px = img.data;
-  if (plan.colour && !plan.blur) {
-    // colour alone: one pass over straight colour, the same bytes
-    colourStraight(px, plan.colour);
-    ctx.putImageData(img, 0, 0);
-    return into;
-  }
-  // colour on straight colour premultiplied afterwards gives colourPixels' bytes (tests/studio-effect-kernels), and takes
-  // the WebAssembly lanes
-  if (plan.colour) colourStraight(px, plan.colour);
-  toPremultiplied(px);
-  const out = plan.blur ? blurPixels(px, w, h, plan.blur, pad) : px;
-  toStraight(out);
-  ctx.putImageData(out === px ? img : new ImageData(out, w, h), 0, 0);
+  // colour on straight colour gives colourPixels' bytes once the canvas premultiplies it (tests/studio-effect-kernels);
+  // the blur premultiplies, blurs and gives straight colour again; both in WebAssembly lanes where they run, in one
+  // memory, the picture copied in once and handed back from there
+  const out = plan.blur ? blurStraight(px, w, h, plan.blur, pad, plan.colour) : colourStraight(px, plan.colour!);
+  ctx.putImageData(out === px ? img : new ImageData(out as Uint8ClampedArray<ArrayBuffer>, w, h), 0, 0);
   return into;
 }
 

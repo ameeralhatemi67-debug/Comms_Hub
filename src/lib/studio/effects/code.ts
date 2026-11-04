@@ -2,7 +2,8 @@
 // and the path taken where there is no chip. Pixels are RGBA, premultiplied as the canvas keeps them; every step is
 // whole-number arithmetic with one rounding, written as chip.ts writes it. Pure, usable in a worker.
 import { reduced, type BlurPlan, type ColourPlan } from './plan.ts';
-import { colourOpaque } from './simd.ts';
+import { blurLanes } from './blur-simd.ts';
+import { colourLanes } from './simd.ts';
 
 /** Straight colour from premultiplied, rounded to the nearest; opaque pixels unchanged. */
 export const unpremultiply = (p: number, a: number) => (a === 255 ? p : a ? Math.min(255, Math.floor((p * 255 + (a >> 1)) / a)) : 0);
@@ -76,11 +77,12 @@ export function colourPixels(px: Uint8ClampedArray, plan: ColourPlan): void {
 /**
  * colourPixels on straight colour as getImageData gives it, for putImageData, in one pass: a see-through pixel is taken
  * premultiplied (exact) and back to straight colour by unpremultiply, as the chip takes it, so the canvas ends up with
- * colourPixels' bytes. Opaque pixels go through simd.ts's WebAssembly four at a time where it runs (`simd`), the rest
- * here.
+ * colourPixels' bytes. Worked out by simd.ts's WebAssembly where it runs (`simd`), the same bytes, here otherwise; the
+ * result is `px`, or simd.ts's memory, good until the next effect.
  */
-export function colourStraight(px: Uint8ClampedArray, plan: ColourPlan, simd = true): void {
-  const fast = simd ? colourOpaque(px, plan) : 0;
+export function colourStraight(px: Uint8ClampedArray, plan: ColourPlan, simd = true): Uint8ClampedArray {
+  const fast = simd ? colourLanes(px, plan) : null;
+  if (fast) return fast;
   const t = plan.table ?? Uint8Array.from({ length: 256 }, (_, i) => i);
   const m = plan.matrix;
   const o0 = plan.offset ? plan.offset[0] : 0;
@@ -90,7 +92,7 @@ export function colourStraight(px: Uint8ClampedArray, plan: ColourPlan, simd = t
   const [k0, k1, k2, k3, k4, k5, k6, k7, k8] = k ?? [];
   for (let i = 0; i < px.length; i += 4) {
     const a = px[i + 3];
-    if (!a || (a === 255 && i < fast)) continue;
+    if (!a) continue;
     let r = px[i];
     let g = px[i + 1];
     let b = px[i + 2];
@@ -109,14 +111,18 @@ export function colourStraight(px: Uint8ClampedArray, plan: ColourPlan, simd = t
       px[i + 2] = t[b];
     }
   }
+  return px;
 }
 
 /**
  * A blur plan over a w by h picture of premultiplied pixels; returns the blurred picture, the same size. With `pad`,
  * the picture is taken as lying in a transparent margin of `pad` pixels on every side (a multiple of the plan's n),
- * which the blur reads and the result leaves out: what the canvas filter did at the edge of what it was given.
+ * which the blur reads and the result leaves out: what the canvas filter did at the edge of what it was given. Worked
+ * out by blur-simd.ts's WebAssembly where it runs (`simd`), the same bytes, here otherwise.
  */
-export function blurPixels(px: Uint8ClampedArray, w: number, h: number, plan: BlurPlan, pad = 0): Uint8ClampedArray<ArrayBuffer> {
+export function blurPixels(px: Uint8ClampedArray, w: number, h: number, plan: BlurPlan, pad = 0, simd = true): Uint8ClampedArray<ArrayBuffer> {
+  const fast = simd ? blurLanes(px, w, h, plan, pad) : null;
+  if (fast) return fast;
   const { n, k, radius, weights } = plan;
   const vw = w + 2 * pad;
   const vh = h + 2 * pad;
@@ -255,5 +261,23 @@ export function blurPixels(px: Uint8ClampedArray, w: number, h: number, plan: Bl
     const d = y * w * 4;
     for (let i = 0; i < w * 4; i++) out[d + i] = (wy0 * lo[i] + wy1 * hi[i] + half) >>> total;
   }
+  return out;
+}
+
+/**
+ * blurPixels over straight colour as getImageData gives it, for putImageData: coloured first if `colour` is given
+ * (colourStraight), premultiplied, blurred and straight again, the same bytes as those steps one after the other. The
+ * result may be blur-simd.ts's memory, good until the next blur, and `px` may be changed.
+ */
+export function blurStraight(px: Uint8ClampedArray, w: number, h: number, plan: BlurPlan, pad = 0, colour: ColourPlan | null = null, simd = true): Uint8ClampedArray<ArrayBuffer> {
+  const fast = simd ? blurLanes(px, w, h, plan, pad, { colour, straight: true, borrowed: true }) : null;
+  if (fast) return fast;
+  if (colour) {
+    const coloured = colourStraight(px, colour, simd);
+    if (coloured !== px) px.set(coloured);
+  }
+  toPremultiplied(px);
+  const out = blurPixels(px, w, h, plan, pad, false);
+  toStraight(out);
   return out;
 }

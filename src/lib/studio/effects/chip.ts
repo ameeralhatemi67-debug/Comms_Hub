@@ -17,7 +17,9 @@ precision highp float;
 precision highp int;
 precision highp usampler2D;
 uniform sampler2D src;
-uniform ivec2 size;
+// what a pass may read, in the coordinates of what it writes: outside, transparent
+uniform ivec2 lo;
+uniform ivec2 hi;
 uniform bool toCanvas;
 uniform int flip;
 uniform ivec2 origin;
@@ -89,7 +91,7 @@ void main() {
   uvec4 s = uvec4(0u);
   for (int j = -radius; j <= radius; j++) {
     ivec2 q = p + dir * j;
-    if (q.x < 0 || q.y < 0 || q.x >= size.x || q.y >= size.y) continue;
+    if (q.x < lo.x || q.y < lo.y || q.x >= hi.x || q.y >= hi.y) continue;
     s += uint(weights[j + radius]) * at(q);
   }
   colour = vec4((s + 32768u) >> 16u) / 255.0;
@@ -104,7 +106,7 @@ void main() {
   uvec4 s = uvec4(0u);
   for (int j = -r; j <= r; j++) {
     ivec2 q = p + dir * j;
-    if (q.x < 0 || q.y < 0 || q.x >= size.x || q.y >= size.y) continue;
+    if (q.x < lo.x || q.y < lo.y || q.x >= hi.x || q.y >= hi.y) continue;
     s += at(q);
   }
   uint w = uint(2 * r + 1);
@@ -261,10 +263,11 @@ function target(s: Gl, i: number, w: number, h: number): Target {
 }
 
 /**
- * One pass: `p` reads `from` and writes `size` pixels into `to`, or into the canvas's top left corner when `to` is
- * null (the canvas only grows; the caller takes that corner).
+ * One pass: `p` reads `from` at `origin` and writes `size` pixels into `to`, or into the canvas's top left corner when
+ * `to` is null (the canvas only grows; the caller takes that corner). A pass of the blur reads within `bounds` (lo and
+ * hi, in the coordinates it writes), by default what it writes.
  */
-function run(s: Gl, p: Program, from: WebGLTexture, size: [number, number], to: Target | null, set: () => void, origin: [number, number] = [0, 0]) {
+function run(s: Gl, p: Program, from: WebGLTexture, size: [number, number], to: Target | null, set: () => void, origin: [number, number] = [0, 0], bounds: [number, number, number, number] = [0, 0, size[0], size[1]]) {
   const { gl } = s;
   if (to) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, s.frame);
@@ -278,7 +281,8 @@ function run(s: Gl, p: Program, from: WebGLTexture, size: [number, number], to: 
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, from);
   gl.uniform1i(p.at('src'), 0);
-  gl.uniform2i(p.at('size'), size[0], size[1]);
+  gl.uniform2i(p.at('lo'), bounds[0], bounds[1]);
+  gl.uniform2i(p.at('hi'), bounds[2], bounds[3]);
   gl.uniform1i(p.at('toCanvas'), to ? 0 : 1);
   gl.uniform1i(p.at('flip'), s.canvas.height);
   gl.uniform2i(p.at('origin'), origin[0], origin[1]);
@@ -303,16 +307,23 @@ function setColour(s: Gl, p: Program, c: ColourPlan) {
   gl.uniform3i(p.at('offset'), o[0], o[1], o[2]);
 }
 
-/** A blur of `from`; with `colour`, each pixel is coloured as the reduction reads it (the blur must reduce). */
+/**
+ * A blur of the w by h of `from` at `origin`; with `colour`, each pixel is coloured as the reduction reads it. At full
+ * size with no colour there is nothing to reduce or enlarge: the first pass reads the picture where it is, the margin
+ * of `pad` transparent by its bounds, and the last writes the picture's own w by h onto the canvas, the same bytes as
+ * code.ts blurPixels' reduction, passes and enlargement at full size (each a copy there).
+ */
 function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad: number, origin: [number, number], colour: ColourPlan | null = null) {
   const { gl } = s;
   const vw = w + 2 * pad;
   const vh = h + 2 * pad;
   const rw = reduced(vw, b.n);
   const rh = reduced(vh, b.n);
-  const direct = b.n === 1 && !pad;
+  const whole = b.n === 1 && !colour;
   let src = from;
-  if (!direct) {
+  let read: [number, number] = [origin[0] - pad, origin[1] - pad];
+  let within: [number, number, number, number] = [pad, pad, pad + w, pad + h];
+  if (!whole) {
     const small = target(s, 1, rw, rh);
     run(s, s.reduce, from, [rw, rh], small, () => {
       gl.uniform2i(s.reduce.at('area'), w, h);
@@ -330,6 +341,8 @@ function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad:
       }
     }, origin);
     src = small.tex;
+    read = [0, 0];
+    within = [0, 0, rw, rh];
   }
   // the passes: the weights across then down, or three boxes across then three down; between two pictures in turn, the
   // last onto the canvas when nothing is enlarged
@@ -351,10 +364,17 @@ function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad:
   });
   const passes: Pass[] = b.boxes ? [...b.boxes.map((wd) => box([1, 0], wd)), ...b.boxes.map((wd) => box([0, 1], wd))] : [weights([1, 0]), weights([0, 1])];
   for (let i = 0; i < passes.length; i++) {
-    const last = i === passes.length - 1;
-    const to = last && direct ? null : target(s, 2 + (i % 2), rw, rh);
-    run(s, passes[i].p, src, [rw, rh], to, passes[i].set, i === 0 && direct ? origin : [0, 0]);
-    if (!to) return;
+    if (i) {
+      read = [0, 0];
+      within = [0, 0, rw, rh];
+    }
+    if (i === passes.length - 1 && b.n === 1) {
+      // the picture's own w by h, read from inside the margin
+      run(s, passes[i].p, src, [w, h], null, passes[i].set, [read[0] + pad, read[1] + pad], [within[0] - pad, within[1] - pad, within[2] - pad, within[3] - pad]);
+      return;
+    }
+    const to = target(s, 2 + (i % 2), rw, rh);
+    run(s, passes[i].p, src, [rw, rh], to, passes[i].set, read, within);
     src = to.tex;
   }
   run(s, s.enlarge, src, [w, h], null, () => {
@@ -418,8 +438,8 @@ export function effectsOnChip(picture: TexImageSource, w: number, h: number, pla
       gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 1, gl.RED_INTEGER, gl.UNSIGNED_BYTE, c.table);
       gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
     }
-    // colour and a blur that reduces: each pixel coloured as the reduction reads it, one full-size pass fewer
-    const folded = !!(c && plan.blur && (plan.blur.n > 1 || pad > 0));
+    // colour and a blur: each pixel coloured as the reduction reads it, one full-size pass fewer when it reduces
+    const folded = !!(c && plan.blur);
     if (c && !folded) {
       const into = plan.blur ? target(s, 0, w, h) : null;
       run(s, s.colour, from, [w, h], into, () => setColour(s, s.colour, c), origin);

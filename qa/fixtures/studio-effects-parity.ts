@@ -11,8 +11,9 @@ import { corpus } from '../../src/lib/studio/bench-docs.ts';
 import { SyntheticSources, basePixels } from '../../src/lib/studio/bench.ts';
 import { composeFrame, filterOf } from '../../src/lib/studio/compose.ts';
 import { applyEffect, blurPlan, effectOf, effectsChip, setEffectPath, type EffectPlan } from '../../src/lib/studio/effects/index.ts';
-import { colourStraight, toPremultiplied } from '../../src/lib/studio/effects/code.ts';
-import { colourOpaque } from '../../src/lib/studio/effects/simd.ts';
+import { blurStraight, colourStraight, toPremultiplied } from '../../src/lib/studio/effects/code.ts';
+import { blurLanes } from '../../src/lib/studio/effects/blur-simd.ts';
+import { colourLanes } from '../../src/lib/studio/effects/simd.ts';
 import * as schema from '../../src/lib/studio/schema.ts';
 import { loadFonts, usedFonts } from '../../src/lib/studio/text.ts';
 import { loadSticker, MotionRenderer } from '../../src/lib/studio/motion-adapter.ts';
@@ -157,19 +158,24 @@ export async function identity() {
       const code = read(applyEffect(copy(), w, h, c.plan, { pad: c.pad, path: 'code' })!, w, h);
       const onChip = chip ? applyEffect(copy(), w, h, c.plan, { pad: c.pad, path: 'chip' }) : null;
       const chipPx = onChip ? read(onChip, w, h) : null;
-      // the plain code's colour in WebAssembly lanes against the same arithmetic one pixel at a time
-      let lanes: { offered: boolean; differing: number } | null = null;
-      if (c.plan.colour && !c.plan.blur) {
-        const px = p.canvas.getContext('2d')!.getImageData(0, 0, w, h).data;
-        const a = px.slice();
-        const b = px.slice();
-        const offered = colourOpaque(a.slice(), c.plan.colour) > 0;
-        colourStraight(a, c.plan.colour, true);
-        colourStraight(b, c.plan.colour, false);
-        let differing = 0;
-        for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) differing++;
-        lanes = { offered, differing };
+      // the plain code in WebAssembly lanes (colour, and the blur with any colour) against the same arithmetic one pixel
+      // at a time, from the straight colour getImageData gives
+      const px = p.canvas.getContext('2d')!.getImageData(0, 0, w, h).data;
+      let a: Uint8ClampedArray;
+      let b: Uint8ClampedArray;
+      let offered: boolean;
+      if (c.plan.blur) {
+        offered = !!blurLanes(px.slice(), w, h, c.plan.blur, c.pad, { colour: c.plan.colour, straight: true });
+        a = blurStraight(px.slice(), w, h, c.plan.blur, c.pad, c.plan.colour, true).slice();
+        b = blurStraight(px.slice(), w, h, c.plan.blur, c.pad, c.plan.colour, false);
+      } else {
+        offered = !!colourLanes(px.slice(), c.plan.colour!);
+        a = colourStraight(px.slice(), c.plan.colour!, true).slice();
+        b = colourStraight(px.slice(), c.plan.colour!, false);
       }
+      let differing = 0;
+      for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) differing++;
+      const lanes = { offered, differing };
       // before: the canvas filter over the picture, as compose.ts and cover.ts drew it
       const old = canvasOf(w, h);
       old.ctx.filter = c.filter;

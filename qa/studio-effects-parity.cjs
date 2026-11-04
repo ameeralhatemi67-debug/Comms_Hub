@@ -4,7 +4,8 @@
 // runs in Edge and inside the development package on the saving chip, on the strong chip and with no chip at all:
 //   1. every effect, at several strengths, over three pictures (footage, an item with soft and see-through edges,
 //      every colour at every opacity): chip against plain code, byte for byte, wherever the chip path is offered, and
-//      the plain code's colour in WebAssembly lanes (effects/simd.ts) against the same arithmetic a pixel at a time;
+//      the plain code's colour and blur in WebAssembly lanes (effects/simd.ts, blur-simd.ts) against the same arithmetic
+//      a pixel at a time;
 //   2. every frame of the cross-device corpus composed with each path: the same hash;
 //   3. the plain code is the same everywhere: each case's hash equals Edge's;
 //   4. how far each effect moved from the canvas filter used before, on each engine's own filter (recorded, and held
@@ -125,7 +126,7 @@ async function runIn(page) {
     for (const [engine, r] of Object.entries(runs)) {
       const withLanes = r.identity.cases.filter((c) => c.lanes);
       const bad = withLanes.filter((c) => !c.lanes.offered || c.lanes.differing !== 0);
-      check(`${engine}: the colour in WebAssembly lanes equals the plain code one pixel at a time (${withLanes.length} cases)`, withLanes.length > 0 && bad.length === 0, { bad: bad.map((c) => ({ picture: c.picture, effect: c.effect, ...c.lanes })) });
+      check(`${engine}: the colour and the blur in WebAssembly lanes equal the plain code one pixel at a time (${withLanes.length} cases)`, withLanes.length > 0 && bad.length === 0, { bad: bad.map((c) => ({ picture: c.picture, effect: c.effect, ...c.lanes })) });
     }
     for (const [engine, r] of Object.entries(runs)) {
       const differ = r.identity.cases.filter((c, i) => c.hash !== ref.identity.cases[i]?.hash).map((c) => `${c.picture}: ${c.effect}`);

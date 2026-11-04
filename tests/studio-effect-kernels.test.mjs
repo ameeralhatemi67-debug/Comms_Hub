@@ -129,8 +129,7 @@ test('colour on straight colour in one pass leaves the canvas the bytes of the p
     const viaPremultiplied = straight.slice();
     toPremultiplied(viaPremultiplied);
     colourPixels(viaPremultiplied, plan);
-    const once = straight.slice();
-    colourStraight(once, plan);
+    const once = colourStraight(straight.slice(), plan).slice();
     // what the canvas keeps after putImageData
     toPremultiplied(once);
     for (let i = 0; i < once.length; i += 4) {
@@ -156,7 +155,7 @@ test('a scratch picture grows to hold what a frame asks and shrinks only after a
 
 test('the colour in WebAssembly lanes gives the bytes of the plain code, opaque pixels or not', async () => {
   const { colourStraight } = await import('../src/lib/studio/effects/code.ts');
-  const { colourOpaque } = await import('../src/lib/studio/effects/simd.ts');
+  const { colourLanes } = await import('../src/lib/studio/effects/simd.ts');
   const { photoColourPlan } = await import('../src/lib/studio/effects/plan.ts');
   const plans = [
     ...[{ brightness: 12, contrast: 18, saturation: 25 }, { brightness: -8, contrast: 10, saturation: -30 }, { brightness: 0, contrast: 0, saturation: -100 }, { brightness: 37, contrast: -63, saturation: 81 }, { brightness: 100, contrast: 0, saturation: 0 }, { brightness: 0, contrast: -100, saturation: 0 }, { brightness: -50, contrast: 100, saturation: 100 }].map(colourPlan),
@@ -170,11 +169,9 @@ test('the colour in WebAssembly lanes gives the bytes of the plain code, opaque 
   for (let i = 3; i < base.length; i += 4 * 37) base[i] = 0;
   toStraight(base);
   for (const plan of plans) {
-    const lanes = base.slice();
-    const plain = base.slice();
-    assert.ok(colourOpaque(lanes.slice(), plan) > 0, 'the lanes are offered here');
-    colourStraight(lanes, plan, true);
-    colourStraight(plain, plan, false);
+    assert.ok(colourLanes(base.slice(), plan), 'the lanes are offered here');
+    const lanes = colourStraight(base.slice(), plan, true).slice();
+    const plain = colourStraight(base.slice(), plan, false);
     assert.deepEqual([...lanes], [...plain]);
   }
 });
@@ -198,4 +195,65 @@ test('a blur of more than 1 and at most 4 pixels is three odd boxes whose spread
   const even = new Uint8ClampedArray(60 * 40 * 4).fill(255);
   const out = blurPixels(even, 60, 40, blurPlan(3));
   for (let y = 12; y < 28; y++) for (let x = 12; x < 48; x++) assert.equal(out[(y * 60 + x) * 4 + 3], 255);
+});
+
+test('the blur in WebAssembly lanes gives the bytes of the plain code, at every reduction, size and margin', async () => {
+  const { blurLanes, blurModule } = await import('../src/lib/studio/effects/blur-simd.ts');
+  assert.ok(WebAssembly.validate(blurModule()), 'the module is valid');
+  const sizes = [[1, 1], [3, 5], [97, 61], [211, 40], [40, 211], [8, 300]];
+  for (const s of [0.4, 0.8, 1, 1.01, 1.5, 2.5, 4, 4.5, 7, 9, 16, 30, 64, 100]) {
+    const plan = blurPlan(s);
+    for (const [w, h] of sizes) {
+      // see-through, and mostly opaque with clear holes, as footage over an item's edges is
+      const pictures = [picture(w, h, w * 31 + h), picture(w, h, 5)];
+      for (let i = 0; i < pictures[1].length; i += 4) pictures[1][i + 3] = (i / 4) % 13 ? 255 : 0;
+      for (let i = 0; i < pictures[1].length; i += 4) if (!pictures[1][i + 3]) pictures[1][i] = pictures[1][i + 1] = pictures[1][i + 2] = 0;
+      for (const pad of [0, Math.ceil(plan.reach / plan.n) * plan.n]) {
+        for (const px of pictures) {
+          const lanes = blurLanes(px.slice(), w, h, plan, pad);
+          assert.ok(lanes, 'the lanes are offered here');
+          const plain = blurPixels(px.slice(), w, h, plan, pad, false);
+          assert.equal(lanes.length, plain.length);
+          let differing = 0;
+          for (let i = 0; i < plain.length; i++) if (lanes[i] !== plain[i]) differing++;
+          assert.equal(differing, 0, `blur ${s} on ${w} by ${h}, margin ${pad}`);
+        }
+      }
+    }
+  }
+  // the default takes the lanes, and gives the same bytes
+  const px = picture(97, 61, 3);
+  assert.deepEqual(blurPixels(px, 97, 61, blurPlan(9), 32), blurPixels(px, 97, 61, blurPlan(9), 32, false));
+  assert.equal(blurLanes(px, 97, 61, blurPlan(9), 3), null, 'a margin that is not a whole number of cells is left to the plain code');
+});
+
+test('the blur over straight colour gives the bytes of colouring, premultiplying, blurring and unpremultiplying in turn', async () => {
+  const { blurStraight } = await import('../src/lib/studio/effects/code.ts');
+  const { photoColourPlan } = await import('../src/lib/studio/effects/plan.ts');
+  const colours = [null, colourPlan({ brightness: 12, contrast: 18, saturation: 25 }), colourPlan({ brightness: -40, contrast: 0, saturation: 0 }), photoColourPlan({ contrast: -45, saturation: 60, warmth: 30 })];
+  for (const s of [0.6, 2.5, 4, 9, 30]) {
+    const plan = blurPlan(s);
+    for (const [w, h] of [[1, 1], [5, 3], [97, 61], [64, 64]]) {
+      // every opacity, clear pixels with colour left in them as getImageData never gives, runs of opaque ones
+      const px = picture(w, h, w + h + 11);
+      for (let i = 0; i < px.length; i += 4) if ((i / 4) % 7 > 2) px[i + 3] = 255;
+      toStraight(px);
+      for (const pad of [0, Math.ceil(plan.reach / plan.n) * plan.n]) {
+        for (const colour of colours) {
+          const lanes = blurStraight(px.slice(), w, h, plan, pad, colour).slice();
+          const plain = blurStraight(px.slice(), w, h, plan, pad, colour, false);
+          let differing = 0;
+          for (let i = 0; i < plain.length; i++) if (lanes[i] !== plain[i]) differing++;
+          assert.equal(differing, 0, `blur ${s} on ${w} by ${h}, margin ${pad}, colour ${!!colour}`);
+        }
+      }
+    }
+  }
+  // every straight colour at every opacity, premultiplied and back, through a blur that changes nothing
+  const ramp = new Uint8ClampedArray(256 * 256 * 4);
+  for (let a = 0; a < 256; a++) for (let v = 0; v < 256; v++) ramp.set([v, 255 - v, (v * 7) & 255, a], (a * 256 + v) * 4);
+  const none = { ...blurPlan(0.4), radius: 0, weights: Int32Array.of(65536) };
+  const lanes = blurStraight(ramp.slice(), 256, 256, none).slice();
+  const plain = blurStraight(ramp.slice(), 256, 256, none, 0, null, false);
+  assert.deepEqual([...lanes], [...plain]);
 });

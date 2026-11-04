@@ -1,14 +1,15 @@
-// code.ts colourStraight for opaque pixels as WebAssembly with 128-bit lanes, four pixels at a time, for a computer
-// without a usable graphics chip: the same whole-number arithmetic, so the same bytes, where plain code took about
-// 66 ms a 1080p frame (measured on 2026-11-04 with no chip). The table's steps are float32 multiplies and adds, which
-// WebAssembly rounds exactly as Math.fround does in plan.ts; the matrix is 32-bit integers. The module is written here
-// instruction by instruction, as yuv-simd.ts is, so what it does can be read: `run(start, end)` works the RGBA bytes
-// from `start` to `end` (a multiple of 16 apart) in its own memory, with the plan written at address 0, and leaves every
-// pixel that is not opaque as it was, for code.ts to finish. tests/studio-effect-kernels.test.mjs holds the two equal
-// byte for byte. Pure apart from the module it compiles.
+// code.ts colourStraight as WebAssembly with 128-bit lanes, four pixels at a time, for a computer without a usable
+// graphics chip: the same whole-number arithmetic, so the same bytes, where plain code took about 66 ms a 1080p frame
+// (measured on 2026-11-04 with no chip). The table's steps are float32 multiplies and adds, which WebAssembly rounds
+// exactly as Math.fround does in plan.ts; the matrix is 32-bit integers; a see-through pixel is premultiplied and made
+// straight again first, as the chip reads it, each a float32 quotient below 2^24 cut to a whole number, which is the
+// exact one. The module is written here instruction by instruction, as yuv-simd.ts is, so what it does can be read:
+// `run(start, end)` works the RGBA bytes from `start` to `end` (a multiple of 16 apart) in the effects' one memory
+// (lanesMemory, shared with blur-simd.ts), with the plan written at address 0, and leaves clear pixels as they were.
+// tests/studio-effect-kernels.test.mjs holds the two equal byte for byte. Pure apart from the module it compiles.
 import type { ColourPlan } from './plan.ts';
 
-const leb = (n: number): number[] => {
+export const leb = (n: number): number[] => {
   const out: number[] = [];
   for (;;) {
     const b = n & 0x7f;
@@ -28,14 +29,14 @@ const sleb = (n: number): number[] => {
     if (done) return out;
   }
 };
-const section = (id: number, body: number[]) => [id, ...leb(body.length), ...body];
-const vec = (items: number[][]) => [...leb(items.length), ...items.flat()];
-const name = (s: string) => [...leb(s.length), ...[...s].map((c) => c.charCodeAt(0))];
+export const section = (id: number, body: number[]) => [id, ...leb(body.length), ...body];
+export const vec = (items: number[][]) => [...leb(items.length), ...items.flat()];
+export const name = (s: string) => [...leb(s.length), ...[...s].map((c) => c.charCodeAt(0))];
 const f32 = (x: number) => [...new Uint8Array(Float32Array.of(x).buffer)];
 
-// the instructions used (WebAssembly 2.0, its SIMD opcodes after 0xfd)
-const simd = (op: number) => [0xfd, ...leb(op)];
-const I = {
+// the instructions used (WebAssembly 2.0, its SIMD opcodes after 0xfd), shared with blur-simd.ts
+export const simd = (op: number) => [0xfd, ...leb(op)];
+export const I = {
   get: (i: number) => [0x20, ...leb(i)],
   set: (i: number) => [0x21, ...leb(i)],
   i32: (n: number) => [0x41, ...sleb(n)],
@@ -74,8 +75,22 @@ const I = {
 export const PLAN_AT = 0;
 export const PIXELS_AT = 128;
 
+/** Undefined until first asked; null where WebAssembly is missing. */
+let memory: WebAssembly.Memory | null | undefined;
+/** The one memory of the effects' modules, so a picture coloured and blurred is copied in once. */
+export function lanesMemory(): WebAssembly.Memory | null {
+  if (memory === undefined) memory = typeof WebAssembly === 'undefined' ? null : new WebAssembly.Memory({ initial: 1 });
+  return memory;
+}
+/** Room for `bytes` in lanesMemory. */
+export function roomFor(mem: WebAssembly.Memory, bytes: number) {
+  if (mem.buffer.byteLength < bytes) mem.grow(Math.ceil((bytes - mem.buffer.byteLength) / 65536));
+}
+/** The import section of a module that works in lanesMemory, as `env.mem`. */
+export const memoryImport = () => section(2, vec([[...name('env'), ...name('mem'), 0x02, 0x00, 0x01]]));
+
 // locals: start, end (params), p, steps, useMatrix (i32); then v128 locals by name
-const V = ['v', 'r', 'g', 'b', 's0', 'c0', 's1', 'c1', 'm0', 'm1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'o0', 'o1', 'o2', 'k255', 'kA', 'kHalf', 'kLow', 'kOne', 'f0', 'f255', 'q', 'nr', 'ng'] as const;
+const V = ['v', 'r', 'g', 'b', 's0', 'c0', 's1', 'c1', 'm0', 'm1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'o0', 'o1', 'o2', 'k255', 'kA', 'kHalf', 'kLow', 'kOne', 'f0', 'f255', 'q', 'nr', 'ng', 'a'] as const;
 const L = (n: (typeof V)[number]) => 5 + V.indexOf(n);
 
 /** One table step on channel `x`: convert, multiply, add, cut, keep within 0 to 255, back to integers. */
@@ -92,6 +107,18 @@ const toByte = (into: number) => [
   ...I.get(into), ...I.get(L('kOne')), ...I.and, ...I.and,
   ...I.set(L('q')), ...I.get(into), ...I.get(L('q')), ...I.subx,
   ...I.i32(0), ...I.splat, ...I.maxS, ...I.get(L('k255')), ...I.minS, ...I.set(into),
+];
+
+const divF = simd(0xe7);
+const allTrue = simd(0xa3);
+/**
+ * Channel `x` of a see-through pixel premultiplied and straight again (code.ts unpremultiply(premultiply(x, a), a)):
+ * (x * a + 127) / 255, then (p * 255 + a / 2) / a, at most 255. An opaque pixel comes out as it went in.
+ */
+const seen = (x: number) => [
+  ...I.get(x), ...I.get(L('a')), ...I.mulx, ...I.i32(127), ...I.splat, ...I.addx, ...I.convertF, ...I.get(L('f255')), ...divF, ...I.truncF,
+  ...I.get(L('k255')), ...I.mulx, ...I.get(L('a')), ...I.i32(1), ...I.shrU, ...I.addx, ...I.convertF,
+  ...I.get(L('a')), ...I.convertF, ...divF, ...I.truncF, ...I.get(L('k255')), ...I.minS, ...I.set(x),
 ];
 
 /** m[a] * r + m[b] * g + m[c] * b + o, then toByte, into `into`. */
@@ -124,6 +151,11 @@ function body(): number[] {
     ...I.get(L('v')), ...I.get(L('k255')), ...I.and, ...I.set(L('r')),
     ...I.get(L('v')), ...I.i32(8), ...I.shrU, ...I.get(L('k255')), ...I.and, ...I.set(L('g')),
     ...I.get(L('v')), ...I.i32(16), ...I.shrU, ...I.get(L('k255')), ...I.and, ...I.set(L('b')),
+    ...I.get(L('v')), ...I.i32(24), ...I.shrU, ...I.set(L('a')),
+    // four opaque pixels need nothing more; see-through ones are taken as the chip takes them
+    ...I.get(L('a')), ...I.get(L('k255')), ...I.eq, ...allTrue, 0x45, 0x04, 0x40,
+    ...seen(L('r')), ...seen(L('g')), ...seen(L('b')),
+    0x0b,
     // the table's steps
     ...I.get(3), ...I.i32(0), ...I.gtU, 0x04, 0x40,
     ...tableStep(L('r'), L('s0'), L('c0')), ...tableStep(L('g'), L('s0'), L('c0')), ...tableStep(L('b'), L('s0'), L('c0')),
@@ -136,14 +168,14 @@ function body(): number[] {
     ...row('m0', 'm1', 'm2', 'o0', L('nr')), ...row('m3', 'm4', 'm5', 'o1', L('ng')), ...row('m6', 'm7', 'm8', 'o2', L('b')),
     ...I.get(L('nr')), ...I.set(L('r')), ...I.get(L('ng')), ...I.set(L('g')),
     0x0b,
-    // back into one word: the opacity kept, red low; a pixel not opaque stays as it was
+    // back into one word: the opacity kept, red low; a clear pixel stays as it was
     ...I.get(2),
+    ...I.get(L('v')),
     ...I.get(L('v')), ...I.get(L('kA')), ...I.and,
     ...I.get(L('r')), ...I.or,
     ...I.get(L('g')), ...I.i32(8), ...I.shl, ...I.or,
     ...I.get(L('b')), ...I.i32(16), ...I.shl, ...I.or,
-    ...I.get(L('v')),
-    ...I.get(L('v')), ...I.i32(24), ...I.shrU, ...I.get(L('k255')), ...I.eq,
+    ...I.get(L('a')), ...I.i32(0), ...I.splat, ...I.eq,
     ...I.select,
     ...I.store,
     ...I.get(2), ...I.i32(16), ...I.add, ...I.set(2),
@@ -153,17 +185,16 @@ function body(): number[] {
   ];
 }
 
-/** The module: memory exported as `mem`, the function as `run(start, end)`. */
+/** The module: memory imported as `env.mem`, the function exported as `run(start, end)`. */
 export function colourModule(): Uint8Array<ArrayBuffer> {
   const types = section(1, vec([[0x60, ...vec([[0x7f], [0x7f]]), 0x00]]));
   const funcs = section(3, vec([[0x00]]));
-  const memory = section(5, vec([[0x00, 0x01]]));
-  const exports = section(7, vec([[...name('run'), 0x00, 0x00], [...name('mem'), 0x02, 0x00]]));
+  const exports = section(7, vec([[...name('run'), 0x00, 0x00]]));
   const locals = vec([[3, 0x7f], [V.length, 0x7b]]);
   const code = body();
   const fn = [...locals, ...code];
   const codes = section(10, vec([[...leb(fn.length), ...fn]]));
-  return Uint8Array.from([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, ...types, ...funcs, ...memory, ...exports, ...codes]);
+  return Uint8Array.from([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, ...types, ...memoryImport(), ...funcs, ...exports, ...codes]);
 }
 
 type Kernel = { mem: WebAssembly.Memory; run: (start: number, end: number) => void };
@@ -174,12 +205,13 @@ function kernel(): Kernel | null {
   if (made !== undefined) return made;
   made = null;
   try {
-    if (typeof WebAssembly === 'undefined') return null;
+    const mem = lanesMemory();
+    if (!mem) return null;
     const bytes = colourModule();
     if (!WebAssembly.validate(bytes)) return null;
     // small enough (under 4 KB) to compile at once on the page
-    const e = new WebAssembly.Instance(new WebAssembly.Module(bytes)).exports as unknown as Kernel;
-    made = { mem: e.mem, run: e.run };
+    const e = new WebAssembly.Instance(new WebAssembly.Module(bytes), { env: { mem } }).exports as unknown as Kernel;
+    made = { mem, run: e.run };
   } catch {
     made = null;
   }
@@ -187,16 +219,10 @@ function kernel(): Kernel | null {
 }
 
 /**
- * The plan over the opaque pixels of `px` (straight RGBA), four at a time, for the first `done` bytes (a multiple of 16);
- * every other pixel is left as it was. 0 where the module is not offered or the plan is not one it takes.
+ * The plan written at PLAN_AT for `run`; false where the plan is not one the module takes (a table without its steps).
  */
-export function colourOpaque(px: Uint8ClampedArray, plan: ColourPlan): number {
-  if (plan.table && !plan.steps.length) return 0;
-  const k = kernel();
-  if (!k) return 0;
-  const done = px.length - (px.length % 16);
-  const need = PIXELS_AT + done;
-  if (k.mem.buffer.byteLength < need) k.mem.grow(Math.ceil((need - k.mem.buffer.byteLength) / 65536));
+function written(k: Kernel, plan: ColourPlan): boolean {
+  if (plan.table && !plan.steps.length) return false;
   const f = new Float32Array(k.mem.buffer, PLAN_AT, 4);
   const n = new Int32Array(k.mem.buffer, PLAN_AT, 18);
   const st = plan.table ? plan.steps : [];
@@ -208,9 +234,32 @@ export function colourOpaque(px: Uint8ClampedArray, plan: ColourPlan): number {
   n[5] = plan.matrix ? 1 : 0;
   for (let i = 0; i < 9; i++) n[6 + i] = plan.matrix ? plan.matrix[i] : 0;
   for (let i = 0; i < 3; i++) n[15 + i] = plan.offset ? plan.offset[i] : 0;
-  const mem = new Uint8Array(k.mem.buffer, PIXELS_AT, done);
-  mem.set(px.subarray(0, done));
-  k.run(PIXELS_AT, PIXELS_AT + done);
-  px.set(mem);
-  return done;
+  return true;
+}
+
+/**
+ * The plan over `px` (straight RGBA), four pixels at a time, the result in lanesMemory, good until the next effect, for
+ * putImageData at once; null where the module is not offered or the plan is not one it takes.
+ */
+export function colourLanes(px: Uint8ClampedArray, plan: ColourPlan): Uint8ClampedArray<ArrayBuffer> | null {
+  const k = kernel();
+  if (!k) return null;
+  // the last few lanes past the picture work on whatever lies there, and are not returned
+  const end = PIXELS_AT + Math.ceil(px.length / 16) * 16;
+  roomFor(k.mem, end);
+  if (!written(k, plan)) return null;
+  new Uint8Array(k.mem.buffer).set(px, PIXELS_AT);
+  k.run(PIXELS_AT, end);
+  return new Uint8ClampedArray(k.mem.buffer, PIXELS_AT, px.length);
+}
+
+/**
+ * The plan over the bytes from `start` to `end` of lanesMemory (a multiple of 16 apart, from PIXELS_AT on), where they
+ * already are; false, and nothing done, where the module is not offered or the plan is not one it takes.
+ */
+export function colourInPlace(start: number, end: number, plan: ColourPlan): boolean {
+  const k = kernel();
+  if (!k || !written(k, plan)) return false;
+  k.run(start, end);
+  return true;
 }
