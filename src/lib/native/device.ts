@@ -163,3 +163,40 @@ export function currentEntry(p: { current: ProfileKey; entries: ProfileEntry[] }
   const same = p.entries.filter((e) => e.key.app === k.app && e.key.chrome === k.chrome && e.key.switch === k.switch && e.key.chip.vendorId === k.chip.vendorId && e.key.chip.deviceId === k.chip.deviceId && e.key.chip.driver === k.chip.driver);
   return same.sort((a, b) => b.at - a.at)[0] ?? null;
 }
+
+/**
+ * Whether this device has a measurement the studio follows (MVP_draft.md 63.6.1): measured, never measured, or stale with
+ * the first reason of a fixed order: the application (or its Chromium) updated, the graphics chip (or its switch) changed,
+ * or its driver changed. A stale measurement is compared with the newest one taken on this chip when there is one, so an
+ * update is not taken for a change of chip. Null while the application has not answered.
+ */
+export type MeasureState = { kind: 'measured' } | { kind: 'never' } | { kind: 'stale'; why: 'app' | 'chip' | 'driver' };
+
+export function measureState(p: { current: ProfileKey; entries: ProfileEntry[] } | null): MeasureState | null {
+  if (!p) return null;
+  if (currentEntry(p)) return { kind: 'measured' };
+  if (!p.entries.length) return { kind: 'never' };
+  const k = p.current;
+  const sameChip = (e: ProfileEntry) => e.key.switch === k.switch && e.key.chip.vendorId === k.chip.vendorId && e.key.chip.deviceId === k.chip.deviceId;
+  const newest = (list: ProfileEntry[]) => [...list].sort((a, b) => b.at - a.at)[0];
+  const e = newest(p.entries.filter(sameChip)) ?? newest(p.entries);
+  if (e.key.app !== k.app || e.key.chrome !== k.chrome) return { kind: 'stale', why: 'app' };
+  if (!sameChip(e)) return { kind: 'stale', why: 'chip' };
+  return { kind: 'stale', why: 'driver' };
+}
+
+// each reason is its own whole phrase, so the verb agrees with its subject
+const CHANGED: Record<'app' | 'chip' | 'driver', string> = { app: 'تغيّر إصدار التطبيق', chip: 'تغيّرت بطاقة الرسوميات', driver: 'تغيّر برنامج تشغيل البطاقة' };
+
+/** What the studio says of a missing or stale measurement, or null when there is nothing to say. */
+export function measureLine(s: MeasureState | null): string | null {
+  if (!s || s.kind === 'measured') return null;
+  if (s.kind === 'never') return 'لم يُقَس هذا الجهاز بعد، فيعمل الاستوديو بأبسط إعداداته. القياس نحو نصف دقيقة، ولا يُرسل شيء خارج الجهاز.';
+  return `${CHANGED[s.why]} منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.`;
+}
+
+/** The page's event after a measurement is saved, so the studio's note reads the profile again. */
+export const PROFILE_SAVED = 'commshub:profile-saved';
+
+/** The key «لاحقاً» is kept for: a later change of application, Chromium, chip, switch or driver shows the note again. */
+export const measureKeyId = (k: ProfileKey) => [k.app, k.chrome, k.switch, k.chip.vendorId, k.chip.deviceId, k.chip.driver].join('|');

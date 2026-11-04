@@ -419,6 +419,10 @@ choice of 2026-11-03): bridge version 6 adds `gpu` and `profile`.
   The spread it reports is that of the figures something decides on (`DECIDING`).
 - `qa/desktop-profile.cjs` measures on both chips through the real bridge and records the processor's load beside each
   measurement, since a busy laptop measures badly.
+- **A missing or stale measurement is said, never acted on** (`MVP_draft.md` 63.6.1). `measureState` in
+  `src/lib/native/device.ts` decides measured, never, or stale with one reason, and `src/components/native/measure-note.tsx`
+  shows one line on the studio's home and under the editors' menus. It never measures by itself, it hides while the page is
+  busy and in the preview's window, and «لاحقاً» is kept for the present key only. `qa/desktop-measure-note.cjs` holds it.
 - **An effect that must match across machines is whole-number arithmetic.** «إخفاء بالمربعات» is: on the graphics chip in
   WebGL2 (`src/lib/studio/squares-gl.ts`, texelFetch and unsigned sums) and in plain code (`cover.ts` `mosaic`), held equal
   byte for byte by `qa/studio-crossdevice.cjs`. Never read the composed picture back each frame on the chip's canvas: it

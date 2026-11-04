@@ -1001,7 +1001,7 @@ test('D9: the panel offers the chip, the measurement and the plan only inside an
   const fs = await import('node:fs');
   const ui = fs.readFileSync('src/components/native/device-info.tsx', 'utf8');
   assert.match(ui, /const tuning = n\.has\('gpu'\) && n\.has\('profile'\);/);
-  assert.match(ui, /\{tuning && <DeviceTuning facts=\{facts\} \/>\}/);
+  assert.match(ui, /\{tuning && <DeviceTuning facts=\{facts\}( focus=\{focus\})? \/>\}/);
   assert.match(ui, /await import\('@\/lib\/studio\/bench'\)/, 'the measurement is loaded only when asked for');
   assert.ok(ui.includes('قياس قدرة الجهاز') && ui.includes('التفاصيل') && ui.includes('إعادة التشغيل الآن'));
   assert.equal(/\p{Extended_Pictographic}/u.test(ui), false);

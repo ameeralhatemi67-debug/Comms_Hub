@@ -3,7 +3,8 @@
 // The frame both studio editors share on a computer (MVP_draft.md 62.1, 62.2): the menu bar, the windows,
 // filling the browser window, the editor's dark or light chrome and the shortcuts sheet. The menus of
 // «ملف», «تحرير», «المقطع» and «عرض» are the editor's own; «النوافذ» and «مساعدة» are built here from the
-// window list (panels.ts) and the shortcuts (shortcuts.ts). «مساعدة» also opens «معلومات الجهاز» (MVP_draft.md 63).
+// window list (panels.ts) and the shortcuts (shortcuts.ts). «مساعدة» also opens «معلومات الجهاز» (MVP_draft.md 63), and
+// in the desktop application a line under the menus says when this device is not measured (63.6.1).
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   FolderOpen, Sparkles, Rows3, MonitorPlay, SlidersHorizontal, Type, WandSparkles, FileOutput, History, Settings2, MessageSquareText, Layers, Keyboard, BookOpen, RotateCcw, Maximize2, LayoutDashboard, Files, Bookmark, Cpu,
@@ -15,6 +16,7 @@ import { MenuBar, ShortcutsSheet, type Menu, type MenuItem } from './menubar';
 import { Workspace, useWorkspaceLayout, type PanelSpec } from './workspace';
 import { useFillHeight } from './prefs';
 import { DeviceInfoDialog } from '../native/device-info';
+import { MeasureNote } from '../native/measure-note';
 
 export const PANEL_ICON: Record<string, ReactNode> = {
   folder: <FolderOpen aria-hidden="true" />,
@@ -124,6 +126,7 @@ export function EditorFrame({
         onShortcuts={() => frame.setKeys(true)}
         extra={toolbar}
       />
+      <MeasureNote />
       <Workspace panels={panels} layout={ws.layout} onLayout={ws.setLayout} focused={frame.focused} onFocus={frame.setFocused} chromeLabel={kind === 'video' ? 'نوافذ محرر الفيديو' : 'نوافذ محرر الصورة'} />
       {children}
       {frame.keys && <ShortcutsSheet scope={scope} onClose={() => frame.setKeys(false)} windowNames={windowNames} />}
