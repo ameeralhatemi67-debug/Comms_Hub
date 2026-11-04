@@ -2889,6 +2889,29 @@ While it works: «جارٍ القياس …٪…» with «إلغاء». Afterwar
   proof is `qa/studio-crossdevice.cjs`.
 - Nothing is scheduled: the measurement runs when the person asks.
 
+## 63.6.1 When this device is not measured, or its measurement is stale, 2026-11-04
+
+On Desktop Power's resumption of 2026-11-04. Inside the application only: in a browser, and in an application without the
+profile (before bridge version 6), nothing of this appears.
+
+The studio follows a measurement only when it was made for this device as it is now: the application's version, Chromium's
+version, the chip's switch, the chip and its driver (mains or battery aside). Without one it runs at its floor, today's
+behaviour (63.6 «Boundaries»). The studio says so, quietly:
+- **The note.** One line on the studio's home, above the projects, and under the menus of every editor:
+  - never measured: «لم يُقَس هذا الجهاز بعد، فيعمل الاستوديو بأبسط إعداداته. القياس نحو نصف دقيقة، ولا يُرسل شيء خارج
+    الجهاز.»;
+  - measured for another key: «تغيّر … منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.», naming one
+    reason only, the first that differs from the newest measurement on the same chip (or the newest of all): «إصدار التطبيق»
+    (the application or Chromium), then «بطاقة الرسوميات» (the chip or its switch), then «برنامج تشغيل البطاقة».
+- **Its buttons.** «قياس قدرة الجهاز» opens «معلومات الجهاز» with its own button of that name in view and ready: the note never
+  measures by itself. «لاحقاً» hides it on this device for the present key only, so a new version, chip or driver brings it back.
+- **When it is not shown.** While the page exports or sends a file for review, and in the preview's own window on a second
+  screen (63.5). It goes as soon as a measurement is saved.
+- **«معلومات الجهاز»** says the same stale line under «قياس قدرة الجهاز».
+
+The rule is `measureState` in `src/lib/native/device.ts` (held by `tests/native-power.test.mjs`), the note
+`src/components/native/measure-note.tsx`, and the proof `qa/desktop-measure-note.cjs`.
+
 ## 63.7 A faster preview (D10), 2026-11-04
 
 Phase D10 of `Desktop_Power_Ideas.md` (ideas P-02, P-03 and P-04). Speed only: the preview shows the same project at the same
