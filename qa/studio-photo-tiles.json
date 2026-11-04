@@ -1,0 +1,650 @@
+{
+  "script": "qa/studio-photo-tiles.cjs",
+  "run": "2026-11-04T22:49:35.165Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "Edge adjusted the 8000 by 6000 photo and the see-through one in six ways each, by one worker and by several",
+      "pass": true,
+      "detail": "{\"cores\":12,\"counts\":[1,2,4,10],\"chip\":true,\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "edge: every way (1 worker, 2 workers, 4 workers, 10 workers, chip) gives one worker's bytes, every adjustment, both photos",
+      "pass": true,
+      "detail": "{\"bad\":[],\"chip\":true,\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "app-saving: every way (1 worker, 2 workers, 4 workers, 10 workers, chip) gives one worker's bytes, every adjustment, both photos",
+      "pass": true,
+      "detail": "{\"bad\":[],\"chip\":true,\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "app-strong: every way (1 worker, 2 workers, 4 workers, 10 workers, chip) gives one worker's bytes, every adjustment, both photos",
+      "pass": true,
+      "detail": "{\"bad\":[],\"chip\":true,\"renderer\":\"ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "app-software: every way (1 worker, 2 workers, 4 workers, 10 workers) gives one worker's bytes, every adjustment, both photos",
+      "pass": true,
+      "detail": "{\"bad\":[],\"chip\":false,\"renderer\":\"ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "edge: one worker gives Edge's bytes for every adjustment",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "app-saving: one worker gives Edge's bytes for every adjustment",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "app-strong: one worker gives Edge's bytes for every adjustment",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    },
+    {
+      "name": "app-software: one worker gives Edge's bytes for every adjustment",
+      "pass": true,
+      "detail": "{\"differ\":[]}"
+    }
+  ],
+  "notes": [
+    "Times are worth reading only beside the load recorded with them: a laptop busy with other work times badly."
+  ],
+  "runs": {
+    "edge": {
+      "engine": {
+        "browser": "156.0.4314.58"
+      },
+      "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cores": 12,
+      "chip": true,
+      "load": {
+        "before": 10,
+        "after": 23
+      },
+      "msLargePhoto": {
+        "1 worker": 61454,
+        "2 workers": 29424,
+        "4 workers": 18894,
+        "10 workers": 15760,
+        "chip": 570
+      },
+      "results": [
+        {
+          "picture": "8000x6000",
+          "adjust": "brightness",
+          "ms": {
+            "1 worker": 2037,
+            "2 workers": 926,
+            "4 workers": 798,
+            "10 workers": 743,
+            "chip": 249
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "contrast",
+          "ms": {
+            "1 worker": 1484,
+            "2 workers": 898,
+            "4 workers": 739,
+            "10 workers": 762,
+            "chip": 125
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "saturation",
+          "ms": {
+            "1 worker": 1653,
+            "2 workers": 1107,
+            "4 workers": 796,
+            "10 workers": 681,
+            "chip": 92
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "warmth",
+          "ms": {
+            "1 worker": 2268,
+            "2 workers": 1056,
+            "4 workers": 843,
+            "10 workers": 715,
+            "chip": 104
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "blur",
+          "ms": {
+            "1 worker": 27147,
+            "2 workers": 10423,
+            "4 workers": 6735,
+            "10 workers": 6746
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "all",
+          "ms": {
+            "1 worker": 26865,
+            "2 workers": 15014,
+            "4 workers": 8983,
+            "10 workers": 6113
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "brightness",
+          "ms": {
+            "1 worker": 287,
+            "2 workers": 161,
+            "4 workers": 95,
+            "10 workers": 79,
+            "chip": 7
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "contrast",
+          "ms": {
+            "1 worker": 164,
+            "2 workers": 104,
+            "4 workers": 78,
+            "10 workers": 112,
+            "chip": 7
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "saturation",
+          "ms": {
+            "1 worker": 159,
+            "2 workers": 103,
+            "4 workers": 76,
+            "10 workers": 64,
+            "chip": 6
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "warmth",
+          "ms": {
+            "1 worker": 146,
+            "2 workers": 100,
+            "4 workers": 83,
+            "10 workers": 69,
+            "chip": 6
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "blur",
+          "ms": {
+            "1 worker": 1244,
+            "2 workers": 724,
+            "4 workers": 753,
+            "10 workers": 381
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "all",
+          "ms": {
+            "1 worker": 1254,
+            "2 workers": 1213,
+            "4 workers": 459,
+            "10 workers": 338
+          }
+        }
+      ]
+    },
+    "app-saving": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cores": 12,
+      "chip": true,
+      "load": {
+        "before": 3,
+        "after": 1
+      },
+      "msLargePhoto": {
+        "1 worker": 47386,
+        "2 workers": 32974,
+        "4 workers": 21733,
+        "10 workers": 14676,
+        "chip": 680
+      },
+      "results": [
+        {
+          "picture": "8000x6000",
+          "adjust": "brightness",
+          "ms": {
+            "1 worker": 1991,
+            "2 workers": 967,
+            "4 workers": 900,
+            "10 workers": 804,
+            "chip": 299
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "contrast",
+          "ms": {
+            "1 worker": 1311,
+            "2 workers": 900,
+            "4 workers": 1090,
+            "10 workers": 1417,
+            "chip": 82
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "saturation",
+          "ms": {
+            "1 worker": 1905,
+            "2 workers": 1816,
+            "4 workers": 1131,
+            "10 workers": 722,
+            "chip": 203
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "warmth",
+          "ms": {
+            "1 worker": 1642,
+            "2 workers": 963,
+            "4 workers": 762,
+            "10 workers": 641,
+            "chip": 96
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "blur",
+          "ms": {
+            "1 worker": 25199,
+            "2 workers": 13959,
+            "4 workers": 9031,
+            "10 workers": 5378
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "all",
+          "ms": {
+            "1 worker": 15338,
+            "2 workers": 14369,
+            "4 workers": 8819,
+            "10 workers": 5714
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "brightness",
+          "ms": {
+            "1 worker": 191,
+            "2 workers": 109,
+            "4 workers": 83,
+            "10 workers": 98,
+            "chip": 7
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "contrast",
+          "ms": {
+            "1 worker": 155,
+            "2 workers": 116,
+            "4 workers": 79,
+            "10 workers": 62,
+            "chip": 6
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "saturation",
+          "ms": {
+            "1 worker": 149,
+            "2 workers": 115,
+            "4 workers": 73,
+            "10 workers": 62,
+            "chip": 6
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "warmth",
+          "ms": {
+            "1 worker": 140,
+            "2 workers": 103,
+            "4 workers": 76,
+            "10 workers": 81,
+            "chip": 6
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "blur",
+          "ms": {
+            "1 worker": 1169,
+            "2 workers": 1108,
+            "4 workers": 642,
+            "10 workers": 394
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "all",
+          "ms": {
+            "1 worker": 1150,
+            "2 workers": 1084,
+            "4 workers": 464,
+            "10 workers": 335
+          }
+        }
+      ]
+    },
+    "app-strong": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cores": 12,
+      "chip": true,
+      "load": {
+        "before": 10,
+        "after": 6
+      },
+      "msLargePhoto": {
+        "1 worker": 59283,
+        "2 workers": 32120,
+        "4 workers": 18203,
+        "10 workers": 13430,
+        "chip": 447
+      },
+      "results": [
+        {
+          "picture": "8000x6000",
+          "adjust": "brightness",
+          "ms": {
+            "1 worker": 2135,
+            "2 workers": 950,
+            "4 workers": 705,
+            "10 workers": 609,
+            "chip": 222
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "contrast",
+          "ms": {
+            "1 worker": 1362,
+            "2 workers": 808,
+            "4 workers": 676,
+            "10 workers": 583,
+            "chip": 85
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "saturation",
+          "ms": {
+            "1 worker": 1598,
+            "2 workers": 1044,
+            "4 workers": 787,
+            "10 workers": 669,
+            "chip": 71
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "warmth",
+          "ms": {
+            "1 worker": 1409,
+            "2 workers": 984,
+            "4 workers": 817,
+            "10 workers": 547,
+            "chip": 69
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "blur",
+          "ms": {
+            "1 worker": 27583,
+            "2 workers": 14521,
+            "4 workers": 6820,
+            "10 workers": 5361
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "all",
+          "ms": {
+            "1 worker": 25196,
+            "2 workers": 13813,
+            "4 workers": 8398,
+            "10 workers": 5661
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "brightness",
+          "ms": {
+            "1 worker": 168,
+            "2 workers": 88,
+            "4 workers": 80,
+            "10 workers": 62,
+            "chip": 6
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "contrast",
+          "ms": {
+            "1 worker": 148,
+            "2 workers": 93,
+            "4 workers": 70,
+            "10 workers": 75,
+            "chip": 6
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "saturation",
+          "ms": {
+            "1 worker": 159,
+            "2 workers": 111,
+            "4 workers": 78,
+            "10 workers": 75,
+            "chip": 6
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "warmth",
+          "ms": {
+            "1 worker": 151,
+            "2 workers": 113,
+            "4 workers": 93,
+            "10 workers": 95,
+            "chip": 7
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "blur",
+          "ms": {
+            "1 worker": 1186,
+            "2 workers": 688,
+            "4 workers": 529,
+            "10 workers": 461
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "all",
+          "ms": {
+            "1 worker": 1161,
+            "2 workers": 1153,
+            "4 workers": 502,
+            "10 workers": 382
+          }
+        }
+      ]
+    },
+    "app-software": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "cores": 12,
+      "chip": false,
+      "load": {
+        "before": 13,
+        "after": 2
+      },
+      "msLargePhoto": {
+        "1 worker": 54450,
+        "2 workers": 30652,
+        "4 workers": 17632,
+        "10 workers": 12378
+      },
+      "results": [
+        {
+          "picture": "8000x6000",
+          "adjust": "brightness",
+          "ms": {
+            "1 worker": 1048,
+            "2 workers": 720,
+            "4 workers": 573,
+            "10 workers": 430
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "contrast",
+          "ms": {
+            "1 worker": 1070,
+            "2 workers": 709,
+            "4 workers": 567,
+            "10 workers": 470
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "saturation",
+          "ms": {
+            "1 worker": 1307,
+            "2 workers": 783,
+            "4 workers": 627,
+            "10 workers": 492
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "warmth",
+          "ms": {
+            "1 worker": 1264,
+            "2 workers": 805,
+            "4 workers": 643,
+            "10 workers": 444
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "blur",
+          "ms": {
+            "1 worker": 24899,
+            "2 workers": 14019,
+            "4 workers": 6487,
+            "10 workers": 5107
+          }
+        },
+        {
+          "picture": "8000x6000",
+          "adjust": "all",
+          "ms": {
+            "1 worker": 24862,
+            "2 workers": 13616,
+            "4 workers": 8735,
+            "10 workers": 5435
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "brightness",
+          "ms": {
+            "1 worker": 142,
+            "2 workers": 96,
+            "4 workers": 62,
+            "10 workers": 102
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "contrast",
+          "ms": {
+            "1 worker": 132,
+            "2 workers": 97,
+            "4 workers": 62,
+            "10 workers": 49
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "saturation",
+          "ms": {
+            "1 worker": 129,
+            "2 workers": 101,
+            "4 workers": 59,
+            "10 workers": 66
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "warmth",
+          "ms": {
+            "1 worker": 135,
+            "2 workers": 85,
+            "4 workers": 61,
+            "10 workers": 62
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "blur",
+          "ms": {
+            "1 worker": 1145,
+            "2 workers": 722,
+            "4 workers": 642,
+            "10 workers": 385
+          }
+        },
+        {
+          "picture": "2400x1600 see-through",
+          "adjust": "all",
+          "ms": {
+            "1 worker": 1130,
+            "2 workers": 1049,
+            "4 workers": 469,
+            "10 workers": 307
+          }
+        }
+      ]
+    }
+  },
+  "total": 9,
+  "passed": 9,
+  "failed": 0
+}

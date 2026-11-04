@@ -1,13 +1,14 @@
 // Covered areas (MVP_draft.md 62.8): a box or an oval that blurs, or turns into large squares, whatever is
 // already drawn under it, for faces, car plates and papers. Drawn by the compositor as a pass over the
-// pixels below it, so the preview and the export cover the same pixels. Where the browser has no canvas
-// filter, blur falls back to a soft reduce-and-enlarge, the same in that browser's preview and export.
-// The squares are worked out from the pixels themselves, with whole numbers, the same on every computer: on the
+// pixels below it, so the preview and the export cover the same pixels. The blur is effects/'s, whole numbers on the
+// graphics chip or in plain code, the same on every computer; until 2026-11-04 it was the canvas filter, which each
+// chip drew a little differently, with a soft reduce-and-enlarge where a browser had no filter. The squares are worked out from the pixels themselves, with whole numbers, the same on every computer: on the
 // graphics chip (squares-gl.ts), or in plain code here (mosaic). Shrinking without smoothing, as they were made before
 // 2026-11-03, let each graphics chip pick its own pixel for a square (Desktop_Power_Ideas.md 5.2,
 // qa/studio-crossdevice.cjs).
 import type { Cover, Transform } from './schema.ts';
 import { squaresOnChip } from './squares-gl.ts';
+import { applyEffect, blurPlan } from './effects/index.ts';
 
 export const COVER_MODES: { value: Cover['mode']; label: string }[] = [
   { value: 'blur', label: 'تمويه' },
@@ -109,20 +110,6 @@ export function squaresImage(ctx: CanvasRenderingContext2D, x0: number, y0: numb
   return out;
 }
 
-let filterOk: boolean | null = null;
-function canFilter(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D): boolean {
-  if (filterOk === null) {
-    try {
-      ctx.filter = 'blur(1px)';
-      filterOk = ctx.filter === 'blur(1px)';
-      ctx.filter = 'none';
-    } catch {
-      filterOk = false;
-    }
-  }
-  return filterOk;
-}
-
 type Scratch = HTMLCanvasElement | OffscreenCanvas;
 const scratches: Scratch[] = [];
 function scratch(i: number, w: number, h: number): Scratch {
@@ -159,34 +146,23 @@ export function drawCover(ctx: CanvasRenderingContext2D, cover: Cover, tr: Trans
   const bw = x1 - x0;
   const bh = y1 - y0;
   if (bw < 1 || bh < 1) return;
-  const big = scratch(0, bw, bh);
-  const b = big.getContext('2d') as CanvasRenderingContext2D;
-  b.setTransform(1, 0, 0, 1, 0, 0);
-  b.clearRect(0, 0, bw, bh);
-  let image: CanvasImageSource = big;
+  // no shared scratch picture: a blur and a squares cover in one frame resized one twice a frame, and a resize
+  // reallocates it (measured on 2026-11-04, about 8 ms a frame in Edge); an area that could not be worked out is left
+  // as it is, as the cleared scratch drawn over it used to leave it
+  let image: CanvasImageSource | null = null;
   if (cover.mode === 'blocks') {
     // squares worked out from the pixels under the area, the same on every machine
     const size = Math.max(2, coverBlock(cover) * scale);
     const cols = Math.min(bw, Math.max(1, Math.round(bw / size)));
     const rows = Math.min(bh, Math.max(1, Math.round(bh / size)));
-    image = squaresImage(ctx, x0, y0, bw, bh, cols, rows, mosaicStep(size)) ?? big;
-  } else if (canFilter(b)) {
-    b.filter = `blur(${radius.toFixed(2)}px)`;
-    b.drawImage(canvas, x0, y0, bw, bh, 0, 0, bw, bh);
-    b.filter = 'none';
+    image = squaresImage(ctx, x0, y0, bw, bh, cols, rows, mosaicStep(size));
   } else {
-    // blur where the canvas has no filter: reduce, then enlarge smoothly
-    const size = Math.max(2, radius);
-    const sw = Math.max(1, Math.round(bw / size));
-    const sh = Math.max(1, Math.round(bh / size));
-    const small = scratch(1, sw, sh);
-    const s = small.getContext('2d') as CanvasRenderingContext2D;
-    s.setTransform(1, 0, 0, 1, 0, 0);
-    s.imageSmoothingEnabled = true;
-    s.clearRect(0, 0, sw, sh);
-    s.drawImage(canvas, x0, y0, bw, bh, 0, 0, sw, sh);
-    b.drawImage(small, 0, 0, sw, sh, 0, 0, bw, bh);
+    // the area as it is, blurred as if nothing lay beyond it, as the canvas filter did (effects/), read straight from the
+    // picture rather than copied first
+    const plan = blurPlan(radius);
+    if (plan) image = applyEffect(canvas as HTMLCanvasElement, bw, bh, { colour: null, blur: plan }, { pad: plan.reach, at: [x0, y0] });
   }
+  if (!image) return;
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = a;

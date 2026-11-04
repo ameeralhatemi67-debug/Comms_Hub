@@ -2,7 +2,8 @@
 // photo, used alike by the preview, the export and the photo editor, so what is seen is what is
 // exported. Media come through a Resolver (decoded video frames, pictures); motion templates through
 // MotionRenderer; brand marks through sticker(); transitions and entry and exit movements through
-// transitions.ts. Pure apart from the canvas it is given.
+// transitions.ts; colour adjustments and blur through effects/, the same bytes on every computer. Pure apart from
+// the canvas it is given.
 import { canvasOf, type Adjust, type Clip, type Fit, type Layer, type Micros, type ProjectDoc, type Transform } from './schema.ts';
 import { clipAlpha, sourceOf, visibleAt } from './timeline.ts';
 import { MotionRenderer, fitToLength, graphicById, motionDims, motionParams, settledSec, sticker, templateTime } from './motion-adapter.ts';
@@ -12,6 +13,7 @@ import { transformWithKeys } from './keys.ts';
 import { sourceTime } from './speed.ts';
 import { drawCover } from './cover.ts';
 import { drawSlot } from './slot.ts';
+import { applyEffect, effectOf, layer, type EffectPlan } from './effects/index.ts';
 
 export type Resolver = {
   /** The frame of a video source shown at `at` (source time) for a clip, or null while it is not ready. */
@@ -59,21 +61,11 @@ const sizeOf = (img: CanvasImageSource | null): { w: number; h: number } | null 
   return w && h ? { w, h } : null;
 };
 
-let filterOk: boolean | null = null;
-/** Whether the browser applies ctx.filter (Safari did not for long). */
-export function supportsFilter(): boolean {
-  if (filterOk !== null) return filterOk;
-  try {
-    const c = document.createElement('canvas').getContext('2d')!;
-    c.filter = 'brightness(1.5)';
-    filterOk = c.filter === 'brightness(1.5)';
-  } catch {
-    filterOk = false;
-  }
-  return filterOk;
-}
-
-/** The CSS filter of an adjustment (brightness, contrast, saturation; -100 to 100 each). */
+/**
+ * The CSS filter an adjustment (brightness, contrast, saturation; -100 to 100 each) was drawn with until 2026-11-04,
+ * when effects/ took its place: each graphics chip drew it a little differently. Kept as the description the effects
+ * follow (effects/plan.ts) and for the check that measures how far they moved (qa/studio-effects-parity.cjs).
+ */
 export function filterOf(a: Adjust | undefined): string {
   if (!a) return 'none';
   const parts: string[] = [];
@@ -235,30 +227,115 @@ export function drawItem(ctx: CanvasRenderingContext2D, doc: ProjectDoc, item: C
   if (turn) ctx.rotate((turn * Math.PI) / 180);
   const flip = (item as Layer).flip;
   if (flip?.h || flip?.v) ctx.scale(flip.h ? -1 : 1, flip.v ? -1 : 1);
-  const f = filterOf((item as Clip).adjust);
-  const parts: string[] = [];
-  // photos are adjusted by the pixel functions (resolver.adjusted); video uses the canvas filter
-  if (f !== 'none' && !c.preAdjusted && doc.kind !== 'photo') parts.push(f);
-  if (fx.blur > 0.05) parts.push(`blur(${(fx.blur * scale).toFixed(2)}px)`);
-  if (parts.length && supportsFilter()) ctx.filter = parts.join(' ');
   const k = tr.scale * fx.scale;
-  if (item.text) {
-    ctx.scale(k, k);
-    const L = layoutText(ctx, item.text, W, scale);
-    if (fx.local) clipLocal(ctx, fx.local, L.boxW, L.height);
-    drawText(ctx, item.text, 0, 0, W, scale, L, fx.reveal);
-  } else {
-    const w = base.w * k * scale;
-    const h = base.h * k * scale;
-    if (fx.local) clipLocal(ctx, fx.local, w, h);
-    if (c.draw) c.draw(ctx, w, h, scale * k);
+  const L = item.text ? (ctx.scale(k, k), layoutText(ctx, item.text, W, scale)) : null;
+  const w = L ? L.boxW : base.w * k * scale;
+  const h = L ? L.height : base.h * k * scale;
+  const paint = (g: CanvasRenderingContext2D) => {
+    if (item.text) drawText(g, item.text, 0, 0, W, scale, L!, fx.reveal);
+    else if (c.draw) c.draw(g, w, h, scale * k);
     else if (c.img) {
       const full = sizeOf(c.img) ?? c.natural;
-      if (crop) ctx.drawImage(c.img, full.w * crop.l, full.h * crop.t, full.w * (1 - crop.l - crop.r), full.h * (1 - crop.t - crop.b), -w / 2, -h / 2, w, h);
-      else ctx.drawImage(c.img, -w / 2, -h / 2, w, h);
+      if (crop) g.drawImage(c.img, full.w * crop.l, full.h * crop.t, full.w * (1 - crop.l - crop.r), full.h * (1 - crop.t - crop.b), -w / 2, -h / 2, w, h);
+      else g.drawImage(c.img, -w / 2, -h / 2, w, h);
     }
+  };
+  // photos are adjusted by the pixel functions (resolver.adjusted); a video's adjustment and every blur are effects
+  const plan = effectOf(!c.preAdjusted && doc.kind !== 'photo' ? (item as Clip).adjust : undefined, fx.blur > 0.05 ? fx.blur * scale : 0);
+  if (!plan) {
+    if (fx.local) clipLocal(ctx, fx.local, w, h);
+    paint(ctx);
+  } else {
+    // text may draw beyond its box (strokes, shadows): its layer is the whole canvas
+    const margin = 2 + (item.shape ? item.shape.strokeWidth * scale * k : 0);
+    const several = !!(item.text || item.shape || item.slot);
+    drawEffected(ctx, plan, L ? null : { w: w + 2 * margin, h: h + 2 * margin }, paint, fx.local ? () => clipLocal(ctx, fx.local!, w, h) : null, several);
   }
   ctx.restore();
+}
+
+/**
+ * An item with effects (effects/): drawn as it would be into a layer the size of what it covers, and its blur's
+ * reach, the effect worked out on that layer, which is then laid on the canvas with the item's blend and clipping, as
+ * the canvas filter applied them. The filter worked on each drawing call alone, so an item drawn in `several` calls
+ * (a text and its box, a shape's fill and line) is drawn into its layer at its opacity, as each call was, and the
+ * layer laid down whole; a picture keeps its opacity for the last step, where it is exact. `box` is the item's own box
+ * in the context's current coordinates, null for the whole canvas. The context's transform is changed; drawItem
+ * restores it.
+ */
+function drawEffected(ctx: CanvasRenderingContext2D, plan: EffectPlan, box: { w: number; h: number } | null, paint: (g: CanvasRenderingContext2D) => void, local: (() => void) | null, several: boolean) {
+  const m = ctx.getTransform();
+  const cw = ctx.canvas.width;
+  const ch = ctx.canvas.height;
+  const reach = plan.blur?.reach ?? 0;
+  let x0 = -reach;
+  let y0 = -reach;
+  let x1 = cw + reach;
+  let y1 = ch + reach;
+  let pad = 0;
+  if (box) {
+    const xs: number[] = [];
+    const ys: number[] = [];
+    for (const [px, py] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      const x = (px * box.w) / 2;
+      const y = (py * box.h) / 2;
+      xs.push(m.a * x + m.c * y + m.e);
+      ys.push(m.b * x + m.d * y + m.f);
+    }
+    const bx0 = Math.floor(Math.min(...xs));
+    const by0 = Math.floor(Math.min(...ys));
+    const bx1 = Math.ceil(Math.max(...xs));
+    const by1 = Math.ceil(Math.max(...ys));
+    x0 = Math.max(x0, bx0 - reach);
+    y0 = Math.max(y0, by0 - reach);
+    x1 = Math.min(x1, bx1 + reach);
+    y1 = Math.min(y1, by1 + reach);
+    // or only what of the box can reach the canvas and the canvas pixels it reaches, with the blur's margin (`pad`)
+    // left transparent around them, when that is less to blur: a full-frame clip then keeps the frame's own size
+    // (measured on 2026-11-04: the frame and the reach on every side made the blurred cross a quarter larger to draw,
+    // read and lay down)
+    if (reach) {
+      const t0 = Math.min(Math.max(-reach, bx0), Math.max(0, bx0 - reach));
+      const u0 = Math.min(Math.max(-reach, by0), Math.max(0, by0 - reach));
+      const t1 = Math.max(Math.min(cw + reach, bx1), Math.min(cw, bx1 + reach));
+      const u1 = Math.max(Math.min(ch + reach, by1), Math.min(ch, by1 + reach));
+      // none of it reaches the canvas
+      if (t1 <= t0 || u1 <= u0) return;
+      if ((t1 - t0 + 2 * reach) * (u1 - u0 + 2 * reach) <= (x1 - x0) * (y1 - y0)) {
+        [x0, y0, x1, y1] = [t0, u0, t1, u1];
+        pad = reach;
+      }
+    }
+  }
+  // nothing drawn beyond the canvas is seen without a blur to bring it in
+  if (!reach) {
+    x0 = Math.max(0, x0);
+    y0 = Math.max(0, y0);
+    x1 = Math.min(cw, x1);
+    y1 = Math.min(ch, y1);
+  }
+  const bw = x1 - x0;
+  const bh = y1 - y0;
+  if (bw < 1 || bh < 1) return;
+  const { canvas, ctx: g } = layer(0, bw, bh);
+  g.save();
+  g.imageSmoothingEnabled = ctx.imageSmoothingEnabled;
+  g.imageSmoothingQuality = ctx.imageSmoothingQuality;
+  if (several) g.globalAlpha = ctx.globalAlpha;
+  // the same transform moved by whole pixels, so the item lands on the same pixels as it would on the canvas
+  g.setTransform(m.a, m.b, m.c, m.d, m.e - x0, m.f - y0);
+  paint(g as CanvasRenderingContext2D);
+  g.restore();
+  let out: CanvasImageSource = canvas;
+  try {
+    out = applyEffect(canvas, bw, bh, plan, { pad }) ?? canvas;
+  } catch {
+    // an effect that cannot be worked out leaves the item as drawn
+  }
+  if (local) local();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  if (several) ctx.globalAlpha = 1;
+  ctx.drawImage(out, 0, 0, bw, bh, x0, y0, bw, bh);
 }
 
 /** Shows only part of an item's own box, from one side (a wipe of the item, in its own coordinates). */

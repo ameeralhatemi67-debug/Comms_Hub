@@ -2667,6 +2667,14 @@ On «المراجعة» (`/approvals/<id>`), for files of video:
 - A project page lists the studio projects of its works; Home has a «الاستوديو» section with the projects being edited, the open notes on studio files and the nearest dates of linked works.
 - All of these are shown only to those who may open the studio.
 
+## 62.15 Colour adjustments and blur, the same on every computer, 2026-11-04
+
+Owner direction of 2026-11-03 (`Desktop_Power_Ideas.md` P-09 and P-17, recorded in `progress.md`): a stronger computer changes speed, never the picture.
+- A clip's «السطوع» and «التباين» and «التشبع», the blur of «تمويه» as a transition or a movement, and «تمويه منطقة» are worked out with whole numbers, on the graphics chip or by the page where there is none, so the same project gives the same picture on every computer. Before, they were the browser's own filters, which each graphics chip drew a little differently.
+- A project saved before shows its colour adjustments within one level of 255 of what it showed in Edge, and its blurs within two levels inside the picture and up to five where a blurred picture fades out at its edge or follows a colour adjustment, no more than the old filters differed between one laptop's own graphics chips.
+- A photo's adjustments («السطوع»، «التباين»، «التشبع»، «الدفء»، «التمويه») are worked out with whole numbers too: without blur on the graphics chip, a part at a time; with blur in bands across as many of the computer's cores as its plan allows (63.6), one at a time without a plan, as before. Every way gives the same picture. A photo saved before may differ by one level in at most a few pixels in a hundred.
+- Nothing changes in the windows.
+
 # 63. The desktop application «مركز الاتصال المؤسسي», Windows, 2026-10-20
 
 Owner decisions of 2026-10-20: `Desktop_App_Plan.md`, accepted with the answers of its section 11.1 and recorded in `progress.md`. An application for Windows that opens the live site in its own window. It is a shell around the website, not a copy of it: every page, rule and check stays the website's, and a browser remains a full client. This section describes phase D1; 63.1 adds phase D2, 63.2 phase D3 and 63.3 phase D4, and the later phases are in the plan.

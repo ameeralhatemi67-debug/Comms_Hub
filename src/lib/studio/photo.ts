@@ -1,9 +1,15 @@
 // Photo projects (MVP_draft.md 62): layers drawn bottom first by the shared compositor, and the
-// picture adjustments (brightness, contrast, saturation, warmth, blur) as pixel functions, run in a
-// worker so a large photo does not freeze the page, and used alike for the preview and the export (the
-// canvas's own filter is not used for photos: Safari long ignored it, and it has no warmth). Pure apart
-// from the worker.
+// picture adjustments (brightness, contrast, saturation, warmth, blur) as pixel functions, run in
+// workers so a large photo does not freeze the page, and used alike for the preview and the export (the
+// canvas's own filter is not used for photos: Safari long ignored it, and it has no warmth). Since
+// 2026-11-04 (Desktop_Power_Ideas.md P-17) the colour is whole numbers (effects/plan.ts photoColourPlan),
+// the picture is cut into bands across as many workers as the computer's plan allows (scale.ts
+// photoWorkers), each with the rows its blur reads, and an adjustment without blur is worked out on the
+// graphics chip where there is one; every way gives the same bytes (qa/studio-photo-tiles.cjs). Pure apart
+// from the workers.
 import { PHOTO_MAX_SIDE, uid, type Adjust, type Content, type Layer, type ProjectDoc, type Transform } from './schema.ts';
+import { effectsOnChip, photoColourPlan } from './effects/index.ts';
+import { FLOOR } from './scale.ts';
 
 export type NewLayer = Content & Partial<Omit<Layer, 'id' | 'transform' | keyof Content>> & { id?: string; transform?: Transform };
 
@@ -87,29 +93,37 @@ export const adjusts = (a: Adjust | undefined) => !!a && !!(a.brightness || a.co
 // Pixel functions. Each is self-contained (no outside names), so the worker can run its source text.
 // ---------------------------------------------------------------------------
 
+/**
+ * A photo's colour plan (`m` and `o`, effects/plan.ts photoColourPlan) in place on RGBA bytes as getImageData gives
+ * them: colour is taken as the canvas holds it, premultiplied, back to straight colour as the graphics chip takes it
+ * (effects/code.ts), so a see-through pixel comes out of the canvas the same either way.
+ */
+export function photoPixels(data: Uint8ClampedArray, m: Int32Array, o: Int32Array): void {
+  for (let i = 0; i < data.length; i += 4) {
+    const a = data[i + 3];
+    if (!a) continue;
+    let r = data[i];
+    let g = data[i + 1];
+    let b = data[i + 2];
+    if (a !== 255) {
+      r = Math.min(255, Math.floor((Math.floor((r * a + 127) / 255) * 255 + (a >> 1)) / a));
+      g = Math.min(255, Math.floor((Math.floor((g * a + 127) / 255) * 255 + (a >> 1)) / a));
+      b = Math.min(255, Math.floor((Math.floor((b * a + 127) / 255) * 255 + (a >> 1)) / a));
+    }
+    const vr = m[0] * r + m[1] * g + m[2] * b + o[0];
+    const vg = m[3] * r + m[4] * g + m[5] * b + o[1];
+    const vb = m[6] * r + m[7] * g + m[8] * b + o[2];
+    // rounded to the nearest, an exact half to the even neighbour, as the bytes of an ImageData round
+    data[i] = vr <= 0 ? 0 : Math.min(255, (vr & 65535) === 32768 ? ((vr + 32768) >> 16) & ~1 : (vr + 32768) >> 16);
+    data[i + 1] = vg <= 0 ? 0 : Math.min(255, (vg & 65535) === 32768 ? ((vg + 32768) >> 16) & ~1 : (vg + 32768) >> 16);
+    data[i + 2] = vb <= 0 ? 0 : Math.min(255, (vb & 65535) === 32768 ? ((vb + 32768) >> 16) & ~1 : (vb + 32768) >> 16);
+  }
+}
+
 /** Brightness, contrast, saturation and warmth (each -100 to 100), in place on RGBA bytes. */
 export function adjustPixels(data: Uint8ClampedArray, a: { brightness?: number; contrast?: number; saturation?: number; warmth?: number }): void {
-  const br = 1 + (a.brightness || 0) / 100;
-  const ct = 1 + (a.contrast || 0) / 100;
-  const sat = 1 + (a.saturation || 0) / 100;
-  const wr = (a.warmth || 0) / 100;
-  for (let i = 0; i < data.length; i += 4) {
-    let r = data[i] * br;
-    let g = data[i + 1] * br;
-    let b = data[i + 2] * br;
-    r = (r - 128) * ct + 128;
-    g = (g - 128) * ct + 128;
-    b = (b - 128) * ct + 128;
-    const y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    r = y + (r - y) * sat;
-    g = y + (g - y) * sat;
-    b = y + (b - y) * sat;
-    r *= 1 + wr * 0.25;
-    b *= 1 - wr * 0.25;
-    data[i] = r;
-    data[i + 1] = g;
-    data[i + 2] = b;
-  }
+  const plan = photoColourPlan(a);
+  if (plan) photoPixels(data, plan.matrix!, plan.offset!);
 }
 
 /** A blur of the given radius in pixels: three box passes each way (close to a Gaussian). */
@@ -142,60 +156,146 @@ export function blurPixels(data: Uint8ClampedArray, w: number, h: number, radius
   }
 }
 
-let worker: Worker | null = null;
-let seq = 0;
-const waiting = new Map<number, (d: ImageData) => void>();
-const pending = new Map<number, { w: number }>();
+/** The blur radius of an adjustment, whole pixels, for a picture of w by h: 100 is a sixtieth of the longer side. */
+export const blurRadius = (a: Pick<Adjust, 'blur'>, w: number, h: number) => (a.blur ? Math.max(0, Math.round((a.blur / 100) * (Math.max(w, h) / 60))) : 0);
 
-function startWorker(): Worker | null {
-  if (worker) return worker;
-  if (typeof Worker === 'undefined' || typeof Blob === 'undefined') return null;
-  const src = `const adjustPixels = ${adjustPixels.toString()};
-const blurPixels = ${blurPixels.toString()};
-self.onmessage = (e) => {
-  const { id, data, w, h, a } = e.data;
-  adjustPixels(data, a);
-  if (a.blur) blurPixels(data, w, h, a.blur / 100 * Math.max(w, h) / 60);
+/**
+ * The picture's rows cut into `n` bands: each band works rows top to bottom and keeps rows y0 to y1. A blur of radius
+ * r makes three passes each way, each reaching r rows, so a band reads 3r rows beyond what it keeps (fewer at the
+ * picture's own edges, which every band treats as the whole picture does), and what it keeps is exact.
+ */
+export function bandsOf(h: number, n: number, radius: number): { top: number; y0: number; y1: number; bottom: number }[] {
+  const k = Math.max(1, Math.min(Math.floor(n), h));
+  const reach = 3 * radius;
+  return Array.from({ length: k }, (_, i) => {
+    const y0 = Math.floor((i * h) / k);
+    const y1 = Math.floor(((i + 1) * h) / k);
+    return { top: Math.max(0, y0 - reach), y0, y1, bottom: Math.min(h, y1 + reach) };
+  });
+}
+
+/** One band's work: the colour plan, then the blur. Self-contained like the pixel functions it calls. */
+const bandWork = `self.onmessage = (e) => {
+  const { id, data, w, h, m, o, r } = e.data;
+  photoPixels(data, m, o);
+  if (r) blurPixels(data, w, h, r);
   self.postMessage({ id, data }, [data.buffer]);
 };`;
+
+/** Workers for photo adjustments: at most this many at once (scale.ts photoWorkers; the floor is one). */
+let workersWanted = FLOOR.photoWorkers;
+export const setPhotoWorkers = (n: number) => {
+  workersWanted = Math.max(1, Math.min(16, Math.floor(n) || 1));
+};
+
+type Band = { data: Uint8ClampedArray; w: number; h: number; m: Int32Array; o: Int32Array; r: number };
+const workers: Worker[] = [];
+const waiting = new Map<number, (d: Uint8ClampedArray) => void>();
+let seq = 0;
+let refused = false;
+
+function workerPool(n: number): Worker[] {
+  if (refused || typeof Worker === 'undefined' || typeof Blob === 'undefined') return [];
+  const src = `const photoPixels = ${photoPixels.toString()};\nconst blurPixels = ${blurPixels.toString()};\n${bandWork}`;
   try {
-    worker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
-    worker.onmessage = (e: MessageEvent<{ id: number; data: Uint8ClampedArray }>) => {
-      const done = waiting.get(e.data.id);
-      waiting.delete(e.data.id);
-      if (done) done(new ImageData(e.data.data as Uint8ClampedArray<ArrayBuffer>, (pending.get(e.data.id) ?? { w: 1 }).w));
-      pending.delete(e.data.id);
-    };
+    while (workers.length < n) {
+      const w = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+      w.onmessage = (e: MessageEvent<{ id: number; data: Uint8ClampedArray }>) => {
+        const done = waiting.get(e.data.id);
+        waiting.delete(e.data.id);
+        done?.(e.data.data);
+      };
+      workers.push(w);
+    }
   } catch {
-    worker = null;
+    if (!workers.length) refused = true;
   }
-  return worker;
+  return workers.slice(0, n);
 }
+
+function inWorker(w: Worker, band: Band): Promise<Uint8ClampedArray> {
+  const id = ++seq;
+  return new Promise((resolve) => {
+    waiting.set(id, resolve);
+    w.postMessage({ id, ...band }, [band.data.buffer]);
+  });
+}
+
+const IDENTITY = Int32Array.of(65536, 0, 0, 0, 65536, 0, 0, 0, 65536);
+const NO_OFFSET = new Int32Array(3);
+
+/** The chip's share of a large photo at a time: a canvas past its memory would get a smaller picture (chip.ts). */
+const CHIP_TILE = 4096;
+let tile: OffscreenCanvas | HTMLCanvasElement | null = null;
+
 /**
- * A picture with an adjustment applied, as a canvas: in the worker, or on this thread where workers are
- * refused. Blur is a share of the picture's longer side (100 is a sixtieth of it).
+ * A colour plan over the canvas on the graphics chip, a tile at a time (colour is pixel by pixel, so tiles are exact);
+ * false when the chip declines a tile, the canvas then partly done.
  */
-export async function adjustImage(img: CanvasImageSource & { width: number; height: number }, a: Adjust): Promise<HTMLCanvasElement> {
+function colourOnChip(c: HTMLCanvasElement, ctx: CanvasRenderingContext2D, plan: NonNullable<ReturnType<typeof photoColourPlan>>): boolean {
+  for (let y = 0; y < c.height; y += CHIP_TILE) {
+    for (let x = 0; x < c.width; x += CHIP_TILE) {
+      const tw = Math.min(CHIP_TILE, c.width - x);
+      const th = Math.min(CHIP_TILE, c.height - y);
+      tile ??= typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(tw, th) : document.createElement('canvas');
+      if (tile.width !== tw) tile.width = tw;
+      if (tile.height !== th) tile.height = th;
+      const t = tile.getContext('2d') as CanvasRenderingContext2D;
+      t.clearRect(0, 0, tw, th);
+      t.drawImage(c, x, y, tw, th, 0, 0, tw, th);
+      const out = effectsOnChip(tile, tw, th, { colour: plan, blur: null });
+      if (!out) return false;
+      ctx.clearRect(x, y, tw, th);
+      ctx.drawImage(out, 0, 0, tw, th, x, y, tw, th);
+    }
+  }
+  return true;
+}
+
+/**
+ * A picture with an adjustment applied, as a canvas. Without blur, on the graphics chip where it runs; otherwise in
+ * bands across up to `workers` workers (the plan's photoWorkers by default), or on this thread where workers are
+ * refused. Every way gives the same bytes. `path` is for the browser check: 'chip' or 'workers' alone.
+ */
+export async function adjustImage(img: CanvasImageSource & { width: number; height: number }, a: Adjust, o: { workers?: number; path?: 'auto' | 'chip' | 'workers' } = {}): Promise<HTMLCanvasElement> {
   const c = document.createElement('canvas');
-  c.width = img.width;
-  c.height = img.height;
+  const W = (c.width = img.width);
+  const H = (c.height = img.height);
   const ctx = c.getContext('2d', { willReadFrequently: true })!;
   ctx.drawImage(img, 0, 0);
-  const data = ctx.getImageData(0, 0, c.width, c.height);
-  const w = startWorker();
-  let out: ImageData;
-  if (w) {
-    const id = ++seq;
-    pending.set(id, { w: c.width });
-    out = await new Promise<ImageData>((resolve) => {
-      waiting.set(id, resolve);
-      w.postMessage({ id, data: data.data, w: c.width, h: c.height, a }, [data.data.buffer]);
-    });
-  } else {
-    adjustPixels(data.data, a);
-    if (a.blur) blurPixels(data.data, c.width, c.height, (a.blur / 100) * (Math.max(c.width, c.height) / 60));
-    out = data;
+  const plan = photoColourPlan(a);
+  const r = blurRadius(a, W, H);
+  const path = o.path ?? 'auto';
+  if (plan && !r && path !== 'workers') {
+    if (colourOnChip(c, ctx, plan)) return c;
+    // a tile declined: the picture again as it was, for the workers
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(img, 0, 0);
+    if (path === 'chip') throw new Error('NO_CHIP');
   }
-  ctx.putImageData(out, 0, 0);
+  if (!plan && !r) return c;
+  let pixels = ctx.getImageData(0, 0, W, H);
+  const data = pixels.data;
+  // with no colour, the identity: each engine reads a see-through pixel back to straight colour its own way, and
+  // photoPixels puts it in one form before the blur reads it
+  const m = plan?.matrix ?? IDENTITY;
+  const off = plan?.offset ?? NO_OFFSET;
+  const pool = workerPool(Math.max(1, Math.floor(o.workers ?? workersWanted)));
+  if (!pool.length) {
+    photoPixels(data, m, off);
+    blurPixels(data, W, H, r);
+  } else if (pool.length === 1) {
+    // one worker: the whole picture, moved there and back without a copy, as before 2026-11-04
+    pixels = new ImageData((await inWorker(pool[0], { data, w: W, h: H, m, o: off, r })) as Uint8ClampedArray<ArrayBuffer>, W, H);
+  } else {
+    const bands = bandsOf(H, pool.length, r);
+    await Promise.all(
+      bands.map(async (b, i) => {
+        const out = await inWorker(pool[i], { data: data.slice(b.top * W * 4, b.bottom * W * 4), w: W, h: b.bottom - b.top, m, o: off, r });
+        data.set(out.subarray((b.y0 - b.top) * W * 4, (b.y1 - b.top) * W * 4), b.y0 * W * 4);
+      }),
+    );
+  }
+  ctx.putImageData(pixels, 0, 0);
   return c;
 }

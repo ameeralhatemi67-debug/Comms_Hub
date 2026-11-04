@@ -1,0 +1,413 @@
+{
+  "script": "qa/studio-effects-frames.cjs",
+  "run": "2026-11-04T22:59:42.413Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "app-software: every chosen frame drawn both ways, as saved and without colour, and compared with Edge's pixel by pixel",
+      "pass": true,
+      "detail": "{\"renderer\":\"ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"frames\":[{\"frame\":\"transitions#0\",\"compositor\":\"before\",\"variant\":\"as saved\",\"psnr\":50.42,\"max\":2,\"over2\":0},{\"frame\":\"transitions#0\",\"compositor\":\"before\",\"variant\":\"no colour\",\"psnr\":50.1,\"max\":2,\"over2\":0},{\"frame\":\"transitions#13\",\"compositor\":\"before\",\"variant\":\"as saved\",\"psnr\":48.9,\"max\":4,\"over2\":0.0836},{\"frame\":\"transitions#13\",\"compositor\":\"before\",\"variant\":\"no colour\",\"psnr\":48.61,\"max\":4,\"over2\":0.1514},{\"frame\":\"transitions#15\",\"compositor\":\"before\",\"variant\":\"as saved\",\"psnr\":50.6,\"max\":4,\"over2\":0.0298},{\"frame\":\"transitions#15\",\"compositor\":\"before\",\"variant\":\"no colour\",\"psnr\":49.54,\"max\":4,\"over2\":0.351},{\"frame\":\"transitions#0\",\"compositor\":\"after\",\"variant\":\"as saved\",\"psnr\":49.35,\"max\":2,\"over2\":0},{\"frame\":\"transitions#0\",\"compositor\":\"after\",\"variant\":\"no colour\",\"psnr\":50.1,\"max\":2,\"over2\":0},{\"frame\":\"transitions#13\",\"compositor\":\"after\",\"variant\":\"as saved\",\"psnr\":48.77,\"max\":3,\"over2\":0.0895},{\"frame\":\"transitions#13\",\"compositor\":\"after\",\"variant\":\"no colour\",\"psnr\":48.61,\"max\":4,\"over2\":0.1514},{\"frame\":\"transitions#15\",\"compositor\":\"after\",\"variant\":\"as saved\",\"psnr\":49.55,\"max\":2,\"over2\":0},{\"frame\":\"transitions#15\",\"compositor\":\"after\",\"variant\":\"no colour\",\"psnr\":50.18,\"max\":2,\"over2\":0}]}"
+    },
+    {
+      "name": "app-strong: every chosen frame drawn both ways, as saved and without colour, and compared with Edge's pixel by pixel",
+      "pass": true,
+      "detail": "{\"renderer\":\"ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"frames\":[{\"frame\":\"transitions#0\",\"compositor\":\"before\",\"variant\":\"as saved\",\"psnr\":54.06,\"max\":2,\"over2\":0},{\"frame\":\"transitions#0\",\"compositor\":\"before\",\"variant\":\"no colour\",\"psnr\":54.11,\"max\":1,\"over2\":0},{\"frame\":\"transitions#13\",\"compositor\":\"before\",\"variant\":\"as saved\",\"psnr\":54.62,\"max\":2,\"over2\":0},{\"frame\":\"transitions#13\",\"compositor\":\"before\",\"variant\":\"no colour\",\"psnr\":54.77,\"max\":2,\"over2\":0},{\"frame\":\"transitions#15\",\"compositor\":\"before\",\"variant\":\"as saved\",\"psnr\":53.83,\"max\":3,\"over2\":0},{\"frame\":\"transitions#15\",\"compositor\":\"before\",\"variant\":\"no colour\",\"psnr\":53.83,\"max\":3,\"over2\":0},{\"frame\":\"transitions#0\",\"compositor\":\"after\",\"variant\":\"as saved\",\"psnr\":54.05,\"max\":2,\"over2\":0},{\"frame\":\"transitions#0\",\"compositor\":\"after\",\"variant\":\"no colour\",\"psnr\":54.11,\"max\":1,\"over2\":0},{\"frame\":\"transitions#13\",\"compositor\":\"after\",\"variant\":\"as saved\",\"psnr\":54.77,\"max\":1,\"over2\":0},{\"frame\":\"transitions#13\",\"compositor\":\"after\",\"variant\":\"no colour\",\"psnr\":54.77,\"max\":2,\"over2\":0},{\"frame\":\"transitions#15\",\"compositor\":\"after\",\"variant\":\"as saved\",\"psnr\":54.02,\"max\":2,\"over2\":0},{\"frame\":\"transitions#15\",\"compositor\":\"after\",\"variant\":\"no colour\",\"psnr\":54.02,\"max\":2,\"over2\":0}]}"
+    }
+  ],
+  "notes": [
+    "\"before\" is compose.ts and cover.ts of 998ef0c, the canvas filters; \"no colour\" is the same frame with every colour adjustment taken out, so it differs between engines by picture scaling alone."
+  ],
+  "runs": {
+    "app-software": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "frames": [
+        {
+          "name": "transitions",
+          "i": 0,
+          "t": 950000,
+          "variant": "as saved",
+          "compositor": "before",
+          "psnr": 50.42,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 3167741,
+            "1": 2847282,
+            "2": 205777
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 0,
+          "t": 950000,
+          "variant": "no colour",
+          "compositor": "before",
+          "psnr": 50.1,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 2779368,
+            "1": 3270002,
+            "2": 171430
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "t": 10050000,
+          "variant": "as saved",
+          "compositor": "before",
+          "psnr": 48.9,
+          "max": 4,
+          "over2": 0.0836,
+          "levels": {
+            "0": 2471841,
+            "1": 3271091,
+            "2": 472667,
+            "3": 5186,
+            "4": 15
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "t": 10050000,
+          "variant": "no colour",
+          "compositor": "before",
+          "psnr": 48.61,
+          "max": 4,
+          "over2": 0.1514,
+          "levels": {
+            "0": 2354717,
+            "1": 3312201,
+            "2": 544462,
+            "3": 9336,
+            "4": 84
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "t": 11450000,
+          "variant": "as saved",
+          "compositor": "before",
+          "psnr": 50.6,
+          "max": 4,
+          "over2": 0.0298,
+          "levels": {
+            "0": 3330937,
+            "1": 2683078,
+            "2": 204930,
+            "3": 1854,
+            "4": 1
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "t": 11450000,
+          "variant": "no colour",
+          "compositor": "before",
+          "psnr": 49.54,
+          "max": 4,
+          "over2": 0.351,
+          "levels": {
+            "0": 3057168,
+            "1": 2754968,
+            "2": 386830,
+            "3": 21789,
+            "4": 45
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 0,
+          "t": 950000,
+          "variant": "as saved",
+          "compositor": "after",
+          "psnr": 49.35,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 2079212,
+            "1": 3957837,
+            "2": 183751
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 0,
+          "t": 950000,
+          "variant": "no colour",
+          "compositor": "after",
+          "psnr": 50.1,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 2779368,
+            "1": 3270002,
+            "2": 171430
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "t": 10050000,
+          "variant": "as saved",
+          "compositor": "after",
+          "psnr": 48.77,
+          "max": 3,
+          "over2": 0.0895,
+          "levels": {
+            "0": 2399410,
+            "1": 3316183,
+            "2": 499642,
+            "3": 5565
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "t": 10050000,
+          "variant": "no colour",
+          "compositor": "after",
+          "psnr": 48.61,
+          "max": 4,
+          "over2": 0.1514,
+          "levels": {
+            "0": 2354717,
+            "1": 3312201,
+            "2": 544462,
+            "3": 9336,
+            "4": 84
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "t": 11450000,
+          "variant": "as saved",
+          "compositor": "after",
+          "psnr": 49.55,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 2252431,
+            "1": 3797156,
+            "2": 171213
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "t": 11450000,
+          "variant": "no colour",
+          "compositor": "after",
+          "psnr": 50.18,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 2735287,
+            "1": 3354980,
+            "2": 130533
+          }
+        }
+      ]
+    },
+    "app-strong": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "frames": [
+        {
+          "name": "transitions",
+          "i": 0,
+          "t": 950000,
+          "variant": "as saved",
+          "compositor": "before",
+          "psnr": 54.06,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 4633881,
+            "1": 1585950,
+            "2": 969
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 0,
+          "t": 950000,
+          "variant": "no colour",
+          "compositor": "before",
+          "psnr": 54.11,
+          "max": 1,
+          "over2": 0,
+          "levels": {
+            "0": 4649378,
+            "1": 1571422
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "t": 10050000,
+          "variant": "as saved",
+          "compositor": "before",
+          "psnr": 54.62,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 4824163,
+            "1": 1396606,
+            "2": 31
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "t": 10050000,
+          "variant": "no colour",
+          "compositor": "before",
+          "psnr": 54.77,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 4871783,
+            "1": 1349011,
+            "2": 6
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "t": 11450000,
+          "variant": "as saved",
+          "compositor": "before",
+          "psnr": 53.83,
+          "max": 3,
+          "over2": 0,
+          "levels": {
+            "0": 4561828,
+            "1": 1653342,
+            "2": 5629,
+            "3": 1
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "t": 11450000,
+          "variant": "no colour",
+          "compositor": "before",
+          "psnr": 53.83,
+          "max": 3,
+          "over2": 0,
+          "levels": {
+            "0": 4566677,
+            "1": 1647585,
+            "2": 6537,
+            "3": 1
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 0,
+          "t": 950000,
+          "variant": "as saved",
+          "compositor": "after",
+          "psnr": 54.05,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 4629996,
+            "1": 1590731,
+            "2": 73
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 0,
+          "t": 950000,
+          "variant": "no colour",
+          "compositor": "after",
+          "psnr": 54.11,
+          "max": 1,
+          "over2": 0,
+          "levels": {
+            "0": 4649378,
+            "1": 1571422
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "t": 10050000,
+          "variant": "as saved",
+          "compositor": "after",
+          "psnr": 54.77,
+          "max": 1,
+          "over2": 0,
+          "levels": {
+            "0": 4872583,
+            "1": 1348217
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 13,
+          "t": 10050000,
+          "variant": "no colour",
+          "compositor": "after",
+          "psnr": 54.77,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 4871783,
+            "1": 1349011,
+            "2": 6
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "t": 11450000,
+          "variant": "as saved",
+          "compositor": "after",
+          "psnr": 54.02,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 4619057,
+            "1": 1601561,
+            "2": 182
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 15,
+          "t": 11450000,
+          "variant": "no colour",
+          "compositor": "after",
+          "psnr": 54.02,
+          "max": 2,
+          "over2": 0,
+          "levels": {
+            "0": 4619507,
+            "1": 1601166,
+            "2": 127
+          }
+        }
+      ]
+    }
+  },
+  "total": 2,
+  "passed": 2,
+  "failed": 0
+}

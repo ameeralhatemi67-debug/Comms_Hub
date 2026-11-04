@@ -3296,3 +3296,59 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - No real measurement ran in the check: a save of fixed numbers through the real bridge stood in for it.
   - One laptop, with two chips. On a laptop with one chip a switch change counts as a chip change by rule (unit-tested), not seen.
 - **Not done.** Nothing pushed.
+
+### 2026-11-04: colour adjustments and blur the same on every computer, and photo adjustments in bands (Desktop Power, Fork 4, P-09 with H-03, and P-17)
+
+- **Owner direction.** The Desktop Power stage, "a stronger computer changes speed, never the video", run by the manager
+  session as parallel forks; this is Fork 4, branch `claude/power-effects-72ab66` from `998ef0c`, with `main` merged in twice
+  (Electron 45, `60335d7`; the export, `dcb2d80`). Q1 to Q7 taken with the recommended answers of `Desktop_Power_Ideas.md`
+  section 10. Local commits only.
+- **What it was, measured first** (a diagnostic in `qa/artifacts`, Edge 156 against the application on each chip and with none,
+  over the synthetic footage at 1:1):
+  - brightness and contrast were the same everywhere: Chromium's 8-bit tables, cut to whole numbers;
+  - the saturation matrix differed by 1 level on 1.5% of channels on the RTX and on 3.4% with no chip;
+  - the canvas blur at 2, 8 and 30 pixels differed by up to 2, 3 and 4 levels on the RTX, 3, 4 and 5 with no chip (49.6 dB);
+  - `willReadFrequently` did not move a canvas off the chip in Edge 156 or the application's Chromium 152 and 156: both
+    kinds of canvas drew the same bytes on each engine, so the choice of path cannot follow it.
+- **What changed (the studio, every client; `MVP_draft.md` 62.15; the `AGENTS.md` D9 bullet).**
+  - `src/lib/studio/effects/`: `plan.ts` specifies each effect once as whole numbers, `chip.ts` works it out in WebGL2
+    (texelFetch, unsigned sums, nothing read back), `code.ts` in plain code, `index.ts` takes the chip where WebGL2 runs on one
+    (as `squares-gl.ts` does) and the plain code elsewhere. No DOM, so Fork 1's workers can import it.
+  - **Colour:** brightness then contrast as Chromium's tables, in its own float formulas; saturation as its matrix, to 1/65536;
+    a sum rounded to the nearest, an exact half to the even neighbour.
+  - **Blur:** the picture averaged in blocks of 2^k until the radius is at most 4 pixels (Skia's rule), integer Gaussian weights
+    there (e^-x from additions and products), bilinear enlargement in 1/(2n) steps, all read as if transparency lay beyond.
+  - `compose.ts` `drawItem`: an item with an adjustment or a blur is drawn into a layer the size of what it covers and the blur's
+    reach, the effect is worked out on that layer, and the layer is laid on the canvas with the item's opacity, blend and
+    clipping. The filter worked on each drawing call alone, so an item drawn in several calls (a text and its box, a shape's
+    fill and line) takes its opacity inside the layer, which by the associativity of source-over gives what the filter gave.
+    `supportsFilter` is gone (it used `document`); `filterOf` stays as the description the effects follow.
+  - `cover.ts`: «تمويه منطقة» uses the same blur. The squares are untouched.
+  - `photo.ts` (P-17): the colour as one whole-number map (`photoColourPlan`); with blur, the picture in bands across up to
+    `photoWorkers` workers (`bandsOf`: each band reads the 3r rows its blur reaches); without blur, on the chip in tiles of 4096.
+- **Found on the way.**
+  - **A picture must reach the chip as the canvas keeps it.** Uploaded with `UNPACK_PREMULTIPLY_ALPHA_WEBGL` false, a canvas came
+    out with other straight colours than getImageData gives on about 3 800 of the 65 536 (colour, opacity) pairs on the AMD chip.
+    Uploaded premultiplied, all 65 536 matched. `squares-gl.ts` uploads unpremultiplied, so on see-through pixels its squares
+    could differ from the plain code's; its check uses opaque footage only. Not changed: the squares were not this fork's.
+  - **Each engine reads see-through pixels back its own way.** getImageData's straight colour of the same canvas bytes differs
+    between Edge, the RTX and no chip; premultiplying it again is exact everywhere. The checks compare what the canvas holds, and
+    a photo's blur, which reads straight colour, first puts every see-through pixel into one form.
+  - **A canvas too large for the chip's memory gets a smaller drawing buffer, silently** (8000 by 6000 on the AMD chip): `chip.ts`
+    checks `drawingBufferWidth` and declines, and `photo.ts` goes through the chip in tiles.
+  - **Skia did its own thing at the edges of a blur and after a colour adjustment.** Inside a picture the blur keeps within
+    2 levels of Edge's filter; within about the radius of a picture's edge, where it fades into transparency, up to 5; after a
+    colour adjustment up to 5 on about 2% of channels. That is the old filter's own spread between this laptop's chips, and the
+    check holds the change to it, with the reason written in the script.
+  - **The first effects were slower, and the cause was one shared scratch canvas.** The timing check
+    (`qa/studio-effects-speed.cjs`) first gave export medians of 77.9 against 23.3 frames a second in Edge, 106.4 against
+    46.0 on the AMD chip, 156.0 against 90.4 on the RTX, 11.3 against 4.9 with no chip. Short probes in Edge (40 frames
+    each) found it: `drawCover` made one scratch canvas for both kinds of cover, and the effects document has a blur cover
+    and a squares cover on screen together, so that canvas was resized twice a frame (one of each kind 11 to 16 ms a frame,
+    two of one kind 2.2 to 5.1 ms). The blur cover now reads its area from the composed picture itself, as the squares do;
+    the chip's canvas and textures grow instead of being resized (`fitted`); the plain-code colour is one pass. The whole
+    effects document then drew in 6.2 ms a frame in Edge, against 10.5 for the old compositor.
+  - **Two first timing runs measured the fixture, not the studio**: 60 painted 4K frames kept per build (about 4 GB of
+    canvases), and a pixel read back each frame from the export's own page canvas. With 8 frames kept it still gave 7 to
+    21 frames a second, before and after alike; with drawing timed on an OffscreenCanvas and the export's canvas never
+    read back, as `export.ts` uses it, 11 to 156. The check now does that.

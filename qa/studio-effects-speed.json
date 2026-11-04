@@ -1,0 +1,274 @@
+{
+  "script": "qa/studio-effects-speed.cjs",
+  "run": "2026-11-04T22:41:44.999Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "edge: the effects document was timed both ways, 3 times each and round 3 again for its load (median export 78.7 frames a second before, 81.0 after; drawing 10.51 ms and 6.37 ms a frame; load before each run 13/27/3/% and 8/18/47/2%)",
+      "pass": true,
+      "detail": "{\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"median\":{\"drawMs\":{\"before\":10.512916666766008,\"after\":6.370000000049671},\"exportFps\":{\"before\":78.68336502555177,\"after\":80.99078729761905}},\"series\":{\"before\":{\"draw\":[10.512916666766008,9.575416666766008,10.72625000004967,10.136666666467985],\"export\":[64.23123243677239,77.55194364588635,83.62952122064361,78.68336502555177],\"load\":[13,27,3,null]},\"after\":{\"draw\":[6.370000000049671,6.180416666716337,6.685416666666667,6.054166666666666],\"export\":[81.96441378301486,80.99078729761905,68.66756315938395,72.69863387124265],\"load\":[8,18,47,2]}},\"reruns\":[2],\"load\":{\"before\":34,\"after\":3}}"
+    },
+    {
+      "name": "app-saving: the effects document was timed both ways, 3 times each (median export 107.9 frames a second before, 106.5 after; drawing 7.39 ms and 6.39 ms a frame; load before each run 11/13/31% and 4/2/10%)",
+      "pass": true,
+      "detail": "{\"renderer\":\"ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"median\":{\"drawMs\":{\"before\":7.386249999950329,\"after\":6.385416666666667},\"exportFps\":{\"before\":107.93793568697998,\"after\":106.52463382157123}},\"series\":{\"before\":{\"draw\":[7.959583333383004,7.386249999950329,7.166666666666667],\"export\":[29.556650246305416,108.16170174526962,107.93793568697998],\"load\":[11,13,31]},\"after\":{\"draw\":[6.385416666666667,6.741249999900659,6.352499999850989],\"export\":[106.52463382157123,101.67337428510909,107.71509357921646],\"load\":[4,2,10]}},\"reruns\":[],\"load\":{\"before\":12,\"after\":34}}"
+    },
+    {
+      "name": "app-strong: the effects document was timed both ways, 3 times each (median export 163.5 frames a second before, 171.1 after; drawing 4.66 ms and 3.22 ms a frame; load before each run 6/2/31% and 1/2/20%)",
+      "pass": true,
+      "detail": "{\"renderer\":\"ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"median\":{\"drawMs\":{\"before\":4.664166666815678,\"after\":3.2174999999503293},\"exportFps\":{\"before\":163.5434412265758,\"after\":171.0742034386476}},\"series\":{\"before\":{\"draw\":[4.444583333532015,4.975416666517655,4.664166666815678],\"export\":[72.79124078814814,163.5434412265758,164.0913441856067],\"load\":[6,2,31]},\"after\":{\"draw\":[3.0100000001490117,3.2174999999503293,3.4879166667660075],\"export\":[178.04154302670625,171.0742034386476,151.98530809032704],\"load\":[1,2,20]}},\"reruns\":[],\"load\":{\"before\":15,\"after\":4}}"
+    },
+    {
+      "name": "app-software: the effects document was timed both ways, 3 times each (median export 12.4 frames a second before, 13.0 after; drawing 76.16 ms and 72.72 ms a frame; load before each run 7/3/20% and 28/15/10%)",
+      "pass": true,
+      "detail": "{\"renderer\":\"ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)\",\"median\":{\"drawMs\":{\"before\":76.15708333328367,\"after\":72.71624999990065},\"exportFps\":{\"before\":12.398807648005487,\"after\":13.032287492253642}},\"series\":{\"before\":{\"draw\":[76.94124999990066,75.66375000004967,76.15708333328367],\"export\":[12.377195018179005,12.477968586690883,12.398807648005487],\"load\":[7,3,20]},\"after\":{\"draw\":[72.58666666671634,72.71624999990065,73.11458333333333],\"export\":[13.079161625731293,13.032287492253642,12.93535556057766],\"load\":[28,15,10]}},\"reruns\":[],\"load\":{\"before\":38,\"after\":22}}"
+    }
+  ],
+  "notes": [
+    "Before is compose.ts and cover.ts of 998ef0c; 240 frames a run. The figures mean something only beside the load recorded with them."
+  ],
+  "runs": {
+    "edge": {
+      "engine": {
+        "browser": "156.0.4314.58"
+      },
+      "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "median": {
+        "drawMs": {
+          "before": 10.512916666766008,
+          "after": 6.370000000049671
+        },
+        "exportFps": {
+          "before": 78.68336502555177,
+          "after": 80.99078729761905
+        }
+      },
+      "series": {
+        "before": {
+          "draw": [
+            10.512916666766008,
+            9.575416666766008,
+            10.72625000004967,
+            10.136666666467985
+          ],
+          "export": [
+            64.23123243677239,
+            77.55194364588635,
+            83.62952122064361,
+            78.68336502555177
+          ],
+          "load": [
+            13,
+            27,
+            3,
+            null
+          ]
+        },
+        "after": {
+          "draw": [
+            6.370000000049671,
+            6.180416666716337,
+            6.685416666666667,
+            6.054166666666666
+          ],
+          "export": [
+            81.96441378301486,
+            80.99078729761905,
+            68.66756315938395,
+            72.69863387124265
+          ],
+          "load": [
+            8,
+            18,
+            47,
+            2
+          ]
+        }
+      },
+      "reruns": [
+        2
+      ],
+      "load": {
+        "before": 34,
+        "after": 3
+      }
+    },
+    "app-saving": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "median": {
+        "drawMs": {
+          "before": 7.386249999950329,
+          "after": 6.385416666666667
+        },
+        "exportFps": {
+          "before": 107.93793568697998,
+          "after": 106.52463382157123
+        }
+      },
+      "series": {
+        "before": {
+          "draw": [
+            7.959583333383004,
+            7.386249999950329,
+            7.166666666666667
+          ],
+          "export": [
+            29.556650246305416,
+            108.16170174526962,
+            107.93793568697998
+          ],
+          "load": [
+            11,
+            13,
+            31
+          ]
+        },
+        "after": {
+          "draw": [
+            6.385416666666667,
+            6.741249999900659,
+            6.352499999850989
+          ],
+          "export": [
+            106.52463382157123,
+            101.67337428510909,
+            107.71509357921646
+          ],
+          "load": [
+            4,
+            2,
+            10
+          ]
+        }
+      },
+      "reruns": [],
+      "load": {
+        "before": 12,
+        "after": 34
+      }
+    },
+    "app-strong": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "median": {
+        "drawMs": {
+          "before": 4.664166666815678,
+          "after": 3.2174999999503293
+        },
+        "exportFps": {
+          "before": 163.5434412265758,
+          "after": 171.0742034386476
+        }
+      },
+      "series": {
+        "before": {
+          "draw": [
+            4.444583333532015,
+            4.975416666517655,
+            4.664166666815678
+          ],
+          "export": [
+            72.79124078814814,
+            163.5434412265758,
+            164.0913441856067
+          ],
+          "load": [
+            6,
+            2,
+            31
+          ]
+        },
+        "after": {
+          "draw": [
+            3.0100000001490117,
+            3.2174999999503293,
+            3.4879166667660075
+          ],
+          "export": [
+            178.04154302670625,
+            171.0742034386476,
+            151.98530809032704
+          ],
+          "load": [
+            1,
+            2,
+            20
+          ]
+        }
+      },
+      "reruns": [],
+      "load": {
+        "before": 15,
+        "after": 4
+      }
+    },
+    "app-software": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "median": {
+        "drawMs": {
+          "before": 76.15708333328367,
+          "after": 72.71624999990065
+        },
+        "exportFps": {
+          "before": 12.398807648005487,
+          "after": 13.032287492253642
+        }
+      },
+      "series": {
+        "before": {
+          "draw": [
+            76.94124999990066,
+            75.66375000004967,
+            76.15708333328367
+          ],
+          "export": [
+            12.377195018179005,
+            12.477968586690883,
+            12.398807648005487
+          ],
+          "load": [
+            7,
+            3,
+            20
+          ]
+        },
+        "after": {
+          "draw": [
+            72.58666666671634,
+            72.71624999990065,
+            73.11458333333333
+          ],
+          "export": [
+            13.079161625731293,
+            13.032287492253642,
+            12.93535556057766
+          ],
+          "load": [
+            28,
+            15,
+            10
+          ]
+        }
+      },
+      "reruns": [],
+      "load": {
+        "before": 38,
+        "after": 22
+      }
+    }
+  },
+  "total": 4,
+  "passed": 4,
+  "failed": 0
+}

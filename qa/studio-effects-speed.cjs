@@ -1,0 +1,232 @@
+// The effects speed check (Desktop_Power_Ideas.md P-09; MVP_draft.md 62.15): the effects document at 1080p over the
+// synthetic 4K footage, timed with the compositor as it is and as it was before the effects (compose.ts and cover.ts
+// of the fork's base, 998ef0c, the canvas filters), in one page, alternately, three times each, so both see the same
+// laptop. Drawn only, and drawn and encoded as an export does. In Edge and inside the development package on the
+// saving chip, the strong chip and with no chip, with the processor's load before and after each engine, since a busy
+// laptop times badly. Run it in a quiet moment. Nothing is checked against a number: the figures are the record.
+// Usage: node qa/studio-effects-speed.cjs   (writes qa/studio-effects-speed.json)
+//        node qa/studio-effects-speed.cjs --edge 3104   (Edge alone on that port, writes qa/artifacts/studio-effects-speed/edge.json)
+//        node qa/studio-effects-speed.cjs --profile   (each part of the document alone, on the saving chip and with no chip;
+//                                                      writes qa/artifacts/studio-effects-speed/profile.json)
+//        node qa/studio-effects-speed.cjs --steps   (one full-frame clip's effect step by step, today's effects only, in the
+//                                                    same two engines; writes qa/artifacts/studio-effects-speed/steps.json)
+// Needs: npm run pack:dev in desktop/, git, nothing on 127.0.0.1:3000.
+const fs = require('node:fs');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+const esbuild = require('esbuild');
+const { dependency, launchOptions } = require('./runtime.cjs');
+const { chromium } = dependency('playwright');
+const h = require('./desktop-helpers.cjs');
+
+const { check, note, result, finish } = h.record('qa/studio-effects-speed.cjs');
+const out = path.join(__dirname, 'artifacts', 'studio-effects-speed');
+const studio = path.join(h.root, 'src', 'lib', 'studio');
+const BASE = '998ef0c';
+const edgeOnly = process.argv.indexOf('--edge') > 0 ? Number(process.argv[process.argv.indexOf('--edge') + 1]) || 3104 : 0;
+const PORT = edgeOnly || 3000;
+const FRAMES = 240;
+const RUNS = 3;
+/** --profile: the document's parts one at a time (the fixture's Variant), to tell apart what each effect costs. */
+const PROFILE = process.argv.includes('--profile');
+/** --steps: effectSteps of the fixture, the chip's and the plain code's costs one step at a time. */
+const STEPS = process.argv.includes('--steps');
+/** Two runs of one round whose loads differ by more than this many points are run again. */
+const LOAD_GAP = 25;
+/** Windows may think a window covered and Chromium then draws it about once a second (found by Fork 2, 2026-11-04). */
+const NO_OCCLUSION = '--disable-features=CalculateNativeWinOcclusion';
+const VARIANTS = (process.env.VARIANTS || 'bare,colour,covers,cross,all').split(',');
+const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average')) || null;
+
+/** compose.ts and cover.ts as they were at the base, read from git, imported in place of today's. */
+function before() {
+  const old = path.join(out, 'old');
+  fs.mkdirSync(old, { recursive: true });
+  for (const f of ['compose.ts', 'cover.ts']) {
+    const r = spawnSync('git', ['show', `${BASE}:src/lib/studio/${f}`], { cwd: h.root, encoding: 'utf8', maxBuffer: 1 << 24 });
+    if (r.status !== 0) throw new Error(`git show ${BASE}:${f}: ${r.stderr}`);
+    fs.writeFileSync(path.join(old, f), r.stdout);
+  }
+  return {
+    name: 'before',
+    setup(b) {
+      b.onResolve({ filter: /(compose|cover)\.ts$/ }, (args) => {
+        const at = path.resolve(args.resolveDir, args.path);
+        if (at === path.join(studio, 'compose.ts') || at === path.join(studio, 'cover.ts')) return { path: path.join(old, path.basename(at)) };
+        return undefined;
+      });
+      // their own imports resolve from where they lived
+      b.onLoad({ filter: /[\\/]old[\\/](compose|cover)\.ts$/ }, (args) => ({ contents: fs.readFileSync(args.path, 'utf8'), loader: 'ts', resolveDir: studio }));
+    },
+  };
+}
+
+async function serve() {
+  const entry = path.join(__dirname, 'fixtures', 'studio-effects-speed.ts');
+  const common = { entryPoints: [entry], bundle: true, format: 'esm', platform: 'browser', target: 'es2022', logLevel: 'silent', absWorkingDir: h.root };
+  await esbuild.build({ ...common, outfile: path.join(out, 'after.js'), banner: { js: "globalThis.__speedName = 'speedAfter';" } });
+  await esbuild.build({ ...common, outfile: path.join(out, 'before.js'), banner: { js: "globalThis.__speedName = 'speedBefore';" }, plugins: [before()] });
+  const page = '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>سرعة المؤثرات</title></head><body><script type="module" src="/before.js"></script><script type="module" src="/after.js"></script></body></html>';
+  const http = require('node:http');
+  const server = http.createServer((req, res) => {
+    const p = new URL(req.url, 'http://x').pathname;
+    if (p === '/') return (res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }), res.end(page));
+    if (p === '/before.js' || p === '/after.js') return (res.writeHead(200, { 'content-type': 'text/javascript' }), res.end(fs.readFileSync(path.join(out, p.slice(1)))));
+    res.writeHead(404);
+    res.end();
+  });
+  await h.listen(server, PORT);
+  return server;
+}
+
+async function stepsIn(page) {
+  await page.waitForFunction(() => !!window.speedAfter, null, { timeout: 60000 });
+  const loadBefore = load();
+  const rows = await page.evaluate((f) => window.speedAfter.effectSteps(f), 40);
+  return { renderer: await page.evaluate(() => window.speedAfter.renderer()), rows, load: { before: loadBefore, after: load() } };
+}
+
+async function profileIn(page, encode) {
+  await page.waitForFunction(() => !!window.speedBefore && !!window.speedAfter, null, { timeout: 60000 });
+  const loadBefore = load();
+  const rows = [];
+  for (const v of VARIANTS) {
+    for (const which of ['before', 'after']) {
+      const g = which === 'before' ? 'speedBefore' : 'speedAfter';
+      const draw = await page.evaluate(([n, f, x]) => window[n].drawOnly(f, x), [g, encode ? 120 : 40, v]);
+      const exp = encode ? await page.evaluate(([n, f, x]) => window[n].exportLike(f, x), [g, 240, v]) : null;
+      rows.push({ variant: v, compositor: which, drawMs: Math.round(draw * 100) / 100, exportFps: exp && Math.round(exp * 10) / 10 });
+    }
+  }
+  return { renderer: await page.evaluate(() => window.speedAfter.renderer()), rows, load: { before: loadBefore, after: load() } };
+}
+
+async function runIn(page) {
+  await page.waitForFunction(() => !!window.speedBefore && !!window.speedAfter, null, { timeout: 60000 });
+  const renderer = await page.evaluate(() => window.speedAfter.renderer());
+  const loadBefore = load();
+  const series = { before: { draw: [], export: [], load: [] }, after: { draw: [], export: [], load: [] } };
+  const one = async (which) => {
+    const g = which === 'before' ? 'speedBefore' : 'speedAfter';
+    // the load beside each run, read just before it
+    series[which].load.push(load());
+    series[which].draw.push(await page.evaluate(([n, f]) => window[n].drawOnly(f), [g, FRAMES]));
+    series[which].export.push(await page.evaluate(([n, f]) => window[n].exportLike(f), [g, FRAMES]));
+  };
+  for (let i = 0; i < RUNS; i++) for (const which of i % 2 ? ['after', 'before'] : ['before', 'after']) await one(which);
+  // a round whose two runs saw very different loads is run again, both kept
+  const reruns = [];
+  for (let i = 0; i < RUNS; i++) {
+    const a = series.before.load[i];
+    const b = series.after.load[i];
+    if (a !== null && b !== null && Math.abs(a - b) > LOAD_GAP) {
+      reruns.push(i);
+      for (const which of ['before', 'after']) await one(which);
+    }
+  }
+  return { renderer, series, reruns, load: { before: loadBefore, after: load() } };
+}
+
+const median = (xs) => {
+  const s = xs.filter((x) => typeof x === 'number').sort((a, b) => a - b);
+  return s.length ? s[s.length >> 1] : null;
+};
+
+(async () => {
+  fs.rmSync(out, { recursive: true, force: true });
+  fs.mkdirSync(out, { recursive: true });
+  let server = null;
+  const runs = {};
+  try {
+    if (!edgeOnly && !fs.existsSync(h.devExe)) throw new Error(`the development package is missing: ${h.devExe} (npm run pack:dev in desktop/)`);
+    if (await h.portAnswers(PORT)) throw new Error(`something already answers on 127.0.0.1:${PORT}; stop it and run again`);
+    server = await serve();
+    if (STEPS) {
+      for (const [engine, settings, args] of [
+        ['app-saving', { keepInTray: false, gpu: 'saving' }, [NO_OCCLUSION]],
+        ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu', NO_OCCLUSION]],
+      ]) {
+        const { app, win, data } = await h.launchDev(`steps-${engine}`, { settings, args });
+        try {
+          await h.instrument(app);
+          await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
+          await win.waitForLoadState('load');
+          runs[engine] = await stepsIn(win);
+        } finally {
+          await h.closeAll();
+          fs.rmSync(data, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
+        }
+      }
+      check('the steps ran on the saving chip and with no chip', !!runs['app-saving'] && !!runs['app-software'], runs);
+      result.steps = runs;
+      const failed = finish(path.join(out, 'steps.json'));
+      await h.closeAll();
+      if (server) server.close();
+      process.exit(failed ? 1 : 0);
+    }
+    if (PROFILE) {
+      for (const [engine, settings, args, encode] of [
+        ['app-saving', { keepInTray: false, gpu: 'saving' }, [NO_OCCLUSION], true],
+        ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu', NO_OCCLUSION], false],
+      ]) {
+        const { app, win, data } = await h.launchDev(`profile-${engine}`, { settings, args });
+        try {
+          await h.instrument(app);
+          await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
+          await win.waitForLoadState('load');
+          runs[engine] = await profileIn(win, encode);
+        } finally {
+          await h.closeAll();
+          // the profile goes with its engine: the drive it lies on ran short (2026-11-04)
+          fs.rmSync(data, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
+        }
+      }
+      check('the profile ran on the saving chip and with no chip', !!runs['app-saving'] && !!runs['app-software'], runs);
+      result.profile = runs;
+      const failed = finish(path.join(out, 'profile.json'));
+      await h.closeAll();
+      if (server) server.close();
+      process.exit(failed ? 1 : 0);
+    }
+    const browser = await chromium.launch(launchOptions);
+    try {
+      const tab = await browser.newPage();
+      await tab.goto(`http://127.0.0.1:${PORT}/`);
+      runs.edge = { engine: { browser: browser.version() }, ...(await runIn(tab)) };
+    } finally {
+      await browser.close();
+    }
+    for (const [engine, settings, args] of edgeOnly ? [] : [
+      ['app-saving', { keepInTray: false, gpu: 'saving' }, [NO_OCCLUSION]],
+      ['app-strong', { keepInTray: false, gpu: 'strong' }, [NO_OCCLUSION]],
+      ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu', NO_OCCLUSION]],
+    ]) {
+      const { app, win, data } = await h.launchDev(`speed-${engine}`, { settings, args });
+      try {
+        await h.instrument(app);
+        await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
+        await win.waitForLoadState('load');
+        const versions = await app.evaluate(() => ({ electron: process.versions.electron, chrome: process.versions.chrome }));
+        runs[engine] = { engine: versions, ...(await runIn(win)) };
+      } finally {
+        await h.closeAll();
+        // the profile goes with its engine: the drive it lies on ran short (2026-11-04)
+        fs.rmSync(data, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
+      }
+    }
+    for (const [engine, r] of Object.entries(runs)) {
+      const m = (w, k) => median(r.series[w][k]);
+      r.median = { drawMs: { before: m('before', 'draw'), after: m('after', 'draw') }, exportFps: { before: m('before', 'export'), after: m('after', 'export') } };
+      check(`${engine}: the effects document was timed both ways, ${RUNS} times each${r.reruns.length ? ` and round ${r.reruns.map((i) => i + 1).join(', ')} again for its load` : ''} (median export ${r.median.exportFps.before?.toFixed(1)} frames a second before, ${r.median.exportFps.after?.toFixed(1)} after; drawing ${r.median.drawMs.before?.toFixed(2)} ms and ${r.median.drawMs.after?.toFixed(2)} ms a frame; load before each run ${r.series.before.load.join('/')}% and ${r.series.after.load.join('/')}%)`, r.series.before.draw.length >= RUNS && r.series.after.draw.length >= RUNS, { renderer: r.renderer, median: r.median, series: r.series, reruns: r.reruns, load: r.load });
+    }
+  } catch (e) {
+    check('the check ran to its end', false, String((e && e.stack) || e));
+  } finally {
+    await h.closeAll();
+    if (server) server.close();
+  }
+  result.runs = Object.fromEntries(Object.entries(runs).map(([e, r]) => [e, { engine: r.engine, renderer: r.renderer, median: r.median, series: r.series, reruns: r.reruns, load: r.load }]));
+  note(`Before is compose.ts and cover.ts of ${BASE}; ${FRAMES} frames a run. The figures mean something only beside the load recorded with them.`);
+  const failed = finish(edgeOnly ? path.join(out, 'edge.json') : path.join(__dirname, 'studio-effects-speed.json'));
+  process.exit(failed ? 1 : 0);
+})();
