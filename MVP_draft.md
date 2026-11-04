@@ -2938,8 +2938,8 @@ makes the light copy («نسخة خفيفة للمعاينة», 63.4) of those t
   not cover, the rule of 63.4 stands (above 1080p, above 50 Mbit/s, or an intermediate codec). A strong laptop makes fewer
   copies, a weak one more.
 - They are made one at a time, or as many as the plan of 63.6 says («النسخ الخفيفة معاً»), the videos first opened first. The
-  note under that plan now reads «هذه القيم خطة الاستوديو على هذا الجهاز: تتبعها «النسخ الخفيفة معاً» الآن، والبقية في المراحل
-  القادمة، ولا تغيّر شيئاً فيما يُصدَّر.».
+  note under that plan now reads «هذه القيم خطة الاستوديو على هذا الجهاز: تتبع المعاينة الآن «دقة المعاينة عند البدء» و«ذاكرة
+  الإطارات للتنقل»، وتتبعها «النسخ الخفيفة معاً»، والبقية في المراحل القادمة، ولا تغيّر شيئاً فيما يُصدَّر.» (since D10).
 - They are made only while the laptop is free: on mains power, with the processor at its full speed, with nothing exporting,
   uploading, playing (a window making sound counts), scrubbing or measuring, while no copy the person asked for is being made,
   and a few seconds after the last key or click in the application. Moving the pointer and scrolling hold nothing.
