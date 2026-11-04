@@ -2537,6 +2537,9 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Built (`MVP_draft.md` section 67.7).** Three more pictures (22 in all) and the keys step with five actions; the keys card of the sheet now draws the step's pictures (`KeysPanel` renders `GuideShots`). The old test line that asked the Instagram guide to say «ولا ترسلهما إلى أحد» now accepts the three forms of that sentence.
 - **Verified, numbers.** `npm run typecheck` clean; `npm test` **735 of 735**; `qa/guide-modal.cjs` **16 of 16** (nine steps, twenty-two pictures, twenty-four markers); `qa/platforms-flow.cjs` **132 of 132** (one new: the keys step of Instagram opened from the connected platform's summary draws five actions and three loaded pictures beside the three fields).
 - **Not verified.** A real connection through the site with this app: the owner has not entered the keys in the site. The steps for «Business», «Requirements» and «Overview» were never photographed.
+- **On the tree that was pushed** (a clean worktree on `origin/main`, because local `main` holds the «إنشاء» commits whose migrations are not applied): `npm run typecheck` clean; `npm test` **730 of 730** (the local count of 735 includes tests of those other commits); `npm run build` clean; `qa/guide-modal.cjs` 16 of 16, `qa/platforms-flow.cjs` 132 of 132, `qa/youtube-test-flow.cjs` 49 of 49 (unchanged by this work). No migration, route, secret or database function was touched.
+- **Deployed.** Pushed as `6d75aab` to `main`; Vercel deployment `dpl_GutEjueopLWtBXBs9ptj8RbGdbuB` READY about a minute later. No runtime errors in the first hour. Six of the new pictures were fetched from production and are byte-identical (sha256) to the files; the home page answers 200. Nothing signed in was checked on the real site.
+- **Remark.** The test that keeps private strings out of the guides names three of them in its pattern (an Instagram handle, an Instagram app number in a URL, a configuration ID), so those three now exist in the repository. They are identifiers of the owner's own test account.
 
 ### 2026-11-03: «تجربة النشر» on Instagram, built
 
@@ -2603,6 +2606,15 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** Anything against Meta: no Instagram account is connected, and the Meta app is not entered yet.
 - **Next.** The owner finishes the Meta app, adds `instagram_manage_contents` to its configuration, connects the department's
   Instagram account, and publishes one test Story from its card.
+
+### 2026-11-03: the X guide, the prices and two new parts of a step
+
+- **Owner direction.** Begin the X guide as the Instagram one was done (better wording with the English set apart, pictures, notes with the circled "!"), starting with the prices of 2026-11-03 as a table and the first steps. The owner sent four pictures of the pricing pages and one of the dashboard, and could not find «Create App» there.
+- **Built (`MVP_draft.md` section 67.8).** `info` (notes with the circled "!") and `tables` (two columns, foldable, every cell isolated) as parts of a step, drawn by the setup sheet and the circled "!". The prices step shows a short table and three folded ones (12, 16 and 19 rows, copied from the pictures), dated, with two notes; the first step lists its actions; one picture of the dashboard, name blurred. Dates in a sentence are now isolated (a defect found by looking: «2026-11-03» read as «03-11-2026» in an Arabic line, and it affected the older dated notes as well).
+- **Verified, numbers.** In a clean tree on `origin/main`: `npm run typecheck` clean; `npm test` **733 of 733** (three new: the parts of a step, the X prices and their agreement, the date); `qa/guide-modal.cjs` 16 of 16; `qa/platforms-flow.cjs` **136 of 136** (four new: the notes with their icons and the four tables with their open and folded states and row counts, the English cells isolated, a folded table opening, a phone with nothing sideways). Screenshots of the step on a computer and a phone were looked at.
+- **Not verified.** The prices were typed from the owner's pictures and checked against them by a test only for agreement among the tables, not against X. Nothing signed in on the real site.
+- **Not done, said plainly.** The steps from «أنشئ التطبيق» on are the old text.
+- **On the tree that was pushed** (rebased on `origin/main` after another session's Instagram test went live): `npm run typecheck` clean; `npm test` **744 of 744**; `npm run build` clean; `qa/guide-modal.cjs` 16 of 16, `qa/platforms-flow.cjs` 136 of 136, `qa/instagram-test-flow.cjs` 43 of 43 and `qa/youtube-test-flow.cjs` 49 of 49 (the last two unchanged by this work). No migration, route, secret or database function was touched.
 
 ### 2026-11-03: «تجربة النشر» on a Facebook Page, built
 

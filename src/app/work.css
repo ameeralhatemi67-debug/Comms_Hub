@@ -1018,6 +1018,20 @@ button.gd-zoom:hover{background:var(--surface-2);border-color:var(--green)}
 .gd-legend>span{display:inline-flex;align-items:center;gap:4px}
 .gd-ring{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#ffb300;color:#1d1d1d;font-style:normal;font-size:11.5px;font-weight:700}
 .gd-ring.x{background:#ff5a4d}/* The setup sheet: progress with a segment per step, the steps still to do dimmed, and one card per step with its button kept in view */
+/* A note with the circled "!" and a table of figures, inside a step */
+.gd-infos{display:grid;gap:10px;margin:4px 0 16px}
+.gd-info{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-size:13px;line-height:1.9;color:var(--ink)}
+.gd-info svg{flex:none;width:18px;height:18px;margin-top:4px;color:var(--green-text)}
+.gd-info p{margin:0;min-width:0;overflow-wrap:anywhere}
+.gd-tables{display:grid;gap:10px;margin:4px 0 18px}
+.gd-tbl{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.gd-tbl summary{display:flex;align-items:center;min-height:44px;padding:6px 14px;font-size:13.5px;font-weight:600;cursor:pointer}
+.gd-scroll{overflow-x:auto}
+.gd-tbl table{width:100%;border-collapse:collapse;font-size:13px}
+.gd-tbl th{padding:8px 14px;border-top:1px solid var(--line);background:var(--surface-2);font-weight:600;text-align:start;color:var(--muted)}
+.gd-tbl td{padding:8px 14px;border-top:1px solid var(--line);text-align:start}
+.gd-tbl td:last-child{white-space:nowrap}
+.gd-tnote{margin:0;padding:8px 14px 10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
 .pf-prog-count{color:var(--muted)}
 .pf-bar.seg{display:flex;gap:3px;height:8px;overflow:visible;background:transparent}
 .pf-bar.seg i{flex:1 1 0;min-width:0;width:auto;height:8px;border-radius:3px;background:var(--chip-bg);box-shadow:inset 0 0 0 1px var(--line)}

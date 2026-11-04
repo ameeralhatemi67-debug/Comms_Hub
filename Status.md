@@ -218,6 +218,24 @@ Live on production as `bf7388a`; migration `platform_tests_instagram` applied to
 - **Next.** The owner finishes the Meta app, adds `instagram_manage_contents` to its configuration, connects the department's
   Instagram account, then publishes one test Story.
 
+## The X guide, first steps, built 2026-11-03
+
+From the owner's walk through the X developer console (`MVP_draft.md` section 67.8, `progress.md`).
+
+- **Done.** A step can carry notes with the circled "!" and tables. The price step shows the console's prices of 2026-11-03 (a short open table and three folded ones), the first step lists its actions, and the dashboard picture has the name blurred.
+- **Evidence.** `npm test` 733 of 733, `qa/platforms-flow.cjs` 136 of 136, `qa/guide-modal.cjs` 16 of 16, typecheck and build clean.
+- **Next.** The owner finds where «Create App» is and sends the next pages; then the steps from «أنشئ التطبيق» on are rewritten the same way.
+
+## The Instagram guide and the look of a setup step, live 2026-11-03 (6d75aab)
+
+From the owner's walk through a real Meta app and their note that the YouTube steps were right and the look should follow (`MVP_draft.md` sections 67.6 and 67.7, `progress.md`).
+
+- **Done.** The setup sheet has a strip of one segment per step with «أُنجز … وبقي …», one card per step with its button kept in view, a copy button on every value to type, numbered pictures with their rings explained, and the steps still to do dimmed. The Instagram guide is nine steps with a list of actions each and 22 pictures from the portfolio's Instagram accounts to the three keys; names, handles, email and IDs are blurred. The client names in the Google guide's «Clients» picture are blurred too.
+- **Evidence.** `npm test` 735 of 735, typecheck and build clean, `qa/guide-modal.cjs` 16 of 16, `qa/platforms-flow.cjs` 132 of 132. Live: Vercel READY, no runtime errors, six pictures byte-identical to the files.
+- **Not verified.** A real Instagram connection through the site with a real app (nobody has entered the keys yet), anything signed in on the real site, a real phone. The steps «Business», «Requirements» and «Overview» of Meta's wizard were never photographed.
+- **Next.** Try the Instagram connection with the real keys, then rewrite Facebook's steps, which share the same Meta app. The owner has finished the walk through Meta's pages.
+- **Note.** Pushed from a clean worktree on `origin/main`, so local `main`'s unapplied «إنشاء» migrations did not go out.
+
 ## «تجربة النشر» on a YouTube account, live 2026-11-03
 
 From the owner's request for a quick test in a connected YouTube channel's sheet (`MVP_draft.md` section 71, `progress.md`). Live on
@@ -230,16 +248,6 @@ production as `267e88f`; migration `platform_tests` applied to comms-hub with th
   the table refuse signed-out callers, the privacy page is the new one, no runtime errors.
 - **Not verified.** A real upload to YouTube; signed in on the real site.
 - **Next.** The owner runs one private test on Hedayh, reconnects the channel once so «حذف» works, and deletes the test.
-
-## The look of a setup step, built 2026-11-03, not live
-
-From the owner's note after the YouTube steps were called right (`MVP_draft.md` section 67.6, `progress.md`). Local only: not committed, not pushed.
-
-- **Done.** The names in the «Clients» picture are blurred. The setup sheet has a strip of one segment per step with «أُنجز … وبقي …», one card per step with its button kept in view, a copy button on every value to type, pictures numbered and their rings explained, and the steps still to do dimmed.
-- **Evidence.** `npm test` 723 of 723, typecheck clean. `qa/platforms-flow.cjs` 131 of 131 (was 121), `qa/guide-modal.cjs` 10 of 10. Build clean.
-- **Not verified.** Signed in on the real site, and on a real phone.
-- **Instagram guide, steps 1 to 4 and the start of 5.** Nine steps and twenty-two pictures from the owner's screenshots, from the portfolio to the three keys (`MVP_draft.md` section 67.7). `npm test` 735 of 735, `qa/guide-modal.cjs` 16 of 16.
-- **Next.** Try the Instagram connection through the site with the real keys (nobody has yet), then rewrite Facebook's steps, which share the same Meta app. The owner has finished the walk through Meta's pages.
 
 ## The YouTube setup guide rewritten, live 2026-11-02
 

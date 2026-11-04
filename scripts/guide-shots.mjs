@@ -2,7 +2,7 @@
 // the platform's own pages. The originals hold real addresses, names and identifiers, so they are never kept in the
 // repository: this script is given the folder that holds them, blurs everything private, draws the numbered rings that
 // say where to click, crops each picture to the part that matters and writes it to public/guides/<set>/.
-//   node scripts/guide-shots.mjs <folder with the originals> [google | meta]
+//   node scripts/guide-shots.mjs <folder with the originals> [google | meta | x]
 // «google» (default): 1.png to 7.png, in the order of the owner's message of 2026-11-02. «meta» (the Instagram guide):
 // meta-1.png to meta-19.png, in the order of the owner's messages of 2026-11-03: the accounts page, its menu, the portfolio's
 // home, the add window, Instagram's own window and the added window (1 to 6); then the apps page, the new app's name,
@@ -10,6 +10,7 @@
 // confirmation of the configuration and the configuration with its return address (12 to 14); then the sections under it
 // that are left alone and the return address once saved (15 to 17); then the app's Basic settings and the
 // configuration's ID (18 and 19).
+// «x» (the X guide): x-1.png, the developer console's dashboard (2026-11-03).
 // A picture wider than the sheet can show is given a `width` and is scaled to it after the crop.
 // Corners are rounded by the page (the figure clips them), so the files stay square and re-usable.
 import { mkdirSync } from 'node:fs';
@@ -22,8 +23,8 @@ if (!src) {
   process.exit(1);
 }
 const set = process.argv[3] ?? 'google';
-if (!['google', 'meta'].includes(set)) {
-  console.error('the set is google or meta');
+if (!['google', 'meta', 'x'].includes(set)) {
+  console.error('the set is google, meta or x');
   process.exit(1);
 }
 const out = resolve(import.meta.dirname, '..', 'public', 'guides', set);
@@ -342,6 +343,20 @@ const SHOTS = [
     marks: [{ box: [760, 203, 32, 32], n: '4' }],
     crop: [443, 172, 650, 75],
     alt: 'الإعداد Instagram API (unified login): سطر Configuration ID وبجانبه أيقونة النسخ',
+  },
+  {
+    set: 'x',
+    name: 'x-dashboard',
+    from: 'x-1.png',
+    blur: [[480, 222, 176, 34]],
+    marks: [
+      { box: [405, 298, 1400, 110], n: '1' },
+      { box: [1658, 218, 147, 40], n: '2' },
+      { box: [1622, 138, 138, 30], n: '4' },
+    ],
+    crop: [395, 120, 1425, 300],
+    width: 975,
+    alt: 'لوحة وحدة المطوّرين Dashboard: رصيد الحساب وزر Buy Credits ولافتة الشحن التلقائي',
   },
 ];
 
