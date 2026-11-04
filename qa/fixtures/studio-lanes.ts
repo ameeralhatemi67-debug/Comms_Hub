@@ -29,7 +29,9 @@ async function fingerprint(frame: VideoFrame): Promise<string> {
 
 export async function exportWith(o: { tag: string; seconds: number; w: number; h: number; short: Short; lanes: number; hash: boolean; faults?: { configOf?: number; failAt?: number }; sample?: boolean[] | null }) {
   const root = await navigator.storage.getDirectory();
-  for (const d of [cache.CACHE_DIR, 'studio-exports', 'studio-manifest.json', 'studio-lanes']) await root.removeEntry(d, { recursive: true }).catch(() => undefined);
+  // the source's copy in the private storage stays between exports (a ten-minute 4K source is gigabytes); the
+  // exports and the lanes' spills go
+  for (const d of ['studio-exports', 'studio-lanes']) await root.removeEntry(d, { recursive: true }).catch(() => undefined);
   const pool = new media.MediaPool({ cache: await cache.DeviceCache.open(), onChange: () => undefined });
   let doc = schema.newVideoDoc('16:9', 30);
   const r = timeline.addSource(doc, { kind: 'library', asset: REAL, version: 1, name: 'مصدر.mp4', media: 'video', duration: o.seconds * schema.US, w: o.w, h: o.h });

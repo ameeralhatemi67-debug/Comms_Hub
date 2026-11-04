@@ -97,7 +97,7 @@ function serve(port) {
 function makeSource() {
   const r = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', `testsrc2=size=${W}x${H}:rate=30:duration=${SECONDS}`, '-f', 'lavfi', '-i', `sine=frequency=440:sample_rate=48000:duration=${SECONDS}`,
     '-vf', 'scale=out_color_matrix=bt709:out_range=tv,format=yuv420p', '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv',
-    '-c:v', 'libx264', '-preset', SECONDS > 60 ? 'ultrafast' : 'veryfast', '-crf', '18', '-g', '30', '-c:a', 'aac', '-b:a', '128k', '-shortest', SOURCE], { encoding: 'utf8' });
+    '-c:v', 'libx264', '-preset', SECONDS > 60 ? 'ultrafast' : 'veryfast', '-crf', SECONDS > 60 ? '23' : '18', '-g', '30', '-c:a', 'aac', '-b:a', '128k', '-shortest', SOURCE], { encoding: 'utf8' });
   if (r.status !== 0) throw new Error(`ffmpeg could not make the source: ${r.stderr}`);
 }
 
