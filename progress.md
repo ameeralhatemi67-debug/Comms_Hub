@@ -3247,6 +3247,15 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - At `5453009` (the second keys in) with the fixed check: typecheck clean, `npm test` **853 of 853**, build passes, then
     `qa/studio-copy-swap.cjs` **18 of 18** (00:53:13 to 00:53:54). Windows did not change the limit during that run, so the
     new guard has not yet met a real change.
+- **The idle check's guard** (`59733bf`, the manager's item of 2026-11-05). `qa/desktop-idle.cjs` also replaced
+  `powerMonitor.emit`, which holds nothing back (above). It now wraps the application's speed-limit listeners.
+  - Held (`realLimits(false)`), only the check's own limits reach them, told 100 once. Let through (`realLimits(true)`),
+    Windows' changes reach them as before. The check's own 70 and 100 (`__sayLimit`) reach them either way.
+  - Windows' changes are recorded apart (`windowsLimits`, each held or let through); `speedLimits` is what the application heard.
+  - **Checked only off the port.** The check's own guard code was run against an `EventEmitter` whose native side calls a copy
+    of `emit` bound beforehand, as Electron's does. Held, Windows' 60 was kept out and the check's 100, 70 and 100 arrived; let
+    through, Windows' 80 arrived. The old guard let the 60 through. Not run on the port yet: it waits for a slot after the quiet
+    window, about 2.5 minutes (4 with the corpus made).
 - **Not done.** Nothing pushed.
 
 ### 2026-11-04: the studio says when this device is not measured, or its measurement is stale (Desktop Power, Fork 3, 63.6.1)
