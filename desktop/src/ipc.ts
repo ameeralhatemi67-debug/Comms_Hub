@@ -3,7 +3,8 @@
 // files, cache and data (version 3, D4), media (version 4, D5), windows (version 5, D6), gpu and profile (version 6,
 // D9, Desktop_Power_Ideas.md P-01 and P-33), life.activity and the media queue (version 7, D12, P-30 and P-08),
 // life.progress and files.dragOut (version 8, D12, P-26 and P-22), files.importCard, copyCard and cancelCard
-// (version 9, D12, P-20); `cardProgress` goes from the main process to the page.
+// (version 9, D12, P-20); `cardProgress` goes from the main process to the page. downloads.open and show (version 10,
+// P-28); `downloadDone` goes from the main process to the page.
 // Every channel the page can call is answered by a handler registered through sender.ts's guard(); `open`,
 // `cacheProgress`, `mediaProgress` and `mediaQueueState` go the other way, from the main process to the page. Pure.
 
@@ -57,6 +58,9 @@ export const CHANNEL = Object.freeze({
   gpuRestart: 'commshub:gpu.restart',
   profileRead: 'commshub:profile.read',
   profileSave: 'commshub:profile.save',
+  downloadsOpen: 'commshub:downloads.open',
+  downloadsShow: 'commshub:downloads.show',
+  downloadDone: 'commshub:downloads.done',
 });
 
 /** The channels the page may call; `open` is sent by the main process only. */
@@ -68,7 +72,8 @@ export const CALLABLE = Object.freeze([
   CHANNEL.mediaProbe, CHANNEL.mediaCopies, CHANNEL.mediaProxy, CHANNEL.mediaConvert, CHANNEL.mediaCancel, CHANNEL.mediaQueue, CHANNEL.mediaQueued,
   CHANNEL.windowsScreens, CHANNEL.windowsPopOut, CHANNEL.windowsClose,
   CHANNEL.gpuState, CHANNEL.gpuChoose, CHANNEL.gpuRestart, CHANNEL.profileRead, CHANNEL.profileSave,
+  CHANNEL.downloadsOpen, CHANNEL.downloadsShow,
 ]);
 
-/** The bridge's version: 1 for info, power, life and notify (D2); 2 adds update (D3); 3 adds files, cache and data (D4); 4 adds media (D5); 5 adds windows (D6); 6 adds gpu and profile (D9); 7 adds life.activity and media.queue, queued and onQueue (D12); 8 adds life.progress and files.dragOut (D12, P-26 and P-22); 9 adds files.importCard, copyCard, cancelCard and onCard (D12, P-20). */
-export const BRIDGE_VERSION = 9;
+/** The bridge's version: 1 for info, power, life and notify (D2); 2 adds update (D3); 3 adds files, cache and data (D4); 4 adds media (D5); 5 adds windows (D6); 6 adds gpu and profile (D9); 7 adds life.activity and media.queue, queued and onQueue (D12); 8 adds life.progress and files.dragOut (D12, P-26 and P-22); 9 adds files.importCard, copyCard, cancelCard and onCard (D12, P-20); 10 adds downloads.open, show and onDone (P-28). */
+export const BRIDGE_VERSION = 10;

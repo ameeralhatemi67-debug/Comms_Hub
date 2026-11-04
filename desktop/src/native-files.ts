@@ -6,16 +6,20 @@
 // File reaches the main process only as the path Chromium attached to it, read in the preload. From D12 (P-22) a file
 // the application gave a token for can be dragged out of the window into another program, by its token; and
 // «استيراد من بطاقة الكاميرا» (P-20) lists a card the person picked, copies the recordings they chose into a folder they
-// pick, each verified (card-copy.ts), and hands back tokens. Neither dialog's path reaches the page.
+// pick, each verified (card-copy.ts), and hands back tokens. Neither dialog's path reaches the page. From bridge version
+// 10 (P-28) a library, mail or messaging download the main process saved can be opened in its program or shown in its
+// folder, by the id it gave at `will-download` (download-store.ts); the page never learns where it was saved.
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { app, BrowserWindow, dialog, nativeImage } from 'electron';
+import { app, BrowserWindow, dialog, nativeImage, shell } from 'electron';
 import type { IpcMainInvokeEvent, Session } from 'electron';
 import { CacheStore, folderLabel, LIMITS, libraryName } from './cache-store.ts';
 import { cardItems, cardView, chosenKeys, freeName, type CardItem } from './card.ts';
 import { copyVerified, listCard, onCard } from './card-copy.ts';
 import { freeBytes } from './device.ts';
+import { DownloadStore } from './download-store.ts';
+import { downloadFrom, viewOf } from './downloads.ts';
 import { FileStore } from './file-store.ts';
 import { addressOf, CACHE_NAME, dialogFilters, newToken, publicView, SCHEME, TOKEN } from './files.ts';
 import { CHANNEL } from './ipc.ts';
@@ -245,13 +249,45 @@ export function startFiles(o: { handle: Handle; site: Session; allowed: readonly
     return true;
   });
 
+  // --- a saved download, opened or shown (P-28) -------------------------------------------------------
+  // Only a download from one of the site's file routes, started by a page on the compiled list, gets an id. The save
+  // dialog stays main.ts's: the person chooses where it goes and under what name, and the kind is read from that name.
+  const downloads = new DownloadStore();
+  o.site.on('will-download', (_event, item, contents) => {
+    const address = item.getURLChain()[0] ?? item.getURL();
+    const from = downloadFrom(address, o.allowed);
+    if (!from || !contents || contents.isDestroyed() || !isAllowed(contents.getURL(), o.allowed)) return;
+    const id = downloads.start(new URL(address).origin, from);
+    item.once('done', (_e, state) => {
+      if (state !== 'completed') return void downloads.drop(id);
+      const r = downloads.finish(id, item.getSavePath());
+      if (r && !contents.isDestroyed() && isAllowed(contents.getURL(), o.allowed)) contents.send(CHANNEL.downloadDone, viewOf(r));
+    });
+  });
+  o.handle(CHANNEL.downloadsOpen, async (_event, id: unknown) => {
+    if (typeof id !== 'string' || !TOKEN.test(id)) throw refused();
+    const can = downloads.openable(id);
+    if (!can.ok) return can;
+    // Windows opens it in the program chosen for its kind; the mark of the web stays on the file for that program to read.
+    const failed = await shell.openPath(can.file).catch(() => 'failed');
+    return failed ? { ok: false, why: 'failed' } : { ok: true };
+  });
+  o.handle(CHANNEL.downloadsShow, (_event, id: unknown) => {
+    if (typeof id !== 'string' || !TOKEN.test(id)) throw refused();
+    const can = downloads.showable(id);
+    if (!can.ok) return can;
+    shell.showItemInFolder(can.file);
+    return { ok: true };
+  });
+
   // --- «مسح بيانات هذا الجهاز» (D-11) ----------------------------------------------------------------
-  /** What else stops before the data goes: the media jobs (native-media.ts) and a card's copy. */
+  /** What else stops before the data goes: the media jobs (native-media.ts), a card's copy, and the downloads' ids. */
   const stops: (() => void)[] = [
     () => {
       for (const c of cards.values()) c.ctl?.abort();
       cards.clear();
     },
+    () => void downloads.clear(),
   ];
   o.handle(CHANNEL.dataClear, async () => {
     for (const ctl of running.values()) ctl.abort();

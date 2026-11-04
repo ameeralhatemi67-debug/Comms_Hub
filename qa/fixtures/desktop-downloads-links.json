@@ -1,0 +1,6 @@
+[
+  { "id": "library", "href": "/api/media/aaaaaaaa-0000-4000-8000-000000000001/content?download=1", "label": "ملف من المكتبة", "name": "تقرير الحملة.pdf", "type": "application/pdf", "body": "%PDF-1.4\n% a fixture, never opened\n" },
+  { "id": "mail", "href": "/api/mail/file/aaaaaaaa-0000-4000-8000-000000000002", "label": "مرفق بريد", "name": "ملاحظات.txt", "type": "text/plain; charset=utf-8", "body": "ملاحظات\n" },
+  { "id": "messaging", "href": "/api/chat/file/aaaaaaaa-0000-4000-8000-000000000003", "label": "ملف في المراسلة", "name": "tool.exe", "type": "application/octet-stream", "body": "not a program: a fixture that is never run\n" },
+  { "id": "other", "href": "/files/elsewhere.pdf", "label": "ملف من مكان آخر", "name": "elsewhere.pdf", "type": "application/pdf", "body": "%PDF-1.4\n% not a site file route\n" }
+]

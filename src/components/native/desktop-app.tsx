@@ -5,7 +5,8 @@
 // stands, and offers «إعادة التشغيل للتحديث» once one is ready (refused during an export). The banner asks
 // an application older than the site needs to update. Inside the application it also offers «مسح بيانات
 // هذا الجهاز» (decision D-11, 63.3), held down like every action that cannot be undone. Every signed-in
-// person sees it; it reads nothing about anyone.
+// person sees it; it reads nothing about anyone. In a browser one line says what the application adds over the browser
+// (by owner request of 2026-11-05), naming only what it really does today.
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Download, Eraser, MonitorDown, RotateCw } from 'lucide-react';
@@ -107,6 +108,7 @@ export function DesktopAppPanel() {
       <p>
         <b>متاح لنظام Windows فقط حالياً</b> (Windows 10 أو 11، معالج 64 بت). نسخ macOS وLinux لم تُبنَ بعد.
       </p>
+      <p data-desktop-strength>تطبيق سطح المكتب أقوى من المتصفح: يقيس قدرة الجهاز، ويسرّع المعاينة، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية.</p>
       <p>تطبيق «مركز الاتصال المؤسسي»: يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب. يتحدّث التطبيق بنفسه كلما نُشر إصدار أحدث.</p>
       {fitNote && <p className="warning" role="status">{fitNote}</p>}
       {latest === undefined && <p className="muted" role="status">جارٍ البحث عن آخر إصدار…</p>}

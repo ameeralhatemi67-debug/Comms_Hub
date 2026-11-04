@@ -41,6 +41,7 @@ const GROUPS = {
   media: ['probe', 'copies', 'proxy', 'convert', 'cancel', 'onProgress', ...(BRIDGE >= 7 ? ['queue', 'queued', 'onQueue'] : [])],
   gpu: ['state', 'choose', 'restart'],
   profile: ['read', 'save'],
+  ...(BRIDGE >= 10 ? { downloads: ['open', 'show', 'onDone'] } : {}),
 };
 
 const page = (title, body) => `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${title}</title></head><body>${body}</body></html>`;
