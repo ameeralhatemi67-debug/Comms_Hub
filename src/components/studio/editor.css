@@ -235,3 +235,6 @@
 .st-slot-files ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .st-slot-files li{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px}
 .st-slot-files li span{flex:1 1 120px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* «اسحب الملف»: a saved export dragged out of the panel, in the desktop application (export-panel.tsx) */
+.st-drag-out{display:inline-flex;align-items:center;gap:4px;margin-inline-start:6px;padding:3px 10px;border:1px solid var(--line);border-radius:6px;cursor:grab;user-select:none;-webkit-user-drag:element}
+.st-drag-out:active{cursor:grabbing}

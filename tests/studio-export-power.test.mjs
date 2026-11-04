@@ -185,3 +185,14 @@ test('one pass, several shapes (P-05): as many shapes go together as there are l
   const panel = fs.readFileSync('src/components/studio/export-panel.tsx', 'utf8');
   assert.match(panel, /if \(what === 'video' && lanes > 1 && list\.length > 1\)/, 'the one pass only where the plan gives lanes');
 });
+
+test('the export panel in the application (D12): the taskbar follows the export, and a saved video can be dragged out', () => {
+  const panel = fs.readFileSync('src/components/studio/export-panel.tsx', 'utf8');
+  assert.match(panel, /setProgress\(\{ label, f \}\);\s*void setTaskbarProgress\(f\);/, 'every progress shown is the taskbar\'s too');
+  assert.equal((panel.match(/setProgress\(\{/g) ?? []).length, 1, 'no progress bypasses it');
+  assert.match(panel, /await setTaskbarProgress\(failed \? 'failed' : 'done'\);/, 'cleared at the end, red after a failure');
+  assert.match(panel, /failed = code !== 'ABORTED';/, 'a cancel is not a failure');
+  assert.match(panel, /token: await fileToken\(saveTo\)/, 'the token is of the saved file itself');
+  assert.doesNotMatch(panel, /fileToken\((file|r\.file)\)/, 'never of a copy');
+  assert.match(panel, /e\.preventDefault\(\);\s*void dragOutFile\(d\.token!\);/);
+});

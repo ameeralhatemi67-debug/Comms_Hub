@@ -12,10 +12,12 @@
 // each shape ticked (MVP_draft.md 62.10), one file each; the platforms it is meant for are checked first;
 // a download may carry the «مسودة» mark (never a library file: what is approved there is what is
 // published); a text track can be written out as SRT captions. While the panel is open and idle, the
-// sound's loudness is measured ahead (loudness-ahead.ts), so «توحيد مستوى الصوت» starts at once.
+// sound's loudness is measured ahead (loudness-ahead.ts), so «توحيد مستوى الصوت» starts at once. In the
+// desktop application the taskbar shows how far the export has got (MVP_draft.md 63.9), and a video saved
+// where the person chose can be dragged out of the panel into Explorer or another program («اسحب الملف»).
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Download, Film, Image as ImageIcon, Library, Send, Subtitles, X } from 'lucide-react';
+import { Download, Film, GripVertical, Image as ImageIcon, Library, Send, Subtitles, X } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { RATIOS, US, canvasOf, durationOf, type Micros, type ProjectDoc, type Ratio } from '@/lib/studio/schema';
 import { allShapes, docForShape } from '@/lib/studio/reframe';
@@ -33,7 +35,7 @@ import { download } from '@/lib/studio/target';
 import { formatBytes, probeSupport } from '@/lib/studio/support';
 import { shortTime } from '@/lib/studio/time';
 import { withKeys } from '@/lib/studio/shortcuts';
-import { keepAwake, markBusy, notifyNative } from '@/lib/native';
+import { dragOutFile, fileToken, keepAwake, markBusy, notifyNative, setTaskbarProgress } from '@/lib/native';
 import { useNativeFeature } from '../native/use-native';
 import type { MediaPool } from '@/lib/studio/media';
 import type { Resolver } from '@/lib/studio/compose';
@@ -44,7 +46,8 @@ import { REVIEWED_STAGES, assetRow, projectExports, uploadToLibrary, uploadVersi
 import { linkFileToWork } from './work-links';
 
 type Dest = 'device' | 'new' | 'version';
-type Done = { kind: 'device'; name: string; bytes: number; url: string; saved?: boolean } | { kind: 'library'; name: string; asset: string; version: number };
+/** `token`: a video saved where the person chose, as the application can drag it out (null in a browser). */
+type Done = { kind: 'device'; name: string; bytes: number; url: string; saved?: boolean; token?: string | null } | { kind: 'library'; name: string; asset: string; version: number };
 type SavePicker = (o: { suggestedName: string; startIn?: string; types: { description: string; accept: Record<string, string[]> }[] }) => Promise<FileSystemFileHandle>;
 
 /** The system's save dialog for one video (desktop application); a cancel stops the export. */
@@ -200,12 +203,18 @@ export function ExportPanel({
     abort.current = ctl;
     let awake: (() => Promise<void>) | null = null;
     let idle: (() => Promise<void>) | null = null;
+    // the panel's bar and, in the application, the taskbar's, together
+    const show = (label: string, f: number) => {
+      setProgress({ label, f });
+      void setTaskbarProgress(f);
+    };
+    let failed = false;
     try {
       awake = await keepAwake('export');
       idle = await markBusy('export');
       let rev = revision();
       if (toLibrary) {
-        setProgress({ label: 'جارٍ حفظ نسخة من المشروع…', f: 0 });
+        show('جارٍ حفظ نسخة من المشروع…', 0);
         const saved = await saveVersion(what === 'still' ? 'قبل حفظ صورة في المكتبة' : 'قبل التصدير إلى المكتبة');
         if (!saved.ok) throw new Error(saved.error ?? 'تعذّر حفظ نسخة من المشروع.');
         rev = revision();
@@ -213,7 +222,7 @@ export function ExportPanel({
       // «توحيد مستوى الصوت»: measured first, then one gain for the whole sound (the same in every shape)
       let gain = 1;
       if (what === 'video' && normalize && hasSound(doc)) {
-        const m = await loudnessOf(doc, pool, { signal: ctl.signal, onProgress: (f) => setProgress({ label: `جارٍ قياس مستوى الصوت ${Math.round(f * 100)}٪`, f }) });
+        const m = await loudnessOf(doc, pool, { signal: ctl.signal, onProgress: (f) => show(`جارٍ قياس مستوى الصوت ${Math.round(f * 100)}٪`, f) });
         gain = normalizeGain(m);
         const after = m.integrated + 20 * Math.log10(gain);
         setLevel(`كان الصوت ${lufsText(m.integrated)}، وصار في الملف نحو ${lufsText(after)}${after < LOUDNESS_TARGET - 0.5 ? ' (أوقفته القمم عند -1 ديسيبل)' : ''}.`);
@@ -226,7 +235,7 @@ export function ExportPanel({
         const tag = list.length > 1 || (shape && shape !== main) ? ` (${shapeName(shape!)})` : '';
         return { shape, d: shape ? docForShape(doc, shape) : doc, name: fileName(`${title}${tag}`, ext) };
       });
-      const progressOf = (of: string) => (p: ExportProgress) => setProgress({ label: p.phase === 'prepare' ? `جارٍ التجهيز${of}…` : p.phase === 'finish' ? `جارٍ إنهاء الملف${of}…` : `جارٍ التصدير${of} ${Math.round((p.done / p.total) * 100)}٪`, f: p.done / Math.max(1, p.total) });
+      const progressOf = (of: string) => (p: ExportProgress) => show(p.phase === 'prepare' ? `جارٍ التجهيز${of}…` : p.phase === 'finish' ? `جارٍ إنهاء الملف${of}…` : `جارٍ التصدير${of} ${Math.round((p.done / p.total) * 100)}٪`, p.done / Math.max(1, p.total));
       // lanes as this computer's measured plan allows (one in a browser), after the ladder's memory; with more than
       // one, as many shapes as lanes are made in one pass (shapes.ts)
       const { lanes } = what === 'video' ? await exportLanes() : { lanes: 1 };
@@ -245,7 +254,7 @@ export function ExportPanel({
         const of = list.length > 1 ? ` ${i + 1} من ${list.length}` : '';
         let file: File;
         if (what === 'still') {
-          setProgress({ label: `جارٍ إنشاء الصورة${of}…`, f: 0.5 });
+          show(`جارٍ إنشاء الصورة${of}…`, 0.5);
           file = await exportStill(d, pool, { t, name, type: stillType, short: photo ? undefined : short, adjusted, watermark });
         } else {
           let saveTo = made.get(i)?.saveTo;
@@ -258,7 +267,8 @@ export function ExportPanel({
           rememberExport(r);
           if (r.steps.length) setSlower(true);
           if (saveTo) {
-            results.push({ kind: 'device', name: file.name, bytes: file.size, url: '', saved: true });
+            // the file where it was saved, never a copy of it (the application refuses anything else)
+            results.push({ kind: 'device', name: file.name, bytes: file.size, url: '', saved: true, token: await fileToken(saveTo) });
             continue;
           }
         }
@@ -271,12 +281,12 @@ export function ExportPanel({
         let asset: string;
         let version: number;
         if (dest === 'new') {
-          const row = await uploadToLibrary(file, folder, (f) => setProgress({ label: `جارٍ رفع الملف${of} ${Math.round(f * 100)}٪`, f }));
+          const row = await uploadToLibrary(file, folder, (f) => show(`جارٍ رفع الملف${of} ${Math.round(f * 100)}٪`, f));
           asset = row.id;
           version = row.current_version;
         } else {
           asset = targetId;
-          version = await uploadVersion(targetId, file, `من الاستوديو: ${title} (النسخة ${rev})`.slice(0, 200), (f) => setProgress({ label: `جارٍ رفع الإصدار ${Math.round(f * 100)}٪`, f }));
+          version = await uploadVersion(targetId, file, `من الاستوديو: ${title} (النسخة ${rev})`.slice(0, 200), (f) => show(`جارٍ رفع الإصدار ${Math.round(f * 100)}٪`, f));
         }
         const rec = await api.exportRecord(projectId, rev, asset, version, what === 'still' ? 'image' : 'video', shape);
         if (!rec.ok) throw new Error(rec.error);
@@ -294,8 +304,11 @@ export function ExportPanel({
       const code = e instanceof ExportError ? e.code : (e as Error).message;
       const text = EXPORT_ERRORS[code] ?? ((e as Error).message || 'تعذّر التصدير.');
       setError(text);
-      if (code !== 'ABORTED') void notifyNative({ title: 'تعذّر التصدير', body: text });
+      // a cancel only clears the taskbar; a failure stays red there until the window is looked at
+      failed = code !== 'ABORTED';
+      if (failed) void notifyNative({ title: 'تعذّر التصدير', body: text });
     } finally {
+      await setTaskbarProgress(failed ? 'failed' : 'done');
       await awake?.();
       await idle?.();
       abort.current = null;
@@ -508,6 +521,24 @@ export function ExportPanel({
         d.kind === 'device' && d.saved ? (
           <p key={`saved:${d.name}`} className="st-done" role="status">
             حُفظ: {d.name} ({formatBytes(d.bytes)})، في المكان الذي اخترته.
+            {d.token && (
+              <>
+                {' '}
+                <span
+                  className="st-mini st-drag-out"
+                  draggable
+                  title="اسحبه إلى مجلد أو إلى برنامج آخر"
+                  onDragStart={(e) => {
+                    // the system drags the file itself; the page's own drag would carry nothing
+                    e.preventDefault();
+                    void dragOutFile(d.token!);
+                  }}
+                >
+                  <GripVertical aria-hidden="true" />
+                  اسحب الملف
+                </span>
+              </>
+            )}
           </p>
         ) : d.kind === 'device' ? (
           <p key={d.url} className="st-done" role="status">
