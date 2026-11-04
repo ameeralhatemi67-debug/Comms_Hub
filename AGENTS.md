@@ -425,7 +425,9 @@ choice of 2026-11-03): bridge version 6 adds `gpu` and `profile`.
   slowed an export with squares from about 115 to about 41 frames a second (measured 2026-11-03).
 - **Colour adjustments and blur are effects, never the canvas filter** (P-09, `MVP_draft.md` 62.15). `src/lib/studio/effects/`
   specifies each as whole numbers once (`plan.ts`), works it out on the chip (`chip.ts`, WebGL2) or in plain code
-  (`code.ts`), held equal byte for byte by `qa/studio-effects-parity.cjs`; it imports no DOM, so it runs in a worker. A
+  (`code.ts`), held equal byte for byte by `qa/studio-effects-parity.cjs`; it imports no DOM, so it runs in a worker.
+  The plain code runs in WebAssembly lanes where it can (`simd.ts`, `blur-simd.ts`, one memory), the same arithmetic held
+  equal to `code.ts` by `tests/studio-effect-kernels.test.mjs`: change the two together. A
   picture is uploaded as the canvas keeps it (premultiplied): letting the upload unpremultiply rounds differently on each
   chip. `compose.ts` draws an item with effects into a layer and lays it down; an item drawn in several calls takes its
   opacity inside the layer, as the filter did. Never set `ctx.filter` for an effect. Photos (`photo.ts`, P-17) use the
