@@ -1,0 +1,174 @@
+{
+  "script": "qa/studio-lanes.cjs",
+  "run": "2026-11-04T22:30:20.321Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "app-nochip: every timed export ran with its own lane count, stepped down nowhere and made every frame (3 rounds of 1, 2 and 3 lanes)",
+      "pass": true,
+      "detail": "{\"wrong\":[],\"median\":{\"1\":53813,\"2\":53582,\"3\":53496}}"
+    }
+  ],
+  "notes": [
+    "app-nochip: time with 1, 2 and 3 lanes (medians of three interleaved rounds, ms): {\"1\":53813,\"2\":53582,\"3\":53496}, speed-up {\"2\":1,\"3\":1.01}, load 63% before and 2% after; each export's load is beside it in the record.",
+    "timing only; frames and structure proven by rows 1 to 4 and the earlier engine rows at 29a1a30",
+    "The application started with --disable-features=CalculateNativeWinOcclusion, its window in front."
+  ],
+  "fixture": {
+    "seconds": 120,
+    "size": "1920x1080",
+    "short": 1080,
+    "engines": [
+      "app-nochip"
+    ],
+    "faults": false,
+    "fingerprinted": "none (timing only)"
+  },
+  "engines": {
+    "app-nochip": {
+      "versions": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "engine": {
+        "onChip": false,
+        "cores": 12
+      },
+      "starts": {
+        "two": [
+          0,
+          1800
+        ],
+        "three": [
+          0,
+          1200,
+          2400
+        ]
+      },
+      "timing": {
+        "loadBefore": 63,
+        "rounds": [
+          {
+            "1": {
+              "ms": 53813,
+              "lanes": 1,
+              "steps": [],
+              "frames": 3600,
+              "via": "yuv",
+              "load": [
+                20,
+                40
+              ]
+            },
+            "2": {
+              "ms": 55734,
+              "lanes": 2,
+              "steps": [],
+              "frames": 3600,
+              "via": "yuv",
+              "load": [
+                35,
+                43
+              ]
+            },
+            "3": {
+              "ms": 56498,
+              "lanes": 3,
+              "steps": [],
+              "frames": 3600,
+              "via": "yuv",
+              "load": [
+                51,
+                16
+              ]
+            }
+          },
+          {
+            "1": {
+              "ms": 54096,
+              "lanes": 1,
+              "steps": [],
+              "frames": 3600,
+              "via": "yuv",
+              "load": [
+                35,
+                10
+              ]
+            },
+            "2": {
+              "ms": 53582,
+              "lanes": 2,
+              "steps": [],
+              "frames": 3600,
+              "via": "yuv",
+              "load": [
+                24,
+                39
+              ]
+            },
+            "3": {
+              "ms": 53496,
+              "lanes": 3,
+              "steps": [],
+              "frames": 3600,
+              "via": "yuv",
+              "load": [
+                43,
+                3
+              ]
+            }
+          },
+          {
+            "1": {
+              "ms": 51494,
+              "lanes": 1,
+              "steps": [],
+              "frames": 3600,
+              "via": "yuv",
+              "load": [
+                43,
+                3
+              ]
+            },
+            "2": {
+              "ms": 50217,
+              "lanes": 2,
+              "steps": [],
+              "frames": 3600,
+              "via": "yuv",
+              "load": [
+                9,
+                10
+              ]
+            },
+            "3": {
+              "ms": 51745,
+              "lanes": 3,
+              "steps": [],
+              "frames": 3600,
+              "via": "yuv",
+              "load": [
+                23,
+                3
+              ]
+            }
+          }
+        ],
+        "loadAfter": 2,
+        "median": {
+          "1": 53813,
+          "2": 53582,
+          "3": 53496
+        },
+        "ratio": {
+          "2": 1,
+          "3": 1.01
+        }
+      },
+      "runs": {}
+    }
+  },
+  "total": 1,
+  "passed": 1,
+  "failed": 0
+}

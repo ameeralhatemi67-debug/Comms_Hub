@@ -3354,3 +3354,34 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   for each 120 s export, so about 2.4 hours for nine), and nothing is claimed for it. Checked so far: the script parses, the
   fixture bundles, and `QUIET=1` without `ENGINES` stops before touching anything; the timing path itself has not run yet.
 - **Not done.** Nothing pushed; drawing in workers (P-07) not switched on anywhere.
+
+### 2026-11-05: D11 (d), the lanes' time on each chip, in the manager's quiet window (Desktop Power, Fork 1)
+
+- **How it ran.** In the window the manager opened at 00:55 for this alone (nobody else ran anything), after merging `main`
+  5c24b55 (`cd11562`; `npm run typecheck` clean). Five runs of `QUIET=1 SECONDS=120 FAULTS=0 node qa/studio-lanes.cjs`, one
+  engine each, in the approved order, one after another, each taking and freeing the port's lock; TEMP and TMP on this
+  worktree's `qa/artifacts/tmp`. The development package 0.8.0 (Electron 45.0.0, Chromium 156.0.8078.48), started with
+  `--disable-features=CalculateNativeWinOcclusion` and its window in front. Each run: three interleaved rounds of one, two and
+  three lanes over a two-minute fixture (3600 frames), no fingerprints, the processor's load before and after every export.
+  Windows' processor speed limit (`% Performance Limit`) was read before and after each run, outside the check: 100% every
+  time, on mains power. These are option A's figures (drawing on the page), the baseline for option B.
+- **Results, all 1 of 1** (every timed export ran with its own lane count, stepped down nowhere and made all 3600 frames).
+  Medians of three, as frames a second for one, two and three lanes, and the speed-up of two and three lanes over one:
+  - the strong chip (RTX 3050), 1080p: 148.6, 252.1, 231.2 (1.70, 1.56); run 3 min 41 s
+    (`qa/studio-lanes-1080-120s-app-strong-speed.json`);
+  - the strong chip, 4K: 50.5, 78.8, 90.2 (1.56, 1.79); run 9 min 37 s (`qa/studio-lanes-2160-120s-app-strong-speed.json`);
+  - the saving chip (AMD Radeon), 1080p: 95.1, 128.8, 130.8 (1.35, 1.38); run 5 min 41 s
+    (`qa/studio-lanes-1080-120s-app-saving-speed.json`);
+  - the saving chip, 4K: 30.5, 49.6, 45.7 (1.63, 1.50); run 15 min 27 s (`qa/studio-lanes-2160-120s-app-saving-speed.json`);
+  - no graphics chip, 1080p (the processor's encoder, BT.709 in workers): 66.9, 67.2, 67.3 (1.00, 1.01); run 9 min 2 s
+    (`qa/studio-lanes-1080-120s-app-nochip-speed.json`). Lanes gain nothing here.
+  - **4K with no graphics chip was not timed** (the manager's decision: about 16 minutes for each 120 s export), and nothing is
+    claimed for it.
+- **The load beside the figures.** With a chip it stayed at 1 to 9% almost everywhere, except: the strong chip at 4K in round 1
+  (46% before the first export, then 12 to 29%); the saving chip at 4K in rounds 2 and 3 (29% then 47% around round 2's three
+  lanes, 100% then 29% around round 3's one lane, 45% then 35% around round 3's three lanes), cause not known. The medians
+  are of three, so one disturbed export does not move them alone. With no chip the export itself loads the processor (20 to
+  51%). Two of the 100 load readings came back empty (null), and the record keeps them as such.
+- **Not verified.** These are one laptop's figures, on mains, with Windows' speed limit read only before and after each run,
+  not during it. The check pins nothing about power through `powerMonitor`.
+- **Not done.** Nothing pushed.
