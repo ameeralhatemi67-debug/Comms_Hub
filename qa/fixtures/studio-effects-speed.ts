@@ -103,9 +103,13 @@ export async function exportLike(frames: number, v: Variant = 'all'): Promise<nu
 }
 
 const ADJUST = { brightness: 12, contrast: 18, saturation: 25 };
-const STEP_CASES: [string, typeof ADJUST | undefined, number][] = [
+/** A case's name, its colour, its blur, and whether a blur at full size keeps its weights instead of the three boxes. */
+const STEP_CASES: [string, typeof ADJUST | undefined, number, boolean?][] = [
   ['colour', ADJUST, 0],
   ['blur 2.5 (boxes)', undefined, 2.5],
+  ['blur 2.5 as weights (17 taps)', undefined, 2.5, true],
+  ['blur 4 (boxes)', undefined, 4],
+  ['blur 4 as weights (25 taps)', undefined, 4, true],
   ['blur 2.5 with colour', ADJUST, 2.5],
   ['blur 9 (reduced 4 times)', undefined, 9],
   ['blur 24 (reduced 8 times)', undefined, 24],
@@ -139,8 +143,9 @@ export function effectSteps(frames: number) {
     frame.clearRect(0, 0, W, H);
     frame.drawImage(footage, 0, 0, W, H);
   }) });
-  for (const [name, adjust, blur] of STEP_CASES) {
-    const plan = effectOf(adjust, blur)!;
+  for (const [name, adjust, blur, weights] of STEP_CASES) {
+    const found = effectOf(adjust, blur)!;
+    const plan = weights && found.blur ? { ...found, blur: { ...found.blur, boxes: null } } : found;
     const pad = plan.blur ? Math.ceil(plan.blur.reach / plan.blur.n) * plan.blur.n : 0;
     const filter = [adjust ? filterOf(adjust) : '', blur ? 'blur(' + blur.toFixed(2) + 'px)' : ''].filter(Boolean).join(' ');
     rows.push({ case: name, path: 'filter before', ms: timed(() => {
