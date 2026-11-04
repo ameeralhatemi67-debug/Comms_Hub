@@ -38,7 +38,7 @@ import { fillWindow, transformAt, transformOf } from '@/lib/studio/compose';
 import { DeviceCache } from '@/lib/studio/cache';
 import { MediaPool, probeFile, type SourceState } from '@/lib/studio/media';
 import { Player } from '@/lib/studio/preview';
-import { frameUs, stepFrames } from '@/lib/studio/time';
+import { frameUs, secondFrames, stepFrames } from '@/lib/studio/time';
 import { matchShortcut, keysOf, typingTarget } from '@/lib/studio/shortcuts';
 import { DEFAULT_TRANSITION, animLabel, entryPatch, transitionLabel, type AnimKind, type TransitionKind } from '@/lib/studio/transitions';
 import { AUTO, PLAY_RESOLUTIONS, RESOLUTIONS } from '@/lib/studio/handles';
@@ -654,9 +654,9 @@ export function VideoEditor(p: EditorProps) {
       case 'play': player?.toggle(); break;
       case 'play-forward': if (!player?.playing) player?.play(); break;
       case 'stop': if (player?.playing) player.pause(); break;
-      case 'back-second': case 'second-back': seek(at - US); break;
-      case 'second-forward': seek(at + US); break;
-      // whole frames from the frame shown, as the stage's buttons step
+      // whole frames from the frame shown, as the stage's buttons step (a second is secondFrames, 30 at 29.97)
+      case 'back-second': case 'second-back': seek(stepFrames(at, -secondFrames(fps), fps)); break;
+      case 'second-forward': seek(stepFrames(at, secondFrames(fps), fps)); break;
       case 'frame-back': seek(stepFrames(at, -1, fps)); break;
       case 'frame-forward': seek(stepFrames(at, 1, fps)); break;
       case 'edit-back': editPoint(-1); break;

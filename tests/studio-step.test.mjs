@@ -4,6 +4,8 @@
 // 30 x 33,333 µs, a frame length rounded to whole microseconds. A step now goes in whole frames from the frame shown.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { US } from '../src/lib/studio/schema.ts';
 import { frameAt, frameShown, frameStart, frameUs, secondFrames, stepFrames } from '../src/lib/studio/time.ts';
 
 const RATES = [24, 25, 30, 30000 / 1001, 60];
@@ -69,4 +71,46 @@ test('from inside a frame a step lands on a frame start, and never before 0', ()
     assert.equal(stepFrames(0, -1, fps), 0);
     assert.equal(stepFrames(frameStart(3, fps), -secondFrames(fps), fps), 0);
   }
+});
+
+// The stage's buttons and the editor's keys are two places: each button's title names its shortcut (withKeys), and the
+// editor answers that shortcut in its run(). Both are read from the source, so a key that seeks some other way is caught.
+const source = (f) => readFileSync(new URL(`../src/components/studio/${f}`, import.meta.url), 'utf8');
+const framesOf = (expr) => (fps) => new Function('secondFrames', 'fps', `return (${expr});`)(secondFrames, fps);
+
+function buttonSteps() {
+  const out = new Map();
+  for (const m of source('stage.tsx').matchAll(/onClick=\{\(\) => step\((.+?)\)\}[^>]*?withKeys\('[^']*', '([a-z-]+)'\)/g)) out.set(m[2], m[1]);
+  return out;
+}
+
+function keySteps() {
+  const out = new Map();
+  for (const m of source('editor.tsx').matchAll(/((?:case '[a-z-]+': )+)seek\(stepFrames\(at, (.+?), fps\)\); break;/g)) {
+    for (const id of m[1].matchAll(/case '([a-z-]+)'/g)) out.set(id[1], m[2]);
+  }
+  return out;
+}
+
+test('each step key lands where the stage button showing that shortcut lands, at every rate', () => {
+  const buttons = buttonSteps();
+  const keys = keySteps();
+  assert.deepEqual([...buttons.keys()].sort(), ['frame-back', 'frame-forward', 'second-back', 'second-forward']);
+  for (const id of ['back-second', 'second-back', 'second-forward', 'frame-back', 'frame-forward']) assert.ok(keys.has(id), `the editor steps ${id} in whole frames`);
+  const pairs = [...buttons].map(([id, expr]) => [id, framesOf(expr), framesOf(keys.get(id))]);
+  pairs.push(['back-second', framesOf(buttons.get('second-back')), framesOf(keys.get('back-second'))]);
+  for (const fps of RATES) {
+    const times = [0, 1, frameStart(29, fps), frameStart(30, fps) - 1, frameStart(31, fps) + 7, frameStart(450, fps), 10 * US + 123];
+    for (const [id, button, key] of pairs) {
+      for (const t of times) assert.equal(stepFrames(t, key(fps), fps), stepFrames(t, button(fps), fps), `${name(fps)}: ${id} from ${t} µs`);
+    }
+  }
+});
+
+test('before: at 29.97 a second key added a real second, which lands mid-frame and a frame short of the button', () => {
+  const fps = 30000 / 1001;
+  const button = stepFrames(0, secondFrames(fps), fps);
+  assert.equal(frameShown(button, fps), 30);
+  assert.equal(frameShown(US, fps), 29);
+  assert.notEqual(US, frameStart(29, fps));
 });
