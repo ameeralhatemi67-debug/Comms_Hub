@@ -11,6 +11,7 @@ import { VideoEditor } from './editor';
 import { PhotoEditor } from './photo-editor';
 import { probeSupport, supportLines, type StudioSupport } from '@/lib/studio/support';
 import { DeviceInfoPanel } from '../native/device-info';
+import { MeasureNote } from '../native/measure-note';
 import { PreviewWindow } from './preview-window';
 import { isPanelWindow } from '@/lib/studio/preview-link';
 import './studio.css';
@@ -34,6 +35,7 @@ export default function StudioPage({ projectId }: { projectId?: string }) {
       <Title title="الاستوديو" sub="مشاريع فيديو وصور تُحرَّر هنا وتُحفظ في قاعدة البيانات، وتستعمل قوالب الحركة وعلامات الهوية وملفات المكتبة.">
         <MotionTabs active="studio" />
       </Title>
+      <MeasureNote />
       <ProjectList />
       <SupportPanel />
       <DeviceInfoPanel />
