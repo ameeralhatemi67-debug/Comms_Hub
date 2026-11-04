@@ -3128,4 +3128,23 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     been read just after the row, while a 4K frame was still being painted on the page's own thread. It is now read only at a
     quiet moment (the row's media let go, the best of three probes). `qa/studio-preview-ui.cjs` stopped at 4 of 5 on «saved is
     not a function»: the new save wait shared its name with the profile's result. Both fixed after; not yet rerun.
+- **A closed project stops its files' decoding** (`aab1a1d`, `b0a319f`, merged as `85e642a`). After the no-chip 10 s floor row,
+  with its media let go, the manager's runs twice found one application process busy on about eight cores for seconds.
+  `MediaPool.dispose` and `forget` never disposed the files' Mediabunny inputs, so a decode still under way ran to its frame;
+  they now dispose the original's and the light copy's, which ends every pass at once. The likelier cause of that load is the
+  software renderer (ANGLE on WARP painting each 4K frame into a new full-size canvas), so `qa/studio-scrub.cjs` now waits after a
+  row until the application uses under one core, and records how long that took and which processes were busiest.
+  - `tests/studio-media-dispose.test.mjs`, 4 tests without a browser: a real Mediabunny input over an MP4 made in the test, a packet
+    pass under way, ended by `dispose()` or `forget()`. With the fix taken out, the three dispose tests fail.
+  - `npm test` **824 of 824**; `npm run build` passes (12:39 to 12:40, at `b0a319f`).
+  - **Not shown in the application:** the manager's port checks that would show the processor settling after a no-chip 4K row were
+    refused, the window drawing about one frame a second while the laptop was in use. That is the guard working.
+- **The copy made in idle time, in an open editor** (`qa/studio-copy-swap.cjs`, written after the handoff, `Desktop_Power_Handoff.md`
+  3.2 idea 1). **Not run yet:** port 3000 is Fork 1's for its D11 rows. It drives the real editor in the development package with
+  no profile, on the D10 4K fixture added from «هذا الجهاز». It reads the application's hold while the editor plays («playing», the
+  source silent and «تشغيل» pressed from the page) and while the ruler is dragged («scrubbing»), and that nothing is held after.
+  It then checks the paused frame's identity across the take-up, the next play's element and frames, and the copy's element at
+  four times. By design (`media.ts` `copiesReady`) a copy is taken up only while paused, never in the middle of a play, so the swap
+  is checked at the pause. A copy that becomes ready during a play (`readyWhilePlaying`) is not driven: the broker holds every
+  copy while the page plays, so that only happens in a race.
 - **Not done.** Nothing pushed.
