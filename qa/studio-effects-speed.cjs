@@ -8,6 +8,8 @@
 //        node qa/studio-effects-speed.cjs --edge 3104   (Edge alone on that port, writes qa/artifacts/studio-effects-speed/edge.json)
 //        node qa/studio-effects-speed.cjs --profile   (each part of the document alone, on the saving chip and with no chip;
 //                                                      writes qa/artifacts/studio-effects-speed/profile.json)
+//        node qa/studio-effects-speed.cjs --steps   (one full-frame clip's effect step by step, today's effects only, in the
+//                                                    same two engines; writes qa/artifacts/studio-effects-speed/steps.json)
 // Needs: npm run pack:dev in desktop/, git, nothing on 127.0.0.1:3000.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -27,6 +29,8 @@ const FRAMES = 240;
 const RUNS = 3;
 /** --profile: the document's parts one at a time (the fixture's Variant), to tell apart what each effect costs. */
 const PROFILE = process.argv.includes('--profile');
+/** --steps: effectSteps of the fixture, the chip's and the plain code's costs one step at a time. */
+const STEPS = process.argv.includes('--steps');
 /** Two runs of one round whose loads differ by more than this many points are run again. */
 const LOAD_GAP = 25;
 /** Windows may think a window covered and Chromium then draws it about once a second (found by Fork 2, 2026-11-04). */
@@ -73,6 +77,13 @@ async function serve() {
   });
   await h.listen(server, PORT);
   return server;
+}
+
+async function stepsIn(page) {
+  await page.waitForFunction(() => !!window.speedAfter, null, { timeout: 60000 });
+  const loadBefore = load();
+  const rows = await page.evaluate((f) => window.speedAfter.effectSteps(f), 40);
+  return { renderer: await page.evaluate(() => window.speedAfter.renderer()), rows, load: { before: loadBefore, after: load() } };
 }
 
 async function profileIn(page, encode) {
@@ -130,6 +141,29 @@ const median = (xs) => {
     if (!edgeOnly && !fs.existsSync(h.devExe)) throw new Error(`the development package is missing: ${h.devExe} (npm run pack:dev in desktop/)`);
     if (await h.portAnswers(PORT)) throw new Error(`something already answers on 127.0.0.1:${PORT}; stop it and run again`);
     server = await serve();
+    if (STEPS) {
+      for (const [engine, settings, args] of [
+        ['app-saving', { keepInTray: false, gpu: 'saving' }, [NO_OCCLUSION]],
+        ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu', NO_OCCLUSION]],
+      ]) {
+        const { app, win, data } = await h.launchDev(`steps-${engine}`, { settings, args });
+        try {
+          await h.instrument(app);
+          await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
+          await win.waitForLoadState('load');
+          runs[engine] = await stepsIn(win);
+        } finally {
+          await h.closeAll();
+          fs.rmSync(data, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
+        }
+      }
+      check('the steps ran on the saving chip and with no chip', !!runs['app-saving'] && !!runs['app-software'], runs);
+      result.steps = runs;
+      const failed = finish(path.join(out, 'steps.json'));
+      await h.closeAll();
+      if (server) server.close();
+      process.exit(failed ? 1 : 0);
+    }
     if (PROFILE) {
       for (const [engine, settings, args, encode] of [
         ['app-saving', { keepInTray: false, gpu: 'saving' }, [NO_OCCLUSION], true],

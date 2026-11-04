@@ -2,8 +2,10 @@
 // qa/studio-effects-speed.cjs: once with the compositor as it is, once with compose.ts and cover.ts as they were
 // before the effects (the canvas filters). Each bundle times the effects document of bench-docs.ts at 1080p over the
 // synthetic 4K footage: drawn only (a one-pixel read waits for the chip), and drawn, made a VideoFrame and encoded,
-// as an export does.
-import { composeFrame } from '../../src/lib/studio/compose.ts';
+// as an export does. `effectSteps` times one full-frame clip's effect step by step, on today's effects only.
+import { composeFrame, filterOf } from '../../src/lib/studio/compose.ts';
+import { applyEffect, effectOf, layer } from '../../src/lib/studio/effects/index.ts';
+import { blurStraight, colourStraight } from '../../src/lib/studio/effects/code.ts';
 import { CODECS, SyntheticSources, sizeAt } from '../../src/lib/studio/bench.ts';
 import { effectsDoc } from '../../src/lib/studio/bench-docs.ts';
 import { frameStart } from '../../src/lib/studio/time.ts';
@@ -100,6 +102,97 @@ export async function exportLike(frames: number, v: Variant = 'all'): Promise<nu
   }
 }
 
+const ADJUST = { brightness: 12, contrast: 18, saturation: 25 };
+const STEP_CASES: [string, typeof ADJUST | undefined, number][] = [
+  ['colour', ADJUST, 0],
+  ['blur 2.5 (boxes)', undefined, 2.5],
+  ['blur 2.5 with colour', ADJUST, 2.5],
+  ['blur 9 (reduced 4 times)', undefined, 9],
+  ['blur 24 (reduced 8 times)', undefined, 24],
+  ['blur 24 with colour', ADJUST, 24],
+];
+
+/**
+ * One full-frame clip of the 4K footage drawn at 1080p with each effect, as drawEffected draws it (a layer the frame's
+ * size with the blur's margin, the effect, the layer laid down), on the chip and in plain code, against the canvas filter
+ * of before and against no effect at all; milliseconds a frame, a one-pixel read each frame. The plain code's steps are
+ * timed apart: drawing the layer, reading it, the effect, writing it back, laying it down.
+ */
+export function effectSteps(frames: number) {
+  const W = 1920;
+  const H = 1080;
+  const frame = new OffscreenCanvas(W, H).getContext('2d')!;
+  const footage = src.videoAt(0);
+  const wait = () => frame.getImageData(0, 0, 1, 1);
+  const timed = (each: () => void) => {
+    for (let n = 0; n < 3; n++) each();
+    wait();
+    const t0 = performance.now();
+    for (let n = 0; n < frames; n++) {
+      each();
+      wait();
+    }
+    return Math.round(((performance.now() - t0) / frames) * 100) / 100;
+  };
+  const rows: Record<string, unknown>[] = [];
+  rows.push({ case: 'no effect', path: 'drawn', ms: timed(() => {
+    frame.clearRect(0, 0, W, H);
+    frame.drawImage(footage, 0, 0, W, H);
+  }) });
+  for (const [name, adjust, blur] of STEP_CASES) {
+    const plan = effectOf(adjust, blur)!;
+    const pad = plan.blur ? Math.ceil(plan.blur.reach / plan.blur.n) * plan.blur.n : 0;
+    const filter = [adjust ? filterOf(adjust) : '', blur ? 'blur(' + blur.toFixed(2) + 'px)' : ''].filter(Boolean).join(' ');
+    rows.push({ case: name, path: 'filter before', ms: timed(() => {
+      frame.clearRect(0, 0, W, H);
+      frame.filter = filter;
+      frame.drawImage(footage, 0, 0, W, H);
+      frame.filter = 'none';
+    }) });
+    for (const path of ['chip', 'code'] as const) {
+      let offered = true;
+      const ms = timed(() => {
+        frame.clearRect(0, 0, W, H);
+        const { canvas, ctx: g } = layer(0, W, H);
+        g.drawImage(footage, 0, 0, W, H);
+        const out = applyEffect(canvas, W, H, plan, { pad, path });
+        if (!out) offered = false;
+        else frame.drawImage(out, 0, 0, W, H, 0, 0, W, H);
+      });
+      if (offered) rows.push({ case: name, path, ms });
+    }
+    // the plain code step by step
+    const parts = { draw: 0, read: 0, effect: 0, write: 0, lay: 0 };
+    for (let n = 0; n < frames + 3; n++) {
+      const t0 = performance.now();
+      frame.clearRect(0, 0, W, H);
+      const { canvas, ctx: g } = layer(0, W, H);
+      g.drawImage(footage, 0, 0, W, H);
+      g.getImageData(0, 0, 1, 1);
+      const t1 = performance.now();
+      const img = g.getImageData(0, 0, W, H);
+      const t2 = performance.now();
+      const out = plan.blur ? blurStraight(img.data, W, H, plan.blur, pad, plan.colour) : colourStraight(img.data, plan.colour!);
+      const t3 = performance.now();
+      g.putImageData(out === img.data ? img : new ImageData(out as Uint8ClampedArray<ArrayBuffer>, W, H), 0, 0);
+      g.getImageData(0, 0, 1, 1);
+      const t4 = performance.now();
+      frame.drawImage(canvas, 0, 0, W, H, 0, 0, W, H);
+      wait();
+      const t5 = performance.now();
+      if (n < 3) continue;
+      parts.draw += t1 - t0;
+      parts.read += t2 - t1;
+      parts.effect += t3 - t2;
+      parts.write += t4 - t3;
+      parts.lay += t5 - t4;
+    }
+    const each = Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, Math.round((v / frames) * 100) / 100]));
+    rows.push({ case: name, path: 'code, step by step', ...each });
+  }
+  return rows;
+}
+
 function renderer(): string {
   const gl = document.createElement('canvas').getContext('webgl');
   const ext = gl?.getExtension('WEBGL_debug_renderer_info');
@@ -107,4 +200,4 @@ function renderer(): string {
 }
 
 const name = (globalThis as unknown as { __speedName?: string }).__speedName ?? 'speed';
-Object.assign(window as unknown as Record<string, unknown>, { [name]: { drawOnly, exportLike, renderer } });
+Object.assign(window as unknown as Record<string, unknown>, { [name]: { drawOnly, exportLike, effectSteps, renderer } });
