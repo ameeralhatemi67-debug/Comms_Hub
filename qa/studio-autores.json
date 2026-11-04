@@ -1,0 +1,1325 @@
+{
+  "script": "qa/studio-autores.cjs",
+  "run": "2026-11-04T05:34:20.193Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "app-saving: three 4K sources ready and a light copy of each made by the application",
+      "pass": true,
+      "detail": "{\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"copies\":{\"ms\":14993,\"tools\":[{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}}]}}"
+    },
+    {
+      "name": "app-saving, «تلقائية» with the budget and light copies (from the plan's start): at most 2% missed, dropped and not shown (0% of 541, 0% of 1628, 0% not shown)",
+      "pass": true,
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17990.20000000001},\"quality\":{\"total\":1628,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":false,\"width\":3840},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":53,\"after\":66}}"
+    },
+    {
+      "name": "app-saving, «تلقائية» with the budget and light copies (from where the last play ended): at most 2% missed, dropped and not shown (0.6% of 541, 0% of 1631, 0% not shown)",
+      "pass": true,
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":538,\"missed\":3,\"reseeks\":0,\"ms\":17999.800000035757},\"quality\":{\"total\":1631,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":false,\"width\":3840},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":63,\"after\":38}}"
+    },
+    {
+      "name": "app-strong: three 4K sources ready and a light copy of each made by the application",
+      "pass": true,
+      "detail": "{\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"copies\":{\"ms\":8652,\"tools\":[{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}}]}}"
+    },
+    {
+      "name": "app-strong, «تلقائية» with the budget and light copies (from the plan's start): at most 2% missed, dropped and not shown (0% of 541, 0% of 1631, 0% not shown)",
+      "pass": true,
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17999.800000023853},\"quality\":{\"total\":1631,\"dropped\":0},\"levels\":[{\"at\":1,\"share\":0.25},{\"at\":4738,\"share\":0.5},{\"at\":9210,\"share\":1}],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":21,\"after\":60}}"
+    },
+    {
+      "name": "app-strong, «تلقائية» with the budget and light copies (from where the last play ended): at most 2% missed, dropped and not shown (0% of 541, 0% of 1632, 0% not shown)",
+      "pass": true,
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17992.5},\"quality\":{\"total\":1632,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":51,\"after\":30}}"
+    },
+    {
+      "name": "app-software: three 4K sources ready and a light copy of each made by the application",
+      "pass": true,
+      "detail": "{\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"copies\":{\"ms\":8934,\"tools\":[{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}}]}}"
+    },
+    {
+      "name": "app-software, «تلقائية» with the budget and light copies (from the plan's start): at most 2% missed, dropped and not shown (0% of 541, 0% of 1630, 0% not shown)",
+      "pass": true,
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":0,\"ms\":17992.39999998809},\"quality\":{\"total\":1630,\"dropped\":0},\"levels\":[{\"at\":4500,\"share\":0.5},{\"at\":8971,\"share\":1}],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":31,\"after\":84}}"
+    },
+    {
+      "name": "app-software, «تلقائية» with the budget and light copies (from where the last play ended): at most 2% missed, dropped and not shown (0% of 541, 0% of 1664, 0% not shown)",
+      "pass": true,
+      "detail": "{\"stats\":{\"due\":541,\"drawn\":541,\"missed\":0,\"reseeks\":6,\"ms\":17989.5},\"quality\":{\"total\":1664,\"dropped\":0},\"levels\":[],\"playing\":[{\"source\":0,\"copy\":true,\"width\":1280},{\"source\":1,\"copy\":true,\"width\":1280},{\"source\":2,\"copy\":true,\"width\":1280}],\"load\":{\"before\":60,\"after\":38}}"
+    }
+  ],
+  "notes": [
+    "app-saving: «كاملة» with no copies missed 67.3%, dropped 0%, not shown 59.3% (198 re-seeks); «تلقائية» with no copies 3.9%, 0%, not shown 0% (2 re-seeks, levels [{\"at\":38,\"share\":0.5},{\"at\":557,\"share\":0.25}]); «كاملة» with copies 1.7%, 0.2%, not shown 1.1%.",
+    "app-strong: «كاملة» with no copies missed 25.4%, dropped 0%, not shown 66.7% (354 re-seeks); «تلقائية» with no copies 6.5%, 0%, not shown 0% (55 re-seeks, levels [{\"at\":25,\"share\":0.5},{\"at\":749,\"share\":0.25}]); «كاملة» with copies 1.5%, 0.2%, not shown 1%.",
+    "app-software: «كاملة» with no copies missed 7%, dropped null%, not shown 100% (390 re-seeks); «تلقائية» with no copies 0%, null%, not shown 100% (405 re-seeks, levels []); «كاملة» with copies 0%, 0%, not shown 0%."
+  ],
+  "settings": {
+    "seconds": 18,
+    "project": "16:9, three video tracks of 4K30 H.264 60 Mbit/s, stage canvas 1280 x 720",
+    "maxPct": 2
+  },
+  "runs": {
+    "app-saving": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48",
+        "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      },
+      "opened": {
+        "states": [
+          {
+            "kind": "ready"
+          },
+          {
+            "kind": "ready"
+          },
+          {
+            "kind": "ready"
+          }
+        ],
+        "clips": [
+          {
+            "source": "s9a76f47ae0",
+            "start": 0,
+            "length": 20000000,
+            "track": "t0774b768ff"
+          },
+          {
+            "source": "s3c95147190",
+            "start": 0,
+            "length": 20000000,
+            "track": "t25d6f63996"
+          },
+          {
+            "source": "s4011000d20",
+            "start": 0,
+            "length": 20000000,
+            "track": "te2697de992"
+          }
+        ],
+        "tools": [
+          {
+            "heavy": false,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "none"
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": false,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "none"
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": false,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "none"
+            },
+            "convert": {
+              "kind": "none"
+            }
+          }
+        ]
+      },
+      "plan": {
+        "entry": {
+          "key": {
+            "app": "0.8.0",
+            "chrome": "156.0.8078.48",
+            "chip": {
+              "vendorId": 4098,
+              "deviceId": 5761,
+              "vendor": "AMD",
+              "name": "AMD Radeon(TM) Graphics",
+              "driver": "31.0.12044.3"
+            },
+            "switch": "low",
+            "power": "ac"
+          },
+          "decode": {
+            "h264_2160": {
+              "hw": 192.18,
+              "sw": 44.89
+            }
+          },
+          "compose": {
+            "plain": 3.11,
+            "text": 5.69,
+            "effects": 10.08
+          },
+          "spread": 41.57
+        },
+        "knobs": {
+          "previewStart": 1,
+          "frameCacheMB": 1024,
+          "exportLanes": 2,
+          "copiesAtOnce": 1,
+          "photoWorkers": 10
+        },
+        "budget": 2.1353333333333335,
+        "numbers": {
+          "v": 1,
+          "encode": {
+            "h264_1080": {
+              "hw": 83.4,
+              "sw": 38.98
+            },
+            "h264_2160": {
+              "hw": 13.77,
+              "sw": 4.79
+            }
+          },
+          "decode": {
+            "h264_2160": {
+              "hw": 192.18,
+              "sw": 44.89
+            }
+          },
+          "lanes": [
+            38.53,
+            52.72,
+            46.35
+          ],
+          "compose": {
+            "plain": 3.11,
+            "text": 5.69,
+            "effects": 10.08
+          },
+          "exportFps": 38.53,
+          "support": {
+            "hevcEncode": true,
+            "av1Encode": true,
+            "tenBitEncode": false,
+            "hevcDecode": true,
+            "av1Decode": true
+          },
+          "runs": 3,
+          "spread": 41.57,
+          "seconds": 83.38,
+          "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        },
+        "load": {
+          "before": 100,
+          "after": 94
+        }
+      },
+      "plays": [
+        {
+          "label": "floor",
+          "stats": {
+            "due": 542,
+            "drawn": 276,
+            "missed": 365,
+            "reseeks": 198,
+            "ms": 18016.200000047684
+          },
+          "quality": {
+            "total": 662,
+            "dropped": 0
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 1,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 2,
+              "copy": false,
+              "width": 3840
+            }
+          ],
+          "missedPct": 67.3,
+          "droppedPct": 0,
+          "shortPct": 59.3,
+          "load": {
+            "before": 99,
+            "after": 100
+          }
+        },
+        {
+          "label": "auto",
+          "stats": {
+            "due": 541,
+            "drawn": 520,
+            "missed": 21,
+            "reseeks": 2,
+            "ms": 18039.600000000006
+          },
+          "quality": {
+            "total": 1632,
+            "dropped": 0
+          },
+          "levels": [
+            {
+              "at": 38,
+              "share": 0.5
+            },
+            {
+              "at": 557,
+              "share": 0.25
+            }
+          ],
+          "end": 0.25,
+          "playing": [
+            {
+              "source": 0,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 1,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 2,
+              "copy": false,
+              "width": 3840
+            }
+          ],
+          "missedPct": 3.9,
+          "droppedPct": 0,
+          "shortPct": 0,
+          "load": {
+            "before": 99,
+            "after": 73
+          }
+        },
+        {
+          "label": "floor-copies",
+          "stats": {
+            "due": 541,
+            "drawn": 1055,
+            "missed": 9,
+            "reseeks": 9,
+            "ms": 18006.800000023853
+          },
+          "quality": {
+            "total": 1605,
+            "dropped": 3
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 1,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 2,
+              "copy": true,
+              "width": 1280
+            }
+          ],
+          "missedPct": 1.7,
+          "droppedPct": 0.2,
+          "shortPct": 1.1,
+          "load": {
+            "before": 54,
+            "after": 68
+          }
+        },
+        {
+          "label": "auto-copies",
+          "stats": {
+            "due": 541,
+            "drawn": 541,
+            "missed": 0,
+            "reseeks": 0,
+            "ms": 17990.20000000001
+          },
+          "quality": {
+            "total": 1628,
+            "dropped": 0
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 1,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 2,
+              "copy": true,
+              "width": 1280
+            }
+          ],
+          "missedPct": 0,
+          "droppedPct": 0,
+          "shortPct": 0,
+          "load": {
+            "before": 53,
+            "after": 66
+          }
+        },
+        {
+          "label": "auto-copies-again",
+          "stats": {
+            "due": 541,
+            "drawn": 538,
+            "missed": 3,
+            "reseeks": 0,
+            "ms": 17999.800000035757
+          },
+          "quality": {
+            "total": 1631,
+            "dropped": 0
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 1,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 2,
+              "copy": true,
+              "width": 1280
+            }
+          ],
+          "missedPct": 0.6,
+          "droppedPct": 0,
+          "shortPct": 0,
+          "load": {
+            "before": 63,
+            "after": 38
+          }
+        }
+      ],
+      "copies": {
+        "ms": 14993,
+        "tools": [
+          {
+            "heavy": true,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "ready",
+              "height": 720
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": true,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "ready",
+              "height": 720
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": true,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "ready",
+              "height": 720
+            },
+            "convert": {
+              "kind": "none"
+            }
+          }
+        ]
+      }
+    },
+    "app-strong": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48",
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      },
+      "opened": {
+        "states": [
+          {
+            "kind": "ready"
+          },
+          {
+            "kind": "ready"
+          },
+          {
+            "kind": "ready"
+          }
+        ],
+        "clips": [
+          {
+            "source": "s41bdc3b5b7",
+            "start": 0,
+            "length": 20000000,
+            "track": "t6eff7fba36"
+          },
+          {
+            "source": "sf986fa67eb",
+            "start": 0,
+            "length": 20000000,
+            "track": "tbd3469c9c6"
+          },
+          {
+            "source": "s656c6e3a08",
+            "start": 0,
+            "length": 20000000,
+            "track": "t424f6905b8"
+          }
+        ],
+        "tools": [
+          {
+            "heavy": false,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "none"
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": false,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "none"
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": false,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "none"
+            },
+            "convert": {
+              "kind": "none"
+            }
+          }
+        ]
+      },
+      "plan": {
+        "entry": {
+          "key": {
+            "app": "0.8.0",
+            "chrome": "156.0.8078.48",
+            "chip": {
+              "vendorId": 4318,
+              "deviceId": 9634,
+              "vendor": "NVIDIA",
+              "name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+              "driver": "32.0.16.1091"
+            },
+            "switch": "high",
+            "power": "ac"
+          },
+          "decode": {
+            "h264_2160": {
+              "hw": 156.74,
+              "sw": 67.88
+            }
+          },
+          "compose": {
+            "plain": 1.67,
+            "text": 3.28,
+            "effects": 5.04
+          },
+          "spread": 12.92
+        },
+        "knobs": {
+          "previewStart": 1,
+          "frameCacheMB": 1024,
+          "exportLanes": 1,
+          "copiesAtOnce": 1,
+          "photoWorkers": 10
+        },
+        "budget": 1.7415555555555555,
+        "numbers": {
+          "v": 1,
+          "encode": {
+            "h264_1080": {
+              "hw": 87.48,
+              "sw": 45.73
+            },
+            "h264_2160": {
+              "hw": 30.71,
+              "sw": 6.82
+            }
+          },
+          "decode": {
+            "h264_2160": {
+              "hw": 156.74,
+              "sw": 67.88
+            }
+          },
+          "lanes": [
+            82.67,
+            86.49,
+            86.55
+          ],
+          "compose": {
+            "plain": 1.67,
+            "text": 3.28,
+            "effects": 5.04
+          },
+          "exportFps": 82.67,
+          "support": {
+            "hevcEncode": true,
+            "av1Encode": true,
+            "tenBitEncode": false,
+            "hevcDecode": true,
+            "av1Decode": true
+          },
+          "runs": 3,
+          "spread": 12.92,
+          "seconds": 49.42,
+          "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3050 Laptop GPU (0x000025A2) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        },
+        "load": {
+          "before": 63,
+          "after": 29
+        }
+      },
+      "plays": [
+        {
+          "label": "floor",
+          "stats": {
+            "due": 540,
+            "drawn": 689,
+            "missed": 137,
+            "reseeks": 354,
+            "ms": 17988.899999988076
+          },
+          "quality": {
+            "total": 540,
+            "dropped": 0
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 1,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 2,
+              "copy": false,
+              "width": 3840
+            }
+          ],
+          "missedPct": 25.4,
+          "droppedPct": 0,
+          "shortPct": 66.7,
+          "load": {
+            "before": 34,
+            "after": 99
+          }
+        },
+        {
+          "label": "auto",
+          "stats": {
+            "due": 541,
+            "drawn": 506,
+            "missed": 35,
+            "reseeks": 55,
+            "ms": 18031.799999976152
+          },
+          "quality": {
+            "total": 1739,
+            "dropped": 0
+          },
+          "levels": [
+            {
+              "at": 25,
+              "share": 0.5
+            },
+            {
+              "at": 749,
+              "share": 0.25
+            }
+          ],
+          "end": 0.25,
+          "playing": [
+            {
+              "source": 0,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 1,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 2,
+              "copy": false,
+              "width": 3840
+            }
+          ],
+          "missedPct": 6.5,
+          "droppedPct": 0,
+          "shortPct": 0,
+          "load": {
+            "before": 100,
+            "after": 39
+          }
+        },
+        {
+          "label": "floor-copies",
+          "stats": {
+            "due": 542,
+            "drawn": 1060,
+            "missed": 8,
+            "reseeks": 9,
+            "ms": 18001.800000023853
+          },
+          "quality": {
+            "total": 1610,
+            "dropped": 3
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 1,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 2,
+              "copy": true,
+              "width": 1280
+            }
+          ],
+          "missedPct": 1.5,
+          "droppedPct": 0.2,
+          "shortPct": 1,
+          "load": {
+            "before": 28,
+            "after": 22
+          }
+        },
+        {
+          "label": "auto-copies",
+          "stats": {
+            "due": 541,
+            "drawn": 541,
+            "missed": 0,
+            "reseeks": 0,
+            "ms": 17999.800000023853
+          },
+          "quality": {
+            "total": 1631,
+            "dropped": 0
+          },
+          "levels": [
+            {
+              "at": 1,
+              "share": 0.25
+            },
+            {
+              "at": 4738,
+              "share": 0.5
+            },
+            {
+              "at": 9210,
+              "share": 1
+            }
+          ],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 1,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 2,
+              "copy": true,
+              "width": 1280
+            }
+          ],
+          "missedPct": 0,
+          "droppedPct": 0,
+          "shortPct": 0,
+          "load": {
+            "before": 21,
+            "after": 60
+          }
+        },
+        {
+          "label": "auto-copies-again",
+          "stats": {
+            "due": 541,
+            "drawn": 541,
+            "missed": 0,
+            "reseeks": 0,
+            "ms": 17992.5
+          },
+          "quality": {
+            "total": 1632,
+            "dropped": 0
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 1,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 2,
+              "copy": true,
+              "width": 1280
+            }
+          ],
+          "missedPct": 0,
+          "droppedPct": 0,
+          "shortPct": 0,
+          "load": {
+            "before": 51,
+            "after": 30
+          }
+        }
+      ],
+      "copies": {
+        "ms": 8652,
+        "tools": [
+          {
+            "heavy": true,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "ready",
+              "height": 720
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": true,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "ready",
+              "height": 720
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": true,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "ready",
+              "height": 720
+            },
+            "convert": {
+              "kind": "none"
+            }
+          }
+        ]
+      }
+    },
+    "app-software": {
+      "engine": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48",
+        "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+      },
+      "opened": {
+        "states": [
+          {
+            "kind": "ready"
+          },
+          {
+            "kind": "ready"
+          },
+          {
+            "kind": "ready"
+          }
+        ],
+        "clips": [
+          {
+            "source": "sa249669c60",
+            "start": 0,
+            "length": 20000000,
+            "track": "t11f0c8cfb1"
+          },
+          {
+            "source": "sbd95ed9d91",
+            "start": 0,
+            "length": 20000000,
+            "track": "t317d013da4"
+          },
+          {
+            "source": "s06cc9472d8",
+            "start": 0,
+            "length": 20000000,
+            "track": "tc84dd08da6"
+          }
+        ],
+        "tools": [
+          {
+            "heavy": false,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "none"
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": false,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "none"
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": false,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "none"
+            },
+            "convert": {
+              "kind": "none"
+            }
+          }
+        ]
+      },
+      "plan": {
+        "entry": {
+          "key": {
+            "app": "0.8.0",
+            "chrome": "156.0.8078.48",
+            "chip": {
+              "vendorId": 65535,
+              "deviceId": 65535,
+              "vendor": "0xffff",
+              "name": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11-10.0.26",
+              "driver": "10.0.26100.9818"
+            },
+            "switch": "none",
+            "power": "ac"
+          },
+          "decode": {
+            "h264_2160": {
+              "hw": null,
+              "sw": 109.29
+            }
+          },
+          "compose": {
+            "plain": 0.66,
+            "text": 2.49,
+            "effects": 75.76
+          },
+          "spread": 4.07
+        },
+        "knobs": {
+          "previewStart": 0.25,
+          "frameCacheMB": 1024,
+          "exportLanes": 1,
+          "copiesAtOnce": 1,
+          "photoWorkers": 10
+        },
+        "budget": 0.19234424498416047,
+        "numbers": {
+          "v": 1,
+          "encode": {
+            "h264_1080": {
+              "hw": null,
+              "sw": 49.47
+            },
+            "h264_2160": {
+              "hw": null,
+              "sw": 7.87
+            }
+          },
+          "decode": {
+            "h264_2160": {
+              "hw": null,
+              "sw": 109.29
+            }
+          },
+          "lanes": [
+            11.52,
+            11.03,
+            10.47
+          ],
+          "compose": {
+            "plain": 0.66,
+            "text": 2.49,
+            "effects": 75.76
+          },
+          "exportFps": 11.52,
+          "support": {
+            "hevcEncode": false,
+            "av1Encode": true,
+            "tenBitEncode": false,
+            "hevcDecode": false,
+            "av1Decode": true
+          },
+          "runs": 3,
+          "spread": 4.07,
+          "seconds": 149.08,
+          "renderer": "ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+        },
+        "load": {
+          "before": 25,
+          "after": 16
+        }
+      },
+      "plays": [
+        {
+          "label": "floor",
+          "stats": {
+            "due": 541,
+            "drawn": 941,
+            "missed": 38,
+            "reseeks": 390,
+            "ms": 17996.999999988067
+          },
+          "quality": {
+            "total": 0,
+            "dropped": 0
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 1,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 2,
+              "copy": false,
+              "width": 3840
+            }
+          ],
+          "missedPct": 7,
+          "droppedPct": null,
+          "shortPct": 100,
+          "load": {
+            "before": 38,
+            "after": 64
+          }
+        },
+        {
+          "label": "auto",
+          "stats": {
+            "due": 541,
+            "drawn": 541,
+            "missed": 0,
+            "reseeks": 405,
+            "ms": 18014.20000000001
+          },
+          "quality": {
+            "total": 0,
+            "dropped": 0
+          },
+          "levels": [],
+          "end": 0.25,
+          "playing": [
+            {
+              "source": 0,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 1,
+              "copy": false,
+              "width": 3840
+            },
+            {
+              "source": 2,
+              "copy": false,
+              "width": 3840
+            }
+          ],
+          "missedPct": 0,
+          "droppedPct": null,
+          "shortPct": 100,
+          "load": {
+            "before": 43,
+            "after": 9
+          }
+        },
+        {
+          "label": "floor-copies",
+          "stats": {
+            "due": 542,
+            "drawn": 1049,
+            "missed": 0,
+            "reseeks": 0,
+            "ms": 18017.000000011933
+          },
+          "quality": {
+            "total": 1626,
+            "dropped": 0
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 1,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 2,
+              "copy": true,
+              "width": 1280
+            }
+          ],
+          "missedPct": 0,
+          "droppedPct": 0,
+          "shortPct": 0,
+          "load": {
+            "before": 17,
+            "after": 34
+          }
+        },
+        {
+          "label": "auto-copies",
+          "stats": {
+            "due": 541,
+            "drawn": 541,
+            "missed": 0,
+            "reseeks": 0,
+            "ms": 17992.39999998809
+          },
+          "quality": {
+            "total": 1630,
+            "dropped": 0
+          },
+          "levels": [
+            {
+              "at": 4500,
+              "share": 0.5
+            },
+            {
+              "at": 8971,
+              "share": 1
+            }
+          ],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 1,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 2,
+              "copy": true,
+              "width": 1280
+            }
+          ],
+          "missedPct": 0,
+          "droppedPct": 0,
+          "shortPct": 0,
+          "load": {
+            "before": 31,
+            "after": 84
+          }
+        },
+        {
+          "label": "auto-copies-again",
+          "stats": {
+            "due": 541,
+            "drawn": 541,
+            "missed": 0,
+            "reseeks": 6,
+            "ms": 17989.5
+          },
+          "quality": {
+            "total": 1664,
+            "dropped": 0
+          },
+          "levels": [],
+          "end": 1,
+          "playing": [
+            {
+              "source": 0,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 1,
+              "copy": true,
+              "width": 1280
+            },
+            {
+              "source": 2,
+              "copy": true,
+              "width": 1280
+            }
+          ],
+          "missedPct": 0,
+          "droppedPct": 0,
+          "shortPct": 0,
+          "load": {
+            "before": 60,
+            "after": 38
+          }
+        }
+      ],
+      "copies": {
+        "ms": 8934,
+        "tools": [
+          {
+            "heavy": true,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "ready",
+              "height": 720
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": true,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "ready",
+              "height": 720
+            },
+            "convert": {
+              "kind": "none"
+            }
+          },
+          {
+            "heavy": true,
+            "audioUnsupported": false,
+            "convertible": false,
+            "converted": false,
+            "proxy": {
+              "kind": "ready",
+              "height": 720
+            },
+            "convert": {
+              "kind": "none"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "total": 9,
+  "passed": 9,
+  "failed": 0
+}
