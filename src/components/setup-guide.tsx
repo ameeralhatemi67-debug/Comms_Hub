@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import { CircleAlert } from 'lucide-react';
 import { GUIDES, resolveGuide, type Guide } from '@/lib/setup-guides';
-import { GuideShots, GuideTodo, Rich } from './guide-text';
+import { GuideInfo, GuideShots, GuideTables, GuideTodo, Rich } from './guide-text';
 import { Modal } from './ui';
 
 export function SetupGuide({
@@ -62,6 +62,8 @@ export function SetupGuide({
                     </span>
                   )}
                   {s.todo && s.todo.length > 0 && <GuideTodo items={s.todo} shots={s.shots} />}
+                  {s.info && s.info.length > 0 && <GuideInfo items={s.info} />}
+                  {s.tables && s.tables.length > 0 && <GuideTables tables={s.tables} />}
                   {s.copy && (
                     <bdi className="su-copy" dir="ltr">
                       {s.copy}

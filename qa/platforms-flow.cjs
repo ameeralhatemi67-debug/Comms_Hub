@@ -626,6 +626,53 @@ const sides = (t) =>
     check('English direction: the pictures keep their own direction and the page does not scroll sideways', (await fits(yl)) && (await yl.evaluate(() => [...document.querySelectorAll('dialog[open] .gd-zoom')].every((e) => getComputedStyle(e).direction === 'ltr'))));
     await yl.context().close();
 
+    // The X guide's price step (MVP_draft.md section 67.8): notes with the circled "!" and tables, in the sheet, on a computer and a phone.
+    const xs = await fresh();
+    await xs.goto(base);
+    await xs.waitForSelector('.pf-row');
+    await row(xs, 'x').locator('.pf-btn').first().click();
+    await sheet(xs).waitFor();
+    await sheet(xs).locator('.pf-step-btn', { hasText: 'اشحن رصيداً' }).click();
+    await xs.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete) && document.querySelector('dialog[open] .gd-tbl'));
+    const xp = await xs.evaluate(() => {
+      const c = document.querySelector('dialog[open] .pf-input .pf-card');
+      const tbl = [...c.querySelectorAll('.gd-tbl')];
+      const stray = [];
+      const w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT);
+      for (let n = w.nextNode(); n; n = w.nextNode()) if (!n.parentElement.closest('bdi') && /[A-Za-z]/.test(n.textContent)) stray.push(n.textContent.trim().slice(0, 40));
+      return {
+        notes: c.querySelectorAll('.gd-info').length,
+        icons: c.querySelectorAll('.gd-info svg').length,
+        tables: tbl.length,
+        open: tbl.map((t) => t.open),
+        rows: tbl.map((t) => t.querySelectorAll('tbody tr').length),
+        first: tbl[0].querySelector('tbody tr').innerText.replace(/\s+/g, ' '),
+        stray,
+        wide: document.documentElement.scrollWidth <= window.innerWidth + 1,
+      };
+    });
+    await xs.screenshot({ path: path.join(out, '26-x-credits.png') });
+    check('the price step of X has two notes with the circled "!" and four tables: the short one open, the three long ones folded', xp.notes === 2 && xp.icons === 2 && xp.tables === 4 && JSON.stringify(xp.open) === '[true,false,false,false]' && JSON.stringify(xp.rows) === '[3,12,16,19]', JSON.stringify(xp));
+    check('the prices are read from the table, and every English cell is isolated', /Post: Create \$0\.015 per request/.test(xp.first) && xp.stray.length === 0 && xp.wide, JSON.stringify(xp));
+    await xs.locator('dialog[open] .gd-tbl').nth(2).locator('summary').click();
+    check('a folded table opens on a click and shows its sixteen rows', (await xs.locator('dialog[open] .gd-tbl').nth(2).evaluate((e) => e.open)) && (await xs.locator('dialog[open] .gd-tbl').nth(2).locator('tbody tr').count()) === 16);
+    await xs.locator('dialog[open] .gd-tbl').nth(2).scrollIntoViewIfNeeded();
+    await xs.screenshot({ path: path.join(out, '27-x-prices-open.png') });
+    await xs.context().close();
+    const xm = await fresh({ width: 390, height: 844 });
+    await xm.goto(base);
+    await xm.waitForSelector('.pf-row');
+    await row(xm, 'x').locator('.pf-btn').first().click();
+    await sheet(xm).waitFor();
+    await xm.evaluate(() => document.querySelector('dialog[open] .pf-step[data-step="credits"] .pf-step-btn, dialog[open] .pf-step-btn')?.click());
+    await xm.evaluate(() => [...document.querySelectorAll('dialog[open] .pf-step-btn')].find((b) => b.textContent.includes('اشحن رصيداً'))?.click());
+    await xm.waitForSelector('dialog[open] .gd-tbl');
+    await xm.locator('dialog[open] .gd-tbl').nth(3).locator('summary').click();
+    await xm.waitForTimeout(100);
+    await xm.screenshot({ path: path.join(out, '28-x-phone.png') });
+    check('phone: the tables, open or folded, stay inside the sheet and the page does not scroll sideways', (await fits(xm)) && (await xm.evaluate(() => { const b = document.querySelector('dialog[open] .pf-body'); return b.scrollWidth <= b.clientWidth + 1; })));
+    await xm.context().close();
+
     await t.context().close();
 
     check('no page error and nothing in the console', errs.length === 0, errs.slice(0, 3).join(' | '));

@@ -3481,6 +3481,20 @@ The pictures are in `public/guides/meta/`, made by `node scripts/guide-shots.mjs
   ticked in one app is still untested.
 - **Unchanged.** Saved progress and every rule of the database.
 
+## 67.8 The X guide, first steps, and notes and tables inside a step, 2026-11-03
+
+The owner began following the X steps on the developer console and sent four pictures of the pricing pages and one of the dashboard. The goals for the whole guide:
+better wording of each step with the English set apart as in 67.5, pictures of the console, and a note with the circled "!" wherever more must be said.
+
+- **Two new parts of a step** (`src/lib/setup-guides.ts`, `src/components/guide-text.tsx`; drawn by the setup sheet and by the circled "!"):
+  - `info`: notes, each with the circled "!" (the icon set's `CircleAlert`), drawn after the list of actions.
+  - `tables`: tables of two columns with a title, an optional note and an optional fold. Every cell is isolated as English, so a price keeps its direction inside an Arabic page; a table too wide for a phone scrolls inside its own frame, never the page.
+- **Dates.** A date such as 2026-11-03 inside an Arabic sentence is isolated by `src/lib/guide-text.ts`; before, the line reversed its hyphens («03-11-2026»). Plain numbers stay in the line.
+- **«اشحن رصيداً»** (`credits`) shows the prices as the console listed them on 2026-11-03: a short open table of what matters to the site (a post, a post with a link, a read of the user), then three folded tables (reads, actions, events), 12, 16 and 19 rows. The reading table is headed «Resource»; the events table's heading was not in the pictures, so its title is the owner's name for it. Two notes: the prices are of that day and change; the site only checks the connection today (one read of the user, about 0.010 dollar each), and real publishing to X has not begun.
+- **«ادخل وحدة المطوّرين»** (`console`) lists its actions. One picture, the dashboard (`public/guides/x/`, made by `node scripts/guide-shots.mjs <folder> x`), with the name blurred.
+- **Not yet done.** The steps from «أنشئ التطبيق» on: the owner could not find «Create App» on the dashboard and is sending the next pages.
+- **Unchanged.** Saved progress, every step id, every rule of the database.
+
 ---
 
 # 68. «ورقة الكتابة» and the writing documents, 2026-11-02

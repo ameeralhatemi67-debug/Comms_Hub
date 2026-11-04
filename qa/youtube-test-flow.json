@@ -1,6 +1,6 @@
 {
   "script": "qa/youtube-test-flow.cjs",
-  "run": "2026-11-03T06:21:23.495Z",
+  "run": "2026-11-03T08:47:31.653Z",
   "checks": [
     {
       "name": "a link to the channel on YouTube, by its handle, in a new tab",
@@ -110,7 +110,7 @@
     {
       "name": "the list shows the test, published and private, by whom",
       "pass": true,
-      "detail": "تجربة من الجهاز\nمنشور · خاص · 03‏/11‏/2026، 9:21 ص · مدير الفحص\nمشاهدة\nحذف"
+      "detail": "تجربة من الجهاز\nمنشور · خاص · 03‏/11‏/2026، 11:47 ص · مدير الفحص\nمشاهدة\nحذف"
     },
     {
       "name": "its delete asks for a hold, with the reason",

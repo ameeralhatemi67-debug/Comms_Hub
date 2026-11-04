@@ -192,3 +192,49 @@ test('the pictures of the Instagram guide are the files in public/guides/meta, w
   assert.doesNotMatch(JSON.stringify(GUIDES), /polkeruoo|17951132926087090|2617091465408415/);
   assert.doesNotMatch(readFileSync('scripts/guide-shots.mjs', 'utf8'), /polkeruoo|17951132926087090/);
 });
+
+test('a step can carry notes with the circled "!" and tables of figures, drawn by both places that draw a guide', () => {
+  for (const f of ['src/components/settings/platform-sheet.tsx', 'src/components/setup-guide.tsx']) {
+    const src = readFileSync(f, 'utf8');
+    assert.match(src, /GuideInfo/, f);
+    assert.match(src, /GuideTables/, f);
+  }
+  const comp = readFileSync('src/components/guide-text.tsx', 'utf8');
+  assert.match(comp, /<bdi dir="ltr">\{a\}<\/bdi>/, 'every cell is isolated');
+  assert.doesNotMatch(comp, /dangerouslySetInnerHTML/);
+});
+
+test('the X guide shows the prices of the developer console as read on 2026-11-03, as tables, and says the date', () => {
+  const g = GUIDES.x;
+  assert.deepEqual(g.steps.map((s) => s.id), ['console', 'credits', 'app', 'auth', 'redirect', 'website', 'keys']);
+  assert.ok(g.steps.filter((s) => s.id !== 'keys').every((s) => s.implied), 'every step before the keys is implied');
+  const credits = g.steps.find((s) => s.id === 'credits');
+  assert.equal(credits.tables.length, 4);
+  const cell = (t, name) => t.rows.find((r) => r[0] === name)?.[1];
+  const [pick, reads, actions, events] = credits.tables;
+  assert.equal(cell(actions, 'Post: Create'), '$0.015 per request');
+  assert.equal(cell(actions, 'Post: Create (with URL)'), '$0.200 per request');
+  assert.equal(cell(reads, 'User: Read'), '$0.010 per resource');
+  assert.equal(cell(events, 'post.delete'), 'Not billed');
+  assert.deepEqual([reads.rows.length, actions.rows.length, events.rows.length], [12, 16, 19]);
+  // The short table repeats rows of the long ones and never a different price.
+  for (const [name, price] of pick.rows) assert.equal(cell(actions, name) ?? cell(reads, name), price, name);
+  assert.ok(pick.fold !== true && credits.tables.slice(1).every((t) => t.fold), 'the short table is open, the long ones folded');
+  assert.match(JSON.stringify(credits.info), /2026-11-03/);
+  assert.match(JSON.stringify(g.notes), /2026-11-03/);
+  for (const t of credits.tables) for (const r of t.rows) assert.ok(r[0].length > 3 && /\$|Not billed/.test(r[1]), r.join());
+  // The picture: a file of public/guides/x, whole, small, and holding no name.
+  const shots = g.steps.flatMap((s) => s.shots ?? []);
+  assert.equal(shots.length, 1);
+  const d = png(`public${shots[0].src}`);
+  assert.deepEqual([d.w, d.h], [shots[0].w, shots[0].h]);
+  assert.ok(d.bytes < 120_000);
+  assert.deepEqual(readdirSync('public/guides/x'), ['x-dashboard.png']);
+  assert.doesNotMatch(JSON.stringify(GUIDES) + readFileSync('scripts/guide-shots.mjs', 'utf8'), /Alhatime/i);
+});
+
+test('a date in a sentence is isolated, so an Arabic line does not reverse its hyphens', () => {
+  const dates = segments('كما قُرئت في 2026-11-03، وتتغير').filter((g) => g.k === 'latin');
+  assert.deepEqual(dates.map((g) => g.s), ['2026-11-03']);
+  assert.equal(segments('بعد 3 أيام و12 ساعة').filter((g) => g.k !== 'text').length, 0, 'plain numbers stay in the line');
+});

@@ -23,6 +23,19 @@ export type GuideShot = {
   rings?: string[];
 };
 
+/** A table of two columns, drawn inside a step: a price list, a list of limits. Cells are plain text; English ones are isolated by the page. */
+export type GuideTable = {
+  /** What the table is (marked text). */
+  title: string;
+  /** The names of the two columns (Arabic). */
+  head: [string, string];
+  rows: [string, string][];
+  /** Drawn folded until opened. */
+  fold?: boolean;
+  /** One line under the table (marked text). */
+  note?: string;
+};
+
 export type GuideStep = {
   /** A stable name for saved progress in «المنصات», so a reworded step keeps its place. */
   id?: string;
@@ -49,6 +62,10 @@ export type GuideStep = {
   implied?: boolean;
   /** A short condition shown beside the step's name: who needs it, when it does not apply. */
   tag?: string;
+  /** Things worth knowing, each drawn as a note with the circled "!": a price, a limit, a trap. */
+  info?: string[];
+  /** Tables of figures the step refers to, drawn after the list of actions. */
+  tables?: GuideTable[];
 };
 export type Guide = {
   title: string;
@@ -76,11 +93,67 @@ const TIKTOK_APPS = { href: 'https://developers.tiktok.com/apps/', label: 'TikTo
 const LINKEDIN_APPS = { href: 'https://www.linkedin.com/developers/apps', label: 'تطبيقاتي في LinkedIn' };
 const X_CONSOLE = { href: 'https://console.x.com', label: 'وحدة مطوّري X' };
 /** A picture of a platform's own page (public/guides/<set>/, made by scripts/guide-shots.mjs): Google's console for «google», Meta's pages for «meta». */
+/** The prices of X's API as the developer console showed them on 2026-11-03 (MVP_draft.md section 67.8), one row per line of its pages. */
+const X_READS: [string, string][] = [
+  ['Posts: Read', '$0.005 per resource'],
+  ['User: Read', '$0.010 per resource'],
+  ['DM Event: Read', '$0.010 per resource'],
+  ['Following/Followers: Read', '$0.010 per resource'],
+  ['List: Read', '$0.005 per resource'],
+  ['Space: Read', '$0.005 per resource'],
+  ['Community: Read', '$0.005 per resource'],
+  ['Note: Read', '$0.005 per resource'],
+  ['Like: Read', '$0.001 per resource'],
+  ['Mute: Read', '$0.001 per resource'],
+  ['Block: Read', '$0.001 per resource'],
+  ['Profile Update: Read', '$0.005 per resource'],
+];
+const X_ACTIONS: [string, string][] = [
+  ['Post: Create', '$0.015 per request'],
+  ['Post: Create (with URL)', '$0.200 per request'],
+  ['Post: Create (summoned)', '$0.010 per request'],
+  ['DM Interaction: Create', '$0.015 per request'],
+  ['User Interaction: Create', '$0.015 per request'],
+  ['Interaction: Delete', '$0.010 per request'],
+  ['Content: Manage', '$0.005 per request'],
+  ['List: Create', '$0.010 per request'],
+  ['List: Manage', '$0.005 per request'],
+  ['Bookmark', '$0.005 per request'],
+  ['Media Metadata', '$0.005 per request'],
+  ['Privacy: Update', '$0.010 per request'],
+  ['Mute: Delete', '$0.005 per request'],
+  ['Counts: Recent', '$0.005 per request'],
+  ['Counts: All', '$0.010 per request'],
+  ['Trends', '$0.010 per request'],
+];
+const X_EVENTS: [string, string][] = [
+  ['post.create', '$0.005'],
+  ['post.delete', 'Not billed'],
+  ['follow.follow', '$0.010'],
+  ['follow.unfollow', '$0.010'],
+  ['mute.mute', '$0.001'],
+  ['mute.unmute', '$0.001'],
+  ['block.block', '$0.001'],
+  ['block.unblock', '$0.001'],
+  ['profile.update.*', '$0.005'],
+  ['chat.received', '$0.010'],
+  ['chat.sent', 'Not billed'],
+  ['chat.conversation_join', 'Not billed'],
+  ['dm.received', '$0.010'],
+  ['dm.sent', 'Not billed'],
+  ['dm.read', 'Not billed'],
+  ['dm.indicate_typing', 'Not billed'],
+  ['news.new', '$0.005'],
+  ['spaces.start', '$0.005'],
+  ['spaces.end', '$0.005'],
+];
+
 const shotOf =
   (set: string) =>
   (name: string, w: number, h: number, alt: string, caption?: string, rings?: string[]): GuideShot => ({ src: `/guides/${set}/${name}.png`, w, h, alt, caption, rings });
 const shot = shotOf('google');
 const metaShot = shotOf('meta');
+const xShot = shotOf('x');
 
 export const GUIDES: Record<string, Guide> = {
   meta: {
@@ -542,8 +615,49 @@ export const GUIDES: Record<string, Guide> = {
     title: 'تجهيز تطبيق X',
     intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف العميل وسره في الموقع.',
     steps: [
-      { id: 'console', implied: true, t: 'ادخل وحدة المطوّرين', b: 'سجّل الدخول في console.x.com بحساب القسم على X، واقبل اتفاقية المطوّرين.', link: X_CONSOLE, ok: 'دخلت' },
-      { id: 'credits', implied: true, t: 'اشحن رصيداً', b: 'X تحاسب على كل طلب من رصيد مسبق: 0.015 دولار للمنشور، و0.20 دولار للمنشور الذي فيه رابط. لا مستوى مجاني في صفحة الأسعار.', link: { href: 'https://docs.x.com/x-api/getting-started/pricing', label: 'أسعار X API' }, ok: 'شحنت الرصيد' },
+      {
+        id: 'console',
+        implied: true,
+        t: 'ادخل وحدة المطوّرين',
+        b: 'هي صفحة X التي تُنشأ منها التطبيقات وتُشحن منها الأرصدة.',
+        todo: [
+          'افتح الصفحة من الرابط، وسجّل الدخول بحساب القسم على X.',
+          'اقبل اتفاقية المطوّرين إن ظهرت.',
+          'تفتح لك «Dashboard» باسمك. على اليسار القوائم التي سنستعملها: «Apps» و«Usage» و«Credits».',
+        ],
+        link: X_CONSOLE,
+        ok: 'دخلت',
+      },
+      {
+        id: 'credits',
+        implied: true,
+        t: 'اشحن رصيداً',
+        b: 'X تحاسب كل طلب من رصيد تشحنه مسبقاً، وأسعار الطلبات في الجداول أدناه.',
+        todo: [
+          'في «Dashboard» ترى «Total Balance» و«Credits» و«Free Credits»: كلها صفر دولار في حساب جديد.',
+          'اضغط «Buy Credits» واختر المبلغ. ابدأ بمبلغ صغير: النشر ما زال محاكاة في الموقع.',
+          'اقرأ أسعار الطلبات في الجداول أدناه قبل أن تدفع.',
+          'اللافتة الصفراء «Enable now» تفعّل الشحن التلقائي حين ينقص الرصيد. فعّله إن أردت ألا يتوقف النشر بغتة، وإلا فراقب الرصيد بنفسك.',
+        ],
+        info: [
+          'الأسعار من وحدة المطوّرين كما ظهرت يوم 2026-11-03، وتتغير: راجعها قبل الشحن.',
+          'ما يُحاسَب عليه الموقع الآن هو فحص الاتصال فقط: يقرأ حساب X مرة، وتسمّيه X «User: Read»، أي نحو 0.010 دولار لكل فحص. أما النشر الحقيقي على X فلم يبدأ بعد.',
+        ],
+        tables: [
+          {
+            title: 'الأهم للنشر',
+            head: ['الطلب', 'السعر'],
+            rows: [X_ACTIONS[0], X_ACTIONS[1], X_READS[1]],
+            note: 'المنشور الذي فيه رابط أغلى بكثير من غيره: 0.200 دولار.',
+          },
+          { title: 'أسعار القراءة (Resource)', head: ['المورد', 'السعر'], rows: X_READS, fold: true },
+          { title: 'أسعار الإجراءات (Action)', head: ['الإجراء', 'السعر'], rows: X_ACTIONS, fold: true },
+          { title: 'أسعار الأحداث (Event)', head: ['الحدث', 'السعر'], rows: X_EVENTS, fold: true, note: 'لا يشترك الموقع في أحداث X، فهذا الجدول للعلم فقط.' },
+        ],
+        shots: [xShot('x-dashboard', 975, 205, 'لوحة وحدة المطوّرين Dashboard: رصيد الحساب وزر Buy Credits ولافتة الشحن التلقائي', 'الاسم محجوب. الأرصدة صفر في حساب جديد.', ['1', '2', '4'])],
+        link: { href: 'https://docs.x.com/x-api/getting-started/pricing', label: 'أسعار X API' },
+        ok: 'شحنت الرصيد',
+      },
       { id: 'app', implied: true, t: 'أنشئ التطبيق', b: '«Create App»، ثم الاسم والوصف والاستعمال.', link: X_CONSOLE, ok: 'أنشأت التطبيق' },
       { id: 'auth', implied: true, t: 'فعّل تسجيل دخول المستخدم', b: 'في إعدادات OAuth 2.0: الصلاحيات «Read and write»، والنوع «Web App» (عميل سرّي).', link: X_CONSOLE, ok: 'فعّلته' },
       { id: 'redirect', implied: true, kind: 'copy', t: 'سجّل عنوان العودة', b: 'أضفه إلى عناوين العودة في التطبيق. يجب أن يطابق تماماً، حتى الشرطة الأخيرة.', copy: '{redirect}', copyLabel: 'عنوان العودة', ok: 'سجّلت العنوان' },
@@ -552,7 +666,7 @@ export const GUIDES: Record<string, Guide> = {
     ],
     notes: [
       'بعد هذه الخطوات تُربط الحسابات من «حسابات المنصات»، ولكل حساب دخول مستقل.',
-      'الأسعار من صفحة X الرسمية في 2026-11-01، وتتغير. يمكن وضع حد للإنفاق في وحدة المطوّرين.',
+      'الأسعار من وحدة المطوّرين في 2026-11-03، وتتغير. يمكن وضع حد للإنفاق في وحدة المطوّرين.',
       'رمز الدخول ساعتان ويُجدَّد تلقائياً بالفحص الذي يجري حين تُفتح صفحة الحسابات، ما دام الدخول طلب «offline.access».',
       SIMULATION,
       PLATFORM_FACTS,
