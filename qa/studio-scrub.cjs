@@ -79,7 +79,7 @@ async function serve(port) {
 }
 
 /** The same seeks with the floor and with the plan's memory, on each fixture: the 16:9 project drawn on a 1280-wide stage. */
-async function runIn(page, isApp = false) {
+async function runIn(page, isApp = false, app = null) {
   await page.waitForFunction(() => !!window.scrub, null, { timeout: 60000 });
   const run = { renderer: await page.evaluate(() => window.scrub.renderer()), fixtures: {} };
   for (const f of FIXTURES.filter((x) => !fixtureOnly || x.name === `${fixtureOnly}.mp4`)) {
@@ -88,6 +88,7 @@ async function runIn(page, isApp = false) {
       // a throttled window measures the throttling: the application's is refused before anything is timed, its drawing
       // measured at a quiet moment (the row before let go of its media)
       await page.evaluate(() => window.scrub.close());
+      const settleBefore = app ? await d10.settle(app) : null;
       const drawBefore = isApp ? await d10.assertDrawing(page, `${f.name} ${mode}`) : await d10.quietDrawRate(page);
       const before = load();
       const opened = await page.evaluate((o) => window.scrub.open(o), { file: f.name, cacheMB, ratio: '16:9', canvasW: 1280 });
@@ -99,9 +100,12 @@ async function runIn(page, isApp = false) {
       const random = await page.evaluate((o) => window.scrub.random(o), { count: SEEKS, seed: 1104, pause: 0 });
       const steps = await page.evaluate((o) => window.scrub.steps(o), { count: STEPS, seed: 7, pause: 0 });
       await page.evaluate(() => window.scrub.close());
+      // what is still busy once the row's media are let go, and for how long: recorded, then the drawing read
+      const settleAfter = app ? await d10.settle(app) : null;
       const drawAfter = await d10.quietDrawRate(page);
-      r[mode] = { opened, cold, settled, identity, random, steps, load: { before, after: load() }, drawRate: { before: drawBefore, after: drawAfter } };
-      if (isApp && drawAfter < d10.MIN_DRAW_RATE) throw new Error(`${f.name} ${mode}: after the row, with its media let go, the window draws ${drawAfter} frames a second (covered, minimised, the screen locked or off); the row is not kept.`);
+      r[mode] = { opened, cold, settled, identity, random, steps, load: { before, after: load() }, drawRate: { before: drawBefore, after: drawAfter }, settle: { before: settleBefore, after: settleAfter } };
+      if (settleAfter && settleAfter.ms > 2000) console.log(`  ${f.name} ${mode}: after the row the application took ${settleAfter.ms} ms to settle; busiest ${JSON.stringify(settleAfter.busiest)}`);
+      if (isApp && drawAfter < d10.MIN_DRAW_RATE) throw new Error(`${f.name} ${mode}: after the row, with its media let go and the application settled (${JSON.stringify(settleAfter)}), the window draws ${drawAfter} frames a second (covered, minimised, the screen locked or off); the row is not kept.`);
       console.log(`${f.name} ${mode}: cold median ${cold.median} (sharp ${cold.sharp.median}); settled ${settled.ms} ms; warm median ${random.median} (sharp ${random.sharp.median}, p95 ${random.p95}); steps forward ${steps.forward.median}, back ${steps.back.median}; load ${before} -> ${r[mode].load.after}`);
     }
     run.fixtures[f.name] = r;
@@ -205,7 +209,7 @@ if (judgeFrom.length) {
           await win.waitForLoadState('load');
           await d10.toFront(app, win);
           const versions = await app.evaluate(() => ({ electron: process.versions.electron, chrome: process.versions.chrome }));
-          runs[engine] = { engine: versions, ...(await runIn(win, true)) };
+          runs[engine] = { engine: versions, ...(await runIn(win, true, app)) };
           runs[engine].memory = await app.evaluate(({ app: a }) => a.getAppMetrics().map((m) => ({ type: m.type, mb: Math.round(m.memory.workingSetSize / 1024) })));
         } catch (e) {
           check(`${engine}: the run went to the end`, false, e.message || String(e));
