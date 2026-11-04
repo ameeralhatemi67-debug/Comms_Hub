@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-effects-parity.cjs",
-  "run": "2026-11-04T02:14:38.786Z",
+  "run": "2026-11-04T03:26:17.504Z",
   "version": "0.7.1",
   "checks": [
     {
@@ -27,6 +27,26 @@
       "name": "app-software: with no usable graphics chip the effects take the plain code",
       "pass": true,
       "detail": "{\"renderer\":\"ANGLE (Microsoft, Microsoft Basic Render Driver (0x0000008C) Direct3D11 vs_5_0 ps_5_0, D3D11)\"}"
+    },
+    {
+      "name": "edge: the colour in WebAssembly lanes equals the plain code one pixel at a time (57 cases)",
+      "pass": true,
+      "detail": "{\"bad\":[]}"
+    },
+    {
+      "name": "app-saving: the colour in WebAssembly lanes equals the plain code one pixel at a time (57 cases)",
+      "pass": true,
+      "detail": "{\"bad\":[]}"
+    },
+    {
+      "name": "app-strong: the colour in WebAssembly lanes equals the plain code one pixel at a time (57 cases)",
+      "pass": true,
+      "detail": "{\"bad\":[]}"
+    },
+    {
+      "name": "app-software: the colour in WebAssembly lanes equals the plain code one pixel at a time (57 cases)",
+      "pass": true,
+      "detail": "{\"bad\":[]}"
     },
     {
       "name": "edge: the plain code gives Edge's bytes for every case",
@@ -100,6 +120,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 92102,
             "max": 1,
@@ -117,6 +141,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 114135,
@@ -136,6 +164,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 126807,
             "max": 1,
@@ -153,6 +185,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -172,6 +208,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -189,6 +229,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -208,6 +252,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -225,6 +273,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -244,6 +296,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -261,6 +317,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -280,6 +340,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -297,6 +361,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -316,6 +384,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -333,6 +405,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 126327,
@@ -352,6 +428,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 125911,
             "max": 1,
@@ -369,6 +449,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 105900,
@@ -388,6 +472,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 102478,
             "max": 1,
@@ -405,6 +493,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 89186,
@@ -424,6 +516,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 129538,
             "max": 1,
@@ -442,6 +538,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 641428,
             "max": 1,
@@ -460,6 +557,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 241130,
             "max": 1,
@@ -478,6 +576,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 239982,
             "max": 1,
@@ -496,6 +595,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 751968,
             "max": 2,
@@ -514,6 +614,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 873128,
             "max": 4,
@@ -532,6 +633,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1242623,
             "max": 5,
@@ -550,6 +652,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1336729,
             "max": 3,
@@ -568,6 +671,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1298589,
             "max": 3,
@@ -586,6 +690,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1324072,
             "max": 5,
@@ -603,6 +708,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 86433,
@@ -622,6 +731,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 110012,
             "max": 1,
@@ -639,6 +752,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 129771,
@@ -658,6 +775,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -675,6 +796,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 3222,
@@ -694,6 +819,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 10261,
             "max": 1,
@@ -711,6 +840,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 14882,
@@ -730,6 +863,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 5082,
             "max": 1,
@@ -747,6 +884,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 26556,
@@ -766,6 +907,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 6588,
             "max": 1,
@@ -783,6 +928,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 6422,
@@ -802,6 +951,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 4666,
             "max": 1,
@@ -819,6 +972,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 3164,
@@ -838,6 +995,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 127558,
             "max": 1,
@@ -855,6 +1016,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 129266,
@@ -874,6 +1039,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 140560,
             "max": 2,
@@ -891,6 +1060,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 133348,
@@ -910,6 +1083,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 131829,
             "max": 2,
@@ -927,6 +1104,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 119007,
@@ -946,6 +1127,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 359420,
             "max": 1,
@@ -964,6 +1146,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 117466,
             "max": 1,
@@ -982,6 +1165,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 120799,
             "max": 1,
@@ -1000,6 +1184,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 731889,
             "max": 3,
@@ -1018,6 +1203,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 916329,
             "max": 4,
@@ -1036,6 +1222,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 891684,
             "max": 2,
@@ -1054,6 +1241,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 906737,
             "max": 2,
@@ -1072,6 +1260,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1207479,
             "max": 3,
@@ -1090,6 +1279,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1090828,
             "max": 5,
@@ -1107,6 +1297,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 14734,
@@ -1126,6 +1320,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 24596,
             "max": 1,
@@ -1143,6 +1341,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 25062,
@@ -1162,6 +1364,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -1179,6 +1385,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 2127,
@@ -1198,6 +1408,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 3291,
             "max": 1,
@@ -1215,6 +1429,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 3159,
@@ -1234,6 +1452,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 2253,
             "max": 1,
@@ -1251,6 +1473,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 11520,
@@ -1270,6 +1496,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 3252,
             "max": 1,
@@ -1287,6 +1517,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 3228,
@@ -1306,6 +1540,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 2427,
             "max": 1,
@@ -1323,6 +1561,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 2007,
@@ -1342,6 +1584,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 26728,
             "max": 1,
@@ -1359,6 +1605,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 28125,
@@ -1378,6 +1628,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 30753,
             "max": 2,
@@ -1395,6 +1649,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 29593,
@@ -1414,6 +1672,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 26966,
             "max": 2,
@@ -1431,6 +1693,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 25247,
@@ -1450,6 +1716,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 154,
             "max": 1,
@@ -1468,6 +1735,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1212,
             "max": 1,
@@ -1486,6 +1754,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 4835,
             "max": 1,
@@ -1504,6 +1773,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 65457,
             "max": 3,
@@ -1522,6 +1792,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 94348,
             "max": 3,
@@ -1540,6 +1811,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 130776,
             "max": 6,
@@ -1558,6 +1830,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 86998,
             "max": 2,
@@ -1576,6 +1849,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 209895,
             "max": 4,
@@ -1594,6 +1868,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 135471,
             "max": 4,
@@ -1627,6 +1902,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 92102,
             "max": 1,
@@ -1644,6 +1923,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 114135,
@@ -1663,6 +1946,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 126807,
             "max": 1,
@@ -1680,6 +1967,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -1699,6 +1990,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -1716,6 +2011,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -1735,6 +2034,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -1752,6 +2055,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -1771,6 +2078,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -1788,6 +2099,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -1807,6 +2122,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -1824,6 +2143,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -1843,6 +2166,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -1860,6 +2187,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 126327,
@@ -1879,6 +2210,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 125911,
             "max": 1,
@@ -1896,6 +2231,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 105900,
@@ -1915,6 +2254,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 102478,
             "max": 1,
@@ -1932,6 +2275,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 89186,
@@ -1951,6 +2298,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 129538,
             "max": 1,
@@ -1969,6 +2320,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 641428,
             "max": 1,
@@ -1987,6 +2339,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 241130,
             "max": 1,
@@ -2005,6 +2358,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 239982,
             "max": 1,
@@ -2023,6 +2377,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 751968,
             "max": 2,
@@ -2041,6 +2396,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 873128,
             "max": 4,
@@ -2059,6 +2415,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1242623,
             "max": 5,
@@ -2077,6 +2434,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1336729,
             "max": 3,
@@ -2095,6 +2453,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1298589,
             "max": 3,
@@ -2113,6 +2472,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1324072,
             "max": 5,
@@ -2130,6 +2490,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 86433,
@@ -2149,6 +2513,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 110012,
             "max": 1,
@@ -2166,6 +2534,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 129771,
@@ -2185,6 +2557,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -2202,6 +2578,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 3222,
@@ -2221,6 +2601,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 10261,
             "max": 1,
@@ -2238,6 +2622,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 14882,
@@ -2257,6 +2645,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 5082,
             "max": 1,
@@ -2274,6 +2666,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 26556,
@@ -2293,6 +2689,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 6588,
             "max": 1,
@@ -2310,6 +2710,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 6422,
@@ -2329,6 +2733,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 4666,
             "max": 1,
@@ -2346,6 +2754,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 3164,
@@ -2365,6 +2777,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 127558,
             "max": 1,
@@ -2382,6 +2798,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 129266,
@@ -2401,6 +2821,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 140560,
             "max": 2,
@@ -2418,6 +2842,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 133348,
@@ -2437,6 +2865,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 131829,
             "max": 2,
@@ -2454,6 +2886,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 119007,
@@ -2473,6 +2909,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 359420,
             "max": 1,
@@ -2491,6 +2928,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 117466,
             "max": 1,
@@ -2509,6 +2947,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 120799,
             "max": 1,
@@ -2527,6 +2966,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 731889,
             "max": 3,
@@ -2545,6 +2985,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 916329,
             "max": 4,
@@ -2563,6 +3004,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 891684,
             "max": 2,
@@ -2581,6 +3023,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 906737,
             "max": 2,
@@ -2599,6 +3042,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1207479,
             "max": 3,
@@ -2617,6 +3061,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1090828,
             "max": 5,
@@ -2634,6 +3079,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 14734,
@@ -2653,6 +3102,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 24596,
             "max": 1,
@@ -2670,6 +3123,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 25062,
@@ -2689,6 +3146,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -2706,6 +3167,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 2127,
@@ -2725,6 +3190,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 3291,
             "max": 1,
@@ -2742,6 +3211,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 3159,
@@ -2761,6 +3234,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 2253,
             "max": 1,
@@ -2778,6 +3255,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 11520,
@@ -2797,6 +3278,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 3252,
             "max": 1,
@@ -2814,6 +3299,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 3228,
@@ -2833,6 +3322,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 2427,
             "max": 1,
@@ -2850,6 +3343,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 2007,
@@ -2869,6 +3366,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 26728,
             "max": 1,
@@ -2886,6 +3387,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 28125,
@@ -2905,6 +3410,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 30753,
             "max": 2,
@@ -2922,6 +3431,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 29593,
@@ -2941,6 +3454,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 26966,
             "max": 2,
@@ -2958,6 +3475,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 25247,
@@ -2977,6 +3498,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 154,
             "max": 1,
@@ -2995,6 +3517,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1212,
             "max": 1,
@@ -3013,6 +3536,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 4835,
             "max": 1,
@@ -3031,6 +3555,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 65457,
             "max": 3,
@@ -3049,6 +3574,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 94348,
             "max": 3,
@@ -3067,6 +3593,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 130776,
             "max": 6,
@@ -3085,6 +3612,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 86998,
             "max": 2,
@@ -3103,6 +3631,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 209895,
             "max": 4,
@@ -3121,6 +3650,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 135471,
             "max": 4,
@@ -3154,6 +3684,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 64951,
             "max": 1,
@@ -3171,6 +3705,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 87550,
@@ -3190,6 +3728,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 86307,
             "max": 1,
@@ -3207,6 +3749,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -3226,6 +3772,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -3243,6 +3793,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -3262,6 +3816,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -3279,6 +3837,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -3298,6 +3860,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -3315,6 +3881,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -3334,6 +3904,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -3351,6 +3925,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 0,
@@ -3370,6 +3948,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -3387,6 +3969,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 84763,
@@ -3406,6 +3992,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 86662,
             "max": 1,
@@ -3423,6 +4013,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 77308,
@@ -3442,6 +4036,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 76020,
             "max": 1,
@@ -3459,6 +4057,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 66705,
@@ -3478,6 +4080,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 87052,
             "max": 1,
@@ -3496,6 +4102,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 635835,
             "max": 1,
@@ -3514,6 +4121,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 176350,
             "max": 1,
@@ -3532,6 +4140,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 176261,
             "max": 1,
@@ -3550,6 +4159,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 780228,
             "max": 2,
@@ -3568,6 +4178,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 892235,
             "max": 3,
@@ -3586,6 +4197,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1227582,
             "max": 5,
@@ -3604,6 +4216,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1243264,
             "max": 3,
@@ -3622,6 +4235,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1227048,
             "max": 3,
@@ -3640,6 +4254,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1419289,
             "max": 5,
@@ -3657,6 +4272,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 78886,
@@ -3676,6 +4295,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 105890,
             "max": 2,
@@ -3693,6 +4316,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 118575,
@@ -3712,6 +4339,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -3729,6 +4360,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 32401,
@@ -3748,6 +4383,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 20629,
             "max": 2,
@@ -3765,6 +4404,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 27139,
@@ -3784,6 +4427,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 5471,
             "max": 2,
@@ -3801,6 +4448,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 26556,
@@ -3820,6 +4471,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 7829,
             "max": 1,
@@ -3837,6 +4492,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 15014,
@@ -3856,6 +4515,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 10013,
             "max": 1,
@@ -3873,6 +4536,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 6514,
@@ -3892,6 +4559,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 117865,
             "max": 1,
@@ -3909,6 +4580,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 118963,
@@ -3928,6 +4603,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 131935,
             "max": 2,
@@ -3945,6 +4624,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 125422,
@@ -3964,6 +4647,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 124419,
             "max": 2,
@@ -3981,6 +4668,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 105859,
@@ -4000,6 +4691,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 357962,
             "max": 1,
@@ -4018,6 +4710,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 115524,
             "max": 1,
@@ -4036,6 +4729,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 131194,
             "max": 1,
@@ -4054,6 +4748,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 716207,
             "max": 3,
@@ -4072,6 +4767,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 897078,
             "max": 4,
@@ -4090,6 +4786,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 863287,
             "max": 2,
@@ -4108,6 +4805,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 866968,
             "max": 2,
@@ -4126,6 +4824,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1166345,
             "max": 2,
@@ -4144,6 +4843,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1095002,
             "max": 5,
@@ -4161,6 +4861,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 15439,
@@ -4180,6 +4884,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 25466,
             "max": 2,
@@ -4197,6 +4905,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 25644,
@@ -4216,6 +4928,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4233,6 +4949,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 10647,
@@ -4252,6 +4972,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 5295,
             "max": 2,
@@ -4269,6 +4993,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 7416,
@@ -4288,6 +5016,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 2430,
             "max": 2,
@@ -4305,6 +5037,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 11520,
@@ -4324,6 +5060,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 3681,
             "max": 1,
@@ -4341,6 +5081,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 5310,
@@ -4360,6 +5104,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 3954,
             "max": 1,
@@ -4377,6 +5125,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 3720,
@@ -4396,6 +5148,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 27601,
             "max": 1,
@@ -4413,6 +5169,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 28813,
@@ -4432,6 +5192,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 31111,
             "max": 2,
@@ -4449,6 +5213,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 29887,
@@ -4468,6 +5236,10 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 27241,
             "max": 2,
@@ -4485,6 +5257,10 @@
             "alphaMax": 0,
             "over2": 0,
             "psnr": 99
+          },
+          "lanes": {
+            "offered": true,
+            "differing": 0
           },
           "sinceFilter": {
             "differing": 26072,
@@ -4504,6 +5280,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 199,
             "max": 1,
@@ -4522,6 +5299,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 1432,
             "max": 1,
@@ -4540,6 +5318,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 5228,
             "max": 1,
@@ -4558,6 +5337,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 59603,
             "max": 3,
@@ -4576,6 +5356,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 92768,
             "max": 3,
@@ -4594,6 +5375,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 128885,
             "max": 6,
@@ -4612,6 +5394,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 81749,
             "max": 2,
@@ -4630,6 +5413,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 215038,
             "max": 4,
@@ -4648,6 +5432,7 @@
             "over2": 0,
             "psnr": 99
           },
+          "lanes": null,
           "sinceFilter": {
             "differing": 134010,
             "max": 4,
@@ -4675,6 +5460,10 @@
           "picture": "frame",
           "effect": "effects A",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 4665,
             "max": 1,
@@ -4687,6 +5476,10 @@
           "picture": "frame",
           "effect": "effects B",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 2393,
             "max": 1,
@@ -4699,6 +5492,10 @@
           "picture": "frame",
           "effect": "grey",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 1560,
             "max": 1,
@@ -4711,6 +5508,10 @@
           "picture": "frame",
           "effect": "brightness -100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4723,6 +5524,10 @@
           "picture": "frame",
           "effect": "brightness -50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4735,6 +5540,10 @@
           "picture": "frame",
           "effect": "brightness 25",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4747,6 +5556,10 @@
           "picture": "frame",
           "effect": "brightness 50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4759,6 +5572,10 @@
           "picture": "frame",
           "effect": "brightness 100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4771,6 +5588,10 @@
           "picture": "frame",
           "effect": "contrast -100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4783,6 +5604,10 @@
           "picture": "frame",
           "effect": "contrast -50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4795,6 +5620,10 @@
           "picture": "frame",
           "effect": "contrast 25",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4807,6 +5636,10 @@
           "picture": "frame",
           "effect": "contrast 50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4819,6 +5652,10 @@
           "picture": "frame",
           "effect": "contrast 100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -4831,6 +5668,10 @@
           "picture": "frame",
           "effect": "saturation -90",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 2345,
             "max": 1,
@@ -4843,6 +5684,10 @@
           "picture": "frame",
           "effect": "saturation -50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 1236,
             "max": 1,
@@ -4855,6 +5700,10 @@
           "picture": "frame",
           "effect": "saturation 25",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 4994,
             "max": 1,
@@ -4867,6 +5716,10 @@
           "picture": "frame",
           "effect": "saturation 50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 1017,
             "max": 1,
@@ -4879,6 +5732,10 @@
           "picture": "frame",
           "effect": "saturation 100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 977,
             "max": 1,
@@ -4891,6 +5748,10 @@
           "picture": "frame",
           "effect": "all three",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 34,
             "max": 1,
@@ -4903,6 +5764,7 @@
           "picture": "frame",
           "effect": "blur 0.4",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 2184921,
             "max": 20,
@@ -4915,6 +5777,7 @@
           "picture": "frame",
           "effect": "blur 1.5",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 470319,
             "max": 5,
@@ -4927,6 +5790,7 @@
           "picture": "frame",
           "effect": "blur 4",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 500987,
             "max": 8,
@@ -4939,6 +5803,7 @@
           "picture": "frame",
           "effect": "blur 4.5",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1062014,
             "max": 6,
@@ -4951,6 +5816,7 @@
           "picture": "frame",
           "effect": "blur 9",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1346431,
             "max": 4,
@@ -4963,6 +5829,7 @@
           "picture": "frame",
           "effect": "blur 30",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1912658,
             "max": 5,
@@ -4975,6 +5842,7 @@
           "picture": "frame",
           "effect": "blur 64",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 2354873,
             "max": 5,
@@ -4987,6 +5855,7 @@
           "picture": "frame",
           "effect": "blur 100",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 2666158,
             "max": 5,
@@ -4999,6 +5868,7 @@
           "picture": "frame",
           "effect": "effects A and blur 9",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1271963,
             "max": 5,
@@ -5011,6 +5881,10 @@
           "picture": "item",
           "effect": "effects A",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 55536,
             "max": 3,
@@ -5023,6 +5897,10 @@
           "picture": "item",
           "effect": "effects B",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 74093,
             "max": 2,
@@ -5035,6 +5913,10 @@
           "picture": "item",
           "effect": "grey",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 86145,
             "max": 1,
@@ -5047,6 +5929,10 @@
           "picture": "item",
           "effect": "brightness -100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -5059,6 +5945,10 @@
           "picture": "item",
           "effect": "brightness -50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 2362,
             "max": 1,
@@ -5071,6 +5961,10 @@
           "picture": "item",
           "effect": "brightness 25",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 4618,
             "max": 2,
@@ -5083,6 +5977,10 @@
           "picture": "item",
           "effect": "brightness 50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 7373,
             "max": 2,
@@ -5095,6 +5993,10 @@
           "picture": "item",
           "effect": "brightness 100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 3095,
             "max": 2,
@@ -5107,6 +6009,10 @@
           "picture": "item",
           "effect": "contrast -100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -5119,6 +6025,10 @@
           "picture": "item",
           "effect": "contrast -50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 3623,
             "max": 1,
@@ -5131,6 +6041,10 @@
           "picture": "item",
           "effect": "contrast 25",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 5200,
             "max": 1,
@@ -5143,6 +6057,10 @@
           "picture": "item",
           "effect": "contrast 50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 3527,
             "max": 1,
@@ -5155,6 +6073,10 @@
           "picture": "item",
           "effect": "contrast 100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 3337,
             "max": 1,
@@ -5167,6 +6089,10 @@
           "picture": "item",
           "effect": "saturation -90",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 84330,
             "max": 1,
@@ -5179,6 +6105,10 @@
           "picture": "item",
           "effect": "saturation -50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 85026,
             "max": 1,
@@ -5191,6 +6121,10 @@
           "picture": "item",
           "effect": "saturation 25",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 102118,
             "max": 2,
@@ -5203,6 +6137,10 @@
           "picture": "item",
           "effect": "saturation 50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 94881,
             "max": 2,
@@ -5215,6 +6153,10 @@
           "picture": "item",
           "effect": "saturation 100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 97599,
             "max": 2,
@@ -5227,6 +6169,10 @@
           "picture": "item",
           "effect": "all three",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 72335,
             "max": 2,
@@ -5239,6 +6185,7 @@
           "picture": "item",
           "effect": "blur 0.4",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1036310,
             "max": 20,
@@ -5251,6 +6198,7 @@
           "picture": "item",
           "effect": "blur 1.5",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 416275,
             "max": 4,
@@ -5263,6 +6211,7 @@
           "picture": "item",
           "effect": "blur 4",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 720911,
             "max": 7,
@@ -5275,6 +6224,7 @@
           "picture": "item",
           "effect": "blur 4.5",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1101108,
             "max": 6,
@@ -5287,6 +6237,7 @@
           "picture": "item",
           "effect": "blur 9",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1229579,
             "max": 6,
@@ -5299,6 +6250,7 @@
           "picture": "item",
           "effect": "blur 30",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1645515,
             "max": 5,
@@ -5311,6 +6263,7 @@
           "picture": "item",
           "effect": "blur 64",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1691176,
             "max": 4,
@@ -5323,6 +6276,7 @@
           "picture": "item",
           "effect": "blur 100",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1803973,
             "max": 5,
@@ -5335,6 +6289,7 @@
           "picture": "item",
           "effect": "effects A and blur 9",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 1187968,
             "max": 7,
@@ -5347,6 +6302,10 @@
           "picture": "ramp",
           "effect": "effects A",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 15192,
             "max": 3,
@@ -5359,6 +6318,10 @@
           "picture": "ramp",
           "effect": "effects B",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 24793,
             "max": 2,
@@ -5371,6 +6334,10 @@
           "picture": "ramp",
           "effect": "grey",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 25068,
             "max": 1,
@@ -5383,6 +6350,10 @@
           "picture": "ramp",
           "effect": "brightness -100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -5395,6 +6366,10 @@
           "picture": "ramp",
           "effect": "brightness -50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 486,
             "max": 1,
@@ -5407,6 +6382,10 @@
           "picture": "ramp",
           "effect": "brightness 25",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 882,
             "max": 2,
@@ -5419,6 +6398,10 @@
           "picture": "ramp",
           "effect": "brightness 50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 1488,
             "max": 2,
@@ -5431,6 +6414,10 @@
           "picture": "ramp",
           "effect": "brightness 100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 570,
             "max": 2,
@@ -5443,6 +6430,10 @@
           "picture": "ramp",
           "effect": "contrast -100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 0,
             "max": 0,
@@ -5455,6 +6446,10 @@
           "picture": "ramp",
           "effect": "contrast -50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 696,
             "max": 1,
@@ -5467,6 +6462,10 @@
           "picture": "ramp",
           "effect": "contrast 25",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 1152,
             "max": 1,
@@ -5479,6 +6478,10 @@
           "picture": "ramp",
           "effect": "contrast 50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 678,
             "max": 1,
@@ -5491,6 +6494,10 @@
           "picture": "ramp",
           "effect": "contrast 100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 642,
             "max": 1,
@@ -5503,6 +6510,10 @@
           "picture": "ramp",
           "effect": "saturation -90",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 26315,
             "max": 1,
@@ -5515,6 +6526,10 @@
           "picture": "ramp",
           "effect": "saturation -50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 27898,
             "max": 1,
@@ -5527,6 +6542,10 @@
           "picture": "ramp",
           "effect": "saturation 25",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 30308,
             "max": 2,
@@ -5539,6 +6558,10 @@
           "picture": "ramp",
           "effect": "saturation 50",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 29256,
             "max": 2,
@@ -5551,6 +6574,10 @@
           "picture": "ramp",
           "effect": "saturation 100",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 26849,
             "max": 2,
@@ -5563,6 +6590,10 @@
           "picture": "ramp",
           "effect": "all three",
           "chip": null,
+          "lanes": {
+            "offered": true,
+            "differing": 0
+          },
           "sinceFilter": {
             "differing": 25287,
             "max": 2,
@@ -5575,6 +6606,7 @@
           "picture": "ramp",
           "effect": "blur 0.4",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 5111,
             "max": 20,
@@ -5587,6 +6619,7 @@
           "picture": "ramp",
           "effect": "blur 1.5",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 14586,
             "max": 4,
@@ -5599,6 +6632,7 @@
           "picture": "ramp",
           "effect": "blur 4",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 38018,
             "max": 8,
@@ -5611,6 +6645,7 @@
           "picture": "ramp",
           "effect": "blur 4.5",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 85249,
             "max": 7,
@@ -5623,6 +6658,7 @@
           "picture": "ramp",
           "effect": "blur 9",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 105816,
             "max": 4,
@@ -5635,6 +6671,7 @@
           "picture": "ramp",
           "effect": "blur 30",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 152785,
             "max": 5,
@@ -5647,6 +6684,7 @@
           "picture": "ramp",
           "effect": "blur 64",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 176618,
             "max": 4,
@@ -5659,6 +6697,7 @@
           "picture": "ramp",
           "effect": "blur 100",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 232741,
             "max": 3,
@@ -5671,6 +6710,7 @@
           "picture": "ramp",
           "effect": "effects A and blur 9",
           "chip": null,
+          "lanes": null,
           "sinceFilter": {
             "differing": 101395,
             "max": 5,
@@ -5686,7 +6726,7 @@
       }
     }
   },
-  "total": 15,
-  "passed": 15,
+  "total": 19,
+  "passed": 19,
   "failed": 0
 }
