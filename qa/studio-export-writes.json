@@ -1,0 +1,155 @@
+{
+ "name": "studio-export-writes",
+ "ranAt": "2026-11-04T19:16:51.202Z",
+ "node": "v22.19.0",
+ "mediabunny": "1.61.2",
+ "options": {
+  "format": "Mp4OutputFormat({ fastStart: false })",
+  "target": "StreamTarget(writable, { chunked: true })",
+  "chunk": "16 MiB (Mediabunny default)"
+ },
+ "driveStep": 262144,
+ "large": {
+  "packets": 600,
+  "bytesPerPacket": 100000,
+  "size": 60382042,
+  "writes": [
+   {
+    "offset": 0,
+    "length": 16777216,
+    "afterFinalizeCalled": false
+   },
+   {
+    "offset": 16777216,
+    "length": 16777216,
+    "afterFinalizeCalled": false
+   },
+   {
+    "offset": 33554432,
+    "length": 16777216,
+    "afterFinalizeCalled": false
+   },
+   {
+    "offset": 28,
+    "length": 8,
+    "afterFinalizeCalled": true
+   },
+   {
+    "offset": 50331648,
+    "length": 10050394,
+    "afterFinalizeCalled": true
+   }
+  ],
+  "outOfOrder": [
+   {
+    "index": 3,
+    "offset": 28,
+    "length": 8,
+    "furthestBefore": 50331648
+   }
+  ],
+  "boxes": [
+   {
+    "offset": 0,
+    "size": 28,
+    "type": "ftyp"
+   },
+   {
+    "offset": 28,
+    "size": 60374416,
+    "type": "mdat"
+   },
+   {
+    "offset": 60374444,
+    "size": 7598,
+    "type": "moov"
+   }
+  ],
+  "writtenBeforeFinalize": 50331648,
+  "forwardPrefixBeforeFinalize": 28,
+  "driveChunksBeforeFinalize": 0
+ },
+ "small": {
+  "packets": 60,
+  "bytesPerPacket": 100000,
+  "size": 6039002,
+  "writes": [
+   {
+    "offset": 0,
+    "length": 6039002,
+    "afterFinalizeCalled": true
+   }
+  ],
+  "outOfOrder": [],
+  "boxes": [
+   {
+    "offset": 0,
+    "size": 28,
+    "type": "ftyp"
+   },
+   {
+    "offset": 28,
+    "size": 6037216,
+    "type": "mdat"
+   },
+   {
+    "offset": 6037244,
+    "size": 1758,
+    "type": "moov"
+   }
+  ],
+  "writtenBeforeFinalize": 0,
+  "forwardPrefixBeforeFinalize": 0,
+  "driveChunksBeforeFinalize": 0
+ },
+ "conclusion": "Before finalize the writable has received only whole 16 MiB pieces; at finalize the muxer rewrites the 8-byte mdat header at byte 28. A provider that takes bytes only forward from byte 0 can therefore receive nothing before the export ends, so with the file unchanged an upload to Google Drive cannot overlap the export. A provider that takes parts in any order (S3 multipart) could take every piece but the first during the export.",
+ "checks": [
+  {
+   "name": "export.ts still writes Mp4OutputFormat({ fastStart: false })",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "target.ts still writes StreamTarget(writable, { chunked: true })",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "the layout is ftyp, mdat, moov",
+   "pass": true,
+   "detail": "{\"large\":[{\"offset\":0,\"size\":28,\"type\":\"ftyp\"},{\"offset\":28,\"size\":60374416,\"type\":\"mdat\"},{\"offset\":60374444,\"size\":7598,\"type\":\"moov\"}],\"small\":[{\"offset\":0,\"size\":28,\"type\":\"ftyp\"},{\"offset\":28,\"size\":6037216,\"type\":\"mdat\"},{\"offset\":6037244,\"size\":1758,\"type\":\"moov\"}]}"
+  },
+  {
+   "name": "large file: full 16 MiB pieces in order before finalize",
+   "pass": true,
+   "detail": "[{\"offset\":0,\"length\":16777216,\"afterFinalizeCalled\":false},{\"offset\":16777216,\"length\":16777216,\"afterFinalizeCalled\":false},{\"offset\":33554432,\"length\":16777216,\"afterFinalizeCalled\":false},{\"offset\":28,\"length\":8,\"afterFinalizeCalled\":true},{\"offset\":50331648,\"length\":10050394,\"afterFinalizeCalled\":true}]"
+  },
+  {
+   "name": "large file: exactly one write out of order",
+   "pass": true,
+   "detail": "[{\"index\":3,\"offset\":28,\"length\":8,\"furthestBefore\":50331648}]"
+  },
+  {
+   "name": "large file: that write is the mdat header, rewritten at finalize",
+   "pass": true,
+   "detail": "{\"mdat\":{\"offset\":28,\"size\":60374416,\"type\":\"mdat\"},\"write\":{\"index\":3,\"offset\":28,\"length\":8,\"furthestBefore\":50331648}}"
+  },
+  {
+   "name": "the mdat header starts right after ftyp, at byte 28",
+   "pass": true,
+   "detail": "{\"ftyp\":{\"offset\":0,\"size\":28,\"type\":\"ftyp\"},\"mdat\":{\"offset\":28,\"size\":60374416,\"type\":\"mdat\"}}"
+  },
+  {
+   "name": "small file: one write, at finalize, the whole file",
+   "pass": true,
+   "detail": "[{\"offset\":0,\"length\":6039002,\"afterFinalizeCalled\":true}]"
+  },
+  {
+   "name": "a forward-only provider can hold no 256 KiB chunk before finalize",
+   "pass": true,
+   "detail": "{\"large\":28,\"small\":0}"
+  }
+ ],
+ "passed": 9,
+ "total": 9
+}

@@ -3250,3 +3250,51 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - With no chip, the application at 4K saturates the processor and its window falls to about one frame a second (the manager's
     finding): its 1080p run may crawl; stop it if the first export takes far longer than about 12 minutes.
 - **Not done.** Nothing pushed; drawing in workers (P-07) not switched on anywhere.
+
+### 2026-11-04: «يُرفع الملف أثناء التصدير» (P-25) parked: not possible on Google Drive with the file unchanged (Desktop Power, Fork 5)
+
+- **What was asked.** During «تصدير وإرسال للمراجعة», the export's stream should feed the library's upload as it is written.
+  The file that reaches the library had to stay byte for byte today's: `Mp4OutputFormat({ fastStart: false })` over
+  `StreamTarget(writable, { chunked: true })`. The brief said to stop and say so if that proved impossible.
+- **Measured (`qa/studio-export-writes.mjs`, `qa/studio-export-writes.json`, 9 of 9).** The probe runs in Node only: no port
+  and no browser. It makes the export's output with the pinned Mediabunny 1.61.2 from made-up AVC and AAC packets, and
+  records every write the writable receives.
+  - **A 60,382,042-byte file** gets five writes:
+    1. three full 16 MiB pieces in order (0, 16 MiB and 32 MiB), 50,331,648 bytes, while it is being made;
+    2. then, at finalize, 8 bytes at byte 28: the mdat header, whose size is known only then (`isobmff-muxer.js`
+       `patchBox`);
+    3. then the remaining 10,050,394 bytes (the rest of mdat and the moov).
+  - **A 6,039,002-byte file** gets one write of the whole file, at finalize. Mediabunny keeps 16 MiB pieces in memory, so a
+    file under 16 MiB does not exist anywhere before the end.
+  - The layout in both is ftyp (28 bytes), mdat from byte 28, moov at the end. The probe also checks that `export.ts` and
+    `target.ts` still use these options.
+- **Why that rules it out.**
+  - The library uploads only to Google Drive: `storageFor` always returns Drive, every `storage_roles` row points at it, and
+    a role's provider cannot be changed.
+  - Drive's resumable upload takes bytes only forward from byte 0 and never rewrites a byte it has received.
+  - Its first chunk must hold bytes 28 to 31, which are written last. So with the file unchanged nothing can be sent before
+    the export ends: the probe's forward prefix before finalize is 28 bytes, and no 256 KiB chunk.
+  - S3 multipart takes parts in any order. There, everything but the first part could go during the export, with the first
+    part sent last. But the S3-compatible provider holds only moves and backups, and making it the library's provider is
+    not offered.
+  - A streaming layout (fragmented MP4, or `fastStart: 'reserve'`) changes the file, which the fixed rule forbids.
+- **Decision.** Parked by the manager; the owner may choose otherwise.
+  - The two small savings that remain on Drive are not built:
+    - (a) opening Drive's session during the export, about a second, not measured: the session would be opened without
+      a length, so the administrator's upload limit would be checked against an estimate;
+    - (b) skipping the browser's metadata read of a new file, under a second.
+  - `Desktop_Power_Ideas.md` P-25 carries the dated note. D12's gate row «تصدير وإرسال» faster end to end is marked not met
+    for this reason.
+  - No change to Fork 1's files, no migration.
+- **A correction to the brief.** The page does see Drive's session address.
+  - `/api/media/upload-session` and `/api/media/[id]/version` return Drive's resumable session address to the page
+    (`upload-session/route.ts:42`).
+  - The page then sends 8 MiB chunks straight to Google (`src/lib/media/upload.ts` `sendToDrive`); nothing passes through
+    the site's server.
+  - The address held back from the page and the server relay in pieces under 4 MB are the platform tests' rules
+    (`platform_tests.upload_url`), not the library's.
+  - The library's path already makes its record only after Drive has the last byte and the server has read the file's size
+    back (`/api/media/complete`). A Drive session that never receives its last byte leaves no file at Google.
+- **Verified.** `node qa/studio-export-writes.mjs`: 9 of 9. `npm run typecheck` clean.
+- **Not run, as the change is a probe and documents only:** the build and `npm test`. Port 3000 is shared and Fork 1's
+  checks are running, and nothing under `src/` changed. Nothing pushed.

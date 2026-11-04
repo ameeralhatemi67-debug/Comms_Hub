@@ -680,6 +680,13 @@ and its JSON, in the project's style).
 - **Rules:** none; the same upload rules and review.
 - **Proof:** `qa/studio-upload-while-export.cjs` against a stand-in provider: time from «تصدير وإرسال» to «أُرسل العمل
   للمراجعة» before and after; a cancel leaves no library row.
+- **2026-11-04: parked. Not possible on Google Drive with the file unchanged** (`qa/studio-export-writes.mjs`, 9 of 9):
+  - The export rewrites the mdat header at byte 28 only at finalize, and a file under 16 MiB is written in one write at
+    the end.
+  - Drive's resumable upload, the library's only provider, takes bytes only forward from byte 0, so nothing can be sent
+    before the export ends.
+  - It would work with S3 multipart as the library's provider, the first part sent last. A role's provider cannot be
+    changed today (`src/lib/storage/index.ts`).
 
 ### 6e. The rest of the application
 
@@ -991,7 +998,8 @@ P-08 with P-30, P-20, P-25, P-26, P-22, P-29.
 - **Exit gate:**
   - a card-shaped fixture imported and verified;
   - copies made in idle time without moving the stage's 95th-percentile frame time;
-  - «تصدير وإرسال» faster end to end against a stand-in provider;
+  - «تصدير وإرسال» faster end to end against a stand-in provider: **not met** (2026-11-04). P-25 is parked: with the file
+    unchanged, nothing can reach Google Drive before the export ends (see P-25);
   - nothing left half-made after a cancel or a quit.
 
 ### D13 gated work: one item at a time, each on an owner's answer
