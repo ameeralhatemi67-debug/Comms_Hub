@@ -1,0 +1,1162 @@
+{
+  "script": "qa/desktop-idle.cjs",
+  "run": "2026-11-04T02:49:29.162Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "the bridge is version 7 or later, with life.activity and media.queue, queued and onQueue",
+      "pass": true,
+      "detail": "{\"bridge\":9,\"life\":[\"busy\",\"idle\",\"activity\",\"progress\"],\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\",\"queue\",\"queued\",\"onQueue\"]}"
+    },
+    {
+      "name": "the studio named its four video sources to the queue on its own, and the application found each needs a light copy here (4K, no profile)",
+      "pass": true,
+      "detail": "{\"opened\":{\"names\":[\"grain-1.mp4\",\"grain-2.mp4\",\"still-3.mp4\",\"still-4.mp4\"],\"states\":[{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"},{\"kind\":\"ready\"}],\"width\":null},\"named\":{\"hold\":null,\"width\":1,\"items\":[{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fbe1befe212d8ade024766b581f0555c823936bf0-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},{\"name\":\"proxy-fc12d8c4218d1c56813e56b8816a9ad630787974f-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null}]}}"
+    },
+    {
+      "name": "a copy the person asks for is made at once and holds the copies made in idle time («asked»)",
+      "pass": true,
+      "detail": "{\"during\":{\"hold\":\"asked\",\"states\":[\"paused\",\"waiting\",\"waiting\",\"waiting\"]},\"ms\":5680,\"after\":[\"waiting\",\"waiting\",\"waiting\",\"ready\"]}"
+    },
+    {
+      "name": "a click: the running copy pauses within a second (11 ms), the hold is «input», and it makes no progress from a second on (4.608 s, then 4.608 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":1.237333,\"pausedMs\":11,\"hold\":\"input\",\"progressHeld\":[4.608,4.608],\"state\":\"paused\",\"resumedMs\":1060,\"sinceHold\":3588,\"after\":7.509333}"
+    },
+    {
+      "name": "a click: released, it goes on from where it was (1060 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":1.237333,\"pausedMs\":11,\"hold\":\"input\",\"progressHeld\":[4.608,4.608],\"state\":\"paused\",\"resumedMs\":1060,\"sinceHold\":3588,\"after\":7.509333}"
+    },
+    {
+      "name": "a click holds only a few seconds: the copy goes on by itself 3588 ms after it (three seconds of quiet)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":1.237333,\"pausedMs\":11,\"hold\":\"input\",\"progressHeld\":[4.608,4.608],\"state\":\"paused\",\"resumedMs\":1060,\"sinceHold\":3588,\"after\":7.509333}"
+    },
+    {
+      "name": "an export (busy): the running copy pauses within a second (10 ms), the hold is «export», and it makes no progress from a second on (8.32 s, then 8.32 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":7.509333,\"pausedMs\":10,\"hold\":\"export\",\"progressHeld\":[8.32,8.32],\"state\":\"paused\",\"resumedMs\":563,\"sinceHold\":3080,\"after\":10.794667}"
+    },
+    {
+      "name": "an export (busy): released, it goes on from where it was (563 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":7.509333,\"pausedMs\":10,\"hold\":\"export\",\"progressHeld\":[8.32,8.32],\"state\":\"paused\",\"resumedMs\":563,\"sinceHold\":3080,\"after\":10.794667}"
+    },
+    {
+      "name": "the page says «playing»: the running copy pauses within a second (8 ms), the hold is «playing», and it makes no progress from a second on (12.309333 s, then 12.309333 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":10.794667,\"pausedMs\":8,\"hold\":\"playing\",\"progressHeld\":[12.309333,12.309333],\"state\":\"paused\",\"resumedMs\":575,\"sinceHold\":3097,\"after\":15.018667}"
+    },
+    {
+      "name": "the page says «playing»: released, it goes on from where it was (575 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":10.794667,\"pausedMs\":8,\"hold\":\"playing\",\"progressHeld\":[12.309333,12.309333],\"state\":\"paused\",\"resumedMs\":575,\"sinceHold\":3097,\"after\":15.018667}"
+    },
+    {
+      "name": "the window makes sound (the studio playing, not saying so): the running copy pauses within a second (22 ms), the hold is «playing», and it makes no progress from a second on (28.272 s, then 29.568 s)",
+      "pass": false,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":15.018667,\"pausedMs\":22,\"hold\":\"playing\",\"progressHeld\":[28.272,29.568],\"state\":\"ready\",\"resumedMs\":4,\"sinceHold\":2530,\"after\":29.568}"
+    },
+    {
+      "name": "the window makes sound (the studio playing, not saying so): released, it goes on from where it was (4 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>3-720-r1-ff902.mp4\",\"at\":15.018667,\"pausedMs\":22,\"hold\":\"playing\",\"progressHeld\":[28.272,29.568],\"state\":\"ready\",\"resumedMs\":4,\"sinceHold\":2530,\"after\":29.568}"
+    },
+    {
+      "name": "on battery (simulated in the main process): the running copy pauses within a second (11 ms), the hold is «battery», and it makes no progress from a second on (5.056 s, then 5.056 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>0-720-r1-ff902.mp4\",\"at\":2.645334,\"pausedMs\":11,\"hold\":\"battery\",\"progressHeld\":[5.056,5.056],\"state\":\"paused\",\"resumedMs\":448,\"sinceHold\":2968,\"after\":7.616}"
+    },
+    {
+      "name": "on battery (simulated in the main process): released, it goes on from where it was (448 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>0-720-r1-ff902.mp4\",\"at\":2.645334,\"pausedMs\":11,\"hold\":\"battery\",\"progressHeld\":[5.056,5.056],\"state\":\"paused\",\"resumedMs\":448,\"sinceHold\":2968,\"after\":7.616}"
+    },
+    {
+      "name": "Windows lowers the processor's speed limit (simulated): the running copy pauses within a second (6 ms), the hold is «throttled», and it makes no progress from a second on (8.64 s, then 8.64 s)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>0-720-r1-ff902.mp4\",\"at\":7.616,\"pausedMs\":6,\"hold\":\"throttled\",\"progressHeld\":[8.64,8.64],\"state\":\"paused\",\"resumedMs\":74,\"sinceHold\":2599,\"after\":9.130667}"
+    },
+    {
+      "name": "Windows lowers the processor's speed limit (simulated): released, it goes on from where it was (74 ms)",
+      "pass": true,
+      "detail": "{\"name\":\"proxy-<fingerprint>0-720-r1-ff902.mp4\",\"at\":7.616,\"pausedMs\":6,\"hold\":\"throttled\",\"progressHeld\":[8.64,8.64],\"state\":\"paused\",\"resumedMs\":74,\"sinceHold\":2599,\"after\":9.130667}"
+    },
+    {
+      "name": "a copy of a still source, which FFmpeg had read whole, is stopped when held (1760 ms), no FFmpeg left and no part file, and made again once released",
+      "pass": true,
+      "detail": "{\"at\":3.989333,\"stoppedMs\":1760,\"left\":0,\"meanwhile\":{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"waiting\",\"done\":0,\"total\":30,\"why\":null},\"again\":{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":0,\"total\":30,\"why\":null}}"
+    },
+    {
+      "name": "every light copy was made",
+      "pass": true,
+      "detail": "{\"hold\":null,\"width\":1,\"items\":[{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":29.525333,\"total\":30,\"why\":null},{\"name\":\"proxy-fbe1befe212d8ade024766b581f0555c823936bf0-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":29.525333,\"total\":30,\"why\":null},{\"name\":\"proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":27.157334,\"total\":30,\"why\":null},{\"name\":\"proxy-fc12d8c4218d1c56813e56b8816a9ad630787974f-720-r1-ff902.mp4\",\"state\":\"ready\",\"done\":0,\"total\":0,\"why\":null}]}"
+    },
+    {
+      "name": "the tray says what is being made in idle time, and why it waits when it does",
+      "pass": true,
+      "detail": "[\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: 3 تنتظر حتى يعود المعالج إلى سرعته\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 3 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 2 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 1 في وقت فراغ الجهاز\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: 1 تنتظر حتى يعود المعالج إلى سرعته\",\"مركز الاتصال المؤسسي\\nنسخ خفيفة للمعاينة: تُنشأ 1 من 1 في وقت فراغ الجهاز\"]"
+    },
+    {
+      "name": "each of the 4 copies keeps every frame of its source, in order (750 frames)",
+      "pass": true,
+      "detail": "[{\"frames\":750,\"wrong\":0},{\"frames\":750,\"wrong\":0},{\"frames\":750,\"wrong\":0},{\"frames\":750,\"wrong\":0}]"
+    },
+    {
+      "name": "no part file is left in the folder",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "a project that wants nothing any more stops its copy: no FFmpeg running and no part file a moment later",
+      "pass": true,
+      "detail": "{\"again\":{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":1.664,\"total\":30,\"why\":null},\"partWhile\":[\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4.part\"],\"ffWhile\":1,\"now\":0,\"parts\":[],\"items\":0}"
+    },
+    {
+      "name": "width 1: the stage's 95th-percentile frame time while copies wait is that of a stage with nothing to make (median 50.1 ms against 49.9 ms, within 10%; a copy running: 33.3 ms)",
+      "pass": true,
+      "detail": "{\"load\":[{\"label\":\"before\",\"percent\":16},{\"label\":\"nothing to make\",\"percent\":20},{\"label\":\"round 1: nothing to make\",\"percent\":16},{\"label\":\"round 1: copies at width 1, held\",\"percent\":99},{\"label\":\"round 1: copies at width 3, held\",\"percent\":100},{\"label\":\"round 1: a copy running (contrast)\",\"percent\":96},{\"label\":\"round 2: nothing to make\",\"percent\":34},{\"label\":\"round 2: copies at width 1, held\",\"percent\":100},{\"label\":\"round 2: copies at width 3, held\",\"percent\":100},{\"label\":\"round 2: a copy running (contrast)\",\"percent\":100},{\"label\":\"round 3: nothing to make\",\"percent\":24},{\"label\":\"round 3: copies at width 1, held\",\"percent\":97},{\"label\":\"round 3: copies at width 3, held\",\"percent\":100},{\"label\":\"round 3: a copy running (contrast)\",\"percent\":96},{\"label\":\"after the rounds\",\"percent\":43}],\"rounds\":[{\"round\":1,\"nothing\":{\"frames\":284,\"p50\":16.7,\"p95\":50.2,\"max\":133.3,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.35}},\"held1\":{\"frames\":271,\"p50\":16.7,\"p95\":66.7,\"max\":217,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.44},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":295,\"p50\":16.7,\"p95\":50.1,\"max\":100.1,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.42},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":343,\"p50\":16.7,\"p95\":33.3,\"max\":116.7,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.41},\"states\":[\"running\",\"waiting\",\"waiting\",\"ready\"]}},{\"round\":2,\"nothing\":{\"frames\":330,\"p50\":16.7,\"p95\":49.9,\"max\":99.5,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.4}},\"held1\":{\"frames\":284,\"p50\":16.7,\"p95\":50.1,\"max\":83.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.44},\"states\":[\"running\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":262,\"p50\":16.7,\"p95\":66.7,\"max\":116.8,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.4},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":361,\"p50\":16.7,\"p95\":16.8,\"max\":83.5,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.34},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]}},{\"round\":3,\"nothing\":{\"frames\":317,\"p50\":16.7,\"p95\":49.9,\"max\":233.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.41}},\"held1\":{\"frames\":374,\"p50\":16.7,\"p95\":16.8,\"max\":66.7,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.47},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":356,\"p50\":16.7,\"p95\":16.9,\"max\":83.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.45},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":343,\"p50\":16.7,\"p95\":33.3,\"max\":83.5,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.4},\"states\":[\"ready\",\"running\",\"waiting\",\"ready\"]}}],\"medians\":{\"nothing\":49.9,\"held1\":50.1,\"held3\":50.1,\"running\":33.3}}"
+    },
+    {
+      "name": "width 3: the stage's 95th-percentile frame time while copies wait is that of a stage with nothing to make (median 50.1 ms against 49.9 ms, within 10%; a copy running: 33.3 ms)",
+      "pass": true,
+      "detail": "{\"load\":[{\"label\":\"before\",\"percent\":16},{\"label\":\"nothing to make\",\"percent\":20},{\"label\":\"round 1: nothing to make\",\"percent\":16},{\"label\":\"round 1: copies at width 1, held\",\"percent\":99},{\"label\":\"round 1: copies at width 3, held\",\"percent\":100},{\"label\":\"round 1: a copy running (contrast)\",\"percent\":96},{\"label\":\"round 2: nothing to make\",\"percent\":34},{\"label\":\"round 2: copies at width 1, held\",\"percent\":100},{\"label\":\"round 2: copies at width 3, held\",\"percent\":100},{\"label\":\"round 2: a copy running (contrast)\",\"percent\":100},{\"label\":\"round 3: nothing to make\",\"percent\":24},{\"label\":\"round 3: copies at width 1, held\",\"percent\":97},{\"label\":\"round 3: copies at width 3, held\",\"percent\":100},{\"label\":\"round 3: a copy running (contrast)\",\"percent\":96},{\"label\":\"after the rounds\",\"percent\":43}],\"rounds\":[{\"round\":1,\"nothing\":{\"frames\":284,\"p50\":16.7,\"p95\":50.2,\"max\":133.3,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.35}},\"held1\":{\"frames\":271,\"p50\":16.7,\"p95\":66.7,\"max\":217,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.44},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":295,\"p50\":16.7,\"p95\":50.1,\"max\":100.1,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.42},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":343,\"p50\":16.7,\"p95\":33.3,\"max\":116.7,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.41},\"states\":[\"running\",\"waiting\",\"waiting\",\"ready\"]}},{\"round\":2,\"nothing\":{\"frames\":330,\"p50\":16.7,\"p95\":49.9,\"max\":99.5,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.4}},\"held1\":{\"frames\":284,\"p50\":16.7,\"p95\":50.1,\"max\":83.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.44},\"states\":[\"running\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":262,\"p50\":16.7,\"p95\":66.7,\"max\":116.8,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.4},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":361,\"p50\":16.7,\"p95\":16.8,\"max\":83.5,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.34},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]}},{\"round\":3,\"nothing\":{\"frames\":317,\"p50\":16.7,\"p95\":49.9,\"max\":233.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.41}},\"held1\":{\"frames\":374,\"p50\":16.7,\"p95\":16.8,\"max\":66.7,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.47},\"states\":[\"paused\",\"waiting\",\"waiting\",\"ready\"]},\"held3\":{\"frames\":356,\"p50\":16.7,\"p95\":16.9,\"max\":83.4,\"element\":{\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.45},\"states\":[\"paused\",\"paused\",\"waiting\",\"ready\"]},\"running\":{\"frames\":343,\"p50\":16.7,\"p95\":33.3,\"max\":83.5,\"element\":{\"paused\":false,\"muted\":true,\"volume\":0,\"readyState\":1,\"time\":1.4},\"states\":[\"ready\",\"running\",\"waiting\",\"ready\"]}}],\"medians\":{\"nothing\":49.9,\"held1\":50.1,\"held3\":50.1,\"running\":33.3}}"
+    },
+    {
+      "name": "every width made every copy",
+      "pass": true,
+      "detail": "{\"1\":{\"ms\":30433,\"loadBefore\":18,\"loadAfter\":5,\"done\":true},\"2\":{\"ms\":33635,\"loadBefore\":9,\"loadAfter\":19,\"done\":true},\"3\":{\"ms\":28852,\"loadBefore\":12,\"loadAfter\":8,\"done\":true}}"
+    },
+    {
+      "name": "quitting while a copy is made in idle time leaves no FFmpeg running, and the next start removes its part file",
+      "pass": true,
+      "detail": "{\"long\":{\"name\":\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4\",\"state\":\"running\",\"done\":2.858667,\"total\":30,\"why\":null},\"partQuit\":[\"proxy-f8a6f0186571bc7d6cc6c634e3c468fca71215f53-720-r1-ff902.mp4.part\"],\"ffAfter\":0,\"parts\":[]}"
+    }
+  ],
+  "notes": [
+    "The corpus (four 4K H.264 sources of 30 s at 25 frames a second, each with its frame numbers; megabytes {\"grain-1.mp4\":140.4,\"grain-2.mp4\":140.4,\"still-3.mp4\":0.8,\"still-4.mp4\":0.8}) took 0 s to make or was kept.",
+    "While the studio played with sound the window was heard: [true,false]; the playing element: {\"paused\":false,\"muted\":false,\"volume\":1,\"readyState\":1,\"time\":1.43}.",
+    "The copies, by source: {\"proxy-<fingerprint>3-720-r1-ff902.mp4\":\"grain-1.mp4\",\"proxy-<fingerprint>0-720-r1-ff902.mp4\":\"grain-2.mp4\",\"proxy-<fingerprint>f-720-r1-ff902.mp4\":\"still-4.mp4\",\"proxy-<fingerprint>1-720-r1-ff902.mp4\":\"still-3.mp4\"}",
+    "The stage's 95th-percentile frame time, median of three 8 s plays each: nothing to make 49.9 ms, copies held at width 1 50.1 ms and at width 3 50.1 ms, a copy running 33.3 ms; every play: [[50.2,66.7,50.1,33.3],[49.9,50.1,66.7,16.8],[49.9,16.8,16.9,33.3]].",
+    "Time to make the copies not in use (30 s of 4K each), one, two and three at a time: {\"1\":{\"ms\":30433,\"loadBefore\":18,\"loadAfter\":5,\"done\":true},\"2\":{\"ms\":33635,\"loadBefore\":9,\"loadAfter\":19,\"done\":true},\"3\":{\"ms\":28852,\"loadBefore\":12,\"loadAfter\":8,\"done\":true}}",
+    "Windows' speed limit for the processor during the run, as the application heard it: [45,46,45,47,52,55,100,100,41,42,41,100,70,100,49,50,51,100,47,45,44,100,47,100,52,100,55,56,58,59,56,52,54,57,56,54,52,54,52,53,58,100,48,49,47,49,53,58,61,62,63,65,67,70,100,45,48,52,56,60,100,100,46,50,55,100,70,67,66,67,100,66,63,62,63,62,100,45,49,50,51,52,56,62,100,100,47,48,46,52,53,58,63,65,69,73,72,73,72,70,66,100,61,60,56,59,60,66,68,100,100,42,43,100,100,36,34,100,51,52,53,57,100,35,34,38,42,46,100,60,100,37,100,41,44,100]."
+  ],
+  "corpus": {
+    "grain-1.mp4": 140.4,
+    "grain-2.mp4": 140.4,
+    "still-3.mp4": 0.8,
+    "still-4.mp4": 0.8
+  },
+  "opened": {
+    "names": [
+      "grain-1.mp4",
+      "grain-2.mp4",
+      "still-3.mp4",
+      "still-4.mp4"
+    ],
+    "states": [
+      {
+        "kind": "ready"
+      },
+      {
+        "kind": "ready"
+      },
+      {
+        "kind": "ready"
+      },
+      {
+        "kind": "ready"
+      }
+    ],
+    "width": null
+  },
+  "holds": {
+    "a click": {
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 1.237333,
+      "pausedMs": 11,
+      "hold": "input",
+      "progressHeld": [
+        4.608,
+        4.608
+      ],
+      "state": "paused",
+      "resumedMs": 1060,
+      "sinceHold": 3588,
+      "after": 7.509333
+    },
+    "an export (busy)": {
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 7.509333,
+      "pausedMs": 10,
+      "hold": "export",
+      "progressHeld": [
+        8.32,
+        8.32
+      ],
+      "state": "paused",
+      "resumedMs": 563,
+      "sinceHold": 3080,
+      "after": 10.794667
+    },
+    "the page says «playing»": {
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 10.794667,
+      "pausedMs": 8,
+      "hold": "playing",
+      "progressHeld": [
+        12.309333,
+        12.309333
+      ],
+      "state": "paused",
+      "resumedMs": 575,
+      "sinceHold": 3097,
+      "after": 15.018667
+    },
+    "the window makes sound (the studio playing, not saying so)": {
+      "name": "proxy-<fingerprint>3-720-r1-ff902.mp4",
+      "at": 15.018667,
+      "pausedMs": 22,
+      "hold": "playing",
+      "progressHeld": [
+        28.272,
+        29.568
+      ],
+      "state": "ready",
+      "resumedMs": 4,
+      "sinceHold": 2530,
+      "after": 29.568
+    },
+    "on battery (simulated in the main process)": {
+      "name": "proxy-<fingerprint>0-720-r1-ff902.mp4",
+      "at": 2.645334,
+      "pausedMs": 11,
+      "hold": "battery",
+      "progressHeld": [
+        5.056,
+        5.056
+      ],
+      "state": "paused",
+      "resumedMs": 448,
+      "sinceHold": 2968,
+      "after": 7.616
+    },
+    "Windows lowers the processor's speed limit (simulated)": {
+      "name": "proxy-<fingerprint>0-720-r1-ff902.mp4",
+      "at": 7.616,
+      "pausedMs": 6,
+      "hold": "throttled",
+      "progressHeld": [
+        8.64,
+        8.64
+      ],
+      "state": "paused",
+      "resumedMs": 74,
+      "sinceHold": 2599,
+      "after": 9.130667
+    }
+  },
+  "soundPlay": {
+    "frames": 215,
+    "p50": 16.7,
+    "p95": 50,
+    "max": 83.5,
+    "element": {
+      "paused": false,
+      "muted": false,
+      "volume": 1,
+      "readyState": 1,
+      "time": 1.43
+    }
+  },
+  "audible": [
+    {
+      "at": 1793760608045,
+      "audible": true
+    },
+    {
+      "at": 1793760608356,
+      "audible": false
+    }
+  ],
+  "readAhead": {
+    "at": 3.989333,
+    "stoppedMs": 1760,
+    "left": 0,
+    "meanwhile": {
+      "name": "proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4",
+      "state": "waiting",
+      "done": 0,
+      "total": 30,
+      "why": null
+    },
+    "again": {
+      "name": "proxy-fd59fa8ef197d923e18628b8c0ef79529810fbd01-720-r1-ff902.mp4",
+      "state": "running",
+      "done": 0,
+      "total": 30,
+      "why": null
+    }
+  },
+  "speed": {
+    "load": [
+      {
+        "label": "before",
+        "percent": 16
+      },
+      {
+        "label": "nothing to make",
+        "percent": 20
+      },
+      {
+        "label": "round 1: nothing to make",
+        "percent": 16
+      },
+      {
+        "label": "round 1: copies at width 1, held",
+        "percent": 99
+      },
+      {
+        "label": "round 1: copies at width 3, held",
+        "percent": 100
+      },
+      {
+        "label": "round 1: a copy running (contrast)",
+        "percent": 96
+      },
+      {
+        "label": "round 2: nothing to make",
+        "percent": 34
+      },
+      {
+        "label": "round 2: copies at width 1, held",
+        "percent": 100
+      },
+      {
+        "label": "round 2: copies at width 3, held",
+        "percent": 100
+      },
+      {
+        "label": "round 2: a copy running (contrast)",
+        "percent": 100
+      },
+      {
+        "label": "round 3: nothing to make",
+        "percent": 24
+      },
+      {
+        "label": "round 3: copies at width 1, held",
+        "percent": 97
+      },
+      {
+        "label": "round 3: copies at width 3, held",
+        "percent": 100
+      },
+      {
+        "label": "round 3: a copy running (contrast)",
+        "percent": 96
+      },
+      {
+        "label": "after the rounds",
+        "percent": 43
+      }
+    ],
+    "rounds": [
+      {
+        "round": 1,
+        "nothing": {
+          "frames": 284,
+          "p50": 16.7,
+          "p95": 50.2,
+          "max": 133.3,
+          "element": {
+            "paused": false,
+            "muted": false,
+            "volume": 1,
+            "readyState": 1,
+            "time": 1.35
+          }
+        },
+        "held1": {
+          "frames": 271,
+          "p50": 16.7,
+          "p95": 66.7,
+          "max": 217,
+          "element": {
+            "paused": false,
+            "muted": false,
+            "volume": 1,
+            "readyState": 1,
+            "time": 1.44
+          },
+          "states": [
+            "paused",
+            "waiting",
+            "waiting",
+            "ready"
+          ]
+        },
+        "held3": {
+          "frames": 295,
+          "p50": 16.7,
+          "p95": 50.1,
+          "max": 100.1,
+          "element": {
+            "paused": false,
+            "muted": false,
+            "volume": 1,
+            "readyState": 1,
+            "time": 1.42
+          },
+          "states": [
+            "paused",
+            "paused",
+            "waiting",
+            "ready"
+          ]
+        },
+        "running": {
+          "frames": 343,
+          "p50": 16.7,
+          "p95": 33.3,
+          "max": 116.7,
+          "element": {
+            "paused": false,
+            "muted": true,
+            "volume": 0,
+            "readyState": 1,
+            "time": 1.41
+          },
+          "states": [
+            "running",
+            "waiting",
+            "waiting",
+            "ready"
+          ]
+        }
+      },
+      {
+        "round": 2,
+        "nothing": {
+          "frames": 330,
+          "p50": 16.7,
+          "p95": 49.9,
+          "max": 99.5,
+          "element": {
+            "paused": false,
+            "muted": false,
+            "volume": 1,
+            "readyState": 1,
+            "time": 1.4
+          }
+        },
+        "held1": {
+          "frames": 284,
+          "p50": 16.7,
+          "p95": 50.1,
+          "max": 83.4,
+          "element": {
+            "paused": false,
+            "muted": false,
+            "volume": 1,
+            "readyState": 1,
+            "time": 1.44
+          },
+          "states": [
+            "running",
+            "waiting",
+            "waiting",
+            "ready"
+          ]
+        },
+        "held3": {
+          "frames": 262,
+          "p50": 16.7,
+          "p95": 66.7,
+          "max": 116.8,
+          "element": {
+            "paused": false,
+            "muted": false,
+            "volume": 1,
+            "readyState": 1,
+            "time": 1.4
+          },
+          "states": [
+            "paused",
+            "paused",
+            "waiting",
+            "ready"
+          ]
+        },
+        "running": {
+          "frames": 361,
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 83.5,
+          "element": {
+            "paused": false,
+            "muted": true,
+            "volume": 0,
+            "readyState": 1,
+            "time": 1.34
+          },
+          "states": [
+            "paused",
+            "waiting",
+            "waiting",
+            "ready"
+          ]
+        }
+      },
+      {
+        "round": 3,
+        "nothing": {
+          "frames": 317,
+          "p50": 16.7,
+          "p95": 49.9,
+          "max": 233.4,
+          "element": {
+            "paused": false,
+            "muted": false,
+            "volume": 1,
+            "readyState": 1,
+            "time": 1.41
+          }
+        },
+        "held1": {
+          "frames": 374,
+          "p50": 16.7,
+          "p95": 16.8,
+          "max": 66.7,
+          "element": {
+            "paused": false,
+            "muted": false,
+            "volume": 1,
+            "readyState": 1,
+            "time": 1.47
+          },
+          "states": [
+            "paused",
+            "waiting",
+            "waiting",
+            "ready"
+          ]
+        },
+        "held3": {
+          "frames": 356,
+          "p50": 16.7,
+          "p95": 16.9,
+          "max": 83.4,
+          "element": {
+            "paused": false,
+            "muted": false,
+            "volume": 1,
+            "readyState": 1,
+            "time": 1.45
+          },
+          "states": [
+            "paused",
+            "paused",
+            "waiting",
+            "ready"
+          ]
+        },
+        "running": {
+          "frames": 343,
+          "p50": 16.7,
+          "p95": 33.3,
+          "max": 83.5,
+          "element": {
+            "paused": false,
+            "muted": true,
+            "volume": 0,
+            "readyState": 1,
+            "time": 1.4
+          },
+          "states": [
+            "ready",
+            "running",
+            "waiting",
+            "ready"
+          ]
+        }
+      }
+    ],
+    "medians": {
+      "nothing": 49.9,
+      "held1": 50.1,
+      "held3": 50.1,
+      "running": 33.3
+    },
+    "widths": {
+      "1": {
+        "ms": 30433,
+        "loadBefore": 18,
+        "loadAfter": 5,
+        "done": true
+      },
+      "2": {
+        "ms": 33635,
+        "loadBefore": 9,
+        "loadAfter": 19,
+        "done": true
+      },
+      "3": {
+        "ms": 28852,
+        "loadBefore": 12,
+        "loadAfter": 8,
+        "done": true
+      }
+    }
+  },
+  "speedLimits": [
+    {
+      "at": 1793760579752,
+      "limit": 45
+    },
+    {
+      "at": 1793760582785,
+      "limit": 46
+    },
+    {
+      "at": 1793760584810,
+      "limit": 45
+    },
+    {
+      "at": 1793760585823,
+      "limit": 47
+    },
+    {
+      "at": 1793760586824,
+      "limit": 52
+    },
+    {
+      "at": 1793760587837,
+      "limit": 55
+    },
+    {
+      "at": 1793760588852,
+      "limit": 100
+    },
+    {
+      "at": 1793760603936,
+      "limit": 100
+    },
+    {
+      "at": 1793760610067,
+      "limit": 41
+    },
+    {
+      "at": 1793760611082,
+      "limit": 42
+    },
+    {
+      "at": 1793760612093,
+      "limit": 41
+    },
+    {
+      "at": 1793760614096,
+      "limit": 100
+    },
+    {
+      "at": 1793760620132,
+      "limit": 70
+    },
+    {
+      "at": 1793760622656,
+      "limit": 100
+    },
+    {
+      "at": 1793760629248,
+      "limit": 49
+    },
+    {
+      "at": 1793760631275,
+      "limit": 50
+    },
+    {
+      "at": 1793760632287,
+      "limit": 51
+    },
+    {
+      "at": 1793760633300,
+      "limit": 100
+    },
+    {
+      "at": 1793760643419,
+      "limit": 47
+    },
+    {
+      "at": 1793760644432,
+      "limit": 45
+    },
+    {
+      "at": 1793760645447,
+      "limit": 44
+    },
+    {
+      "at": 1793760646462,
+      "limit": 100
+    },
+    {
+      "at": 1793760658568,
+      "limit": 47
+    },
+    {
+      "at": 1793760660594,
+      "limit": 100
+    },
+    {
+      "at": 1793760670708,
+      "limit": 52
+    },
+    {
+      "at": 1793760671721,
+      "limit": 100
+    },
+    {
+      "at": 1793760681841,
+      "limit": 55
+    },
+    {
+      "at": 1793760682854,
+      "limit": 56
+    },
+    {
+      "at": 1793760683868,
+      "limit": 58
+    },
+    {
+      "at": 1793760687914,
+      "limit": 59
+    },
+    {
+      "at": 1793760688930,
+      "limit": 56
+    },
+    {
+      "at": 1793760689939,
+      "limit": 52
+    },
+    {
+      "at": 1793760690953,
+      "limit": 54
+    },
+    {
+      "at": 1793760691965,
+      "limit": 57
+    },
+    {
+      "at": 1793760692966,
+      "limit": 56
+    },
+    {
+      "at": 1793760694974,
+      "limit": 54
+    },
+    {
+      "at": 1793760695986,
+      "limit": 52
+    },
+    {
+      "at": 1793760696989,
+      "limit": 54
+    },
+    {
+      "at": 1793760697999,
+      "limit": 52
+    },
+    {
+      "at": 1793760699012,
+      "limit": 53
+    },
+    {
+      "at": 1793760700023,
+      "limit": 58
+    },
+    {
+      "at": 1793760701039,
+      "limit": 100
+    },
+    {
+      "at": 1793760711149,
+      "limit": 48
+    },
+    {
+      "at": 1793760712160,
+      "limit": 49
+    },
+    {
+      "at": 1793760714182,
+      "limit": 47
+    },
+    {
+      "at": 1793760715192,
+      "limit": 49
+    },
+    {
+      "at": 1793760716205,
+      "limit": 53
+    },
+    {
+      "at": 1793760718232,
+      "limit": 58
+    },
+    {
+      "at": 1793760719233,
+      "limit": 61
+    },
+    {
+      "at": 1793760720241,
+      "limit": 62
+    },
+    {
+      "at": 1793760722265,
+      "limit": 63
+    },
+    {
+      "at": 1793760723275,
+      "limit": 65
+    },
+    {
+      "at": 1793760724286,
+      "limit": 67
+    },
+    {
+      "at": 1793760725286,
+      "limit": 70
+    },
+    {
+      "at": 1793760726300,
+      "limit": 100
+    },
+    {
+      "at": 1793760736397,
+      "limit": 45
+    },
+    {
+      "at": 1793760737411,
+      "limit": 48
+    },
+    {
+      "at": 1793760739427,
+      "limit": 52
+    },
+    {
+      "at": 1793760740441,
+      "limit": 56
+    },
+    {
+      "at": 1793760741456,
+      "limit": 60
+    },
+    {
+      "at": 1793760742472,
+      "limit": 100
+    },
+    {
+      "at": 1793760747842,
+      "limit": 100
+    },
+    {
+      "at": 1793760752579,
+      "limit": 46
+    },
+    {
+      "at": 1793760754597,
+      "limit": 50
+    },
+    {
+      "at": 1793760756618,
+      "limit": 55
+    },
+    {
+      "at": 1793760757631,
+      "limit": 100
+    },
+    {
+      "at": 1793760767734,
+      "limit": 70
+    },
+    {
+      "at": 1793760768736,
+      "limit": 67
+    },
+    {
+      "at": 1793760769750,
+      "limit": 66
+    },
+    {
+      "at": 1793760770753,
+      "limit": 67
+    },
+    {
+      "at": 1793760771769,
+      "limit": 100
+    },
+    {
+      "at": 1793760790975,
+      "limit": 66
+    },
+    {
+      "at": 1793760791977,
+      "limit": 63
+    },
+    {
+      "at": 1793760795001,
+      "limit": 62
+    },
+    {
+      "at": 1793760796015,
+      "limit": 63
+    },
+    {
+      "at": 1793760797029,
+      "limit": 62
+    },
+    {
+      "at": 1793760798041,
+      "limit": 100
+    },
+    {
+      "at": 1793760808146,
+      "limit": 45
+    },
+    {
+      "at": 1793760809146,
+      "limit": 49
+    },
+    {
+      "at": 1793760810149,
+      "limit": 50
+    },
+    {
+      "at": 1793760811161,
+      "limit": 51
+    },
+    {
+      "at": 1793760812175,
+      "limit": 52
+    },
+    {
+      "at": 1793760813184,
+      "limit": 56
+    },
+    {
+      "at": 1793760814197,
+      "limit": 62
+    },
+    {
+      "at": 1793760815212,
+      "limit": 100
+    },
+    {
+      "at": 1793760820582,
+      "limit": 100
+    },
+    {
+      "at": 1793760825344,
+      "limit": 47
+    },
+    {
+      "at": 1793760826357,
+      "limit": 48
+    },
+    {
+      "at": 1793760827369,
+      "limit": 46
+    },
+    {
+      "at": 1793760829396,
+      "limit": 52
+    },
+    {
+      "at": 1793760830404,
+      "limit": 53
+    },
+    {
+      "at": 1793760831414,
+      "limit": 58
+    },
+    {
+      "at": 1793760832429,
+      "limit": 63
+    },
+    {
+      "at": 1793760833442,
+      "limit": 65
+    },
+    {
+      "at": 1793760834452,
+      "limit": 69
+    },
+    {
+      "at": 1793760835454,
+      "limit": 73
+    },
+    {
+      "at": 1793760836463,
+      "limit": 72
+    },
+    {
+      "at": 1793760837470,
+      "limit": 73
+    },
+    {
+      "at": 1793760838479,
+      "limit": 72
+    },
+    {
+      "at": 1793760839490,
+      "limit": 70
+    },
+    {
+      "at": 1793760841515,
+      "limit": 66
+    },
+    {
+      "at": 1793760842516,
+      "limit": 100
+    },
+    {
+      "at": 1793760852639,
+      "limit": 61
+    },
+    {
+      "at": 1793760853642,
+      "limit": 60
+    },
+    {
+      "at": 1793760855669,
+      "limit": 56
+    },
+    {
+      "at": 1793760857672,
+      "limit": 59
+    },
+    {
+      "at": 1793760858679,
+      "limit": 60
+    },
+    {
+      "at": 1793760859685,
+      "limit": 66
+    },
+    {
+      "at": 1793760860699,
+      "limit": 68
+    },
+    {
+      "at": 1793760861715,
+      "limit": 100
+    },
+    {
+      "at": 1793760879685,
+      "limit": 100
+    },
+    {
+      "at": 1793760885981,
+      "limit": 42
+    },
+    {
+      "at": 1793760886991,
+      "limit": 43
+    },
+    {
+      "at": 1793760888005,
+      "limit": 100
+    },
+    {
+      "at": 1793760891823,
+      "limit": 100
+    },
+    {
+      "at": 1793760918333,
+      "limit": 36
+    },
+    {
+      "at": 1793760919341,
+      "limit": 34
+    },
+    {
+      "at": 1793760920352,
+      "limit": 100
+    },
+    {
+      "at": 1793760938574,
+      "limit": 51
+    },
+    {
+      "at": 1793760939588,
+      "limit": 52
+    },
+    {
+      "at": 1793760940598,
+      "limit": 53
+    },
+    {
+      "at": 1793760941610,
+      "limit": 57
+    },
+    {
+      "at": 1793760942625,
+      "limit": 100
+    },
+    {
+      "at": 1793760952736,
+      "limit": 35
+    },
+    {
+      "at": 1793760953749,
+      "limit": 34
+    },
+    {
+      "at": 1793760954761,
+      "limit": 38
+    },
+    {
+      "at": 1793760955761,
+      "limit": 42
+    },
+    {
+      "at": 1793760956774,
+      "limit": 46
+    },
+    {
+      "at": 1793760957787,
+      "limit": 100
+    },
+    {
+      "at": 1793760967899,
+      "limit": 60
+    },
+    {
+      "at": 1793760968902,
+      "limit": 100
+    },
+    {
+      "at": 1793760979005,
+      "limit": 37
+    },
+    {
+      "at": 1793760981022,
+      "limit": 100
+    },
+    {
+      "at": 1793760991117,
+      "limit": 41
+    },
+    {
+      "at": 1793760992128,
+      "limit": 44
+    },
+    {
+      "at": 1793760993142,
+      "limit": 100
+    }
+  ],
+  "total": 26,
+  "passed": 25,
+  "failed": 1
+}

@@ -16,7 +16,7 @@ import { keyAction, nextZoom, type KeyAction } from './keys.ts';
 import { givenSwitch, measuredPick, switchFor, SWITCH_NAMES } from './gpu.ts';
 import { startNative, type Native } from './native.ts';
 import { startFiles } from './native-files.ts';
-import { ProfileStore } from './profile.ts';
+import { decodeCapacity, ProfileStore } from './profile.ts';
 import { parseSettings } from './settings.ts';
 import { startMedia } from './native-media.ts';
 import { startWindows } from './native-windows.ts';
@@ -26,6 +26,7 @@ import { decideNavigation, loadFailure, type Decision } from './navigation.ts';
 import { DEVELOPMENT_ORIGIN, isAllowed, PRODUCTION_ORIGIN } from './origins.ts';
 import { permissionGranted } from './permissions.ts';
 import { refusedSwitch } from './switches.ts';
+import { jumpAddress, jumpList, jumpOf } from './taskbar.ts';
 import { parseState, placeWindow, MIN_SIZE, type WindowState } from './window-state.ts';
 
 const PARTITION = 'persist:comms-hub';
@@ -80,12 +81,20 @@ const pagePath = (name: string) => path.join(__dirname, name);
 const background = () => (nativeTheme.shouldUseDarkColors ? '#07130e' : '#f4f6f2');
 
 function startAddress(): string {
+  // a start from the taskbar's jump list (P-26) names one of its places by a word, never an address
+  const jump = jumpOf(process.argv);
   if (__COMMS_HUB_DEV__) {
     const asked = process.env.COMMS_HUB_START;
     if (asked && isAllowed(asked, ALLOWED)) return asked;
-    return `${DEVELOPMENT_ORIGIN}/`;
+    return jump ? jumpAddress(DEVELOPMENT_ORIGIN, jump) : `${DEVELOPMENT_ORIGIN}/`;
   }
-  return `${PRODUCTION_ORIGIN}/`;
+  return jump ? jumpAddress(PRODUCTION_ORIGIN, jump) : `${PRODUCTION_ORIGIN}/`;
+}
+
+/** The origin of the site a window shows, when it shows the site; otherwise the start's. */
+function siteOrigin(win: BrowserWindow): string {
+  const url = win.webContents.getURL();
+  return isAllowed(url, ALLOWED) ? new URL(url).origin : new URL(startAddress()).origin;
 }
 
 function sitePreferences(): WebPreferences {
@@ -315,8 +324,12 @@ function createMainWindow() {
   void win.loadURL(startAddress());
 }
 
-app.on('second-instance', () => {
-  if (main) native?.reveal(main);
+app.on('second-instance', (_event, argv) => {
+  if (!main) return;
+  native?.reveal(main);
+  // a place from the jump list, on the site the window already shows
+  const jump = jumpOf(argv);
+  if (jump) void main.webContents.loadURL(jumpAddress(siteOrigin(main), jump));
 });
 
 app.on('web-contents-created', (_event, contents) => {
@@ -329,12 +342,15 @@ if (lock && !refused) {
   void app.whenReady().then(() => {
     // No native menu bar (11.1): the site and the studio keep their own menus and keys.
     Menu.setApplicationMenu(null);
+    // The taskbar's jump list (P-26): «الاستوديو» and «يحتاج قرارك», each starting this program with its word.
+    if (process.platform === 'win32' && app.isPackaged) app.setJumpList(jumpList(process.execPath));
     prepareSession();
     native = startNative({ allowed: ALLOWED, windows: () => siteWindows, mainWindow: () => main, version: VERSION, iconPath: pagePath('icon.png'), feed: UPDATE_FEED, qa: QA, dev: DEV, gpu: { active: gpuSwitch, given: given !== null }, profiles });
     const stores = startFiles({
       handle: native.handle,
       site: session.fromPartition(PARTITION),
       allowed: ALLOWED,
+      icon: pagePath('icon.png'),
       // «مسح بيانات هذا الجهاز»: every window of the site starts again, signed out.
       reload: () => {
         for (const w of BrowserWindow.getAllWindows()) if (siteWindows.has(w.webContents.id)) void w.webContents.loadURL(startAddress());
@@ -344,7 +360,16 @@ if (lock && !refused) {
     stores.onClear(() => void profiles.clear());
     // FFmpeg is packaged beside the application (resources/ffmpeg); unpacked, it is the fetched copy in vendor/.
     const tools = app.isPackaged ? path.join(process.resourcesPath, 'ffmpeg') : path.join(__dirname, '..', 'vendor', 'ffmpeg');
-    startMedia({ handle: native.handle, ...stores, tools: { ffmpeg: path.join(tools, 'ffmpeg.exe'), ffprobe: path.join(tools, 'ffprobe.exe'), tag: FFMPEG_TAG }, worker: pagePath('media-worker.js') });
+    // From D12 the idle-time broker reads the native layer's facts, and the profile says which sources need a light copy.
+    startMedia({
+      handle: native.handle,
+      ...stores,
+      tools: { ffmpeg: path.join(tools, 'ffmpeg.exe'), ffprobe: path.join(tools, 'ffprobe.exe'), tag: FFMPEG_TAG },
+      worker: pagePath('media-worker.js'),
+      idle: native.idle,
+      background: native.background,
+      decode4k: () => decodeCapacity(profiles.entries(), process.versions.chrome, gpuSwitch),
+    });
     // A studio panel in a window of its own (D6): every rule of the site's windows, black behind the picture.
     startWindows({
       handle: native.handle,

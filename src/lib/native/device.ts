@@ -4,7 +4,7 @@
 // measured the same way in both. Where a laptop has two graphics chips, the guide says how to give the
 // application the stronger one. Pure: the panel gathers the facts.
 import { formatBytes } from '../studio/support.ts';
-import type { GpuChoice, ProfileEntry } from './index.ts';
+import type { GpuChoice, ProfileEntry, ProfileKey } from './index.ts';
 import type { Knobs, Performance } from '../studio/scale.ts';
 
 export type GpuChip = { name: string; vendor: string; active: boolean };
@@ -98,7 +98,7 @@ export const GPU_MEASURE_OTHER = 'لقياس البطاقة الأخرى: اخت
 export const GPU_RESTART = 'تُطبَّق بعد إعادة تشغيل التطبيق.';
 export const GPU_BUSY = 'لا يُعاد تشغيل التطبيق أثناء التصدير. أعد تشغيله بعد انتهائه.';
 export const MEASURE_HINT = 'يقيس التطبيق ما يقدر عليه هذا الجهاز في نحو نصف دقيقة. لا يُرسل شيء خارج الجهاز.';
-export const PLAN_NOTE = 'هذه القيم خطة المراحل القادمة للاستوديو على هذا الجهاز، ولا تغيّر شيئاً في المعاينة أو التصدير الآن.';
+export const PLAN_NOTE = 'هذه القيم خطة الاستوديو على هذا الجهاز: تتبعها «النسخ الخفيفة معاً» الآن، والبقية في المراحل القادمة، ولا تغيّر شيئاً فيما يُصدَّر.';
 
 export const PERFORMANCE_CHOICES: { value: Performance; label: string }[] = [
   { value: 'auto', label: 'تلقائي' },
@@ -154,4 +154,12 @@ export function knobLines(k: Knobs): DeviceLine[] {
     { label: 'النسخ الخفيفة معاً', value: String(k.copiesAtOnce) },
     { label: 'عمّال تعديل الصور', value: String(k.photoWorkers) },
   ];
+}
+
+/** The device profile's measurement for this page's own key: same application, Chromium, chip, driver and switch; the newest. */
+export function currentEntry(p: { current: ProfileKey; entries: ProfileEntry[] } | null): ProfileEntry | null {
+  if (!p) return null;
+  const k = p.current;
+  const same = p.entries.filter((e) => e.key.app === k.app && e.key.chrome === k.chrome && e.key.switch === k.switch && e.key.chip.vendorId === k.chip.vendorId && e.key.chip.deviceId === k.chip.deviceId && e.key.chip.driver === k.chip.driver);
+  return same.sort((a, b) => b.at - a.at)[0] ?? null;
 }

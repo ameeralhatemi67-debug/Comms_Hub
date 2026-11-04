@@ -2940,3 +2940,106 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Verified.** `npm run typecheck` clean; `tests/studio-export-power.test.mjs` and `tests/studio-colour.test.mjs` 12 of 12. The
   application's engines (no chip, both chips) wait for the port-3000 lock.
 - **Not done.** Nothing pushed; drawing in workers not switched on anywhere.
+
+### 2026-11-04: the desktop application, D12: light copies in idle time, parallel library copies, the taskbar, dragging out, the camera card (Desktop Power, Fork 3)
+
+- **Direction.** The Desktop Power manager's list for Fork 3: `Desktop_Power_Ideas.md` P-30 with P-08, P-29, P-26, P-22, P-20, and the
+  path found in its section 12; the recommended answers of its section 10 stand for Q1 to Q7. Built in `claude/power-desktop-5fba9d`,
+  local only; desktop 0.8.0, bridge versions 7 to 9; `MVP_draft.md` 63.9 and the D12 paragraph of `AGENTS.md`.
+- **What changed.**
+  - **Light copies made while the laptop is free (P-30, P-08; bridge 7: `life.activity`, `media.queue`, `queued`, `onQueue`).**
+    - **Where they come from.** The studio names every video source its media pool opens to the application's queue
+      (`src/lib/studio/cache.ts`). The width is `copiesAtOnce` of `scale.ts`.
+    - **When they run** (`desktop/src/idle.ts`): only on mains power, at the processor's full speed limit, with nothing exporting,
+      uploading, playing (said by the page, or the window heard), scrubbing, measuring or asked for, and three seconds after the last
+      key or click in the application. Moving the pointer and scrolling hold nothing.
+    - **A held copy pauses.** The utility process serves its source to FFmpeg over loopback (`loopback.ts`: 127.0.0.1, one 32-byte
+      token per running job, the Host checked, no CORS header) and stops the bytes.
+    - **A copy whose source FFmpeg had already read whole** (a still scene) goes on despite that; after 1.7 s it is ended as `held`
+      and made again later. So is a copy held three minutes, or wanted by no window.
+    - **Which sources need a copy** follows the device profile's 4K decoding rate (`heavyOn`), and today's rule without one.
+    - **What is said:** «التخزين على هذا الجهاز» says how far the copies are and why they wait, and the tray adds a line.
+  - **P-29.** `CacheStore.copy` asks for two 16 MB parts at once, at most four when asked, and keeps only the unbroken start, so a
+    resume starts from the first gap.
+  - **P-26, P-22 (bridge 8: `life.progress`, `files.dragOut`).**
+    - **The taskbar button** shows a page's progress, red on failure until the window is looked at.
+    - **The jump list** offers «الاستوديو» and «يحتاج قرارك» (the home page), by a word of a fixed list, never an address.
+    - **A file used where it is** can be dragged out of «التخزين على هذا الجهاز» into another program.
+    - **Site helpers** for the export panel: `setTaskbarProgress`, `fileToken`, `dragOutFile`. Fork 1 wires them after the merge.
+  - **Section 12.** `cache.usage` names the folder «المجلد الافتراضي» or by its last name, never by its path, which held the Windows user
+    name; the studio shows only a last name even from an older application.
+  - **P-20 «استيراد من بطاقة الكاميرا» (bridge 9: `files.importCard`, `copyCard`, `cancelCard`, `onCard`).**
+    - **The listing:** the card is listed without following a link or a junction out of it, and an AVCHD recording split in parts is
+      one item.
+    - **The copy:** each copy is a `.part` until its SHA-256 read back matches what was read.
+    - **The page** gets keys and tokens, never a path, and the copied videos join the light-copy queue.
+    - **Added from «هذا الجهاز» for now:** the copied files go into a project from there; adding them straight to the timeline is not in
+      this stage.
+  - The plan's note in «معلومات الجهاز» now says the light copies follow it.
+- **Verified, numbers** (the desktop package built from `99d685b`, desktop 0.8.0, bridge 9; records in `0357022`).
+  - **`desktop/`:** `npm run typecheck` clean; `npm test` **158 of 158**. The real-FFmpeg tests:
+    - a copy read over loopback has the same frames as one read from the file;
+    - a paused copy stays at 7.74 s for three seconds, then ends the same;
+    - a still source's copy is ended as held 1741 ms after the pause.
+  - **The site** (at `0357022`): `npm run typecheck` clean; `npm run build` passes; `npm test` **795 of 795** (twelve new in
+    `tests/native-power.test.mjs`).
+  - **`qa/desktop-native.cjs` 37 of 37** (bridge 9; the check now takes the shape from the tree's `BRIDGE_VERSION`).
+  - **`qa/desktop-taskbar.cjs` 13 of 13:** the jump list's first and second starts; the bar, red until focus, ended with its document;
+    refusals; a drag by token, and unknown, malformed or forgotten tokens drag nothing; the label without a path or user name.
+  - **`qa/desktop-files.cjs` 16 of 16.**
+  - **`qa/desktop-card-import.cjs` 11 of 11:**
+    - a 2.07 GB recording split as a camera splits it is copied and joined, its SHA-256 the camera's stream's;
+    - nothing hidden, of Windows' own, a side file or behind the junction is listed;
+    - a cancel, a part pulled out mid-copy and a destination on the card each leave nothing;
+    - 4.29 s per GB on this laptop (read, write, read back).
+  - **`qa/desktop-media.cjs` 52 of 52.** The check now holds the broker, since it is of copies asked for.
+  - **`qa/desktop-idle.cjs` 21 of 23**, on 4K sources with grain at a camera's bitrate (140 MB for 30 s) and still ones (0.8 MB):
+    - a click, an export, «playing», battery and the speed limit each paused the copy in 6 to 20 ms, with no progress from a second on;
+      it went on in 0.5 to 0.9 s, and by itself 3.46 s after the click;
+    - the still source's copy was stopped at 1792 ms and made again;
+    - the asked copy held the others;
+    - the four copies kept 750 of 750 frames, and a cancel and a quit left no FFmpeg and no part.
+  - **Failed in that run: the sound case, two checks.** The window was heard (audible, then silent; the element unmuted at volume 1)
+    and the copy paused in 20 ms. But Windows lowered the processor's speed limit at that moment, so the queue reported the stronger
+    «throttled» and held 16 s.
+  - **The speed runs** (`qa/desktop-idle.cjs --speed`, in two quiet windows the manager granted).
+    - **First run, at `99d685b`, 24 of 27.** 157 speed-limit events in 6.5 minutes, the limit falling to 34% to 75% and back to 100
+      within about ten seconds whenever copies load every core, on a cool and otherwise quiet laptop. The three widths took 37 to 40
+      s for three copies. The stage's p95 was unreadable from single plays (66.8 ms with nothing to make; 83.3, 17.4 and 83.4 ms held
+      at widths 1 to 3), and Fork 4's short benchmarks overlapped its last rows. It also showed a held copy still decoding for up
+      to a second after the pause, while the stage starts; from `e695d04` a paused job drains at idle priority.
+    - **Second run, at `e695d04`, 25 of 26.** The D12 gate holds: the stage's 95th-percentile frame time, median of three
+      interleaved 8 s plays each, was **50.1 ms with copies held at width 1 and at width 3, against 49.9 ms with nothing to make**
+      (within 10%). The processor's load just before each held play was 97% to 100%, as the copies had been running. One copy
+      running, played without sound, gave 33.3 ms; a play with sound is not directly comparable.
+    - **The widths, Windows' speed limit set aside:** 30.4 s, 33.6 s and 28.9 s for one, two and three copies at once. No gain, so
+      `copiesAtOnce` stays 1 in every mode (`scale.ts`); it had followed the export lanes' gain, which measures the chip's encoders.
+      136 speed-limit events, the lowest 34%.
+    - **The sound alone holds a copy**, with Windows' speed-limit events kept out: the hold was «playing», 22 ms after the window was
+      heard. That run's check still failed, because the 4K grainy clip stalled (`readyState` 1) and the window was heard 0.3 s only,
+      after which the copy went on, as it should.
+    - **The sound case again, at `afbde46`, 21 of 23.** The hold was «playing» 23 ms after the window was heard, the reason proven
+      again. But the studio's player in the fixture was heard only in two bursts of about 0.23 s, its element stalling (`readyState`
+      1), so the copy went on between them. The export case paused in 12 ms and did not resume within 15 s of the release, since
+      Windows lowered its own speed limit meanwhile. Both are the fixture's conditions, not the broker's rules.
+    - **`2903ecc`** holds the sound rule with a steady tone from the page and checks the player's own sound apart, and keeps
+      Windows' speed-limit events out of every hold case but the simulated one. The manager runs it in the verification worktree;
+      its result is the manager's record of the merge.
+- **Decisions on the way** (the manager, 2026-11-04): keep the speed-limit hold as built, so copies never push the laptop into its
+  limit; do not raise `copiesAtOnce` above 1 without a measured gain.
+- **On the way.**
+  - **The first packaged run** (from `3a6eb4f`, before the fix): `desktop-idle` 16 of 21, because on 1 MB sources FFmpeg had read the
+    whole file before the pause and went on. That led to the `held` stop and to the grainy corpus. `desktop-media` 50 of 52, because
+    its heavy 4K sources were copied by the broker before the check asked; it now holds the broker.
+  - `qa/desktop-windows.cjs` asked for bridge version exactly 5; it now asks for 5 or later.
+- **Where it differs from the ideas document, with reasons.**
+  - `media.pause(reason)` became `life.activity(kind)`: one word the broker reads for every background job.
+  - Playback is also held when the window is heard, because the studio's player does not say «playing» yet (it is Fork 2's file); the
+    manager routes the player's «scrubbing», using a copy made in idle time at once, and stopping a closed project's copies, after the
+    merge.
+  - P-26 and P-22 share bridge version 8. «يحتاج قرارك» opens the home page, which has no page of its own.
+- **Not verified, said plainly.**
+  - A real drag into Explorer is Windows' own and cannot be driven by Playwright: an owner walkthrough step.
+  - `qa/desktop-shell.cjs` was not run again after item 1.
+  - Nothing was seen signed in.
+- **Not done.** Nothing pushed, no release published.

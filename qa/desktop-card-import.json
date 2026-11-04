@@ -1,0 +1,75 @@
+{
+  "script": "qa/desktop-card-import.cjs",
+  "run": "2026-11-04T02:03:28.860Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "the bridge is version 9 or later, with the card import",
+      "pass": true,
+      "detail": "{\"bridge\":9,\"files\":[\"pick\",\"fromDropped\",\"check\",\"forget\",\"dragOut\",\"importCard\",\"copyCard\",\"cancelCard\",\"onCard\"]}"
+    },
+    {
+      "name": "the card lists its two recordings, the split one as one of two parts, and nothing hidden, Windows' own, a side file or through the junction",
+      "pass": true,
+      "detail": "{\"id\":\"nrBjT7pwtYHRrdbxvGp2r5CeIhVqDzt_m6e1XG1FK-Y\",\"label\":\"EOS_DIGITAL\",\"items\":[{\"key\":\"c0\",\"name\":\"MVI_0001.MP4\",\"size\":2595761,\"media\":\"video\",\"modified\":1793757809936,\"parts\":1},{\"key\":\"c1\",\"name\":\"00000.MTS\",\"size\":2066117932,\"media\":\"video\",\"modified\":1793757817839,\"parts\":2}]}"
+    },
+    {
+      "name": "the page is told no place: not the card's, the folders' or the Windows user name",
+      "pass": true,
+      "detail": "{\"label\":\"EOS_DIGITAL\"}"
+    },
+    {
+      "name": "both recordings are copied and verified: each named once it read back the same, no part file left",
+      "pass": true,
+      "detail": "{\"results\":[{\"key\":\"c0\",\"ok\":true},{\"key\":\"c1\",\"ok\":true}],\"files\":[\"00000.MTS\",\"MVI_0001.MP4\"]}"
+    },
+    {
+      "name": "the joined recording is the camera's stream byte for byte (SHA-256), and the other file the card's",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the joined recording is read as one MPEG-TS stream",
+      "pass": true,
+      "detail": "mpegts"
+    },
+    {
+      "name": "the page gets a token for each copy, and reads it where it is",
+      "pass": true,
+      "detail": "[{\"ok\":true,\"status\":206,\"bytes\":188},{\"ok\":true,\"status\":206,\"bytes\":188}]"
+    },
+    {
+      "name": "a cancel mid-copy leaves no part file and no copy",
+      "pass": true,
+      "detail": "{\"results\":[{\"key\":\"c1\",\"ok\":false,\"why\":\"cancelled\"}],\"left\":[]}"
+    },
+    {
+      "name": "a part pulled out mid-copy fails that recording and leaves no part file and no copy",
+      "pass": true,
+      "detail": "{\"results\":[{\"key\":\"c1\",\"ok\":false,\"why\":\"gone\"}],\"left\":[]}"
+    },
+    {
+      "name": "nothing is copied onto the card itself",
+      "pass": true,
+      "detail": "[{\"key\":\"c0\",\"ok\":false,\"why\":\"inside\"}]"
+    },
+    {
+      "name": "a key not of this listing, an empty choice and another listing are refused",
+      "pass": true,
+      "detail": "[\"refused\",\"refused\",\"refused\",\"refused\",\"refused\"]"
+    }
+  ],
+  "notes": [
+    "The card took 12 s to make: a recording of 2.07 GB split in two parts; the junction out of the card was made.",
+    "Copied and verified 2.069 GB in 8.9 s: 4.29 s a GB on this laptop's disk (read, write, read back)."
+  ],
+  "timing": {
+    "ms": 8883,
+    "gb": 2.069,
+    "secondsPerGb": 4.29,
+    "includes": "reading the card, writing the copy, reading the copy back"
+  },
+  "total": 11,
+  "passed": 11,
+  "failed": 0
+}
