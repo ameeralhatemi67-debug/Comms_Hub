@@ -1,5 +1,5 @@
-// The studio's cache folder (src/cache-store.ts, D4): a copy in resumable parts from a local server, the
-// ten-day rule, the size limit, clearing and another folder.
+// The studio's cache folder (src/cache-store.ts, D4): a copy in resumable parts from a local server, from D12 (P-29)
+// several parts at once, the ten-day rule, the size limit, clearing and another folder.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -7,7 +7,7 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { CacheStore, dueForSweep, FOLDER_NAME, libraryName, overLimit, PART, TEN_DAYS } from '../src/cache-store.ts';
+import { CacheStore, DEFAULT_LABEL, dueForSweep, folderLabel, FOLDER_NAME, libraryName, MAX_RANGES, overLimit, PART, RANGES, TEN_DAYS } from '../src/cache-store.ts';
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'comms-hub-cache-'));
 const asset = '0a1b2c3d-0000-4000-8000-00000000abcd';
@@ -50,13 +50,103 @@ test('a copy in 16 MB parts, resumed after a failure, byte for byte', async () =
   const e = await store.library(name, url, fetcher, { label: 'a.mp4', onProgress: (d) => progress.push(d) });
   assert.equal(e.complete, true);
   assert.equal(e.total, body.length);
-  assert.deepEqual(requests, [`bytes=0-${PART - 1}`, `bytes=${PART}-${2 * PART - 1}`, `bytes=${PART}-${2 * PART - 1}`, `bytes=${2 * PART}-${body.length - 1}`], 'the second part was asked again, never the first; the last part ends where the file does');
+  const second = `bytes=${PART}-${2 * PART - 1}`;
+  const last = `bytes=${2 * PART}-${body.length - 1}`;
+  assert.equal(requests[0], `bytes=0-${PART - 1}`, 'the first part alone, which says the size');
+  assert.ok(requests.slice(1).every((r) => r === second || r === last), 'then the next two at once, which failed, and never the first part again');
+  assert.deepEqual(requests.slice(-2).sort(), [second, last].sort(), 'resumed from the first gap, two at once; the last part ends where the file does');
   assert.ok(fs.readFileSync(path.join(dir, 'default', name)).equals(body));
   assert.equal(store.complete(name).size, body.length);
   requests = [];
   await store.library(name, url, fetcher);
   assert.deepEqual(requests, [], 'complete: nothing fetched again');
   assert.deepEqual(new CacheStore(path.join(dir, 'cache.json'), path.join(dir, 'default')).complete(name)?.size, body.length, 'kept across a restart');
+});
+
+/**
+ * A server whose every answer waits `ms` and then comes at `perSecond` bytes a second on each connection, as a far
+ * provider's does, and that can fail one range once.
+ */
+async function slowServer(file, ms, perSecond = 0) {
+  let failOnce = null;
+  const seen = [];
+  let at = 0;
+  let most = 0;
+  const s = http.createServer((req, res) => {
+    seen.push(req.headers.range);
+    at++;
+    most = Math.max(most, at);
+    setTimeout(() => {
+      at--;
+      const m = /bytes=(\d+)-(\d+)/.exec(req.headers.range || '');
+      if (failOnce && req.headers.range === failOnce) {
+        failOnce = null;
+        res.writeHead(503);
+        return res.end();
+      }
+      const from = Number(m[1]);
+      const to = Math.min(file.length - 1, Number(m[2]));
+      res.writeHead(206, { 'content-range': `bytes ${from}-${to}/${file.length}` });
+      if (!perSecond) return res.end(file.subarray(from, to + 1));
+      const step = 1 << 20;
+      let pos = from;
+      const send = () => {
+        if (pos > to) return res.end();
+        const end = Math.min(to + 1, pos + step);
+        res.write(file.subarray(pos, end));
+        pos = end;
+        setTimeout(send, (1000 * step) / perSecond);
+      };
+      send();
+    }, ms);
+  });
+  await new Promise((r) => s.listen(0, '127.0.0.1', r));
+  return { url: `http://127.0.0.1:${s.address().port}/x`, seen, most: () => most, failOnce: (r) => (failOnce = r), close: () => s.close() };
+}
+const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
+
+test('several parts at once (two unless said, at most four): over a slow link the copy is faster, and the same bytes', async () => {
+  assert.equal(RANGES, 2);
+  assert.equal(MAX_RANGES, 4);
+  const file = crypto.randomBytes(PART * 5 + 777);
+  const slow = await slowServer(file, 100, 50 * 1024 * 1024);
+  const times = {};
+  try {
+    for (const ranges of [1, 3]) {
+      const store = new CacheStore(path.join(dir, `slow-${ranges}.json`), path.join(dir, `slow-${ranges}`));
+      const name = libraryName(asset, 20 + ranges);
+      const t0 = Date.now();
+      await store.library(name, slow.url, fetcher, { ranges });
+      times[ranges] = Date.now() - t0;
+      assert.equal(sha(fs.readFileSync(path.join(dir, `slow-${ranges}`, name))), sha(file), `${ranges}: byte for byte`);
+    }
+    assert.ok(slow.most() <= 3, `never more than asked at once: ${slow.most()}`);
+    assert.ok(times[3] * 1.5 < times[1], `three at once is faster: ${JSON.stringify(times)}`);
+    console.log(`# a ${(file.length / 1048576).toFixed(0)} MB copy, answers after 100 ms at 50 MB/s each: ${times[1]} ms one part at a time, ${times[3]} ms three at once`);
+  } finally {
+    slow.close();
+  }
+});
+
+test('a cut while later parts were already written keeps only the unbroken start, and the copy resumes from the first gap', async () => {
+  const file = crypto.randomBytes(PART * 4 + 99);
+  const slow = await slowServer(file, 20);
+  try {
+    const store = new CacheStore(path.join(dir, 'gap.json'), path.join(dir, 'gap'));
+    const name = libraryName(asset, 30);
+    slow.failOnce(`bytes=${PART}-${2 * PART - 1}`);
+    await assert.rejects(store.library(name, slow.url, fetcher, { ranges: 3 }), /HTTP_503/);
+    const kept = store.entries().find((x) => x.name === name);
+    assert.equal(kept.bytes, PART, 'the start before the gap, not the parts after it');
+    assert.equal(kept.complete, false);
+    slow.seen.length = 0;
+    const e = await new CacheStore(path.join(dir, 'gap.json'), path.join(dir, 'gap')).library(name, slow.url, fetcher, { ranges: 3 });
+    assert.equal(e.complete, true);
+    assert.equal(slow.seen.includes(`bytes=0-${PART - 1}`), false, 'the kept start is not fetched again');
+    assert.equal(sha(fs.readFileSync(path.join(dir, 'gap', name))), sha(file), 'byte for byte');
+  } finally {
+    slow.close();
+  }
 });
 
 test('a copy the site refuses, or one that fails before its first byte, leaves no entry and no file', async () => {
@@ -136,4 +226,23 @@ test('a light copy (D5): written as a .part never served, held while it is made,
   store.record(older);
   store.setLimit(10e9);
   assert.equal(store.entries().length, 2);
+});
+
+test('the page is told the folder\'s label, never its path: «المجلد الافتراضي» or the chosen folder\'s last name', () => {
+  assert.equal(folderLabel(null), DEFAULT_LABEL);
+  assert.equal(DEFAULT_LABEL, 'المجلد الافتراضي');
+  assert.equal(folderLabel(path.join('D:/', 'Media', 'Shoots', FOLDER_NAME)), 'Shoots');
+  assert.equal(folderLabel(path.join('E:/', FOLDER_NAME)), 'E:', 'a drive by its letter');
+  const store = new CacheStore(path.join(dir, 'label.json'), path.join(os.homedir(), 'AppData', 'Roaming', 'x', 'StudioCache'));
+  assert.equal(store.label(), DEFAULT_LABEL);
+  store.setFolder(path.join(dir, 'chosen'));
+  assert.equal(store.label(), 'chosen');
+  for (const l of [folderLabel(null), store.label()]) {
+    assert.equal(/[\/]/.test(l), false, `no separator: ${l}`);
+    assert.equal(l.includes(os.userInfo().username), false, 'no Windows user name');
+  }
+  // the bridge's usage sends the label
+  const src = fs.readFileSync(new URL('../src/native-files.ts', import.meta.url), 'utf8');
+  assert.match(src, /folder: cache\.label\(\)/);
+  assert.equal(/folder: cache\.folder\(\)/.test(src), false, 'the path no longer reaches the page');
 });

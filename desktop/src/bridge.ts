@@ -2,7 +2,9 @@
 // phase D2), checked in the main process before anything is done. Nothing the page sends is trusted:
 // a reason is one of a fixed list, a notice is short plain text whose link is a path on the page's own
 // allowed address, a count is a small whole number. No request carries a file path, a command or an
-// address of another site. Pure.
+// address of another site. From D12 an activity is a word of a fixed list, and the media queue names sources
+// as `media` does (a token or a library version) with a small width. Pure.
+import { TOKEN } from './files.ts';
 import { isAllowed } from './origins.ts';
 
 /** Why the page keeps the laptop awake or the window busy. */
@@ -61,4 +63,45 @@ export function pathOn(value: unknown, pageUrl: string, allowed: readonly string
     return null;
   }
   return `${url.pathname}${url.search}${url.hash}`;
+}
+
+/** What a page says it is doing, so background work waits (D12, P-30: «تشغيل», «تمرير», «قياس»); `none` ends it. */
+export const ACTIVITIES = Object.freeze(['none', 'playing', 'scrubbing', 'measuring'] as const);
+export type Activity = (typeof ACTIVITIES)[number];
+
+export function activityOf(value: unknown): Activity | null {
+  return typeof value === 'string' && (ACTIVITIES as readonly string[]).includes(value) ? (value as Activity) : null;
+}
+
+/** A source as the media tools name it: a device file's token, or a library version. Never a path. */
+export type MediaRef = { token: string } | { asset: string; version: number };
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+export function mediaRefOf(value: unknown): MediaRef | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const v = value as Record<string, unknown>;
+  const keys = Object.keys(v).sort().join(',');
+  if (keys === 'token') return typeof v.token === 'string' && TOKEN.test(v.token) ? { token: v.token } : null;
+  if (keys !== 'asset,version') return null;
+  if (typeof v.asset !== 'string' || !UUID.test(v.asset)) return null;
+  if (typeof v.version !== 'number' || !Number.isSafeInteger(v.version) || v.version < 1) return null;
+  return { asset: v.asset, version: v.version };
+}
+
+/** The sources a window wants light copies of in idle time (D12, P-08), at most this many. */
+export const QUEUE_LIMITS = Object.freeze({ items: 200, width: 3 });
+
+/** `media.queue`'s request, or null: every source well named, a bounded list, a width from 1 to 3. Refused whole. */
+export function queueAskOf(value: unknown): { items: MediaRef[]; width: number } | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const { items, width } = value as { items?: unknown; width?: unknown };
+  if (!Array.isArray(items) || items.length > QUEUE_LIMITS.items) return null;
+  if (typeof width !== 'number' || !Number.isInteger(width) || width < 1 || width > QUEUE_LIMITS.width) return null;
+  const refs: MediaRef[] = [];
+  for (const it of items) {
+    const r = mediaRefOf(it);
+    if (!r) return null;
+    refs.push(r);
+  }
+  return { items: refs, width };
 }

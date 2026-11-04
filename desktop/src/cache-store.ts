@@ -1,8 +1,8 @@
 // The studio's disk cache in a folder on this laptop (Desktop_App_Plan.md 2 and 5.4, phase D4). In a
 // browser the studio keeps its library copies in the browser's private storage, under a quota the
 // browser may clear; in the application they are files in a folder the person may choose (another disk
-// if wanted), with a size limit. A library version is copied once, in resumable parts, from the site's
-// own file route with the window's session, as the page would fetch it; the page then reads it at
+// if wanted), with a size limit. A library version is copied once, in resumable parts (from D12 two at a time,
+// P-29), from the site's own file route with the window's session, as the page would fetch it; the page then reads it at
 // commshub-file://cache/<name>. The ten-day rule is the site's (src/lib/studio/cache.ts dueForSweep):
 // a copy unused for ten days goes when the studio next opens; nothing is scheduled. Over the limit, the
 // copies used longest ago go first; what the open project uses is never removed. From D5 the folder also
@@ -14,9 +14,24 @@ import { CACHE_NAME } from './files.ts';
 
 export const TEN_DAYS = 10 * 86_400_000;
 export const PART = 16 * 1024 * 1024;
+/** Parts asked for at once (D12, Desktop_Power_Ideas.md P-29); more only once a measured link shows the gain. */
+export const RANGES = 2;
+export const MAX_RANGES = 4;
 /** The folder made inside a chosen folder; only its own files are ever removed. */
 export const FOLDER_NAME = 'CommsHub Studio Cache';
 export const LIMITS = Object.freeze([0, 10e9, 25e9, 50e9, 100e9, 250e9]);
+/** What the page is told of the default folder, which lives in the profile under the Windows user's name. */
+export const DEFAULT_LABEL = 'المجلد الافتراضي';
+
+/**
+ * The cache folder as the page may show it: «المجلد الافتراضي», or the last name of the folder the person chose (a
+ * drive's letter for a drive), never a path (Desktop_Power_Ideas.md section 12).
+ */
+export function folderLabel(chosen: string | null): string {
+  if (chosen === null) return DEFAULT_LABEL;
+  const parent = path.dirname(chosen);
+  return path.basename(parent) || parent.replace(/[\\/]+$/, '') || DEFAULT_LABEL;
+}
 
 export type CacheKind = 'library' | 'proxy' | 'convert';
 export type CacheEntry = { name: string; kind: CacheKind; bytes: number; total: number; complete: boolean; lastUsed: number; label?: string };
@@ -57,6 +72,8 @@ export function totalFromRange(h: string | null): number | null {
   const m = /\/(\d+)\s*$/.exec(h ?? '');
   return m ? Number(m[1]) : null;
 }
+
+export type CopyOptions = { label?: string; onProgress?: (done: number, total: number) => void; signal?: AbortSignal; inUse?: ReadonlySet<string>; ranges?: number };
 
 export type Fetch = (url: string, init: { headers: Record<string, string>; signal?: AbortSignal }) => Promise<{ status: number; headers: { get(name: string): string | null }; arrayBuffer(): Promise<ArrayBuffer> }>;
 
@@ -101,6 +118,11 @@ export class CacheStore {
     return this.state.folder === null;
   }
 
+  /** The folder's name for the page (folderLabel): never its path. */
+  label(): string {
+    return folderLabel(this.state.folder);
+  }
+
   private ensureFolder() {
     fs.mkdirSync(this.folder(), { recursive: true });
   }
@@ -138,9 +160,10 @@ export class CacheStore {
 
   /**
    * A library version in the folder: complete already, or copied now in parts from `url` with `fetch`,
-   * resuming a partial copy. One copy at a time per name.
+   * resuming a partial copy. One copy at a time per name. From D12 (P-29) up to `ranges` parts are asked for at
+   * once (RANGES unless said), each written where it belongs.
    */
-  library(name: string, url: string, fetch: Fetch, opts: { label?: string; onProgress?: (done: number, total: number) => void; signal?: AbortSignal; inUse?: ReadonlySet<string> } = {}): Promise<CacheEntry> {
+  library(name: string, url: string, fetch: Fetch, opts: CopyOptions = {}): Promise<CacheEntry> {
     const running = this.running.get(name);
     if (running) return running as Promise<CacheEntry>;
     const p = this.copy(name, url, fetch, opts).finally(() => this.running.delete(name));
@@ -148,7 +171,7 @@ export class CacheStore {
     return p;
   }
 
-  private async copy(name: string, url: string, fetch: Fetch, opts: { label?: string; onProgress?: (done: number, total: number) => void; signal?: AbortSignal; inUse?: ReadonlySet<string> }): Promise<CacheEntry> {
+  private async copy(name: string, url: string, fetch: Fetch, opts: CopyOptions): Promise<CacheEntry> {
     this.ensureFolder();
     const file = this.pathOf(name);
     let e = this.state.entries[name];
@@ -163,14 +186,19 @@ export class CacheStore {
       this.save();
       return { ...e };
     }
-    if (!e || e.bytes !== onDisk) e = { name, kind: 'library', bytes: onDisk, total: e?.total ?? 0, complete: false, lastUsed: Date.now(), label: opts.label };
+    // Only the unbroken start of a copy is kept: parts fetched beyond a gap are fetched again. Without a record of
+    // where that start ends, the copy starts over.
+    const kept = e ? Math.min(e.bytes, onDisk) : 0;
+    e = { name, kind: 'library', bytes: kept, total: e?.total ?? 0, complete: false, lastUsed: Date.now(), label: opts.label ?? e?.label };
     this.state.entries[name] = e;
+    const entry = e;
     const fd = fs.openSync(file, onDisk ? 'r+' : 'w');
+    if (onDisk > kept) fs.ftruncateSync(fd, kept);
     // A copy refused by the site, or one that failed before its first byte, leaves nothing behind; a
     // partial copy stays, to be resumed.
     const forgetIfEmpty = (err: unknown) => {
       const refused = !!(err && typeof err === 'object' && ('denied' in err || 'gone' in err));
-      if (refused || e.bytes === 0) {
+      if (refused || entry.bytes === 0) {
         delete this.state.entries[name];
         this.save();
         try {
@@ -183,43 +211,84 @@ export class CacheStore {
       }
       return false;
     };
-    try {
-      for (;;) {
-        if (e.total && e.bytes >= e.total) break;
-        if (opts.signal?.aborted) throw Object.assign(new Error('aborted'), { name: 'AbortError' });
-        const from = e.bytes;
-        const to = e.total ? Math.min(e.total, from + PART) - 1 : from + PART - 1;
-        const res = await fetch(url, { headers: { Range: `bytes=${from}-${to}` }, signal: opts.signal });
-        if (res.status === 401 || res.status === 403) throw Object.assign(new Error('DENIED'), { denied: true });
-        if (res.status === 404) throw Object.assign(new Error('GONE'), { gone: true });
-        if (res.status !== 206 && res.status !== 200) throw new Error(`HTTP_${res.status}`);
-        const data = Buffer.from(await res.arrayBuffer());
-        if (res.status === 200) {
-          // the server ignored the range: this is the whole file
-          fs.ftruncateSync(fd, 0);
-          fs.writeSync(fd, data, 0, data.length, 0);
-          e.bytes = data.length;
-          e.total = data.length;
-        } else {
-          fs.writeSync(fd, data, 0, data.length, from);
-          e.bytes = from + data.length;
-          e.total = totalFromRange(res.headers.get('content-range')) ?? e.total;
+    const ctl = new AbortController();
+    const stop = () => ctl.abort();
+    opts.signal?.addEventListener('abort', stop, { once: true });
+    /** Parts written beyond the unbroken start, by where they begin. */
+    const ahead = new Map<number, number>();
+    let whole = false;
+    const fetchPart = async (from: number) => {
+      const to = entry.total ? Math.min(entry.total, from + PART) - 1 : from + PART - 1;
+      const res = await fetch(url, { headers: { Range: `bytes=${from}-${to}` }, signal: ctl.signal });
+      if (res.status === 401 || res.status === 403) throw Object.assign(new Error('DENIED'), { denied: true });
+      if (res.status === 404) throw Object.assign(new Error('GONE'), { gone: true });
+      if (res.status !== 206 && res.status !== 200) throw new Error(`HTTP_${res.status}`);
+      const data = Buffer.from(await res.arrayBuffer());
+      if (whole) return;
+      if (res.status === 200) {
+        // the server ignored the range: this is the whole file
+        whole = true;
+        fs.ftruncateSync(fd, 0);
+        fs.writeSync(fd, data, 0, data.length, 0);
+        ahead.clear();
+        entry.bytes = data.length;
+        entry.total = data.length;
+      } else {
+        fs.writeSync(fd, data, 0, data.length, from);
+        entry.total = totalFromRange(res.headers.get('content-range')) ?? entry.total;
+        if (data.length) ahead.set(from, data.length);
+        while (ahead.has(entry.bytes)) {
+          const n = ahead.get(entry.bytes)!;
+          ahead.delete(entry.bytes);
+          entry.bytes += n;
         }
-        e.lastUsed = Date.now();
-        opts.onProgress?.(e.bytes, e.total);
-        this.save();
-        if (!data.length) break;
+        if (!data.length && !entry.total) entry.total = from;
+      }
+      entry.lastUsed = Date.now();
+      opts.onProgress?.(entry.bytes + [...ahead.values()].reduce((a, b) => a + b, 0), entry.total);
+      this.save();
+    };
+    const width = Math.max(1, Math.min(MAX_RANGES, Math.floor(opts.ranges ?? RANGES) || 1));
+    try {
+      if (opts.signal?.aborted) throw Object.assign(new Error('aborted'), { name: 'AbortError' });
+      // the first part alone, when the size is not known yet: it says the size
+      if (!entry.total) await fetchPart(entry.bytes);
+      while (!whole && entry.bytes < entry.total) {
+        const before = entry.bytes;
+        let next = entry.bytes;
+        let failure: unknown = null;
+        const running = new Set<Promise<void>>();
+        const launch = () => {
+          const from = next;
+          next = Math.min(entry.total, next + PART);
+          const p: Promise<void> = fetchPart(from)
+            .catch((err) => {
+              failure ??= err;
+              ctl.abort();
+            })
+            .finally(() => running.delete(p));
+          running.add(p);
+        };
+        for (;;) {
+          while (!failure && !whole && running.size < width && next < entry.total) launch();
+          if (!running.size) break;
+          await Promise.race(running);
+        }
+        if (failure) throw opts.signal?.aborted ? Object.assign(new Error('aborted'), { name: 'AbortError' }) : failure;
+        if (entry.bytes === before) throw new Error('HTTP_SHORT');
       }
     } catch (err) {
+      opts.signal?.removeEventListener('abort', stop);
       if (forgetIfEmpty(err)) throw err;
       fs.closeSync(fd);
       throw err;
     }
+    opts.signal?.removeEventListener('abort', stop);
     fs.closeSync(fd);
-    e.complete = true;
+    entry.complete = true;
     this.save();
     this.enforceLimit(new Set([...(opts.inUse ?? []), name]));
-    return { ...e };
+    return { ...entry };
   }
 
   /** Where a light or converted copy is written before it is complete: never a cache name, so never served. */

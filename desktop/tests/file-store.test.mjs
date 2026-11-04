@@ -68,3 +68,17 @@ test('the fingerprint reads the size and the first and last 4 MB, as the site ke
   const expected = crypto.createHash('sha256').update(`${big.length}|`).update(big.subarray(0, 4 * 1024 * 1024)).update(big.subarray(big.length - 4 * 1024 * 1024)).digest('hex');
   assert.equal(fingerprintOf(f, big.length), expected);
 });
+
+test('a file is dragged out only for a token this store gave, still as chosen; unknown, changed and forgotten tokens drag nothing (D12, P-22)', () => {
+  const store = new FileStore(path.join(dir, 'drag.json'));
+  const f = put('export.mp4', Buffer.alloc(2048, 7));
+  const r = store.add(f);
+  assert.equal(store.dragPath(r.token), f);
+  for (const bad of ['A'.repeat(43), 'short', '../export.mp4', f, null, 42, { token: r.token }]) assert.equal(store.dragPath(bad), null, String(bad));
+  fs.appendFileSync(f, 'x');
+  assert.equal(store.dragPath(r.token), null, 'changed since it was chosen');
+  const again = store.add(f);
+  assert.equal(store.dragPath(again.token), f);
+  store.forget(again.token);
+  assert.equal(store.dragPath(again.token), null, 'forgotten');
+});

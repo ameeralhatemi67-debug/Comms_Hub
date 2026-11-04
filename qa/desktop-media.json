@@ -1,7 +1,7 @@
 {
   "script": "qa/desktop-media.cjs",
-  "run": "2026-11-03T21:03:51.872Z",
-  "version": "0.7.1",
+  "run": "2026-11-04T02:04:01.633Z",
+  "version": "0.8.0",
   "checks": [
     {
       "name": "DT-13: the package carries the pinned FFmpeg, LGPL v3: --enable-version3, no --enable-gpl, no --enable-nonfree",
@@ -56,7 +56,7 @@
     {
       "name": "the bridge is version 4 or later, with the media group",
       "pass": true,
-      "detail": "{\"bridge\":6,\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\"]}"
+      "detail": "{\"bridge\":9,\"media\":[\"probe\",\"copies\",\"proxy\",\"convert\",\"cancel\",\"onProgress\",\"queue\",\"queued\",\"onQueue\"]}"
     },
     {
       "name": "gray-4k-h264.mp4: opens in the studio, and the frame read at each time is the frame that time names, from 0 s (18 times)",
@@ -69,9 +69,9 @@
       "detail": "{\"name\":\"prores-422-4k.mov\",\"size\":19796936,\"type\":\"video/quicktime\",\"info\":{\"media\":\"video\",\"w\":3840,\"h\":2160,\"duration\":8000000},\"viaApp\":false,\"first\":0,\"state\":{\"kind\":\"error\",\"message\":\"هذا المتصفح لا يفك ترميز هذا الفيديو.\",\"convertible\":true},\"tools\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":true,\"converted\":false,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"none\"}}}"
     },
     {
-      "name": "prores-422-4k.mov: converted (7203 ms) to an editable H.264 and AAC copy with every frame, and ready in the studio",
+      "name": "prores-422-4k.mov: converted (5313 ms) to an editable H.264 and AAC copy with every frame, and ready in the studio",
       "pass": true,
-      "detail": "{\"ms\":7203,\"state\":{\"kind\":\"ready\"},\"tools\":{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":true,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"ready\"}},\"progress\":34,\"info\":{\"w\":3840,\"h\":2160,\"duration\":8000000,\"hasAudio\":true},\"file\":\"convert-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-r1-ff902.mp4\",\"probe\":{\"video\":\"h264 3840x2160 yuv420p\",\"frames\":200,\"audio\":\"aac\"}}"
+      "detail": "{\"ms\":5313,\"state\":{\"kind\":\"ready\"},\"tools\":{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":true,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"ready\"}},\"progress\":25,\"info\":{\"w\":3840,\"h\":2160,\"duration\":8000000,\"hasAudio\":true},\"file\":\"convert-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-r1-ff902.mp4\",\"probe\":{\"video\":\"h264 3840x2160 yuv420p\",\"frames\":200,\"audio\":\"aac\"}}"
     },
     {
       "name": "prores-422-4k.mov: the converted copy's frames are the original's, in order",
@@ -89,9 +89,9 @@
       "detail": "{\"name\":\"dnxhr-hq.mov\",\"size\":184272272,\"type\":\"video/quicktime\",\"info\":{\"media\":\"video\",\"w\":1920,\"h\":1080,\"duration\":8000000},\"viaApp\":false,\"first\":0,\"state\":{\"kind\":\"error\",\"message\":\"هذا المتصفح لا يفك ترميز هذا الفيديو.\",\"convertible\":true},\"tools\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":true,\"converted\":false,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"none\"}}}"
     },
     {
-      "name": "dnxhr-hq.mov: converted (1995 ms) to an editable H.264 and AAC copy with every frame, and ready in the studio",
+      "name": "dnxhr-hq.mov: converted (1421 ms) to an editable H.264 and AAC copy with every frame, and ready in the studio",
       "pass": true,
-      "detail": "{\"ms\":1995,\"state\":{\"kind\":\"ready\"},\"tools\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":false,\"converted\":true,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"ready\"}},\"progress\":9,\"info\":{\"w\":1920,\"h\":1080,\"duration\":8000000,\"hasAudio\":true},\"file\":\"convert-fa3441abdbe8336a5450edde7f7523c2f5c16482d-r1-ff902.mp4\",\"probe\":{\"video\":\"h264 1920x1080 yuv420p\",\"frames\":200,\"audio\":\"aac\"}}"
+      "detail": "{\"ms\":1421,\"state\":{\"kind\":\"ready\"},\"tools\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":false,\"converted\":true,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"ready\"}},\"progress\":6,\"info\":{\"w\":1920,\"h\":1080,\"duration\":8000000,\"hasAudio\":true},\"file\":\"convert-fa3441abdbe8336a5450edde7f7523c2f5c16482d-r1-ff902.mp4\",\"probe\":{\"video\":\"h264 1920x1080 yuv420p\",\"frames\":200,\"audio\":\"aac\"}}"
     },
     {
       "name": "dnxhr-hq.mov: the converted copy's frames are the original's, in order",
@@ -119,9 +119,9 @@
       "detail": "{\"name\":\"camera.mts\",\"size\":408712,\"type\":\"text/plain\",\"info\":{\"media\":\"video\",\"w\":1920,\"h\":1080,\"duration\":8005333},\"viaApp\":true,\"first\":1.44,\"state\":{\"kind\":\"ready\"},\"tools\":{\"heavy\":false,\"audioUnsupported\":true,\"convertible\":true,\"converted\":false,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"none\"}}}"
     },
     {
-      "name": "camera.mts: converted (6055 ms) to an editable H.264 and AAC copy with every frame, and ready in the studio",
+      "name": "camera.mts: converted (1995 ms) to an editable H.264 and AAC copy with every frame, and ready in the studio",
       "pass": true,
-      "detail": "{\"ms\":6055,\"state\":{\"kind\":\"ready\"},\"tools\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":false,\"converted\":true,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"ready\"}},\"progress\":30,\"info\":{\"w\":1920,\"h\":1080,\"duration\":9440000,\"hasAudio\":true},\"file\":\"convert-f1c3d07bbf671292c63116331fbd7f61367cabf93-r1-ff902.mp4\",\"probe\":{\"video\":\"h264 1920x1080 yuv420p\",\"frames\":400,\"audio\":\"aac\"}}"
+      "detail": "{\"ms\":1995,\"state\":{\"kind\":\"ready\"},\"tools\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":false,\"converted\":true,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"ready\"}},\"progress\":9,\"info\":{\"w\":1920,\"h\":1080,\"duration\":9440000,\"hasAudio\":true},\"file\":\"convert-f1c3d07bbf671292c63116331fbd7f61367cabf93-r1-ff902.mp4\",\"probe\":{\"video\":\"h264 1920x1080 yuv420p\",\"frames\":400,\"audio\":\"aac\"}}"
     },
     {
       "name": "camera.mts: the converted copy's frames are the original's, in order",
@@ -139,9 +139,9 @@
       "detail": "{\"name\":\"xdcam.mxf\",\"size\":49881145,\"type\":\"\",\"info\":{\"media\":\"video\",\"w\":1920,\"h\":1080,\"duration\":8000000},\"viaApp\":true,\"first\":null,\"state\":{\"kind\":\"error\",\"message\":\"هذا المتصفح لا يفك ترميز هذا الفيديو.\",\"convertible\":true},\"tools\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":true,\"converted\":false,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"none\"}}}"
     },
     {
-      "name": "xdcam.mxf: converted (3638 ms) to an editable H.264 and AAC copy with every frame, and ready in the studio",
+      "name": "xdcam.mxf: converted (1356 ms) to an editable H.264 and AAC copy with every frame, and ready in the studio",
       "pass": true,
-      "detail": "{\"ms\":3638,\"state\":{\"kind\":\"ready\"},\"tools\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":false,\"converted\":true,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"ready\"}},\"progress\":18,\"info\":{\"w\":1920,\"h\":1080,\"duration\":8000000,\"hasAudio\":true},\"file\":\"convert-f85689124a89a146bb1850be9411d40517ac5a169-r1-ff902.mp4\",\"probe\":{\"video\":\"h264 1920x1080 yuv420p\",\"frames\":200,\"audio\":\"aac\"}}"
+      "detail": "{\"ms\":1356,\"state\":{\"kind\":\"ready\"},\"tools\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":false,\"converted\":true,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"ready\"}},\"progress\":6,\"info\":{\"w\":1920,\"h\":1080,\"duration\":8000000,\"hasAudio\":true},\"file\":\"convert-f85689124a89a146bb1850be9411d40517ac5a169-r1-ff902.mp4\",\"probe\":{\"video\":\"h264 1920x1080 yuv420p\",\"frames\":200,\"audio\":\"aac\"}}"
     },
     {
       "name": "xdcam.mxf: the converted copy's frames are the original's, in order",
@@ -164,7 +164,7 @@
       "detail": "{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"none\"}}"
     },
     {
-      "name": "gray-4k-h264.mp4: «إنشاء نسخة خفيفة للمعاينة» made a 720p H.264 copy in 2695 ms, kept from the sweep while the project is open",
+      "name": "gray-4k-h264.mp4: «إنشاء نسخة خفيفة للمعاينة» made a 720p H.264 copy in 1710 ms, kept from the sweep while the project is open",
       "pass": true,
       "detail": "{\"tools\":{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},\"proxyFile\":\"proxy-f204b8a040185335a51a8e91094b3f7d344cae9c8-720-r1-ff902.mp4\",\"probe\":\"h264 1280x720 200\"}"
     },
@@ -179,9 +179,9 @@
       "detail": "{\"before\":\"commshub-file://local/<token>\",\"after\":\"commshub-file://cache/proxy-f204b8a040185335a51a8e91094b3f7d344cae9c8-720-r1-ff902.mp4\"}"
     },
     {
-      "name": "gray-4k-h264.mp4: the export (100 frames, 1407 ms) took its frames from the original's decoder and never from the light copy's",
+      "name": "gray-4k-h264.mp4: the export (100 frames, 1209 ms) took its frames from the original's decoder and never from the light copy's",
       "pass": true,
-      "detail": "{\"ms\":1407,\"frames\":100,\"bytes\":108697,\"uploaded\":200,\"originalCalls\":1,\"lightCalls\":0,\"originalUrl\":\"commshub-file://local/<token>\",\"lightUrl\":\"commshub-file://cache/proxy-f204b8a040185335a51a8e91094b3f7d344cae9c8-720-r1-ff902.mp4\"}"
+      "detail": "{\"ms\":1209,\"frames\":100,\"bytes\":108697,\"uploaded\":200,\"originalCalls\":1,\"lightCalls\":0,\"originalUrl\":\"commshub-file://local/<token>\",\"lightUrl\":\"commshub-file://cache/proxy-f204b8a040185335a51a8e91094b3f7d344cae9c8-720-r1-ff902.mp4\"}"
     },
     {
       "name": "gray-4k-h264.mp4: the export passes ffprobe (1280x720, 100 frames, 4 s) and its frames are the source's own, in order",
@@ -194,7 +194,7 @@
       "detail": "{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":true,\"converted\":false,\"proxy\":{\"kind\":\"none\"},\"convert\":{\"kind\":\"none\"}}"
     },
     {
-      "name": "prores-422-4k.mov: «إنشاء نسخة خفيفة للمعاينة» made a 720p H.264 copy in 5874 ms, kept from the sweep while the project is open",
+      "name": "prores-422-4k.mov: «إنشاء نسخة خفيفة للمعاينة» made a 720p H.264 copy in 2265 ms, kept from the sweep while the project is open",
       "pass": true,
       "detail": "{\"tools\":{\"heavy\":true,\"audioUnsupported\":false,\"convertible\":false,\"converted\":true,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"ready\"}},\"proxyFile\":\"proxy-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-720-r1-ff902.mp4\",\"probe\":\"h264 1280x720 200\"}"
     },
@@ -209,9 +209,9 @@
       "detail": "{\"before\":\"commshub-file://cache/convert-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-r1-ff902.mp4\",\"after\":\"commshub-file://cache/proxy-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-720-r1-ff902.mp4\"}"
     },
     {
-      "name": "prores-422-4k.mov: the export (100 frames, 1473 ms) took its frames from the converted copy's decoder and never from the light copy's",
+      "name": "prores-422-4k.mov: the export (100 frames, 1283 ms) took its frames from the converted copy's decoder and never from the light copy's",
       "pass": true,
-      "detail": "{\"ms\":1473,\"frames\":100,\"bytes\":108733,\"uploaded\":200,\"originalCalls\":1,\"lightCalls\":0,\"originalUrl\":\"commshub-file://cache/convert-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-r1-ff902.mp4\",\"lightUrl\":\"commshub-file://cache/proxy-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-720-r1-ff902.mp4\"}"
+      "detail": "{\"ms\":1283,\"frames\":100,\"bytes\":108733,\"uploaded\":200,\"originalCalls\":1,\"lightCalls\":0,\"originalUrl\":\"commshub-file://cache/convert-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-r1-ff902.mp4\",\"lightUrl\":\"commshub-file://cache/proxy-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-720-r1-ff902.mp4\"}"
     },
     {
       "name": "prores-422-4k.mov: the export passes ffprobe (1280x720, 100 frames, 4 s) and its frames are the source's own, in order",
@@ -219,7 +219,7 @@
       "detail": "{\"probe\":\"1280x720 100\",\"duration\":\"4.010667\",\"wrong\":[]}"
     },
     {
-      "name": "camera-aac.mts: «إنشاء نسخة خفيفة للمعاينة» made a 720p H.264 copy in 1965 ms, kept from the sweep while the project is open",
+      "name": "camera-aac.mts: «إنشاء نسخة خفيفة للمعاينة» made a 720p H.264 copy in 928 ms, kept from the sweep while the project is open",
       "pass": true,
       "detail": "{\"tools\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"ready\",\"height\":720},\"convert\":{\"kind\":\"none\"}},\"proxyFile\":\"proxy-fec54adf983645330dd2d6ca4c002406e3086d559-720-r1-ff902.mp4\",\"probe\":\"h264 1280x720 200\"}"
     },
@@ -234,9 +234,9 @@
       "detail": "{\"before\":\"commshub-file://local/<token>\",\"after\":\"commshub-file://cache/proxy-fec54adf983645330dd2d6ca4c002406e3086d559-720-r1-ff902.mp4\"}"
     },
     {
-      "name": "camera-aac.mts: the export (100 frames, 1152 ms) took its frames from the original's decoder and never from the light copy's",
+      "name": "camera-aac.mts: the export (100 frames, 834 ms) took its frames from the original's decoder and never from the light copy's",
       "pass": true,
-      "detail": "{\"ms\":1152,\"frames\":100,\"bytes\":108288,\"uploaded\":200,\"originalCalls\":1,\"lightCalls\":0,\"originalUrl\":\"commshub-file://local/<token>\",\"lightUrl\":\"commshub-file://cache/proxy-fec54adf983645330dd2d6ca4c002406e3086d559-720-r1-ff902.mp4\"}"
+      "detail": "{\"ms\":834,\"frames\":100,\"bytes\":108288,\"uploaded\":200,\"originalCalls\":1,\"lightCalls\":0,\"originalUrl\":\"commshub-file://local/<token>\",\"lightUrl\":\"commshub-file://cache/proxy-fec54adf983645330dd2d6ca4c002406e3086d559-720-r1-ff902.mp4\"}"
     },
     {
       "name": "camera-aac.mts: the export passes ffprobe (1280x720, 100 frames, 4 s) and its frames are the source's own, in order",
@@ -244,19 +244,19 @@
       "detail": "{\"probe\":\"1280x720 100\",\"duration\":\"4.010667\",\"wrong\":[]}"
     },
     {
-      "name": "a busy 4K ProRes source: converted in 10909 ms (0.92 times real time), then a light copy of it in 4321 ms (2.31 times)",
+      "name": "a busy 4K ProRes source: converted in 7009 ms (1.43 times real time), then a light copy of it in 3493 ms (2.86 times)",
       "pass": true,
-      "detail": "{\"source\":\"ProRes 422, 3840x2160, 25 fps, 10 s, 205521162 bytes (testsrc2)\",\"convertMs\":10909,\"convertSpeed\":0.92,\"proxyMs\":4321,\"proxySpeed\":2.31}"
+      "detail": "{\"source\":\"ProRes 422, 3840x2160, 25 fps, 10 s, 205521162 bytes (testsrc2)\",\"convertMs\":7009,\"convertSpeed\":1.43,\"proxyMs\":3493,\"proxySpeed\":2.86}"
     },
     {
       "name": "a light copy cancelled while it is made leaves no file and no entry behind",
       "pass": true,
-      "detail": "{\"started\":{\"making\":true,\"done\":5.2,\"total\":180},\"cancelled\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"failed\",\"why\":\"cancelled\"},\"convert\":{\"kind\":\"none\"}},\"added\":[]}"
+      "detail": "{\"started\":{\"making\":true,\"done\":6.12,\"total\":180},\"cancelled\":{\"heavy\":false,\"audioUnsupported\":false,\"convertible\":false,\"converted\":false,\"proxy\":{\"kind\":\"failed\",\"why\":\"cancelled\"},\"convert\":{\"kind\":\"none\"}},\"added\":[]}"
     },
     {
       "name": "quitting while a light copy is made leaves no FFmpeg of the application running",
       "pass": true,
-      "detail": "{\"long\":{\"making\":true,\"done\":5.12,\"total\":180},\"partWhile\":[\"proxy-fb202058aaaf4ad413b529fc59271f2f6d0e8d1d5-720-r1-ff902.mp4.part\"],\"runningWhile\":1,\"runningAfter\":0}"
+      "detail": "{\"long\":{\"making\":true,\"done\":5.72,\"total\":180},\"partWhile\":[\"proxy-fb202058aaaf4ad413b529fc59271f2f6d0e8d1d5-720-r1-ff902.mp4.part\"],\"runningWhile\":1,\"runningAfter\":0}"
     },
     {
       "name": "the next start removes what the interrupted copy left (its .part file)",
@@ -265,7 +265,7 @@
     }
   ],
   "notes": [
-    "The corpus took 71 s to make (or was kept from an earlier run): {\"gray-4k-h264.mp4\":{\"bytes\":211437,\"container\":\"mov,mp4,m4a,3gp,3g2,mj2\",\"video\":\"h264 3840x2160 yuv420p\",\"frames\":200,\"audio\":\"aac\"},\"prores-422-4k.mov\":{\"bytes\":19796936,\"container\":\"mov,mp4,m4a,3gp,3g2,mj2\",\"video\":\"prores 3840x2160 yuv422p10le\",\"frames\":200,\"audio\":\"pcm_s24le\"},\"dnxhr-hq.mov\":{\"bytes\":184272272,\"container\":\"mov,mp4,m4a,3gp,3g2,mj2\",\"video\":\"dnxhd 1920x1080 yuv422p\",\"frames\":200,\"audio\":\"pcm_s16le\"},\"hevc-10bit-4k.mp4\":{\"bytes\":194544,\"container\":\"mov,mp4,m4a,3gp,3g2,mj2\",\"video\":\"hevc 3840x2160 yuv420p10le\",\"frames\":200,\"audio\":\"aac\"},\"camera-aac.mts\":{\"bytes\":154724,\"container\":\"mpegts\",\"video\":\"h264 1920x1080 yuv420p\",\"frames\":200,\"audio\":\"aac\"},\"camera.mts\":{\"bytes\":408712,\"container\":\"mpegts\",\"video\":\"h264 1920x1080 yuv420p\",\"frames\":400,\"audio\":\"ac3\"},\"xdcam.mxf\":{\"bytes\":49881145,\"container\":\"mxf\",\"video\":\"mpeg2video 1920x1080 yuv422p\",\"frames\":200,\"audio\":\"pcm_s16le\"}}",
+    "The corpus took 20 s to make (or was kept from an earlier run): {\"gray-4k-h264.mp4\":{\"bytes\":211437,\"container\":\"mov,mp4,m4a,3gp,3g2,mj2\",\"video\":\"h264 3840x2160 yuv420p\",\"frames\":200,\"audio\":\"aac\"},\"prores-422-4k.mov\":{\"bytes\":19796936,\"container\":\"mov,mp4,m4a,3gp,3g2,mj2\",\"video\":\"prores 3840x2160 yuv422p10le\",\"frames\":200,\"audio\":\"pcm_s24le\"},\"dnxhr-hq.mov\":{\"bytes\":184272272,\"container\":\"mov,mp4,m4a,3gp,3g2,mj2\",\"video\":\"dnxhd 1920x1080 yuv422p\",\"frames\":200,\"audio\":\"pcm_s16le\"},\"hevc-10bit-4k.mp4\":{\"bytes\":194544,\"container\":\"mov,mp4,m4a,3gp,3g2,mj2\",\"video\":\"hevc 3840x2160 yuv420p10le\",\"frames\":200,\"audio\":\"aac\"},\"camera-aac.mts\":{\"bytes\":154724,\"container\":\"mpegts\",\"video\":\"h264 1920x1080 yuv420p\",\"frames\":200,\"audio\":\"aac\"},\"camera.mts\":{\"bytes\":408712,\"container\":\"mpegts\",\"video\":\"h264 1920x1080 yuv420p\",\"frames\":400,\"audio\":\"ac3\"},\"xdcam.mxf\":{\"bytes\":49881145,\"container\":\"mxf\",\"video\":\"mpeg2video 1920x1080 yuv422p\",\"frames\":200,\"audio\":\"pcm_s16le\"}}",
     "gray-4k-h264.mp4: the browser decodes it as it is; nothing offered.",
     "prores-422-4k.mov: the browser cannot decode it; the application offers «تحويل إلى نسخة قابلة للتحرير».",
     "dnxhr-hq.mov: the browser cannot decode it; the application offers «تحويل إلى نسخة قابلة للتحرير».",
@@ -568,7 +568,7 @@
   ],
   "converted": {
     "prores-422-4k.mov": {
-      "ms": 7203,
+      "ms": 5313,
       "state": {
         "kind": "ready"
       },
@@ -584,7 +584,7 @@
           "kind": "ready"
         }
       },
-      "progress": 34,
+      "progress": 25,
       "info": {
         "w": 3840,
         "h": 2160,
@@ -599,6 +599,37 @@
       }
     },
     "dnxhr-hq.mov": {
+      "ms": 1421,
+      "state": {
+        "kind": "ready"
+      },
+      "tools": {
+        "heavy": false,
+        "audioUnsupported": false,
+        "convertible": false,
+        "converted": true,
+        "proxy": {
+          "kind": "none"
+        },
+        "convert": {
+          "kind": "ready"
+        }
+      },
+      "progress": 6,
+      "info": {
+        "w": 1920,
+        "h": 1080,
+        "duration": 8000000,
+        "hasAudio": true
+      },
+      "file": "convert-fa3441abdbe8336a5450edde7f7523c2f5c16482d-r1-ff902.mp4",
+      "probe": {
+        "video": "h264 1920x1080 yuv420p",
+        "frames": 200,
+        "audio": "aac"
+      }
+    },
+    "camera.mts": {
       "ms": 1995,
       "state": {
         "kind": "ready"
@@ -619,37 +650,6 @@
       "info": {
         "w": 1920,
         "h": 1080,
-        "duration": 8000000,
-        "hasAudio": true
-      },
-      "file": "convert-fa3441abdbe8336a5450edde7f7523c2f5c16482d-r1-ff902.mp4",
-      "probe": {
-        "video": "h264 1920x1080 yuv420p",
-        "frames": 200,
-        "audio": "aac"
-      }
-    },
-    "camera.mts": {
-      "ms": 6055,
-      "state": {
-        "kind": "ready"
-      },
-      "tools": {
-        "heavy": false,
-        "audioUnsupported": false,
-        "convertible": false,
-        "converted": true,
-        "proxy": {
-          "kind": "none"
-        },
-        "convert": {
-          "kind": "ready"
-        }
-      },
-      "progress": 30,
-      "info": {
-        "w": 1920,
-        "h": 1080,
         "duration": 9440000,
         "hasAudio": true
       },
@@ -661,7 +661,7 @@
       }
     },
     "xdcam.mxf": {
-      "ms": 3638,
+      "ms": 1356,
       "state": {
         "kind": "ready"
       },
@@ -677,7 +677,7 @@
           "kind": "ready"
         }
       },
-      "progress": 18,
+      "progress": 6,
       "info": {
         "w": 1920,
         "h": 1080,
@@ -693,7 +693,7 @@
     }
   },
   "proxy gray-4k-h264.mp4": {
-    "ms": 2695,
+    "ms": 1710,
     "tools": {
       "heavy": true,
       "audioUnsupported": false,
@@ -719,7 +719,7 @@
     "elementSrc": "commshub-file://cache/proxy-f204b8a040185335a51a8e91094b3f7d344cae9c8-720-r1-ff902.mp4"
   },
   "export gray-4k-h264.mp4": {
-    "ms": 1407,
+    "ms": 1209,
     "frames": 100,
     "bytes": 108697,
     "uploaded": 200,
@@ -729,7 +729,7 @@
     "lightUrl": "commshub-file://cache/proxy-f204b8a040185335a51a8e91094b3f7d344cae9c8-720-r1-ff902.mp4"
   },
   "proxy prores-422-4k.mov": {
-    "ms": 5874,
+    "ms": 2265,
     "tools": {
       "heavy": true,
       "audioUnsupported": false,
@@ -756,7 +756,7 @@
     "elementSrc": "commshub-file://cache/proxy-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-720-r1-ff902.mp4"
   },
   "export prores-422-4k.mov": {
-    "ms": 1473,
+    "ms": 1283,
     "frames": 100,
     "bytes": 108733,
     "uploaded": 200,
@@ -766,7 +766,7 @@
     "lightUrl": "commshub-file://cache/proxy-f7511f3871f4108fd5862d4c67d8d905e1f1eb069-720-r1-ff902.mp4"
   },
   "proxy camera-aac.mts": {
-    "ms": 1965,
+    "ms": 928,
     "tools": {
       "heavy": false,
       "audioUnsupported": false,
@@ -792,7 +792,7 @@
     "elementSrc": "commshub-file://cache/proxy-fec54adf983645330dd2d6ca4c002406e3086d559-720-r1-ff902.mp4"
   },
   "export camera-aac.mts": {
-    "ms": 1152,
+    "ms": 834,
     "frames": 100,
     "bytes": 108288,
     "uploaded": 200,
@@ -803,10 +803,10 @@
   },
   "speed": {
     "source": "ProRes 422, 3840x2160, 25 fps, 10 s, 205521162 bytes (testsrc2)",
-    "convertMs": 10909,
-    "convertSpeed": 0.92,
-    "proxyMs": 4321,
-    "proxySpeed": 2.31
+    "convertMs": 7009,
+    "convertSpeed": 1.43,
+    "proxyMs": 3493,
+    "proxySpeed": 2.86
   },
   "folder": {
     "library": 0,

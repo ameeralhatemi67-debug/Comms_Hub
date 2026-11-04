@@ -1,0 +1,78 @@
+{
+  "script": "qa/desktop-taskbar.cjs",
+  "run": "2026-11-04T02:03:05.531Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "a start from the jump list («الاستوديو») opens its place on the site",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/motion/studio"
+    },
+    {
+      "name": "Windows keeps a jump list for the application (its settings read back)",
+      "pass": true,
+      "detail": "{\"minItems\":10,\"removedItems\":[]}"
+    },
+    {
+      "name": "a second start from the jump list («يحتاج قرارك») leaves at once and moves the open window to its place",
+      "pass": true,
+      "detail": "{\"left\":0,\"url\":\"http://127.0.0.1:3000/\"}"
+    },
+    {
+      "name": "a start that names an address instead of a place moves nothing",
+      "pass": true,
+      "detail": "http://127.0.0.1:3000/"
+    },
+    {
+      "name": "the page's progress is the taskbar's bar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a failure turns the bar red at its last fraction, and looking at the window clears it",
+      "pass": true,
+      "detail": "{\"red\":[{\"value\":0.5,\"mode\":\"error\"}],\"seen\":[{\"value\":-1,\"mode\":\"none\"}]}"
+    },
+    {
+      "name": "«done» removes the bar",
+      "pass": true,
+      "detail": "[{\"value\":0.8,\"mode\":\"normal\"},{\"value\":-1,\"mode\":\"none\"}]"
+    },
+    {
+      "name": "a bar ends with the document that set it",
+      "pass": true,
+      "detail": "[{\"value\":-1,\"mode\":\"none\"}]"
+    },
+    {
+      "name": "anything else is refused by the main process, and shows nothing",
+      "pass": true,
+      "detail": "[{\"refused\":\"Error invoking remote method 'commshub:life.progress': Error: refused\"},{\"refused\":\"Error invoking remote method 'commshub:life.progress': Error: refused\"},{\"refused\":\"Error invoking remote method 'commshub:life.progress': Error: refused\"},{\"refused\":\"Error invoking remote method 'commshub:life.progress': Error: refused\"},{\"refused\":\"Error invoking remote method 'commshub:life.progress': Error: refused\"}]"
+    },
+    {
+      "name": "a file the person chose is dragged out by its token: Windows is handed that file, with the brand mark",
+      "pass": true,
+      "detail": "{\"dragged\":true,\"drags\":[{\"file\":\"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\comms-hub-desktop-qa-NJxq5k\\\\drag-out.mp4\",\"icon\":true}]}"
+    },
+    {
+      "name": "an unknown, a malformed or a forgotten token drags nothing",
+      "pass": true,
+      "detail": "{\"unknown\":false,\"malformed\":\"refused\",\"forgotten\":false}"
+    },
+    {
+      "name": "cache.usage names the default folder «المجلد الافتراضي», with no path and no Windows user name",
+      "pass": true,
+      "detail": "{\"folder\":\"المجلد الافتراضي\",\"isDefault\":true}"
+    },
+    {
+      "name": "a chosen folder is named by its last name only",
+      "pass": true,
+      "detail": "{\"folder\":\"مجلد مختار\"}"
+    }
+  ],
+  "notes": [
+    "The drag itself is Windows' own and cannot be driven by Playwright: dropping into Explorer is an owner walkthrough step."
+  ],
+  "total": 13,
+  "passed": 13,
+  "failed": 0
+}
