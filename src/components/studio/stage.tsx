@@ -12,7 +12,7 @@ import { RATIOS, canvasOf, durationOf, type Clip, type Layer, type Micros, type 
 import { boxOf, pick, transformAt, type Resolver } from '@/lib/studio/compose';
 import { AUTO, canvasWidth, dragHandle, handleAt, PLAY_RESOLUTIONS, resolutionLabel, RESOLUTIONS, snapCentre, ROTATE_GAP_PX, HANDLE_PX, type Handle } from '@/lib/studio/handles';
 import { withKeys } from '@/lib/studio/shortcuts';
-import { frameUs, timecode } from '@/lib/studio/time';
+import { secondFrames, stepFrames, timecode } from '@/lib/studio/time';
 import { drawSafeZones } from '@/lib/motion/preview.js';
 import type { Player } from '@/lib/studio/preview';
 import { ADD_MIME, type AddDrop } from './bin';
@@ -243,7 +243,8 @@ export function Stage({
     drag.current = null;
   };
 
-  const step = (n: number) => player?.seek(t + n * frameUs(fps));
+  // whole frames from the frame shown, so a rounded frame length never adds up over presses
+  const step = (n: number) => player?.seek(stepFrames(t, n, fps));
   const cursor = tool === 'text' ? 'text' : hover === 'rotate' ? 'grab' : hover === 'scale' ? 'nwse-resize' : 'default';
 
   return (
@@ -317,7 +318,7 @@ export function Stage({
         <button type="button" onClick={() => player?.seek(0)} aria-label="إلى البداية" title={withKeys('إلى البداية', 'home')}>
           <SkipBack />
         </button>
-        <button type="button" onClick={() => step(-fps)} aria-label="رجوع ثانية" title={withKeys('رجوع ثانية', 'second-back')}>
+        <button type="button" onClick={() => step(-secondFrames(fps))} aria-label="رجوع ثانية" title={withKeys('رجوع ثانية', 'second-back')}>
           <ChevronsLeft />
         </button>
         <button type="button" onClick={() => step(-1)} aria-label="إطار للخلف" title={withKeys('إطار للخلف', 'frame-back')}>
@@ -329,7 +330,7 @@ export function Stage({
         <button type="button" onClick={() => step(1)} aria-label="إطار للأمام" title={withKeys('إطار للأمام', 'frame-forward')}>
           <StepForward />
         </button>
-        <button type="button" onClick={() => step(fps)} aria-label="تقدم ثانية" title={withKeys('تقدم ثانية', 'second-forward')}>
+        <button type="button" onClick={() => step(secondFrames(fps))} aria-label="تقدم ثانية" title={withKeys('تقدم ثانية', 'second-forward')}>
           <ChevronsRight />
         </button>
         <button type="button" onClick={() => player?.seek(Number.MAX_SAFE_INTEGER)} aria-label="إلى النهاية" title={withKeys('إلى النهاية', 'end')}>

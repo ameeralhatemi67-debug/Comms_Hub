@@ -14,6 +14,24 @@ export const frameAt = (us: Micros, fps: number) => Math.floor((us * fps) / US +
 /** The start of frame n. */
 export const frameStart = (n: number, fps: number): Micros => Math.round((n * US) / fps);
 
+/**
+ * The frame a time shows, by the export's rule (scrub.ts EPS, a microsecond): the last frame starting at most 1 µs after
+ * it, with frames starting where an export times them (frameStart). A rounded start just below its exact time is still
+ * its own frame's, which frameAt alone would give to the frame before.
+ */
+export function frameShown(us: Micros, fps: number): number {
+  let n = Math.max(0, frameAt(us, fps));
+  while (frameStart(n + 1, fps) <= us + 1) n++;
+  while (n > 0 && frameStart(n, fps) > us + 1) n--;
+  return n;
+}
+
+/** The playhead moved by whole frames: from the frame it shows to the start of the frame `frames` away, never before 0. */
+export const stepFrames = (us: Micros, frames: number, fps: number): Micros => frameStart(Math.max(0, frameShown(us, fps) + frames), fps);
+
+/** The frames of a step of one second (30 at 29.97, as a timecode without dropped frames counts them). */
+export const secondFrames = (fps: number) => Math.round(fps);
+
 /** A time moved onto the nearest frame boundary. */
 export const snapFrame = (us: Micros, fps: number): Micros => frameStart(Math.round((us * fps) / US), fps);
 
