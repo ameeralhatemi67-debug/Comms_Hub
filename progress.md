@@ -3208,7 +3208,7 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - `tests/studio-step.test.mjs`, 15 tests: 100 presses each way of a frame and of a second at 24, 25, 30, 29.97 and 60, each on
     its exact frame. With the old step put back, 9 of the 15 fail.
   - `npm run typecheck` clean. The full `npm test` and `npm run build` waited for the manager's go (Fork 3 was building), and
-    were run after the rerun below, with the time fix in.
+    were run after the check's rerun, with the time fix in (the last bullet of this entry).
   - Found after it: the transport's time still took its frame with `frameAt`, fixed in the next bullet.
 - **The transport's time reads the frame the stage shows** (`bae0e13`, approved by the manager on 2026-11-05).
   - **What changed.** `timecode` took its frame with `frameAt`. At 30 frames a second a start that rounds down (frames 1, 4, 7
