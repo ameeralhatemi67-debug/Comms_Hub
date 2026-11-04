@@ -1,0 +1,179 @@
+{
+  "script": "qa/studio-lanes.cjs",
+  "run": "2026-11-04T19:42:36.495Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "app-nochip: one lane is the floor (600 frames, every one fingerprinted)",
+      "pass": true,
+      "detail": "{\"via\":\"yuv\",\"ms\":17704,\"printed\":600}"
+    },
+    {
+      "name": "app-nochip, 2 lanes: every composed frame is one lane's, the structure is one lane's exactly",
+      "pass": true,
+      "detail": "{\"lanes\":2,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[17704,18712]}"
+    },
+    {
+      "name": "app-nochip, 2 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
+      "pass": true,
+      "detail": "[{\"frame\":299,\"one\":41.84,\"lanes\":41.84,\"delta\":0},{\"frame\":300,\"one\":42.9,\"lanes\":42.9,\"delta\":0}]"
+    },
+    {
+      "name": "app-nochip, 3 lanes: every composed frame is one lane's, the structure is one lane's exactly",
+      "pass": true,
+      "detail": "{\"lanes\":3,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[17704,19794]}"
+    },
+    {
+      "name": "app-nochip, 3 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
+      "pass": true,
+      "detail": "[{\"frame\":239,\"one\":41.51,\"lanes\":41.51,\"delta\":0},{\"frame\":240,\"one\":42.88,\"lanes\":42.88,\"delta\":0},{\"frame\":419,\"one\":41.93,\"lanes\":41.93,\"delta\":0},{\"frame\":420,\"one\":42.92,\"lanes\":42.92,\"delta\":0}]"
+    },
+    {
+      "name": "app-nochip: a lane with another H.264 profile is refused by the join's guard; the export runs with one lane and its file is the floor's",
+      "pass": true,
+      "detail": "{\"lanes\":1,\"steps\":[\"LANE:LANES\"]}"
+    },
+    {
+      "name": "app-nochip: a lane failing once mid-segment: its segment runs again on the lanes left, and the file is exact",
+      "pass": true,
+      "detail": "{\"lanes\":3,\"steps\":[\"ENCODER\"],\"firstDiff\":-1}"
+    },
+    {
+      "name": "app-nochip: the first segment's lane failing: the export runs again with a lane fewer, and the file is exact",
+      "pass": true,
+      "detail": "{\"lanes\":2,\"steps\":[\"LANE:ENCODER\"]}"
+    }
+  ],
+  "notes": [
+    "The application started with --disable-features=CalculateNativeWinOcclusion, its window in front."
+  ],
+  "fixture": {
+    "seconds": 20,
+    "size": "1920x1080",
+    "short": 1080,
+    "engines": [
+      "app-nochip"
+    ],
+    "faults": true,
+    "fingerprinted": "every frame"
+  },
+  "engines": {
+    "app-nochip": {
+      "versions": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "engine": {
+        "onChip": false,
+        "cores": 12
+      },
+      "starts": {
+        "two": [
+          0,
+          300
+        ],
+        "three": [
+          0,
+          240,
+          420
+        ]
+      },
+      "timing": null,
+      "runs": {
+        "one": {
+          "lanes": 1,
+          "steps": [],
+          "ms": 17704,
+          "fps": 33.9,
+          "load": [
+            57,
+            53
+          ],
+          "bytes": 25359421,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        },
+        "two": {
+          "lanes": 2,
+          "steps": [],
+          "ms": 18712,
+          "fps": 32.1,
+          "load": [
+            53,
+            31
+          ],
+          "bytes": 25359417,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        },
+        "three": {
+          "lanes": 3,
+          "steps": [],
+          "ms": 19794,
+          "fps": 30.3,
+          "load": [
+            51,
+            51
+          ],
+          "bytes": 25357779,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        },
+        "guard": {
+          "lanes": 1,
+          "steps": [
+            "LANE:LANES"
+          ],
+          "ms": 21577,
+          "fps": 27.8,
+          "load": [
+            20,
+            71
+          ],
+          "bytes": 25359421,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        },
+        "lateFault": {
+          "lanes": 3,
+          "steps": [
+            "ENCODER"
+          ],
+          "ms": 20133,
+          "fps": 29.8,
+          "load": [
+            60,
+            62
+          ],
+          "bytes": 25357779,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        },
+        "firstFault": {
+          "lanes": 2,
+          "steps": [
+            "LANE:ENCODER"
+          ],
+          "ms": 18217,
+          "fps": 32.9,
+          "load": [
+            18,
+            13
+          ],
+          "bytes": 25359417,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        }
+      }
+    }
+  },
+  "total": 8,
+  "passed": 8,
+  "failed": 0
+}
