@@ -152,9 +152,12 @@ async function inEngine(page, name, url) {
   const near = new Set([...seg(2), ...seg(3)].filter((b) => b > 0).flatMap((b) => Array.from({ length: 60 }, (_, i) => b - 30 + i)));
   const sample = EVERY === 1 ? null : Array.from({ length: total }, (_, n) => n % EVERY === 0 || near.has(n));
   const exp = async (tag, lanes, faults, hash = true) => {
+    const before = load();
     const e = await page.evaluate((o) => window.lanecheck.exportWith(o), { tag: `${name}-${tag}`, seconds: SECONDS, w: W, h: H, short, lanes, hash, faults, sample });
+    const after = load();
     const file = path.join(out, `${name}-${tag}.mp4`);
-    return { ...e, file, structure: structure(file), psnr: framePsnr(file) };
+    console.log(`  ${name} ${tag}: ${e.lanes} lane(s), ${e.ms} ms, ${Math.round((e.frames / e.ms) * 10000) / 10} frames a second with fingerprints, load ${before}% then ${after}%`);
+    return { ...e, load: [before, after], fps: Math.round((e.frames / e.ms) * 10000) / 10, file, structure: structure(file), psnr: framePsnr(file) };
   };
   r.runs.one = await exp('k1', 1);
   r.runs.two = await exp('k2', 2);
@@ -268,7 +271,7 @@ function takeLock() {
     if (locked && fs.existsSync(LOCK) && fs.readFileSync(LOCK, 'utf8') === BRANCH) fs.rmSync(LOCK);
   }
   result.fixture = { seconds: SECONDS, size: `${W}x${H}`, short, engines: ENGINES, faults: FAULTS, fingerprinted: EVERY === 1 ? 'every frame' : `every ${EVERY}th frame and 30 each side of every boundary` };
-  result.engines = Object.fromEntries(Object.entries(engines).map(([n, e]) => [n, { browser: e.browser, versions: e.versions, engine: e.engine, starts: e.starts, timing: e.timing ?? null, runs: Object.fromEntries(Object.entries(e.runs).map(([k, x]) => [k, { lanes: x.lanes, steps: x.steps, ms: x.ms, bytes: x.bytes, via: x.via, keys: x.structure.keys.length, frames: x.structure.pts.length }])) }]));
+  result.engines = Object.fromEntries(Object.entries(engines).map(([n, e]) => [n, { browser: e.browser, versions: e.versions, engine: e.engine, starts: e.starts, timing: e.timing ?? null, runs: Object.fromEntries(Object.entries(e.runs).map(([k, x]) => [k, { lanes: x.lanes, steps: x.steps, ms: x.ms, fps: x.fps, load: x.load, bytes: x.bytes, via: x.via, keys: x.structure.keys.length, frames: x.structure.pts.length }])) }]));
   if (!EDGE_ONLY) note(`The application started with ${UNCOVERED.join(' ')}, its window in front.`);
   // a run of chosen engines is its own record, so one engine at a time keeps the others'
   const which = process.env.ENGINES ? `-${ENGINES.join('+')}` : '';
