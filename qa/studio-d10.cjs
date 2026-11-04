@@ -14,7 +14,8 @@ const path = require('node:path');
 const { execSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
-const LOCK = path.join(process.env.TEMP || os.tmpdir(), 'comms-hub-port3000.lock');
+// the shared lock lives in the user's own temp folder, even when TEMP is pointed elsewhere for a run's files
+const LOCK = path.join(process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Temp') : os.tmpdir(), 'comms-hub-port3000.lock');
 /** Switches the package starts with in these checks: its window is never taken as hidden while the check runs. */
 const VISIBLE_ARGS = Object.freeze(['--disable-features=CalculateNativeWinOcclusion', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows']);
 /** Frames a second below which a window is taken as throttled (displays draw at 60 or more). */
