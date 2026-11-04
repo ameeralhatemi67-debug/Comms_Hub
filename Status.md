@@ -26,6 +26,28 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, merge 3: the desktop application's D12 (0.8.0, bridge 9), 2026-11-04
+
+- **Done.** Fork 3 (`power-desktop`), merged as `411007d`. The desktop application only; a browser keeps today's behaviour.
+  - P-30 and P-08: light copies made in idle time. A copy pauses for a click, an export, playback, sound, battery or Windows' own speed limit, and a copy whose source FFmpeg has already read whole is stopped and made again.
+  - P-29: library copies fetched two parts at a time.
+  - P-26: taskbar progress and a jump list.
+  - P-22: dragging a file out of the application.
+  - P-20: «استيراد من بطاقة الكاميرا».
+  - `cache.usage` gives the folder's label, never its path.
+- **Evidence, re-run by the manager** at `afbde46` with `2903ecc`'s check (later commits change only `qa/` and `progress.md`):
+  - desktop typecheck clean and 158 of 158; site 795 of 795;
+  - packaged checks: `qa/desktop-native.cjs` 37 of 37, `desktop-taskbar` 13 of 13, `desktop-files` 16 of 16, `desktop-card-import` 11 of 11, `desktop-idle` 24 of 24;
+  - on the merged tree: site typecheck clean, 802 of 802; desktop 158 of 158.
+  - The fork's quiet-window run, not repeated: the stage's 95th-percentile frame time is 50.1 ms with copies held, against 49.9 ms with nothing to make.
+- **Decided.** Copies pause while Windows lowers its own speed limit, so they never push the laptop into it. The limit fell 136 to 157 times in a few minutes whenever copies loaded every core. Copies at once stay 1, because widths 1, 2 and 3 took the same time.
+- **Not verified.** The release package's install was not run (a real installation is on this laptop). A camera card was a fixture of the same shape, not a real card.
+- **Next.**
+  - Forks 1 and 2 connect their pages to the new helpers (taskbar progress, drag out, the idle copies).
+  - Fork 2's D10 rerun, about 80 minutes. Its first run passed every row but two: the no-chip opening jump, and «تلقائية» on the RTX at 2.8% against 2%.
+  - Fork 4's speed work: exports are still 6% slower on the AMD chip, and less than half speed with no chip.
+  - Then Fork 1's D11 gate. Nothing pushed.
+
 ## Desktop Power, merge 2: the export with no graphics chip, and loudness ahead, 2026-11-04
 
 - **Done.** Fork 1 (`power-export`) items 1 to 3 and P-15 (`786f30b`, merged as `dcb2d80`), every client:

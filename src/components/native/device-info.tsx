@@ -12,6 +12,7 @@ import { native, type GpuChoice, type NativeGpuState, type ProfileEntry, type Pr
 import {
   CHIP_GUIDE,
   chipFromRenderer,
+  currentEntry,
   deviceLines,
   factsFromApp,
   GPU_AUTO_HINT,
@@ -100,14 +101,6 @@ export function DeviceInfo() {
       {tuning && <DeviceTuning facts={facts} />}
     </div>
   );
-}
-
-/** The measurement this page's own key matches: same application, Chromium, chip, driver and switch; the newest. */
-function currentEntry(p: { current: ProfileKey; entries: ProfileEntry[] } | null): ProfileEntry | null {
-  if (!p) return null;
-  const k = p.current;
-  const same = p.entries.filter((e) => e.key.app === k.app && e.key.chrome === k.chrome && e.key.switch === k.switch && e.key.chip.vendorId === k.chip.vendorId && e.key.chip.deviceId === k.chip.deviceId && e.key.chip.driver === k.chip.driver);
-  return same.sort((a, b) => b.at - a.at)[0] ?? null;
 }
 
 /** D9, inside the desktop application: the chip, the measurement, and the plan. */
