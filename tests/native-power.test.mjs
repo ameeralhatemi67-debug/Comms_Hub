@@ -344,6 +344,8 @@ test('P-28: a saved download is heard and acted on by its id; what the notice sa
   assert.equal(WHY_LINE.kind, NEVER_OPENS);
   assert.deepEqual(Object.keys(WHY_LINE).sort(), ['failed', 'gone', 'kind', 'unmarked']);
   for (const t of [OPEN_LABEL, SHOW_LABEL, NEVER_OPENS, ...Object.values(WHY_LINE)]) assert.equal(/\p{Extended_Pictographic}/u.test(t), false, t);
+  const notice = fs.readFileSync(new URL('../src/components/native/desktop-downloads.tsx', import.meta.url), 'utf8');
+  assert.match(notice, /\{SAVED_BEFORE\}\s*<bdi>\{last\.name\}<\/bdi>\s*\{SAVED_AFTER\}/, 'the name is isolated, so a Latin ending keeps the marks in place');
   const shell = fs.readFileSync(new URL('../src/components/shell.tsx', import.meta.url), 'utf8');
   assert.match(shell, /<DesktopDownloads \/>/, 'the shell carries the notice on every page');
 });

@@ -7,9 +7,11 @@ import type { DownloadWhy, NativeDownload } from './index.ts';
 export const OPEN_LABEL = 'فتح بالبرنامج الافتراضي';
 export const SHOW_LABEL = 'إظهار في المجلد';
 
-/** The notice's line for a saved download. */
+/** The notice's line for a saved download, around the file's name, which the page isolates (a name may be Latin, Arabic or both). */
+export const SAVED_BEFORE = 'حُفظ «';
+export const SAVED_AFTER = '».';
 export function downloadLine(d: NativeDownload): string {
-  return `حُفظ «${d.name}».`;
+  return `${SAVED_BEFORE}${d.name}${SAVED_AFTER}`;
 }
 
 /** Said under the line of a file whose kind never opens from the application. */

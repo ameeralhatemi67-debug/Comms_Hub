@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 import { FileText, FolderOpen, X } from 'lucide-react';
 import { actOnDownload, onDownloadDone, type NativeDownload } from '@/lib/native';
-import { downloadLine, NEVER_OPENS, OPEN_LABEL, SHOW_LABEL, WHY_LINE } from '@/lib/native/downloads';
+import { NEVER_OPENS, OPEN_LABEL, SAVED_AFTER, SAVED_BEFORE, SHOW_LABEL, WHY_LINE } from '@/lib/native/downloads';
 import { useNativeFeature } from './use-native';
 
 export function DesktopDownloads() {
@@ -35,7 +35,11 @@ export function DesktopDownloads() {
   };
   return (
     <div className="dv-download" role="status" data-download-note>
-      <p>{downloadLine(last)}</p>
+      <p>
+        {SAVED_BEFORE}
+        <bdi>{last.name}</bdi>
+        {SAVED_AFTER}
+      </p>
       {last.kind === null && <p className="muted">{NEVER_OPENS}</p>}
       <div className="actions">
         {last.kind !== null && (

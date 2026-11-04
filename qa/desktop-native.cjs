@@ -107,19 +107,20 @@ async function partOne(state) {
   const rec = () => h.recorded(app);
 
   // 1. The shape of version 1.
-  const shape = await win.evaluate(() => {
+  // The groups this tree's version has (GROUPS): version 10 adds downloads (P-28).
+  const shape = await win.evaluate((names) => {
     const n = window.commsHubNative;
     return {
       keys: Object.keys(n),
       fields: { platform: n.platform, shell: n.shell, version: n.version, bridge: n.bridge },
-      groups: { power: Object.keys(n.power), life: Object.keys(n.life), notify: Object.keys(n.notify), update: Object.keys(n.update), files: Object.keys(n.files), cache: Object.keys(n.cache), data: Object.keys(n.data), windows: Object.keys(n.windows), media: Object.keys(n.media), gpu: Object.keys(n.gpu), profile: Object.keys(n.profile) },
-      frozen: [n, n.power, n.life, n.notify, n.update, n.files, n.cache, n.data, n.windows, n.media, n.gpu, n.profile].every((o) => Object.isFrozen(o)),
+      groups: Object.fromEntries(names.map((g) => [g, Object.keys(n[g] || {})])),
+      frozen: [n, ...names.map((g) => n[g])].every((o) => Object.isFrozen(o)),
       fns: [n.info, n.power.keepAwake, n.power.release, n.life.busy, n.life.idle, n.notify.show, n.notify.badge, n.notify.onOpen].every((f) => typeof f === 'function'),
     };
-  });
+  }, Object.keys(GROUPS));
   check(
-    `the bridge is version ${BRIDGE}: who the application is, then info, power, life, notify, update, files, cache, data, windows, media, gpu and profile, each with the methods of its version`,
-    JSON.stringify(shape.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', 'power', 'life', 'notify', 'update', 'files', 'cache', 'data', 'windows', 'media', 'gpu', 'profile']) &&
+    `the bridge is version ${BRIDGE}: who the application is, then info, ${Object.keys(GROUPS).join(', ')}, each with the methods of its version`,
+    JSON.stringify(shape.keys) === JSON.stringify(['platform', 'shell', 'version', 'bridge', 'info', ...Object.keys(GROUPS)]) &&
       JSON.stringify(shape.fields) === JSON.stringify({ platform: 'desktop', shell: 'electron', version: h.pkg.version, bridge: BRIDGE }) &&
       JSON.stringify(shape.groups) === JSON.stringify(GROUPS) &&
       shape.fns,

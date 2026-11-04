@@ -3296,3 +3296,47 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - No real measurement ran in the check: a save of fixed numbers through the real bridge stood in for it.
   - One laptop, with two chips. On a laptop with one chip a switch change counts as a chip change by rule (unit-tested), not seen.
 - **Not done.** Nothing pushed.
+
+### 2026-11-05: a saved download opens in its program (P-28, bridge 10), and the account card says what the application adds (Desktop Power, Fork 3)
+
+- **Asked.** By Desktop Power's manager on the owner's yes to P-28 of 2026-11-05, with the account card's line by the owner's words:
+  the desktop version is the stronger one. Main merged first at `6c35268`.
+- **Built** (`e0ffbd5`, `f3ee449`, `3951903` and this entry's commit):
+  - `desktop/src/downloads.ts`: the fixed list of kinds that open (`OPEN_KINDS`: documents, pictures, sound, video, by the saved
+    name's last extension; never a program, installer, shortcut, script, web page, SVG, Office file with macros or archive), the
+    site's file routes a download is offered from (`DOWNLOAD_ROUTES`, held equal to `src/lib/native/files.ts`), and the mark of the
+    web read and written (`isMarked`, `zoneText`).
+  - `desktop/src/download-store.ts`: an id of 32 random bytes per download at `will-download`, the newest twenty in memory, forgotten
+    with «مسح بيانات هذا الجهاز»; the mark kept, or written (zone 3, the site's origin) when Chromium left none or a weaker one; open
+    only a plain file of a listed kind while the mark is on it, show any.
+  - `native-files.ts` registers the listener and the two handlers; bridge version 10 adds `downloads.open`, `show` and `onDone`.
+  - The page: `src/components/native/desktop-downloads.tsx` in the shell, «حُفظ «…».» with «فتح بالبرنامج الافتراضي» (not for a kind that
+    never opens) and «إظهار في المجلد»; the name is isolated (`bdi`). No Windows notice for a download: only «يحتاج قرارك» items become
+    Windows notices (the manager approved the in-page notice only).
+  - The account card's browser view: one line of what every member gets («يحتاج قرارك» on the device with its count on the taskbar,
+    documents, pictures and clips opened in their programs), and a second of the studio's gains shown only when `useStudioTab`, the
+    studio tab bar's own check, says the studio opens. Export lanes are left out (planned, not used by the export yet), and so is the
+    taskbar's progress (no page sends it yet); dragging files out is in the studio line, since only the studio's storage panel offers it.
+  - `MVP_draft.md` 63.2 and 63.10; `AGENTS.md`'s bridge 10 paragraph.
+- **Verification & evidence**, in the manager's slot (02:23 to about 02:45), TEMP and TMP in this worktree's `qa/artifacts/tmp`, the port's
+  lock held by this branch:
+  - `npm run typecheck` clean (22 s; 10 s again on the final code); `desktop` typecheck clean.
+  - `npm test`: **854 of 855** on the first run. `tests/studio-access.test.mjs` pinned the studio tab's old line, which `useStudioTab`
+    replaced; the test now holds the hook and the same check (`3951903`). Then **855 of 855**, twice, the second on the final code.
+  - `desktop` `npm test` **164 of 164** (36.2 s), `desktop/tests/downloads.test.mjs` 6 of 6 among them (real NTFS files and their
+    Zone.Identifier streams).
+  - `npm run pack:dev` (0.8.0, bridge 10) in 19 s.
+  - `qa/desktop-downloads.cjs` **12 of 12** (11 s), and 12 of 12 again after the name was isolated (10 s): nothing in Edge; the library, mail
+    and messaging downloads heard with an id, the saved name and the kind only; every saved file in zone 3; the PDF opened and shown (both
+    recorded in the main process, nothing really opened); `tool.exe` refused for its kind and only shown; the PDF refused once its mark was
+    taken off; an unknown id «gone», a number or a path refused by the bridge; an address outside the file routes saved and not offered;
+    the notice's words and buttons for both. Results in `qa/desktop-downloads.json`, pictures in `qa/artifacts/desktop-downloads/`.
+  - `qa/desktop-native.cjs` **36 of 37** first: the check's own expected shape was written out by hand and lacked `downloads`. It now
+    follows its `GROUPS` list; then **37 of 37** (94 s).
+  - `next build` clean: compiled in 25.5 s, 43 of 43 static pages, 62 s in all.
+- **Found.** Electron 45's Chromium writes the mark of the web itself: zone 3 with `ReferrerUrl` and a `HostUrl` that is the whole file
+  address (the file's id included), on all three files. The application's own mark, which names the origin only, was therefore not written
+  in the packaged run; that path is held by the unit tests alone.
+- **Not verified, said plainly.** Nothing signed in: the notice and the card were checked on fixture pages, and the card's studio line
+  through its test, not seen. No program was really opened: `shell.openPath` was recorded. One laptop.
+- **Not done.** Nothing pushed. Release preparation (0.9.0) waits for the manager.
