@@ -19,7 +19,7 @@ import { US, type Micros, type ProjectDoc, type Source } from './schema.ts';
 import { DeviceCache } from './cache.ts';
 import { divisorFor, EPS, FrameStore, THUMB_PART, thumbShare, type Kept } from './scrub.ts';
 import { PEAKS_PER_SECOND, peaksKey, reduceInto } from './peaks.ts';
-import type { NativeCopies, NativeMediaRef } from '../native/index.ts';
+import type { NativeCopies, NativeMediaRef, NativeQueueState } from '../native/index.ts';
 
 export type SourceState =
   | { kind: 'loading'; done: number; total: number }
@@ -146,6 +146,47 @@ export class MediaPool {
 
   constructor(opts: { cache: DeviceCache | null; onChange: () => void; url?: (asset: string, version: number) => string }) {
     this.opts = opts;
+    // D12: a light copy the application made in idle time is read from the moment it is ready
+    this.unqueue = opts.cache?.hasCopyQueue ? opts.cache.onQueue((st) => void this.copiesReady(st)) : null;
+  }
+
+  private unqueue: (() => void) | null = null;
+  /** The light copies already taken up from the queue, by name; and those ready while playing, taken up at the pause. */
+  private takenUp = new Set<string>();
+  private readyWhilePlaying = new Set<string>();
+
+  /** The queue said what it holds: a source whose 720p light copy is now ready reads it (never in the middle of a play). */
+  private async copiesReady(st: NativeQueueState) {
+    for (const item of st.items) {
+      if (item.state !== 'ready' || this.takenUp.has(item.name)) continue;
+      for (const [id, t] of this.tooling) {
+        if (t.copies?.names.proxy['720'] !== item.name) continue;
+        const l = this.loaded.get(id);
+        if (!l || l.preview) {
+          this.takenUp.add(item.name);
+          continue;
+        }
+        if (this.playing) {
+          this.readyWhilePlaying.add(item.name);
+          continue;
+        }
+        this.takenUp.add(item.name);
+        await this.takeUp(l, t);
+      }
+    }
+  }
+
+  private async takeUp(l: Loaded, t: Tooling) {
+    try {
+      const copies = await this.opts.cache?.copies(t.ref);
+      if (this.disposed || !copies?.proxy || l.preview) return;
+      t.copies = copies;
+      await this.openPreview(l, copies.proxy.url, copies.proxy.name, copies.proxy.height);
+      t.proxy = { kind: 'ready', height: copies.proxy.height };
+    } catch {
+      // the preview goes on reading the original
+    }
+    if (!this.disposed) this.opts.onChange();
   }
 
   state(id: string): SourceState | undefined {
@@ -536,10 +577,16 @@ export class MediaPool {
     }
   }
 
-  /** While playing nothing is read ahead, and no decoder is kept open for it. */
+  /** While playing nothing is read ahead, and no decoder is kept open for it; a light copy ready meanwhile is taken up after. */
   setPlaying(p: boolean) {
     this.playing = p;
-    if (p) for (const l of this.loaded.values()) if (!l.scrubbing) void this.endRun(l);
+    if (p) {
+      for (const l of this.loaded.values()) if (!l.scrubbing) void this.endRun(l);
+    } else if (this.readyWhilePlaying.size) {
+      this.readyWhilePlaying.clear();
+      const st = this.opts.cache?.queued;
+      if (st) void this.copiesReady(st);
+    }
   }
 
   private onScreen(): Set<Canvas> {
@@ -1002,6 +1049,9 @@ export class MediaPool {
 
   dispose() {
     this.disposed = true;
+    // the project is closed: the application stops making its light copies (D12)
+    this.unqueue?.();
+    this.opts.cache?.stopQueue();
     for (const el of this.elements.values()) {
       el.pause();
       el.removeAttribute('src');

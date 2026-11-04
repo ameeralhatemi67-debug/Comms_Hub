@@ -5,18 +5,10 @@
 // with «الأداء»; null in a browser, before a measurement, or when the bridge does not answer, and then the editor keeps
 // today's behaviour (the floor). It reads nothing about any person, and nothing of it leaves the device.
 import { useEffect, useState } from 'react';
-import { native, type ProfileEntry, type ProfileKey, type ProfileNumbers } from '@/lib/native';
-import { factsFromApp } from '@/lib/native/device';
+import { native, type ProfileNumbers } from '@/lib/native';
+import { currentEntry, factsFromApp } from '@/lib/native/device';
 import { isPerformance, plan, type Knobs, type Performance } from '@/lib/studio/scale';
 import { usePref } from './prefs';
-
-/** The measurement this page's own key matches: same application, Chromium, chip, driver and switch; the newest. */
-export function currentEntry(p: { current: ProfileKey; entries: ProfileEntry[] } | null): ProfileEntry | null {
-  if (!p) return null;
-  const k = p.current;
-  const same = p.entries.filter((e) => e.key.app === k.app && e.key.chrome === k.chrome && e.key.switch === k.switch && e.key.chip.vendorId === k.chip.vendorId && e.key.chip.deviceId === k.chip.deviceId && e.key.chip.driver === k.chip.driver);
-  return [...same].sort((a, b) => b.at - a.at)[0] ?? null;
-}
 
 export type StudioPlan = { knobs: Knobs; numbers: ProfileNumbers };
 

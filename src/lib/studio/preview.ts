@@ -15,6 +15,10 @@ import type { MotionRenderer } from './motion-adapter.ts';
 import { wallNow, type Clock } from './preview-link.ts';
 import { needOf, rangeOf } from './scrub.ts';
 import { BEHIND_RESEEKS, BUDGET_STEP, startLevel, streamPlan, UHD30, type AutoLevel, type Stream } from './playback.ts';
+import { setActivity, type Activity } from '../native/index.ts';
+
+/** Milliseconds after the last move of a paused playhead that dragging it counts as over. */
+export const SCRUB_QUIET = 400;
 
 export const DRIFT = 0.12;
 
@@ -64,6 +68,16 @@ export class Player {
   private lastN = -1;
   /** The re-seeks already told to «تلقائية». */
   private judged = 0;
+  /** What the desktop application was last told this page is doing (D12: its background work waits meanwhile). */
+  private activity: Activity = 'none';
+  private scrubTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Tells the application, only when it changes; never waited for, so a jump never waits on the bridge. */
+  private say(kind: Activity) {
+    if (kind === this.activity) return;
+    this.activity = kind;
+    void setActivity(kind);
+  }
   private readonly o: PlayerOptions;
 
   constructor(o: PlayerOptions) {
@@ -128,6 +142,9 @@ export class Player {
     if (this.t >= end) this.t = 0;
     this.playing = true;
     this.o.pool.setPlaying(true);
+    if (this.scrubTimer) clearTimeout(this.scrubTimer);
+    this.scrubTimer = null;
+    this.say('playing');
     this.startPerf = performance.now();
     this.startT = this.t;
     this.stats = { due: 0, drawn: 0, missed: 0, reseeks: 0, ms: 0 };
@@ -157,6 +174,7 @@ export class Player {
     if (this.playing && this.auto) this.auto.known = true;
     this.playing = false;
     this.o.pool.setPlaying(false);
+    this.say('none');
     this.live = new Set();
     cancelAnimationFrame(this.raf);
     this.o.pool.pauseExcept(new Set());
@@ -172,7 +190,17 @@ export class Player {
 
   seek(t: Micros) {
     const end = durationOf(this.o.getDoc());
+    const moved = Math.max(0, Math.min(Math.round(t), end)) !== this.t;
     this.t = Math.max(0, Math.min(Math.round(t), end));
+    // a paused playhead that moves is being dragged or stepped: said once, and «none» a moment after it stops
+    if (!this.playing && moved) {
+      this.say('scrubbing');
+      if (this.scrubTimer) clearTimeout(this.scrubTimer);
+      this.scrubTimer = setTimeout(() => {
+        this.scrubTimer = null;
+        if (!this.playing) this.say('none');
+      }, SCRUB_QUIET);
+    }
     if (this.playing) {
       this.startT = this.t;
       this.startPerf = performance.now();
@@ -326,5 +354,7 @@ export class Player {
   dispose() {
     this.playing = false;
     cancelAnimationFrame(this.raf);
+    if (this.scrubTimer) clearTimeout(this.scrubTimer);
+    this.say('none');
   }
 }

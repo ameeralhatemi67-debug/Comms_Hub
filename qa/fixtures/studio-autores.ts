@@ -16,7 +16,7 @@ import { canvasWidth } from '../../src/lib/studio/handles.ts';
 import { measureDevice } from '../../src/lib/studio/bench.ts';
 import { native, type ProfileNumbers } from '../../src/lib/native/index.ts';
 import { factsFromApp } from '../../src/lib/native/device.ts';
-import { currentEntry } from '../../src/components/studio/plan.ts';
+import { currentEntry } from '../../src/lib/native/device.ts';
 
 const US = schema.US;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -54,6 +54,9 @@ async function settled(pool: media.MediaPool, id: string, ms = 600000) {
 async function open() {
   const files = [...(document.getElementById('files') as HTMLInputElement).files!];
   const dc = (await cache.DeviceCache.open())!;
+  // the plays with and without light copies are this check's own: the idle-time queue of D12 is kept out of them (it
+  // would make copies between plays), and the copies are made when the check asks (copies() below)
+  (dc as unknown as { copyQueue: unknown }).copyQueue = null;
   const pool = new media.MediaPool({ cache: dc, onChange: () => undefined });
   let doc = schema.newVideoDoc('16:9', 30);
   const ids: string[] = [];
