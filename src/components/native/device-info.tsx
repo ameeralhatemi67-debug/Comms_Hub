@@ -5,7 +5,8 @@
 // the studio's home and from «مساعدة» in the editors. It reads nothing about any person.
 // From D9 (MVP_draft.md 63.6, Desktop_Power_Ideas.md P-01, P-33, P-36), inside the application only:
 // «بطاقة الرسوميات للاستوديو» on a laptop with two chips, «قياس قدرة الجهاز», and, folded under «التفاصيل»,
-// the measured figures, «الأداء» and the plan of scale.ts. In a browser nothing of this appears.
+// the measured figures, «الأداء» and the plan of scale.ts. In a browser nothing of this appears. From 63.6.1 it says why when
+// the measurement is stale, and the studio's note opens it at the measurement (`focus`).
 import { useEffect, useRef, useState } from 'react';
 import { CircleAlert, CircleCheck } from 'lucide-react';
 import { native, type GpuChoice, type NativeGpuState, type ProfileEntry, type ProfileKey } from '@/lib/native';
@@ -13,6 +14,9 @@ import {
   CHIP_GUIDE,
   chipFromRenderer,
   currentEntry,
+  measureLine,
+  measureState,
+  PROFILE_SAVED,
   deviceLines,
   factsFromApp,
   GPU_AUTO_HINT,
@@ -81,7 +85,7 @@ function Lines({ lines }: { lines: DeviceLine[] }) {
   );
 }
 
-export function DeviceInfo() {
+export function DeviceInfo({ focus }: { focus?: 'measure' } = {}) {
   const [facts, setFacts] = useState<DeviceFacts | null>(null);
   useEffect(() => {
     let live = true;
@@ -98,13 +102,13 @@ export function DeviceInfo() {
       <Lines lines={deviceLines(facts)} />
       {needsChipGuide(facts) && !tuning && <p className="st-hint">{CHIP_GUIDE}</p>}
       {!facts.app && <p className="st-hint">في تطبيق سطح المكتب تظهر هنا بطاقة الرسوميات المستعملة والمساحة الحرة، ويستمر التصدير والنافذة مصغّرة.</p>}
-      {tuning && <DeviceTuning facts={facts} />}
+      {tuning && <DeviceTuning facts={facts} focus={focus} />}
     </div>
   );
 }
 
 /** D9, inside the desktop application: the chip, the measurement, and the plan. */
-function DeviceTuning({ facts }: { facts: DeviceFacts }) {
+function DeviceTuning({ facts, focus }: { facts: DeviceFacts; focus?: 'measure' }) {
   const n = native();
   const [gpu, setGpu] = useState<NativeGpuState | null>(null);
   const [profile, setProfile] = useState<{ current: ProfileKey; entries: ProfileEntry[] } | null>(null);
@@ -112,6 +116,13 @@ function DeviceTuning({ facts }: { facts: DeviceFacts }) {
   const [note, setNote] = useState<string | null>(null);
   const [performance, setPerformance] = usePref<Performance>('performance', 'auto', isPerformance);
   const abort = useRef<AbortController | null>(null);
+  const measureButton = useRef<HTMLButtonElement>(null);
+  // opened from the studio's note: the measurement in view, its button ready
+  useEffect(() => {
+    if (focus !== 'measure' || !measureButton.current) return;
+    measureButton.current.scrollIntoView({ block: 'center' });
+    measureButton.current.focus();
+  }, [focus]);
 
   useEffect(() => {
     let live = true;
@@ -146,6 +157,7 @@ function DeviceTuning({ facts }: { facts: DeviceFacts }) {
       setProfile(await n.raw!.profile!.read!());
       setGpu(await n.raw!.gpu!.state!());
       setNote(profileSummary(entry));
+      window.dispatchEvent(new Event(PROFILE_SAVED));
     } catch (e) {
       setNote((e as Error)?.name === 'AbortError' ? 'أُلغي القياس.' : 'تعذّر القياس على هذا الجهاز.');
     } finally {
@@ -182,7 +194,7 @@ function DeviceTuning({ facts }: { facts: DeviceFacts }) {
       )}
       <div className="dv-row">
         <div className="actions">
-          <button type="button" className="st-mini" disabled={progress !== null} onClick={() => void measure()}>
+          <button type="button" className="st-mini" ref={measureButton} disabled={progress !== null} onClick={() => void measure()} data-measure>
             قياس قدرة الجهاز
           </button>
           {progress !== null && (
@@ -195,6 +207,7 @@ function DeviceTuning({ facts }: { facts: DeviceFacts }) {
           )}
         </div>
         <p className="st-hint">{MEASURE_HINT}</p>
+        {measureState(profile)?.kind === 'stale' && <p className="st-hint" data-measure-why>{measureLine(measureState(profile))}</p>}
         {note ? <p className="st-hint" role="status">{note}</p> : entry && <p className="st-hint">{profileSummary(entry)}</p>}
       </div>
       {entry && (
@@ -231,11 +244,11 @@ export function DeviceInfoPanel() {
 }
 
 /** From «مساعدة» in the editors. */
-export function DeviceInfoDialog({ onClose }: { onClose: () => void }) {
+export function DeviceInfoDialog({ onClose, focus }: { onClose: () => void; focus?: 'measure' }) {
   return (
     <Modal title="معلومات الجهاز" onClose={onClose}>
       <div className="st-support">
-        <DeviceInfo />
+        <DeviceInfo focus={focus} />
       </div>
     </Modal>
   );

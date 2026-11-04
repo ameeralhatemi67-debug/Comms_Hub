@@ -246,3 +246,53 @@ test('D12, P-20: a card\'s videos join the light-copy queue as soon as they are 
   const sent = log.filter((x) => x[0] === 'queue');
   assert.deepEqual(sent.at(-1)[1].items, [{ token }], 'the video only');
 });
+
+test('63.6.1: a device is measured, never measured, or stale for the first reason of app, chip and driver', async () => {
+  const { measureKeyId, measureLine, measureState } = await import('../src/lib/native/device.ts');
+  const entry = (over = {}, at = 1) => ({ at, key: { ...key, ...over, chip: { ...key.chip, ...(over.chip ?? {}) } }, numbers });
+  assert.equal(measureState(null), null, 'the application has not answered: nothing is said');
+  assert.deepEqual(measureState({ current: key, entries: [] }), { kind: 'never' });
+  assert.deepEqual(measureState({ current: key, entries: [entry()] }), { kind: 'measured' });
+  assert.deepEqual(measureState({ current: key, entries: [entry({ power: 'battery' })] }), { kind: 'measured' }, 'mains or battery is not a reason');
+  assert.deepEqual(measureState({ current: key, entries: [entry({ app: '0.7.1' })] }), { kind: 'stale', why: 'app' });
+  assert.deepEqual(measureState({ current: key, entries: [entry({ chrome: '152.0.7977.130' })] }), { kind: 'stale', why: 'app' }, 'Chromium comes with the application');
+  assert.deepEqual(measureState({ current: key, entries: [entry({ switch: 'low', chip: { vendorId: 4098, deviceId: 5761 } })] }), { kind: 'stale', why: 'chip' });
+  assert.deepEqual(measureState({ current: key, entries: [entry({ switch: 'high' })] }), { kind: 'stale', why: 'chip' }, 'another switch is another chip');
+  assert.deepEqual(measureState({ current: key, entries: [entry({ chip: { driver: '31.0' } })] }), { kind: 'stale', why: 'driver' });
+  assert.deepEqual(measureState({ current: key, entries: [entry({ app: '0.7.1', chip: { driver: '31.0' } })] }), { kind: 'stale', why: 'app' }, 'one reason, the first that differs');
+  // this chip's own newest measurement decides: an update is not taken for a change of chip
+  const amdNewer = entry({ app: '0.8.0', switch: 'low', chip: { vendorId: 4098, deviceId: 5761 } }, 9);
+  const rtxOlder = entry({ app: '0.7.1' }, 2);
+  assert.deepEqual(measureState({ current: key, entries: [rtxOlder, amdNewer] }), { kind: 'stale', why: 'app' });
+  assert.deepEqual(measureState({ current: key, entries: [amdNewer] }), { kind: 'stale', why: 'chip' });
+  assert.equal(measureLine({ kind: 'measured' }), null);
+  assert.equal(measureLine(null), null);
+  assert.equal(measureLine({ kind: 'never' }), 'لم يُقَس هذا الجهاز بعد، فيعمل الاستوديو بأبسط إعداداته. القياس نحو نصف دقيقة، ولا يُرسل شيء خارج الجهاز.');
+  assert.equal(measureLine({ kind: 'stale', why: 'app' }), 'تغيّر إصدار التطبيق منذ آخر قياس، فعاد الاستوديو إلى أبسط إعداداته حتى يُقاس الجهاز من جديد.');
+  assert.match(measureLine({ kind: 'stale', why: 'chip' }), /^تغيّر بطاقة الرسوميات منذ آخر قياس/);
+  assert.match(measureLine({ kind: 'stale', why: 'driver' }), /^تغيّر برنامج تشغيل البطاقة منذ آخر قياس/);
+  assert.equal(/\p{Extended_Pictographic}/u.test(measureLine({ kind: 'never' }) + measureLine({ kind: 'stale', why: 'driver' })), false);
+  // «لاحقاً» is kept for one key: any change of application, Chromium, switch, chip or driver is another key; power is not
+  const id = measureKeyId(key);
+  for (const other of [{ app: '0.8.1' }, { chrome: '156.0.1' }, { switch: 'low' }, { chip: { ...key.chip, deviceId: 1 } }, { chip: { ...key.chip, driver: '33' } }]) assert.notEqual(measureKeyId({ ...key, ...other }), id, JSON.stringify(other));
+  assert.equal(measureKeyId({ ...key, power: 'battery' }), id);
+});
+
+test('63.6.1: the page knows it is busy while it told the application so, and stops knowing when it ends', async () => {
+  const { markBusy, onPageBusy, pageBusy } = await import('../src/lib/native/index.ts');
+  const b = v7().bridge;
+  inApp(b);
+  let heard = 0;
+  const stop = onPageBusy(() => heard++);
+  assert.equal(pageBusy(), false);
+  const end = await markBusy('export');
+  assert.equal(pageBusy(), true);
+  await end();
+  await end();
+  assert.equal(pageBusy(), false, 'ended once, whatever calls it twice');
+  assert.equal(heard, 2);
+  stop();
+  inApp(undefined);
+  await markBusy('export');
+  assert.equal(pageBusy(), false, 'a browser is never busy for the application');
+});
