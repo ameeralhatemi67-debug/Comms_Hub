@@ -3259,7 +3259,7 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     manager's slot, relayed by Fork 4, on the development package (bridge 9), on Fork 3's corpus copied in (hashes equal, made
     after the recipe's last change). TEMP was in `qa/artifacts/tmp`, and the shared lock was taken by me around the run, since
     this check does not take it itself.
-  - **The guard held.** Windows changed the limit 87 times, from 35% to 78%. While held (18 to 55 s), all 29 of its changes
+  - **The guard held.** Windows changed the limit 85 times, from 35% to 78%. While held (18 to 55 s), all 29 of its changes
     were kept out, and the application heard only the check's own 100. Let through from the simulated case on (55 s), they
     reached the application, as the check intends. Its last change, at 138 s, was back to 100.
   - **Passed:**
