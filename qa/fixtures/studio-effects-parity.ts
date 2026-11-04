@@ -165,9 +165,11 @@ export async function identity() {
       let b: Uint8ClampedArray;
       let offered: boolean;
       if (c.plan.blur) {
-        offered = !!blurLanes(px.slice(), w, h, c.plan.blur, c.pad, { colour: c.plan.colour, straight: true });
-        a = blurStraight(px.slice(), w, h, c.plan.blur, c.pad, c.plan.colour, true).slice();
-        b = blurStraight(px.slice(), w, h, c.plan.blur, c.pad, c.plan.colour, false);
+        // the margin rounded up to the reduction, as applyEffect rounds it
+        const pad = Math.ceil(c.pad / c.plan.blur.n) * c.plan.blur.n;
+        offered = !!blurLanes(px.slice(), w, h, c.plan.blur, pad, { colour: c.plan.colour, straight: true });
+        a = blurStraight(px.slice(), w, h, c.plan.blur, pad, c.plan.colour, true).slice();
+        b = blurStraight(px.slice(), w, h, c.plan.blur, pad, c.plan.colour, false);
       } else {
         offered = !!colourLanes(px.slice(), c.plan.colour!);
         a = colourStraight(px.slice(), c.plan.colour!, true).slice();
