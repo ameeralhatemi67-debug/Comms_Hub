@@ -26,6 +26,17 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, merge 7: whole-frame steps and the idle-time copy check, 2026-11-05
+
+- **Done.** Fork 2's follow-ups, merged as `da52a3f`.
+  - «إطار للأمام» and «إطار للخلف», «تقدم ثانية» and «رجوع ثانية», and their keys now step in whole frames. Before, a rounded frame length added up: four presses of «تقدم ثانية» at 30 frames a second landed one frame short.
+  - The transport's time reads the frame the stage shows. At 30 frames a second, one «إطار للأمام» from the start used to read 00:00.00.
+  - At 29.97 the time counts 30 frames to a second (non-drop timecode), so it reads 0.1% behind the ruler. This is accepted.
+  - `qa/studio-copy-swap.cjs` proves a light copy made in idle time is taken up by an open editor at the pause and keeps every frame's identity. The next play is in step after 64 ms, against 2.2 s from the original.
+- **Evidence, re-run by the manager** at `5453009` in `verify-e3cab67`: typecheck clean, `npm test` 853 of 853, `next build`, `qa/studio-copy-swap.cjs` 18 of 18. The fork's own run was 18 of 18.
+- **Found by the manager's first run (16 of 18).** The checks' guard against Windows' speed limit held nothing back: Electron hands Windows' events to a copy of `emit` bound earlier. The copy check now takes the application's listeners off instead (`9426597`). `qa/desktop-idle.cjs` has the same guard and is fixed at its next port slot.
+- **Next.** Fork 1's D11 timing runs in the quiet window (opened 00:56), then Fork 4's last speed slot, then the D11 verification and merge. Nothing pushed.
+
 ## Desktop Power, merge 6: the studio says when the device is not measured, 2026-11-04
 
 - **Resumed.** The owner resumed the stage at about 19:10 under a new manager session, with these instructions: finish what is left, and add a prompt when the measurement is missing or stale. P-25 is parked: with the file unchanged, nothing can reach Google Drive before the export ends (`qa/studio-export-writes.mjs`, on `claude/power-upload-b13ac1`, to be merged after D11).
