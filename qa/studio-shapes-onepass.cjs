@@ -40,7 +40,8 @@ const ENGINES = (process.env.ENGINES || 'edge,edge-nochip,app-nochip,app-saving,
 const out = path.join(__dirname, 'artifacts', 'studio-shapes-onepass');
 const REAL = '00000000-0000-4000-8000-0000000000f3';
 const SOURCE = path.join(out, 'source.mp4');
-const LOCK = path.join(process.env.TEMP || os.tmpdir(), 'comms-hub-port3000.lock');
+// the shared lock lives in the user's own temp folder, even when TEMP is pointed elsewhere for a run's files
+const LOCK = path.join(process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Temp') : os.tmpdir(), 'comms-hub-port3000.lock');
 const BRANCH = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: h.root, encoding: 'utf8' }).stdout.trim();
 const fontDir = (pkg) => path.join(h.root, 'node_modules', '@fontsource', pkg);
 const fontCss = [['ibm-plex-sans-arabic', '600'], ['ibm-plex-sans-arabic', '700']]

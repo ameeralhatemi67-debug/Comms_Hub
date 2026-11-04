@@ -3201,7 +3201,20 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     - Ten minutes at 4K, 1368 frames fingerprinted (sampled, below), 5 of 5: frames and structure exact; boundary frames
       0.00 dB at 9000, and 0.00, 0.00 and +0.01 dB at 6000 and 12000. 738, 610 and 589 s (24.4, 29.5 and 30.5 frames a
       second), the processor at 54 then 85%, 40 then 31%, 73 then 14% (`qa/studio-lanes-2160-600s-app-saving.json`).
-  - **(the application on the strong chip and with no chip: to fill)**
+  - **The application on the strong chip (RTX 3050):**
+    - 20 s with the forced faults, 8 of 8, at 21 to 24 frames a second with fingerprints, so the window was not throttled
+      (`qa/studio-lanes-1080-20s-app-strong.json`).
+    - Ten minutes at 1080p, every frame fingerprinted, 5 of 5: frames and structure exact; boundary frames 0.00 dB at 9000,
+      6000 and 12000. 752, 759 and 758 s (23.9, 23.7 and 23.8 frames a second), the processor at 42 then 32%, 37 then 33%,
+      15 then 22% (`qa/studio-lanes-1080-600s-app-strong.json`).
+    - **Ten minutes at 4K: not finished.** One lane finished (576 s, 31.2 frames a second, sampled fingerprints). The two-lane
+      export then stopped with `QuotaExceededError`: drive C was down to 3.5 GB, about 15 GB of it this fork's own earlier
+      profiles, holding the private copies of the long sources and exports, which the checks did not remove
+      (`qa/studio-lanes-2160-600s-app-strong.json`, 0 of 1, the error alone). Those four profiles were removed (C back to 18.6
+      GB), the checks now remove their profile when an engine closes, and the run was started again with TEMP and TMP on D:.
+      The owner paused the stage while it was making its source; it was stopped there, and nothing of it is recorded.
+  - **With no graphics chip in the application: not run** (the owner's pause came first). Edge with `--disable-gpu` passed the
+    20 s lanes and faults (above).
   - **The encoded bytes are not the same, and section 5.2 does not ask them to be.** On the AMD chip the files of one, two
     and three lanes differ by some tens of kilobytes (1080p: 828,060,193, 828,040,925 and 828,060,326 bytes); four processor
     encoders run at once for P-05 made two shapes' bits differ, the files 56.3 and 56.9 dB apart. In both, section 5.2's
@@ -3219,8 +3232,21 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     frame: fingerprinting every 4K frame would hold port 3000, which all forks share, for hours more.
   - No ten-minute 4K run with no graphics chip: about 80 minutes for each lane count.
   - The time ratios are of two-minute fixtures in a quiet window: ten-minute runs do not fit in one.
-- **Not verified, said plainly.**
-  - The application on the strong chip and with no chip: waiting for their turn on port 3000.
-  - The time ratio for each chip: waiting for its quiet window.
-  - A renderer killed mid-segment (above). Nothing signed in: the panel's lanes and one pass were not clicked through.
-- **Not done.** Nothing pushed.
+- **Stopped at the owner's pause (2026-11-04), said plainly.** Of D11's gate, still to run: ten minutes at 4K on the strong
+  chip; with no chip in the application, the 20 s faults, the shapes and ten minutes at 1080p; and (d), the time ratio for each
+  chip in a quiet window (two-minute 1080p and 4K fixtures, three interleaved rounds of one, two and three lanes, without
+  fingerprints: `QUIET=1`). Not verified: a renderer killed mid-segment (above); nothing signed in (the panel's lanes and one
+  pass were not clicked through); the plan's lanes on a measured profile (`exportLanes`) were not exercised in the application.
+- **To resume, and the traps.**
+  - Each run of the application takes port 3000's lock itself, at `%LOCALAPPDATA%\Temp\comms-hub-port3000.lock` (the checks no
+    longer read it through TEMP), and frees it when it ends; one engine at a time.
+  - **Run with TEMP and TMP on D:.** The application's profile, and so its private storage (a ten-minute 4K source's copy of 2 to
+    4 GB, a 3.4 GB export, the lanes' spills), goes where `os.tmpdir()` says; on C: it filled the owner's drive. The command:
+    `TEMP=D:\…\qa\artifacts\tmp TMP=D:\…\qa\artifacts\tmp ENGINES=app-strong SECONDS=600 SIZE=2160 FAULTS=0 EVERY=15 node qa/studio-lanes.cjs`,
+    then `ENGINES=app-nochip SECONDS=20 node qa/studio-lanes.cjs`, `ENGINES=app-nochip node qa/studio-shapes-onepass.cjs` and
+    `ENGINES=app-nochip SECONDS=600 SIZE=1080 FAULTS=0 node qa/studio-lanes.cjs`, each with the same TEMP and TMP.
+  - The application starts with `--disable-features=CalculateNativeWinOcclusion` and its window in front (a covered window drew
+    about once a second); each export prints its frame rate and the processor's load, so a throttled run shows within one export.
+  - With no chip, the application at 4K saturates the processor and its window falls to about one frame a second (the manager's
+    finding): its 1080p run may crawl; stop it if the first export takes far longer than about 12 minutes.
+- **Not done.** Nothing pushed; drawing in workers (P-07) not switched on anywhere.

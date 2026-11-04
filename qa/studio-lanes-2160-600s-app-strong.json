@@ -1,0 +1,29 @@
+{
+  "script": "qa/studio-lanes.cjs",
+  "run": "2026-11-04T10:59:30.425Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "the check ran to its end",
+      "pass": false,
+      "detail": "page.evaluate: QuotaExceededError: The operation failed because it would cause the application to exceed its storage quota.\n    at exp (D:\\Agents\\main\\projects\\ideas\\Comms_Hub\\.claude\\worktrees\\power-export-821809\\qa\\studio-lanes.cjs:156:26)\n    at inEngine (D:\\Agents\\main\\projects\\ideas\\Comms_Hub\\.claude\\worktrees\\power-export-821809\\qa\\studio-lanes.cjs:163:22)\n    at async D:\\Agents\\main\\projects\\ideas\\Comms_Hub\\.claude\\worktrees\\power-export-821809\\qa\\studio-lanes.cjs:232:41"
+    }
+  ],
+  "notes": [
+    "The application started with --disable-features=CalculateNativeWinOcclusion, its window in front."
+  ],
+  "fixture": {
+    "seconds": 600,
+    "size": "3840x2160",
+    "short": 2160,
+    "engines": [
+      "app-strong"
+    ],
+    "faults": false,
+    "fingerprinted": "every 15th frame and 30 each side of every boundary"
+  },
+  "engines": {},
+  "total": 1,
+  "passed": 0,
+  "failed": 1
+}
