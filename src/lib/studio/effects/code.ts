@@ -73,6 +73,42 @@ export function colourPixels(px: Uint8ClampedArray, plan: ColourPlan): void {
 }
 
 /**
+ * colourPixels on straight colour as getImageData gives it, for putImageData, in one pass: a see-through pixel is taken
+ * premultiplied (exact) and back to straight colour by unpremultiply, as the chip takes it, so the canvas ends up with
+ * colourPixels' bytes.
+ */
+export function colourStraight(px: Uint8ClampedArray, plan: ColourPlan): void {
+  const t = plan.table ?? Uint8Array.from({ length: 256 }, (_, i) => i);
+  const m = plan.matrix;
+  const o0 = plan.offset ? plan.offset[0] : 0;
+  const o1 = plan.offset ? plan.offset[1] : 0;
+  const o2 = plan.offset ? plan.offset[2] : 0;
+  const k = m ? Array.from({ length: 9 }, (_, e) => Int32Array.from(t, (v) => m[e] * v)) : null;
+  const [k0, k1, k2, k3, k4, k5, k6, k7, k8] = k ?? [];
+  for (let i = 0; i < px.length; i += 4) {
+    const a = px[i + 3];
+    if (!a) continue;
+    let r = px[i];
+    let g = px[i + 1];
+    let b = px[i + 2];
+    if (a !== 255) {
+      r = unpremultiply(premultiply(r, a), a);
+      g = unpremultiply(premultiply(g, a), a);
+      b = unpremultiply(premultiply(b, a), a);
+    }
+    if (k) {
+      px[i] = toByte(k0[r] + k1[g] + k2[b] + o0);
+      px[i + 1] = toByte(k3[r] + k4[g] + k5[b] + o1);
+      px[i + 2] = toByte(k6[r] + k7[g] + k8[b] + o2);
+    } else {
+      px[i] = t[r];
+      px[i + 1] = t[g];
+      px[i + 2] = t[b];
+    }
+  }
+}
+
+/**
  * A blur plan over a w by h picture of premultiplied pixels; returns the blurred picture, the same size. With `pad`,
  * the picture is taken as lying in a transparent margin of `pad` pixels on every side (a multiple of the plan's n),
  * which the blur reads and the result leaves out: what the canvas filter did at the edge of what it was given.
@@ -94,7 +130,7 @@ export function blurPixels(px: Uint8ClampedArray, w: number, h: number, plan: Bl
       for (let yy = j * n - pad, end = yy + n; yy < end; yy++) {
         if (yy < 0 || yy >= h) continue;
         for (let x = 0; x < w; x++) {
-          const i = ((x + pad) / n) | 0;
+          const i = (x + pad) >> k;
           const s = (yy * w + x) * 4;
           const d = i * 4;
           row[d] += px[s];

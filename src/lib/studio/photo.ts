@@ -246,7 +246,7 @@ function colourOnChip(c: HTMLCanvasElement, ctx: CanvasRenderingContext2D, plan:
       const out = effectsOnChip(tile, tw, th, { colour: plan, blur: null });
       if (!out) return false;
       ctx.clearRect(x, y, tw, th);
-      ctx.drawImage(out, x, y);
+      ctx.drawImage(out, 0, 0, tw, th, x, y, tw, th);
     }
   }
   return true;

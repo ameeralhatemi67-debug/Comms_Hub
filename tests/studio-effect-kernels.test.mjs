@@ -119,3 +119,37 @@ test('a blur with a margin reads transparency beyond the picture and returns the
   assert.ok(out[3] < 160 && out[3] > 60, 'the corner fades towards the margin');
   assert.ok(out[(15 * 40 + 20) * 4 + 3] > out[3], 'the middle less');
 });
+
+test('colour on straight colour in one pass leaves the canvas the bytes of the premultiplied path', async () => {
+  const { colourStraight } = await import('../src/lib/studio/effects/code.ts');
+  for (const a of [{ brightness: 12, contrast: 18, saturation: 25 }, { brightness: -100, contrast: 0, saturation: 0 }, { brightness: 0, contrast: -60, saturation: 100 }]) {
+    const plan = colourPlan(a);
+    const straight = picture(97, 61, 13);
+    toStraight(straight);
+    const viaPremultiplied = straight.slice();
+    toPremultiplied(viaPremultiplied);
+    colourPixels(viaPremultiplied, plan);
+    const once = straight.slice();
+    colourStraight(once, plan);
+    // what the canvas keeps after putImageData
+    toPremultiplied(once);
+    for (let i = 0; i < once.length; i += 4) {
+      if (!once[i + 3]) continue;
+      for (let k = 0; k < 4; k++) assert.equal(once[i + k], viaPremultiplied[i + k], `${JSON.stringify(a)} at ${i / 4}`);
+    }
+  }
+});
+
+test('a scratch picture grows to hold what a frame asks and shrinks only after a long time far too large', async () => {
+  const { fitted } = await import('../src/lib/studio/effects/chip.ts');
+  const r = { cw: 0, ch: 0, over: 0 };
+  assert.deepEqual(fitted(r, 1920, 1080), [1920, 1080]);
+  assert.deepEqual(fitted(r, 1000, 1100), [1920, 1100], 'each side grows to the larger');
+  for (let i = 0; i < 50; i++) {
+    assert.equal(fitted(r, 1920, 1080), null, 'a frame of a large and a small effect reallocates nothing');
+    assert.equal(fitted(r, 300, 300), null);
+  }
+  let shrunk = null;
+  for (let i = 0; i < 130 && !shrunk; i++) shrunk = fitted(r, 300, 300);
+  assert.deepEqual(shrunk, [300, 300], 'far too large for 120 requests in a row');
+});

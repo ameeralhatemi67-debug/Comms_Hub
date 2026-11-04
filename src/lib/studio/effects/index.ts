@@ -4,8 +4,8 @@
 // runs on one and the plain code elsewhere, which is where the canvas itself is drawn by the processor and reading it
 // back costs little: on a chip the composed picture is never read back. Before 2026-11-04 these were the canvas's own
 // filters, drawn differently by each graphics chip. No DOM: usable in a worker, on an OffscreenCanvas.
-import { effectsOnChip } from './chip.ts';
-import { blurPixels, colourPixels, toPremultiplied, toStraight } from './code.ts';
+import { effectsOnChip, fitted, type Room } from './chip.ts';
+import { blurPixels, colourPixels, colourStraight, toPremultiplied, toStraight } from './code.ts';
 import type { EffectPlan } from './plan.ts';
 
 export { blurPlan, colourPlan, effectOf, photoColourPlan, type BlurPlan, type ColourPlan, type EffectPlan } from './plan.ts';
@@ -21,15 +21,23 @@ type Ctx2D = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 type Scratch = HTMLCanvasElement | OffscreenCanvas;
 
 const scratches: Scratch[] = [];
-/** Scratch canvas `i`, w by h, cleared: the picture an effect is worked out from. */
+const rooms: Room[] = [];
+/**
+ * Scratch canvas `i` with its top left w by h cleared: the picture an effect is worked out from. It grows rather than
+ * following each size (chip.ts fitted), since resizing a canvas reallocates it and a frame may ask for several sizes;
+ * read and draw its corner with a source rect.
+ */
 export function layer(i: number, w: number, h: number): { canvas: Scratch; ctx: Ctx2D } {
   let c = scratches[i];
   if (!c) {
     c = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : document.createElement('canvas');
     scratches[i] = c;
   }
-  if (c.width !== w) c.width = w;
-  if (c.height !== h) c.height = h;
+  const fit = fitted((rooms[i] ??= { cw: c.width, ch: c.height, over: 0 }), w, h);
+  if (fit) {
+    c.width = fit[0];
+    c.height = fit[1];
+  }
   const ctx = c.getContext('2d') as Ctx2D;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = 1;
@@ -38,32 +46,43 @@ export function layer(i: number, w: number, h: number): { canvas: Scratch; ctx: 
   return { canvas: c, ctx };
 }
 
-/** The plan in plain code over a canvas's own pixels, written back into it. */
-function onCode(canvas: Scratch, w: number, h: number, plan: EffectPlan, pad: number): Scratch {
-  const ctx = canvas.getContext('2d') as Ctx2D;
-  const img = ctx.getImageData(0, 0, w, h);
+/**
+ * The plan in plain code over the w by h at `at` of a canvas, written into `into` (a scratch canvas, its top left), by
+ * default the canvas itself.
+ */
+function onCode(canvas: Scratch, w: number, h: number, plan: EffectPlan, pad: number, at: [number, number], into: Scratch): Scratch {
+  const img = (canvas.getContext('2d') as Ctx2D).getImageData(at[0], at[1], w, h);
+  const ctx = into.getContext('2d') as Ctx2D;
   const px = img.data;
+  if (plan.colour && !plan.blur) {
+    // colour alone: one pass over straight colour, the same bytes
+    colourStraight(px, plan.colour);
+    ctx.putImageData(img, 0, 0);
+    return into;
+  }
   toPremultiplied(px);
   if (plan.colour) colourPixels(px, plan.colour);
   const out = plan.blur ? blurPixels(px, w, h, plan.blur, pad) : px;
   toStraight(out);
   ctx.putImageData(out === px ? img : new ImageData(out, w, h), 0, 0);
-  return canvas;
+  return into;
 }
 
 /**
- * `plan` over the w by h picture on `canvas` (a scratch of layer()), as a picture of w by h to draw back: the chip's
- * canvas, or `canvas` itself rewritten by the plain code; null when the path asked for is not offered here. With
- * `pad`, the picture is blurred as if surrounded by that much transparency (code.ts blurPixels), rounded up to the
- * plan's reduction.
+ * `plan` over the top left w by h of `canvas` (a scratch of layer()), as a canvas whose top left w by h is the result to
+ * draw back with a source rect: the chip's canvas, or `canvas` itself rewritten by the plain code; null when the path
+ * asked for is not offered here. With `pad`, the picture is blurred as if surrounded by that much transparency (code.ts
+ * blurPixels), rounded up to the plan's reduction. With `at`, the w by h is read from that place of `canvas` (the
+ * picture being composed): the chip uploads it straight from there, and the plain code writes into scratch `into`.
  */
-export function applyEffect(canvas: Scratch, w: number, h: number, plan: EffectPlan, o: { pad?: number; path?: EffectPath } = {}): CanvasImageSource | null {
+export function applyEffect(canvas: Scratch, w: number, h: number, plan: EffectPlan, o: { pad?: number; path?: EffectPath; at?: [number, number]; into?: number } = {}): CanvasImageSource | null {
   const n = plan.blur?.n ?? 1;
   const pad = plan.blur && o.pad ? Math.ceil(o.pad / n) * n : 0;
   const path = o.path ?? asked;
+  const at = o.at ?? [0, 0];
   if (path !== 'code') {
-    const chip = effectsOnChip(canvas, w, h, plan, pad);
+    const chip = effectsOnChip(canvas, w, h, plan, pad, at);
     if (chip || path === 'chip') return chip;
   }
-  return onCode(canvas, w, h, plan, pad);
+  return onCode(canvas, w, h, plan, pad, at, o.at ? layer(o.into ?? 1, w, h).canvas : canvas);
 }

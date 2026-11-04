@@ -146,23 +146,23 @@ export function drawCover(ctx: CanvasRenderingContext2D, cover: Cover, tr: Trans
   const bw = x1 - x0;
   const bh = y1 - y0;
   if (bw < 1 || bh < 1) return;
-  const big = scratch(0, bw, bh);
-  const b = big.getContext('2d') as CanvasRenderingContext2D;
-  b.setTransform(1, 0, 0, 1, 0, 0);
-  b.clearRect(0, 0, bw, bh);
-  let image: CanvasImageSource = big;
+  // no shared scratch picture: a blur and a squares cover in one frame resized one twice a frame, and a resize
+  // reallocates it (measured on 2026-11-04, about 8 ms a frame in Edge); an area that could not be worked out is left
+  // as it is, as the cleared scratch drawn over it used to leave it
+  let image: CanvasImageSource | null = null;
   if (cover.mode === 'blocks') {
     // squares worked out from the pixels under the area, the same on every machine
     const size = Math.max(2, coverBlock(cover) * scale);
     const cols = Math.min(bw, Math.max(1, Math.round(bw / size)));
     const rows = Math.min(bh, Math.max(1, Math.round(bh / size)));
-    image = squaresImage(ctx, x0, y0, bw, bh, cols, rows, mosaicStep(size)) ?? big;
+    image = squaresImage(ctx, x0, y0, bw, bh, cols, rows, mosaicStep(size));
   } else {
-    // the area as it is, blurred as if nothing lay beyond it, as the canvas filter did (effects/)
-    b.drawImage(canvas, x0, y0, bw, bh, 0, 0, bw, bh);
+    // the area as it is, blurred as if nothing lay beyond it, as the canvas filter did (effects/), read straight from the
+    // picture rather than copied first
     const plan = blurPlan(radius);
-    if (plan) image = applyEffect(big, bw, bh, { colour: null, blur: plan }, { pad: plan.reach }) ?? big;
+    if (plan) image = applyEffect(canvas as HTMLCanvasElement, bw, bh, { colour: null, blur: plan }, { pad: plan.reach, at: [x0, y0] });
   }
+  if (!image) return;
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = a;

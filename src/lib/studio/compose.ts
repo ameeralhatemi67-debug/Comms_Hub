@@ -314,7 +314,7 @@ function drawEffected(ctx: CanvasRenderingContext2D, plan: EffectPlan, box: { w:
   if (local) local();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   if (several) ctx.globalAlpha = 1;
-  ctx.drawImage(out, x0, y0);
+  ctx.drawImage(out, 0, 0, bw, bh, x0, y0, bw, bh);
 }
 
 /** Shows only part of an item's own box, from one side (a wipe of the item, in its own coordinates). */

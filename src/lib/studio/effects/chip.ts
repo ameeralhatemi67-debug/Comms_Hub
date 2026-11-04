@@ -19,10 +19,12 @@ precision highp usampler2D;
 uniform sampler2D src;
 uniform ivec2 size;
 uniform bool toCanvas;
+uniform int flip;
+uniform ivec2 origin;
 out vec4 colour;
-uvec4 at(ivec2 p) { return uvec4(round(texelFetch(src, p, 0) * 255.0)); }
-// the pixel this fragment writes: textures keep the picture's rows top first, the canvas bottom first
-ivec2 here() { ivec2 p = ivec2(gl_FragCoord.xy); if (toCanvas) p.y = size.y - 1 - p.y; return p; }
+uvec4 at(ivec2 p) { return uvec4(round(texelFetch(src, p + origin, 0) * 255.0)); }
+// the pixel this fragment writes: textures keep the picture's rows top first, the canvas (flip rows high) bottom first
+ivec2 here() { ivec2 p = ivec2(gl_FragCoord.xy); if (toCanvas) p.y = flip - 1 - p.y; return p; }
 `;
 
 // A colour plan (code.ts colourPixels): straight colour, the table, the matrix, premultiplied again.
@@ -105,7 +107,8 @@ void main() {
 }`;
 
 type Program = { program: WebGLProgram; at: (name: string) => WebGLUniformLocation | null };
-type Target = { tex: WebGLTexture; w: number; h: number };
+/** A picture on the chip: `w` by `h` used, in a texture of `cw` by `ch` (fitted), so no frame reallocates it. */
+type Target = Room & { tex: WebGLTexture; w: number; h: number };
 type Gl = {
   canvas: OffscreenCanvas;
   gl: WebGL2RenderingContext;
@@ -113,7 +116,8 @@ type Gl = {
   reduce: Program;
   weights: Program;
   enlarge: Program;
-  input: WebGLTexture;
+  input: Target;
+  out: Room;
   table: WebGLTexture;
   frame: WebGLFramebuffer;
   targets: Target[];
@@ -174,7 +178,8 @@ function setup(): Gl | null {
       reduce: program(gl, REDUCE),
       weights: program(gl, WEIGHTS),
       enlarge: program(gl, ENLARGE),
-      input: texture(gl),
+      input: { tex: texture(gl), w: 0, h: 0, cw: 0, ch: 0, over: 0 },
+      out: { cw: 1, ch: 1, over: 0 },
       table,
       frame: gl.createFramebuffer()!,
       targets: [],
@@ -189,30 +194,57 @@ function setup(): Gl | null {
 /** Whether this computer works the effects out on its graphics chip. */
 export const effectsChip = () => setup() !== null;
 
-/** Intermediate picture `i`, w by h, made or resized as needed. */
-function target(s: Gl, i: number, w: number, h: number): Target {
-  const { gl } = s;
-  let t = s.targets[i];
-  if (!t) t = s.targets[i] = { tex: texture(gl), w: 0, h: 0 };
-  if (t.w !== w || t.h !== h) {
-    gl.bindTexture(gl.TEXTURE_2D, t.tex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    t.w = w;
-    t.h = h;
+/** A size kept for a canvas or texture: `over` counts the requests in a row it was far too large for. */
+export type Room = { cw: number; ch: number; over: number };
+
+/**
+ * The size `r` must take to hold w by h, or null to keep it: grown to the larger of each side, never following each
+ * request (a frame may ask for several sizes, and each change reallocates), and made exactly w by h once it has held
+ * more than four times what was asked for 120 requests in a row, since drawing a canvas back copies all of it.
+ */
+export function fitted(r: Room, w: number, h: number): [number, number] | null {
+  r.over = r.cw * r.ch > 4 * w * h ? r.over + 1 : 0;
+  if (r.over > 120) {
+    r.over = 0;
+    r.cw = w;
+    r.ch = h;
+    return [w, h];
   }
+  if (r.cw >= w && r.ch >= h) return null;
+  r.cw = Math.max(r.cw, w);
+  r.ch = Math.max(r.ch, h);
+  return [r.cw, r.ch];
+}
+
+/** `t` with room for w by h (fitted). */
+function room(gl: WebGL2RenderingContext, t: Target, w: number, h: number): Target {
+  if (fitted(t, w, h)) {
+    gl.bindTexture(gl.TEXTURE_2D, t.tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, t.cw, t.ch, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  }
+  t.w = w;
+  t.h = h;
   return t;
 }
 
-/** One pass: `p` reads `from` (w by h) and writes into `to`, or into the canvas (w by h) when `to` is null. */
-function run(s: Gl, p: Program, from: WebGLTexture, size: [number, number], to: Target | null, set: () => void) {
+/** Intermediate picture `i`, w by h used. */
+function target(s: Gl, i: number, w: number, h: number): Target {
+  return room(s.gl, (s.targets[i] ??= { tex: texture(s.gl), w: 0, h: 0, cw: 0, ch: 0, over: 0 }), w, h);
+}
+
+/**
+ * One pass: `p` reads `from` and writes `size` pixels into `to`, or into the canvas's top left corner when `to` is
+ * null (the canvas only grows; the caller takes that corner).
+ */
+function run(s: Gl, p: Program, from: WebGLTexture, size: [number, number], to: Target | null, set: () => void, origin: [number, number] = [0, 0]) {
   const { gl } = s;
   if (to) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, s.frame);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, to.tex, 0);
-    gl.viewport(0, 0, to.w, to.h);
+    gl.viewport(0, 0, size[0], size[1]);
   } else {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.viewport(0, 0, s.canvas.width, s.canvas.height);
+    gl.viewport(0, s.canvas.height - size[1], size[0], size[1]);
   }
   gl.useProgram(p.program);
   gl.activeTexture(gl.TEXTURE0);
@@ -220,11 +252,13 @@ function run(s: Gl, p: Program, from: WebGLTexture, size: [number, number], to: 
   gl.uniform1i(p.at('src'), 0);
   gl.uniform2i(p.at('size'), size[0], size[1]);
   gl.uniform1i(p.at('toCanvas'), to ? 0 : 1);
+  gl.uniform1i(p.at('flip'), s.canvas.height);
+  gl.uniform2i(p.at('origin'), origin[0], origin[1]);
   set();
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
-function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad: number) {
+function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad: number, origin: [number, number]) {
   const { gl } = s;
   const vw = w + 2 * pad;
   const vh = h + 2 * pad;
@@ -239,7 +273,7 @@ function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad:
       gl.uniform1i(s.reduce.at('n'), b.n);
       gl.uniform1i(s.reduce.at('shift'), 2 * b.k);
       gl.uniform1i(s.reduce.at('pad'), pad);
-    });
+    }, origin);
     src = small.tex;
   }
   const weights = (dir: [number, number]) => () => {
@@ -248,7 +282,7 @@ function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad:
     gl.uniform1iv(s.weights.at('weights'), b.weights);
   };
   const across = target(s, 2, rw, rh);
-  run(s, s.weights, src, [rw, rh], across, weights([1, 0]));
+  run(s, s.weights, src, [rw, rh], across, weights([1, 0]), direct ? origin : [0, 0]);
   if (direct) {
     run(s, s.weights, across.tex, [rw, rh], null, weights([0, 1]));
     return;
@@ -264,10 +298,11 @@ function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad:
 }
 
 /**
- * The plan over `picture` (w by h, as a canvas keeps it), as a canvas of w by h to draw back; null when this computer
- * cannot do it on its chip. `pad` as code.ts blurPixels.
+ * The plan over the top left w by h of `picture` (as a canvas keeps it), as a canvas whose top left w by h is the result
+ * to draw back (the canvas may be larger: it only grows); null when this computer cannot do it on its chip. `pad` as
+ * code.ts blurPixels. `at` reads the w by h from that place of `picture` instead, uploaded straight from it.
  */
-export function effectsOnChip(picture: TexImageSource, w: number, h: number, plan: EffectPlan, pad = 0): OffscreenCanvas | null {
+export function effectsOnChip(picture: TexImageSource, w: number, h: number, plan: EffectPlan, pad = 0, at: [number, number] = [0, 0]): OffscreenCanvas | null {
   const s = setup();
   if (!s) return null;
   const { gl } = s;
@@ -284,20 +319,35 @@ export function effectsOnChip(picture: TexImageSource, w: number, h: number, pla
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
     gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, s.input);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, picture);
+    // the whole picture, read at `at` by the shaders, as squares-gl.ts uploads it: the copy that stays on the chip
+    const pw = (picture as { width: number }).width;
+    const ph = (picture as { height: number }).height;
+    if (at[0] < 0 || at[1] < 0 || at[0] + w > pw || at[1] + h > ph) return null;
+    room(gl, s.input, pw, ph);
+    gl.bindTexture(gl.TEXTURE_2D, s.input.tex);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, pw, ph, gl.RGBA, gl.UNSIGNED_BYTE, picture);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-    if (s.canvas.width !== w) s.canvas.width = w;
-    if (s.canvas.height !== h) s.canvas.height = h;
+    // the canvas grows rather than following each size (resizing reallocates its drawing buffer, and a frame may ask for
+    // several), and shrinks back when far too large, since drawing it back copies all of it
+    const fit = fitted(s.out, w, h);
+    if (fit) {
+      s.canvas.width = fit[0];
+      s.canvas.height = fit[1];
+    }
     // a canvas too large for the chip's memory gets a smaller drawing buffer, silently: then the plain code works it out
-    if (gl.drawingBufferWidth !== w || gl.drawingBufferHeight !== h) return null;
-    let from = s.input;
+    if (gl.drawingBufferWidth !== s.canvas.width || gl.drawingBufferHeight !== s.canvas.height) {
+      s.canvas.width = s.canvas.height = 1;
+      s.out = { cw: 1, ch: 1, over: 0 };
+      return null;
+    }
+    let from = s.input.tex;
+    let origin = at;
     const c = plan.colour;
     if (c) {
       if (c.table) {
         gl.bindTexture(gl.TEXTURE_2D, s.table);
         gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8UI, 256, 1, 0, gl.RED_INTEGER, gl.UNSIGNED_BYTE, c.table);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 256, 1, gl.RED_INTEGER, gl.UNSIGNED_BYTE, c.table);
         gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
       }
       const into = plan.blur ? target(s, 0, w, h) : null;
@@ -314,11 +364,12 @@ export function effectsOnChip(picture: TexImageSource, w: number, h: number, pla
         gl.uniform3i(s.colour.at('m2'), m[6], m[7], m[8]);
         const o = c.offset ?? new Int32Array(3);
         gl.uniform3i(s.colour.at('offset'), o[0], o[1], o[2]);
-      });
+      }, origin);
       if (!into) return s.canvas;
       from = into.tex;
+      origin = [0, 0];
     }
-    if (plan.blur) blur(s, plan.blur, from, w, h, pad);
+    if (plan.blur) blur(s, plan.blur, from, w, h, pad, origin);
     return s.canvas;
   } catch {
     return null;
