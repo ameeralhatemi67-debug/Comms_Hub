@@ -10,17 +10,15 @@
 // Usage: node qa/studio-preview-ui.cjs   (writes qa/studio-preview-ui.json)   Needs: npm run pack:dev, 127.0.0.1:3000 free.
 const fs = require('node:fs');
 const path = require('node:path');
-const os = require('node:os');
 const esbuild = require('esbuild');
 const { dependency, launchOptions } = require('./runtime.cjs');
 const { chromium } = dependency('playwright');
 const h = require('./desktop-helpers.cjs');
 const { makeMedia, fontCss, serve, root } = require('./studio-media.cjs');
+const d10 = require('./studio-d10.cjs');
 
 const { check, note, result, finish } = h.record('qa/studio-preview-ui.cjs');
 const out = path.join(__dirname, 'artifacts', 'studio-preview-ui');
-const LOCK = path.join(process.env.TEMP || os.tmpdir(), 'comms-hub-port3000.lock');
-const BRANCH = 'claude/power-preview-b15ae2';
 const RTX = {
   v: 1, encode: { h264_1080: { hw: 87.7, sw: 43 }, h264_2160: { hw: 22.8, sw: 13.5 } }, decode: { h264_2160: { hw: 101.7, sw: 95.7 } },
   lanes: [79.7, 184.8, 186.5], compose: { plain: 1.2, text: 3, effects: 7 }, exportFps: 70,
@@ -81,6 +79,14 @@ async function menu(tab) {
   await tab.locator('body').press('Escape');
   return r;
 }
+/**
+ * Waits until the project is saved (its autosave runs after 15 s), so a reload is never asked «leave with unsaved
+ * changes?»; a prompt that still comes is accepted where the page is listened to.
+ */
+async function saved(tab) {
+  await tab.locator('.st-save.st-save-saved').waitFor({ timeout: 40000 });
+}
+
 /** Plays for `ms` and reads the badge and the canvas's width while playing, then pauses. */
 async function playing(tab, ms) {
   await tab.locator('.st-play').click();
@@ -93,18 +99,14 @@ async function playing(tab, ms) {
 
 (async () => {
   let server = null;
-  let locked = false;
+  // the lock of 127.0.0.1:3000, named after this worktree's branch and freed however the process ends
+  const port = d10.portLock();
   try {
     fs.rmSync(out, { recursive: true, force: true });
     fs.mkdirSync(out, { recursive: true });
     makeMedia(out);
     await build();
-    try {
-      fs.writeFileSync(LOCK, BRANCH, { flag: 'wx' });
-      locked = true;
-    } catch {
-      if (fs.readFileSync(LOCK, 'utf8').trim() !== BRANCH) throw new Error(`${LOCK} exists: another check holds 127.0.0.1:3000`);
-    }
+    if (!port.take()) throw new Error(`${port.file} exists: another check holds 127.0.0.1:3000`);
     if (await h.portAnswers(3000)) throw new Error('something already answers on 127.0.0.1:3000');
     const pages = (p) => (p === '/' || p.startsWith('/motion/studio') ? page : undefined);
     const s = await serve(out, pages);
@@ -115,10 +117,13 @@ async function playing(tab, ms) {
     const base = 'http://127.0.0.1:3000';
 
     // --- inside the application, with a measurement --------------------------------------------------
-    const { app, win } = await h.launchDev('preview-ui', { settings: { keepInTray: false, gpu: 'strong' } });
+    const { app, win } = await h.launchDev('preview-ui', { settings: { keepInTray: false, gpu: 'strong' }, args: [...d10.VISIBLE_ARGS] });
+    // a «leave with unsaved changes?» prompt is answered, never left to the driver
+    win.on('dialog', (d) => void d.accept().catch(() => undefined));
     try {
       await h.until(() => win.url().startsWith(base), 30000);
       await win.waitForLoadState('load');
+      await d10.toFront(app, win);
       const saved = await win.evaluate(async (n) => {
         const b = window.commsHubNative;
         const e = await b.profile.save(n);
@@ -132,10 +137,13 @@ async function playing(tab, ms) {
       check('with a measurement the preview plays at «تلقائية» and pauses at «كاملة» unless chosen otherwise', first === 'تلقائية / كاملة' && m.checked === 'تلقائية', { label: first, menu: m });
       check('«تلقائية» is the first choice of «أثناء التشغيل», with its words', m.first === 'تلقائية' && m.hint === 'تلقائية: تنزل دقة المعاينة أثناء التشغيل حين تفوتها إطارات، وتعود حين يستقر التشغيل.', m);
       const fullW = await win.evaluate(() => document.querySelector('.st-canvas').width);
+      // a throttled window misses frames and «تلقائية» steps down for it: refused before any play
+      await d10.assertDrawing(win, 'the editor');
       const calm = await playing(win, 1500);
       check('a light project plays at full under «تلقائية» from the plan\'s start (no badge)', calm.badge === null && calm.width === fullW, { ...calm, fullW });
       // the level a play of this shape ended on, kept on this device, is the start of the next one
       await win.evaluate(() => localStorage.setItem('studio.pref.auto-resolution', JSON.stringify({ '16:9': 0.5 })));
+      await saved(win);
       await win.reload();
       await win.locator('.st-editor').waitFor({ timeout: 20000 });
       await win.waitForFunction(() => !document.querySelector('.st-clip-load'), null, { timeout: 20000 });
@@ -148,6 +156,7 @@ async function playing(tab, ms) {
       await win.locator('.st-res > button').click();
       await win.locator('.st-res-pop [role="radiogroup"]').first().getByRole('radio', { name: 'كاملة' }).click();
       await win.locator('body').press('Escape');
+      await saved(win);
       await win.reload();
       await win.locator('.st-editor').waitFor({ timeout: 20000 });
       check('a resolution the person chose wins over the plan and is remembered', (await label(win)) === 'كاملة', await label(win));
@@ -178,7 +187,7 @@ async function playing(tab, ms) {
   } finally {
     await h.closeAll();
     if (server) server.close();
-    if (locked) fs.rmSync(LOCK, { force: true });
+    port.free();
     process.exitCode = finish(path.join(__dirname, 'studio-preview-ui.json')) ? 1 : 0;
   }
 })();

@@ -22,6 +22,7 @@ const { dependency, launchOptions } = require('./runtime.cjs');
 const { chromium } = dependency('playwright');
 const h = require('./desktop-helpers.cjs');
 const { make4k } = require('./studio-4k.cjs');
+const d10 = require('./studio-d10.cjs');
 
 const { check, note, result, finish } = h.record('qa/studio-scrub.cjs');
 const out = path.join(__dirname, 'artifacts', 'studio-scrub');
@@ -30,7 +31,6 @@ const wanted = (engine) => !onlyList.length || onlyList.includes(engine);
 const fixtureOnly = (process.argv.find((a) => a.startsWith('--fixture=')) || '').slice(10);
 const quick = process.argv.includes('--quick');
 const outFile = path.resolve(h.root, (process.argv.find((a) => a.startsWith('--out=')) || '--out=qa/studio-scrub.json').slice(6));
-const LOCK = path.join(process.env.TEMP || require('node:os').tmpdir(), 'comms-hub-port3000.lock');
 /** The pilot laptop's plan: 16 GB at 64 MB a gigabyte (scale.ts plan, «تلقائي»). */
 const CACHE_MB = 1024;
 const SEEKS = quick ? 40 : 200;
@@ -79,12 +79,14 @@ async function serve(port) {
 }
 
 /** The same seeks with the floor and with the plan's memory, on each fixture: the 16:9 project drawn on a 1280-wide stage. */
-async function runIn(page) {
+async function runIn(page, isApp = false) {
   await page.waitForFunction(() => !!window.scrub, null, { timeout: 60000 });
   const run = { renderer: await page.evaluate(() => window.scrub.renderer()), fixtures: {} };
   for (const f of FIXTURES.filter((x) => !fixtureOnly || x.name === `${fixtureOnly}.mp4`)) {
     const r = {};
     for (const [mode, cacheMB] of [['floor', 0], ['kept', CACHE_MB]]) {
+      // a throttled window measures the throttling: the application's is refused before anything is timed
+      const drawBefore = isApp ? await d10.assertDrawing(page, `${f.name} ${mode}`) : await d10.drawRate(page);
       const before = load();
       const opened = await page.evaluate((o) => window.scrub.open(o), { file: f.name, cacheMB, ratio: '16:9', canvasW: 1280 });
       // cold: jumps as soon as the project opens; then the preview left open on the clip (the small frames fill), then
@@ -94,23 +96,14 @@ async function runIn(page) {
       const identity = await page.evaluate(() => window.scrub.identity());
       const random = await page.evaluate((o) => window.scrub.random(o), { count: SEEKS, seed: 1104, pause: 0 });
       const steps = await page.evaluate((o) => window.scrub.steps(o), { count: STEPS, seed: 7, pause: 0 });
-      r[mode] = { opened, cold, settled, identity, random, steps, load: { before, after: load() } };
+      const drawAfter = await d10.drawRate(page);
+      r[mode] = { opened, cold, settled, identity, random, steps, load: { before, after: load() }, drawRate: { before: drawBefore, after: drawAfter } };
+      if (isApp && drawAfter < d10.MIN_DRAW_RATE) throw new Error(`${f.name} ${mode}: the window fell to ${drawAfter} frames a second while it was timed (covered, minimised, the screen locked or off); the row is not kept.`);
       console.log(`${f.name} ${mode}: cold median ${cold.median} (sharp ${cold.sharp.median}); settled ${settled.ms} ms; warm median ${random.median} (sharp ${random.sharp.median}, p95 ${random.p95}); steps forward ${steps.forward.median}, back ${steps.back.median}; load ${before} -> ${r[mode].load.after}`);
     }
     run.fixtures[f.name] = r;
   }
   return run;
-}
-
-const BRANCH = 'claude/power-preview-b15ae2';
-/** The lock of 127.0.0.1:3000: taken here, or already held for this branch by whoever runs the checks in a row. */
-function takeLock() {
-  try {
-    fs.writeFileSync(LOCK, BRANCH, { flag: 'wx' });
-    return 'taken';
-  } catch {
-    return fs.readFileSync(LOCK, 'utf8').trim() === BRANCH ? 'held' : null;
-  }
 }
 
 /** The gate, judged on whatever engines ran (a run that stopped early still has its others judged). */
@@ -165,7 +158,8 @@ if (judgeFrom.length) {
 (async () => {
   const runs = {};
   let server = null;
-  let locked = false;
+  // the lock of 127.0.0.1:3000, named after this worktree's branch and freed however the process ends
+  const port = d10.portLock();
   try {
     makeFixtures();
     result.fixtures = Object.fromEntries(FIXTURES.map((f) => {
@@ -197,19 +191,18 @@ if (judgeFrom.length) {
     ].filter(([n]) => wanted(n));
     if (apps.length) {
       if (!fs.existsSync(h.devExe)) throw new Error(`the development package is missing: ${h.devExe} (npm run pack:dev in desktop/)`);
-      const lock = takeLock();
-      if (!lock) throw new Error(`${LOCK} exists: another check holds 127.0.0.1:3000`);
-      locked = lock === 'taken';
+      if (!port.take()) throw new Error(`${port.file} exists: another check holds 127.0.0.1:3000`);
       if (await h.portAnswers(3000)) throw new Error('something already answers on 127.0.0.1:3000');
       server = await serve(3000);
       for (const [engine, settings, args] of apps) {
-        const { app, win } = await h.launchDev(`scrub-${engine}`, { settings, args });
+        const { app, win } = await h.launchDev(`scrub-${engine}`, { settings, args: [...args, ...d10.VISIBLE_ARGS] });
         try {
           // an engine whose page stops is recorded as such; the others still run
           await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
           await win.waitForLoadState('load');
+          await d10.toFront(app, win);
           const versions = await app.evaluate(() => ({ electron: process.versions.electron, chrome: process.versions.chrome }));
-          runs[engine] = { engine: versions, ...(await runIn(win)) };
+          runs[engine] = { engine: versions, ...(await runIn(win, true)) };
           runs[engine].memory = await app.evaluate(({ app: a }) => a.getAppMetrics().map((m) => ({ type: m.type, mb: Math.round(m.memory.workingSetSize / 1024) })));
         } catch (e) {
           check(`${engine}: the run went to the end`, false, e.message || String(e));
@@ -224,7 +217,7 @@ if (judgeFrom.length) {
   } finally {
     await h.closeAll();
     if (server) server.close();
-    if (locked) fs.rmSync(LOCK, { force: true });
+    port.free();
     try {
       judge(runs);
     } catch (e) {

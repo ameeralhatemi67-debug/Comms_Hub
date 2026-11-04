@@ -16,17 +16,16 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
-const os = require('node:os');
 const esbuild = require('esbuild');
 const h = require('./desktop-helpers.cjs');
 const { make4k } = require('./studio-4k.cjs');
+const d10 = require('./studio-d10.cjs');
 
 const { check, note, result, finish } = h.record('qa/studio-autores.cjs');
 const out = path.join(__dirname, 'artifacts', 'studio-autores');
 const scrubOut = path.join(__dirname, 'artifacts', 'studio-scrub');
 const only = (process.argv.find((a) => a.startsWith('--only=')) || '').slice(7);
 const quick = process.argv.includes('--quick');
-const LOCK = path.join(process.env.TEMP || os.tmpdir(), 'comms-hub-port3000.lock');
 const SECONDS = quick ? 8 : 18;
 const MAX_PCT = 2;
 const NAMES = ['track-a.mp4', 'track-b.mp4', 'track-c.mp4'];
@@ -60,9 +59,13 @@ async function serve() {
 }
 
 async function playIn(win, o) {
+  // a throttled window measures the throttling: refused before the play is timed, and a play during which it fell is not kept
+  const drawBefore = await d10.assertDrawing(win, o.label);
   const before = load();
   const r = await win.evaluate((x) => window.autores.play(x), { ...o, seconds: SECONDS });
   r.load = { before, after: load() };
+  r.drawRate = { before: drawBefore, after: await d10.drawRate(win) };
+  if (r.drawRate.after < d10.MIN_DRAW_RATE) throw new Error(`${o.label}: the window fell to ${r.drawRate.after} frames a second during the play (covered, minimised, the screen locked or off); not kept.`);
   console.log(`  ${o.label}: missed ${r.missedPct}% of ${r.stats.due}, dropped ${r.droppedPct}% of ${r.quality.total}, not shown ${r.shortPct}%, reseeks ${r.stats.reseeks}, levels ${JSON.stringify(r.levels)}, copies ${r.playing.map((p) => (p.copy ? 1 : 0)).join('')}; load ${before} -> ${r.load.after}`);
   return { label: o.label, ...r };
 }
@@ -70,17 +73,12 @@ async function playIn(win, o) {
 (async () => {
   const runs = {};
   let server = null;
-  let locked = false;
+  // the lock of 127.0.0.1:3000, named after this worktree's branch and freed however the process ends
+  const port = d10.portLock();
   try {
     makeFixtures();
     if (!fs.existsSync(h.devExe)) throw new Error(`the development package is missing: ${h.devExe} (npm run pack:dev in desktop/)`);
-    // the lock of 127.0.0.1:3000: taken here, or already held for this branch by whoever runs the checks in a row
-    try {
-      fs.writeFileSync(LOCK, 'claude/power-preview-b15ae2', { flag: 'wx' });
-      locked = true;
-    } catch {
-      if (fs.readFileSync(LOCK, 'utf8').trim() !== 'claude/power-preview-b15ae2') throw new Error(`${LOCK} exists: another check holds 127.0.0.1:3000`);
-    }
+    if (!port.take()) throw new Error(`${port.file} exists: another check holds 127.0.0.1:3000`);
     if (await h.portAnswers(3000)) throw new Error('something already answers on 127.0.0.1:3000');
     server = await serve();
     const apps = [
@@ -90,11 +88,12 @@ async function playIn(win, o) {
     ].filter(([n]) => !only || only === n);
     for (const [engine, settings, args] of apps) {
       console.log(engine);
-      const { app, win } = await h.launchDev(`autores-${engine}`, { settings, args });
+      const { app, win } = await h.launchDev(`autores-${engine}`, { settings, args: [...args, ...d10.VISIBLE_ARGS] });
       try {
         await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
         await win.waitForLoadState('load');
         await win.waitForFunction(() => !!window.autores, null, { timeout: 60000 });
+        await d10.toFront(app, win);
         await win.setViewportSize?.({ width: 1300, height: 760 }).catch(() => undefined);
         const versions = await app.evaluate(() => ({ electron: process.versions.electron, chrome: process.versions.chrome }));
         const r = { engine: { ...versions, renderer: await win.evaluate(() => window.autores.renderer()) } };
@@ -137,7 +136,7 @@ async function playIn(win, o) {
   } finally {
     await h.closeAll();
     if (server) server.close();
-    if (locked) fs.rmSync(LOCK, { force: true });
+    port.free();
     result.settings = { seconds: SECONDS, project: '16:9, three video tracks of 4K30 H.264 60 Mbit/s, stage canvas 1280 x 720', maxPct: MAX_PCT };
     result.runs = runs;
     process.exitCode = finish(path.join(__dirname, 'studio-autores.json')) ? 1 : 0;

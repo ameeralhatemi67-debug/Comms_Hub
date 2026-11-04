@@ -3115,4 +3115,11 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     copy made in idle time into an open editor, or reads «scrubbing» and «playing» in the application's broker.
   - The D6 preview window keeps today's decoder (its own pool, no plan).
   - One laptop only; the speed rows were taken on it with other work quiet but not absent (loads above).
+- **The harness, after the manager's verification.** Run from another worktree, the playback check drew 8 frames of about 211 in
+  every play, today's «كاملة» included: a window Chromium took as hidden (covered, or the screen locked or off) draws about once
+  a second. The three D10 checks now share `qa/studio-d10.cjs`: the package starts with Windows' occlusion tracking off and its
+  window above the others, a check refuses loudly to time a window that draws under 45 frames a second (and drops a row during
+  which it fell), the port's lock names the running worktree's branch (it was a fixed name) and is freed when the process ends,
+  and the editor check waits for the save before a reload and accepts a «leave with unsaved changes?» prompt (its crash in
+  `Page.handleJavaScriptDialog`). Written and checked for syntax and the lock's rules; not yet run against the port.
 - **Not done.** Nothing pushed.
