@@ -40,12 +40,16 @@ export const frameCount = (us: Micros, fps: number) => Math.max(0, Math.ceil((us
 
 const two = (n: number) => String(n).padStart(2, '0');
 
-/** 01:05.12 (minutes, seconds, frame) for the transport; hours only when needed. */
+/**
+ * 01:05.12 (minutes, seconds, frame) for the transport; hours only when needed. The frame is the one the stage shows
+ * (frameShown, the export's rule), and a second is whole frames (secondFrames), so the time read is the frame drawn.
+ */
 export function timecode(us: Micros, fps: number): string {
   const neg = us < 0;
-  const f = frameAt(Math.abs(us), fps);
-  const sec = Math.floor(f / fps);
-  const fr = f - sec * fps;
+  const per = secondFrames(fps);
+  const f = frameShown(Math.abs(us), fps);
+  const sec = Math.floor(f / per);
+  const fr = f - sec * per;
   const h = Math.floor(sec / 3600);
   const m = Math.floor((sec % 3600) / 60);
   const s = sec % 60;
