@@ -7,6 +7,7 @@ import { composeFrame } from '../../src/lib/studio/compose.ts';
 import { CODECS, SyntheticSources, sizeAt } from '../../src/lib/studio/bench.ts';
 import { effectsDoc } from '../../src/lib/studio/bench-docs.ts';
 import { frameStart } from '../../src/lib/studio/time.ts';
+import type { ProjectDoc } from '../../src/lib/studio/schema.ts';
 
 const FPS = 30;
 const US = 1_000_000;
@@ -15,14 +16,27 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // the footage repeats every 8 frames, painted once for the page, as «قياس قدرة الجهاز» does (bench.ts): the timing is the
 // compositor's, and 8 frames of 4K stay well inside the chip's memory
 const src = new SyntheticSources(8);
-let made: ReturnType<typeof make> | null = null;
+const made = new Map<string, ReturnType<typeof make>>();
+
+/**
+ * The document, or part of it, to tell the effects' costs apart: 'all'; 'colour', its two adjusted clips and caption
+ * without the covers; 'covers', the covers without the adjustments; 'bare', neither; 'cross', all of it during the blurred
+ * cross only (1.6 to 2.2 seconds).
+ */
+export type Variant = 'all' | 'colour' | 'covers' | 'bare' | 'cross';
+const without = (d: ProjectDoc, covers: boolean, adjust: boolean): ProjectDoc => ({
+  ...d,
+  video: { ...d.video!, tracks: d.video!.tracks.map((t) => ({ ...t, clips: t.clips.filter((c) => !(covers && c.cover)).map((c) => (adjust ? { ...c, adjust: undefined } : c)) })) },
+});
+const docOf = (v: Variant) => (v === 'colour' ? without(effectsDoc(), true, false) : v === 'covers' ? without(effectsDoc(), false, true) : v === 'bare' ? without(effectsDoc(), true, true) : effectsDoc());
+const at = (v: Variant, n: number) => (v === 'cross' ? Math.round(1.6 * US) + frameStart(n % 18, FPS) : frameStart(n, FPS) % (4 * US));
 
 /**
  * Two canvases: the export's, a page canvas never read back as export.ts uses it (a page canvas read back each frame is
  * moved off the chip by Chromium), and an OffscreenCanvas for drawing alone, read one pixel a frame as bench.ts does.
  */
-function make() {
-  const doc = effectsDoc();
+function make(v: Variant) {
+  const doc = docOf(v);
   const { w, h, scale } = sizeAt(doc, 1080);
   const canvas = document.createElement('canvas');
   canvas.width = w;
@@ -31,36 +45,36 @@ function make() {
   const ctx = canvas.getContext('2d')!;
   const off = new OffscreenCanvas(w, h).getContext('2d')! as unknown as CanvasRenderingContext2D;
   for (let n = 0; n < 30; n++) {
-    composeFrame(ctx, doc, frameStart(n, FPS) % (4 * US), res, { scale });
-    composeFrame(off, doc, frameStart(n, FPS) % (4 * US), res, { scale });
+    composeFrame(ctx, doc, at(v, n), res, { scale });
+    composeFrame(off, doc, at(v, n), res, { scale });
   }
   off.getImageData(0, 0, 1, 1);
   return { doc, w, h, scale, canvas, ctx, off, res };
 }
 
-const setup = () => (made ??= make());
+const setup = (v: Variant) => made.get(v) ?? made.set(v, make(v)).get(v)!;
 
 /** Milliseconds per frame, drawn only. */
-export function drawOnly(frames: number): number {
-  const s = setup();
+export function drawOnly(frames: number, v: Variant = 'all'): number {
+  const s = setup(v);
   const t0 = performance.now();
   for (let n = 0; n < frames; n++) {
-    composeFrame(s.off, s.doc, frameStart(n, FPS) % (4 * US), s.res, { scale: s.scale });
+    composeFrame(s.off, s.doc, at(v, n), s.res, { scale: s.scale });
     s.off.getImageData(0, 0, 1, 1);
   }
   return (performance.now() - t0) / frames;
 }
 
 /** Frames a second drawn, made a VideoFrame and encoded (H.264, 1080p, 10 Mbit/s), or null without an encoder. */
-export async function exportLike(frames: number): Promise<number | null> {
-  const s = setup();
+export async function exportLike(frames: number, v: Variant = 'all'): Promise<number | null> {
+  const s = setup(v);
   let failed = false;
   const enc = new VideoEncoder({ output: () => undefined, error: () => (failed = true) });
   try {
     enc.configure({ codec: CODECS.h264, width: s.w, height: s.h, bitrate: 10e6, framerate: FPS });
     const t0 = performance.now();
     for (let n = 0; n < frames && !failed; n++) {
-      composeFrame(s.ctx, s.doc, frameStart(n, FPS) % (4 * US), s.res, { scale: s.scale });
+      composeFrame(s.ctx, s.doc, at(v, n), s.res, { scale: s.scale });
       const f = new VideoFrame(s.canvas, { timestamp: frameStart(n, FPS), duration: Math.round(US / FPS) });
       while (enc.encodeQueueSize > 6) await sleep(0);
       enc.encode(f, { keyFrame: n % 60 === 0 });

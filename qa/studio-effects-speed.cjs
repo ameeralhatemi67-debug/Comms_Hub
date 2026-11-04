@@ -6,6 +6,8 @@
 // laptop times badly. Run it in a quiet moment. Nothing is checked against a number: the figures are the record.
 // Usage: node qa/studio-effects-speed.cjs   (writes qa/studio-effects-speed.json)
 //        node qa/studio-effects-speed.cjs --edge 3104   (Edge alone on that port, writes qa/artifacts/studio-effects-speed/edge.json)
+//        node qa/studio-effects-speed.cjs --profile   (each part of the document alone, on the saving chip and with no chip;
+//                                                      writes qa/artifacts/studio-effects-speed/profile.json)
 // Needs: npm run pack:dev in desktop/, git, nothing on 127.0.0.1:3000.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -23,6 +25,9 @@ const edgeOnly = process.argv.indexOf('--edge') > 0 ? Number(process.argv[proces
 const PORT = edgeOnly || 3000;
 const FRAMES = 240;
 const RUNS = 3;
+/** --profile: the document's parts one at a time (the fixture's Variant), to tell apart what each effect costs. */
+const PROFILE = process.argv.includes('--profile');
+const VARIANTS = ['bare', 'colour', 'covers', 'cross', 'all'];
 const load = () => Number(h.ps('(Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average')) || null;
 
 /** compose.ts and cover.ts as they were at the base, read from git, imported in place of today's. */
@@ -66,6 +71,21 @@ async function serve() {
   return server;
 }
 
+async function profileIn(page, encode) {
+  await page.waitForFunction(() => !!window.speedBefore && !!window.speedAfter, null, { timeout: 60000 });
+  const loadBefore = load();
+  const rows = [];
+  for (const v of VARIANTS) {
+    for (const which of ['before', 'after']) {
+      const g = which === 'before' ? 'speedBefore' : 'speedAfter';
+      const draw = await page.evaluate(([n, f, x]) => window[n].drawOnly(f, x), [g, encode ? 120 : 40, v]);
+      const exp = encode ? await page.evaluate(([n, f, x]) => window[n].exportLike(f, x), [g, 240, v]) : null;
+      rows.push({ variant: v, compositor: which, drawMs: Math.round(draw * 100) / 100, exportFps: exp && Math.round(exp * 10) / 10 });
+    }
+  }
+  return { renderer: await page.evaluate(() => window.speedAfter.renderer()), rows, load: { before: loadBefore, after: load() } };
+}
+
 async function runIn(page) {
   await page.waitForFunction(() => !!window.speedBefore && !!window.speedAfter, null, { timeout: 60000 });
   const renderer = await page.evaluate(() => window.speedAfter.renderer());
@@ -95,6 +115,28 @@ const median = (xs) => {
     if (!edgeOnly && !fs.existsSync(h.devExe)) throw new Error(`the development package is missing: ${h.devExe} (npm run pack:dev in desktop/)`);
     if (await h.portAnswers(PORT)) throw new Error(`something already answers on 127.0.0.1:${PORT}; stop it and run again`);
     server = await serve();
+    if (PROFILE) {
+      for (const [engine, settings, args, encode] of [
+        ['app-saving', { keepInTray: false, gpu: 'saving' }, [], true],
+        ['app-software', { keepInTray: false, gpu: 'auto' }, ['--disable-gpu'], false],
+      ]) {
+        const { app, win } = await h.launchDev(`profile-${engine}`, { settings, args });
+        try {
+          await h.instrument(app);
+          await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
+          await win.waitForLoadState('load');
+          runs[engine] = await profileIn(win, encode);
+        } finally {
+          await h.closeAll();
+        }
+      }
+      check('the profile ran on the saving chip and with no chip', !!runs['app-saving'] && !!runs['app-software'], runs);
+      result.profile = runs;
+      const failed = finish(path.join(out, 'profile.json'));
+      await h.closeAll();
+      if (server) server.close();
+      process.exit(failed ? 1 : 0);
+    }
     const browser = await chromium.launch(launchOptions);
     try {
       const tab = await browser.newPage();

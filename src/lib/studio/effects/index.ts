@@ -5,7 +5,7 @@
 // back costs little: on a chip the composed picture is never read back. Before 2026-11-04 these were the canvas's own
 // filters, drawn differently by each graphics chip. No DOM: usable in a worker, on an OffscreenCanvas.
 import { effectsOnChip, fitted, type Room } from './chip.ts';
-import { blurPixels, colourPixels, colourStraight, toPremultiplied, toStraight } from './code.ts';
+import { blurPixels, colourStraight, toPremultiplied, toStraight } from './code.ts';
 import type { EffectPlan } from './plan.ts';
 
 export { blurPlan, colourPlan, effectOf, photoColourPlan, type BlurPlan, type ColourPlan, type EffectPlan } from './plan.ts';
@@ -60,8 +60,10 @@ function onCode(canvas: Scratch, w: number, h: number, plan: EffectPlan, pad: nu
     ctx.putImageData(img, 0, 0);
     return into;
   }
+  // colour on straight colour premultiplied afterwards gives colourPixels' bytes (tests/studio-effect-kernels), and takes
+  // the WebAssembly lanes
+  if (plan.colour) colourStraight(px, plan.colour);
   toPremultiplied(px);
-  if (plan.colour) colourPixels(px, plan.colour);
   const out = plan.blur ? blurPixels(px, w, h, plan.blur, pad) : px;
   toStraight(out);
   ctx.putImageData(out === px ? img : new ImageData(out, w, h), 0, 0);
