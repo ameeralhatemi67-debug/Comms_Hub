@@ -3177,10 +3177,27 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
       `DRIFT` (0.12 s, 3.6 frames), so that lag stays for the play.
     - The original's element did the same (median 2, worst 3), but only after a 1240 ms warm-up of up to 25 frames behind.
       Dropped frames by the elements' own count: 0 of 131 for the original, 2 of 100 for the copy.
-  - Not rerun, by the manager's instruction.
+  - Not rerun then, by the manager's instruction.
   - **Why the rows changed after this run** (the manager's decision): two rows had a wrong constant, and one a limit stricter
     than the player's design. The expected frame is now the playhead's. The copy's play is now judged by the player's own
-    rule (`DRIFT`), with its median and worst recorded beside the original's.
+    rule (`DRIFT`), with its median and worst recorded beside the original's. A row was added for the step itself (four
+    presses of «تقدم ثانية» land on frame 120), so the check has 18 rows.
+  - **The rerun: 18 of 18** (`qa/studio-copy-swap.json`, 2026-11-05 from 00:42:13, 43 s, the other forks idle). It ran once, at
+    `bae0e13` (main `5c24b55` merged, the step and time fixes in), on the development package 0.8.0 (bridge 9), with no profile,
+    on the RTX 3050, a 421-pixel stage canvas at 1.25 device pixels, TEMP in `qa/artifacts/tmp`, the lock taken by the check.
+    - Four presses of «تقدم ثانية» landed on frame 120. Every reading agreed with the playhead: 120 from the original, then
+      120, 150, 122 and 120 from the copy.
+    - While the editor played, the hold read «playing» in all ten readings. The running copy (1.97 s into its work) paused;
+      what was already in flight landed by 617 ms (3 s), and then it made no progress. Nothing was held after the pause.
+    - While the ruler was dragged, the hold read «scrubbing». It gave way to the drag's own input within 340 ms of the last
+      move, and nothing was held from 882 ms on.
+    - The copy was made in the quiet after the drag, ready 2 ms after the editor was left at 4 s, and taken up at the pause.
+      The editor first read the copy 18.0 s into the page.
+    - The next play ran from the copy: in step 64 ms after the press, then every drawn frame within `DRIFT` and none going
+      back, median 2 and worst 3 frames off, 0 of 96 dropped. The original's play in the same run was in step only after
+      2237 ms (up to 47 frames behind while warming up), then median 3 and worst 6, one frame outside, 0 of 170 dropped.
+    - Sent to 4, 5.5, 10 and 15.5 s, the copy's element gave frames 120, 165, 300 and 465. «playing» was read during that
+      play too, and afterwards nothing was held or being made.
 - **A step of the playhead goes in whole frames** (`b4b2dd4`, found by the run above).
   - **What changed.** The stage's «إطار للأمام», «إطار للخلف», «تقدم ثانية» and «رجوع ثانية», and the editor's frame keys, used to
     add a rounded frame length (`frameUs`, 33,333 µs at 30 frames a second) at each press. They now move by whole frames from the
@@ -3190,11 +3207,22 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     at every project rate, so they are unchanged.
   - `tests/studio-step.test.mjs`, 15 tests: 100 presses each way of a frame and of a second at 24, 25, 30, 29.97 and 60, each on
     its exact frame. With the old step put back, 9 of the 15 fail.
-  - `npm run typecheck` clean. The full `npm test` and `npm run build` are not run yet: Fork 3 was building, and the manager asked
-    for light work only.
-  - **Found and left:** the transport's timecode takes a frame with `frameAt`, not by the export's rule. So at 30 frames a second,
-    a playhead on a start that rounds down (frames 1, 4, 7 and so on) reads as the frame before. One «إطار للأمام» from 0 reads
-    00:00.00, as it did before this change.
+  - `npm run typecheck` clean. The full `npm test` and `npm run build` waited for the manager's go (Fork 3 was building), and
+    were run after the rerun below, with the time fix in.
+  - Found after it: the transport's time still took its frame with `frameAt`, fixed in the next bullet.
+- **The transport's time reads the frame the stage shows** (`bae0e13`, approved by the manager on 2026-11-05).
+  - **What changed.** `timecode` took its frame with `frameAt`. At 30 frames a second a start that rounds down (frames 1, 4, 7
+    and so on) read as the frame before: one «إطار للأمام» from 0 drew frame 1 and read 00:00.00. It now takes the frame by
+    `frameShown` and counts a second in whole frames (`secondFrames`, 30 at 29.97), as «تقدم ثانية» steps. Both times on the
+    stage use it. No Arabic string changed.
+  - `tests/studio-timecode.test.mjs`, 10 tests: after n presses of «إطار للأمام» from 0, n = 0 to 100, at 24, 25, 30, 29.97
+    and 60, the time reads frame n. With the old `timecode`, 7 of the 10 fail; 25 reads right either way, its frames being
+    whole microseconds.
+  - **The review player is unchanged.** It shows tenths of a second of its element's time (`review-keys.ts` `playerTime`), not
+    frames, with 100 µs of room for a seek that lands early. A test holds that each of those frame starts shows its own tenth.
+- **The suites, at `bae0e13` with the rerun done** (2026-11-05, one after another): `npm run typecheck` clean (20 s);
+  `npm test` **851 of 851** (00:44:25 to 00:44:38); `npm run build` passes, compiled in 22.0 s, 43 of 43 pages, no warning
+  (00:44:53 to 00:45:42).
 - **The D10 checks' port lock** is `%LOCALAPPDATA%\Temp\comms-hub-port3000.lock` always (`9a3db90`, `qa/studio-d10.cjs`, the line
   Fork 1's branch has). With TEMP moved for a run's files, the lock followed TEMP, so two checks could each hold "the" lock.
 - **Not done.** Nothing pushed.
