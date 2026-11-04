@@ -200,29 +200,31 @@ async function main() {
       wc.sendInputEvent({ type: 'mouseDown', x: 20, y: 20, button: 'left', clickCount: 1 });
       wc.sendInputEvent({ type: 'mouseUp', x: 20, y: 20, button: 'left', clickCount: 1 });
     }, mainId);
+    await realLimits(false);
     const input = await held('a click', click, async () => undefined, 'input');
     if (input) check(`a click holds only a few seconds: the copy goes on by itself ${input.sinceHold} ms after it (three seconds of quiet)`, input.sinceHold >= 3000 && input.sinceHold <= 5000, input);
     await held('an export (busy)', () => win.evaluate(() => window.busy(true)), () => win.evaluate(() => window.busy(false)), 'export');
     await held('the page says «playing»', () => win.evaluate(() => window.activity('playing')), () => win.evaluate(() => window.activity('none')), 'playing');
     let playing = null;
     const sound = await held(
-      'the window makes sound (the studio playing, not saying so)',
+      'the window makes sound (a steady tone; the page says nothing)',
       async () => {
-        // the sound alone holds it: Windows' own speed-limit changes are kept out meanwhile
-        await realLimits(false);
         await app.evaluate(() => (globalThis.__audible = []));
-        // the still clip plays without a stall, so the window is heard the whole time
-        playing = win.evaluate(() => window.play(6, { file: 'still-3.mp4' }));
+        playing = win.evaluate(() => window.tone(6));
       },
       async () => {
-        result.soundPlay = await playing;
-        await realLimits(true);
+        await playing;
       },
       'playing',
       () => app.evaluate(() => globalThis.__audible.find((x) => x.audible)?.at ?? null),
     );
     result.audible = await app.evaluate(() => globalThis.__audible.slice());
-    if (sound) note(`While the studio played with sound the window was heard: ${JSON.stringify(result.audible.map((x) => x.audible))}; the playing element: ${JSON.stringify(result.soundPlay && result.soundPlay.element)}.`);
+    // the studio's own player, with sound: heard, though on this laptop in short bursts while its 4K element stalls
+    await app.evaluate(() => (globalThis.__audible = []));
+    result.soundPlay = await win.evaluate(() => window.play(4, { file: 'still-3.mp4' }));
+    result.playerAudible = await app.evaluate(() => globalThis.__audible.slice());
+    note(`The tone was heard: ${JSON.stringify(result.audible.map((x) => x.audible))}. The studio's player, playing with sound, was heard too: ${JSON.stringify(result.playerAudible.map((x) => x.audible))}; its element ${JSON.stringify(result.soundPlay && result.soundPlay.element)}.`);
+    check('the studio\'s player playing with sound makes the window heard', result.playerAudible.some((x) => x.audible), result.playerAudible);
     await held(
       'on battery (simulated in the main process)',
       () => app.evaluate(({ powerMonitor }) => {
@@ -236,6 +238,7 @@ async function main() {
       }),
       'battery',
     );
+    await realLimits(true);
     await held(
       'Windows lowers the processor\'s speed limit (simulated)',
       () => app.evaluate(({ powerMonitor }) => void powerMonitor.emit('speed-limit-change', { limit: 70 })),

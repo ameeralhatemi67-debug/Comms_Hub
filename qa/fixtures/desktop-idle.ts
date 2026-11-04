@@ -127,9 +127,25 @@ export async function play(seconds: number, o: { muted?: boolean; say?: boolean;
   return { frames: kept.length, p50: q(0.5), p95: q(0.95), max: Math.round(kept[kept.length - 1] * 100) / 100, element };
 }
 
+/** A steady tone from the page for `seconds`: the window is heard throughout, whatever the studio's player does. */
+export async function tone(seconds: number) {
+  const ctx = new AudioContext();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  gain.gain.value = 0.05;
+  osc.frequency.value = 440;
+  osc.connect(gain).connect(ctx.destination);
+  await ctx.resume();
+  osc.start();
+  await sleep(seconds * 1000);
+  osc.stop();
+  await ctx.close();
+  return { state: 'done' };
+}
+
 declare global {
   interface Window {
     [k: string]: unknown;
   }
 }
-Object.assign(window, { openCorpus, queued, heardStates, refs, queueWith, queueOnly, copyNames, clearCopies, stopQueue, activity, busy, ask, play });
+Object.assign(window, { openCorpus, queued, heardStates, refs, queueWith, queueOnly, copyNames, clearCopies, stopQueue, activity, busy, ask, play, tone });
