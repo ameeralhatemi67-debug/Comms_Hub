@@ -26,6 +26,21 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, paused by the owner, 2026-11-04
+
+- **Where it stands.** About three quarters of the stage is merged: Electron 45, the no-chip export and loudness ahead, D10 and D12. Every fork stopped at a safe point, with no process running, no lock held and clean trees. Nothing pushed, released or migrated.
+- **Open.**
+  - Fork 1's D11 gate rows: the RTX at 4K, no chip, the lane timing. Its lanes, ladder and one-pass shapes are built on `claude/power-export-821809` (`f155ca8`) and passed on the AMD chip and at 1080p on the RTX.
+  - Fork 4's effects fail the speed gate (AMD -4%, no chip about half), with two more fixes written and not yet run (`claude/power-effects-72ab66`, `50b0916`).
+- **The handoff** is `Desktop_Power_Handoff.md`: each fork's state, the resume commands, the owner's decisions and the traps.
+
+## Desktop Power, merge 5: a closed project stops decoding, 2026-11-04
+
+- **Done.** Fork 2's D10 follow-up, merged as `85e642a`. `MediaPool.dispose()` and `forget()` now dispose the files' Mediabunny inputs. Before, a frame request still under way at close ran on to its frame, up to 300 4K frames on the processor with no graphics chip. The D10 checks now wait for the application to settle after each row and name the busiest processes.
+- **Evidence.** Typecheck clean; `npm test` 824 of 824, including `tests/studio-media-dispose.test.mjs`. The fork removed the two fixed lines on purpose and three of the four tests then failed.
+- **Not verified in the application.** The port checks were refused from 12:40 to 13:09. The package window drew about one frame a second with every process idle while the laptop was in use. The change touches no rendered output.
+- **Next.** Fork 1's D11 engines: the RTX now, then no chip and the timing. Fork 4's last timing slot. Nothing pushed.
+
 ## Desktop Power, merge 4: D10 «معاينة أسرع», 2026-11-04
 
 - **Done.** Fork 2 (`power-preview`), merged as `aa9ac18`, every client; a browser and no profile keep today's behaviour.
