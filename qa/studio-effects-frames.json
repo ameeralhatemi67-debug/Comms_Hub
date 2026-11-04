@@ -1,7 +1,7 @@
 {
   "script": "qa/studio-effects-frames.cjs",
-  "run": "2026-11-04T02:34:59.579Z",
-  "version": "0.7.1",
+  "run": "2026-11-04T22:59:42.413Z",
+  "version": "0.8.0",
   "checks": [
     {
       "name": "app-software: every chosen frame drawn both ways, as saved and without colour, and compared with Edge's pixel by pixel",
