@@ -64,7 +64,10 @@ export function plan(p: ProfileNumbers | null, m: Machine = {}, performance: Per
   const cores = m.cores && m.cores > 0 ? Math.floor(m.cores) : 1;
   const step = previewStep(p);
   const lanes = lanesFrom(p.lanes, performance === 'max' ? MAX_GAIN : LANE_GAIN);
-  const copies = lanesFrom(p.lanes, LANE_GAIN) > 1 ? 2 : 1;
+  // Light copies stay one at a time until the profile measures FFmpeg's copies themselves: export lanes are the chip's
+  // encoders, and on the pilot laptop widths 1, 2 and 3 took the same 37 to 40 s, since Windows' speed limit holds
+  // copies that load every core (D12, measured 2026-11-04).
+  const copies = FLOOR.copiesAtOnce;
   const cache = (perGb: number, cap: number) => Math.floor(clamp(gb * perGb, 0, cap) / 64) * 64;
   if (performance === 'light') {
     return {
@@ -80,7 +83,7 @@ export function plan(p: ProfileNumbers | null, m: Machine = {}, performance: Per
       previewStart: PREVIEW_STEPS[Math.max(0, step - 1)],
       frameCacheMB: cache(128, 6144),
       exportLanes: lanes,
-      copiesAtOnce: clamp(lanes, 1, 3),
+      copiesAtOnce: copies,
       photoWorkers: clamp(cores - 1, 1, 15),
     };
   }

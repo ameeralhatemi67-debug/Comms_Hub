@@ -2906,7 +2906,11 @@ makes the light copy («نسخة خفيفة للمعاينة», 63.4) of those t
   uploading, playing (a window making sound counts), scrubbing or measuring, while no copy the person asked for is being made,
   and a few seconds after the last key or click in the application. Moving the pointer and scrolling hold nothing.
 - Held, a copy pauses within a second and goes on later from where it was. A copy held for three minutes is stopped and made
-  again later. Nothing of an unfinished copy is kept: closing the project, quitting the application or «حذف ملفات المعاينة
+  again later.
+- Windows lowers the processor's speed limit whenever copies load every core (on the pilot laptop to as low as 34%, back to
+  100% within about ten seconds), and the copies wait meanwhile, so they are made in bursts and never push the laptop into its
+  limit (decision of 2026-11-04). One copy at a time is as fast as two or three (about 30 s for three copies of 30 s of 4K with
+  the limit set aside, 37 to 40 s with it), so they are made one at a time until a measurement shows a gain. Nothing of an unfinished copy is kept: closing the project, quitting the application or «حذف ملفات المعاينة
   المؤقتة» leaves no part of one behind.
 - A copy the person asks for with «إنشاء نسخة خفيفة للمعاينة» is made at once and never held; the others wait for it.
 

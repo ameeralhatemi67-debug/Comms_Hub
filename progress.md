@@ -2911,9 +2911,27 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     - the still source's copy was stopped at 1792 ms and made again;
     - the asked copy held the others;
     - the four copies kept 750 of 750 frames, and a cancel and a quit left no FFmpeg and no part.
-  - **Failed: the sound case, two checks.** The window was heard (audible, then silent; the element unmuted at volume 1) and the copy
-    paused in 20 ms. But Windows lowered the processor's speed limit at that moment, the laptop being hot from the checks, so the queue
-    reported the stronger «throttled» and held 16 s. Sound as the reason is not proven by this run.
+  - **Failed in that run: the sound case, two checks.** The window was heard (audible, then silent; the element unmuted at volume 1)
+    and the copy paused in 20 ms. But Windows lowered the processor's speed limit at that moment, so the queue reported the stronger
+    «throttled» and held 16 s.
+  - **The speed runs** (`qa/desktop-idle.cjs --speed`, in two quiet windows the manager granted).
+    - **First run, at `99d685b`, 24 of 27.** 157 speed-limit events in 6.5 minutes, the limit falling to 34% to 75% and back to 100
+      within about ten seconds whenever copies load every core, on a cool and otherwise quiet laptop. The three widths took 37 to 40
+      s for three copies. The stage's p95 was unreadable from single plays (66.8 ms with nothing to make; 83.3, 17.4 and 83.4 ms held
+      at widths 1 to 3), and Fork 4's short benchmarks overlapped its last rows. It also showed a held copy still decoding for up
+      to a second after the pause, while the stage starts; from `e695d04` a paused job drains at idle priority.
+    - **Second run, at `e695d04`, 25 of 26.** The D12 gate holds: the stage's 95th-percentile frame time, median of three
+      interleaved 8 s plays each, was **50.1 ms with copies held at width 1 and at width 3, against 49.9 ms with nothing to make**
+      (within 10%). The processor's load just before each held play was 97% to 100%, as the copies had been running. One copy
+      running, played without sound, gave 33.3 ms; a play with sound is not directly comparable.
+    - **The widths, Windows' speed limit set aside:** 30.4 s, 33.6 s and 28.9 s for one, two and three copies at once. No gain, so
+      `copiesAtOnce` stays 1 in every mode (`scale.ts`); it had followed the export lanes' gain, which measures the chip's encoders.
+      136 speed-limit events, the lowest 34%.
+    - **The sound alone holds a copy**, with Windows' speed-limit events kept out: the hold was «playing», 22 ms after the window was
+      heard. That run's check still failed, because the 4K grainy clip stalled (`readyState` 1) and the window was heard 0.3 s only,
+      after which the copy went on, as it should. The check now plays the still clip for the sound case; RERUN.
+- **Decisions on the way** (the manager, 2026-11-04): keep the speed-limit hold as built, so copies never push the laptop into its
+  limit; do not raise `copiesAtOnce` above 1 without a measured gain.
 - **On the way.**
   - **The first packaged run** (from `3a6eb4f`, before the fix): `desktop-idle` 16 of 21, because on 1 MB sources FFmpeg had read the
     whole file before the pause and went on. That led to the `held` stop and to the grainy corpus. `desktop-media` 50 of 52, because
@@ -2926,8 +2944,6 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     merge.
   - P-26 and P-22 share bridge version 8. «يحتاج قرارك» opens the home page, which has no page of its own.
 - **Not verified, said plainly.**
-  - The speed figures of the D12 gate (the stage's 95th-percentile frame time with copies held, and the time to make the copies at
-    widths 1 to 3) wait for a quiet window (`qa/desktop-idle.cjs --speed`); `copiesAtOnce` keeps D9's rule until then.
   - A real drag into Explorer is Windows' own and cannot be driven by Playwright: an owner walkthrough step.
   - `qa/desktop-shell.cjs` was not run again after item 1.
   - Nothing was seen signed in.

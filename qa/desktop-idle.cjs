@@ -211,7 +211,8 @@ async function main() {
         // the sound alone holds it: Windows' own speed-limit changes are kept out meanwhile
         await realLimits(false);
         await app.evaluate(() => (globalThis.__audible = []));
-        playing = win.evaluate(() => window.play(6, {}));
+        // the still clip plays without a stall, so the window is heard the whole time
+        playing = win.evaluate(() => window.play(6, { file: 'still-3.mp4' }));
       },
       async () => {
         result.soundPlay = await playing;

@@ -39,8 +39,8 @@ test('lanes: added while the encoders together gain enough, never more than the 
 
 test('the pilot laptop\'s two chips and a weak laptop', () => {
   const machine = { cores: 12, memory: 16e9 };
-  assert.deepEqual(plan(amd, machine), { previewStart: 1, frameCacheMB: 1024, exportLanes: 2, copiesAtOnce: 2, photoWorkers: 10 });
-  assert.deepEqual(plan(rtx, machine), { previewStart: 1, frameCacheMB: 1024, exportLanes: 2, copiesAtOnce: 2, photoWorkers: 10 });
+  assert.deepEqual(plan(amd, machine), { previewStart: 1, frameCacheMB: 1024, exportLanes: 2, copiesAtOnce: 1, photoWorkers: 10 });
+  assert.deepEqual(plan(rtx, machine), { previewStart: 1, frameCacheMB: 1024, exportLanes: 2, copiesAtOnce: 1, photoWorkers: 10 });
   assert.deepEqual(plan(weak, { cores: 4, memory: 8e9 }), { previewStart: 1 / 2, frameCacheMB: 512, exportLanes: 1, copiesAtOnce: 1, photoWorkers: 2 });
 });
 

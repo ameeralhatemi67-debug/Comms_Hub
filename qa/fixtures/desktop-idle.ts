@@ -90,7 +90,7 @@ export async function ask(name: string, height = 720) {
  * Plays the project on the studio's player for `seconds` and times the stage: the gap between drawn frames, its median,
  * 95th percentile and worst. `muted` plays without sound (so the window is not heard), `say` tells the application.
  */
-export async function play(seconds: number, o: { muted?: boolean; say?: boolean } = {}) {
+export async function play(seconds: number, o: { muted?: boolean; say?: boolean; file?: string } = {}) {
   const canvas = document.createElement('canvas');
   canvas.width = 1280;
   canvas.height = 720;
@@ -106,12 +106,14 @@ export async function play(seconds: number, o: { muted?: boolean; say?: boolean 
     last = t;
     if (on) requestAnimationFrame(tick);
   };
-  pl.seek(0);
+  // from the start, or from the clip of one file (a light one plays without a stall, so its sound never stops)
+  const from = o.file ? doc.video?.tracks.flatMap((t) => t.clips).find((c) => c.source === ids.find((x) => x.name === o.file)?.id)?.start ?? 0 : 0;
+  pl.seek(from);
   pl.play();
   requestAnimationFrame(tick);
   // the clip playing a moment in: whether its element plays, and with sound
   await sleep(1500);
-  const clip = doc.video?.tracks.flatMap((t) => t.clips).find((c) => c.start === 0);
+  const clip = doc.video?.tracks.flatMap((t) => t.clips).find((c) => c.start === from);
   const el = clip ? pool.element(clip.id, clip.source) : null;
   const element = el ? { paused: el.paused, muted: el.muted, volume: el.volume, readyState: el.readyState, time: Math.round(el.currentTime * 100) / 100 } : null;
   await sleep(Math.max(0, seconds * 1000 - 1500));
