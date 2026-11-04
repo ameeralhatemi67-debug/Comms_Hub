@@ -164,7 +164,7 @@ function takeLock() {
       ['app-saving', { keepInTray: false, gpu: 'saving' }, []],
       ['app-strong', { keepInTray: false, gpu: 'strong' }, []],
     ]) {
-      const { app, win } = await h.launchDev(`draw-${name}`, { settings, args: [...args, ...UNCOVERED] });
+      const { app, win, data } = await h.launchDev(`draw-${name}`, { settings, args: [...args, ...UNCOVERED] });
       await toFront(app);
       try {
         await h.instrument(app);
@@ -174,6 +174,8 @@ function takeLock() {
         runs[name] = { versions, ...(await inEngine(win, name, 'http://127.0.0.1:3000')) };
       } finally {
         await h.closeAll();
+        // the profile holds the private copies of the sources and exports (gigabytes for the long runs)
+        fs.rmSync(data, { recursive: true, force: true });
       }
     }
 

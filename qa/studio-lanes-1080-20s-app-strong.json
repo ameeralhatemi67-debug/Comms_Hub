@@ -1,0 +1,179 @@
+{
+  "script": "qa/studio-lanes.cjs",
+  "run": "2026-11-04T10:11:14.458Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "app-strong: one lane is the floor (600 frames, every one fingerprinted)",
+      "pass": true,
+      "detail": "{\"via\":\"canvas\",\"ms\":24890,\"printed\":600}"
+    },
+    {
+      "name": "app-strong, 2 lanes: every composed frame is one lane's, the structure is one lane's exactly",
+      "pass": true,
+      "detail": "{\"lanes\":2,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[24890,26550]}"
+    },
+    {
+      "name": "app-strong, 2 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
+      "pass": true,
+      "detail": "[{\"frame\":299,\"one\":43.15,\"lanes\":43.15,\"delta\":0},{\"frame\":300,\"one\":43.1,\"lanes\":43.1,\"delta\":0}]"
+    },
+    {
+      "name": "app-strong, 3 lanes: every composed frame is one lane's, the structure is one lane's exactly",
+      "pass": true,
+      "detail": "{\"lanes\":3,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[24890,27758]}"
+    },
+    {
+      "name": "app-strong, 3 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
+      "pass": true,
+      "detail": "[{\"frame\":239,\"one\":42.05,\"lanes\":42.05,\"delta\":0},{\"frame\":240,\"one\":42.03,\"lanes\":42.03,\"delta\":0},{\"frame\":419,\"one\":43.28,\"lanes\":43.27,\"delta\":-0.01},{\"frame\":420,\"one\":43.29,\"lanes\":43.29,\"delta\":0}]"
+    },
+    {
+      "name": "app-strong: a lane with another H.264 profile is refused by the join's guard; the export runs with one lane and its file is the floor's",
+      "pass": true,
+      "detail": "{\"lanes\":1,\"steps\":[\"LANE:LANES\"]}"
+    },
+    {
+      "name": "app-strong: a lane failing once mid-segment: its segment runs again on the lanes left, and the file is exact",
+      "pass": true,
+      "detail": "{\"lanes\":3,\"steps\":[\"ENCODER\"],\"firstDiff\":-1}"
+    },
+    {
+      "name": "app-strong: the first segment's lane failing: the export runs again with a lane fewer, and the file is exact",
+      "pass": true,
+      "detail": "{\"lanes\":2,\"steps\":[\"LANE:ENCODER\"]}"
+    }
+  ],
+  "notes": [
+    "The application started with --disable-features=CalculateNativeWinOcclusion, its window in front."
+  ],
+  "fixture": {
+    "seconds": 20,
+    "size": "1920x1080",
+    "short": 1080,
+    "engines": [
+      "app-strong"
+    ],
+    "faults": true,
+    "fingerprinted": "every frame"
+  },
+  "engines": {
+    "app-strong": {
+      "versions": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "engine": {
+        "onChip": true,
+        "cores": 12
+      },
+      "starts": {
+        "two": [
+          0,
+          300
+        ],
+        "three": [
+          0,
+          240,
+          420
+        ]
+      },
+      "timing": null,
+      "runs": {
+        "one": {
+          "lanes": 1,
+          "steps": [],
+          "ms": 24890,
+          "fps": 24.1,
+          "load": [
+            45,
+            19
+          ],
+          "bytes": 26747136,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        },
+        "two": {
+          "lanes": 2,
+          "steps": [],
+          "ms": 26550,
+          "fps": 22.6,
+          "load": [
+            8,
+            34
+          ],
+          "bytes": 26753853,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        },
+        "three": {
+          "lanes": 3,
+          "steps": [],
+          "ms": 27758,
+          "fps": 21.6,
+          "load": [
+            22,
+            43
+          ],
+          "bytes": 26751530,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        },
+        "guard": {
+          "lanes": 1,
+          "steps": [
+            "LANE:LANES"
+          ],
+          "ms": 27816,
+          "fps": 21.6,
+          "load": [
+            67,
+            28
+          ],
+          "bytes": 26747136,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        },
+        "lateFault": {
+          "lanes": 3,
+          "steps": [
+            "ENCODER"
+          ],
+          "ms": 28080,
+          "fps": 21.4,
+          "load": [
+            23,
+            23
+          ],
+          "bytes": 26751530,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        },
+        "firstFault": {
+          "lanes": 2,
+          "steps": [
+            "LANE:ENCODER"
+          ],
+          "ms": 28686,
+          "fps": 20.9,
+          "load": [
+            34,
+            23
+          ],
+          "bytes": 26753853,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        }
+      }
+    }
+  },
+  "total": 8,
+  "passed": 8,
+  "failed": 0
+}

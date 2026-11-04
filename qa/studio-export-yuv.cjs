@@ -253,7 +253,7 @@ function takeLock() {
       ['app-saving', { keepInTray: false, gpu: 'saving' }, [], true],
       ['app-strong', { keepInTray: false, gpu: 'strong' }, [], true],
     ]) {
-      const { app, win } = await h.launchDev(`yuv-${name}`, { settings, args: [...args, ...UNCOVERED] });
+      const { app, win, data } = await h.launchDev(`yuv-${name}`, { settings, args: [...args, ...UNCOVERED] });
       await toFront(app);
       try {
         await h.instrument(app);
@@ -263,6 +263,8 @@ function takeLock() {
         runs[name] = { versions, ...(await inEngine(win, name, 'http://127.0.0.1:3000', chip)) };
       } finally {
         await h.closeAll();
+        // the profile holds the private copies of the sources and exports (gigabytes for the long runs)
+        fs.rmSync(data, { recursive: true, force: true });
       }
     }
 
