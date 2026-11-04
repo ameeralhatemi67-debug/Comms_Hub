@@ -17,6 +17,20 @@ const { dependency, launchOptions } = require('./runtime.cjs');
 const { chromium } = dependency('playwright');
 const h = require('./desktop-helpers.cjs');
 
+/**
+ * A covered window draws about once a second (Fork 2, 2026-11-04), which would stretch a long export: the application
+ * starts with Windows' occlusion tracking off, and its window is brought in front of the others.
+ */
+const UNCOVERED = ['--disable-features=CalculateNativeWinOcclusion'];
+const toFront = (app) =>
+  app.evaluate(({ BrowserWindow }) => {
+    const w = BrowserWindow.getAllWindows()[0];
+    w.show();
+    if (w.isMinimized()) w.restore();
+    w.moveTop();
+    w.focus();
+  });
+
 const { check, note, result, finish } = h.record('qa/studio-shapes-onepass.cjs');
 const SECONDS = Number(process.env.SECONDS || 6);
 const QUIET = process.env.QUIET === '1';
@@ -155,7 +169,8 @@ function takeLock() {
       }
     }
     for (const [name, settings, args] of apps) {
-      const { app, win } = await h.launchDev(`shapes-${name}`, { settings, args });
+      const { app, win } = await h.launchDev(`shapes-${name}`, { settings, args: [...args, ...UNCOVERED] });
+      await toFront(app);
       try {
         await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
         await win.waitForLoadState('load');
@@ -186,6 +201,8 @@ function takeLock() {
     if (locked && fs.existsSync(LOCK) && fs.readFileSync(LOCK, 'utf8') === BRANCH) fs.rmSync(LOCK);
   }
   result.engines = Object.fromEntries(Object.entries(engines).map(([n, e]) => [n, { browser: e.browser, versions: e.versions, aloneMs: e.aloneMs, togetherMs: e.togetherMs, timing: e.timing ?? null, files: e.files }]));
-  const failed = finish(path.join(__dirname, `studio-shapes-onepass${EDGE_ONLY ? '-edge' : QUIET ? '-speed' : ''}.json`));
+  if (!EDGE_ONLY) note(`The application started with ${UNCOVERED.join(' ')}, its window in front.`);
+  const which = process.env.ENGINES ? `-${ENGINES.join('+')}` : '';
+  const failed = finish(path.join(__dirname, `studio-shapes-onepass${which}${EDGE_ONLY ? '-edge' : QUIET ? '-speed' : ''}.json`));
   process.exit(failed ? 1 : 0);
 })();

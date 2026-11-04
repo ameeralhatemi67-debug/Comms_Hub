@@ -26,6 +26,20 @@ const { dependency, launchOptions } = require('./runtime.cjs');
 const { chromium } = dependency('playwright');
 const h = require('./desktop-helpers.cjs');
 
+/**
+ * A covered window draws about once a second (Fork 2, 2026-11-04), which would stretch a long export: the application
+ * starts with Windows' occlusion tracking off, and its window is brought in front of the others.
+ */
+const UNCOVERED = ['--disable-features=CalculateNativeWinOcclusion'];
+const toFront = (app) =>
+  app.evaluate(({ BrowserWindow }) => {
+    const w = BrowserWindow.getAllWindows()[0];
+    w.show();
+    if (w.isMinimized()) w.restore();
+    w.moveTop();
+    w.focus();
+  });
+
 const { check, note, result, finish } = h.record('qa/studio-export-yuv.cjs');
 const out = path.join(__dirname, 'artifacts', 'studio-export-yuv');
 const REAL = '00000000-0000-4000-8000-0000000000f1';
@@ -239,7 +253,8 @@ function takeLock() {
       ['app-saving', { keepInTray: false, gpu: 'saving' }, [], true],
       ['app-strong', { keepInTray: false, gpu: 'strong' }, [], true],
     ]) {
-      const { app, win } = await h.launchDev(`yuv-${name}`, { settings, args });
+      const { app, win } = await h.launchDev(`yuv-${name}`, { settings, args: [...args, ...UNCOVERED] });
+      await toFront(app);
       try {
         await h.instrument(app);
         await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);

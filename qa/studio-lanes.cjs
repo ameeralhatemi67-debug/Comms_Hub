@@ -24,6 +24,20 @@ const { dependency, launchOptions } = require('./runtime.cjs');
 const { chromium } = dependency('playwright');
 const h = require('./desktop-helpers.cjs');
 
+/**
+ * A covered window draws about once a second (Fork 2, 2026-11-04), which would stretch a long export: the application
+ * starts with Windows' occlusion tracking off, and its window is brought in front of the others.
+ */
+const UNCOVERED = ['--disable-features=CalculateNativeWinOcclusion'];
+const toFront = (app) =>
+  app.evaluate(({ BrowserWindow }) => {
+    const w = BrowserWindow.getAllWindows()[0];
+    w.show();
+    if (w.isMinimized()) w.restore();
+    w.moveTop();
+    w.focus();
+  });
+
 const { check, note, result, finish } = h.record('qa/studio-lanes.cjs');
 const SECONDS = Number(process.env.SECONDS || 20);
 const SIZE = Number(process.env.SIZE || 1080);
@@ -206,7 +220,8 @@ function takeLock() {
       ['app-saving', { keepInTray: false, gpu: 'saving' }, []],
       ['app-strong', { keepInTray: false, gpu: 'strong' }, []],
     ]).filter(([n]) => ENGINES.includes(n))) {
-      const { app, win } = await h.launchDev(`lanes-${name}`, { settings, args });
+      const { app, win } = await h.launchDev(`lanes-${name}`, { settings, args: [...args, ...UNCOVERED] });
+      await toFront(app);
       try {
         await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
         await win.waitForLoadState('load');
@@ -254,6 +269,9 @@ function takeLock() {
   }
   result.fixture = { seconds: SECONDS, size: `${W}x${H}`, short, engines: ENGINES, faults: FAULTS, fingerprinted: EVERY === 1 ? 'every frame' : `every ${EVERY}th frame and 30 each side of every boundary` };
   result.engines = Object.fromEntries(Object.entries(engines).map(([n, e]) => [n, { browser: e.browser, versions: e.versions, engine: e.engine, starts: e.starts, timing: e.timing ?? null, runs: Object.fromEntries(Object.entries(e.runs).map(([k, x]) => [k, { lanes: x.lanes, steps: x.steps, ms: x.ms, bytes: x.bytes, via: x.via, keys: x.structure.keys.length, frames: x.structure.pts.length }])) }]));
-  const failed = finish(path.join(__dirname, `studio-lanes-${SIZE}-${SECONDS}s${EDGE_ONLY ? '-edge' : QUIET ? '-speed' : ''}.json`));
+  if (!EDGE_ONLY) note(`The application started with ${UNCOVERED.join(' ')}, its window in front.`);
+  // a run of chosen engines is its own record, so one engine at a time keeps the others'
+  const which = process.env.ENGINES ? `-${ENGINES.join('+')}` : '';
+  const failed = finish(path.join(__dirname, `studio-lanes-${SIZE}-${SECONDS}s${which}${EDGE_ONLY ? '-edge' : QUIET ? '-speed' : ''}.json`));
   process.exit(failed ? 1 : 0);
 })();
