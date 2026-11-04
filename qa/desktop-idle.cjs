@@ -178,7 +178,26 @@ async function main() {
     const doneOf = async (name) => (await q()).items.find((i) => i.name === name)?.done ?? null;
     result.holds = {};
     /** Holds a running copy one way, and releases it: paused within a second, no progress from a second on, then on again. */
+    /**
+     * Waits, at most two minutes, until Windows' own limit is back at 100 (none heard counts as 100). A pause drains FFmpeg's
+     * full input buffers, a second or two of a grainy source; on a processor Windows holds at a third of its speed that takes
+     * longer than the worker's settle time, and the copy is rightly stopped as one that would not wait (found 2026-11-05 at
+     * 36 to 38%). Such a hold says nothing about the hold itself, so it is recorded as not measured, never passed.
+     */
+    const COOL_MS = 120000;
+    const windowsLimit = () => app.evaluate(() => {
+      const w = globalThis.__limits.filter((x) => !x.ours);
+      return w.length ? w[w.length - 1].limit : 100;
+    });
+    result.notMeasured = [];
     async function held(label, hold, release, want, since = null) {
+      const full = await h.until(async () => ((await windowsLimit()) >= 100 ? true : null), COOL_MS, 500);
+      if (!full) {
+        const limit = await windowsLimit();
+        result.notMeasured.push({ label, limit });
+        note(`${label}: not measured. Windows held the processor at ${limit}% for the two minutes before it.`);
+        return null;
+      }
       const it = await runningCopy();
       if (!it) return check(`${label}: a copy of a grainy source was being made`, false, await q());
       let start = Date.now();
@@ -284,8 +303,9 @@ async function main() {
       check(`a copy of a still source, which FFmpeg had read whole, is stopped when held (${stopped} ms), no FFmpeg left and no part file, and made again once released`, stopped !== null && stopped <= 2000 && left === 0 && parts().length === 0 && meanwhile?.state === 'waiting' && !!again, result.readAhead);
     } else check('a copy of a still source was being made', false, await q());
 
-    // every copy, made in the end
-    await win.evaluate(() => window.queueWith(1));
+    // every copy, made in the end (the answer is recorded, so a refused or narrowed queue says so itself)
+    const answer = await win.evaluate(() => window.queueWith(1));
+    result.lastQueue = { answered: answer?.items?.length ?? null, states: answer?.items?.map((i) => i.state) ?? null };
     const all = await h.until(async () => {
       const s = await q();
       return s.items.length === NAMES.length && s.items.every((i) => i.state === 'ready') ? s : null;

@@ -196,7 +196,8 @@ export class MediaPool {
 
   private async takeUp(l: Loaded, t: Tooling) {
     try {
-      const copies = await this.opts.cache?.copies(t.ref);
+      // only asks: the source was named to the queue when it opened, and a forgotten queue stays forgotten
+      const copies = await this.opts.cache?.copies(t.ref, { want: false });
       if (this.disposed || !copies?.proxy || l.preview) return;
       t.copies = copies;
       await this.openPreview(l, copies.proxy.url, copies.proxy.name, copies.proxy.height);

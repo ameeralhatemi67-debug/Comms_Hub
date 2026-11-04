@@ -3282,6 +3282,21 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
       `queueWith(1)`, so whether the application refused it is not known.
     - **Each copy keeps every frame:** only 2 copies existed, the two stills. Both kept 750 of 750 frames in order.
   - Not rerun, as instructed.
+- **The causes, found by the manager** (2026-11-05, reading the code from `411007d`, when the check passed 25 of 26, to `238417a`).
+  - **The queue: D10's take-up.** When a copy turns ready, `MediaPool.takeUp` asks `DeviceCache.copies`, and asking also
+    named the source to the queue (`want`). The check had stopped the queue (`stopQueue`, which empties what is wanted) and
+    then named the four sources straight through the bridge. So when still-3 turned ready, the page named still-3 alone, and
+    the application, which replaces a window's whole list, dropped the other three. In the product, everything open is
+    already wanted and the queue stops only when a project closes, so nothing showed there.
+    - **Fixed:** `copies(ref, { want: false })` only asks, and the take-up uses it. `tests/native-power.test.mjs` has a new
+      test: a stopped queue stays stopped after a take-up, and opening a source still names it. With the old line it fails.
+  - **The export hold: the processor really was slow.** At the pause FFmpeg's input buffers hold a second or two of a grainy
+    source. Windows held the processor at 36 to 38% then, kept from the application by the guard, so draining them took
+    longer than the worker's settle time, and the copy was rightly stopped as one that would not wait. The old guard let
+    every limit through, so the case never met a slowed processor before.
+    - **Changed in the check:** each hold waits up to two minutes for Windows' own limit to be back at 100. Otherwise it is
+      recorded as not measured (`notMeasured`), never passed. The answer of the last `queueWith` is recorded too (`lastQueue`).
+  - The check is rerun at the next port slot, after D11's proof.
 - **Not done.** Nothing pushed.
 
 ### 2026-11-04: the studio says when this device is not measured, or its measurement is stale (Desktop Power, Fork 3, 63.6.1)

@@ -373,8 +373,10 @@ export class DeviceCache {
     return token ? { token } : null;
   }
 
-  async copies(ref: NativeMediaRef): Promise<NativeCopies | null> {
-    if (this.copyQueue) this.want(ref);
+  /** The copies of a source, as the application names them. A source opened (want) is also named to the idle-time queue;
+   * a copy taken up at the pause only asks, so it never brings back a source the queue was told to forget. */
+  async copies(ref: NativeMediaRef, { want = true }: { want?: boolean } = {}): Promise<NativeCopies | null> {
+    if (this.copyQueue && want) this.want(ref);
     return this.mediaTools ? this.mediaTools.copies!(ref).catch(() => null) : null;
   }
 

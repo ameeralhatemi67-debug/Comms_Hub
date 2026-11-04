@@ -131,6 +131,23 @@ test('D12: every video source the pool opens is named to the queue once, a momen
   assert.deepEqual(last[1].items, [], 'the application stops making them');
 });
 
+test('D12: a copy taken up at the pause only asks, so a queue the studio stopped stays stopped', async () => {
+  // found by qa/desktop-idle.cjs on 2026-11-05: the take-up's ask named its one source to an emptied queue, and the
+  // application, which replaces a window's whole list, dropped every other copy it was making
+  const log = [];
+  const app = v7(log, { profile: { current: key, entries: [{ at: 1, key, numbers }] } });
+  inApp(app.bridge);
+  const c = await DeviceCache.open();
+  c.stopQueue();
+  const before = log.filter((x) => x[0] === 'queue').length;
+  await c.copies({ token }, { want: false });
+  await sleep(250);
+  assert.equal(log.filter((x) => x[0] === 'queue').length, before, 'nothing named');
+  await c.copies({ token });
+  await sleep(250);
+  assert.deepEqual(log.filter((x) => x[0] === 'queue').at(-1)[1].items, [{ token }], 'opening a source still names it');
+});
+
 test('D12: in a browser the studio names nothing and says nothing of copies', async () => {
   inApp({});
   const c = await DeviceCache.open();
