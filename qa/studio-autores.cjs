@@ -63,7 +63,7 @@ async function playIn(win, o) {
   const before = load();
   const r = await win.evaluate((x) => window.autores.play(x), { ...o, seconds: SECONDS });
   r.load = { before, after: load() };
-  console.log(`  ${o.label}: missed ${r.missedPct}% of ${r.stats.due}, dropped ${r.droppedPct}% of ${r.quality.total}, reseeks ${r.stats.reseeks}, levels ${JSON.stringify(r.levels)}, copies ${r.playing.map((p) => (p.copy ? 1 : 0)).join('')}; load ${before} -> ${r.load.after}`);
+  console.log(`  ${o.label}: missed ${r.missedPct}% of ${r.stats.due}, dropped ${r.droppedPct}% of ${r.quality.total}, not shown ${r.shortPct}%, reseeks ${r.stats.reseeks}, levels ${JSON.stringify(r.levels)}, copies ${r.playing.map((p) => (p.copy ? 1 : 0)).join('')}; load ${before} -> ${r.load.after}`);
   return { label: o.label, ...r };
 }
 
@@ -108,12 +108,12 @@ async function playIn(win, o) {
         console.log(`  plan: start ${start}, frame memory ${r.plan.knobs.frameCacheMB} MB, budget ${budget && budget.toFixed(2)} streams of 4K30; renderer ${r.engine.renderer}`);
         r.plays = [];
         r.plays.push(await playIn(win, { label: 'floor', resolution: 1, start: 1, budget: null }));
-        r.plays.push(await playIn(win, { label: 'auto', resolution: 'auto', start, budget }));
+        r.plays.push(await playIn(win, { label: 'auto', resolution: 'auto', start, budget, fresh: true }));
         r.copies = await win.evaluate(() => window.autores.copies());
         r.plays.push(await playIn(win, { label: 'floor-copies', resolution: 1, start: 1, budget: null }));
-        const cold = await playIn(win, { label: 'auto-copies', resolution: 'auto', start, budget });
+        const cold = await playIn(win, { label: 'auto-copies', resolution: 'auto', start, budget, fresh: true });
         r.plays.push(cold);
-        r.plays.push(await playIn(win, { label: 'auto-copies-again', resolution: 'auto', start: cold.end, budget }));
+        r.plays.push(await playIn(win, { label: 'auto-copies-again', resolution: 'auto', start: cold.end, budget, fresh: false }));
         runs[engine] = r;
       } finally {
         await h.closeAll();
@@ -125,11 +125,12 @@ async function playIn(win, o) {
       check(`${engine}: three 4K sources ready and a light copy of each made by the application`, r.opened.states.every((s) => s.kind === 'ready') && r.copies.tools.every((t) => t && t.proxy.kind === 'ready'), { states: r.opened.states, copies: r.copies });
       for (const label of ['auto-copies', 'auto-copies-again']) {
         const p = r.plays.find((x) => x.label === label);
-        check(`${engine}, «تلقائية» with the budget and light copies (${label === 'auto-copies' ? 'from the plan\'s start' : 'from where the last play ended'}): at most ${MAX_PCT}% missed and ${MAX_PCT}% dropped (${p.missedPct}% of ${p.stats.due}, ${p.droppedPct}% of ${p.quality.total})`, p.missedPct <= MAX_PCT && (p.droppedPct === null || p.droppedPct <= MAX_PCT), { stats: p.stats, quality: p.quality, levels: p.levels, playing: p.playing, load: p.load });
+        // missed on the stage, dropped by the elements, and not shown at all (an element that keeps re-seeking shows nothing)
+        check(`${engine}, «تلقائية» with the budget and light copies (${label === 'auto-copies' ? 'from the plan\'s start' : 'from where the last play ended'}): at most ${MAX_PCT}% missed, dropped and not shown (${p.missedPct}% of ${p.stats.due}, ${p.droppedPct}% of ${p.quality.total}, ${p.shortPct}% not shown)`, p.missedPct <= MAX_PCT && p.droppedPct !== null && p.droppedPct <= MAX_PCT && p.shortPct <= MAX_PCT, { stats: p.stats, quality: p.quality, levels: p.levels, playing: p.playing, load: p.load });
       }
       const f = r.plays.find((x) => x.label === 'floor');
       const a = r.plays.find((x) => x.label === 'auto');
-      note(`${engine}: «كاملة» with no copies missed ${f.missedPct}% and dropped ${f.droppedPct}%; «تلقائية» with no copies ${a.missedPct}% and ${a.droppedPct}% (levels ${JSON.stringify(a.levels)}); «كاملة» with copies ${r.plays[2].missedPct}% and ${r.plays[2].droppedPct}%.`);
+      note(`${engine}: «كاملة» with no copies missed ${f.missedPct}%, dropped ${f.droppedPct}%, not shown ${f.shortPct}% (${f.stats.reseeks} re-seeks); «تلقائية» with no copies ${a.missedPct}%, ${a.droppedPct}%, not shown ${a.shortPct}% (${a.stats.reseeks} re-seeks, levels ${JSON.stringify(a.levels)}); «كاملة» with copies ${r.plays[2].missedPct}%, ${r.plays[2].droppedPct}%, not shown ${r.plays[2].shortPct}%.`);
     }
   } catch (e) {
     check('the check ran to the end', false, e.stack || String(e));

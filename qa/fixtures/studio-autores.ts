@@ -98,7 +98,11 @@ async function copies() {
 /** The stage: one canvas and one player for the whole session, as the editor keeps them (the budget it lowered stays). */
 let stage: { canvas: HTMLCanvasElement; player: Player; size: (share: number) => void; onAuto: (share: number) => void } | null = null;
 
-async function play(o: { resolution: number | 'auto'; start: number; budget: number | null; seconds: number }) {
+/**
+ * `fresh` starts «تلقائية» anew at `start` (the plan's start, nothing known); otherwise it goes on from the level the last
+ * play ended on, as the editor keeps it for the session.
+ */
+async function play(o: { resolution: number | 'auto'; start: number; budget: number | null; seconds: number; fresh?: boolean }) {
   const c = cur!;
   if (!stage) {
     const canvas = document.createElement('canvas');
@@ -121,7 +125,9 @@ async function play(o: { resolution: number | 'auto'; start: number; budget: num
   const levels: { at: number; share: number }[] = [];
   let share = o.resolution === 'auto' ? PREVIEW_STEPS[stepOf(PREVIEW_STEPS, o.start)] : o.resolution;
   let t0 = 0;
-  player.auto = o.resolution === 'auto' ? new AutoLevel(PREVIEW_STEPS, stepOf(PREVIEW_STEPS, o.start)) : null;
+  if (o.resolution !== 'auto') player.auto = null;
+  else if (o.fresh || !player.auto) player.auto = new AutoLevel(PREVIEW_STEPS, stepOf(PREVIEW_STEPS, o.start));
+  if (player.auto) share = player.auto.value;
   stage.onAuto = (sh) => {
     share = sh;
     levels.push({ at: Math.round(performance.now() - t0), share: sh });
@@ -143,7 +149,10 @@ async function play(o: { resolution: number | 'auto'; start: number; budget: num
     return { source: i, copy: el?.dataset.copy === '1', width: el?.videoWidth ?? null };
   });
   player.pause();
-  return { stats, quality, levels, end: share, playing, missedPct: Math.round((stats.missed / Math.max(1, stats.due)) * 1000) / 10, droppedPct: quality.total ? Math.round((quality.dropped / quality.total) * 1000) / 10 : null };
+  // the frames the elements never showed: three videos, each due as many frames as the project
+  const due = stats.due * c.ids.length;
+  const shortPct = Math.round(Math.max(0, 1 - quality.total / Math.max(1, due)) * 1000) / 10;
+  return { stats, quality, levels, end: share, playing, missedPct: Math.round((stats.missed / Math.max(1, stats.due)) * 1000) / 10, droppedPct: quality.total ? Math.round((quality.dropped / quality.total) * 1000) / 10 : null, shortPct };
 }
 
 function renderer() {

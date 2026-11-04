@@ -49,6 +49,12 @@ export const SCRUB_IDLE = 150;
 /** The paused preview's own decoder (D10): the light copy's when there is one, its key frames, and the stretch it is reading. */
 type Scrub = {
   sink: VideoSampleSink;
+  /**
+   * The decoder a jump reads with: asked to give each frame as soon as it is decoded (WebCodecs optimizeForLatency),
+   * because a decoder on the processor otherwise holds a few frames back (measured on 2026-11-04 with no graphics chip:
+   * a jump right after opening at 349 ms against 276 for the decoder of old, which empties itself after one frame).
+   */
+  jump: VideoSampleSink;
   keys: EncodedPacketSink;
   /** How far the frame source's times are from the original's (a light copy, media.ts elementOffset). */
   off: number;
@@ -582,7 +588,7 @@ export class MediaPool {
       const mb = await mediabunny();
       const p = l.preview;
       const track = (await (p?.input ?? l.input!).getPrimaryVideoTrack())!;
-      return { sink: new mb.VideoSampleSink(track), keys: new mb.EncodedPacketSink(track), off: p?.offset ?? 0, w: await track.getDisplayWidth(), h: await track.getDisplayHeight(), run: null, fill: null, filled: null };
+      return { sink: new mb.VideoSampleSink(track), jump: new mb.VideoSampleSink(track, { optimizeForLatency: true }), keys: new mb.EncodedPacketSink(track), off: p?.offset ?? 0, w: await track.getDisplayWidth(), h: await track.getDisplayHeight(), run: null, fill: null, filled: null };
     })());
   }
 
@@ -740,7 +746,7 @@ export class MediaPool {
       await run.it.return(undefined).catch(() => undefined);
       run = null;
     }
-    if (!run) run = sc.run = { it: sc.sink.samples(ts), d, pos: -Infinity, prev: null, done: false, frame: 1 / 30, kept: 0 };
+    if (!run) run = sc.run = { it: sc.jump.samples(ts), d, pos: -Infinity, prev: null, done: false, frame: 1 / 30, kept: 0 };
     while (l.want === want && !this.disposed && this.store === store && sc.run === run) {
       // the frames before `want` are passed without being painted: the jump waits for its own frame only
       const f = await this.pull(l, sc, run, d, store, want);

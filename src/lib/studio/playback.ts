@@ -31,6 +31,11 @@ export class AutoLevel {
   private settleUntil = 0;
   /** The largest level that missed during this play: never stepped up to again before the play ends. */
   private ceiling = 0;
+  /**
+   * The level comes from experience (a play of this shape on this device, remembered or just ended), so the guess of
+   * startLevel does not override it.
+   */
+  known = false;
 
   constructor(steps: readonly number[], start: number) {
     this.steps = steps;
@@ -91,10 +96,14 @@ export class AutoLevel {
 }
 
 /**
- * The step a play may start at for `load` 4K30 streams decoded at once: full up to one, a half up to two, a quarter
- * beyond (drawing several large videos each frame costs more than the canvas, and a quarter canvas leaves the most).
+ * The step a first play may start at for `load` 4K30 streams decoded at once. With a measured budget: full while the
+ * streams are within it (a tenth over for the light copies' share), a half up to twice it, a quarter beyond. With none:
+ * full up to one, a half up to two, a quarter beyond (drawing several large videos each frame costs more than the canvas).
+ * Measured on 2026-11-04 on the RTX: two 4K streams and a light copy, within its budget of 2.09, held «كاملة», while
+ * starting at a quarter cost 2.4% to 2.8% of frames in the two steps back up.
  */
-export function startLevel(load: number): number {
+export function startLevel(load: number, budget: number | null = null): number {
+  if (budget !== null && budget > 0) return load <= budget * 1.1 ? 0 : load <= budget * 2 ? 1 : 2;
   return load > 2 ? 2 : load > 1 ? 1 : 0;
 }
 

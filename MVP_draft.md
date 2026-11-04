@@ -2911,7 +2911,9 @@ of 63.6 gives (64 MB a gigabyte of the computer's memory, at most 3 GB; «أخف
 frame once and counts those it could not draw in time:
 - a quarter of a second with two or more missed lowers it one step (كاملة، 1/2، 1/4);
 - four calm seconds raise it one step, never back to a step that missed during the same play;
-- a play starts where the last play of the same shape ended on this device, else at «دقة المعاينة عند البدء» of the plan.
+- a play starts where the last play of the same shape ended on this device, else at «دقة المعاينة عند البدء» of the plan, lower
+  when the videos at the playhead are more than the device measured it could decode at once;
+- a video that had to be put back in step counts as a missed frame, so a decoder that cannot keep up never reads as calm.
 
 The badge reads «تلقائية: 1/2» while lowered, and the menu says «تلقائية: تنزل دقة المعاينة أثناء التشغيل حين تفوتها إطارات، وتعود حين
 يستقر التشغيل.». Once the device is measured «تلقائية» is the default while playing, unless the person chose otherwise; in a browser

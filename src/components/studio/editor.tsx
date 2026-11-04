@@ -326,7 +326,10 @@ export function VideoEditor(p: EditorProps) {
       player.onAuto = null;
       return;
     }
-    const a = new AutoLevel(PREVIEW_STEPS, stepOf(PREVIEW_STEPS, shares.current[ratio] ?? previewStart));
+    const remembered = shares.current[ratio];
+    const a = new AutoLevel(PREVIEW_STEPS, stepOf(PREVIEW_STEPS, remembered ?? previewStart));
+    // a level a play of this shape ended on is experience; the plan's start is a guess
+    a.known = remembered !== undefined;
     // chosen while playing: judged from now
     if (player.playing) a.start(performance.now());
     player.auto = a;

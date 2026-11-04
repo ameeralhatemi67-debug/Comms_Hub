@@ -62,6 +62,8 @@ export class Player {
   /** The play so far: project frames due, draws, frames not drawn in time, elements put back in step, milliseconds. */
   stats = { due: 0, drawn: 0, missed: 0, reseeks: 0, ms: 0 };
   private lastN = -1;
+  /** The re-seeks already told to «تلقائية». */
+  private judged = 0;
   private readonly o: PlayerOptions;
 
   constructor(o: PlayerOptions) {
@@ -130,12 +132,17 @@ export class Player {
     this.startT = this.t;
     this.stats = { due: 0, drawn: 0, missed: 0, reseeks: 0, ms: 0 };
     this.lastN = -1;
+    this.judged = 0;
     this.behind = [];
     this.sync(true);
-    // «تلقائية» never starts above what the streams at the playhead can be drawn at
+    // «تلقائية»: a first play never starts above what the streams at the playhead can be drawn at; a level that comes
+    // from experience is kept
     if (this.auto) {
       const was = this.auto.level;
-      this.auto.atLeast(startLevel(this.load()));
+      if (!this.auto.known) {
+        const b = this.budget?.() ?? null;
+        this.auto.atLeast(startLevel(this.load(), b === null ? null : b * this.budgetShare));
+      }
       this.auto.start(this.startPerf);
       if (this.auto.level !== was) this.onAuto?.(this.auto.value);
     }
@@ -146,6 +153,8 @@ export class Player {
   }
 
   pause() {
+    // the level this play ended on is experience: the next play starts there
+    if (this.playing && this.auto) this.auto.known = true;
     this.playing = false;
     this.o.pool.setPlaying(false);
     this.live = new Set();
@@ -200,7 +209,11 @@ export class Player {
       this.stats.drawn++;
       this.draw();
     }
-    if (this.auto && due && this.auto.frame(now, due, missed) !== null) this.onAuto?.(this.auto.value);
+    // an element put back in step showed no new frame for a while: as a missed frame for «تلقائية», so a decoder that
+    // cannot keep up is never taken for a calm play
+    const behind = this.stats.reseeks - this.judged;
+    this.judged = this.stats.reseeks;
+    if (this.auto && due && this.auto.frame(now, due, missed + behind) !== null) this.onAuto?.(this.auto.value);
     this.o.onTime(this.t, true);
     this.raf = requestAnimationFrame(this.loop);
   };

@@ -107,6 +107,14 @@ test('a play starts no higher than the streams at the playhead allow; a lower re
   assert.equal(startLevel(1), 0);
   assert.equal(startLevel(1.5), 1);
   assert.equal(startLevel(3), 2);
+  // with a measured budget: full while the streams are within it (the RTX of 2026-11-04: two 4K and a light copy, 2.09)
+  assert.equal(startLevel(2.11, 2.09), 0);
+  assert.equal(startLevel(3, 2.09), 1);
+  assert.equal(startLevel(5, 2.09), 2);
+  assert.equal(startLevel(0.33, 0.21), 1);
+  assert.equal(startLevel(0.2, 0.21), 0);
+  // a larger budget never starts lower
+  for (const load of [0.5, 1, 2, 3, 5]) assert.ok(startLevel(load, 4) <= startLevel(load, 2));
   const a = new AutoLevel(PREVIEW_STEPS, 0);
   a.atLeast(startLevel(3));
   assert.equal(a.value, 0.25);
