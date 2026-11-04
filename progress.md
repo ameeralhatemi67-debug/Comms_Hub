@@ -3121,5 +3121,11 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   window above the others, a check refuses loudly to time a window that draws under 45 frames a second (and drops a row during
   which it fell), the port's lock names the running worktree's branch (it was a fixed name) and is freed when the process ends,
   and the editor check waits for the save before a reload and accepts a «leave with unsaved changes?» prompt (its crash in
-  `Page.handleJavaScriptDialog`). Written and checked for syntax and the lock's rules; not yet run against the port.
+  `Page.handleJavaScriptDialog`).
+  - The manager's run of `3ab0c25`: `qa/studio-scrub.cjs --only=app-strong --fixture=gop2` **6 of 6** (the jump right after
+    opening 179.9 ms against 162.7, inside the rule; the sharp frame 171.9 against 180.2). With no chip on 10 s key frames the
+    check refused its floor row, "1 frame a second": a misfire, since the window was shown, on top, the screen on. The rate had
+    been read just after the row, while a 4K frame was still being painted on the page's own thread. It is now read only at a
+    quiet moment (the row's media let go, the best of three probes). `qa/studio-preview-ui.cjs` stopped at 4 of 5 on «saved is
+    not a function»: the new save wait shared its name with the profile's result. Both fixed after; not yet rerun.
 - **Not done.** Nothing pushed.

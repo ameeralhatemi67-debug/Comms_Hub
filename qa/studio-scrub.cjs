@@ -85,8 +85,10 @@ async function runIn(page, isApp = false) {
   for (const f of FIXTURES.filter((x) => !fixtureOnly || x.name === `${fixtureOnly}.mp4`)) {
     const r = {};
     for (const [mode, cacheMB] of [['floor', 0], ['kept', CACHE_MB]]) {
-      // a throttled window measures the throttling: the application's is refused before anything is timed
-      const drawBefore = isApp ? await d10.assertDrawing(page, `${f.name} ${mode}`) : await d10.drawRate(page);
+      // a throttled window measures the throttling: the application's is refused before anything is timed, its drawing
+      // measured at a quiet moment (the row before let go of its media)
+      await page.evaluate(() => window.scrub.close());
+      const drawBefore = isApp ? await d10.assertDrawing(page, `${f.name} ${mode}`) : await d10.quietDrawRate(page);
       const before = load();
       const opened = await page.evaluate((o) => window.scrub.open(o), { file: f.name, cacheMB, ratio: '16:9', canvasW: 1280 });
       // cold: jumps as soon as the project opens; then the preview left open on the clip (the small frames fill), then
@@ -96,9 +98,10 @@ async function runIn(page, isApp = false) {
       const identity = await page.evaluate(() => window.scrub.identity());
       const random = await page.evaluate((o) => window.scrub.random(o), { count: SEEKS, seed: 1104, pause: 0 });
       const steps = await page.evaluate((o) => window.scrub.steps(o), { count: STEPS, seed: 7, pause: 0 });
-      const drawAfter = await d10.drawRate(page);
+      await page.evaluate(() => window.scrub.close());
+      const drawAfter = await d10.quietDrawRate(page);
       r[mode] = { opened, cold, settled, identity, random, steps, load: { before, after: load() }, drawRate: { before: drawBefore, after: drawAfter } };
-      if (isApp && drawAfter < d10.MIN_DRAW_RATE) throw new Error(`${f.name} ${mode}: the window fell to ${drawAfter} frames a second while it was timed (covered, minimised, the screen locked or off); the row is not kept.`);
+      if (isApp && drawAfter < d10.MIN_DRAW_RATE) throw new Error(`${f.name} ${mode}: after the row, with its media let go, the window draws ${drawAfter} frames a second (covered, minimised, the screen locked or off); the row is not kept.`);
       console.log(`${f.name} ${mode}: cold median ${cold.median} (sharp ${cold.sharp.median}); settled ${settled.ms} ms; warm median ${random.median} (sharp ${random.sharp.median}, p95 ${random.p95}); steps forward ${steps.forward.median}, back ${steps.back.median}; load ${before} -> ${r[mode].load.after}`);
     }
     run.fixtures[f.name] = r;

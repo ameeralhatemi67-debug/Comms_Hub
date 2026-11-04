@@ -201,4 +201,12 @@ function renderer() {
   return gl && ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : null;
 }
 
-(window as unknown as { scrub: unknown }).scrub = { open, settle, random, steps, identity, renderer };
+/** The row's media let go (its decoders end), so the page is quiet when the check measures how it draws. */
+function close() {
+  cur?.player.dispose();
+  cur?.pool.dispose();
+  cur?.canvas.remove();
+  cur = null;
+}
+
+(window as unknown as { scrub: unknown }).scrub = { open, close, settle, random, steps, identity, renderer };

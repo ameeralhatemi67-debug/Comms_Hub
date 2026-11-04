@@ -5,7 +5,9 @@
 //   A covered, minimised or unlit window is throttled by Chromium (about one frame a second, timers clamped), and a check
 //   timed there measures the throttling, not the studio (2026-11-04: 8 frames drawn of about 211). So the package starts
 //   with Windows' occlusion tracking off, its window is shown above the others, and a check refuses, loudly, to time a
-//   window that does not draw at the display's rate.
+//   window that does not draw at the display's rate. The rate is taken at a quiet moment, never during a timed row: with
+//   no graphics chip a 4K frame is painted on the page's own thread and holds it for up to a second, by design
+//   (2026-11-04: "1 frame a second" right after a no-chip 10 s row, in a window shown and on top).
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -100,13 +102,26 @@ const drawRate = (page) =>
       }),
   );
 
-/** Throws, with what to do, when the window does not draw at the display's rate; returns the rate otherwise. */
+/**
+ * The draw rate at a quiet moment: up to `tries` probes a moment apart, the best of them. The page's own work can hold one
+ * probe back; a hidden window is low in every one.
+ */
+async function quietDrawRate(page, tries = 3) {
+  let best = 0;
+  for (let i = 0; i < tries && best < MIN_DRAW_RATE; i++) {
+    if (i) await new Promise((r) => setTimeout(r, 700));
+    best = Math.max(best, await drawRate(page));
+  }
+  return best;
+}
+
+/** Throws, with what to do, when the window does not draw at the display's rate at a quiet moment; returns the rate otherwise. */
 async function assertDrawing(page, label) {
-  const rate = await drawRate(page);
+  const rate = await quietDrawRate(page);
   if (rate < MIN_DRAW_RATE) {
     throw new Error(`${label}: the window draws ${rate} frames a second, under ${MIN_DRAW_RATE}: it is throttled (covered, minimised, the screen locked or off). Nothing was timed; run again with the screen on and unlocked.`);
   }
   return rate;
 }
 
-module.exports = { LOCK, VISIBLE_ARGS, MIN_DRAW_RATE, branch, portLock, toFront, drawRate, assertDrawing };
+module.exports = { LOCK, VISIBLE_ARGS, MIN_DRAW_RATE, branch, portLock, toFront, drawRate, quietDrawRate, assertDrawing };

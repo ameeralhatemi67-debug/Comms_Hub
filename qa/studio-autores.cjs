@@ -64,8 +64,9 @@ async function playIn(win, o) {
   const before = load();
   const r = await win.evaluate((x) => window.autores.play(x), { ...o, seconds: SECONDS });
   r.load = { before, after: load() };
-  r.drawRate = { before: drawBefore, after: await d10.drawRate(win) };
-  if (r.drawRate.after < d10.MIN_DRAW_RATE) throw new Error(`${o.label}: the window fell to ${r.drawRate.after} frames a second during the play (covered, minimised, the screen locked or off); not kept.`);
+  // measured once the play has stopped, at a quiet moment (the paused frame is decoded on the page's thread with no chip)
+  r.drawRate = { before: drawBefore, after: await d10.quietDrawRate(win) };
+  if (r.drawRate.after < d10.MIN_DRAW_RATE) throw new Error(`${o.label}: after the play the window draws ${r.drawRate.after} frames a second (covered, minimised, the screen locked or off); not kept.`);
   console.log(`  ${o.label}: missed ${r.missedPct}% of ${r.stats.due}, dropped ${r.droppedPct}% of ${r.quality.total}, not shown ${r.shortPct}%, reseeks ${r.stats.reseeks}, levels ${JSON.stringify(r.levels)}, copies ${r.playing.map((p) => (p.copy ? 1 : 0)).join('')}; load ${before} -> ${r.load.after}`);
   return { label: o.label, ...r };
 }

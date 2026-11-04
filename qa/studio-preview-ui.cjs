@@ -83,7 +83,7 @@ async function menu(tab) {
  * Waits until the project is saved (its autosave runs after 15 s), so a reload is never asked «leave with unsaved
  * changes?»; a prompt that still comes is accepted where the page is listened to.
  */
-async function saved(tab) {
+async function afterSave(tab) {
   await tab.locator('.st-save.st-save-saved').waitFor({ timeout: 40000 });
 }
 
@@ -143,7 +143,7 @@ async function playing(tab, ms) {
       check('a light project plays at full under «تلقائية» from the plan\'s start (no badge)', calm.badge === null && calm.width === fullW, { ...calm, fullW });
       // the level a play of this shape ended on, kept on this device, is the start of the next one
       await win.evaluate(() => localStorage.setItem('studio.pref.auto-resolution', JSON.stringify({ '16:9': 0.5 })));
-      await saved(win);
+      await afterSave(win);
       await win.reload();
       await win.locator('.st-editor').waitFor({ timeout: 20000 });
       await win.waitForFunction(() => !document.querySelector('.st-clip-load'), null, { timeout: 20000 });
@@ -156,7 +156,7 @@ async function playing(tab, ms) {
       await win.locator('.st-res > button').click();
       await win.locator('.st-res-pop [role="radiogroup"]').first().getByRole('radio', { name: 'كاملة' }).click();
       await win.locator('body').press('Escape');
-      await saved(win);
+      await afterSave(win);
       await win.reload();
       await win.locator('.st-editor').waitFor({ timeout: 20000 });
       check('a resolution the person chose wins over the plan and is remembered', (await label(win)) === 'كاملة', await label(win));
