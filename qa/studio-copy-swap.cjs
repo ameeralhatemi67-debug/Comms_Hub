@@ -191,7 +191,8 @@ function watch() {
 function judgePlay(p, label) {
   const off = (f) => (f.shown === null ? null : f.shown < f.lo ? f.shown - f.lo : f.shown > f.hi ? f.shown - f.hi : 0);
   const frames = p.frames.map((f) => ({ ...f, off: off(f) }));
-  const steady = frames.findIndex((f) => f.ready >= 2 && f.off !== null && Math.abs(f.off) <= 1);
+  // in step by the player's own rule: the element shows frames and is no further off the clock than DRIFT allows
+  const steady = frames.findIndex((f) => f.ready >= 2 && f.off !== null && Math.abs(f.off) <= IN_RULE);
   const after = steady < 0 ? [] : frames.slice(steady);
   const offs = after.map((f) => f.off).filter((x) => x !== null);
   const sorted = offs.map(Math.abs).sort((a, b) => a - b);
@@ -291,7 +292,10 @@ function judgePlay(p, label) {
     const before = await win.evaluate(() => window.__swap.settled());
     const readsBefore = await win.evaluate(() => window.__swap.reads());
     const stateBefore = (await item())?.state;
-    check(`paused at ${AT} s, the stage shows frame ${AT * FPS} from the original (no read of a copy yet)`, before.shown === AT * FPS && before.playhead === AT * FPS && readsBefore.copy === 0 && stateBefore !== 'ready', { before, readsBefore, stateBefore });
+    // the identity proven is the stage against its own playhead; the frames read here (120, 122, 150) start on or just
+    // after their exact times, where the transport's timecode (frameAt) and the export's rule (frameShown) agree
+    check(`paused at the playhead, the stage shows the playhead's frame (${before.playhead}) from the original (no read of a copy yet)`, before.shown !== null && before.shown === before.playhead && readsBefore.copy === 0 && stateBefore !== 'ready', { before, readsBefore, stateBefore });
+    check(`four presses of «تقدم ثانية» from the start land on frame ${AT * FPS} (whole frames, time.ts stepFrames)`, before.playhead === AT * FPS, before);
 
     // --- «playing»: the page's own word -----------------------------------------------------------
     await d10.assertDrawing(win, 'the editor');
@@ -380,7 +384,9 @@ function judgePlay(p, label) {
     result.takenUpAtPause = { before, still, next, again, two, back, readsAt, readsAfter, madeMs };
     // the seeks after the take-up are the copy's: it was read for them, or the original was not (its reads may be cached)
     const fromCopy = readsAfter.copy > readsAt.copy || readsAfter.original === readsAt.original;
-    check(`taken up at the pause, the paused frame keeps its identity: frame ${AT * FPS} from the original, and from the copy frame ${AT * FPS} again (${again.shown}), ${(AT + 1) * FPS} a second on (${next.shown}) and ${AT * FPS + 2} two frames on (${two.shown})`, still.shown === AT * FPS && again.shown === AT * FPS && next.shown === (AT + 1) * FPS && two.shown === AT * FPS + 2 && back.shown === AT * FPS && fromCopy, result.takenUpAtPause);
+    const p0 = before.playhead;
+    const reads = [still, next, again, two, back];
+    check(`taken up at the pause, the paused frame keeps its identity: frame ${before.shown} from the original, and from the copy ${again.shown} again, ${next.shown} a second on and ${two.shown} two frames on, each the playhead's`, reads.every((r) => r.shown !== null && r.shown === r.playhead) && still.shown === before.shown && again.shown === before.shown && back.shown === before.shown && next.playhead === p0 + FPS && two.playhead === p0 + 2 && fromCopy, result.takenUpAtPause);
 
     // --- the next play: the copy's element ---------------------------------------------------------
     await d10.assertDrawing(win, 'the editor');
@@ -390,7 +396,7 @@ function judgePlay(p, label) {
     const e = judgePlay(await playE, 'the copy');
     result.copyPlay = { hold: holdE, play: e };
     check('the next play runs from the copy: its element is the light copy\'s, and no element of the original is made for it',e.made.length >= 1 && e.made.every((m) => m.place === 'copy' && m.copy === '1') && e.element?.place === 'copy', { made: e.made, element: e.element });
-    check(`its frames keep their identity: once in step (${e.inStepMs} ms after the press) every drawn frame is within the player's own rule of the clock (${IN_RULE} frames, preview.ts DRIFT), the median within one, none going back`, e.inStepMs !== null && e.inStepMs <= 1000 && e.outside === 0 && e.medianOff !== null && e.medianOff <= 1 && e.back === 0, e);
+    check(`its frames keep their identity by the player's own rule: in step ${e.inStepMs} ms after the press, then every drawn frame within ${IN_RULE} frames of the clock (preview.ts DRIFT ${DRIFT} s) and none going back; median ${e.medianOff} and worst ${e.worstOff} frames off (the original: ${a.medianOff} and ${a.worstOff}, in step after ${a.inStepMs} ms)`, e.inStepMs !== null && e.inStepMs <= 1000 && e.outside === 0 && e.back === 0, { copy: e, original: { inStepMs: a.inStepMs, medianOff: a.medianOff, worstOff: a.worstOff, outside: a.outside, back: a.back } });
     check('it plays at the same frame of the clock as the original\'s play did, or nearer (median offset, frames)', a.medianOff === null || (e.medianOff !== null && e.medianOff <= Math.max(1, a.medianOff)), { original: a.medianOff, copy: e.medianOff });
     note(`The press to the element in step: the original ${a.inStepMs} ms (warm-up offsets ${JSON.stringify(a.warmup)}), the copy ${e.inStepMs} ms (${JSON.stringify(e.warmup)}); frames drawn ${a.drawn} and ${e.drawn}; the elements' own count ${JSON.stringify(a.quality)} and ${JSON.stringify(e.quality)}. A play starts its element as it starts, from the original or the copy alike; until then the stage shows the paused decoder's frame.`);
 

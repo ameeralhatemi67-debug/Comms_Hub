@@ -3178,4 +3178,23 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     - The original's element did the same (median 2, worst 3), but only after a 1240 ms warm-up of up to 25 frames behind.
       Dropped frames by the elements' own count: 0 of 131 for the original, 2 of 100 for the copy.
   - Not rerun, by the manager's instruction.
+  - **Why the rows changed after this run** (the manager's decision): two rows had a wrong constant, and one a limit stricter
+    than the player's design. The expected frame is now the playhead's. The copy's play is now judged by the player's own
+    rule (`DRIFT`), with its median and worst recorded beside the original's.
+- **A step of the playhead goes in whole frames** (`b4b2dd4`, found by the run above).
+  - **What changed.** The stage's «إطار للأمام», «إطار للخلف», «تقدم ثانية» and «رجوع ثانية», and the editor's frame keys, used to
+    add a rounded frame length (`frameUs`, 33,333 µs at 30 frames a second) at each press. They now move by whole frames from the
+    frame shown, to the start an export gives that frame (`time.ts` `stepFrames`, `frameStart`).
+  - **Which frame a time shows** follows the export's rule (`frameShown`, a microsecond as `scrub.ts` `EPS`). A second is whole
+    frames: the rate, and 30 at 29.97. The editor's second keys add exactly one second, which keeps a frame start on its frame
+    at every project rate, so they are unchanged.
+  - `tests/studio-step.test.mjs`, 15 tests: 100 presses each way of a frame and of a second at 24, 25, 30, 29.97 and 60, each on
+    its exact frame. With the old step put back, 9 of the 15 fail.
+  - `npm run typecheck` clean. The full `npm test` and `npm run build` are not run yet: Fork 3 was building, and the manager asked
+    for light work only.
+  - **Found and left:** the transport's timecode takes a frame with `frameAt`, not by the export's rule. So at 30 frames a second,
+    a playhead on a start that rounds down (frames 1, 4, 7 and so on) reads as the frame before. One «إطار للأمام» from 0 reads
+    00:00.00, as it did before this change.
+- **The D10 checks' port lock** is `%LOCALAPPDATA%\Temp\comms-hub-port3000.lock` always (`9a3db90`, `qa/studio-d10.cjs`, the line
+  Fork 1's branch has). With TEMP moved for a run's files, the lock followed TEMP, so two checks could each hold "the" lock.
 - **Not done.** Nothing pushed.
