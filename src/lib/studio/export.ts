@@ -102,8 +102,51 @@ export const EXPORT_ERRORS: Record<string, string> = {
 
 type Frames = { gen: AsyncGenerator<WrappedCanvas, void, unknown>; cur: WrappedCanvas | null; next: WrappedCanvas | null };
 
+/**
+ * The decoded frames an export draws from (the media pool's): stills read their one frame once; reversed clips read
+ * each frame where it is (the decoder seeks); every other clip, at any speed or ramp, is decoded in one forward pass
+ * over the stretch it shows. A frame is the decoder's canvas, valid until the next call for that clip.
+ */
+export function exportFrames(pool: MediaPool) {
+  const iters = new Map<string, Frames>();
+  const stills = new Map<string, CanvasImageSource | null>();
+  return {
+    async frame(clip: Clip, t: Micros): Promise<CanvasImageSource | null> {
+      if (isHold(clip)) {
+        if (!stills.has(clip.id)) {
+          const f = await pool.frameAt(clip.source!, sourceTime(clip, t));
+          stills.set(clip.id, f ? copyFrame(f) : null);
+        }
+        return stills.get(clip.id) ?? null;
+      }
+      if (clip.reverse) return pool.frameAt(clip.source!, sourceTime(clip, t));
+      const at = sourceTime(clip, t) / US;
+      let f = iters.get(clip.id);
+      if (!f) {
+        const from = sourceTime(clip, clip.start) / US;
+        const to = sourceTime(clip, clip.start + clip.length) / US;
+        const gen = pool.frames(clip.source!, from, to + 0.5);
+        if (!gen) return null;
+        const first = await gen.next();
+        const second = first.done ? { done: true, value: undefined } : await gen.next();
+        f = { gen, cur: first.done ? null : first.value, next: second.done ? null : (second.value as WrappedCanvas) };
+        iters.set(clip.id, f);
+      }
+      while (f.next && f.next.timestamp <= at + 1e-6) {
+        f.cur = f.next;
+        const r = await f.gen.next();
+        f.next = r.done ? null : r.value;
+      }
+      return (f.cur?.canvas as CanvasImageSource) ?? null;
+    },
+    async close() {
+      for (const f of iters.values()) await f.gen.return(undefined).catch(() => undefined);
+    },
+  };
+}
+
 /** Reads one source's decoded sound for a span of source time. */
-function audioReader(pool: MediaPool, mb: typeof import('mediabunny')): AudioSourceReader {
+export function audioReader(pool: MediaPool, mb: typeof import('mediabunny')): AudioSourceReader {
   return (sourceId, from, to) => {
     const input = pool.input(sourceId);
     if (!input) return null;
@@ -137,7 +180,7 @@ export async function measureLoudness(doc: ProjectDoc, pool: MediaPool, opts: { 
 }
 
 /** Every sample of a mixed window times one gain (the export's «توحيد مستوى الصوت»). */
-function applyGain(b: AudioBuffer, gain: number): AudioBuffer {
+export function applyGain(b: AudioBuffer, gain: number): AudioBuffer {
   if (gain === 1) return b;
   for (let c = 0; c < b.numberOfChannels; c++) {
     const d = b.getChannelData(c);
@@ -314,43 +357,11 @@ export async function exportVideo(
     const audio = sound ? new mb.AudioBufferSource({ codec: acodec, quality: mb.QUALITY_HIGH }) : null;
     if (audio) output.addAudioTrack(audio);
     const motion = new MotionRenderer();
-    const iters = new Map<string, Frames>();
+    const source = exportFrames(pool);
     const read = audioReader(pool, mb);
     const wins = audio ? windows(duration) : [];
     let wi = 0;
     const scale = w / canvasOf(doc).w;
-
-    // stills read their one frame once; reversed clips read each frame where it is (the decoder seeks);
-    // every other clip, at any speed or ramp, is decoded in one forward pass over the stretch it shows
-    const stills = new Map<string, CanvasImageSource | null>();
-    const frameFor = async (clip: Clip, t: Micros): Promise<CanvasImageSource | null> => {
-      if (isHold(clip)) {
-        if (!stills.has(clip.id)) {
-          const f = await pool.frameAt(clip.source!, sourceTime(clip, t));
-          stills.set(clip.id, f ? copyFrame(f) : null);
-        }
-        return stills.get(clip.id) ?? null;
-      }
-      if (clip.reverse) return pool.frameAt(clip.source!, sourceTime(clip, t));
-      const at = sourceTime(clip, t) / US;
-      let f = iters.get(clip.id);
-      if (!f) {
-        const from = sourceTime(clip, clip.start) / US;
-        const to = sourceTime(clip, clip.start + clip.length) / US;
-        const gen = pool.frames(clip.source!, from, to + 0.5);
-        if (!gen) return null;
-        const first = await gen.next();
-        const second = first.done ? { done: true, value: undefined } : await gen.next();
-        f = { gen, cur: first.done ? null : first.value, next: second.done ? null : (second.value as WrappedCanvas) };
-        iters.set(clip.id, f);
-      }
-      while (f.next && f.next.timestamp <= at + 1e-6) {
-        f.cur = f.next;
-        const r = await f.gen.next();
-        f.next = r.done ? null : r.value;
-      }
-      return (f.cur?.canvas as CanvasImageSource) ?? null;
-    };
 
     try {
       await output.start();
@@ -360,7 +371,7 @@ export async function exportVideo(
         // the sound stays one window ahead of the pictures
         while (audio && wi < wins.length && wins[wi].from <= t) await audio.add(applyGain(await mixWindow(doc, wins[wi++], read), opts.gain ?? 1));
         const frames = new Map<string, CanvasImageSource | null>();
-        for (const { clip } of visibleAt(doc, t)) if (sourceOf(doc, clip.source)?.media === 'video') frames.set(clip.id, await frameFor(clip, t));
+        for (const { clip } of visibleAt(doc, t)) if (sourceOf(doc, clip.source)?.media === 'video') frames.set(clip.id, await source.frame(clip, t));
         if (drawers) {
           // the decoded frames copied for a drawer (the decoder reuses its canvases)
           const sent: [string, ImageBitmap | null][] = [];
@@ -393,7 +404,7 @@ export async function exportVideo(
       pipe?.close();
       drawers?.close();
       for (const job of [...drawn, ...inflight]) void job.frame.then((f) => f.close(), () => undefined);
-      for (const f of iters.values()) await f.gen.return(undefined).catch(() => undefined);
+      await source.close();
     }
     const file = await target.result();
     return { file, bytes: file.size, frames: total, duration, target: target.kind, audio: !!audio, via, yuvWorkers: workers, yuvSimd: pipe?.simd === true, drawers: drawCount, lanes: 1, steps: [] };
@@ -439,8 +450,9 @@ export async function exportVideo(
           signal: opts.signal,
           video,
           before,
+          // a segment run again counts its frames again: never past the whole
           progress: (done) => {
-            if (done % 5 === 0 || done === total) opts.onProgress?.({ phase: 'encode', done, total });
+            if (done % 5 === 0 || done >= total) opts.onProgress?.({ phase: 'encode', done: Math.min(done, total), total });
           },
           faults: opts.faults,
           inspect: opts.inspect,

@@ -23,9 +23,10 @@ import { exportChecks, hasStop } from '@/lib/studio/checks';
 import { openSlots } from '@/lib/studio/slot';
 import { toSrt } from '@/lib/studio/text';
 import { factsOf, usePlatforms } from './platforms';
-import { EXPORT_ERRORS, ExportError, SHORT_LABELS, estimateBytes, exportStill, exportVideo, fileName, outputSize, type ExportProgress, type Short, type VideoFormat } from '@/lib/studio/export';
+import { EXPORT_ERRORS, ExportError, SHORT_LABELS, estimateBytes, exportStill, exportVideo, fileName, outputSize, type ExportProgress, type ExportResult, type Short, type VideoFormat } from '@/lib/studio/export';
 import { loudnessOf, soundReady, storedLoudness, workAhead } from '@/lib/studio/loudness-ahead';
 import { exportLanes, rememberExport } from '@/lib/studio/export-plan';
+import { exportShapes, shapeGroups } from '@/lib/studio/shapes';
 import { LOUDNESS_TARGET, lufsText, normalizeGain } from '@/lib/studio/loudness';
 import { hasSound } from '@/lib/studio/audio';
 import { download } from '@/lib/studio/target';
@@ -221,31 +222,38 @@ export function ExportPanel({
       const list: (Ratio | null)[] = photo ? [null] : chosenShapes;
       const results: Done[] = [];
       let linked: string | null = null;
-      for (let i = 0; i < list.length; i++) {
-        const shape = list[i];
-        const d = shape ? docForShape(doc, shape) : doc;
+      const shaped = list.map((shape) => {
         const tag = list.length > 1 || (shape && shape !== main) ? ` (${shapeName(shape!)})` : '';
-        const name = fileName(`${title}${tag}`, ext);
+        return { shape, d: shape ? docForShape(doc, shape) : doc, name: fileName(`${title}${tag}`, ext) };
+      });
+      const progressOf = (of: string) => (p: ExportProgress) => setProgress({ label: p.phase === 'prepare' ? `جارٍ التجهيز${of}…` : p.phase === 'finish' ? `جارٍ إنهاء الملف${of}…` : `جارٍ التصدير${of} ${Math.round((p.done / p.total) * 100)}٪`, f: p.done / Math.max(1, p.total) });
+      // lanes as this computer's measured plan allows (one in a browser), after the ladder's memory; with more than
+      // one, as many shapes as lanes are made in one pass (shapes.ts)
+      const { lanes } = what === 'video' ? await exportLanes() : { lanes: 1 };
+      const made = new Map<number, { r: ExportResult; saveTo?: FileSystemFileHandle }>();
+      if (what === 'video' && lanes > 1 && list.length > 1) {
+        const jobs: { i: number; saveTo?: FileSystemFileHandle }[] = [];
+        for (let i = 0; i < shaped.length; i++) jobs.push({ i, saveTo: !toLibrary && saveInPlace ? await chooseSaveFile(shaped[i].name, format) : undefined });
+        for (const group of shapeGroups(jobs, lanes)) {
+          const of = ` ${group.map((j) => j.i + 1).join(' و')} من ${list.length} معاً`;
+          const rs = await exportShapes(group.map((j) => ({ doc: shaped[j.i].d, name: shaped[j.i].name, saveTo: j.saveTo })), pool, { short, format, gain, watermark, signal: ctl.signal, onProgress: progressOf(of) });
+          rs.forEach((r, k) => made.set(group[k].i, { r, saveTo: group[k].saveTo }));
+        }
+      }
+      for (let i = 0; i < list.length; i++) {
+        const { shape, d, name } = shaped[i];
         const of = list.length > 1 ? ` ${i + 1} من ${list.length}` : '';
         let file: File;
         if (what === 'still') {
           setProgress({ label: `جارٍ إنشاء الصورة${of}…`, f: 0.5 });
           file = await exportStill(d, pool, { t, name, type: stillType, short: photo ? undefined : short, adjusted, watermark });
         } else {
-          const saveTo = !toLibrary && saveInPlace ? await chooseSaveFile(name, format) : undefined;
-          // lanes as this computer's measured plan allows (one in a browser), after the ladder's memory
-          const { lanes } = await exportLanes();
-          const r = await exportVideo(d, pool, {
-            short,
-            format,
-            name,
-            gain,
-            watermark,
-            saveTo,
-            lanes,
-            signal: ctl.signal,
-            onProgress: (p: ExportProgress) => setProgress({ label: p.phase === 'prepare' ? `جارٍ التجهيز${of}…` : p.phase === 'finish' ? `جارٍ إنهاء الملف${of}…` : `جارٍ التصدير${of} ${Math.round((p.done / p.total) * 100)}٪`, f: p.done / Math.max(1, p.total) }),
-          });
+          let saveTo = made.get(i)?.saveTo;
+          let r = made.get(i)?.r;
+          if (!r) {
+            saveTo = !toLibrary && saveInPlace ? await chooseSaveFile(name, format) : undefined;
+            r = await exportVideo(d, pool, { short, format, name, gain, watermark, saveTo, lanes, signal: ctl.signal, onProgress: progressOf(of) });
+          }
           file = r.file;
           rememberExport(r);
           if (r.steps.length) setSlower(true);

@@ -175,3 +175,13 @@ test('the ladder\'s memory (P-35): a lane failure caps the next exports at what 
   rememberExport({ lanes: 1, steps: ['DRAW_WORKER'] }, s);
   assert.equal(ladderLanes(3, readLadder(s)), 3, 'a worker failure is not a lane failure');
 });
+
+test('one pass, several shapes (P-05): as many shapes go together as there are lanes, in order', async () => {
+  const { shapeGroups } = await import('../src/lib/studio/shapes.ts');
+  assert.deepEqual(shapeGroups([1, 2, 3, 4], 2), [[1, 2], [3, 4]]);
+  assert.deepEqual(shapeGroups([1, 2, 3, 4], 3), [[1, 2, 3], [4]]);
+  assert.deepEqual(shapeGroups([1, 2, 3], 1), [[1], [2], [3]], 'one lane: one after another, as before');
+  assert.deepEqual(shapeGroups([1, 2], 4), [[1, 2]]);
+  const panel = fs.readFileSync('src/components/studio/export-panel.tsx', 'utf8');
+  assert.match(panel, /if \(what === 'video' && lanes > 1 && list\.length > 1\)/, 'the one pass only where the plan gives lanes');
+});

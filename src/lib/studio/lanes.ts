@@ -5,8 +5,8 @@
 // (VideoSampleSource into an output that keeps nothing), so every lane's frames and settings are the single lane's.
 // The packets join into the file's one video track in order: the first segment's as they come, the others kept in the
 // browser's private storage until their turn (a long 4K export would not fit in memory). The join is guarded: every
-// lane's decoder description (codec string and parameter sets) must be the first lane's, or nothing is written and
-// the export runs again with one lane. A segment after the first whose lane fails is run again by the lanes left;
+// lane's decoder description (codec string and parameter sets) must be the first lane's, or every lane stops, the
+// file of this attempt is thrown away with nothing of the other lanes in it, and the export runs again with one lane. A segment after the first whose lane fails is run again by the lanes left;
 // a failure of the first segment, or of the last lane, ends this way and the export runs again with fewer lanes.
 // A lane after the first starts encoding one key-frame group (two seconds) before its segment and drops those packets:
 // a processor's encoder controls its rate from what it has seen, and started cold at the segment it made the
@@ -188,6 +188,9 @@ function laneFrames(mb: Mb, pool: MediaPool) {
 }
 
 /** One segment through one lane: its packets to `emit`, in order. Throws LaneError on a lane's failure. */
+/** Times a later segment is run again after its lane failed, before the attempt ends and the export takes fewer lanes. */
+const RETRIES = 2;
+
 /** Frames a lane encodes before its segment and drops, to warm its encoder's rate control: one key-frame group. */
 export const warmFrames = (fps: number) => Math.round(fps * 2);
 
@@ -304,83 +307,96 @@ async function runSegment(c: LaneContext, seg: Segment, lane: number, emit: (p: 
 
 /**
  * The project's video through `segments.length` lanes into `c.video`. Returns the lane failures met on the way (each a
- * segment run again by the lanes left). Throws LaneError where the export must run again with fewer lanes: the join
- * guard failing ('LANES'), the first segment's lane failing, or no lane left.
+ * segment run again by the lanes left). Throws LaneError where the export must run again with fewer lanes: a lane whose
+ * decoder description is not the first segment's ('LANES'; every lane stops at once, and the export's file is thrown
+ * away before anything of that lane reaches it), the first segment's lane failing, or no lane left. Every lane has
+ * stopped before this returns or throws.
  */
 export async function encodeLanes(c: LaneContext, segments: Segment[]): Promise<string[]> {
   const steps: string[] = [];
   const k = segments.length;
   const first = new Array<Meta>(k).fill(undefined);
-  let guard = 'waiting' as 'waiting' | 'open';
   let mismatch = false;
-  const held: [EncodedPacket, Meta][] = [];
   let live = Promise.resolve();
   let done = 0;
   const spills = new Map<number, Spill>();
   const tick = () => c.progress(++done);
+  // stops every lane: the person cancelled, a description differs, or a lane failed in a way that ends this attempt
+  const stop = new AbortController();
+  const onCancel = () => stop.abort();
+  c.signal?.addEventListener('abort', onCancel);
+  const lane: LaneContext = { ...c, signal: stop.signal };
 
-  const toFile = (p: EncodedPacket, meta: Meta) => {
-    live = live.then(async () => {
-      await c.before(p.timestamp);
-      await c.video.add(p, meta);
-    });
-  };
-  const checkGuard = () => {
-    if (guard === 'open' || first.some((m) => !m?.decoderConfig)) return;
-    mismatch = first.some((m) => !same(m, first[0]));
-    if (mismatch) return;
-    guard = 'open';
-    for (const [p, m] of held.splice(0)) toFile(p, m);
-  };
-
-  // segment 0 goes to the file as it comes (after the guard); the others to their spills
+  // the first segment goes into the file as it comes; the others wait in their spills, checked against it
   const emitter = (seg: number) => (p: EncodedPacket, meta: Meta) => {
     if (!first[seg] && meta?.decoderConfig) {
       first[seg] = meta;
-      checkGuard();
+      const ref = first[0];
+      if ((seg === 0 && first.some((m) => m && !same(m, meta))) || (seg !== 0 && ref && !same(meta, ref))) {
+        mismatch = true;
+        stop.abort();
+      }
     }
     if (seg === 0) {
-      if (guard === 'open') toFile(p, held.length ? undefined : meta);
-      else held.push([p, meta]);
+      live = live.then(async () => {
+        await c.before(p.timestamp);
+        await c.video.add(p, meta);
+      });
     } else spills.get(seg)!.push(p);
   };
 
   const queue = segments.map((_, i) => i);
-  let lanes = k;
+  const tries = new Map<number, number>();
+  let active = 0;
+  let fatal: unknown = null;
   const runner = async () => {
-    while (queue.length) {
-      const seg = queue.shift()!;
-      if (seg !== 0) spills.set(seg, await Spill.open(`lane-${seg}`));
-      try {
-        await runSegment(c, segments[seg], seg, emitter(seg), tick);
-        if (mismatch) throw new LaneError('LANES');
-        if (seg !== 0) await spills.get(seg)!.close();
-      } catch (e) {
-        const code = e instanceof LaneError ? e.code : 'ENCODER';
-        if (seg === 0 || code === 'LANES' || code === 'ABORTED' || code === 'COLOUR') throw e;
-        // a later segment's lane failed: its packets are dropped, the segment waits for a lane, and this lane stops
-        await spills.get(seg)?.discard();
-        spills.delete(seg);
-        first[seg] = undefined;
-        steps.push(code);
-        queue.push(seg);
-        if (--lanes === 0) throw new LaneError(code);
-        return;
+    active++;
+    try {
+      while (queue.length && !stop.signal.aborted) {
+        const seg = queue.shift()!;
+        if (seg !== 0) spills.set(seg, await Spill.open(`lane-${seg}`));
+        try {
+          await runSegment(lane, segments[seg], seg, emitter(seg), tick);
+          if (seg !== 0) await spills.get(seg)!.close();
+        } catch (e) {
+          const code = e instanceof LaneError ? e.code : 'ENCODER';
+          if (stop.signal.aborted) return;
+          if (seg === 0 || code === 'COLOUR' || (tries.get(seg) ?? 0) >= RETRIES) {
+            fatal ??= e instanceof LaneError ? e : new LaneError(code);
+            stop.abort();
+            return;
+          }
+          // a later segment's lane failed: its packets are dropped and the segment waits for a lane; this lane stops,
+          // one lane fewer, unless it is the last one running, which then takes it itself
+          tries.set(seg, (tries.get(seg) ?? 0) + 1);
+          await spills.get(seg)?.discard();
+          spills.delete(seg);
+          first[seg] = undefined;
+          steps.push(code);
+          queue.push(seg);
+          if (active > 1) return;
+        }
       }
+    } finally {
+      active--;
     }
   };
   try {
-    await Promise.all(Array.from({ length: k }, () => runner()));
-    if (mismatch || guard !== 'open') throw new LaneError('LANES');
+    await Promise.allSettled(Array.from({ length: k }, () => runner()));
+    if (c.signal?.aborted) throw new LaneError('ABORTED');
+    if (mismatch || first.some((m, i) => i > 0 && !same(m, first[0]))) throw new LaneError('LANES');
+    if (fatal) throw fatal instanceof LaneError ? fatal : new LaneError('ENCODER');
+    if (queue.length) throw new LaneError('ENCODER');
     await live;
     for (let seg = 1; seg < k; seg++) {
-      const s = spills.get(seg)!;
-      for await (const p of s.replay(c.mb)) {
+      for await (const p of spills.get(seg)!.replay(c.mb)) {
         await c.before(p.timestamp);
         await c.video.add(p);
       }
     }
   } finally {
+    c.signal?.removeEventListener('abort', onCancel);
+    await live.catch(() => undefined);
     for (const s of spills.values()) await s.discard();
   }
   return steps;
