@@ -3,7 +3,8 @@
 // code where there is not, and the two must give the same bytes. The fixture (qa/fixtures/studio-effects-parity.ts)
 // runs in Edge and inside the development package on the saving chip, on the strong chip and with no chip at all:
 //   1. every effect, at several strengths, over three pictures (footage, an item with soft and see-through edges,
-//      every colour at every opacity): chip against plain code, byte for byte, wherever the chip path is offered;
+//      every colour at every opacity): chip against plain code, byte for byte, wherever the chip path is offered, and
+//      the plain code's colour in WebAssembly lanes (effects/simd.ts) against the same arithmetic a pixel at a time;
 //   2. every frame of the cross-device corpus composed with each path: the same hash;
 //   3. the plain code is the same everywhere: each case's hash equals Edge's;
 //   4. how far each effect moved from the canvas filter used before, on each engine's own filter (recorded, and held
@@ -122,6 +123,11 @@ async function runIn(page) {
       check(`${engine}: every effect on the graphics chip equals the plain code byte for byte (${cases.length} cases)`, bad.length === 0, { renderer: r.renderer, bad: bad.map((c) => ({ picture: c.picture, effect: c.effect, ...c.chip })) });
     }
     for (const [engine, r] of Object.entries(runs)) {
+      const withLanes = r.identity.cases.filter((c) => c.lanes);
+      const bad = withLanes.filter((c) => !c.lanes.offered || c.lanes.differing !== 0);
+      check(`${engine}: the colour in WebAssembly lanes equals the plain code one pixel at a time (${withLanes.length} cases)`, withLanes.length > 0 && bad.length === 0, { bad: bad.map((c) => ({ picture: c.picture, effect: c.effect, ...c.lanes })) });
+    }
+    for (const [engine, r] of Object.entries(runs)) {
       const differ = r.identity.cases.filter((c, i) => c.hash !== ref.identity.cases[i]?.hash).map((c) => `${c.picture}: ${c.effect}`);
       check(`${engine}: the plain code gives Edge's bytes for every case`, differ.length === 0, { differ });
     }
@@ -156,7 +162,7 @@ async function runIn(page) {
     engine: r.engine,
     renderer: r.renderer,
     chip: r.identity?.chip,
-    cases: r.identity?.cases.map((c) => ({ picture: c.picture, effect: c.effect, chip: c.chip, sinceFilter: c.sinceFilter })),
+    cases: r.identity?.cases.map((c) => ({ picture: c.picture, effect: c.effect, chip: c.chip, lanes: c.lanes, sinceFilter: c.sinceFilter })),
     corpus: r.corpus ? Object.fromEntries(Object.entries(r.corpus).map(([p, fr]) => [p, fr.length])) : null,
   }]));
   note('The chip path and the plain code are compared byte for byte; how far each effect moved from the canvas filter is measured against each engine\'s own filter, and checked against Edge\'s.');

@@ -69,9 +69,9 @@ function onCode(canvas: Scratch, w: number, h: number, plan: EffectPlan, pad: nu
 }
 
 /**
- * `plan` over the top left w by h of `canvas` (a scratch of layer()), as a canvas whose top left w by h is the result to
- * draw back with a source rect: the chip's canvas, or `canvas` itself rewritten by the plain code; null when the path
- * asked for is not offered here. With `pad`, the picture is blurred as if surrounded by that much transparency (code.ts
+ * `plan` over the top left w by h of `canvas` (a scratch of layer()), as a picture whose top left w by h is the result
+ * to draw back with a source rect: the chip's canvas, or `canvas` itself rewritten by the plain code; null when the
+ * path asked for is not offered here. With `pad`, the picture is blurred as if surrounded by that much transparency (code.ts
  * blurPixels), rounded up to the plan's reduction. With `at`, the w by h is read from that place of `canvas` (the
  * picture being composed): the chip uploads it straight from there, and the plain code writes into scratch `into`.
  */

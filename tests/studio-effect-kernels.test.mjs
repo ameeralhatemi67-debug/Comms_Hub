@@ -153,3 +153,28 @@ test('a scratch picture grows to hold what a frame asks and shrinks only after a
   for (let i = 0; i < 130 && !shrunk; i++) shrunk = fitted(r, 300, 300);
   assert.deepEqual(shrunk, [300, 300], 'far too large for 120 requests in a row');
 });
+
+test('the colour in WebAssembly lanes gives the bytes of the plain code, opaque pixels or not', async () => {
+  const { colourStraight } = await import('../src/lib/studio/effects/code.ts');
+  const { colourOpaque } = await import('../src/lib/studio/effects/simd.ts');
+  const { photoColourPlan } = await import('../src/lib/studio/effects/plan.ts');
+  const plans = [
+    ...[{ brightness: 12, contrast: 18, saturation: 25 }, { brightness: -8, contrast: 10, saturation: -30 }, { brightness: 0, contrast: 0, saturation: -100 }, { brightness: 37, contrast: -63, saturation: 81 }, { brightness: 100, contrast: 0, saturation: 0 }, { brightness: 0, contrast: -100, saturation: 0 }, { brightness: -50, contrast: 100, saturation: 100 }].map(colourPlan),
+    ...[{ brightness: 30, warmth: 70 }, { contrast: -45, saturation: 60 }, { brightness: 100, contrast: 100, saturation: 100, warmth: 100 }].map(photoColourPlan),
+  ];
+  // mostly opaque, as footage is, with see-through and clear pixels among them, and a length that is not 16-aligned
+  const w = 211;
+  const h = 97;
+  const base = picture(w, h, 33);
+  for (let i = 0; i < base.length; i += 4) if ((i / 4) % 11) base[i + 3] = 255;
+  for (let i = 3; i < base.length; i += 4 * 37) base[i] = 0;
+  toStraight(base);
+  for (const plan of plans) {
+    const lanes = base.slice();
+    const plain = base.slice();
+    assert.ok(colourOpaque(lanes.slice(), plan) > 0, 'the lanes are offered here');
+    colourStraight(lanes, plan, true);
+    colourStraight(plain, plan, false);
+    assert.deepEqual([...lanes], [...plain]);
+  }
+});

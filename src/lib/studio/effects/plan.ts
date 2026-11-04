@@ -10,7 +10,13 @@
  * its constant `offset` (1/65536 too), rounded to the nearest (an exact half to the even neighbour) and kept within 0
  * to 255.
  */
-export type ColourPlan = { table: Uint8Array | null; matrix: Int32Array | null; offset: Int32Array | null };
+export type ColourPlan = {
+  table: Uint8Array | null;
+  matrix: Int32Array | null;
+  offset: Int32Array | null;
+  /** The table's steps, each a float32 slope and a float32 constant: v = slope * x + constant, cut, kept within 0 to 255. */
+  steps: [number, number][];
+};
 
 /**
  * A blur of `sigma` pixels: the picture reduced `n` times (2^k) by averaging each n by n block, blurred there with
@@ -25,11 +31,12 @@ export type EffectPlan = { colour: ColourPlan | null; blur: BlurPlan | null };
 const f = Math.fround;
 const css = (v: number, digits: number) => Number(v.toFixed(digits));
 
+/** One step of Chromium's linear component transfer: its float32 slope and float32 constant, 255 * intercept. */
+const step = (slope: number, intercept: number): [number, number] => [f(slope), f(255 * f(intercept))];
+
 /** Chromium's table for a linear component transfer: slope * i + 255 * intercept in floats, cut to a whole number. */
-function linearTable(slope: number, intercept: number): Uint8Array {
+function linearTable([s, b]: [number, number]): Uint8Array {
   const t = new Uint8Array(256);
-  const s = f(slope);
-  const b = f(255 * f(intercept));
   for (let i = 0; i < 256; i++) {
     const v = f(f(s * i) + b);
     t[i] = v <= 0 ? 0 : v >= 255 ? 255 : Math.floor(v);
@@ -56,9 +63,12 @@ export function colourPlan(a: { brightness?: number; contrast?: number; saturati
   const ct = amount(a.contrast);
   const sat = amount(a.saturation);
   let table: Uint8Array | null = null;
-  if (br !== 1 || ct !== 1) {
-    const tb = br !== 1 ? linearTable(br, 0) : null;
-    const tc = ct !== 1 ? linearTable(ct, -0.5 * f(ct) + 0.5) : null;
+  const steps: [number, number][] = [];
+  if (br !== 1) steps.push(step(br, 0));
+  if (ct !== 1) steps.push(step(ct, -0.5 * f(ct) + 0.5));
+  if (steps.length) {
+    const tb = br !== 1 ? linearTable(steps[0]) : null;
+    const tc = ct !== 1 ? linearTable(steps[steps.length - 1]) : null;
     table = new Uint8Array(256);
     for (let i = 0; i < 256; i++) {
       const x = tb ? tb[i] : i;
@@ -66,7 +76,7 @@ export function colourPlan(a: { brightness?: number; contrast?: number; saturati
     }
   }
   const matrix = sat !== 1 ? saturationMatrix(sat) : null;
-  return table || matrix ? { table, matrix, offset: null } : null;
+  return table || matrix ? { table, matrix, offset: null, steps } : null;
 }
 
 /**
@@ -93,7 +103,7 @@ export function photoColourPlan(a: { brightness?: number; contrast?: number; sat
     // saturation leaves a grey grey, so contrast's constant passes through it unchanged
     offset[i] = Math.round(65536 * warm[i] * 128 * (1 - ct));
   }
-  return { table: null, matrix, offset };
+  return { table: null, matrix, offset, steps: [] };
 }
 
 /** e^-x from additions, products and quotients alone, so every engine computes the same weights. */

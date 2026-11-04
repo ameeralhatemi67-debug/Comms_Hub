@@ -2,6 +2,7 @@
 // and the path taken where there is no chip. Pixels are RGBA, premultiplied as the canvas keeps them; every step is
 // whole-number arithmetic with one rounding, written as chip.ts writes it. Pure, usable in a worker.
 import { reduced, type BlurPlan, type ColourPlan } from './plan.ts';
+import { colourOpaque } from './simd.ts';
 
 /** Straight colour from premultiplied, rounded to the nearest; opaque pixels unchanged. */
 export const unpremultiply = (p: number, a: number) => (a === 255 ? p : a ? Math.min(255, Math.floor((p * 255 + (a >> 1)) / a)) : 0);
@@ -75,9 +76,11 @@ export function colourPixels(px: Uint8ClampedArray, plan: ColourPlan): void {
 /**
  * colourPixels on straight colour as getImageData gives it, for putImageData, in one pass: a see-through pixel is taken
  * premultiplied (exact) and back to straight colour by unpremultiply, as the chip takes it, so the canvas ends up with
- * colourPixels' bytes.
+ * colourPixels' bytes. Opaque pixels go through simd.ts's WebAssembly four at a time where it runs (`simd`), the rest
+ * here.
  */
-export function colourStraight(px: Uint8ClampedArray, plan: ColourPlan): void {
+export function colourStraight(px: Uint8ClampedArray, plan: ColourPlan, simd = true): void {
+  const fast = simd ? colourOpaque(px, plan) : 0;
   const t = plan.table ?? Uint8Array.from({ length: 256 }, (_, i) => i);
   const m = plan.matrix;
   const o0 = plan.offset ? plan.offset[0] : 0;
@@ -87,7 +90,7 @@ export function colourStraight(px: Uint8ClampedArray, plan: ColourPlan): void {
   const [k0, k1, k2, k3, k4, k5, k6, k7, k8] = k ?? [];
   for (let i = 0; i < px.length; i += 4) {
     const a = px[i + 3];
-    if (!a) continue;
+    if (!a || (a === 255 && i < fast)) continue;
     let r = px[i];
     let g = px[i + 1];
     let b = px[i + 2];

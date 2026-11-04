@@ -11,7 +11,8 @@ import { corpus } from '../../src/lib/studio/bench-docs.ts';
 import { SyntheticSources, basePixels } from '../../src/lib/studio/bench.ts';
 import { composeFrame, filterOf } from '../../src/lib/studio/compose.ts';
 import { applyEffect, blurPlan, effectOf, effectsChip, setEffectPath, type EffectPlan } from '../../src/lib/studio/effects/index.ts';
-import { toPremultiplied } from '../../src/lib/studio/effects/code.ts';
+import { colourStraight, toPremultiplied } from '../../src/lib/studio/effects/code.ts';
+import { colourOpaque } from '../../src/lib/studio/effects/simd.ts';
 import * as schema from '../../src/lib/studio/schema.ts';
 import { loadFonts, usedFonts } from '../../src/lib/studio/text.ts';
 import { loadSticker, MotionRenderer } from '../../src/lib/studio/motion-adapter.ts';
@@ -156,13 +157,26 @@ export async function identity() {
       const code = read(applyEffect(copy(), w, h, c.plan, { pad: c.pad, path: 'code' })!, w, h);
       const onChip = chip ? applyEffect(copy(), w, h, c.plan, { pad: c.pad, path: 'chip' }) : null;
       const chipPx = onChip ? read(onChip, w, h) : null;
+      // the plain code's colour in WebAssembly lanes against the same arithmetic one pixel at a time
+      let lanes: { offered: boolean; differing: number } | null = null;
+      if (c.plan.colour && !c.plan.blur) {
+        const px = p.canvas.getContext('2d')!.getImageData(0, 0, w, h).data;
+        const a = px.slice();
+        const b = px.slice();
+        const offered = colourOpaque(a.slice(), c.plan.colour) > 0;
+        colourStraight(a, c.plan.colour, true);
+        colourStraight(b, c.plan.colour, false);
+        let differing = 0;
+        for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) differing++;
+        lanes = { offered, differing };
+      }
       // before: the canvas filter over the picture, as compose.ts and cover.ts drew it
       const old = canvasOf(w, h);
       old.ctx.filter = c.filter;
       old.ctx.drawImage(p.canvas, 0, 0);
       old.ctx.filter = 'none';
       const before = held(old.ctx, w, h);
-      out.push({ picture: p.name, effect: c.name, chip: chipPx ? compare(chipPx, code) : null, sinceFilter: compare(before, code), hash: await sha256(code) });
+      out.push({ picture: p.name, effect: c.name, chip: chipPx ? compare(chipPx, code) : null, lanes, sinceFilter: compare(before, code), hash: await sha256(code) });
     }
   }
   return { chip, cases: out };

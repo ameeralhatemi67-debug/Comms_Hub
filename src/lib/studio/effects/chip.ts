@@ -161,6 +161,9 @@ function setup(): Gl | null {
   try {
     const canvas = new OffscreenCanvas(1, 1);
     // a software renderer is refused: without a graphics chip the plain code is the quicker one
+    // the drawing buffer is kept and drawn back: handing it over instead (transferToImageBitmap) was measured slower on
+    // 2026-11-04, the effects document drawing in 8.25 rather than 6.04 ms a frame in Edge and 8.63 rather than 6.81 on
+    // the AMD chip
     const gl = canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: true, preserveDrawingBuffer: true, antialias: false, depth: false, stencil: false, failIfMajorPerformanceCaveat: true });
     if (!gl) return null;
     canvas.addEventListener('webglcontextlost', () => {
@@ -298,9 +301,10 @@ function blur(s: Gl, b: BlurPlan, from: WebGLTexture, w: number, h: number, pad:
 }
 
 /**
- * The plan over the top left w by h of `picture` (as a canvas keeps it), as a canvas whose top left w by h is the result
- * to draw back (the canvas may be larger: it only grows); null when this computer cannot do it on its chip. `pad` as
- * code.ts blurPixels. `at` reads the w by h from that place of `picture` instead, uploaded straight from it.
+ * The plan over the top left w by h of `picture` (as a canvas keeps it), as a picture whose top left w by h is the result
+ * to draw back (it may be larger: the chip's canvas grows to fit), drawn before the next call; null when this computer
+ * cannot do it on its chip. `pad` as code.ts blurPixels. `at` reads the w by h from that place of
+ * `picture` instead, uploaded straight from it.
  */
 export function effectsOnChip(picture: TexImageSource, w: number, h: number, plan: EffectPlan, pad = 0, at: [number, number] = [0, 0]): OffscreenCanvas | null {
   const s = setup();
