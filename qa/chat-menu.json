@@ -1,6 +1,6 @@
 {
   "script": "qa/chat-menu.cjs",
-  "run": "2026-10-19T07:04:52.002Z",
+  "run": "2026-11-05T07:50:01.783Z",
   "checks": [
     {
       "name": "the fixture reproduces the bug with the old rule: the menu is in the flow and shrinks the message list",

@@ -7,7 +7,7 @@
 // the work to that conversation; /create?type=<type> opens on that type.
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, ChartGantt, FileText, Film, Flag, Image as ImageIcon, Lock, Mail, Play, Plus, Send, Users, WandSparkles, X } from 'lucide-react';
+import { ArrowRight, ChartGantt, Flag, Lock, Mail, Play, Plus, Send, Users, WandSparkles, X } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import { needProps } from '@/lib/kit/need';
 import { useCanCreate } from '../can-create';
@@ -37,6 +37,7 @@ import {
 } from '@/lib/work/rules';
 import { useWork, type LibraryFile } from './data';
 import { Av, Empty, Hint, Ic, LibraryPicker, Modal, TYPE_HINT, TYPE_ICON } from './parts';
+import { FileThumb } from '../file-thumb';
 import { PlanEditor, PlanRows, keyed, staffOf, type EditRow } from './plan';
 import { ProjectDialog } from './projects';
 
@@ -624,7 +625,7 @@ export function CreatePage() {
                 {d.assets.map((a) => (
                   <div className="wk-arow" key={a.id}>
                     <span className="th">
-                      <Ic i={a.kind === 'video' ? Film : a.kind === 'image' ? ImageIcon : FileText} />
+                      <FileThumb of={{ asset: a.id, version: a.current_version }} kind={a.kind} name={a.name} />
                     </span>
                     <span style={{ minWidth: 0 }}>
                       <b>{a.name}</b>

@@ -22,6 +22,7 @@ export function driveStorage(drive: Drive): StorageProvider {
     open: (ref, range) => drive.open(ref, range),
     read: (ref) => drive.read(ref),
     checksum: (ref) => drive.checksum(ref),
+    thumbnail: (ref) => drive.thumbnail(ref),
     account: () => drive.account(),
     quota: () => drive.quota(),
     sink: () => drive.sink(),

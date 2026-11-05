@@ -2,6 +2,7 @@
 // A file attached to mail or messaging: a Drive session through the Hub, the bytes
 // straight to Google, then the Hub checks the file in Drive and registers it.
 import { sendToDrive } from '../media/upload';
+import { keepThumb, makeThumb } from '../media/thumb-maker';
 import { MAIL_ATTACH_BYTES } from './rules';
 
 export type UploadedFile = { id: string; name: string; size_bytes: number; mime_type: string };
@@ -19,6 +20,8 @@ export async function uploadAttachment(file: File, onProgress: (f: number) => vo
   });
   if (!session.ok) throw new Error(await errorOf(session, 'تعذّر بدء الرفع.'));
   const { sessionUrl } = (await session.json()) as { sessionUrl: string };
+  // A picture or a video gets its thumbnail, drawn while it travels (MVP_draft.md section 77).
+  const thumb = makeThumb(file);
   const fileId = await sendToDrive(sessionUrl, file, onProgress);
   const done = await fetch('/api/mail/upload-complete', {
     method: 'POST',
@@ -27,5 +30,6 @@ export async function uploadAttachment(file: File, onProgress: (f: number) => vo
   });
   if (!done.ok) throw new Error(await errorOf(done, 'تعذّر تسجيل المرفق.'));
   const j = (await done.json()) as { id: string; name: string; size: number; mime: string };
+  await keepThumb({ mailFile: j.id }, thumb);
   return { id: j.id, name: j.name, size_bytes: j.size, mime_type: j.mime };
 }

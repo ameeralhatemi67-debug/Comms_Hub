@@ -11,6 +11,7 @@
 
 import { forgetCreds, integrationCreds, vaultReachable, vaultSecret } from '../integrations/vault.ts';
 import { StorageError, type FileChange, type SinkState, type SinkTarget, type SmallFile, type StorageSink } from '../storage/provider.ts';
+import { DRIVE_SIZES, driveThumbAt, sniffImage, thumbFits, type ThumbType } from '../media/thumbs.ts';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const API = 'https://www.googleapis.com/drive/v3';
@@ -295,6 +296,30 @@ export function createDrive(deps: Partial<Deps> = {}) {
       return http(`${API}/files/${encodeURIComponent(id)}?alt=media`, {
         headers: { Authorization: `Bearer ${await accessToken()}`, ...(range ? { Range: range } : {}) },
       });
+    },
+
+    /**
+     * Drive's own thumbnail of a file, as bytes, or null when Drive has none. Its link is short-lived and, for a file that is
+     * not shared publicly (all of the Hub's are), must be fetched with the token (Drive API, files resource, read 2026-11-05).
+     * The server asks for THUMB_EDGE pixels, then a smaller size if that picture is over the limit. Never logged.
+     */
+    async thumbnail(id: string): Promise<{ bytes: Uint8Array; mime: ThumbType } | null> {
+      const meta = await api<{ hasThumbnail?: boolean; thumbnailLink?: string }>(
+        `/files/${encodeURIComponent(id)}?fields=${encodeURIComponent('hasThumbnail,thumbnailLink')}`,
+      );
+      if (!meta.thumbnailLink) return null;
+      for (const size of DRIVE_SIZES) {
+        const link = driveThumbAt(meta.thumbnailLink, size);
+        if (!link) return null;
+        const res = await http(link, { headers: { Authorization: `Bearer ${await accessToken()}` } });
+        // A redirect may only land on Google's own picture hosts too.
+        if (!res.ok || (res.url && !driveThumbAt(res.url, size))) return null;
+        const bytes = new Uint8Array(await res.arrayBuffer());
+        const mime = sniffImage(bytes);
+        if (!mime) return null;
+        if (thumbFits(bytes, mime)) return { bytes, mime };
+      }
+      return null;
     },
 
     /** A whole small file's bytes. */

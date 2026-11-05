@@ -16,6 +16,7 @@ import type { Category, Graphic } from '@/lib/motion/types';
 import { suggestedFirst } from '@/lib/studio/worklink';
 import { DesktopOnly } from './compact';
 import { useNativeFeature } from '../native/use-native';
+import { FileThumb } from '../file-thumb';
 
 export type LibraryItem = { id: string; name: string; kind: 'video' | 'image' | 'audio'; current_version: number; mime_type: string; dims: string | null; duration: string | null };
 
@@ -149,11 +150,10 @@ export function LibraryPane(p: Pick<BinProps, 'canLibrary' | 'readOnly' | 'photo
           {items.map((it) => (
             <li key={it.id}>
               <button type="button" disabled={p.readOnly} onClick={() => p.onLibrary(it)} title={`إضافة «${it.name}» عند رأس التشغيل، أو اسحبه إلى الخط الزمني`} draggable={!p.readOnly} onDragStart={dragAdd({ type: 'library', item: it })}>
-                {it.kind === 'image' ? (
-                  <img src={`/api/media/${it.id}/content?v=${it.current_version}`} alt="" loading="lazy" draggable={false} />
-                ) : (
-                  <span className="st-lib-ico">{it.kind === 'video' ? <Film /> : <Music />}</span>
-                )}
+                {/* The file's thumbnail (MVP_draft.md section 77), never the whole file; sound keeps its mark. */}
+                <span className="st-lib-ico">
+                  <FileThumb of={{ asset: it.id, version: it.current_version }} kind={it.kind} name={it.name} fallback={it.kind === 'video' ? <Film /> : it.kind === 'audio' ? <Music /> : undefined} />
+                </span>
                 <span className="st-lib-name" dir="auto">{it.name}</span>
                 <small>
                   {it.kind === 'video' ? 'فيديو' : it.kind === 'audio' ? 'صوت' : 'صورة'}

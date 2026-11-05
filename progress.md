@@ -3883,3 +3883,70 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Security advisor:** 357 findings before and after; the only change is `platform_test_done`'s finding moving to its new form.
 - Results in `qa/platform-tests-rules-comms-hub.json`, `qa/platform-tests-instagram-rules-comms-hub.json`, and the second run in
   `qa/platform-tests-facebook-rules-comms-hub.json` (`after_youtube_choices`). Nothing pushed.
+
+### 2026-11-05: thumbnails for every stored file (director's notes, step 2, N-4)
+
+- **Owner decision.** Step 2 of `Director_Notes_Plan.md`, approved the same day, with answer Q4: thumbnails are kept in the
+  database. `MVP_draft.md` section 77 is new; `AGENTS.md` carries the rule that a file is never shown as a name alone.
+- **What was built.**
+  - **Database.** Migration `20261105140000_file_thumbs.sql` is written and **not applied**.
+    - `file_thumbs` holds one picture per library version or per mail and messaging file. A picture is WebP, JPEG or PNG,
+      64 bytes to 48 KB, and is checked by its own first bytes. A `none` row says Drive had no picture.
+    - Rows cascade with their file.
+    - Who sees a thumbnail is who may see its file (`thumb_may_see`).
+    - `thumb_save` is the uploader's only, from the browser. `thumb_keep` is the server's, with the key, and never writes over
+      an existing picture.
+  - **The browser.** `src/lib/media/thumb-maker.ts` draws the picture while the file uploads. A picture is drawn smaller. A
+    video gives its frame a tenth of the way in, at most 3 seconds, and the browser gives up after 8 seconds. The upload helpers
+    for the library (new files and new versions), mail and messaging save it once the file is registered. A failure never fails
+    an upload.
+  - **The server.** `/api/thumb/<media|mail>/<id>` serves the stored picture, cached for good because the version is in the
+    address. With no picture stored, it asks the storage provider for its own (`StorageProvider.thumbnail`; Drive's
+    `thumbnailLink`, fetched with the token from Google's picture hosts only) and keeps it. With none there either, it answers
+    204, so the page draws its tile without an error in the console, and Drive is asked again after a day.
+  - **Rules shared by both sides** are in `src/lib/media/thumbs.ts`. The component is `src/components/file-thumb.tsx`.
+  - **Where pictures now show:**
+    - the library's cards, list and board, which no longer load the whole file;
+    - the versions on a file's page;
+    - the large video's poster;
+    - the library picker;
+    - «إنشاء»'s files and the work page's files;
+    - the review screen's file parts and documents, and the player's poster;
+    - the post preview (its first picture) and «حزمة النشر»;
+    - mail attachments and library cards, and the composer and its picker;
+    - messaging pictures (thumbnail first), files and the room's gallery;
+    - the studio's library list;
+    - the chosen file in all three «تجربة النشر» panels, drawn before sending.
+  - **Not built yet:** the library's upload tray, the studio's project list, a test's «آخر التجارب», and received Gmail files.
+- **Fixed in passing.**
+  - A library card inside mail or messaging needed the media page, so it broke for anyone without it. The thumbnail route asks
+    the database instead.
+  - `qa/post-preview.cjs` and `qa/work-pages.cjs` had not run since 2026-11-02: they lacked the guide text and the test panels
+    that `channels.tsx` and `sheet.tsx` began importing. They now compile those, or stand in for them, and run again.
+- **Verified.**
+  - Type check, build and tests:
+    - `npm run typecheck` clean;
+    - `npm run build` clean, with `/api/thumb/[kind]/[id]` in the route list;
+    - `npm test` 893 of 893, including `tests/thumbs.test.mjs` 11 of 11. These cover Drive's thumbnail against a fake Drive
+      (the token, the size step-down, refusing another host), the SQL limits held equal, and the upload order.
+  - Database rules: `supabase/tests/thumbs_rules.sql` 39 of 39 on a private container with every migration replayed.
+    Result in `qa/thumbs-rules.json`.
+  - `node qa/thumbs-flow.cjs`: 19 of 19. It covers:
+    - the cards asking for thumbnails and never for a whole file;
+    - a real 2400×1350 picture drawn as a 320×180 WebP under 48 KB;
+    - a real recorded video's frame drawn, red where it was red;
+    - a broken video giving none in under 4 seconds;
+    - an upload saving its picture as version 1 after `/api/media/complete`;
+    - evening mode.
+  - Other browser flows on the changed screens:
+    - `youtube-test-flow` 68 of 68, `instagram-test-flow` 43 of 43, `facebook-test-flow` 37 of 37;
+    - `review-player` 14 of 14 (one earlier run missed the Space key on timing and passed when re-run);
+    - `studio-ui` 122 of 122, after its fixture answered thumbnails with 204;
+    - `chat-menu` 6 of 6, `post-preview` 202 of 202, `work-pages` 1077 of 1077.
+- **Not verified.**
+  - Nothing ran against the real Drive or the signed-in site. Drive's `thumbnailLink` and its `=s320` size suffix are proven
+    only against a fake.
+  - The database rules ran on a private container, not on comms-hub.
+- **Before deploying.** Apply the migration first. Without it, nothing is kept: the browser's pictures are dropped (`thumb_save`
+  fails silently), and every first view of a file asks Drive again (`thumb_keep` fails, and the picture is served unkept). Nothing
+  pushed.

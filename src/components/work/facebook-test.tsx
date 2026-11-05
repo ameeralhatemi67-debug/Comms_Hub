@@ -27,9 +27,10 @@ import type { AccountRow } from '@/lib/work/rules';
 import { useWork, type LibraryFile } from './data';
 import { Hint, Ic, LibraryPicker } from './parts';
 import { api, clock, mb, mimeOf, said, sendToDrive, sleep, toJpeg, useTests, videoSeconds, when } from './test-kit';
+import { PickedThumb } from './picked-thumb';
 
 /** A chosen file, ready to send: a picture already redrawn to JPEG, a video with its length when the browser can tell. */
-type Ready = { name: string; from: 'device' | 'library'; blob: Blob | null; asset: string | null; mime: string; size: number; seconds: number | null };
+type Ready = { name: string; from: 'device' | 'library'; blob: Blob | null; asset: string | null; version?: number; mime: string; size: number; seconds: number | null };
 type Phase =
   | { t: 'idle' }
   | { t: 'preparing' }
@@ -102,7 +103,7 @@ export function FacebookTest({ a, onReconnect }: { a: AccountRow; onReconnect: (
         // A library video is read by the server where it is; its type and size are the library's.
         const { data } = await supabase().from('media_files').select('mime_type,size_bytes').eq('id', pick.file.id).maybeSingle();
         const seconds = await videoSeconds(`/api/media/${pick.file.id}/content`);
-        setReady({ name: pick.name, from: 'library', blob: null, asset: pick.file.id, mime: String(data?.mime_type ?? '').toLowerCase(), size: Number(data?.size_bytes ?? 0), seconds });
+        setReady({ name: pick.name, from: 'library', blob: null, asset: pick.file.id, version: pick.file.current_version, mime: String(data?.mime_type ?? '').toLowerCase(), size: Number(data?.size_bytes ?? 0), seconds });
       }
       setPhase({ t: 'idle' });
     } catch {
@@ -274,6 +275,7 @@ export function FacebookTest({ a, onReconnect }: { a: AccountRow; onReconnect: (
             <div className="yt-file">
               {ready ? (
                 <div className="yt-chip" data-fb="picked">
+                  <PickedThumb blob={ready.blob} asset={ready.asset} version={ready.version} mime={ready.mime} name={ready.name} />
                   <b>
                     <bdi>{ready.name}</bdi>
                   </b>

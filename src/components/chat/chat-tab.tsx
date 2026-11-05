@@ -38,6 +38,8 @@ import {
 import { stageAr } from '@/lib/mail/rules';
 import { pipeline, stagePosition, type Stage } from '@/lib/media/rules';
 import { Thumb } from '../media/parts';
+import { FileThumb } from '../file-thumb';
+import { kindOfMime, thumbUrl } from '@/lib/media/thumbs';
 import { fileAt } from '@/lib/native/files';
 import { PhoneFileButtons, PhoneFileLink } from '../native/phone-file';
 import { Face, presenceOf, presenceText, roleTitle, usePeople } from '../people';
@@ -797,15 +799,14 @@ function Content({ room, m, onImg }: { room: RoomRow; m: ChatMessage; onImg: (m:
   if (m.kind === 'image')
     return (
       <button type="button" className="b-img" onClick={() => onImg(m)} aria-label="عرض الصورة">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={`/api/chat/file/${String(d.file)}`} alt={m.body || 'صورة'} loading="lazy" />
+        <ChatPicture file={String(d.file)} alt={m.body || 'صورة'} />
       </button>
     );
   if (m.kind === 'file')
     return (
       <PhoneFileLink className="b-file" file={{ name: String(d.name ?? 'ملف'), path: fileAt.chat(String(d.file)) }}>
         <span className="fi">
-          <I n="file" />
+          <FileThumb of={{ mailFile: String(d.file) }} kind={kindOfMime(String(d.mime ?? ''))} name={String(d.name ?? '')} />
         </span>
         <span>
           <b>{String(d.name ?? 'ملف')}</b>
@@ -885,6 +886,29 @@ function Voice({ m }: { m: ChatMessage }) {
         </button>
       </span>
     </div>
+  );
+}
+
+/**
+ * A picture sent in messaging: its thumbnail first (MVP_draft.md section 77), the full picture when it is opened, or here when
+ * there is no thumbnail.
+ */
+function ChatPicture({ file, alt }: { file: string; alt: string }) {
+  const [full, setFull] = useState(false);
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={full ? `/api/chat/file/${file}` : thumbUrl({ mailFile: file })} alt={alt} loading="lazy" onError={() => setFull(true)} />
+  );
+}
+
+/** A library file in a room's gallery: its picture when this person may see it, else the film mark. */
+function GalleryAsset({ id, name }: { id: string; name: string }) {
+  const c = useChat();
+  const a = c.assets.find((x) => x.id === id);
+  return (
+    <Link href={`/media/${id}`} aria-label={name} className="galt">
+      {a ? <FileThumb of={{ asset: a.id, version: a.current_version }} kind={a.kind} name={a.name} /> : <I n="film" />}
+    </Link>
   );
 }
 
@@ -1752,13 +1776,10 @@ function Info({ room, name, onClose, onLeft, onImg }: { room: RoomRow; name: str
             {media.map((m) =>
               m.kind === 'image' ? (
                 <button type="button" key={m.id} onClick={() => onImg(m)} aria-label="صورة">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={`/api/chat/file/${String(m.data?.file)}`} alt="" loading="lazy" />
+                  <ChatPicture file={String(m.data?.file)} alt="" />
                 </button>
               ) : (
-                <Link key={m.id} href={`/media/${String(m.data?.asset_id)}`} aria-label={String(m.data?.name ?? '')} className="galt">
-                  <I n="film" />
-                </Link>
+                <GalleryAsset key={m.id} id={String(m.data?.asset_id)} name={String(m.data?.name ?? '')} />
               ),
             )}
           </div>

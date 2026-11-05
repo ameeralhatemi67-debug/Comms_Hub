@@ -664,6 +664,22 @@ asks the permission. `work_cancel` (`*work_cancel*`) lets a creator take a work 
 closing it: a work is never deleted. Its rules are held by `supabase/tests/create_access_rules.sql` and
 `supabase/tests/work_cancel_rules.sql`.
 
+Every stored file has a thumbnail, by owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-4, `MVP_draft.md` section 77,
+recorded in `progress.md`). A file is never shown as a name alone: use `src/components/file-thumb.tsx` (`FileThumb`) wherever one
+is listed, and never load a whole file just to show it small.
+- **Where it lives.** One small picture per library version or mail and messaging file, in Postgres (`file_thumbs`,
+  `supabase/migrations/*file_thumbs*`), at most 48 KB. It goes with its file, is left out of backups, and is served by
+  `/api/thumb/<media|mail>/<id>`, cached for good because the version is in the address.
+- **Who sees it** is exactly who may see the file (`thumb_may_see`). The route asks for no page grant.
+- **How it is made.** The uploader's browser draws it while the file travels (`src/lib/media/thumb-maker.ts`, hooked into
+  `src/lib/media/upload.ts` and `src/lib/mail/upload.ts`) and saves it through `thumb_save`, uploader only. Failing to draw one
+  never fails an upload.
+- **The fallback.** Otherwise the server asks the storage provider for its own picture (`StorageProvider.thumbnail`, Drive's
+  `thumbnailLink`, fetched with the token from Google's picture hosts only) and keeps it with the server key through `thumb_keep`,
+  never over a picture already there.
+- **Checks.** The limits exist once in `src/lib/media/thumbs.ts` and once in SQL, held equal by `tests/thumbs.test.mjs`. The rules
+  are held by `supabase/tests/thumbs_rules.sql`, and `qa/thumbs-flow.cjs` draws real pictures and a recorded video on a fixture.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted

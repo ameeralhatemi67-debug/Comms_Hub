@@ -1,6 +1,6 @@
 {
   "script": "qa/youtube-test-flow.cjs",
-  "run": "2026-11-05T07:08:06.439Z",
+  "run": "2026-11-05T07:46:17.108Z",
   "checks": [
     {
       "name": "a link to the channel on YouTube, by its handle, in a new tab",
@@ -75,7 +75,7 @@
     {
       "name": "the chosen file is named with its size",
       "pass": true,
-      "detail": "clip.mp4\nمن هذا الجهاز · 0.7 ميغابايت"
+      "detail": "MP4\nclip.mp4\nمن هذا الجهاز · 0.7 ميغابايت"
     },
     {
       "name": "a title YouTube refuses is caught before sending",
@@ -110,7 +110,7 @@
     {
       "name": "the list shows the test, published and private, by whom",
       "pass": true,
-      "detail": "تجربة من الجهاز\nمنشور · خاص · 05‏/11‏/2026، 10:08 ص · مدير الفحص\nمشاهدة\nحذف"
+      "detail": "تجربة من الجهاز\nمنشور · خاص · 05‏/11‏/2026، 10:46 ص · مدير الفحص\nمشاهدة\nحذف"
     },
     {
       "name": "its delete asks for a hold, with the reason",
@@ -125,7 +125,7 @@
     {
       "name": "the library offers videos only",
       "pass": true,
-      "detail": "[\"مقطع الحملة.mp4\\n· الإصدار 3\"]"
+      "detail": "[\"MP4\\nمقطع الحملة.mp4\\n· الإصدار 3\"]"
     },
     {
       "name": "and says the server reads the file where it is",
@@ -245,17 +245,17 @@
     {
       "name": "it is sent private, with the Riyadh time as an instant",
       "pass": true,
-      "detail": "{\"account\":\"a-yt\",\"privacy\":\"private\",\"scheduled_for\":\"2026-11-07T07:08:00.000Z\",\"title\":\"تجربة مجدولة\",\"description\":\"\",\"source\":\"device\",\"size\":307200,\"mime\":\"video/mp4\"}"
+      "detail": "{\"account\":\"a-yt\",\"privacy\":\"private\",\"scheduled_for\":\"2026-11-07T07:46:00.000Z\",\"title\":\"تجربة مجدولة\",\"description\":\"\",\"source\":\"device\",\"size\":307200,\"mime\":\"video/mp4\"}"
     },
     {
       "name": "the result says private until YouTube makes it public at its time",
       "pass": true,
-      "detail": "وصل المقطع إلى القناة خاصاً، ويجعله يوتيوب عاماً السبت 7 نوفمبر 10:08 بتوقيت الرياض. قد يحتاج يوتيوب دقائق لمعالجته قبل أن يُشاهَد.\nمشاهدة على يوتيوب"
+      "detail": "وصل المقطع إلى القناة خاصاً، ويجعله يوتيوب عاماً السبت 7 نوفمبر 10:46 بتوقيت الرياض. قد يحتاج يوتيوب دقائق لمعالجته قبل أن يُشاهَد.\nمشاهدة على يوتيوب"
     },
     {
       "name": "the list says when it becomes public",
       "pass": true,
-      "detail": "تجربة مجدولة\nمجدول · يصبح عاماً السبت 7 نوفمبر 10:08 · 05‏/11‏/2026، 10:08 ص · مدير الفحص\nمشاهدة\nحذف"
+      "detail": "تجربة مجدولة\nمجدول · يصبح عاماً السبت 7 نوفمبر 10:46 · 05‏/11‏/2026، 10:46 ص · مدير الفحص\nمشاهدة\nحذف"
     },
     {
       "name": "a scheduled test can be deleted before its time",
@@ -285,7 +285,7 @@
     {
       "name": "a cancel stops the pieces and closes the test",
       "pass": true,
-      "detail": "[\"POST /api/platforms/check\",\"POST /api/platforms/test\",\"PUT /api/platforms/test/00000000-0000-4000-8000-000000000001?from=0\",\"DELETE /api/platforms/test/00000000-0000-4000-8000-000000000001\"]"
+      "detail": "[\"POST /api/platforms/check\",\"POST /api/platforms/test\",\"PUT /api/platforms/test/00000000-0000-4000-8000-000000000001?from=0\",\"PUT /api/platforms/test/00000000-0000-4000-8000-000000000001?from=262144\",\"DELETE /api/platforms/test/00000000-0000-4000-8000-000000000001\"]"
     },
     {
       "name": "without the permission there is no delete, only YouTube Studio",
@@ -330,7 +330,7 @@
     {
       "name": "phone: the send button is a comfortable size",
       "pass": true,
-      "detail": "{\"x\":236.796875,\"y\":756.71875,\"width\":117.203125,\"height\":42}"
+      "detail": "{\"x\":236.796875,\"y\":788.71875,\"width\":117.203125,\"height\":42}"
     },
     {
       "name": "evening: the result is readable on its own ground",

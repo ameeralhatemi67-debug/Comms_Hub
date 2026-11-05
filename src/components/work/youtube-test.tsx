@@ -33,6 +33,7 @@ import { riyadhInstant, riyadhStamp, type AccountRow } from '@/lib/work/rules';
 import { useWork, type LibraryFile } from './data';
 import { Hint, Ic, LibraryPicker } from './parts';
 import { api, mb, mimeOf, said, useTests, when } from './test-kit';
+import { PickedThumb } from './picked-thumb';
 
 type Picked = { from: 'device'; file: File; mime: string } | { from: 'library'; file: LibraryFile };
 type Phase =
@@ -288,6 +289,13 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
               <div className="yt-file">
                 {picked ? (
                   <div className="yt-chip" data-yt="picked">
+                    <PickedThumb
+                      blob={picked.from === 'device' ? picked.file : null}
+                      asset={picked.from === 'library' ? picked.file.id : null}
+                      version={picked.from === 'library' ? picked.file.current_version : null}
+                      mime={picked.from === 'device' ? picked.mime : 'video/mp4'}
+                      name={picked.file.name}
+                    />
                     <b>
                       <bdi>{picked.file.name}</bdi>
                     </b>

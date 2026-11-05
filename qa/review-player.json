@@ -1,11 +1,11 @@
 {
   "script": "qa/review-player.cjs",
-  "run": "2026-10-20T11:54:23.166Z",
+  "run": "2026-11-05T07:57:40.411Z",
   "checks": [
     {
       "name": "Space plays the player last used and K pauses it",
       "pass": true,
-      "detail": "0.31"
+      "detail": "0.49"
     },
     {
       "name": "L moves a second on and J a second back",
@@ -20,7 +20,7 @@
     {
       "name": "N writes a note at the current frame on the version shown, with the area dragged on the paused picture (media_note_add)",
       "pass": true,
-      "detail": "00:02.0 {\"id\":\"939cc012-0f41-4800-9a69-e736732d8371\",\"asset_id\":\"00000000-0000-4000-8000-0000000000a1\",\"author\":\"dir@t.test\",\"body\":\"الشعار يغطي الوجه\",\"timecode\":null,\"created_at\":\"2026-10-20T11:54:27.985Z\",\"version\":2,\"at_ms\":2000,\"area\":{\"x\":0.2,\"y\":0.2,\"w\":0.3,\"h\":0.4},\"parent_id\":null,\"done_at\":null,\"done_by\":null}"
+      "detail": "00:02.0 {\"id\":\"56d32ebe-8334-4498-a6d6-bbb259e3dce6\",\"asset_id\":\"00000000-0000-4000-8000-0000000000a1\",\"author\":\"dir@t.test\",\"body\":\"الشعار يغطي الوجه\",\"timecode\":null,\"created_at\":\"2026-11-05T07:57:46.820Z\",\"version\":2,\"at_ms\":2000,\"area\":{\"x\":0.2,\"y\":0.2,\"w\":0.3,\"h\":0.4},\"parent_id\":null,\"done_at\":null,\"done_by\":null}"
     },
     {
       "name": "the note is a mark under the player, and its area is drawn over the picture",
@@ -35,12 +35,12 @@
     {
       "name": "an answer keeps its note's version, and «تم» closes the note in the list and on its mark",
       "pass": true,
-      "detail": "{\"ans\":[\"نقلته إلى الزاوية\",2],\"done\":\"2026-10-20T11:54:28.665Z\",\"markOpen\":1}"
+      "detail": "{\"ans\":[\"نقلته إلى الزاوية\",2],\"done\":\"2026-11-05T07:57:47.540Z\",\"markOpen\":1}"
     },
     {
       "name": "«جنباً إلى جنب» plays version 1 beside version 2 on one clock, playing and pausing together",
       "pass": true,
-      "detail": "{\"asked\":3,\"both\":[1.351863,1.358914,false],\"still\":[1.359137,1.374556,true,true]}"
+      "detail": "{\"asked\":3,\"both\":[1.344074,1.366271,false],\"still\":[1.350567,1.375199,true,true]}"
     },
     {
       "name": "«بالفاصل» lays version 1 over version 2 cut at the divider, which moves",
@@ -55,7 +55,7 @@
     {
       "name": "the keys follow the player last used: L moves the 9:16 video, not the other; Shift+G shows its Reels safe zones, which a wide video does not offer",
       "pass": true,
-      "detail": "{\"act\":\"no,yes\",\"t1\":1,\"w0\":1.359137,\"w1\":1.359137,\"safeOn\":\"true\",\"tint\":41,\"wideOff\":true}"
+      "detail": "{\"act\":\"no,yes\",\"t1\":1,\"w0\":1.350567,\"w1\":1.350567,\"safeOn\":\"true\",\"tint\":41,\"wideOff\":true}"
     },
     {
       "name": "A does nothing where the file's button is off (as for a file the reviewer uploaded), and says so",

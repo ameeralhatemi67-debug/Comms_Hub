@@ -32,6 +32,8 @@ import { fileAt } from '@/lib/native/files';
 import { PhoneFileLink } from '../native/phone-file';
 import { DecideDialog, usePermRequests } from '../perm-requests';
 import { REQUEST_STATUS, howAr } from '@/lib/permissions';
+import { FileThumb } from '../file-thumb';
+import { kindOfMime } from '@/lib/media/thumbs';
 
 const STAGE_TONE: Record<string, string> = {
   draft: '', production: 'info', review: 'review', changes: 'warn', rejected: 'danger', ready: 'success', scheduled: 'schedule', published: 'done',
@@ -338,7 +340,9 @@ function Attachments({ x }: { x: MessageRow }) {
         const f = m.files.find((y) => y.id === id);
         return (
           <PhoneFileLink key={id} className="ml-att" file={{ name: f?.name ?? 'مرفق', path: fileAt.mail(id) }}>
-            <I n="file" />
+            <span className="ml-ath">
+              <FileThumb of={{ mailFile: id }} kind={kindOfMime(f?.mime_type)} name={f?.name} />
+            </span>
             <span>{f?.name ?? 'مرفق'}</span>
             <small>{f ? `${fileSize(f.size_bytes)} · Drive` : 'Drive'}</small>
           </PhoneFileLink>
@@ -374,7 +378,7 @@ function RefCard({ id, outgoing }: { id: string; outgoing: boolean }) {
     <div className="ml-refwrap">
       <div className="ml-ref">
         <span className="th">
-          <I n={a.kind === 'video' ? 'film' : a.kind === 'image' ? 'image' : 'file'} />
+          <FileThumb of={{ asset: a.id, version: outgoing && a.approved_version ? a.approved_version : a.current_version }} kind={a.kind} name={a.name} />
         </span>
         <span>
           <b>{a.name}</b>

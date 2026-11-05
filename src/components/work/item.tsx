@@ -16,7 +16,6 @@ import {
   Clock,
   Eye,
   FileText,
-  Film,
   Flag,
   History,
   Image as ImageIcon,
@@ -96,6 +95,7 @@ import {
 } from '@/lib/work/rules';
 import { useWork, useWorkDetail, type WorkDetail } from './data';
 import { Av, Empty, Hint, Ic, LibraryPicker, Modal, PrioChip, RestrictedChip, StatusChip, TYPE_ICON, Wid } from './parts';
+import { FileThumb } from '../file-thumb';
 import { PlanEditor, type EditRow } from './plan';
 import { PublishNowDialog, ScheduleDialog, isMailWork, publishOp } from './publish';
 import { CopyStrip, PreviewOfWork } from './post-preview';
@@ -889,7 +889,7 @@ function MediaPanel({ d, onAdd, act }: { d: WorkDetail; onAdd: () => void; act: 
             return (
               <div className="wk-arow" key={a.asset_id}>
                 <span className="th">
-                  <Ic i={f?.kind === 'video' ? Film : f?.kind === 'image' ? ImageIcon : FileText} />
+                  {f ? <FileThumb of={{ asset: f.id, version: f.current_version }} kind={f.kind} name={f.name} /> : <Ic i={FileText} />}
                 </span>
                 {f ? (
                   <Link href={`/media/${f.id}`} style={{ minWidth: 0 }}>

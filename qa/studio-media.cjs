@@ -95,6 +95,11 @@ function serve(dir, pages, requests = []) {
       IDS[id] = path.basename(sess.file);
       return json(200, { id });
     }
+    // A library file's thumbnail (MVP_draft.md section 77): none in the fixture, answered as the route answers when there is none.
+    if (req.method === 'GET' && url.pathname.startsWith('/api/thumb/')) {
+      res.writeHead(204, { 'Cache-Control': 'private, max-age=600' });
+      return res.end();
+    }
     const asset = /^\/__asset\/([0-9a-f-]+)$/.exec(url.pathname);
     if (asset) {
       const a = assets.get(asset[1]);

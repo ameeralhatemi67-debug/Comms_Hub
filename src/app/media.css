@@ -247,13 +247,14 @@
 .mx-kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;margin:0}
 .mx-kv dt{color:var(--muted)} .mx-kv dd{margin:0;overflow-wrap:anywhere}
 .mx-vers{display:grid;margin:0;padding:0}
-.mx-vers li{list-style:none;display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.mx-vers li{list-style:none;display:grid;grid-template-columns:26px 56px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
 .mx-vers li:first-child{border-top:0}
 .mx-vers .dt{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);border:2px solid var(--m-line2);color:var(--muted)}
 .mx-vers .dt svg{width:13px;height:13px}
 .mx-vers li.ok .dt{background:var(--m-gold);border-color:transparent;color:var(--m-ongold)}
 .mx-vers li.now .dt{border-color:var(--green);color:var(--green-text)}
 .mx-vers small{color:var(--muted);display:block;font-size:12px}
+.mx-vers .vth{width:56px;height:36px;border-radius:6px;overflow:hidden}
 .mx-chk{display:grid;gap:8px}
 .mx-chk div{display:flex;gap:10px;align-items:center;font-size:13.5px}
 .mx-chk .b{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;border:1.5px solid var(--m-line2)}

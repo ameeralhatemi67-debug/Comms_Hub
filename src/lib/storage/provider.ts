@@ -128,6 +128,11 @@ export interface StorageProvider {
   read(ref: string): Promise<Uint8Array>;
   /** A content hash the provider keeps, or null when it has none for this file. */
   checksum(ref: string): Promise<string | null>;
+  /**
+   * The provider's own small picture of a file (MVP_draft.md section 77), or null when it has none. Optional: a provider
+   * without one leaves the thumbnail to the uploader's browser. Throws StorageError (404 when the file is gone).
+   */
+  thumbnail?(ref: string): Promise<{ bytes: Uint8Array; mime: 'image/webp' | 'image/jpeg' | 'image/png' } | null>;
 
   /** Asks the provider whether a copy is still there, and how big it is. Does not throw for a missing file. */
   check(ref: string, expectedSize?: number | null): Promise<CopyCheck>;

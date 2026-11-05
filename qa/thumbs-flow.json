@@ -1,0 +1,105 @@
+{
+  "script": "qa/thumbs-flow.cjs",
+  "run": "2026-11-05T07:54:30.217Z",
+  "checks": [
+    {
+      "name": "each card asks for its version's thumbnail",
+      "pass": true,
+      "detail": "[\"GET /api/thumb/media/a-vid?v=1\",\"GET /api/thumb/media/a-img?v=2\",\"GET /api/thumb/media/a-doc?v=1\",\"GET /api/thumb/media/a-aud?v=1\"]"
+    },
+    {
+      "name": "no card asks for a whole file",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "the picture and the video show their thumbnails",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the video carries its play mark, the picture none",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a file with no picture keeps the library's coloured tile",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a thumbnail fills its card, cropped to it",
+      "pass": true,
+      "detail": "[true,true,\"cover\"]"
+    },
+    {
+      "name": "the large video has its thumbnail as the poster",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a mail attachment shows its picture",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "one with none shows the tile with its extension",
+      "pass": true,
+      "detail": "PDF"
+    },
+    {
+      "name": "a large picture becomes a WebP of 320 by 180, under 48 KB",
+      "pass": true,
+      "detail": "{\"mime\":\"image/webp\",\"size\":1218,\"head\":\"RIFFWEBP\",\"w\":320,\"h\":180}"
+    },
+    {
+      "name": "a recorded video gives its frame, really drawn (red where it was red)",
+      "pass": true,
+      "detail": "{\"mime\":\"image/webp\",\"w\":320,\"h\":180,\"red\":191,\"green\":57,\"blue\":43}"
+    },
+    {
+      "name": "a text file and a broken video give none, without waiting long",
+      "pass": true,
+      "detail": "{\"text\":null,\"broken\":null,\"ms\":7}"
+    },
+    {
+      "name": "a file chosen on this device shows its picture before anything is sent",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an upload saves one thumbnail, for the file it registered, as version 1",
+      "pass": true,
+      "detail": "{\"id\":\"a-new\",\"saves\":1,\"args\":{\"asset\":\"a-new\",\"version\":1,\"mail\":null,\"mime\":\"image/webp\"},\"head\":\"RIFF\",\"lastFetch\":[\"/api/media/upload-session\",\"/drive-session\",\"/api/media/complete\"],\"pdfSaves\":0}"
+    },
+    {
+      "name": "after the file is registered",
+      "pass": true,
+      "detail": "[\"/api/media/upload-session\",\"/drive-session\",\"/api/media/complete\"]"
+    },
+    {
+      "name": "a PDF uploads with no thumbnail from the browser (the server asks Drive for one later)",
+      "pass": true,
+      "detail": "{\"id\":\"a-new\",\"saves\":1,\"args\":{\"asset\":\"a-new\",\"version\":1,\"mail\":null,\"mime\":\"image/webp\"},\"head\":\"RIFF\",\"lastFetch\":[\"/api/media/upload-session\",\"/drive-session\",\"/api/media/complete\"],\"pdfSaves\":0}"
+    },
+    {
+      "name": "evening: the tile is readable on its own ground",
+      "pass": true,
+      "detail": "rgb(79, 207, 163) / rgb(19, 42, 33)"
+    },
+    {
+      "name": "nothing was loaded from outside the fixture",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 19,
+  "passed": 19,
+  "failed": 0
+}

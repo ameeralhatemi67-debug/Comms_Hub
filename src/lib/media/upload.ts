@@ -3,6 +3,7 @@
 // in chunks (resumable), then ask the Hub to register it. Shared by new files and
 // new versions.
 import { CHUNK_BYTES } from '../drive/media';
+import { keepThumb, makeThumb } from './thumb-maker';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -104,6 +105,8 @@ export function probeMedia(file: File): Promise<Probe> {
 /** A brand-new asset in a folder. Returns the asset id. */
 export async function uploadNewAsset(file: File, folderId: string, onProgress: (f: number) => void): Promise<string> {
   const probe = await probeMedia(file);
+  // The thumbnail is drawn while the file travels, and saved once the file is registered (MVP_draft.md section 77).
+  const thumb = makeThumb(file);
   const session = await fetch('/api/media/upload-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -118,7 +121,9 @@ export async function uploadNewAsset(file: File, folderId: string, onProgress: (
     body: JSON.stringify({ fileId, folderId, dims: probe.dims, duration: probe.duration }),
   });
   if (!done.ok) throw new Error(await errorOf(done, 'تعذّر تسجيل الملف.'));
-  return ((await done.json()) as { id: string }).id;
+  const id = ((await done.json()) as { id: string }).id;
+  await keepThumb({ asset: id, version: 1 }, thumb);
+  return id;
 }
 
 /** A new version of an existing asset. Returns the version number it became (the studio records it). */
@@ -128,6 +133,7 @@ export async function uploadNewVersion(
   note: string,
   onProgress: (f: number) => void,
 ): Promise<number> {
+  const thumb = makeThumb(file);
   const session = await fetch(`/api/media/${assetId}/version`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -142,5 +148,7 @@ export async function uploadNewVersion(
     body: JSON.stringify({ fileId, note }),
   });
   if (!done.ok) throw new Error(await errorOf(done, 'تعذّر تسجيل الإصدار.'));
-  return ((await done.json()) as { version: number }).version;
+  const version = ((await done.json()) as { version: number }).version;
+  await keepThumb({ asset: assetId, version }, thumb);
+  return version;
 }

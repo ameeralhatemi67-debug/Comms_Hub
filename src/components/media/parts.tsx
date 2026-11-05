@@ -39,6 +39,8 @@ import {
 } from 'lucide-react';
 import { pipeline, stageLabels, stagePosition, stageTone, isSideStage, type Stage } from '@/lib/media/rules';
 import type { AssetRow } from './provider';
+import { FileThumb } from '../file-thumb';
+import { thumbUrl } from '@/lib/media/thumbs';
 
 const icons = {
   alert: AlertTriangle,
@@ -94,20 +96,25 @@ const PALETTES = [
 ];
 const hueOf = (id: string) => [...id].reduce((n, c) => n + c.charCodeAt(0), 0) % PALETTES.length;
 
-/** Preview of an asset: the real file for images and video, an icon tile otherwise. */
+/**
+ * Preview of an asset. On a card, its thumbnail (MVP_draft.md section 77): a small picture, never the whole file, so a page
+ * of cards stays light. Large, on the asset's own page, the real picture or the video with its thumbnail as the poster. With
+ * no thumbnail, the coloured tile with the kind's icon.
+ */
 export function Thumb({ asset, large = false }: { asset: Pick<AssetRow, 'id' | 'kind' | 'name' | 'current_version'>; large?: boolean }) {
   const src = `/api/media/${asset.id}/content?v=${asset.current_version}`;
-  if (asset.kind === 'image')
+  const of = { asset: asset.id, version: asset.current_version };
+  if (large && asset.kind === 'image')
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={asset.name} loading={large ? 'eager' : 'lazy'} />;
-  if (asset.kind === 'video')
-    return large ? <video src={src} controls preload="metadata" /> : <video src={src} muted playsInline preload="metadata" />;
+    return <img src={src} alt={asset.name} loading="eager" />;
+  if (large && asset.kind === 'video') return <video src={src} controls preload="metadata" poster={thumbUrl(of)} />;
   const [a, b] = PALETTES[hueOf(asset.id)];
-  return (
+  const tile = (
     <div className="fb" style={{ background: `linear-gradient(135deg,${a},${b})` }}>
-      <Icon name={asset.kind === 'audio' ? 'music' : 'file'} />
+      <Icon name={asset.kind === 'audio' ? 'music' : asset.kind === 'video' ? 'film' : asset.kind === 'image' ? 'image' : 'file'} />
     </div>
   );
+  return <FileThumb of={of} kind={asset.kind} name={asset.name} alt={asset.name} fallback={tile} />;
 }
 
 export function StageChip({ stage }: { stage: Stage }) {

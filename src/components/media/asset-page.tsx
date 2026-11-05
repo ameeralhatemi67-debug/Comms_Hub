@@ -30,6 +30,7 @@ import { Title } from '../ui';
 import { MediaDialogs, type Dialog } from './dialogs';
 import { useAssetActions } from './actions';
 import { Avatar, Icon, KIND_AR, StageChip, Thumb, Ts } from './parts';
+import { FileThumb } from '../file-thumb';
 import { useMedia } from './provider';
 import { StorageState } from './storage-state';
 import { HOLD } from '@/lib/kit/hold-reasons';
@@ -403,6 +404,9 @@ export function AssetPage({ id }: { id: string }) {
                   <li key={v.id} className={`${ok ? 'ok' : ''} ${now ? 'now' : ''}`}>
                     <span className="dt">
                       <Icon name={ok ? 'lock' : 'history'} />
+                    </span>
+                    <span className="vth">
+                      <FileThumb of={{ asset: asset.id, version: v.version }} kind={asset.kind} name={asset.name} />
                     </span>
                     <span>
                       <b>
