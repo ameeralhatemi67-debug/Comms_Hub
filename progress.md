@@ -3839,3 +3839,30 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   test settles it, and the panel says what YouTube applied.
 - **Before deploying.** Apply the migration first: the panel now selects `shown_publish_at`, so the code without it would empty
   every platform's «آخر التجارب». Nothing pushed.
+
+### 2026-11-05: three migrations applied to comms-hub, «إنشاء» as a permission, «إلغاء العمل» and the Facebook test (the manager)
+
+- **By the owner's yes of 2026-11-05** ("Yes, apply them"), applied in order through the Supabase MCP tool:
+  `create_access` (version 20261105072249), `work_cancel` (20261105072309), `platform_tests_facebook` (20261105072343).
+  The md5 of each stored statement equals the file's (`ec7c7f71...`, `b73c33be...`, `8a62413b...`). `create_access` patches
+  each function only if it carries the expected text exactly once, and it applied, so the live definitions were as written.
+  `android_releases` stays unapplied by design, and `platform_tests_youtube_choices` (20261105120000, step 1 of the director's
+  notes) was **not** applied: it was not part of the question, and its entry above says it must be applied before deploying.
+- **Verified on comms-hub after applying**, each rules file sent verbatim as one transaction rolled back at the end, with
+  throwaway accounts only: `create_access_rules.sql` **61 of 61**, `work_cancel_rules.sql` **40 of 40**,
+  `platform_tests_facebook_rules.sql` **48 of 48** (the same totals as on the private container before). Nothing was left
+  behind: no @t.test account or user, no throwaway integration, the server key's hash is the real one, `platform_tests` holds
+  its one earlier row. Results in `qa/create-access-rules-comms-hub.json`, `qa/work-cancel-rules-comms-hub.json`,
+  `qa/platform-tests-facebook-rules-comms-hub.json`.
+- **Found on the way: a rolled-back test still uses up work numbers.** `work_create` draws from `work_no_seq`, which a rollback
+  does not return; the two runs that create works took 11 numbers (1 to 12, with one work on the site). The sequence was set back
+  to 1 under a share lock on `works`, only because the count and the highest number were unchanged, so the next real work is
+  number 2. A later run on comms-hub that creates works should note the sequence first and restore it the same way.
+- **Security advisor after applying:** on these migrations' objects only `authenticated_security_definer_function_executable`,
+  for `work_cancel` (new, callable by signed-in people by design, it checks its caller) and the three replaced platform-test
+  functions (callable as before); none for anon, no table without a policy; `perm_create_giver` and `work_touched_by_others` are
+  not callable through the API. The count before applying was not taken.
+- **What the live site does now.** Its code (origin/main) predates these migrations, and it agrees with them: it builds a
+  person's pages from `my_capabilities` (`src/lib/supabase/session.ts`), so `page.create`'s role templates now decide «إنشاء»
+  there too. The assistant, the writer and the producer keep it; the designer and the member no longer see it, and the database
+  refuses them `work_create`. «إلغاء العمل» and the Facebook test wait for the push. Nothing pushed.

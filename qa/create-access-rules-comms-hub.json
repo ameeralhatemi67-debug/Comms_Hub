@@ -1,0 +1,42 @@
+{
+  "script": "supabase/tests/create_access_rules.sql",
+  "script_md5": "7e0930bfbe8f73f384a8b01eb7951ed7",
+  "run": "2026-11-05",
+  "migration": {
+    "file": "supabase/migrations/20261102200000_create_access.sql",
+    "file_md5": "ec7c7f71087089e0fe514a65446e67fd",
+    "applied": "applied to comms-hub (hrghmioxvgkjpnydrxrk) with the owner's approval of 2026-11-05, as version 20261105072249 'create_access'; md5 of the stored statement ec7c7f71087089e0fe514a65446e67fd equals the md5 of the file"
+  },
+  "how": "Each run is one transaction against comms-hub, rolled back at the end, through the MCP execute_sql tool, with the rules file sent verbatim. Throwaway accounts (@t.test) act through row level security; nothing about a real person is read into the result.",
+  "before_applying": {
+    "what": "On a private Docker container with every migration replayed, before applying (progress.md, 2026-11-02 and 2026-11-03).",
+    "total": 61,
+    "passed": 61
+  },
+  "after_applying": {
+    "what": "The rules file run verbatim against the applied migration.",
+    "total": 61,
+    "passed": 61,
+    "run_md5": "7e0930bfbe8f73f384a8b01eb7951ed7",
+    "run_md5_equals_file": true,
+    "left_behind": {
+      "throwaway_accounts": 0,
+      "throwaway_users": 0,
+      "work_no_seq_last": 1,
+      "max_work_no": 1,
+      "works": 1
+    },
+    "sequence": "work_create draws from work_no_seq, which a rollback does not return. The two runs that create works drew 11 numbers (last_value 1 to 12, works still 1); the sequence was set back to 1 under a share lock on works, only because the count and the highest number were unchanged."
+  },
+  "advisors": {
+    "run": "2026-11-05, after all three were applied",
+    "findings_after": {
+      "rls_enabled_no_policy": 13,
+      "anon_security_definer_function_executable": 22,
+      "authenticated_security_definer_function_executable": 321,
+      "auth_leaked_password_protection": 1
+    },
+    "on_these_migrations": "authenticated_security_definer_function_executable for work_cancel (new, callable by signed-in people by design, it checks its caller) and for platform_test_may, platform_test_start and platform_test_done (replaced, callable as before); none for anon, no table without a policy; the helpers perm_create_giver and work_touched_by_others are not executable by authenticated",
+    "findings_before": "not taken before applying"
+  }
+}
