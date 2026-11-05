@@ -1,0 +1,174 @@
+{
+  "script": "qa/studio-lanes.cjs",
+  "run": "2026-11-04T21:59:27.651Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "app-strong: every timed export ran with its own lane count, stepped down nowhere and made every frame (3 rounds of 1, 2 and 3 lanes)",
+      "pass": true,
+      "detail": "{\"wrong\":[],\"median\":{\"1\":71270,\"2\":45657,\"3\":39910}}"
+    }
+  ],
+  "notes": [
+    "app-strong: time with 1, 2 and 3 lanes (medians of three interleaved rounds, ms): {\"1\":71270,\"2\":45657,\"3\":39910}, speed-up {\"2\":1.56,\"3\":1.79}, load 12% before and 3% after; each export's load is beside it in the record.",
+    "timing only; frames and structure proven by rows 1 to 4 and the earlier engine rows at 29a1a30",
+    "The application started with --disable-features=CalculateNativeWinOcclusion, its window in front."
+  ],
+  "fixture": {
+    "seconds": 120,
+    "size": "3840x2160",
+    "short": 2160,
+    "engines": [
+      "app-strong"
+    ],
+    "faults": false,
+    "fingerprinted": "none (timing only)"
+  },
+  "engines": {
+    "app-strong": {
+      "versions": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "engine": {
+        "onChip": true,
+        "cores": 12
+      },
+      "starts": {
+        "two": [
+          0,
+          1800
+        ],
+        "three": [
+          0,
+          1200,
+          2400
+        ]
+      },
+      "timing": {
+        "loadBefore": 12,
+        "rounds": [
+          {
+            "1": {
+              "ms": 73017,
+              "lanes": 1,
+              "steps": [],
+              "frames": 3600,
+              "via": "canvas",
+              "load": [
+                46,
+                12
+              ]
+            },
+            "2": {
+              "ms": 45967,
+              "lanes": 2,
+              "steps": [],
+              "frames": 3600,
+              "via": "canvas",
+              "load": [
+                27,
+                29
+              ]
+            },
+            "3": {
+              "ms": 41393,
+              "lanes": 3,
+              "steps": [],
+              "frames": 3600,
+              "via": "canvas",
+              "load": [
+                24,
+                16
+              ]
+            }
+          },
+          {
+            "1": {
+              "ms": 70071,
+              "lanes": 1,
+              "steps": [],
+              "frames": 3600,
+              "via": "canvas",
+              "load": [
+                8,
+                9
+              ]
+            },
+            "2": {
+              "ms": 45657,
+              "lanes": 2,
+              "steps": [],
+              "frames": 3600,
+              "via": "canvas",
+              "load": [
+                6,
+                null
+              ]
+            },
+            "3": {
+              "ms": 39910,
+              "lanes": 3,
+              "steps": [],
+              "frames": 3600,
+              "via": "canvas",
+              "load": [
+                13,
+                3
+              ]
+            }
+          },
+          {
+            "1": {
+              "ms": 71270,
+              "lanes": 1,
+              "steps": [],
+              "frames": 3600,
+              "via": "canvas",
+              "load": [
+                3,
+                3
+              ]
+            },
+            "2": {
+              "ms": 42743,
+              "lanes": 2,
+              "steps": [],
+              "frames": 3600,
+              "via": "canvas",
+              "load": [
+                4,
+                4
+              ]
+            },
+            "3": {
+              "ms": 38660,
+              "lanes": 3,
+              "steps": [],
+              "frames": 3600,
+              "via": "canvas",
+              "load": [
+                2,
+                2
+              ]
+            }
+          }
+        ],
+        "loadAfter": 3,
+        "median": {
+          "1": 71270,
+          "2": 45657,
+          "3": 39910
+        },
+        "ratio": {
+          "2": 1.56,
+          "3": 1.79
+        }
+      },
+      "runs": {}
+    }
+  },
+  "total": 1,
+  "passed": 1,
+  "failed": 0
+}

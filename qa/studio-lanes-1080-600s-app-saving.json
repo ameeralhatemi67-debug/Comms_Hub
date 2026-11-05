@@ -1,0 +1,116 @@
+{
+  "script": "qa/studio-lanes.cjs",
+  "run": "2026-11-04T08:09:51.281Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "app-saving: one lane is the floor (18000 frames, every one fingerprinted)",
+      "pass": true,
+      "detail": "{\"via\":\"canvas\",\"ms\":643885,\"printed\":18000}"
+    },
+    {
+      "name": "app-saving, 2 lanes: every composed frame is one lane's, the structure is one lane's exactly",
+      "pass": true,
+      "detail": "{\"lanes\":2,\"steps\":[],\"firstDiff\":-1,\"keys\":300,\"ms\":[643885,655902]}"
+    },
+    {
+      "name": "app-saving, 2 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
+      "pass": true,
+      "detail": "[{\"frame\":8999,\"one\":42.71,\"lanes\":42.71,\"delta\":0},{\"frame\":9000,\"one\":42.61,\"lanes\":42.61,\"delta\":0}]"
+    },
+    {
+      "name": "app-saving, 3 lanes: every composed frame is one lane's, the structure is one lane's exactly",
+      "pass": true,
+      "detail": "{\"lanes\":3,\"steps\":[],\"firstDiff\":-1,\"keys\":300,\"ms\":[643885,695303]}"
+    },
+    {
+      "name": "app-saving, 3 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
+      "pass": true,
+      "detail": "[{\"frame\":5999,\"one\":41.91,\"lanes\":41.91,\"delta\":0},{\"frame\":6000,\"one\":41.85,\"lanes\":41.85,\"delta\":0},{\"frame\":11999,\"one\":42.03,\"lanes\":42.07,\"delta\":0.04},{\"frame\":12000,\"one\":41.96,\"lanes\":41.96,\"delta\":0}]"
+    }
+  ],
+  "notes": [
+    "The application started with --disable-features=CalculateNativeWinOcclusion, its window in front."
+  ],
+  "fixture": {
+    "seconds": 600,
+    "size": "1920x1080",
+    "short": 1080,
+    "engines": [
+      "app-saving"
+    ],
+    "faults": false,
+    "fingerprinted": "every frame"
+  },
+  "engines": {
+    "app-saving": {
+      "versions": {
+        "electron": "45.0.0",
+        "chrome": "156.0.8078.48"
+      },
+      "engine": {
+        "onChip": true,
+        "cores": 12
+      },
+      "starts": {
+        "two": [
+          0,
+          9000
+        ],
+        "three": [
+          0,
+          6000,
+          12000
+        ]
+      },
+      "timing": null,
+      "runs": {
+        "one": {
+          "lanes": 1,
+          "steps": [],
+          "ms": 643885,
+          "fps": 28,
+          "load": [
+            13,
+            32
+          ],
+          "bytes": 828060193,
+          "via": "canvas",
+          "keys": 300,
+          "frames": 18000
+        },
+        "two": {
+          "lanes": 2,
+          "steps": [],
+          "ms": 655902,
+          "fps": 27.4,
+          "load": [
+            30,
+            41
+          ],
+          "bytes": 828040925,
+          "via": "canvas",
+          "keys": 300,
+          "frames": 18000
+        },
+        "three": {
+          "lanes": 3,
+          "steps": [],
+          "ms": 695303,
+          "fps": 25.9,
+          "load": [
+            40,
+            85
+          ],
+          "bytes": 828060326,
+          "via": "canvas",
+          "keys": 300,
+          "frames": 18000
+        }
+      }
+    }
+  },
+  "total": 5,
+  "passed": 5,
+  "failed": 0
+}

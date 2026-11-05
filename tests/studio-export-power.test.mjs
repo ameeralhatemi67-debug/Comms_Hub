@@ -104,7 +104,7 @@ test("the WebAssembly conversion gives i420Into's bytes in every shape and size,
 
 test('the workers are offered and the page stays the way where they cannot be made', () => {
   const src = fs.readFileSync('src/lib/studio/export.ts', 'utf8');
-  assert.match(src, /e\.code === 'YUV_WORKER'\) return run\(via, 0\)/, 'a failed worker starts the export again on the page');
+  assert.match(src, /code === 'YUV_WORKER' && workers > 0\) workers = 0;/, 'a failed worker starts the export again on the page');
   assert.match(src, /rgbaToI420\(ctx\.getImageData\(0, 0, w, h\)\.data, w, h\)/, 'the page\'s conversion is kept');
   const pipe = fs.readFileSync('src/lib/studio/yuv-pipe.ts', 'utf8');
   assert.match(pipe, /const i420Into = \$\{i420Into\.toString\(\)\}/);
@@ -137,4 +137,62 @@ test('the sound\'s key (P-15) changes with everything the mix depends on and not
   changed(tl.setTrackSound(doc, doc.video.tracks.find((t) => t.clips.length).id, { role: 'music', duck: 6 }), 'the track\'s role and lowering');
   changed({ ...doc, sources: doc.sources.map((s) => ({ ...s, version: 2 })) }, 'a new version of the source');
   changed(tl.addClip(doc, { text: { content: 'بعد' }, start: 6 * US, length: US }).doc, 'a text that makes the project longer');
+});
+
+test('lanes (P-06): segments start on one lane\'s key frames, as equal as whole groups allow, never more than the groups', async () => {
+  const { segmentsOf } = await import('../src/lib/studio/segments.ts');
+  for (const [total, fps, lanes] of [[90, 30, 2], [18000, 30, 3], [18000, 30, 4], [100, 30, 4], [30, 30, 3], [1441, 24, 3], [36000, 60, 2]]) {
+    const segs = segmentsOf(total, fps, lanes);
+    const group = fps * 2;
+    assert.ok(segs.length >= 1 && segs.length <= lanes && segs.length <= Math.ceil(total / group), `${total}/${fps}/${lanes}`);
+    assert.equal(segs[0].from, 0);
+    assert.equal(segs.at(-1).to, total);
+    segs.forEach((s, i) => {
+      assert.equal(s.from % group, 0, 'each segment starts on a key frame');
+      assert.ok(s.to > s.from);
+      if (i) assert.equal(s.from, segs[i - 1].to, 'contiguous');
+    });
+    const sizes = segs.map((s) => Math.ceil((s.to - s.from) / group));
+    assert.ok(Math.max(...sizes) - Math.min(...sizes) <= 1, 'as equal as whole groups allow');
+  }
+  assert.equal(segmentsOf(60, 30, 3).length, 1, 'one group is one segment');
+});
+
+test('the ladder\'s memory (P-35): a lane failure caps the next exports at what finished, for a few exports only', async () => {
+  const { REMEMBER, ladderLanes, readLadder, rememberExport } = await import('../src/lib/studio/export-plan.ts');
+  const box = new Map();
+  const s = { getItem: (k) => box.get(k) ?? null, setItem: (k, v) => box.set(k, v) };
+  assert.equal(ladderLanes(3, readLadder(s)), 3, 'nothing remembered: the plan');
+  rememberExport({ lanes: 2, steps: ['LANE:ENCODER'] }, s, 1);
+  assert.equal(ladderLanes(3, readLadder(s)), 2, 'after a step down, at most what finished');
+  assert.equal(ladderLanes(1, readLadder(s)), 1, 'never above the plan');
+  for (let i = 0; i < REMEMBER - 1; i++) rememberExport({ lanes: 2, steps: [] }, s);
+  assert.equal(ladderLanes(3, readLadder(s)), 2, `still capped after ${REMEMBER - 1} more exports`);
+  rememberExport({ lanes: 2, steps: [] }, s);
+  assert.equal(ladderLanes(3, readLadder(s)), 3, `back to the plan after ${REMEMBER}`);
+  assert.equal(readLadder(s).events.length, 1, 'the event is kept');
+  assert.deepEqual(readLadder({ getItem: () => '{broken', setItem() {} }), { lanes: null, events: [] }, 'unreadable memory is no memory');
+  rememberExport({ lanes: 1, steps: ['DRAW_WORKER'] }, s);
+  assert.equal(ladderLanes(3, readLadder(s)), 3, 'a worker failure is not a lane failure');
+});
+
+test('one pass, several shapes (P-05): as many shapes go together as there are lanes, in order', async () => {
+  const { shapeGroups } = await import('../src/lib/studio/shapes.ts');
+  assert.deepEqual(shapeGroups([1, 2, 3, 4], 2), [[1, 2], [3, 4]]);
+  assert.deepEqual(shapeGroups([1, 2, 3, 4], 3), [[1, 2, 3], [4]]);
+  assert.deepEqual(shapeGroups([1, 2, 3], 1), [[1], [2], [3]], 'one lane: one after another, as before');
+  assert.deepEqual(shapeGroups([1, 2], 4), [[1, 2]]);
+  const panel = fs.readFileSync('src/components/studio/export-panel.tsx', 'utf8');
+  assert.match(panel, /if \(what === 'video' && lanes > 1 && list\.length > 1\)/, 'the one pass only where the plan gives lanes');
+});
+
+test('the export panel in the application (D12): the taskbar follows the export, and a saved video can be dragged out', () => {
+  const panel = fs.readFileSync('src/components/studio/export-panel.tsx', 'utf8');
+  assert.match(panel, /setProgress\(\{ label, f \}\);\s*void setTaskbarProgress\(f\);/, 'every progress shown is the taskbar\'s too');
+  assert.equal((panel.match(/setProgress\(\{/g) ?? []).length, 1, 'no progress bypasses it');
+  assert.match(panel, /await setTaskbarProgress\(failed \? 'failed' : 'done'\);/, 'cleared at the end, red after a failure');
+  assert.match(panel, /failed = code !== 'ABORTED';/, 'a cancel is not a failure');
+  assert.match(panel, /token: await fileToken\(saveTo\)/, 'the token is of the saved file itself');
+  assert.doesNotMatch(panel, /fileToken\((file|r\.file)\)/, 'never of a copy');
+  assert.match(panel, /e\.preventDefault\(\);\s*void dragOutFile\(d\.token!\);/);
 });

@@ -20,7 +20,8 @@ export type Target = {
   discard: () => Promise<void>;
 };
 
-export async function openTarget(name: string, type: string, expectedBytes: number, saveTo?: FileSystemFileHandle): Promise<Target> {
+/** `keep`: the earlier exports in the folder are kept (several shapes written at once, shapes.ts). */
+export async function openTarget(name: string, type: string, expectedBytes: number, saveTo?: FileSystemFileHandle, keep = false): Promise<Target> {
   const mb = await import('mediabunny');
   if (saveTo) {
     const writable = await saveTo.createWritable();
@@ -37,7 +38,7 @@ export async function openTarget(name: string, type: string, expectedBytes: numb
       const root = await navigator.storage.getDirectory();
       const dir = await root.getDirectoryHandle(EXPORT_DIR, { create: true });
       // one export kept at a time: the previous ones are removed
-      for await (const [k] of (dir as unknown as { entries(): AsyncIterable<[string, FileSystemHandle]> }).entries()) await dir.removeEntry(k).catch(() => undefined);
+      if (!keep) for await (const [k] of (dir as unknown as { entries(): AsyncIterable<[string, FileSystemHandle]> }).entries()) await dir.removeEntry(k).catch(() => undefined);
       const handle = await dir.getFileHandle(name, { create: true });
       const writable = await handle.createWritable();
       return {

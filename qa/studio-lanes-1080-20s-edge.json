@@ -1,0 +1,269 @@
+{
+  "script": "qa/studio-lanes.cjs",
+  "run": "2026-11-04T07:57:01.407Z",
+  "version": "0.8.0",
+  "checks": [
+    {
+      "name": "edge: one lane is the floor (600 frames, every one fingerprinted)",
+      "pass": true,
+      "detail": "{\"via\":\"canvas\",\"ms\":20039,\"printed\":600}"
+    },
+    {
+      "name": "edge, 2 lanes: every composed frame is one lane's, the structure is one lane's exactly",
+      "pass": true,
+      "detail": "{\"lanes\":2,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[20039,24088]}"
+    },
+    {
+      "name": "edge, 2 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
+      "pass": true,
+      "detail": "[{\"frame\":299,\"one\":43.04,\"lanes\":43.04,\"delta\":0},{\"frame\":300,\"one\":43.11,\"lanes\":43.11,\"delta\":0}]"
+    },
+    {
+      "name": "edge, 3 lanes: every composed frame is one lane's, the structure is one lane's exactly",
+      "pass": true,
+      "detail": "{\"lanes\":3,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[20039,23943]}"
+    },
+    {
+      "name": "edge, 3 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
+      "pass": true,
+      "detail": "[{\"frame\":239,\"one\":41.92,\"lanes\":41.92,\"delta\":0},{\"frame\":240,\"one\":42.04,\"lanes\":42.04,\"delta\":0},{\"frame\":419,\"one\":43.19,\"lanes\":43.19,\"delta\":0},{\"frame\":420,\"one\":43.29,\"lanes\":43.29,\"delta\":0}]"
+    },
+    {
+      "name": "edge: a lane with another H.264 profile is refused by the join's guard; the export runs with one lane and its file is the floor's",
+      "pass": true,
+      "detail": "{\"lanes\":1,\"steps\":[\"LANE:LANES\"]}"
+    },
+    {
+      "name": "edge: a lane failing once mid-segment: its segment runs again on the lanes left, and the file is exact",
+      "pass": true,
+      "detail": "{\"lanes\":3,\"steps\":[\"ENCODER\"],\"firstDiff\":-1}"
+    },
+    {
+      "name": "edge: the first segment's lane failing: the export runs again with a lane fewer, and the file is exact",
+      "pass": true,
+      "detail": "{\"lanes\":2,\"steps\":[\"LANE:ENCODER\"]}"
+    },
+    {
+      "name": "edge-nochip: one lane is the floor (600 frames, every one fingerprinted)",
+      "pass": true,
+      "detail": "{\"via\":\"yuv\",\"ms\":21060,\"printed\":600}"
+    },
+    {
+      "name": "edge-nochip, 2 lanes: every composed frame is one lane's, the structure is one lane's exactly",
+      "pass": true,
+      "detail": "{\"lanes\":2,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[21060,24608]}"
+    },
+    {
+      "name": "edge-nochip, 2 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
+      "pass": true,
+      "detail": "[{\"frame\":299,\"one\":41.84,\"lanes\":41.84,\"delta\":0},{\"frame\":300,\"one\":42.9,\"lanes\":42.9,\"delta\":0}]"
+    },
+    {
+      "name": "edge-nochip, 3 lanes: every composed frame is one lane's, the structure is one lane's exactly",
+      "pass": true,
+      "detail": "{\"lanes\":3,\"steps\":[],\"firstDiff\":-1,\"keys\":10,\"ms\":[21060,22152]}"
+    },
+    {
+      "name": "edge-nochip, 3 lanes: each frame at a segment's boundary is within 0.5 dB of one lane's (PSNR against the source)",
+      "pass": true,
+      "detail": "[{\"frame\":239,\"one\":41.51,\"lanes\":41.51,\"delta\":0},{\"frame\":240,\"one\":42.88,\"lanes\":42.88,\"delta\":0},{\"frame\":419,\"one\":41.93,\"lanes\":41.93,\"delta\":0},{\"frame\":420,\"one\":42.92,\"lanes\":42.92,\"delta\":0}]"
+    },
+    {
+      "name": "edge-nochip: a lane with another H.264 profile is refused by the join's guard; the export runs with one lane and its file is the floor's",
+      "pass": true,
+      "detail": "{\"lanes\":1,\"steps\":[\"LANE:LANES\"]}"
+    },
+    {
+      "name": "edge-nochip: a lane failing once mid-segment: its segment runs again on the lanes left, and the file is exact",
+      "pass": true,
+      "detail": "{\"lanes\":3,\"steps\":[\"ENCODER\"],\"firstDiff\":-1}"
+    },
+    {
+      "name": "edge-nochip: the first segment's lane failing: the export runs again with a lane fewer, and the file is exact",
+      "pass": true,
+      "detail": "{\"lanes\":2,\"steps\":[\"LANE:ENCODER\"]}"
+    }
+  ],
+  "notes": [],
+  "fixture": {
+    "seconds": 20,
+    "size": "1920x1080",
+    "short": 1080,
+    "engines": [
+      "edge",
+      "edge-nochip",
+      "app-nochip",
+      "app-saving",
+      "app-strong"
+    ],
+    "faults": true,
+    "fingerprinted": "every frame"
+  },
+  "engines": {
+    "edge": {
+      "browser": "156.0.4314.58",
+      "engine": {
+        "onChip": true,
+        "cores": 12
+      },
+      "starts": {
+        "two": [
+          0,
+          300
+        ],
+        "three": [
+          0,
+          240,
+          420
+        ]
+      },
+      "timing": null,
+      "runs": {
+        "one": {
+          "lanes": 1,
+          "steps": [],
+          "ms": 20039,
+          "bytes": 26721544,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        },
+        "two": {
+          "lanes": 2,
+          "steps": [],
+          "ms": 24088,
+          "bytes": 26721544,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        },
+        "three": {
+          "lanes": 3,
+          "steps": [],
+          "ms": 23943,
+          "bytes": 26721544,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        },
+        "guard": {
+          "lanes": 1,
+          "steps": [
+            "LANE:LANES"
+          ],
+          "ms": 26353,
+          "bytes": 26721544,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        },
+        "lateFault": {
+          "lanes": 3,
+          "steps": [
+            "ENCODER"
+          ],
+          "ms": 24901,
+          "bytes": 26721544,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        },
+        "firstFault": {
+          "lanes": 2,
+          "steps": [
+            "LANE:ENCODER"
+          ],
+          "ms": 33289,
+          "bytes": 26721544,
+          "via": "canvas",
+          "keys": 10,
+          "frames": 600
+        }
+      }
+    },
+    "edge-nochip": {
+      "browser": "156.0.4314.58",
+      "engine": {
+        "onChip": false,
+        "cores": 12
+      },
+      "starts": {
+        "two": [
+          0,
+          300
+        ],
+        "three": [
+          0,
+          240,
+          420
+        ]
+      },
+      "timing": null,
+      "runs": {
+        "one": {
+          "lanes": 1,
+          "steps": [],
+          "ms": 21060,
+          "bytes": 25359421,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        },
+        "two": {
+          "lanes": 2,
+          "steps": [],
+          "ms": 24608,
+          "bytes": 25359417,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        },
+        "three": {
+          "lanes": 3,
+          "steps": [],
+          "ms": 22152,
+          "bytes": 25357779,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        },
+        "guard": {
+          "lanes": 1,
+          "steps": [
+            "LANE:LANES"
+          ],
+          "ms": 21861,
+          "bytes": 25359421,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        },
+        "lateFault": {
+          "lanes": 3,
+          "steps": [
+            "ENCODER"
+          ],
+          "ms": 20444,
+          "bytes": 25357779,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        },
+        "firstFault": {
+          "lanes": 2,
+          "steps": [
+            "LANE:ENCODER"
+          ],
+          "ms": 20056,
+          "bytes": 25359417,
+          "via": "yuv",
+          "keys": 10,
+          "frames": 600
+        }
+      }
+    }
+  },
+  "total": 16,
+  "passed": 16,
+  "failed": 0
+}

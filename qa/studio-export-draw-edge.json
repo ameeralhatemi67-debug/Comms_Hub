@@ -1,0 +1,505 @@
+{
+  "script": "qa/studio-export-draw.cjs",
+  "run": "2026-11-03T22:14:29.394Z",
+  "version": "0.7.1",
+  "checks": [
+    {
+      "name": "edge: every frame of the corpus composed by drawing workers is the page's, byte for byte",
+      "pass": false,
+      "detail": "{\"frames\":54,\"faces\":6,\"fonts\":true,\"differing\":{\"plain\":[{\"i\":4,\"max\":1,\"pixels\":93,\"box\":[531,1253,752,1546]},{\"i\":5,\"max\":1,\"pixels\":56,\"box\":[691,1352,1000,1447]}],\"brand\":[{\"i\":0,\"max\":1,\"pixels\":5,\"box\":[791,503,877,601]},{\"i\":1,\"max\":1,\"pixels\":19,\"box\":[601,493,891,635]},{\"i\":2,\"max\":1,\"pixels\":16,\"box\":[435,496,891,635]},{\"i\":3,\"max\":1,\"pixels\":12,\"box\":[397,516,894,613]},{\"i\":4,\"max\":1,\"pixels\":68,\"box\":[312,489,886,638]}]}}"
+    },
+    {
+      "name": "edge: an export drawn by two workers carries the page's 90 video packets",
+      "pass": true,
+      "detail": "{\"via\":\"canvas\",\"page\":{\"count\":90,\"hash\":\"f4d453981b24ed99\"},\"workers\":{\"count\":90,\"hash\":\"f4d453981b24ed99\"},\"ms\":[2246,2423]}"
+    },
+    {
+      "name": "edge: where the drawing workers cannot start, the export draws on the page, says so, and carries the same packets",
+      "pass": true,
+      "detail": "{\"steps\":[\"DRAW_WORKER\"],\"packets\":{\"count\":90,\"hash\":\"f4d453981b24ed99\"}}"
+    },
+    {
+      "name": "edge: no page errors",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "edge-nochip: every frame of the corpus composed by drawing workers is the page's, byte for byte",
+      "pass": false,
+      "detail": "{\"frames\":54,\"faces\":6,\"fonts\":true,\"differing\":{\"effects\":[{\"i\":0,\"max\":44,\"pixels\":3394,\"box\":[430,160,1658,884]},{\"i\":1,\"max\":50,\"pixels\":3375,\"box\":[430,160,1658,884]},{\"i\":2,\"max\":18,\"pixels\":3226,\"box\":[430,160,1658,884]},{\"i\":3,\"max\":24,\"pixels\":3306,\"box\":[430,160,1658,884]},{\"i\":4,\"max\":21,\"pixels\":3311,\"box\":[430,160,1658,884]},{\"i\":5,\"max\":24,\"pixels\":3319,\"box\":[430,160,1658,884]}],\"transitions\":[{\"i\":14,\"max\":108,\"pixels\":3431,\"box\":[409,0,1510,1079]}],\"covers\":[{\"i\":0,\"max\":22,\"pixels\":128553,\"box\":[113,446,1006,1500]},{\"i\":1,\"max\":18,\"pixels\":132250,\"box\":[110,449,987,1473]},{\"i\":2,\"max\":27,\"pixels\":144137,\"box\":[113,445,1007,1502]},{\"i\":3,\"max\":20,\"pixels\":128675,\"box\":[110,449,987,1473]},{\"i\":4,\"max\":18,\"pixels\":125793,\"box\":[111,448,997,1487]},{\"i\":5,\"max\":10,\"pixels\":121658,\"box\":[117,440,1017,1520]}]}}"
+    },
+    {
+      "name": "edge-nochip: an export drawn by two workers carries the page's 90 video packets",
+      "pass": true,
+      "detail": "{\"via\":\"yuv\",\"page\":{\"count\":90,\"hash\":\"b827fcf745ff560c\"},\"workers\":{\"count\":90,\"hash\":\"b827fcf745ff560c\"},\"ms\":[2331,1901]}"
+    },
+    {
+      "name": "edge-nochip: where the drawing workers cannot start, the export draws on the page, says so, and carries the same packets",
+      "pass": true,
+      "detail": "{\"steps\":[\"DRAW_WORKER\"],\"packets\":{\"count\":90,\"hash\":\"b827fcf745ff560c\"}}"
+    },
+    {
+      "name": "edge-nochip: no page errors",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": [
+    "Timings in the record are of a loaded laptop and are not speed figures."
+  ],
+  "runs": {
+    "edge": {
+      "browser": "156.0.4314.58",
+      "engine": {
+        "renderer": "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001681) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "onChip": true
+      },
+      "exports": {
+        "page": {
+          "tag": "edge-page",
+          "frames": 90,
+          "bytes": 4146987,
+          "ms": 2246,
+          "via": "canvas",
+          "drawers": 0,
+          "steps": [],
+          "yuvSimd": false,
+          "packets": {
+            "count": 90,
+            "hash": "f4d453981b24ed99"
+          }
+        },
+        "workers": {
+          "tag": "edge-workers",
+          "frames": 90,
+          "bytes": 4146987,
+          "ms": 2423,
+          "via": "canvas",
+          "drawers": 2,
+          "steps": [],
+          "yuvSimd": false,
+          "packets": {
+            "count": 90,
+            "hash": "f4d453981b24ed99"
+          }
+        },
+        "broken": {
+          "tag": "edge-broken",
+          "frames": 90,
+          "bytes": 4146987,
+          "ms": 2326,
+          "via": "canvas",
+          "drawers": 0,
+          "steps": [
+            "DRAW_WORKER"
+          ],
+          "yuvSimd": false,
+          "packets": {
+            "count": 90,
+            "hash": "f4d453981b24ed99"
+          }
+        }
+      },
+      "differing": [
+        {
+          "name": "plain",
+          "i": 4,
+          "size": "1080x1920",
+          "page": "8bdd345ab8a7542ade39921ba84a9cbccb30a47e2f55049315e61ab564f73178",
+          "worker": "0246020480347893280bd5f24249dcbdd5b3bddb76cbe2d7ca3300fb8f365877",
+          "diff": {
+            "max": 1,
+            "pixels": 93,
+            "box": [
+              531,
+              1253,
+              752,
+              1546
+            ]
+          }
+        },
+        {
+          "name": "plain",
+          "i": 5,
+          "size": "1080x1920",
+          "page": "a8d6e7fdc0f1be79ecc061fabe06dd78535dcebc133659e093cdea4dfe0f8564",
+          "worker": "13a2a5980d2bd04fcff4e3b6cfaaa8ad78030706dd595722dd18e67d0658bf51",
+          "diff": {
+            "max": 1,
+            "pixels": 56,
+            "box": [
+              691,
+              1352,
+              1000,
+              1447
+            ]
+          }
+        },
+        {
+          "name": "brand",
+          "i": 0,
+          "size": "1080x1080",
+          "page": "1742c617e89ce9bafb13cbe9c6fc375c91cfa9c58612bf28b8cbc54aaa5fb62f",
+          "worker": "2bb6a9807760ff22cc9d82711077d69989840af1814f1003024e1136718ebbbb",
+          "diff": {
+            "max": 1,
+            "pixels": 5,
+            "box": [
+              791,
+              503,
+              877,
+              601
+            ]
+          }
+        },
+        {
+          "name": "brand",
+          "i": 1,
+          "size": "1080x1080",
+          "page": "7a653f070a7da3dd451a0ba046e0412a7bcd9611c817d4ebd3f47b04b08ac64a",
+          "worker": "e0d8af4f352c5c64a8692f3f6d292cbc8aeddf8eb4e65f435a1fd5a13e33af08",
+          "diff": {
+            "max": 1,
+            "pixels": 19,
+            "box": [
+              601,
+              493,
+              891,
+              635
+            ]
+          }
+        },
+        {
+          "name": "brand",
+          "i": 2,
+          "size": "1080x1080",
+          "page": "a1a3a0af28f3b099e3ea1b30ce0e88204a18fc58b16dbbee5b83930cc00700cb",
+          "worker": "f21876907d79158ae0078812121f4d4cfb3bcb56b82c08c17ac9d604fccc349d",
+          "diff": {
+            "max": 1,
+            "pixels": 16,
+            "box": [
+              435,
+              496,
+              891,
+              635
+            ]
+          }
+        },
+        {
+          "name": "brand",
+          "i": 3,
+          "size": "1080x1080",
+          "page": "679ee34c0040248a9bed2bbadda13c8e4bde8dca572198cfb694b00b3154f42d",
+          "worker": "91476c6f355b8ba40718ab1ed3cfe5882cb2a4edbc561467e89a18fc54f45cca",
+          "diff": {
+            "max": 1,
+            "pixels": 12,
+            "box": [
+              397,
+              516,
+              894,
+              613
+            ]
+          }
+        },
+        {
+          "name": "brand",
+          "i": 4,
+          "size": "1080x1080",
+          "page": "3eed55c602a1b8d4f96d74cc5bc5df22e5b3d8a13e063e1f492ac65ddd4f9b3a",
+          "worker": "c6376a8c199f41c45f8fc9ed7a53f0e7b70da97944668500f7b56f5b096795e0",
+          "diff": {
+            "max": 1,
+            "pixels": 68,
+            "box": [
+              312,
+              489,
+              886,
+              638
+            ]
+          }
+        }
+      ]
+    },
+    "edge-nochip": {
+      "browser": "156.0.4314.58",
+      "engine": {
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "onChip": false
+      },
+      "exports": {
+        "page": {
+          "tag": "edge-nochip-page",
+          "frames": 90,
+          "bytes": 3816099,
+          "ms": 2331,
+          "via": "yuv",
+          "drawers": 0,
+          "steps": [],
+          "yuvSimd": true,
+          "packets": {
+            "count": 90,
+            "hash": "b827fcf745ff560c"
+          }
+        },
+        "workers": {
+          "tag": "edge-nochip-workers",
+          "frames": 90,
+          "bytes": 3816099,
+          "ms": 1901,
+          "via": "yuv",
+          "drawers": 2,
+          "steps": [],
+          "yuvSimd": true,
+          "packets": {
+            "count": 90,
+            "hash": "b827fcf745ff560c"
+          }
+        },
+        "broken": {
+          "tag": "edge-nochip-broken",
+          "frames": 90,
+          "bytes": 3816099,
+          "ms": 1874,
+          "via": "yuv",
+          "drawers": 0,
+          "steps": [
+            "DRAW_WORKER"
+          ],
+          "yuvSimd": true,
+          "packets": {
+            "count": 90,
+            "hash": "b827fcf745ff560c"
+          }
+        }
+      },
+      "differing": [
+        {
+          "name": "effects",
+          "i": 0,
+          "size": "1920x1080",
+          "page": "dbc9babb76311d552f70e11977ecfbcf8d638c4606b00a982de2799b2ac8e846",
+          "worker": "320a2747817dfec683d42d5555df345206a088b35379f6421e4d519838bf357a",
+          "diff": {
+            "max": 44,
+            "pixels": 3394,
+            "box": [
+              430,
+              160,
+              1658,
+              884
+            ]
+          }
+        },
+        {
+          "name": "effects",
+          "i": 1,
+          "size": "1920x1080",
+          "page": "f09810ffae8144fa25778f4b82139c8fed98ba834ff49c3c54ed5aa1ff555b8c",
+          "worker": "e656aa59951dd8d3f495f8e29a9bf25103a4019263fa5c51a617372949979ad8",
+          "diff": {
+            "max": 50,
+            "pixels": 3375,
+            "box": [
+              430,
+              160,
+              1658,
+              884
+            ]
+          }
+        },
+        {
+          "name": "effects",
+          "i": 2,
+          "size": "1920x1080",
+          "page": "7af4047659d66f8fb3c27cabee6e5b8cd613d1732ba316d5002169dbdc223fa1",
+          "worker": "236c086d537ee64350e08849a777aace063ef05148c1df0be9f4c00d009939f0",
+          "diff": {
+            "max": 18,
+            "pixels": 3226,
+            "box": [
+              430,
+              160,
+              1658,
+              884
+            ]
+          }
+        },
+        {
+          "name": "effects",
+          "i": 3,
+          "size": "1920x1080",
+          "page": "67c7d51840e40778f40bc42ec33c15ab1987e8c8e2b16d569fe942d50b5fad6a",
+          "worker": "c401d4596089865088fcaf691f93da80cd950d3b8196eeb1e537f358e9782cd7",
+          "diff": {
+            "max": 24,
+            "pixels": 3306,
+            "box": [
+              430,
+              160,
+              1658,
+              884
+            ]
+          }
+        },
+        {
+          "name": "effects",
+          "i": 4,
+          "size": "1920x1080",
+          "page": "4ed6943a08e76f39f31b47893b559a88fb5c5cce078493203a047decf98a1695",
+          "worker": "982253c00dcd6051dbf346ad30adef8007c52f35bdfff018199a622e24b3ab11",
+          "diff": {
+            "max": 21,
+            "pixels": 3311,
+            "box": [
+              430,
+              160,
+              1658,
+              884
+            ]
+          }
+        },
+        {
+          "name": "effects",
+          "i": 5,
+          "size": "1920x1080",
+          "page": "219a410a1ff74a3a9b8f669cae8dcd57e5f90a65ead8543d43ccf72e703d2018",
+          "worker": "5175388f4ec878d73d3bbb6092f4133469ac96eb429932c34c5c84896cc8c8bf",
+          "diff": {
+            "max": 24,
+            "pixels": 3319,
+            "box": [
+              430,
+              160,
+              1658,
+              884
+            ]
+          }
+        },
+        {
+          "name": "transitions",
+          "i": 14,
+          "size": "1920x1080",
+          "page": "1cd6f1e1eb73910648e86a0e152e7f9e5159ee681a1910f0ae970414656a527a",
+          "worker": "1459bb0b1061fdc107e5a087daa381200880eeb1bef16136c15727119ab9e96b",
+          "diff": {
+            "max": 108,
+            "pixels": 3431,
+            "box": [
+              409,
+              0,
+              1510,
+              1079
+            ]
+          }
+        },
+        {
+          "name": "covers",
+          "i": 0,
+          "size": "1080x1920",
+          "page": "26ef928e9c05ef53026c138f2567511a43de5024b79fcbea765a9b2915b06a57",
+          "worker": "7ce1ad83728bd96298c7f3a0426a84da87dd2854327719a6baa48e8bd0507134",
+          "diff": {
+            "max": 22,
+            "pixels": 128553,
+            "box": [
+              113,
+              446,
+              1006,
+              1500
+            ]
+          }
+        },
+        {
+          "name": "covers",
+          "i": 1,
+          "size": "1080x1920",
+          "page": "5f50975e2eaecd235113b0946242d127a9ae131837ca02ebb62ae9e73cfc9d95",
+          "worker": "1a96c2baa62fb1eab16e0fe2683a698d7f61990e017855213806440552ac6052",
+          "diff": {
+            "max": 18,
+            "pixels": 132250,
+            "box": [
+              110,
+              449,
+              987,
+              1473
+            ]
+          }
+        },
+        {
+          "name": "covers",
+          "i": 2,
+          "size": "1080x1920",
+          "page": "7a1159d3150f687bf6ab9410caf436d7f3fd4756076d0f2c6300ff2f9e6aec1d",
+          "worker": "0a4f19259f7bbda0d6c8afd32fcecb44388730a43721482d56f1275f182ac1df",
+          "diff": {
+            "max": 27,
+            "pixels": 144137,
+            "box": [
+              113,
+              445,
+              1007,
+              1502
+            ]
+          }
+        },
+        {
+          "name": "covers",
+          "i": 3,
+          "size": "1080x1920",
+          "page": "8d532e5334934df9b505207d01ad5e95557290aa321cd025a7ab7c87fb86be39",
+          "worker": "81d531ae305711972da23a5a3e4244a37ef0cca91c96d620da78ecf03420e426",
+          "diff": {
+            "max": 20,
+            "pixels": 128675,
+            "box": [
+              110,
+              449,
+              987,
+              1473
+            ]
+          }
+        },
+        {
+          "name": "covers",
+          "i": 4,
+          "size": "1080x1920",
+          "page": "0b8b7a472efade3da7ec28048f640158e39564d04673d51fd93075a8dc9989b7",
+          "worker": "62ff6e29cdf3ae57715151344221e5f3815fb6aef1c5f8b1cdd6bd5fbda2e3ed",
+          "diff": {
+            "max": 18,
+            "pixels": 125793,
+            "box": [
+              111,
+              448,
+              997,
+              1487
+            ]
+          }
+        },
+        {
+          "name": "covers",
+          "i": 5,
+          "size": "1080x1920",
+          "page": "193668b7aa5739ed32173ac13e916de484e61b0d380bb698531733e41608ca30",
+          "worker": "23f22c09c30bbe95cbfcf88dba3b8a8e50ca2a0708215e8d8bb7878e7f46591d",
+          "diff": {
+            "max": 10,
+            "pixels": 121658,
+            "box": [
+              117,
+              440,
+              1017,
+              1520
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "total": 8,
+  "passed": 6,
+  "failed": 2
+}

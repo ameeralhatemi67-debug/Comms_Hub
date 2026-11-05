@@ -2927,6 +2927,32 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   was not timed (VP9 has no chip encoder here, so it always takes the BT.709 path).
 - **Not done.** Nothing pushed.
 
+### 2026-11-04: the export's drawing in workers (P-07), built, proven where it is exact, and kept off (Desktop Power, Fork 1)
+
+- **What was built.** `src/lib/studio/export-draw.ts` is an export drawing worker: it composes frames with the studio's own
+  compositor, `compose.ts`, unchanged, on an OffscreenCanvas. `draw-shim.ts` gives the compositor's modules the little of a page they
+  use: a canvas element is an OffscreenCanvas, `document.fonts` is the worker's own set, and `new Image()` loads a picture into an
+  OffscreenCanvas. `drawers.ts` is the page's half. It mirrors the font faces the page has loaded (each with its own file and range,
+  read from the page's style sheets, so text falls back from font to font as on the page), and sends the project's pictures and,
+  frame by frame, the decoded frames as ImageBitmaps. `export.ts` takes `drawers` (default 0) and encodes the workers' frames as it
+  encodes its own canvas. A worker that cannot start or fails starts the export again on the page (`steps: ['DRAW_WORKER']`).
+- **Measured (`qa/studio-export-draw.cjs`, Edge 156 with and without its chip, `qa/studio-export-draw-edge.json`, 6 of 8).**
+  - An export with an Arabic title drawn by two workers carries exactly the page's 90 video packets, on both engines.
+  - Where the workers cannot start, the export draws on the page, says so, and carries the same packets.
+  - **The corpus is not exact everywhere.** With the AMD chip: plain, 2 frames (38 to 95 pixels, 1 level) and brand, 5 frames (5 to
+    67 pixels, 1 level). The page's canvas element and an OffscreenCanvas on the page agree there; the worker thread's raster differs
+    by one level on shape and brand-mark edges. With `--disable-gpu`: effects, 6 frames (up to 3394 pixels, 50 levels); covers, 6
+    frames (up to 144137 pixels, 27 levels); transitions, 1 frame (3431 pixels, 108 levels). Here the cause is the kind of canvas,
+    not the thread: an OffscreenCanvas on the page already differs from the canvas element in those blur and filter paths, and the
+    worker equals the page's OffscreenCanvas exactly (a diagnostic in the session's scratch folder).
+- **Decision (the manager, (A)).** The drawing in workers stays in the code, off by default; nothing in `scale.ts` or the export panel
+  turns it on in this stage, and the floor stays the page's canvas element, today's frames. Once Fork 4's whole-number blur and
+  filters are on main, the corpus in workers is to be run again on every engine; the AMD chip's one-level edges may remain, so any
+  later switch-on is per engine and proven by this check. Making the floor itself draw in a worker (B) goes to the owner as a choice.
+- **Verified.** `npm run typecheck` clean; `tests/studio-export-power.test.mjs` and `tests/studio-colour.test.mjs` 12 of 12. The
+  application's engines (no chip, both chips) wait for the port-3000 lock.
+- **Not done.** Nothing pushed; drawing in workers not switched on anywhere.
+
 ### 2026-11-04: the desktop application, D12: light copies in idle time, parallel library copies, the taskbar, dragging out, the camera card (Desktop Power, Fork 3)
 
 - **Direction.** The Desktop Power manager's list for Fork 3: `Desktop_Power_Ideas.md` P-30 with P-08, P-29, P-26, P-22, P-20, and the
@@ -3458,3 +3484,185 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified, said plainly.** Nothing signed in: the notice and the card were checked on fixture pages, and the card's studio line
   through its test, not seen. No program was really opened: `shell.openPath` was recorded. One laptop.
 - **Not done.** Nothing pushed. Release preparation (0.9.0) waits for the manager.
+
+### 2026-11-04: export lanes (P-06), the step-down ladder (P-35) and one pass for several shapes (P-05) (Desktop Power, Fork 1, D11)
+
+- **Lanes (`segments.ts`, `lanes.ts`, `export.ts`).** The frames are cut into contiguous segments on one lane's key frames
+  (every two seconds), as equal as whole groups allow. Each lane runs its segment on the page's own canvases (the floor's
+  kind, so composed frames are one lane's): its own decoders, made with the media pool's sink settings, and its own
+  Mediabunny encoder from one lane's settings, into an output that keeps nothing. The first segment's packets go into the
+  file as they come; the others wait in the browser's private storage (`studio-lanes`) and follow in order. The sound is
+  mixed once and kept one window ahead, as with one lane.
+  - **The join's guard.** Every lane's decoder description (codec string, parameter sets, colour) is compared with the first
+    segment's as it arrives; on a difference every lane stops, the attempt's file is thrown away, and the export runs
+    again with one lane, so no mixed file is ever kept. (Section 9 said "before writing anything": the first segment's
+    packets reach the attempt's file before the other lanes report, and that file is discarded; holding them instead
+    could hold a whole segment in memory when a later lane starts late.)
+  - **Warming a later lane.** Started cold at its segment, the processor's encoder made a later segment's first frame about
+    1.5 dB worse than one lane (Edge with no chip, 20 s fixture: 41.36 against 42.90 dB). A lane after the first now encodes
+    the two seconds before its segment first and drops those packets: the boundary frames then equal one lane's to 0.00 dB.
+- **The ladder (P-35; `lanes.ts`, `export.ts`, `export-plan.ts`).** A later segment whose lane fails is run again on the
+  lanes left (the last lane running takes it itself; twice at most); a failure of the first segment, a refused join, or
+  repeated failures end the attempt and the export runs again with a lane fewer; a drawing or BT.709 worker's failure runs it
+  again without that worker. After a step down, the next five exports on this device start at most at the lanes that
+  finished (`rememberExport`, kept beside the studio's preferences). The panel says «تعذّر التصدير المتوازي على هذا الجهاز،
+  فأُكمل بالطريقة المعتادة.» when an export finished a slower way. A renderer killed mid-segment is not covered: it ends the
+  page and the export with it, as it always did; resuming across it is outside this stage.
+- **Where lanes come from.** The panel asks `exportLanes()`: the device's measured plan (`scale.ts`, the D9 measurement for this
+  application, Chromium, chip, driver and switch), then the ladder's memory. With no measurement, in a browser or on a phone,
+  it is one lane: today's export. Drawing in workers is not turned on anywhere (P-07, decision (A)).
+- **One pass, several shapes (P-05; `shapes.ts`).** With more than one lane and two to four shapes ticked, as many shapes as
+  lanes are made together: each source decoded once (a shape moves where a clip sits, never which frame it shows), every
+  shape composed on its own canvas and encoded by its own encoder into its own file, the sound mixed once for all. Any
+  failure but a cancel makes the shapes again one after another, as before (`steps: ['ONE_PASS']`), so nothing is lost.
+- **Verified, numbers.** `npm run typecheck` clean; `npm test` 806 of 806. `qa/studio-lanes.cjs` with one lane (the floor),
+  two and three, the application started with `--disable-features=CalculateNativeWinOcclusion` and its window in front (a
+  covered window draws about once a second, Fork 2's finding); the times are with fingerprints and are not speed figures.
+  - **Edge 156, with and without its chip, 20 s at 1080p:** 16 of 16 (`qa/studio-lanes-1080-20s-edge.json`).
+  - **The application on the saving chip (AMD):**
+    - 20 s with the forced faults, 8 of 8: the guard refused a lane with another H.264 profile and one lane made the file;
+      a lane failing once mid-segment had its segment run again by the lanes left; the first segment's lane failing ran the
+      export again with two lanes; every file exact (`qa/studio-lanes-1080-20s-app-saving.json`).
+    - Ten minutes at 1080p, every one of the 18000 composed frames fingerprinted, 5 of 5: two and three lanes give one
+      lane's frames and structure (300 key frames); the frames at the boundaries 0.00 dB from one lane's at frame 9000, and
+      0.00, 0.00 and +0.04 dB at 6000 and 12000. 644, 656 and 695 s (28.0, 27.4 and 25.9 frames a second), the processor at
+      13 then 32%, 30 then 41%, 40 then 85% (`qa/studio-lanes-1080-600s-app-saving.json`).
+    - Ten minutes at 4K, 1368 frames fingerprinted (sampled, below), 5 of 5: frames and structure exact; boundary frames
+      0.00 dB at 9000, and 0.00, 0.00 and +0.01 dB at 6000 and 12000. 738, 610 and 589 s (24.4, 29.5 and 30.5 frames a
+      second), the processor at 54 then 85%, 40 then 31%, 73 then 14% (`qa/studio-lanes-2160-600s-app-saving.json`).
+  - **The application on the strong chip (RTX 3050):**
+    - 20 s with the forced faults, 8 of 8, at 21 to 24 frames a second with fingerprints, so the window was not throttled
+      (`qa/studio-lanes-1080-20s-app-strong.json`).
+    - Ten minutes at 1080p, every frame fingerprinted, 5 of 5: frames and structure exact; boundary frames 0.00 dB at 9000,
+      6000 and 12000. 752, 759 and 758 s (23.9, 23.7 and 23.8 frames a second), the processor at 42 then 32%, 37 then 33%,
+      15 then 22% (`qa/studio-lanes-1080-600s-app-strong.json`).
+    - **Ten minutes at 4K: not finished.** One lane finished (576 s, 31.2 frames a second, sampled fingerprints). The two-lane
+      export then stopped with `QuotaExceededError`: drive C was down to 3.5 GB, about 15 GB of it this fork's own earlier
+      profiles, holding the private copies of the long sources and exports, which the checks did not remove
+      (`qa/studio-lanes-2160-600s-app-strong.json`, 0 of 1, the error alone). Those four profiles were removed (C back to 18.6
+      GB), the checks now remove their profile when an engine closes, and the run was started again with TEMP and TMP on D:.
+      The owner paused the stage while it was making its source; it was stopped there, and nothing of it is recorded.
+  - **With no graphics chip in the application: not run** (the owner's pause came first). Edge with `--disable-gpu` passed the
+    20 s lanes and faults (above).
+  - **The encoded bytes are not the same, and section 5.2 does not ask them to be.** On the AMD chip the files of one, two
+    and three lanes differ by some tens of kilobytes (1080p: 828,060,193, 828,040,925 and 828,060,326 bytes); four processor
+    encoders run at once for P-05 made two shapes' bits differ, the files 56.3 and 56.9 dB apart. In both, section 5.2's
+    first level (structure, exact) and second level (composed frames exactly equal on one machine for every knob setting)
+    hold; the encoded file is its third level, quality against its own frames, where byte-equality is not asked, as hardware
+    encoders do not give it (DT-06).
+  - **One pass, several shapes (`qa/studio-shapes-onepass.cjs`):** Edge with and without its chip 8 of 8, the saving chip 4 of 4;
+    every shape's composed frames and structure are its own export's; the packets are recorded (identical with a chip, as
+    above without one).
+- **Found and fixed on the way (a04d40c).** In the Edge run before the long ones, a first segment whose lane failed before its
+  encoder had described itself made the export run again with one lane instead of one fewer: the missing description was taken
+  for a refused join. A lane's own failure is now read before the descriptions are compared; Edge then passed 16 of 16.
+- **Deviations from `Desktop_Power_Ideas.md` section 9, with reasons (the manager's approval of 2026-11-04).**
+  - The 4K ten-minute fixture fingerprints every 15th composed frame and the 30 on each side of every boundary, not every
+    frame: fingerprinting every 4K frame would hold port 3000, which all forks share, for hours more.
+  - No ten-minute 4K run with no graphics chip: about 80 minutes for each lane count.
+  - The time ratios are of two-minute fixtures in a quiet window: ten-minute runs do not fit in one.
+- **Stopped at the owner's pause (2026-11-04), said plainly.** Of D11's gate, still to run: ten minutes at 4K on the strong
+  chip; with no chip in the application, the 20 s faults, the shapes and ten minutes at 1080p; and (d), the time ratio for each
+  chip in a quiet window (two-minute 1080p and 4K fixtures, three interleaved rounds of one, two and three lanes, without
+  fingerprints: `QUIET=1`). Not verified: a renderer killed mid-segment (above); nothing signed in (the panel's lanes and one
+  pass were not clicked through); the plan's lanes on a measured profile (`exportLanes`) were not exercised in the application.
+- **To resume, and the traps.**
+  - Each run of the application takes port 3000's lock itself, at `%LOCALAPPDATA%\Temp\comms-hub-port3000.lock` (the checks no
+    longer read it through TEMP), and frees it when it ends; one engine at a time.
+  - **Run with TEMP and TMP on D:.** The application's profile, and so its private storage (a ten-minute 4K source's copy of 2 to
+    4 GB, a 3.4 GB export, the lanes' spills), goes where `os.tmpdir()` says; on C: it filled the owner's drive. The command:
+    `TEMP=D:\…\qa\artifacts\tmp TMP=D:\…\qa\artifacts\tmp ENGINES=app-strong SECONDS=600 SIZE=2160 FAULTS=0 EVERY=15 node qa/studio-lanes.cjs`,
+    then `ENGINES=app-nochip SECONDS=20 node qa/studio-lanes.cjs`, `ENGINES=app-nochip node qa/studio-shapes-onepass.cjs` and
+    `ENGINES=app-nochip SECONDS=600 SIZE=1080 FAULTS=0 node qa/studio-lanes.cjs`, each with the same TEMP and TMP.
+  - The application starts with `--disable-features=CalculateNativeWinOcclusion` and its window in front (a covered window drew
+    about once a second); each export prints its frame rate and the processor's load, so a throttled run shows within one export.
+  - With no chip, the application at 4K saturates the processor and its window falls to about one frame a second (the manager's
+    finding): its 1080p run may crawl; stop it if the first export takes far longer than about 12 minutes.
+- **Not done.** Nothing pushed; drawing in workers (P-07) not switched on anywhere.
+
+### 2026-11-04 (evening): D11's gate rows 1 to 4 after the owner resumed Desktop Power (Desktop Power, Fork 1)
+
+- **Before the rows.** Merged `main` (85e642a, 5a442e6, ea72695) into the branch (6780c40). `desktop/` had not changed, so the
+  development package was not rebuilt. `npm run typecheck` clean; `npm test` 828 of 828.
+- **How they ran.** One engine at a time on port 3000, each run taking and freeing the lock itself; TEMP and TMP on
+  `qa/artifacts/tmp` in this worktree (drive D) for every command; each run removed its profile when its engine closed (two empty
+  folders were left each time and removed by hand). Nothing of tonight's runs was written to drive C. The application was the
+  development package 0.8.0 (Electron 45.0.0, Chromium 156.0.8078.48), started with `--disable-features=CalculateNativeWinOcclusion`
+  and its window in front. The times are with fingerprints and are not speed figures; the time ratio is (d), below.
+- **Row 1, the strong chip (RTX 3050), ten minutes at 4K, every 15th frame and 30 each side of every boundary fingerprinted
+  (1368 frames): 5 of 5** (`qa/studio-lanes-2160-600s-app-strong.json`, which replaces the record of the run the full drive
+  stopped; that one is at f155ca8).
+  - One, two and three lanes: 445.9, 366.9 and 386.9 s (40.4, 49.1 and 46.5 frames a second), the processor at 46%, 5 then 5%,
+    4 then 2%.
+  - Every fingerprinted composed frame is one lane's, the structure is one lane's exactly (18000 frames, 300 key frames).
+  - The frames at the boundaries are 0.00 dB from one lane's: 43.48 and 43.57 dB at 8999 and 9000; 43.00, 43.09, 43.08 and
+    43.12 dB at 5999, 6000, 11999 and 12000.
+  - The files: 3,431,240,009, 3,430,985,206 and 3,430,894,885 bytes (section 5.2's third level, as above).
+- **Row 2, no graphics chip in the application, 20 s at 1080p with the forced faults, every frame fingerprinted: 8 of 8**
+  (`qa/studio-lanes-1080-20s-app-nochip.json`).
+  - One, two and three lanes: 17.7, 18.7 and 19.8 s (33.9, 32.1 and 30.3 frames a second, so the window was not throttled).
+  - Frames and structure exact; boundary frames 0.00 dB from one lane's (41.84 and 42.90 dB at 299 and 300; 41.51, 42.88,
+    41.93 and 42.92 dB at 239, 240, 419 and 420).
+  - The guard refused a lane with another H.264 profile and one lane made the file (21.6 s); a lane failing once mid-segment
+    had its segment run again on the lanes left (three lanes, 20.1 s); the first segment's lane failing ran the export again
+    with two lanes (18.2 s); every file exact.
+- **Row 3, no graphics chip, one pass for four shapes: 4 of 4** (`qa/studio-shapes-onepass-app-nochip.json`). Every shape's
+  composed frames and structure equal its own export's. The packets are identical for 16:9 and 9:16; for 1:1 and 4:5 they
+  differ, the two files 56.84 and 55.98 dB apart, recorded as a note, as with the saving chip (section 5.2's third level). Four
+  shapes one after another 20.0 s, in one pass 15.2 s, with fingerprints.
+- **Row 4, no graphics chip, ten minutes at 1080p, every one of the 18000 frames fingerprinted: 5 of 5**
+  (`qa/studio-lanes-1080-600s-app-nochip.json`).
+  - It did not crawl: one, two and three lanes 492.9, 488.6 and 550.3 s (36.5, 36.8 and 32.7 frames a second), the processor
+    at 20%, 14 then 2%, 1%.
+  - Frames and structure exact (300 key frames); boundary frames 0.00 dB from one lane's (41.62 and 42.79 dB at 8999 and 9000;
+    41.65, 42.80, 41.57 and 42.78 dB at 5999, 6000, 11999 and 12000).
+  - The files: 761,761,518, 761,760,931 and 761,765,326 bytes.
+- **Still not run, said plainly.** (d), the time ratio for each chip, waits for a quiet window from the manager (two-minute 1080p
+  and 4K fixtures, three interleaved rounds of one, two and three lanes, `QUIET=1`). Without it no lane count is promised as
+  faster: tonight two lanes were quicker than one on the strong chip at 4K and three lanes slower than one with no chip at 1080p,
+  with fingerprints and a processor shared with other sessions. Still not verified: a renderer killed mid-segment; nothing signed
+  in (the panel's lanes and one pass were not clicked through); `exportLanes` on a measured profile in the application.
+- **Found on the way, not touched.** Drive C holds 268 older check profiles (`%LOCALAPPDATA%\Temp\comms-hub-desktop-qa-*`, about
+  7.5 GB in all, none written tonight), from runs of several sessions before the checks removed their profiles; which session
+  made each cannot be told from the folder, so none was removed.
+- **(d) made timing only, before the quiet window (the manager's decision of 2026-11-04).** `QUIET=1` in `qa/studio-lanes.cjs`
+  now runs no fingerprinted export: three interleaved rounds of one, two and three lanes, the processor's load before and after
+  every export in the record, and a check that every timed export ran with its own lane count, stepped down nowhere and made
+  every frame. It refuses to start without `ENGINES`; its record always ends in `-speed` (held by the name's own check), so it
+  never writes over a gate row's; its notes say "timing only; frames and structure proven by rows 1 to 4 and the earlier engine
+  rows at 29a1a30". A timed export's file is not sent to the runner (`keep: false` in `qa/fixtures/studio-lanes.ts`). The window
+  times the strong and the saving chips at 1080p and 4K and no chip at 1080p; **4K with no chip is not timed** (about 16 minutes
+  for each 120 s export, so about 2.4 hours for nine), and nothing is claimed for it. Checked so far: the script parses, the
+  fixture bundles, and `QUIET=1` without `ENGINES` stops before touching anything; the timing path itself has not run yet.
+- **Not done.** Nothing pushed; drawing in workers (P-07) not switched on anywhere.
+
+### 2026-11-05: D11 (d), the lanes' time on each chip, in the manager's quiet window (Desktop Power, Fork 1)
+
+- **How it ran.** In the window the manager opened at 00:55 for this alone (nobody else ran anything), after merging `main`
+  5c24b55 (`cd11562`; `npm run typecheck` clean). Five runs of `QUIET=1 SECONDS=120 FAULTS=0 node qa/studio-lanes.cjs`, one
+  engine each, in the approved order, one after another, each taking and freeing the port's lock; TEMP and TMP on this
+  worktree's `qa/artifacts/tmp`. The development package 0.8.0 (Electron 45.0.0, Chromium 156.0.8078.48), started with
+  `--disable-features=CalculateNativeWinOcclusion` and its window in front. Each run: three interleaved rounds of one, two and
+  three lanes over a two-minute fixture (3600 frames), no fingerprints, the processor's load before and after every export.
+  Windows' processor speed limit (`% Performance Limit`) was read before and after each run, outside the check: 100% every
+  time, on mains power. These are option A's figures (drawing on the page), the baseline for option B.
+- **Results, all 1 of 1** (every timed export ran with its own lane count, stepped down nowhere and made all 3600 frames).
+  Medians of three, as frames a second for one, two and three lanes, and the speed-up of two and three lanes over one:
+  - the strong chip (RTX 3050), 1080p: 148.6, 252.1, 231.2 (1.70, 1.56); run 3 min 41 s
+    (`qa/studio-lanes-1080-120s-app-strong-speed.json`);
+  - the strong chip, 4K: 50.5, 78.8, 90.2 (1.56, 1.79); run 9 min 37 s (`qa/studio-lanes-2160-120s-app-strong-speed.json`);
+  - the saving chip (AMD Radeon), 1080p: 95.1, 128.8, 130.8 (1.35, 1.38); run 5 min 41 s
+    (`qa/studio-lanes-1080-120s-app-saving-speed.json`);
+  - the saving chip, 4K: 30.5, 49.6, 45.7 (1.63, 1.50); run 15 min 27 s (`qa/studio-lanes-2160-120s-app-saving-speed.json`);
+  - no graphics chip, 1080p (the processor's encoder, BT.709 in workers): 66.9, 67.2, 67.3 (1.00, 1.01); run 9 min 2 s
+    (`qa/studio-lanes-1080-120s-app-nochip-speed.json`). Lanes gain nothing here.
+  - **4K with no graphics chip was not timed** (the manager's decision: about 16 minutes for each 120 s export), and nothing is
+    claimed for it.
+- **The load beside the figures.** With a chip it stayed at 1 to 9% almost everywhere, except: the strong chip at 4K in round 1
+  (46% before the first export, then 12 to 29%); the saving chip at 4K in rounds 2 and 3 (29% then 47% around round 2's three
+  lanes, 100% then 29% around round 3's one lane, 45% then 35% around round 3's three lanes), cause not known. The medians
+  are of three, so one disturbed export does not move them alone. With no chip the export itself loads the processor (20 to
+  51%). Two of the 100 load readings came back empty (null), and the record keeps them as such.
+- **Not verified.** These are one laptop's figures, on mains, with Windows' speed limit read only before and after each run,
+  not during it. The check pins nothing about power through `powerMonitor`.
+- **Not done.** Nothing pushed.

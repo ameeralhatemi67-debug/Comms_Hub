@@ -26,6 +26,20 @@ const { dependency, launchOptions } = require('./runtime.cjs');
 const { chromium } = dependency('playwright');
 const h = require('./desktop-helpers.cjs');
 
+/**
+ * A covered window draws about once a second (Fork 2, 2026-11-04), which would stretch a long export: the application
+ * starts with Windows' occlusion tracking off, and its window is brought in front of the others.
+ */
+const UNCOVERED = ['--disable-features=CalculateNativeWinOcclusion'];
+const toFront = (app) =>
+  app.evaluate(({ BrowserWindow }) => {
+    const w = BrowserWindow.getAllWindows()[0];
+    w.show();
+    if (w.isMinimized()) w.restore();
+    w.moveTop();
+    w.focus();
+  });
+
 const { check, note, result, finish } = h.record('qa/studio-export-yuv.cjs');
 const out = path.join(__dirname, 'artifacts', 'studio-export-yuv');
 const REAL = '00000000-0000-4000-8000-0000000000f1';
@@ -33,7 +47,8 @@ const SOURCE = path.join(out, 'source.mp4');
 const QUIET = process.env.QUIET === '1';
 /** ONLY=edge runs Edge alone (port 3101, no lock), recorded apart in qa/studio-export-yuv-edge.json. */
 const EDGE_ONLY = process.env.ONLY === 'edge';
-const LOCK = path.join(process.env.TEMP || os.tmpdir(), 'comms-hub-port3000.lock');
+// the shared lock lives in the user's own temp folder, even when TEMP is pointed elsewhere for a run's files
+const LOCK = path.join(process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, 'Temp') : os.tmpdir(), 'comms-hub-port3000.lock');
 const BRANCH = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: h.root, encoding: 'utf8' }).stdout.trim();
 const fontDir = (pkg) => path.join(h.root, 'node_modules', '@fontsource', pkg);
 const fontCss = [['ibm-plex-sans-arabic', '600'], ['ibm-plex-sans-arabic', '700'], ['reem-kufi', '600'], ['aref-ruqaa', '700']]
@@ -107,7 +122,7 @@ function serve(port) {
     res.writeHead(404);
     res.end();
   });
-  return h.listen(server, port).then(() => server);
+  return h.listen(server, port).then((got) => Object.assign(server, { port: got }));
 }
 
 function makeSource() {
@@ -218,7 +233,9 @@ function takeLock() {
     if (!EDGE_ONLY && !(locked = takeLock())) throw new Error(`the port-3000 lock is held (${fs.readFileSync(LOCK, 'utf8')}); run again when it is free`);
     makeSource();
     await bundle();
-    servers.push(await serve(3101));
+    // Edge needs no fixed port (only the application opens 127.0.0.1:3000): a free one, so other checks can run
+    const edge = await serve(0);
+    servers.push(edge);
     if (!EDGE_ONLY) servers.push(await serve(3000));
 
     // Edge: with its graphics chip, then without
@@ -226,7 +243,7 @@ function takeLock() {
       const browser = await chromium.launch({ ...launchOptions, args });
       try {
         const tab = await browser.newPage();
-        runs[name] = { browser: browser.version(), ...(await inEngine(tab, name, 'http://127.0.0.1:3101', chip)) };
+        runs[name] = { browser: browser.version(), ...(await inEngine(tab, name, `http://127.0.0.1:${edge.port}`, chip)) };
       } finally {
         await browser.close();
       }
@@ -237,7 +254,8 @@ function takeLock() {
       ['app-saving', { keepInTray: false, gpu: 'saving' }, [], true],
       ['app-strong', { keepInTray: false, gpu: 'strong' }, [], true],
     ]) {
-      const { app, win } = await h.launchDev(`yuv-${name}`, { settings, args });
+      const { app, win, data } = await h.launchDev(`yuv-${name}`, { settings, args: [...args, ...UNCOVERED] });
+      await toFront(app);
       try {
         await h.instrument(app);
         await h.until(() => win.url().startsWith('http://127.0.0.1:3000'), 30000);
@@ -246,6 +264,8 @@ function takeLock() {
         runs[name] = { versions, ...(await inEngine(win, name, 'http://127.0.0.1:3000', chip)) };
       } finally {
         await h.closeAll();
+        // the profile holds the private copies of the sources and exports (gigabytes for the long runs)
+        fs.rmSync(data, { recursive: true, force: true });
       }
     }
 
