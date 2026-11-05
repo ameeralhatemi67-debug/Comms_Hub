@@ -26,6 +26,22 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Desktop Power, merge 11: D11 «تصدير أسرع» with option A, 2026-11-05
+
+- **Done.** Fork 1's D11, merged in `dfe0684`. Main is now `6050574`, with Fork 5's P-25 record and Fork 4's notes.
+  - Export lanes (P-06): on a measured device with a graphics chip, two or three lanes export 1.35 to 1.79 times faster (the (d) runs). With no chip it stays at one lane.
+  - The step-down ladder (P-35): a failing lane runs the file again with a lane fewer, and nothing is lost.
+  - One pass for several shapes (P-05).
+- **P-07 option B is not merged,** though the owner said yes.
+  - At 4K on the saving chip, its best lane count was 15.9% slower than A's.
+  - An export would then differ from the preview: brand marks by up to 137 levels with a chip.
+  - It stays on `claude/power-export-821809` (`016c952`) for the owner's decision.
+- **Evidence, run by the manager on the merged tree:**
+  - typecheck, `npm test` 880 of 880, `next build`;
+  - lanes on the strong chip 8 of 8, one-pass shapes 20 of 20, export colour 32 of 32, effects identity 19 of 19;
+  - cross-device 43 of 43, with a stated tolerance for no graphics chip: 48 dB and 2.5% of channels more than 2 levels apart, for the processor's own edge smoothing and video colour. Chips keep 50 dB and 0.1%.
+- **Next.** The final regression on main, the 0.9.0 release build, the three migrations (the owner's word), and the push.
+
 ## Desktop Power, merges 9 and 10: P-28, the copy queue fix, and origin's deploys, 2026-11-05
 
 - **Done.**
