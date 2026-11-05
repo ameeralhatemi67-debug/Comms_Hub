@@ -42,8 +42,8 @@ related:
     processor at 34 to 70% and the owner was using the laptop, so the package window drew one frame a second. They need about
     45 quiet minutes.
   - `origin/main` has one commit main lacks: `5a50567`, the mail and messaging window, deployed alone, with its migration
-    `chat_window` applied to comms-hub. The push must merge it first, and its spec is also `MVP_draft.md` section 74, the number
-    the calendar colours took on main.
+    `chat_window` applied to comms-hub. The push must merge it first. Its spec keeps `MVP_draft.md` section 74: the calendar
+    colours were renumbered to 75 on main (`3badbff`), so the merge keeps 74, 75, then 77.
 - **Next.** The quiet re-run, then the 0.9.0 package. Nothing pushed or released.
 
 ## The director's notes, steps 1 to 3: YouTube's four choices, thumbnails and calendar colours, 2026-11-05
