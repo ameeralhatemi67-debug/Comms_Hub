@@ -26,6 +26,16 @@ related:
 
 # Communication Department Hub — Current Status
 
+## «نافذة البريد والمراسلة», the experimental mail and messaging window, 2026-11-05
+
+- **Live, off by default.** A person turns it on in «الحساب» «التجارب»; it needs the page «البريد». `MVP_draft.md` section 74.
+- **Deployed alone** as `5a50567` on `origin/main` (built on `origin/main`, not on local main, which holds other unpushed work).
+  This branch carries the same change on local main for a later merge.
+- **Migration applied** to comms-hub with the owner's yes (`20261105180000_chat_window.sql`). «العام» and a work's own room exist
+  only after their first message.
+- **Checked:** SQL rules 87 of 87 on a private container, `qa/chat-window-flow.cjs` 57 of 57 on a fixture, `npm test` and the build
+  clean. Not yet tried signed in on the live site.
+
 ## The director's notes, step 1: «غير مدرج» and «مجدول» in YouTube's «تجربة النشر», 2026-11-05
 
 - **Approved.** `Director_Notes_Plan.md`, with the recommended answers to Q1 to Q5: calendar colours (N-1), quick actions and
