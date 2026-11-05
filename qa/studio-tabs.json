@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-tabs.cjs",
-  "run": "2026-10-19T17:24:10.961Z",
+  "run": "2026-11-05T02:56:10.965Z",
   "checks": [
     {
       "name": "1440: the bar has two tabs, «قوالب الحركة» to /motion and «الاستوديو» to /motion/studio, each with an icon",

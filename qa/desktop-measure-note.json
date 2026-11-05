@@ -1,6 +1,6 @@
 {
   "script": "qa/desktop-measure-note.cjs",
-  "run": "2026-11-04T20:24:08.054Z",
+  "run": "2026-11-05T02:47:45.910Z",
   "version": "0.8.0",
   "checks": [
     {

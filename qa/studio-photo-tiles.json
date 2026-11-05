@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-photo-tiles.cjs",
-  "run": "2026-11-04T22:49:35.165Z",
+  "run": "2026-11-05T02:56:53.648Z",
   "version": "0.8.0",
   "checks": [
     {
@@ -61,111 +61,111 @@
       "cores": 12,
       "chip": true,
       "load": {
-        "before": 10,
-        "after": 23
+        "before": 18,
+        "after": 3
       },
       "msLargePhoto": {
-        "1 worker": 61454,
-        "2 workers": 29424,
-        "4 workers": 18894,
-        "10 workers": 15760,
-        "chip": 570
+        "1 worker": 57622,
+        "2 workers": 31464,
+        "4 workers": 18614,
+        "10 workers": 14304,
+        "chip": 543
       },
       "results": [
         {
           "picture": "8000x6000",
           "adjust": "brightness",
           "ms": {
-            "1 worker": 2037,
-            "2 workers": 926,
-            "4 workers": 798,
-            "10 workers": 743,
-            "chip": 249
+            "1 worker": 1935,
+            "2 workers": 955,
+            "4 workers": 773,
+            "10 workers": 726,
+            "chip": 237
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "contrast",
           "ms": {
-            "1 worker": 1484,
-            "2 workers": 898,
-            "4 workers": 739,
-            "10 workers": 762,
-            "chip": 125
+            "1 worker": 1290,
+            "2 workers": 865,
+            "4 workers": 763,
+            "10 workers": 732,
+            "chip": 103
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "saturation",
           "ms": {
-            "1 worker": 1653,
-            "2 workers": 1107,
-            "4 workers": 796,
-            "10 workers": 681,
-            "chip": 92
+            "1 worker": 1566,
+            "2 workers": 1019,
+            "4 workers": 850,
+            "10 workers": 703,
+            "chip": 91
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "warmth",
           "ms": {
-            "1 worker": 2268,
-            "2 workers": 1056,
-            "4 workers": 843,
-            "10 workers": 715,
-            "chip": 104
+            "1 worker": 2310,
+            "2 workers": 1016,
+            "4 workers": 856,
+            "10 workers": 683,
+            "chip": 112
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "blur",
           "ms": {
-            "1 worker": 27147,
-            "2 workers": 10423,
-            "4 workers": 6735,
-            "10 workers": 6746
+            "1 worker": 25305,
+            "2 workers": 14128,
+            "4 workers": 7181,
+            "10 workers": 5611
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "all",
           "ms": {
-            "1 worker": 26865,
-            "2 workers": 15014,
-            "4 workers": 8983,
-            "10 workers": 6113
+            "1 worker": 25216,
+            "2 workers": 13481,
+            "4 workers": 8191,
+            "10 workers": 5849
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "brightness",
           "ms": {
-            "1 worker": 287,
-            "2 workers": 161,
-            "4 workers": 95,
-            "10 workers": 79,
-            "chip": 7
+            "1 worker": 241,
+            "2 workers": 103,
+            "4 workers": 92,
+            "10 workers": 139,
+            "chip": 6
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "contrast",
           "ms": {
-            "1 worker": 164,
-            "2 workers": 104,
-            "4 workers": 78,
-            "10 workers": 112,
-            "chip": 7
+            "1 worker": 144,
+            "2 workers": 115,
+            "4 workers": 123,
+            "10 workers": 65,
+            "chip": 6
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "saturation",
           "ms": {
-            "1 worker": 159,
-            "2 workers": 103,
-            "4 workers": 76,
-            "10 workers": 64,
+            "1 worker": 146,
+            "2 workers": 105,
+            "4 workers": 78,
+            "10 workers": 62,
             "chip": 6
           }
         },
@@ -173,31 +173,31 @@
           "picture": "2400x1600 see-through",
           "adjust": "warmth",
           "ms": {
-            "1 worker": 146,
-            "2 workers": 100,
-            "4 workers": 83,
-            "10 workers": 69,
-            "chip": 6
+            "1 worker": 142,
+            "2 workers": 101,
+            "4 workers": 79,
+            "10 workers": 89,
+            "chip": 7
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "blur",
           "ms": {
-            "1 worker": 1244,
-            "2 workers": 724,
-            "4 workers": 753,
-            "10 workers": 381
+            "1 worker": 1148,
+            "2 workers": 649,
+            "4 workers": 452,
+            "10 workers": 387
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "all",
           "ms": {
-            "1 worker": 1254,
-            "2 workers": 1213,
-            "4 workers": 459,
-            "10 workers": 338
+            "1 worker": 1163,
+            "2 workers": 1112,
+            "4 workers": 461,
+            "10 workers": 357
           }
         }
       ]
@@ -211,89 +211,89 @@
       "cores": 12,
       "chip": true,
       "load": {
-        "before": 3,
-        "after": 1
+        "before": 4,
+        "after": 2
       },
       "msLargePhoto": {
-        "1 worker": 47386,
-        "2 workers": 32974,
-        "4 workers": 21733,
-        "10 workers": 14676,
-        "chip": 680
+        "1 worker": 56197,
+        "2 workers": 31013,
+        "4 workers": 18171,
+        "10 workers": 14040,
+        "chip": 1065
       },
       "results": [
         {
           "picture": "8000x6000",
           "adjust": "brightness",
           "ms": {
-            "1 worker": 1991,
-            "2 workers": 967,
-            "4 workers": 900,
-            "10 workers": 804,
-            "chip": 299
+            "1 worker": 1929,
+            "2 workers": 920,
+            "4 workers": 795,
+            "10 workers": 696,
+            "chip": 791
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "contrast",
           "ms": {
-            "1 worker": 1311,
-            "2 workers": 900,
-            "4 workers": 1090,
-            "10 workers": 1417,
-            "chip": 82
+            "1 worker": 1157,
+            "2 workers": 870,
+            "4 workers": 937,
+            "10 workers": 971,
+            "chip": 110
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "saturation",
           "ms": {
-            "1 worker": 1905,
-            "2 workers": 1816,
-            "4 workers": 1131,
-            "10 workers": 722,
-            "chip": 203
+            "1 worker": 1750,
+            "2 workers": 1302,
+            "4 workers": 1016,
+            "10 workers": 759,
+            "chip": 84
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "warmth",
           "ms": {
-            "1 worker": 1642,
-            "2 workers": 963,
-            "4 workers": 762,
-            "10 workers": 641,
-            "chip": 96
+            "1 worker": 1426,
+            "2 workers": 997,
+            "4 workers": 731,
+            "10 workers": 723,
+            "chip": 80
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "blur",
           "ms": {
-            "1 worker": 25199,
-            "2 workers": 13959,
-            "4 workers": 9031,
-            "10 workers": 5378
+            "1 worker": 25469,
+            "2 workers": 13799,
+            "4 workers": 6241,
+            "10 workers": 5360
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "all",
           "ms": {
-            "1 worker": 15338,
-            "2 workers": 14369,
-            "4 workers": 8819,
-            "10 workers": 5714
+            "1 worker": 24466,
+            "2 workers": 13125,
+            "4 workers": 8451,
+            "10 workers": 5531
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "brightness",
           "ms": {
-            "1 worker": 191,
-            "2 workers": 109,
-            "4 workers": 83,
-            "10 workers": 98,
+            "1 worker": 173,
+            "2 workers": 114,
+            "4 workers": 97,
+            "10 workers": 77,
             "chip": 7
           }
         },
@@ -301,10 +301,10 @@
           "picture": "2400x1600 see-through",
           "adjust": "contrast",
           "ms": {
-            "1 worker": 155,
-            "2 workers": 116,
-            "4 workers": 79,
-            "10 workers": 62,
+            "1 worker": 149,
+            "2 workers": 98,
+            "4 workers": 73,
+            "10 workers": 64,
             "chip": 6
           }
         },
@@ -312,10 +312,10 @@
           "picture": "2400x1600 see-through",
           "adjust": "saturation",
           "ms": {
-            "1 worker": 149,
-            "2 workers": 115,
-            "4 workers": 73,
-            "10 workers": 62,
+            "1 worker": 144,
+            "2 workers": 102,
+            "4 workers": 77,
+            "10 workers": 58,
             "chip": 6
           }
         },
@@ -323,10 +323,10 @@
           "picture": "2400x1600 see-through",
           "adjust": "warmth",
           "ms": {
-            "1 worker": 140,
-            "2 workers": 103,
-            "4 workers": 76,
-            "10 workers": 81,
+            "1 worker": 146,
+            "2 workers": 107,
+            "4 workers": 81,
+            "10 workers": 71,
             "chip": 6
           }
         },
@@ -334,20 +334,20 @@
           "picture": "2400x1600 see-through",
           "adjust": "blur",
           "ms": {
-            "1 worker": 1169,
-            "2 workers": 1108,
-            "4 workers": 642,
-            "10 workers": 394
+            "1 worker": 1177,
+            "2 workers": 671,
+            "4 workers": 767,
+            "10 workers": 406
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "all",
           "ms": {
-            "1 worker": 1150,
-            "2 workers": 1084,
-            "4 workers": 464,
-            "10 workers": 335
+            "1 worker": 1265,
+            "2 workers": 1088,
+            "4 workers": 486,
+            "10 workers": 355
           }
         }
       ]
@@ -361,89 +361,89 @@
       "cores": 12,
       "chip": true,
       "load": {
-        "before": 10,
-        "after": 6
+        "before": 6,
+        "after": 2
       },
       "msLargePhoto": {
-        "1 worker": 59283,
-        "2 workers": 32120,
-        "4 workers": 18203,
-        "10 workers": 13430,
-        "chip": 447
+        "1 worker": 55535,
+        "2 workers": 30751,
+        "4 workers": 20905,
+        "10 workers": 12926,
+        "chip": 429
       },
       "results": [
         {
           "picture": "8000x6000",
           "adjust": "brightness",
           "ms": {
-            "1 worker": 2135,
-            "2 workers": 950,
-            "4 workers": 705,
+            "1 worker": 2037,
+            "2 workers": 818,
+            "4 workers": 701,
             "10 workers": 609,
-            "chip": 222
+            "chip": 206
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "contrast",
           "ms": {
-            "1 worker": 1362,
-            "2 workers": 808,
-            "4 workers": 676,
-            "10 workers": 583,
-            "chip": 85
+            "1 worker": 1193,
+            "2 workers": 802,
+            "4 workers": 788,
+            "10 workers": 529,
+            "chip": 68
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "saturation",
           "ms": {
-            "1 worker": 1598,
-            "2 workers": 1044,
-            "4 workers": 787,
-            "10 workers": 669,
-            "chip": 71
+            "1 worker": 1455,
+            "2 workers": 916,
+            "4 workers": 788,
+            "10 workers": 574,
+            "chip": 75
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "warmth",
           "ms": {
-            "1 worker": 1409,
-            "2 workers": 984,
-            "4 workers": 817,
-            "10 workers": 547,
-            "chip": 69
+            "1 worker": 1423,
+            "2 workers": 994,
+            "4 workers": 725,
+            "10 workers": 562,
+            "chip": 80
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "blur",
           "ms": {
-            "1 worker": 27583,
-            "2 workers": 14521,
-            "4 workers": 6820,
-            "10 workers": 5361
+            "1 worker": 24792,
+            "2 workers": 13768,
+            "4 workers": 9007,
+            "10 workers": 5208
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "all",
           "ms": {
-            "1 worker": 25196,
-            "2 workers": 13813,
-            "4 workers": 8398,
-            "10 workers": 5661
+            "1 worker": 24635,
+            "2 workers": 13453,
+            "4 workers": 8896,
+            "10 workers": 5444
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "brightness",
           "ms": {
-            "1 worker": 168,
-            "2 workers": 88,
-            "4 workers": 80,
-            "10 workers": 62,
+            "1 worker": 164,
+            "2 workers": 96,
+            "4 workers": 79,
+            "10 workers": 68,
             "chip": 6
           }
         },
@@ -451,10 +451,10 @@
           "picture": "2400x1600 see-through",
           "adjust": "contrast",
           "ms": {
-            "1 worker": 148,
-            "2 workers": 93,
-            "4 workers": 70,
-            "10 workers": 75,
+            "1 worker": 153,
+            "2 workers": 95,
+            "4 workers": 84,
+            "10 workers": 72,
             "chip": 6
           }
         },
@@ -463,9 +463,9 @@
           "adjust": "saturation",
           "ms": {
             "1 worker": 159,
-            "2 workers": 111,
+            "2 workers": 114,
             "4 workers": 78,
-            "10 workers": 75,
+            "10 workers": 67,
             "chip": 6
           }
         },
@@ -473,10 +473,10 @@
           "picture": "2400x1600 see-through",
           "adjust": "warmth",
           "ms": {
-            "1 worker": 151,
-            "2 workers": 113,
-            "4 workers": 93,
-            "10 workers": 95,
+            "1 worker": 149,
+            "2 workers": 101,
+            "4 workers": 94,
+            "10 workers": 84,
             "chip": 7
           }
         },
@@ -484,20 +484,20 @@
           "picture": "2400x1600 see-through",
           "adjust": "blur",
           "ms": {
-            "1 worker": 1186,
-            "2 workers": 688,
-            "4 workers": 529,
-            "10 workers": 461
+            "1 worker": 1160,
+            "2 workers": 715,
+            "4 workers": 700,
+            "10 workers": 428
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "all",
           "ms": {
-            "1 worker": 1161,
-            "2 workers": 1153,
-            "4 workers": 502,
-            "10 workers": 382
+            "1 worker": 1168,
+            "2 workers": 1088,
+            "4 workers": 451,
+            "10 workers": 359
           }
         }
       ]
@@ -511,134 +511,134 @@
       "cores": 12,
       "chip": false,
       "load": {
-        "before": 13,
+        "before": 8,
         "after": 2
       },
       "msLargePhoto": {
-        "1 worker": 54450,
-        "2 workers": 30652,
-        "4 workers": 17632,
-        "10 workers": 12378
+        "1 worker": 54557,
+        "2 workers": 29977,
+        "4 workers": 19715,
+        "10 workers": 12539
       },
       "results": [
         {
           "picture": "8000x6000",
           "adjust": "brightness",
           "ms": {
-            "1 worker": 1048,
-            "2 workers": 720,
-            "4 workers": 573,
-            "10 workers": 430
+            "1 worker": 1066,
+            "2 workers": 668,
+            "4 workers": 564,
+            "10 workers": 426
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "contrast",
           "ms": {
-            "1 worker": 1070,
-            "2 workers": 709,
+            "1 worker": 1110,
+            "2 workers": 700,
             "4 workers": 567,
-            "10 workers": 470
+            "10 workers": 474
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "saturation",
           "ms": {
-            "1 worker": 1307,
-            "2 workers": 783,
+            "1 worker": 1319,
+            "2 workers": 806,
             "4 workers": 627,
-            "10 workers": 492
+            "10 workers": 449
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "warmth",
           "ms": {
-            "1 worker": 1264,
-            "2 workers": 805,
-            "4 workers": 643,
-            "10 workers": 444
+            "1 worker": 1280,
+            "2 workers": 785,
+            "4 workers": 604,
+            "10 workers": 500
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "blur",
           "ms": {
-            "1 worker": 24899,
-            "2 workers": 14019,
-            "4 workers": 6487,
-            "10 workers": 5107
+            "1 worker": 25078,
+            "2 workers": 13658,
+            "4 workers": 8933,
+            "10 workers": 5190
           }
         },
         {
           "picture": "8000x6000",
           "adjust": "all",
           "ms": {
-            "1 worker": 24862,
-            "2 workers": 13616,
-            "4 workers": 8735,
-            "10 workers": 5435
+            "1 worker": 24704,
+            "2 workers": 13360,
+            "4 workers": 8420,
+            "10 workers": 5500
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "brightness",
           "ms": {
-            "1 worker": 142,
-            "2 workers": 96,
-            "4 workers": 62,
-            "10 workers": 102
+            "1 worker": 140,
+            "2 workers": 85,
+            "4 workers": 94,
+            "10 workers": 57
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "contrast",
           "ms": {
-            "1 worker": 132,
-            "2 workers": 97,
-            "4 workers": 62,
-            "10 workers": 49
+            "1 worker": 127,
+            "2 workers": 84,
+            "4 workers": 59,
+            "10 workers": 72
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "saturation",
           "ms": {
-            "1 worker": 129,
-            "2 workers": 101,
-            "4 workers": 59,
-            "10 workers": 66
+            "1 worker": 133,
+            "2 workers": 78,
+            "4 workers": 54,
+            "10 workers": 49
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "warmth",
           "ms": {
-            "1 worker": 135,
-            "2 workers": 85,
-            "4 workers": 61,
-            "10 workers": 62
+            "1 worker": 128,
+            "2 workers": 84,
+            "4 workers": 59,
+            "10 workers": 52
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "blur",
           "ms": {
-            "1 worker": 1145,
-            "2 workers": 722,
-            "4 workers": 642,
-            "10 workers": 385
+            "1 worker": 1133,
+            "2 workers": 683,
+            "4 workers": 674,
+            "10 workers": 377
           }
         },
         {
           "picture": "2400x1600 see-through",
           "adjust": "all",
           "ms": {
-            "1 worker": 1130,
-            "2 workers": 1049,
-            "4 workers": 469,
-            "10 workers": 307
+            "1 worker": 1157,
+            "2 workers": 1042,
+            "4 workers": 454,
+            "10 workers": 352
           }
         }
       ]

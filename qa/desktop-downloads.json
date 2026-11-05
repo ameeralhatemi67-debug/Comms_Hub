@@ -1,6 +1,6 @@
 {
   "script": "qa/desktop-downloads.cjs",
-  "run": "2026-11-04T23:27:54.687Z",
+  "run": "2026-11-05T02:47:36.282Z",
   "version": "0.8.0",
   "checks": [
     {
@@ -16,7 +16,7 @@
     {
       "name": "a library, a mail and a messaging download are each heard once saved: an id of 43 characters, the saved name and the kind, nothing else",
       "pass": true,
-      "detail": "[{\"id\":\"UxxjeB4z8X6IhZGZuUQ-Zn_FTMloIE63IzY27BKCjU8\",\"name\":\"تقرير الحملة.pdf\",\"kind\":\"document\"},{\"id\":\"PZ03LfLvaHdHWXKTDlfTmUp-3_mVatbvB0Bzln4hWoA\",\"name\":\"ملاحظات.txt\",\"kind\":\"document\"},{\"id\":\"wk2A_nKXp3pMZCcXPJB03YubcXN0mDlgKxJuDrFi9jU\",\"name\":\"tool.exe\",\"kind\":null}]"
+      "detail": "[{\"id\":\"emusZ7BqARxYZC4NDZdiKkDf_FfwRDVMJPGbjFGAdlE\",\"name\":\"تقرير الحملة.pdf\",\"kind\":\"document\"},{\"id\":\"xLYbePFyJ0BPn016D79Ph3pRG50WlwBRbx3rGC6RDgw\",\"name\":\"ملاحظات.txt\",\"kind\":\"document\"},{\"id\":\"k0K228ZDvzqmWPGw0lat8joxsFiJpqPEStUlclaeuVY\",\"name\":\"tool.exe\",\"kind\":null}]"
     },
     {
       "name": "every saved download carries Windows' Zone.Identifier in the internet zone, the PDF, the text file and tool.exe alike",
@@ -31,7 +31,7 @@
     {
       "name": "tool.exe is refused for its kind and never handed to Windows; it can still be shown in its folder",
       "pass": true,
-      "detail": "{\"exeOpen\":{\"ok\":false,\"why\":\"kind\"},\"exeShow\":{\"ok\":true},\"opened\":[\"D:\\\\Agents\\\\main\\\\projects\\\\ideas\\\\Comms_Hub\\\\.claude\\\\worktrees\\\\power-desktop-5fba9d\\\\qa\\\\artifacts\\\\tmp\\\\comms-hub-desktop-qa-lm0rsG\\\\saved\\\\plain\\\\تقرير الحملة.pdf\"]}"
+      "detail": "{\"exeOpen\":{\"ok\":false,\"why\":\"kind\"},\"exeShow\":{\"ok\":true},\"opened\":[\"D:\\\\Agents\\\\main\\\\projects\\\\ideas\\\\Comms_Hub\\\\.claude\\\\worktrees\\\\verify-e3cab67\\\\qa\\\\artifacts\\\\tmp\\\\comms-hub-desktop-qa-YYsWM2\\\\saved\\\\plain\\\\تقرير الحملة.pdf\"]}"
     },
     {
       "name": "a PDF whose mark of the web was taken off is no longer opened",
@@ -51,7 +51,7 @@
     {
       "name": "the notice says «حُفظ «تقرير الحملة.pdf».» with «فتح بالبرنامج الافتراضي» and «إظهار في المجلد», and its open button opens the file",
       "pass": true,
-      "detail": "{\"t1\":\"حُفظ «تقرير الحملة.pdf».\\n\\nفتح بالبرنامج الافتراضي\\nإظهار في المجلد\",\"b1\":[\"فتح بالبرنامج الافتراضي\",\"إظهار في المجلد\"],\"last\":\"D:\\\\Agents\\\\main\\\\projects\\\\ideas\\\\Comms_Hub\\\\.claude\\\\worktrees\\\\power-desktop-5fba9d\\\\qa\\\\artifacts\\\\tmp\\\\comms-hub-desktop-qa-lm0rsG\\\\saved\\\\notice\\\\تقرير الحملة.pdf\"}"
+      "detail": "{\"t1\":\"حُفظ «تقرير الحملة.pdf».\\n\\nفتح بالبرنامج الافتراضي\\nإظهار في المجلد\",\"b1\":[\"فتح بالبرنامج الافتراضي\",\"إظهار في المجلد\"],\"last\":\"D:\\\\Agents\\\\main\\\\projects\\\\ideas\\\\Comms_Hub\\\\.claude\\\\worktrees\\\\verify-e3cab67\\\\qa\\\\artifacts\\\\tmp\\\\comms-hub-desktop-qa-YYsWM2\\\\saved\\\\notice\\\\تقرير الحملة.pdf\"}"
     },
     {
       "name": "for tool.exe the notice has no open button, says it never opens, and shows it in its folder",

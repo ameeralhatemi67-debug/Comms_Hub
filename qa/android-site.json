@@ -1,6 +1,6 @@
 {
   "script": "qa/android-site.cjs",
-  "run": "2026-10-26T09:41:29.832Z",
+  "run": "2026-11-05T07:29:53.816Z",
   "checks": [
     {
       "name": "a browser: «نسيت كلمة المرور» mails a link back to /",

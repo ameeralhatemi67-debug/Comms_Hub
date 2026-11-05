@@ -1,7 +1,7 @@
 {
   "script": "qa/studio-loudness-ahead.cjs",
-  "run": "2026-11-03T22:44:30.606Z",
-  "version": "0.7.1",
+  "run": "2026-11-05T02:56:16.240Z",
+  "version": "0.8.0",
   "checks": [
     {
       "name": "the two-minute source is ready",
@@ -11,22 +11,22 @@
     {
       "name": "worked out ahead, the loudness equals the export's own measurement within 0.1 LU, and the peak too",
       "pass": true,
-      "detail": "{\"ahead\":{\"integrated\":-11.16592139976566,\"peakDb\":-9.872226717075904,\"blocks\":1149},\"fresh\":{\"integrated\":-11.16592139976566,\"peakDb\":-9.872226717075904,\"blocks\":1149},\"before\":-11.16592139976566}"
+      "detail": "{\"ahead\":{\"integrated\":-11.165595323498641,\"peakDb\":-9.81612389351782,\"blocks\":1149},\"fresh\":{\"integrated\":-11.165595323498641,\"peakDb\":-9.81612389351782,\"blocks\":1149},\"before\":-11.165595323498641}"
     },
     {
       "name": "an export with «توحيد مستوى الصوت» after it uses the stored figure and reaches its first frame sooner",
       "pass": true,
-      "detail": "{\"before\":7327,\"after\":469,\"aheadMs\":5538,\"load\":[76,45]}"
+      "detail": "{\"before\":5108,\"after\":381,\"aheadMs\":4094,\"load\":[1,4]}"
     },
     {
       "name": "a change of volume is measured again (about 6 dB quieter); a picture moved keeps the stored figure",
       "pass": true,
-      "detail": "{\"quieter\":{\"cached\":false,\"integrated\":-17.186521313045283},\"fresh\":-11.16592139976566,\"moved\":[true,true]}"
+      "detail": "{\"quieter\":{\"cached\":false,\"integrated\":-17.186195236778264},\"fresh\":-11.165595323498641,\"moved\":[true,true]}"
     },
     {
       "name": "panel: while the export panel is open, the sound's level is worked out by itself and said",
       "pass": true,
-      "detail": "{\"said\":\"قيس مستوى الصوت مسبقاً: -18.1 LUFS، فيبدأ التصدير الموحَّد دون انتظار القياس.\",\"ms\":1887}"
+      "detail": "{\"said\":\"قيس مستوى الصوت مسبقاً: -18.1 LUFS، فيبدأ التصدير الموحَّد دون انتظار القياس.\",\"ms\":1867}"
     },
     {
       "name": "panel: an export with «توحيد مستوى الصوت» starts without measuring again, and says the level before and after",
@@ -51,38 +51,38 @@
   "module": {
     "ready": true,
     "before": {
-      "ms": 7327,
+      "ms": 5108,
       "cached": false,
-      "integrated": -11.16592139976566,
-      "peakDb": -9.872226717075904
+      "integrated": -11.165595323498641,
+      "peakDb": -9.81612389351782
     },
-    "aheadMs": 5538,
+    "aheadMs": 4094,
     "ahead": {
-      "integrated": -11.16592139976566,
-      "peakDb": -9.872226717075904,
+      "integrated": -11.165595323498641,
+      "peakDb": -9.81612389351782,
       "blocks": 1149
     },
     "after": {
-      "ms": 469,
+      "ms": 381,
       "cached": true,
-      "integrated": -11.16592139976566,
-      "peakDb": -9.872226717075904
+      "integrated": -11.165595323498641,
+      "peakDb": -9.81612389351782
     },
     "fresh": {
-      "integrated": -11.16592139976566,
-      "peakDb": -9.872226717075904,
+      "integrated": -11.165595323498641,
+      "peakDb": -9.81612389351782,
       "blocks": 1149
     },
     "quieterStored": false,
     "quieter": {
       "cached": false,
-      "integrated": -17.186521313045283
+      "integrated": -17.186195236778264
     },
     "movedSameKey": true,
     "movedStored": true,
     "load": [
-      76,
-      45
+      1,
+      4
     ]
   },
   "total": 8,

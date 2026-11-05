@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-export.cjs",
-  "run": "2026-11-03T20:06:28.992Z",
+  "run": "2026-11-05T02:54:08.026Z",
   "checks": [
     {
       "name": "the export is H.264 at 1280x720 with AAC sound at 48 kHz stereo",
@@ -94,7 +94,7 @@
     }
   ],
   "timing": {
-    "exportMs": 4044,
+    "exportMs": 2310,
     "bytes": 181002,
     "estimate": 4543000
   },

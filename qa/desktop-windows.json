@@ -1,7 +1,7 @@
 {
   "script": "qa/desktop-windows.cjs",
-  "run": "2026-11-03T21:09:36.987Z",
-  "version": "0.7.1",
+  "run": "2026-11-05T02:53:04.050Z",
+  "version": "0.8.0",
   "checks": [
     {
       "name": "the editor's page has its project ready (a 20 s source with its frame numbers)",
@@ -11,7 +11,7 @@
     {
       "name": "the bridge is version 5 or later, with windows: screens, popOut and close",
       "pass": true,
-      "detail": "{\"bridge\":6,\"keys\":[\"screens\",\"popOut\",\"close\"],\"screens\":[{\"id\":2564784556,\"label\":\"\",\"primary\":true,\"current\":true,\"bounds\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":864},\"workArea\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":816},\"scaleFactor\":1.25}],\"timeline\":\"refused\",\"badProject\":\"refused\"}"
+      "detail": "{\"bridge\":10,\"keys\":[\"screens\",\"popOut\",\"close\"],\"screens\":[{\"id\":2564784556,\"label\":\"\",\"primary\":true,\"current\":true,\"bounds\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":864},\"workArea\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":816},\"scaleFactor\":1.25}],\"timeline\":\"refused\",\"badProject\":\"refused\"}"
     },
     {
       "name": "the screens: at least one, exactly one holding the editor, each with its bounds and scale",
@@ -21,7 +21,7 @@
     {
       "name": "another panel, or a project that is not one, is refused",
       "pass": true,
-      "detail": "{\"bridge\":6,\"keys\":[\"screens\",\"popOut\",\"close\"],\"screens\":[{\"id\":2564784556,\"label\":\"\",\"primary\":true,\"current\":true,\"bounds\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":864},\"workArea\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":816},\"scaleFactor\":1.25}],\"timeline\":\"refused\",\"badProject\":\"refused\"}"
+      "detail": "{\"bridge\":10,\"keys\":[\"screens\",\"popOut\",\"close\"],\"screens\":[{\"id\":2564784556,\"label\":\"\",\"primary\":true,\"current\":true,\"bounds\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":864},\"workArea\":{\"x\":0,\"y\":0,\"width\":1536,\"height\":816},\"scaleFactor\":1.25}],\"timeline\":\"refused\",\"badProject\":\"refused\"}"
     },
     {
       "name": "«فتح المعاينة في نافذة مستقلة» opens a second window on the project's own address, and the two find each other",
@@ -34,24 +34,24 @@
       "detail": "{\"editor\":{\"frame\":219,\"t\":7300000},\"preview\":{\"frame\":219,\"t\":7300000},\"expected\":219}"
     },
     {
-      "name": "DT-14, playing 8 s: at each of the preview window's 246 drawn frames its playhead is within one frame (33.3 ms) of the editor's: mean 0.75 ms, p95 1.2 ms, max 15.7 ms",
+      "name": "DT-14, playing 8 s: at each of the preview window's 247 drawn frames its playhead is within one frame (33.3 ms) of the editor's: mean 1.22 ms, p95 1.2 ms, max 14.5 ms",
       "pass": true,
-      "detail": "{\"count\":241,\"mean\":0.75,\"p95\":1.2,\"max\":15.7,\"editorFrames\":243,\"previewFrames\":246}"
+      "detail": "{\"count\":242,\"mean\":1.22,\"p95\":1.2,\"max\":14.5,\"editorFrames\":244,\"previewFrames\":247}"
     },
     {
       "name": "paused, both stop on the same frame",
       "pass": true,
-      "detail": "{\"editor\":{\"frame\":459,\"t\":15302900},\"preview\":{\"frame\":459,\"t\":15302900}}"
+      "detail": "{\"editor\":{\"frame\":459,\"t\":15303700},\"preview\":{\"frame\":459,\"t\":15303700}}"
     },
     {
-      "name": "a jump to 15 s while playing is followed in 0.9 ms, and the two stay within one frame on both sides of it (max 12.6 ms)",
+      "name": "a jump to 15 s while playing is followed in 0.4 ms, and the two stay within one frame on both sides of it (max 17.5 ms)",
       "pass": true,
-      "detail": "{\"count\":90,\"mean\":0.57,\"p95\":1.6,\"max\":12.6,\"followedInMs\":0.9}"
+      "detail": "{\"count\":90,\"mean\":1.89,\"p95\":13.5,\"max\":17.5,\"followedInMs\":0.4}"
     },
     {
       "name": "space in the preview window plays the editor, and again pauses it",
       "pass": true,
-      "detail": "{\"afterSpace\":{\"present\":true,\"leaderHere\":false,\"keys\":1,\"docs\":0,\"t\":16491000,\"playing\":true,\"hasPlayer\":true},\"afterSecond\":{\"present\":true,\"leaderHere\":false,\"keys\":2,\"docs\":0,\"t\":16491000,\"playing\":false,\"hasPlayer\":true}}"
+      "detail": "{\"afterSpace\":{\"present\":true,\"leaderHere\":false,\"keys\":1,\"docs\":0,\"t\":16471700,\"playing\":true,\"hasPlayer\":true},\"afterSecond\":{\"present\":true,\"leaderHere\":false,\"keys\":2,\"docs\":0,\"t\":16471700,\"playing\":false,\"hasPlayer\":true}}"
     },
     {
       "name": "full screen on the screen asked for, then back to a window; asking again moves the same window, never a second one",
@@ -61,7 +61,7 @@
     {
       "name": "the editor reloaded: the preview window hears it leave, then finds the new one and gets the project again",
       "pass": true,
-      "detail": "{\"gone\":{\"present\":false,\"leaderHere\":false,\"keys\":0,\"docs\":1,\"t\":16491000,\"playing\":false,\"hasPlayer\":true},\"back\":{\"editor\":{\"present\":true,\"leaderHere\":false,\"keys\":0,\"docs\":0,\"t\":0,\"playing\":false,\"hasPlayer\":true},\"preview\":{\"present\":false,\"leaderHere\":true,\"keys\":0,\"docs\":2,\"t\":0,\"playing\":false,\"hasPlayer\":true}},\"docsBefore\":1}"
+      "detail": "{\"gone\":{\"present\":false,\"leaderHere\":false,\"keys\":0,\"docs\":1,\"t\":16471700,\"playing\":false,\"hasPlayer\":true},\"back\":{\"editor\":{\"present\":true,\"leaderHere\":false,\"keys\":0,\"docs\":0,\"t\":0,\"playing\":false,\"hasPlayer\":true},\"preview\":{\"present\":false,\"leaderHere\":true,\"keys\":0,\"docs\":2,\"t\":0,\"playing\":false,\"hasPlayer\":true}},\"docsBefore\":1}"
     },
     {
       "name": "the editor leaving closes the preview window",
@@ -121,29 +121,29 @@
     "expected": 219
   },
   "playing": {
-    "count": 241,
-    "mean": 0.75,
+    "count": 242,
+    "mean": 1.22,
     "p95": 1.2,
-    "max": 15.7,
-    "editorFrames": 243,
-    "previewFrames": 246
+    "max": 14.5,
+    "editorFrames": 244,
+    "previewFrames": 247
   },
   "stopped": {
     "editor": {
       "frame": 459,
-      "t": 15302900
+      "t": 15303700
     },
     "preview": {
       "frame": 459,
-      "t": 15302900
+      "t": 15303700
     }
   },
   "jump": {
     "count": 90,
-    "mean": 0.57,
-    "p95": 1.6,
-    "max": 12.6,
-    "followedInMs": 0.9
+    "mean": 1.89,
+    "p95": 13.5,
+    "max": 17.5,
+    "followedInMs": 0.4
   },
   "fullScreen": {
     "full": {
@@ -167,7 +167,7 @@
       "leaderHere": false,
       "keys": 0,
       "docs": 1,
-      "t": 16491000,
+      "t": 16471700,
       "playing": false,
       "hasPlayer": true
     },
