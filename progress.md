@@ -3493,9 +3493,8 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - **Photo tiles**, `qa/studio-photo-tiles.cjs`: 9 of 9. Every way (1, 2, 4 and 10 workers, and the chip where there is one)
     gives one worker's bytes for every adjustment of the 8000 by 6000 photo and the see-through one, on every engine.
   - `qa/studio-engine.cjs` in Edge: 41 of 41.
+  - At `d14f1d5`, after the slot: `npm test` 843 of 843 and `npm run build` clean (05:17 to 05:19).
 - **Not verified, said plainly.**
-  - `npm test` and `npm run build` on this tip are not yet run: `npm test` was 841 of 841 at `d7321d9`, and the build waits for
-    a quiet laptop.
   - One laptop with two chips. The director's laptop (Q1) was not measured.
   - Nothing was seen signed in, and no real project was opened.
   - An export in a worker (P-07 option B) is not built yet. The effects use no DOM: WebGL2 on an OffscreenCanvas, WebAssembly
