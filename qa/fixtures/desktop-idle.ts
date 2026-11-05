@@ -72,8 +72,29 @@ export async function copyNames() {
   }
   return out;
 }
-/** «حذف ملفات المعاينة المؤقتة», sparing what the project uses now (a light copy the preview reads). */
-export const clearCopies = () => dc.clearLibrary(pool.inUse(doc));
+/** Opens the project's sources in a new media pool, as the editor does, and waits until each is loaded. */
+async function openPool() {
+  pool = new media.MediaPool({ cache: dc, onChange: () => undefined });
+  pool.ensure(doc);
+  for (const { id } of ids) {
+    for (let i = 0; i < 600 && pool.state(id)?.kind === 'loading'; i++) await sleep(100);
+  }
+  // the cache names the sources to the queue a moment after the last one (sendQueue), before the check sets its own
+  await sleep(500);
+}
+
+/**
+ * The project closed, «حذف ملفات المعاينة المؤقتة», and the project opened again, so every light copy is made again.
+ * Since D10 an open project reads a copy made in idle time from the moment it is ready (MediaPool.copiesReady), and
+ * «حذف» rightly spares what is in use; clearing with the project open left the copies it had taken up, and the holds
+ * found nothing running (found 2026-11-05, when the wait for Windows' full speed outlasted both grainy copies).
+ */
+export async function clearCopies() {
+  pool.dispose();
+  const r = await dc.clearLibrary(new Set());
+  await openPool();
+  return r;
+}
 export const stopQueue = () => dc.stopQueue();
 export const activity = (kind: 'none' | 'playing' | 'scrubbing' | 'measuring') => setActivity(kind);
 export const busy = (on: boolean) => (on ? bridge().life.busy('export') : bridge().life.idle());
