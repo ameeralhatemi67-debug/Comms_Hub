@@ -37,5 +37,29 @@
     },
     "on_these_migrations": "authenticated_security_definer_function_executable for work_cancel (new, callable by signed-in people by design, it checks its caller) and for platform_test_may, platform_test_start and platform_test_done (replaced, callable as before); none for anon, no table without a policy; the helpers perm_create_giver and work_touched_by_others are not executable by authenticated",
     "findings_before": "not taken before applying"
+  },
+  "after_youtube_choices": {
+    "what": "Run verbatim again after platform_tests_youtube_choices replaced platform_test_start and platform_test_done.",
+    "migration": {
+      "file": "supabase/migrations/20261105120000_platform_tests_youtube_choices.sql",
+      "file_md5": "be2272f0c7d5e1f8c23080a99ba38765",
+      "applied": "applied to comms-hub (hrghmioxvgkjpnydrxrk) with the owner's approval of 2026-11-05, as version 20261105073612 'platform_tests_youtube_choices'; md5 of the stored statement be2272f0c7d5e1f8c23080a99ba38765 equals the md5 of the file"
+    },
+    "total": 48,
+    "passed": 48,
+    "run_md5": "18d005c2c2237e03f19098d555499b5a",
+    "run_md5_equals_file": true,
+    "left_behind": {
+      "throwaway_accounts": 0,
+      "throwaway_users": 0,
+      "throwaway_integrations": 0,
+      "throwaway_platform_accounts": 0,
+      "throwaway_media_files": 0,
+      "platform_tests": 1,
+      "server_key_is_a_throwaway": false,
+      "work_no_seq_last": 1,
+      "platform_test_done_versions": 1,
+      "anon_may_call_platform_test_done": false
+    }
   }
 }

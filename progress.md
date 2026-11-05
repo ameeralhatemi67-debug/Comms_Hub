@@ -3866,3 +3866,20 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   person's pages from `my_capabilities` (`src/lib/supabase/session.ts`), so `page.create`'s role templates now decide «إنشاء»
   there too. The assistant, the writer and the producer keep it; the designer and the member no longer see it, and the database
   refuses them `work_create`. «إلغاء العمل» and the Facebook test wait for the push. Nothing pushed.
+
+### 2026-11-05: `platform_tests_youtube_choices` applied to comms-hub (director's notes, step 1; the manager)
+
+- **By the owner's yes of 2026-11-05** ("Yes, apply it"), applied as version 20261105073612; the md5 of the stored statement
+  equals the file's (`be2272f0...`), the same file the container runs of the step-1 entry above used. The live site's code keeps
+  working on it: `platform_test_done` gains `p_publish_at` with a default, so the current five- and six-part calls still resolve,
+  and the table's checks only widen. This settles that entry's "Before deploying": the push no longer waits for it.
+- **Verified on comms-hub after applying**, each rules file verbatim in one rolled-back transaction:
+  `platform_tests_instagram_rules.sql` **62 of 62**, `platform_tests_facebook_rules.sql` **48 of 48** (again, against the
+  replaced functions), `platform_tests_rules.sql` **94 of 95**. The one difference is case 28, "the director sees it", which
+  counts every test a director may see and got 2 for 1: comms-hub holds one real test from before the run. A separate rolled-back
+  query as a throwaway director saw that 1 row and none made by the tests, so the rule holds and the file's count assumes an empty
+  table. Left behind: nothing (no @t.test account, user, integration, platform account or library file; the real server key; one
+  `platform_test_done`, not callable by anon; `work_no_seq` untouched at 1).
+- **Security advisor:** 357 findings before and after; the only change is `platform_test_done`'s finding moving to its new form.
+- Results in `qa/platform-tests-rules-comms-hub.json`, `qa/platform-tests-instagram-rules-comms-hub.json`, and the second run in
+  `qa/platform-tests-facebook-rules-comms-hub.json` (`after_youtube_choices`). Nothing pushed.
