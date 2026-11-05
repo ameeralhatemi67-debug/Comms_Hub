@@ -55,7 +55,7 @@ related:
     not changed. A clean run needs the laptop free of other sessions and Docker.
   - `20261105160000_direct_publish.sql` (`e8e2fa9`) is not applied to comms-hub and needs the owner's yes before a push.
   - `origin/main` is an ancestor of main again (`fc5737c` merged `5a50567`), so the push is a fast-forward.
-- **Next.** Stage 2, below in time and above on this page.
+- **Next.** Stage 2, done: see the section above.
 
 ## «نافذة البريد والمراسلة», the experimental mail and messaging window, 2026-11-05
 
