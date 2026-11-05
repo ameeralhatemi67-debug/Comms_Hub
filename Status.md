@@ -42,8 +42,14 @@ related:
     weeks broken.
   - Migration `20261105140000_file_thumbs.sql` is written and **not applied**. Apply it before deploying.
   - Unproven against the real Drive: its own thumbnails for older files and documents.
-- **Step 3, calendar colours,** is being built in its own session and branch.
-- **Next.** The owner's word to apply the thumbnails migration, then the deploy. Then step 4, quick actions and «نشر مباشر» (N-2).
+- **Step 3, calendar colours, merged into main.**
+  - Each person colours the calendar by kind, status, project, platform or person, from twelve fixed colours, kept in the
+    database (`MVP_draft.md` section 74).
+  - Migration `20261105130000_calendar_prefs.sql` is **not applied**.
+  - On the merged tree: `npm test` 906 of 906, the SQL rules 51 of 51, `qa/calendar-colors.cjs` 85 of 85.
+- **Next.**
+  - The owner's word to apply the two migrations (`calendar_prefs`, `file_thumbs`), then the deploy.
+  - Then step 4: quick actions and «نشر مباشر» (N-2).
 
 ## Desktop Power, merge 11: D11 «تصدير أسرع» with option A, 2026-11-05
 

@@ -3950,3 +3950,59 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Before deploying.** Apply the migration first. Without it, nothing is kept: the browser's pictures are dropped (`thumb_save`
   fails silently), and every first view of a file asks Drive again (`thumb_keep` fails, and the picture is served unkept). Nothing
   pushed.
+
+### 2026-11-05: «ألوان التقويم», the calendar in the person's own colours (director's notes, step 3, N-1)
+
+- **Owner decision.** `Director_Notes_Plan.md` section 1, approved 2026-11-05 with answer Q1: colours are personal and kept in the
+  database. Built in its own worktree branch, beside steps 2 and 4, to be merged by the owner.
+- **What was built.**
+  - «الألوان» on the calendar's bar opens the sheet «ألوان التقويم»: «لوّن حسب» (five, «نوع الموعد» first), one folded row per value,
+    twelve preset colours, «إرجاع الافتراضي» for one value and for all. `MVP_draft.md` section 74.
+  - Rules in `src/lib/work/calendar-colors.ts` (pure): the palette, the five modes and their defaults, which value an entry has,
+    the classes of a chip, a row, Home's label, a band and an account, the key, and the 200. The sheet, the key and one shared,
+    sequential save in `src/components/work/calendar-colors.tsx`. Classes `pal-0` to `pal-11` with light and dark values, and the
+    warnings drawn outside a coloured chip, in `src/app/work.css`.
+  - Wired into the four views, the bands and month strips (`src/components/work/calendar.tsx`), the project cards and a project
+    page's band (`projects.tsx`, replacing `toneOf` where a colour is chosen), and Home's next days (`home.tsx`, which used
+    `CAL_KIND`). The calendar's guide has a part «الألوان» and a «جديد» card (calendar version 2).
+  - Migration `20261105130000_calendar_prefs.sql` (written, **not applied** to comms-hub): `calendar_prefs` (one row per person,
+    a mode, at most 200 pairs, its own check), row level security on the owner's row, the one write `calendar_prefs_save`, the row
+    removed with the account. Errors `CAL_PREFS_INVALID` and `CAL_PREFS_TOO_MANY` worded in `src/lib/work/rules.ts`.
+  - The account deletion list (`src/lib/account-deletion.ts`, `public/account-deletion.html`, `MVP_draft.md` 64.6) now names
+    «ألوان تقويمك» among what goes with the account.
+- **Verified.**
+  - `npm run typecheck` clean; `npm run build` clean; `npm test` 895 of 895 (`tests/calendar-colors.test.mjs` 13 of 13, new):
+    text on its own ground 7.7:1 or more and edges 3.2:1 or more against every surface in both modes; the CSS holds the palette
+    exactly; with nothing chosen every chip, row, label, band and the key are today's class for class; every mark stays on every
+    entry in every mode and colour (more than 200 cases) and is drawn after the colour, outside the chip, in colours of 3:1 or
+    more on every ground; the key patterns, modes and limit are the migration's.
+  - SQL rules on a private container with every migration replayed (68): `calendar_prefs_rules.sql` 51 of 51 (own row only,
+    administrators included; no direct write; modes, keys, colours 0 to 11, 200 kept and 201 refused; a sign-in without an
+    account refused; the table's own checks; the row removed with the account). Result `qa/calendar-prefs-rules.json`.
+  - `node qa/calendar-colors.cjs`: 85 of 85 in Edge on a fixture of the real calendar, project pages, Home and sheet. Result
+    `qa/calendar-colors.json`, pictures under `qa/artifacts/calendar-colors/` (not committed).
+- **Interpretation recorded.** "The project page's calendar" is taken as the calendar the project page opens with «في التقويم»
+  (it shows that project, and a work in several projects takes that project's colour there) and the project page's own band. The
+  timeline («الجدول الزمني») keeps its stage states, which are progress rather than calendar colours.
+- **Not verified.** Nothing was run signed in against comms-hub. A person's default colour comes from the address, so two people
+  can start alike. `Status.md` was left for the merge, since the parallel steps edit it too.
+- **Before deploying.** Apply the migration first. Without it the calendar reads no choice and shows today's colours, but every
+  pick is refused and said. Nothing pushed.
+
+### 2026-11-05: step 3 (calendar colours) merged into main beside step 2 (thumbnails)
+
+- **Owner decision.** The owner asked for the merge of `claude/keen-goldberg-fe0fde` (`4ec843a`) into main.
+- **Conflicts.** Three, each from both sides appending:
+  - `MVP_draft.md` keeps section 74 before 77;
+  - `progress.md` keeps both entries;
+  - `package.json` runs both `tests/calendar-colors.test.mjs` and `tests/thumbs.test.mjs`.
+- **Also fixed.** `qa/work-pages.cjs` now also compiles the calendar colour modules that `calendar.tsx`, `projects.tsx` and
+  `home.tsx` import.
+- **Verified on the merged tree:**
+  - `npm run typecheck` clean, `npm run build` clean, `npm test` 906 of 906;
+  - SQL rules on a private container with every migration replayed: `thumbs_rules.sql` 39 of 39 and `calendar_prefs_rules.sql`
+    51 of 51;
+  - browser flows: `qa/calendar-colors.cjs` 85 of 85, `qa/thumbs-flow.cjs` 19 of 19, `qa/work-pages.cjs` 1077 of 1077 and
+    `qa/post-preview.cjs` 202 of 202.
+- **Not applied.** Neither `20261105130000_calendar_prefs.sql` nor `20261105140000_file_thumbs.sql` is applied to comms-hub. Both
+  need the owner's word before main is pushed. Nothing pushed.

@@ -37,7 +37,7 @@ const sources = [
   'components/work/post-preview.tsx', 'components/work/connect.tsx',
   'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts',
   // «المنصات» and «حسابات المنصات» redesigned: the sheet, the marks, the words of a sign-in
-  'components/sheet.tsx', 'components/platform-icon.tsx', 'components/file-thumb.tsx', 'lib/media/thumbs.ts', 'components/guide-text.tsx', 'lib/guide-text.ts', 'lib/setup-guides.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts', 'lib/native/notices.ts',
+  'components/sheet.tsx', 'components/platform-icon.tsx', 'components/file-thumb.tsx', 'lib/media/thumbs.ts', 'components/work/calendar-colors.tsx', 'lib/work/calendar-colors.ts', 'components/guide-text.tsx', 'lib/guide-text.ts', 'lib/setup-guides.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts', 'lib/native/notices.ts',
   // The studio's third round, Phase 9: the review player, its keys, the queue, notes, the key hold
   'components/work/review-player.tsx', 'lib/work/queue.ts', 'lib/work/review-keys.ts', 'lib/studio/shortcuts.ts',
   'lib/media/notes.ts', 'lib/kit/hold.ts', 'lib/kit/layer.ts', 'lib/motion/preview.js',
@@ -75,7 +75,7 @@ for (const m of sources) {
     .replace(/from '@\/lib\/([^']+)\.js'/g, `from '${up}lib/$1.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
-    .replace(/from '(\.\/(?:work\/)?(?:plan|parts|list|item|create|publish|approvals|review|channels|calendar|projects|requests|day-dialogs|post-preview|connect|review-player))'/g, "from '$1.js'");
+    .replace(/from '(\.\/(?:work\/)?(?:plan|parts|list|item|create|publish|approvals|review|channels|calendar|projects|requests|day-dialogs|post-preview|connect|review-player|calendar-colors))'/g, "from '$1.js'");
   const dest = path.join(build, m.replace(/\.(tsx?|js)$/, '.js'));
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, js);
