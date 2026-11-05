@@ -12,7 +12,8 @@ html.cw-full .toast{left:25px;bottom:190px}
   background:var(--campaign-bg);color:var(--on-brand);box-shadow:var(--shadow-dialog);touch-action:none;cursor:grab;
   transition:bottom .25s cubic-bezier(.16,1,.3,1),transform .15s;animation:cw-pop .3s cubic-bezier(.16,1,.3,1)}
 .cw-launch::before{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent);pointer-events:none}
-.cw-launch:hover{transform:translateY(-2px)}
+/* The site's button:hover background must not reach the launcher: it stays deep green. */
+.cw-launch:hover,.cw-launch:focus-visible{background:var(--campaign-bg);color:var(--on-brand);transform:translateY(-2px)}
 .cw-launch.moving{transition:none;cursor:grabbing;transform:scale(1.06)}
 .cw-launch svg{width:24px;height:24px}
 .cw-badge,.cw-decide{position:absolute;inset-inline-start:-7px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;font-size:11px;font-weight:700;display:grid;place-items:center;font-variant-numeric:tabular-nums}
