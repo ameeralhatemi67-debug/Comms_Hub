@@ -8,7 +8,7 @@
 // directly. Dragging uses pointer events (src/lib/work/drag.ts), so a finger works too.
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   Bell,
   BriefcaseBusiness,
@@ -20,6 +20,7 @@ import {
   Flag,
   ListChecks,
   Mail,
+  Palette,
   Plus,
   Send,
   Shield,
@@ -49,7 +50,6 @@ import {
   BUSY_DAY,
   CAL_KIND,
   FILTERS,
-  KEY_ORDER,
   WEEK_DAYS,
   bandsFor,
   calEntries,
@@ -76,6 +76,8 @@ import {
   type PlanWork,
   whenText,
 } from '@/lib/work/planning';
+import { DEFAULT_PREFS, accountClass, bandClass, chipClass, rowClass, type CalPrefs, type ColorLook } from '@/lib/work/calendar-colors';
+import { CalendarColorsSheet, CalendarKey, useCalendarColors, useColorLook } from './calendar-colors';
 import { usePlanData, useWork, useWorkList } from './data';
 import { AddDayDialog, DueDialog, EventDialog, MoveDialog, ReminderDialog, TaskDialog, TaskExtensionDialog, type DayPick } from './day-dialogs';
 import { ExtensionDialog } from './item';
@@ -94,6 +96,8 @@ type Dialog =
   | { t: 'taskExt'; e: CalEntry };
 
 const VIEWS: [CalView, string][] = [['day', 'يوم'], ['week', 'أسبوع'], ['month', 'شهر'], ['agenda', 'قائمة']];
+/** The person's colours and what an entry needs to be coloured (src/lib/work/calendar-colors.ts), for every view. */
+const Colors = createContext<{ prefs: CalPrefs; look: ColorLook }>({ prefs: DEFAULT_PREFS, look: {} });
 
 export function CalendarPage() {
   const w = useWork();
@@ -107,6 +111,7 @@ export function CalendarPage() {
   const [project, setProject] = useState(params.get('project') || 'all');
   const [sel, setSel] = useState<string | null>(null);
   const [dlg, setDlg] = useState<Dialog | null>(null);
+  const [colorsOpen, setColorsOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const nowIso = useMemo(() => new Date().toISOString(), [items, plan.tasks]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -121,6 +126,9 @@ export function CalendarPage() {
     () => calEntries({ works, tasks: plan.tasks, events: plan.events, reminders: plan.reminders, accounts: w.accounts, me: w.me, today: w.today, nowIso, filter, mine, project }),
     [works, plan.tasks, plan.events, plan.reminders, w.accounts, w.me, w.today, nowIso, filter, mine, project],
   );
+  const { prefs } = useCalendarColors();
+  const look = useColorLook(items, w.accounts, project);
+  const colors = useMemo(() => ({ prefs, look }), [prefs, look]);
   const pendingOf = (id: string) => items.find((x) => x.w.id === id)?.pendingKeys;
   const stagesOf = (id: string) => items.find((x) => x.w.id === id)?.stages ?? [];
 
@@ -241,6 +249,10 @@ export function CalendarPage() {
             </option>
           ))}
         </select>
+        <button type="button" className="wk-btn sm" data-gd="calcolors" aria-haspopup="dialog" onClick={() => setColorsOpen(true)}>
+          <Ic i={Palette} />
+          الألوان
+        </button>
       </div>
 
       {loading ? (
@@ -252,6 +264,7 @@ export function CalendarPage() {
           أعد تحميل الصفحة. إن تكرر هذا فقد يكون الاتصال بقاعدة البيانات متوقفاً.
         </Empty>
       ) : (
+        <Colors.Provider value={colors}>
         <div ref={wrap} className="wk-calwrap">
           {view === 'week' && (
             <Week all={all} anchor={anchor} works={works} filter={filter} mine={mine} project={project} nowIso={nowIso} canDrag={canDrag} onSel={setSel} onDay={(d) => { setView('day'); setAnchor(d); }} onAdd={(d) => setDlg({ t: 'add', date: d })} />
@@ -260,23 +273,10 @@ export function CalendarPage() {
           {view === 'day' && <DayList all={all} day={anchor} filter={filter} project={project} onSel={setSel} onAdd={(d) => setDlg({ t: 'add', date: d })} />}
           {view === 'agenda' && <Agenda all={all} anchor={anchor} onSel={setSel} onDay={(d) => { setView('day'); setAnchor(d); }} />}
         </div>
+        </Colors.Provider>
       )}
 
-      <div className="wk-legend">
-        {KEY_ORDER.map((k) => (
-          <span key={k} className={`wk-cchip ${CAL_KIND[k][1]} static`}>
-            <span>{CAL_KIND[k][0]}</span>
-          </span>
-        ))}
-        <span className="wk-cchip k-pub risk static">
-          <Ic i={TriangleAlert} />
-          <span>التفويض لا يغطي الموعد</span>
-        </span>
-        <span className="wk-cchip k-pub near static">
-          <Ic i={Clock} />
-          <span>قريب من منشور آخر</span>
-        </span>
-      </div>
+      <CalendarKey entries={all} look={look} />
       <p className="wk-col-hint">
         النشر في هذه المرحلة محاكاة: لا يصل شيء إلى المنصات.{' '}
         {lead || canPublish(w.role) ? `اسحب موعد نشر إلى يوم آخر لطلب نقله${lead ? '، واسحب التسليم أو المرحلة لتغييرهما مباشرة' : ''}. أو افتح أي موعد واختر الإجراء.` : 'افتح أي موعد لترى تفاصيله.'}
@@ -293,6 +293,7 @@ export function CalendarPage() {
         />
       )}
 
+      {colorsOpen && <CalendarColorsSheet onClose={() => setColorsOpen(false)} />}
       {dlg?.t === 'add' && <AddDayDialog date={dlg.date} ready={ready} onClose={() => setDlg(null)} onPick={(p) => pickDay(dlg.date, p)} />}
       {dlg?.t === 'move' && <MoveDialog w={dlg.w} at={dlg.at} entries={all} onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'due' && dlg.e.w && <DueDialog w={dlg.e.w} stages={stagesOf(dlg.e.w.id)} si={dlg.e.k === 'stage' ? (dlg.e.si ?? null) : null} date={dlg.date} onClose={() => setDlg(null)} act={act} />}
@@ -310,14 +311,14 @@ export function CalendarPage() {
 // Entries
 // ---------------------------------------------------------------------------
 export function Chip({ e, compact, drag, onSel }: { e: CalEntry; compact?: boolean; drag: boolean; onSel: (k: string) => void }) {
-  const [label, cls] = CAL_KIND[e.k];
-  const res = e.k === 'done' && e.ch && e.w?.results[e.ch] ? (e.w.results[e.ch].ok ? ' ok' : ' bad') : '';
+  const { prefs, look } = useContext(Colors);
+  const label = CAL_KIND[e.k][0];
   // A stage on a day cell names the stage; its work is in the tooltip and the panel.
   const title = compact && e.k === 'stage' ? (e.sn ?? entryTitle(e)) : entryTitle(e);
   return (
     <button
       type="button"
-      className={`wk-cchip ${cls}${res}${e.late ? ' late' : ''}${e.risk ? ' risk' : ''}${e.near ? ' near' : ''}${e.w && e.w.priority === 'urgent' && e.k !== 'done' ? ' urg' : ''}`}
+      className={`wk-cchip ${chipClass(e, prefs, look)}`}
       data-cdrag={drag ? e.key : undefined}
       title={`${label} · ${entryTitle(e)}${e.risk ? ' · التفويض لا يغطي الموعد' : ''}${e.near ? ` · قريب من «${e.near.title}»` : ''}`}
       onClick={() => onSel(e.key)}
@@ -359,6 +360,7 @@ function Week(props: {
   onAdd: (d: string) => void;
 }) {
   const w = useWork();
+  const { prefs } = useContext(Colors);
   const { all, anchor, works, filter, canDrag, onSel } = props;
   const ws = weekStart(anchor);
   const days = daysFrom(ws, 7);
@@ -379,7 +381,7 @@ function Week(props: {
           <div className="cw-lab">المشاريع</div>
           <div className="cw-bands">
             {bands.map((b) => (
-              <Link key={b.id} href={`/projects/${b.id}`} className={`wk-band t${b.tone}${b.cut0 ? ' cut0' : ''}${b.cut1 ? ' cut1' : ''}`} style={{ gridColumn: `${b.from + 1} / ${b.to + 2}` }}>
+              <Link key={b.id} href={`/projects/${b.id}`} className={`wk-band ${bandClass(b.id, prefs)}${b.cut0 ? ' cut0' : ''}${b.cut1 ? ' cut1' : ''}`} style={{ gridColumn: `${b.from + 1} / ${b.to + 2}` }}>
                 {b.name}
               </Link>
             ))}
@@ -454,6 +456,7 @@ const tasksOf = (all: CalEntry[]) => [...new Map(all.filter((e) => e.t).map((e) 
 
 function Month({ all, anchor, filter, project, canDrag, onSel, onDay, onAdd }: { all: CalEntry[]; anchor: string; filter: CalFilter; project: string; canDrag: (e: CalEntry) => boolean; onSel: (k: string) => void; onDay: (d: string) => void; onAdd: (d: string) => void }) {
   const w = useWork();
+  const { prefs } = useContext(Colors);
   const cells = monthCells(anchor);
   const month = anchor.slice(0, 7);
   const projects = filter.camps ? w.projects.filter((p) => project === 'all' || p.id === project) : [];
@@ -474,7 +477,7 @@ function Month({ all, anchor, filter, project, canDrag, onSel, onDay, onAdd }: {
               </button>
               <span className="cm-str">
                 {bandsFor(projects, d, 1).map((b) => (
-                  <i key={b.id} className={`t${b.tone}`} title={b.name} />
+                  <i key={b.id} className={bandClass(b.id, prefs)} title={b.name} />
                 ))}
               </span>
               {dayCount(all, d) >= BUSY_DAY && <span className="wk-busy">مزدحم</span>}
@@ -499,10 +502,11 @@ function Month({ all, anchor, filter, project, canDrag, onSel, onDay, onAdd }: {
 
 function Row({ x, onSel }: { x: { e: CalEntry; chs: string[] }; onSel: (k: string) => void }) {
   const w = useWork();
+  const { prefs, look } = useContext(Colors);
   const e = x.e;
-  const [label, cls] = CAL_KIND[e.k];
+  const label = CAL_KIND[e.k][0];
   return (
-    <button type="button" className={`wk-crow ${cls}${e.late ? ' late' : ''}`} onClick={() => onSel(e.key)}>
+    <button type="button" className={`wk-crow ${rowClass(e, prefs, look)}`} onClick={() => onSel(e.key)}>
       <time>{e.time || 'طوال اليوم'}</time>
       <span className="ck">{label}</span>
       <span className="ct">
@@ -526,7 +530,7 @@ function Row({ x, onSel }: { x: { e: CalEntry; chs: string[] }; onSel: (k: strin
               const r = e.k === 'done' ? e.w?.results[c] : undefined;
               const risk = !r && e.k !== 'done' && a && a.platform !== 'mail' && e.iso && !authOk(a, e.iso);
               return (
-                <span key={c} className={`wk-cr ${r ? (r.ok ? 'ok' : 'bad') : risk ? 'risk' : ''}`}>
+                <span key={c} className={`wk-cr ${accountClass(c, r ? (r.ok ? 'ok' : 'bad') : risk ? 'risk' : '', prefs, look.platformOf)}`}>
                   {accountName(a)}
                 </span>
               );
@@ -540,6 +544,7 @@ function Row({ x, onSel }: { x: { e: CalEntry; chs: string[] }; onSel: (k: strin
 
 function DayList({ all, day, filter, project, onSel, onAdd }: { all: CalEntry[]; day: string; filter: CalFilter; project: string; onSel: (k: string) => void; onAdd: (d: string) => void }) {
   const w = useWork();
+  const { prefs } = useContext(Colors);
   const list = all.filter((e) => e.date === day);
   const bands = filter.camps ? bandsFor(w.projects, day, 1, project) : [];
   return (
@@ -547,7 +552,7 @@ function DayList({ all, day, filter, project, onSel, onAdd }: { all: CalEntry[];
       {bands.length > 0 && (
         <div className="wk-parts">
           {bands.map((b) => (
-            <Link key={b.id} href={`/projects/${b.id}`} className={`wk-band t${b.tone}`}>
+            <Link key={b.id} href={`/projects/${b.id}`} className={`wk-band ${bandClass(b.id, prefs)}`}>
               {b.name}
             </Link>
           ))}

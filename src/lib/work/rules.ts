@@ -1087,6 +1087,9 @@ const ERRORS: Record<string, string> = {
   PART_INVALID: 'هذا الجزء ليس من أجزاء العمل.',
   KEEP_INVALID: 'عدد الإصدارات من 3 إلى 50.',
   IDEA_USED: 'صارت هذه الفكرة عملاً من قبل.',
+  // «ألوان التقويم» (supabase/migrations/*calendar_prefs*).
+  CAL_PREFS_INVALID: 'تعذّر حفظ الألوان: أحد الاختيارات غير صالح. أعد فتح التقويم وحاول مجدداً.',
+  CAL_PREFS_TOO_MANY: 'بلغت ألوانك المحفوظة 200. أرجع بعض القيم إلى الافتراضي أولاً.',
 };
 export function workErrorText(message: string | null | undefined): string {
   const m = message ?? '';

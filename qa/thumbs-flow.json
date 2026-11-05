@@ -1,6 +1,6 @@
 {
   "script": "qa/thumbs-flow.cjs",
-  "run": "2026-11-05T07:54:30.217Z",
+  "run": "2026-11-05T08:14:47.434Z",
   "checks": [
     {
       "name": "each card asks for its version's thumbnail",
@@ -55,12 +55,12 @@
     {
       "name": "a recorded video gives its frame, really drawn (red where it was red)",
       "pass": true,
-      "detail": "{\"mime\":\"image/webp\",\"w\":320,\"h\":180,\"red\":191,\"green\":57,\"blue\":43}"
+      "detail": "{\"mime\":\"image/webp\",\"w\":320,\"h\":180,\"red\":191,\"green\":57,\"blue\":41}"
     },
     {
       "name": "a text file and a broken video give none, without waiting long",
       "pass": true,
-      "detail": "{\"text\":null,\"broken\":null,\"ms\":7}"
+      "detail": "{\"text\":null,\"broken\":null,\"ms\":4}"
     },
     {
       "name": "a file chosen on this device shows its picture before anything is sent",

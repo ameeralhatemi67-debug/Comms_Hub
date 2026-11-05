@@ -7,8 +7,8 @@
     "applied": "this run is on a private container and touched nothing"
   },
   "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
-  "run": "2026-11-05T07:23:34.020Z",
-  "migrations_replayed": 68,
+  "run": "2026-11-05T08:13:02.264Z",
+  "migrations_replayed": 69,
   "differ": [],
   "total": 39,
   "passed": 39

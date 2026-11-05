@@ -34,10 +34,12 @@ import {
 import { CAL_KIND, calEntries, entryTitle,
   whenText,
 } from '@/lib/work/planning';
+import { labelClass } from '@/lib/work/calendar-colors';
 import { resumeRow, writingQueue } from '@/lib/writing/flow';
 import { readLocalDraft } from './writing/api';
 import { usePlanData, useWork, useWorkList, useWritingMarks, type ListItem } from './work/data';
 import { HomePermissions } from './home-perms';
+import { useCalendarColors, useColorLook } from './work/calendar-colors';
 import { Av, Empty, Ic, StatusChip, Wid } from './work/parts';
 
 type Tile = { key: string; label: string; value: number; hint: string; href: string; hot?: boolean };
@@ -109,6 +111,9 @@ export function HomePage() {
     .filter((e) => e.date >= w.today && e.date <= dayAdd(w.today, 6) && e.k !== 'held')
     .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   const seen = new Set<string>();
+  // «ألوان التقويم» (MVP_draft.md 74): the same colours as the calendar.
+  const { prefs: colors } = useCalendarColors();
+  const look = useColorLook(items, w.accounts);
   const upcoming = week.filter((e) => {
     const k = `${e.k}|${e.w?.id ?? e.key}|${e.date}|${e.time}`;
     if (seen.has(k)) return false;
@@ -231,7 +236,7 @@ export function HomePage() {
                         <span className="t">
                           <b>{entryTitle(e)}</b>
                           <small>
-                            <span className={`wk-cchip ${CAL_KIND[e.k][1]} static`}>
+                            <span className={`wk-cchip ${labelClass(e, colors, look)} static`}>
                               <span>{CAL_KIND[e.k][0]}</span>
                             </span>
                             <span>
