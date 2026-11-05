@@ -34,17 +34,17 @@ related:
   - desktop-idle's 8 of 17 was the check: it cleared copies with its project open, and since D10 an open project keeps the copies
     it reads. Fixed in the fixture only (`eeb2b47`); now 19 of 22.
   - android-site's 0 of 1 was the worktree's missing public settings.
-- **Migrations.** comms-hub has every migration on main except `android_releases` (unapplied by design), each on the owner's
-  word: `create_access`, `work_cancel`, `platform_tests_facebook` and `platform_tests_youtube_choices` by the manager (`9805be8`,
-  `31249b6`), `calendar_prefs` and `file_thumbs` by the director's notes session (`d653c68`). A push no longer waits on any.
+- **Migrations.** comms-hub has every migration on main except `android_releases` (unapplied by design) and `direct_publish`
+  (below), each on the owner's word: `create_access`, `work_cancel`, `platform_tests_facebook` and `platform_tests_youtube_choices` by the manager (`9805be8`,
+  `31249b6`), `calendar_prefs` and `file_thumbs` by the director's notes session (`d653c68`).
 - **Open.**
-  - desktop-idle's last three holds, `studio-scrub --quick` and `studio-autores --quick` were not measured: Windows held the
-    processor at 34 to 70% and the owner was using the laptop, so the package window drew one frame a second. They need about
-    45 quiet minutes.
-  - `origin/main` has one commit main lacks: `5a50567`, the mail and messaging window, deployed alone, with its migration
-    `chat_window` applied to comms-hub. The push must merge it first. Its spec keeps `MVP_draft.md` section 74: the calendar
-    colours were renumbered to 75 on main (`3badbff`), so the merge keeps 74, 75, then 77.
-- **Next.** The quiet re-run, then the 0.9.0 package. Nothing pushed or released.
+  - The quiet re-run (12:24 to 12:54): desktop-idle 22 of 24, its two misses a paused FFmpeg draining at idle priority past its
+    one-second settle on a loaded laptop (by design: the copy is stopped and made again). studio-scrub and studio-autores were
+    refused again by their guard (the package window at one frame a second); their D10 gate records stand, and that code has
+    not changed. A clean run needs the laptop free of other sessions and Docker.
+  - `20261105160000_direct_publish.sql` (`e8e2fa9`) is not applied to comms-hub and needs the owner's yes before a push.
+  - `origin/main` is an ancestor of main again (`fc5737c` merged `5a50567`), so the push is a fast-forward.
+- **Next.** The 0.9.0 package (stage 2). Nothing pushed or released.
 
 ## «نافذة البريد والمراسلة», the experimental mail and messaging window, 2026-11-05
 

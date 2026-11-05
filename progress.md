@@ -4171,3 +4171,27 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - Direct posts in the account's sheet.
 - **Not verified.** Nothing against YouTube or Meta, and nothing signed in. Nothing pushed. Apply the migration before deploying:
   the panels now select `purpose`, so code without it would empty every platform's «آخر التجارب».
+
+### 2026-11-05: the quiet re-run of the desktop release's three timing checks (stage 1 of the release)
+
+- **Run** at the owner's "Start now", 12:24 to 12:54, at `fc5737c` (main with the mail window merged; none of the studio,
+  native, desktop or check files changed since `5aa385d`). The owner stepped away; the laptop was kept awake. At the start the
+  processor was 41% busy at 72% of its rated performance, with Docker Desktop and other sessions running.
+- **`qa/desktop-idle.cjs` 22 of 24** (19 of 22 before). The fixture fix held: every hold found a copy running. Five holds passed
+  (a click 53 ms, an export 13 ms, the page saying «playing» 10 ms, the battery 11 ms; each paused and made no progress).
+  Two did not: the window's sound and the simulated speed limit paused within 35 and 9 ms, then the copy was stopped and sent
+  back to waiting, as one that would not wait.
+  - **Why, read in `desktop/src/media-worker.ts`:** a paused FFmpeg drops to idle priority while it drains what it read already,
+    and if it still moves on after `SETTLE_MS` (1 s) it is stopped and made again later. On a loaded laptop the idle-priority
+    drain runs past that second. Windows was at 100% from 7 s before the simulated-limit hold to 3 s after it (203 changes of
+    the limit in the 483 s run), so it is the load, not Windows' limit alone.
+  - Which hold misses changes from run to run: the battery failed at 10:39 and passed now, the sound passed then and failed now.
+    Every hold passed on a quiet laptop on 2026-11-04 (`afbde46`, 25 of 26; `35d831c`). This is the designed behaviour, not a
+    fault: a stopped copy leaves no part file and is made again.
+- **`qa/studio-scrub.cjs --quick` 12 of 15 and `qa/studio-autores.cjs --quick` 0 of 1: refused again by their guard**, the
+  package window drawing one frame a second "covered, minimised, the screen locked or off". The screen was not locked and never
+  turns off; what covered the window was not found. The Edge rows kept 48 of 48 identity times. The gate runs of D10
+  (`qa/studio-scrub.json` 48 of 48, `qa/studio-autores.json` 9 of 9) stand, and the code they cover has not changed since.
+- **Records.** The gate records are kept; this run's three JSON files are not committed.
+- **Before a push:** `20261105160000_direct_publish.sql` (`e8e2fa9`, «نشر مباشر») is not applied to comms-hub and needs the
+  owner's yes. Every other migration on main is applied, and the push is a fast-forward of `origin/main`.
