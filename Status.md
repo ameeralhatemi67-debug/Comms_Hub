@@ -26,6 +26,24 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The desktop release, stage 1: the final regression continued, 2026-11-05
+
+- **Done.** On `power-final` (`5ee911d`, with main's director's notes step 1 merged in): typecheck clean, `npm test` 882 of 882,
+  `next build` clean, and 24 of the regression's checks passed in full, among them `android-site` 12 of 12 and
+  `youtube-test-flow` 68 of 68.
+  - desktop-idle's 8 of 17 was the check: it cleared copies with its project open, and since D10 an open project keeps the copies
+    it reads. Fixed in the fixture only (`eeb2b47`); now 19 of 22.
+  - android-site's 0 of 1 was the worktree's missing public settings.
+- **Migrations.** comms-hub now has every migration on main except `android_releases`: the manager applied `create_access`,
+  `work_cancel`, `platform_tests_facebook` and `platform_tests_youtube_choices` on the owner's yes (`9805be8`, `31249b6`).
+- **Open.**
+  - desktop-idle's last three holds, `studio-scrub --quick` and `studio-autores --quick` were not measured: Windows held the
+    processor at 34 to 70% and the owner was using the laptop, so the package window drew one frame a second. They need about
+    45 quiet minutes.
+  - The merge into main waits for the main checkout's uncommitted `MVP_draft.md` (section 77, thumbnails).
+  - `20261105140000_file_thumbs.sql`, written in the main checkout and not committed, will need the owner's yes before a push.
+- **Next.** The quiet re-run, the merge into main, then the 0.9.0 package. Nothing pushed or released.
+
 ## The director's notes, step 1: «غير مدرج» and «مجدول» in YouTube's «تجربة النشر», 2026-11-05
 
 - **Approved.** `Director_Notes_Plan.md`, with the recommended answers to Q1 to Q5: calendar colours (N-1), quick actions and

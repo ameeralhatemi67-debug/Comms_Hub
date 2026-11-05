@@ -3839,3 +3839,40 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   test settles it, and the panel says what YouTube applied.
 - **Before deploying.** Apply the migration first: the panel now selects `shown_publish_at`, so the code without it would empty
   every platform's «آخر التجارب». Nothing pushed.
+
+### 2026-11-05: the desktop release's final regression, continued (Desktop Power; stage 1 of the release)
+
+- **Why.** The owner asked a new session to finish the regression the manager had left at 21 of 27 (`power-final`, `09ddefc`), as
+  the first stage of shipping 0.9.0; the manager stood down. At the owner's word the session stopped the Hatan project's
+  `next dev`, which held port 3000.
+- **Two failures were in the checks, not the application.**
+  - `qa/desktop-idle.cjs`, 8 of 17. Since D10 an open project reads a light copy made in idle time from the moment it is ready
+    (`MediaPool.copiesReady`), and «حذف ملفات المعاينة المؤقتة» rightly spares what is in use. The fixture cleared with its project
+    open; once the wait for Windows' full speed outlasted both grainy copies, they stayed taken up, the check remade them six times
+    and every hold found nothing running. `qa/fixtures/desktop-idle.ts` now closes the project, clears every copy and opens it
+    again (`eeb2b47`). The application is unchanged.
+  - `qa/android-site.cjs`, 0 of 1. The verify worktree had no `.env.local`, so the site showed «الاتصال بالحسابات غير مضبوط»
+    instead of the sign-in form. The worktree was given the two public values only (`NEXT_PUBLIC_SUPABASE_URL` and the
+    publishable key, gitignored); no server secret was copied.
+- **On the merged tree.** main's `de6dde0` and `68244c2` merged into `power-final` as `5ee911d`, no conflicts. Typecheck clean,
+  `npm test` **882 of 882**, `next build` clean. Then, from 10:29: `qa/android-site.cjs` **12 of 12**, `qa/youtube-test-flow.cjs`
+  **68 of 68**, `qa/desktop-idle.cjs` **19 of 22**.
+- **Not measured, because of the laptop, not the code.**
+  - desktop-idle's three failures are the battery hold and the simulated speed limit. Both paused within 13 and 9 ms, then the
+    copy was stopped (back to waiting at 0 s) instead of held, and after the speed-limit hold it had not resumed within 15 s.
+    Windows changed the processor's speed limit 248 times in the 532 s run, mostly to 34 to 70%; before both holds it was back at
+    100 only for a moment and fell again within about ten seconds. A copy whose FFmpeg cannot drain its input within the worker's
+    settle time is stopped by design. The click, export and sound holds passed (55, 12 and 34 ms).
+  - `qa/studio-scrub.cjs --quick`, 12 of 15: the Edge rows kept 48 of 48 identity times on gop2 and gop10. The three application
+    rows were refused by the check's own guard: the window drew one frame a second, because the owner was using the laptop and
+    the package window was covered.
+  - `qa/studio-autores.cjs --quick`, 0 of 1: refused by the same guard (two frames a second).
+  - Measured at 11:00: on mains, display never turned off, the processor at 69% of its rated performance at 24% load, Docker
+    Desktop and several other sessions running.
+- **Records.** The 22 checks that passed in full are committed (`00b8337`). desktop-idle, studio-scrub and studio-autores keep
+  their gate records until the quiet re-run. `qa/studio-ui.cjs` (122 of 122) and youtube-test-flow passed too, but their records
+  are being rewritten by other work in the main checkout, so they are not committed here.
+- **Not checked in a browser:** `09ddefc`'s photo editor taking the plan's worker count. `qa/studio-photo-tiles.cjs` (9 of 9) ran
+  before that change; it proves every worker count gives the same bytes.
+- **Next.** The three checks in a quiet window (the laptop untouched, about 45 minutes). The merge into main waits for the main
+  checkout's uncommitted `MVP_draft.md` (section 77, thumbnails; no line overlaps). Then the 0.9.0 package. Nothing pushed.
