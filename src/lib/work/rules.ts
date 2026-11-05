@@ -49,7 +49,10 @@ export type WorkRow = {
   review_cycle: number | null;
   /** What the writer gathered beside the text. Not a version. */
   research?: string | null;
-  results: Record<string, { ok: boolean; at: string; why: string | null }>;
+  /** How each account went out; a YouTube account says its visibility (MVP_draft.md 78). */
+  results: Record<string, { ok: boolean; at: string; why: string | null; privacy?: 'public' | 'unlisted' | 'private' }>;
+  /** YouTube's choice for each of the work's YouTube accounts, kept at «نشر الآن» (MVP_draft.md 78). Absent before the migration. */
+  pub_options?: Record<string, string>;
   closed_at: string | null;
   closed_by: string | null;
   close_reason: string | null;
@@ -96,6 +99,8 @@ export type AccountRow = {
   external_id?: string | null;
   external_name?: string | null;
   scopes?: string[];
+  /** A YouTube account's «الظهور الافتراضي» at «نشر الآن»; none is «عام» (MVP_draft.md 78). */
+  default_privacy?: 'unlisted' | 'private' | null;
 };
 
 export type TaskRow = {

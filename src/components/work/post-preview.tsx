@@ -13,6 +13,8 @@ import { checkFor, copyFor, publishedVersion, type Copy, type CopySource } from 
 import { foldOf, headline, layoutOf, splitTitle, LEVEL_AR, type Check as CheckResult, type Limits } from '@/lib/platforms/limits';
 import { MODE_AR, MODE_HELP_AR } from '@/lib/platforms/info';
 import { accountName, platformInfo, platformLabels, type AccountRow } from '@/lib/work/rules';
+import type { YtChoice } from '@/lib/platforms/test-rules';
+import { studioStep } from '@/lib/work/youtube-choices';
 import { Ic } from './parts';
 import { FileThumb } from '../file-thumb';
 
@@ -186,8 +188,11 @@ export function useSendChecks(src: CopySource | null, accounts: AccountRow[]) {
 
 export type SendCheck = NonNullable<ReturnType<typeof useSendChecks>>[number];
 
-/** The list in the scheduling and publishing dialogs: one row per account, the preview behind it. */
-export function SendChecks({ rows }: { rows: SendCheck[] | null }) {
+/**
+ * The list in the scheduling and publishing dialogs: one row per account, the preview behind it. `choices` is YouTube's choice for each
+ * YouTube account (MVP_draft.md 78), which «حزمة النشر» repeats for a channel published by hand.
+ */
+export function SendChecks({ rows, choices }: { rows: SendCheck[] | null; choices?: Readonly<Record<string, YtChoice>> }) {
   if (!rows) return <p className="wk-col-hint">جارٍ فحص النسخ…</p>;
   if (!rows.length) return null;
   return (
@@ -204,7 +209,7 @@ export function SendChecks({ rows }: { rows: SendCheck[] | null }) {
               {line && <small>{line}</small>}
             </summary>
             <PostPreview platform={r.account.platform} copy={r.copy} account={r.account} check={r.check} limits={r.limits} />
-            <PublishPack platform={r.account.platform} copy={r.copy} />
+            <PublishPack platform={r.account.platform} copy={r.copy} choice={choices?.[r.account.id]} />
           </details>
         );
       })}
@@ -217,7 +222,7 @@ export function SendChecks({ rows }: { rows: SendCheck[] | null }) {
  * «نشر مساعد» or «مهمة يدوية»): the exact text to paste and the files to upload, then confirm
  * in the platform's own app. Nothing is sent from here.
  */
-export function PublishPack({ platform, copy }: { platform: string; copy: Copy }) {
+export function PublishPack({ platform, copy, choice }: { platform: string; copy: Copy; choice?: YtChoice }) {
   const info = platformInfo(platform);
   const [done, setDone] = useState(false);
   if (!info || info.kind !== 'social' || info.publish_mode === 'auto') return null;
@@ -235,6 +240,7 @@ export function PublishPack({ platform, copy }: { platform: string; copy: Copy }
         حزمة النشر · {MODE_AR[info.publish_mode]}
       </b>
       <small>{MODE_HELP_AR[info.publish_mode]}</small>
+      {platform === 'youtube' && choice && <small data-pack-choice={choice}>{studioStep(choice)}</small>}
       {copy.text.trim() ? <pre>{copy.text}</pre> : <small>لا نص في هذه النسخة.</small>}
       <button type="button" className="wk-btn sm" onClick={() => void take()} disabled={!copy.text.trim()}>
         <Ic i={ClipboardCopy} />

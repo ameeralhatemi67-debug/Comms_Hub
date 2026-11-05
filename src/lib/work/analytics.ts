@@ -45,6 +45,11 @@ export type PlatformLine = {
   /** Results of the publishing simulation for accounts of this platform. */
   ok: number;
   failed: number;
+  /**
+   * YouTube only: the successful results by how they went out (MVP_draft.md 78), since an unlisted or private video does not reach
+   * the public. A result from before the choice counts as public.
+   */
+  visibility?: { public: number; unlisted: number; private: number };
   /** The owner's readiness tracker for what the platform asks outside the site. */
   readiness: string | null;
 };
@@ -135,6 +140,7 @@ export function analyse(
       addressed: 0,
       ok: 0,
       failed: 0,
+      ...(p.key === 'youtube' ? { visibility: { public: 0, unlisted: 0, private: 0 } } : {}),
       readiness: p.readiness ?? null,
     };
     return line;
@@ -158,6 +164,7 @@ export function analyse(
       if (r.ok) {
         line.ok++;
         ok++;
+        if (line.visibility) line.visibility[r.privacy === 'unlisted' || r.privacy === 'private' ? r.privacy : 'public']++;
       } else {
         line.failed++;
         failed++;

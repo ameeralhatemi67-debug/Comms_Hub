@@ -200,6 +200,8 @@ export type CalEntry = {
   multi?: boolean;
   /** A direct post, not a work (MVP_draft.md 76.6). */
   dp?: DirectEntry;
+  /** A published YouTube account that is not public: «غير مدرج» or «خاص» (MVP_draft.md 78). */
+  vis?: string;
 };
 export type CalInput = {
   works: PlanWork[];
@@ -239,7 +241,8 @@ export function calEntries(x: CalInput): CalEntry[] {
       for (const c of w.channels) {
         const a = acc.get(c);
         const lane = !a ? c : a.platform === 'mail' ? 'mail' : c;
-        const pub = (k: CalKind, iso: string | null) => iso && push({ k, at: stampOf(iso), iso, w, ch: c, lane });
+        const vis = PRIVACY_AR[w.results[c]?.ok && w.results[c]?.privacy !== 'public' ? (w.results[c]?.privacy ?? '') : ''];
+        const pub = (k: CalKind, iso: string | null) => iso && push({ k, at: stampOf(iso), iso, w, ch: c, lane, ...(k === 'done' && vis ? { vis } : {}) });
         if (['PUBLISHED', 'PARTIAL', 'FAILED', 'PUBLISHING'].includes(w.status) && w.pub_at) pub('done', w.pub_at);
         else if (w.status === 'SCHEDULED') pub('pub', w.sched_at);
         else if (w.status === 'APPROVED' && w.proposed_at) pub('pubok', w.proposed_at);

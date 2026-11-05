@@ -40,6 +40,7 @@ import {
   typeLabels,
   type WorkRow,
 } from '@/lib/work/rules';
+import { narrowWord } from '@/lib/work/youtube-choices';
 import { queueOrder, reviewQueue } from '@/lib/work/queue';
 import { useDecisions, useWork, useWorkList, type ListItem } from './data';
 import { Av, Empty, Hint, Ic, PrioChip, StatusChip, Wid } from './parts';
@@ -343,6 +344,11 @@ function PublishTab({ items, dec, act }: { items: ListItem[]; dec: Dec; act: Act
                 <span key={c} className={`wk-cr ${r ? (r.ok ? 'ok' : 'bad') : when && a && !authOk(a, when) ? 'risk' : ''}`}>
                   {accountName(a)}
                   {r ? (r.ok ? ` · نُشر ${riyadhStamp(r.at).slice(5)}` : ` · ${r.why ?? 'فشل'}`) : when && a && !authOk(a, when) ? ' · التفويض ينتهي قبل الموعد' : ''}
+                  {r?.ok && narrowWord(r) && (
+                    <span className="wk-vis" data-vis={r.privacy}>
+                      {narrowWord(r)}
+                    </span>
+                  )}
                 </span>
               );
             })}

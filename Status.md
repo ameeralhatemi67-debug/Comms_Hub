@@ -26,6 +26,21 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Director's notes, step 5: YouTube's four choices in the work cycle, 2026-11-05
+
+- **Done, on local main, not pushed.** `MVP_draft.md` section 78.
+  - «نشر الآن» asks each YouTube channel «عام», «غير مدرج» or «خاص», from the channel's «الظهور الافتراضي». «جدولة» is «مجدول»,
+    public at the time.
+  - The word «غير مدرج» or «خاص» shows on the work page, in «الموافقات والنشر», on the calendar, in the notice and in «التحليلات».
+- **Checks.**
+  - Rules: 36 of 36 on a private container, and the four older work rule files unchanged.
+  - `npm test` 941 of 941; typecheck and build pass.
+  - `publish-choices-flow` 17 of 17, `work-pages` 1120 of 1120, `post-preview` 202 of 202.
+- **Waiting for the owner.** Apply `20261105230000_work_youtube_choices.sql` to comms-hub, before this code is pushed: without it,
+  «نشر الآن» on a YouTube work is refused.
+- **Not checked:** anything signed in.
+- **Next:** every step of the director's notes is built. What is left is the owner's: this migration, the push, and the bridge computer.
+
 ## Director's notes, step 4 finished: «مجدول» on Instagram, direct posts on the calendar and in the account sheet, 2026-11-05
 
 - **Done, on local main (`2c5d96e`), not pushed.** `MVP_draft.md` 76.5 and 76.6. Its migration is applied to comms-hub (version

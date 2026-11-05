@@ -45,6 +45,8 @@ const sources = [
   'lib/kit/need.ts', 'lib/permissions.ts',
   // Direct posts on the calendar (MVP_draft.md 76.6): the words of a post's kind and privacy
   'lib/platforms/test-rules.ts',
+  // YouTube's choices in the work cycle (MVP_draft.md 78)
+  'lib/work/youtube-choices.ts',
   'lib/writing/flow.ts', 'lib/writing/doc.ts', 'lib/studio/fonts.ts', 'components/writing/doc-view.tsx', 'components/writing/api.ts',
 ];
 for (const m of sources) {
@@ -183,7 +185,7 @@ const works = [
     results: { 'a-ig': { ok: true, at: '2026-10-11T09:00:00Z', why: null }, 'a-x': { ok: false, at: '2026-10-11T09:00:00Z', why: 'التفويض منتهٍ' } } }),
     stages: [], projects: [], flags: 0 },
   { w: W({ id: 'CH-9', title: 'فيديو منشور', type: 'video', status: 'PUBLISHED', channels: ['a-yt'], pub_at: '2026-10-10T09:00:00Z',
-    results: { 'a-yt': { ok: true, at: '2026-10-10T09:00:00Z', why: null } } }),
+    results: { 'a-yt': { ok: true, at: '2026-10-10T09:00:00Z', why: null, privacy: 'unlisted' } }, pub_options: { 'a-yt': 'unlisted' } }),
     stages: [], projects: [], flags: 0 },
   { w: W({ id: 'CH-10', title: 'بيان الشراكة للمراجعة', type: 'press', status: 'IN_REVIEW', review_cycle: 1, channels: ['a-mail'], assignee: 'lama@x.sa' }),
     stages: [], projects: [], flags: 0 },
@@ -350,6 +352,8 @@ async function renderAll() {
   render('channels-sheet', 'dir@x.sa', 'director', h(chan.ChannelsPage, { initialOpen: 'a-yt' }));
   render('channels-writer', 'khalid@x.sa', 'writer', h(chan.ChannelsPage));
   render('item-publisher', 'noura@x.sa', 'publisher', h(item.WorkItemPage, { id: 'CH-4' }), { detail: detailOf(3) });
+  // A YouTube video that went out «غير مدرج» (MVP_draft.md 78): its word on the work page.
+  render('item-published-yt', 'noura@x.sa', 'publisher', h(item.WorkItemPage, { id: 'CH-9' }), { detail: detailOf(works.findIndex((x) => x.w.id === 'CH-9')) });
   const nlist = [
     { id: 'n1', tier: 'decide', body: 'أعاد أحمد «فيديو قصص الملتقى» للمراجعة.', go: { page: 'review', id: 'CH-2' }, created_at: '2026-10-11T09:00:00Z', read_at: null },
     { id: 'n2', tier: 'attention', body: 'طلبت ريم تعديل «ملصق الشتاء».', go: { page: 'item', id: 'CH-5' }, created_at: '2026-10-11T08:00:00Z', read_at: null },
@@ -395,6 +399,7 @@ async function renderAll() {
   const drawer = (name, as, role, e, extra = {}) =>
     render(name, as, role, wk(h(cal.EntryDrawer, { e, pendingKeys: works5.find((x) => x.w.id === e.w?.id)?.pendingKeys, stages: works5.find((x) => x.w.id === e.w?.id)?.stages ?? [], onClose() {}, open() {}, act: async () => true })), { ...s5, ...extra });
   drawer('drawer-pub-writer', 'khalid@x.sa', 'writer', entries.find((e) => e.k === 'pub' && e.w.id === 'CH-7' && e.ch === 'a-x'));
+  drawer('drawer-done-yt', 'dir@x.sa', 'director', entries.find((e) => e.k === 'done' && e.w?.id === 'CH-9'));
   // A direct post's drawer (MVP_draft.md 76.6): who made it, that it waits for its time, and nothing of a work's.
   const directEntries = planning.calEntries({ works: [], tasks: [], events: [], reminders: [], accounts, me: 'dir@x.sa', today: TODAY, nowIso: '2026-10-12T06:00:00Z', direct: direct5 });
   drawer('drawer-direct', 'dir@x.sa', 'director', directEntries.find((e) => e.dp?.id === 'dp-1'));
@@ -510,14 +515,16 @@ window.__ready = true;
       'dialog-extension': ['الموعد الجديد', 'السبب'],
       'approvals-director': ['الموافقات والنشر', 'بانتظار قراري', 'فيديو قصص الملتقى', 'أرسلها أحمد', 'مراجعة', 'في المراجعة ولا تقرر فيها', 'بيان الشراكة للمراجعة'],
       'approvals-writer': ['بانتظار القرار', 'أرسلتها أنا'],
-      'approvals-publish': ['النشر في هذه المرحلة محاكاة', 'جاهز للنشر', 'مجدول', 'نشر جزئي أو فشل', 'منشور', 'مواعيد معرضة للخطر', 'جدولة', 'إعادة المحاولة للفاشلة', 'تغيير الموعد', 'بتأكيد قبل النشر', 'اعتمده محمد', 'إعادة الربط'],
+      'approvals-publish': ['النشر في هذه المرحلة محاكاة', 'جاهز للنشر', 'مجدول', 'نشر جزئي أو فشل', 'منشور', 'مواعيد معرضة للخطر', 'جدولة', 'إعادة المحاولة للفاشلة', 'تغيير الموعد', 'بتأكيد قبل النشر', 'اعتمده محمد', 'إعادة الربط', 'غير مدرج'],
       'approvals-publish-lead': ['الجدولة والنشر لمسؤول النشر', 'إدارة حسابات المنصات'],
       'review-director': ['أنت تراجع', 'الدورة 1', 'جاهز للمراجعة', 'ما تغيّر منذ الإصدار المعتمد', 'تغيّر بعد اعتماده', 'اعتماد هذا الجزء', 'طلب تعديل عليه', 'فيديو الملتقى', 'v2', 'موعد النشر', 'المنصات والحسابات', 'اعتماد الأجزاء المعلّقة (4)', 'رفض العمل', 'لا يُنشر تلقائياً', 'معتمد ولم يتغيّر'],
       'review-writer': ['عرض للمراجعة', 'القرار لمدير الاتصال ومساعده'],
       'review-self': ['لا تعتمد ما أرسلته أو رفعته بنفسك'],
       'review-package': ['الحزمة كاملة', 'اعتماد الحزمة كاملة', 'يُعتمد حزمة كاملة'],
       'channels-director': ['حسابات المنصات', 'إضافة حساب', 'يوتيوب', 'صندوق القسم', 'يحتاج انتباهك', 'التفويض منتهٍ', 'إعادة الربط'],
-      'channels-sheet': ['يقبل الفيديو فقط', 'تعديل', 'خيارات أخرى'],
+      'channels-sheet': ['يقبل الفيديو فقط', 'تعديل', 'خيارات أخرى', 'الظهور الافتراضي', 'عام عند «نشر الآن»، ويُغيَّر لكل عمل', 'الظهور الافتراضي عند «نشر الآن»', 'قناة للمراجعة الداخلية تبدأ عادة «غير مدرج»'],
+      'item-published-yt': ['فيديو منشور', 'يوتيوب · الرسمي', 'غير مدرج'],
+      'drawer-done-yt': ['فيديو منشور', 'نُشر (محاكاة) · غير مدرج'],
       'channels-publisher': ['إعادة الربط', 'لك إعادة ربط الحسابات'],
       'channels-writer': ['حسابات المنصات لمن يديرها وينشر عليها'],
       'item-publisher': ['جدولة الإرسال', 'إرسال الآن من البريد'],

@@ -4333,3 +4333,42 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Now.** Every migration of the director's notes steps 1 to 4 is on comms-hub. Commit `2c5d96e` may be pushed; that is the
   release session's to do. The bridge computer still needs this `bridge/whatsapp/` before a scheduled post goes out on time. Until
   then it goes out late, at the next opening of Home.
+
+### 2026-11-05: YouTube's four choices in the work cycle (director's notes, step 5, N-3)
+
+- **Owner decision.** «Start step 5», by the approved plan (section 3, items 3 to 11) and answer Q5: the visibility needs no new
+  approval.
+- **What was built (`MVP_draft.md` section 78).** Publishing works stays a simulation.
+  - **«نشر الآن»:** each YouTube channel of the work gets «عام», «غير مدرج» or «خاص». It starts from the channel's «الظهور
+    الافتراضي», else «عام». Only the YouTube channels are sent, and a work without one sends what it always did.
+  - **«جدولة» is «مجدول»:** each YouTube row says YouTube makes it public at the time. `work_schedule` is unchanged.
+  - **«الظهور الافتراضي»:** in a YouTube channel's sheet, shown to all and changed by the director and the assistant.
+  - **The record:** `works.pub_options` and `results[account].privacy`. A retry goes as asked, and a scheduled work goes out «عام».
+  - **The word «غير مدرج» or «خاص»** on the work page, on the chips of «الموافقات والنشر», on the calendar's published entry and its
+    drawer, in the work log, and in the notice and its push.
+  - **«التحليلات»** splits YouTube's successes by visibility.
+  - **«حزمة النشر»** says what to choose in YouTube Studio, for a channel published by hand; YouTube is automatic today.
+  - **The guides:** «الموافقات والنشر» (version 2) and «حسابات المنصات» (version 3) say what is new.
+  - The accounts' list now reads every column of `platform_accounts`, all of which a page could already read. A column added later
+    never breaks it.
+- **Migration.** `20261105230000_work_youtube_choices.sql`, **not applied** to comms-hub; it waits for the owner's words.
+  - It adds two columns and four functions, and replaces `work_publish(text, text)` (now a call to the new form) and
+    `work_run_publish`.
+  - It drops and rewrites no data.
+  - Without it, the dialogs still work, but «نشر الآن» on a YouTube work is refused, because the three-argument form does not exist.
+    So it must be applied before this is pushed.
+- **Checks, all run here.**
+  - **Rules on a private container:**
+    - `supabase/tests/work_youtube_choices_rules.sql` **36 of 36** (`qa/work-youtube-choices-rules.json`);
+    - unchanged, after the replaced functions: `work_rules` **135 of 135**, `limits_rules` **63 of 63**, `approval_rules` **71 of 71**,
+      `writing_rules` **322 of 322**.
+  - **Unit tests.** `npm test` **941 of 941**, with `tests/work-youtube-choices.test.mjs` (4).
+  - **Typecheck and build.** `npm run typecheck` and `npm run build` pass.
+  - **Browser checks:**
+    - `qa/publish-choices-flow.cjs` **17 of 17**: the real dialogs, the default, a change, what is sent, no choice for Instagram,
+      «جدولة», and phone width;
+    - `qa/work-pages.cjs` **1120 of 1120**: the word on the work page, on the approvals chip and in the calendar drawer, and the
+      account sheet's default;
+    - `qa/post-preview.cjs` **202 of 202**.
+- **Not checked.** Nothing signed in on the live site. Nothing reaches YouTube from a work, by design.
+- **Now.** Steps 1 to 5 of the director's notes are built. Nothing of this entry is pushed, and its migration waits for the owner.

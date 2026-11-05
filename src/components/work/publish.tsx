@@ -4,10 +4,13 @@
 // moment, and nothing reaches a platform. Only the publisher named on the accounts may act
 // (work_may_publish); an approved time binds, and another time sends «موعد النشر» alone back
 // for approval, then schedules itself when it is approved (work_schedule).
+// YouTube's four choices (MVP_draft.md 78): «نشر الآن» asks each YouTube account «عام», «غير مدرج» or «خاص», from its default;
+// «جدولة» is «مجدول», which YouTube makes public at the time. Approval does not change.
 import { useState } from 'react';
 import { CalendarDays, Check, Lock, Send, ShieldCheck, TriangleAlert, Upload } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { accountName, authOk, riyadhInstant, riyadhStamp, type AccountRow, type WorkRow } from '@/lib/work/rules';
+import { NOW_CHOICES, SCHEDULED_LINE, choiceSub, choiceWord, defaultChoice, nowOptions, youtubeOf, type NowChoice } from '@/lib/work/youtube-choices';
 import { useWork } from './data';
 import { Hint, Ic, Modal } from './parts';
 import { SendChecks, blocked, useCopySource, useSendChecks } from './post-preview';
@@ -71,6 +74,11 @@ export function ScheduleDialog({ w, approvedParts, at: from, onClose, act }: { w
                   {a.handle && <small className="ltr">{a.handle}</small>}
                 </span>
                 <span className={`wk-cr ${ok ? 'ok' : 'risk'}`}>{ok ? 'التفويض يغطي الموعد' : 'التفويض ينتهي قبل الموعد'}</span>
+                {a.platform === 'youtube' && (
+                  <small className="wk-yt-line" data-yt-sched={a.id}>
+                    {SCHEDULED_LINE}
+                  </small>
+                )}
               </div>
             );
           })}
@@ -94,7 +102,7 @@ export function ScheduleDialog({ w, approvedParts, at: from, onClose, act }: { w
         </div>
         <small className="wk-why">الاختيار المبدئي من إعداد الحساب في «حسابات المنصات».</small>
       </div>
-      {!mail && <SendChecks rows={checks} />}
+      {!mail && <SendChecks rows={checks} choices={Object.fromEntries(chs.filter((a) => a.platform === 'youtube').map((a) => [a.id, 'scheduled' as const]))} />}
       {stop && <Hint warn>نسخة تتجاوز حدود منصتها: لا تُجدول حتى تُعدَّل. الحدود من «الإعدادات» «المنصات»، ويعدّلها من يملك «إدارة المنصات وتطبيقاتها».</Hint>}
       {bad.length > 0 && <Hint i={Lock} warn>لست ممن ينشر على: {bad.map(accountName).join('، ')}. يحدد ذلك من يدير الحسابات.</Hint>}
       {chs.filter((a) => at && !authOk(a, at)).map((a) => (
@@ -121,6 +129,10 @@ export function PublishNowDialog({ w, onClose, act }: { w: WorkRow; onClose: () 
   const x = useWork();
   const now = new Date().toISOString();
   const mail = isMailWork(w, x.accounts);
+  // Each YouTube account starts at its default; the publisher may narrow or widen it (MVP_draft.md 78).
+  const [picked, setPicked] = useState<Record<string, NowChoice>>({});
+  const tubes = youtubeOf(w, x.accounts);
+  const options = nowOptions(w, x.accounts, picked);
   const bad = notMine(w, x.accounts, x.me, x.isAdmin || x.role === 'admin');
   const src = useCopySource(w.id, w.type);
   const checks = useSendChecks(src, channelsOf(w, x.accounts));
@@ -141,11 +153,27 @@ export function PublishNowDialog({ w, onClose, act }: { w: WorkRow; onClose: () 
                 <Ic i={ok ? Check : TriangleAlert} />
                 {ok ? 'جاهز' : 'التفويض منتهٍ: سيفشل'}
               </span>
+              {a.platform === 'youtube' && (
+                <div className="wk-yt-pick" data-yt-now={a.id}>
+                  <div className="wk-seg" role="group" aria-label={`الظهور على ${accountName(a)}`}>
+                    {NOW_CHOICES.map((c) => (
+                      <button key={c} type="button" aria-pressed={options[a.id] === c} data-choice={c} onClick={() => setPicked({ ...picked, [a.id]: c })}>
+                        {choiceWord(c)}
+                      </button>
+                    ))}
+                  </div>
+                  <small>
+                    {choiceSub(options[a.id])}
+                    {options[a.id] === defaultChoice(a) && a.default_privacy ? ' الاختيار المبدئي لهذه القناة.' : ''}
+                  </small>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
-      {!mail && <SendChecks rows={checks} />}
+      {tubes.length > 0 && <small className="wk-why">«مجدول» هو الاختيار الرابع: من «جدولة»، ويجعله يوتيوب عاماً في موعده.</small>}
+      {!mail && <SendChecks rows={checks} choices={options} />}
       {stop && <Hint warn>نسخة تتجاوز حدود منصتها: لا تُنشر حتى تُعدَّل وتُعتمد من جديد.</Hint>}
       {bad.length > 0 && <Hint i={Lock} warn>لست ممن ينشر على: {bad.map(accountName).join('، ')}.</Hint>}
       <div className="wk-row-acts">
@@ -157,7 +185,13 @@ export function PublishNowDialog({ w, onClose, act }: { w: WorkRow; onClose: () 
           className="wk-btn primary"
           disabled={stop}
           data-hold={HOLD.publishNow}
-          onClick={() => void act('work_publish', { p_work: w.id, p_op: 'now' }, mail ? 'أُرسل من البريد (محاكاة).' : 'نُشر (محاكاة). النتيجة لكل حساب في صفحة العمل.').then((ok) => ok && onClose())}
+          onClick={() =>
+            void act(
+              'work_publish',
+              tubes.length ? { p_work: w.id, p_op: 'now', p_options: options } : { p_work: w.id, p_op: 'now' },
+              mail ? 'أُرسل من البريد (محاكاة).' : 'نُشر (محاكاة). النتيجة لكل حساب في صفحة العمل.',
+            ).then((ok) => ok && onClose())
+          }
         >
           <Ic i={Upload} />
           {mail ? 'إرسال الآن' : 'نشر الآن'}

@@ -27,6 +27,7 @@ import { ConnectChooser, RECONNECT_KEY, connLine, defaultPublishers } from './co
 import { Empty, Hint, Ic, Modal } from './parts';
 import { staffOf } from './plan';
 import { DirectPosts } from './direct-posts';
+import { NOW_CHOICES, choiceSub, choiceWord, defaultChoice } from '@/lib/work/youtube-choices';
 import { FacebookTest } from './facebook-test';
 import { InstagramTest } from './instagram-test';
 import { YouTubeTest } from './youtube-test';
@@ -409,6 +410,12 @@ function AccountSheet({
               <dt>عند الموعد</dt>
               <dd>{a.mode === 'ask' ? 'اسأل قبل النشر' : 'نشر تلقائي'}</dd>
             </div>
+            {a.platform === 'youtube' && (
+              <div data-yt-default={defaultChoice(a)}>
+                <dt>الظهور الافتراضي</dt>
+                <dd>{choiceWord(defaultChoice(a))} عند «نشر الآن»، ويُغيَّر لكل عمل</dd>
+              </div>
+            )}
             {a.purpose && (
               <div>
                 <dt>الغرض</dt>
@@ -425,6 +432,26 @@ function AccountSheet({
               <Ic i={Film} />{' '}
               {a.platform === 'youtube' ? 'يقبل الفيديو فقط: الطويل وShorts. لكل منشور عنوان ووصف وصورة مصغّرة وخصوصية (عام، غير مدرج، خاص).' : 'يقبل الفيديو فقط: لا يُرسل إليه عمل بلا فيديو.'}
             </p>
+          )}
+          {mgr && a.platform === 'youtube' && (
+            // «الظهور الافتراضي» (MVP_draft.md 78): what «نشر الآن» starts from on this channel. «مجدول» comes from «جدولة».
+            <div className="l pf-yt-default">
+              <span id={`yt-def-${a.id}`}>الظهور الافتراضي عند «نشر الآن»</span>
+              <div className="wk-seg" role="group" aria-labelledby={`yt-def-${a.id}`} data-yt="default">
+                {NOW_CHOICES.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    aria-pressed={defaultChoice(a) === c}
+                    data-choice={c}
+                    onClick={() => defaultChoice(a) !== c && void act('account_set_privacy', { p_id: a.id, p_privacy: c }, `صار الظهور الافتراضي لـ ${accountName(a)}: ${choiceWord(c)}.`)}
+                  >
+                    {choiceWord(c)}
+                  </button>
+                ))}
+              </div>
+              <small className="wk-why">{choiceSub(defaultChoice(a))} قناة للمراجعة الداخلية تبدأ عادة «غير مدرج».</small>
+            </div>
           )}
           {mgr && (
             <div className="pf-acts">

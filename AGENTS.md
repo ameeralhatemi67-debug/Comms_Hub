@@ -316,6 +316,20 @@ is the one real publish outside the work cycle; publishing works stays a simulat
 - **Checks.** `supabase/tests/direct_publish_rules.sql` and `direct_schedule_rules.sql` hold the rules, and `qa/direct-publish-flow.cjs`
   clicks through the menu, the sheet, both panels, «مجدول» and the account's list on a fixture.
 
+YouTube's four choices reach the work cycle, by owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-3 step 5 with answer Q5,
+`MVP_draft.md` section 78, `supabase/migrations/*work_youtube_choices*`). Publishing works stays a simulation.
+- **«نشر الآن»** asks each YouTube channel of the work «عام», «غير مدرج» or «خاص». It starts from the channel's «الظهور الافتراضي»
+  (`default_privacy`, set by `account_manager` only), else «عام».
+  - The choice goes to `work_publish(p_work, p_op, p_options)`; the two-argument form passes none.
+  - It is kept in `works.pub_options`, and each result says how the channel went out (`results[account].privacy`).
+- **«جدولة» is «مجدول»**: public at its time, as YouTube does it. Never offer unlisted or private at a time; `work_schedule` takes no
+  choice.
+- **Approval does not change.** Never send a work back for approval for its visibility.
+- **The rules exist once** in `src/lib/work/youtube-choices.ts` and once in SQL, held by `tests/work-youtube-choices.test.mjs` and
+  `supabase/tests/work_youtube_choices_rules.sql`. `qa/publish-choices-flow.cjs` clicks through the real dialogs.
+- **The accounts' list reads every column** (`select('*')` in `data.tsx`), so a column added later never breaks it before its
+  migration is applied.
+
 Integrations, storage providers and backups are real, by owner directive of 2026-10-14
 (`Settings_Integrations_Plan.md`, decisions E-1 to E-7, recorded in `progress.md`). Every
 connection (storage provider, platform app, messaging) is a row of one integrations core

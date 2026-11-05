@@ -179,6 +179,12 @@ export function AnalyticsPage() {
                     <span>
                       {num(p.ok)} / {num(p.failed)}
                       {rate !== null && <small> · {rate}%</small>}
+                      {p.visibility && p.ok > 0 && (
+                        <small className="an-vis" data-vis="youtube">
+                          {' '}
+                          · عام {num(p.visibility.public)} · غير مدرج {num(p.visibility.unlisted)} · خاص {num(p.visibility.private)}
+                        </small>
+                      )}
                     </span>
                   </div>
                 );
@@ -186,7 +192,7 @@ export function AnalyticsPage() {
             </div>
             <p className="wk-col-hint">
               المصدر: حسابات القسم وحالة ربطها، وأعمال وجّهت نسخاً إلى حسابات المنصة، ونتائج المحاكاة لكل حساب. «مربوطة فعلاً» عبر
-              تسجيل دخول المنصة نفسها لا الربط التجريبي.
+              تسجيل دخول المنصة نفسها لا الربط التجريبي. يوتيوب مقسوم بحسب الظهور: «غير مدرج» و«خاص» لا يصلان إلى الجمهور.
             </p>
           </section>
         </>

@@ -5,7 +5,8 @@ Status: approved by the owner on 2026-11-05, with the recommended answer to ever
 - Steps 1 to 4 as first built are pushed and live (`6f61ef2`), their migrations applied to comms-hub.
 - The rest of step 4 is on local main (`2c5d96e`), not pushed: «مجدول» on Instagram (Q3) and direct posts on the calendar and in
   the account sheet. Its migration is applied to comms-hub (version `20261105111847`).
-- Step 5 is next.
+- Step 5 (YouTube's four choices in the work cycle, spec 78) is built on local main, not pushed. Its migration
+  `20261105230000_work_youtube_choices.sql` waits for the owner.
 
 The director asked for four things:
 

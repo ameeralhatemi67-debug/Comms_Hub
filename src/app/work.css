@@ -1201,3 +1201,7 @@ button.ac-pick:hover{border-color:var(--green);background:var(--soft)}
 .dp-platform.soon small{font-weight:600}
 .yt-notify{margin:2px 0 6px}
 .yt-notify small{display:block;color:var(--muted);font-weight:400}
+/* YouTube's four choices in the work cycle (MVP_draft.md 78): the publish dialogs, and the word a narrower one leaves behind. */
+.wk .wk-chanrow .wk-yt-line,.wk .wk-chanrow .wk-yt-pick{grid-column:1/-1}
+.wk .wk-yt-pick{display:grid;gap:4px;justify-items:start}
+.wk .wk-vis{display:inline-block;margin-inline-start:4px;padding:0 6px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--w-ink2);font-size:11px;font-weight:600;line-height:1.6}

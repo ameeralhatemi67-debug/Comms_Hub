@@ -4189,3 +4189,80 @@ cycle.
 - «تجربة النشر»: the chosen file, drawn in the browser before anything is sent when it comes from this device.
 - Not yet: the library's upload tray, the studio's project list, a test's «آخر التجارب», and a received Gmail attachment, which
   is not stored by the site.
+
+# 78. YouTube's four choices in the work cycle, 2026-11-05
+
+By owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-3, step 5, with answer Q5). After approval, the publisher chooses how
+each YouTube channel of a work goes out, as YouTube Studio offers it. Publishing works stays a simulation: the site records what
+YouTube would be asked, and nothing reaches YouTube.
+
+## 78.1 «نشر الآن»
+
+- Each YouTube channel of the work has three choices: «عام», «غير مدرج» and «خاص», in that order. Under the choices, a line says what
+  the chosen one means, the same words as «تجربة النشر».
+- A channel starts at its own default (78.3), and the line says so. With no default it starts at «عام». The choice is the
+  publisher's, for this work.
+- Another account (Instagram, X, mail) has no choice. The dialog says «مجدول» is the fourth choice, and comes from «جدولة».
+- The long press is unchanged: «النشر يصل إلى المنصات ولا يُتراجع عنه.»
+- What is sent: every YouTube channel of the work with its choice, and nothing for any other account. A work with no YouTube channel
+  sends what it always did.
+
+## 78.2 «جدولة» is «مجدول»
+
+- YouTube schedules only one way: the video stays private until its time, and YouTube makes it public then, by itself. YouTube has no
+  «غير مدرج» at a time.
+- So «جدولة» offers no choice. Each YouTube row says: «مجدول: يبقى خاصاً حتى الموعد، ثم يجعله يوتيوب عاماً. لنشره غير مدرج أو خاصاً
+  اختر «نشر الآن».»
+- A scheduled work's YouTube channels go out «عام» at the time, whether the due run publishes it or a publisher confirms it.
+- `work_schedule` is unchanged.
+
+## 78.3 «الظهور الافتراضي»
+
+- In a YouTube channel's sheet on «حسابات المنصات», the facts say «الظهور الافتراضي»: «عام عند «نشر الآن»، ويُغيَّر لكل عمل».
+- The director and the assistant (`account_manager`) change it there, with the same three choices. A channel for internal review
+  usually starts «غير مدرج».
+- It is `platform_accounts.default_privacy`. «عام» is kept as no default, and only YouTube has it.
+
+## 78.4 Approval
+
+- Approval does not change (answer Q5). Approval clears the content for the public, and a narrower choice is always allowed.
+- Choosing a visibility never sends the work back for approval.
+
+## 78.5 What is recorded and shown
+
+- `works.pub_options` keeps each YouTube channel's choice at «نشر الآن».
+- Each account's result keeps how it went out (`results[account].privacy`). A work published before this keeps no choice, and counts
+  as «عام».
+- A retry sends the failed channels again as they were asked.
+- A channel that went out «غير مدرج» or «خاص» carries that word:
+  - on the work page's publishing panel;
+  - on the account chip in «الموافقات والنشر», «النشر»;
+  - on the calendar's published entry: its row, its tooltip and its drawer («نُشر (محاكاة) · غير مدرج»);
+  - in the work log («نجح يوتيوب · الرسمي (غير مدرج)»);
+  - in the notice and its push: ««…»: منشور. يوتيوب · الرسمي: غير مدرج.».
+- A scheduled entry carries no word, as it becomes public.
+- **«التحليلات»** splits YouTube's successful results by visibility («عام N · غير مدرج N · خاص N»). Unlisted and private videos do not
+  reach the public.
+- **«حزمة النشر»**, for a channel published by hand, says what to choose in YouTube Studio. YouTube's registry mode is automatic
+  today, so the package does not show for it yet.
+- **Not built.** The work page shows no link to the video, because publishing works is a simulation and there is none.
+
+## 78.6 Where it lives
+
+- Migration `supabase/migrations/20261105230000_work_youtube_choices.sql`:
+  - `work_publish(text, text, jsonb)`; the two-argument form calls it with no choice;
+  - `work_pub_choices`, `account_set_privacy` and `yt_privacy_ar`;
+  - `work_run_publish`, replaced.
+- Rules: `src/lib/work/youtube-choices.ts`, which shares the words of «تجربة النشر» in `test-rules.ts`.
+- Pages:
+  - the dialogs: `src/components/work/publish.tsx`;
+  - the account's default: `channels.tsx`;
+  - the words: `item.tsx`, `approvals.tsx`, `calendar.tsx` and `src/lib/work/planning.ts`;
+  - the analytics: `src/lib/work/analytics.ts`;
+  - the package: `post-preview.tsx`.
+- The guides of «الموافقات والنشر» (version 2) and «حسابات المنصات» (version 3) say what is new.
+- Checks:
+  - `supabase/tests/work_youtube_choices_rules.sql`;
+  - `tests/work-youtube-choices.test.mjs`;
+  - `qa/publish-choices-flow.cjs`, which clicks through the real dialogs;
+  - `qa/work-pages.cjs`.

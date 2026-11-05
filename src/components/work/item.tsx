@@ -93,6 +93,7 @@ import {
   type StageRow,
   type WorkAction,
 } from '@/lib/work/rules';
+import { narrowWord } from '@/lib/work/youtube-choices';
 import { useWork, useWorkDetail, type WorkDetail } from './data';
 import { Av, Empty, Hint, Ic, LibraryPicker, Modal, PrioChip, RestrictedChip, StatusChip, TYPE_ICON, Wid } from './parts';
 import { FileThumb } from '../file-thumb';
@@ -1040,7 +1041,14 @@ function PublishPanel({ d }: { d: WorkDetail }) {
                 {a?.handle && <small className="ltr">{a.handle}</small>}
               </span>
               {r ? (
-                <span className={r.ok ? 'ok' : 'late'}>{r.ok ? `نُشر ${riyadhStamp(r.at).slice(5)}` : (r.why ?? 'فشل')}</span>
+                <span className={r.ok ? 'ok' : 'late'}>
+                  {r.ok ? `نُشر ${riyadhStamp(r.at).slice(5)}` : (r.why ?? 'فشل')}
+                  {narrowWord(r) && (
+                    <span className="wk-vis" data-vis={r.privacy}>
+                      {narrowWord(r)}
+                    </span>
+                  )}
+                </span>
               ) : when && a && !authOk(a, when) ? (
                 <span className="late">التفويض ينتهي قبل الموعد</span>
               ) : (

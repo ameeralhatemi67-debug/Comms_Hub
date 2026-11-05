@@ -26,7 +26,7 @@ fs.rmSync(build, { recursive: true, force: true });
 const sources = [
   'components/work/post-preview.tsx', 'components/work/connect.tsx', 'components/work/channels.tsx', 'components/work/parts.tsx', 'components/work/plan.tsx',
   'lib/work/rules.ts', 'lib/work/planning.ts', 'lib/work/drag.ts', 'lib/media/rules.ts', 'lib/domain.ts', 'lib/kit/hold-reasons.ts',
-  'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts', 'lib/platforms/test-rules.ts',
+  'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts', 'lib/platforms/test-rules.ts', 'lib/work/youtube-choices.ts',
   'components/sheet.tsx', 'components/platform-icon.tsx', 'components/file-thumb.tsx', 'lib/media/thumbs.ts', 'components/guide-text.tsx', 'lib/guide-text.ts', 'lib/setup-guides.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts',
 ];
 for (const m of sources) {

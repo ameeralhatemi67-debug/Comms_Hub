@@ -1,0 +1,95 @@
+{
+  "script": "qa/publish-choices-flow.cjs",
+  "run": "2026-11-05T11:50:04.358Z",
+  "checks": [
+    {
+      "name": "each YouTube channel offers «عام», «غير مدرج» and «خاص», «عام» first",
+      "pass": true,
+      "detail": "[\"عام\",\"غير مدرج\",\"خاص\"]"
+    },
+    {
+      "name": "a channel with no default starts «عام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a channel «غير مدرج» by default starts there, and says so",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Instagram has no such choice",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the dialog says «مجدول» is the fourth choice, from «جدولة»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a change is kept, and its meaning shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the other channel keeps its own",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«نشر الآن» still asks for its long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sent: every YouTube channel with its choice, and nothing for Instagram",
+      "pass": true,
+      "detail": "{\"fn\":\"work_publish\",\"args\":{\"p_work\":\"CH-501\",\"p_op\":\"now\",\"p_options\":{\"yt-main\":\"private\",\"yt-review\":\"unlisted\"}}}"
+    },
+    {
+      "name": "no YouTube channel: no choice shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and none sent: the call is as it was",
+      "pass": true,
+      "detail": "{\"fn\":\"work_publish\",\"args\":{\"p_work\":\"CH-501\",\"p_op\":\"now\"}}"
+    },
+    {
+      "name": "«جدولة»: each YouTube channel says it is «مجدول» and becomes public at the time",
+      "pass": true,
+      "detail": "[[\"yt-main\",\"مجدول: يبقى خاصاً حتى الموعد، ثم يجعله يوتيوب عاماً. لنشره غير مدرج أو خاصاً اختر «نشر الآن».\"],[\"yt-review\",\"مجدول: يبقى خاصاً حتى الموعد، ثم يجعله يوتيوب عاماً. لنشره غير مدرج أو خاصاً اختر «نشر الآن».\"]]"
+    },
+    {
+      "name": "no choice to make there",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "scheduling sends what it always did",
+      "pass": true,
+      "detail": "{\"fn\":\"work_schedule\",\"args\":{\"p_work\":\"CH-501\",\"p_when\":\"2026-11-07T11:50:00.000Z\",\"p_mode\":\"auto\"}}"
+    },
+    {
+      "name": "phone: nothing sideways with the choices open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing was loaded from outside the fixture",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 17,
+  "passed": 17,
+  "failed": 0
+}

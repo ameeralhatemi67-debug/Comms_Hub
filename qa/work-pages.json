@@ -1,5 +1,5 @@
 {
-  "run": "2026-11-05T11:00:03.091Z",
+  "run": "2026-11-05T11:51:00.544Z",
   "checks": [
     {
       "name": "list-director: renders",
@@ -177,6 +177,11 @@
       "detail": ""
     },
     {
+      "name": "item-published-yt: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "notices: renders",
       "pass": true,
       "detail": ""
@@ -268,6 +273,11 @@
     },
     {
       "name": "drawer-pub-writer: renders",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-done-yt: renders",
       "pass": true,
       "detail": ""
     },
@@ -1797,6 +1807,11 @@
       "detail": ""
     },
     {
+      "name": "approvals-publish: shows «غير مدرج»",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "approvals-publish: no emoji",
       "pass": true,
       "detail": ""
@@ -2317,6 +2332,26 @@
       "detail": ""
     },
     {
+      "name": "channels-sheet: shows «الظهور الافتراضي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-sheet: shows «عام عند «نشر الآن»، ويُغيَّر لكل عمل»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-sheet: shows «الظهور الافتراضي عند «نشر الآن»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "channels-sheet: shows «قناة للمراجعة الداخلية تبدأ عادة «غير مدرج»»",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "channels-sheet: no emoji",
       "pass": true,
       "detail": ""
@@ -2398,6 +2433,46 @@
     },
     {
       "name": "item-publisher · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-published-yt · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-published-yt · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "item-published-yt: shows «فيديو منشور»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-published-yt: shows «يوتيوب · الرسمي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-published-yt: shows «غير مدرج»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-published-yt: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-published-yt · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "item-published-yt · a · 390: no sideways scroll",
       "pass": true,
       "detail": "overflow 0px"
     },
@@ -3388,6 +3463,41 @@
     },
     {
       "name": "drawer-pub-writer · a · 390: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-done-yt · a · 1280: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-done-yt · a · 1280: no sideways scroll",
+      "pass": true,
+      "detail": "overflow 0px"
+    },
+    {
+      "name": "drawer-done-yt: shows «فيديو منشور»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-done-yt: shows «نُشر (محاكاة) · غير مدرج»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-done-yt: no emoji",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-done-yt · a · 390: no page errors",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drawer-done-yt · a · 390: no sideways scroll",
       "pass": true,
       "detail": "overflow 0px"
     },
@@ -5494,8 +5604,8 @@
   ],
   "errors": [],
   "summary": {
-    "total": 1098,
-    "passed": 1098,
+    "total": 1120,
+    "passed": 1120,
     "failed": 0
   }
 }

@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/work_youtube_choices_rules.sql",
+  "script_md5": "6ea30fe17d2fc174f938100d5f4febe3",
+  "migration": {
+    "file": "supabase/migrations/20261105230000_work_youtube_choices.sql",
+    "file_md5": "63a246ea984cfc452cbfdfd64dd15f70",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-05T11:56:20.107Z",
+  "migrations_replayed": 73,
+  "differ": [],
+  "total": 36,
+  "passed": 36
+}

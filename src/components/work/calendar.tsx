@@ -45,6 +45,7 @@ import {
   type StageRow,
   type WorkRow,
 } from '@/lib/work/rules';
+import { narrowWord } from '@/lib/work/youtube-choices';
 import {
   ALL_ON,
   BUSY_DAY,
@@ -323,7 +324,7 @@ export function Chip({ e, compact, drag, onSel }: { e: CalEntry; compact?: boole
       type="button"
       className={`wk-cchip ${chipClass(e, prefs, look)}`}
       data-cdrag={drag ? e.key : undefined}
-      title={`${label} · ${entryTitle(e)}${e.risk ? ' · التفويض لا يغطي الموعد' : ''}${e.near ? ` · قريب من «${e.near.title}»` : ''}`}
+      title={`${label} · ${entryTitle(e)}${e.vis ? ` · ${e.vis}` : ''}${e.risk ? ' · التفويض لا يغطي الموعد' : ''}${e.near ? ` · قريب من «${e.near.title}»` : ''}`}
       onClick={() => onSel(e.key)}
     >
       {e.time && <time>{e.time}</time>}
@@ -540,6 +541,11 @@ function Row({ x, onSel }: { x: { e: CalEntry; chs: string[] }; onSel: (k: strin
               return (
                 <span key={c} className={`wk-cr ${accountClass(c, r ? (r.ok ? 'ok' : 'bad') : risk ? 'risk' : '', prefs, look.platformOf)}`}>
                   {accountName(a)}
+                  {r?.ok && narrowWord(r) && (
+                    <span className="wk-vis" data-vis={r.privacy}>
+                      {narrowWord(r)}
+                    </span>
+                  )}
                 </span>
               );
             })}
@@ -672,7 +678,10 @@ export function EntryDrawer({ e, pendingKeys, stages, onClose, open, act }: { e:
                   {a?.handle && <small className="ltr">{a.handle}</small>}
                 </span>
                 {e.k === 'done' && r ? (
-                  <span className={`wk-cr ${r.ok ? 'ok' : 'bad'}`}>{r.ok ? 'نُشر (محاكاة)' : (r.why ?? 'فشل')}</span>
+                  <span className={`wk-cr ${r.ok ? 'ok' : 'bad'}`}>
+                    {r.ok ? 'نُشر (محاكاة)' : (r.why ?? 'فشل')}
+                    {r.ok && narrowWord(r) ? ` · ${narrowWord(r)}` : ''}
+                  </span>
                 ) : (
                   <span className={`wk-cr ${ok ? 'ok' : 'risk'}`}>{ok ? 'التفويض يغطي الموعد' : 'التفويض لا يغطي الموعد'}</span>
                 )}
