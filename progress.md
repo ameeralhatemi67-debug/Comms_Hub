@@ -4042,6 +4042,6 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not checked in a browser:** `09ddefc`'s photo editor taking the plan's worker count. `qa/studio-photo-tiles.cjs` (9 of 9) ran
   before that change; it proves every worker count gives the same bytes.
 - **Merged into main** once main's thumbnails (`691b1ff`) and calendar colours (`503d032`) were in `power-final`: typecheck
-  clean, `npm test` **NNN of NNN**, `next build` clean. `20261105130000_calendar_prefs.sql` and `20261105140000_file_thumbs.sql` are not applied to
-  comms-hub and need the owner's yes before a push.
+  clean, `npm test` **906 of 906**, `next build` clean. `20261105130000_calendar_prefs.sql` and
+  `20261105140000_file_thumbs.sql` are not applied to comms-hub and need the owner's yes before a push.
 - **Next.** The three checks in a quiet window (the laptop untouched, about 45 minutes), then the 0.9.0 package. Nothing pushed.

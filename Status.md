@@ -28,7 +28,7 @@ related:
 
 ## The desktop release, stage 1: the final regression continued, 2026-11-05
 
-- **Done.** On `power-final` (`5ee911d`, with main's director's notes step 1 merged in): typecheck clean, `npm test` 882 of 882,
+- **Done, and merged into main.** With main's director's notes steps 1 to 3 merged in: typecheck clean, `npm test` 906 of 906,
   `next build` clean, and 24 of the regression's checks passed in full, among them `android-site` 12 of 12 and
   `youtube-test-flow` 68 of 68.
   - desktop-idle's 8 of 17 was the check: it cleared copies with its project open, and since D10 an open project keeps the copies
@@ -40,7 +40,8 @@ related:
   - desktop-idle's last three holds, `studio-scrub --quick` and `studio-autores --quick` were not measured: Windows held the
     processor at 34 to 70% and the owner was using the laptop, so the package window drew one frame a second. They need about
     45 quiet minutes.
-  - `20261105140000_file_thumbs.sql` (main `691b1ff`, thumbnails) is not applied to comms-hub and needs the owner's yes before a push.
+  - Not applied to comms-hub, each needing the owner's yes before a push: `20261105130000_calendar_prefs.sql` (calendar
+    colours, `503d032`) and `20261105140000_file_thumbs.sql` (thumbnails, `691b1ff`).
 - **Next.** The quiet re-run, then the 0.9.0 package. Nothing pushed or released.
 
 ## The director's notes, steps 1 and 2: YouTube's four choices in «تجربة النشر», and thumbnails, 2026-11-05
