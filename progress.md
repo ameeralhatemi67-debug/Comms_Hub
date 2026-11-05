@@ -3666,3 +3666,32 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** These are one laptop's figures, on mains, with Windows' speed limit read only before and after each run,
   not during it. The check pins nothing about power through `powerMonitor`.
 - **Not done.** Nothing pushed.
+
+### 2026-11-05: D11 merged with option A, and the cross-device tolerance for no graphics chip (Desktop Power, the manager)
+
+- **Decision.** D11 (export lanes P-06, the step-down ladder P-35, one pass for several shapes P-05) is merged with P-07 kept
+  off (option A), from Fork 1's `f62caf7`, which carries no code of option B.
+  - The owner said yes to option B on 2026-11-05, as "today's frames change once". Built and measured by Fork 1, it broke the
+    manager's rule (b): at 4K on the saving chip its best lane count was 15.9% slower than A's.
+  - It also made an export differ from the preview, which draws on the page: brand marks by up to 137 levels with a chip.
+  - It did not close the no-chip gap either: six rows still failed in worker mode.
+  - Option B stays on `claude/power-export-821809` (`016c952`), with Fork 1's numbers, for the owner to decide on.
+- **Evidence, run by the manager** on the merge (`dfe0684`, main `19c31f2` with D11) in `verify-e3cab67`:
+  - typecheck clean, `npm test` 880 of 880, `next build`;
+  - `qa/studio-lanes.cjs` with `ENGINES=app-strong`, 8 of 8;
+  - `qa/studio-shapes-onepass.cjs` 20 of 20;
+  - `qa/studio-export-yuv.cjs` 32 of 32;
+  - `qa/studio-effects-parity.cjs` 19 of 19, with D11 and Fork 4's effects together;
+  - `qa/studio-crossdevice.cjs` 38 of 43 at first, then 43 of 43 with the stated tolerance below.
+  - Fork 1's own records stand beside these: D11's gate rows 1 to 4 and (d) under A, 5 of 5.
+- **The tolerance for no graphics chip** (the manager's, `qa/studio-crossdevice.cjs` `tolOf`).
+  - Between `--disable-gpu` and a chip: PSNR at least 48 dB and at most 2.5% of channels more than 2 levels apart.
+  - Between chips it stays at 50 dB and 0.1%, and the same machine stays exact in any order.
+  - **Why.** Chromium's software rasterizer smooths the edges of text, shapes and pictures by its own rule (keys 55.04 dB,
+    brand 50.17, landscape-keys 53.36), and turns a decoded video frame into colour with its own rounding, a few levels
+    across the whole picture. The whole-number effects then carry that input exactly: effects frame 0 is 50.43 dB with 2.02%
+    over 2 levels, frame 2 is 48.54 dB, and transitions are 48.77.
+  - Before Fork 4's effects the same effects frames were 3.01% and 48.21 dB. No speed knob is in the difference.
+- **Not verified.** One laptop. The no-chip figures are this laptop's processor, and another processor's software drawing may
+  round differently.
+- **Not done.** Nothing pushed.

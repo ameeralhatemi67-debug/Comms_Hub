@@ -1,7 +1,7 @@
 {
   "script": "qa/studio-export-yuv.cjs",
-  "run": "2026-11-03T21:32:03.136Z",
-  "version": "0.7.1",
+  "run": "2026-11-05T01:58:54.416Z",
+  "version": "0.8.0",
   "checks": [
     {
       "name": "edge, the bundle: every composed frame of the corpus converted by the workers (WebAssembly) is the page's conversion byte for byte, labelled BT.709 limited range",
@@ -52,6 +52,26 @@
       "name": "app-strong, a minified bundle: every composed frame of the corpus converted by the workers (WebAssembly) is the page's conversion byte for byte, labelled BT.709 limited range",
       "pass": true,
       "detail": "{\"frames\":54,\"differing\":[],\"simd\":[true],\"sizes\":[\"1080x1920\",\"1920x1080\",\"1080x1350\",\"1080x1080\"]}"
+    },
+    {
+      "name": "edge, under the site's own Content-Security-Policy: the workers convert with WebAssembly, to the same bytes",
+      "pass": true,
+      "detail": "{\"simd\":[true],\"messages\":[]}"
+    },
+    {
+      "name": "edge, under that policy without 'wasm-unsafe-eval': the workers convert in plain code, to the same bytes",
+      "pass": true,
+      "detail": "{\"simd\":[false],\"messages\":[]}"
+    },
+    {
+      "name": "edge-nochip, under the site's own Content-Security-Policy: the workers convert with WebAssembly, to the same bytes",
+      "pass": true,
+      "detail": "{\"simd\":[true],\"messages\":[]}"
+    },
+    {
+      "name": "edge-nochip, under that policy without 'wasm-unsafe-eval': the workers convert in plain code, to the same bytes",
+      "pass": true,
+      "detail": "{\"simd\":[false],\"messages\":[]}"
     },
     {
       "name": "edge: the export takes the canvas way",
@@ -161,7 +181,7 @@
           "code": "now",
           "frames": 90,
           "bytes": 3982815,
-          "ms": 2268,
+          "ms": 1411,
           "via": "canvas",
           "yuvWorkers": 0,
           "yuvSimd": false,
@@ -184,7 +204,7 @@
           "code": "at998",
           "frames": 90,
           "bytes": 3982815,
-          "ms": 2186,
+          "ms": 1489,
           "via": "canvas",
           "yuvWorkers": 0,
           "yuvSimd": false,
@@ -219,7 +239,7 @@
           "code": "now",
           "frames": 90,
           "bytes": 3812461,
-          "ms": 2074,
+          "ms": 1598,
           "via": "yuv",
           "yuvWorkers": 2,
           "yuvSimd": true,
@@ -242,7 +262,7 @@
           "code": "now",
           "frames": 90,
           "bytes": 3812461,
-          "ms": 3851,
+          "ms": 3285,
           "via": "yuv",
           "yuvWorkers": 0,
           "yuvSimd": false,
@@ -280,7 +300,7 @@
           "code": "now",
           "frames": 90,
           "bytes": 3812461,
-          "ms": 2811,
+          "ms": 1726,
           "via": "yuv",
           "yuvWorkers": 2,
           "yuvSimd": true,
@@ -303,7 +323,7 @@
           "code": "now",
           "frames": 90,
           "bytes": 3812461,
-          "ms": 4523,
+          "ms": 3324,
           "via": "yuv",
           "yuvWorkers": 0,
           "yuvSimd": false,
@@ -341,7 +361,7 @@
           "code": "now",
           "frames": 90,
           "bytes": 4008618,
-          "ms": 2403,
+          "ms": 1612,
           "via": "canvas",
           "yuvWorkers": 0,
           "yuvSimd": false,
@@ -364,7 +384,7 @@
           "code": "at998",
           "frames": 90,
           "bytes": 4008618,
-          "ms": 2589,
+          "ms": 1384,
           "via": "canvas",
           "yuvWorkers": 0,
           "yuvSimd": false,
@@ -402,7 +422,7 @@
           "code": "now",
           "frames": 90,
           "bytes": 4007980,
-          "ms": 1431,
+          "ms": 991,
           "via": "canvas",
           "yuvWorkers": 0,
           "yuvSimd": false,
@@ -425,7 +445,7 @@
           "code": "at998",
           "frames": 90,
           "bytes": 4007980,
-          "ms": 1307,
+          "ms": 882,
           "via": "canvas",
           "yuvWorkers": 0,
           "yuvSimd": false,
@@ -448,7 +468,7 @@
       "frames": 54
     }
   },
-  "total": 28,
-  "passed": 28,
+  "total": 32,
+  "passed": 32,
   "failed": 0
 }

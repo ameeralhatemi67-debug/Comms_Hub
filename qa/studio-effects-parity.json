@@ -1,6 +1,6 @@
 {
   "script": "qa/studio-effects-parity.cjs",
-  "run": "2026-11-04T22:40:15.625Z",
+  "run": "2026-11-05T02:00:38.658Z",
   "version": "0.8.0",
   "checks": [
     {

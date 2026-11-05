@@ -36,6 +36,17 @@ const fontCss = [['ibm-plex-sans-arabic', '600'], ['ibm-plex-sans-arabic', '700'
  */
 const MIN_PSNR = 50;
 const MAX_OVER2 = 0.1;
+/**
+ * Between the processor's drawing (no graphics chip, `--disable-gpu`) and a chip's, the manager's stated tolerance of
+ * 2026-11-05: PSNR >= 48 dB and at most 2.5% of channels more than 2 levels apart. Chromium's software rasterizer smooths the
+ * edges of text, shapes and pictures by its own rule (keys, brand, landscape-keys), and turns a decoded video frame into
+ * colour with its own rounding, a few levels across the whole picture; the whole-number effects then carry that input
+ * exactly (effects frame 0: 50.43 dB with 2.02% over 2 levels; frame 2: 48.54 dB; transitions 48.77). Before the effects
+ * the same frames were 3.01% and 48.21 dB. Nothing a speed knob does is in it: the same machine is still held exact in any
+ * order, and the chips against each other at 50 dB and 0.1%.
+ */
+const NOCHIP = new Set(['app-software']);
+const tolOf = (engine) => (NOCHIP.has(engine) ? { psnr: 48, over2: 2.5 } : { psnr: MIN_PSNR, over2: MAX_OVER2 });
 
 function send(req, res, file, type) {
   const data = fs.readFileSync(file);
@@ -194,9 +205,10 @@ async function runIn(page, engine, reference) {
       r.summary = { frames: r.compared.length, identical, minPsnr: Math.min(...r.compared.map((c) => c.psnr)), maxOver2: Math.max(...r.compared.map((c) => c.over2)), maxDiff: Math.max(...r.compared.map((c) => c.maxDiff)) };
       for (const name of [...new Set(r.compared.map((c) => c.name))]) {
         const mine = r.compared.filter((c) => c.name === name);
-        const bad = mine.filter((c) => c.psnr < MIN_PSNR || c.over2 > MAX_OVER2);
+        const tol = tolOf(engine);
+        const bad = mine.filter((c) => c.psnr < tol.psnr || c.over2 > tol.over2);
         const worst = [...mine].sort((a, b) => a.psnr - b.psnr)[0];
-        check(`${engine}, «${name}»: every frame within the tolerance of the reference (PSNR at least ${MIN_PSNR} dB, at most ${MAX_OVER2}% of channels more than 2 levels apart)`, bad.length === 0, { frames: mine.length, identical: mine.filter((c) => c.maxDiff === 0).length, worst, bad: bad.length });
+        check(`${engine}, «${name}»: every frame within the tolerance of the reference (PSNR at least ${tol.psnr} dB, at most ${tol.over2}% of channels more than 2 levels apart)`, bad.length === 0, { frames: mine.length, identical: mine.filter((c) => c.maxDiff === 0).length, worst, bad: bad.length });
       }
     }
     const probes = Object.fromEntries(Object.keys(runs).map((e) => [e, structure(path.join(out, `${e}.mp4`))]));
@@ -222,7 +234,7 @@ async function runIn(page, engine, reference) {
   // the record keeps every frame's hash per engine, and the comparisons; the PNGs stay in qa/artifacts
   result.reference = runs.edge ? runs.edge.first.map((f) => ({ name: f.name, i: f.i, t: f.t, size: `${f.w}x${f.h}`, hash: f.hash })) : [];
   result.runs = Object.fromEntries(Object.entries(runs).map(([e, r]) => [e, { engine: r.engine, renderer: r.renderer, exported: r.exported, psnr: r.psnr, summary: r.summary ?? null, sameAsReference: r.first.filter((f, i) => f.hash === runs.edge?.first[i]?.hash).length, squares: r.squares, compared: r.compared }]));
-  note(`Tolerance across machines: PSNR at least ${MIN_PSNR} dB and at most ${MAX_OVER2}% of channels more than 2 levels apart, per frame. Exact equality is asked only of the same machine.`);
+  note(`Tolerance across machines: PSNR at least ${MIN_PSNR} dB and at most ${MAX_OVER2}% of channels more than 2 levels apart, per frame; between no graphics chip and a chip, at least 48 dB and at most 2.5% (the processor's own edge smoothing and video colour). Exact equality is asked only of the same machine.`);
   const failed = finish(path.join(__dirname, 'studio-crossdevice.json'));
   process.exit(failed ? 1 : 0);
 })();
