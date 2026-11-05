@@ -4307,3 +4307,29 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   `tests/instagram-test.test.mjs` and `tests/direct-publish.test.mjs` read it there.
 - **Now.** Steps 1 to 4 are built. The direct_schedule migration waits for the owner. Nothing of this entry is pushed. Step 5 (YouTube's
   four choices in the work cycle, spec 78) is next.
+
+### 2026-11-05: direct_schedule applied to comms-hub (director's notes, step 4 finished)
+
+- **Owner decision.** «Apply the migration», for `20261105210000_direct_schedule.sql`.
+- **Before.** Read-only, on comms-hub:
+  - nothing after `direct_publish`;
+  - both constraints it replaces were present;
+  - `platform_tests` held one row (a deleted YouTube test);
+  - none of the new columns or functions existed.
+- **Applied** through the Supabase connector as version `20261105111847`. The stored statement's md5 equals the file's (`d73e9f7c…`).
+  - It adds a state, four columns, two constraints, an index and eight functions, and replaces four functions.
+  - It drops, deletes and rewrites no data. The one row is untouched.
+- **Checked on comms-hub, read-only** (`qa/direct-schedule-comms-hub.json`):
+  - a page reads `fired_at` and never the caption, the alt text or the lease;
+  - signed out, only the six fire functions may be called, behind the server key, as `platform_test_fetch` is. Never wait or cancel;
+  - `direct_fail` and `direct_fire_held` are not callable from outside;
+  - the replaced functions carry the new rules.
+- **Rules not run on comms-hub.** `direct_schedule_rules.sql` replaces the server key inside its own transaction, which this session's
+  permission check refuses on the live database. It stands at 69 of 69 on a private container.
+- **Security advisor.** The same four kinds of notice:
+  - signed-in callable functions went from 327 to 335 (wait, cancel and the six fire functions);
+  - signed-out callable functions went from 22 to 28 (the six fire functions);
+  - 13 tables without a policy and 1 password notice are unchanged.
+- **Now.** Every migration of the director's notes steps 1 to 4 is on comms-hub. Commit `2c5d96e` may be pushed; that is the
+  release session's to do. The bridge computer still needs this `bridge/whatsapp/` before a scheduled post goes out on time. Until
+  then it goes out late, at the next opening of Home.

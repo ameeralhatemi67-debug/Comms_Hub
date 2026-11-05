@@ -1,0 +1,34 @@
+{
+  "migration": {
+    "file": "supabase/migrations/20261105210000_direct_schedule.sql",
+    "file_md5": "d73e9f7c41be8770b7ae56dbb0eaf02b",
+    "applied": "comms-hub (hrghmioxvgkjpnydrxrk) on 2026-11-05 as version 20261105111847, with the owner's words «Apply the migration»; the stored statement's md5 equals the file's"
+  },
+  "before": "Read-only, before applying: no migration after direct_publish; both replaced constraints present; one row (a deleted YouTube test); none of the new columns or functions present.",
+  "rules": "supabase/tests/direct_schedule_rules.sql was not run on comms-hub: like the other rule files of this engine it replaces the server key inside its own transaction, which this session's permission check refuses on the live database. It passed 69 of 69 on a private container (qa/direct-schedule-rules.json), and the four older rule files of the engine still pass there (45, 95, 62, 48).",
+  "how": "Read-only catalog checks on comms-hub through the Supabase connector.",
+  "run": "2026-11-05",
+  "checks": {
+    "the waiting state, the new scheduled_kind rule and the waiting rule are constraints": true,
+    "the due index exists": true,
+    "a page reads fired_at": true,
+    "a page never reads caption, alt or fire_lease": true,
+    "signed out may claim and finish a due post (the server key is the gate)": true,
+    "signed out may not wait or cancel": true,
+    "a signed-in page may wait (through the server)": true,
+    "direct_fail and direct_fire_held are not callable from outside": true,
+    "platform_test_failed refuses a post being fired": true,
+    "platform_test_get says whether a post was fired": true,
+    "platform_test_start lets an Instagram direct post carry a time": true,
+    "direct_announce says on time or late": true,
+    "the one existing row is untouched": true
+  },
+  "advisor": {
+    "kinds": "the same four",
+    "authenticated_security_definer_function_executable": "327 -> 335: direct_wait, direct_cancel and the six direct_fire_* functions, each gated by the server key",
+    "anon_security_definer_function_executable": "22 -> 28: the six direct_fire_* functions, gated by the server key as platform_test_fetch is",
+    "rls_enabled_no_policy": "13 -> 13",
+    "auth_leaked_password_protection": "1 -> 1",
+    "inner steps": "direct_fail and direct_fire_held do not appear"
+  }
+}

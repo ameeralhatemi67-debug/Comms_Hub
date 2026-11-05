@@ -28,7 +28,8 @@ related:
 
 ## Director's notes, step 4 finished: «مجدول» on Instagram, direct posts on the calendar and in the account sheet, 2026-11-05
 
-- **Done, on local main, not pushed.** `MVP_draft.md` 76.5 and 76.6.
+- **Done, on local main (`2c5d96e`), not pushed.** `MVP_draft.md` 76.5 and 76.6. Its migration is applied to comms-hub (version
+  `20261105111847`, the owner's words; read-only checks in `qa/direct-schedule-comms-hub.json`).
   - «مجدول» on Instagram's «نشر مباشر»: the file goes now, and the post waits.
   - `/api/platforms/due` fires it when called by the bridge's loop or by Home. It is said as late when Home fired it.
   - Direct posts show on the calendar and in the account's sheet.
@@ -36,9 +37,10 @@ related:
   - Rules: 69 of 69 on a private container, and the four older rule files unchanged.
   - `npm test` 937 of 937, bridge tests 19 passed and 1 skipped as before, typecheck and build pass.
   - `direct-publish-flow` 59 of 59, `work-pages` 1098 of 1098, `post-preview` 202 of 202, `instagram-test-flow` 43 of 43.
-- **Waiting for the owner.**
-  - Apply `20261105210000_direct_schedule.sql` to comms-hub, before this code is pushed.
-  - Update the bridge computer to this `bridge/whatsapp/`.
+- **Waiting.**
+  - The push of `2c5d96e`, which is the release session's.
+  - The owner: update the bridge computer to this `bridge/whatsapp/`. Until then a scheduled post goes out late, at the next opening
+    of Home.
 - **Not checked:** a real scheduled post through Meta; anything signed in.
 - **Next:** step 5, YouTube's four choices in the work cycle (spec 78).
 

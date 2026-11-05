@@ -302,8 +302,8 @@ is the one real publish outside the work cycle; publishing works stays a simulat
 - **Nothing is hidden.** The database writes every direct post and delete to «سجل النشاط» (`direct`, `direct_off`) and tells the
   account's publishers and the assistants «للعلم». Keep it in the database, never in the page.
 - **Facebook** takes no direct post until the owner says so («قريباً»).
-- **«مجدول» on Instagram** (answer Q3, `MVP_draft.md` 76.5, `supabase/migrations/*direct_schedule*`). Meta keeps no time, so the
-  site asks Meta at the time; never add a timer to the site for it.
+- **«مجدول» on Instagram** (answer Q3, `MVP_draft.md` 76.5, `supabase/migrations/*direct_schedule*`, applied to comms-hub on
+  2026-11-05 with the owner's approval). Meta keeps no time, so the site asks Meta at the time; never add a timer to the site for it.
   - The file goes at once and the post waits (`waiting`). Its caption and alt text are columns no page reads.
   - `/api/platforms/due` fires what is due. Its callers are the WhatsApp bridge's loop about once a minute (`dueClient`,
     `kickDue`), or Home once when opened (`src/lib/platforms/due-kick.ts`), when the post is late and said so.

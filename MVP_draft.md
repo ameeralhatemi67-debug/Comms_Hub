@@ -4115,7 +4115,8 @@ makes the call at the time. The site still has no timer.
 - **While it is being sent,** its author can neither cancel it («يُنشر هذا المنشور الآن، فلا يُلغى…», `FIRING`) nor publish it
   from the page.
 - **Where it lives.**
-  - Migration `supabase/migrations/20261105210000_direct_schedule.sql`, held by `supabase/tests/direct_schedule_rules.sql`.
+  - Migration `supabase/migrations/20261105210000_direct_schedule.sql`, applied to comms-hub on 2026-11-05 (version
+    `20261105111847`), held by `supabase/tests/direct_schedule_rules.sql`.
   - Rules in TypeScript: `src/lib/platforms/test-rules.ts`.
   - The run: `direct-due.ts`, wired by `direct-due-server.ts`. The temporary address: `temp-link.ts`.
   - Home's call: `src/lib/platforms/due-kick.ts`. The bridge's: `dueClient` and `kickDue` in `bridge/whatsapp/`.

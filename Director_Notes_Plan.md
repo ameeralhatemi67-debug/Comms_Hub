@@ -3,8 +3,8 @@
 Status: approved by the owner on 2026-11-05, with the recommended answer to every question in section 5 (Q1 to Q5).
 - Steps 1 to 4 of section 6 are built on main.
 - Steps 1 to 4 as first built are pushed and live (`6f61ef2`), their migrations applied to comms-hub.
-- The rest of step 4 is on local main, not pushed: «مجدول» on Instagram (Q3) and direct posts on the calendar and in the account
-  sheet. Its migration `20261105210000_direct_schedule.sql` waits for the owner.
+- The rest of step 4 is on local main (`2c5d96e`), not pushed: «مجدول» on Instagram (Q3) and direct posts on the calendar and in
+  the account sheet. Its migration is applied to comms-hub (version `20261105111847`).
 - Step 5 is next.
 
 The director asked for four things:
