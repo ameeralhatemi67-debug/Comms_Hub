@@ -4009,12 +4009,78 @@ of the day and list views keeps its red border all round. A failed publish keeps
   says so.
 - Checks: `tests/calendar-colors.test.mjs`, `supabase/tests/calendar_prefs_rules.sql`, `qa/calendar-colors.cjs`.
 
+# 76. «إجراءات سريعة» and «نشر مباشر» on Home, 2026-11-05
+
+By owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-2, with answer Q2). Home gets a short menu of quick actions. Its first
+item lets the director, or the Admin, publish for real to YouTube or Instagram, now or at a set time, outside the work cycle.
+Publishing works stays a simulation.
+
+## 76.1 «إجراءات سريعة»
+
+- A button «إجراءات سريعة» in Home's header, beside «إنشاء عمل», opens a short menu. Escape or a click elsewhere closes it.
+- Each item shows only to whoever may do it, and asks the same permission its own page asks. The database decides in the end.
+  - «نشر مباشر»: the holders of `publish.direct` (76.2).
+  - «تذكير خاص»: everyone. It opens the calendar's own reminder dialog, for today.
+  - «حدث في التقويم»: whoever opens the calendar. It opens the calendar's own event dialog, for today.
+  - «رفع ملف إلى المكتبة» opens «مكتبة الوسائط», and «رسالة جديدة» opens the mail, for whoever opens those pages.
+
+## 76.2 Who
+
+- The fixed capability `publish.direct` «النشر المباشر من «الرئيسية»» belongs to the Admin and the director, like the studio's.
+  No grant, template, preset or request can give it, because a direct post skips the work cycle and its approval.
+- The person must also be one who may test the account (`platform_test_may`), and the account must be connected for real.
+
+## 76.3 The sheet
+
+- **«أين؟»**
+  - YouTube and Instagram, each with how many accounts are connected.
+  - Every other social platform of the registry shows «قريباً» and cannot be pressed. Mail is not a publishing platform and is not
+    shown.
+  - A simulated account is never offered.
+- **The account.** With one account, its form opens at once. With more, the person picks one.
+- **The form** is the «تجربة النشر» panel in its direct mode (`youtube-test.tsx`, `instagram-test.tsx`), open at once:
+  - The lead says it publishes for real, outside the work cycle, is written to «سجل النشاط», and is told to the account's
+    publishers and the assistant.
+  - **YouTube** (section 71.2): the title starts empty, with YouTube's four choices.
+    - «إشعار المشتركين», on by default, shows for «عام» and «مجدول»; YouTube does not notify for the other two.
+    - «مجدول» may be up to 180 days ahead, where a test may go 30.
+    - «نشر للعموم» asks for a long press: «يُنشر المقطع للعموم على القناة الآن، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.» «جدولة النشر»
+      asks for one too: «يجعل يوتيوب المقطع عاماً في موعده بنفسه، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.» «نشر», for private and
+      unlisted, does not.
+  - **Instagram** (section 72.3): a Story, a picture post or a Reel. Every post there is public, so every send asks for a long press:
+    «يُنشر على الحساب للعموم الآن، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.»
+  - **Its own list**, «آخر المنشورات المباشرة», with «مشاهدة» and «حذف» as the tests have.
+
+## 76.4 What a direct post is
+
+- A row of `platform_tests` with `purpose` 'direct', on the same engine as a test. The page never holds a token or an upload address,
+  and the server relays the file.
+- **Limits.** 20 direct posts a day per account, counted apart from the 10 tests. Both are under YouTube's 100 uploads a day for the
+  whole project.
+- **Nothing is hidden.** When a direct post arrives:
+  - the library's log writes it as `direct`, shown in «سجل النشاط» under «النشر والجدولة»: «نشر … مباشرة «…» على يوتيوب · …», or
+    «جدول … نشراً مباشراً … ويصبح عاماً في موعده»;
+  - the account's publishers and the assistants get a «للعلم» notice that opens «حسابات المنصات».
+
+  The person who published is not told their own act.
+- **Deleting** a direct post belongs to the holders of `publish.direct` only. It is written as `direct_off` and told the same way. A
+  test records and tells nothing, as before.
+- **Facebook** takes no direct post yet. Its tests are unchanged.
+
+## 76.5 Not built yet
+
+- **A scheduled Instagram post.** Meta's API publishes at the moment it is called, so the site must make the call at the time. The
+  owner's answer Q3: the loop of the WhatsApp bridge on the owner's computer fires it, or the next opening of the site when that
+  computer is off, said as late. Until it is built, Instagram offers «الآن» only.
+- **Direct posts on the calendar** («نُشر مباشرة», «مجدول مباشرة»).
+- **Direct posts in the account's sheet** on «حسابات المنصات». Today the publishers learn of them by the notice.
+
 # 77. Thumbnails of stored files, 2026-11-05
 
 By owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-4, answer Q4): a stored file is never shown as a name alone. Every
 library version, and every file sent in mail or messaging, has a small picture, or a tile that says what it is. Section 74 is the
-mail and messaging window and 75 the calendar colours; 76 and 78 are kept for the plan's quick actions and for YouTube's four
-choices in the work cycle.
+mail and messaging window, 75 the calendar colours and 76 the quick actions; 78 is kept for YouTube's four choices in the work
+cycle.
 
 ## 77.1 The picture
 

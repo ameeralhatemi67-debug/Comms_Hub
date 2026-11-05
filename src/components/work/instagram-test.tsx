@@ -29,6 +29,7 @@ import {
   type IgChoice,
   type TestKind,
   type TestRow,
+  type TestPurpose,
 } from '@/lib/platforms/test-rules';
 import type { AccountRow } from '@/lib/work/rules';
 import { useWork, type LibraryFile } from './data';
@@ -65,9 +66,14 @@ const LEAD: Record<IgChoice, string> = {
   reel: 'يظهر في تبويب الريلز للجميع ويبقى حتى يُحذف. MP4 أو MOV، من 3 ثوانٍ إلى 15 دقيقة.',
 };
 
-export function InstagramTest({ a, onReconnect }: { a: AccountRow; onReconnect: () => void }) {
+/**
+ * `mode` 'direct' is Home's «نشر مباشر» (MVP_draft.md 76): the same engine and form for a real post, open at once, with its own
+ * list. Every Instagram post is public, so each asks for a long press. The database decides who may.
+ */
+export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow; onReconnect: () => void; mode?: TestPurpose }) {
+  const direct = mode === 'direct';
   const w = useWork();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(direct);
   const [choice, setChoice] = useState<IgChoice>('story');
   const [ready, setReady] = useState<Ready | null>(null);
   const [picking, setPicking] = useState(false);
@@ -76,7 +82,7 @@ export function InstagramTest({ a, onReconnect }: { a: AccountRow; onReconnect: 
   const [feed, setFeed] = useState(false);
   const [phase, setPhase] = useState<Phase>({ t: 'idle' });
   const [quota, setQuota] = useState<{ used: number; total: number } | null>(null);
-  const [tests, load] = useTests(a.id);
+  const [tests, load] = useTests(a.id, mode);
   const [removing, setRemoving] = useState<string | null>(null);
   const [scopeNote, setScopeNote] = useState(false);
   const [now, setNow] = useState(() => Date.now());
@@ -157,6 +163,7 @@ export function InstagramTest({ a, onReconnect }: { a: AccountRow; onReconnect: 
         caption: words,
         alt: kind === 'image' ? alt : '',
         share_to_feed: kind === 'reel' ? feed : undefined,
+        ...(direct ? { purpose: 'direct' } : {}),
       }),
     });
     if (!start.ok || typeof start.b.test !== 'string') return fail(start.b);
@@ -200,7 +207,15 @@ export function InstagramTest({ a, onReconnect }: { a: AccountRow; onReconnect: 
       const r = await api(`/api/platforms/test/${test}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'advance' }) });
       if (r.b.done === true) {
         setPhase({ t: 'done', url: typeof r.b.url === 'string' ? r.b.url : null, kind });
-        w.say(kind === 'story_image' || kind === 'story_video' ? 'نُشرت القصة التجريبية على إنستغرام.' : 'نُشرت التجربة على إنستغرام.');
+        w.say(
+          direct
+            ? kind === 'story_image' || kind === 'story_video'
+              ? 'نُشرت القصة على إنستغرام.'
+              : 'نُشر على إنستغرام.'
+            : kind === 'story_image' || kind === 'story_video'
+              ? 'نُشرت القصة التجريبية على إنستغرام.'
+              : 'نُشرت التجربة على إنستغرام.',
+        );
         return load();
       }
       if (r.b.phase === 'wait') {
@@ -233,7 +248,7 @@ export function InstagramTest({ a, onReconnect }: { a: AccountRow; onReconnect: 
   };
 
   return (
-    <section className="yt-test" aria-label="تجربة النشر" data-gd="ig-test">
+    <section className="yt-test" aria-label={direct ? 'نشر مباشر' : 'تجربة النشر'} data-gd="ig-test" data-mode={mode}>
       {profile && (
         <div className="pf-acts yt-links">
           <a className="pf-link" href={profile} target="_blank" rel="noopener noreferrer" data-ig="profile">
@@ -242,15 +257,19 @@ export function InstagramTest({ a, onReconnect }: { a: AccountRow; onReconnect: 
           </a>
         </div>
       )}
-      <h4>تجربة النشر</h4>
-      <p className="yt-lead">ينشر على الحساب شيئاً حقيقياً ليتأكد أن النشر يصل. لا يمر بالمراجعة ولا يُعدّ عملاً. لا يوجد على إنستغرام نشر خاص: القصة تختفي بعد 24 ساعة، والمنشور والريلز يبقيان حتى يُحذفا.</p>
+      <h4>{direct ? 'نشر مباشر' : 'تجربة النشر'}</h4>
+      <p className="yt-lead">
+        {direct
+          ? 'ينشر على الحساب فعلاً، خارج دورة العمل. يُسجَّل في «سجل النشاط»، ويُبلَّغ ناشرو الحساب والمساعد. لا يوجد على إنستغرام نشر خاص: القصة تختفي بعد 24 ساعة، والمنشور والريلز يبقيان حتى يُحذفا.'
+          : 'ينشر على الحساب شيئاً حقيقياً ليتأكد أن النشر يصل. لا يمر بالمراجعة ولا يُعدّ عملاً. لا يوجد على إنستغرام نشر خاص: القصة تختفي بعد 24 ساعة، والمنشور والريلز يبقيان حتى يُحذفا.'}
+      </p>
       {!connected ? (
-        <Hint warn>الحساب غير متصل الآن، فلا تُجرى التجربة. أعد ربطه أولاً.</Hint>
+        <Hint warn>{direct ? 'الحساب غير متصل الآن، فلا يُنشر عليه. أعد ربطه أولاً.' : 'الحساب غير متصل الآن، فلا تُجرى التجربة. أعد ربطه أولاً.'}</Hint>
       ) : !open ? (
         <div className="pf-acts">
           <button type="button" className="wk-btn sm" data-ig="open" onClick={() => setOpen(true)}>
             <Ic i={Upload} />
-            بدء تجربة
+            {direct ? 'نشر جديد' : 'بدء تجربة'}
           </button>
         </div>
       ) : (
@@ -377,7 +396,12 @@ export function InstagramTest({ a, onReconnect }: { a: AccountRow; onReconnect: 
           ) : (
             <div className="pf-acts">
               {/* Every Instagram test is seen by others, so both ask for a long press. */}
-              {story ? (
+              {direct ? (
+                <button type="button" className="pf-btn pri" data-ig="send" disabled={Boolean(problem) || busy} data-hold={HOLD.directInstagram} onClick={() => void send()}>
+                  <Upload aria-hidden="true" />
+                  {story ? 'نشر القصة' : 'نشر للعموم'}
+                </button>
+              ) : story ? (
                 <button type="button" className="pf-btn pri" data-ig="send" disabled={Boolean(problem) || busy} data-hold={HOLD.igTestStory} onClick={() => void send()}>
                   <Upload aria-hidden="true" />
                   نشر القصة التجريبية
@@ -429,7 +453,7 @@ export function InstagramTest({ a, onReconnect }: { a: AccountRow; onReconnect: 
 
       {tests.length > 0 && (
         <div className="yt-list" data-ig="list">
-          <h5>آخر التجارب</h5>
+          <h5>{direct ? 'آخر المنشورات المباشرة' : 'آخر التجارب'}</h5>
           {(scopeNote || (!canDelete && tests.some((t) => t.state === 'published'))) && (
             <Hint>
               الحذف من هنا يحتاج إذن «instagram_manage_contents» في إعداد تطبيق Meta، ولم يُعطه الحساب عند ربطه. أضفه في الإعداد ثم أعد ربط الحساب، أو احذف المنشور من تطبيق إنستغرام.{' '}

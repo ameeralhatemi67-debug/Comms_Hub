@@ -1,7 +1,16 @@
 import { fail, guard } from '@/lib/drive/guard';
 import { serverKeyOrNull } from '@/lib/integrations/vault';
 import { isUuid, json } from '@/lib/platforms/route';
-import { DEVICE_PIECE, LIBRARY_PIECE, TEST_ERROR_AR, scheduleProblem, testProblem } from '@/lib/platforms/test-rules';
+import {
+  DEVICE_PIECE,
+  LIBRARY_PIECE,
+  TEST_ERROR_AR,
+  YT_DIRECT_SCHEDULE_MAX_DAYS,
+  YT_SCHEDULE_MAX_DAYS,
+  directNotify,
+  scheduleProblem,
+  testProblem,
+} from '@/lib/platforms/test-rules';
 import { fbStart } from '@/lib/platforms/test-facebook';
 import { igStart } from '@/lib/platforms/test-instagram';
 import { dbCode, giveUp, refuse, testInfo, youtubeToken } from '@/lib/platforms/test-server';
@@ -28,13 +37,18 @@ export async function POST(request: Request) {
     typeof b.title !== 'string' ||
     typeof b.description !== 'string' ||
     (b.source !== 'device' && b.source !== 'library') ||
-    (b.scheduled_for != null && (typeof b.scheduled_for !== 'string' || b.privacy !== 'private'))
+    (b.scheduled_for != null && (typeof b.scheduled_for !== 'string' || b.privacy !== 'private')) ||
+    (b.purpose != null && b.purpose !== 'test' && b.purpose !== 'direct') ||
+    (b.notify != null && (typeof b.notify !== 'boolean' || b.purpose !== 'direct'))
   )
     return fail(400, TEST_ERROR_AR.TEST_INVALID);
+  // A test, or a direct post from Home's «نشر مباشر» (MVP_draft.md 76): the database decides who may make one.
+  const direct = b.purpose === 'direct';
   // «مجدول»: private now, made public by YouTube at this time. The database checks the same window.
   const publishAt = typeof b.scheduled_for === 'string' ? b.scheduled_for : null;
-  if (publishAt && scheduleProblem(publishAt)) return refuse('SCHEDULE_INVALID');
+  if (publishAt && scheduleProblem(publishAt, Date.now(), direct ? YT_DIRECT_SCHEDULE_MAX_DAYS : YT_SCHEDULE_MAX_DAYS)) return refuse('SCHEDULE_INVALID');
   const at = publishAt ? new Date(publishAt).toISOString() : null;
+  const notify = direct ? directNotify(b.privacy, Boolean(at), typeof b.notify === 'boolean' ? b.notify : null) : false;
   const db = await serverClient();
 
   let size: number;
@@ -58,15 +72,28 @@ export async function POST(request: Request) {
 
   const { data: id, error } = await db.rpc('platform_test_start', {
     p_account: b.account,
-    p: { privacy: b.privacy, title: b.title.trim(), source: b.source, asset, version, size, mime, ...(at ? { scheduled_for: at } : {}) },
+    p: {
+      privacy: b.privacy,
+      title: b.title.trim(),
+      source: b.source,
+      asset,
+      version,
+      size,
+      mime,
+      ...(at ? { scheduled_for: at } : {}),
+      ...(direct ? { purpose: 'direct', notify } : {}),
+    },
   });
-  if (error || typeof id !== 'string') return refuse(dbCode(error?.message));
+  if (error || typeof id !== 'string') {
+    const code = dbCode(error?.message);
+    return refuse(direct && code === 'TEST_LIMIT' ? 'DIRECT_LIMIT' : code);
+  }
   const t = await testInfo(db, id);
   if (!t) return giveUp(db, id, 'FORBIDDEN');
 
-  const tok = await youtubeToken(db, fetch, t, 'تجربة نشر على يوتيوب', true);
+  const tok = await youtubeToken(db, fetch, t, direct ? 'نشر مباشر على يوتيوب' : 'تجربة نشر على يوتيوب', true);
   if ('error' in tok) return giveUp(db, id, tok.error);
-  const open = await youtubeOpenUpload(fetch, { access: tok.access, video: { title: b.title, description: b.description, privacy: b.privacy, publishAt: at, size, mime } });
+  const open = await youtubeOpenUpload(fetch, { access: tok.access, video: { title: b.title, description: b.description, privacy: b.privacy, publishAt: at, size, mime, notify } });
   if ('error' in open) return giveUp(db, id, open.error);
   const { error: kept } = await db.rpc('platform_test_session', { p_key: serverKeyOrNull(), p_test: id, p_url: open.url });
   if (kept) return giveUp(db, id, 'PLATFORM_ERROR');

@@ -39,6 +39,7 @@ import { resumeRow, writingQueue } from '@/lib/writing/flow';
 import { readLocalDraft } from './writing/api';
 import { usePlanData, useWork, useWorkList, useWritingMarks, type ListItem } from './work/data';
 import { HomePermissions } from './home-perms';
+import { QuickActions } from './quick-actions';
 import { useCalendarColors, useColorLook } from './work/calendar-colors';
 import { Av, Empty, Ic, StatusChip, Wid } from './work/parts';
 
@@ -137,6 +138,7 @@ export function HomePage() {
             <Ic i={CalendarDays} />
             اليوم: {fdate(w.today)}
           </span>
+          <QuickActions />
           {canCreate && (
             <Link className="wk-btn gold" href="/create">
               <Ic i={Plus} />

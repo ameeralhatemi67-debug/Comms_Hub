@@ -105,6 +105,11 @@ export const CAPABILITIES: Capability[] = [
     key: 'motion.studio', grp: 'fixed', label: 'الاستوديو في «استوديو الحركة»', grantable: false, scope: 'none', minRank: 3,
     fixedRoles: ['admin', 'director'], why: 'الاستوديو لمسؤول النظام ومدير الاتصال المؤسسي فقط، بقرار المالك في 2026-10-19.', sort: 66,
   },
+  // «نشر مباشر» from Home (MVP_draft.md 76), fixed by the owner's decision of 2026-11-05 (Director_Notes_Plan.md Q2).
+  {
+    key: 'publish.direct', grp: 'fixed', label: 'النشر المباشر من «الرئيسية»', grantable: false, scope: 'none', minRank: 3,
+    fixedRoles: ['admin', 'director'], why: 'النشر المباشر يتجاوز دورة العمل، فهو لمسؤول النظام ومدير الاتصال المؤسسي فقط، بقرار المالك في 2026-11-05.', sort: 67,
+  },
 ];
 
 export const capability = (key: string) => CAPABILITIES.find((c) => c.key === key);

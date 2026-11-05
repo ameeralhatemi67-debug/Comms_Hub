@@ -44,7 +44,7 @@ export type Entry = {
 const LIBRARY_KIND: Record<string, EntryKind> = {
   upload: 'files', version: 'files', copy: 'files', download: 'files',
   stage: 'review', approve: 'review', changes: 'review', reject: 'review',
-  schedule: 'publish', publish: 'publish', date: 'publish',
+  schedule: 'publish', publish: 'publish', date: 'publish', direct: 'publish', direct_off: 'publish',
   assign: 'tasks', done: 'tasks',
   access: 'access', lock: 'access', link: 'access', permission: 'access',
 };

@@ -288,6 +288,24 @@ A test on a Facebook Page is real too, by the same day's directive (`MVP_draft.m
   and the address with `test-instagram.ts`. The panels share `src/components/work/test-kit.ts`. The rules are held by
   `supabase/tests/platform_tests_facebook_rules.sql`, `tests/facebook-test.test.mjs` and `qa/facebook-test-flow.cjs`.
 
+«نشر مباشر» from Home's «إجراءات سريعة» is real too, by owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-2 with answer Q2,
+`MVP_draft.md` section 76, recorded in `progress.md`). It is the one real publish outside the work cycle; publishing works stays a
+simulation.
+- **Who.** The fixed capability `publish.direct`, the Admin's and the director's only, like `motion.studio`. Never make it
+  grantable, and never offer «نشر مباشر» to anyone else.
+- **The engine.** A direct post is a `platform_tests` row with `purpose` 'direct' (`supabase/migrations/*direct_publish*`), on the
+  test engine and its rules: no token or upload address in a page, the server relaying the file.
+  - The panels take `mode="direct"` (`youtube-test.tsx`, `instagram-test.tsx`); the sheet is `src/components/work/direct-publish.tsx`
+    and the menu `src/components/quick-actions.tsx`.
+  - Its limits (20 a day, YouTube's «مجدول» up to 180 days, subscribers notified only when asked) exist once in `test-rules.ts` and
+    once in SQL, held equal by `tests/direct-publish.test.mjs`.
+- **Nothing is hidden.** The database writes every direct post and delete to «سجل النشاط» (`direct`, `direct_off`) and tells the
+  account's publishers and the assistants «للعلم». Keep it in the database, never in the page.
+- **Facebook** takes no direct post until the owner says so («قريباً»). A scheduled Instagram post waits for the bridge's loop
+  (answer Q3) and is not built; never add a timer to the site for it.
+- **Checks.** `supabase/tests/direct_publish_rules.sql` holds the rules, and `qa/direct-publish-flow.cjs` clicks through the menu, the
+  sheet and both panels on a fixture.
+
 Integrations, storage providers and backups are real, by owner directive of 2026-10-14
 (`Settings_Integrations_Plan.md`, decisions E-1 to E-7, recorded in `progress.md`). Every
 connection (storage provider, platform app, messaging) is a row of one integrations core

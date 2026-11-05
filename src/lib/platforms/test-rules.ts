@@ -58,14 +58,31 @@ export const ytStatus = (choice: YtChoice, at: string | null): { privacy: TestPr
  */
 export const YT_SCHEDULE_MIN_MINUTES = 10;
 export const YT_SCHEDULE_MAX_DAYS = 30;
+/** A direct post from Home's «نشر مباشر» may be scheduled further ahead than a test (MVP_draft.md 76). */
+export const YT_DIRECT_SCHEDULE_MAX_DAYS = 180;
 /** What is wrong with a scheduled time, in words, or null. */
-export function scheduleProblem(at: string | null, now: number = Date.now()): string | null {
+export function scheduleProblem(at: string | null, now: number = Date.now(), maxDays: number = YT_SCHEDULE_MAX_DAYS): string | null {
   const t = at ? Date.parse(at) : NaN;
   if (!Number.isFinite(t)) return 'اختر موعد النشر.';
   if (t < now + YT_SCHEDULE_MIN_MINUTES * 60e3) return `الموعد بعد ${YT_SCHEDULE_MIN_MINUTES} دقائق على الأقل.`;
-  if (t > now + YT_SCHEDULE_MAX_DAYS * 864e5) return `تُجدول التجربة حتى ${YT_SCHEDULE_MAX_DAYS} يوماً من الآن.`;
+  if (t > now + maxDays * 864e5)
+    return maxDays === YT_SCHEDULE_MAX_DAYS ? `تُجدول التجربة حتى ${maxDays} يوماً من الآن.` : `يُجدول النشر حتى ${maxDays} يوماً من الآن.`;
   return null;
 }
+
+/**
+ * Why a post is made: a test («تجربة النشر») or a real post from Home's «نشر مباشر» (Director_Notes_Plan.md N-2, MVP_draft.md 76).
+ * Both run on the same engine and table; the database tells them apart and keeps their rules.
+ */
+export type TestPurpose = 'test' | 'direct';
+/** Direct posts a day per account, apart from the tests. The database holds the same (*direct_publish*). */
+export const DIRECT_PER_DAY = 20;
+/**
+ * Whether YouTube tells the channel's subscribers of a direct post: what the person chose, else yes when the video is or
+ * becomes public. A test never does. The database works out the same default.
+ */
+export const directNotify = (privacy: TestPrivacy, scheduled: boolean, chosen: boolean | null | undefined) =>
+  chosen ?? (privacy === 'public' || scheduled);
 /** The choice a recorded test was sent with. */
 export const choiceOf = (t: { privacy: TestPrivacy | null; scheduled_for?: string | null }): YtChoice | null =>
   t.privacy === 'private' && t.scheduled_for ? 'scheduled' : t.privacy;
@@ -82,6 +99,9 @@ export type TestRow = {
   shown_privacy: 'private' | 'public' | 'unlisted' | null;
   /** The time YouTube said it will make a scheduled video public, read back with the video. */
   shown_publish_at?: string | null;
+  purpose?: TestPurpose;
+  /** A YouTube direct post: whether subscribers were told. */
+  notify?: boolean | null;
   error: string | null;
   created_by: string;
   created_at: string;
@@ -133,8 +153,9 @@ export const TEST_ERROR_AR: Record<string, string> = {
   ACCOUNT_OFF: 'الحساب موقوف. فعّله أولاً.',
   NOT_CONNECTED: 'الحساب غير مربوط الآن. أعد ربطه ثم جرّب.',
   TEST_INVALID: 'بيانات التجربة ناقصة أو غير صالحة.',
-  SCHEDULE_INVALID: `موعد التجربة المجدولة بين ${YT_SCHEDULE_MIN_MINUTES} دقائق و${YT_SCHEDULE_MAX_DAYS} يوماً من الآن.`,
+  SCHEDULE_INVALID: `الموعد المجدول بعد ${YT_SCHEDULE_MIN_MINUTES} دقائق على الأقل، وحتى ${YT_SCHEDULE_MAX_DAYS} يوماً للتجربة و${YT_DIRECT_SCHEDULE_MAX_DAYS} يوماً للنشر المباشر.`,
   TEST_LIMIT: `بلغ الحساب ${TESTS_PER_DAY} تجارب في يوم. جرّب غداً.`,
+  DIRECT_LIMIT: `بلغ الحساب ${DIRECT_PER_DAY} منشوراً مباشراً في يوم. انشر غداً.`,
   SCOPE_MISSING: 'لم تأذن المنصة للموقع بهذا بعد. أعد ربط الحساب مرة واحدة ووافق على كل الصلاحيات.',
   UPLOAD_LIMIT: 'بلغ تطبيق Google حد الرفع اليومي عند يوتيوب. جرّب بعد يوم.',
   UPLOAD_EXPIRED: 'انتهت مهلة هذا الرفع عند يوتيوب. ابدأ التجربة من جديد.',

@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/direct_publish_rules.sql",
+  "script_md5": "01485a6dd4f9be013dc0202da4dd759f",
+  "migration": {
+    "file": "supabase/migrations/20261105160000_direct_publish.sql",
+    "file_md5": "acd2fb44b6c9443e5517d8997d1d85d0",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-05T09:17:57.101Z",
+  "migrations_replayed": 71,
+  "differ": [],
+  "total": 45,
+  "passed": 45
+}

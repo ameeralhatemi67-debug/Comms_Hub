@@ -3,7 +3,7 @@
 // redrawn to JPEG, a video's length, and a file sent straight to the Drive upload the site opened. Client-safe.
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { TEST_ERROR_AR, type TestRow } from '@/lib/platforms/test-rules';
+import { TEST_ERROR_AR, type TestPurpose, type TestRow } from '@/lib/platforms/test-rules';
 
 const UPLOAD_FAILED = TEST_ERROR_AR.TEMP_UPLOAD_FAILED;
 
@@ -113,18 +113,22 @@ export async function sendToDrive(session: string, blob: Blob, onProgress: (f: n
   }
 }
 
-/** An account's last five tests, as row level security shows them, and a way to read them again. */
-export function useTests(account: string): [TestRow[], () => Promise<void>] {
+/**
+ * An account's last five tests, or its last five direct posts from Home's «نشر مباشر» (MVP_draft.md 76), as row level security
+ * shows them, and a way to read them again.
+ */
+export function useTests(account: string, purpose: TestPurpose = 'test'): [TestRow[], () => Promise<void>] {
   const [tests, setTests] = useState<TestRow[]>([]);
   const load = useCallback(async () => {
     const { data } = await supabase()
       .from('platform_tests')
-      .select('id,privacy,title,kind,state,video_id,post_url,shown_privacy,shown_publish_at,error,link,scheduled_for,created_by,created_at,done_at,deleted_at')
+      .select('id,privacy,title,kind,state,video_id,post_url,shown_privacy,shown_publish_at,error,link,scheduled_for,purpose,notify,created_by,created_at,done_at,deleted_at')
       .eq('account_id', account)
+      .eq('purpose', purpose)
       .order('created_at', { ascending: false })
       .limit(5);
     setTests((data ?? []) as TestRow[]);
-  }, [account]);
+  }, [account, purpose]);
   useEffect(() => {
     void load();
   }, [load]);

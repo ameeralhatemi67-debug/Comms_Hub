@@ -4119,3 +4119,55 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   the box at full size and on phones.
 - **Not proven:** nothing signed in on the live site yet, and no real «العام» or work room exists until someone sends the first
   message. Removing someone from a work does not remove them from its room (by design, nobody is removed).
+
+### 2026-11-05: «إجراءات سريعة» and «نشر مباشر» on Home (director's notes, step 4, N-2)
+
+- **Owner decision.** «Start step 4», under the approved plan's answer Q2: direct publishing is the Admin's and the director's only,
+  fixed. `MVP_draft.md` section 76 is new. `AGENTS.md` records it as the one real publish outside the work cycle.
+- **What was built.**
+  - **Database.** Migration `20261105160000_direct_publish.sql` is written and **not applied**.
+    - It seeds the fixed capability `publish.direct` (admin, director).
+    - `platform_tests` gains `purpose` ('test' or 'direct') and `notify`.
+    - `platform_test_start` refuses a direct post without the capability. It counts 20 direct posts a day apart from the 10
+      tests, allows a direct «مجدول» up to 180 days, lets only a YouTube direct post notify subscribers (by default when public or
+      scheduled), and takes no Facebook direct post.
+    - `platform_test_done` and `platform_test_deleted` write a direct post and its delete to the library's log (`direct`,
+      `direct_off`) and tell the account's publishers and the assistants «للعلم» (`direct_announce`, not callable from outside).
+    - Deleting a direct post is the capability's only.
+  - **Server.** The test routes pass `purpose` and `notify` through. YouTube is asked to notify subscribers only for a direct post
+    that asks (`youtube.ts`). A direct post's own limit is said as `DIRECT_LIMIT`.
+  - **Panels.** `youtube-test.tsx` and `instagram-test.tsx` take `mode="direct"`:
+    - open at once, with an empty title;
+    - the subscribers' choice, and the 180-day window;
+    - their own long presses (`directPublic`, `directScheduled`, `directInstagram`);
+    - their own list.
+  - **Home.** «إجراءات سريعة» (`src/components/quick-actions.tsx`) offers «نشر مباشر» (capability only), «تذكير خاص», «حدث في التقويم»,
+    «رفع ملف إلى المكتبة» and «رسالة جديدة». The sheet (`src/components/work/direct-publish.tsx`) offers YouTube and Instagram with
+    their connected accounts, and the registry's other social platforms as «قريباً».
+  - **«سجل النشاط».** It words both log types, under «النشر والجدولة».
+- **Verified.**
+  - Type check, build and tests:
+    - `npm run typecheck` clean;
+    - `npm run build` clean;
+    - `npm test` 924 of 924, including `tests/direct-publish.test.mjs` 7 of 7 and the rights catalog test, now reading the new
+      migration.
+  - SQL rules on a private container with every migration replayed:
+    - `direct_publish_rules.sql` 45 of 45: who holds it, who may start or delete, notify and its default, both windows, Instagram,
+      no Facebook, the log and the notices with their words, the separate daily count, privileges;
+    - the earlier rule files unchanged: YouTube tests 95 of 95, Instagram 62 of 62, Facebook 48 of 48.
+  - `node qa/direct-publish-flow.cjs`: 37 of 37. It covers:
+    - the menu, its gate and its closing;
+    - the sheet's platforms, «قريباً» and no simulated account;
+    - YouTube direct: the choices, subscribers on, off and absent, 100 days allowed and 181 refused, the holds, what is sent, its list;
+    - Instagram direct;
+    - the reminder dialog;
+    - the publisher's menu;
+    - phone width.
+  - The changed screens' flows: `youtube-test-flow` 68 of 68, `instagram-test-flow` 43 of 43, `facebook-test-flow` 37 of 37,
+    `work-pages` 1077 of 1077 (Home's menu stood in), `post-preview` 202 of 202.
+- **Not built (section 76.5).**
+  - A scheduled Instagram post, which waits for the bridge's loop per answer Q3.
+  - Direct posts on the calendar.
+  - Direct posts in the account's sheet.
+- **Not verified.** Nothing against YouTube or Meta, and nothing signed in. Nothing pushed. Apply the migration before deploying:
+  the panels now select `purpose`, so code without it would empty every platform's «آخر التجارب».

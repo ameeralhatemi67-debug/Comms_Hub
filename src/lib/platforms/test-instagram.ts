@@ -100,13 +100,27 @@ export async function igStart(request: Request, db: SupabaseClient, b: Record<st
 
   const { data: id, error } = await db.rpc('platform_test_start', {
     p_account: b.account,
-    p: { kind, title: igTitle(kind, caption), source: b.source, asset, version, size, mime, share_to_feed: kind === 'reel' ? b.share_to_feed === true : null },
+    p: {
+      kind,
+      title: igTitle(kind, caption),
+      source: b.source,
+      asset,
+      version,
+      size,
+      mime,
+      share_to_feed: kind === 'reel' ? b.share_to_feed === true : null,
+      // A direct post from Home's «نشر مباشر» (MVP_draft.md 76); the database decides who may make one.
+      ...(b.purpose === 'direct' ? { purpose: 'direct' } : {}),
+    },
   });
-  if (error || typeof id !== 'string') return refuse(dbCode(error?.message));
+  if (error || typeof id !== 'string') {
+    const code = dbCode(error?.message);
+    return refuse(b.purpose === 'direct' && code === 'TEST_LIMIT' ? 'DIRECT_LIMIT' : code);
+  }
   const t = await testInfo(db, id);
   if (!t) return giveUp(db, id, 'FORBIDDEN');
 
-  const tok = await instagramToken(db, fetch, t, 'تجربة نشر على إنستغرام', true);
+  const tok = await instagramToken(db, fetch, t, b.purpose === 'direct' ? 'نشر مباشر على إنستغرام' : 'تجربة نشر على إنستغرام', true);
   if ('error' in tok) return giveUp(db, id, tok.error);
   const quota = await igPublishingLimit(fetch, { token: tok.token, user: t.external_id ?? '' });
   if (quota && quota.used >= quota.total) return giveUp(db, id, 'QUOTA_REACHED');

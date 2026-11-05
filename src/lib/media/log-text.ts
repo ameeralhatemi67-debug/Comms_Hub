@@ -92,6 +92,15 @@ export function describe(e: LogRow, nameOf: (email: string) => string): Describe
       return { text: `أنشأ ${who} رابط مراجعة لـ «${name}»` };
     case 'undo':
       return { text: `تراجع ${who} عن: ${str(d.label)}` };
+    // «نشر مباشر» from Home (MVP_draft.md 76): a real post outside the work cycle, written by the database when it arrives.
+    case 'direct': {
+      const where = `${str(d.platform)} · ${str(d.account)}`;
+      return str(d.shown) === 'مجدول'
+        ? { text: `جدول ${who} نشراً مباشراً «${name}» على ${where}، ويصبح عاماً في موعده`, after: 'مجدول' }
+        : { text: `نشر ${who} مباشرة «${name}» على ${where}`, after: str(d.shown) || undefined };
+    }
+    case 'direct_off':
+      return { text: `حذف ${who} المنشور المباشر «${name}» من ${str(d.platform)} · ${str(d.account)}` };
     default:
       return { text: `${who}: ${e.type}` };
   }
@@ -107,6 +116,8 @@ export const logTypeLabels: Record<string, string> = {
   reject: 'رفض',
   schedule: 'جدولة',
   publish: 'نشر',
+  direct: 'نشر مباشر',
+  direct_off: 'حذف منشور مباشر',
   assign: 'إسناد مهمة',
   done: 'إتمام مهمة',
   copy: 'عنوان ووصف',

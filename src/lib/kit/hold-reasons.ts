@@ -36,6 +36,12 @@ export const HOLD = {
   platformTestPublic: 'المقطع العام يراه كل من يزور القناة فور رفعه.',
   /** «حسابات المنصات»: a scheduled test video on YouTube, made public by YouTube at its time (MVP_draft.md 71.2). */
   platformTestScheduled: 'يجعل يوتيوب المقطع عاماً في موعده بنفسه، فيراه كل من يزور القناة ما لم يُحذف قبله.',
+  /** «نشر مباشر» on Home (MVP_draft.md 76): a public video, outside the work cycle. */
+  directPublic: 'يُنشر المقطع للعموم على القناة الآن، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.',
+  /** «نشر مباشر»: a scheduled video, which YouTube makes public at its time. */
+  directScheduled: 'يجعل يوتيوب المقطع عاماً في موعده بنفسه، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.',
+  /** «نشر مباشر» on Instagram: every post there is public. */
+  directInstagram: 'يُنشر على الحساب للعموم الآن، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.',
   /** «حسابات المنصات»: delete a test video from YouTube. */
   platformTestDelete: 'يُحذف المقطع من القناة على يوتيوب نهائياً، ولا يُسترجع.',
   /** «حسابات المنصات»: an Instagram test Story (MVP_draft.md section 72). */

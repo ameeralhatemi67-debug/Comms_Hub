@@ -73,6 +73,12 @@ related:
     text equal to the file). Its rules were checked there read-only; the full rule file was refused by the session's permission
     check and stands at 39 of 39 on a private container.
   - Unproven against the real Drive: its own thumbnails for older files and documents.
+- **Step 4, «إجراءات سريعة» and «نشر مباشر», built on local main** (`MVP_draft.md` 76).
+  - The director and the Admin publish for real to YouTube (all four choices, subscribers' notice, schedule up to 180 days) or
+    Instagram, outside the work cycle. Each post is logged and told to the account's publishers and the assistant.
+  - `npm test` 924 of 924, `direct_publish_rules.sql` 45 of 45, `qa/direct-publish-flow.cjs` 37 of 37.
+  - Migration `20261105160000_direct_publish.sql` is **not applied**.
+  - Not built: Instagram «مجدول» (the bridge's loop), direct posts on the calendar and in the account sheet.
 - **Step 3, calendar colours, merged into main.**
   - Each person colours the calendar by kind, status, project, platform or person, from twelve fixed colours, kept in the
     database (`MVP_draft.md` section 74).
@@ -81,7 +87,6 @@ related:
   - On the merged tree: `npm test` 906 of 906, the SQL rules 51 of 51, `qa/calendar-colors.cjs` 85 of 85.
 - **Next.**
   - Every migration of steps 1 to 3 is applied, so the push of main waits only on the release session's own steps.
-  - Then step 4: quick actions and «نشر مباشر» (N-2).
 
 ## Desktop Power, merge 11: D11 «تصدير أسرع» with option A, 2026-11-05
 

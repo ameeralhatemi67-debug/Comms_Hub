@@ -1,0 +1,195 @@
+{
+  "script": "qa/direct-publish-flow.cjs",
+  "run": "2026-11-05T09:30:32.874Z",
+  "checks": [
+    {
+      "name": "the button says what it is, and its menu is closed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the director's menu: «نشر مباشر» first, then the four shortcuts",
+      "pass": true,
+      "detail": "[\"نشر مباشر\",\"تذكير خاص\",\"حدث في التقويم\",\"رفع ملف إلى المكتبة\",\"رسالة جديدة\"]"
+    },
+    {
+      "name": "the button says the menu is open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the library and mail open their own pages",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes the menu",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a click elsewhere closes it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«نشر مباشر» opens its sheet and the menu closes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the sheet says it publishes for real, outside the work cycle, for the director and the Admin",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "YouTube and Instagram, each with its connected account",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the registry's other platforms show «قريباً» and cannot be pressed; mail is not among them",
+      "pass": true,
+      "detail": "[[\"x\",true,true],[\"linkedin\",true,true],[\"facebook\",true,true]]"
+    },
+    {
+      "name": "nothing is offered before a platform is chosen",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "one account: its panel opens at once, in direct mode",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says it publishes for real and tells the publishers",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the title starts empty",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the four choices, private first",
+      "pass": true,
+      "detail": "[\"خاص\",\"غير مدرج\",\"عام\",\"مجدول\"]"
+    },
+    {
+      "name": "no subscribers' choice for a private video",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "public: subscribers are told unless turned off",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a public direct post says so and asks for a long press, with the reason",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sent as a direct post, public, telling subscribers",
+      "pass": true,
+      "detail": "{\"account\":\"a-yt\",\"privacy\":\"public\",\"purpose\":\"direct\",\"notify\":true,\"title\":\"إعلان الحملة\",\"description\":\"\",\"source\":\"device\",\"size\":307200,\"mime\":\"video/mp4\"}"
+    },
+    {
+      "name": "its list is the direct posts'",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "said in words",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "turned off: sent with no notice to subscribers",
+      "pass": true,
+      "detail": "{\"account\":\"a-yt\",\"privacy\":\"public\",\"purpose\":\"direct\",\"notify\":false,\"title\":\"إعلان الحملة\",\"description\":\"\",\"source\":\"device\",\"size\":307200,\"mime\":\"video/mp4\"}"
+    },
+    {
+      "name": "unlisted: no subscribers' choice, and a plain «نشر»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "scheduled: subscribers are told when it becomes public",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a direct post may be scheduled 100 days ahead, which a test may not",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "but not past 180 days",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a scheduled direct post asks for its own long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Instagram opens in direct mode at once",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "every Instagram post is public, so it asks for a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the YouTube panel is gone with the choice",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the sheet closes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«تذكير خاص» opens the calendar's own dialog, for today",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the account's publisher has no «نشر مباشر»",
+      "pass": true,
+      "detail": "[\"تذكير خاص\",\"حدث في التقويم\",\"رفع ملف إلى المكتبة\",\"رسالة جديدة\"]"
+    },
+    {
+      "name": "phone: the menu fits on the screen",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing sideways with the panel open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing was loaded from outside the fixture",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 37,
+  "passed": 37,
+  "failed": 0
+}

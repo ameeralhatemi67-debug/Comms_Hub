@@ -39,7 +39,7 @@ export type TestInfo = {
 /** The short code a database refusal carries («FORBIDDEN», «TEST_LIMIT», ...). */
 export const dbCode = (message: string | null | undefined) => /\b([A-Z][A-Z_]{3,39})\b/.exec(message ?? '')?.[1] ?? 'PLATFORM_ERROR';
 
-const STATUS: Record<string, number> = { FORBIDDEN: 403, TEST_INVALID: 400, SCHEDULE_INVALID: 400, TEST_LIMIT: 429, UPLOAD_LIMIT: 429, NOT_CONNECTED: 409, ACCOUNT_OFF: 409, UPLOAD_EXPIRED: 410, SCOPE_MISSING: 403 };
+const STATUS: Record<string, number> = { FORBIDDEN: 403, TEST_INVALID: 400, SCHEDULE_INVALID: 400, DIRECT_LIMIT: 429, TEST_LIMIT: 429, UPLOAD_LIMIT: 429, NOT_CONNECTED: 409, ACCOUNT_OFF: 409, UPLOAD_EXPIRED: 410, SCOPE_MISSING: 403 };
 /** A refusal as the page reads it: the words, and the code for what the page offers next. */
 export const refuse = (code: string, retry = false) =>
   Response.json({ error: TEST_ERROR_AR[code] ?? connErrorAr(code), code, ...(retry ? { retry: true } : {}) }, { status: STATUS[code] ?? 502, headers: { 'Cache-Control': 'no-store' } });

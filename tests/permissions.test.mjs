@@ -24,6 +24,8 @@ const intSql = readFileSync('supabase/migrations/20261014120000_integrations.sql
 const studioSql = readFileSync('supabase/migrations/20261019120000_studio_access.sql', 'utf8');
 // «سجل النشاط» adds the whole log and the month's report (MVP_draft.md 66).
 const activitySql = readFileSync('supabase/migrations/20261101120000_activity_report.sql', 'utf8');
+// «نشر مباشر» (MVP_draft.md 76): the fixed capability publish.direct.
+const directSql = readFileSync('supabase/migrations/20261105160000_direct_publish.sql', 'utf8');
 
 // «إنشاء» as a role template, given by the Admin and the Director (MVP_draft.md section 70).
 const createSql = readFileSync('supabase/migrations/20261102200000_create_access.sql', 'utf8');
@@ -33,7 +35,8 @@ function seeded() {
   const block = sql.slice(sql.indexOf('insert into public.capabilities'), sql.indexOf('-- Role templates equal'))
     + intSql.slice(intSql.indexOf('insert into public.capabilities'), intSql.indexOf('insert into public.role_capabilities'))
     + studioSql.slice(studioSql.indexOf('insert into public.capabilities'), studioSql.indexOf('create function public.studio_can'))
-    + activitySql.slice(activitySql.indexOf('insert into public.capabilities'), activitySql.indexOf('insert into public.role_capabilities'));
+    + activitySql.slice(activitySql.indexOf('insert into public.capabilities'), activitySql.indexOf('insert into public.role_capabilities'))
+    + directSql.slice(directSql.indexOf('insert into public.capabilities'), directSql.indexOf('alter table public.platform_tests'));
   const rows = [];
   // A later migration removes a page from the catalogue (Action_Plan.md B6, «المراقبة» folded into «سجل النشاط»).
   const foldSql = readFileSync('supabase/migrations/20261015170000_fold_monitoring.sql', 'utf8');

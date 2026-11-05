@@ -59,6 +59,8 @@ for (const m of sources) {
     .replace(/from '\.\/data'/g, `from '${up}mocks/data.js'`)
     .replace(/from '\.\/work\/data'/g, `from '${up}mocks/data.js'`)
     .replace(/from '\.\/home-perms'/g, `from '${up}mocks/home-perms.js'`)
+    // Home's «إجراءات سريعة» has its own check (qa/direct-publish-flow.cjs)
+    .replace(/from '\.\/quick-actions'/g, `from '${up}mocks/quick-actions.js'`)
     .replace(/from '\.\.?\/can-create'/g, `from '${up}mocks/can-create.js'`)
     .replace(/from '\.\.\/perm-requests'/g, `from '${up}mocks/perm-requests.js'`)
     // the studio's links on the work page («فتح في الاستوديو») have their own check (qa/studio-ui.cjs --only=work)
@@ -88,6 +90,7 @@ fs.writeFileSync(path.join(build, 'mocks', 'navigation.js'), `export const useRo
 export const usePathname = () => '/approvals';
 export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search || '');`);
 fs.writeFileSync(path.join(build, 'mocks', 'setup-guide.js'), 'export const SetupGuide = () => null;');
+fs.writeFileSync(path.join(build, 'mocks', 'quick-actions.js'), 'export const QuickActions = () => null;');
 fs.writeFileSync(path.join(build, 'mocks', 'test-panels.js'), ['YouTubeTest', 'InstagramTest', 'FacebookTest'].map((n) => `export const ${n} = () => null;`).join(' '));
 fs.writeFileSync(path.join(build, 'mocks', 'dynamic.js'), 'export default () => () => null;');
 // The shells around the site: a browser has none (tests/native.test.mjs holds the real ones).

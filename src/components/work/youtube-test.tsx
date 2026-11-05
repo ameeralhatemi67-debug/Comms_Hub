@@ -15,7 +15,9 @@ import {
   YT_CHOICES,
   YT_CHOICE_AR,
   YT_CHOICE_SUB,
+  YT_DIRECT_SCHEDULE_MAX_DAYS,
   YT_MANAGE_SCOPE,
+  YT_SCHEDULE_MAX_DAYS,
   YT_SCHEDULE_MIN_MINUTES,
   channelUrl,
   postsUrl,
@@ -25,6 +27,7 @@ import {
   videoStudioUrl,
   videoUrl,
   ytStatus,
+  type TestPurpose,
   type TestRow,
   type YtChoice,
 } from '@/lib/platforms/test-rules';
@@ -42,21 +45,28 @@ type Phase =
   | { t: 'done'; video: string; privacy: string | null; publishAt: string | null; asked: YtChoice }
   | { t: 'error'; text: string; code?: string };
 
-export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: () => void }) {
+/**
+ * `mode` 'direct' is Home's «نشر مباشر» (MVP_draft.md 76): the same engine and form for a real post, open at once, with an empty
+ * title, the subscribers' choice, a schedule up to 180 days ahead, and its own list. The database decides who may.
+ */
+export function YouTubeTest({ a, onReconnect, mode = 'test' }: { a: AccountRow; onReconnect: () => void; mode?: TestPurpose }) {
   const w = useWork();
-  const [open, setOpen] = useState(false);
+  const direct = mode === 'direct';
+  const [open, setOpen] = useState(direct);
   const [kind, setKind] = useState<'video' | 'post'>('video');
   const [choice, setChoice] = useState<YtChoice>('private');
   // «مجدول»: a Riyadh date and time, as the schedule dialog takes it.
   const [slot, setSlot] = useState('');
   const [picked, setPicked] = useState<Picked | null>(null);
   const [picking, setPicking] = useState(false);
-  const [title, setTitle] = useState('تجربة نشر');
+  const [title, setTitle] = useState(direct ? '' : 'تجربة نشر');
+  // A direct post that is or becomes public tells the channel's subscribers unless this is turned off.
+  const [notify, setNotify] = useState(true);
   const [description, setDescription] = useState('');
   const [post, setPost] = useState('');
   const [copied, setCopied] = useState(false);
   const [phase, setPhase] = useState<Phase>({ t: 'idle' });
-  const [tests, load] = useTests(a.id);
+  const [tests, load] = useTests(a.id, mode);
   const [removing, setRemoving] = useState<string | null>(null);
   const [scopeNote, setScopeNote] = useState(false);
   const stop = useRef(false);
@@ -78,7 +88,7 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
       ? !picked
         ? 'اختر مقطع الفيديو.'
         : (testProblem({ title, description, size: size ?? 1, mime: picked.from === 'device' ? picked.mime : 'video/mp4' }) ??
-          (choice === 'scheduled' ? scheduleProblem(at) : null))
+          (choice === 'scheduled' ? scheduleProblem(at, Date.now(), direct ? YT_DIRECT_SCHEDULE_MAX_DAYS : YT_SCHEDULE_MAX_DAYS) : null))
       : null;
   const soonest = riyadhStamp(new Date(Date.now() + (YT_SCHEDULE_MIN_MINUTES + 1) * 60e3).toISOString()).replace(' ', 'T');
   const sending = phase.t === 'sending';
@@ -96,6 +106,7 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
         account: a.id,
         privacy: status.privacy,
         ...(status.publishAt ? { scheduled_for: status.publishAt } : {}),
+        ...(direct ? { purpose: 'direct', notify: asked === 'public' || asked === 'scheduled' ? notify : false } : {}),
         title: title.trim(),
         description,
         source: picked.from,
@@ -122,7 +133,7 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
       const r = await api(`/api/platforms/test/${test}?from=${from}`, { method: 'PUT', headers: body ? { 'Content-Type': 'application/octet-stream' } : undefined, body });
       if (r.b.done === true && typeof r.b.video === 'string') {
         setPhase({ t: 'done', ...arrived(r.b), asked });
-        w.say('وصل مقطع التجربة إلى يوتيوب.');
+        w.say(direct ? 'وصل المقطع إلى يوتيوب.' : 'وصل مقطع التجربة إلى يوتيوب.');
         return void load();
       }
       if (typeof r.b.next === 'number') {
@@ -166,7 +177,7 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
   };
 
   return (
-    <section className="yt-test" aria-label="تجربة النشر" data-gd="yt-test">
+    <section className="yt-test" aria-label={direct ? 'نشر مباشر' : 'تجربة النشر'} data-gd="yt-test" data-mode={mode}>
       {(channel || studio) && (
         <div className="pf-acts yt-links">
           {channel && (
@@ -183,15 +194,19 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
           )}
         </div>
       )}
-      <h4>تجربة النشر</h4>
-      <p className="yt-lead">يرفع مقطعاً حقيقياً إلى القناة ليتأكد أن النشر يصل. لا يمر بالمراجعة ولا يُعدّ عملاً، ولا يُنبَّه المشتركون.</p>
+      <h4>{direct ? 'نشر مباشر' : 'تجربة النشر'}</h4>
+      <p className="yt-lead">
+        {direct
+          ? 'ينشر المقطع على القناة فعلاً، خارج دورة العمل. يُسجَّل في «سجل النشاط»، ويُبلَّغ ناشرو الحساب والمساعد.'
+          : 'يرفع مقطعاً حقيقياً إلى القناة ليتأكد أن النشر يصل. لا يمر بالمراجعة ولا يُعدّ عملاً، ولا يُنبَّه المشتركون.'}
+      </p>
       {!connected ? (
-        <Hint warn>القناة غير متصلة الآن، فلا تُجرى التجربة. أعد ربطها أولاً.</Hint>
+        <Hint warn>{direct ? 'القناة غير متصلة الآن، فلا يُنشر عليها. أعد ربطها أولاً.' : 'القناة غير متصلة الآن، فلا تُجرى التجربة. أعد ربطها أولاً.'}</Hint>
       ) : !open ? (
         <div className="pf-acts">
           <button type="button" className="wk-btn sm" data-yt="open" onClick={() => setOpen(true)}>
             <Ic i={Upload} />
-            بدء تجربة
+            {direct ? 'نشر جديد' : 'بدء تجربة'}
           </button>
         </div>
       ) : (
@@ -285,6 +300,14 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
                   <p className="yt-sub">يُرفع المقطع الآن خاصاً. إن اكتمل الرفع بعد موعده نشره يوتيوب فور اكتماله.</p>
                 </>
               )}
+              {direct && (choice === 'public' || choice === 'scheduled') && (
+                <label className="pf-check yt-notify" data-yt="notify">
+                  <input type="checkbox" checked={notify} disabled={sending} onChange={(e) => setNotify(e.target.checked)} />
+                  <span>
+                    إشعار المشتركين <small>يرسل يوتيوب تنبيهاً لمشتركي القناة {choice === 'scheduled' ? 'حين يصبح المقطع عاماً' : 'الآن'}.</small>
+                  </span>
+                </label>
+              )}
 
               <div className="yt-file">
                 {picked ? (
@@ -358,7 +381,22 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
               ) : (
                 <div className="pf-acts">
                   {/* What becomes public asks for a long press: a public test, and a scheduled one, which YouTube makes public. */}
-                  {choice === 'public' ? (
+                  {direct && choice === 'public' ? (
+                    <button type="button" className="pf-btn pri" data-yt="send" disabled={Boolean(problem)} data-hold={HOLD.directPublic} onClick={() => void send()}>
+                      <Upload aria-hidden="true" />
+                      نشر للعموم
+                    </button>
+                  ) : direct && choice === 'scheduled' ? (
+                    <button type="button" className="pf-btn pri" data-yt="send" disabled={Boolean(problem)} data-hold={HOLD.directScheduled} onClick={() => void send()}>
+                      <Upload aria-hidden="true" />
+                      جدولة النشر
+                    </button>
+                  ) : direct ? (
+                    <button type="button" className="pf-btn pri" data-yt="send" disabled={Boolean(problem)} onClick={() => void send()}>
+                      <Upload aria-hidden="true" />
+                      نشر
+                    </button>
+                  ) : choice === 'public' ? (
                     <button type="button" className="pf-btn pri" data-yt="send" disabled={Boolean(problem)} data-hold={HOLD.platformTestPublic} onClick={() => void send()}>
                       <Upload aria-hidden="true" />
                       نشر التجربة للعموم
@@ -416,7 +454,7 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
 
       {tests.length > 0 && (
         <div className="yt-list" data-yt="list">
-          <h5>آخر التجارب</h5>
+          <h5>{direct ? 'آخر المنشورات المباشرة' : 'آخر التجارب'}</h5>
           {(scopeNote || (!canDelete && tests.some((t) => t.state === 'published'))) && (
             <Hint>
               الحذف من هنا يحتاج إذناً إضافياً من Google لم تُعطه القناة عند ربطها. أعد ربطها مرة واحدة ووافق على كل الصلاحيات، أو احذف المقطع من YouTube Studio.{' '}

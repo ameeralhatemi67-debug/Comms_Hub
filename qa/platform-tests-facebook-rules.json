@@ -2,13 +2,13 @@
   "script": "supabase/tests/platform_tests_facebook_rules.sql",
   "script_md5": "18d005c2c2237e03f19098d555499b5a",
   "migration": {
-    "file": "supabase/migrations/20261105120000_platform_tests_youtube_choices.sql",
-    "file_md5": "be2272f0c7d5e1f8c23080a99ba38765",
+    "file": "supabase/migrations/20261105160000_direct_publish.sql",
+    "file_md5": "acd2fb44b6c9443e5517d8997d1d85d0",
     "applied": "this run is on a private container and touched nothing"
   },
   "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
-  "run": "2026-11-05T07:05:42.290Z",
-  "migrations_replayed": 67,
+  "run": "2026-11-05T09:19:50.878Z",
+  "migrations_replayed": 71,
   "differ": [],
   "total": 48,
   "passed": 48

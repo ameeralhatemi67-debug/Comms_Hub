@@ -47,18 +47,27 @@ export function ytReason(status: number, body: Record<string, unknown>): string 
 }
 
 /** A video to upload. `publishAt` makes it «مجدول»: YouTube keeps it private and makes it public at that time by itself. */
-export type TestVideo = { title: string; description: string; privacy: TestPrivacy; publishAt?: string | null; size: number; mime: string };
+export type TestVideo = {
+  title: string;
+  description: string;
+  privacy: TestPrivacy;
+  publishAt?: string | null;
+  size: number;
+  mime: string;
+  /** Tell the channel's subscribers: a direct post's choice (MVP_draft.md 76). A test never does. */
+  notify?: boolean;
+};
 
 /** The status YouTube is asked for. A time is sent only with private, the one privacy YouTube schedules from. */
 export const ytUploadStatus = (v: Pick<TestVideo, 'privacy' | 'publishAt'>) =>
   v.publishAt ? { privacyStatus: 'private', publishAt: v.publishAt } : { privacyStatus: v.privacy };
 
 /**
- * Opens a resumable upload at YouTube with the video's details. Subscribers are not told of a test, whatever its privacy.
- * Returns the upload's address, which the server keeps and never gives to a page.
+ * Opens a resumable upload at YouTube with the video's details. Subscribers are not told of a test, whatever its privacy; a
+ * direct post tells them when it asks to. Returns the upload's address, which the server keeps and never gives to a page.
  */
 export async function youtubeOpenUpload(f: Fetch, a: { access: string; video: TestVideo }): Promise<{ url: string } | { error: string }> {
-  const params = new URLSearchParams({ uploadType: 'resumable', part: 'snippet,status', notifySubscribers: 'false' });
+  const params = new URLSearchParams({ uploadType: 'resumable', part: 'snippet,status', notifySubscribers: a.video.notify === true ? 'true' : 'false' });
   const r = await ask(
     f,
     `${UPLOAD}?${params.toString()}`,
