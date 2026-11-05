@@ -1,0 +1,42 @@
+{
+  "script": "supabase/tests/platform_tests_instagram_rules.sql",
+  "script_md5": "c31563dd38985aa8c6d851a0a6a1c3a3",
+  "run": "2026-11-05",
+  "migration": {
+    "file": "supabase/migrations/20261105120000_platform_tests_youtube_choices.sql",
+    "file_md5": "be2272f0c7d5e1f8c23080a99ba38765",
+    "applied": "applied to comms-hub (hrghmioxvgkjpnydrxrk) with the owner's approval of 2026-11-05, as version 20261105073612 'platform_tests_youtube_choices'; md5 of the stored statement be2272f0c7d5e1f8c23080a99ba38765 equals the md5 of the file"
+  },
+  "how": "Each run is one transaction against comms-hub, rolled back at the end, through the MCP execute_sql tool, with the rules file sent verbatim. Throwaway accounts (@t.test) act through row level security; the server key is replaced by a throwaway inside the transaction; nothing about a real person is read into the result.",
+  "before_applying": {
+    "what": "On a private Docker container with every migration replayed (qa/platform-tests-instagram-rules.json).",
+    "total": 62,
+    "passed": 62
+  },
+  "after_applying": {
+    "what": "The rules file run verbatim against the applied migration.",
+    "total": 62,
+    "passed": 62,
+    "run_md5": "c31563dd38985aa8c6d851a0a6a1c3a3",
+    "run_md5_equals_file": true,
+    "left_behind": {
+      "throwaway_accounts": 0,
+      "throwaway_users": 0,
+      "throwaway_integrations": 0,
+      "throwaway_platform_accounts": 0,
+      "throwaway_media_files": 0,
+      "platform_tests": 1,
+      "server_key_is_a_throwaway": false,
+      "work_no_seq_last": 1,
+      "platform_test_done_versions": 1,
+      "anon_may_call_platform_test_done": false
+    }
+  },
+  "advisors": {
+    "run": "2026-11-05, before and after applying",
+    "findings_before": 357,
+    "findings_after": 357,
+    "new": "authenticated_security_definer_function_executable for platform_test_done with p_publish_at",
+    "gone": "the same finding for platform_test_done without it (the function was replaced)"
+  }
+}

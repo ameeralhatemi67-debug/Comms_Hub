@@ -3840,6 +3840,50 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Before deploying.** Apply the migration first: the panel now selects `shown_publish_at`, so the code without it would empty
   every platform's «آخر التجارب». Nothing pushed.
 
+### 2026-11-05: three migrations applied to comms-hub, «إنشاء» as a permission, «إلغاء العمل» and the Facebook test (the manager)
+
+- **By the owner's yes of 2026-11-05** ("Yes, apply them"), applied in order through the Supabase MCP tool:
+  `create_access` (version 20261105072249), `work_cancel` (20261105072309), `platform_tests_facebook` (20261105072343).
+  The md5 of each stored statement equals the file's (`ec7c7f71...`, `b73c33be...`, `8a62413b...`). `create_access` patches
+  each function only if it carries the expected text exactly once, and it applied, so the live definitions were as written.
+  `android_releases` stays unapplied by design, and `platform_tests_youtube_choices` (20261105120000, step 1 of the director's
+  notes) was **not** applied: it was not part of the question, and its entry above says it must be applied before deploying.
+- **Verified on comms-hub after applying**, each rules file sent verbatim as one transaction rolled back at the end, with
+  throwaway accounts only: `create_access_rules.sql` **61 of 61**, `work_cancel_rules.sql` **40 of 40**,
+  `platform_tests_facebook_rules.sql` **48 of 48** (the same totals as on the private container before). Nothing was left
+  behind: no @t.test account or user, no throwaway integration, the server key's hash is the real one, `platform_tests` holds
+  its one earlier row. Results in `qa/create-access-rules-comms-hub.json`, `qa/work-cancel-rules-comms-hub.json`,
+  `qa/platform-tests-facebook-rules-comms-hub.json`.
+- **Found on the way: a rolled-back test still uses up work numbers.** `work_create` draws from `work_no_seq`, which a rollback
+  does not return; the two runs that create works took 11 numbers (1 to 12, with one work on the site). The sequence was set back
+  to 1 under a share lock on `works`, only because the count and the highest number were unchanged, so the next real work is
+  number 2. A later run on comms-hub that creates works should note the sequence first and restore it the same way.
+- **Security advisor after applying:** on these migrations' objects only `authenticated_security_definer_function_executable`,
+  for `work_cancel` (new, callable by signed-in people by design, it checks its caller) and the three replaced platform-test
+  functions (callable as before); none for anon, no table without a policy; `perm_create_giver` and `work_touched_by_others` are
+  not callable through the API. The count before applying was not taken.
+- **What the live site does now.** Its code (origin/main) predates these migrations, and it agrees with them: it builds a
+  person's pages from `my_capabilities` (`src/lib/supabase/session.ts`), so `page.create`'s role templates now decide «إنشاء»
+  there too. The assistant, the writer and the producer keep it; the designer and the member no longer see it, and the database
+  refuses them `work_create`. «إلغاء العمل» and the Facebook test wait for the push. Nothing pushed.
+
+### 2026-11-05: `platform_tests_youtube_choices` applied to comms-hub (director's notes, step 1; the manager)
+
+- **By the owner's yes of 2026-11-05** ("Yes, apply it"), applied as version 20261105073612; the md5 of the stored statement
+  equals the file's (`be2272f0...`), the same file the container runs of the step-1 entry above used. The live site's code keeps
+  working on it: `platform_test_done` gains `p_publish_at` with a default, so the current five- and six-part calls still resolve,
+  and the table's checks only widen. This settles that entry's "Before deploying": the push no longer waits for it.
+- **Verified on comms-hub after applying**, each rules file verbatim in one rolled-back transaction:
+  `platform_tests_instagram_rules.sql` **62 of 62**, `platform_tests_facebook_rules.sql` **48 of 48** (again, against the
+  replaced functions), `platform_tests_rules.sql` **94 of 95**. The one difference is case 28, "the director sees it", which
+  counts every test a director may see and got 2 for 1: comms-hub holds one real test from before the run. A separate rolled-back
+  query as a throwaway director saw that 1 row and none made by the tests, so the rule holds and the file's count assumes an empty
+  table. Left behind: nothing (no @t.test account, user, integration, platform account or library file; the real server key; one
+  `platform_test_done`, not callable by anon; `work_no_seq` untouched at 1).
+- **Security advisor:** 357 findings before and after; the only change is `platform_test_done`'s finding moving to its new form.
+- Results in `qa/platform-tests-rules-comms-hub.json`, `qa/platform-tests-instagram-rules-comms-hub.json`, and the second run in
+  `qa/platform-tests-facebook-rules-comms-hub.json` (`after_youtube_choices`). Nothing pushed.
+
 ### 2026-11-05: the desktop release's final regression, continued (Desktop Power; stage 1 of the release)
 
 - **Why.** The owner asked a new session to finish the regression the manager had left at 21 of 27 (`power-final`, `09ddefc`), as

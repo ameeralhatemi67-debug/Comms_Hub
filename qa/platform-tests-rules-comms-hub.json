@@ -1,0 +1,50 @@
+{
+  "script": "supabase/tests/platform_tests_rules.sql",
+  "script_md5": "c88394c27df58413ca0a5dfac0cd89a6",
+  "run": "2026-11-05",
+  "migration": {
+    "file": "supabase/migrations/20261105120000_platform_tests_youtube_choices.sql",
+    "file_md5": "be2272f0c7d5e1f8c23080a99ba38765",
+    "applied": "applied to comms-hub (hrghmioxvgkjpnydrxrk) with the owner's approval of 2026-11-05, as version 20261105073612 'platform_tests_youtube_choices'; md5 of the stored statement be2272f0c7d5e1f8c23080a99ba38765 equals the md5 of the file"
+  },
+  "how": "Each run is one transaction against comms-hub, rolled back at the end, through the MCP execute_sql tool, with the rules file sent verbatim. Throwaway accounts (@t.test) act through row level security; the server key is replaced by a throwaway inside the transaction; nothing about a real person is read into the result.",
+  "before_applying": {
+    "what": "On a private Docker container with every migration replayed (qa/platform-tests-rules.json).",
+    "total": 95,
+    "passed": 95
+  },
+  "after_applying": {
+    "what": "The rules file run verbatim against the applied migration.",
+    "total": 95,
+    "passed": 94,
+    "run_md5": "c88394c27df58413ca0a5dfac0cd89a6",
+    "run_md5_equals_file": true,
+    "differs": [
+      {
+        "case": "28 the director sees it",
+        "expect": "1",
+        "got": "2",
+        "why": "The count is of every test a director may see, and comms-hub holds one real test from before the run; a separate rolled-back query as a throwaway director saw 1 row with none made by the tests. The rule, that a director sees every test, holds; the file's count assumes an empty table."
+      }
+    ],
+    "left_behind": {
+      "throwaway_accounts": 0,
+      "throwaway_users": 0,
+      "throwaway_integrations": 0,
+      "throwaway_platform_accounts": 0,
+      "throwaway_media_files": 0,
+      "platform_tests": 1,
+      "server_key_is_a_throwaway": false,
+      "work_no_seq_last": 1,
+      "platform_test_done_versions": 1,
+      "anon_may_call_platform_test_done": false
+    }
+  },
+  "advisors": {
+    "run": "2026-11-05, before and after applying",
+    "findings_before": 357,
+    "findings_after": 357,
+    "new": "authenticated_security_definer_function_executable for platform_test_done with p_publish_at",
+    "gone": "the same finding for platform_test_done without it (the function was replaced)"
+  }
+}
