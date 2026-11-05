@@ -190,6 +190,18 @@ async function main() {
       return w.length ? w[w.length - 1].limit : 100;
     });
     result.notMeasured = [];
+    /**
+     * A grainy copy still to make. The wait for Windows can outlast both grainy copies (found 2026-11-05: both were made
+     * before the first hold), and a hold needs one running, so they are made again from the start.
+     */
+    async function grainyLeft() {
+      if ((await q()).items.some((i) => grainy.has(i.name) && i.state !== 'ready')) return;
+      result.remade = (result.remade ?? 0) + 1;
+      await win.evaluate(() => window.stopQueue());
+      await h.until(async () => (ffmpegLeft() === 0 ? true : null), 10000, 200);
+      await clearCopies();
+      await win.evaluate(() => window.queueOnly(['grain-1.mp4', 'grain-2.mp4'], 1));
+    }
     async function held(label, hold, release, want, since = null) {
       const full = await h.until(async () => ((await windowsLimit()) >= 100 ? true : null), COOL_MS, 500);
       if (!full) {
@@ -198,6 +210,7 @@ async function main() {
         note(`${label}: not measured. Windows held the processor at ${limit}% for the two minutes before it.`);
         return null;
       }
+      await grainyLeft();
       const it = await runningCopy();
       if (!it) return check(`${label}: a copy of a grainy source was being made`, false, await q());
       let start = Date.now();
@@ -279,6 +292,8 @@ async function main() {
       () => app.evaluate(() => void globalThis.__sayLimit(100)),
       'throttled',
     );
+    // what follows needs a copy to run, and Windows' own limit would hold it (found 2026-11-05 on a long regression)
+    await realLimits(false);
 
     // a still source: FFmpeg reads it whole at once, so a pause cannot hold it; it is stopped instead and made again later
     await win.evaluate(() => window.stopQueue());
@@ -401,6 +416,7 @@ async function main() {
     const win32 = result.windowsLimits;
     note(`The processor's speed limit as the application heard it (its listeners wrapped: ${result.limitListeners}):${JSON.stringify(result.speedLimits.map((x) => (x.ours ? x.limit : `${x.limit} (Windows)`)))}. ${win32.length ? `Windows changed the limit ${win32.length} times during the run (${win32.map((x) => `${x.limit}, ${x.heard ? 'let through' : 'held'}`).join('; ')}).` : "Windows did not change the processor's speed limit during the run."}`);
 
+    await realLimits(false);
     await clearCopies();
     await win.evaluate(() => window.queueWith(1));
     const long = await runningCopy(new Set(Object.keys(fileOf)));

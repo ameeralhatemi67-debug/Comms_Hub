@@ -116,7 +116,7 @@ async function picture(tab, file) {
     check('«التفاصيل»: the figures in Arabic, with the chip and the power it was measured on', ['قيس على', 'سرعة التصدير المرجعية', 'ترميز H.264 بمقاس 1080p', 'ترميز H.264 بمقاس 4K', 'فك ترميز H.264 بمقاس 4K', 'مرمّزات تعمل معاً (1080p)', 'رسم إطار 1080p', 'ثبات القياس'].every((k) => k in figures) && /موصول بالكهرباء|على البطارية/.test(figures['قيس على']), figures);
     const planOf = () => lines(win, '.dv-details > ul:last-of-type');
     const auto = await planOf();
-    check('«التفاصيل»: «الأداء» at «تلقائي», and the plan under its note', JSON.stringify(await pressed(win, 'dv-perf')) === JSON.stringify(['تلقائي']) && (await text(win)).includes('هذه القيم خطة المراحل القادمة للاستوديو على هذا الجهاز') && Object.keys(auto).length === 5, auto);
+    check('«التفاصيل»: «الأداء» at «تلقائي», and the plan under its note', JSON.stringify(await pressed(win, 'dv-perf')) === JSON.stringify(['تلقائي']) && (await text(win)).includes('هذه القيم خطة الاستوديو على هذا الجهاز: يتبعها في المعاينة والتصدير والنسخ الخفيفة وتعديل الصور') && !(await text(win)).includes('المراحل القادمة') && Object.keys(auto).length === 5, auto);
     await picture(win, 'app-details.png');
     await win.getByRole('button', { name: 'أخف على الجهاز' }).click();
     await h.sleep(300);

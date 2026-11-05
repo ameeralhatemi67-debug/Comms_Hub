@@ -21,7 +21,9 @@ import { MotionRenderer, graphicById } from '@/lib/studio/motion-adapter';
 import { boxOf, composePhoto, pick, transformOf, type Resolver } from '@/lib/studio/compose';
 import { defaultText } from '@/lib/studio/text';
 import { probeFile } from '@/lib/studio/media';
-import { addLayer, adjustImage, adjusts, alignLayer, duplicateLayer, moveLayer, removeLayer, setCanvas, updateLayer } from '@/lib/studio/photo';
+import { addLayer, adjustImage, adjusts, alignLayer, duplicateLayer, moveLayer, removeLayer, setCanvas, setPhotoWorkers, updateLayer } from '@/lib/studio/photo';
+import { FLOOR } from '@/lib/studio/scale';
+import { useStudioPlan } from './plan';
 import { redoLabel, undoLabel } from '@/lib/studio/history';
 import { dragHandle, handleAt, snapCentre, type Handle } from '@/lib/studio/handles';
 import { keysOf, matchShortcut, typingTarget } from '@/lib/studio/shortcuts';
@@ -81,6 +83,10 @@ export function PhotoEditor(p: EditorProps) {
   useExactSources(doc, pool, tick, h.quiet);
   const assetsReady = useStudioAssets();
   const fontTick = useStudioFonts(doc);
+  // the plan of this computer (P-17): photo adjustments in bands across its workers; one worker in a browser or before a
+  // measurement, as before. Every count gives the same bytes (qa/studio-photo-tiles.cjs).
+  const photoWorkers = useStudioPlan()?.knobs.photoWorkers ?? FLOOR.photoWorkers;
+  useEffect(() => setPhotoWorkers(photoWorkers), [photoWorkers]);
   const motion = useMemo(() => new MotionRenderer(), []);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);

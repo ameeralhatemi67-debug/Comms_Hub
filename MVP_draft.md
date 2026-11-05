@@ -2753,10 +2753,10 @@ Phase D3 of `Desktop_App_Plan.md`, without signing: the pilot stays unsigned (de
   really does today:
   - for every member, one line: «تطبيق سطح المكتب أقوى من المتصفح: تصل إشعارات «يحتاج قرارك» إلى الجهاز ويظهر عددها على شريط المهام، وتُفتح المستندات والصور والمقاطع التي تنزّلها في برامجها.»;
   - for a person whose access opens the studio (its tab bar's own check, the Admin and the director), a second line:
-    «وفي الاستوديو يقيس قدرة الجهاز، ويسرّع المعاينة، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية، وتُسحب منه ملفات هذا الجهاز إلى البرامج الأخرى.».
+    «وفي الاستوديو يقيس قدرة الجهاز، ويسرّع المعاينة وتعديل الصور، ويصدّر عدة أشكال معاً، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية، ويُظهر تقدّم التصدير على شريط المهام، وتُسحب منه ملفات هذا الجهاز إلى البرامج الأخرى.».
 
-  Export lanes are planned but not used by the export yet, and no page sends its progress to the taskbar yet, so neither is
-  named. Then «تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.», then «تنزيل التطبيق» with the version and its size, and: «يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».». Before the first release is published: «لم يُنشر إصدار للتنزيل بعد.».
+  Since D11 (2026-11-05) the export makes several shapes together in lanes, sends its progress to the taskbar, and photo
+  adjustments follow the plan's workers, so the studio's line names all three. Then «تطبيق «مركز الاتصال المؤسسي» لنظام Windows (x64): يفتح المركز في نافذته، ويستمر التصدير والنافذة مصغّرة، وتصل إشعارات «يحتاج قرارك» إلى الحاسوب.», then «تنزيل التطبيق» with the version and its size, and: «يُثبَّت لحسابك وحده دون صلاحيات المسؤول. النسخة التجريبية غير موقّعة بعد، فيسأل Windows مرة واحدة: اختر «مزيد من المعلومات» ثم «تشغيل على أي حال».». Before the first release is published: «لم يُنشر إصدار للتنزيل بعد.».
 - **Inside the application:** «تعمل الآن في تطبيق سطح المكتب، الإصدار …», then where its update stands:
   - «جارٍ البحث عن تحديث…»;
   - «هذا أحدث إصدار.»;

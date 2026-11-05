@@ -370,19 +370,23 @@ test('P-28: a saved download is heard and acted on by its id; what the notice sa
 test('the account card says in one line what the application adds for every member, and in a second the studio\'s gains to those the studio opens to', () => {
   const card = fs.readFileSync(new URL('../src/components/native/desktop-app.tsx', import.meta.url), 'utf8');
   const everyone = 'تطبيق سطح المكتب أقوى من المتصفح: تصل إشعارات «يحتاج قرارك» إلى الجهاز ويظهر عددها على شريط المهام، وتُفتح المستندات والصور والمقاطع التي تنزّلها في برامجها.';
-  const studio = 'وفي الاستوديو يقيس قدرة الجهاز، ويسرّع المعاينة، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية، وتُسحب منه ملفات هذا الجهاز إلى البرامج الأخرى.';
+  const studio = 'وفي الاستوديو يقيس قدرة الجهاز، ويسرّع المعاينة وتعديل الصور، ويصدّر عدة أشكال معاً، ويصنع النسخ الخفيفة في أوقات الفراغ، ويفتح صيغ الفيديو التي لا يقرؤها المتصفح، ويعرض المعاينة على شاشة ثانية، ويُظهر تقدّم التصدير على شريط المهام، وتُسحب منه ملفات هذا الجهاز إلى البرامج الأخرى.';
   assert.ok(card.includes(`<p data-desktop-strength>${everyone}</p>`), 'every member\'s line, unconditioned');
   assert.ok(card.includes(`{studio && <p data-desktop-strength="studio">${studio}</p>}`), 'the studio\'s line only with studio access');
   assert.equal(card.split(everyone).length, 2);
   assert.equal(card.split(studio).length, 2);
   // every member's line names nothing of the studio
   for (const w of ['الاستوديو', 'المعاينة', 'النسخ الخفيفة', 'قدرة الجهاز', 'شاشة ثانية', 'تُسحب']) assert.equal(everyone.includes(w), false, w);
-  // export lanes are planned (scale.ts) but the export does not use them yet; no page sends the taskbar's progress yet
-  for (const line of [everyone, studio]) {
-    assert.equal(/مسارات التصدير|أسرع في التصدير|يصدّر أسرع/.test(line), false);
-    assert.equal(/تقدّم/.test(line), false);
-    assert.equal(/\p{Extended_Pictographic}/u.test(line), false);
-  }
+  // since D11 the export runs several shapes in lanes and the export panel sends its progress to the taskbar, and photo
+  // adjustments follow the plan's workers: the studio's line names them, every member's line does not
+  const panel = fs.readFileSync(new URL('../src/components/studio/export-panel.tsx', import.meta.url), 'utf8');
+  assert.match(panel, /await exportLanes\(\)/);
+  assert.match(panel, /setTaskbarProgress\(/);
+  const photo = fs.readFileSync(new URL('../src/components/studio/photo-editor.tsx', import.meta.url), 'utf8');
+  assert.match(photo, /setPhotoWorkers\(photoWorkers\)/);
+  assert.ok(studio.includes('ويصدّر عدة أشكال معاً') && studio.includes('ويُظهر تقدّم التصدير على شريط المهام') && studio.includes('وتعديل الصور'));
+  for (const line of [everyone, studio]) assert.equal(/\p{Extended_Pictographic}/u.test(line), false);
+  assert.equal(/تقدّم|أشكال|تعديل الصور/.test(everyone), false);
   // «الحساب» asks the studio tab's own check
   const page = fs.readFileSync(new URL('../src/components/supporting.tsx', import.meta.url), 'utf8');
   assert.match(page, /const studio = useStudioTab\(\);/);
