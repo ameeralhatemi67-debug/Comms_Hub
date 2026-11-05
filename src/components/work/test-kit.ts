@@ -119,7 +119,7 @@ export function useTests(account: string): [TestRow[], () => Promise<void>] {
   const load = useCallback(async () => {
     const { data } = await supabase()
       .from('platform_tests')
-      .select('id,privacy,title,kind,state,video_id,post_url,shown_privacy,error,link,scheduled_for,created_by,created_at,done_at,deleted_at')
+      .select('id,privacy,title,kind,state,video_id,post_url,shown_privacy,shown_publish_at,error,link,scheduled_for,created_by,created_at,done_at,deleted_at')
       .eq('account_id', account)
       .order('created_at', { ascending: false })
       .limit(5);

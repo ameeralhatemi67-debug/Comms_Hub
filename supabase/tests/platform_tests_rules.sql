@@ -1,5 +1,6 @@
--- MVP_draft.md section 71 (migration 20261103120000_platform_tests.sql): «تجربة النشر» on a YouTube account. Who may
--- test, what a test may be, that no page reads the upload's address, that every server step needs the server key and the
+-- MVP_draft.md section 71 (migrations 20261103120000_platform_tests.sql and 20261105120000_platform_tests_youtube_choices.sql):
+-- «تجربة النشر» on a YouTube account. Who may test, what a test may be (YouTube's four choices: «خاص», «غير مدرج», «عام» and
+-- «مجدول», private with a time), that no page reads the upload's address, that every server step needs the server key and the
 -- right person, that only a video recorded on the account's own channel can be deleted, and the daily limit. Only
 -- throwaway accounts (@t.test) are touched; the server key is replaced by a throwaway inside the transaction. One
 -- transaction, rolled back at the end. Result: qa/platform-tests-rules.json.
@@ -57,7 +58,7 @@ select pg_temp.t('08 nor a writer', $q$ select public.platform_test_start(pg_tem
 
 -- 2. What a test may be -----------------------------------------------------------------------------------------------
 select pg_temp.who('00000000-0000-0000-0000-0000000000a4');
-select pg_temp.t('09 unlisted is not offered', $q$ select public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p(privacy => 'unlisted')) $q$, 'ERR TEST_INVALID');
+select pg_temp.t('09 a public video has no time: only a private one is scheduled', $q$ select public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p(privacy => 'public') || jsonb_build_object('scheduled_for', (now() + interval '1 day')::text)) $q$, 'ERR TEST_INVALID');
 select pg_temp.t('10 a title with < is refused, as YouTube refuses it', $q$ select public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p(title => 'a<b')) $q$, 'ERR TEST_INVALID');
 select pg_temp.t('11 an empty title', $q$ select public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p(title => '   ')) $q$, 'ERR TEST_INVALID');
 select pg_temp.t('12 a title over 100', $q$ select public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p(title => repeat('ع', 101))) $q$, 'ERR TEST_INVALID');
@@ -186,6 +187,37 @@ select pg_temp.c('73 the address appears in no notice, event or account', ((sele
   + (select count(*) from public.integration_events where data::text like '%TESTMARK%')
   + (select count(*) from public.platform_accounts where row_to_json(platform_accounts)::text like '%TESTMARK%'))::text, '0');
 select pg_temp.c('74 and is dropped from every test that is not uploading', (select count(*)::text from public.platform_tests where state <> 'uploading' and upload_url is not null), '0');
+
+-- 10. YouTube's four choices (20261105120000_platform_tests_youtube_choices.sql) -------------------------------------------
+reset role;
+-- The day's count starts again for this part: the eight earlier tests made for the limit are removed.
+delete from public.platform_tests where title like 'سابقة %';
+set local role authenticated;
+select pg_temp.who('00000000-0000-0000-0000-0000000000a4');
+select pg_temp.t('75 an unlisted test is accepted', $q$ insert into v select 'u1', public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p(1000, 'غير مدرج', 'unlisted')) $q$, 'ok');
+select pg_temp.c('76 recorded unlisted, with no time', (select privacy || ' ' || coalesce(scheduled_for::text, 'none') from public.platform_tests where id = pg_temp.g('u1')::uuid), 'unlisted none');
+select pg_temp.t('77 its upload', $q$ select public.platform_test_session('k-test-run-only', pg_temp.g('u1')::uuid, pg_temp.g('url')) $q$, 'ok');
+select pg_temp.c('78 it arrives', (select public.platform_test_done('k-test-run-only', pg_temp.g('u1')::uuid, 'unlistedV01', 'UCtestchannel', 'unlisted')), 'published');
+select pg_temp.c('79 shown unlisted, with no publish time', (select shown_privacy || ' ' || coalesce(shown_publish_at::text, 'none') from public.platform_tests where id = pg_temp.g('u1')::uuid), 'unlisted none');
+select pg_temp.t('80 an unlisted video has no time', $q$ select public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p(privacy => 'unlisted') || jsonb_build_object('scheduled_for', (now() + interval '1 day')::text)) $q$, 'ERR TEST_INVALID');
+select pg_temp.t('81 a time sooner than ten minutes is refused by name', $q$ select public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p() || jsonb_build_object('scheduled_for', (now() + interval '5 minutes')::text)) $q$, 'ERR SCHEDULE_INVALID');
+select pg_temp.t('82 so is a time already past', $q$ select public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p() || jsonb_build_object('scheduled_for', (now() - interval '1 hour')::text)) $q$, 'ERR SCHEDULE_INVALID');
+select pg_temp.t('83 and one beyond thirty days', $q$ select public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p() || jsonb_build_object('scheduled_for', (now() + interval '31 days')::text)) $q$, 'ERR SCHEDULE_INVALID');
+select pg_temp.t('84 a time that is not a time', $q$ select public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p() || '{"scheduled_for":"next week"}') $q$, 'ERR TEST_INVALID');
+select pg_temp.t('85 a scheduled test is private with its time', $q$ insert into v select 's1', public.platform_test_start(pg_temp.g('yt')::uuid, pg_temp.p(1000, 'مجدول') || jsonb_build_object('scheduled_for', (now() + interval '1 day')::text)) $q$, 'ok');
+select pg_temp.c('86 recorded so', (select privacy || ' ' || (scheduled_for = now() + interval '1 day')::text from public.platform_tests where id = pg_temp.g('s1')::uuid), 'private true');
+select pg_temp.t('87 its upload', $q$ select public.platform_test_session('k-test-run-only', pg_temp.g('s1')::uuid, pg_temp.g('url')) $q$, 'ok');
+select pg_temp.c('88 it arrives with the time YouTube says it will publish at', (select public.platform_test_done('k-test-run-only', pg_temp.g('s1')::uuid, 'schedV00001', 'UCtestchannel', 'private', null, now() + interval '1 day')), 'published');
+select pg_temp.c('89 the page reads both times', (select shown_privacy || ' ' || (shown_publish_at = scheduled_for)::text from public.platform_tests where id = pg_temp.g('s1')::uuid), 'private true');
+reset role;
+select pg_temp.t('90 the table itself refuses a public video with a time', $q$ update public.platform_tests set privacy = 'public' where id = pg_temp.g('s1')::uuid $q$, 'ERR new row for relation "platform_tests" violates check constraint "platform_tests_scheduled_kind"');
+select pg_temp.t('91 and a privacy YouTube does not have', $q$ update public.platform_tests set privacy = 'scheduled' where id = pg_temp.g('u1')::uuid $q$, 'ERR new row for relation "platform_tests" violates check constraint "platform_tests_privacy_check"');
+select pg_temp.c('92 a page may read the publish time YouTube gave', has_column_privilege('authenticated', 'public.platform_tests', 'shown_publish_at', 'select')::text, 'true');
+set local role authenticated;
+select pg_temp.who('00000000-0000-0000-0000-0000000000a2');
+select pg_temp.t('93 the director deletes a scheduled test before its time', $q$ select public.platform_test_deleted('k-test-run-only', pg_temp.g('s1')::uuid) $q$, 'ok');
+reset role;
+select pg_temp.c('94 deleted', (select state from public.platform_tests where id = pg_temp.g('s1')::uuid), 'deleted');
 
 select n, k, v, expect from r where v is distinct from expect
 union all select 0, 'TOTAL', count(*)::text, (count(*) filter (where v is not distinct from expect))::text || ' passed' from r

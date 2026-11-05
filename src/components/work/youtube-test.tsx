@@ -4,24 +4,32 @@
 // The file comes from this device, sent in pieces through the site, or from the library, read by the server itself; the
 // page never holds a token or YouTube's upload address. A community post cannot be published by any outside application,
 // because YouTube's API has no such method: it is written here, copied, and posted on YouTube itself. Who may test is the
-// database's decision (platform_test_may); the panel is drawn for the same people.
+// database's decision (platform_test_may); the panel is drawn for the same people. Since 2026-11-05 a video goes out in one of
+// YouTube's four ways (MVP_draft.md 71.2): «خاص», «غير مدرج», «عام», or «مجدول», private until YouTube itself makes it public.
 import { useRef, useState } from 'react';
 import { Copy, ExternalLink, FolderOpen, Laptop, Link2, Trash2, Upload, X } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import {
   PRIVACY_AR,
   TEST_ERROR_AR,
+  YT_CHOICES,
+  YT_CHOICE_AR,
+  YT_CHOICE_SUB,
   YT_MANAGE_SCOPE,
+  YT_SCHEDULE_MIN_MINUTES,
   channelUrl,
   postsUrl,
+  scheduleProblem,
   studioUrl,
   testProblem,
   videoStudioUrl,
   videoUrl,
-  type TestPrivacy,
+  ytStatus,
   type TestRow,
+  type YtChoice,
 } from '@/lib/platforms/test-rules';
-import type { AccountRow } from '@/lib/work/rules';
+import { whenText } from '@/lib/work/planning';
+import { riyadhInstant, riyadhStamp, type AccountRow } from '@/lib/work/rules';
 import { useWork, type LibraryFile } from './data';
 import { Hint, Ic, LibraryPicker } from './parts';
 import { api, mb, mimeOf, said, useTests, when } from './test-kit';
@@ -30,14 +38,16 @@ type Picked = { from: 'device'; file: File; mime: string } | { from: 'library'; 
 type Phase =
   | { t: 'idle' }
   | { t: 'sending'; pct: number }
-  | { t: 'done'; video: string; privacy: string | null; asked: TestPrivacy }
+  | { t: 'done'; video: string; privacy: string | null; publishAt: string | null; asked: YtChoice }
   | { t: 'error'; text: string; code?: string };
 
 export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: () => void }) {
   const w = useWork();
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<'video' | 'post'>('video');
-  const [privacy, setPrivacy] = useState<TestPrivacy>('private');
+  const [choice, setChoice] = useState<YtChoice>('private');
+  // «مجدول»: a Riyadh date and time, as the schedule dialog takes it.
+  const [slot, setSlot] = useState('');
   const [picked, setPicked] = useState<Picked | null>(null);
   const [picking, setPicking] = useState(false);
   const [title, setTitle] = useState('تجربة نشر');
@@ -61,24 +71,30 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
 
 
   const size = picked ? (picked.from === 'device' ? picked.file.size : null) : null;
+  const at = choice === 'scheduled' && slot ? riyadhInstant(slot) : null;
   const problem =
     kind === 'video'
       ? !picked
         ? 'اختر مقطع الفيديو.'
-        : testProblem({ title, description, size: size ?? 1, mime: picked.from === 'device' ? picked.mime : 'video/mp4' })
+        : (testProblem({ title, description, size: size ?? 1, mime: picked.from === 'device' ? picked.mime : 'video/mp4' }) ??
+          (choice === 'scheduled' ? scheduleProblem(at) : null))
       : null;
+  const soonest = riyadhStamp(new Date(Date.now() + (YT_SCHEDULE_MIN_MINUTES + 1) * 60e3).toISOString()).replace(' ', 'T');
   const sending = phase.t === 'sending';
 
   const send = async () => {
     if (!picked || problem) return;
     stop.current = false;
+    const asked = choice;
+    const status = ytStatus(asked, at);
     setPhase({ t: 'sending', pct: 0 });
     const start = await api('/api/platforms/test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         account: a.id,
-        privacy,
+        privacy: status.privacy,
+        ...(status.publishAt ? { scheduled_for: status.publishAt } : {}),
         title: title.trim(),
         description,
         source: picked.from,
@@ -104,7 +120,7 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
       const body = picked.from === 'device' ? picked.file.slice(from, from + len) : null;
       const r = await api(`/api/platforms/test/${test}?from=${from}`, { method: 'PUT', headers: body ? { 'Content-Type': 'application/octet-stream' } : undefined, body });
       if (r.b.done === true && typeof r.b.video === 'string') {
-        setPhase({ t: 'done', video: r.b.video, privacy: typeof r.b.privacy === 'string' ? r.b.privacy : null, asked: privacy });
+        setPhase({ t: 'done', ...arrived(r.b), asked });
         w.say('وصل مقطع التجربة إلى يوتيوب.');
         return void load();
       }
@@ -120,7 +136,7 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
         const where = await api(`/api/platforms/test/${test}?from=${from}&ask=1`, { method: 'PUT' });
         if (typeof where.b.next === 'number') from = where.b.next;
         else if (where.b.done === true && typeof where.b.video === 'string') {
-          setPhase({ t: 'done', video: where.b.video, privacy: typeof where.b.privacy === 'string' ? where.b.privacy : null, asked: privacy });
+          setPhase({ t: 'done', ...arrived(where.b), asked });
           return void load();
         }
         continue;
@@ -246,18 +262,28 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
             <>
               <div className="yt-row">
                 <span className="yt-lbl" id={`yt-priv-${a.id}`}>
-                  الخصوصية
+                  الظهور
                 </span>
-                <div className="wk-seg" role="group" aria-labelledby={`yt-priv-${a.id}`}>
-                  <button type="button" aria-pressed={privacy === 'private'} disabled={sending} onClick={() => setPrivacy('private')}>
-                    خاص
-                  </button>
-                  <button type="button" aria-pressed={privacy === 'public'} disabled={sending} onClick={() => setPrivacy('public')}>
-                    عام
-                  </button>
+                <div className="wk-seg" role="group" aria-labelledby={`yt-priv-${a.id}`} data-yt="choice">
+                  {YT_CHOICES.map((c) => (
+                    <button key={c} type="button" aria-pressed={choice === c} disabled={sending} data-choice={c} onClick={() => setChoice(c)}>
+                      {YT_CHOICE_AR[c]}
+                    </button>
+                  ))}
                 </div>
               </div>
-              <p className="yt-sub">{privacy === 'private' ? 'لا يراه إلا من يدير القناة.' : 'يراه كل من يزور القناة، ويبقى حتى يُحذف.'}</p>
+              <p className="yt-sub" data-yt="choice-sub">
+                {YT_CHOICE_SUB[choice]}
+              </p>
+              {choice === 'scheduled' && (
+                <>
+                  <label className="pf-f yt-f">
+                    موعد النشر <small>بتوقيت الرياض</small>
+                    <input type="datetime-local" data-yt="when" value={slot} min={soonest} disabled={sending} onChange={(e) => setSlot(e.target.value)} />
+                  </label>
+                  <p className="yt-sub">يُرفع المقطع الآن خاصاً. إن اكتمل الرفع بعد موعده نشره يوتيوب فور اكتماله.</p>
+                </>
+              )}
 
               <div className="yt-file">
                 {picked ? (
@@ -323,11 +349,16 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
                 </div>
               ) : (
                 <div className="pf-acts">
-                  {/* A public test asks for a long press; a private one does not. */}
-                  {privacy === 'public' ? (
+                  {/* What becomes public asks for a long press: a public test, and a scheduled one, which YouTube makes public. */}
+                  {choice === 'public' ? (
                     <button type="button" className="pf-btn pri" data-yt="send" disabled={Boolean(problem)} data-hold={HOLD.platformTestPublic} onClick={() => void send()}>
                       <Upload aria-hidden="true" />
                       نشر التجربة للعموم
+                    </button>
+                  ) : choice === 'scheduled' ? (
+                    <button type="button" className="pf-btn pri" data-yt="send" disabled={Boolean(problem)} data-hold={HOLD.platformTestScheduled} onClick={() => void send()}>
+                      <Upload aria-hidden="true" />
+                      جدولة التجربة
                     </button>
                   ) : (
                     <button type="button" className="pf-btn pri" data-yt="send" disabled={Boolean(problem)} onClick={() => void send()}>
@@ -360,11 +391,12 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
       {phase.t === 'done' && (
         <div className="pf-note ok yt-done" role="status" data-yt="done">
           <span>
-            وصل المقطع إلى القناة{phase.privacy ? ` (${PRIVACY_AR[phase.privacy] ?? phase.privacy})` : ''}. قد يحتاج يوتيوب دقائق لمعالجته قبل أن يُشاهَد.
+            {phase.asked === 'scheduled' && phase.publishAt
+              ? `وصل المقطع إلى القناة خاصاً، ويجعله يوتيوب عاماً ${whenText(phase.publishAt)} بتوقيت الرياض.`
+              : `وصل المقطع إلى القناة${phase.privacy ? ` (${PRIVACY_AR[phase.privacy] ?? phase.privacy})` : ''}.`}{' '}
+            قد يحتاج يوتيوب دقائق لمعالجته قبل أن يُشاهَد.
           </span>
-          {phase.asked === 'public' && phase.privacy && phase.privacy !== 'public' && (
-            <span className="yt-sub">طلبت «عام» فأبقاه يوتيوب «{PRIVACY_AR[phase.privacy] ?? phase.privacy}». غيّر خصوصيته من YouTube Studio إن شئت.</span>
-          )}
+          {keptNote(phase) && <span className="yt-sub">{keptNote(phase)}</span>}
           <span className="pf-acts">
             <a className="pf-link" href={videoUrl(phase.video)} target="_blank" rel="noopener noreferrer">
               <ExternalLink aria-hidden="true" />
@@ -394,7 +426,7 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
                 </b>
                 <small>
                   {t.state === 'published'
-                    ? `منشور · ${PRIVACY_AR[t.shown_privacy ?? t.privacy ?? ''] ?? ''}`
+                    ? listState(t)
                     : t.state === 'deleted'
                       ? 'حُذف من يوتيوب'
                       : t.state === 'uploading'
@@ -442,4 +474,32 @@ export function YouTubeTest({ a, onReconnect }: { a: AccountRow; onReconnect: ()
       )}
     </section>
   );
+}
+
+/** What YouTube answered with the last byte: the video, the privacy it gave, and its publish time. */
+function arrived(b: Record<string, unknown>) {
+  return {
+    video: String(b.video),
+    privacy: typeof b.privacy === 'string' ? b.privacy : null,
+    publishAt: typeof b.publishAt === 'string' ? b.publishAt : null,
+  };
+}
+
+/** When YouTube kept the video narrower than asked: said, with where to change it. */
+function keptNote(p: { asked: YtChoice; privacy: string | null; publishAt: string | null }): string | null {
+  if (p.asked === 'scheduled')
+    return p.publishAt ? null : `طلبت «${YT_CHOICE_AR.scheduled}» فأبقاه يوتيوب «${PRIVACY_AR[p.privacy ?? 'private'] ?? p.privacy}» بلا موعد. اضبط موعده من YouTube Studio إن شئت.`;
+  if (!p.privacy || p.privacy === p.asked) return null;
+  return `طلبت «${YT_CHOICE_AR[p.asked]}» فأبقاه يوتيوب «${PRIVACY_AR[p.privacy] ?? p.privacy}». غيّر خصوصيته من YouTube Studio إن شئت.`;
+}
+
+/** A published test in the list: its privacy, or for «مجدول» the time YouTube gave, before and after it comes. */
+function listState(t: TestRow): string {
+  if (t.privacy === 'private' && t.scheduled_for) {
+    if (!t.shown_publish_at) return `${YT_CHOICE_AR.scheduled} · أبقاه يوتيوب خاصاً بلا موعد`;
+    return Date.parse(t.shown_publish_at) > Date.now()
+      ? `${YT_CHOICE_AR.scheduled} · يصبح عاماً ${whenText(t.shown_publish_at)}`
+      : `${YT_CHOICE_AR.scheduled} · حلّ موعده ${whenText(t.shown_publish_at)}`;
+  }
+  return `منشور · ${PRIVACY_AR[t.shown_privacy ?? t.privacy ?? ''] ?? ''}`;
 }

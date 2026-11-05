@@ -6,7 +6,7 @@ tags:
   - document/progress
   - knowledge/dated
 created: 2026-08-18
-updated: 2026-11-02
+updated: 2026-11-05
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -3805,3 +3805,37 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Verified.** `node qa/studio-export-writes.mjs`: 9 of 9. `npm run typecheck` clean.
 - **Not run, as the change is a probe and documents only:** the build and `npm test`. Port 3000 is shared and Fork 1's
   checks are running, and nothing under `src/` changed. Nothing pushed.
+
+### 2026-11-05: the director's notes approved, and step 1 built: «غير مدرج» and «مجدول» in YouTube's «تجربة النشر» (N-3)
+
+- **Owner decision.** The owner approved `Director_Notes_Plan.md` (committed `de6dde0`) with the recommended answer to all five
+  questions: calendar colours are personal and kept in the database (Q1); «نشر مباشر» is the director's and the Admin's only,
+  fixed (Q2); a scheduled Instagram post is fired by the WhatsApp bridge's loop, or at the next opening of the site, said as late
+  (Q3); thumbnails are kept in the database (Q4); the YouTube choice in the work cycle needs no new approval (Q5). Step 1 of its
+  section 6 was asked for first.
+- **Deviation from the specification, by that directive.** `MVP_draft.md` 71.2 said «غير مدرج» is not offered and
+  `supabase/tests/platform_tests_rules.sql` test 09 enforced it. Both are revised: the YouTube test now offers YouTube's four
+  choices, «خاص» (default), «غير مدرج», «عام» and «مجدول».
+- **What was built.**
+  - Migration `20261105120000_platform_tests_youtube_choices.sql` (written, **not applied** to comms-hub): `privacy` may be
+    `unlisted`; a YouTube test may carry `scheduled_for` only when private; the window is 10 minutes to 30 days ahead, refused
+    as `SCHEDULE_INVALID`; `shown_publish_at` keeps the time YouTube answered; `platform_test_done` takes `p_publish_at`.
+  - «مجدول» is YouTube's `status.publishAt` on a private video (videos resource, read 2026-11-05 through Context7): YouTube
+    makes it public by itself, so the site needs no timer. Rules in `src/lib/platforms/test-rules.ts` (`YT_CHOICES`, `ytStatus`,
+    `scheduleProblem`), the request in `youtube.ts` (`ytUploadStatus`, which never sends a time with anything but private), the
+    routes, the panel `src/components/work/youtube-test.tsx`, and a new hold reason `platformTestScheduled`.
+  - The result and «آخر التجارب» say when YouTube kept a video narrower than asked, including a scheduled video given no time.
+- **Verified.**
+  - `npm run typecheck` clean; `npm run build` clean; `npm test` 882 of 882 (`tests/youtube-test.test.mjs` 13 of 13, two new).
+  - SQL rules on a private container with every migration replayed (67): `platform_tests_rules.sql` 95 of 95 (20 new cases,
+    75 to 94, and test 09 rewritten), `platform_tests_instagram_rules.sql` 62 of 62, `platform_tests_facebook_rules.sql` 48 of 48.
+    Results in `qa/platform-tests-rules.json`, `qa/platform-tests-instagram-rules.json`, `qa/platform-tests-facebook-rules.json`.
+  - `node qa/youtube-test-flow.cjs`: 68 of 68 on the fixture (19 new: the four choices in order, unlisted sent with no time,
+    the time field in Riyadh time, refusals under 10 minutes and over 30 days, the hold, the instant sent, the result and the
+    list, and a scheduled video YouTube gave no time). Result `qa/youtube-test-flow.json`, pictures under
+    `qa/artifacts/youtube-test-flow/`.
+- **Not verified.** Nothing was tried against YouTube itself. Google's pages disagree on whether an unaudited application may
+  upload anything but private (the 2020 revision note says no, today's reference says yes); the first real unlisted or scheduled
+  test settles it, and the panel says what YouTube applied.
+- **Before deploying.** Apply the migration first: the panel now selects `shown_publish_at`, so the code without it would empty
+  every platform's «آخر التجارب». Nothing pushed.

@@ -5,6 +5,8 @@
 //   scopes=upload  the channel was connected before the delete permission;   flaky=1  the second piece is lost once;
 //   role=publisher / role=other  the account's own publisher / a publisher who is not on it;   off=1  needs reconnecting;
 //   slow=1  each piece takes 400 ms, so an upload can be cancelled half way.
+// YouTube's answer to the last byte: «غير مدرج» is kept unlisted, «مجدول» private with its time (none when the title is «بلا موعد»),
+// and every other choice private, as YouTube does for an application it has not audited.
 // The rules themselves are the database's (supabase/tests/platform_tests_rules.sql) and the routes' (tests/youtube-test.test.mjs).
 import { useSyncExternalStore } from 'react';
 import { setPlatformRegistry, type AccountRow, type PlatformInfo } from '../../src/lib/work/rules';
@@ -23,7 +25,10 @@ const yt: AccountRow = {
   active: true, fixed: false, conn_kind: 'oauth', conn_state: q.get('off') ? 'needs_reconnect' : 'connected', conn_checked_at: later(-0.01), conn_error: q.get('off') ? 'TOKEN_REFUSED' : null,
   external_id: 'UCfixturechannel000000', external_name: 'جمعية هداية', scopes: q.get('scopes') === 'upload' ? FULL.slice(0, 2) : FULL,
 };
-type Test = { id: string; privacy: string; title: string; state: string; video_id: string | null; shown_privacy: string | null; error: string | null; created_by: string; created_at: string; deleted_at: string | null; size: number; piece: number; got: number; lost: boolean };
+type Test = {
+  id: string; privacy: string; title: string; state: string; video_id: string | null; shown_privacy: string | null; shown_publish_at: string | null;
+  scheduled_for: string | null; error: string | null; created_by: string; created_at: string; deleted_at: string | null; size: number; piece: number; got: number; lost: boolean;
+};
 const db = {
   tests: [] as Test[],
   calls: [] as { method: string; url: string; body: unknown; bytes: number }[],
@@ -62,8 +67,13 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   if (url === '/api/platforms/test' && method === 'POST') {
     if (ME === 'pub2@example.test') return reply({ error: 'تجربة النشر لمن يدير الحسابات ولمن ينشر على هذه القناة.', code: 'FORBIDDEN' }, 403);
     if (body.title === 'أعد الربط') return reply({ error: 'لم يأذن Google للموقع بهذا بعد. أعد ربط القناة مرة واحدة ووافق على كل الصلاحيات.', code: 'SCOPE_MISSING' }, 403);
+    if (body.scheduled_for != null && body.privacy !== 'private') return reply({ error: 'بيانات التجربة ناقصة أو غير صالحة.', code: 'TEST_INVALID' }, 400);
     const size = body.source === 'library' ? 600 * 1024 : body.size;
-    const t: Test = { id: `00000000-0000-4000-8000-${String(db.tests.length + 1).padStart(12, '0')}`, privacy: body.privacy, title: body.title, state: 'uploading', video_id: null, shown_privacy: null, error: null, created_by: ME, created_at: new Date().toISOString(), deleted_at: null, size, piece: PIECE, got: 0, lost: false };
+    const t: Test = {
+      id: `00000000-0000-4000-8000-${String(db.tests.length + 1).padStart(12, '0')}`, privacy: body.privacy, title: body.title, state: 'uploading', video_id: null,
+      shown_privacy: null, shown_publish_at: null, scheduled_for: body.scheduled_for ?? null, error: null, created_by: ME, created_at: new Date().toISOString(), deleted_at: null,
+      size, piece: PIECE, got: 0, lost: false,
+    };
     db.tests.push(t);
     changed();
     return reply({ test: t.id, size, piece: PIECE });
@@ -85,9 +95,11 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     }
     t.got = from + len;
     if (t.got < t.size) return reply({ next: t.got });
-    Object.assign(t, { state: 'published', video_id: 'dQw4w9WgXcQ', shown_privacy: 'private' });
+    const shown = t.privacy === 'unlisted' ? 'unlisted' : 'private';
+    const publishAt = t.scheduled_for && t.title !== 'بلا موعد' ? t.scheduled_for : null;
+    Object.assign(t, { state: 'published', video_id: 'dQw4w9WgXcQ', shown_privacy: shown, shown_publish_at: publishAt });
     changed();
-    return reply({ done: true, video: 'dQw4w9WgXcQ', privacy: 'private' });
+    return reply({ done: true, video: 'dQw4w9WgXcQ', privacy: shown, publishAt });
   }
   if (method === 'DELETE') {
     if (t.state === 'uploading') {
