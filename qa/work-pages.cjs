@@ -37,7 +37,7 @@ const sources = [
   'components/work/post-preview.tsx', 'components/work/connect.tsx',
   'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts',
   // «المنصات» and «حسابات المنصات» redesigned: the sheet, the marks, the words of a sign-in
-  'components/sheet.tsx', 'components/platform-icon.tsx', 'lib/setup-guides.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts', 'lib/native/notices.ts',
+  'components/sheet.tsx', 'components/platform-icon.tsx', 'components/file-thumb.tsx', 'lib/media/thumbs.ts', 'components/guide-text.tsx', 'lib/guide-text.ts', 'lib/setup-guides.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts', 'lib/native/notices.ts',
   // The studio's third round, Phase 9: the review player, its keys, the queue, notes, the key hold
   'components/work/review-player.tsx', 'lib/work/queue.ts', 'lib/work/review-keys.ts', 'lib/studio/shortcuts.ts',
   'lib/media/notes.ts', 'lib/kit/hold.ts', 'lib/kit/layer.ts', 'lib/motion/preview.js',
@@ -65,7 +65,10 @@ for (const m of sources) {
     .replace(/from '\.\.\/studio\/work-links'/g, `from '${up}mocks/studio-links.js'`)
     // the channels page's setup guide has its own check (tests/setup-guides.test.mjs)
     .replace(/from '\.\.\/setup-guide'/g, `from '${up}mocks/setup-guide.js'`)
-    .replace(/from '\.\.\/(sheet|platform-icon)'/g, "from '../$1.js'")
+    // the account sheet's «تجربة النشر» panels have their own checks (qa/youtube-test-flow.cjs, instagram-, facebook-)
+    .replace(/from '\.\/(youtube-test|instagram-test|facebook-test)'/g, `from '${up}mocks/test-panels.js'`)
+    .replace(/from '\.\.\/(sheet|platform-icon|file-thumb)'/g, "from '../$1.js'")
+    .replace(/from '\.\/guide-text'/g, "from './guide-text.js'")
     .replace(/from '(\.\.?)\/writing\/(doc-view|api)'/g, "from '$1/writing/$2.js'")
     .replace(/from '\.\/api'/g, "from './api.js'")
     .replace(/from 'next\/dynamic'/g, `from '${up}mocks/dynamic.js'`)
@@ -85,6 +88,7 @@ fs.writeFileSync(path.join(build, 'mocks', 'navigation.js'), `export const useRo
 export const usePathname = () => '/approvals';
 export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search || '');`);
 fs.writeFileSync(path.join(build, 'mocks', 'setup-guide.js'), 'export const SetupGuide = () => null;');
+fs.writeFileSync(path.join(build, 'mocks', 'test-panels.js'), ['YouTubeTest', 'InstagramTest', 'FacebookTest'].map((n) => `export const ${n} = () => null;`).join(' '));
 fs.writeFileSync(path.join(build, 'mocks', 'dynamic.js'), 'export default () => () => null;');
 // The shells around the site: a browser has none (tests/native.test.mjs holds the real ones).
 fs.mkdirSync(path.join(build, 'lib', 'native'), { recursive: true });

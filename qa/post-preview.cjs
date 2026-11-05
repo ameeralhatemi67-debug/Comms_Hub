@@ -27,7 +27,7 @@ const sources = [
   'components/work/post-preview.tsx', 'components/work/connect.tsx', 'components/work/channels.tsx', 'components/work/parts.tsx', 'components/work/plan.tsx',
   'lib/work/rules.ts', 'lib/work/planning.ts', 'lib/work/drag.ts', 'lib/media/rules.ts', 'lib/domain.ts', 'lib/kit/hold-reasons.ts',
   'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts',
-  'components/sheet.tsx', 'components/platform-icon.tsx', 'lib/setup-guides.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts',
+  'components/sheet.tsx', 'components/platform-icon.tsx', 'components/file-thumb.tsx', 'lib/media/thumbs.ts', 'components/guide-text.tsx', 'lib/guide-text.ts', 'lib/setup-guides.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts',
 ];
 for (const m of sources) {
   const src = fs.readFileSync(path.join(root, 'src', m), 'utf8');
@@ -42,8 +42,11 @@ for (const m of sources) {
     .replace(/from 'next\/navigation'/g, `from '${up}mocks/navigation.js'`)
     .replace(/from '\.\/data'/g, `from '${up}mocks/data.js'`)
     .replace(/from '\.\.\/perm-requests'/g, `from '${up}mocks/perm-requests.js'`)
-    .replace(/from '\.\.\/(sheet|platform-icon)'/g, "from '../$1.js'")
+    .replace(/from '\.\.\/(sheet|platform-icon|file-thumb)'/g, "from '../$1.js'")
+    .replace(/from '\.\/guide-text'/g, "from './guide-text.js'")
     .replace(/from '\.\.\/setup-guide'/g, `from '${up}mocks/setup-guide.js'`)
+    // the account sheet's «تجربة النشر» panels have their own checks (qa/youtube-test-flow.cjs, instagram-, facebook-)
+    .replace(/from '\.\/(youtube-test|instagram-test|facebook-test)'/g, `from '${up}mocks/test-panels.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
     .replace(/from '(\.\/(?:plan|parts|post-preview|connect))'/g, "from '$1.js'");
@@ -61,6 +64,7 @@ export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search 
 fs.writeFileSync(path.join(build, 'mocks', 'supabase.js'), `const chain = new Proxy(function () {}, { get: () => chain, apply: () => chain });
 export const supabase = () => chain;`);
 fs.writeFileSync(path.join(build, 'mocks', 'setup-guide.js'), 'export const SetupGuide = () => null;');
+fs.writeFileSync(path.join(build, 'mocks', 'test-panels.js'), ['YouTubeTest', 'InstagramTest', 'FacebookTest'].map((n) => `export const ${n} = () => null;`).join(' '));
 fs.writeFileSync(path.join(build, 'mocks', 'perm-requests.js'), 'export const usePermRequests = () => ({ list: [], status: "ready", reload: async () => {} });');
 fs.writeFileSync(path.join(build, 'mocks', 'data.js'), `export const useWork = () => globalThis.__WK.ctx;
 export const useWorkList = () => ({ items: globalThis.__WK.items, status: 'ready', reload: async () => {} });

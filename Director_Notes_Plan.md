@@ -1,7 +1,8 @@
 # Director's notes: plan for approval (2026-11-05)
 
 Status: approved by the owner on 2026-11-05, with the recommended answer to every question in section 5 (Q1 to Q5). Step 1 of
-section 6 is being built first.
+section 6 is built (`68244c2`, its migration applied to comms-hub), step 2 (thumbnails) is built on local main with its migration
+not applied, and step 3 (calendar colours) is being built in its own session.
 
 The director asked for four things:
 

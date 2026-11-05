@@ -9,11 +9,12 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Check, ClipboardCopy, Film, Image as ImageIcon, Info, Lock, TriangleAlert } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
-import { checkFor, copyFor, type Copy, type CopySource } from '@/lib/platforms/copies';
+import { checkFor, copyFor, publishedVersion, type Copy, type CopySource } from '@/lib/platforms/copies';
 import { foldOf, headline, layoutOf, splitTitle, LEVEL_AR, type Check as CheckResult, type Limits } from '@/lib/platforms/limits';
 import { MODE_AR, MODE_HELP_AR } from '@/lib/platforms/info';
 import { accountName, platformInfo, platformLabels, type AccountRow } from '@/lib/work/rules';
 import { Ic } from './parts';
+import { FileThumb } from '../file-thumb';
 
 const NOTE = 'معاينة تقريبية: الطول والحدود وترتيب العناصر دقيقة، أما الشكل فتقريبي. الملفات مواضع محجوزة.';
 
@@ -58,25 +59,28 @@ export function CheckList({ check, limits }: { check: CheckResult; limits?: Limi
   );
 }
 
+/** The post's media as the platform shows it first: the first picture or video's own thumbnail, with the counts on it. */
 function MediaBlock({ c }: { c: Copy }) {
   const n = c.images + c.videos;
   if (n === 0 && c.hidden === 0) return <div className="wk-pv-media none">بلا ملف</div>;
+  const first = c.files.find((f) => f.id && publishedVersion(f) && (f.kind === 'image' || f.kind === 'video'));
   return (
-    <div className="wk-pv-media">
+    <div className={`wk-pv-media${first ? ' has-pic' : ''}`}>
+      {first && <FileThumb of={{ asset: first.id!, version: publishedVersion(first)! }} kind={first.kind} name={first.name} className="wk-pv-pic" />}
       {c.videos > 0 && (
-        <span>
+        <span className="cnt">
           <Ic i={Film} />
           {c.videos === 1 ? 'فيديو' : `${c.videos} فيديو`}
         </span>
       )}
       {c.images > 0 && (
-        <span>
+        <span className="cnt">
           <Ic i={ImageIcon} />
           {c.images === 1 ? 'صورة' : `${c.images} صور`}
         </span>
       )}
       {c.hidden > 0 && (
-        <span>
+        <span className="cnt">
           <Ic i={Lock} />
           {c.hidden} في مجلد لا تصل إليه
         </span>
@@ -240,6 +244,9 @@ export function PublishPack({ platform, copy }: { platform: string; copy: Copy }
         <ul>
           {copy.files.map((f, i) => (
             <li key={f.id ?? i}>
+              <span className="wk-pk-th">
+                <FileThumb of={f.id && publishedVersion(f) ? { asset: f.id, version: publishedVersion(f)! } : null} kind={f.kind} name={f.name} />
+              </span>
               {f.id ? <Link href={`/media/${f.id}`}>{f.name ?? 'ملف'}</Link> : (f.name ?? 'ملف')} <small>({f.kind === 'video' ? 'فيديو' : f.kind === 'image' ? 'صورة' : 'ملف'})</small>
             </li>
           ))}

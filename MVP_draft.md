@@ -3868,3 +3868,49 @@ says so and offers no test.
 Ten tests per Page a day, as YouTube's and Instagram's, beside Meta's 30 Reels a day. Meta's refusals are worded by its error
 codes; a permissions refusal names the two usual causes: the person who connected cannot create content on the Page, or the
 Page waits for Page Publishing Authorization.
+
+# 77. Thumbnails of stored files, 2026-11-05
+
+By owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-4, answer Q4): a stored file is never shown as a name alone. Every
+library version, and every file sent in mail or messaging, has a small picture, or a tile that says what it is. Sections 74 to 76
+are kept for the plan's other notes (calendar colours, quick actions, YouTube's four choices in the work cycle).
+
+## 77.1 The picture
+
+- One per library version, or per mail or messaging file: WebP, 320 pixels on its longest side, never larger than the original,
+  64 bytes to 48 KB. JPEG when the browser does not write WebP; PNG only from Drive.
+- **Drawn by the uploader's browser, while the file travels.** A picture is drawn smaller; a video gives its frame a tenth of the
+  way in, never later than 3 seconds, so a fade from black is passed. A picture with transparency sits on white. The browser
+  gives up after 8 seconds on a video it cannot decode. The picture is saved once the file is registered, and a failure never
+  fails the upload.
+- **Asked of Drive for everything else** (documents, files uploaded before this, a phone's upload, a video the browser could not
+  read): the first time the picture is wanted, the site's server asks Drive for its own thumbnail of the file, with the token, and
+  keeps a copy. When Drive has none, that is remembered for a day, so a page of tiles does not ask again.
+- **No picture:** the tile. The library keeps its coloured tile with the kind's icon. Elsewhere the tile shows the kind's icon and
+  the file's extension («PDF»). A video's picture carries a small play mark.
+
+## 77.2 Who sees it
+
+- Exactly who may see the file: a library file by its folder's level, a mail or messaging file by the mail and room it is on.
+  Internal mail stays private from administrators, as the file does. No page grant is asked, so a library card in messaging shows
+  its picture to whoever may see the file, which fixes the broken tile for people without «مكتبة الوسائط».
+- Only who uploaded a version, or a file, saves its picture from the browser. They may replace their own, or the server's, never
+  another person's. Only the site's server, with its key, keeps Drive's picture, and never over one already there.
+- A thumbnail goes with its file, and is not part of a backup: it is made again from the file (`BACKUP_EXCLUDED`).
+
+## 77.3 Where it shows
+
+- «مكتبة الوسائط»: the cards, the list and the board show the thumbnail, never the whole file, so a page of cards stays light. On a
+  file's page the picture is shown whole, a video has its thumbnail as its poster, and every version in «الإصدارات» has its own.
+- The library picker everywhere it opens («إنشاء», the work page, «تجربة النشر»), «إنشاء»'s chosen files, the work page's files.
+- The review screen: each file part's header shows the version under review; a document under review shows its picture, not its
+  name; the player's video has its poster.
+- The post preview shows the first picture or video of the post (its approved version) under the counts; «حزمة النشر» lists each
+  file with its picture.
+- Mail: attachments, library cards in a thread and in the composer, and the composer's library picker.
+- «المراسلة»: a picture in a room shows its thumbnail first and the whole picture when it is opened; a file shows its picture; the
+  room's gallery shows library files by their pictures.
+- The studio's library list.
+- «تجربة النشر»: the chosen file, drawn in the browser before anything is sent when it comes from this device.
+- Not yet: the library's upload tray, the studio's project list, a test's «آخر التجارب», and a received Gmail attachment, which
+  is not stored by the site.

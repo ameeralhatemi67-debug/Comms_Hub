@@ -132,7 +132,7 @@
 .ml .b-img{display:block;border:0;padding:0;background:none;border-radius:10px;overflow:hidden;cursor:zoom-in;margin:2px 0;max-width:320px;width:100%;min-height:0}
 .b-img img{display:block;width:100%;max-height:360px;object-fit:cover}
 .b-file{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent);min-width:220px;margin:2px 0;color:var(--ink)}
-.b-file .fi{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--soft);color:var(--green-text)}
+.b-file .fi{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--soft);color:var(--green-text);overflow:hidden;flex:none}
 .b-file b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
 .b-file small{color:var(--muted);font-size:11.5px}
 .voice{display:grid;grid-template-columns:36px minmax(140px,1fr) auto;gap:10px;align-items:center;min-width:240px;padding:2px 0}

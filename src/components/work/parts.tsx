@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { priorityLabels, statusLabels, type Priority, type WorkStatus, type WorkType } from '@/lib/work/rules';
 import { libraryFiles, type LibraryFile } from './data';
+import { FileThumb } from '../file-thumb';
 
 export const TYPE_ICON: Record<WorkType, LucideIcon> = {
   post: Send,
@@ -156,7 +157,9 @@ export function LibraryPicker({ have, only, note, onPick, onClose }: { have: str
         {files?.length === 0 && <p className="wk-col-hint">لا ملفات تطابق البحث في المجلدات التي تصل إليها.</p>}
         {files?.map((f) => (
           <button type="button" key={f.id} disabled={have.includes(f.id)} onClick={() => onPick(f)}>
-            <Ic i={f.kind === 'video' ? Film : f.kind === 'image' ? ImageIcon : FileText} />
+            <span className="wk-pth">
+              <FileThumb of={{ asset: f.id, version: f.current_version }} kind={f.kind} name={f.name} />
+            </span>
             <span className="grow">
               <b>{f.name}</b>
               <small> · الإصدار {f.current_version}{have.includes(f.id) ? ' · مرتبط' : ''}</small>

@@ -23,6 +23,8 @@ import { useAccount } from '@/lib/account-context';
 import { useCaps } from '../caps';
 import { askFor } from '@/lib/kit/need';
 import { REQUEST_HOURS, askable, capLabel, capability, howAr } from '@/lib/permissions';
+import { FileThumb } from '../file-thumb';
+import { kindOfMime } from '@/lib/media/thumbs';
 
 export type CardDraft =
   | { type: 'task'; what: string; assignee: string; due: string; priority: 'normal' | 'urgent' }
@@ -391,7 +393,9 @@ export function Composer({
           <div className="ml-atts">
             {d.files.map((f) => (
               <span key={f.id} className="ml-att">
-                <I n="file" />
+                <span className="ml-ath">
+                  <FileThumb of={{ mailFile: f.id }} kind={kindOfMime(f.mime_type)} name={f.name} />
+                </span>
                 <span>{f.name}</span>
                 <small>{fileSize(f.size_bytes)} · Drive</small>
                 <button type="button" aria-label="إزالة" onClick={() => set({ files: d.files.filter((x) => x.id !== f.id) })}>
@@ -420,7 +424,7 @@ export function Composer({
             <div key={id} className="ml-refwrap">
               <div className="ml-ref">
                 <span className="th">
-                  <I n={a?.kind === 'video' ? 'film' : a?.kind === 'image' ? 'image' : 'file'} />
+                  <FileThumb of={a ? { asset: a.id, version: a.current_version } : null} kind={a?.kind} name={a?.name} />
                 </span>
                 <span>
                   <b>{a?.name ?? 'أصل'}</b>
@@ -679,7 +683,7 @@ function Panel({
             {m.assets.map((a) => (
               <button type="button" key={a.id} disabled={refs.includes(a.id)} onClick={() => onRef(a.id)}>
                 <span className="th">
-                  <I n={a.kind === 'video' ? 'film' : a.kind === 'image' ? 'image' : 'file'} />
+                  <FileThumb of={{ asset: a.id, version: a.current_version }} kind={a.kind} name={a.name} />
                 </span>
                 <span>
                   <b>{a.name}</b>

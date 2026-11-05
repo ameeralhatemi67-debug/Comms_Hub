@@ -1,6 +1,6 @@
 {
   "script": "qa/instagram-test-flow.cjs",
-  "run": "2026-11-03T11:00:23.487Z",
+  "run": "2026-11-05T07:47:25.055Z",
   "checks": [
     {
       "name": "a link to the account on Instagram, by its username, in a new tab",
@@ -40,7 +40,7 @@
     {
       "name": "a picture is redrawn to JPEG before it goes",
       "pass": true,
-      "detail": "لقطة.png\nمن هذا الجهاز · JPEG · 0.0 ميغابايت"
+      "detail": "PNG\nلقطة.png\nمن هذا الجهاز · JPEG · 0.0 ميغابايت"
     },
     {
       "name": "a Story asks for its own long press",
@@ -80,7 +80,7 @@
     {
       "name": "the list shows the Story and when it disappears",
       "pass": true,
-      "detail": "تجربة قصة\nقصة · تختفي 04‏/11‏/2026، 2:00 م · 03‏/11‏/2026، 2:00 م · مدير الفحص\nحذف"
+      "detail": "تجربة قصة\nقصة · تختفي 06‏/11‏/2026، 10:47 ص · 05‏/11‏/2026، 10:47 ص · مدير الفحص\nحذف"
     },
     {
       "name": "a post asks for a caption with counters, and alt text",
@@ -120,7 +120,7 @@
     {
       "name": "for a Reel the library offers videos only",
       "pass": true,
-      "detail": "[\"مقطع الحملة.mp4\\n· الإصدار 3\"]"
+      "detail": "[\"MP4\\nمقطع الحملة.mp4\\n· الإصدار 3\"]"
     },
     {
       "name": "the library video is named with where it is",

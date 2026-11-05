@@ -58,6 +58,7 @@ import { ReviewPlayer, type PlayerStart } from './review-player';
 import { Av, Empty, Hint, Ic, Modal } from './parts';
 import { CopyStrip, PreviewOfWork } from './post-preview';
 import { TextShow } from '../writing/doc-view';
+import { FileThumb } from '../file-thumb';
 
 const KIND_ICON: Record<string, LucideIcon> = { text: FileText, copy: Send, asset: ImageIcon, dest: Users, date: Clock };
 /** The version number of a file part («v3» to 3). */
@@ -520,7 +521,11 @@ function PartRowView({
     <article className="wk-rrow">
       <div className="rh">
         <span className="ri">
-          <Ic i={KIND_ICON[p.kind] ?? FileText} />
+          {p.kind === 'asset' ? (
+            <FileThumb of={{ asset: p.key.slice(2), version: verOf(p) }} kind={d.assets.find((x) => x.asset_id === p.key.slice(2))?.file?.kind} name={p.label} />
+          ) : (
+            <Ic i={KIND_ICON[p.kind] ?? FileText} />
+          )}
         </span>
         <span>
           <b>{p.label}</b>
@@ -751,7 +756,10 @@ function AssetReview({ d, p, prev, notes, onNote, canNote, active = false, onAct
             // eslint-disable-next-line @next/next/no-img-element
             <img src={`/api/media/${id}/content?v=${file.current_version}`} alt={file.name} />
           ) : (
-            <span>{file.name}</span>
+            <span className="wk-rdoc">
+              <FileThumb of={{ asset: id, version: verOf(p) }} kind={file.kind} name={file.name} />
+              <span>{file.name}</span>
+            </span>
           )}
         </div>
         {meta}

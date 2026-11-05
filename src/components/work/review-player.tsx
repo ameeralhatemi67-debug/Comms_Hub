@@ -16,6 +16,7 @@ import { keyHoldEnd, keyHoldStart } from '@/lib/kit/hold';
 import { addNote, areaOf, noteMs, noteTime, setNoteDone, type Note, type NoteArea } from '@/lib/media/notes';
 import { typingTarget } from '@/lib/studio/shortcuts';
 import { contentBox, frameLength, isReels, markAt, matchReviewKey, pictureFraction, playerTime, reviewKeyLabel } from '@/lib/work/review-keys';
+import { thumbUrl } from '@/lib/media/thumbs';
 
 type VideoWithFrames = HTMLVideoElement & { requestVideoFrameCallback?: (cb: (now: number, meta: { mediaTime: number }) => void) => number; cancelVideoFrameCallback?: (h: number) => void };
 
@@ -341,7 +342,7 @@ export function ReviewPlayer({
           </div>
         )}
         <div className="wk-rp-stage" ref={stage}>
-          <video ref={video} controls preload="metadata" playsInline src={src(version)} aria-label={`${name}، الإصدار ${version}`} />
+          <video ref={video} controls preload="metadata" playsInline src={src(version)} poster={kind === 'video' ? thumbUrl({ asset: assetId, version }) : undefined} aria-label={`${name}، الإصدار ${version}`} />
           {picture && (
             <canvas
               ref={over}

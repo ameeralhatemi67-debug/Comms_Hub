@@ -10,10 +10,12 @@ export type CopySource = {
   type: string;
   texts: { n: number; body: string }[];
   variants: { platform: string; n: number; body: string }[];
-  assets: { file: { kind: string; id?: string; name?: string } | null }[];
+  assets: { file: { kind: string; id?: string; name?: string; current_version?: number; approved_version?: number | null } | null }[];
 };
 
-export type CopyFile = { id?: string; name?: string; kind: string };
+export type CopyFile = { id?: string; name?: string; kind: string; current_version?: number; approved_version?: number | null };
+/** The version a file is published at: the approved one, else the current one. */
+export const publishedVersion = (f: CopyFile) => f.approved_version ?? f.current_version ?? null;
 
 export type Copy = {
   platform: string;

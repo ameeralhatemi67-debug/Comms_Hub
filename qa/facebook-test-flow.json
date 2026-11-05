@@ -1,6 +1,6 @@
 {
   "script": "qa/facebook-test-flow.cjs",
-  "run": "2026-11-03T10:59:40.936Z",
+  "run": "2026-11-05T07:48:48.798Z",
   "checks": [
     {
       "name": "a link to the Page on Facebook, by its id, in a new tab",
@@ -75,7 +75,7 @@
     {
       "name": "for a photo the library offers pictures only",
       "pass": true,
-      "detail": "[\"صورة الغلاف.png\\n· الإصدار 1\"]"
+      "detail": "[\"PNG\\nصورة الغلاف.png\\n· الإصدار 1\"]"
     },
     {
       "name": "a library picture is redrawn to JPEG here",
