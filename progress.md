@@ -4372,3 +4372,29 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     - `qa/post-preview.cjs` **202 of 202**.
 - **Not checked.** Nothing signed in on the live site. Nothing reaches YouTube from a work, by design.
 - **Now.** Steps 1 to 5 of the director's notes are built. Nothing of this entry is pushed, and its migration waits for the owner.
+
+### 2026-11-05: work_youtube_choices applied to comms-hub (director's notes, step 5)
+
+- **Owner decision.** «Apply the migration», for `20261105230000_work_youtube_choices.sql`.
+- **Before.** Read-only, on comms-hub:
+  - nothing after `direct_schedule`;
+  - none of the new columns or functions existed;
+  - `work_publish` had its one form;
+  - the site held one work, with no results, and one YouTube channel.
+- **Applied** through the Supabase connector as version `20261105120224`. The stored statement's md5 equals the file's (`63a246ea…`).
+  - It adds two columns and four functions, makes `work_publish(text, text)` a call to the new three-argument form, and replaces
+    `work_run_publish`.
+  - It drops, deletes and rewrites no data. The one work and the YouTube channel are untouched.
+- **Checked on comms-hub, read-only** (`qa/work-youtube-choices-comms-hub.json`):
+  - both forms of `work_publish` and `account_set_privacy` are callable signed in and not signed out;
+  - the two helpers are not callable from outside;
+  - a page reads the new columns;
+  - the run records each YouTube result's visibility.
+- **Rules not run on comms-hub.** They write accounts and works inside their own transaction, which this session keeps off the live
+  database. They stand at 36 of 36 on a private container.
+- **Security advisor.** The same four kinds of notice:
+  - signed-in callable functions went from 335 to 337: the new `work_publish` form and `account_set_privacy`, each checking the person
+    inside;
+  - signed-out 28, tables without a policy 13 and the password notice 1 are unchanged.
+- **Now.** Every migration of the director's notes, steps 1 to 5, is on comms-hub. Main up to this entry may be pushed; that is the
+  release session's to do, and it was told.

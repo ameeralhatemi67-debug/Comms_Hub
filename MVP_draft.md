@@ -4249,7 +4249,8 @@ YouTube would be asked, and nothing reaches YouTube.
 
 ## 78.6 Where it lives
 
-- Migration `supabase/migrations/20261105230000_work_youtube_choices.sql`:
+- Migration `supabase/migrations/20261105230000_work_youtube_choices.sql`, applied to comms-hub on 2026-11-05 (version
+  `20261105120224`):
   - `work_publish(text, text, jsonb)`; the two-argument form calls it with no choice;
   - `work_pub_choices`, `account_set_privacy` and `yt_privacy_ar`;
   - `work_run_publish`, replaced.

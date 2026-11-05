@@ -1,0 +1,28 @@
+{
+  "migration": {
+    "file": "supabase/migrations/20261105230000_work_youtube_choices.sql",
+    "file_md5": "63a246ea984cfc452cbfdfd64dd15f70",
+    "applied": "comms-hub (hrghmioxvgkjpnydrxrk) on 2026-11-05 as version 20261105120224, with the owner's words «Apply the migration»; the stored statement's md5 equals the file's"
+  },
+  "before": "Read-only, before applying: no migration after direct_schedule; none of the new columns or functions present; work_publish had one form; one work (no results) and one YouTube channel.",
+  "rules": "supabase/tests/work_youtube_choices_rules.sql was not run on comms-hub: it writes accounts and works inside its own transaction, which this session keeps off the live database. It passed 36 of 36 on a private container (qa/work-youtube-choices-rules.json), and the four older work rule files still pass there (135, 63, 71, 322).",
+  "how": "Read-only catalog checks on comms-hub through the Supabase connector.",
+  "run": "2026-11-05",
+  "checks": {
+    "work_publish has its two forms, the two-argument one calling the new one with no choice": true,
+    "a signed-in page may call both forms and account_set_privacy": true,
+    "signed out may call none of them": true,
+    "work_pub_choices and yt_privacy_ar are not callable from outside": true,
+    "a page reads works.pub_options and platform_accounts.default_privacy": true,
+    "work_run_publish records each YouTube result's privacy": true,
+    "the one existing work is untouched (IN_PRODUCTION, no choice, no results)": true,
+    "the YouTube channel has no default, so «عام»": true
+  },
+  "advisor": {
+    "kinds": "the same four",
+    "authenticated_security_definer_function_executable": "335 -> 337: work_publish(text, text, jsonb) and account_set_privacy, each checking the person inside (work_may_publish, account_manager)",
+    "anon_security_definer_function_executable": "28 -> 28",
+    "rls_enabled_no_policy": "13 -> 13",
+    "auth_leaked_password_protection": "1 -> 1"
+  }
+}

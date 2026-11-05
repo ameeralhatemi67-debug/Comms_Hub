@@ -317,7 +317,8 @@ is the one real publish outside the work cycle; publishing works stays a simulat
   clicks through the menu, the sheet, both panels, «مجدول» and the account's list on a fixture.
 
 YouTube's four choices reach the work cycle, by owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-3 step 5 with answer Q5,
-`MVP_draft.md` section 78, `supabase/migrations/*work_youtube_choices*`). Publishing works stays a simulation.
+`MVP_draft.md` section 78, `supabase/migrations/*work_youtube_choices*`, applied to comms-hub on 2026-11-05 with the owner's approval).
+Publishing works stays a simulation.
 - **«نشر الآن»** asks each YouTube channel of the work «عام», «غير مدرج» or «خاص». It starts from the channel's «الظهور الافتراضي»
   (`default_privacy`, set by `account_manager` only), else «عام».
   - The choice goes to `work_publish(p_work, p_op, p_options)`; the two-argument form passes none.
