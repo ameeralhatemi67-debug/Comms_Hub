@@ -1,32 +1,32 @@
 {
   "script": "qa/desktop-update.cjs",
-  "run": "2026-10-20T20:57:40.480Z",
-  "version": "0.3.0",
+  "run": "2026-11-05T10:14:27.335Z",
+  "version": "0.9.0",
   "checks": [
     {
-      "name": "latest.yml names version 0.3.1, its installer, size and SHA-512",
+      "name": "latest.yml names version 0.9.1, its installer, size and SHA-512",
       "pass": true,
-      "detail": "version: 0.3.1\nfiles:\n  - url: CommsHub-QA-Setup-0.3.1-x64.exe\n    sha512: 9f6qiXn/g7lwmqYCPJgjsOgbdamux5xKD8ags1I4+Y3laWDICHiWUXkzr4QrPzCvcpCx0cY709uwmjtAL7wM7w==\n    size: 111615108\npath: CommsHub-QA-Setup-0.3.1-x64.exe\nsha512: 9f6qiXn/g7lwmqYCPJgjsOgbdamux5xKD8ags1I4+Y3laWDICHiWUXkzr4QrPzCvcpCx0cY709uwmjtAL7wM7w==\nreleaseDate: '2026-10-20T20:59:19.670Z'\n"
+      "detail": "version: 0.9.1\nfiles:\n  - url: CommsHub-QA-Setup-0.9.1-x64.exe\n    sha512: T3kN7s34tFq5CXqyexStxizA2xsXU/Fcek6oayWWKN6TFRp4qp/Cze9UHcn7m5y+3mCEGH1y6g/f7iKZckxUJg==\n    size: 162637899\npath: CommsHub-QA-Setup-0.9.1-x64.exe\nsha512: T3kN7s34tFq5CXqyexStxizA2xsXU/Fcek6oayWWKN6TFRp4qp/Cze9UHcn7m5y+3mCEGH1y6g/f7iKZckxUJg==\nreleaseDate: '2026-11-05T10:16:42.782Z'\n"
     },
     {
       "name": "DT-09: the package names no publisher, so the updater checks the SHA-512 only (the pilot is unsigned, D-7)",
       "pass": true,
-      "detail": "provider: generic\nurl: http://127.0.0.1:52301/feed\nupdaterCacheDirName: sa.commshub.desktop.qa-updater\n"
+      "detail": "provider: generic\nurl: http://127.0.0.1:63975/feed\nupdaterCacheDirName: sa.commshub.desktop.qa-updater\n"
     },
     {
-      "name": "DT-08: version 0.3.0 installs silently for this user",
+      "name": "DT-08: version 0.9.0 installs silently for this user",
       "pass": true,
-      "detail": "{\"status\":0,\"version\":\"0.3.0\"}"
+      "detail": "{\"status\":0,\"version\":\"0.9.0\"}"
     },
     {
-      "name": "DT-08: the application asks the feed and downloads 0.3.1 in the background",
+      "name": "DT-08: the application asks the feed and downloads 0.9.1 in the background",
       "pass": true,
-      "detail": "[\"latest.yml\",\"CommsHub-QA-Setup-0.3.1-x64.exe.blockmap\",\"CommsHub-QA-Setup-0.3.0-x64.exe.blockmap\",\"CommsHub-QA-Setup-0.3.1-x64.exe\"]"
+      "detail": "[\"latest.yml\",\"CommsHub-QA-Setup-0.9.1-x64.exe.blockmap\",\"CommsHub-QA-Setup-0.9.0-x64.exe.blockmap\",\"CommsHub-QA-Setup-0.9.1-x64.exe\"]"
     },
     {
-      "name": "DT-08: closing the window quits, and 0.3.1 is installed on quit",
+      "name": "DT-08: closing the window quits, and 0.9.1 is installed on quit",
       "pass": true,
-      "detail": "0.3.1"
+      "detail": "0.9.1"
     },
     {
       "name": "DT-08: an update keeps the application's data (D-11)",
@@ -34,14 +34,14 @@
       "detail": "{\"before\":true,\"after\":true}"
     },
     {
-      "name": "DT-08: the program on disk is 0.3.1",
+      "name": "DT-08: the program on disk is 0.9.1",
       "pass": true,
-      "detail": "0.3.1.0"
+      "detail": "0.9.1.0"
     },
     {
       "name": "DT-09: a replaced installer (one byte changed under a valid manifest) is downloaded and refused by its SHA-512, and nothing is installed",
       "pass": true,
-      "detail": "{\"downloaded\":true,\"version\":\"0.3.1\",\"pending\":[]}"
+      "detail": "{\"downloaded\":true,\"version\":\"0.9.1\",\"pending\":[]}"
     },
     {
       "name": "DT-08: a silent uninstall removes the program, its Start menu shortcut, its Windows entry and its data (D-11)",
@@ -56,12 +56,12 @@
   ],
   "notes": [],
   "build": {
-    "seconds": 98,
+    "seconds": 135,
     "versions": [
-      "0.3.0",
-      "0.3.1"
+      "0.9.0",
+      "0.9.1"
     ],
-    "installerBytes": 111615108
+    "installerBytes": 162637899
   },
   "signatures": "Not applicable: the pilot build is unsigned (decision D-7). signtool, codesign, spctl and stapler were not run. Once a certificate exists, electron-builder writes the publisher into app-update.yml and electron-updater checks it on every update.",
   "requests": [
@@ -70,15 +70,15 @@
       "range": null
     },
     {
-      "name": "CommsHub-QA-Setup-0.3.1-x64.exe.blockmap",
+      "name": "CommsHub-QA-Setup-0.9.1-x64.exe.blockmap",
       "range": null
     },
     {
-      "name": "CommsHub-QA-Setup-0.3.0-x64.exe.blockmap",
+      "name": "CommsHub-QA-Setup-0.9.0-x64.exe.blockmap",
       "range": null
     },
     {
-      "name": "CommsHub-QA-Setup-0.3.1-x64.exe",
+      "name": "CommsHub-QA-Setup-0.9.1-x64.exe",
       "range": null
     },
     {
@@ -86,11 +86,11 @@
       "range": null
     },
     {
-      "name": "CommsHub-QA-Setup-0.3.2-x64.exe.blockmap",
+      "name": "CommsHub-QA-Setup-0.9.2-x64.exe.blockmap",
       "range": null
     },
     {
-      "name": "CommsHub-QA-Setup-0.3.2-x64.exe",
+      "name": "CommsHub-QA-Setup-0.9.2-x64.exe",
       "range": null
     }
   ],

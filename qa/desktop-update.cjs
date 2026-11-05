@@ -54,8 +54,17 @@ const closeWindow = () => h.ps(`Get-Process -Name CommsHub -ErrorAction Silently
 const sha512 = (file) => crypto.createHash('sha512').update(fs.readFileSync(file)).digest('base64');
 
 async function buildQa(version, feed) {
+  // build.mjs reads the bundled packages' licences from paths esbuild gives relative to its working folder, which esbuild
+  // takes once, when it is first loaded: so desktop/ is the working folder before build.mjs is imported, as for `npm run build`
+  // (from the repository root it looked in desktop/desktop/node_modules, since D5)
+  const here = process.cwd();
+  process.chdir(h.desktop);
   const { buildApp } = await import('../desktop/scripts/build.mjs');
-  await buildApp('qa', path.join(h.desktop, 'build'), { version, feed });
+  try {
+    await buildApp('qa', path.join(h.desktop, 'build'), { version, feed });
+  } finally {
+    process.chdir(here);
+  }
   const r = spawnSync(process.execPath, [path.join(h.desktop, 'node_modules', 'electron-builder', 'cli.js'), '--config', 'electron-builder.qa.cjs', '--win', '--x64', '--publish', 'never'], {
     cwd: h.desktop,
     env: { ...process.env, COMMS_HUB_QA_VERSION: version, COMMS_HUB_QA_FEED: feed },

@@ -1,13 +1,13 @@
 {
   "script": "qa/desktop-shell.cjs",
-  "run": "2026-11-03T21:00:14.688Z",
-  "version": "0.7.1",
+  "run": "2026-11-05T10:12:50.793Z",
+  "version": "0.9.0",
   "packages": {
-    "installer": "desktop/dist/release/CommsHub-Setup-0.7.1-x64.exe",
-    "installerBytes": 162627170,
+    "installer": "desktop/dist/release/CommsHub-Setup-0.9.0-x64.exe",
+    "installerBytes": 162637941,
     "installerSize": "155.1 MB",
-    "unpackedBytes": 482262447,
-    "unpackedSize": "459.9 MB"
+    "unpackedBytes": 482310432,
+    "unpackedSize": "460.0 MB"
   },
   "fuses": {
     "release": {
@@ -64,7 +64,7 @@
     {
       "name": "the bridge exists on an allowed page: who the application is, then the groups of version 1",
       "pass": true,
-      "detail": "{\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.7.1\",\"bridge\":6},\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"windows\",\"media\",\"gpu\",\"profile\"],\"frozen\":true}"
+      "detail": "{\"fields\":{\"platform\":\"desktop\",\"shell\":\"electron\",\"version\":\"0.9.0\",\"bridge\":10},\"keys\":[\"platform\",\"shell\",\"version\",\"bridge\",\"info\",\"power\",\"life\",\"notify\",\"update\",\"files\",\"cache\",\"data\",\"windows\",\"media\",\"gpu\",\"profile\",\"downloads\"],\"frozen\":true}"
     },
     {
       "name": "the bridge object cannot be changed by the page",
@@ -84,7 +84,7 @@
     {
       "name": "a foreign link opens in the system browser",
       "pass": true,
-      "detail": "[\"http://127.0.0.1:60418/landing\"]"
+      "detail": "[\"http://127.0.0.1:63906/landing\"]"
     },
     {
       "name": "a foreign link leaves the window where it was",
@@ -94,22 +94,22 @@
     {
       "name": "window.open of a foreign address opens in the system browser and makes no window",
       "pass": true,
-      "detail": "{\"opened\":[\"http://127.0.0.1:60418/landing\",\"http://127.0.0.1:60418/popup\"],\"windows\":1}"
+      "detail": "{\"opened\":[\"http://127.0.0.1:63906/landing\",\"http://127.0.0.1:63906/popup\"],\"windows\":1}"
     },
     {
       "name": "a mail link goes to the system",
       "pass": true,
-      "detail": "[\"http://127.0.0.1:60418/landing\",\"http://127.0.0.1:60418/popup\",\"mailto:team@example.com?subject=qa\"]"
+      "detail": "[\"http://127.0.0.1:63906/landing\",\"http://127.0.0.1:63906/popup\",\"mailto:team@example.com?subject=qa\"]"
     },
     {
       "name": "a redirect out of the list goes to the system browser, the window stays",
       "pass": true,
-      "detail": "{\"opened\":[\"http://127.0.0.1:60418/landing\",\"http://127.0.0.1:60418/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:60418/redirected\"],\"url\":\"http://127.0.0.1:3000/\"}"
+      "detail": "{\"opened\":[\"http://127.0.0.1:63906/landing\",\"http://127.0.0.1:63906/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:63906/redirected\"],\"url\":\"http://127.0.0.1:3000/\"}"
     },
     {
       "name": "any other kind of address (ms-settings:, file:) is refused: nothing opens, the window stays",
       "pass": true,
-      "detail": "{\"opened\":[\"http://127.0.0.1:60418/landing\",\"http://127.0.0.1:60418/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:60418/redirected\"],\"url\":\"http://127.0.0.1:3000/\"}"
+      "detail": "{\"opened\":[\"http://127.0.0.1:63906/landing\",\"http://127.0.0.1:63906/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:63906/redirected\"],\"url\":\"http://127.0.0.1:3000/\"}"
     },
     {
       "name": "the foreign pages were never loaded inside the application",
@@ -144,17 +144,17 @@
     {
       "name": "«متابعة في المتصفح» opens /api/drive/connect in the system browser and closes the note",
       "pass": true,
-      "detail": "[\"http://127.0.0.1:60418/landing\",\"http://127.0.0.1:60418/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:60418/redirected\",\"http://127.0.0.1:3000/api/drive/connect\"]"
+      "detail": "[\"http://127.0.0.1:63906/landing\",\"http://127.0.0.1:63906/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:63906/redirected\",\"http://127.0.0.1:3000/api/drive/connect\"]"
     },
     {
       "name": "«إلغاء» closes the note and opens nothing (a platform connection started by the page)",
       "pass": true,
-      "detail": "[\"http://127.0.0.1:60418/landing\",\"http://127.0.0.1:60418/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:60418/redirected\",\"http://127.0.0.1:3000/api/drive/connect\"]"
+      "detail": "[\"http://127.0.0.1:63906/landing\",\"http://127.0.0.1:63906/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:63906/redirected\",\"http://127.0.0.1:3000/api/drive/connect\"]"
     },
     {
       "name": "/api/onedrive/connect goes to the system browser the same way",
       "pass": true,
-      "detail": "[\"http://127.0.0.1:60418/landing\",\"http://127.0.0.1:60418/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:60418/redirected\",\"http://127.0.0.1:3000/api/drive/connect\",\"http://127.0.0.1:3000/api/onedrive/connect\"]"
+      "detail": "[\"http://127.0.0.1:63906/landing\",\"http://127.0.0.1:63906/popup\",\"mailto:team@example.com?subject=qa\",\"http://127.0.0.1:63906/redirected\",\"http://127.0.0.1:3000/api/drive/connect\",\"http://127.0.0.1:3000/api/onedrive/connect\"]"
     },
     {
       "name": "no connection route was ever loaded inside the application",
@@ -234,7 +234,7 @@
     {
       "name": "a foreign top-level page gets no bridge",
       "pass": true,
-      "detail": "{\"url\":\"http://127.0.0.1:60418/foreign\",\"bridge\":\"undefined\",\"mic\":\"refused:NotAllowedError\",\"notifications\":\"denied\"}"
+      "detail": "{\"url\":\"http://127.0.0.1:63906/foreign\",\"bridge\":\"undefined\",\"mic\":\"refused:NotAllowedError\",\"notifications\":\"denied\"}"
     },
     {
       "name": "a foreign page gets no permission (microphone, notifications)",
@@ -244,12 +244,12 @@
     {
       "name": "the window runs isolated and sandboxed, without Node.js and without webview",
       "pass": true,
-      "detail": "{\"contextIsolation\":true,\"sandbox\":true,\"nodeIntegration\":false,\"nodeIntegrationInSubFrames\":false,\"webviewTag\":false,\"menu\":null,\"persistent\":true,\"storage\":\"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\comms-hub-desktop-qa-U7gZ3K\\\\dev-profile\\\\Partitions\\\\comms-hub\"}"
+      "detail": "{\"contextIsolation\":true,\"sandbox\":true,\"nodeIntegration\":false,\"nodeIntegrationInSubFrames\":false,\"webviewTag\":false,\"menu\":null,\"persistent\":true,\"storage\":\"D:\\\\Agents\\\\main\\\\projects\\\\ideas\\\\Comms_Hub\\\\.claude\\\\worktrees\\\\verify-e3cab67\\\\qa\\\\artifacts\\\\tmp\\\\comms-hub-desktop-qa-DMPNIe\\\\dev-profile\\\\Partitions\\\\comms-hub\"}"
     },
     {
       "name": "the site lives in the persistent profile persist:comms-hub",
       "pass": true,
-      "detail": "C:\\Users\\User\\AppData\\Local\\Temp\\comms-hub-desktop-qa-U7gZ3K\\dev-profile\\Partitions\\comms-hub"
+      "detail": "D:\\Agents\\main\\projects\\ideas\\Comms_Hub\\.claude\\worktrees\\verify-e3cab67\\qa\\artifacts\\tmp\\comms-hub-desktop-qa-DMPNIe\\dev-profile\\Partitions\\comms-hub"
     },
     {
       "name": "there is no native menu bar",
@@ -259,7 +259,7 @@
     {
       "name": "the user agent ends with CommsHubDesktop/<version> and carries no Electron token",
       "pass": true,
-      "detail": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.8078.48 Safari/537.36 CommsHubDesktop/0.7.1"
+      "detail": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.8078.48 Safari/537.36 CommsHubDesktop/0.9.0"
     },
     {
       "name": "keys reach the page once the window has settled (a neutral F24)",
