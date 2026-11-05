@@ -54,7 +54,7 @@ import { REQUEST_STATUS, howAr, type Mode } from '@/lib/permissions';
 
 export type MailPrefill = { to: string[]; subject: string; body: string; refs: string[] };
 
-type DialogState =
+export type DialogState =
   | null
   | { kind: 'new' }
   | { kind: 'fwd'; msg: ChatMessage }
@@ -230,7 +230,7 @@ export function ChatTab({ onToMail }: { onToMail: (p: MailPrefill) => void }) {
   );
 }
 
-const dmOther = (r: RoomRow, me: string, members: { email: string }[]) =>
+export const dmOther = (r: RoomRow, me: string, members: { email: string }[]) =>
   members.find((m) => m.email !== me)?.email ?? (r.dm_key ?? '').split('|').find((e) => e !== me) ?? me;
 
 function MeLine() {
@@ -272,7 +272,7 @@ function MeLine() {
   );
 }
 
-function RoomFace({ r, name, size = 'md' }: { r: RoomRow; name: string; size?: 'sm' | 'md' | 'lg' }) {
+export function RoomFace({ r, name, size = 'md' }: { r: RoomRow; name: string; size?: 'sm' | 'md' | 'lg' }) {
   const c = useChat();
   if (r.type === 'dm') return <Face email={dmOther(r, c.me, c.membersOf(r.id))} label={name} size={size} dot />;
   if (r.type === 'channel')
@@ -305,7 +305,7 @@ function RoomRowView({ r, name, on, onOpen }: { r: RoomRow; name: string; on: bo
       <span className="mid">
         <span className="nm">
           <span>{name}</span>
-          {r.link && <I n={r.link.type === 'campaign' ? 'flag' : 'work'} />}
+          {r.link && r.link.type !== 'all' && <I n={r.link.type === 'campaign' ? 'flag' : 'work'} />}
         </span>
         {typing.length ? (
           <span className="sn typing">{r.type === 'dm' ? 'يكتب…' : `${people.nameOf(typing[0])} يكتب…`}</span>
@@ -355,7 +355,21 @@ function Starred({ onJump }: { onJump: (room: string) => void }) {
 
 type DialogSetter = (d: DialogState) => void;
 
-function Conversation({
+/** What a conversation hands to a message box that replaces its own (the mail and messaging window, MVP_draft.md 74). */
+export type ComposerSlot = {
+  room: RoomRow;
+  canPost: boolean;
+  reply: ChatMessage | null;
+  edit: ChatMessage | null;
+  urgency: Urgency;
+  setUrgency: (u: Urgency) => void;
+  clearReply: () => void;
+  clearEdit: () => void;
+  editLast: () => void;
+  onCommand: (id: (typeof COMMANDS)[number]['id']) => void;
+};
+
+export function Conversation({
   room,
   name,
   info,
@@ -363,6 +377,7 @@ function Conversation({
   onBack,
   onDialog,
   onToMail,
+  composer,
 }: {
   room: RoomRow;
   name: string;
@@ -371,6 +386,8 @@ function Conversation({
   onBack: () => void;
   onDialog: DialogSetter;
   onToMail: (p: MailPrefill) => void;
+  /** A message box in place of this conversation's own; without it the conversation is unchanged. */
+  composer?: (slot: ComposerSlot) => ReactNode;
 }) {
   const c = useChat();
   const people = usePeople();
@@ -442,6 +459,21 @@ function Conversation({
     ) : (
       <small>{members.map((m) => (m.email === c.me ? 'أنت' : people.nameOf(m.email))).join('، ')}</small>
     );
+
+  const editLast = () => {
+    const mine = [...msgs].reverse().find((m) => canEdit(m, c.me, Date.now()));
+    if (mine) setEdit(mine);
+  };
+  const onCommand = (id: (typeof COMMANDS)[number]['id']) => {
+    if (id === 'task') return canAssign(c.role) ? onDialog({ kind: 'task' }) : c.say('إسناد المهام لمدير الاتصال ومساعده والمنتج الإعلامي.');
+    if (id === 'poll') return onDialog({ kind: 'poll' });
+    if (id === 'approval') return onDialog({ kind: 'approval' });
+    if (id === 'asset') return onDialog({ kind: 'asset' });
+    if (id === 'work') return onDialog({ kind: 'work' });
+    if (id === 'urgent') return caps.has('urgency.3') ? setUrgency(3) : c.say(URGENCY_WHY[3]);
+    if (id === 'mail') return void toMail(null);
+    if (id === 'perm') return onDialog({ kind: 'perm' });
+  };
 
   const pinned = room.pinned_message ? msgs.find((m) => m.id === room.pinned_message && !m.deleted) : undefined;
   const findQ = find?.trim() ?? '';
@@ -539,7 +571,20 @@ function Conversation({
         {!msgs.length && <div className="cx-sys">بداية المحادثة</div>}
       </div>
 
-      {canPost ? (
+      {composer ? (
+        composer({
+          room,
+          canPost,
+          reply,
+          edit,
+          urgency,
+          setUrgency,
+          clearReply: () => setReply(null),
+          clearEdit: () => setEdit(null),
+          editLast,
+          onCommand,
+        })
+      ) : canPost ? (
         <Composer
           room={room}
           reply={reply}
@@ -548,20 +593,8 @@ function Conversation({
           onUrgency={setUrgency}
           onClearReply={() => setReply(null)}
           onClearEdit={() => setEdit(null)}
-          onEditLast={() => {
-            const mine = [...msgs].reverse().find((m) => canEdit(m, c.me, Date.now()));
-            if (mine) setEdit(mine);
-          }}
-          onCommand={(id) => {
-            if (id === 'task') return canAssign(c.role) ? onDialog({ kind: 'task' }) : c.say('إسناد المهام لمدير الاتصال ومساعده والمنتج الإعلامي.');
-            if (id === 'poll') return onDialog({ kind: 'poll' });
-            if (id === 'approval') return onDialog({ kind: 'approval' });
-            if (id === 'asset') return onDialog({ kind: 'asset' });
-            if (id === 'work') return onDialog({ kind: 'work' });
-            if (id === 'urgent') return caps.has('urgency.3') ? setUrgency(3) : c.say(URGENCY_WHY[3]);
-            if (id === 'mail') return void toMail(null);
-            if (id === 'perm') return onDialog({ kind: 'perm' });
-          }}
+          onEditLast={editLast}
+          onCommand={onCommand}
         />
       ) : (
         <div className="cx-ro">الكتابة في هذه القناة لمشرفيها. يمكنك التفاعل مع الإعلانات والإقرار بالاستلام.</div>
@@ -613,7 +646,7 @@ function Frag({ children }: { children: ReactNode }) {
 
 function ContextStrip({ room, work }: { room: RoomRow; work: { id: string; title: string; status: string }[] }) {
   const c = useChat();
-  if (!room.link) return null;
+  if (!room.link || room.link.type === 'all') return null;
   if (room.link.type === 'campaign') {
     const inReview = c.assets.filter((a) => a.stage === 'review').length;
     return (
@@ -1679,7 +1712,7 @@ function MessageMenu({
 
 /* ------------------------------------------------------------------ info panel */
 
-function Info({ room, name, onClose, onLeft, onImg }: { room: RoomRow; name: string; onClose: () => void; onLeft: () => void; onImg: (m: ChatMessage) => void }) {
+export function Info({ room, name, onClose, onLeft, onImg }: { room: RoomRow; name: string; onClose: () => void; onLeft: () => void; onImg: (m: ChatMessage) => void }) {
   const c = useChat();
   const people = usePeople();
   const members = c.membersOf(room.id);
@@ -1817,7 +1850,7 @@ function Info({ room, name, onClose, onLeft, onImg }: { room: RoomRow; name: str
 
 /* ------------------------------------------------------------------ dialogs */
 
-function Dlg({ title, onClose, children, wide = false }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
+export function Dlg({ title, onClose, children, wide = false }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const d = ref.current;
@@ -1872,7 +1905,7 @@ function Pop({ x, y, onClose, children }: { x: number; y: number; onClose: () =>
   );
 }
 
-function NewChat({ onClose, onOpen }: { onClose: () => void; onOpen: (id: string) => void }) {
+export function NewChat({ onClose, onOpen }: { onClose: () => void; onOpen: (id: string) => void }) {
   const c = useChat();
   const people = usePeople();
   const works = useLinkableWorks();
@@ -1993,7 +2026,7 @@ function NewChat({ onClose, onOpen }: { onClose: () => void; onOpen: (id: string
   );
 }
 
-function Forward({ msg, names, onClose }: { msg: ChatMessage; names: (r: RoomRow) => string; onClose: () => void }) {
+export function Forward({ msg, names, onClose }: { msg: ChatMessage; names: (r: RoomRow) => string; onClose: () => void }) {
   const c = useChat();
   const [pick, setPick] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -2047,7 +2080,7 @@ function Forward({ msg, names, onClose }: { msg: ChatMessage; names: (r: RoomRow
   );
 }
 
-function PollDialog({ room, onClose }: { room: RoomRow; onClose: () => void }) {
+export function PollDialog({ room, onClose }: { room: RoomRow; onClose: () => void }) {
   const c = useChat();
   const [q, setQ] = useState('');
   const [opts, setOpts] = useState(['', '']);
@@ -2102,7 +2135,7 @@ function PollDialog({ room, onClose }: { room: RoomRow; onClose: () => void }) {
   );
 }
 
-function TaskDialog({ room, what: initial, onClose }: { room: RoomRow; what?: string; onClose: () => void }) {
+export function TaskDialog({ room, what: initial, onClose }: { room: RoomRow; what?: string; onClose: () => void }) {
   const c = useChat();
   const people = usePeople();
   const members = c.membersOf(room.id).filter((m) => m.email !== c.me);
@@ -2161,7 +2194,7 @@ function TaskDialog({ room, what: initial, onClose }: { room: RoomRow; what?: st
   );
 }
 
-function AssetDialog({ room, approval, onClose }: { room: RoomRow; approval: boolean; onClose: () => void }) {
+export function AssetDialog({ room, approval, onClose }: { room: RoomRow; approval: boolean; onClose: () => void }) {
   const c = useChat();
   const list: AssetLite[] = c.assets.filter((a) => !approval || a.stage === 'review');
   const [caption, setCaption] = useState('');
@@ -2204,7 +2237,7 @@ function AssetDialog({ room, approval, onClose }: { room: RoomRow; approval: boo
   );
 }
 
-function WorkDialog({ room, onClose }: { room: RoomRow; onClose: () => void }) {
+export function WorkDialog({ room, onClose }: { room: RoomRow; onClose: () => void }) {
   const c = useChat();
   const works = useLinkableWorks();
   const go = async (id: string, title: string, status: string) => {

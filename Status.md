@@ -46,6 +46,15 @@ related:
     colours were renumbered to 75 on main (`3badbff`), so the merge keeps 74, 75, then 77.
 - **Next.** The quiet re-run, then the 0.9.0 package. Nothing pushed or released.
 
+## «نافذة البريد والمراسلة», the experimental mail and messaging window, 2026-11-05
+
+- **Live, off by default.** A person turns it on in «الحساب» «التجارب»; it needs the page «البريد». `MVP_draft.md` section 74.
+- **Deployed alone** as `5a50567` on `origin/main`, and merged into local main from `claude/chat-window` (`261e753`, `d0bf3ab`).
+- **Migration applied** to comms-hub with the owner's yes (`20261105180000_chat_window.sql`). «العام» and a work's own room exist
+  only after their first message.
+- **Checked:** SQL rules 87 of 87 on a private container, `qa/chat-window-flow.cjs` 57 of 57 on a fixture, `npm test` and the build
+  clean. Not yet tried signed in on the live site.
+
 ## The director's notes, steps 1 to 3: YouTube's four choices, thumbnails and calendar colours, 2026-11-05
 
 - **Approved.** `Director_Notes_Plan.md`, with the recommended answers to Q1 to Q5: calendar colours (N-1), quick actions and

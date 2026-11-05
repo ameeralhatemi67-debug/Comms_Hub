@@ -30,6 +30,7 @@ import { MyDevicesPanels } from './native/devices';
 import { PhoneLockPanel } from './native/phone-lock';
 import { beforeSignOut, removeOtherPhones } from '@/lib/native/device-push';
 import { AccountDeletionPanel } from './account-deletion';
+import { ChatWindowPanel } from './chat-window/account-panel';
 
 const pageNames: Record<string, string> = {
   mail: 'البريد',
@@ -137,6 +138,9 @@ export function Supporting({ page }: { page: string }) {
         </Panel>
         <Panel title="المظهر">
           <AppearancePanel />
+        </Panel>
+        <Panel title="التجارب" className="cw-panel">
+          <ChatWindowPanel />
         </Panel>
         {platform !== 'android' && (
           <Panel title="تطبيق سطح المكتب">

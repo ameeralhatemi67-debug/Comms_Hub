@@ -1,0 +1,295 @@
+{
+  "script": "qa/chat-window-flow.cjs",
+  "run": "2026-11-05T07:53:58.582Z",
+  "checks": [
+    {
+      "name": "off by default: no launcher, the switch reads off",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the account panel says it is an experiment",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "turning it on saves it on the account",
+      "pass": true,
+      "detail": "[{\"fn\":\"profile_update\",\"args\":{\"p\":{\"chat_window\":true}}}]"
+    },
+    {
+      "name": "the launcher sits at the bottom of the left edge",
+      "pass": true,
+      "detail": "{\"l\":16,\"t\":828,\"r\":72,\"b\":884,\"w\":56,\"h\":56}"
+    },
+    {
+      "name": "a drag moves it up the edge and never sideways",
+      "pass": true,
+      "detail": "{\"home\":{\"l\":16,\"t\":828,\"r\":72,\"b\":884,\"w\":56,\"h\":56},\"moved\":{\"l\":16,\"t\":500,\"r\":72,\"b\":556,\"w\":56,\"h\":56}}"
+    },
+    {
+      "name": "the page toast stays clear of the launcher",
+      "pass": true,
+      "detail": "{\"toast\":{\"l\":97,\"t\":824,\"r\":267,\"b\":876,\"w\":170,\"h\":52},\"moved\":{\"l\":16,\"t\":500,\"r\":72,\"b\":556,\"w\":56,\"h\":56}}"
+    },
+    {
+      "name": "dropped near its place, it goes home",
+      "pass": true,
+      "detail": "{\"back\":{\"l\":16,\"t\":828,\"r\":72,\"b\":884,\"w\":56,\"h\":56},\"home\":{\"l\":16,\"t\":828,\"r\":72,\"b\":884,\"w\":56,\"h\":56}}"
+    },
+    {
+      "name": "it opens beside the page, at the side size, under the top bar",
+      "pass": true,
+      "detail": "{\"l\":0,\"t\":72,\"r\":380,\"b\":900,\"w\":380,\"h\":828}"
+    },
+    {
+      "name": "the launcher steps aside while the window is open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "side size: minimise, middle, full, mail page",
+      "pass": true,
+      "detail": "[\"تصغير إلى الزر\",\"نافذة وسطى\",\"نافذة كاملة\",\"فتح صفحة البريد\"]"
+    },
+    {
+      "name": "one column at the side size",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "middle: 720 and two columns",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "middle size: minimise, side, full, mail page",
+      "pass": true,
+      "detail": "[\"تصغير إلى الزر\",\"نافذة جانبية\",\"نافذة كاملة\",\"فتح صفحة البريد\"]"
+    },
+    {
+      "name": "full: up to the sidebar, never over it",
+      "pass": true,
+      "detail": "{\"win\":{\"l\":0,\"t\":72,\"r\":1216,\"b\":900,\"w\":1216,\"h\":828},\"side\":{\"l\":1216,\"t\":0,\"r\":1440,\"b\":900,\"w\":224,\"h\":900}}"
+    },
+    {
+      "name": "full size: minimise, side, mail page",
+      "pass": true,
+      "detail": "[\"تصغير إلى الزر\",\"نافذة جانبية\",\"فتح صفحة البريد\"]"
+    },
+    {
+      "name": "the full size follows the sidebar as it closes",
+      "pass": true,
+      "detail": "{\"l\":1364,\"t\":0,\"r\":1440,\"b\":900,\"w\":76,\"h\":900}"
+    },
+    {
+      "name": "while dragging, the edge says the size and width",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a drag of the edge sets any width, one column under 600",
+      "pass": true,
+      "detail": "{\"l\":0,\"t\":72,\"r\":540,\"b\":900,\"w\":540,\"h\":828}"
+    },
+    {
+      "name": "near a stop, the edge lands on it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Home on the edge returns to the side size",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "with nothing open, the box sends to «العام»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "@ first opens «إلى من تُرسل؟» with people and mail",
+      "pass": true,
+      "detail": "[\"الأشخاص\",\"بريد\"]"
+    },
+    {
+      "name": "Enter picks: the label names the person",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the message goes to the person",
+      "pass": true,
+      "detail": "[{\"fn\":\"chat_send\",\"args\":{\"p_room\":\"r-sara\",\"p_kind\":\"text\",\"p_body\":\"النسخة 3 وصلت، أراجعها الآن.\",\"p_reply\":null,\"p_data\":null,\"p_urgency\":0,\"p_forward\":false}}]"
+    },
+    {
+      "name": "afterwards the box returns to «العام» and says where it went",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the first message to «العام» asks once",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«العام» starts with its first message",
+      "pass": true,
+      "detail": "{\"fn\":\"chat_send\",\"args\":{\"p_room\":\"r-all\",\"p_kind\":\"text\",\"p_body\":\"تذكير: اجتماع التنسيق بعد نصف ساعة.\",\"p_reply\":null,\"p_data\":null,\"p_urgency\":0,\"p_forward\":false}}"
+    },
+    {
+      "name": "the second message to «العام» does not ask again",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "+ at the side size: four actions and «المزيد»",
+      "pass": true,
+      "detail": "[\"إرفاق ملف أو صورة\",\"رسالة صوتية\",\"مهمة\",\"تصويت\"]"
+    },
+    {
+      "name": "«المزيد» shows the rest",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes the menu and leaves the window open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "@ later in the text offers the room's members",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the mention is written into the text",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it is sent in the open group",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "on a work page, its conversation is offered first",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it explains who is in it before it starts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the first message starts the work's room",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "then the window shows that conversation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "mail: the list, newest unread first",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a new mail is the box's default, folded to its fields",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the reader is the mail page's own, without its second reply box",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "opening it marks it read",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the box replies in the thread",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a reply waits ten seconds to be taken back",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "then it is sent in the thread, with the signature",
+      "pass": true,
+      "detail": "{\"fn\":\"mail_send\",\"args\":{\"p_thread\":\"t-int\",\"p_subject\":\"رد: موعد اعتماد نص الفيلم\",\"p_to\":[\"p:khalid@t.test\"],\"p_cc\":[],\"p_bcc\":[],\"p_body\":\"موافق، الساعة 11:30.\\n\\nريم السالم\\nمدير الاتصال المؤسسي، إدارة الاتصال المؤسسي\",\"p_refs\":[],\"p_files\":[],\"p_card\":null,\"p_send_at\":null,\"p_links\":[],\"p_forward\":false}}"
+    },
+    {
+      "name": "«بريد جديد» from @ grows the box to To and Subject",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a new mail goes to the chosen person with its subject",
+      "pass": true,
+      "detail": "{\"fn\":\"mail_send\",\"args\":{\"p_thread\":null,\"p_subject\":\"جدول الأسبوع\",\"p_to\":[\"p:khalid@t.test\"],\"p_cc\":[],\"p_bcc\":[],\"p_body\":\"مرفق الجدول بعد التعديل.\\n\\nريم السالم\\nمدير الاتصال المؤسسي، إدارة الاتصال المؤسسي\",\"p_refs\":[],\"p_files\":[],\"p_card\":null,\"p_send_at\":null,\"p_links\":[],\"p_forward\":false}}"
+    },
+    {
+      "name": "Escape minimises to the launcher",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Alt+M opens it again",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«فتح صفحة البريد» goes there and the window steps aside",
+      "pass": true,
+      "detail": "/mail/chat"
+    },
+    {
+      "name": "leaving the mail page brings the launcher back",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "turning it off removes the launcher at once",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "375: the launcher sits above the bottom bar",
+      "pass": true,
+      "detail": "{\"qb\":{\"l\":16,\"t\":679,\"r\":72,\"b\":735,\"w\":56,\"h\":56},\"nav\":{\"l\":0,\"t\":751,\"r\":375,\"b\":812,\"w\":375,\"h\":61}}"
+    },
+    {
+      "name": "375: the window fills the screen above the bottom bar, with no edge to drag",
+      "pass": true,
+      "detail": "{\"l\":0,\"t\":0,\"r\":375,\"b\":751,\"w\":375,\"h\":751}"
+    },
+    {
+      "name": "375: only minimise and the mail page in its header",
+      "pass": true,
+      "detail": "[\"تصغير إلى الزر\",\"فتح صفحة البريد\"]"
+    },
+    {
+      "name": "375: nothing scrolls sideways",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page errors",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 57,
+  "passed": 57,
+  "failed": 0
+}

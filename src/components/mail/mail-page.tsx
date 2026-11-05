@@ -33,6 +33,7 @@ import { Composer, blankDraft, cardTitle, type Draft } from './composer';
 import { Av, I, localInput, tokenName, type IconName } from './parts';
 import { MailProvider, useMail, type Outgoing } from './provider';
 import { ThreadView } from './thread';
+import { composeDraft, quickOutgoing, signatureOf, useDrafts, type Extra } from './compose';
 import { ChatProvider, useChat } from '../chat/provider';
 import { ChatTab, type MailPrefill } from '../chat/chat-tab';
 import { PeopleProvider, usePeopleOptional } from '../people';
@@ -99,7 +100,7 @@ function ChatView() {
   );
 }
 
-type Extra = Partial<Draft> & { replyTo?: string; quick?: boolean };
+// Extra (a reply, reply to all or forward) and the quick send are in ./compose, shared with the mail and messaging window.
 
 function Mail() {
   const m = useMail();
@@ -173,53 +174,13 @@ function Mail() {
 
   // Builds a reply, reply-all or forward from the thread, then opens it or sends it.
   const compose = (extra: Extra = {}) => {
-    const base = blankDraft();
-    let d: Draft = { ...base, ...extra };
-    const v = extra.thread ? m.viewOf(extra.thread) : undefined;
-    if (v && extra.mode && extra.mode !== 'new') {
-      const ms = mails(v);
-      const src = ms.find((x) => x.id === extra.replyTo) ?? ms[ms.length - 1];
-      const t = v.thread;
-      if (extra.mode === 'forward') {
-        const who = src.author ? m.nameOf(src.author) : src.from_name || src.from_email || '';
-        d = {
-          ...d,
-          subject: `إعادة توجيه: ${t.subject}`,
-          body: `${extra.body ?? ''}\n\n---------- رسالة محوّلة ----------\nمن: ${who}\nالتاريخ: ${fullWhen(src.created_at)}\nالموضوع: ${t.subject}\n\n${src.body}`,
-          refs: src.refs,
-          files: m.files.filter((f) => src.files.includes(f.id)),
-        };
-      } else {
-        const sender = src.author ? `p:${src.author}` : null;
-        const others = [...src.to_list, ...src.cc_list].filter((x) => x !== `p:${m.me}` && !x.startsWith('e:'));
-        const to: string[] = t.kind === 'external' ? [] : src.author === m.me ? src.to_list : sender ? [sender] : [];
-        d = {
-          ...d,
-          subject: t.subject.startsWith('رد: ') ? t.subject : `رد: ${t.subject}`,
-          to: extra.mode === 'replyall' && t.kind === 'internal' ? [...new Set([...to, ...others])] : to,
-        };
-      }
-    }
+    const d = composeDraft(m, extra);
     if (extra.quick) return sendNow(d);
     setDraft(d);
   };
 
   const sendNow = (d: Draft) => {
-    const me = m.personOf(m.me);
-    const out: Outgoing = {
-      thread: d.thread,
-      forward: d.mode === 'forward',
-      subject: d.subject,
-      to: d.to,
-      cc: d.cc,
-      bcc: d.bcc,
-      body: `${d.body.trim()}\n\n${people?.me?.profile?.signature || `${me?.display_name ?? ''}\n${roles[m.role]?.name ?? ''}، إدارة الاتصال المؤسسي`}`,
-      refs: d.refs,
-      files: d.files.map((f) => f.id),
-      card: null,
-      sendAt: null,
-      links: [],
-    };
+    const out: Outgoing = quickOutgoing(d, signatureOf(m, people?.me?.profile?.signature));
     m.send(out, 'يُرسل الرد', () => setDraft({ ...d, sig: true }));
   };
 
@@ -1084,25 +1045,4 @@ function SettingsDialog({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** Drafts live in this browser for now. */
-function useDrafts(me: string): [Draft[], (d: Draft[]) => void] {
-  const key = `comms-hub-mail-drafts:${me}`;
-  const [drafts, setState] = useState<Draft[]>([]);
-  useEffect(() => {
-    try {
-      setState(JSON.parse(localStorage.getItem(key) ?? '[]') as Draft[]);
-    } catch {
-      setState([]);
-    }
-  }, [key]);
-  const set = (d: Draft[]) => {
-    setState(d);
-    try {
-      localStorage.setItem(key, JSON.stringify(d.slice(0, 30)));
-    } catch {
-      /* storage unavailable: drafts stay for this visit only */
-    }
-  };
-  return [drafts, set];
-}
 
