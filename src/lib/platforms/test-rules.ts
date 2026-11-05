@@ -6,6 +6,8 @@
 // From Google's documentation as read on 2026-11-03: a title is at most 100 characters and a description 5000 bytes,
 // neither may hold < or >; an upload is sent in pieces that are multiples of 256 KiB; deleting a video needs the
 // youtube.force-ssl scope (or youtube), which youtube.upload does not give. The API cannot create a community post.
+// Read on 2026-11-05: a privacy is public, unlisted or private; status.publishAt can be set only on a private video that was
+// never published, YouTube makes it public at that time, and a time already past publishes at once.
 //
 // From Meta's documentation as read on 2026-11-03: pictures are JPEG only, at most 8 MB, 4:5 to 1.91:1 for a post; a Story
 // video is MP4 or MOV, 3 to 60 seconds, at most 100 MB; a Reel 3 seconds to 15 minutes, at most 300 MB (100 MB for a test
@@ -31,7 +33,42 @@ export const YT_MANAGE_SCOPE = 'https://www.googleapis.com/auth/youtube.force-ss
 /** Every upload address YouTube gives starts so; the server sends a piece nowhere else. */
 export const UPLOAD_PREFIX = 'https://www.googleapis.com/upload/youtube/v3/videos?';
 
-export type TestPrivacy = 'private' | 'public';
+/** YouTube's three privacy values (videos resource, status.privacyStatus). */
+export type TestPrivacy = 'private' | 'public' | 'unlisted';
+/**
+ * The four ways a YouTube video goes out, in YouTube Studio's order (owner directive of 2026-11-05, MVP_draft.md 71.2).
+ * «مجدول» is YouTube's own: a private video with a `publishAt`, which YouTube makes public at that time by itself.
+ */
+export type YtChoice = 'private' | 'unlisted' | 'public' | 'scheduled';
+export const YT_CHOICES: readonly YtChoice[] = ['private', 'unlisted', 'public', 'scheduled'];
+export const YT_CHOICE_AR: Record<YtChoice, string> = { private: 'خاص', unlisted: 'غير مدرج', public: 'عام', scheduled: 'مجدول' };
+/** One line under the choice: who sees the video. */
+export const YT_CHOICE_SUB: Record<YtChoice, string> = {
+  private: 'لا يراه إلا من يدير القناة.',
+  unlisted: 'لا يظهر في القناة ولا في البحث، ويراه من معه الرابط فقط.',
+  public: 'يراه كل من يزور القناة، ويبقى حتى يُحذف.',
+  scheduled: 'يبقى خاصاً حتى موعده، ثم يجعله يوتيوب عاماً بنفسه ولو لم يكن الموقع مفتوحاً.',
+};
+/** What YouTube is asked for: the privacy, and the time for «مجدول». A scheduled video is private until then. */
+export const ytStatus = (choice: YtChoice, at: string | null): { privacy: TestPrivacy; publishAt: string | null } =>
+  choice === 'scheduled' ? { privacy: 'private', publishAt: at } : { privacy: choice, publishAt: null };
+/**
+ * The window of a scheduled test: the site's own rule, not YouTube's, so a test is not forgotten and made public months later.
+ * The database holds the same (supabase/migrations/*platform_tests_youtube_choices*).
+ */
+export const YT_SCHEDULE_MIN_MINUTES = 10;
+export const YT_SCHEDULE_MAX_DAYS = 30;
+/** What is wrong with a scheduled time, in words, or null. */
+export function scheduleProblem(at: string | null, now: number = Date.now()): string | null {
+  const t = at ? Date.parse(at) : NaN;
+  if (!Number.isFinite(t)) return 'اختر موعد النشر.';
+  if (t < now + YT_SCHEDULE_MIN_MINUTES * 60e3) return `الموعد بعد ${YT_SCHEDULE_MIN_MINUTES} دقائق على الأقل.`;
+  if (t > now + YT_SCHEDULE_MAX_DAYS * 864e5) return `تُجدول التجربة حتى ${YT_SCHEDULE_MAX_DAYS} يوماً من الآن.`;
+  return null;
+}
+/** The choice a recorded test was sent with. */
+export const choiceOf = (t: { privacy: TestPrivacy | null; scheduled_for?: string | null }): YtChoice | null =>
+  t.privacy === 'private' && t.scheduled_for ? 'scheduled' : t.privacy;
 export type TestState = 'uploading' | 'published' | 'failed' | 'deleted';
 export type TestRow = {
   id: string;
@@ -43,6 +80,8 @@ export type TestRow = {
   state: TestState;
   video_id: string | null;
   shown_privacy: 'private' | 'public' | 'unlisted' | null;
+  /** The time YouTube said it will make a scheduled video public, read back with the video. */
+  shown_publish_at?: string | null;
   error: string | null;
   created_by: string;
   created_at: string;
@@ -94,6 +133,7 @@ export const TEST_ERROR_AR: Record<string, string> = {
   ACCOUNT_OFF: 'الحساب موقوف. فعّله أولاً.',
   NOT_CONNECTED: 'الحساب غير مربوط الآن. أعد ربطه ثم جرّب.',
   TEST_INVALID: 'بيانات التجربة ناقصة أو غير صالحة.',
+  SCHEDULE_INVALID: `موعد التجربة المجدولة بين ${YT_SCHEDULE_MIN_MINUTES} دقائق و${YT_SCHEDULE_MAX_DAYS} يوماً من الآن.`,
   TEST_LIMIT: `بلغ الحساب ${TESTS_PER_DAY} تجارب في يوم. جرّب غداً.`,
   SCOPE_MISSING: 'لم تأذن المنصة للموقع بهذا بعد. أعد ربط الحساب مرة واحدة ووافق على كل الصلاحيات.',
   UPLOAD_LIMIT: 'بلغ تطبيق Google حد الرفع اليومي عند يوتيوب. جرّب بعد يوم.',

@@ -243,8 +243,12 @@ platform's response body in a log, a URL, an event or a notification.
 
 A test upload to YouTube is real, by owner directive of 2026-11-03 (`MVP_draft.md` section 71, recorded in `progress.md`). It is
 the one real publish, and it is not a work: «تجربة النشر» in a connected channel's sheet (`src/components/work/youtube-test.tsx`)
-uploads a video the person chose, with their title, description and privacy («خاص» or «عام», never notifying subscribers), and
-deletes only what a test uploaded. Publishing works stays a simulation.
+uploads a video the person chose, with their title, description and one of YouTube's four choices, never notifying subscribers,
+and deletes only what a test uploaded. Publishing works stays a simulation.
+- **The four choices** (owner directive of 2026-11-05, `Director_Notes_Plan.md` N-3, `MVP_draft.md` 71.2) are «خاص», «غير مدرج»,
+  «عام» and «مجدول». «مجدول» is YouTube's own `publishAt` on a private video, which YouTube makes public at its time; it is never a
+  fourth privacy and never a timer of the site's. Its window (10 minutes to 30 days) exists once in `test-rules.ts` and once in
+  `*platform_tests_youtube_choices*`. What YouTube applied (`shown_privacy`, `shown_publish_at`) is read back and said when narrower.
 - **Who** is the database's (`platform_test_may` in `supabase/migrations/*platform_tests*`): those who manage accounts and the
   account's own publishers. Every server step needs `MAIL_SERVER_KEY`.
 - **The page never holds a token or YouTube's upload address.** The server opens the upload (`src/app/api/platforms/test/`),

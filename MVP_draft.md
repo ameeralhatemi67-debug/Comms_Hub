@@ -3691,7 +3691,7 @@ blocks what came before it. Mail, the studio and the writing sheet have their ow
 By owner directive of 2026-11-03: in «حسابات المنصات», the sheet of a really-connected YouTube channel lets the people who run it
 publish a real test to the channel, choose its privacy and its file, and delete it again. It proves that publishing reaches the
 channel. Publishing works stays a simulation; this is the one real upload, and it is not a work: no review, no approval, no
-schedule, no copy, nothing in the calendar.
+copy, nothing in the calendar. Since 2026-11-05 a test may be «مجدول», which is YouTube's own schedule, not the site's (71.2).
 
 ## 71.1 Where it is, and who sees it
 
@@ -3705,18 +3705,33 @@ schedule, no copy, nothing in the calendar.
 ## 71.2 The form
 
 - **النوع:** «فيديو» (the default) or «منشور مجتمع».
-- **الخصوصية:** «خاص» (the default) or «عام», with one line under it saying who sees it. «غير مدرج» is not offered.
+- **الظهور** (revised 2026-11-05, by owner directive, `Director_Notes_Plan.md` N-3; until then «الخصوصية» offered «خاص» and «عام» only,
+  and «غير مدرج» was refused): one choice of YouTube's four, in YouTube Studio's order, with one line under it saying who sees it.
+  - «خاص» (the default): «لا يراه إلا من يدير القناة.»
+  - «غير مدرج»: «لا يظهر في القناة ولا في البحث، ويراه من معه الرابط فقط.»
+  - «عام»: «يراه كل من يزور القناة، ويبقى حتى يُحذف.»
+  - «مجدول»: «يبقى خاصاً حتى موعده، ثم يجعله يوتيوب عاماً بنفسه ولو لم يكن الموقع مفتوحاً.» It is not a fourth privacy: the video is
+    uploaded now as private with YouTube's `publishAt`, and YouTube makes it public at that time (YouTube Data API, videos resource,
+    read 2026-11-05). YouTube has no "becomes unlisted at a time", so a scheduled video always becomes public.
+  - «مجدول» opens **موعد النشر** «بتوقيت الرياض», a date and time at least 10 minutes and at most 30 days ahead. The window is the
+    site's rule for a test, not YouTube's, so a test is not forgotten and made public months later; the database refuses a time
+    outside it as `SCHEDULE_INVALID`. A line under it: «يُرفع المقطع الآن خاصاً. إن اكتمل الرفع بعد موعده نشره يوتيوب فور اكتماله.»
 - **الملف:** «من المكتبة» opens the library picker with videos only; «من هذا الجهاز» opens the device's file chooser for a video. The
   chosen file shows as one line with its name and where it came from (its size, or its version), and a button to remove it.
 - **العنوان** (filled with «تجربة نشر», up to 100 characters) and **الوصف** (optional, up to 5000 bytes). YouTube refuses `<` and
   `>` in both, so the form says so before sending.
-- **«نشر التجربة»**, or «نشر التجربة للعموم» when public. A public test asks for a long press: «المقطع العام يراه كل من يزور القناة
-  فور رفعه.»
+- **«نشر التجربة»** for private and unlisted, with no long press. «نشر التجربة للعموم» when public, with a long press: «المقطع العام
+  يراه كل من يزور القناة فور رفعه.» «جدولة التجربة» when scheduled, with a long press: «يجعل يوتيوب المقطع عاماً في موعده بنفسه، فيراه
+  كل من يزور القناة ما لم يُحذف قبله.»
 - While it sends: a progress bar, «جارٍ الرفع N٪» and «إلغاء». A piece lost on the way is resumed by asking YouTube where the upload
   stands, up to three times in a row.
-- At the end: «وصل المقطع إلى القناة (خاص)», that YouTube may need minutes to process it, and «مشاهدة على يوتيوب». When public was asked
-  and YouTube kept it private, the result says so and points to YouTube Studio.
-- Subscribers are never notified of a test, whatever its privacy.
+- At the end: «وصل المقطع إلى القناة (خاص)», that YouTube may need minutes to process it, and «مشاهدة على يوتيوب». A scheduled test
+  says «وصل المقطع إلى القناة خاصاً، ويجعله يوتيوب عاماً <اليوم والوقت> بتوقيت الرياض.», from the time YouTube itself answered.
+- When YouTube kept the video narrower than asked (public or unlisted kept private, or a scheduled video given no time), the result
+  says so: «طلبت «عام» فأبقاه يوتيوب «خاص»…», «طلبت «مجدول» فأبقاه يوتيوب «خاص» بلا موعد…», and points to YouTube Studio. Google's own
+  pages disagree on whether an application it has not audited may upload anything but private, so the answer is read back every
+  time rather than assumed.
+- Subscribers are never notified of a test, whatever its choice.
 
 ## 71.3 A community post
 
@@ -3726,7 +3741,11 @@ copied and the channel's posts page opens, where the person posts it and attache
 
 ## 71.4 «آخر التجارب» and deleting
 
-- The last five tests of the channel: title, state («منشور · خاص»، «حُذف من يوتيوب»، «يُرفع الآن»، «لم يكتمل: …»), time and who.
+- The last five tests of the channel: title, state («منشور · خاص»، «منشور · غير مدرج»، «حُذف من يوتيوب»، «يُرفع الآن»، «لم يكتمل: …»), time
+  and who. A scheduled test reads «مجدول · يصبح عاماً <الوقت>» before its time and «مجدول · حلّ موعده <الوقت>» after it, from the time
+  YouTube gave; the site does not ask YouTube again, so it never claims the video went public. With no time from YouTube it reads
+  «مجدول · أبقاه يوتيوب خاصاً بلا موعد».
+- A scheduled test can be deleted before its time like any other, which cancels its publishing.
 - A published test has «مشاهدة» and «حذف». Delete asks for a long press: «يُحذف المقطع من القناة على يوتيوب نهائياً، ولا يُسترجع.»
   Anyone who may test the channel may delete a test, not only its sender.
 - Only a test is deleted, by the id YouTube returned when it arrived, and only when that video was on this channel.

@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { GOOGLE_SCOPES, googleAccess, packTokens, unpackTokens } from '../src/lib/platforms/oauth2.ts';
-import { nextByte, youtubeDelete, youtubeOpenUpload, youtubeSendPiece, ytReason } from '../src/lib/platforms/youtube.ts';
+import { nextByte, youtubeDelete, youtubeOpenUpload, youtubeSendPiece, ytReason, ytUploadStatus } from '../src/lib/platforms/youtube.ts';
 import {
   DESCRIPTION_MAX_BYTES,
   DEVICE_PIECE,
@@ -15,22 +15,31 @@ import {
   TESTS_PER_DAY,
   TITLE_MAX,
   UPLOAD_PREFIX,
+  YT_CHOICES,
+  YT_CHOICE_AR,
+  YT_CHOICE_SUB,
   YT_MANAGE_SCOPE,
+  YT_SCHEDULE_MAX_DAYS,
+  YT_SCHEDULE_MIN_MINUTES,
   channelUrl,
+  choiceOf,
   isUploadUrl,
   pieceAt,
   pieceFits,
   postsUrl,
+  scheduleProblem,
   studioUrl,
   testProblem,
   videoStudioUrl,
   videoUrl,
+  ytStatus,
 } from '../src/lib/platforms/test-rules.ts';
 import { CONN_ERROR_AR } from '../src/lib/platforms/info.ts';
 import { HOLD } from '../src/lib/kit/hold-reasons.ts';
 
 const read = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 const SQL = read('supabase/migrations/20261103120000_platform_tests.sql');
+const CHOICES_SQL = read('supabase/migrations/20261105120000_platform_tests_youtube_choices.sql');
 const PAGE = read('src/components/work/youtube-test.tsx');
 const START = read('src/app/api/platforms/test/route.ts');
 const STEP = read('src/app/api/platforms/test/[id]/route.ts');
@@ -105,6 +114,55 @@ test('an upload is opened with the details, unannounced to subscribers, and its 
   assert.deepEqual(await youtubeOpenUpload(fake(() => Promise.reject(new Error('down'))), { access: 't', video: v }), { error: 'UNREACHABLE' });
 });
 
+test('YouTube\'s four choices: unlisted is a privacy, and «مجدول» is private with a time that YouTube keeps', async () => {
+  assert.deepEqual([...YT_CHOICES], ['private', 'unlisted', 'public', 'scheduled'], 'YouTube Studio\'s order');
+  assert.deepEqual(YT_CHOICES.map((c) => YT_CHOICE_AR[c]), ['خاص', 'غير مدرج', 'عام', 'مجدول']);
+  for (const c of YT_CHOICES) assert.ok(YT_CHOICE_SUB[c], c);
+  const at = '2026-11-20T06:00:00.000Z';
+  assert.deepEqual(ytStatus('unlisted', at), { privacy: 'unlisted', publishAt: null }, 'only «مجدول» carries a time');
+  assert.deepEqual(ytStatus('scheduled', at), { privacy: 'private', publishAt: at });
+  assert.deepEqual(ytUploadStatus({ privacy: 'unlisted' }), { privacyStatus: 'unlisted' });
+  assert.deepEqual(ytUploadStatus({ privacy: 'public', publishAt: at }), { privacyStatus: 'private', publishAt: at }, 'a time is sent with private only');
+  assert.equal(choiceOf({ privacy: 'private', scheduled_for: at }), 'scheduled');
+  assert.equal(choiceOf({ privacy: 'private', scheduled_for: null }), 'private');
+  assert.equal(choiceOf({ privacy: 'unlisted' }), 'unlisted');
+
+  const f = fake(() => json({}, 200, { Location: UP }));
+  await youtubeOpenUpload(f, { access: 'tok', video: { title: 'a', description: '', privacy: 'unlisted', size: 1, mime: 'video/mp4' } });
+  await youtubeOpenUpload(f, { access: 'tok', video: { title: 'a', description: '', privacy: 'private', publishAt: at, size: 1, mime: 'video/mp4' } });
+  assert.deepEqual(JSON.parse(f.seen[0].body).status, { privacyStatus: 'unlisted' });
+  assert.deepEqual(JSON.parse(f.seen[1].body).status, { privacyStatus: 'private', publishAt: at });
+  for (const s of f.seen) assert.equal(new URL(s.url).searchParams.get('notifySubscribers'), 'false', 'a test never notifies, whatever its choice');
+
+  // YouTube's answer to the last piece names the time it will publish at, which is kept as an instant.
+  const last = fake(() => json({ id: 'dQw4w9WgXcQ', snippet: { channelId: 'UCabc' }, status: { privacyStatus: 'private', publishAt: '2026-11-20T06:00:00Z' } }, 201));
+  const r = await youtubeSendPiece(last, { url: UP, access: 't', bytes: new Uint8Array(10), from: 0, total: 10 });
+  assert.deepEqual(r, { video: { id: 'dQw4w9WgXcQ', channelId: 'UCabc', privacy: 'private', publishAt: at } });
+  const odd = fake(() => json({ id: 'dQw4w9WgXcQ', snippet: { channelId: 'UCabc' }, status: { privacyStatus: 'private', publishAt: 'soon' } }, 201));
+  assert.equal((await youtubeSendPiece(odd, { url: UP, access: 't', bytes: new Uint8Array(10), from: 0, total: 10 })).video.publishAt, null);
+});
+
+test('a scheduled test\'s window: the site\'s own, the same in the database', () => {
+  const now = Date.parse('2026-11-05T09:00:00Z');
+  assert.match(scheduleProblem(null, now), /اختر/);
+  assert.match(scheduleProblem('not a time', now), /اختر/);
+  assert.match(scheduleProblem(new Date(now + 9 * 60e3).toISOString(), now), /10 دقائق/);
+  assert.equal(scheduleProblem(new Date(now + YT_SCHEDULE_MIN_MINUTES * 60e3).toISOString(), now), null);
+  assert.equal(scheduleProblem(new Date(now + YT_SCHEDULE_MAX_DAYS * 864e5).toISOString(), now), null);
+  assert.match(scheduleProblem(new Date(now + YT_SCHEDULE_MAX_DAYS * 864e5 + 60e3).toISOString(), now), /30 يوماً/);
+  assert.match(scheduleProblem(new Date(now - 60e3).toISOString(), now), /10 دقائق/);
+  // The migration refuses the same window by name, and a time with any privacy but private.
+  assert.ok(CHOICES_SQL.includes(`v_when < now() + interval '${YT_SCHEDULE_MIN_MINUTES} minutes' or v_when > now() + interval '${YT_SCHEDULE_MAX_DAYS} days') then
+    raise exception 'SCHEDULE_INVALID'`), 'the window');
+  assert.ok(CHOICES_SQL.includes(`(v_when is not null and v_privacy <> 'private')`), 'a time with private only');
+  assert.ok(CHOICES_SQL.includes(`privacy in ('private','public','unlisted')`), 'the three privacies');
+  assert.ok(TEST_ERROR_AR.SCHEDULE_INVALID.includes(String(YT_SCHEDULE_MIN_MINUTES)) && TEST_ERROR_AR.SCHEDULE_INVALID.includes(String(YT_SCHEDULE_MAX_DAYS)));
+  const done = CHOICES_SQL.slice(CHOICES_SQL.indexOf('create function public.platform_test_done(')).split('\n$$;')[0];
+  assert.match(done, /mail_key_ok\(p_key\)/, 'recording the result still needs the server key');
+  assert.match(CHOICES_SQL, /grant select \(shown_publish_at\) on public\.platform_tests to authenticated/);
+  assert.ok(!/grant select \([^)]*upload_url/.test(CHOICES_SQL), 'never the upload address');
+});
+
 test('pieces go to the upload with their range, and YouTube\'s answer is the next byte or the video', async () => {
   const f = fake(() => json(null, 308, { Range: 'bytes=0-3145727' }));
   const bytes = new Uint8Array(DEVICE_PIECE);
@@ -116,7 +174,7 @@ test('pieces go to the upload with their range, and YouTube\'s answer is the nex
 
   const last = fake(() => json({ id: 'dQw4w9WgXcQ', snippet: { channelId: 'UCabc' }, status: { privacyStatus: 'private' } }, 201));
   assert.deepEqual(await youtubeSendPiece(last, { url: UP, access: 't', bytes: new Uint8Array(10), from: 3145728, total: 3145738 }), {
-    video: { id: 'dQw4w9WgXcQ', channelId: 'UCabc', privacy: 'private' },
+    video: { id: 'dQw4w9WgXcQ', channelId: 'UCabc', privacy: 'private', publishAt: null },
   });
   assert.equal(last.seen[0].headers.get('content-range'), 'bytes 3145728-3145737/3145738');
 
@@ -203,8 +261,8 @@ test('the migration holds the same limits, and hides the upload address from pag
 });
 
 test('every refusal has words', () => {
-  const raised = [...SQL.matchAll(/raise exception '([A-Z_]+)'/g)].map((m) => m[1]);
-  const errors = [...SQL.matchAll(/error = '([A-Z_]+)'/g)].map((m) => m[1]);
+  const raised = [...(SQL + CHOICES_SQL).matchAll(/raise exception '([A-Z_]+)'/g)].map((m) => m[1]);
+  const errors = [...(SQL + CHOICES_SQL).matchAll(/error = '([A-Z_]+)'/g)].map((m) => m[1]);
   for (const code of new Set([...raised, ...errors])) assert.ok(TEST_ERROR_AR[code], code);
   const produced = [...YT.matchAll(/(?:error: |return )'([A-Z][A-Z_]+)'/g)].map((m) => m[1]);
   const server = [...(SERVER + START + STEP).matchAll(/refuse\('([A-Z_]+)'|giveUp\(db, id, '([A-Z_]+)'\)|p_error: '([A-Z_]+)'/g)].map((m) => m[1] ?? m[2] ?? m[3]);
@@ -217,7 +275,8 @@ test('the page never holds a token or an upload address, and the server never lo
   for (const src of [START, STEP, SERVER, YT]) assert.ok(!/console\./.test(src));
   assert.match(PAGE, /HOLD\.platformTestDelete/);
   assert.match(PAGE, /HOLD\.platformTestPublic/);
-  assert.ok(HOLD.platformTestDelete && HOLD.platformTestPublic);
+  assert.match(PAGE, /data-hold=\{HOLD\.platformTestScheduled\}/);
+  assert.ok(HOLD.platformTestDelete && HOLD.platformTestPublic && HOLD.platformTestScheduled);
   // A community post is never sent: the page copies it and opens YouTube.
   const post = PAGE.slice(PAGE.indexOf("{kind === 'post' ? ("), PAGE.indexOf('data-yt="device"'));
   assert.ok(post.length > 500 && post.includes('data-yt="post-open"'), 'the post block was found');

@@ -73,10 +73,17 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   const r = await youtubeSendPiece(fetch, { url: t.url, access: tok.access, bytes, from, total: t.size });
   if ('next' in r) return json({ next: r.next });
   if ('video' in r) {
-    const { data: state, error } = await db.rpc('platform_test_done', { p_key: serverKeyOrNull(), p_test: id, p_video: r.video.id, p_channel: r.video.channelId, p_privacy: r.video.privacy });
+    const { data: state, error } = await db.rpc('platform_test_done', {
+      p_key: serverKeyOrNull(),
+      p_test: id,
+      p_video: r.video.id,
+      p_channel: r.video.channelId,
+      p_privacy: r.video.privacy,
+      p_publish_at: r.video.publishAt,
+    });
     if (error) return refuse(dbCode(error.message));
     if (state !== 'published') return refuse('CHANNEL_MISMATCH');
-    return json({ done: true, video: r.video.id, privacy: r.video.privacy });
+    return json({ done: true, video: r.video.id, privacy: r.video.privacy, publishAt: r.video.publishAt });
   }
   if (r.error === 'UNREACHABLE' || r.error === 'PLATFORM_DOWN') return refuse(r.error, true);
   return giveUp(db, id, r.error);

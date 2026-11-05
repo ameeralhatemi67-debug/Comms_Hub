@@ -8,7 +8,7 @@
 // 200 or 201 with the video. An upload is one call of the "Video Uploads" quota (100 a day); a delete is 50 units of
 // the 10,000 a day and needs youtube.force-ssl or youtube. The API has no method that creates a community post.
 import type { Fetch } from './oauth.ts';
-import { isUploadUrl } from './test-rules.ts';
+import { isUploadUrl, type TestPrivacy } from './test-rules.ts';
 
 const UPLOAD = 'https://www.googleapis.com/upload/youtube/v3/videos';
 const YT = 'https://www.googleapis.com/youtube/v3';
@@ -46,7 +46,12 @@ export function ytReason(status: number, body: Record<string, unknown>): string 
   return 'PLATFORM_ERROR';
 }
 
-export type TestVideo = { title: string; description: string; privacy: 'private' | 'public'; size: number; mime: string };
+/** A video to upload. `publishAt` makes it «مجدول»: YouTube keeps it private and makes it public at that time by itself. */
+export type TestVideo = { title: string; description: string; privacy: TestPrivacy; publishAt?: string | null; size: number; mime: string };
+
+/** The status YouTube is asked for. A time is sent only with private, the one privacy YouTube schedules from. */
+export const ytUploadStatus = (v: Pick<TestVideo, 'privacy' | 'publishAt'>) =>
+  v.publishAt ? { privacyStatus: 'private', publishAt: v.publishAt } : { privacyStatus: v.privacy };
 
 /**
  * Opens a resumable upload at YouTube with the video's details. Subscribers are not told of a test, whatever its privacy.
@@ -67,7 +72,7 @@ export async function youtubeOpenUpload(f: Fetch, a: { access: string; video: Te
       },
       body: JSON.stringify({
         snippet: { title: a.video.title.trim(), description: a.video.description, categoryId: '22' },
-        status: { privacyStatus: a.video.privacy },
+        status: ytUploadStatus(a.video),
       }),
     },
     20_000,
@@ -78,7 +83,7 @@ export async function youtubeOpenUpload(f: Fetch, a: { access: string; video: Te
   return isUploadUrl(url) ? { url } : { error: 'PLATFORM_ERROR' };
 }
 
-export type Uploaded = { id: string; channelId: string | null; privacy: string | null };
+export type Uploaded = { id: string; channelId: string | null; privacy: string | null; publishAt: string | null };
 
 /** Where an upload stands after a 308: the next byte YouTube needs. No `Range` means it has nothing yet. */
 export function nextByte(range: string | null): number {
@@ -104,8 +109,16 @@ export async function youtubeSendPiece(
     const id = typeof r.body.id === 'string' ? r.body.id : '';
     if (!id) return { error: 'PLATFORM_ERROR' };
     const snippet = (r.body.snippet ?? {}) as { channelId?: unknown };
-    const status = (r.body.status ?? {}) as { privacyStatus?: unknown };
-    return { video: { id, channelId: typeof snippet.channelId === 'string' ? snippet.channelId : null, privacy: typeof status.privacyStatus === 'string' ? status.privacyStatus : null } };
+    const status = (r.body.status ?? {}) as { privacyStatus?: unknown; publishAt?: unknown };
+    const at = typeof status.publishAt === 'string' && Number.isFinite(Date.parse(status.publishAt)) ? new Date(status.publishAt).toISOString() : null;
+    return {
+      video: {
+        id,
+        channelId: typeof snippet.channelId === 'string' ? snippet.channelId : null,
+        privacy: typeof status.privacyStatus === 'string' ? status.privacyStatus : null,
+        publishAt: at,
+      },
+    };
   }
   return { error: ytReason(r.status, r.body) };
 }

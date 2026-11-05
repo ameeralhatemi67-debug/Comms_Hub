@@ -34,6 +34,8 @@ export const HOLD = {
   accountDisconnect: 'الفصل يدمّر رمز الحساب وينهي تفويضه فوراً، فلا يُنشر عليه حتى يُعاد ربطه.',
   /** «حسابات المنصات»: a public test video on YouTube (MVP_draft.md section 71). */
   platformTestPublic: 'المقطع العام يراه كل من يزور القناة فور رفعه.',
+  /** «حسابات المنصات»: a scheduled test video on YouTube, made public by YouTube at its time (MVP_draft.md 71.2). */
+  platformTestScheduled: 'يجعل يوتيوب المقطع عاماً في موعده بنفسه، فيراه كل من يزور القناة ما لم يُحذف قبله.',
   /** «حسابات المنصات»: delete a test video from YouTube. */
   platformTestDelete: 'يُحذف المقطع من القناة على يوتيوب نهائياً، ولا يُسترجع.',
   /** «حسابات المنصات»: an Instagram test Story (MVP_draft.md section 72). */

@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-11-03
+updated: 2026-11-05
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -25,6 +25,21 @@ related:
 ---
 
 # Communication Department Hub — Current Status
+
+## The director's notes, step 1: «غير مدرج» and «مجدول» in YouTube's «تجربة النشر», 2026-11-05
+
+- **Approved.** `Director_Notes_Plan.md`, with the recommended answers to Q1 to Q5: calendar colours (N-1), quick actions and
+  «نشر مباشر» (N-2), YouTube's four choices everywhere (N-3), thumbnails (N-4).
+- **Done, not deployed.** Step 1: the YouTube test offers «خاص»، «غير مدرج»، «عام»، «مجدول». «مجدول» is YouTube's own `publishAt`, so
+  YouTube publishes it on time with the site closed.
+  - typecheck and build clean, `npm test` 882 of 882, SQL rules 95 of 95 (YouTube), 62 of 62 (Instagram), 48 of 48 (Facebook) on a
+    private container, `qa/youtube-test-flow.cjs` 68 of 68.
+  - Migration `20261105120000_platform_tests_youtube_choices.sql` is written and **not applied**. It must be applied before this code
+    is deployed, or every platform's «آخر التجارب» list comes back empty.
+- **Unproven.** No real YouTube upload yet: the first unlisted or scheduled test shows whether Google keeps an unaudited
+  application's uploads private.
+- **Next.** The owner's word to apply the migration and deploy; then step 2 of the plan, thumbnails (N-4). Step 3, calendar colours,
+  shares no files with steps 1 and 2 and can run beside them.
 
 ## Desktop Power, merge 11: D11 «تصدير أسرع» with option A, 2026-11-05
 

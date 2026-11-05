@@ -30,6 +30,9 @@ const page = (dark) =>
   `<style>${css}</style><style>body{font-family:"Segoe UI",Tahoma,sans-serif}main{max-width:1120px;margin:auto;padding:16px}</style></head><body><div id="root"></div><script type="module" src="/flow.js"></script></body></html>`;
 const HOLD_PUBLIC = 'المقطع العام يراه كل من يزور القناة فور رفعه.';
 const HOLD_DELETE = 'يُحذف المقطع من القناة على يوتيوب نهائياً، ولا يُسترجع.';
+const HOLD_SCHEDULED = 'يجعل يوتيوب المقطع عاماً في موعده بنفسه، فيراه كل من يزور القناة ما لم يُحذف قبله.';
+/** A Riyadh 'YYYY-MM-DDTHH:MM' some minutes from now, as a datetime-local field takes it. */
+const riyadhIn = (minutes) => new Date(Date.now() + 3 * 3600e3 + minutes * 60e3).toISOString().slice(0, 16);
 const KB = 1024;
 
 const sheet = (t) => t.locator('dialog.pf-sheet[open]');
@@ -209,6 +212,69 @@ const file = (name, size, mimeType = 'video/mp4') => ({ name, mimeType, buffer: 
     await t.screenshot({ path: path.join(out, '05-deleted.png') });
     check('nothing was loaded from outside the fixture except the posts page opened on purpose', outside.every((u) => u === 'https://www.youtube.com/@hedayh/posts'), outside);
     await t.context().close();
+
+    // ---------- 5b. YouTube's four choices: unlisted, and scheduled (owner directive of 2026-11-05) ----------
+    const ch = await open();
+    await start(ch);
+    const choices = await panel(ch).locator('[data-yt="choice"] button').allInnerTexts();
+    check('four choices, in YouTube Studio\'s order', JSON.stringify(choices.map((x) => x.trim())) === JSON.stringify(['خاص', 'غير مدرج', 'عام', 'مجدول']), choices);
+    await panel(ch).getByRole('button', { name: 'غير مدرج' }).click();
+    check('unlisted says only who has the link sees it', (await panel(ch).locator('[data-yt="choice-sub"]').innerText()).includes('من معه الرابط فقط'));
+    await panel(ch).locator('[data-yt="file"]').setInputFiles(file('unlisted.mp4', 300 * KB));
+    await panel(ch).locator('.yt-f input').fill('تجربة غير مدرجة');
+    const unl = panel(ch).locator('[data-yt="send"]');
+    check('an unlisted test asks for no hold', (await unl.getAttribute('data-hold')) === null && (await unl.innerText()).includes('نشر التجربة'));
+    let mark = (await calls(ch)).length;
+    await unl.click();
+    await panel(ch).locator('[data-yt="done"]').waitFor();
+    const uPost = (await calls(ch)).slice(mark).find((x) => x.method === 'POST');
+    check('it is sent unlisted, with no time', uPost.body.privacy === 'unlisted' && !('scheduled_for' in uPost.body), uPost.body);
+    const uDone = await panel(ch).locator('[data-yt="done"]').innerText();
+    check('the result says unlisted, and nothing was kept narrower', uDone.includes('(غير مدرج)') && !uDone.includes('طلبت'), uDone);
+    check('the list shows it unlisted', (await panel(ch).locator('.yt-item').first().innerText()).includes('منشور · غير مدرج'));
+
+    await panel(ch).getByRole('button', { name: 'إزالة الملف' }).click();
+    check('no time field before «مجدول»', (await panel(ch).locator('[data-yt="when"]').count()) === 0);
+    await panel(ch).getByRole('button', { name: 'مجدول' }).click();
+    check('scheduled says YouTube makes it public at its time by itself', (await panel(ch).locator('[data-yt="choice-sub"]').innerText()).includes('يجعله يوتيوب عاماً بنفسه'));
+    const whenField = panel(ch).locator('[data-yt="when"]');
+    check('a date and time in Riyadh time', (await whenField.isVisible()) && (await panel(ch).locator('label:has([data-yt="when"])').innerText()).includes('بتوقيت الرياض'));
+    await panel(ch).locator('[data-yt="file"]').setInputFiles(file('later.mp4', 300 * KB));
+    await panel(ch).locator('.yt-f input:not([data-yt="when"])').fill('تجربة مجدولة');
+    const sch = panel(ch).locator('[data-yt="send"]');
+    check('nothing is scheduled without a time', (await sch.isDisabled()) && (await panel(ch).locator('.yt-sub.warn').innerText()).includes('اختر موعد النشر'));
+    await whenField.fill(riyadhIn(5));
+    check('a time sooner than ten minutes is refused before sending', (await sch.isDisabled()) && (await panel(ch).locator('.yt-sub.warn').innerText()).includes('10 دقائق'));
+    await whenField.fill(riyadhIn(31 * 24 * 60));
+    check('and one beyond thirty days', (await sch.isDisabled()) && (await panel(ch).locator('.yt-sub.warn').innerText()).includes('30 يوماً'));
+    const slot = riyadhIn(2 * 24 * 60);
+    await whenField.fill(slot);
+    check('a scheduled test says so and asks for a hold, with the reason', !(await sch.isDisabled()) && (await sch.innerText()).includes('جدولة التجربة') && (await sch.getAttribute('data-hold')) === HOLD_SCHEDULED);
+    await ch.screenshot({ path: path.join(out, '05b-scheduled-form.png') });
+    mark = (await calls(ch)).length;
+    await sch.click();
+    await panel(ch).locator('[data-yt="done"]').waitFor();
+    const sPost = (await calls(ch)).slice(mark).find((x) => x.method === 'POST');
+    const asked = new Date(`${slot}:00+03:00`).toISOString();
+    check('it is sent private, with the Riyadh time as an instant', sPost.body.privacy === 'private' && sPost.body.scheduled_for === asked, sPost.body);
+    const sDone = await panel(ch).locator('[data-yt="done"]').innerText();
+    check('the result says private until YouTube makes it public at its time', sDone.includes('وصل المقطع إلى القناة خاصاً') && sDone.includes('ويجعله يوتيوب عاماً') && sDone.includes('بتوقيت الرياض') && !sDone.includes('طلبت'), sDone);
+    check('the list says when it becomes public', (await panel(ch).locator('.yt-item').first().innerText()).includes('مجدول · يصبح عاماً'), await panel(ch).locator('.yt-item').first().innerText());
+    check('a scheduled test can be deleted before its time', (await panel(ch).locator('.yt-item').first().getByRole('button', { name: 'حذف' }).count()) === 1);
+    await ch.screenshot({ path: path.join(out, '05c-scheduled-done.png') });
+
+    // YouTube kept it private with no time: said, with where to set it.
+    await panel(ch).getByRole('button', { name: 'إزالة الملف' }).click();
+    await panel(ch).locator('[data-yt="file"]').setInputFiles(file('notime.mp4', 300 * KB));
+    await panel(ch).locator('.yt-f input:not([data-yt="when"])').fill('بلا موعد');
+    await sch.click();
+    await panel(ch).locator('[data-yt="done"]').waitFor({ state: 'detached' }).catch(() => undefined);
+    await panel(ch).locator('[data-yt="done"]').waitFor();
+    await ch.waitForFunction(() => document.querySelector('[data-yt="done"]')?.textContent?.includes('بلا موعد'));
+    const nDone = await panel(ch).locator('[data-yt="done"]').innerText();
+    check('asked scheduled and YouTube kept no time: said, with where to set it', nDone.includes('طلبت «مجدول» فأبقاه يوتيوب «خاص» بلا موعد') && nDone.includes('YouTube Studio'), nDone);
+    check('and the list says so', (await panel(ch).locator('.yt-item').first().innerText()).includes('أبقاه يوتيوب خاصاً بلا موعد'));
+    await ch.context().close();
 
     // A piece lost on the way: the page asks where the upload stands and goes on.
     const fl = await open('?flaky=1');
