@@ -4072,3 +4072,19 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   signed in rose from 323 to 327, by `calendar_prefs_save`, `thumb_save`, `thumb_keep` and `thumb_may_see`, the intended write
   paths, as with every other feature. The one for when signed out stayed at 22.
 - **Now.** Every migration of the director's notes steps 1 to 3 is on comms-hub. Nothing pushed.
+
+### 2026-11-05: «ألوان التقويم» renumbered to section 75 of the spec
+
+- **Why.** The deployed site's `MVP_draft.md` (origin's `5a50567`, the mail and messaging window) already holds section 74.
+  Local main also had «ألوان التقويم» as 74.
+- **What changed.**
+  - «ألوان التقويم» is now 75, with its parts 75.1 to 75.5.
+  - Section 77 names the numbers: 74 the window, 75 the colours, and 76 and 78 kept for the plan's quick actions and YouTube's
+    four choices in the work cycle. `Director_Notes_Plan.md` follows.
+  - Comments in `calendar-colors.ts`, `calendar-colors.tsx`, `home.tsx`, `tests/calendar-colors.test.mjs`, `qa/calendar-colors.cjs`
+    and its fixture now say 75.
+- **Left as they are.** The applied migration `20261105130000_calendar_prefs.sql` and `supabase/tests/calendar_prefs_rules.sql`
+  still say 74, so their recorded checksums stay true. Section 75 says so.
+- **Verified.** `npm test` passes in full (906 of 906). Comments and the spec only; no code changed.
+- **For the merge of origin/main.** `MVP_draft.md` will still conflict where both sides appended. Keep 74 (the window), then 75,
+  then 77.

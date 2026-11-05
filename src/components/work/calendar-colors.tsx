@@ -1,5 +1,5 @@
 'use client';
-// «ألوان التقويم» (MVP_draft.md section 74, Director_Notes_Plan.md N-1): the person's own choice of colours, read once
+// «ألوان التقويم» (MVP_draft.md section 75, Director_Notes_Plan.md N-1): the person's own choice of colours, read once
 // per visit from `calendar_prefs` (row level security shows each person their own row only) and written only through
 // `calendar_prefs_save`, one save after another, always the latest. The calendar, the project pages and Home's next
 // days read the same choice through `useCalendarColors`. The rules are src/lib/work/calendar-colors.ts.

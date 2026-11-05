@@ -1,4 +1,4 @@
-// «ألوان التقويم» (MVP_draft.md 74, Director_Notes_Plan.md N-1): the rules in src/lib/work/calendar-colors.ts, the
+// «ألوان التقويم» (MVP_draft.md 75, Director_Notes_Plan.md N-1): the rules in src/lib/work/calendar-colors.ts, the
 // twelve colours in src/app/work.css, and what the migration must hold. The database's own half is
 // supabase/tests/calendar_prefs_rules.sql; the sheet is clicked through by qa/calendar-colors.cjs.
 import test from 'node:test';

@@ -61,7 +61,7 @@ assumed.
   - `tests/calendar-colors.test.mjs`: contrast of every pair in both modes, and that warnings win;
   - `supabase/tests/calendar_prefs_rules.sql`: only one's own row;
   - `qa/calendar-colors.cjs`: clicks through the sheet on a fixture.
-- **Spec:** `MVP_draft.md` section 74.
+- **Spec:** `MVP_draft.md` section 75 (74 is the mail and messaging window).
 
 ---
 
@@ -109,7 +109,7 @@ assumed.
 
 - **It is a real publish.** It is built on the engine of «تجربة النشر», which already works for real. It is a new exception to
   "publishing is a simulation", and it needs the owner's directive (this approval), recorded in `AGENTS.md`, `progress.md` and
-  `MVP_draft.md` section 75. Publishing works stays a simulation.
+  `MVP_draft.md` section 76. Publishing works stays a simulation.
 - **It sits outside the work cycle**, so it has no stages and no approval. That is why it belongs to the top of the chain only:
   - a fixed capability, `publish.direct`, for the Admin and the director, like `motion.studio`;
   - no grant, template or request can give it (decision Q2).

@@ -3869,14 +3869,18 @@ Ten tests per Page a day, as YouTube's and Instagram's, beside Meta's 30 Reels a
 codes; a permissions refusal names the two usual causes: the person who connected cannot create content on the Page, or the
 Page waits for Page Publishing Authorization.
 
-# 74. «ألوان التقويم»: the calendar in the person's own colours, 2026-11-05
+# 75. «ألوان التقويم»: the calendar in the person's own colours, 2026-11-05
+
+Numbered 74 when it was written. The mail and messaging window took 74 on the deployed site the same day, so this is 75. The
+applied migration `20261105130000_calendar_prefs.sql` and `supabase/tests/calendar_prefs_rules.sql` still say 74 in their
+comments, because their recorded checksums must stay true.
 
 By owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-1, with answer Q1: the colours are personal and kept in the
 database, so they follow the person to the site, the desktop application and the phone). The director asked to change the
 calendar's colours to follow progress more easily. A person colours the calendar by one thing at a time, and picks a colour for
 each of its values from twelve. Nobody else sees the choice, administrators included, and it changes nothing for anyone else.
 
-## 74.1 The button and the sheet
+## 75.1 The button and the sheet
 
 - **«الألوان»** sits on the calendar's bar, after «كل المشاريع», and opens the sheet «ألوان التقويم» (`src/components/sheet.tsx`),
   under the line «ألوانك أنت: تتبعك على كل جهاز، ولا تغيّر ما يراه غيرك.»
@@ -3892,7 +3896,7 @@ each of its values from twelve. Nobody else sees the choice, administrators incl
 - **Saving** is at once, the whole choice in one call, one after another; the foot says «تُحفظ ألوانك فور اختيارها.» A refusal is
   said in words and the calendar goes back to what was kept.
 
-## 74.2 The modes and their defaults
+## 75.2 The modes and their defaults
 
 | «لوّن حسب» | A value is | Default colour | Keeps its kind's colour |
 |---|---|---|---|
@@ -3905,14 +3909,14 @@ each of its values from twelve. Nobody else sees the choice, administrators incl
 Two people may start in the same colour; picking another for one is the remedy. A default is never stored, so only real choices
 count toward the 200.
 
-## 74.3 Warnings stay on top
+## 75.3 Warnings stay on top
 
 A colour changes the fill, the text and the edge only. A kind keeps its shape (a dashed border for what is not fixed yet, a struck
 held time). Late, at risk, near and urgent keep their marks, drawn outside the chip on the calendar's own ground, where no colour
 can hide them: late a red outline, at risk an amber ring, near an amber line under it, urgent a red edge at its start. A late row
 of the day and list views keeps its red border all round. A failed publish keeps its red and takes no colour.
 
-## 74.4 The key and where the colours apply
+## 75.4 The key and where the colours apply
 
 - **The key** under the calendar is today's in «نوع الموعد», each kind in its chosen colour. In any other mode it reads «لوّن حسب …:»,
   lists the values on the calendar now in the sheet's order, shows the four warnings as they are drawn on a colour, and says what
@@ -3923,7 +3927,7 @@ of the day and list views keeps its red border all round. A failed publish keeps
   named in a row in «المنصة», unless a result or a risk is shown; and Home's «الأيام السبعة القادمة».
 - The calendar's guide has a new part «الألوان» and says what is new once (`src/lib/help/pages.ts`, calendar version 2).
 
-## 74.5 Where it lives
+## 75.5 Where it lives
 
 - Rules: `src/lib/work/calendar-colors.ts` (pure). The sheet, the key and the shared choice: `src/components/work/calendar-colors.tsx`.
   The twelve colours: classes `pal-0` to `pal-11` in `src/app/work.css`, held equal to the rules.
@@ -3936,8 +3940,9 @@ of the day and list views keeps its red border all round. A failed publish keeps
 # 77. Thumbnails of stored files, 2026-11-05
 
 By owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-4, answer Q4): a stored file is never shown as a name alone. Every
-library version, and every file sent in mail or messaging, has a small picture, or a tile that says what it is. Sections 74 to 76
-are kept for the plan's other notes (calendar colours, quick actions, YouTube's four choices in the work cycle).
+library version, and every file sent in mail or messaging, has a small picture, or a tile that says what it is. Section 74 is the
+mail and messaging window and 75 the calendar colours; 76 and 78 are kept for the plan's quick actions and for YouTube's four
+choices in the work cycle.
 
 ## 77.1 The picture
 

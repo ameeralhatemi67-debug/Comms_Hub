@@ -111,7 +111,7 @@ export function HomePage() {
     .filter((e) => e.date >= w.today && e.date <= dayAdd(w.today, 6) && e.k !== 'held')
     .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   const seen = new Set<string>();
-  // «ألوان التقويم» (MVP_draft.md 74): the same colours as the calendar.
+  // «ألوان التقويم» (MVP_draft.md 75): the same colours as the calendar.
   const { prefs: colors } = useCalendarColors();
   const look = useColorLook(items, w.accounts);
   const upcoming = week.filter((e) => {

@@ -1,4 +1,4 @@
-// Stand-ins for the browser check of «ألوان التقويم» (qa/calendar-colors.cjs, MVP_draft.md section 74): the database
+// Stand-ins for the browser check of «ألوان التقويم» (qa/calendar-colors.cjs, MVP_draft.md section 75): the database
 // client, the work provider and the dialogs the calendar opens, so the real calendar, project pages and Home draw on a
 // fixture. `calendar_prefs_save` answers as the database function does: it checks the mode, the keys, the colours and
 // the 200, keeps the row, and returns it; every call is recorded. Flags in the address change the case:

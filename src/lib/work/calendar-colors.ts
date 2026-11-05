@@ -1,4 +1,4 @@
-// «ألوان التقويم» (MVP_draft.md section 74, Director_Notes_Plan.md N-1, owner's answer Q1 of 2026-11-05): a
+// «ألوان التقويم» (MVP_draft.md section 75, Director_Notes_Plan.md N-1, owner's answer Q1 of 2026-11-05): a
 // person colours the calendar by one of five things, each value taking one of twelve preset colours. The choice is
 // personal and lives in the database (`calendar_prefs`, supabase/migrations/*calendar_prefs*), so it follows the
 // person to every device. Pure, covered by tests/calendar-colors.test.mjs, which also holds the palette equal to the

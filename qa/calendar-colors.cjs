@@ -1,4 +1,4 @@
-// Browser check of «ألوان التقويم» (MVP_draft.md section 74), in Edge: the real «التقويم», «المشاريع», project page and
+// Browser check of «ألوان التقويم» (MVP_draft.md section 75), in Edge: the real «التقويم», «المشاريع», project page and
 // Home, and the real sheet, on a fixture (qa/fixtures/calendar-colors.tsx) with stand-ins for the database and the work
 // provider, because the pages need a signed-in person and no bypass is allowed.
 //   1. Nothing chosen: today's calendar, class for class, and today's key.
