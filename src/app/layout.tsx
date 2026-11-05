@@ -23,6 +23,7 @@ import './auth.css';
 import './media.css';
 import './mail.css';
 import './chat.css';
+import './chat-window.css';
 import './kit.css';
 import './work.css';
 import './permissions.css';

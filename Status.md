@@ -26,6 +26,15 @@ related:
 
 # Communication Department Hub — Current Status
 
+## «نافذة البريد والمراسلة», the experimental mail and messaging window, 2026-11-05
+
+- **Live, off by default.** A person turns it on in «الحساب» «التجارب»; it needs the page «البريد». `MVP_draft.md` section 74.
+- **Migration applied** to comms-hub with the owner's yes (`20261105180000_chat_window.sql`). «العام» and a work's own room exist
+  only after their first message.
+- **Checked:** SQL rules 87 of 87 on a private container, `qa/chat-window-flow.cjs` 57 of 57 on a fixture, `npm test` and the build
+  clean. Not yet tried signed in on the live site.
+- **Next:** the owner and a tester turn it on and send the first messages; the window's notes come back through «أرسل ملاحظة».
+
 ## «تجربة النشر» on Instagram, live 2026-11-03 (bf7388a)
 
 From the owner's request after the Instagram guide went live (`MVP_draft.md` section 72, `Instagram_Test_Plan.md`, `progress.md`).

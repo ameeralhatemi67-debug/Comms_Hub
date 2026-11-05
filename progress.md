@@ -2597,3 +2597,34 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** The prices were typed from the owner's pictures and checked against them by a test only for agreement among the tables, not against X. Nothing signed in on the real site.
 - **Not done, said plainly.** The steps from «أنشئ التطبيق» on are the old text.
 - **On the tree that was pushed** (rebased on `origin/main` after another session's Instagram test went live): `npm run typecheck` clean; `npm test` **744 of 744**; `npm run build` clean; `qa/guide-modal.cjs` 16 of 16, `qa/platforms-flow.cjs` 136 of 136, `qa/instagram-test-flow.cjs` 43 of 43 and `qa/youtube-test-flow.cjs` 49 of 49 (the last two unchanged by this work). No migration, route, secret or database function was touched.
+
+### 2026-11-05: «نافذة البريد والمراسلة», the experimental mail and messaging window (MVP_draft.md 74)
+
+- **Directive:** the owner's brief of 2026-11-05, after the prototype artifact «نافذة البريد والمراسلة» (versions 1 and 2) and two
+  notes: keep «أرسل ملاحظة» in the top bar beside the notifications, and let the launcher move only up and down the left edge. The
+  owner then asked for it to be built fully, as a switch on «الحساب» that is off by default, saved on the account, with the two
+  migrations applied once tested and the change pushed to deploy.
+- **What was built:** `src/components/chat-window/` (launcher, window, list, message box, mail pane), mounted in the shell; its
+  rules in `src/lib/chat-window/rules.ts`; the switch on «الحساب» «التجارب». The window reuses the messaging tab's `Conversation`
+  (which now takes a `composer` slot), info panel and dialogs, and the mail page's `ThreadView` and `Composer`. Replies and quick
+  mail moved from the mail page into `src/components/mail/compose.ts`, used by both, without changing what the mail page sends.
+  The heavy part loads only after the window is first opened (`live.tsx`).
+- **Database:** `20261105180000_chat_window.sql`: `profiles.chat_window` (off), `chat_global_room` («العام», made by its first
+  message, every account a member, later accounts joined by a trigger), `chat_work_room` (a work's own room: those involved and
+  the director and the assistant), `chat_member` refusing leave, add and remove in «العام» (`GLOBAL_ROOM`) and leave and remove in
+  a work's room (`WORK_ROOM`), and `push_route_chat` sending a mention to a muted member of «العام». **Applied to comms-hub on
+  2026-11-05 with the owner's yes**; checked there: the column present with nobody switched on, the three functions and the
+  trigger present, no room created, anonymous callers refused.
+- **Evidence:** typecheck and build clean; `npm test` 893 of 893 on the branch from local main, 762 of 762 on `origin/main` with
+  only this change; SQL rules `supabase/tests/chat_window_rules.sql` 87 of 87 on a private container (`qa/chat-window-rules.json`,
+  68 migrations replayed), with mutation runs that broke the migration and were caught, and a race of two sessions opening the same
+  rooms at once that produced one room each; `qa/chat-window-flow.cjs` 57 of 57 (`qa/chat-window-flow.json`) on both trees: off by
+  default, the switch, the launcher's vertical-only drag, the three sizes and their buttons, full width following the sidebar, the
+  edge and its keys, @ and mention pickers, «العام» asking once and starting with its first message, a work's room starting with
+  its first message, a reply and a new mail through the ten seconds to take them back, Escape and Alt+M, the mail page, phone width
+  in the evening theme, no page errors.
+- **Found and fixed while checking:** a drop of the launcher near its place threw instead of going home; Escape on a menu item
+  minimised the window; the box's hidden file picker showed because the site's inputs are `display:block`; page toasts covered
+  the box at full size and on phones.
+- **Not proven:** nothing signed in on the live site yet, and no real «العام» or work room exists until someone sends the first
+  message. Removing someone from a work does not remove them from its room (by design, nobody is removed).

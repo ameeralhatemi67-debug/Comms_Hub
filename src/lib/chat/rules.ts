@@ -8,7 +8,8 @@ export type RoomRow = {
   type: 'dm' | 'group' | 'channel';
   name: string | null;
   description: string | null;
-  link: { type: 'campaign' } | { type: 'work'; id: string; title?: string } | null;
+  /** 'all' is «العام», and a work link with `auto` is a work's own conversation (MVP_draft.md 74). */
+  link: { type: 'campaign' } | { type: 'work'; id: string; title?: string; auto?: boolean } | { type: 'all' } | null;
   dm_key: string | null;
   pinned_message: string | null;
   created_by: string;
@@ -50,6 +51,8 @@ export type ProfileRow = {
   presence_note: string | null;
   signature: string | null;
   enter_sends: boolean;
+  /** The experimental mail and messaging window is on for this account (MVP_draft.md 74). */
+  chat_window?: boolean;
 };
 
 export const REACTIONS: [string, string][] = [
@@ -181,7 +184,13 @@ export function chatSysText(d: Record<string, unknown> | null, nameOf: (e: strin
   const who = (k: string) => (typeof d[k] === 'string' ? nameOf(d[k] as string) : '');
   switch (d.e) {
     case 'created':
-      return d.type === 'channel' ? 'إنشاء القناة' : 'إنشاء المجموعة';
+      return d.type === 'channel'
+        ? 'إنشاء القناة'
+        : d.type === 'all'
+          ? 'بداية «العام»: كل أعضاء المركز هنا'
+          : d.type === 'work'
+            ? 'بداية محادثة العمل: أصحاب مراحله ومدير الاتصال ومساعده'
+            : 'إنشاء المجموعة';
     case 'added':
       return `انضمام ${who('who')}`;
     case 'removed':
@@ -228,6 +237,8 @@ const CHAT_ERRORS: Record<string, string> = {
   INVALID_NAME: 'اكتب اسماً بين حرف و80 حرفاً.',
   STAGE_DENIED: 'لا يسمح دورك أو صلاحيتك على المجلد بهذه الخطوة.',
   SELF_APPROVAL: 'لا تعتمد إصداراً رفعته بنفسك. يقرر فيه غيرك من القيادة.',
+  GLOBAL_ROOM: '«العام» يضم كل أعضاء المركز تلقائياً. يمكنك كتمها بدل مغادرتها.',
+  WORK_ROOM: 'أعضاء محادثة العمل يتبعون مراحله. يمكنك كتمها بدل مغادرتها.',
   FORBIDDEN: 'لا يسمح دورك بهذا الإجراء.',
 };
 export function chatErrorText(message: string | null | undefined) {

@@ -45,6 +45,7 @@ import { PhoneLockOffer } from './native/phone-lock';
 import { PhoneUploads } from './native/phone-uploads';
 import { beforeSignOut } from '@/lib/native/device-push';
 import { FeedbackButton, useErrorReporter } from './feedback';
+import { ChatWindow } from './chat-window';
 
 /** The icon of each menu entry; the entries themselves (and who sees them) are in src/lib/access.ts. */
 const menuIcons = {
@@ -307,6 +308,9 @@ function FullShell({ children }: { children: ReactNode }) {
           </button>
         </Modal>
       )}
+
+      {/* The experimental mail and messaging window, on for accounts that turned it on (MVP_draft.md 74). */}
+      <ChatWindow />
 
       {(state.message || kit.offer) && (
         <div className="toast" role="status">
