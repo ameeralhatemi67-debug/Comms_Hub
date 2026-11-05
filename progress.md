@@ -4237,3 +4237,21 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Before the upload.** The release opens the production site, which has none of D9 to D12's site code until main is pushed,
   so the three files go up after the push: the installer, the blockmap, then `latest.yml` (`desktop/README.md`). Installed
   copies then find 0.9.0 at their next start or within four hours. Nothing uploaded or pushed.
+
+### 2026-11-05: main pushed and deployed with the desktop release (stage 3 of the release)
+
+- **Pushed** at the owner's "Yes, push main", 13:29: exactly `6f61ef2`, as a fast-forward of `origin/main` (`c5f2a9f..6f61ef2`, 205
+  commits: Desktop Power D9 to D12 with P-28, the final regression, the 0.9.0 version, and the director's notes steps 1 to 4
+  with the mail and messaging window). The commit was named rather than the branch, so nothing committed meanwhile could ride
+  along.
+- **Before the push,** main's migrations against comms-hub by name: every one in `6f61ef2` is applied except `android_releases`
+  (by design). `20261105210000_direct_schedule.sql` in the main checkout is another session's uncommitted work and was not
+  pushed. `limits_enforced_fix` is on comms-hub without a file, as since 2026-10-15.
+- **Vercel:** `dpl_2FRskf78fsFaoutmiVHdgA24TL6J` READY 66 s after the push, aliased to `comms-hub-three.vercel.app`; the
+  page carries the deployed version `6f61ef2`.
+- **Live checks, signed out, nothing written:** `qa/site-live.cjs` **9 of 9**, `qa/platform-setup-live.cjs` **10 of 10**,
+  `qa/writing-live.cjs` **16 of 16**, `qa/feedback-live.cjs` **8 of 8**.
+- **Not checked live:** anything signed in, as everywhere in this project: the «تطبيق سطح المكتب» card on «الحساب», the
+  studio, and the director's notes pages.
+- **Left, the owner's:** upload `CommsHub-Setup-0.9.0-x64.exe`, its blockmap, then `latest.yml` to `desktop-releases/windows-x64/`
+  (`desktop/README.md`). Until then the download offers 0.6.0, which keeps working with this site.

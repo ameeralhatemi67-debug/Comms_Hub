@@ -26,6 +26,15 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The desktop release, stage 3: main pushed and live, 2026-11-05
+
+- **Done.** `6f61ef2` pushed at the owner's yes (13:29) and deployed by Vercel 66 s later; the live page carries `6f61ef2`. Signed
+  out, nothing written: `site-live` 9 of 9, `platform-setup-live` 10 of 10, `writing-live` 16 of 16, `feedback-live` 8 of 8.
+- **Database.** Every migration in the pushed commit is on comms-hub, except `android_releases` (by design).
+- **Not checked live:** anything signed in.
+- **Next, the owner's:** upload the 0.9.0 installer, its blockmap, then `latest.yml` to `desktop-releases/windows-x64/`. The files are in
+  `.claude/worktrees/verify-e3cab67/desktop/dist/release/`.
+
 ## The desktop release, stage 2: 0.9.0 built and checked, 2026-11-05
 
 - **Done.** Version 0.9.0 (`a8c068d`): desktop tests 164 of 164. `CommsHub-Setup-0.9.0-x64.exe` (162.6 MB, unsigned), its blockmap and
@@ -34,8 +43,7 @@ related:
   - `qa/desktop-shell.cjs` 68 of 68 and `qa/desktop-update.cjs` 10 of 10, after a stale line in each was fixed (`ff636d0`). The update
     check had not run to its end since D5.
   - The owner's installed 0.6.0 was not touched.
-- **Next.** Stage 3: the owner's yes to push main, then the live site checked, then the owner uploads the three files, `latest.yml`
-  last (`desktop/README.md`). Nothing pushed or uploaded.
+- **Next.** Stage 3, done: see the section above.
 
 ## The desktop release, stage 1: the final regression continued, 2026-11-05
 

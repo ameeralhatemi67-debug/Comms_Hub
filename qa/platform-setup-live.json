@@ -1,6 +1,6 @@
 {
   "script": "qa/platform-setup-live.cjs",
-  "run": "2026-11-01T21:23:26.134Z",
+  "run": "2026-11-05T10:41:20.108Z",
   "checks": [
     {
       "name": "the page really runs next 16.4.3",
@@ -10,7 +10,7 @@
     {
       "name": "the styles of both pages are out",
       "pass": true,
-      "detail": "281219 bytes"
+      "detail": "345720 bytes"
     },
     {
       "name": "and the old ones are gone",

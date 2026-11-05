@@ -1,11 +1,11 @@
 {
   "script": "qa/feedback-live.cjs",
-  "run": "2026-11-02T08:04:06.139Z",
+  "run": "2026-11-05T10:41:37.732Z",
   "checks": [
     {
       "name": "the page carries the deployed version",
       "pass": true,
-      "detail": "ed657c0"
+      "detail": "6f61ef2"
     },
     {
       "name": "nothing of the note is served to a stranger",
