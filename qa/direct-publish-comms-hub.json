@@ -1,0 +1,29 @@
+{
+  "migration": {
+    "file": "supabase/migrations/20261105160000_direct_publish.sql",
+    "file_md5": "acd2fb44b6c9443e5517d8997d1d85d0",
+    "applied": "comms-hub (hrghmioxvgkjpnydrxrk) on 2026-11-05 as version 20261105100645, with the owner's words «Apply the migration»; the stored statement's md5 equals the file's"
+  },
+  "rules": "supabase/tests/direct_publish_rules.sql was not run on comms-hub: like thumbs_rules.sql it replaces the server key inside its own transaction, which this session's permission check refuses on the live database. It passed 45 of 45 on a private container (qa/direct-publish-rules.json).",
+  "how": "Read-only catalog checks on comms-hub through the Supabase connector.",
+  "run": "2026-11-05",
+  "checks": {
+    "publish.direct is fixed, not grantable, admin and director, sort 67": true,
+    "purpose (default 'test') and notify added": true,
+    "the one existing row is now a test": true,
+    "a page reads purpose": true,
+    "a page never reads upload_url": true,
+    "a page may not call direct_announce or direct_words": true,
+    "a signed-in page may start": true,
+    "signed out may not start, finish or delete": true,
+    "platform_test_start checks publish.direct": true,
+    "platform_test_done announces a direct post": true,
+    "platform_test_deleted checks publish.direct": true
+  },
+  "advisor": {
+    "kinds": "the same four",
+    "authenticated_security_definer_function_executable": "327 -> 327",
+    "anon_security_definer_function_executable": "22 -> 22",
+    "rls_enabled_no_policy": "13 -> 13"
+  }
+}

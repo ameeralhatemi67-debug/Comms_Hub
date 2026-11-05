@@ -4195,3 +4195,20 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Records.** The gate records are kept; this run's three JSON files are not committed.
 - **Before a push:** `20261105160000_direct_publish.sql` (`e8e2fa9`, «نشر مباشر») is not applied to comms-hub and needs the
   owner's yes. Every other migration on main is applied, and the push is a fast-forward of `origin/main`.
+
+### 2026-11-05: direct_publish applied to comms-hub (director's notes, step 4)
+
+- **Owner decision.** «Apply the migration», for `20261105160000_direct_publish.sql`.
+- **Applied** through the Supabase connector as version `20261105100645`. The stored statement's md5 equals the file's
+  (`acd2fb44…`). It adds a capability, two columns, an index and two functions, and replaces three functions. It drops, deletes
+  and rewrites no data; the one existing test on the site now reads `purpose` 'test'.
+- **Checked on comms-hub, read-only** (`qa/direct-publish-comms-hub.json`):
+  - `publish.direct` is fixed, not grantable, and held by admin and director;
+  - a page reads `purpose` and never `upload_url`;
+  - a page may not call `direct_announce` or `direct_words`;
+  - signed out, nothing may start, finish or delete;
+  - the three replaced functions check the capability and announce as written.
+- **Rules not run on comms-hub.** `direct_publish_rules.sql`, like `thumbs_rules.sql`, replaces the server key inside its own
+  transaction, which this session's permission check refuses on the live database. It stands at 45 of 45 on a private container.
+- **Security advisor.** No new notice: 327, 22 and 13, as before. The two new functions are not callable from outside.
+- **Now.** Every migration of the director's notes steps 1 to 4 is on comms-hub. Nothing pushed.
