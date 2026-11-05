@@ -3868,3 +3868,73 @@ says so and offers no test.
 Ten tests per Page a day, as YouTube's and Instagram's, beside Meta's 30 Reels a day. Meta's refusals are worded by its error
 codes; a permissions refusal names the two usual causes: the person who connected cannot create content on the Page, or the
 Page waits for Page Publishing Authorization.
+
+---
+
+# 74. «نافذة البريد والمراسلة»: the experimental mail and messaging window, 2026-11-05
+
+By the owner's directive of 2026-11-05, after the prototype artifact «نافذة البريد والمراسلة» (versions 1 and 2) and the owner's
+notes on it. An experiment: off for everyone until a person turns it on.
+
+## 74.1 The switch
+
+«الحساب» has a panel «التجارب» with one switch, «نافذة البريد والمراسلة», marked «تجريبي», off by default. It is saved on the
+account (`profiles.chat_window`, written only by `profile_update`), so it follows the person to every device and the phone
+application. It needs the page «البريد»; without it the switch is shown off and disabled, with the reason. The place of the
+launcher and the window's width are remembered on the device only.
+
+## 74.2 The launcher and the sizes
+
+- **The launcher** sits on the left edge, at the bottom by default, and moves only up and down that edge (owner's note of
+  2026-11-05). Dropped near its place it goes home. A press without a drag opens the window; Alt+M opens and closes it. Its numbers
+  are unread conversations and mail, and, for the director and the assistant, outside mail held for their approval. It is not
+  shown on the mail page, which has everything, nor in the studio's editor.
+- **The window** is not a sheet: it sits beside the page, under the top bar, anchored to the left edge, and the page keeps working.
+  It stays open while the person moves between pages. Escape, and «تصغير إلى الزر», minimise it to the launcher.
+- **Sizes.** The right edge resizes it to any width from 340 pixels to the sidebar's edge, never over the sidebar; dragging near
+  380 or 720 lands on them, near the sidebar it becomes the full size, and the full size follows the sidebar as it opens and
+  closes. While the edge is dragged or focused it says the size, the width and what the size shows. Double-click: side or full.
+  Arrow keys move it by 40, Home goes to the side size, End to full.
+- **Header**, top right: «تصغير إلى الزر», the size buttons, «فتح صفحة البريد». The side size offers «نافذة وسطى» and «نافذة
+  كاملة», the middle size «نافذة جانبية» and «نافذة كاملة», the full size «نافذة جانبية». The centre holds the «البريد» /
+  «المراسلة» toggle with their unread counts.
+- **What each size shows.** Side (under 600): one column, the list or one conversation or thread. Middle: the list beside the
+  conversation, search inside it, and the mail folder picker and filters. Full (from 1000): the conversation's info panel, the mail
+  folders, the shared mailbox and the labels. The mail page keeps everything else (rules, outgoing pause, response time, selecting
+  several, keyboard shortcuts, presence, WhatsApp). A line under each list says what a larger size adds.
+- **Phone width** (under 700): the window fills the screen above the bottom bar, without an edge, with «تصغير» and «فتح صفحة البريد».
+- **The page's toasts** move clear of the launcher and the window.
+
+## 74.3 The message box
+
+One box at the bottom of the window, with + above the send button on the right. Where it sends is always shown above it.
+
+- **The default:** the open conversation, else «العام»; in mail, a reply in the open thread, else a new mail.
+- **@ as the first word** opens «إلى من تُرسل؟»: «العام», «أعمالك», the groups and channels, the people, and mail («بريد جديد»,
+  «بريد إلى …», «بريد خارجي إلى …» for an address). The pick replaces the label, which then says what it replaced, with × to go
+  back. After sending the box returns to its default and says where the message went, with «فتح».
+- **@ later in the text** mentions a member of the destination, as on the messaging tab. **/ as the first word** and **+** are
+  the quick actions: a file or picture, a voice note, and the messaging tab's own task, poll, approval request, library item, work,
+  importance level, move to mail and permission request. The side size shows four and «المزيد».
+- **«العام»:** the first message of a session asks once, «ستصل هذه الرسالة إلى … في «العام»».
+- **Mail:** choosing mail grows the box to «إلى», «نسخة» and «الموضوع». In a thread, + switches between «رد», «رد على الكل»,
+  «إعادة توجيه» and, for outside mail, «ملاحظة داخلية». «المحرر الكامل» opens the mail page's composer with what was typed, for
+  cards, scheduling, blind copies and templates. A mail waits ten seconds to be taken back, as on the mail page. Outside mail that
+  needs approval says so before it is sent.
+
+## 74.4 «العام» and a work's own conversation
+
+- **«العام»** is one group for every account. It does not exist until its first message: until then the list shows it with
+  «تبدأ مع أول رسالة», and the first message creates it with every account as a member. A later account joins by itself. Nobody
+  leaves it or is added or removed by hand; a person may mute it, and a mention still reaches a muted member.
+- **A work's conversation** belongs to one work and starts with its first message. Its members are the work's owner, creator,
+  participants and stage holders, and the director and the assistant; each opening adds whoever has joined the work since, and
+  nobody is removed. Nobody leaves it or is removed by hand; a room administrator may add a guest. On a work's page the window
+  offers «محادثة هذا العمل» (or «ابدأ محادثة هذا العمل») at the top of its list. «أعمالك» in the picker lists the works the person
+  is involved in, or every open work for the director, the assistant and the administrator.
+- Both show on the messaging tab like any other group.
+
+## 74.5 What stays as it was
+
+The mail page and the messaging tab are unchanged; the window uses their conversation, info panel, dialogs, reader and composer,
+and the same database functions. The mailbox syncs while the window's live part is loaded, as while the mail page is open.

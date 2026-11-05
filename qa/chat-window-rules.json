@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/chat_window_rules.sql",
+  "script_md5": "14cbd9ad32d3434b147a64e6b62aaa49",
+  "migration": {
+    "file": "supabase/migrations/20261105180000_chat_window.sql",
+    "file_md5": "2749f78b71eb8c135442d5dea9a547a5",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-05T07:36:28.640Z",
+  "migrations_replayed": 68,
+  "differ": [],
+  "total": 87,
+  "passed": 87
+}

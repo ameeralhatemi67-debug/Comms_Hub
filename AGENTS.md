@@ -664,6 +664,21 @@ asks the permission. `work_cancel` (`*work_cancel*`) lets a creator take a work 
 closing it: a work is never deleted. Its rules are held by `supabase/tests/create_access_rules.sql` and
 `supabase/tests/work_cancel_rules.sql`.
 
+The mail and messaging window is real too, as an experiment, by owner directive of 2026-11-05 (`MVP_draft.md` section 74,
+recorded in `progress.md`). It is `src/components/chat-window/`, mounted in the shell, and it is off unless the account turned it on
+in «الحساب» «التجارب» (`profiles.chat_window`, written only by `profile_update`); it needs the page «البريد».
+- **It decides nothing.** It reuses the mail page's providers, the messaging tab's conversation, info panel and dialogs
+  (`Conversation` takes a `composer` slot for the window's box), the mail reader `ThreadView` and the full `Composer`. Replies and
+  quick mail are built once, in `src/components/mail/compose.ts`, for the page and the window. Sizes, the launcher's place, the
+  triggers of @ and / and where a message goes are `src/lib/chat-window/rules.ts`, held by `tests/chat-window.test.mjs`.
+- **The launcher moves only up and down the left edge**, by the owner's note. The window never covers the sidebar.
+- **«العام» and a work's own conversation start with their first message** (`chat_global_room`, `chat_work_room` in
+  `supabase/migrations/*chat_window*`). «العام» holds every account and nobody leaves it (`GLOBAL_ROOM`); a work's room holds those
+  involved and the director and the assistant, adds newcomers when opened, removes nobody, and nobody leaves it (`WORK_ROOM`). A muted
+  member of «العام» still gets a push for a mention. The rules are held by `supabase/tests/chat_window_rules.sql`.
+- **Its heavy part loads only once the window is opened** (`live.tsx`), and unloads on the mail page; while it is loaded the
+  mailbox syncs, as it does while the mail page is open. `qa/chat-window-flow.cjs` clicks through it on a fixture.
+
 ## Writing markdown from a shell
 
 Write markdown with a file-write tool, a heredoc, or a single-quoted
