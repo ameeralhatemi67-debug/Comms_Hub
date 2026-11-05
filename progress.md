@@ -3985,5 +3985,7 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   are being rewritten by other work in the main checkout, so they are not committed here.
 - **Not checked in a browser:** `09ddefc`'s photo editor taking the plan's worker count. `qa/studio-photo-tiles.cjs` (9 of 9) ran
   before that change; it proves every worker count gives the same bytes.
-- **Next.** The three checks in a quiet window (the laptop untouched, about 45 minutes). The merge into main waits for the main
-  checkout's uncommitted `MVP_draft.md` (section 77, thumbnails; no line overlaps). Then the 0.9.0 package. Nothing pushed.
+- **Merged into main** once main's thumbnails commit (`691b1ff`) was in `power-final` (`75000d1`): typecheck clean, `npm test`
+  **893 of 893**, `next build` clean. `20261105140000_file_thumbs.sql` is not applied to comms-hub and needs the owner's yes
+  before a push.
+- **Next.** The three checks in a quiet window (the laptop untouched, about 45 minutes), then the 0.9.0 package. Nothing pushed.
