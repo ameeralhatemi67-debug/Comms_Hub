@@ -289,8 +289,8 @@ A test on a Facebook Page is real too, by the same day's directive (`MVP_draft.m
   `supabase/tests/platform_tests_facebook_rules.sql`, `tests/facebook-test.test.mjs` and `qa/facebook-test-flow.cjs`.
 
 «نشر مباشر» from Home's «إجراءات سريعة» is real too, by owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-2 with answer Q2,
-`MVP_draft.md` section 76, recorded in `progress.md`). It is the one real publish outside the work cycle; publishing works stays a
-simulation.
+`MVP_draft.md` section 76, recorded in `progress.md`; the migration applied to comms-hub on 2026-11-05 with the owner's approval). It
+is the one real publish outside the work cycle; publishing works stays a simulation.
 - **Who.** The fixed capability `publish.direct`, the Admin's and the director's only, like `motion.studio`. Never make it
   grantable, and never offer «نشر مباشر» to anyone else.
 - **The engine.** A direct post is a `platform_tests` row with `purpose` 'direct' (`supabase/migrations/*direct_publish*`), on the

@@ -1,8 +1,8 @@
 # Director's notes: plan for approval (2026-11-05)
 
 Status: approved by the owner on 2026-11-05, with the recommended answer to every question in section 5 (Q1 to Q5). Steps 1 to
-3 of section 6 are built and on main, with their migrations applied to comms-hub. Step 4 is built on local main with its migration
-not applied, except a scheduled Instagram post (Q3) and direct posts on the calendar. Step 5 is next. Nothing is pushed.
+4 of section 6 are built on main, and their migrations are applied to comms-hub. Step 4 lacks a scheduled Instagram post (Q3) and
+direct posts on the calendar and in the account sheet. Step 5 is next. Nothing is pushed.
 
 The director asked for four things:
 

@@ -77,7 +77,8 @@ related:
   - The director and the Admin publish for real to YouTube (all four choices, subscribers' notice, schedule up to 180 days) or
     Instagram, outside the work cycle. Each post is logged and told to the account's publishers and the assistant.
   - `npm test` 924 of 924, `direct_publish_rules.sql` 45 of 45, `qa/direct-publish-flow.cjs` 37 of 37.
-  - Migration `20261105160000_direct_publish.sql` is **not applied**.
+  - Migration `20261105160000_direct_publish.sql` is **applied to comms-hub** (owner's words, version `20261105100645`, the stored
+    text equal to the file), checked there read-only.
   - Not built: Instagram «مجدول» (the bridge's loop), direct posts on the calendar and in the account sheet.
 - **Step 3, calendar colours, merged into main.**
   - Each person colours the calendar by kind, status, project, platform or person, from twelve fixed colours, kept in the
