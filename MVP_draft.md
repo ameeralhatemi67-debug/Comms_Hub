@@ -3278,7 +3278,7 @@ Phase A8 of `Android_Build_Plan.md`. The application is published on Google Play
 **«حذف الحساب» on «الحساب».** For every member, in the application and in a browser alike.
 - «تستطيع أن تطلب حذف حسابك من المركز، في التطبيق أو في المتصفح. يصل طلبك إلى من يملك إزالة حسابك: مسؤول النظام، ومدير الاتصال لمن دونه.»
 - «ما يُحذف وما يبقى» opens two lists.
-  - **Deleted with the account:** «الدخول وكل الجلسات على كل جهاز»; «ملفك الشخصي: الاسم الظاهر والصورة والعنوان واللون والتوقيع»; «صلاحياتك المضافة وطلباتها»; «رقم واتساب المرتبط وما كتمته»; «هواتفك في «أجهزتي» ورموز تنبيهاتها»; «تنبيهاتك وتذكيراتك الخاصة وتقدّمك في الأدلة ونجومك في المراسلة».
+  - **Deleted with the account:** «الدخول وكل الجلسات على كل جهاز»; «ملفك الشخصي: الاسم الظاهر والصورة والعنوان واللون والتوقيع»; «صلاحياتك المضافة وطلباتها»; «رقم واتساب المرتبط وما كتمته»; «هواتفك في «أجهزتي» ورموز تنبيهاتها»; «تنبيهاتك وتذكيراتك الخاصة وتقدّمك في الأدلة ونجومك في المراسلة وألوان تقويمك».
   - **Kept as the institution's record:** «الأعمال ونصوصها وتعليقاتها وقراراتها والمهام»; «الملفات التي رفعتها إلى المكتبة»; «البريد والرسائل في المحادثات، لأنها لأعضائها جميعاً»; «السجلات: من فعل ماذا ومتى»; «سجل الطلب نفسه: من طلب الحذف ومتى ومن نفّذه».
 - «ملاحظة لمن ينفّذ الطلب (اختيارية)», up to 500 characters, then «طلب حذف حسابي» behind a long press («يصل الطلب إلى من يملك إزالة حسابك، وعند تنفيذه يُلغى دخولك ويُحذف ملفك الشخصي. يمكنك سحبه قبل ذلك.»). Then «وصل طلبك إلى من يملك إزالة حسابك.».
 - **While it is open:** «طلبت حذف حسابك في …. وصل الطلب إلى من يملك إزالة حسابك، وعند تنفيذه يُلغى دخولك من كل جهاز ويُحذف ملفك الشخصي.», the note, and «سحب الطلب» («سُحب طلب الحذف، ويبقى حسابك كما هو.»).
@@ -3868,3 +3868,67 @@ says so and offers no test.
 Ten tests per Page a day, as YouTube's and Instagram's, beside Meta's 30 Reels a day. Meta's refusals are worded by its error
 codes; a permissions refusal names the two usual causes: the person who connected cannot create content on the Page, or the
 Page waits for Page Publishing Authorization.
+
+# 74. «ألوان التقويم»: the calendar in the person's own colours, 2026-11-05
+
+By owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-1, with answer Q1: the colours are personal and kept in the
+database, so they follow the person to the site, the desktop application and the phone). The director asked to change the
+calendar's colours to follow progress more easily. A person colours the calendar by one thing at a time, and picks a colour for
+each of its values from twelve. Nobody else sees the choice, administrators included, and it changes nothing for anyone else.
+
+## 74.1 The button and the sheet
+
+- **«الألوان»** sits on the calendar's bar, after «كل المشاريع», and opens the sheet «ألوان التقويم» (`src/components/sheet.tsx`),
+  under the line «ألوانك أنت: تتبعك على كل جهاز، ولا تغيّر ما يراه غيرك.»
+- **«لوّن حسب»** is one row of five, the default first: «نوع الموعد», «حالة العمل», «المشروع», «المنصة», «المسؤول». Under it, one line
+  says what the choice does and what keeps its kind's colour.
+- **«الألوان»** lists every value of the chosen mode, one folded row each: the value drawn in its colour, the colour's name (or
+  «اللون المعتاد» for a kind not changed), and «اختيارك» when the person chose it. Opening a row shows twelve colours, named
+  (أخضر، فيروزي، سماوي، أزرق، نيلي، بنفسجي، وردي، أحمر، برتقالي، ذهبي، زيتوني، رمادي), and «إرجاع الافتراضي» when the value
+  was changed. One kind of control for one idea, defaults first, options folded until needed.
+- **There is no free colour.** Each of the twelve is a background, its text and an edge, drawn for light and for dark, with text
+  at 7.7:1 or more on its own ground and the edge at 3.2:1 or more on every surface.
+- **«إرجاع الافتراضي للكل»** at the foot returns every value of the shown mode to its default; the other modes keep theirs.
+- **Saving** is at once, the whole choice in one call, one after another; the foot says «تُحفظ ألوانك فور اختيارها.» A refusal is
+  said in words and the calendar goes back to what was kept.
+
+## 74.2 The modes and their defaults
+
+| «لوّن حسب» | A value is | Default colour | Keeps its kind's colour |
+|---|---|---|---|
+| «نوع الموعد» | one of the key's eleven kinds («تغطية حدث» and «حدث» are one) | today's colours | nothing |
+| «حالة العمل» | the work's status; a stage takes its work's | one per status, all eleven apart | a task, an event, a reminder |
+| «المشروع» | the work's first project, or the one the calendar shows; a task's, an event's | the colour nearest the project's band tone | what is in no project |
+| «المنصة» | the account of a publishing entry | by its platform (Instagram pink, YouTube red, X grey, Facebook blue, LinkedIn sky, TikTok teal, mail gold), else steady from its id | what is not published on an account |
+| «المسؤول» | a stage's holder, a task's assignee, a work's responsible person | steady from the address | an event, a reminder, a request with nobody responsible yet |
+
+Two people may start in the same colour; picking another for one is the remedy. A default is never stored, so only real choices
+count toward the 200.
+
+## 74.3 Warnings stay on top
+
+A colour changes the fill, the text and the edge only. A kind keeps its shape (a dashed border for what is not fixed yet, a struck
+held time). Late, at risk, near and urgent keep their marks, drawn outside the chip on the calendar's own ground, where no colour
+can hide them: late a red outline, at risk an amber ring, near an amber line under it, urgent a red edge at its start. A late row
+of the day and list views keeps its red border all round. A failed publish keeps its red and takes no colour.
+
+## 74.4 The key and where the colours apply
+
+- **The key** under the calendar is today's in «نوع الموعد», each kind in its chosen colour. In any other mode it reads «لوّن حسب …:»,
+  lists the values on the calendar now in the sheet's order, shows the four warnings as they are drawn on a colour, and says what
+  keeps its kind's colour.
+- **Where:** the calendar's month, week, day and list views; the project bands, the month's day strips, the project cards of
+  «المشاريع» and the band of a project page (a project's chosen colour replaces its tone in any mode); the calendar a project page
+  opens with «في التقويم», which shows that project, so a work in several projects takes that project's colour there; the accounts
+  named in a row in «المنصة», unless a result or a risk is shown; and Home's «الأيام السبعة القادمة».
+- The calendar's guide has a new part «الألوان» and says what is new once (`src/lib/help/pages.ts`, calendar version 2).
+
+## 74.5 Where it lives
+
+- Rules: `src/lib/work/calendar-colors.ts` (pure). The sheet, the key and the shared choice: `src/components/work/calendar-colors.tsx`.
+  The twelve colours: classes `pal-0` to `pal-11` in `src/app/work.css`, held equal to the rules.
+- Data: `calendar_prefs` (`supabase/migrations/20261105130000_calendar_prefs.sql`): one row per person, a mode and at most 200
+  value-to-colour pairs. Row level security shows each person their own row only. The only write is `calendar_prefs_save(p_mode,
+  p_colors)`, which names no person and replaces the whole choice. The row goes with the account, and the account deletion list
+  says so.
+- Checks: `tests/calendar-colors.test.mjs`, `supabase/tests/calendar_prefs_rules.sql`, `qa/calendar-colors.cjs`.

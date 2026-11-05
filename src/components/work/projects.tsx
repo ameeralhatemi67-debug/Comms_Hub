@@ -42,13 +42,14 @@ import {
   projState,
   projTasks,
   projWorks,
-  toneOf,
   type EventItem,
   type PlanDraft,
   type PlanWork,
   type TaskItem,
   whenText,
 } from '@/lib/work/planning';
+import { bandClass } from '@/lib/work/calendar-colors';
+import { useCalendarColors } from './calendar-colors';
 import { usePlanData, useWork, useWorkList, type Project } from './data';
 import { EventDialog, TaskDialog, TaskExtensionDialog } from './day-dialogs';
 import { WorkTable } from './list';
@@ -92,6 +93,7 @@ export function ProjectsPage() {
   const plan = usePlanData();
   const router = useRouter();
   const [dlg, setDlg] = useState(false);
+  const { prefs: colors } = useCalendarColors();
   const list = [...w.projects].sort((a, b) => (a.start_on < b.start_on ? 1 : -1));
   const loading = status === 'loading' || plan.status === 'loading' || w.status === 'loading';
   return (
@@ -136,7 +138,7 @@ export function ProjectsPage() {
             const nx = projNext(ws, plan.events.filter((e) => e.project_id === p.id), w.today);
             const [state, cls] = projState(p, w.today);
             return (
-              <article className={`wk-projcard t${toneOf(p.id)}`} key={p.id}>
+              <article className={`wk-projcard ${bandClass(p.id, colors)}`} key={p.id}>
                 <div className="pc-top">
                   <span className="wk-chip plain">{projectTypeLabels[p.type] ?? p.type}</span>
                   <span className={`wk-chip ${cls}`}>{state}</span>
@@ -195,6 +197,7 @@ export function ProjectPage({ id }: { id: string }) {
   const [tab, setTab] = useState<PTab>(PTABS.some((t) => t[0] === tab0) ? (tab0 as PTab) : 'timeline');
   const [dlg, setDlg] = useState<'' | 'edit' | 'task' | 'event' | { ext: TaskItem }>('');
   const act = useAct([reload, plan.reload]);
+  const { prefs: colors } = useCalendarColors();
   const P = w.projects.find((p) => p.id === id);
   if (status === 'loading' || plan.status === 'loading' || w.status === 'loading')
     return (
@@ -242,7 +245,7 @@ export function ProjectPage({ id }: { id: string }) {
         <div className="wk-pbody">
           <div className="top">
             <span className="wk-chip plain">{projectTypeLabels[P.type] ?? P.type}</span>
-            <span className={`wk-band t${toneOf(P.id)}`}>
+            <span className={`wk-band ${bandClass(P.id, colors)}`}>
               {fdate(P.start_on)} – {fdate(P.end_on)}
             </span>
             <span className={`wk-chip ${projState(P, w.today)[1]}`}>{projState(P, w.today)[0]}</span>

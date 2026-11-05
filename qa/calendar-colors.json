@@ -1,0 +1,435 @@
+{
+  "script": "qa/calendar-colors.cjs",
+  "run": "2026-11-05T07:48:54.341Z",
+  "checks": [
+    {
+      "name": "the week draws its entries",
+      "pass": true,
+      "detail": "14"
+    },
+    {
+      "name": "nothing chosen: no chip carries a chosen colour",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "and every chip has its kind's own class, as before",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the key is today's: the eleven kinds, then the two warnings",
+      "pass": true,
+      "detail": "[\"مجدول\",\"معتمد · لم يُجدول\",\"مقترح · لم يُعتمد بعد\",\"موعد مطلوب\",\"معلّق حتى القرار\",\"نُشر\",\"تسليم\",\"مرحلة\",\"مهمة\",\"حدث\",\"تذكير\",\"التفويض لا يغطي الموعد\",\"قريب من منشور آخر\"]"
+    },
+    {
+      "name": "the choice is read once from the database",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«الألوان» is on the calendar's bar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it opens the sheet «ألوان التقويم»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the sheet says the colours are the person's own and follow them",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«لوّن حسب» has five choices, «نوع الموعد» first and chosen",
+      "pass": true,
+      "detail": "[[\"نوع الموعد\",\"true\"],[\"حالة العمل\",\"false\"],[\"المشروع\",\"false\"],[\"المنصة\",\"false\"],[\"المسؤول\",\"false\"]]"
+    },
+    {
+      "name": "one row per kind, in the key's order",
+      "pass": true,
+      "detail": "[\"مجدول\",\"معتمد · لم يُجدول\",\"مقترح · لم يُعتمد بعد\",\"موعد مطلوب\",\"معلّق حتى القرار\",\"نُشر\",\"تسليم\",\"مرحلة\",\"مهمة\",\"حدث\",\"تذكير\"]"
+    },
+    {
+      "name": "every row folded until opened",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a kind starts in its usual colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "there is no free colour picker",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "opened: twelve colours, each named",
+      "pass": true,
+      "detail": "[\"أخضر\",\"فيروزي\",\"سماوي\",\"أزرق\",\"نيلي\",\"بنفسجي\",\"وردي\",\"أحمر\",\"برتقالي\",\"ذهبي\",\"زيتوني\",\"رمادي\"]"
+    },
+    {
+      "name": "none chosen while the kind keeps its usual colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "each swatch drawn in its own colour",
+      "pass": true,
+      "detail": "[\"rgb(47, 143, 87)\",\"rgb(31, 133, 128)\",\"rgb(42, 120, 181)\",\"rgb(59, 95, 204)\",\"rgb(90, 82, 208)\",\"rgb(135, 67, 194)\",\"rgb(191, 59, 121)\",\"rgb(194, 69, 58)\",\"rgb(192, 95, 34)\",\"rgb(168, 122, 8)\",\"rgb(111, 131, 28)\",\"rgb(95, 110, 130)\"]"
+    },
+    {
+      "name": "a pick is saved at once, the whole choice",
+      "pass": true,
+      "detail": "{\"p_mode\":\"kind\",\"p_colors\":{\"kind:pub\":4}}"
+    },
+    {
+      "name": "the row says it is the person's choice",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "every «مجدول» on the calendar takes it",
+      "pass": true,
+      "detail": "[\"wk-cchip.k-pub.pal.pal-4.urg\",\"wk-cchip.k-pub.pal.pal-4.risk.near.urg\",\"wk-cchip.k-pub.pal.pal-4.risk.near\"]"
+    },
+    {
+      "name": "drawn in the colour and its text",
+      "pass": true,
+      "detail": "[\"rgb(229, 225, 250) rgb(49, 46, 129)\",\"rgb(229, 225, 250) rgb(49, 46, 129)\",\"rgb(229, 225, 250) rgb(49, 46, 129)\"]"
+    },
+    {
+      "name": "the other kinds stay as they were",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the key shows it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«إرجاع الافتراضي» for one value keeps nothing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and the chips are today's again",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "choosing «حالة العمل» is saved",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the sheet lists the eleven statuses",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and says what keeps its kind's colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a scheduled work takes «مجدول»'s colour on every account",
+      "pass": true,
+      "detail": "[\"wk-cchip.k-pub.pal.pal-1.urg\",\"wk-cchip.k-pub.pal.pal-1.risk.near.urg\"]"
+    },
+    {
+      "name": "a stage takes its work's status, «قيد الإنتاج»",
+      "pass": true,
+      "detail": "[\"wk-cchip\",\"k-stage\",\"pal\",\"pal-2\",\"late\"]"
+    },
+    {
+      "name": "a reminder is not a work and keeps its kind's colour",
+      "pass": true,
+      "detail": "[\"wk-cchip\",\"k-rem\"]"
+    },
+    {
+      "name": "the key follows the mode",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and lists the statuses on the calendar now, in order",
+      "pass": true,
+      "detail": "[\"قيد الإنتاج\",\"قيد المراجعة\",\"جاهز للنشر\",\"مجدول\",\"نشر جزئي\"]"
+    },
+    {
+      "name": "a status's colour is chosen like a kind's",
+      "pass": true,
+      "detail": "[\"wk-cchip\",\"k-plan\",\"pal\",\"pal-7\"]"
+    },
+    {
+      "name": "and saved with the mode",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "at risk, coloured: an amber ring outside the chip",
+      "pass": true,
+      "detail": "rgb(251, 252, 249) 0px 0px 0px 1px, rgb(132, 88, 15) 0px 0px 0px 3px, rgb(132, 88, 15) 0px 3px 0px 0px, rgb(162, 58, 46) 4px 0px 0px 0px"
+    },
+    {
+      "name": "near, coloured: an amber line under it",
+      "pass": true,
+      "detail": "rgb(251, 252, 249) 0px 0px 0px 1px, rgb(132, 88, 15) 0px 0px 0px 3px, rgb(132, 88, 15) 0px 3px 0px 0px, rgb(162, 58, 46) 4px 0px 0px 0px"
+    },
+    {
+      "name": "urgent, coloured: a red edge at its start",
+      "pass": true,
+      "detail": "rgb(251, 252, 249) 0px 0px 0px 1px, rgb(132, 88, 15) 0px 0px 0px 3px, rgb(132, 88, 15) 0px 3px 0px 0px, rgb(162, 58, 46) 4px 0px 0px 0px"
+    },
+    {
+      "name": "late, coloured: a red outline outside it",
+      "pass": true,
+      "detail": "solid rgb(162, 58, 46)"
+    },
+    {
+      "name": "a late chip keeps its colour's readable text",
+      "pass": true,
+      "detail": "rgb(12, 74, 110)"
+    },
+    {
+      "name": "a failed publish keeps its red and takes no colour",
+      "pass": true,
+      "detail": "[\"wk-cchip\",\"k-done\",\"bad\"]"
+    },
+    {
+      "name": "a late task without a colour keeps today's red",
+      "pass": true,
+      "detail": "{\"t\":\"مهمة · مراجعة الصور\",\"c\":[\"wk-cchip\",\"k-task\",\"late\"],\"bg\":\"rgb(230, 237, 245)\",\"fg\":\"rgb(162, 58, 46)\",\"ol\":\"none rgb(162, 58, 46)\",\"bs\":\"none\"}"
+    },
+    {
+      "name": "«إرجاع الافتراضي للكل» empties this mode",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and is gone when nothing is changed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the projects are the values",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the project's band takes its colour instead of its tone",
+      "pass": true,
+      "detail": "[\"wk-band pal pal-10 cut1\",\"rgb(233, 240, 208)\"]"
+    },
+    {
+      "name": "a project with no colour keeps its tone",
+      "pass": true,
+      "detail": "wk-band t2 cut1"
+    },
+    {
+      "name": "its works take it on the calendar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "so do its own events",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "what is in no project keeps its kind's colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "month: the day's strip of the project in its colour",
+      "pass": true,
+      "detail": "[\"pal pal-10\",\"rgb(111, 131, 28)\"]"
+    },
+    {
+      "name": "month: its chips too",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«المنصة»: each account starts from its platform's colour",
+      "pass": true,
+      "detail": "[[\"wk-cchip\",\"k-pub\",\"pal\",\"pal-6\",\"urg\"],[\"wk-cchip\",\"k-pub\",\"pal\",\"pal-11\",\"risk\",\"near\",\"urg\"]]"
+    },
+    {
+      "name": "a delivery is on no account and keeps its kind's colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "list view: the row's stripe takes the first account's colour",
+      "pass": true,
+      "detail": "{\"t\":\"إعلان الشتاء\",\"c\":[\"wk-crow\",\"k-pub\",\"pal\",\"pal-2\"],\"stripe\":\"rgb(42, 120, 181)\",\"accs\":[\"wk-cr pal pal-2\",\"wk-cr risk\"]}"
+    },
+    {
+      "name": "and each account named in the row in its own colour",
+      "pass": true,
+      "detail": "[\"wk-cr pal pal-2\",\"wk-cr risk\"]"
+    },
+    {
+      "name": "a result on an account wins over its colour",
+      "pass": true,
+      "detail": "[\"wk-cr ok\",\"wk-cr bad\"]"
+    },
+    {
+      "name": "day view: rows carry the person's colour",
+      "pass": true,
+      "detail": "[[\"ملصق اليوم\",\"wk-crow.k-due.pal.pal-4\"],[\"منشور الصباح\",\"wk-crow.k-done.pal.pal-4\"],[\"اجتماع الفريق\",\"wk-crow.k-event\"],[\"اتصال بالمطبعة\",\"wk-crow.k-rem\"]]"
+    },
+    {
+      "name": "an event and a reminder have nobody responsible: their kind's colour",
+      "pass": true,
+      "detail": "[\"wk-crow.k-due.pal.pal-4\",\"wk-crow.k-done.pal.pal-4\",\"wk-crow.k-event\",\"wk-crow.k-rem\"]"
+    },
+    {
+      "name": "«المسؤول»: a stage is its holder's",
+      "pass": true,
+      "detail": "[[\"wk-cchip\",\"k-stage\",\"pal\",\"pal-8\",\"late\"],[\"wk-cchip\",\"k-stage\",\"pal\",\"pal-4\"]]"
+    },
+    {
+      "name": "and the person's works take it too",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the key lists the people on the calendar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "every change was one save of the whole choice, in order",
+      "pass": true,
+      "detail": "{\"p_mode\":\"person\",\"p_colors\":{\"project:0b6f7c1e-1d2a-4c3b-9e8f-1234567890ab\":10,\"platform:11111111-1111-4111-8111-111111111111\":2,\"person:wri@example.test\":8}}"
+    },
+    {
+      "name": "Escape closes the sheet",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and the focus is back on «الألوان»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a choice kept in the database is the calendar on the next visit",
+      "pass": true,
+      "detail": "[\"wk-cchip\",\"k-plan\",\"pal\",\"pal-4\"]"
+    },
+    {
+      "name": "with the key in that mode",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and the sheet opens on it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a refusal is said in words",
+      "pass": true,
+      "detail": "[\"تعذّر حفظ الألوان: أحد الاختيارات غير صالح. أعد فتح التقويم وحاول مجدداً.\"]"
+    },
+    {
+      "name": "and the calendar goes back to what was kept",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«المشاريع»: a project's card takes its colour",
+      "pass": true,
+      "detail": "[\"حملة الشتاء\",\"wk-projcard pal pal-10\",\"rgb(111, 131, 28)\"]"
+    },
+    {
+      "name": "and one with none keeps its tone",
+      "pass": true,
+      "detail": "[\"المعرض\",\"wk-projcard t2\",\"rgb(20, 104, 79)\"]"
+    },
+    {
+      "name": "the project page's band takes it too",
+      "pass": true,
+      "detail": "[\"wk-band pal pal-10\",\"rgb(233, 240, 208)\"]"
+    },
+    {
+      "name": "and its «في التقويم» opens the calendar on that project, where the same colours apply",
+      "pass": true,
+      "detail": "/calendar?date=2026-11-05&project=0b6f7c1e-1d2a-4c3b-9e8f-1234567890ab&view=week"
+    },
+    {
+      "name": "Home's next days use the same colours",
+      "pass": true,
+      "detail": "[[\"ملصق اليوم\",\"wk-cchip k-due pal pal-2 static\"],[\"منشور الصباح\",\"wk-cchip k-done pal pal-9 static\"],[\"اجتماع الفريق\",\"wk-cchip k-event static\"],[\"اتصال بالمطبعة\",\"wk-cchip k-rem static\"],[\"فيديو الافتتاح\",\"wk-cchip k-due pal pal-2 static\"],[\"المونتاج · فيديو الافتتاح\",\"wk-cchip k-stage pal pal-2 static\"],[\"تهنئة\",\"wk-cchip k-ok pal pal-0 static\"]]"
+    },
+    {
+      "name": "and what has no value keeps its kind's colour there too",
+      "pass": true,
+      "detail": "[[\"ملصق اليوم\",\"wk-cchip k-due pal pal-2 static\"],[\"منشور الصباح\",\"wk-cchip k-done pal pal-9 static\"],[\"اجتماع الفريق\",\"wk-cchip k-event static\"],[\"اتصال بالمطبعة\",\"wk-cchip k-rem static\"],[\"فيديو الافتتاح\",\"wk-cchip k-due pal pal-2 static\"],[\"المونتاج · فيديو الافتتاح\",\"wk-cchip k-stage pal pal-2 static\"],[\"تهنئة\",\"wk-cchip k-ok pal pal-0 static\"]]"
+    },
+    {
+      "name": "evening: a colour takes its dark pair",
+      "pass": true,
+      "detail": "{\"t\":\"مجدول · إعلان الشتاء\",\"c\":[\"wk-cchip\",\"k-pub\",\"pal\",\"pal-1\",\"urg\"],\"bg\":\"rgb(17, 58, 57)\",\"fg\":\"rgb(153, 227, 223)\",\"ol\":\"none rgb(153, 227, 223)\",\"bs\":\"rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(241, 154, 141) 4px 0px 0px 0px\"}"
+    },
+    {
+      "name": "evening: every coloured chip on screen is readable",
+      "pass": true,
+      "detail": "8.435862776890074"
+    },
+    {
+      "name": "evening: late keeps its red outline",
+      "pass": true,
+      "detail": "solid rgb(241, 154, 141)"
+    },
+    {
+      "name": "phone: the calendar opens on the list",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: its rows carry the colours",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing sideways with the sheet open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: a colour is a comfortable size to tap",
+      "pass": true,
+      "detail": "{\"x\":298.171875,\"y\":765.15625,\"width\":47.828125,\"height\":36}"
+    },
+    {
+      "name": "phone: the five choices fit",
+      "pass": true,
+      "detail": "{\"x\":277.15625,\"y\":217.5625,\"width\":77.84375,\"height\":32}"
+    },
+    {
+      "name": "nothing left the fixture",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 85,
+  "passed": 85,
+  "failed": 0
+}

@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/calendar_prefs_rules.sql",
+  "script_md5": "af7a03c388f1923e410c509fef2fcc59",
+  "migration": {
+    "file": "supabase/migrations/20261105130000_calendar_prefs.sql",
+    "file_md5": "fdf7ab9dbc2fa5b1eac76e37da6530f6",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-05T07:45:02.181Z",
+  "migrations_replayed": 68,
+  "differ": [],
+  "total": 51,
+  "passed": 51
+}
