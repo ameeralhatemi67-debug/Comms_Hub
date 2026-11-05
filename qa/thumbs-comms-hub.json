@@ -1,0 +1,34 @@
+{
+  "migration": {
+    "file": "supabase/migrations/20261105140000_file_thumbs.sql",
+    "file_md5": "99654ab2530fe25fc563026e1304313a",
+    "applied": "comms-hub (hrghmioxvgkjpnydrxrk) on 2026-11-05 as version 20261105082140, with the owner's words «Apply the migrations»; the stored statement's md5 equals the file's"
+  },
+  "rules": "supabase/tests/thumbs_rules.sql was NOT run on comms-hub: the session's permission check refused it (it replaces the server key inside its rolled-back transaction). It passed 39 of 39 on a private container (qa/thumbs-rules.json).",
+  "how": "Read-only catalog checks on comms-hub through the Supabase connector.",
+  "run": "2026-11-05",
+  "checks": {
+    "row level security on": true,
+    "one policy, select only (file_thumbs_read:r)": true,
+    "a page cannot insert": true,
+    "a page cannot update": true,
+    "signed out cannot read the table": true,
+    "signed in reads the picture column": true,
+    "signed in does not read made_by": true,
+    "signed out cannot call thumb_save or thumb_keep": true,
+    "signed in may call thumb_save": true,
+    "thumb_save, thumb_keep and thumb_may_see are security definer; thumb_bytes_ok and thumb_decode are not": true,
+    "a WebP's first bytes pass": true,
+    "JPEG bytes named WebP are refused": true,
+    "49,156 bytes are refused": true,
+    "two foreign keys cascade": true,
+    "no rows yet": true
+  },
+  "advisor": {
+    "kinds_before": 4,
+    "kinds_after": 4,
+    "authenticated_security_definer_function_executable": "323 -> 327 (calendar_prefs_save, thumb_save, thumb_keep, thumb_may_see)",
+    "anon_security_definer_function_executable": "22 -> 22",
+    "rls_enabled_no_policy": "13 -> 13"
+  }
+}

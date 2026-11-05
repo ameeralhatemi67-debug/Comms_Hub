@@ -665,7 +665,8 @@ closing it: a work is never deleted. Its rules are held by `supabase/tests/creat
 `supabase/tests/work_cancel_rules.sql`.
 
 Every stored file has a thumbnail, by owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-4, `MVP_draft.md` section 77,
-recorded in `progress.md`). A file is never shown as a name alone: use `src/components/file-thumb.tsx` (`FileThumb`) wherever one
+recorded in `progress.md`; the migration applied to comms-hub on 2026-11-05 with the owner's approval). A file is never shown as a
+name alone: use `src/components/file-thumb.tsx` (`FileThumb`) wherever one
 is listed, and never load a whole file just to show it small.
 - **Where it lives.** One small picture per library version or mail and messaging file, in Postgres (`file_thumbs`,
   `supabase/migrations/*file_thumbs*`), at most 48 KB. It goes with its file, is left out of backups, and is served by

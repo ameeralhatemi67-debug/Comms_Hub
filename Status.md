@@ -44,7 +44,7 @@ related:
     colours, `503d032`) and `20261105140000_file_thumbs.sql` (thumbnails, `691b1ff`).
 - **Next.** The quiet re-run, then the 0.9.0 package. Nothing pushed or released.
 
-## The director's notes, steps 1 and 2: YouTube's four choices in «تجربة النشر», and thumbnails, 2026-11-05
+## The director's notes, steps 1 to 3: YouTube's four choices, thumbnails and calendar colours, 2026-11-05
 
 - **Approved.** `Director_Notes_Plan.md`, with the recommended answers to Q1 to Q5: calendar colours (N-1), quick actions and
   «نشر مباشر» (N-2), YouTube's four choices everywhere (N-3), thumbnails (N-4).
@@ -58,15 +58,18 @@ related:
   - `thumbs_rules.sql` 39 of 39 on a private container.
   - `qa/thumbs-flow.cjs` 19 of 19, and the changed screens' flows all pass. `post-preview` and `work-pages` run again after two
     weeks broken.
-  - Migration `20261105140000_file_thumbs.sql` is written and **not applied**. Apply it before deploying.
+  - Migration `20261105140000_file_thumbs.sql` is **applied to comms-hub** (owner's words, version `20261105082140`, the stored
+    text equal to the file). Its rules were checked there read-only; the full rule file was refused by the session's permission
+    check and stands at 39 of 39 on a private container.
   - Unproven against the real Drive: its own thumbnails for older files and documents.
 - **Step 3, calendar colours, merged into main.**
   - Each person colours the calendar by kind, status, project, platform or person, from twelve fixed colours, kept in the
     database (`MVP_draft.md` section 74).
-  - Migration `20261105130000_calendar_prefs.sql` is **not applied**.
+  - Migration `20261105130000_calendar_prefs.sql` is **applied to comms-hub** (owner's words, version `20261105082109`); its rules
+    51 of 51 there, in a run that could not commit.
   - On the merged tree: `npm test` 906 of 906, the SQL rules 51 of 51, `qa/calendar-colors.cjs` 85 of 85.
 - **Next.**
-  - The owner's word to apply the two migrations (`calendar_prefs`, `file_thumbs`), then the deploy.
+  - Every migration of steps 1 to 3 is applied, so the push of main waits only on the release session's own steps.
   - Then step 4: quick actions and «نشر مباشر» (N-2).
 
 ## Desktop Power, merge 11: D11 «تصدير أسرع» with option A, 2026-11-05

@@ -4045,3 +4045,30 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   clean, `npm test` **906 of 906**, `next build` clean. `20261105130000_calendar_prefs.sql` and
   `20261105140000_file_thumbs.sql` are not applied to comms-hub and need the owner's yes before a push.
 - **Next.** The three checks in a quiet window (the laptop untouched, about 45 minutes), then the 0.9.0 package. Nothing pushed.
+
+### 2026-11-05: calendar_prefs and file_thumbs applied to comms-hub (director's notes, steps 2 and 3)
+
+- **Owner decision.** «Apply the migrations», for the two migrations on main that comms-hub did not have.
+- **Applied** through the Supabase connector, calendar colours first:
+  - `20261105130000_calendar_prefs.sql` as version `20261105082109`;
+  - `20261105140000_file_thumbs.sql` as version `20261105082140`.
+
+  Each stored statement's md5 equals its file's (`fdf7ab9d…` and `99654ab2…`). Neither drops, deletes or changes existing data:
+  both add tables and functions only.
+- **Rules on comms-hub.**
+  - `calendar_prefs_rules.sql`: 51 of 51. It ran in one transaction whose last step raised the result as an error, so nothing of
+    the run could be committed. Afterwards no `@t.test` account or user and no calendar row remained.
+    Result in `qa/calendar-prefs-rules-comms-hub.json`.
+  - `thumbs_rules.sql` was **not run on comms-hub**. The session's permission check refused it, as it replaces the server key
+    inside its own transaction. It stands at 39 of 39 on a private container. Instead, read-only checks on comms-hub found, all as
+    the migration says (`qa/thumbs-comms-hub.json`):
+    - row level security on, with one read policy;
+    - no insert or update for a page, and nothing for someone signed out;
+    - `made_by` hidden from a page;
+    - the three definer functions and the two plain ones as written;
+    - the byte check passing a WebP and refusing a wrong type and an oversize picture;
+    - both foreign keys cascading.
+- **Security advisor.** No new kind of notice: the same four kinds before and after. The one for definer functions callable when
+  signed in rose from 323 to 327, by `calendar_prefs_save`, `thumb_save`, `thumb_keep` and `thumb_may_see`, the intended write
+  paths, as with every other feature. The one for when signed out stayed at 22.
+- **Now.** Every migration of the director's notes steps 1 to 3 is on comms-hub. Nothing pushed.

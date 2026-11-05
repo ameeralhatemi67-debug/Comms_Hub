@@ -1,0 +1,14 @@
+{
+  "script": "supabase/tests/calendar_prefs_rules.sql",
+  "script_md5": "af7a03c388f1923e410c509fef2fcc59",
+  "migration": {
+    "file": "supabase/migrations/20261105130000_calendar_prefs.sql",
+    "file_md5": "fdf7ab9dbc2fa5b1eac76e37da6530f6",
+    "applied": "comms-hub (hrghmioxvgkjpnydrxrk) on 2026-11-05 as version 20261105082109, with the owner's words «Apply the migrations»; the stored statement's md5 equals the file's"
+  },
+  "how": "Run on comms-hub through the Supabase connector, in one transaction. The file's last select and rollback were replaced by a block that raises the result as an error, which aborts the transaction, so nothing of the run could be committed. Afterwards no @t.test account, user or calendar row remained.",
+  "run": "2026-11-05",
+  "total": 51,
+  "passed": 51,
+  "differ": []
+}
