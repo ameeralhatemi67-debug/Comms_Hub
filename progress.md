@@ -4212,3 +4212,28 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   transaction, which this session's permission check refuses on the live database. It stands at 45 of 45 on a private container.
 - **Security advisor.** No new notice: 327, 22 and 13, as before. The two new functions are not callable from outside.
 - **Now.** Every migration of the director's notes steps 1 to 4 is on comms-hub. Nothing pushed.
+
+### 2026-11-05: the desktop application 0.9.0 built and checked (stage 2 of the release)
+
+- **Version.** `npm run release:bump -- 0.9.0` raised `desktop/package.json` and the lockfile's two copies from 0.8.0; the
+  pinned version in `desktop/tests/config.test.mjs` moved with it (`a8c068d`). Desktop typecheck clean, desktop tests
+  **164 of 164**.
+- **Packages,** built from `a8c068d` in `.claude/worktrees/verify-e3cab67/desktop` (the pinned FFmpeg already in
+  `vendor/ffmpeg`, nothing downloaded). `npm run pack` wrote `dist/release/CommsHub-Setup-0.9.0-x64.exe` (162,637,941 bytes,
+  SHA-512 `2aN2uFWkWRSR...`), its blockmap (172,512 bytes) and `latest.yml` (version 0.9.0, released 2026-11-05T10:10:18Z).
+  Unsigned, as the pilot is (D-7). `npm run pack:dev` rebuilt the development package.
+- **`npm run release:check`: READY,** 0.9.0 over the published 0.6.0: `latest.yml` names the package's version, the
+  installer's size and SHA-512 equal it, the blockmap is there, and the installer is under the bucket's limit. The fuses read
+  back from the release package: RunAsNode, NODE_OPTIONS and the inspector arguments off; cookie encryption, asar integrity
+  and loading only from the asar on.
+- **`qa/desktop-shell.cjs` 68 of 68,** once its stale line was fixed (it expected bridge 6 and D9's groups; the application
+  reports bridge 10 with `downloads`). The release package's install, run and uninstall were skipped because this laptop has
+  the owner's installation (0.6.0, untouched).
+- **`qa/desktop-update.cjs` 10 of 10,** for the first time since D3: from D5 on it stopped at its build, because esbuild takes
+  its working folder once when loaded and the check imported `build.mjs` from the repository root. Now: 0.9.0 installs
+  silently, finds 0.9.1 on a local feed, downloads it in the background and installs it on quit, keeps the data, refuses a
+  replaced installer by its SHA-512, and uninstalls without a trace. Its package is `sa.commshub.desktop.qa`; nothing of it is
+  left, and the release files are unchanged (READY again after the run). Both fixes: `ff636d0`.
+- **Before the upload.** The release opens the production site, which has none of D9 to D12's site code until main is pushed,
+  so the three files go up after the push: the installer, the blockmap, then `latest.yml` (`desktop/README.md`). Installed
+  copies then find 0.9.0 at their next start or within four hours. Nothing uploaded or pushed.

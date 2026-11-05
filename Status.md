@@ -26,6 +26,17 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The desktop release, stage 2: 0.9.0 built and checked, 2026-11-05
+
+- **Done.** Version 0.9.0 (`a8c068d`): desktop tests 164 of 164. `CommsHub-Setup-0.9.0-x64.exe` (162.6 MB, unsigned), its blockmap and
+  `latest.yml` are in `.claude/worktrees/verify-e3cab67/desktop/dist/release/`, not in git.
+  - `npm run release:check`: READY, 0.9.0 over the published 0.6.0. The fuses are as the plan requires.
+  - `qa/desktop-shell.cjs` 68 of 68 and `qa/desktop-update.cjs` 10 of 10, after a stale line in each was fixed (`ff636d0`). The update
+    check had not run to its end since D5.
+  - The owner's installed 0.6.0 was not touched.
+- **Next.** Stage 3: the owner's yes to push main, then the live site checked, then the owner uploads the three files, `latest.yml`
+  last (`desktop/README.md`). Nothing pushed or uploaded.
+
 ## The desktop release, stage 1: the final regression continued, 2026-11-05
 
 - **Done, and merged into main.** With main's director's notes steps 1 to 3 merged in: typecheck clean, `npm test` 906 of 906,
@@ -44,7 +55,7 @@ related:
     not changed. A clean run needs the laptop free of other sessions and Docker.
   - `20261105160000_direct_publish.sql` (`e8e2fa9`) is not applied to comms-hub and needs the owner's yes before a push.
   - `origin/main` is an ancestor of main again (`fc5737c` merged `5a50567`), so the push is a fast-forward.
-- **Next.** The 0.9.0 package (stage 2). Nothing pushed or released.
+- **Next.** Stage 2, below in time and above on this page.
 
 ## «نافذة البريد والمراسلة», the experimental mail and messaging window, 2026-11-05
 
