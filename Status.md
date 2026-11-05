@@ -34,14 +34,16 @@ related:
   - desktop-idle's 8 of 17 was the check: it cleared copies with its project open, and since D10 an open project keeps the copies
     it reads. Fixed in the fixture only (`eeb2b47`); now 19 of 22.
   - android-site's 0 of 1 was the worktree's missing public settings.
-- **Migrations.** comms-hub now has every migration on main except `android_releases`: the manager applied `create_access`,
-  `work_cancel`, `platform_tests_facebook` and `platform_tests_youtube_choices` on the owner's yes (`9805be8`, `31249b6`).
+- **Migrations.** comms-hub has every migration on main except `android_releases` (unapplied by design), each on the owner's
+  word: `create_access`, `work_cancel`, `platform_tests_facebook` and `platform_tests_youtube_choices` by the manager (`9805be8`,
+  `31249b6`), `calendar_prefs` and `file_thumbs` by the director's notes session (`d653c68`). A push no longer waits on any.
 - **Open.**
   - desktop-idle's last three holds, `studio-scrub --quick` and `studio-autores --quick` were not measured: Windows held the
     processor at 34 to 70% and the owner was using the laptop, so the package window drew one frame a second. They need about
     45 quiet minutes.
-  - Not applied to comms-hub, each needing the owner's yes before a push: `20261105130000_calendar_prefs.sql` (calendar
-    colours, `503d032`) and `20261105140000_file_thumbs.sql` (thumbnails, `691b1ff`).
+  - `origin/main` has one commit main lacks: `5a50567`, the mail and messaging window, deployed alone, with its migration
+    `chat_window` applied to comms-hub. The push must merge it first, and its spec is also `MVP_draft.md` section 74, the number
+    the calendar colours took on main.
 - **Next.** The quiet re-run, then the 0.9.0 package. Nothing pushed or released.
 
 ## The director's notes, steps 1 to 3: YouTube's four choices, thumbnails and calendar colours, 2026-11-05
