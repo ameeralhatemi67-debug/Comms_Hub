@@ -42,6 +42,8 @@ export const HOLD = {
   directScheduled: 'يجعل يوتيوب المقطع عاماً في موعده بنفسه، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.',
   /** «نشر مباشر» on Instagram: every post there is public. */
   directInstagram: 'يُنشر على الحساب للعموم الآن، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.',
+  /** «نشر مباشر» on Instagram, «مجدول» (MVP_draft.md 76.5): the site asks Meta at the time. */
+  directInstagramScheduled: 'يُنشر على الحساب للعموم في موعده، خارج دورة العمل، ويُبلَّغ ناشرو الحساب. يمكن إلغاؤه قبل موعده.',
   /** «حسابات المنصات»: delete a test video from YouTube. */
   platformTestDelete: 'يُحذف المقطع من القناة على يوتيوب نهائياً، ولا يُسترجع.',
   /** «حسابات المنصات»: an Instagram test Story (MVP_draft.md section 72). */

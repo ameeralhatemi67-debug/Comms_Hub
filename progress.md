@@ -4255,3 +4255,55 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   studio, and the director's notes pages.
 - **Left, the owner's:** upload `CommsHub-Setup-0.9.0-x64.exe`, its blockmap, then `latest.yml` to `desktop-releases/windows-x64/`
   (`desktop/README.md`). Until then the download offers 0.6.0, which keeps working with this site.
+
+### 2026-11-05: step 4 finished: «مجدول» on Instagram, and direct posts on the calendar and in the account sheet (director's notes, N-2)
+
+- **Owner decision.** «Finish step 4», by the plan's answer Q3. A scheduled Instagram post is fired by the WhatsApp bridge's loop, or
+  late at the next opening of the site.
+- **What was built (`MVP_draft.md` 76.5 and 76.6, replacing «Not built yet»).**
+  - **«مجدول» on Instagram, direct mode only.**
+    - The panel's «الموعد» offers «الآن» or «مجدول»: a Riyadh time, 10 minutes to 30 days ahead, with its own long press.
+    - The file goes at once, then the post waits (`waiting`), its caption and alt text in columns no page reads.
+    - The publishers and the assistants are told it is scheduled. A holder of `publish.direct` may cancel it before its time.
+  - **Going out.** `/api/platforms/due` fires what is due, with the server key and no session (`direct-due.ts`). It is called by the
+    bridge's loop about once a minute (`dueClient`, `kickDue`), or by Home once when opened (`due-kick.ts`).
+    - Key-only functions claim up to three due posts under a two-minute lease and hand over the account's token, recorded in its
+      events under the post's author.
+    - The run makes Meta's container and publishes once Meta is ready. It logs nothing and answers counts only.
+    - The post is written to «سجل النشاط» under its author and told «للعلم», late or on time.
+    - A refusal, an account that is off, a container still preparing after half an hour, or a post a day overdue (`OVERDUE`) is
+      closed, and its author is told for attention.
+  - **Direct posts on the calendar** (`directPlace`): on the account's lane as «مجدول» or «نُشر», in no project, never dragged.
+    The drawer says who made the post and where it stands.
+  - **Direct posts in the account sheet** on «حسابات المنصات» (`direct-posts.tsx`): the last five, read only.
+  - **No new column read by the page.** The lists work out «يُنشر الآن» from the time, so the code works before the migration is
+    applied.
+- **Migration.** `20261105210000_direct_schedule.sql`, **not applied** to comms-hub. It waits for the owner's words, and must be applied
+  before this code is pushed. Without it, scheduling is refused, Home's call answers 502, and the bridge logs `site_rejected` once a
+  minute. Nothing breaks.
+  - It adds the `waiting` state and four columns, and replaces `platform_test_start`, `platform_test_get`, `platform_test_failed` and
+    `direct_announce`.
+  - It adds `direct_wait`, `direct_cancel` and the key-only `direct_fire_*` functions.
+  - It drops and rewrites no data.
+- **Checks, all run here.**
+  - **Rules on a private container (72 migrations replayed):**
+    - `supabase/tests/direct_schedule_rules.sql`: **69 of 69** (`qa/direct-schedule-rules.json`);
+    - unchanged, after the replaced functions: `direct_publish_rules` **45 of 45**, `platform_tests_rules` **95 of 95**,
+      `platform_tests_instagram_rules` **62 of 62**, `platform_tests_facebook_rules` **48 of 48**.
+  - **Unit tests.** `npm test` **937 of 937**, with `tests/direct-schedule.test.mjs` (13). It runs the due run against a fake database
+    and a fake Meta: sent, asked, published, released, refused, given up, and no log line.
+  - **The bridge.** `npm test` in `bridge/whatsapp`: 20 tests, 19 passed and 1 skipped, as before (the pinned library is not installed
+    here). The three new due tests are among them.
+  - **Typecheck and build.** `npm run typecheck` passes. `npm run build` passes and lists `/api/platforms/due`.
+  - **Browser checks:**
+    - `qa/direct-publish-flow.cjs` **59 of 59**, up from 37: «مجدول» on Instagram (window, long press, the Riyadh time sent, the file
+      sent, waiting, cancelled) and the account sheet's list;
+    - `qa/work-pages.cjs` **1098 of 1098**: a direct post on the week and day views, absent from a project's view, and its drawer;
+    - `qa/post-preview.cjs` **202 of 202**;
+    - `qa/instagram-test-flow.cjs` **43 of 43**.
+- **Not checked.** Meta itself: no scheduled post has gone out through the bridge or Home on the real account. The bridge computer needs
+  this version of `bridge/whatsapp/` to call the due run; an older copy never calls it. Nothing signed in on the live site.
+- **Moved.** The temporary address's helper is `src/lib/platforms/temp-link.ts`, re-exported by `test-instagram.ts`.
+  `tests/instagram-test.test.mjs` and `tests/direct-publish.test.mjs` read it there.
+- **Now.** Steps 1 to 4 are built. The direct_schedule migration waits for the owner. Nothing of this entry is pushed. Step 5 (YouTube's
+  four choices in the work cycle, spec 78) is next.

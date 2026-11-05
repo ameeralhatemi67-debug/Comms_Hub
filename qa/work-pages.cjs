@@ -43,6 +43,8 @@ const sources = [
   'lib/media/notes.ts', 'lib/kit/hold.ts', 'lib/kit/layer.ts', 'lib/motion/preview.js',
   // «ورقة الكتابة»: its list, the read-only view of a document and its calls. The sheet has its own check (qa/writing-flow.cjs).
   'lib/kit/need.ts', 'lib/permissions.ts',
+  // Direct posts on the calendar (MVP_draft.md 76.6): the words of a post's kind and privacy
+  'lib/platforms/test-rules.ts',
   'lib/writing/flow.ts', 'lib/writing/doc.ts', 'lib/studio/fonts.ts', 'components/writing/doc-view.tsx', 'components/writing/api.ts',
 ];
 for (const m of sources) {
@@ -61,6 +63,10 @@ for (const m of sources) {
     .replace(/from '\.\/home-perms'/g, `from '${up}mocks/home-perms.js'`)
     // Home's «إجراءات سريعة» has its own check (qa/direct-publish-flow.cjs)
     .replace(/from '\.\/quick-actions'/g, `from '${up}mocks/quick-actions.js'`)
+    // direct posts are read from the fixture (__WK.direct); the account sheet's list and Home's due kick have their own checks
+    // (qa/direct-publish-flow.cjs, tests/direct-schedule.test.mjs)
+    .replace(/from '\.\/(?:work\/)?direct-posts'/g, `from '${up}mocks/direct-posts.js'`)
+    .replace(/from '@\/lib\/platforms\/due-kick'/g, `from '${up}mocks/due-kick.js'`)
     .replace(/from '\.\.?\/can-create'/g, `from '${up}mocks/can-create.js'`)
     .replace(/from '\.\.\/perm-requests'/g, `from '${up}mocks/perm-requests.js'`)
     // the studio's links on the work page («فتح في الاستوديو») have their own check (qa/studio-ui.cjs --only=work)
@@ -91,6 +97,8 @@ export const usePathname = () => '/approvals';
 export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search || '');`);
 fs.writeFileSync(path.join(build, 'mocks', 'setup-guide.js'), 'export const SetupGuide = () => null;');
 fs.writeFileSync(path.join(build, 'mocks', 'quick-actions.js'), 'export const QuickActions = () => null;');
+fs.writeFileSync(path.join(build, 'mocks', 'direct-posts.js'), 'export const DirectPosts = () => null;\nexport const useDirectPosts = () => globalThis.__WK.direct ?? [];');
+fs.writeFileSync(path.join(build, 'mocks', 'due-kick.js'), 'export const kickDue = () => false;');
 fs.writeFileSync(path.join(build, 'mocks', 'test-panels.js'), ['YouTubeTest', 'InstagramTest', 'FacebookTest'].map((n) => `export const ${n} = () => null;`).join(' '));
 fs.writeFileSync(path.join(build, 'mocks', 'dynamic.js'), 'export default () => () => null;');
 // The shells around the site: a browser has none (tests/native.test.mjs holds the real ones).
@@ -371,7 +379,11 @@ async function renderAll() {
   for (const [n, as, role, el] of pubDialogs) render(`dialog-${n}`, as, role, wk(el));
 
   // Step 5: «التقويم», «المشاريع» and the project page, «الطلبات», Home.
-  const s5 = { items: works5, plan: plan5, rq: rq5 };
+  // A direct post of «نشر مباشر» waiting on the Instagram account, and one a project filter hides (MVP_draft.md 76.6).
+  const direct5 = [
+    { id: 'dp-1', account_id: 'a-ig', kind: 'image', title: 'منشور مباشر مجدول', state: 'waiting', scheduled_for: '2026-10-14T09:00:00Z', shown_publish_at: null, done_at: null, post_url: null, video_id: null, privacy: null, shown_privacy: null, created_by: 'dir@x.sa' },
+  ];
+  const s5 = { items: works5, plan: plan5, rq: rq5, direct: direct5 };
   render('calendar-week', 'dir@x.sa', 'director', h(cal.CalendarPage), { ...s5, search: 'date=2026-10-12&view=week' });
   render('calendar-month', 'dir@x.sa', 'director', h(cal.CalendarPage), { ...s5, search: 'date=2026-10-12&view=month' });
   render('calendar-day', 'dir@x.sa', 'director', h(cal.CalendarPage), { ...s5, search: 'date=2026-10-14&view=day' });
@@ -383,6 +395,9 @@ async function renderAll() {
   const drawer = (name, as, role, e, extra = {}) =>
     render(name, as, role, wk(h(cal.EntryDrawer, { e, pendingKeys: works5.find((x) => x.w.id === e.w?.id)?.pendingKeys, stages: works5.find((x) => x.w.id === e.w?.id)?.stages ?? [], onClose() {}, open() {}, act: async () => true })), { ...s5, ...extra });
   drawer('drawer-pub-writer', 'khalid@x.sa', 'writer', entries.find((e) => e.k === 'pub' && e.w.id === 'CH-7' && e.ch === 'a-x'));
+  // A direct post's drawer (MVP_draft.md 76.6): who made it, that it waits for its time, and nothing of a work's.
+  const directEntries = planning.calEntries({ works: [], tasks: [], events: [], reminders: [], accounts, me: 'dir@x.sa', today: TODAY, nowIso: '2026-10-12T06:00:00Z', direct: direct5 });
+  drawer('drawer-direct', 'dir@x.sa', 'director', directEntries.find((e) => e.dp?.id === 'dp-1'));
   drawer('drawer-move-director', 'dir@x.sa', 'director', entry('move', 'CH-11'));
   drawer('drawer-move-self', 'khalid@x.sa', 'director', entry('move', 'CH-11'));
   drawer('drawer-pubok-publisher', 'noura@x.sa', 'publisher', entry('pubok', 'CH-12'));
@@ -514,13 +529,14 @@ window.__ready = true;
       'dialog-account-add': ['المنصة', 'إضافة حساب تجريبي', '60 يوماً'],
       'dialog-account-busy': ['لا يُحذف', 'CH-7'],
       // Step 5
-      'calendar-week': ['التقويم', '11 أكتوبر إلى 17 أكتوبر 2026', 'مراحل ومهام ممتدة', 'إنستغرام · الرسمي', 'X · الرسمي', 'التفويض منتهٍ', 'التسليم والمهام', 'حمل الفريق', 'منشور الملتقى المجدول', 'ملتقى الشركاء', 'اليوم الوطني 2026', 'التفويض لا يغطي الموعد', 'النشر في هذه المرحلة محاكاة', 'اسحب موعد نشر إلى يوم آخر لطلب نقله، واسحب التسليم أو المرحلة', 'سارة · المرئيات', 'أحمد · تغطية يومية للمعرض'],
+      'calendar-week': ['التقويم', '11 أكتوبر إلى 17 أكتوبر 2026', 'مراحل ومهام ممتدة', 'إنستغرام · الرسمي', 'X · الرسمي', 'التفويض منتهٍ', 'التسليم والمهام', 'حمل الفريق', 'منشور الملتقى المجدول', 'ملتقى الشركاء', 'اليوم الوطني 2026', 'التفويض لا يغطي الموعد', 'النشر في هذه المرحلة محاكاة', 'اسحب موعد نشر إلى يوم آخر لطلب نقله، واسحب التسليم أو المرحلة', 'سارة · المرئيات', 'أحمد · تغطية يومية للمعرض', 'منشور مباشر مجدول'],
       'calendar-month': ['أكتوبر 2026', 'الأحد', 'السبت', 'منشور الملتقى المجدول'],
-      'calendar-day': ['الأربعاء 14 أكتوبر 2026', 'منشور الملتقى المجدول', 'قريب من «منشور معتمد قريب»', 'معتمد · لم يُجدول', 'إضافة في هذا اليوم', 'ملتقى الشركاء'],
+      'calendar-day': ['الأربعاء 14 أكتوبر 2026', 'منشور الملتقى المجدول', 'قريب من «منشور معتمد قريب»', 'معتمد · لم يُجدول', 'إضافة في هذا اليوم', 'ملتقى الشركاء', 'منشور مباشر مجدول', 'نشر مباشر · إنستغرام · منشور صورة · مجدول'],
       'calendar-agenda': ['من 12 أكتوبر لمدة أسبوعين', 'اليوم', 'افتح أي موعد لترى تفاصيله', 'طوال اليوم'],
       'calendar-member': ['التقويم', 'إضافة'],
       'calendar-project': ['اليوم الوطني 2026', 'فرز الصور'],
       'drawer-pub-writer': ['مجدول', 'طلب نقل الموعد', 'التفويض لا يغطي الموعد', 'فتح العمل', 'بتوقيت الرياض'],
+      'drawer-direct': ['منشور مباشر مجدول', 'مجدول', 'الرسمي', 'إنستغرام · منشور صورة · مجدول', 'نشر مباشر من «الرئيسية» بيد', 'خارج دورة العمل', 'ينتظر موعده', 'ويُلغى قبله من «نشر مباشر»'],
       'drawer-move-director': ['موعد مطلوب', 'اعتماد الموعد الجديد', 'سحب طلب النقل', 'طلب خالد نقل الموعد'],
       'drawer-move-self': ['أرسلتَ هذا العمل للمراجعة بنفسك', 'سحب طلب النقل'],
       'drawer-pubok-publisher': ['معتمد · لم يُجدول', 'جدولة في الموعد المعتمد', 'طلب نقل الموعد'],
@@ -584,8 +600,9 @@ window.__ready = true;
       // Step 5: what a role must not see
       'calendar-agenda': ['واسحب التسليم أو المرحلة'],
       'calendar-member': ['اسحب موعد نشر'],
-      'calendar-project': ['تغطية يومية للمعرض'],
+      'calendar-project': ['تغطية يومية للمعرض', 'منشور مباشر مجدول'],
       'drawer-pub-writer': ['جدولة في الموعد المعتمد', 'تغيير موعد التسليم'],
+      'drawer-direct': ['طلب نقل الموعد', 'فتح العمل', 'جدولة في الموعد المعتمد'],
       'drawer-move-self': ['اعتماد الموعد الجديد'],
       'drawer-stage-designer': ['تغيير موعد المرحلة'],
       'projects-writer': ['مشروع جديد'],

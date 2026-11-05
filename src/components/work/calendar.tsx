@@ -79,6 +79,7 @@ import {
 import { DEFAULT_PREFS, accountClass, bandClass, chipClass, rowClass, type CalPrefs, type ColorLook } from '@/lib/work/calendar-colors';
 import { CalendarColorsSheet, CalendarKey, useCalendarColors, useColorLook } from './calendar-colors';
 import { usePlanData, useWork, useWorkList } from './data';
+import { useDirectPosts } from './direct-posts';
 import { AddDayDialog, DueDialog, EventDialog, MoveDialog, ReminderDialog, TaskDialog, TaskExtensionDialog, type DayPick } from './day-dialogs';
 import { ExtensionDialog } from './item';
 import { Av, Empty, Hint, Ic, PrioChip, StatusChip, Wid } from './parts';
@@ -103,6 +104,8 @@ export function CalendarPage() {
   const w = useWork();
   const { items, status, reload } = useWorkList();
   const plan = usePlanData();
+  // Direct posts of Home's «نشر مباشر» (MVP_draft.md 76.6), on their account's lane.
+  const direct = useDirectPosts();
   const params = useSearchParams();
   const [view, setView] = useState<CalView>((params.get('view') as CalView) || 'week');
   const [anchor, setAnchor] = useState(params.get('date') || w.today);
@@ -123,8 +126,8 @@ export function CalendarPage() {
 
   const works: PlanWork[] = items;
   const all = useMemo(
-    () => calEntries({ works, tasks: plan.tasks, events: plan.events, reminders: plan.reminders, accounts: w.accounts, me: w.me, today: w.today, nowIso, filter, mine, project }),
-    [works, plan.tasks, plan.events, plan.reminders, w.accounts, w.me, w.today, nowIso, filter, mine, project],
+    () => calEntries({ works, tasks: plan.tasks, events: plan.events, reminders: plan.reminders, accounts: w.accounts, me: w.me, today: w.today, nowIso, filter, mine, project, direct }),
+    [works, plan.tasks, plan.events, plan.reminders, w.accounts, w.me, w.today, nowIso, filter, mine, project, direct],
   );
   const { prefs } = useCalendarColors();
   const look = useColorLook(items, w.accounts, project);
@@ -513,6 +516,11 @@ function Row({ x, onSel }: { x: { e: CalEntry; chs: string[] }; onSel: (k: strin
         <b>{entryTitle(e)}</b>
         <small>
           {e.w && <Wid id={e.w.id} />}
+          {e.dp && (
+            <span>
+              نشر مباشر · {e.dp.what} · {w.nameOf(e.dp.by)}
+            </span>
+          )}
           {e.k === 'stage' && e.w && e.si != null ? <span>مرحلة من «{e.w.title}»</span> : null}
           {e.k === 'task' ? <span>إلى {w.nameOf(e.t!.assignee)}</span> : e.k === 'event' ? <span>{e.w?.place ?? ''}</span> : e.w?.assignee ? <span>{w.nameOf(e.w.assignee)}</span> : null}
           {e.late && <span className="late">متأخر</span>}
@@ -672,6 +680,40 @@ export function EntryDrawer({ e, pendingKeys, stages, onClose, open, act }: { e:
             );
           })}
         </div>
+      )}
+      {e.dp && (
+        <div className="wk-chanlist" data-cal="direct">
+          {(() => {
+            const a = x.accounts.find((y) => y.id === e.ch);
+            return (
+              <div className="wk-chanrow">
+                <span>
+                  <b>{accountName(a)}</b>
+                  {a?.handle && <small className="ltr">{a.handle}</small>}
+                </span>
+                <span className={`wk-cr ${e.risk ? 'risk' : 'ok'}`}>{e.dp.what}</span>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+      {e.dp && (
+        <Hint i={Send}>
+          نشر مباشر من «الرئيسية» بيد {x.nameOf(e.dp.by)}، خارج دورة العمل.{' '}
+          {e.dp.state === 'waiting'
+            ? 'ينتظر موعده: يطلب الموقع نشره حين يحين، ويُلغى قبله من «نشر مباشر».'
+            : e.dp.state === 'scheduled'
+              ? 'رُفع المقطع خاصاً، ويجعله يوتيوب عاماً في موعده بنفسه.'
+              : 'نُشر فعلاً على المنصة.'}
+          {e.dp.url && (
+            <>
+              {' '}
+              <a className="pf-link" href={e.dp.url} target="_blank" rel="noopener noreferrer" data-cal="direct-link">
+                فتح على المنصة
+              </a>
+            </>
+          )}
+        </Hint>
       )}
       {e.near && (
         <Hint warn>

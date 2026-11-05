@@ -4067,13 +4067,80 @@ Publishing works stays a simulation.
   test records and tells nothing, as before.
 - **Facebook** takes no direct post yet. Its tests are unchanged.
 
-## 76.5 Not built yet
+## 76.5 «مجدول» on Instagram
 
-- **A scheduled Instagram post.** Meta's API publishes at the moment it is called, so the site must make the call at the time. The
-  owner's answer Q3: the loop of the WhatsApp bridge on the owner's computer fires it, or the next opening of the site when that
-  computer is off, said as late. Until it is built, Instagram offers «الآن» only.
-- **Direct posts on the calendar** («نُشر مباشرة», «مجدول مباشرة»).
-- **Direct posts in the account's sheet** on «حسابات المنصات». Today the publishers learn of them by the notice.
+Built 2026-11-05 by the owner's answer Q3. Meta's API publishes at the moment it is called and keeps no time of its own, so the site
+makes the call at the time. The site still has no timer.
+
+- **The form.** In direct mode only, «الموعد» offers «الآن» (the default) and «مجدول».
+  - «مجدول» asks for a Riyadh date and time, at least 10 minutes and at most 30 days ahead (`IG_DIRECT_SCHEDULE_MAX_DAYS`).
+  - A line under it says how it goes out: «لا يجدول إنستغرام بنفسه، فالموقع يطلب النشر في الموعد: يُرفع الملف الآن، ويطلبه جهاز الجسر كل
+    دقيقة. إن كان الجهاز مغلقاً نُشر حين يفتح أحدٌ «الرئيسية»، متأخراً، وقيل ذلك.»
+  - The button says «جدولة القصة» or «جدولة النشر». It asks for its own long press: «يُنشر على الحساب للعموم في موعده، خارج دورة العمل،
+    ويُبلَّغ ناشرو الحساب. يمكن إلغاؤه قبل موعده.»
+  - A test has no time, and the database refuses one.
+- **Scheduling.**
+  - The file goes now, as for a post now: a device file to «تجارب النشر» in Drive, a library video read where it is. The server
+    checks the account with Meta.
+  - Once the file is there, the post waits (`state` 'waiting', `direct_wait`). Its caption and alt text are kept in the row, in
+    columns no page reads.
+  - The account's publishers and the assistants are told «للعلم»: «جُدول نشر مباشر «…» على إنستغرام · … (قصة)، ويُنشر في …».
+  - Nothing is written to «سجل النشاط» until it goes out.
+- **Waiting.**
+  - The panel's list and the account's sheet show «مجدول · يُنشر …».
+  - A holder of `publish.direct` may cancel it with «إلغاء الجدولة» (`direct_cancel`), shown as «أُلغي قبل موعده». The temporary copy
+    goes to Drive's trash.
+  - Starting another post never closes a waiting one.
+- **Going out.** `/api/platforms/due` fires what is due. Two callers, nothing scheduled in the site:
+  - the WhatsApp bridge computer's loop, about once a minute, with `WHATSAPP_SERVER_KEY`;
+  - Home, once when anyone signed in opens it, at most once a minute, never waiting for the answer.
+
+  Either way the run is the server's own, with `MAIL_SERVER_KEY` and no person's session (`src/lib/platforms/direct-due.ts`).
+  - `direct_fire_claim` hands it up to three due posts, each leased for two minutes, with the account's token. The use is written
+    to the account's events under the post's author.
+  - It checks Instagram's daily limit, sets the temporary address, has Meta make the container, and asks for its status within the
+    call. Once Meta is ready, the address ends, the post is published, its link is read, and the copy goes to Drive's trash.
+  - Still preparing at the end of the call: the lease ends and the next call asks again.
+  - It touches only a due scheduled Instagram direct post. It logs nothing, and answers counts only.
+- **Published.**
+  - Written to «سجل النشاط» under its author.
+  - Told «للعلم» to the publishers, the assistants and the author: «نُشر في موعده …», or «نُشر متأخراً N دقيقة عن موعده …» when it
+    went out more than 5 minutes late (`DIRECT_LATE_MINUTES`). The lists say «متأخراً N دقيقة عن موعده».
+- **Not published.** The author is told for attention: «تعذّر نشر «…» المجدول على إنستغرام · …».
+  - Meta refused it: closed with Meta's reason.
+  - The account is off or not connected at its time: closed.
+  - A container still preparing after half an hour: closed as `WAIT_TOO_LONG`.
+  - More than a day past its time: given up as `OVERDUE` («مضى يوم على موعده ولم يُنشر…»). This happens when neither the bridge nor
+    a Home opening came.
+- **While it is being sent,** its author can neither cancel it («يُنشر هذا المنشور الآن، فلا يُلغى…», `FIRING`) nor publish it
+  from the page.
+- **Where it lives.**
+  - Migration `supabase/migrations/20261105210000_direct_schedule.sql`, held by `supabase/tests/direct_schedule_rules.sql`.
+  - Rules in TypeScript: `src/lib/platforms/test-rules.ts`.
+  - The run: `direct-due.ts`, wired by `direct-due-server.ts`. The temporary address: `temp-link.ts`.
+  - Home's call: `src/lib/platforms/due-kick.ts`. The bridge's: `dueClient` and `kickDue` in `bridge/whatsapp/`.
+  - Checks: `tests/direct-schedule.test.mjs` and `qa/direct-publish-flow.cjs`.
+
+## 76.6 Direct posts on the calendar and in the account's sheet
+
+- **The calendar** shows a direct post on its account's lane, with the publishing entries, in no project:
+  - a post waiting for its time, or a YouTube video YouTube will make public later, as «مجدول»;
+  - a published post as «نُشر», at the time it went out, or the time YouTube made it public.
+
+  A cancelled, failed or deleted post is not shown.
+  - Its row says «نشر مباشر · إنستغرام · منشور صورة · مجدول · …» and who made it.
+  - Its drawer says it is a direct post from «الرئيسية», outside the work cycle, where it stands, and links to the platform once
+    published.
+  - It is never dragged. «لي وحدي» shows only one's own, and a project's view shows none.
+  - It warns beside a work's publication within two hours on the same account, as two works do.
+  - The colours follow 75: its account in «المنصة», its author in «المسؤول».
+- **The account's sheet** on «حسابات المنصات», for YouTube and Instagram, lists the account's last five direct posts to everyone who
+  may test the account (row level security decides). Each line says where the post stands; a published one has «فتح». The list
+  only reads: cancelling and deleting stay in «نشر مباشر», which the sheet says.
+- **Where it lives.**
+  - `directPlace` in `src/lib/work/planning.ts` and `directLine` in `test-rules.ts`.
+  - `DirectPosts` and `useDirectPosts` in `src/components/work/direct-posts.tsx`.
+  - Checks: `tests/direct-schedule.test.mjs`, `qa/work-pages.cjs` and `qa/direct-publish-flow.cjs`.
 
 # 77. Thumbnails of stored files, 2026-11-05
 

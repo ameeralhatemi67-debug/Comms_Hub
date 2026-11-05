@@ -6,6 +6,7 @@
 // say them before a click. After «النموذج المرجعي للمركز» version 5 (calEntries, lanesNow,
 // spansFor, bandsFor, moveWarn, projProgress, backSchedule, workFromProjectPlan, inboxItems).
 import type { Role } from '../domain.ts';
+import { IG_KIND_AR, PRIVACY_AR } from '../platforms/test-rules.ts';
 import {
   MAIN_ROLE,
   OUTSTANDING,
@@ -135,6 +136,46 @@ export const FILTERS: [keyof CalFilter, string][] = [
 ];
 export const ALL_ON: CalFilter = { pub: true, due: true, stages: true, tasks: true, events: true, camps: true, rem: true };
 
+/**
+ * A direct post of Home's «نشر مباشر» (MVP_draft.md 76.6), as the calendar reads it from platform_tests: not a work, so it has no
+ * stage, approval or move, and is never dragged. Row level security decides who sees it (those who may test the account).
+ */
+export type DirectItem = {
+  id: string;
+  account_id: string;
+  kind: string | null;
+  title: string;
+  state: string;
+  scheduled_for: string | null;
+  shown_publish_at: string | null;
+  done_at: string | null;
+  post_url: string | null;
+  video_id: string | null;
+  privacy: string | null;
+  shown_privacy: string | null;
+  created_by: string;
+};
+/** What a calendar entry knows of a direct post: `waiting` for its time (Instagram), `scheduled` at YouTube, or `published`. */
+export type DirectEntry = { id: string; title: string; by: string; url: string | null; state: 'waiting' | 'scheduled' | 'published'; what: string };
+
+/** Where a direct post sits on the calendar, or null: a cancelled, failed, deleted or unfinished one is not shown. */
+export function directPlace(d: DirectItem, nowIso: string): { k: CalKind; iso: string; dp: DirectEntry } | null {
+  const video = d.kind === 'video' || d.kind === null;
+  const url = d.post_url ?? (video && d.video_id ? `https://www.youtube.com/watch?v=${encodeURIComponent(d.video_id)}` : null);
+  const base = { id: d.id, title: d.title, by: d.created_by, url };
+  const kindWords = video ? 'يوتيوب' : `إنستغرام · ${IG_KIND_AR[d.kind ?? ''] ?? ''}`;
+  if (d.state === 'waiting' && d.scheduled_for) return { k: 'pub', iso: d.scheduled_for, dp: { ...base, state: 'waiting', what: `${kindWords} · مجدول` } };
+  if (d.state !== 'published') return null;
+  if (video && d.shown_publish_at) {
+    // YouTube holds the video private until its time and makes it public then by itself.
+    const ahead = Date.parse(d.shown_publish_at) > Date.parse(nowIso);
+    return { k: ahead ? 'pub' : 'done', iso: d.shown_publish_at, dp: { ...base, state: ahead ? 'scheduled' : 'published', what: `${kindWords} · ${ahead ? 'مجدول' : 'عام'}` } };
+  }
+  if (!d.done_at) return null;
+  const shown = video ? (PRIVACY_AR[d.shown_privacy ?? d.privacy ?? ''] ?? '') : '';
+  return { k: 'done', iso: d.done_at, dp: { ...base, state: 'published', what: shown ? `${kindWords} · ${shown}` : kindWords } };
+}
+
 export type CalEntry = {
   key: string;
   k: CalKind;
@@ -157,6 +198,8 @@ export type CalEntry = {
   risk?: boolean;
   near?: { title: string; time: string; id: string };
   multi?: boolean;
+  /** A direct post, not a work (MVP_draft.md 76.6). */
+  dp?: DirectEntry;
 };
 export type CalInput = {
   works: PlanWork[];
@@ -170,6 +213,8 @@ export type CalInput = {
   filter?: CalFilter;
   mine?: boolean;
   project?: string;
+  /** Direct posts of Home's «نشر مباشر», shown with the publishing entries, outside any project. */
+  direct?: DirectItem[];
 };
 
 const stampOf = (iso: string) => riyadhStamp(iso);
@@ -212,6 +257,12 @@ export function calEntries(x: CalInput): CalEntry[] {
       });
     if (f.events && w.type === 'event' && w.event_at) push({ k: 'event', at: stampOf(w.event_at), w, lane: 'ev' });
   }
+  if (f.pub && proj === 'all')
+    for (const d of x.direct ?? []) {
+      if (x.mine && d.created_by !== x.me) continue;
+      const p = directPlace(d, x.nowIso);
+      if (p) push({ k: p.k, at: stampOf(p.iso), iso: p.iso, ch: d.account_id, lane: d.account_id, dp: p.dp, key: keyOf('dp', d.id) });
+    }
   if (f.tasks) {
     const workOf = new Map(x.works.map((i) => [i.w.id, i]));
     for (const t of x.tasks) {
@@ -234,12 +285,13 @@ export function calEntries(x: CalInput): CalEntry[] {
     }
   if (f.rem) for (const r of x.reminders) push({ k: 'rem', at: stampOf(r.at), r, lane: 'int' });
 
-  // Two publications of different works on the same account within two hours.
+  // Two publications of different works, or direct posts, on the same account within two hours.
   const pubs = out.filter((e) => PUBLISHING.includes(e.k) && e.iso);
+  const idOf = (e: CalEntry) => e.w?.id ?? e.dp?.id ?? e.key;
   for (const e of pubs)
     for (const o of pubs)
-      if (o !== e && o.ch === e.ch && o.w?.id !== e.w?.id && Math.abs(Date.parse(o.iso!) - Date.parse(e.iso!)) < 120 * 60e3)
-        e.near = { title: o.w!.title, time: o.time, id: o.w!.id };
+      if (o !== e && o.ch === e.ch && idOf(o) !== idOf(e) && Math.abs(Date.parse(o.iso!) - Date.parse(e.iso!)) < 120 * 60e3)
+        e.near = { title: entryTitle(o), time: o.time, id: idOf(o) };
   // An account whose authorisation will not cover the time.
   for (const e of out) {
     const a = e.ch ? acc.get(e.ch) : undefined;
@@ -249,6 +301,7 @@ export function calEntries(x: CalInput): CalEntry[] {
 }
 
 export function entryTitle(e: CalEntry): string {
+  if (e.dp) return e.dp.title;
   if (e.k === 'task') return e.t!.what;
   if (e.k === 'evt') return e.ev!.title;
   if (e.k === 'rem') return e.r!.body;
@@ -267,7 +320,7 @@ export function dayLoad(all: CalEntry[], d: string): { n: number; late: boolean 
 export function grouped(list: CalEntry[]): { e: CalEntry; chs: string[] }[] {
   const g = new Map<string, { e: CalEntry; chs: string[] }>();
   for (const e of list) {
-    const k = e.ch ? keyOf(e.k, e.w?.id, e.date, e.time) : e.key;
+    const k = e.ch ? keyOf(e.k, e.w?.id ?? e.dp?.id, e.date, e.time) : e.key;
     if (!g.has(k)) g.set(k, { e, chs: [] });
     if (e.ch) g.get(k)!.chs.push(e.ch);
   }

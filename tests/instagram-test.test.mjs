@@ -209,8 +209,11 @@ test('the page never holds a token or the temporary address, and the server neve
 });
 
 test('the temporary address: random, hashed, checked by shape, and answered the same for anything wrong', () => {
-  assert.match(SERVER, /randomBytes\(32\)\.toString\('hex'\)/);
-  assert.match(SERVER, /createHash\('sha256'\)/);
+  // The address's helper is shared with the due run of «مجدول» (MVP_draft.md 76.5).
+  const LINK = read('src/lib/platforms/temp-link.ts');
+  assert.match(SERVER, /import \{ hashOf, newLink \} from '\.\/temp-link\.ts';/);
+  assert.match(LINK, /randomBytes\(32\)\.toString\('hex'\)/);
+  assert.match(LINK, /createHash\('sha256'\)/);
   assert.match(SERVER, /if \(!key \|\| !\/\^\[0-9a-f\]\{64\}\$\/\.test\(token\)\) return none\(\);/);
   assert.match(SERVER, /'Cache-Control': 'no-store'/);
   assert.match(SERVER, /'X-Robots-Tag': 'noindex, nofollow'/);

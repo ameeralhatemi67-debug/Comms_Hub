@@ -301,10 +301,20 @@ is the one real publish outside the work cycle; publishing works stays a simulat
     once in SQL, held equal by `tests/direct-publish.test.mjs`.
 - **Nothing is hidden.** The database writes every direct post and delete to «سجل النشاط» (`direct`, `direct_off`) and tells the
   account's publishers and the assistants «للعلم». Keep it in the database, never in the page.
-- **Facebook** takes no direct post until the owner says so («قريباً»). A scheduled Instagram post waits for the bridge's loop
-  (answer Q3) and is not built; never add a timer to the site for it.
-- **Checks.** `supabase/tests/direct_publish_rules.sql` holds the rules, and `qa/direct-publish-flow.cjs` clicks through the menu, the
-  sheet and both panels on a fixture.
+- **Facebook** takes no direct post until the owner says so («قريباً»).
+- **«مجدول» on Instagram** (answer Q3, `MVP_draft.md` 76.5, `supabase/migrations/*direct_schedule*`). Meta keeps no time, so the
+  site asks Meta at the time; never add a timer to the site for it.
+  - The file goes at once and the post waits (`waiting`). Its caption and alt text are columns no page reads.
+  - `/api/platforms/due` fires what is due. Its callers are the WhatsApp bridge's loop about once a minute (`dueClient`,
+    `kickDue`), or Home once when opened (`src/lib/platforms/due-kick.ts`), when the post is late and said so.
+  - The run is the server's own (`direct-due.ts`): `MAIL_SERVER_KEY`, no session, the key-only `direct_fire_*` functions, which
+    touch only a due scheduled Instagram direct post, under a two-minute lease.
+  - It reads the token from the claim, never logs, and answers counts only. Keep the engine free of Drive and the vault
+    (`direct-due-server.ts` wires them), so `tests/direct-schedule.test.mjs` runs it against fakes.
+- **Outside «نشر مباشر»** (76.6): direct posts show on the calendar (`directPlace`, never dragged, in no project), and in the
+  account's sheet (`direct-posts.tsx`), read only.
+- **Checks.** `supabase/tests/direct_publish_rules.sql` and `direct_schedule_rules.sql` hold the rules, and `qa/direct-publish-flow.cjs`
+  clicks through the menu, the sheet, both panels, «مجدول» and the account's list on a fixture.
 
 Integrations, storage providers and backups are real, by owner directive of 2026-10-14
 (`Settings_Integrations_Plan.md`, decisions E-1 to E-7, recorded in `progress.md`). Every

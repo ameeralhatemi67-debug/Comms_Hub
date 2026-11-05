@@ -6,7 +6,7 @@
 // receipt, and answers nothing. Secrets come from bridge/whatsapp/.env (never committed).
 const fs=require('node:fs');
 const path=require('node:path');
-const {siteClient,pushClient,errorInfo}=require('./transport.cjs');
+const {siteClient,pushClient,dueClient,errorInfo}=require('./transport.cjs');
 const {createLoop}=require('./loop.cjs');
 const {createProvider}=require('./provider.cjs');
 
@@ -41,7 +41,9 @@ function createBridge({Client,LocalAuth,QRCode,env,fetcher=fetch,out=console,int
   const log=(stage,info)=>out.error(new Date().toISOString(),stage,JSON.stringify(info));
   // Push notices (MVP_draft.md 64.3, S-2): the same key, a second door, beside the WhatsApp work.
   const push=pushClient(fetcher,env.COMMS_SITE_URL,env.WHATSAPP_SERVER_KEY);
-  const loop=createLoop({dispatch,provider,log,push});
+  // Scheduled Instagram posts (MVP_draft.md 76.5): the same key, the site fires what is due, about once a minute.
+  const due=dueClient(fetcher,env.COMMS_SITE_URL,env.WHATSAPP_SERVER_KEY);
+  const loop=createLoop({dispatch,provider,log,push,due});
   let timer=null,stopped=false;
 
   client.on('qr',async qr=>{

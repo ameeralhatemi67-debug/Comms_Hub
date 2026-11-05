@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase/client';
 import {
   IG_ALT_MAX,
   IG_CAPTION_MAX,
+  IG_DIRECT_SCHEDULE_MAX_DAYS,
   IG_HASHTAGS_MAX,
   IG_KIND_AR,
   IG_MANAGE_SCOPE,
@@ -22,16 +23,19 @@ import {
   IG_POLL_MS,
   IG_WAIT_MS,
   TEST_ERROR_AR,
+  YT_SCHEDULE_MIN_MINUTES,
   igProfileUrl,
   igProblem,
   kindOf,
+  lateMinutes,
+  scheduleProblem,
   storyEnds,
   type IgChoice,
   type TestKind,
   type TestRow,
   type TestPurpose,
 } from '@/lib/platforms/test-rules';
-import type { AccountRow } from '@/lib/work/rules';
+import { riyadhInstant, riyadhStamp, type AccountRow } from '@/lib/work/rules';
 import { useWork, type LibraryFile } from './data';
 import { Hint, Ic, LibraryPicker } from './parts';
 import { api, clock, mb, mimeOf, said, sendToDrive, sleep, toJpeg, useTests, videoSeconds, when } from './test-kit';
@@ -57,6 +61,7 @@ type Phase =
   | { t: 'upload'; pct: number }
   | { t: 'wait'; since: number }
   | { t: 'done'; url: string | null; kind: TestKind }
+  | { t: 'scheduled'; at: string | null; kind: TestKind }
   | { t: 'error'; text: string; code?: string };
 
 const ACCEPT: Record<IgChoice, string> = { story: 'image/*,video/mp4,video/quicktime', image: 'image/*', reel: 'video/mp4,video/quicktime' };
@@ -69,6 +74,8 @@ const LEAD: Record<IgChoice, string> = {
 /**
  * `mode` 'direct' is Home's «نشر مباشر» (MVP_draft.md 76): the same engine and form for a real post, open at once, with its own
  * list. Every Instagram post is public, so each asks for a long press. The database decides who may.
+ * A direct post may also be «مجدول» (76.5): the file goes now, and the site asks Meta at the time (the bridge computer's loop, or
+ * the next opening of Home, late). Until then it waits in the list and may be cancelled.
  */
 export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow; onReconnect: () => void; mode?: TestPurpose }) {
   const direct = mode === 'direct';
@@ -80,6 +87,9 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
   const [caption, setCaption] = useState('تجربة نشر');
   const [alt, setAlt] = useState('');
   const [feed, setFeed] = useState(false);
+  // A direct post: now, or at a Riyadh date and time.
+  const [timing, setTiming] = useState<'now' | 'scheduled'>('now');
+  const [slot, setSlot] = useState('');
   const [phase, setPhase] = useState<Phase>({ t: 'idle' });
   const [quota, setQuota] = useState<{ used: number; total: number } | null>(null);
   const [tests, load] = useTests(a.id, mode);
@@ -104,7 +114,10 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
 
   const kind = ready ? kindOf(choice, ready.mime) : null;
   const words = kind === 'story_image' || kind === 'story_video' ? '' : caption;
-  const problem = !ready
+  const later = direct && timing === 'scheduled';
+  const at = later && slot ? riyadhInstant(slot) : null;
+  const soonest = riyadhStamp(new Date(now + (YT_SCHEDULE_MIN_MINUTES + 1) * 60e3).toISOString()).replace(' ', 'T');
+  const fileProblem = !ready
     ? choice === 'reel'
       ? 'اختر مقطع الفيديو.'
       : 'اختر الملف.'
@@ -115,6 +128,7 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
           ? 'يقبل إنستغرام الريلز MP4 أو MOV.'
           : 'القصة صورة أو فيديو MP4 أو MOV.'
       : igProblem({ kind, size: ready.size, mime: ready.mime, caption: words, alt: kind === 'image' ? alt : '', seconds: ready.seconds, ratio: ready.ratio });
+  const problem = fileProblem ?? (later ? scheduleProblem(at, Date.now(), IG_DIRECT_SCHEDULE_MAX_DAYS, 'direct') : null);
   const stats = copyStats(caption);
 
   const take = async (pick: { name: string; from: 'device'; file: File } | { name: string; from: 'library'; file: LibraryFile }) => {
@@ -164,9 +178,17 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
         alt: kind === 'image' ? alt : '',
         share_to_feed: kind === 'reel' ? feed : undefined,
         ...(direct ? { purpose: 'direct' } : {}),
+        ...(direct && at ? { scheduled_for: at } : {}),
       }),
     });
     if (!start.ok || typeof start.b.test !== 'string') return fail(start.b);
+    // Scheduled: the file is where Meta will fetch it from, and the post waits for its time.
+    const waits = async (b: Record<string, unknown>) => {
+      setPhase({ t: 'scheduled', at: typeof b.at === 'string' ? b.at : at, kind });
+      w.say(`جُدول «${kind === 'story_image' || kind === 'story_video' ? 'القصة' : 'المنشور'}» على إنستغرام.`);
+      await load();
+    };
+    if (start.b.phase === 'scheduled') return waits(start.b);
     const test = start.b.test;
     if (start.b.quota && typeof start.b.quota === 'object') setQuota(start.b.quota as { used: number; total: number });
     const cancel = async () => {
@@ -190,6 +212,7 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
         body: JSON.stringify({ step: 'uploaded', ref, caption: words, alt: kind === 'image' ? alt : '' }),
       });
       if (!sent.ok) return fail(sent.b);
+      if (sent.b.phase === 'scheduled') return waits(sent.b);
     }
 
     // Meta fetches and prepares the file; the page asks how it is going until it is published.
@@ -231,7 +254,8 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
     setRemoving(t.id);
     const r = await api(`/api/platforms/test/${t.id}`, { method: 'DELETE' });
     setRemoving(null);
-    if (r.ok) w.say(`حُذف «${t.title}» من إنستغرام.`);
+    if (r.ok && t.state === 'waiting') w.say(`أُلغيت جدولة «${t.title}».`);
+    else if (r.ok) w.say(`حُذف «${t.title}» من إنستغرام.`);
     else if (r.b.code === 'SCOPE_MISSING') setScopeNote(true);
     else w.say(said(r.b));
     await load();
@@ -240,11 +264,17 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
   const story = kind === 'story_image' || kind === 'story_video' || (!kind && choice === 'story');
   const statusOf = (t: TestRow) => {
     if (t.state === 'deleted') return 'حُذف من إنستغرام';
-    if (t.state === 'uploading') return 'يُنشر الآن';
+    if (t.state === 'waiting' && t.scheduled_for)
+      return Date.parse(t.scheduled_for) <= now ? `حان موعده (${when(t.scheduled_for)}) · يُنشر حين يطلبه جهاز الجسر أو تُفتح «الرئيسية»` : `مجدول · يُنشر ${when(t.scheduled_for)}`;
+    // A scheduled post still uploading before its time is its file on the way; at or after its time, the site is sending it.
+    if (t.state === 'uploading') return !t.scheduled_for || Date.parse(t.scheduled_for) <= now ? 'يُنشر الآن' : 'يُرفع الملف';
+    if (t.state === 'failed' && t.error === 'CANCELLED' && t.scheduled_for) return 'أُلغي قبل موعده';
     if (t.state === 'failed') return `لم يكتمل${t.error ? `: ${TEST_ERROR_AR[t.error] ?? 'خطأ من المنصة.'}` : ''}`;
+    const late = lateMinutes(t);
+    const lateText = late ? ` · متأخراً ${late} دقيقة عن موعده` : '';
     const ends = t.kind === 'story_image' || t.kind === 'story_video' ? storyEnds(t.done_at) : null;
-    if (ends) return Date.parse(ends) <= now ? 'قصة انتهت' : `قصة · تختفي ${when(ends)}`;
-    return `نُشر · ${IG_KIND_AR[t.kind ?? ''] ?? ''}`;
+    if (ends) return (Date.parse(ends) <= now ? 'قصة انتهت' : `قصة · تختفي ${when(ends)}`) + lateText;
+    return `نُشر · ${IG_KIND_AR[t.kind ?? ''] ?? ''}${lateText}`;
   };
 
   return (
@@ -367,6 +397,35 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
             </label>
           )}
 
+          {direct && (
+            <>
+              <div className="yt-row">
+                <span className="yt-lbl" id={`ig-when-${a.id}`}>
+                  الموعد
+                </span>
+                <div className="wk-seg" role="group" aria-labelledby={`ig-when-${a.id}`} data-ig="timing">
+                  {(['now', 'scheduled'] as const).map((c) => (
+                    <button type="button" key={c} aria-pressed={timing === c} disabled={busy} data-timing={c} onClick={() => setTiming(c)}>
+                      {c === 'now' ? 'الآن' : 'مجدول'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {later && (
+                <>
+                  <label className="pf-f yt-f">
+                    موعد النشر <small>بتوقيت الرياض، حتى {IG_DIRECT_SCHEDULE_MAX_DAYS} يوماً</small>
+                    <input type="datetime-local" data-ig="when" value={slot} min={soonest} disabled={busy} onChange={(e) => setSlot(e.target.value)} />
+                  </label>
+                  <p className="yt-sub" data-ig="when-note">
+                    لا يجدول إنستغرام بنفسه، فالموقع يطلب النشر في الموعد: يُرفع الملف الآن، ويطلبه جهاز الجسر كل دقيقة. إن كان الجهاز مغلقاً
+                    نُشر حين يفتح أحدٌ «الرئيسية»، متأخراً، وقيل ذلك.
+                  </p>
+                </>
+              )}
+            </>
+          )}
+
           {phase.t === 'upload' || phase.t === 'wait' ? (
             <div className="yt-progress" role="status" aria-live="polite" data-ig="progress">
               {phase.t === 'upload' ? (
@@ -397,9 +456,16 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
             <div className="pf-acts">
               {/* Every Instagram test is seen by others, so both ask for a long press. */}
               {direct ? (
-                <button type="button" className="pf-btn pri" data-ig="send" disabled={Boolean(problem) || busy} data-hold={HOLD.directInstagram} onClick={() => void send()}>
+                <button
+                  type="button"
+                  className="pf-btn pri"
+                  data-ig="send"
+                  disabled={Boolean(problem) || busy}
+                  data-hold={later ? HOLD.directInstagramScheduled : HOLD.directInstagram}
+                  onClick={() => void send()}
+                >
                   <Upload aria-hidden="true" />
-                  {story ? 'نشر القصة' : 'نشر للعموم'}
+                  {later ? (story ? 'جدولة القصة' : 'جدولة النشر') : story ? 'نشر القصة' : 'نشر للعموم'}
                 </button>
               ) : story ? (
                 <button type="button" className="pf-btn pri" data-ig="send" disabled={Boolean(problem) || busy} data-hold={HOLD.igTestStory} onClick={() => void send()}>
@@ -417,7 +483,7 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
               </button>
             </div>
           )}
-          {problem && ready && !busy && <p className="yt-sub warn">{problem}</p>}
+          {problem && (ready || (later && slot)) && !busy && <p className="yt-sub warn">{problem}</p>}
         </div>
       )}
 
@@ -439,7 +505,13 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
       )}
       {phase.t === 'done' && (
         <div className="pf-note ok yt-done" role="status" data-ig="done">
-          <span>{phase.kind === 'story_image' || phase.kind === 'story_video' ? 'نُشرت القصة على الحساب، وتختفي بعد 24 ساعة.' : 'نُشرت التجربة على الحساب.'}</span>
+          <span>
+            {phase.kind === 'story_image' || phase.kind === 'story_video'
+              ? 'نُشرت القصة على الحساب، وتختفي بعد 24 ساعة.'
+              : direct
+                ? 'نُشر على الحساب.'
+                : 'نُشرت التجربة على الحساب.'}
+          </span>
           {phase.url && (
             <span className="pf-acts">
               <a className="pf-link" href={phase.url} target="_blank" rel="noopener noreferrer">
@@ -448,6 +520,14 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
               </a>
             </span>
           )}
+        </div>
+      )}
+
+      {phase.t === 'scheduled' && (
+        <div className="pf-note ok yt-done" role="status" data-ig="scheduled">
+          <span>
+            جُدول{phase.at ? `، ويُنشر ${when(phase.at)}` : ''}. يبقى في القائمة أدناه حتى موعده، ويمكن إلغاؤه قبله.
+          </span>
         </div>
       )}
 
@@ -473,6 +553,14 @@ export function InstagramTest({ a, onReconnect, mode = 'test' }: { a: AccountRow
                   {statusOf(t)} · {when(t.created_at)} · {w.nameOf(t.created_by)}
                 </small>
               </span>
+              {t.state === 'waiting' && (
+                <span className="yt-item-acts">
+                  <button type="button" className="wk-btn sm quiet" data-ig="unschedule" disabled={removing === t.id} onClick={() => void remove(t)}>
+                    <Ic i={X} />
+                    {removing === t.id ? 'جارٍ الإلغاء…' : 'إلغاء الجدولة'}
+                  </button>
+                </span>
+              )}
               {t.state === 'published' && (
                 <span className="yt-item-acts">
                   {t.post_url && (

@@ -24,6 +24,12 @@ and reduced from `D:\Agents\main\projects\hida\bridge` (that project is not touc
   `POST /api/push/flush`, with the same key and no body. The site sends what its push outbox holds with
   its own server key and answers with counts only: no notice, token or phone passes through this
   computer. One flush at a time; after a refusal it waits a minute. The WhatsApp work never waits for it.
+- **It is the clock of «مجدول» on Instagram (`MVP_draft.md` 76.5).** About once a minute it calls a third
+  door, `POST /api/platforms/due`, with the same key and no body. The site fires the scheduled Instagram
+  posts that are due with its own key and answers with counts only: no post, token or address passes
+  through this computer. One call at a time, never in the way of the WhatsApp work. With this computer
+  off, a post goes out late, when someone opens «الرئيسية». A computer running an older copy of the bridge
+  never makes this call: update it to this version.
 - **No secrets here.** `.env` (the site address and the key), the linked session (`.session`)
   and `node_modules` stay on this computer and are ignored by git. Logs carry row ids and
   reasons, never a number or a text.
@@ -36,9 +42,9 @@ volume low, and expect to link again occasionally (plan section 13).
 | File | Holds |
 |---|---|
 | `bridge.cjs` | Start-up, QR in the terminal, the link's life, the five-second loop. |
-| `loop.cjs` | One tick: ask for a push flush, report, heartbeat, claim, send through the guarded sender, report. |
+| `loop.cjs` | One tick: ask for a push flush (and, once a minute, the due run), report, heartbeat, claim, send through the guarded sender, report. |
 | `policy.cjs` | Which rows may be sent, and the sender bound to one claimed batch. |
-| `transport.cjs` | The two doors of the site (dispatch and push flush), safe error descriptions, Arabic reasons. |
+| `transport.cjs` | The three doors of the site (dispatch, push flush, due run), safe error descriptions, Arabic reasons. |
 | `provider.cjs` | `sendCode`, `sendMessage`, `status` over WhatsApp Web (the real `WhatsAppProvider`). |
 | `compat.cjs` | The Hedayah bridge's reviewed transform for whatsapp-web.js 1.34.7 message keys. |
 | `run-bridge.bat` | Installs the pinned packages once (without downloading a browser) and runs the bridge. |

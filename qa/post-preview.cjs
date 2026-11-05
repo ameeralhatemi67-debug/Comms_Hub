@@ -26,7 +26,7 @@ fs.rmSync(build, { recursive: true, force: true });
 const sources = [
   'components/work/post-preview.tsx', 'components/work/connect.tsx', 'components/work/channels.tsx', 'components/work/parts.tsx', 'components/work/plan.tsx',
   'lib/work/rules.ts', 'lib/work/planning.ts', 'lib/work/drag.ts', 'lib/media/rules.ts', 'lib/domain.ts', 'lib/kit/hold-reasons.ts',
-  'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts',
+  'lib/platforms/info.ts', 'lib/platforms/limits.ts', 'lib/platforms/copies.ts', 'lib/platforms/provider.ts', 'lib/platforms/test-rules.ts',
   'components/sheet.tsx', 'components/platform-icon.tsx', 'components/file-thumb.tsx', 'lib/media/thumbs.ts', 'components/guide-text.tsx', 'lib/guide-text.ts', 'lib/setup-guides.ts', 'lib/platforms/setup.ts', 'lib/integrations/expiry.ts',
 ];
 for (const m of sources) {
@@ -47,6 +47,8 @@ for (const m of sources) {
     .replace(/from '\.\.\/setup-guide'/g, `from '${up}mocks/setup-guide.js'`)
     // the account sheet's «تجربة النشر» panels have their own checks (qa/youtube-test-flow.cjs, instagram-, facebook-)
     .replace(/from '\.\/(youtube-test|instagram-test|facebook-test)'/g, `from '${up}mocks/test-panels.js'`)
+    // the account sheet's direct posts have their own check (qa/direct-publish-flow.cjs)
+    .replace(/from '\.\/direct-posts'/g, `from '${up}mocks/direct-posts.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
     .replace(/from '(\.[^']+)\.ts'/g, "from '$1.js'")
     .replace(/from '(\.\/(?:plan|parts|post-preview|connect))'/g, "from '$1.js'");
@@ -64,6 +66,7 @@ export const useSearchParams = () => new URLSearchParams(globalThis.__WK.search 
 fs.writeFileSync(path.join(build, 'mocks', 'supabase.js'), `const chain = new Proxy(function () {}, { get: () => chain, apply: () => chain });
 export const supabase = () => chain;`);
 fs.writeFileSync(path.join(build, 'mocks', 'setup-guide.js'), 'export const SetupGuide = () => null;');
+fs.writeFileSync(path.join(build, 'mocks', 'direct-posts.js'), 'export const DirectPosts = () => null; export const useDirectPosts = () => [];');
 fs.writeFileSync(path.join(build, 'mocks', 'test-panels.js'), ['YouTubeTest', 'InstagramTest', 'FacebookTest'].map((n) => `export const ${n} = () => null;`).join(' '));
 fs.writeFileSync(path.join(build, 'mocks', 'perm-requests.js'), 'export const usePermRequests = () => ({ list: [], status: "ready", reload: async () => {} });');
 fs.writeFileSync(path.join(build, 'mocks', 'data.js'), `export const useWork = () => globalThis.__WK.ctx;

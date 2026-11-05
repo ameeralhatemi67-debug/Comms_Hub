@@ -26,6 +26,7 @@ import { useWork, useWorkList, type ListItem } from './data';
 import { ConnectChooser, RECONNECT_KEY, connLine, defaultPublishers } from './connect';
 import { Empty, Hint, Ic, Modal } from './parts';
 import { staffOf } from './plan';
+import { DirectPosts } from './direct-posts';
 import { FacebookTest } from './facebook-test';
 import { InstagramTest } from './instagram-test';
 import { YouTubeTest } from './youtube-test';
@@ -461,6 +462,7 @@ function AccountSheet({
           {a.platform === 'youtube' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <YouTubeTest a={a} onReconnect={onReconnect} />}
           {a.platform === 'instagram' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <InstagramTest a={a} onReconnect={onReconnect} />}
           {a.platform === 'facebook' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <FacebookTest a={a} onReconnect={onReconnect} />}
+          {(a.platform === 'youtube' || a.platform === 'instagram') && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <DirectPosts a={a} />}
           {mgr && !a.fixed && (
             <details className="pf-more">
               <summary>خيارات أخرى</summary>

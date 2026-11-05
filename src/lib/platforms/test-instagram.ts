@@ -11,16 +11,18 @@
 //      make a container from it.
 //   4. advance, each time the page asks: Meta's status; once ready the address ends, the post is published, its link
 //      read, the result recorded and the temporary copy moved to Drive's trash.
-import { createHash, randomBytes } from 'node:crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { json } from './route.ts';
 import { serverKeyOrNull } from '../integrations/vault.ts';
 import { loadApp, loadSecret } from './connect.ts';
 import { metaAccountHealth, type Fetch } from './oauth.ts';
 import { igContainerStatus, igCreateContainer, igDelete, igMedia, igPublish, igPublishingLimit, type IgPost } from './instagram.ts';
-import { IG_LINK_MINUTES, IG_VIDEO_TYPES, igProblem, igTitle, isPictureKind, type TestKind } from './test-rules.ts';
+import { IG_DIRECT_SCHEDULE_MAX_DAYS, IG_LINK_MINUTES, IG_VIDEO_TYPES, igProblem, igTitle, isPictureKind, scheduleProblem, type TestKind } from './test-rules.ts';
 import { dbCode, giveUp, refuse, testInfo, type TestInfo } from './test-server.ts';
 import { openStored, storageConfigured, storageFor } from '../storage/index.ts';
+import { hashOf, newLink } from './temp-link.ts';
+
+export { hashOf, newLink };
 
 const TEMP_MARKER = 'commsHubPublishTests';
 const TEMP_FOLDER = 'تجارب النشر';
@@ -30,12 +32,6 @@ export const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice
 
 /** The name the server gives a device file in «تجارب النشر»: it alone proves which upload is this test's. */
 export const tempName = (id: string, mime: string) => `تجربة-${id}.${mime === 'image/jpeg' ? 'jpg' : mime === 'video/quicktime' ? 'mov' : 'mp4'}`;
-/** The temporary address's token and the hash the database keeps. */
-export function newLink(): { token: string; hash: string } {
-  const token = randomBytes(32).toString('hex');
-  return { token, hash: hashOf(token) };
-}
-export const hashOf = (token: string) => createHash('sha256').update(token).digest('hex');
 
 /**
  * A Meta account's token (an Instagram account's or a Facebook Page's), checked with Meta first when `check` (the account
@@ -70,7 +66,21 @@ export async function stop(db: SupabaseClient, t: TestInfo, code: string) {
   return giveUp(db, t.id, code);
 }
 
-/** Step 1. `b` is the page's request: account, kind, source, asset (a library video), size and mime (a device file), caption, alt, share_to_feed. */
+/**
+ * A scheduled direct post waits once its file is where Meta will fetch it from (MVP_draft.md 76.5): the due run fires it at its
+ * time. Its caption and alt text go to the database, which no page reads back.
+ */
+async function igWait(db: SupabaseClient, t: TestInfo, words: { caption: string; alt: string }) {
+  const { error } = await db.rpc('direct_wait', { p_key: serverKeyOrNull(), p_test: t.id, p_caption: words.caption, p_alt: words.alt });
+  if (error) return stop(db, t, dbCode(error.message));
+  return json({ test: t.id, phase: 'scheduled', at: t.scheduled_for ?? null });
+}
+const scheduled = (t: Pick<TestInfo, 'purpose' | 'scheduled_for'>) => t.purpose === 'direct' && !!t.scheduled_for;
+
+/**
+ * Step 1. `b` is the page's request: account, kind, source, asset (a library video), size and mime (a device file), caption, alt,
+ * share_to_feed; for a direct post, `purpose` and, when scheduled, `scheduled_for`.
+ */
 export async function igStart(request: Request, db: SupabaseClient, b: Record<string, unknown>, me: string) {
   const kind = b.kind as TestKind;
   if (!IG_KINDS.includes(kind) || (b.source !== 'device' && b.source !== 'library')) return refuse('TEST_INVALID');
@@ -96,6 +106,11 @@ export async function igStart(request: Request, db: SupabaseClient, b: Record<st
   }
   const problem = igProblem({ kind, size, mime, caption, alt });
   if (problem) return Response.json({ error: problem }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
+  // «مجدول» is a direct post's only (MVP_draft.md 76.5); the database holds the same window.
+  const at = b.purpose === 'direct' && typeof b.scheduled_for === 'string' && b.scheduled_for ? b.scheduled_for : null;
+  if (b.scheduled_for != null && b.scheduled_for !== '' && !at) return refuse('TEST_INVALID');
+  const when = at ? scheduleProblem(at, Date.now(), IG_DIRECT_SCHEDULE_MAX_DAYS, 'direct') : null;
+  if (when) return Response.json({ error: when, code: 'SCHEDULE_INVALID' }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
   if (b.source === 'device' && !(await storageConfigured('library'))) return refuse('DRIVE_NOT_CONNECTED');
 
   const { data: id, error } = await db.rpc('platform_test_start', {
@@ -111,6 +126,7 @@ export async function igStart(request: Request, db: SupabaseClient, b: Record<st
       share_to_feed: kind === 'reel' ? b.share_to_feed === true : null,
       // A direct post from Home's «نشر مباشر» (MVP_draft.md 76); the database decides who may make one.
       ...(b.purpose === 'direct' ? { purpose: 'direct' } : {}),
+      ...(at ? { scheduled_for: new Date(at).toISOString() } : {}),
     },
   });
   if (error || typeof id !== 'string') {
@@ -122,10 +138,11 @@ export async function igStart(request: Request, db: SupabaseClient, b: Record<st
 
   const tok = await instagramToken(db, fetch, t, b.purpose === 'direct' ? 'نشر مباشر على إنستغرام' : 'تجربة نشر على إنستغرام', true);
   if ('error' in tok) return giveUp(db, id, tok.error);
-  const quota = await igPublishingLimit(fetch, { token: tok.token, user: t.external_id ?? '' });
+  // A scheduled post is checked against Instagram's daily limit when it goes out, not now.
+  const quota = at ? null : await igPublishingLimit(fetch, { token: tok.token, user: t.external_id ?? '' });
   if (quota && quota.used >= quota.total) return giveUp(db, id, 'QUOTA_REACHED');
 
-  if (t.source === 'library') return igSend(request, db, t, tok.token, { caption, alt }, quota);
+  if (t.source === 'library') return at ? igWait(db, t, { caption, alt }) : igSend(request, db, t, tok.token, { caption, alt }, quota);
   const upload = await openTempUpload(request, t, me);
   return upload ? json({ test: id, phase: 'upload', upload, quota }) : giveUp(db, id, 'TEMP_UPLOAD_FAILED');
 }
@@ -176,6 +193,7 @@ export async function igUploaded(request: Request, db: SupabaseClient, t: TestIn
   const got = await acceptTemp(db, t, b, me);
   if (got instanceof Response) return got;
   const ref = got.ref;
+  if (scheduled(t)) return igWait(db, { ...t, temp_ref: ref }, { caption: str(b.caption, 2400), alt: str(b.alt, 1100) });
   const tok = await instagramToken(db, fetch, t, 'تجربة نشر على إنستغرام', false);
   if ('error' in tok) return stop(db, { ...t, temp_ref: ref }, tok.error);
   return igSend(request, db, { ...t, temp_ref: ref }, tok.token, { caption: str(b.caption, 2400), alt: str(b.alt, 1100) }, null);
@@ -201,7 +219,8 @@ async function igSend(request: Request, db: SupabaseClient, t: TestInfo, token: 
 
 /** Step 4, each time the page asks: still preparing, or published, or stopped with Meta's reason. */
 export async function igAdvance(db: SupabaseClient, t: TestInfo) {
-  if (!t.mine || t.state !== 'uploading' || !t.container) return refuse('TEST_INVALID');
+  // A post the due run took is the server's to publish.
+  if (!t.mine || t.state !== 'uploading' || !t.container || t.fired) return refuse('TEST_INVALID');
   const tok = await instagramToken(db, fetch, t, 'تجربة نشر على إنستغرام', false);
   if ('error' in tok) return tok.error === 'UNREACHABLE' ? refuse(tok.error, true) : stop(db, t, tok.error);
   const s = await igContainerStatus(fetch, { token: tok.token, id: t.container });
@@ -223,8 +242,18 @@ export async function igAdvance(db: SupabaseClient, t: TestInfo) {
   return json({ done: true, post: p.id, url: link, kind: t.kind });
 }
 
-/** DELETE: a waiting test is cancelled by whoever started it; a published one is deleted on Instagram. */
+/**
+ * DELETE: a test still uploading is cancelled by whoever started it; a scheduled direct post waiting for its time by a holder of
+ * «نشر مباشر»; a published one is deleted on Instagram. A post the due run is sending is not cancelled.
+ */
 export async function igRemove(db: SupabaseClient, t: TestInfo) {
+  if (t.state === 'waiting') {
+    const { data: ref, error } = await db.rpc('direct_cancel', { p_key: serverKeyOrNull(), p_test: t.id });
+    if (error) return refuse(dbCode(error.message));
+    await trashTemp({ temp_ref: typeof ref === 'string' ? ref : null });
+    return json({ cancelled: true });
+  }
+  if (t.state === 'uploading' && t.fired) return refuse('FIRING');
   if (t.state === 'uploading') {
     if (!t.mine) return refuse('FORBIDDEN');
     await trashTemp(t);

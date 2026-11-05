@@ -34,6 +34,22 @@ function pushClient(fetcher,base,key,timeoutMs=60000){
   };
 }
 
+/**
+ * The due run of scheduled Instagram posts (MVP_draft.md 76.5, answer Q3): the same key, a third door. The site fires what is
+ * due with its own key and answers only how many; the bridge never sees a post, a token or an address.
+ */
+function dueClient(fetcher,base,key,timeoutMs=75000){
+  const url=String(base||'').replace(/\/+$/,'')+'/api/platforms/due';
+  if(!/^https?:\/\//.test(url))throw Object.assign(Error('Set COMMS_SITE_URL to the site address'),{code:'no_site'});
+  if(!key)throw Object.assign(Error('Set WHATSAPP_SERVER_KEY'),{code:'no_key'});
+  return async function due(){
+    const response=await fetcher(url,{method:'POST',headers:{Authorization:'Bearer '+key},signal:AbortSignal.timeout(timeoutMs)});
+    if(!response.ok)throw Object.assign(Error('Site refused the request'),{code:'site_rejected',http_status:response.status});
+    const data=await response.json().catch(()=>({}));
+    return {published:Number(data?.published)||0,failed:Number(data?.failed)||0};
+  };
+}
+
 /** A safe description of an error: a code and a stage, never content. */
 function errorInfo(error,stage){
   let code=error&&error.code;
@@ -61,4 +77,4 @@ const REASON_AR={
 };
 const reasonAr=(code)=>REASON_AR[code]||'تعذّر الإرسال.';
 
-module.exports={siteClient,pushClient,errorInfo,reasonAr};
+module.exports={siteClient,pushClient,dueClient,errorInfo,reasonAr};

@@ -6,8 +6,10 @@
 //   2. The sheet: YouTube and Instagram with their connected accounts, the registry's other platforms as «قريباً», no simulated account.
 //   3. YouTube in direct mode: open at once, an empty title, the four choices, the subscribers' choice for public and scheduled, a
 //      schedule up to 180 days, the long press, what is sent, and its own list.
-//   4. Instagram in direct mode: open at once, its long press.
+//   4. Instagram in direct mode: open at once, its long press; «الآن» or «مجدول» (MVP_draft.md 76.5): a Riyadh time in the window,
+//      its own long press, the file sent now and the post waiting in the list, then cancelled before its time.
 //   5. «تذكير خاص» opens the calendar's own dialog; phone width; no page error.
+//   6. The account sheet's list of direct posts (76.6): where each stands, late and cancelled included, and the link of a published one.
 // What this cannot check: YouTube and Meta themselves, and the database's rules (supabase/tests/direct_publish_rules.sql).
 // Usage: node qa/direct-publish-flow.cjs   (writes qa/direct-publish-flow.json, screenshots in qa/artifacts/direct-publish-flow/)
 const fs = require('node:fs');
@@ -32,6 +34,9 @@ const page = (dark) =>
 const HOLD_DIRECT_PUBLIC = 'يُنشر المقطع للعموم على القناة الآن، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.';
 const HOLD_DIRECT_SCHEDULED = 'يجعل يوتيوب المقطع عاماً في موعده بنفسه، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.';
 const HOLD_DIRECT_INSTAGRAM = 'يُنشر على الحساب للعموم الآن، خارج دورة العمل، ويُبلَّغ ناشرو الحساب.';
+const HOLD_DIRECT_IG_SCHEDULED = 'يُنشر على الحساب للعموم في موعده، خارج دورة العمل، ويُبلَّغ ناشرو الحساب. يمكن إلغاؤه قبل موعده.';
+// A real picture, redrawn to JPEG by the panel: 738 x 560.
+const WIDE = path.join(h.root, 'public', 'guides', 'meta', 'config-confirm.png');
 const KB = 1024;
 const riyadhIn = (minutes) => new Date(Date.now() + 3 * 3600e3 + minutes * 60e3).toISOString().slice(0, 16);
 
@@ -189,6 +194,45 @@ const file = (name, size, mimeType = 'video/mp4') => ({ name, mimeType, buffer: 
     check('every Instagram post is public, so it asks for a long press', (await igSend.count()) === 1 && (await igSend.getAttribute('data-hold')) === HOLD_DIRECT_INSTAGRAM);
     check('the YouTube panel is gone with the choice', (await sheet(t).locator('.yt-test[data-gd="yt-test"]').count()) === 0);
     await t.screenshot({ path: path.join(out, '04-instagram-direct.png') });
+
+    // «مجدول» on Instagram (MVP_draft.md 76.5).
+    const timing = await igPanel.locator('[data-ig="timing"] button').allInnerTexts();
+    check('Instagram: «الآن» or «مجدول», now chosen', JSON.stringify(timing.map((x) => x.trim())) === JSON.stringify(['الآن', 'مجدول']) && (await igPanel.locator('[data-timing="now"]').getAttribute('aria-pressed')) === 'true', timing);
+    check('now: no time to choose', (await igPanel.locator('[data-ig="when"]').count()) === 0);
+    await igPanel.locator('[data-ig="file"]').setInputFiles({ name: 'إعلان.png', mimeType: 'image/png', buffer: fs.readFileSync(WIDE) });
+    await igPanel.locator('[data-ig="picked"]').waitFor();
+    await igPanel.locator('[data-timing="scheduled"]').click();
+    const igWhen = igPanel.locator('[data-ig="when"]');
+    const whenNote = await igPanel.locator('[data-ig="when-note"]').innerText();
+    check('«مجدول» asks for a Riyadh time and says how the post goes out, and when it goes out late', (await igWhen.count()) === 1 && whenNote.includes('جهاز الجسر') && whenNote.includes('«الرئيسية»') && whenNote.includes('متأخراً'), whenNote);
+    check('with no time it cannot be sent', await igSend.isDisabled());
+    await igWhen.fill(riyadhIn(31 * 24 * 60));
+    check('not past 30 days', (await igPanel.locator('.yt-sub.warn').innerText()).includes('30 يوماً') && (await igSend.isDisabled()));
+    await igWhen.fill(riyadhIn(5));
+    check('not sooner than ten minutes', (await igPanel.locator('.yt-sub.warn').innerText()).includes('10 دقائق') && (await igSend.isDisabled()));
+    const slot = riyadhIn(26 * 60);
+    await igWhen.fill(slot);
+    check('a scheduled Story asks for its own long press, with the reason', (await igSend.innerText()).includes('جدولة القصة') && (await igSend.getAttribute('data-hold')) === HOLD_DIRECT_IG_SCHEDULED && !(await igSend.isDisabled()));
+    await t.screenshot({ path: path.join(out, '04b-instagram-scheduled.png') });
+    mark = (await calls(t)).length;
+    await igSend.click();
+    await igPanel.locator('[data-ig="scheduled"]').waitFor();
+    const igCalls = (await calls(t)).slice(mark);
+    const igStart = igCalls.find((x) => x.url === '/api/platforms/test' && x.method === 'POST');
+    check('sent as a direct Story at that Riyadh time', igStart?.body.purpose === 'direct' && igStart?.body.kind === 'story_image' && igStart?.body.scheduled_for === new Date(`${slot}:00+03:00`).toISOString(), igStart?.body);
+    check('the file goes now, and the server is told it arrived', igCalls.some((x) => x.url.startsWith('/api/platforms/fake-drive/') && x.method === 'PUT' && x.bytes > 0) && igCalls.some((x) => x.method === 'POST' && x.body?.step === 'uploaded'));
+    check('nothing asks Meta after it: the post waits', !igCalls.some((x) => x.body?.step === 'advance'));
+    const scheduledNote = await igPanel.locator('[data-ig="scheduled"]').innerText();
+    check('it says it is scheduled, and may be cancelled before its time', scheduledNote.includes('جُدول') && scheduledNote.includes('يمكن إلغاؤه'), scheduledNote);
+    check('said in words', (await t.evaluate(() => window.__db.says)).includes('جُدول «القصة» على إنستغرام.'));
+    const waiting = igPanel.locator('.yt-item[data-state="waiting"]');
+    check('it waits in the list with its time', (await waiting.count()) === 1 && (await waiting.innerText()).includes('مجدول · يُنشر'));
+    mark = (await calls(t)).length;
+    await waiting.locator('[data-ig="unschedule"]').click();
+    await igPanel.locator('.yt-item[data-state="failed"]').first().waitFor();
+    check('cancelled before its time, by the post\'s own route', (await calls(t)).slice(mark).some((x) => x.method === 'DELETE') && (await igPanel.locator('.yt-item[data-state="failed"]').first().innerText()).includes('أُلغي قبل موعده'));
+    await igPanel.locator('[data-timing="now"]').click();
+    check('back to «الآن»: no time, and the long press of a post now', (await igWhen.count()) === 0 && (await igSend.getAttribute('data-hold')) === HOLD_DIRECT_INSTAGRAM);
     await sheet(t).getByRole('button', { name: 'إغلاق' }).first().click();
     check('the sheet closes', (await t.locator('dialog.pf-sheet[open]').count()) === 0);
 
@@ -216,6 +260,22 @@ const file = (name, size, mimeType = 'video/mp4') => ({ name, mimeType, buffer: 
     check('phone: nothing sideways with the panel open', await fits(ph));
     await ph.screenshot({ path: path.join(out, '05-phone.png') });
     await ph.context().close();
+
+    // ---------- 6. the account sheet's list of direct posts ----------
+    const ls = await open('?view=list');
+    const list = ls.locator('[data-gd="direct-posts"]');
+    await list.waitFor();
+    const listText = await list.innerText();
+    check('the account\'s sheet lists its direct posts and says where they are managed', listText.includes('المنشورات المباشرة') && listText.includes('منه تُلغى جدولتها أو تُحذف'), listText.slice(0, 200));
+    check('one waiting, with its time', (await list.locator('.yt-item[data-state="waiting"]').innerText()).includes('مجدول · يُنشر'));
+    check('one published late, said in minutes', (await list.locator('.yt-item', { hasText: 'منشور تأخر' }).innerText()).includes('متأخراً 41 دقيقة عن موعده'));
+    check('one cancelled before its time', (await list.locator('.yt-item', { hasText: 'قصة أُلغيت' }).innerText()).includes('أُلغي قبل موعده'));
+    check('a YouTube post with its visibility', (await list.locator('.yt-item', { hasText: 'مقطع غير مدرج' }).innerText()).includes('غير مدرج'));
+    const links = await list.locator('a.wk-btn').evaluateAll((a) => a.map((x) => x.getAttribute('href')));
+    check('a published post opens on its platform; a waiting or cancelled one has no link', JSON.stringify(links.sort()) === JSON.stringify(['https://www.instagram.com/p/fixture-late/', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ']), links);
+    check('it only reads: no button to cancel or delete there', (await list.locator('button').count()) === 0);
+    await ls.screenshot({ path: path.join(out, '06-account-list.png') });
+    await ls.context().close();
 
     check('nothing was loaded from outside the fixture', outside.length === 0, outside);
     check('no page error and nothing in the console', errs.length === 0, errs.slice(0, 3).join(' | '));

@@ -3,8 +3,8 @@
 // Offline: no WhatsApp, no internet. +999 numbers belong to no country.
 const test=require('node:test');const assert=require('node:assert/strict');const http=require('node:http');
 const {EventEmitter}=require('node:events');
-const {siteClient,pushClient}=require('./transport.cjs');
-const {createLoop,PUSH_PAUSE_MS}=require('./loop.cjs');
+const {siteClient,pushClient,dueClient}=require('./transport.cjs');
+const {createLoop,PUSH_PAUSE_MS,DUE_GAP_MS}=require('./loop.cjs');
 const {createBridge,EVENTS}=require('./bridge.cjs');
 
 const KEY='k-fake-site-only';
@@ -21,6 +21,12 @@ function fakeSite(){
         if(req.headers.authorization!=='Bearer '+KEY)return send(401,{error:'forbidden'});
         s.flushes=(s.flushes||0)+1;s.flushBodies=[...(s.flushBodies||[]),body];
         return send(200,{state:'done',sent:2,failed:0,retry:0,gone:0,rounds:1});
+      }
+      // The due run of scheduled Instagram posts (MVP_draft.md 76.5): the same key, no body, counts back.
+      if(req.method==='POST'&&req.url==='/api/platforms/due'){
+        if(req.headers.authorization!=='Bearer '+KEY)return send(401,{error:'forbidden'});
+        s.dues=(s.dues||0)+1;s.dueBodies=[...(s.dueBodies||[]),body];
+        return send(200,{state:'ran',claimed:1,published:1,waiting:0,failed:0});
       }
       if(req.method!=='POST'||req.url!=='/api/whatsapp/dispatch')return send(404,{});
       if(req.headers.authorization!=='Bearer '+KEY)return send(401,{error:'forbidden'});
@@ -156,6 +162,7 @@ test('one way: the bridge listens to no incoming message, call or receipt, and a
   assert.equal((await b.provider.status()).ready,false);
   await b.loop.settle();
   assert.equal(site.flushes,1,'the bridge also asked the site to flush the push outbox');
+  assert.equal(site.dues,1,'and to fire the scheduled Instagram posts that are due');
   await b.stop();
   assert.equal(initialised,0,'the test never started a real session');
 });
@@ -203,5 +210,50 @@ test('pushClient needs the site address and the key, and posts no body',async()=
   const f=async(url,init)=>{seen={url,init};return new Response(JSON.stringify({state:'empty',sent:0}),{status:200});};
   assert.deepEqual(await pushClient(f,'https://hub.example/',KEY)(),{state:'empty',sent:0});
   assert.equal(seen.url,'https://hub.example/api/push/flush');
+  assert.equal(seen.init.method,'POST');assert.equal(seen.init.headers.Authorization,'Bearer '+KEY);assert.equal(seen.init.body,undefined);
+});
+
+test('due (MVP_draft.md 76.5): about once a minute the site is asked to fire what is due, with the key and no body',async t=>{
+  const site=await fakeSite();t.after(()=>site.server.close());
+  const provider=fakeProvider();
+  let clock=1000;
+  const loop=createLoop({dispatch:siteClient(fetch,site.base,KEY),provider,due:dueClient(fetch,site.base,KEY),now:()=>clock});
+  site.queue.push(row(1,'+99900000001'));
+  assert.deepEqual(await loop.tick(),{sent:1,refused:0,failed:0},'WhatsApp works as before');
+  await loop.settle();
+  await loop.tick();await loop.settle();
+  assert.equal(site.dues,1,'not every tick: once a minute');
+  clock+=DUE_GAP_MS;
+  await loop.tick();await loop.settle();
+  assert.equal(site.dues,2,'again after a minute');
+  assert.deepEqual(site.dueBodies,['',''],'the call sends nothing but the key');
+  assert.deepEqual(loop.dueStats,{calls:2,published:2,failed:0,errors:0});
+});
+
+test('due: one run at a time; a refused run delays no WhatsApp row and logs a code, never the key',async t=>{
+  const site=await fakeSite();t.after(()=>site.server.close());
+  const provider=fakeProvider();
+  let clock=1000,calls=0,release;
+  const slow=()=>{calls++;return new Promise(r=>{release=()=>r({published:0,failed:0});});};
+  const loop=createLoop({dispatch:siteClient(fetch,site.base,KEY),provider,due:slow,now:()=>clock});
+  await loop.tick();clock+=DUE_GAP_MS;await loop.tick();
+  assert.equal(calls,1,'a second run does not start while one runs, even after a minute');
+  release();await loop.settle();
+  const logs=[];
+  const refused=createLoop({dispatch:siteClient(fetch,site.base,KEY),provider,due:dueClient(fetch,site.base,'wrong-key'),now:()=>clock,log:(...a)=>logs.push(JSON.stringify(a))});
+  site.queue.push(row(2,'+99900000002'));
+  assert.deepEqual(await refused.tick(),{sent:1,refused:0,failed:0},'the WhatsApp row still goes');
+  await refused.settle();
+  assert.equal(refused.dueStats.errors,1);
+  assert.ok(logs.length&&logs.every(l=>l.includes('site_rejected')&&!l.includes('wrong-key')&&!l.includes(KEY)),'logs carry a code, never a key');
+});
+
+test('dueClient needs the site address and the key, and posts no body',async()=>{
+  assert.throws(()=>dueClient(fetch,'',KEY),/COMMS_SITE_URL/);
+  assert.throws(()=>dueClient(fetch,'https://hub.example',''),/WHATSAPP_SERVER_KEY/);
+  let seen;
+  const f=async(url,init)=>{seen={url,init};return new Response(JSON.stringify({state:'ran',claimed:0,published:0,waiting:0,failed:0}),{status:200});};
+  assert.deepEqual(await dueClient(f,'https://hub.example/',KEY)(),{published:0,failed:0});
+  assert.equal(seen.url,'https://hub.example/api/platforms/due');
   assert.equal(seen.init.method,'POST');assert.equal(seen.init.headers.Authorization,'Bearer '+KEY);assert.equal(seen.init.body,undefined);
 });

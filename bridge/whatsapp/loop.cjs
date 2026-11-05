@@ -7,16 +7,32 @@
 // Each tick also asks the site to flush the push outbox (MVP_draft.md 64.3, starter S-2), one flush
 // at a time and beside the WhatsApp work, never in its way: a slow or refused flush delays nothing
 // here, and after a refusal the loop waits a minute before asking again.
+// About once a minute it also asks the site to fire the scheduled Instagram posts that are due (MVP_draft.md 76.5, answer Q3),
+// the same way: one call at a time, never in the way of the WhatsApp work. This is the clock of «مجدول» on Instagram; with this
+// computer off, a post waits until someone opens Home, and is said as late.
 const {acceptBatch,guardedSender}=require('./policy.cjs');
 const {errorInfo,reasonAr}=require('./transport.cjs');
 
 const PUSH_PAUSE_MS=60000;
+const DUE_GAP_MS=60000;
 
-function createLoop({dispatch,provider,batch=5,log=()=>{},push=null,now=()=>Date.now()}){
+function createLoop({dispatch,provider,batch=5,log=()=>{},push=null,due=null,now=()=>Date.now()}){
   let pending=[]; // reports not yet accepted by the site
   let failures=0;
   let pushing=null,pushPauseUntil=0;
   const pushStats={calls:0,sent:0,errors:0};
+  let dueRunning=null,dueNext=0;
+  const dueStats={calls:0,published:0,failed:0,errors:0};
+
+  function kickDue(){
+    if(!due||dueRunning||now()<dueNext)return;
+    dueNext=now()+DUE_GAP_MS;
+    dueRunning=Promise.resolve()
+      .then(()=>due())
+      .then(r=>{dueStats.calls++;dueStats.published+=Number(r&&r.published)||0;dueStats.failed+=Number(r&&r.failed)||0;},
+        error=>{dueStats.errors++;log('due',errorInfo(error,'due'));})
+      .finally(()=>{dueRunning=null;});
+  }
 
   function kickPush(){
     if(!push||pushing||now()<pushPauseUntil)return;
@@ -29,6 +45,7 @@ function createLoop({dispatch,provider,batch=5,log=()=>{},push=null,now=()=>Date
 
   async function tick(){
     kickPush();
+    kickDue();
     const status=await provider.status().catch(()=>({ready:false,note:'status unavailable'}));
     let items=[];
     try{
@@ -70,9 +87,10 @@ function createLoop({dispatch,provider,batch=5,log=()=>{},push=null,now=()=>Date
     tick,delay,
     get pending(){return pending;},
     get pushStats(){return {...pushStats};},
-    /** Resolves when the push flush in flight (if any) has finished. */
-    settle:()=>pushing||Promise.resolve(),
+    get dueStats(){return {...dueStats};},
+    /** Resolves when the push flush and the due run in flight (if any) have finished. */
+    settle:()=>Promise.all([pushing,dueRunning]).then(()=>undefined),
   };
 }
 
-module.exports={createLoop,PUSH_PAUSE_MS};
+module.exports={createLoop,PUSH_PAUSE_MS,DUE_GAP_MS};

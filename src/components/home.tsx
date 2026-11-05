@@ -4,7 +4,7 @@
 // the calendar, and the team's load for the leaders. The earlier browser sample (campaign,
 // sample works and their numbers) is gone from Home: every link here opens a real page.
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { BriefcaseBusiness, CalendarDays, Inbox, PenLine, Plus, Shield, TriangleAlert, Users } from 'lucide-react';
 import { roles } from '@/lib/domain';
 import { useCanCreate } from './can-create';
@@ -40,6 +40,8 @@ import { readLocalDraft } from './writing/api';
 import { usePlanData, useWork, useWorkList, useWritingMarks, type ListItem } from './work/data';
 import { HomePermissions } from './home-perms';
 import { QuickActions } from './quick-actions';
+import { useDirectPosts } from './work/direct-posts';
+import { kickDue } from '@/lib/platforms/due-kick';
 import { useCalendarColors, useColorLook } from './work/calendar-colors';
 import { Av, Empty, Ic, StatusChip, Wid } from './work/parts';
 
@@ -49,6 +51,7 @@ export function HomePage() {
   const w = useWork();
   const { items, status } = useWorkList();
   const plan = usePlanData();
+  const direct = useDirectPosts();
   const canCreate = useCanCreate();
   const role = w.role;
   const lead = isLead(role);
@@ -58,6 +61,10 @@ export function HomePage() {
   const mySteps = open.flatMap((x) => openSteps(x.stages).filter((i) => x.stages[i].who === me).map((i) => ({ x, s: x.stages[i] })));
   const myTasks = plan.tasks.filter((t) => t.assignee === me && t.status !== 'done');
   const nowIso = useMemo(() => new Date().toISOString(), [items]); // eslint-disable-line react-hooks/exhaustive-deps
+  // A scheduled Instagram post the bridge computer left goes out now, late (MVP_draft.md 76.5).
+  useEffect(() => {
+    kickDue();
+  }, []);
   const maker = !lead && role !== 'publisher' && role !== 'member';
   const marks = useWritingMarks(maker);
   const resume = useMemo(() => {
@@ -108,7 +115,7 @@ export function HomePage() {
     .slice(0, 8);
   const focusTitle = lead ? 'يحتاج قرارك أو متابعتك' : role === 'publisher' ? 'جاهزيتك للنشر' : role === 'member' ? 'طلباتك' : 'أولويات عملك';
 
-  const week = calEntries({ works: items, tasks: plan.tasks, events: plan.events, reminders: plan.reminders, accounts: w.accounts, me, today: w.today, nowIso, mine: !lead && role !== 'publisher' })
+  const week = calEntries({ works: items, tasks: plan.tasks, events: plan.events, reminders: plan.reminders, accounts: w.accounts, me, today: w.today, nowIso, mine: !lead && role !== 'publisher', direct })
     .filter((e) => e.date >= w.today && e.date <= dayAdd(w.today, 6) && e.k !== 'held')
     .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   const seen = new Set<string>();

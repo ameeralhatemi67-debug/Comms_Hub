@@ -60,14 +60,29 @@ export const YT_SCHEDULE_MIN_MINUTES = 10;
 export const YT_SCHEDULE_MAX_DAYS = 30;
 /** A direct post from Home's «نشر مباشر» may be scheduled further ahead than a test (MVP_draft.md 76). */
 export const YT_DIRECT_SCHEDULE_MAX_DAYS = 180;
-/** What is wrong with a scheduled time, in words, or null. */
-export function scheduleProblem(at: string | null, now: number = Date.now(), maxDays: number = YT_SCHEDULE_MAX_DAYS): string | null {
+/**
+ * A direct post on Instagram may be scheduled too (MVP_draft.md 76.5, answer Q3). Meta publishes at the moment it is asked, so the
+ * site asks at the time: the bridge computer's loop, or the next opening of Home, said as late. The database holds the same window
+ * (*direct_schedule*).
+ */
+export const IG_DIRECT_SCHEDULE_MAX_DAYS = 30;
+/** A scheduled Instagram post that went out more than this after its time is told as late. The database holds the same. */
+export const DIRECT_LATE_MINUTES = 5;
+/** A scheduled Instagram post left this long past its time is given up (OVERDUE). The database holds the same. */
+export const DIRECT_OVERDUE_HOURS = 24;
+/** What is wrong with a scheduled time, in words, or null. A test's window is said as a test's. */
+export function scheduleProblem(at: string | null, now: number = Date.now(), maxDays: number = YT_SCHEDULE_MAX_DAYS, purpose: TestPurpose = maxDays === YT_SCHEDULE_MAX_DAYS ? 'test' : 'direct'): string | null {
   const t = at ? Date.parse(at) : NaN;
   if (!Number.isFinite(t)) return 'اختر موعد النشر.';
   if (t < now + YT_SCHEDULE_MIN_MINUTES * 60e3) return `الموعد بعد ${YT_SCHEDULE_MIN_MINUTES} دقائق على الأقل.`;
-  if (t > now + maxDays * 864e5)
-    return maxDays === YT_SCHEDULE_MAX_DAYS ? `تُجدول التجربة حتى ${maxDays} يوماً من الآن.` : `يُجدول النشر حتى ${maxDays} يوماً من الآن.`;
+  if (t > now + maxDays * 864e5) return purpose === 'test' ? `تُجدول التجربة حتى ${maxDays} يوماً من الآن.` : `يُجدول النشر حتى ${maxDays} يوماً من الآن.`;
   return null;
+}
+/** How many minutes after its time a scheduled Instagram post went out, when that is late; else null. */
+export function lateMinutes(t: { scheduled_for?: string | null; done_at?: string | null; kind?: TestKind; state?: TestState }): number | null {
+  if (t.state !== 'published' || !t.scheduled_for || !t.done_at || t.kind === 'video' || t.kind === undefined) return null;
+  const late = Date.parse(t.done_at) - Date.parse(t.scheduled_for);
+  return Number.isFinite(late) && late > DIRECT_LATE_MINUTES * 60e3 ? Math.ceil(late / 60e3) : null;
 }
 
 /**
@@ -86,7 +101,8 @@ export const directNotify = (privacy: TestPrivacy, scheduled: boolean, chosen: b
 /** The choice a recorded test was sent with. */
 export const choiceOf = (t: { privacy: TestPrivacy | null; scheduled_for?: string | null }): YtChoice | null =>
   t.privacy === 'private' && t.scheduled_for ? 'scheduled' : t.privacy;
-export type TestState = 'uploading' | 'published' | 'failed' | 'deleted';
+/** `waiting`: a scheduled Instagram direct post, its file ready, until the due run fires it. */
+export type TestState = 'uploading' | 'waiting' | 'published' | 'failed' | 'deleted';
 export type TestRow = {
   id: string;
   privacy: TestPrivacy | null;
@@ -147,13 +163,33 @@ export const videoStudioUrl = (id: string) => `https://studio.youtube.com/video/
 
 export const PRIVACY_AR: Record<string, string> = { private: 'خاص', public: 'عام', unlisted: 'غير مدرج' };
 
+/**
+ * A direct post's line in its account's sheet on «حسابات المنصات» (MVP_draft.md 76.6): where it stands, in words. `at` formats a
+ * time as the page shows it.
+ */
+export function directLine(t: TestRow, now: number, at: (iso: string) => string): string {
+  if (t.state === 'waiting') return t.scheduled_for ? `مجدول · يُنشر ${at(t.scheduled_for)}` : 'مجدول';
+  if (t.state === 'uploading') return t.scheduled_for && Date.parse(t.scheduled_for) > now ? 'يُرفع الملف' : 'يُنشر الآن';
+  if (t.state === 'deleted') return 'حُذف من المنصة';
+  if (t.state === 'failed')
+    return t.error === 'CANCELLED' && t.scheduled_for ? 'أُلغي قبل موعده' : `لم يكتمل${t.error ? `: ${TEST_ERROR_AR[t.error] ?? 'خطأ من المنصة.'}` : ''}`;
+  if (!t.kind || t.kind === 'video') {
+    if (t.scheduled_for && t.shown_publish_at) return Date.parse(t.shown_publish_at) > now ? `مجدول · يصبح عاماً ${at(t.shown_publish_at)}` : 'عام';
+    return PRIVACY_AR[t.shown_privacy ?? t.privacy ?? ''] ?? 'نُشر';
+  }
+  const late = lateMinutes(t);
+  return `نُشر · ${IG_KIND_AR[t.kind] ?? ''}${late ? ` · متأخراً ${late} دقيقة عن موعده` : ''}`;
+}
+
 /** The codes of the test routes, in words. A connection code falls through to the connection's words. */
 export const TEST_ERROR_AR: Record<string, string> = {
   FORBIDDEN: 'تجربة النشر لمن يدير الحسابات ولمن ينشر على هذا الحساب.',
   ACCOUNT_OFF: 'الحساب موقوف. فعّله أولاً.',
   NOT_CONNECTED: 'الحساب غير مربوط الآن. أعد ربطه ثم جرّب.',
   TEST_INVALID: 'بيانات التجربة ناقصة أو غير صالحة.',
-  SCHEDULE_INVALID: `الموعد المجدول بعد ${YT_SCHEDULE_MIN_MINUTES} دقائق على الأقل، وحتى ${YT_SCHEDULE_MAX_DAYS} يوماً للتجربة و${YT_DIRECT_SCHEDULE_MAX_DAYS} يوماً للنشر المباشر.`,
+  SCHEDULE_INVALID: `الموعد المجدول بعد ${YT_SCHEDULE_MIN_MINUTES} دقائق على الأقل، وحتى ${YT_SCHEDULE_MAX_DAYS} يوماً للتجربة ولمنشور إنستغرام، و${YT_DIRECT_SCHEDULE_MAX_DAYS} يوماً لمقطع يوتيوب مباشر.`,
+  OVERDUE: 'مضى يوم على موعده ولم يُنشر، لأن جهاز الجسر كان مغلقاً ولم يُفتح الموقع. جدوله من جديد.',
+  FIRING: 'يُنشر هذا المنشور الآن، فلا يُلغى. انتظر حتى يكتمل ثم احذفه إن شئت.',
   TEST_LIMIT: `بلغ الحساب ${TESTS_PER_DAY} تجارب في يوم. جرّب غداً.`,
   DIRECT_LIMIT: `بلغ الحساب ${DIRECT_PER_DAY} منشوراً مباشراً في يوم. انشر غداً.`,
   SCOPE_MISSING: 'لم تأذن المنصة للموقع بهذا بعد. أعد ربط الحساب مرة واحدة ووافق على كل الصلاحيات.',

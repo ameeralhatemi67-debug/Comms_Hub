@@ -3,7 +3,10 @@
 // request); this file adds what Home's menu needs: the capabilities by role, a work provider with a YouTube channel and an Instagram
 // account connected for real, a simulated account that is not offered, and the registry's other platforms («قريباً»).
 //   role=publisher  the account's publisher, who holds no publish.direct.
-// The rules themselves are the database's (supabase/tests/direct_publish_rules.sql).
+//   view=list       the account sheet's list of direct posts, over posts already made (MVP_draft.md 76.6).
+// Instagram's routes answer as the site's do for a direct post from this device: the file goes to a stand-in for Drive, then the
+// post is published, or, «مجدول» (76.5), waits for its time and may be cancelled.
+// The rules themselves are the database's (supabase/tests/direct_publish_rules.sql, direct_schedule_rules.sql).
 import { useSyncExternalStore } from 'react';
 import { setPlatformRegistry, type AccountRow, type PlatformInfo } from '../../src/lib/work/rules';
 export { supabase, libraryFiles, useWorkList } from './fake-youtube-test';
@@ -25,14 +28,18 @@ const account = (id: string, platform: string, label: string, handle: string, ex
   conn_kind: real ? 'oauth' : null, conn_state: real ? 'connected' : null, conn_checked_at: later(-0.01), conn_error: null,
   external_id: real ? external : null, external_name: real ? label : null, scopes: real && platform === 'youtube' ? FULL : real ? ['instagram_business_basic', 'instagram_business_content_publish'] : [],
 }) as AccountRow;
-const accounts: AccountRow[] = [
+export const accounts: AccountRow[] = [
   account('a-yt', 'youtube', 'جمعية هداية', '@hedayh', 'UCfixturechannel000000'),
   account('a-ig', 'instagram', 'هداية', '@hedayh', '17841400000000001'),
   // A simulated account is never a place to publish for real.
   account('a-x', 'x', 'هداية على إكس', '@hedayh', '', false),
 ];
 
-type W = { __db: { says: string[] }; __calls: { fn: string; args: Record<string, unknown> }[] };
+type Row = Record<string, unknown> & { id: string; kind?: string; state: string; scheduled_for?: string | null };
+type W = {
+  __db: { says: string[]; tests: Row[]; calls: { method: string; url: string; body: unknown; bytes: number }[] };
+  __calls: { fn: string; args: Record<string, unknown> }[];
+};
 const w = window as unknown as W;
 w.__calls = [];
 const people = [
@@ -40,6 +47,66 @@ const people = [
   { email: 'pub@example.test', display_name: 'ناشر الفحص', role: 'publisher', avatar: null },
 ];
 const nameOf = (e: string | null | undefined) => people.find((x) => x.email === e)?.display_name ?? e ?? '';
+
+// Posts already made, for the account sheet's list (view=list): one waiting, one published late, one cancelled, one on YouTube.
+const at = (minutes: number) => new Date(Date.now() + minutes * 60e3).toISOString();
+const row = (id: string, extra: Partial<Row>): Row => ({
+  id: `00000000-0000-4000-8000-0000000009${id}`, privacy: null, title: 'منشور', kind: 'image', state: 'published', video_id: null, post_url: null,
+  shown_privacy: null, shown_publish_at: null, scheduled_for: null, purpose: 'direct', error: null, created_by: 'dir@example.test',
+  created_at: at(-600), done_at: null, deleted_at: null, size: 0, piece: 0, got: 0, lost: false, ...extra,
+});
+if (q.get('view') === 'list')
+  w.__db.tests.push(
+    row('01', { kind: 'video', title: 'مقطع غير مدرج', privacy: 'unlisted', shown_privacy: 'unlisted', video_id: 'dQw4w9WgXcQ', done_at: at(-590) }),
+    row('02', { title: 'قصة أُلغيت', kind: 'story_image', state: 'failed', error: 'CANCELLED', scheduled_for: at(300) }),
+    row('03', { title: 'منشور تأخر', scheduled_for: at(-120), done_at: at(-79), post_url: 'https://www.instagram.com/p/fixture-late/' }),
+    row('04', { title: 'منشور ينتظر', state: 'waiting', scheduled_for: at(1500) }),
+  );
+
+// Instagram's routes for a direct post from this device: the file to a stand-in for Drive, then published, or waiting.
+const before = window.fetch.bind(window);
+window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  const url = String(input);
+  const method = init?.method ?? 'GET';
+  const body = typeof init?.body === 'string' ? (JSON.parse(init.body) as Record<string, unknown>) : null;
+  const reply = (b: unknown, status = 200) => new Response(JSON.stringify(b), { status, headers: { 'Content-Type': 'application/json' } });
+  const db = w.__db;
+  const note = () => db.calls.push({ method, url, body, bytes: init?.body instanceof Blob ? init.body.size : 0 });
+  if (url === '/api/platforms/test' && method === 'POST' && typeof body?.kind === 'string') {
+    note();
+    const t = row(String(db.tests.length + 10).padStart(2, '0'), {
+      title: String(body.kind).startsWith('story') ? 'قصة' : 'منشور', kind: String(body.kind), state: 'uploading',
+      scheduled_for: typeof body.scheduled_for === 'string' ? body.scheduled_for : null, created_by: ME, created_at: new Date().toISOString(),
+    });
+    db.tests.push(t);
+    return reply({ test: t.id, phase: 'upload', upload: `/api/platforms/fake-drive/${t.id}` });
+  }
+  if (url.startsWith('/api/platforms/fake-drive/') && method === 'PUT') {
+    note();
+    return reply({ id: 'driveTempFixture0001' });
+  }
+  const m = /^\/api\/platforms\/test\/([^?]+)$/.exec(url);
+  const t = m ? db.tests.find((x) => x.id === m[1] && x.kind && x.kind !== 'video') : undefined;
+  if (t) {
+    note();
+    if (method === 'POST' && body?.step === 'uploaded') {
+      if (t.scheduled_for) {
+        t.state = 'waiting';
+        return reply({ test: t.id, phase: 'scheduled', at: t.scheduled_for });
+      }
+      return reply({ test: t.id, phase: 'wait' });
+    }
+    if (method === 'POST' && body?.step === 'advance') {
+      Object.assign(t, { state: 'published', done_at: new Date().toISOString(), post_url: 'https://www.instagram.com/p/fixture/' });
+      return reply({ done: true, post: '17900000000000099', url: t.post_url, kind: t.kind });
+    }
+    if (method === 'DELETE' && t.state === 'waiting') {
+      Object.assign(t, { state: 'failed', error: 'CANCELLED' });
+      return reply({ cancelled: true });
+    }
+  }
+  return before(input, init);
+};
 let version = 0;
 const listeners = new Set<() => void>();
 const subscribe = (l: () => void) => {

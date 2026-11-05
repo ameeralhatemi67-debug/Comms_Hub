@@ -173,7 +173,8 @@ export function entryValue(e: CalEntry, mode: ColorMode, look: ColorLook = {}): 
   if (e.k === 'task') return e.t?.assignee ?? null;
   if (e.k === 'stage') return (e.w && e.si != null ? look.stageWho?.(e.w.id, e.si) : null) ?? null;
   if (e.k === 'evt' || e.k === 'rem') return null;
-  return e.w?.assignee ?? null;
+  // A direct post's person is the one who made it.
+  return e.w?.assignee ?? e.dp?.by ?? null;
 }
 export function entryKey(e: CalEntry, prefs: CalPrefs, look: ColorLook = {}): string | null {
   const v = entryValue(e, prefs.mode, look);

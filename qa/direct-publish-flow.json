@@ -1,6 +1,6 @@
 {
   "script": "qa/direct-publish-flow.cjs",
-  "run": "2026-11-05T09:30:32.874Z",
+  "run": "2026-11-05T11:05:36.247Z",
   "checks": [
     {
       "name": "the button says what it is, and its menu is closed",
@@ -153,6 +153,81 @@
       "detail": ""
     },
     {
+      "name": "Instagram: «الآن» or «مجدول», now chosen",
+      "pass": true,
+      "detail": "[\"الآن\",\"مجدول\"]"
+    },
+    {
+      "name": "now: no time to choose",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«مجدول» asks for a Riyadh time and says how the post goes out, and when it goes out late",
+      "pass": true,
+      "detail": "لا يجدول إنستغرام بنفسه، فالموقع يطلب النشر في الموعد: يُرفع الملف الآن، ويطلبه جهاز الجسر كل دقيقة. إن كان الجهاز مغلقاً نُشر حين يفتح أحدٌ «الرئيسية»، متأخراً، وقيل ذلك."
+    },
+    {
+      "name": "with no time it cannot be sent",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "not past 30 days",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "not sooner than ten minutes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a scheduled Story asks for its own long press, with the reason",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sent as a direct Story at that Riyadh time",
+      "pass": true,
+      "detail": "{\"account\":\"a-ig\",\"kind\":\"story_image\",\"source\":\"device\",\"size\":57792,\"mime\":\"image/jpeg\",\"caption\":\"\",\"alt\":\"\",\"purpose\":\"direct\",\"scheduled_for\":\"2026-11-06T13:05:00.000Z\"}"
+    },
+    {
+      "name": "the file goes now, and the server is told it arrived",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing asks Meta after it: the post waits",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says it is scheduled, and may be cancelled before its time",
+      "pass": true,
+      "detail": "جُدول، ويُنشر 06‏/11‏/2026، 4:05 م. يبقى في القائمة أدناه حتى موعده، ويمكن إلغاؤه قبله."
+    },
+    {
+      "name": "said in words",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it waits in the list with its time",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "cancelled before its time, by the post's own route",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "back to «الآن»: no time, and the long press of a post now",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "the sheet closes",
       "pass": true,
       "detail": ""
@@ -178,6 +253,41 @@
       "detail": ""
     },
     {
+      "name": "the account's sheet lists its direct posts and says where they are managed",
+      "pass": true,
+      "detail": "المنشورات المباشرة\n\nتُنشر من «نشر مباشر» في «الرئيسية»، خارج دورة العمل. منه تُلغى جدولتها أو تُحذف.\n\nمنشور ينتظر\nمجدول · يُنشر 06‏/11‏/2026، 3:05 م · 05‏/11‏/2026، 4:05 ص · مدير الفحص\nمنشور تأخر\nنُشر"
+    },
+    {
+      "name": "one waiting, with its time",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "one published late, said in minutes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "one cancelled before its time",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a YouTube post with its visibility",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a published post opens on its platform; a waiting or cancelled one has no link",
+      "pass": true,
+      "detail": "[\"https://www.instagram.com/p/fixture-late/\",\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\"]"
+    },
+    {
+      "name": "it only reads: no button to cancel or delete there",
+      "pass": true,
+      "detail": ""
+    },
+    {
       "name": "nothing was loaded from outside the fixture",
       "pass": true,
       "detail": "[]"
@@ -189,7 +299,7 @@
     }
   ],
   "notes": [],
-  "total": 37,
-  "passed": 37,
+  "total": 59,
+  "passed": 59,
   "failed": 0
 }

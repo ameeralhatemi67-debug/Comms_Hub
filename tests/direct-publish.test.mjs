@@ -94,7 +94,8 @@ test('the panels\' direct mode: open at once, its own list, a long press for any
   }
   assert.match(YT_PANEL, /data-hold=\{HOLD\.directPublic\}/);
   assert.match(YT_PANEL, /data-hold=\{HOLD\.directScheduled\}/);
-  assert.match(IG_PANEL, /data-hold=\{HOLD\.directInstagram\}/);
+  // Now or at its time (MVP_draft.md 76.5), each with its own long press.
+  assert.match(IG_PANEL, /data-hold=\{later \? HOLD\.directInstagramScheduled : HOLD\.directInstagram\}/);
   assert.ok(HOLD.directPublic && HOLD.directScheduled && HOLD.directInstagram);
   assert.match(YT_PANEL, /data-yt="notify"/, 'the subscribers\' choice');
   assert.match(YT_PANEL, /direct \? YT_DIRECT_SCHEDULE_MAX_DAYS : YT_SCHEDULE_MAX_DAYS/);
