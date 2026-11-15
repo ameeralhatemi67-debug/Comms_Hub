@@ -60,12 +60,11 @@ export const refuse = (code: string, retry = false, detail?: string) =>
     { status: STATUS[code] ?? 502, headers: { 'Cache-Control': 'no-store' } },
   );
 
-/** Closes an upload that cannot go on, then refuses. */
+/** Closes an upload that cannot go on, keeps what the platform said beside it (`error_detail`, MVP_draft.md 79.6), then refuses. */
 export async function giveUp(db: SupabaseClient, id: string, code: string, detail?: string) {
-  await db.rpc('platform_test_failed', { p_key: serverKeyOrNull(), p_test: id, p_error: code }).then(
-    () => undefined,
-    () => undefined,
-  );
+  const quiet = (p: PromiseLike<unknown>) => Promise.resolve(p).then(() => undefined, () => undefined);
+  await quiet(db.rpc('platform_test_failed', { p_key: serverKeyOrNull(), p_test: id, p_error: code }));
+  if (detail && DETAIL_RE.test(detail)) await quiet(db.rpc('platform_test_failed_detail', { p_key: serverKeyOrNull(), p_test: id, p_detail: detail }));
   return refuse(code, false, detail);
 }
 

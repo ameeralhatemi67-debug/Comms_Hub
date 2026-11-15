@@ -12,6 +12,7 @@ import { FolderOpen, Inbox, Laptop, Link2, RefreshCw, Send, X } from 'lucide-rea
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { supabase } from '@/lib/supabase/client';
 import {
+  DETAIL_RE,
   TEST_ERROR_AR,
   TT_BRANDED_URL,
   TT_CAPTION_MAX,
@@ -199,7 +200,7 @@ export function TikTokTest({ a, onReconnect, mode = 'test' }: { a: AccountRow; o
 
   const statusOf = (t: TestRow) => {
     if (t.state === 'uploading') return 'يُرسل الآن';
-    if (t.state === 'failed') return `لم يكتمل${t.error ? `: ${TEST_ERROR_AR[t.error] ?? 'خطأ من المنصة.'}` : ''}`;
+    if (t.state === 'failed') return `لم يكتمل${t.error ? `: ${TEST_ERROR_AR[t.error] ?? 'خطأ من المنصة.'}` : ''}${t.error_detail && DETAIL_RE.test(t.error_detail) ? ` (${t.error_detail})` : ''}`;
     if (direct) return directLine(t, now, when);
     if (t.kind === 'tt_draft') return 'وصلت مسودة إلى صندوق الحساب';
     return `نُشر · ${TT_PRIVACY_AR[(t.privacy ?? 'private') as TtPrivacy] ?? ''}`;
@@ -228,9 +229,23 @@ export function TikTokTest({ a, onReconnect, mode = 'test' }: { a: AccountRow; o
       ) : (
         <div className="yt-form">
           {creator ? (
-            <p className="yt-sub" data-tt="creator">
-              يُرسل إلى حساب TikTok: <b><bdi>{creator.nickname || 'الحساب'}</bdi></b>
-            </p>
+            <>
+              <p className="yt-sub" data-tt="creator">
+                يُرسل إلى حساب TikTok: <b><bdi>{creator.nickname || 'الحساب'}</bdi></b>
+                {/* TikTok offers «الجميع» only to a public account: that is how the page knows which one TikTok sees now. */}
+                <span data-tt="visibility"> · الحساب عند TikTok الآن: {creator.privacy.includes('public') ? 'عام' : 'خاص'}</span>
+                <button type="button" className="wk-btn sm quiet" data-tt="reread" disabled={busy} onClick={() => void readCreator()}>
+                  <Ic i={RefreshCw} />
+                  تحديث
+                </button>
+              </p>
+              {post && creator.privacy.includes('public') && (
+                <Hint warn>
+                  يرى TikTok الحساب عاماً الآن، فسيرفض المنشور المباشر حتى يدقق التطبيق. اجعل الحساب خاصاً في تطبيق TikTok ثم اضغط «تحديث» هنا. قد يتأخر TikTok
+                  دقائق في رؤية التغيير.
+                </Hint>
+              )}
+            </>
           ) : creatorError ? (
             <div className="pf-note bad" role="alert" data-tt="creator-error">
               {creatorError.text}

@@ -4363,3 +4363,16 @@ Instagram test's temporary copy and address:
 - A connection lasting into another year says its year («متصل حتى 15 نوفمبر 2027»): TikTok's sign-in lasts a year.
 - Checks: `tests/tiktok-test.test.mjs`; `supabase/tests/platform_tests_tiktok_rules.sql` and `platform_app_reset_rules.sql` on a private
   container; `qa/tiktok-test-flow.cjs`, which clicks through the real panel on a fixture.
+
+## 79.6 What the platform said, kept, and the account as TikTok sees it, 2026-11-15
+
+- **The platform's line.** A failed test or direct post keeps, beside the site's own code, what the platform said: TikTok's error code,
+  its log id (which TikTok's support asks for) and the HTTP status, or a finished upload's failure reason, or Drive's code
+  (`platform_tests.error_detail`, `supabase/migrations/20261115140000_platform_tests_error_detail.sql`). The panel says it after the
+  words when the failure happens, and the list keeps it. Letters, digits and a few marks only (`DETAIL_RE`), never a message or a body.
+  The server writes it right after the failure (`platform_test_failed_detail`); before the migration, the list is read as it was.
+- **The account as TikTok sees it.** The form says «الحساب عند TikTok الآن: عام» or «خاص», from the privacy levels TikTok offers (only a
+  public account is offered «الجميع»), with «تحديث» to ask again. Choosing «منشور» on a public account warns that TikTok will refuse it
+  until the app is audited.
+- **Meta's «App not active».** The guide's step «أضف من سيربطون الحسابات» and the connection's notes say what it means: the app is in
+  development mode and the person signing in has no role on it, or Meta has paused the app until its «Required actions» are done.

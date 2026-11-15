@@ -1,6 +1,6 @@
 {
   "script": "qa/facebook-test-flow.cjs",
-  "run": "2026-11-15T10:24:16.839Z",
+  "run": "2026-11-15T10:56:18.095Z",
   "checks": [
     {
       "name": "a link to the Page on Facebook, by its id, in a new tab",

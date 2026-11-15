@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/platform_tests_error_detail_rules.sql",
+  "script_md5": "fbc335195b29a192a2678d4ac2a26fd5",
+  "migration": {
+    "file": "supabase/migrations/20261115140000_platform_tests_error_detail.sql",
+    "file_md5": "79803703e0b37970e5518c30fabf9f79",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-15T10:49:24.732Z",
+  "migrations_replayed": 76,
+  "differ": [],
+  "total": 13,
+  "passed": 13
+}

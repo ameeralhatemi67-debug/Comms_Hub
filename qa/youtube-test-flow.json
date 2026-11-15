@@ -1,6 +1,6 @@
 {
   "script": "qa/youtube-test-flow.cjs",
-  "run": "2026-11-15T10:24:57.769Z",
+  "run": "2026-11-15T10:57:00.316Z",
   "checks": [
     {
       "name": "a link to the channel on YouTube, by its handle, in a new tab",
@@ -110,7 +110,7 @@
     {
       "name": "the list shows the test, published and private, by whom",
       "pass": true,
-      "detail": "تجربة من الجهاز\nمنشور · خاص · 15‏/11‏/2026، 1:25 م · مدير الفحص\nمشاهدة\nحذف"
+      "detail": "تجربة من الجهاز\nمنشور · خاص · 15‏/11‏/2026، 1:57 م · مدير الفحص\nمشاهدة\nحذف"
     },
     {
       "name": "its delete asks for a hold, with the reason",
@@ -245,17 +245,17 @@
     {
       "name": "it is sent private, with the Riyadh time as an instant",
       "pass": true,
-      "detail": "{\"account\":\"a-yt\",\"privacy\":\"private\",\"scheduled_for\":\"2026-11-17T10:25:00.000Z\",\"title\":\"تجربة مجدولة\",\"description\":\"\",\"source\":\"device\",\"size\":307200,\"mime\":\"video/mp4\"}"
+      "detail": "{\"account\":\"a-yt\",\"privacy\":\"private\",\"scheduled_for\":\"2026-11-17T10:57:00.000Z\",\"title\":\"تجربة مجدولة\",\"description\":\"\",\"source\":\"device\",\"size\":307200,\"mime\":\"video/mp4\"}"
     },
     {
       "name": "the result says private until YouTube makes it public at its time",
       "pass": true,
-      "detail": "وصل المقطع إلى القناة خاصاً، ويجعله يوتيوب عاماً الثلاثاء 17 نوفمبر 13:25 بتوقيت الرياض. قد يحتاج يوتيوب دقائق لمعالجته قبل أن يُشاهَد.\nمشاهدة على يوتيوب"
+      "detail": "وصل المقطع إلى القناة خاصاً، ويجعله يوتيوب عاماً الثلاثاء 17 نوفمبر 13:57 بتوقيت الرياض. قد يحتاج يوتيوب دقائق لمعالجته قبل أن يُشاهَد.\nمشاهدة على يوتيوب"
     },
     {
       "name": "the list says when it becomes public",
       "pass": true,
-      "detail": "تجربة مجدولة\nمجدول · يصبح عاماً الثلاثاء 17 نوفمبر 13:25 · 15‏/11‏/2026، 1:25 م · مدير الفحص\nمشاهدة\nحذف"
+      "detail": "تجربة مجدولة\nمجدول · يصبح عاماً الثلاثاء 17 نوفمبر 13:57 · 15‏/11‏/2026، 1:57 م · مدير الفحص\nمشاهدة\nحذف"
     },
     {
       "name": "a scheduled test can be deleted before its time",

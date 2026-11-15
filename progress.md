@@ -4495,3 +4495,21 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   its log id (which TikTok's support asks for) and the HTTP status, or the failure reason of a finished upload, for example «(tiktok
   unaudited_client_can_only_post_to_private_accounts log … http 403)». Never TikTok's message or body (`ttDetail`, `DETAIL_RE`).
   `npm test` 954 of 954; `qa/tiktok-test-flow.cjs` 43, instagram 43, facebook 37, youtube 68, all passing.
+
+### 2026-11-15: the platform's line kept in the list, the account's privacy as TikTok sees it, and Meta's «App not active»
+
+- **Owner direction.** «Keep the full TikTok error in the list too»; the direct post was still refused after making the account private
+  and no inbox notice was seen; the director met Meta's «App not active» when adding the Instagram account. `MVP_draft.md` 79.6.
+- **Built.**
+  - Migration `20261115140000_platform_tests_error_detail.sql`: `error_detail` beside `error`, written by `platform_test_failed_detail`
+    with the server key for the failure's own author, within ten minutes, once. `giveUp` keeps it; the list reads it, and reads the old
+    columns until the migration is applied.
+  - The TikTok form says whether TikTok sees the account as public or private now, warns on «منشور» when it is public, and asks again on
+    «تحديث».
+  - The Meta guide's roles step and the connection's notes explain «App not active».
+- **Verified, numbers.** `npm test` **955 of 955**; typecheck and build clean; `platform_tests_error_detail_rules.sql` **13 of 13** on a
+  private container; `qa/tiktok-test-flow.cjs` **50 of 50** (seven new: TikTok's line in the error and in the list, private and public
+  as TikTok sees them, the warning, «تحديث»); instagram 43, facebook 37, youtube 68, direct publish 59, platforms 136, guide modal 21.
+- **Not verified.** Why TikTok still refused the post after the account was made private: the next try will show what TikTok sees
+  («عام» or «خاص») and TikTok's own line. Meta's page was not reproduced; the explanation is from Meta's own wording.
+- **Not done.** The migration is not applied: it is handed to the owner with `qa/sql/check-error-detail.sql`.

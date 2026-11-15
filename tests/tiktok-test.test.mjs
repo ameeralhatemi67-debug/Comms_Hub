@@ -200,3 +200,24 @@ test('a TikTok refusal carries TikTok\'s own code, its log id and the HTTP statu
   const server = read('src/lib/platforms/test-tiktok.ts');
   for (const re of [/giveUp\(db, id, c\.error, c\.detail\)/, /stop\(db, t, r\.error, r\.detail\)/, /stop\(db, t, s\.reason, s\.detail\)/]) assert.match(server, re);
 });
+
+test('the platform\'s line is kept beside a failure, read when the database has it, and said in the list', async () => {
+  const server = read('src/lib/platforms/test-server.ts');
+  assert.match(server, /platform_test_failed_detail', \{ p_key: serverKeyOrNull\(\), p_test: id, p_detail: detail \}/, 'kept by the failure\'s own server step');
+  assert.match(server, /if \(detail && DETAIL_RE\.test\(detail\)\)/);
+  const kit = read('src/components/work/test-kit.ts');
+  assert.match(kit, /read\(`\$\{cols\},error_detail`\)/);
+  assert.match(kit, /if \(error\) \(\{ data \} = await read\(cols\)\)/, 'before the migration the list is read as it was');
+  const sql = read('supabase/migrations/20261115140000_platform_tests_error_detail.sql');
+  const { DETAIL_RE } = await import('../src/lib/platforms/test-rules.ts');
+  assert.ok(sql.includes(`'${DETAIL_RE.source}'`), 'the database accepts exactly what the page shows');
+  const { directLine } = await import('../src/lib/platforms/test-rules.ts');
+  const row = { id: '1', title: 'x', state: 'failed', kind: 'tt_post', privacy: 'private', video_id: null, shown_privacy: null, error: 'TT_UNAUDITED', error_detail: 'tiktok unaudited_client_can_only_post_to_private_accounts log ABC123456 http 403', created_by: 'a', created_at: '', deleted_at: null };
+  assert.match(directLine(row, 0, String), /\(tiktok unaudited_client_can_only_post_to_private_accounts log ABC123456 http 403\)$/);
+  assert.doesNotMatch(directLine({ ...row, error_detail: '<b>no</b>' }, 0, String), /no/, 'anything not a code line is left out');
+  const panel = read('src/components/work/tiktok-test.tsx');
+  assert.match(panel, /creator\.privacy\.includes\('public'\) \? 'عام' : 'خاص'/, 'the account as TikTok sees it');
+  assert.match(panel, /data-tt="reread"/);
+  const meta = (await import('../src/lib/setup-guides.ts')).GUIDES.meta.steps.find((s) => s.id === 'roles');
+  assert.match(JSON.stringify(meta.info), /App not active/, 'the guide says what Meta\'s «App not active» means');
+});

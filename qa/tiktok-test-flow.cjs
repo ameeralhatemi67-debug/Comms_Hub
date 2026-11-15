@@ -205,7 +205,25 @@ const video = (name, size) => ({ name, mimeType: 'video/mp4', buffer: Buffer.all
     await panel(rf).locator('[data-tt="send"]').click();
     await panel(rf).locator('[data-tt="error"]').waitFor();
     check('TikTok\'s refusal of an unaudited post to a public account is said, with what to do', (await panel(rf).locator('[data-tt="error"]').innerText()).includes('اجعل الحساب خاصاً'));
+    check('and with TikTok\'s own code, log id and status', (await panel(rf).locator('[data-tt="error"]').innerText()).includes('(tiktok unaudited_client_can_only_post_to_private_accounts log 202611151842436E093E9C1F146C37F821 http 403)'));
+    await panel(rf).locator('.yt-item[data-state="failed"]').first().waitFor();
+    check('the list keeps TikTok\'s line beside the words', (await panel(rf).locator('.yt-item[data-state="failed"]').first().innerText()).includes('log 202611151842436E093E9C1F146C37F821 http 403'));
+    check('a private account is said as TikTok sees it, with no warning', (await panel(rf).locator('[data-tt="visibility"]').innerText()).includes('خاص') && (await panel(rf).locator('.wk-hint.warn').count()) === 0);
     await rf.context().close();
+
+    const pu = await open('?public=1');
+    await start(pu);
+    await panel(pu).locator('[data-tt="creator"]').waitFor();
+    check('a public account is said as TikTok sees it', (await panel(pu).locator('[data-tt="visibility"]').innerText()).includes('عام'));
+    check('a draft needs no warning about it', (await panel(pu).locator('.wk-hint.warn').count()) === 0);
+    await choose(pu, 'post');
+    check('a post warns that TikTok will refuse it until the account is private', (await panel(pu).locator('.wk-hint.warn').innerText()).includes('يرى TikTok الحساب عاماً'));
+    const asked = (await calls(pu)).filter((x) => x.url === '/api/platforms/test/creator').length;
+    await panel(pu).locator('[data-tt="reread"]').click();
+    await panel(pu).locator('[data-tt="creator"]').waitFor();
+    check('«تحديث» asks TikTok again', (await calls(pu)).filter((x) => x.url === '/api/platforms/test/creator').length === asked + 1);
+    await pu.screenshot({ path: path.join(out, '07-public-warning.png'), fullPage: true });
+    await pu.context().close();
 
     const cf = await open('?creator=fail');
     await start(cf);

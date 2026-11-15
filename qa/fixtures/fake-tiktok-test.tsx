@@ -23,7 +23,7 @@ export const tt: AccountRow = {
   external_id: '-000openid', external_name: 'حساب القسم', scopes: ['user.info.basic', 'video.publish', 'video.upload'],
 };
 type Test = {
-  id: string; privacy: string | null; title: string; kind: string; state: string; video_id: string | null; post_url: string | null; shown_privacy: null; error: string | null;
+  id: string; privacy: string | null; title: string; kind: string; state: string; video_id: string | null; post_url: string | null; shown_privacy: null; error: string | null; error_detail?: string | null;
   link: null; scheduled_for: null; purpose: string; created_by: string; created_at: string; done_at: string | null; deleted_at: null;
   size: number | null; source: string | null; ref: string | null; waits: number;
 };
@@ -86,13 +86,20 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   if (url === '/api/platforms/test/creator') {
     if (q.get('creator') === 'fail') return reply({ error: 'طلبات كثيرة إلى المنصة في دقيقة. انتظر قليلاً ثم جرّب.', code: 'RATE_LIMIT', retry: true }, 429);
     // A private account: TikTok offers followers, friends and only me, and this one has Duet off.
-    return reply({ creator: { nickname: 'حساب القسم على TikTok', privacy: ['friends', 'followers', 'private'], commentOff: false, duetOff: true, stitchOff: false, maxSeconds: 600 } });
+    // public=1: a public account, which TikTok offers «الجميع».
+    const privacy = q.get('public') ? ['public', 'friends', 'private'] : ['friends', 'followers', 'private'];
+    return reply({ creator: { nickname: 'حساب القسم على TikTok', privacy, commentOff: false, duetOff: true, stitchOff: false, maxSeconds: 600 } });
   }
   if (url === '/api/platforms/test' && method === 'POST') {
     if (ME === 'pub2@example.test') return reply({ error: 'تجربة النشر لمن يدير الحسابات ولمن ينشر على هذا الحساب.', code: 'FORBIDDEN' }, 403);
     const b = body as Record<string, string>;
-    if (b.caption === 'ارفض')
-      return reply({ error: 'لم يدقق TikTok التطبيق بعد، فلا ينشر مباشرة إلا على حساب خاص. اجعل الحساب خاصاً في تطبيق TikTok، أو أرسل مسودة.', code: 'TT_UNAUDITED' }, 403);
+    if (b.caption === 'ارفض') {
+      // As the route answers: the test closed with the site's code, TikTok's line kept beside it, and both said.
+      const detail = 'tiktok unaudited_client_can_only_post_to_private_accounts log 202611151842436E093E9C1F146C37F821 http 403';
+      newTest('tt_post', 'ارفض', { state: 'failed', error: 'TT_UNAUDITED', error_detail: detail, privacy: b.privacy ?? null });
+      changed();
+      return reply({ error: 'لم يدقق TikTok التطبيق بعد، فلا ينشر مباشرة إلا على حساب خاص. اجعل الحساب خاصاً في تطبيق TikTok، أو أرسل مسودة.', code: 'TT_UNAUDITED', detail }, 403);
+    }
     const line = String(b.caption ?? '').split('\n').find((l) => l.trim())?.trim();
     const size = b.source === 'library' ? LIBRARY[b.asset]?.size_bytes : Number(b.size);
     const t = newTest(b.kind, line || (b.kind === 'tt_draft' ? 'تجربة مسودة في صندوق TikTok' : 'تجربة منشور مباشر'), { size, source: b.source, privacy: b.privacy ?? null });

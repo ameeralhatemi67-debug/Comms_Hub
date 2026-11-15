@@ -119,6 +119,8 @@ export type TestRow = {
   /** A YouTube direct post: whether subscribers were told. */
   notify?: boolean | null;
   error: string | null;
+  /** What the platform said beside the site's code (MVP_draft.md 79.6): TikTok's code, log id and status, or Drive's code. */
+  error_detail?: string | null;
   created_by: string;
   created_at: string;
   deleted_at: string | null;
@@ -172,7 +174,9 @@ export function directLine(t: TestRow, now: number, at: (iso: string) => string)
   if (t.state === 'uploading') return t.scheduled_for && Date.parse(t.scheduled_for) > now ? 'يُرفع الملف' : 'يُنشر الآن';
   if (t.state === 'deleted') return 'حُذف من المنصة';
   if (t.state === 'failed')
-    return t.error === 'CANCELLED' && t.scheduled_for ? 'أُلغي قبل موعده' : `لم يكتمل${t.error ? `: ${TEST_ERROR_AR[t.error] ?? 'خطأ من المنصة.'}` : ''}`;
+    return t.error === 'CANCELLED' && t.scheduled_for
+      ? 'أُلغي قبل موعده'
+      : `لم يكتمل${t.error ? `: ${TEST_ERROR_AR[t.error] ?? 'خطأ من المنصة.'}` : ''}${t.error_detail && DETAIL_RE.test(t.error_detail) ? ` (${t.error_detail})` : ''}`;
   if (!t.kind || t.kind === 'video') {
     if (t.scheduled_for && t.shown_publish_at) return Date.parse(t.shown_publish_at) > now ? `مجدول · يصبح عاماً ${at(t.shown_publish_at)}` : 'عام';
     return PRIVACY_AR[t.shown_privacy ?? t.privacy ?? ''] ?? 'نُشر';

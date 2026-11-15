@@ -122,14 +122,12 @@ export async function sendToDrive(session: string, blob: Blob, onProgress: (f: n
 export function useTests(account: string, purpose: TestPurpose = 'test'): [TestRow[], () => Promise<void>] {
   const [tests, setTests] = useState<TestRow[]>([]);
   const load = useCallback(async () => {
-    const { data } = await supabase()
-      .from('platform_tests')
-      .select('id,privacy,title,kind,state,video_id,post_url,shown_privacy,shown_publish_at,error,link,scheduled_for,purpose,notify,created_by,created_at,done_at,deleted_at')
-      .eq('account_id', account)
-      .eq('purpose', purpose)
-      .order('created_at', { ascending: false })
-      .limit(5);
-    setTests((data ?? []) as TestRow[]);
+    const cols = 'id,privacy,title,kind,state,video_id,post_url,shown_privacy,shown_publish_at,error,link,scheduled_for,purpose,notify,created_by,created_at,done_at,deleted_at';
+    const read = (c: string) => supabase().from('platform_tests').select(c).eq('account_id', account).eq('purpose', purpose).order('created_at', { ascending: false }).limit(5);
+    // What the platform said (error_detail, MVP_draft.md 79.6) is read when the database has it; before its migration, the list as it was.
+    let { data, error } = await read(`${cols},error_detail`);
+    if (error) ({ data } = await read(cols));
+    setTests((data ?? []) as unknown as TestRow[]);
   }, [account, purpose]);
   useEffect(() => {
     void load();
