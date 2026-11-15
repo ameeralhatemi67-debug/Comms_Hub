@@ -3,7 +3,7 @@
 // redrawn to JPEG, a video's length, and a file sent straight to the Drive upload the site opened. Client-safe.
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { TEST_ERROR_AR, type TestPurpose, type TestRow } from '@/lib/platforms/test-rules';
+import { DETAIL_RE, TEST_ERROR_AR, type TestPurpose, type TestRow } from '@/lib/platforms/test-rules';
 
 const UPLOAD_FAILED = TEST_ERROR_AR.TEMP_UPLOAD_FAILED;
 
@@ -41,9 +41,9 @@ export async function api(url: string, init: RequestInit): Promise<Reply> {
     return { ok: false, b: { error: 'تعذّر الوصول إلى الخادم.', retry: true } };
   }
 }
-/** The refusal in words, with another service's short code after it when the server knows it («DRIVE_403»), for whoever fixes it. */
+/** The refusal in words, with what another service said after it when the server knows it («DRIVE_403», TikTok's code and log id), for whoever fixes it. */
 export const said = (b: Record<string, unknown>) =>
-  (typeof b.error === 'string' && b.error ? b.error : 'تعذّر إتمام التجربة.') + (typeof b.detail === 'string' && /^[A-Z0-9_]{2,40}$/.test(b.detail) ? ` (${b.detail})` : '');
+  (typeof b.error === 'string' && b.error ? b.error : 'تعذّر إتمام التجربة.') + (typeof b.detail === 'string' && DETAIL_RE.test(b.detail) ? ` (${b.detail})` : '');
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const DRIVE_CHUNK = 8 * 1024 * 1024;

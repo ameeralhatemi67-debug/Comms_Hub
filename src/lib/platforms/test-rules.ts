@@ -183,6 +183,12 @@ export function directLine(t: TestRow, now: number, at: (iso: string) => string)
   return `نُشر · ${IG_KIND_AR[t.kind] ?? ''}${late ? ` · متأخراً ${late} دقيقة عن موعده` : ''}`;
 }
 
+/**
+ * What another service said, as a refusal may carry it after its words: a code («DRIVE_403»), or TikTok's own line («tiktok
+ * url_ownership_unverified log 2026... http 403»). Letters, digits and a few marks only, never a message or a body.
+ */
+export const DETAIL_RE = /^[A-Za-z0-9_.:~ -]{2,160}$/;
+
 /** The codes of the test routes, in words. A connection code falls through to the connection's words. */
 export const TEST_ERROR_AR: Record<string, string> = {
   FORBIDDEN: 'تجربة النشر لمن يدير الحسابات ولمن ينشر على هذا الحساب.',

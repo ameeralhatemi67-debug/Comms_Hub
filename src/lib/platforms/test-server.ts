@@ -8,7 +8,7 @@ import { serverKeyOrNull } from '../integrations/vault.ts';
 import { loadApp, loadSecret } from './connect.ts';
 import { googleAccess, googleChannels, googleRolling } from './oauth2.ts';
 import type { Fetch } from './oauth.ts';
-import { TEST_ERROR_AR } from './test-rules.ts';
+import { DETAIL_RE, TEST_ERROR_AR } from './test-rules.ts';
 import { openStored } from '../storage/index.ts';
 
 export type TestInfo = {
@@ -56,7 +56,7 @@ export const detailOf = (e: unknown): string => {
 /** A refusal as the page reads it: the words, the code for what the page offers next, and another service's short code when known. */
 export const refuse = (code: string, retry = false, detail?: string) =>
   Response.json(
-    { error: TEST_ERROR_AR[code] ?? connErrorAr(code), code, ...(retry ? { retry: true } : {}), ...(detail && /^[A-Z0-9_]{2,40}$/.test(detail) ? { detail } : {}) },
+    { error: TEST_ERROR_AR[code] ?? connErrorAr(code), code, ...(retry ? { retry: true } : {}), ...(detail && DETAIL_RE.test(detail) ? { detail } : {}) },
     { status: STATUS[code] ?? 502, headers: { 'Cache-Control': 'no-store' } },
   );
 

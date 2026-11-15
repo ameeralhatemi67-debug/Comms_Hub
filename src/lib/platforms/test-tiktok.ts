@@ -83,7 +83,7 @@ export async function ttCreatorFor(db: SupabaseClient, account: string, direct: 
   const tok = await tiktokToken(db, fetch, { account, integration: a.integration_id, external_id: a.external_id }, direct ? DIRECT : PURPOSE, true);
   if ('error' in tok) return refuse(tok.error);
   const c = await ttCreator(fetch, { token: tok.token });
-  if ('error' in c) return refuse(c.error, c.error === 'RATE_LIMIT' || c.error === 'PLATFORM_DOWN' || c.error === 'UNREACHABLE');
+  if ('error' in c) return refuse(c.error, c.error === 'RATE_LIMIT' || c.error === 'PLATFORM_DOWN' || c.error === 'UNREACHABLE', c.detail);
   return json({ creator: c });
 }
 
@@ -145,7 +145,7 @@ export async function ttStart(request: Request, db: SupabaseClient, b: Record<st
   // A post's privacy is checked against the creator's settings as they are now; TikTok refuses any other.
   if (options) {
     const c = await ttCreator(fetch, { token: tok.token });
-    if ('error' in c) return giveUp(db, id, c.error);
+    if ('error' in c) return giveUp(db, id, c.error, c.detail);
     if (!c.privacy.includes(options.privacy)) return giveUp(db, id, 'TT_PRIVACY_MISMATCH');
   }
   if (b.source === 'library') return send(request, db, t, tok.token, options);
@@ -171,7 +171,7 @@ async function send(request: Request, db: SupabaseClient, t: TestInfo, token: st
   const link = await setLink(request, db, t);
   if (link instanceof Response) return link;
   const r = options ? await ttPost(fetch, { token, videoUrl: link.url, options }) : await ttDraft(fetch, { token, videoUrl: link.url });
-  if ('error' in r) return stop(db, t, r.error);
+  if ('error' in r) return stop(db, t, r.error, r.detail);
   const { error } = await db.rpc('platform_test_container', { p_key: serverKeyOrNull(), p_test: t.id, p_container: r.publish });
   if (error) return stop(db, t, 'PLATFORM_ERROR');
   return json({ test: t.id, phase: 'wait' });
@@ -190,11 +190,11 @@ export async function ttAdvance(db: SupabaseClient, t: TestInfo) {
   const tok = await tiktokToken(db, fetch, t, t.purpose === 'direct' ? DIRECT : PURPOSE, false);
   if ('error' in tok) return tok.error === 'UNREACHABLE' ? refuse(tok.error, true) : stop(db, t, tok.error);
   const s = await ttStatus(fetch, { token: tok.token, publish: t.container });
-  if ('error' in s) return s.error === 'UNREACHABLE' || s.error === 'PLATFORM_DOWN' || s.error === 'RATE_LIMIT' ? refuse(s.error, true) : stop(db, t, s.error);
+  if ('error' in s) return s.error === 'UNREACHABLE' || s.error === 'PLATFORM_DOWN' || s.error === 'RATE_LIMIT' ? refuse(s.error, true, s.detail) : stop(db, t, s.error, s.detail);
   if (s.state === 'processing') return json({ phase: 'wait' });
   if (s.state === 'failed') {
     await endLink(db, t);
-    return stop(db, t, s.reason);
+    return stop(db, t, s.reason, s.detail);
   }
   // TikTok has the file: the address ends and the copy goes to Drive's trash.
   await endLink(db, t);

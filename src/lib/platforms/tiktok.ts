@@ -42,7 +42,7 @@ export type TtPostOptions = {
   /** «Branded content»: a paid partnership with a third party. */
   branded: boolean;
 };
-export type TtStatus = { state: 'processing' } | { state: 'inbox' } | { state: 'published'; post: string | null } | { state: 'failed'; reason: string };
+export type TtStatus = { state: 'processing' } | { state: 'inbox' } | { state: 'published'; post: string | null } | { state: 'failed'; reason: string; detail?: string };
 
 /** `text` is the answer as sent: a post id is a 64-bit number, which JSON.parse would round. */
 type Answer = { status: number; body: Record<string, unknown>; text: string };
@@ -73,6 +73,20 @@ async function ask(f: Fetch, url: string, token: string, body: unknown, timeout 
 const codeOf = (a: Answer) => String(((a.body.error ?? {}) as { code?: unknown }).code ?? '');
 const dataOf = (a: Answer) => (a.body.data ?? {}) as Record<string, unknown>;
 const worked = (a: Answer) => a.status === 200 && (codeOf(a) === 'ok' || codeOf(a) === '');
+
+/**
+ * What TikTok said, for whoever traces a failure: its own error code, its log id (which TikTok's support asks for) and the HTTP
+ * status, as one short line such as «tiktok unaudited_client_can_only_post_to_private_accounts log 2026111509... http 403». Never a
+ * message or a body; anything not shaped like a code is left out.
+ */
+export function ttDetail(a: Answer | null): string | undefined {
+  if (!a) return 'tiktok unreachable';
+  const e = (a.body.error ?? {}) as { code?: unknown; log_id?: unknown; logid?: unknown };
+  const code = typeof e.code === 'string' && /^[a-z0-9_]{1,80}$/.test(e.code) ? e.code : '';
+  const log = [e.log_id, e.logid].find((x): x is string => typeof x === 'string' && /^[A-Za-z0-9]{6,64}$/.test(x));
+  const parts = ['tiktok', code, log ? `log ${log}` : '', a.status !== 200 ? `http ${a.status}` : ''].filter(Boolean);
+  return parts.length > 1 ? parts.join(' ') : undefined;
+}
 
 /** TikTok's error codes as the site's. Never a message or a body. */
 export function ttError(a: Answer | null): string {
@@ -108,9 +122,9 @@ export function ttError(a: Answer | null): string {
 }
 
 /** The creator's settings, read each time the form opens, as TikTok asks. */
-export async function ttCreator(f: Fetch, a: { token: string }): Promise<Creator | { error: string }> {
+export async function ttCreator(f: Fetch, a: { token: string }): Promise<Creator | { error: string; detail?: string }> {
   const r = await ask(f, `${API}/creator_info/query/`, a.token, undefined);
-  if (!r || !worked(r)) return { error: ttError(r) };
+  if (!r || !worked(r)) return { error: ttError(r), detail: ttDetail(r) };
   const d = dataOf(r);
   const levels = Array.isArray(d.privacy_level_options) ? d.privacy_level_options : [];
   const privacy = (['public', 'friends', 'followers', 'private'] as TtPrivacy[]).filter((p) => levels.includes(TT_LEVEL[p]));
@@ -128,14 +142,15 @@ export async function ttCreator(f: Fetch, a: { token: string }): Promise<Creator
 const publishId = (v: unknown) => (typeof v === 'string' && /^[A-Za-z0-9_.~-]{6,64}$/.test(v) ? v : null);
 
 /** A draft in the creator's TikTok inbox, fetched by TikTok from `videoUrl`. */
-export async function ttDraft(f: Fetch, a: { token: string; videoUrl: string }): Promise<{ publish: string } | { error: string }> {
+export async function ttDraft(f: Fetch, a: { token: string; videoUrl: string }): Promise<{ publish: string } | { error: string; detail?: string }> {
   const r = await ask(f, `${API}/inbox/video/init/`, a.token, { source_info: { source: 'PULL_FROM_URL', video_url: a.videoUrl } });
   const id = r && worked(r) ? publishId(dataOf(r).publish_id) : null;
-  return id ? { publish: id } : { error: r && worked(r) ? 'PLATFORM_ERROR' : ttError(r) };
+  if (id) return { publish: id };
+  return r && worked(r) ? { error: 'PLATFORM_ERROR' } : { error: ttError(r), detail: ttDetail(r) };
 }
 
 /** A direct post, fetched by TikTok from `videoUrl`, with the choices the person made. */
-export async function ttPost(f: Fetch, a: { token: string; videoUrl: string; options: TtPostOptions }): Promise<{ publish: string } | { error: string }> {
+export async function ttPost(f: Fetch, a: { token: string; videoUrl: string; options: TtPostOptions }): Promise<{ publish: string } | { error: string; detail?: string }> {
   const o = a.options;
   const r = await ask(f, `${API}/video/init/`, a.token, {
     post_info: {
@@ -150,7 +165,8 @@ export async function ttPost(f: Fetch, a: { token: string; videoUrl: string; opt
     source_info: { source: 'PULL_FROM_URL', video_url: a.videoUrl },
   });
   const id = r && worked(r) ? publishId(dataOf(r).publish_id) : null;
-  return id ? { publish: id } : { error: r && worked(r) ? 'PLATFORM_ERROR' : ttError(r) };
+  if (id) return { publish: id };
+  return r && worked(r) ? { error: 'PLATFORM_ERROR' } : { error: ttError(r), detail: ttDetail(r) };
 }
 
 const FAIL: Record<string, string> = {
@@ -169,9 +185,9 @@ const FAIL: Record<string, string> = {
 };
 
 /** Where an upload stands at TikTok. */
-export async function ttStatus(f: Fetch, a: { token: string; publish: string }): Promise<TtStatus | { error: string }> {
+export async function ttStatus(f: Fetch, a: { token: string; publish: string }): Promise<TtStatus | { error: string; detail?: string }> {
   const r = await ask(f, `${API}/status/fetch/`, a.token, { publish_id: a.publish });
-  if (!r || !worked(r)) return { error: ttError(r) };
+  if (!r || !worked(r)) return { error: ttError(r), detail: ttDetail(r) };
   const d = dataOf(r);
   switch (d.status) {
     case 'PROCESSING_DOWNLOAD':
@@ -186,7 +202,10 @@ export async function ttStatus(f: Fetch, a: { token: string; publish: string }):
       return { state: 'published', post };
     }
     case 'FAILED':
-      return { state: 'failed', reason: FAIL[String(d.fail_reason ?? '')] ?? 'PLATFORM_ERROR' };
+      {
+        const why = typeof d.fail_reason === 'string' && /^[a-z0-9_]{1,80}$/.test(d.fail_reason) ? d.fail_reason : '';
+        return { state: 'failed', reason: FAIL[why] ?? 'PLATFORM_ERROR', detail: `tiktok ${why || 'failed'}` };
+      }
   }
   return { state: 'processing' };
 }

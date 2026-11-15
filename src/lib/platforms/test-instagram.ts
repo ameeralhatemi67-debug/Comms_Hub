@@ -61,9 +61,9 @@ export async function trashTemp(t: Pick<TestInfo, 'temp_ref'>) {
   if (t.temp_ref) await quiet(storageFor('library').trash(t.temp_ref));
 }
 /** Stops a test that cannot go on: the record, the address and the temporary copy. */
-export async function stop(db: SupabaseClient, t: TestInfo, code: string) {
+export async function stop(db: SupabaseClient, t: TestInfo, code: string, detail?: string) {
   await trashTemp(t);
-  return giveUp(db, t.id, code);
+  return giveUp(db, t.id, code, detail);
 }
 
 /**

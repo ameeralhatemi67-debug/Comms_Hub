@@ -66,7 +66,8 @@ test('TikTok\'s refusals become the site\'s codes, each with words, and a strang
   for (const [status, code, ours] of cases) {
     const { f } = fake({ '/v2/post/publish/video/init/': [status, { error: { code } }] });
     const r = await ttPost(f, { token: 't', videoUrl: 'https://x/y', options: { title: '', privacy: 'private', comments: false, duet: false, stitch: false, ownBrand: false, branded: false } });
-    assert.deepEqual(r, { error: ours }, code);
+    assert.equal(r.error, ours, code);
+    assert.ok(r.detail.startsWith(`tiktok ${code}`), `${code}: TikTok's own code goes with it`);
     assert.ok(TEST_ERROR_AR[ours] || ['TOKEN_REFUSED', 'PLATFORM_DOWN'].includes(ours), `${ours} has words`);
   }
   assert.equal(ttError(null), 'UNREACHABLE');
@@ -85,7 +86,7 @@ test('where an upload stands: fetching, in the inbox, published with its public 
   assert.notEqual(String(JSON.parse(raw).data.publicaly_available_post_id[0]), '7300000000000000123', 'JSON.parse would have rounded it');
   assert.deepEqual(await at({ status: 'PUBLISH_COMPLETE' }), { state: 'published', post: null }, 'a private post has no public id');
   for (const [reason, ours] of [['duration_check_failed', 'TT_DURATION'], ['video_pull_failed', 'TT_PULL_FAILED'], ['file_format_check_failed', 'TT_FORMAT'], ['auth_removed', 'PERMISSION_REVOKED'], ['spam_risk_text', 'TT_TEXT_REFUSED']]) {
-    assert.deepEqual(await at({ status: 'FAILED', fail_reason: reason }), { state: 'failed', reason: ours }, reason);
+    assert.deepEqual(await at({ status: 'FAILED', fail_reason: reason }), { state: 'failed', reason: ours, detail: `tiktok ${reason}` }, reason);
   }
 });
 
@@ -175,7 +176,27 @@ test('a failed Drive step says Drive\'s short code, and never a message or a bod
   assert.equal(detailOf(new Error('Request had invalid authentication credentials. token=abc')), 'UNKNOWN', 'a sentence is never passed on');
   assert.equal(detailOf(Object.assign(new Error('x'), { name: 'TimeoutError' })), 'TIMEOUT');
   const kit = read('src/components/work/test-kit.ts');
-  assert.match(kit, /typeof b\.detail === 'string' && \/\^\[A-Z0-9_\]\{2,40\}\$\/\.test\(b\.detail\)/, 'the page shows only a code');
+  assert.match(kit, /typeof b\.detail === 'string' && DETAIL_RE\.test\(b\.detail\)/, 'the page shows only a code line');
   for (const f of ['src/lib/platforms/test-tiktok.ts', 'src/lib/platforms/test-facebook.ts', 'src/lib/platforms/test-instagram.ts'])
     assert.match(read(f), /giveUp\(db, (t\.)?id, 'TEMP_UPLOAD_FAILED', (upload\.error|detailOf\(e\))\)/, f);
+});
+
+test('a TikTok refusal carries TikTok\'s own code, its log id and the HTTP status, and nothing else of the answer', async () => {
+  const { ttDetail } = await import('../src/lib/platforms/tiktok.ts');
+  const { DETAIL_RE } = await import('../src/lib/platforms/test-rules.ts');
+  const answer = (status, error) => ({ status, body: { error }, text: '' });
+  const d = ttDetail(answer(403, { code: 'unaudited_client_can_only_post_to_private_accounts', message: 'Please review our integration guidelines', log_id: '202611150953012345ABCDEF' }));
+  assert.equal(d, 'tiktok unaudited_client_can_only_post_to_private_accounts log 202611150953012345ABCDEF http 403');
+  assert.ok(DETAIL_RE.test(d), 'the page will show it');
+  assert.doesNotMatch(d, /review|guidelines/, 'never TikTok\'s message');
+  assert.equal(ttDetail(answer(403, { code: 'Bad Code <x>', log_id: 'x y' })), 'tiktok http 403', 'what is not shaped like a code is left out');
+  assert.equal(ttDetail(null), 'tiktok unreachable');
+  // The whole way: TikTok's refusal of a post reaches the page with its line.
+  const f = async () => new Response(JSON.stringify({ error: { code: 'url_ownership_unverified', message: 'x', log_id: 'ABC123456' } }), { status: 403 });
+  const r = await ttPost(f, { token: 't', videoUrl: 'https://x/y', options: { title: '', privacy: 'private', comments: false, duet: false, stitch: false, ownBrand: false, branded: false } });
+  assert.deepEqual(r, { error: 'TT_URL_UNVERIFIED', detail: 'tiktok url_ownership_unverified log ABC123456 http 403' });
+  const failed = await ttStatus(async () => new Response(JSON.stringify({ data: { status: 'FAILED', fail_reason: 'video_pull_failed' }, error: { code: 'ok' } })), { token: 't', publish: 'v_pub_url~v2.1' });
+  assert.deepEqual(failed, { state: 'failed', reason: 'TT_PULL_FAILED', detail: 'tiktok video_pull_failed' });
+  const server = read('src/lib/platforms/test-tiktok.ts');
+  for (const re of [/giveUp\(db, id, c\.error, c\.detail\)/, /stop\(db, t, r\.error, r\.detail\)/, /stop\(db, t, s\.reason, s\.detail\)/]) assert.match(server, re);
 });

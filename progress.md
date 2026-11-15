@@ -4487,3 +4487,11 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   back (name, folder, size, uploader) and the trash. The live site logs nothing there by design, so a refusal now carries Drive's short
   code (`detail`, for example `DRIVE_403`; never a message or a body), shown after the words in the panel, for Instagram and Facebook
   too. `npm test` 953 of 953; `qa/tiktok-test-flow.cjs` 43, `instagram-test-flow` 43, `facebook-test-flow` 37, all passing.
+- **First real TikTok results (same day).** A draft from this device reached the account's TikTok inbox: the Drive copy, TikTok's pull
+  from the sandbox's verified address and the status all worked on the second try, after the owner reconnected Drive. A direct post was
+  refused by TikTok with `unaudited_client_can_only_post_to_private_accounts`, as TikTok's docs say for a public account before the
+  audit; the panel said so in words.
+- **More exact errors.** At the owner's request, every TikTok refusal now carries TikTok's own line after the words: its error code,
+  its log id (which TikTok's support asks for) and the HTTP status, or the failure reason of a finished upload, for example «(tiktok
+  unaudited_client_can_only_post_to_private_accounts log … http 403)». Never TikTok's message or body (`ttDetail`, `DETAIL_RE`).
+  `npm test` 954 of 954; `qa/tiktok-test-flow.cjs` 43, instagram 43, facebook 37, youtube 68, all passing.
