@@ -4478,3 +4478,6 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   and the old rule gone, the reset and its log). The migration history of comms-hub does not list them, since they did not go through
   the connector.
 - **Now.** TikTok's test, «نشر مباشر» and «إعادة ضبط» are live. Untried against TikTok itself; the first test should be a draft.
+- **The sandbox's own URL check (same day).** «Verify domains» opened «URL properties for Comms Hub test»: the sandbox verifies the
+  site's address on its own, with its own file. `public/tiktokmVeHsM7eRDS14x3fUohWVDCoXVWpjPLq.txt` added (a public token only), and
+  the guide's «أضف المنتجين» action 5 now says the sandbox needs its own file from the system administrator.

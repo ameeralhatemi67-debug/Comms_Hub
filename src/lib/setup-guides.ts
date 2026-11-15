@@ -459,7 +459,7 @@ export const GUIDES: Record<string, Guide> = {
           'اضغط «Add» في «Login Kit» أولاً: «Content Posting API» لا يُضاف قبله.',
           'ثم «Add» في «Content Posting API»، ثم «Done». لا تضف «Share Kit»، وإن أضفته فاحذفه بأيقونة السلة على بطاقته.',
           'في بطاقة «Content Posting API» شغّل «Direct Post».',
-          'في «Verify domains» اضغط «Verify» ووثّق عنوان الموقع نفسه من الخطوة 3: منه يجلب TikTok المقطع (pull_by_url). إن سألك عن البيئة فاختر «Sandbox».',
+          'في «Verify domains» اضغط «Verify»: تفتح «URL properties» لبيئة التجربة، ولها توثيقها المستقل. وثّق عنوان الموقع كما في الخطوة 3، بملف جديد يرسله مسؤول النظام. منه يجلب TikTok المقطع (pull_by_url).',
         ],
         shots: [
           tiktokShot('products-add', 787, 650, 'نافذة Add products: Login Kit وShare Kit بزر Add، وContent Posting API رمادي «Requires Login Kit»', undefined, ['2']),
