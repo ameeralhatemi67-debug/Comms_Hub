@@ -4457,3 +4457,17 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** Nothing has reached TikTok: the fake stands in for it. Whether the sandbox accepts a pull from the site's address
   without its own URL verification is unknown until the first real test.
 - **Not done, said plainly.** Neither migration is applied to comms-hub; nothing is pushed. The reset has not been used.
+
+### 2026-11-15: TikTok's test, «نشر مباشر» and the reset pushed and live; the two migrations wait for the SQL editor
+
+- **Owner decision.** «Yes, go live»: apply the two migrations to comms-hub and push main.
+- **Pushed.** `43d784f..93cd572` to `main` (with it the director's notes commits and the TikTok guide, whose migrations were applied
+  before). Vercel production `dpl_DaUA3p8GEgZPbKD363AxHjHSJFfs`, serving about 50 seconds after the push.
+- **Checked live, signed out.** The signature file, the 1024 icon and the guide's pictures answer as files; `POST
+  /api/platforms/test/creator` answers 401 «سجّل الدخول أولاً.» signed out and 403 from another site; `POST /api/platforms/test`
+  answers 401 signed out; Home answers 200.
+- **Not applied.** The Supabase connector refused every call this session («You do not have permission to perform this action»),
+  even listing migrations, though it shows as connected. `20261115120000_platform_tests_tiktok.sql` and
+  `20261115130000_platform_app_reset.sql` were handed to the owner to run, in that order, in the SQL editor of comms-hub. Until then
+  the TikTok panel's server steps are refused by the database (the account is not one it lets anyone test) and «إعادة ضبط» answers
+  that the request could not be done; nothing else changes.
