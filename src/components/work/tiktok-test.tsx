@@ -502,7 +502,7 @@ export function TikTokTest({ a, onReconnect, mode = 'test' }: { a: AccountRow; o
         <div className="pf-note ok yt-done" role="status" data-tt="done">
           <span>
             {phase.inbox
-              ? 'وصلت المسودة إلى صندوق الحساب على TikTok. افتح تطبيق TikTok واضغط إشعار الصندوق لإكمالها ونشرها.'
+              ? 'وصلت المسودة إلى صندوق الحساب على TikTok. في تطبيق TikTok على الهاتف افتح «Inbox» ثم «System notifications»، واضغط إشعار الصندوق «Your content from … is ready» لإكمالها ونشرها.'
               : 'نُشر المقطع على TikTok. قد يستغرق ظهوره على الحساب بضع دقائق.'}
           </span>
         </div>

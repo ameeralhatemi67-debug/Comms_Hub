@@ -4516,3 +4516,16 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Pushed and live.** `d267516..5dd7b5e` with the owner's yes; Vercel production `dpl_GmAy4maba4Lph6Xc77wenEboR4DQ` ready. Signed out,
   Home answers 200 and the creator route 401. The migration `20261115140000_platform_tests_error_detail.sql` waits for the owner's SQL
   editor; until then the list reads its old columns.
+
+### 2026-11-15: TikTok's test proved end to end, signed in, on the real sandbox
+
+- **The owner's run.** `20261115140000_platform_tests_error_detail.sql` applied in the SQL editor; `qa/sql/check-error-detail.sql`
+  answered 3 of 3 true. With the test account made private, the form said «الحساب عند TikTok الآن: خاص», and a direct post as «أنا فقط»
+  went out: the TikTok app shows it on the account, marked Private. Drafts arrive in the TikTok app under «Inbox», «System
+  notifications», as «TikTok platform · Notices: Your content from Comms Hub dev is ready».
+- **So, proven signed in on the live site:** the TikTok connection through the sandbox, the creator's settings, a draft from this device
+  (Drive copy, TikTok's pull from the sandbox's verified address, status), a direct post, TikTok's refusal of a post to a public account
+  with its own line, and the account's privacy as TikTok sees it. Not yet tried: a video from the library, a commercial disclosure,
+  «نشر مباشر» from Home with TikTok.
+- **Changed after it.** The draft's success message names where the draft is («Inbox», «System notifications»). `npm test` 955 of 955,
+  `qa/tiktok-test-flow.cjs` 50 of 50. Not pushed.
