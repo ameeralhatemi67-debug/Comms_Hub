@@ -168,6 +168,8 @@ export function platformError(message: string | null | undefined): string {
     ['READINESS_INVALID', 'حالة غير معروفة.'],
     ['UNKNOWN_PLATFORM', 'المنصة غير موجودة.'],
     ['APPEND_ONLY', 'السجل يُكتب ولا يُعدّل.'],
+    ['APP_IN_USE', 'ما زال حساب متصلاً بتطبيق هذه المنصة. افصله أو احذفه من «حسابات المنصات» أولاً.'],
+    ['APP_SHARED', 'تطبيق Google نفسه يخدم Google Drive للمكتبة، فلا يُعاد ضبطه من هنا.'],
     ['FORBIDDEN', 'لا تملك «إدارة المنصات وتطبيقاتها».'],
   ];
   for (const [code, text] of table) if (m.includes(code)) return text;

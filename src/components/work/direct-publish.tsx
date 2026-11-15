@@ -1,6 +1,6 @@
 'use client';
 // «نشر مباشر» (MVP_draft.md section 76, Director_Notes_Plan.md N-2), opened from Home's «إجراءات سريعة»: the director, or the Admin,
-// publishes for real to a connected YouTube channel or Instagram account, outside the work cycle. It is the engine and form of
+// publishes for real to a connected YouTube channel, Instagram account or TikTok account, outside the work cycle. It is the engine and form of
 // «تجربة النشر» in their direct mode (youtube-test.tsx, instagram-test.tsx); every rule is the database's (publish.direct, fixed to
 // the Admin and the director). The other platforms of the registry show «قريباً». Publishing works stays a simulation.
 import { useState } from 'react';
@@ -12,9 +12,10 @@ import { useWork } from './data';
 import { Hint } from './parts';
 import { InstagramTest } from './instagram-test';
 import { YouTubeTest } from './youtube-test';
+import { TikTokTest } from './tiktok-test';
 
 /** The platforms «نشر مباشر» publishes to now. */
-export const DIRECT_PLATFORMS: readonly string[] = ['youtube', 'instagram'];
+export const DIRECT_PLATFORMS: readonly string[] = ['youtube', 'instagram', 'tiktok'];
 /** Platforms never offered here, not even as «قريباً»: mail is not a publishing platform. */
 const NOT_PUBLISHING = ['mail'];
 
@@ -72,7 +73,7 @@ export function DirectPublishSheet({ onClose }: { onClose: () => void }) {
             </button>
           ))}
         </div>
-        {!platform && <Hint>اختر المنصة. يوتيوب وإنستغرام فقط الآن، والباقي قريباً.</Hint>}
+        {!platform && <Hint>اختر المنصة. يوتيوب وإنستغرام وTikTok الآن، والباقي قريباً.</Hint>}
 
         {platform && accounts.length > 1 && (
           <>
@@ -89,6 +90,7 @@ export function DirectPublishSheet({ onClose }: { onClose: () => void }) {
 
         {account?.platform === 'youtube' && <YouTubeTest key={account.id} a={account} mode="direct" onReconnect={reconnect} />}
         {account?.platform === 'instagram' && <InstagramTest key={account.id} a={account} mode="direct" onReconnect={reconnect} />}
+        {account?.platform === 'tiktok' && <TikTokTest key={account.id} a={account} mode="direct" onReconnect={reconnect} />}
       </div>
     </Sheet>
   );

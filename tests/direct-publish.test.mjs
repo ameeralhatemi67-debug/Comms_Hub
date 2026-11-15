@@ -101,7 +101,7 @@ test('the panels\' direct mode: open at once, its own list, a long press for any
   assert.match(YT_PANEL, /direct \? YT_DIRECT_SCHEDULE_MAX_DAYS : YT_SCHEDULE_MAX_DAYS/);
 });
 
-test('the menu: «نشر مباشر» only for the capability, the sheet offers YouTube and Instagram and the rest as «قريباً»', () => {
+test('the menu: «نشر مباشر» only for the capability, the sheet offers YouTube, Instagram and TikTok and the rest as «قريباً»', () => {
   assert.match(HOME, /<QuickActions \/>/);
   assert.match(MENU, /const direct = caps\.has\('publish\.direct'\)/);
   assert.match(MENU, /\{direct && \(\s*<button type="button" role="menuitem" data-qa="direct"/);
@@ -109,7 +109,8 @@ test('the menu: «نشر مباشر» only for the capability, the sheet offers 
     assert.ok(MENU.includes(`caps.has('page.${page}')`), page);
     assert.ok(MENU.includes(`data-qa="${k}"`), k);
   }
-  assert.match(SHEET, /DIRECT_PLATFORMS: readonly string\[\] = \['youtube', 'instagram'\]/);
+  assert.match(SHEET, /DIRECT_PLATFORMS: readonly string\[\] = \['youtube', 'instagram', 'tiktok'\]/);
+  assert.match(SHEET, /account\?\.platform === 'tiktok' && <TikTokTest key=\{account\.id\} a=\{account\} mode="direct"/);
   assert.match(SHEET, /<small>قريباً<\/small>/);
   assert.match(SHEET, /a\.conn_kind === 'oauth' && a\.active/, 'only accounts connected for real');
   assert.match(SHEET, /mode="direct"/);

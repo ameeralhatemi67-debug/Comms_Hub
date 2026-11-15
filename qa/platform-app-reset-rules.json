@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/platform_app_reset_rules.sql",
+  "script_md5": "9c29946bc50d6e027816dc1009fa9d47",
+  "migration": {
+    "file": "supabase/migrations/20261115130000_platform_app_reset.sql",
+    "file_md5": "4417a83a5957d26107aefd92e213759c",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-15T09:06:16.437Z",
+  "migrations_replayed": 75,
+  "differ": [],
+  "total": 20,
+  "passed": 20
+}

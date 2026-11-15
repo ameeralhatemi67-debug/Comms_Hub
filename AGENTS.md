@@ -288,6 +288,24 @@ A test on a Facebook Page is real too, by the same day's directive (`MVP_draft.m
   and the address with `test-instagram.ts`. The panels share `src/components/work/test-kit.ts`. The rules are held by
   `supabase/tests/platform_tests_facebook_rules.sql`, `tests/facebook-test.test.mjs` and `qa/facebook-test-flow.cjs`.
 
+A test on TikTok is real too, and so is «نشر مباشر» to TikTok, by owner directive of 2026-11-15 (`MVP_draft.md` section 79), from
+`src/components/work/tiktok-test.tsx`.
+- **A draft is the default.** It goes to the account's TikTok inbox (`video.upload`) and shows nothing until the owner posts it from
+  the TikTok app, so it needs no long press. A post (`video.publish`) asks for one.
+- **TikTok's posting rules are the page's.** The creator's settings are read each time the form opens
+  (`POST /api/platforms/test/creator`), the nickname is shown, no privacy is chosen in advance, the interactions and the commercial
+  disclosure start off, the consent sentence stands above the button, and the video is shown first. Keep every one of them.
+- **TikTok fetches the file** from the temporary address (PULL_FROM_URL), so the site's address must stay verified in the app's
+  URL properties and «Verify domains». The `publish_id` is the container; a post id is read digit for digit from TikTok's text, never
+  through a JavaScript number.
+- **No delete and no schedule:** TikTok's API has neither. Never offer one; the page says to delete in the TikTok app.
+- The server half is `src/lib/platforms/tiktok.ts` and `test-tiktok.ts`. The rules are held by
+  `supabase/tests/platform_tests_tiktok_rules.sql`, `tests/tiktok-test.test.mjs` and `qa/tiktok-test-flow.cjs`.
+
+«إعادة ضبط» of a platform (`platform_app_reset`, `MVP_draft.md` 79.4) forgets its app's secret, a waiting sign-in and the saved steps,
+and switches the platform off. It is refused while an account still holds a token of the app, and for YouTube, whose Google app is
+also the library's Drive.
+
 «نشر مباشر» from Home's «إجراءات سريعة» is real too, by owner directive of 2026-11-05 (`Director_Notes_Plan.md` N-2 with answer Q2,
 `MVP_draft.md` section 76, recorded in `progress.md`; the migration applied to comms-hub on 2026-11-05 with the owner's approval). It
 is the one real publish outside the work cycle; publishing works stays a simulation.

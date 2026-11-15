@@ -14,7 +14,7 @@ import { openStored } from '../storage/index.ts';
 export type TestInfo = {
   id: string;
   account: string;
-  /** The account's platform: 'youtube' or 'instagram'. */
+  /** The account's platform: 'youtube', 'instagram', 'facebook' or 'tiktok'. */
   platform: string;
   integration: string | null;
   external_id: string | null;
@@ -39,6 +39,8 @@ export type TestInfo = {
   container: string | null;
   share_to_feed: boolean | null;
   temp_ref: string | null;
+  /** The privacy the post was started with: YouTube's, or a TikTok post's (MVP_draft.md 79). */
+  privacy?: string | null;
 };
 
 /** The short code a database refusal carries («FORBIDDEN», «TEST_LIMIT», ...). */

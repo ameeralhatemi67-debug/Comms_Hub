@@ -4,6 +4,7 @@ import { isUuid, json } from '@/lib/platforms/route';
 import { DEVICE_PIECE, LIBRARY_PIECE, pieceAt } from '@/lib/platforms/test-rules';
 import { fbAdvance, fbPhotoStep, fbRemove, fbUploaded } from '@/lib/platforms/test-facebook';
 import { igAdvance, igRemove, igUploaded } from '@/lib/platforms/test-instagram';
+import { ttAdvance, ttRemove, ttUploaded } from '@/lib/platforms/test-tiktok';
 import { dbCode, giveUp, libraryPiece, refuse, testInfo, youtubeToken } from '@/lib/platforms/test-server';
 import { youtubeDelete, youtubeSendPiece } from '@/lib/platforms/youtube';
 import { serverClient } from '@/lib/supabase/server';
@@ -11,7 +12,7 @@ import { serverClient } from '@/lib/supabase/server';
 export const maxDuration = 60;
 
 // The rest of «تجربة النشر» (MVP_draft.md sections 71 to 73).
-//   POST          Instagram and a Facebook Reel: {step: 'uploaded', ref, ...} once a device file is in Drive, then
+//   POST          Instagram, a Facebook Reel and TikTok: {step: 'uploaded', ref, ...} once a device file is in Drive, then
 //                 {step: 'advance'} each time the page asks how Meta is getting on (test-instagram.ts, test-facebook.ts).
 //   PUT           a Facebook photo: the page's form with the JPEG and its words, at most 4 MB, passed to Meta as a file.
 //   PUT ?from=N   YouTube:   one piece of the file, relayed to the upload the server opened: the page's bytes for a file from its
@@ -28,7 +29,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const db = await serverClient();
   const t = await testInfo(db, id);
   if (!t || !t.mine) return refuse('FORBIDDEN');
-  if (!b || (t.platform !== 'instagram' && t.platform !== 'facebook')) return refuse('TEST_INVALID');
+  if (!b || (t.platform !== 'instagram' && t.platform !== 'facebook' && t.platform !== 'tiktok')) return refuse('TEST_INVALID');
+  if (t.platform === 'tiktok') {
+    if (b.step === 'uploaded') return ttUploaded(request, db, t, b, g.account.email);
+    if (b.step === 'advance') return ttAdvance(db, t);
+    return refuse('TEST_INVALID');
+  }
   if (t.platform === 'facebook') {
     if (b.step === 'uploaded') return fbUploaded(request, db, t, b, g.account.email);
     if (b.step === 'advance') return fbAdvance(db, t, b);
@@ -99,6 +105,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   if (!t) return refuse('FORBIDDEN');
   if (t.platform === 'instagram') return igRemove(db, t);
   if (t.platform === 'facebook') return fbRemove(db, t);
+  if (t.platform === 'tiktok') return ttRemove(db, t);
 
   if (t.state === 'uploading') {
     if (!t.mine) return refuse('FORBIDDEN');

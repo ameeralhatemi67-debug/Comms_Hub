@@ -4295,3 +4295,71 @@ YouTube would be asked, and nothing reaches YouTube.
   - `tests/work-youtube-choices.test.mjs`;
   - `qa/publish-choices-flow.cjs`, which clicks through the real dialogs;
   - `qa/work-pages.cjs`.
+
+---
+
+# 79. «تجربة النشر» and «نشر مباشر» on TikTok, and «إعادة ضبط» of a platform, 2026-11-15
+
+By owner directive of 2026-11-15, after the TikTok guide (67.9) and the first real TikTok connection: «make sure the testing for
+TikTok is ready, and the publishing is also ready», and «we need a delete connected account, and also delete connection with
+platform». Publishing works stays a simulation.
+
+## 79.1 What TikTok allows, as read on 2026-11-15
+
+From TikTok's Content Posting API pages (creator info, direct post, upload, status, media transfer, content sharing guidelines):
+
+- **Two ways.** A draft goes to the creator's TikTok inbox (`video.upload`), at most 5 pending in 24 hours, and the creator finishes and
+  posts it in the TikTok app. A direct post (`video.publish`) goes out at once with a privacy from the creator's own list: «الجميع»,
+  «الأصدقاء», «المتابعون» or «أنا فقط».
+- **Until TikTok audits the app,** a direct post is «أنا فقط» only, and only to an account that is private at the time; at most 5
+  people may post in 24 hours. A draft is not held by that rule.
+- **No schedule, no delete.** The API has no publish time and no way to delete a post. A post is removed in the TikTok app.
+- **TikTok's rules for a posting page:** read the creator's settings each time the page opens and show the account's nickname; no
+  privacy chosen in advance; comments, Duet and Stitch off until turned on, greyed when the account turned them off; the commercial
+  disclosure off until turned on, then «علامتك التجارية» or «محتوى ممول» (at least one), branded content never «أنا فقط»; the consent
+  sentence (the Music Usage Confirmation, and the Branded Content Policy for branded content) above the button; the video shown before
+  it goes; and a word that a post may take minutes to show.
+- **TikTok's own guidelines** list «a utility tool to help upload contents to the account(s) you or your team manages» as not
+  acceptable for the audit. The audit may therefore be refused, and the department may stay with drafts, or with «أنا فقط» posts.
+
+## 79.2 The panel
+
+`src/components/work/tiktok-test.tsx`, in a connected TikTok account's sheet on «حسابات المنصات» (for those who manage accounts and
+the account's own publishers), and in Home's «نشر مباشر» (`mode="direct"`, the Admin's and the director's, `publish.direct`).
+
+- **«مسودة في صندوق TikTok»** is the default: nothing shows until the owner posts it, so it needs no long press.
+- **«منشور»** follows 79.1 point by point and asks for a long press (`HOLD.ttTestPost`, `HOLD.directTikTok`).
+- A video from the library or from this device, MP4 or MOV, at most 100 MB, no longer than the creator's own limit.
+- The list says what arrived and says that deleting is done in the TikTok app; it offers no delete.
+
+## 79.3 The engine
+
+On the engine of «تجربة النشر» (`platform_tests`, `supabase/migrations/20261115120000_platform_tests_tiktok.sql`), with the
+Instagram test's temporary copy and address:
+
+- The kinds `tt_draft` and `tt_post`; a post keeps its privacy (`public`, `friends`, `followers`, `private`); TikTok's `publish_id` is
+  the container. A draft never has a post id; a post has one only once it is public and passed moderation, read digit for digit from
+  TikTok's answer, because a 64-bit id loses its last digits as a JavaScript number.
+- TikTok fetches the file from `/api/platforms/test/file/<token>` (PULL_FROM_URL), under the site's verified URL prefix. This needs
+  «Verify domains» in Content Posting API (guide step «أضف المنتجين», action 5).
+- The server half is `src/lib/platforms/tiktok.ts` (the calls) and `test-tiktok.ts` (the steps); the creator's settings come from
+  `POST /api/platforms/test/creator`. The token is refreshed when needed and the account checked before a start.
+- A direct post is written to «سجل النشاط» and told «للعلم», as for YouTube and Instagram.
+
+## 79.4 «إعادة ضبط» of a platform
+
+`platform_app_reset` (`supabase/migrations/20261115130000_platform_app_reset.sql`), from «المنصات», the platform's sheet, «خيارات
+متقدمة», a held button (`HOLD.platformReset`), for the holders of «إدارة المنصات وتطبيقاتها» and «أسرار الاتصالات».
+
+- It forgets the app's secret (out of the vault), closes its integration (the log stays), drops a sign-in still waiting, clears the
+  saved steps and switches the platform off for new accounts. Meta's one app resets Instagram and Facebook together.
+- Refused while an account still holds a token of the app (APP_IN_USE): remove the account («حذف») or end its connection («فصل»)
+  first, both under «خيارات أخرى» in the account's sheet, where they already were. Refused for YouTube, whose Google app is also the
+  library's Drive (APP_SHARED).
+- The app on the platform's own site stays until it is deleted there.
+
+## 79.5 Also
+
+- A connection lasting into another year says its year («متصل حتى 15 نوفمبر 2027»): TikTok's sign-in lasts a year.
+- Checks: `tests/tiktok-test.test.mjs`; `supabase/tests/platform_tests_tiktok_rules.sql` and `platform_app_reset_rules.sql` on a private
+  container; `qa/tiktok-test-flow.cjs`, which clicks through the real panel on a fixture.

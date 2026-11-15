@@ -952,7 +952,10 @@ export function accountState(a: Pick<AccountRow, 'active' | 'authorized_until'> 
   if (!a.authorized_until) return ['متصل', 'approved'];
   if (Date.parse(a.authorized_until) <= Date.parse(nowIso)) return ['التفويض منتهٍ', 'danger'];
   if (Date.parse(a.authorized_until) - Date.parse(nowIso) < 6 * 864e5) return [`ينتهي ${riyadhStamp(a.authorized_until)}`, 'warn'];
-  return [`متصل حتى ${sdate(riyadhStamp(a.authorized_until))}`, 'approved'];
+  // A date in another year carries its year: TikTok's sign-in lasts a year, and «15 نوفمبر» alone would read as today.
+  const until = riyadhStamp(a.authorized_until);
+  const year = until.slice(0, 4) === riyadhStamp(nowIso).slice(0, 4) ? '' : ` ${until.slice(0, 4)}`;
+  return [`متصل حتى ${sdate(until)}${year}`, 'approved'];
 }
 /** The accounts of a scheduled work whose authorisation will not cover its time. */
 export function atRisk(w: Pick<WorkRow, 'status' | 'sched_at' | 'channels'>, accounts: AccountRow[]): AccountRow[] {

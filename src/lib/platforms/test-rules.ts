@@ -105,7 +105,7 @@ export const choiceOf = (t: { privacy: TestPrivacy | null; scheduled_for?: strin
 export type TestState = 'uploading' | 'waiting' | 'published' | 'failed' | 'deleted';
 export type TestRow = {
   id: string;
-  privacy: TestPrivacy | null;
+  privacy: TestPrivacy | TtPrivacy | null;
   title: string;
   kind?: TestKind;
   post_url?: string | null;
@@ -177,6 +177,8 @@ export function directLine(t: TestRow, now: number, at: (iso: string) => string)
     if (t.scheduled_for && t.shown_publish_at) return Date.parse(t.shown_publish_at) > now ? `مجدول · يصبح عاماً ${at(t.shown_publish_at)}` : 'عام';
     return PRIVACY_AR[t.shown_privacy ?? t.privacy ?? ''] ?? 'نُشر';
   }
+  if (t.kind === 'tt_draft') return 'أُرسل مسودة إلى صندوق TikTok';
+  if (t.kind === 'tt_post') return `نُشر على TikTok · ${TT_PRIVACY_AR[(t.privacy ?? 'private') as TtPrivacy] ?? ''}`;
   const late = lateMinutes(t);
   return `نُشر · ${IG_KIND_AR[t.kind] ?? ''}${late ? ` · متأخراً ${late} دقيقة عن موعده` : ''}`;
 }
@@ -223,12 +225,29 @@ export const TEST_ERROR_AR: Record<string, string> = {
   SILENT_MISMATCH: 'قرأ الفحص منشوراً لا يطابق ما أنشأه، فلم يُعدّ ناجحاً. حُذف المنشور إن أمكن.',
   SILENT_NOT_DELETED: 'أنشأ الفحص المنشور المجدول وقرأه، لكن فيسبوك رفض حذفه. احذفه من هنا أو من Meta Business Suite قبل موعده.',
   PHOTO_REFUSED: 'رفضت فيسبوك الصورة. جرّب صورة أخرى.',
+  // TikTok
+  RATE_LIMIT: 'طلبات كثيرة إلى المنصة في دقيقة. انتظر قليلاً ثم جرّب.',
+  TT_UNAUDITED: 'لم يدقق TikTok التطبيق بعد، فلا ينشر مباشرة إلا على حساب خاص. اجعل الحساب خاصاً في تطبيق TikTok، أو أرسل مسودة.',
+  TT_URL_UNVERIFIED: 'لم يوثَّق عنوان الموقع في تطبيق TikTok، فلا يجلب TikTok الملف منه. راجع خطوة «وثّق عنوان الموقع».',
+  TT_PRIVACY_MISMATCH: 'لم يعد هذا الخيار متاحاً للحساب. أعد فتح النموذج واختر من جديد.',
+  TT_DAILY_CAP: 'بلغ الحساب حد TikTok اليومي للنشر عبر التطبيقات. جرّب غداً.',
+  TT_PENDING_CAP: 'في صندوق الحساب على TikTok خمس مسودات لم تُكمل في يوم. أكملها أو احذفها من تطبيق TikTok أولاً.',
+  TT_BANNED: 'يمنع TikTok هذا الحساب من النشر الآن. افتح تطبيق TikTok وراجع الحساب.',
+  TT_FORMAT: 'رفض TikTok صيغة الملف. جرّب MP4 بترميز H.264.',
+  TT_DURATION: 'مدة المقطع خارج ما يقبله TikTok لهذا الحساب.',
+  TT_FRAME_RATE: 'يقبل TikTok من 23 إلى 60 إطاراً في الثانية.',
+  TT_PICTURE_SIZE: 'أبعاد المقطع خارج ما يقبله TikTok (من 360 إلى 4096 بكسل).',
+  TT_PULL_FAILED: 'لم يستطع TikTok جلب الملف من الموقع. أعد المحاولة بعد قليل.',
+  TT_TEXT_REFUSED: 'رفض TikTok نص الشرح.',
+  TT_SPAM: 'أوقف TikTok النشر لاشتباهه بإزعاج. انتظر قبل تجربة أخرى.',
+  TT_WAIT_TOO_LONG: 'أطال TikTok جلب المقطع وفحصه. ابدأ من جديد بملف أصغر.',
+  TT_NO_DELETE: 'لا يسمح TikTok للتطبيقات بحذف منشور. احذفه من تطبيق TikTok نفسه.',
 };
 
 // ---------------------------------------------------------------------------
 // Instagram (MVP_draft.md section 72)
 // ---------------------------------------------------------------------------
-export type TestKind = 'video' | 'story_image' | 'story_video' | 'image' | 'reel' | 'fb_silent' | 'fb_text' | 'fb_photo' | 'fb_reel';
+export type TestKind = 'video' | 'story_image' | 'story_video' | 'image' | 'reel' | 'fb_silent' | 'fb_text' | 'fb_photo' | 'fb_reel' | 'tt_draft' | 'tt_post';
 /** What the person chooses; a Story becomes a picture or a video Story by its file. */
 export type IgChoice = 'story' | 'image' | 'reel';
 export const IG_PICTURE_MAX = 8 * 1024 * 1024;
@@ -350,3 +369,73 @@ export const fbPageUrl = (id: string | null | undefined) => (id && /^[0-9]{5,30}
 /** Where a Page's scheduled posts are listed, for a silent check whose delete was refused. */
 export const fbScheduledUrl = (id: string | null | undefined) =>
   id && /^[0-9]{5,30}$/.test(id) ? `https://business.facebook.com/latest/posts/scheduled_posts?asset_id=${id}` : null;
+
+// ---------------------------------------------------------------------------
+// TikTok (MVP_draft.md section 79)
+// ---------------------------------------------------------------------------
+// From TikTok's Content Posting API as read on 2026-11-15: a caption has at most 2200 UTF-16 units; TikTok fetches the file
+// (MP4 or MOV here) from the site's temporary address; a draft waits in the creator's TikTok inbox, at most 5 pending in 24
+// hours; an unaudited app posts only as «لي فقط» and only to a private account; the API cannot delete or schedule a post.
+export type TtChoice = 'draft' | 'post';
+export const TT_KIND: Record<TtChoice, TestKind> = { draft: 'tt_draft', post: 'tt_post' };
+export const TT_KIND_AR: Record<string, string> = { tt_draft: 'مسودة في صندوق TikTok', tt_post: 'منشور مباشر' };
+export const TT_VIDEO_MAX = IG_VIDEO_MAX;
+export const TT_CAPTION_MAX = 2200;
+/** TikTok's privacy levels by the site's short names, in TikTok's own order, and their words as TikTok's app says them. */
+export type TtPrivacy = 'public' | 'friends' | 'followers' | 'private';
+export const TT_PRIVACY_ORDER: readonly TtPrivacy[] = ['public', 'friends', 'followers', 'private'];
+export const TT_PRIVACY_AR: Record<TtPrivacy, string> = { public: 'الجميع', friends: 'الأصدقاء', followers: 'المتابعون', private: 'أنا فقط' };
+export const isTtKind = (k: string): k is 'tt_draft' | 'tt_post' => k === 'tt_draft' || k === 'tt_post';
+/** The page asks TikTok again this often while it fetches the video, and gives up after this long. */
+export const TT_POLL_MS = 5000;
+export const TT_WAIT_MS = 10 * 60 * 1000;
+/** TikTok's own pages the consent sentence links to. */
+export const TT_MUSIC_URL = 'https://www.tiktok.com/legal/page/global/music-usage-confirmation/en';
+export const TT_BRANDED_URL = 'https://www.tiktok.com/legal/page/global/bc-policy/en';
+
+/** The length TikTok counts a caption in: UTF-16 units. */
+const units = (s: string) => s.length;
+
+/**
+ * What is wrong with a TikTok test before it is sent, in words, or null. For a post, `privacy` is the person's own choice (TikTok
+ * asks that none is chosen in advance), and the commercial switches follow TikTok's rules for its posting page.
+ */
+export function ttProblem(t: {
+  kind: TestKind;
+  size?: number | null;
+  mime?: string | null;
+  seconds?: number | null;
+  maxSeconds?: number | null;
+  caption: string;
+  privacy?: TtPrivacy | null;
+  commercial?: boolean;
+  ownBrand?: boolean;
+  branded?: boolean;
+}): string | null {
+  if (!(IG_VIDEO_TYPES as readonly string[]).includes(t.mime ?? '')) return 'يقبل TikTok هنا الفيديو MP4 أو MOV.';
+  if (!t.size || t.size < 1) return 'الملف فارغ.';
+  if (t.size > TT_VIDEO_MAX) return 'التجربة تقبل مقطعاً حتى 100 ميغابايت.';
+  if (t.seconds != null && t.seconds < 1) return 'المقطع أقصر من ثانية.';
+  if (t.seconds != null && t.maxSeconds != null && t.seconds > t.maxSeconds) return `يقبل هذا الحساب على TikTok مقطعاً حتى ${clockOf(t.maxSeconds)}.`;
+  if (t.kind === 'tt_draft') return null;
+  if (units(t.caption) > TT_CAPTION_MAX) return `الشرح أطول من ${TT_CAPTION_MAX} حرف.`;
+  if (!t.privacy) return 'اختر من يرى المنشور.';
+  if (t.commercial && !t.ownBrand && !t.branded) return 'اختر «علامتك التجارية» أو «محتوى ممول» أو كليهما، أو أطفئ الإفصاح.';
+  if (t.branded && t.privacy === 'private') return 'المحتوى الممول لا يكون «أنا فقط».';
+  return null;
+}
+const clockOf = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+/** The list's title for a TikTok test: the caption's first line, else the kind. Never holds < or >. */
+export function ttTitle(kind: TestKind, caption: string): string {
+  const line = caption.split(/\r?\n/).find((l) => l.trim())?.trim().replace(/[<>]/g, '') ?? '';
+  const t = [...line].slice(0, TITLE_MAX).join('');
+  return t || `تجربة ${TT_KIND_AR[kind] ?? ''}`.trim();
+}
+
+/** The label TikTok puts on a post with the commercial disclosure on. */
+export function ttLabel(ownBrand: boolean, branded: boolean): string | null {
+  if (branded) return 'سيُوسم المنشور «شراكة مدفوعة».';
+  if (ownBrand) return 'سيُوسم المنشور «محتوى ترويجي».';
+  return null;
+}

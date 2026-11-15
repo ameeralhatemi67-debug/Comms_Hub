@@ -1,6 +1,6 @@
 {
   "script": "qa/direct-publish-flow.cjs",
-  "run": "2026-11-05T11:05:36.247Z",
+  "run": "2026-11-15T09:13:39.571Z",
   "checks": [
     {
       "name": "the button says what it is, and its menu is closed",
@@ -190,7 +190,7 @@
     {
       "name": "sent as a direct Story at that Riyadh time",
       "pass": true,
-      "detail": "{\"account\":\"a-ig\",\"kind\":\"story_image\",\"source\":\"device\",\"size\":57792,\"mime\":\"image/jpeg\",\"caption\":\"\",\"alt\":\"\",\"purpose\":\"direct\",\"scheduled_for\":\"2026-11-06T13:05:00.000Z\"}"
+      "detail": "{\"account\":\"a-ig\",\"kind\":\"story_image\",\"source\":\"device\",\"size\":57792,\"mime\":\"image/jpeg\",\"caption\":\"\",\"alt\":\"\",\"purpose\":\"direct\",\"scheduled_for\":\"2026-11-16T11:13:00.000Z\"}"
     },
     {
       "name": "the file goes now, and the server is told it arrived",
@@ -205,7 +205,7 @@
     {
       "name": "it says it is scheduled, and may be cancelled before its time",
       "pass": true,
-      "detail": "جُدول، ويُنشر 06‏/11‏/2026، 4:05 م. يبقى في القائمة أدناه حتى موعده، ويمكن إلغاؤه قبله."
+      "detail": "جُدول، ويُنشر 16‏/11‏/2026، 2:13 م. يبقى في القائمة أدناه حتى موعده، ويمكن إلغاؤه قبله."
     },
     {
       "name": "said in words",
@@ -255,7 +255,7 @@
     {
       "name": "the account's sheet lists its direct posts and says where they are managed",
       "pass": true,
-      "detail": "المنشورات المباشرة\n\nتُنشر من «نشر مباشر» في «الرئيسية»، خارج دورة العمل. منه تُلغى جدولتها أو تُحذف.\n\nمنشور ينتظر\nمجدول · يُنشر 06‏/11‏/2026، 3:05 م · 05‏/11‏/2026، 4:05 ص · مدير الفحص\nمنشور تأخر\nنُشر"
+      "detail": "المنشورات المباشرة\n\nتُنشر من «نشر مباشر» في «الرئيسية»، خارج دورة العمل. منه تُلغى جدولتها أو تُحذف.\n\nمنشور ينتظر\nمجدول · يُنشر 16‏/11‏/2026، 1:13 م · 15‏/11‏/2026، 2:13 ص · مدير الفحص\nمنشور تأخر\nنُشر"
     },
     {
       "name": "one waiting, with its time",

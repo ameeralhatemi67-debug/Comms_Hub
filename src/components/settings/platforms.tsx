@@ -408,6 +408,19 @@ function Advanced({ p, impact, canManage, busy, lock, act, onEdit, onDelete }: {
             >
               {p.enabled ? 'إيقاف' : 'تفعيل'}
             </button>
+            {providerOf(p.key) && p.key !== 'youtube' && (
+              <button
+                type="button"
+                className="pf-btn fix st-reset"
+                disabled={busy}
+                data-hold={HOLD.platformReset}
+                {...(canManage
+                  ? { onClick: () => void act('platform_app_reset', { p_key: p.key }, `أُعيد ضبط ${p.label_ar}: يبدأ إعدادها من الخطوة الأولى.`) }
+                  : lock('إعادة الضبط لمن يملك «إدارة المنصات وتطبيقاتها» و«أسرار الاتصالات».'))}
+              >
+                إعادة ضبط
+              </button>
+            )}
             {!p.builtin && (
               <button type="button" className="pf-btn fix st-delete" disabled={busy} {...(canManage ? { onClick: onDelete } : lock('الحذف لمن يملك «إدارة المنصات وتطبيقاتها».'))}>
                 حذف

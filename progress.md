@@ -4425,3 +4425,35 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   is not built yet.
 - **Not done, said plainly.** Not pushed. The sandbox's keys are stored on comms-hub and the test account is in the sandbox's
   «Target Users»; both are to be removed when the TikTok work ends.
+
+### 2026-11-15: «تجربة النشر» and «نشر مباشر» on TikTok, and «إعادة ضبط» of a platform
+
+- **Owner direction.** After connecting the test account to the sandbox: make the TikTok test and publishing ready, with TikTok's own
+  choices where it has them, and add a way to remove a connected account and a platform's connection. `MVP_draft.md` section 79.
+- **TikTok's docs, read the same day** (creator info, direct post, upload, status, media transfer, sharing guidelines): a draft to the
+  inbox or a direct post with one of four privacies; until the audit, direct posts are «أنا فقط» on a private account only; no
+  schedule and no delete in the API. TikTok's guidelines name a tool for a team's own accounts as not acceptable for the audit, so
+  the audit may be refused.
+- **Built.**
+  - Migration `20261115120000_platform_tests_tiktok.sql`: kinds `tt_draft` and `tt_post`, TikTok's privacies, `publish_id` as the
+    container, a TikTok row published with no post id, direct posts in «سجل النشاط».
+  - `src/lib/platforms/tiktok.ts`, `test-tiktok.ts`, `POST /api/platforms/test/creator`, and the routes. The file is fetched by TikTok
+    from the temporary address; a post id is read digit for digit from TikTok's text (a 64-bit id would be rounded as a number).
+  - `src/components/work/tiktok-test.tsx` in the account sheet and in «نشر مباشر»: a draft by default, a post following TikTok's posting
+    rules (creator read on opening, nickname, no default privacy, interactions and disclosure off, consent, preview, long press).
+  - Migration `20261115130000_platform_app_reset.sql` and «إعادة ضبط» under «خيارات متقدمة» in «المنصات». An account's «حذف» and «فصل»
+    already existed under «خيارات أخرى» in its sheet.
+  - The TikTok guide's «أضف المنتجين» now says to verify the domain in «Verify domains» (PULL_FROM_URL needs it); its picture redrawn.
+  - «متصل حتى» says the year when it is not this year.
+- **Verified, numbers.**
+  - `npm test` **952 of 952** (`tests/tiktok-test.test.mjs` new, 10 tests: the calls against a fake TikTok, the error words, a 19-digit
+    id kept whole, the shared rules, parity with the migration, the panel's posting rules, the reset; three older tests updated for
+    TikTok). `npm run typecheck` clean, `npm run build` clean.
+  - On a private container with every migration replayed: `platform_tests_tiktok_rules.sql` **46 of 46**, `platform_app_reset_rules.sql`
+    **20 of 20**, and the older rules unchanged: platform tests 95, Instagram 62, Facebook 48, direct publish 45, direct schedule 69,
+    YouTube choices 36, all passing.
+  - Browser: `qa/tiktok-test-flow.cjs` **43 of 43** (new); facebook 37, instagram 43, youtube 68, direct publish 59, platforms 136,
+    guide modal 21, all passing. The screenshots were looked at; the first showed checkboxes drawn as large as fields, fixed.
+- **Not verified.** Nothing has reached TikTok: the fake stands in for it. Whether the sandbox accepts a pull from the site's address
+  without its own URL verification is unknown until the first real test.
+- **Not done, said plainly.** Neither migration is applied to comms-hub; nothing is pushed. The reset has not been used.

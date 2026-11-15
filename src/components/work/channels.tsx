@@ -7,8 +7,8 @@
 // connects to nothing, for trying a platform that is not set up, and an authorisation runs 60 days. Approval binds to
 // the account and its handle, so renaming a handle re-opens «المنصات والحسابات» (account_save), and an account in use by
 // approved, scheduled or in-review work cannot be stopped or deleted. Publishing works is a simulation; a YouTube, an
-// Instagram or a Facebook account's sheet alone publishes a real test (youtube-test.tsx, instagram-test.tsx and
-// facebook-test.tsx, MVP_draft.md 71 to 73).
+// Instagram, a Facebook or a TikTok account's sheet alone publishes a real test (youtube-test.tsx, instagram-test.tsx,
+// facebook-test.tsx and tiktok-test.tsx, MVP_draft.md 71 to 73 and 79).
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { SetupGuide } from '../setup-guide';
@@ -30,6 +30,7 @@ import { DirectPosts } from './direct-posts';
 import { NOW_CHOICES, choiceSub, choiceWord, defaultChoice } from '@/lib/work/youtube-choices';
 import { FacebookTest } from './facebook-test';
 import { InstagramTest } from './instagram-test';
+import { TikTokTest } from './tiktok-test';
 import { YouTubeTest } from './youtube-test';
 
 const LOCKING = ['APPROVED', 'SCHEDULED', 'IN_REVIEW'];
@@ -186,7 +187,7 @@ export function ChannelsPage({ initialOpen }: { /** Draws an account's sheet wit
       </div>
       <p className="wk-simnote">
         <Ic i={TriangleAlert} />
-        <span>الربط حقيقي، أما نشر الأعمال فما زال محاكاة: لا يصل منها شيء إلى المنصة بعد. وحدها «تجربة النشر» في حسابات يوتيوب وإنستغرام وفيسبوك تنشر شيئاً حقيقياً.</span>
+        <span>الربط حقيقي، أما نشر الأعمال فما زال محاكاة: لا يصل منها شيء إلى المنصة بعد. وحدها «تجربة النشر» في حسابات يوتيوب وإنستغرام وفيسبوك وTikTok تنشر شيئاً حقيقياً.</span>
       </p>
       {connNote && (
         <p className={connNote.ok ? 'wk-simnote' : 'wk-err'} role="status">
@@ -489,7 +490,8 @@ function AccountSheet({
           {a.platform === 'youtube' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <YouTubeTest a={a} onReconnect={onReconnect} />}
           {a.platform === 'instagram' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <InstagramTest a={a} onReconnect={onReconnect} />}
           {a.platform === 'facebook' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <FacebookTest a={a} onReconnect={onReconnect} />}
-          {(a.platform === 'youtube' || a.platform === 'instagram') && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <DirectPosts a={a} />}
+          {a.platform === 'tiktok' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <TikTokTest a={a} onReconnect={onReconnect} />}
+          {(a.platform === 'youtube' || a.platform === 'instagram' || a.platform === 'tiktok') && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <DirectPosts a={a} />}
           {mgr && !a.fixed && (
             <details className="pf-more">
               <summary>خيارات أخرى</summary>

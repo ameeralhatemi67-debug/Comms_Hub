@@ -1,6 +1,6 @@
 {
   "script": "qa/instagram-test-flow.cjs",
-  "run": "2026-11-05T11:06:01.473Z",
+  "run": "2026-11-15T09:12:03.142Z",
   "checks": [
     {
       "name": "a link to the account on Instagram, by its username, in a new tab",
@@ -80,7 +80,7 @@
     {
       "name": "the list shows the Story and when it disappears",
       "pass": true,
-      "detail": "تجربة قصة\nقصة · تختفي 06‏/11‏/2026، 2:06 م · 05‏/11‏/2026، 2:06 م · مدير الفحص\nحذف"
+      "detail": "تجربة قصة\nقصة · تختفي 16‏/11‏/2026، 12:12 م · 15‏/11‏/2026، 12:12 م · مدير الفحص\nحذف"
     },
     {
       "name": "a post asks for a caption with counters, and alt text",
@@ -120,7 +120,7 @@
     {
       "name": "for a Reel the library offers videos only",
       "pass": true,
-      "detail": "[\"مقطع الحملة.mp4\\n· الإصدار 3\"]"
+      "detail": "[\"MP4\\nمقطع الحملة.mp4\\n· الإصدار 3\"]"
     },
     {
       "name": "the library video is named with where it is",

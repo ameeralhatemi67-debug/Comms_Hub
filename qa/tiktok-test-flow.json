@@ -1,0 +1,225 @@
+{
+  "script": "qa/tiktok-test-flow.cjs",
+  "run": "2026-11-15T09:10:30.211Z",
+  "checks": [
+    {
+      "name": "it says TikTok cannot delete through applications",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "folded until asked for, and nothing asked of TikTok before",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "opening reads the creator's settings once, and names the account",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a draft by default",
+      "pass": true,
+      "detail": "[\"مسودة في صندوق TikTok\"]"
+    },
+    {
+      "name": "a draft needs no words and no long press, and waits for a file",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says nothing shows until the owner posts it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the chosen video is shown before it goes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a library draft is named by its id, with no privacy, never uploaded by the page",
+      "pass": true,
+      "detail": "{\"account\":\"a-tt\",\"kind\":\"tt_draft\",\"caption\":\"\",\"source\":\"library\",\"asset\":\"f-video\"}"
+    },
+    {
+      "name": "the page asked until it arrived",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the result says it is in the inbox and how to finish it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the list says so, with no delete",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no privacy is chosen in advance, and only the creator's are offered",
+      "pass": true,
+      "detail": "[[\"\",true,\"اختر\"],[\"friends\",false,\"الأصدقاء\"],[\"followers\",false,\"المتابعون\"],[\"private\",false,\"أنا فقط\"]]"
+    },
+    {
+      "name": "comments, Duet and Stitch start off, and the Duet the account turned off is greyed",
+      "pass": true,
+      "detail": "[[false,false],[false,true],[false,false]]"
+    },
+    {
+      "name": "the Duet the account turned off says so",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the commercial disclosure starts off",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a post waits for a privacy to be chosen",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the disclosure on needs one of its two",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "branded content cannot be «أنا فقط»: the choice is undone and the option closed",
+      "pass": true,
+      "detail": "[\"\",true]"
+    },
+    {
+      "name": "it says the label TikTok will put on it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the consent names the branded content policy and the music confirmation, each linked",
+      "pass": true,
+      "detail": "[[\"https://www.tiktok.com/legal/page/global/bc-policy/en\",\"_blank\"],[\"https://www.tiktok.com/legal/page/global/music-usage-confirmation/en\",\"_blank\"]]"
+    },
+    {
+      "name": "and says a post may take minutes to show",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "your own brand alone is labelled «محتوى ترويجي», and the consent drops the policy",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a post asks for a long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the start carries exactly the person's choices",
+      "pass": true,
+      "detail": "{\"account\":\"a-tt\",\"kind\":\"tt_post\",\"privacy\":\"private\",\"caption\":\"تجربة منشور #وسم\",\"comments\":true,\"duet\":false,\"stitch\":false,\"commercial\":true,\"own_brand\":true,\"branded\":false,\"source\":\"device\",\"size\":307200,\"mime\":\"video/mp4\"}"
+    },
+    {
+      "name": "a device file goes to Drive whole, then is registered with the same choices",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the result says it was posted and may take minutes",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the list says it was posted for «أنا فقط», with no delete, and says where to delete",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says what an unaudited app may post",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing was loaded from outside the fixture",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "TikTok's refusal of an unaudited post to a public account is said, with what to do",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "when TikTok will not say the creator's settings, nothing can be sent, and a retry is offered",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the wait says the page must stay open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a cancel closes the test",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the account's own publisher sees the panel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a publisher who is not on the account does not",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an account that needs reconnecting is not tested",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«نشر مباشر» opens at once, under its own name, with no close",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a direct post asks for its own long press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it is sent as a direct post",
+      "pass": true,
+      "detail": "{\"account\":\"a-tt\",\"kind\":\"tt_post\",\"privacy\":\"followers\",\"caption\":\"\",\"comments\":false,\"duet\":false,\"stitch\":false,\"commercial\":false,\"own_brand\":false,\"branded\":false,\"source\":\"device\",\"size\":1000,\"mime\":\"video/mp4\",\"purpose\":\"direct\"}"
+    },
+    {
+      "name": "its list is the direct posts', in their words",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing sideways with the post form open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: the choices are readable on their ground",
+      "pass": true,
+      "detail": "rgb(31, 58, 46) / rgb(232, 241, 234) / rgb(14, 31, 24)"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 43,
+  "passed": 43,
+  "failed": 0
+}

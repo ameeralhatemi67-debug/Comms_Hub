@@ -286,7 +286,7 @@ test('direct posts belong to no project, follow «لي وحدي», keep apart at
   assert.match(CALENDAR, /const direct = useDirectPosts\(\);/);
   assert.match(CALENDAR, /data-cal="direct"/);
   assert.match(CALENDAR, /const canDrag = \(e: CalEntry\) =>\n\s+!!e\.w &&/, 'only a work is dragged');
-  assert.match(CHANNELS, /\(a\.platform === 'youtube' \|\| a\.platform === 'instagram'\) && oauth && \(mgr \|\| \(pub && a\.publishers\.includes\(w\.me\)\)\) && <DirectPosts a=\{a\} \/>/);
+  assert.match(CHANNELS, /\(a\.platform === 'youtube' \|\| a\.platform === 'instagram' \|\| a\.platform === 'tiktok'\) && oauth && \(mgr \|\| \(pub && a\.publishers\.includes\(w\.me\)\)\) && <DirectPosts a=\{a\} \/>/);
 });
 
 test('the sheet\'s line says where a direct post stands', () => {

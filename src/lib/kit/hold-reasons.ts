@@ -56,6 +56,12 @@ export const HOLD = {
   fbTestPost: 'يراه كل من يزور الصفحة فور نشره ويبقى حتى يُحذف.',
   /** «حسابات المنصات»: delete a test post from a Facebook Page. */
   fbTestDelete: 'يُحذف المنشور من الصفحة على فيسبوك نهائياً، ولا يُسترجع.',
+  /** «المنصات»: forget a platform's app and its saved steps (MVP_draft.md 79.4). */
+  platformReset: 'ينسى الموقع تطبيق المنصة وسره وخطواتها المحفوظة، فتبدأ من الخطوة الأولى. التطبيق على موقع المنصة يبقى حتى يُحذف هناك.',
+  /** «حسابات المنصات»: a TikTok test post, which goes out at once (MVP_draft.md section 79). A draft to the inbox needs none. */
+  ttTestPost: 'يُنشر المقطع على الحساب في TikTok فوراً، ولا يحذفه الموقع: يُحذف من تطبيق TikTok.',
+  /** «نشر مباشر» on TikTok: outside the work cycle, and only TikTok's app can delete it. */
+  directTikTok: 'يُنشر على الحساب في TikTok الآن، خارج دورة العمل، ويُبلَّغ ناشرو الحساب. لا يحذفه الموقع: يُحذف من تطبيق TikTok.',
   // Permissions (Permissions_Plan.md 10, «New hold buttons»).
   /** «الحسابات»: remove a member. */
   removeMember: 'إزالة العضو تفصله عن المركز وتبقي أعماله لدى من يُسند إليه.',

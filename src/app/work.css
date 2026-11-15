@@ -1040,6 +1040,13 @@ p.pf-note.info{background:var(--surface-2);border:1px solid var(--line);color:va
 .yt-f textarea{display:block;width:100%;min-height:72px;margin-top:6px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px;resize:vertical}
 .yt-file input[type=file]{display:none}
 .yt-chip{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
+.tt-preview{display:block;width:100%;max-width:320px;max-height:360px;margin-top:8px;border-radius:8px;background:#000}
+.tt-allow{border:1px solid var(--line);border-radius:8px;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+.tt-allow legend{padding:0 4px;font-weight:600}
+.tt-check{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}
+.tt-check input{width:auto;min-height:0;margin:0;flex:none}
+.tt-check small{color:var(--muted);font-size:12px}
+.tt-check[aria-disabled]{color:var(--muted)}
 .yt-chip b{flex:1 1 auto;min-width:0;font-size:13px;font-weight:600;overflow-wrap:anywhere}
 .yt-chip small{font-size:12px;color:var(--muted)}
 .yt-progress{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:13px}

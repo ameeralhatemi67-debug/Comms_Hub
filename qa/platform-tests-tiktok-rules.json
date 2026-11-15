@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/platform_tests_tiktok_rules.sql",
+  "script_md5": "333b65e47a2c497b95fa9165b4f5e7b3",
+  "migration": {
+    "file": "supabase/migrations/20261115120000_platform_tests_tiktok.sql",
+    "file_md5": "5aa9f3b9d365378e3ecfa88cc823a229",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-15T08:52:18.156Z",
+  "migrations_replayed": 74,
+  "differ": [],
+  "total": 46,
+  "passed": 46
+}
