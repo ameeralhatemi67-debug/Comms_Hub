@@ -4471,3 +4471,10 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   `20261115130000_platform_app_reset.sql` were handed to the owner to run, in that order, in the SQL editor of comms-hub. Until then
   the TikTok panel's server steps are refused by the database (the account is not one it lets anyone test) and «إعادة ضبط» answers
   that the request could not be done; nothing else changes.
+- **Applied by the owner, then checked.** The owner ran both files in the SQL editor of comms-hub. Signed out, the public API answers
+  «permission denied for function platform_app_reset» (it exists, and anon may not run it) where a missing name answers PGRST202. The
+  owner then ran the read-only `qa/sql/check-tiktok-migrations.sql` (first proved 9 of 9 on a private container) on comms-hub: **all 9
+  lines true** (the TikTok kinds and privacies, who may test, the start, the privacy read by the server, the arrival with no post id
+  and the old rule gone, the reset and its log). The migration history of comms-hub does not list them, since they did not go through
+  the connector.
+- **Now.** TikTok's test, «نشر مباشر» and «إعادة ضبط» are live. Untried against TikTok itself; the first test should be a draft.
