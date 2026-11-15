@@ -4398,3 +4398,30 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - signed-out 28, tables without a policy 13 and the password notice 1 are unchanged.
 - **Now.** Every migration of the director's notes, steps 1 to 5, is on comms-hub. Main up to this entry may be pushed; that is the
   release session's to do, and it was told.
+
+### 2026-11-15: the TikTok setup guide, with pictures, from the owner's walk
+
+- **Owner direction.** Make the TikTok steps as clear as the YouTube and Instagram ones, with pictures, so the director can set it up
+  alone; then connect the account and build a TikTok test like YouTube's and Instagram's. The walk itself is not the real setup: at the
+  end the site's TikTok connection is reset for the director.
+- **Live before this entry.** TikTok's URL-prefix signature file, pushed alone as `43d784f` off `origin/main` with the owner's yes (local
+  `main` stays ahead with its unpushed commits). The live site served it about two minutes after the push, and TikTok verified the prefix.
+- **Built (`MVP_draft.md` section 67.9).**
+  - The `tiktok` guide rewritten: 12 steps with numbered actions, copy fields and notes, from the organization to the review.
+  - 29 pictures in `public/guides/tiktok/` from the owner's 45 screenshots (`scripts/guide-shots.mjs`, set `tiktok`), names blurred.
+  - `public/brand/comms-hub-icon-1024.png`, the logo at TikTok's icon size.
+  - A note in `connect_tiktok`: before approval only an account in «Target Users» connects.
+  - `.su-copy` wraps between words.
+- **Verified, numbers.**
+  - `npm test` **942 of 942** (a new test: the 12 ids, which are implied, the 29 files at their sizes and nothing else in the folder, the
+    rings equal to the script's, the slash, the 120 and 1000 character limits, the icon at 1024, and no name or token of the originals in
+    the words or the script; the platform-state test now needs `details` with `review`).
+  - `npm run typecheck` clean, `npm run build` clean.
+  - `qa/guide-modal.cjs` **21 of 21** (five new: twelve steps and their actions, 29 pictures loaded inside the dialog, English isolated,
+    nothing sideways on a computer or a phone). The screenshots were looked at.
+  - `qa/platforms-flow.cjs` **136 of 136**, its TikTok counts moved from 9 steps to 12.
+  - Every picture was looked at for the place of its rings and its blur.
+- **Not verified.** Following the guide from the start on a fresh TikTok account. The review's explanation describes a TikTok test that
+  is not built yet.
+- **Not done, said plainly.** Not pushed. The sandbox's keys are stored on comms-hub and the test account is in the sandbox's
+  «Target Users»; both are to be removed when the TikTok work ends.

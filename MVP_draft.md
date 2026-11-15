@@ -3495,6 +3495,34 @@ better wording of each step with the English set apart as in 67.5, pictures of t
 - **Not yet done.** The steps from «أنشئ التطبيق» on: the owner could not find «Create App» on the dashboard and is sending the next pages.
 - **Unchanged.** Saved progress, every step id, every rule of the database.
 
+## 67.9 The TikTok guide, from the owner's walk, 2026-11-15
+
+The owner walked through TikTok for Developers with a test account and sent 45 screenshots, so that the director can later follow the
+steps alone. The walk is not the real setup: once the guide and the TikTok test are done, the site's TikTok connection is reset and the
+director starts from the first step.
+
+- **What TikTok's pages showed.**
+  - An app belongs to an organization, which must exist first («My organizations», «Create an organization»; its name never changes).
+  - «Create app» asks a name and a type; the type is «Other» and never changes.
+  - The website is proved with «URL properties», «URL prefix» and a signature file the site serves. «Domain» needs a DNS record the site
+    does not have. The website in «Basic information» must equal the verified prefix letter by letter, so it ends with a slash.
+  - «Production» saves nothing until the review's explanation and demo video are filled. The demo is recorded in a «Sandbox», which
+    saves with «Apply changes», takes the same products, redirect address and scopes, and admits only the accounts in «Target Users».
+  - «Share Kit» and «Verify domains» (pull_by_url) are not needed: every product and scope must appear in the demo video, and the site
+    sends the file itself.
+- **The guide** (`src/lib/setup-guides.ts`, `tiktok`) has 12 steps: `org`, `app`, `verify`, `sandbox`, `products`, `redirect`, `scopes`,
+  `targets`, `keys`, `details`, `review`, `audit`. Every step before the keys is `implied`. `details` (Production's basic information)
+  moved after the keys and is no longer implied, because it can only be saved with the review; the keys are the sandbox's until TikTok
+  approves the app. The values to paste (website with its slash, icon, a description of 98 characters, terms, privacy, and the review's
+  explanation of 920 characters) are copy fields of their steps. The icon is `public/brand/comms-hub-icon-1024.png`, made from the logo.
+- **Pictures.** 29, in `public/guides/tiktok/`, made by `node scripts/guide-shots.mjs <folder> tiktok`; the organization's name, the
+  test account's name and picture and the signature file's name are blurred, and the originals are not kept.
+- **A value to copy** now wraps between words and breaks inside one only when it must (`.su-copy`, `overflow-wrap:anywhere`), so a
+  paragraph such as the review's explanation reads normally and an address still fits.
+- **Not yet true.** The review's explanation describes the TikTok test publish, which is not built yet; it is checked again when it is.
+  Nobody has followed the new steps from the start on a fresh TikTok account.
+- **Unchanged.** Every rule of the database. Saved progress keeps its ids; a saved `details` still counts.
+
 ---
 
 # 68. «ورقة الكتابة» and the writing documents, 2026-11-02

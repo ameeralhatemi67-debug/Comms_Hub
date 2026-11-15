@@ -119,7 +119,7 @@ const sides = (t) =>
     await t.screenshot({ path: path.join(out, '01-platforms.png'), fullPage: true });
     const states = await t.locator('.pf-row').evaluateAll((l) => Object.fromEntries(l.map((e) => [e.dataset.platform, e.dataset.state])));
     check('every platform has one state, worked out from what is stored', JSON.stringify(states) === JSON.stringify({ x: 'issue', youtube: 'steps', tiktok: 'steps', linkedin: 'none', instagram: 'ok', snapchat: 'manual', mail: 'mail' }), JSON.stringify(states));
-    check('the words of the chips', (await chip(t, 'x')) === 'يوجد خلل' && (await chip(t, 'linkedin')) === 'غير متصلة' && (await chip(t, 'instagram')) === 'متصلة' && (await chip(t, 'snapchat')) === 'نشر يدوي' && (await chip(t, 'tiktok')) === 'خطوات ناقصة · 6 من 9', await chip(t, 'tiktok'));
+    check('the words of the chips', (await chip(t, 'x')) === 'يوجد خلل' && (await chip(t, 'linkedin')) === 'غير متصلة' && (await chip(t, 'instagram')) === 'متصلة' && (await chip(t, 'snapchat')) === 'نشر يدوي' && (await chip(t, 'tiktok')) === 'خطوات ناقصة · 6 من 12', await chip(t, 'tiktok'));
     check('a stored secret proves the steps it proves: YouTube shows what is left of the shared Google app', (await chip(t, 'youtube')) === 'خطوات ناقصة · 11 من 13' && (await row(t, 'youtube').innerText()).includes('التالي: سجّل عنوان العودة ليوتيوب'), await chip(t, 'youtube'));
     const groups = await t.locator('.pf-group h3').allInnerTexts();
     check('what needs the reader comes first', groups[0].includes('تحتاج منك خطوة') && groups[0].includes('4') && groups[1].includes('لا شيء مطلوب منك الآن'), groups);
@@ -142,8 +142,8 @@ const sides = (t) =>
     await t.waitForTimeout(300);
     await t.screenshot({ path: path.join(out, '03-sheet-keys.png') });
     let text = await sheet(t).innerText();
-    check('it opens where the person stopped, with the bar and the saved word', text.includes('الخطوة 7 من 9') && text.includes('انسخ المفتاح والسر') && text.includes('يُحفظ تقدمك'), text.slice(0, 120));
-    check('the bar shows how far', (await t.locator('.pf-bar').getAttribute('aria-valuenow')) === '67');
+    check('it opens where the person stopped, with the bar and the saved word', text.includes('الخطوة 9 من 12') && text.includes('انسخ المفتاح والسر') && text.includes('يُحفظ تقدمك'), text.slice(0, 120));
+    check('the bar shows how far', (await t.locator('.pf-bar').getAttribute('aria-valuenow')) === '50');
     check('the app id kept from before is there; the secret is not', (await sheet(t).getByLabel('مفتاح العميل (Client key)').inputValue()) === 'client-key-saved' && (await sheet(t).getByLabel('سر العميل (Client secret)').inputValue()) === '');
     const cur = await t.locator('.pf-step.cur .pf-link').getAttribute('href');
     check('the step links to the platform, in a new tab', cur === 'https://developers.tiktok.com/apps/' && (await t.locator('.pf-step.cur .pf-link').getAttribute('target')) === '_blank' && (await t.locator('.pf-step.cur .pf-link').getAttribute('rel')) === 'noopener noreferrer');
@@ -154,10 +154,10 @@ const sides = (t) =>
     await sheet(t).getByLabel('سر العميل (Client secret)').fill('refused-secret');
     await sheet(t).getByRole('button', { name: 'فحص وحفظ' }).click();
     await sheet(t).locator('.pf-note.bad').waitFor();
-    check('a pair the platform refuses stays on the step, and says why', (await sheet(t).locator('.pf-note.bad').innerText()).includes('رفضت المنصة') && (await sheet(t).innerText()).includes('الخطوة 7 من 9'));
+    check('a pair the platform refuses stays on the step, and says why', (await sheet(t).locator('.pf-note.bad').innerText()).includes('رفضت المنصة') && (await sheet(t).innerText()).includes('الخطوة 9 من 12'));
     await sheet(t).getByLabel('سر العميل (Client secret)').fill(SECRET);
     await sheet(t).getByRole('button', { name: 'فحص وحفظ' }).click();
-    await t.waitForFunction(() => document.querySelector('dialog[open]')?.innerText.includes('الخطوة 8 من 9'));
+    await t.waitForFunction(() => document.querySelector('dialog[open]')?.innerText.includes('الخطوة 11 من 12'));
     const after = await calls(t);
     check('the secret went to the route that checks it', after.some((c) => c.name === '/api/platforms/app' && c.args.secret === SECRET && c.args.provider === 'tiktok'));
     const saves = await calls(t, 'platform_setup_save');
@@ -167,11 +167,11 @@ const sides = (t) =>
     // Back and forth, and closing.
     await sheet(t).getByRole('button', { name: 'إغلاق', exact: true }).click();
     await t.locator('dialog.pf-sheet').waitFor({ state: 'detached' });
-    await t.waitForFunction(() => document.querySelector('.pf-row[data-platform="tiktok"] .pf-chip')?.innerText.includes('7 من 9'));
-    check('closing says progress is kept, and the row moved on', (await t.locator('.ml-hint').innerText()).includes('حُفظ تقدمك: 7 من 9'), await chip(t, 'tiktok'));
+    await t.waitForFunction(() => document.querySelector('.pf-row[data-platform="tiktok"] .pf-chip')?.innerText.includes('10 من 12'));
+    check('closing says progress is kept, and the row moved on', (await t.locator('.ml-hint').innerText()).includes('حُفظ تقدمك: 10 من 12'), await chip(t, 'tiktok'));
     await row(t, 'tiktok').locator('.pf-btn').first().click();
     await sheet(t).waitFor();
-    check('coming back opens the same step', (await sheet(t).innerText()).includes('الخطوة 8 من 9') && (await sheet(t).innerText()).includes('قدّم التطبيق للمراجعة'));
+    check('coming back opens the same step', (await sheet(t).innerText()).includes('الخطوة 11 من 12') && (await sheet(t).innerText()).includes('قدّم التطبيق للمراجعة'));
     await sheet(t).locator('.pf-step-btn', { hasText: 'سجّل عنوان العودة' }).click();
     check('any step can be opened', (await sheet(t).locator('.pf-input').innerText()).includes('عنوان العودة'));
     const copy = await sheet(t).locator('.pf-copy input').inputValue();

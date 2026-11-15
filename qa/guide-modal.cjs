@@ -165,6 +165,42 @@ const page = (dark) =>
     check('phone: the Instagram guide fits, pictures included', await fits(igm));
     await igm.context().close();
 
+    // The TikTok guide (MVP_draft.md section 67.9): twelve steps, twenty-nine pictures from the owner's walk of 2026-11-15.
+    const tt = await open({ width: 1056, height: 900 }, '?guide=tiktok');
+    await loadAll(tt);
+    const ttInfo = await tt.evaluate(() => {
+      const d = document.querySelector('dialog[open]');
+      const steps = [...d.querySelectorAll('.su-steps > li')];
+      const imgs = [...d.querySelectorAll('.gd-shot img')];
+      const stray = [];
+      const w = document.createTreeWalker(d.querySelector('.su-body'), NodeFilter.SHOW_TEXT);
+      for (let n = w.nextNode(); n; n = w.nextNode()) if (!n.parentElement.closest('bdi') && /[A-Za-z]/.test(n.textContent)) stray.push(n.textContent.trim().slice(0, 40));
+      return {
+        steps: steps.length,
+        todo: steps.map((li) => li.querySelectorAll('.gd-todo li').length),
+        imgs: imgs.length,
+        loaded: imgs.every((e) => e.naturalWidth > 0 && e.naturalWidth === Number(e.getAttribute('width')) && e.naturalHeight === Number(e.getAttribute('height'))),
+        inside: imgs.every((e) => e.getBoundingClientRect().right <= d.getBoundingClientRect().right + 1 && e.getBoundingClientRect().left >= d.getBoundingClientRect().left - 1),
+        raw: /`|«[^»]*[A-Za-z][^»]*»/.test(d.querySelector('.su-body').innerText.replace(/«[^»]*[؀-ۿ][^»]*»/g, '')),
+        copies: d.querySelectorAll('.su-copy').length,
+        stray,
+      };
+    });
+    await tt.screenshot({ path: path.join(out, '06-tiktok.png') });
+    check('the TikTok guide draws twelve steps, every one but the last with its list of actions', ttInfo.steps === 12 && ttInfo.todo.join() === '5,5,5,4,5,3,3,4,5,5,5,0', JSON.stringify(ttInfo.todo));
+    check('its twenty-nine pictures load at their own size and sit inside the dialog', ttInfo.imgs === 29 && ttInfo.loaded && ttInfo.inside, JSON.stringify({ imgs: ttInfo.imgs, loaded: ttInfo.loaded, inside: ttInfo.inside }));
+    check('English is isolated in the TikTok guide, and no mark is left in its words', ttInfo.stray.length === 0 && !ttInfo.raw, JSON.stringify({ stray: ttInfo.stray, raw: ttInfo.raw }));
+    check('nothing sideways in the TikTok dialog', await fits(tt));
+    await tt.locator('dialog[open] .gd-shot').nth(9).scrollIntoViewIfNeeded();
+    await tt.screenshot({ path: path.join(out, '07-tiktok-sandbox.png') });
+    await tt.context().close();
+    const ttm = await open({ width: 390, height: 844 }, '?guide=tiktok');
+    await loadAll(ttm);
+    check('phone: the TikTok guide fits, pictures included', await fits(ttm));
+    await ttm.locator('dialog[open] .gd-shot').nth(4).scrollIntoViewIfNeeded();
+    await ttm.screenshot({ path: path.join(out, '08-tiktok-phone.png') });
+    await ttm.context().close();
+
     check('no page error and nothing in the console', errs.length === 0, errs.slice(0, 3).join(' | '));
   } catch (e) {
     check('the flow ran to its end', false, String(e.message ?? e).slice(0, 500));

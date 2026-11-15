@@ -57,7 +57,8 @@ test('a stored secret proves the steps before it, except those another connectio
   // For the others the secret is the end of the work.
   for (const k of ['x', 'linkedin', 'instagram']) assert.equal(state(k, { app: app() }), 'ok', k);
   assert.equal(state('tiktok', { app: app() }), 'steps', 'TikTok still has its app review');
-  assert.equal(state('tiktok', { app: app(), setup: { done: ['review'] } }), 'ok');
+  assert.equal(state('tiktok', { app: app(), setup: { done: ['review'] } }), 'steps', 'and the Production details that go with it');
+  assert.equal(state('tiktok', { app: app(), setup: { done: ['details', 'review'] } }), 'ok');
 });
 
 test('the words of a chip, the sentence under a name and the one button', () => {
@@ -158,8 +159,9 @@ test('the facts of 2026-11-01 are the ones in the steps', () => {
 test('the addresses are filled in, and a second value to copy too', () => {
   const g = resolveGuide(GUIDES.tiktok, 'https://hub.example.org', 'tiktok');
   const d = g.steps.find((s) => s.id === 'details');
-  assert.equal(d.copy, 'https://hub.example.org');
-  assert.deepEqual(d.more.map((m) => m.copy), ['https://hub.example.org/terms.html', 'https://hub.example.org/privacy.html']);
+  // TikTok compares the website with the verified prefix letter by letter, so it ends with the slash (2026-11-15).
+  assert.equal(d.copy, 'https://hub.example.org/');
+  assert.deepEqual(d.more.filter((m) => m.label !== 'الوصف').map((m) => m.copy), ['https://hub.example.org/brand/comms-hub-icon-1024.png', 'https://hub.example.org/terms.html', 'https://hub.example.org/privacy.html']);
   assert.doesNotMatch(JSON.stringify(g), /\{origin\}|\{redirect\}/);
 });
 

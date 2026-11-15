@@ -1,6 +1,6 @@
 {
   "script": "qa/platforms-flow.cjs",
-  "run": "2026-11-05T03:08:31.746Z",
+  "run": "2026-11-15T08:15:51.402Z",
   "checks": [
     {
       "name": "every platform has one state, worked out from what is stored",
@@ -10,7 +10,7 @@
     {
       "name": "the words of the chips",
       "pass": true,
-      "detail": "خطوات ناقصة · 6 من 9"
+      "detail": "خطوات ناقصة · 6 من 12"
     },
     {
       "name": "a stored secret proves the steps it proves: YouTube shows what is left of the shared Google app",
@@ -55,7 +55,7 @@
     {
       "name": "it opens where the person stopped, with the bar and the saved word",
       "pass": true,
-      "detail": "إعداد تيك توك\nتُجرى مرة واحدة. بعدها تُضاف الحسابات من «حسابات المنصات» بلا أي من هذه الخطوات.\nخطوات ناقصة · 6 من 9\nإغلا"
+      "detail": "إعداد تيك توك\nتُجرى مرة واحدة. بعدها تُضاف الحسابات من «حسابات المنصات» بلا أي من هذه الخطوات.\nخطوات ناقصة · 6 من 12\nإغل"
     },
     {
       "name": "the bar shows how far",
@@ -100,7 +100,7 @@
     {
       "name": "closing says progress is kept, and the row moved on",
       "pass": true,
-      "detail": "خطوات ناقصة · 7 من 9"
+      "detail": "خطوات ناقصة · 10 من 12"
     },
     {
       "name": "coming back opens the same step",
@@ -115,7 +115,7 @@
     {
       "name": "an address to copy is filled in from the site, whole",
       "pass": true,
-      "detail": "http://127.0.0.1:53362/api/platforms/callback/tiktok"
+      "detail": "http://127.0.0.1:62523/api/platforms/callback/tiktok"
     },
     {
       "name": "Escape closes the sheet",
@@ -200,7 +200,7 @@
     {
       "name": "what needs attention comes first, with why and what depends on it",
       "pass": true,
-      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-08 06:08\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
+      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-18 11:16\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
     },
     {
       "name": "accounts are grouped by platform, each one line",
@@ -210,7 +210,7 @@
     {
       "name": "a line says the state, who publishes, when, and what uses it",
       "pass": true,
-      "detail": "الحساب الرسمي\n@org_official\nمتصل حتى 25 ديسمبر\nناشر الفحص\nنشر تلقائي\nعمل واحد"
+      "detail": "الحساب الرسمي\n@org_official\nمتصل حتى 4 يناير\nناشر الفحص\nنشر تلقائي\nعمل واحد"
     },
     {
       "name": "an account connected to nothing is marked, and never says connected",
@@ -530,17 +530,17 @@
     {
       "name": "a step is one card: its number and name, what it says when it is already done, and the button that goes on",
       "pass": true,
-      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(39, 61, 52)\",\"upDashed\":\"dashed\"}"
+      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(29, 50, 41)\",\"upDashed\":\"dashed\"}"
     },
     {
       "name": "an action a picture shows says which picture; the pictures are numbered and say what their rings mean",
       "pass": true,
-      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(39, 61, 52)\",\"upDashed\":\"dashed\"}"
+      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(29, 50, 41)\",\"upDashed\":\"dashed\"}"
     },
     {
       "name": "the steps still to do are dimmed and drawn dashed, and the one you are on is not",
       "pass": true,
-      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(39, 61, 52)\",\"upDashed\":\"dashed\"}"
+      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(29, 50, 41)\",\"upDashed\":\"dashed\"}"
     },
     {
       "name": "a value to type has its own copy button, and it copies the value exactly",

@@ -90,6 +90,17 @@ const SIMULATION_FB = 'نشر الأعمال ما زال محاكاة. وحده�
 const META_APPS = { href: 'https://developers.facebook.com/apps/', label: 'Meta for Developers' };
 const META_PORTFOLIO = { href: 'https://business.facebook.com/settings', label: 'إعدادات حافظة الأعمال' };
 const TIKTOK_APPS = { href: 'https://developers.tiktok.com/apps/', label: 'TikTok for Developers' };
+const TIKTOK_PORTAL = { href: 'https://developers.tiktok.com/', label: 'TikTok for Developers' };
+/** What TikTok shows people about the app (at most 120 characters, held by tests/setup-guides.test.mjs). */
+const TIKTOK_DESCRIPTION = "Our communications department's internal tool for publishing its own videos to its TikTok account.";
+/** The explanation TikTok asks for in «App review» (at most 1000 characters): what each product and scope does on the site. */
+const TIKTOK_REVIEW =
+  'Comms Hub is the internal web tool of our communications department. ' +
+  'Login Kit: an administrator connects the department\'s own TikTok account from the Connected accounts page. The token stays on our server. ' +
+  'user.info.basic shows the account\'s display name and avatar and checks that the connection still works. ' +
+  'Content Posting API: in the account\'s panel a team member picks a video and writes the caption, then either sends it to the account\'s TikTok inbox as a draft that the owner finishes in TikTok (video.upload), ' +
+  'or posts it directly (video.publish). Before a direct post the page reads the creator info, shows the account\'s nickname, offers only the privacy levels TikTok returns with none chosen in advance, ' +
+  'the comment, duet and stitch settings and the commercial content disclosure, and asks for agreement to TikTok\'s Music Usage Confirmation. The video is sent as a file and the page shows the publish status.';
 const LINKEDIN_APPS = { href: 'https://www.linkedin.com/developers/apps', label: 'تطبيقاتي في LinkedIn' };
 const X_CONSOLE = { href: 'https://console.x.com', label: 'وحدة مطوّري X' };
 /** A picture of a platform's own page (public/guides/<set>/, made by scripts/guide-shots.mjs): Google's console for «google», Meta's pages for «meta». */
@@ -154,6 +165,7 @@ const shotOf =
 const shot = shotOf('google');
 const metaShot = shotOf('meta');
 const xShot = shotOf('x');
+const tiktokShot = shotOf('tiktok');
 
 export const GUIDES: Record<string, Guide> = {
   meta: {
@@ -347,22 +359,240 @@ export const GUIDES: Record<string, Guide> = {
   },
   tiktok: {
     title: 'تجهيز تطبيق TikTok',
-    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال مفتاح العميل وسره في الموقع، ثم مراجعة TikTok وتدقيقها.',
+    intro: 'للمدير. تُجرى مرة واحدة في TikTok for Developers: مؤسسة، ثم تطبيق، ثم بيئة تجربة تُربط بها الحسابات وتُجرَّب، ثم مراجعة TikTok.',
     steps: [
-      { id: 'app', implied: true, t: 'أنشئ التطبيق', b: 'في TikTok for Developers: «Manage apps» ثم «Connect an app»، واختر مؤسسة مالكة له لا حساباً فردياً.', link: TIKTOK_APPS, ok: 'أنشأت التطبيق' },
-      { id: 'details', implied: true, kind: 'copy', t: 'أكمل بيانات التطبيق', b: 'الأيقونة (1024 في 1024)، والاسم، والفئة، والوصف، والمنصة Web. وهذه روابط الموقع والشروط والخصوصية.', copy: '{origin}', copyLabel: 'عنوان الموقع', more: [{ label: 'رابط الشروط', copy: '{origin}/terms.html' }, { label: 'رابط الخصوصية', copy: '{origin}/privacy.html' }], ok: 'أكملتها' },
-      { id: 'verify', implied: true, t: 'وثّق الروابط', b: 'اختر التوثيق بـ«URL prefix». تعطيك TikTok ملف توقيع يوضع على الموقع: أرسله إلى مسؤول النظام ليضيفه، ثم اضغط «Verify».', link: TIKTOK_APPS, ok: 'وثّقتها' },
-      { id: 'products', implied: true, t: 'أضف المنتجين', b: '«Login Kit» و«Content Posting API»، وفعّل فيه «Direct Post».', link: TIKTOK_APPS, ok: 'أضفتهما' },
-      { id: 'redirect', implied: true, kind: 'copy', t: 'سجّل عنوان العودة', b: 'في Login Kit، الحقل «Redirect URI»: الصق هذا العنوان تماماً.', copy: '{redirect}', copyLabel: 'عنوان العودة', ok: 'سجّلت العنوان' },
-      { id: 'scopes', implied: true, t: 'حدّد الصلاحيات', b: 'user.info.basic (يحتاجها فحص الاتصال) وvideo.publish وvideo.upload. صلاحية لم تُمنح تجعل TikTok يرفض الدخول.', link: TIKTOK_APPS, ok: 'حدّدتها' },
-      { id: 'keys', kind: 'keys', t: 'انسخ المفتاح والسر', b: '«Client key» و«Client secret» من «App details». الصقهما هنا فقط، ولا ترسلهما إلى أحد.', link: TIKTOK_APPS },
-      { id: 'review', t: 'قدّم التطبيق للمراجعة', b: 'في «App review» اشرح كل منتج وصلاحية، وارفع فيديو يعرض الاستعمال كاملاً، ثم «Submit for review». يصير التطبيق «Live» بعد الموافقة.', link: TIKTOK_APPS, ok: 'صار Live' },
-      { id: 'audit', kind: 'review', t: 'تدقيق النشر', b: 'قبل اجتياز «التدقيق» كل ما يُنشر مقيّد بالمشاهدة الخاصة: هذه قاعدة TikTok لا قاعدة الموقع.', link: TIKTOK_APPS, ok: 'سأقدّمه لاحقاً' },
+      {
+        id: 'org',
+        implied: true,
+        t: 'أنشئ مؤسسة',
+        b: 'يطلب TikTok أن تملك التطبيقَ مؤسسة لا شخص، فتُنشأ أولاً.',
+        todo: [
+          'افتح الصفحة من الرابط، وسجّل الدخول بحساب TikTok الذي سيملك التطبيق.',
+          'من «Developer Portal» أعلى الصفحة اختر «My organizations».',
+          'اضغط «Create an organization».',
+          'في «Organization name» اكتب اسم القسم، ثم اضغط «Create». لا يتغير الاسم بعد ذلك.',
+          'تفتح صفحة المؤسسة على «Overview».',
+        ],
+        shots: [
+          tiktokShot('org-menu', 350, 205, 'قائمة Developer Portal: My organizations وManage apps', undefined, ['2']),
+          tiktokShot('org-list', 680, 108, 'أعلى صفحة My organizations من جهة اليمين: زر Create an organization', undefined, ['3']),
+          tiktokShot('org-name', 945, 416, 'نافذة Create an organization: حقل Organization name وتحته أن الاسم لا يتغير، وزر Create', undefined, ['4']),
+          tiktokShot('org-page', 537, 152, 'أعلى صفحة المؤسسة: Organizations ثم اسمها، وتبويبات Overview وRoles and access وCompliance وSettings', 'اسم المؤسسة محجوب.'),
+        ],
+        link: TIKTOK_PORTAL,
+        ok: 'أنشأتها',
+      },
+      {
+        id: 'app',
+        implied: true,
+        t: 'أنشئ التطبيق',
+        b: 'التطبيق هو الهوية التي يعرّف بها الموقع نفسه عند TikTok.',
+        todo: [
+          'في صفحة المؤسسة، تحت «Apps»، اضغط «Create app».',
+          'في «App name» اكتب `Comms Hub`. يظهر الاسم لمن يربط حسابه.',
+          'في «App type» اختر «Other». لا يتغير النوع بعد ذلك.',
+          'اضغط «Create app».',
+          'تفتح صفحة التطبيق، وفي أعلاها «Production» و«Sandbox».',
+        ],
+        shots: [
+          tiktokShot('app-create', 480, 300, 'قسم Apps في صفحة المؤسسة: No apps yet وزر Create app', undefined, ['1']),
+          tiktokShot('app-name', 782, 651, 'نافذة Create app: حقل App name وفيه Comms Hub، وثلاثة أنواع آخرها Other مختار، وزر Create app', undefined, ['2', '3', '4']),
+          tiktokShot('app-page', 980, 330, 'صفحة التطبيق: Production وSandbox في أعلاها، والقائمة، وCredentials مخفية', 'الاسم في الصورة كما ظهر بعد الإنشاء.', ['5']),
+        ],
+        info: ['إن بدأت من «Manage apps» ثم «Connect an app» فاختر «Organization» ثم مؤسستك. إن قالت القائمة «No organizations» فارجع إلى الخطوة السابقة.'],
+        link: TIKTOK_APPS,
+        ok: 'أنشأت التطبيق',
+      },
+      {
+        id: 'verify',
+        implied: true,
+        kind: 'copy',
+        t: 'وثّق عنوان الموقع',
+        b: 'يثبت لـTikTok أن الموقع لكم. يُجرى مرة واحدة ويغطي كل عناوين الموقع.',
+        todo: [
+          'أعلى صفحة التطبيق اضغط «URL properties»، ثم «Verify properties».',
+          'اختر «URL prefix». لا تختر «Domain»: يحتاج سجلاً في DNS لا نملكه.',
+          'انسخ العنوان من الحقل أدناه والصقه كما هو، بالشرطة التي في آخره، ثم اضغط «Verify».',
+          'اضغط «Download File» وأرسل الملف إلى مسؤول النظام ليضعه على الموقع، وانتظر حتى يخبرك أنه وُضع.',
+          'اضغط «Verify». يظهر العنوان تحت «Verified properties».',
+        ],
+        copy: '{origin}/',
+        copyLabel: 'عنوان الموقع',
+        shots: [
+          tiktokShot('verify-open', 942, 478, 'نافذة URL properties for Production: «You must verify URL properties» وزر Verify properties', undefined, ['1']),
+          tiktokShot('verify-type', 938, 532, 'نافذة Select property type: Domain بسجل DNS وURL prefix بملف توقيع', undefined, ['2', 'x']),
+          tiktokShot('verify-prefix', 870, 268, 'خيار URL prefix وفي حقله عنوان الموقع منتهياً بشرطة، وزر Verify', undefined, ['3']),
+          tiktokShot('verify-file', 937, 466, 'نافذة Verify URL prefix: زر Download File باسم الملف، ثم Upload to وعنوان الموقع، وزر Verify', 'اسم الملف محجوب: لكل تطبيق ملفه.', ['4', '5']),
+          tiktokShot('verify-error', 922, 382, 'نافذة Your property could not be verified: لم يُعثر على ملف التوقيع، وزرا Back وOk', 'هذا ما يظهر إن ضغطت «Verify» قبل أن يوضع الملف.'),
+          tiktokShot('verify-done', 942, 260, 'نافذة URL properties: عنوان الموقع تحت Verified properties بنوع URL prefix', 'بعد التوثيق.'),
+        ],
+        info: ['إن ظهرت «Your property could not be verified» فالملف لم يوضع بعد، أو وُضع قبل أقل من دقيقتين. اضغط «Back» ثم أعد المحاولة بعد قليل.'],
+        link: TIKTOK_APPS,
+        ok: 'وثّقته',
+      },
+      {
+        id: 'sandbox',
+        implied: true,
+        t: 'أنشئ بيئة التجربة',
+        b: 'لا يحفظ TikTok نسخة «Production» إلا مع طلب المراجعة وفيديو من الموقع نفسه، فالربط والتجربة يبدآن في «Sandbox».',
+        todo: [
+          'أعلى صفحة التطبيق اضغط «Sandbox».',
+          'إن لم تكن هناك بيئة، فاضغط زر الإضافة بجانب «Sandbox» في القائمة وسمّها `Comms Hub test`.',
+          'تأكد أن اللافتة تقول إنك تعدّل بيئة التجربة لا «Production».',
+          'بعد كل تعديل في البيئة اضغط «Apply changes».',
+        ],
+        shots: [
+          tiktokShot('sandbox-menu', 565, 521, 'أعلى صفحة التطبيق على Sandbox: في القائمة Sandbox وبجانبها زر الإضافة، وتحتها Comms Hub test', undefined, ['1', '2']),
+          tiktokShot('sandbox-bar', 975, 100, 'شريط بيئة التجربة: Delete Sandbox وApply changes، ولافتة أنك تعدّل Comms Hub test وهي نسخة Sandbox', undefined, ['3', '4']),
+        ],
+        info: ['إن ضغطت «Save» في «Production» فسترى «This form has 2 errors»: هما شرح المراجعة وفيديوها، ولا يُحفظ شيء قبلهما. هذا طبيعي، وتعود إليهما في آخر الخطوات.'],
+        link: TIKTOK_APPS,
+        ok: 'أنشأتها',
+      },
+      {
+        id: 'products',
+        implied: true,
+        t: 'أضف المنتجين',
+        b: 'Login Kit لربط الحساب، وContent Posting API للنشر. كل منتج يُضاف يجب أن يظهر في فيديو المراجعة، فلا تضف غيرهما.',
+        todo: [
+          'من القائمة افتح «Products»، ثم اضغط «Add products».',
+          'اضغط «Add» في «Login Kit» أولاً: «Content Posting API» لا يُضاف قبله.',
+          'ثم «Add» في «Content Posting API»، ثم «Done». لا تضف «Share Kit»، وإن أضفته فاحذفه بأيقونة السلة على بطاقته.',
+          'في بطاقة «Content Posting API» شغّل «Direct Post».',
+          'اترك «Verify domains» كما هو: يرسل الموقع الملف بنفسه فلا يحتاجه.',
+        ],
+        shots: [
+          tiktokShot('products-add', 787, 650, 'نافذة Add products: Login Kit وShare Kit بزر Add، وContent Posting API رمادي «Requires Login Kit»', undefined, ['2']),
+          tiktokShot('products-added', 785, 858, 'نافذة Add products بعد الإضافة: Login Kit وContent Posting API وعليهما Added، وزر Done', 'الحلقة الحمراء على «Share Kit»: لا يحتاجه الموقع.', ['3', 'x']),
+          tiktokShot('posting', 975, 384, 'بطاقة Content Posting API: مفتاح Direct Post مشغّل، وتحته Verify domains وزر Verify', undefined, ['4', 'x']),
+        ],
+        link: TIKTOK_APPS,
+        ok: 'أضفتهما',
+      },
+      {
+        id: 'redirect',
+        implied: true,
+        kind: 'copy',
+        t: 'سجّل عنوان العودة',
+        b: 'هو العنوان الذي يعيد TikTok الناس إليه بعد موافقتهم، ويجب أن يطابق تماماً.',
+        todo: [
+          'في بطاقة «Login Kit»، تحت «Redirect URI»، اختر «Web».',
+          'انسخ العنوان من الحقل أدناه والصقه بالضبط، بلا مسافة قبله أو بعده.',
+          'اضغط «Apply changes».',
+        ],
+        copy: '{redirect}',
+        copyLabel: 'عنوان العودة',
+        shots: [tiktokShot('redirect', 975, 377, 'بطاقة Login Kit: Redirect URI وتبويب Web وفي الحقل عنوان العودة', undefined, ['1', '2'])],
+        link: TIKTOK_APPS,
+        ok: 'سجّلت العنوان',
+      },
+      {
+        id: 'scopes',
+        implied: true,
+        t: 'حدّد الصلاحيات',
+        b: 'ثلاث صلاحيات فقط، وكل صلاحية تُضاف يجب أن تظهر في فيديو المراجعة.',
+        todo: [
+          'من القائمة افتح «Scopes»، ثم اضغط «Add scopes».',
+          'اختر user.info.basic وvideo.publish وvideo.upload، ولا شيء غيرها.',
+          'تأكد أن الثلاث في القائمة، ثم اضغط «Apply changes».',
+        ],
+        shots: [tiktokShot('scopes', 975, 431, 'قسم Scopes: زر Add scopes وتحته user.info.basic وvideo.publish وvideo.upload', undefined, ['1', '3'])],
+        info: ['user.info.basic يقرأ اسم الحساب ويفحص الاتصال، وvideo.publish ينشر مباشرة، وvideo.upload يرسل الفيديو مسودةً إلى صندوق الحساب في TikTok.'],
+        link: TIKTOK_APPS,
+        ok: 'حدّدتها',
+      },
+      {
+        id: 'targets',
+        implied: true,
+        t: 'أضف حساب التجربة',
+        b: 'لا يدخل بيئة التجربة إلا حساب TikTok مضاف إليها، فأضف حساب القسم الذي سيُربط.',
+        todo: [
+          'من القائمة افتح «Sandbox settings»، وفي «Target Users» اضغط «Add account».',
+          'اضغط «Continue»، وسجّل الدخول بحساب القسم في TikTok.',
+          'يسأل TikTok إن كنت تفوّض الحساب مستخدمَ اختبار للتطبيق: اضغط «متابعة».',
+          'يظهر الحساب في القائمة. أضف بالطريقة نفسها كل حساب آخر سيُربط، ثم اضغط «Apply changes».',
+        ],
+        shots: [
+          tiktokShot('targets-add', 975, 257, 'قسم Target Users: «Try out your Sandbox with an authorized target account» وزر Add account', undefined, ['1']),
+          tiktokShot('targets-continue', 443, 267, 'نافذة Connect TikTok account: سيُطلب منك الدخول إلى TikTok، وزرا Cancel وContinue', undefined, ['2']),
+          tiktokShot('targets-consent', 797, 673, 'صفحة TikTok بالعربية: يحتاج تطبيق TikTok for Developers إلى التحقق من حسابك، وزرا متابعة وإلغاء', 'اسم الحساب وصورته محجوبان.', ['3']),
+          tiktokShot('targets-list', 975, 292, 'قسم Target Users: الحساب المضاف ووقت إضافته وزر Remove', 'اسم الحساب محجوب.', ['4']),
+        ],
+        link: TIKTOK_APPS,
+        ok: 'أضفته',
+      },
+      {
+        id: 'keys',
+        kind: 'keys',
+        t: 'انسخ المفتاح والسر',
+        b: 'قيمتان من بيئة التجربة، تلصقهما هنا وحدهما ولا ترسلهما إلى أحد.',
+        todo: [
+          'في بيئة التجربة افتح «App details» ثم «Credentials».',
+          'اضغط العين بجانب «Client key» وانسخه، والصقه في الحقل الأول هنا.',
+          'وكذلك «Client secret» في الحقل الثاني. لا ترسله إلى أحد.',
+          'اترك «الصلاحيات المطلوبة» في «خيارات أخرى» فارغاً: الافتراضي هو الثلاث نفسها.',
+          'اضغط «فحص وحفظ». يسأل الموقع TikTok أولاً، ولا يحفظ شيئاً إن رفض.',
+        ],
+        shots: [
+          tiktokShot('keys-menu', 291, 325, 'قائمة التطبيق: App details مفتوحة وتحتها Credentials وBasic information', undefined, ['1']),
+          tiktokShot('keys', 975, 164, 'قسم Credentials: Client key وClient secret مخفيان، وبجانب كل منهما أيقونة العين', 'لا تصوّر المفتاحين وهما ظاهران.', ['2', '3']),
+        ],
+        info: ['بعد أن يوافق TikTok على المراجعة ويصير التطبيق «Live»، تُستبدل بهذين مفتاحا «Production» من هذه الخطوة نفسها.'],
+        link: TIKTOK_APPS,
+      },
+      {
+        id: 'details',
+        kind: 'copy',
+        t: 'أكمل بيانات «Production»',
+        b: 'تُملأ في «Production» مع طلب المراجعة، لأن TikTok لا يحفظها قبله.',
+        todo: [
+          'اضغط «Production» أعلى الصفحة، ثم من القائمة «App details» ثم «Basic information».',
+          'في «App icon» ارفع أيقونة الموقع: نزّلها من العنوان أدناه (1024 في 1024).',
+          'في «App name» `Comms Hub`، وفي «Category» اختر «Business»، وفي «Description» الصق الوصف من الحقل أدناه.',
+          'في «Terms of Service URL» و«Privacy Policy URL» الصق الرابطين من الحقلين أدناه.',
+          'في «Platforms» اختر «Web»، والصق عنوان الموقع بالشرطة التي في آخره. بدونها يقول TikTok «This URL is not verified».',
+        ],
+        copy: '{origin}/',
+        copyLabel: 'عنوان الموقع',
+        more: [
+          { label: 'أيقونة الموقع', copy: '{origin}/brand/comms-hub-icon-1024.png' },
+          { label: 'الوصف', copy: TIKTOK_DESCRIPTION },
+          { label: 'رابط الشروط', copy: '{origin}/terms.html' },
+          { label: 'رابط الخصوصية', copy: '{origin}/privacy.html' },
+        ],
+        shots: [
+          tiktokShot('details-category', 582, 400, 'قائمة Category مفتوحة: Books وBusiness وEducation وEntertainment وFinance', undefined, ['3']),
+          tiktokShot('details-web', 975, 326, 'Platforms وعليها Web، وحقل Web/Desktop URL بلا شرطة في آخره وتحته «This URL is not verified»', 'الحلقة الحمراء: عنوان بلا شرطة في آخره لا يطابق العنوان الموثَّق.', ['x']),
+        ],
+        link: TIKTOK_APPS,
+        ok: 'أكملتها',
+      },
+      {
+        id: 'review',
+        kind: 'copy',
+        t: 'قدّم التطبيق للمراجعة',
+        b: 'يراجع TikTok التطبيق بفيديو يعرض الربط والنشر من الموقع نفسه. بعد الموافقة يصير «Live».',
+        todo: [
+          'في «Production» أضف المنتجين وعنوان العودة والصلاحيات نفسها كما في بيئة التجربة.',
+          'في «App review»، في حقل الشرح، الصق النص من الحقل أدناه.',
+          'سجّل فيديو من الموقع وهو على بيئة التجربة: ربط الحساب من «حسابات المنصات»، ثم «تجربة النشر» بنوعيها حتى يظهر الفيديو في TikTok. الصيغة mp4 أو mov، حتى 50 MB.',
+          'اضغط «Upload» وارفع الفيديو، ثم «Save»، ثم «Submit for review».',
+          'بعد الموافقة انسخ مفتاحي «Production» وضعهما مكان مفتاحي التجربة في خطوة المفتاح والسر.',
+        ],
+        copy: TIKTOK_REVIEW,
+        copyLabel: 'شرح المراجعة',
+        shots: [tiktokShot('review', 975, 452, 'قسم App review: حقل الشرح بحد 1000 حرف، وزر Upload لفيديو العرض وشروطه', undefined, ['2', '4'])],
+        info: ['يقول TikTok إن التطبيق الذي لم يُوافَق عليه من قبل يُعرض في الفيديو من بيئة التجربة، وإن عنوان الموقع في الفيديو يجب أن يطابق العنوان الموثَّق.'],
+        link: TIKTOK_APPS,
+        ok: 'صار Live',
+      },
+      { id: 'audit', kind: 'review', t: 'تدقيق النشر', b: 'قبل اجتياز «التدقيق» كل ما يُنشر مباشرة مقيّد بالمشاهدة الخاصة: هذه قاعدة TikTok لا قاعدة الموقع.', link: TIKTOK_APPS, ok: 'سأقدّمه لاحقاً' },
     ],
     notes: [
-      'قبل التدقيق يجب أن يكون الحساب خاصاً وقت النشر، وبحد 5 مستخدمين في 24 ساعة. بعده يبقى حد نحو 15 منشوراً في اليوم للحساب.',
-      'بيئة Sandbox تتيح التجربة بلا مراجعة.',
+      'قبل التدقيق لا يُنشر مباشرة إلا بالمشاهدة الخاصة، وبحد 5 مستخدمين في 24 ساعة. بعده يبقى حد نحو 15 منشوراً في اليوم للحساب.',
+      'في بيئة التجربة لا يدخل إلا الحسابات المضافة في «Target Users»، والمسودة المرسلة إلى الصندوق لا تظهر لأحد حتى ينشرها صاحب الحساب من TikTok.',
       'مدة رمز الدخول 24 ساعة ويُجدَّد تلقائياً بالفحص الذي يجري حين تُفتح صفحة الحسابات.',
+      'الصور من حساب مطوّر جُرّبت عليه الخطوات في 2026-11-15: اسم المؤسسة والحساب محجوبان. قد يختلف شكل صفحات TikTok قليلاً، فاعتمد على أسماء الأزرار.',
       SIMULATION,
       PLATFORM_FACTS,
     ],
@@ -392,7 +622,7 @@ export const GUIDES: Record<string, Guide> = {
       { t: 'عُد إلى الموقع', b: 'يظهر حسابك باسمه، فحدّد من ينشر عليه.' },
       { t: 'تأكد من الحالة', b: '«ربط حقيقي» وتاريخ التفويض. يُجدَّد الرمز تلقائياً حين تُفتح هذه الصفحة.' },
     ],
-    notes: ['لربط حساب آخر سجّل خروجك من TikTok ثم أعد الخطوات.', 'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز المدير التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
+    notes: ['لربط حساب آخر سجّل خروجك من TikTok ثم أعد الخطوات.', 'قبل أن يوافق TikTok على التطبيق لا يُربط إلا حساب أضافه المدير إلى «Target Users» في بيئة التجربة.', 'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز المدير التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
   },
   google: {
     title: 'تجهيز تطبيق Google ليوتيوب وDrive',

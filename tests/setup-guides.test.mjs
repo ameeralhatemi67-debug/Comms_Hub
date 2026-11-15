@@ -17,8 +17,8 @@ const walk = (dir) =>
 test('every guide has a title, who it is for, and numbered steps with something to do in each', () => {
   for (const [key, g] of Object.entries(GUIDES)) {
     assert.ok(g.title.length > 5 && g.intro.length > 20, key);
-    // The Google guide is longer on purpose (MVP_draft.md section 67.5): one action to a step is what a first-time reader can follow.
-    assert.ok(g.steps.length >= 2 && g.steps.length <= (key === 'google' ? 14 : 10), `${key}: ${g.steps.length} steps`);
+    // The Google and TikTok guides are longer on purpose (MVP_draft.md sections 67.5 and 67.9): one action to a step is what a first-time reader can follow.
+    assert.ok(g.steps.length >= 2 && g.steps.length <= (key === 'google' || key === 'tiktok' ? 14 : 10), `${key}: ${g.steps.length} steps`);
     for (const s of g.steps) assert.ok(s.t.length > 3, `${key}: a step has a title`);
     if (g.link) assert.match(g.link.href, /^https:\/\//, key);
     for (const s of g.steps) if (s.link) assert.match(s.link.href, /^https:\/\//, `${key}: ${s.t}`);
@@ -191,6 +191,49 @@ test('the pictures of the Instagram guide are the files in public/guides/meta, w
   // The handle and the portfolio's name in the originals are nowhere in the words, and the script that makes the pictures names no original but its inputs.
   assert.doesNotMatch(JSON.stringify(GUIDES), /polkeruoo|17951132926087090|2617091465408415/);
   assert.doesNotMatch(readFileSync('scripts/guide-shots.mjs', 'utf8'), /polkeruoo|17951132926087090/);
+});
+
+test('the TikTok guide follows the owner\'s walk of 2026-11-15: its pictures are the files in public/guides/tiktok, and nothing private is kept', () => {
+  const dir = 'public/guides/tiktok';
+  const g = GUIDES.tiktok;
+  assert.deepEqual(g.steps.map((s) => s.id), ['org', 'app', 'verify', 'sandbox', 'products', 'redirect', 'scopes', 'targets', 'keys', 'details', 'review', 'audit']);
+  // Every step before the keys is proved by the stored secret; the Production details and the review are confirmed by hand.
+  assert.ok(g.steps.slice(0, g.steps.findIndex((s) => s.id === 'keys')).every((s) => s.implied), 'every step before the keys is implied');
+  assert.deepEqual(g.steps.filter((s) => !s.implied && s.kind !== 'keys').map((s) => s.id), ['details', 'review', 'audit']);
+  const used = new Set();
+  for (const s of g.steps) {
+    for (const h of s.shots ?? []) {
+      assert.match(h.src, /^\/guides\/tiktok\/[a-z-]+\.png$/, h.src);
+      used.add(h.src.split('/').pop());
+      const d = png(`public${h.src}`);
+      assert.deepEqual([d.w, d.h], [h.w, h.h], `${h.src} is ${d.w} x ${d.h}`);
+      assert.ok(d.bytes < 120_000, `${h.src}: ${d.bytes} bytes`);
+      assert.ok(h.alt.length > 15 && h.w <= 1000, h.src);
+    }
+  }
+  assert.equal(used.size, 29);
+  assert.deepEqual(readdirSync(dir).sort(), [...used].sort(), 'no file in the folder is left unused, and no original screenshot is kept');
+  // The rings listed here are the ones scripts/guide-shots.mjs draws.
+  const rings = g.steps.flatMap((s) => (s.shots ?? []).map((x) => (x.rings ?? []).join('')));
+  const drawn = [...readFileSync('scripts/guide-shots.mjs', 'utf8').matchAll(/set: 'tiktok', name: '([a-z-]+)'[^\n]*/g)].map((m) => [m[1], [...m[0].matchAll(/n: '(\w)'/g)].map((n) => n[1]).join('')]);
+  const listed = g.steps.flatMap((s) => (s.shots ?? []).map((x) => [x.src.split('/').pop().replace('.png', ''), (x.rings ?? []).join('')]));
+  assert.deepEqual(Object.fromEntries(listed), Object.fromEntries(drawn));
+  assert.equal(rings.length, 29);
+  // The address to verify ends with the slash TikTok compares, the values fit TikTok's limits, and the icon exists.
+  const r = resolveGuide(g, 'https://hub.example.org', 'tiktok');
+  assert.equal(r.steps.find((s) => s.id === 'verify').copy, 'https://hub.example.org/');
+  const details = r.steps.find((s) => s.id === 'details');
+  assert.equal(details.copy, 'https://hub.example.org/');
+  const value = (label) => details.more.find((m) => m.label === label).copy;
+  assert.ok(value('الوصف').length <= 120);
+  assert.equal(value('أيقونة الموقع'), 'https://hub.example.org/brand/comms-hub-icon-1024.png');
+  const icon = png('public/brand/comms-hub-icon-1024.png');
+  assert.deepEqual([icon.w, icon.h], [1024, 1024]);
+  assert.ok(icon.bytes < 5_000_000);
+  assert.ok(r.steps.find((s) => s.id === 'review').copy.length <= 1000);
+  // The organization's name, the test account and the signature token are nowhere in the words or in the script.
+  const words = JSON.stringify(GUIDES) + readFileSync('scripts/guide-shots.mjs', 'utf8');
+  assert.doesNotMatch(words, /Amir|amiralhatime|UdJ9tyTUy/i);
 });
 
 test('a step can carry notes with the circled "!" and tables of figures, drawn by both places that draw a guide', () => {

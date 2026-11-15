@@ -2,7 +2,7 @@
 // the platform's own pages. The originals hold real addresses, names and identifiers, so they are never kept in the
 // repository: this script is given the folder that holds them, blurs everything private, draws the numbered rings that
 // say where to click, crops each picture to the part that matters and writes it to public/guides/<set>/.
-//   node scripts/guide-shots.mjs <folder with the originals> [google | meta | x]
+//   node scripts/guide-shots.mjs <folder with the originals> [google | meta | x | tiktok]
 // «google» (default): 1.png to 7.png, in the order of the owner's message of 2026-11-02. «meta» (the Instagram guide):
 // meta-1.png to meta-19.png, in the order of the owner's messages of 2026-11-03: the accounts page, its menu, the portfolio's
 // home, the add window, Instagram's own window and the added window (1 to 6); then the apps page, the new app's name,
@@ -11,6 +11,7 @@
 // that are left alone and the return address once saved (15 to 17); then the app's Basic settings and the
 // configuration's ID (18 and 19).
 // «x» (the X guide): x-1.png, the developer console's dashboard (2026-11-03).
+// «tiktok» (the TikTok guide): tiktok-1.png to tiktok-45.png, the owner's walk through TikTok for Developers of 2026-11-15.
 // A picture wider than the sheet can show is given a `width` and is scaled to it after the crop.
 // Corners are rounded by the page (the figure clips them), so the files stay square and re-usable.
 import { mkdirSync } from 'node:fs';
@@ -23,8 +24,8 @@ if (!src) {
   process.exit(1);
 }
 const set = process.argv[3] ?? 'google';
-if (!['google', 'meta', 'x'].includes(set)) {
-  console.error('the set is google, meta or x');
+if (!['google', 'meta', 'x', 'tiktok'].includes(set)) {
+  console.error('the set is google, meta, x or tiktok');
   process.exit(1);
 }
 const out = resolve(import.meta.dirname, '..', 'public', 'guides', set);
@@ -358,6 +359,36 @@ const SHOTS = [
     width: 975,
     alt: 'لوحة وحدة المطوّرين Dashboard: رصيد الحساب وزر Buy Credits ولافتة الشحن التلقائي',
   },
+  // «tiktok»: the names of the organization and of the test account are blurred; the keys were never shown.
+  { set: 'tiktok', name: 'org-menu', from: 'tiktok-2.png', marks: [{ box: [26, 72, 300, 50], n: '2' }], alt: 'قائمة Developer Portal: My organizations وManage apps' },
+  { set: 'tiktok', name: 'org-list', from: 'tiktok-1.png', marks: [{ box: [1534, 132, 268, 59], n: '3' }], crop: [1180, 108, 680, 108], alt: 'أعلى صفحة My organizations من جهة اليمين: زر Create an organization' },
+  { set: 'tiktok', name: 'org-name', from: 'tiktok-6.png', marks: [{ box: [24, 198, 903, 68], n: '4' }, { box: [799, 346, 128, 52] }], alt: 'نافذة Create an organization: حقل Organization name وتحته أن الاسم لا يتغير، وزر Create' },
+  { set: 'tiktok', name: 'org-page', from: 'tiktok-7.png', blur: [[150, 22, 135, 32]], alt: 'أعلى صفحة المؤسسة: Organizations ثم اسمها، وتبويبات Overview وRoles and access وCompliance وSettings' },
+  { set: 'tiktok', name: 'app-create', from: 'tiktok-8.png', marks: [{ box: [527, 467, 145, 62], n: '1' }], crop: [360, 250, 480, 300], alt: 'قسم Apps في صفحة المؤسسة: No apps yet وزر Create app' },
+  { set: 'tiktok', name: 'app-name', from: 'tiktok-10.png', marks: [{ box: [16, 106, 750, 62], n: '2' }, { box: [26, 414, 720, 70], n: '3' }, { box: [624, 572, 142, 60], n: '4' }], alt: 'نافذة Create app: حقل App name وفيه Comms Hub، وثلاثة أنواع آخرها Other مختار، وزر Create app' },
+  { set: 'tiktok', name: 'app-page', from: 'tiktok-11.png', marks: [{ box: [328, 22, 230, 46], n: '5' }], crop: [0, 0, 980, 330], alt: 'صفحة التطبيق: Production وSandbox في أعلاها، والقائمة، وCredentials مخفية' },
+  { set: 'tiktok', name: 'verify-open', from: 'tiktok-17.png', marks: [{ box: [369, 308, 208, 54], n: '1' }], alt: 'نافذة URL properties for Production: «You must verify URL properties» وزر Verify properties' },
+  { set: 'tiktok', name: 'verify-type', from: 'tiktok-19.png', marks: [{ box: [20, 326, 896, 182], n: '2' }, { box: [20, 124, 896, 184], n: 'x', color: RED }], alt: 'نافذة Select property type: Domain بسجل DNS وURL prefix بملف توقيع' },
+  { set: 'tiktok', name: 'verify-prefix', from: 'tiktok-22.png', marks: [{ box: [70, 189, 638, 68], n: '3' }], alt: 'خيار URL prefix وفي حقله عنوان الموقع منتهياً بشرطة، وزر Verify' },
+  { set: 'tiktok', name: 'verify-file', from: 'tiktok-23.png', blur: [[322, 162, 494, 36]], marks: [{ box: [262, 146, 563, 70], n: '4' }, { box: [791, 393, 130, 54], n: '5' }], alt: 'نافذة Verify URL prefix: زر Download File باسم الملف، ثم Upload to وعنوان الموقع، وزر Verify' },
+  { set: 'tiktok', name: 'verify-error', from: 'tiktok-24.png', crop: [0, 225, 922, 382], alt: 'نافذة Your property could not be verified: لم يُعثر على ملف التوقيع، وزرا Back وOk' },
+  { set: 'tiktok', name: 'verify-done', from: 'tiktok-27.png', crop: [0, 0, 942, 260], alt: 'نافذة URL properties: عنوان الموقع تحت Verified properties بنوع URL prefix' },
+  { set: 'tiktok', name: 'sandbox-menu', from: 'tiktok-32.png', marks: [{ box: [448, 22, 108, 44], n: '1' }, { box: [242, 114, 38, 38], n: '2' }], alt: 'أعلى صفحة التطبيق على Sandbox: في القائمة Sandbox وبجانبها زر الإضافة، وتحتها Comms Hub test' },
+  { set: 'tiktok', name: 'sandbox-bar', from: 'tiktok-31.png', marks: [{ box: [209, 178, 1200, 63], n: '3' }, { box: [1404, 96, 189, 56], n: '4' }], crop: [0, 85, 1605, 165], width: 975, alt: 'شريط بيئة التجربة: Delete Sandbox وApply changes، ولافتة أنك تعدّل Comms Hub test وهي نسخة Sandbox' },
+  { set: 'tiktok', name: 'products-add', from: 'tiktok-33.png', marks: [{ box: [42, 285, 323, 70], n: '2' }], crop: [0, 0, 787, 650], alt: 'نافذة Add products: Login Kit وShare Kit بزر Add، وContent Posting API رمادي «Requires Login Kit»' },
+  { set: 'tiktok', name: 'products-added', from: 'tiktok-34.png', marks: [{ box: [40, 567, 323, 70], n: '3' }, { box: [404, 109, 365, 248], n: 'x', color: RED }], alt: 'نافذة Add products بعد الإضافة: Login Kit وContent Posting API وعليهما Added، وزر Done' },
+  { set: 'tiktok', name: 'posting', from: 'tiktok-37.png', marks: [{ box: [1088, 310, 82, 56], n: '4' }, { box: [1032, 478, 130, 54], n: 'x', color: RED }], crop: [0, 135, 1218, 480], width: 975, alt: 'بطاقة Content Posting API: مفتاح Direct Post مشغّل، وتحته Verify domains وزر Verify' },
+  { set: 'tiktok', name: 'redirect', from: 'tiktok-36.png', marks: [{ box: [136, 238, 98, 44], n: '1' }, { box: [44, 312, 1126, 62], n: '2' }], width: 975, alt: 'بطاقة Login Kit: Redirect URI وتبويب Web وفي الحقل عنوان العودة' },
+  { set: 'tiktok', name: 'scopes', from: 'tiktok-38.png', marks: [{ box: [426, 104, 207, 70], n: '1' }, { box: [46, 196, 1140, 300], n: '3' }], width: 975, alt: 'قسم Scopes: زر Add scopes وتحته user.info.basic وvideo.publish وvideo.upload' },
+  { set: 'tiktok', name: 'targets-add', from: 'tiktok-39.png', marks: [{ box: [522, 182, 169, 55], n: '1' }], width: 975, alt: 'قسم Target Users: «Try out your Sandbox with an authorized target account» وزر Add account' },
+  { set: 'tiktok', name: 'targets-continue', from: 'tiktok-40.png', marks: [{ box: [224, 174, 192, 60], n: '2' }], alt: 'نافذة Connect TikTok account: سيُطلب منك الدخول إلى TikTok، وزرا Cancel وContinue' },
+  { set: 'tiktok', name: 'targets-consent', from: 'tiktok-42.png', blur: [[318, 124, 180, 40]], marks: [{ box: [153, 563, 254, 70], n: '3' }], alt: 'صفحة TikTok بالعربية: يحتاج تطبيق TikTok for Developers إلى التحقق من حسابك، وزرا متابعة وإلغاء' },
+  { set: 'tiktok', name: 'targets-list', from: 'tiktok-43.png', blur: [[48, 220, 150, 34]], marks: [{ box: [42, 208, 1140, 60], n: '4' }], width: 975, alt: 'قسم Target Users: الحساب المضاف ووقت إضافته وزر Remove' },
+  { set: 'tiktok', name: 'keys-menu', from: 'tiktok-44.png', marks: [{ box: [18, 58, 128, 42], n: '1' }], alt: 'قائمة التطبيق: App details مفتوحة وتحتها Credentials وBasic information' },
+  { set: 'tiktok', name: 'keys', from: 'tiktok-45.png', marks: [{ box: [42, 96, 560, 100], n: '2' }, { box: [620, 96, 562, 100], n: '3' }], width: 975, alt: 'قسم Credentials: Client key وClient secret مخفيان، وبجانب كل منهما أيقونة العين' },
+  { set: 'tiktok', name: 'details-category', from: 'tiktok-13.png', marks: [{ box: [32, 160, 528, 62], n: '3' }], crop: [0, 0, 582, 400], alt: 'قائمة Category مفتوحة: Books وBusiness وEducation وEntertainment وFinance' },
+  { set: 'tiktok', name: 'details-web', from: 'tiktok-18.png', marks: [{ box: [36, 260, 1098, 54], n: 'x', color: RED }], width: 975, alt: 'Platforms وعليها Web، وحقل Web/Desktop URL بلا شرطة في آخره وتحته «This URL is not verified»' },
+  { set: 'tiktok', name: 'review', from: 'tiktok-29.png', marks: [{ box: [38, 283, 1140, 131], n: '2' }, { box: [38, 498, 130, 54], n: '4' }], crop: [0, 80, 1208, 560], width: 975, alt: 'قسم App review: حقل الشرح بحد 1000 حرف، وزر Upload لفيديو العرض وشروطه' },
 ];
 
 /** A numbered ring, drawn as paths so no font is needed on the machine that makes the pictures. */
