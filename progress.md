@@ -4513,3 +4513,6 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not verified.** Why TikTok still refused the post after the account was made private: the next try will show what TikTok sees
   («عام» or «خاص») and TikTok's own line. Meta's page was not reproduced; the explanation is from Meta's own wording.
 - **Not done.** The migration is not applied: it is handed to the owner with `qa/sql/check-error-detail.sql`.
+- **Pushed and live.** `d267516..5dd7b5e` with the owner's yes; Vercel production `dpl_GmAy4maba4Lph6Xc77wenEboR4DQ` ready. Signed out,
+  Home answers 200 and the creator route 401. The migration `20261115140000_platform_tests_error_detail.sql` waits for the owner's SQL
+  editor; until then the list reads its old columns.
