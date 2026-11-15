@@ -4481,3 +4481,9 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **The sandbox's own URL check (same day).** «Verify domains» opened «URL properties for Comms Hub test»: the sandbox verifies the
   site's address on its own, with its own file. `public/tiktokmVeHsM7eRDS14x3fUohWVDCoXVWpjPLq.txt` added (a public token only), and
   the guide's «أضف المنتجين» action 5 now says the sandbox needs its own file from the system administrator.
+- **The first device tries failed at the temporary Drive copy (same day).** Three tries (two drafts, one post) were recorded as
+  `TEMP_UPLOAD_FAILED` by the server, so the start or the check of the Drive copy failed, not the page's upload. The same steps run from
+  this computer with the site's own settings worked whole: the «تجارب النشر» folder, the upload session, a 1000-byte upload, the read
+  back (name, folder, size, uploader) and the trash. The live site logs nothing there by design, so a refusal now carries Drive's short
+  code (`detail`, for example `DRIVE_403`; never a message or a body), shown after the words in the panel, for Instagram and Facebook
+  too. `npm test` 953 of 953; `qa/tiktok-test-flow.cjs` 43, `instagram-test-flow` 43, `facebook-test-flow` 37, all passing.

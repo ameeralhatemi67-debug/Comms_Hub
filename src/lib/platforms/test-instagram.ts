@@ -18,7 +18,7 @@ import { loadApp, loadSecret } from './connect.ts';
 import { metaAccountHealth, type Fetch } from './oauth.ts';
 import { igContainerStatus, igCreateContainer, igDelete, igMedia, igPublish, igPublishingLimit, type IgPost } from './instagram.ts';
 import { IG_DIRECT_SCHEDULE_MAX_DAYS, IG_LINK_MINUTES, IG_VIDEO_TYPES, igProblem, igTitle, isPictureKind, scheduleProblem, type TestKind } from './test-rules.ts';
-import { dbCode, giveUp, refuse, testInfo, type TestInfo } from './test-server.ts';
+import { dbCode, detailOf, giveUp, refuse, testInfo, type TestInfo } from './test-server.ts';
 import { openStored, storageConfigured, storageFor } from '../storage/index.ts';
 import { hashOf, newLink } from './temp-link.ts';
 
@@ -144,17 +144,17 @@ export async function igStart(request: Request, db: SupabaseClient, b: Record<st
 
   if (t.source === 'library') return at ? igWait(db, t, { caption, alt }) : igSend(request, db, t, tok.token, { caption, alt }, quota);
   const upload = await openTempUpload(request, t, me);
-  return upload ? json({ test: id, phase: 'upload', upload, quota }) : giveUp(db, id, 'TEMP_UPLOAD_FAILED');
+  return 'url' in upload ? json({ test: id, phase: 'upload', upload: upload.url, quota }) : giveUp(db, id, 'TEMP_UPLOAD_FAILED', upload.error);
 }
 
 /** A Drive upload session in «تجارب النشر» for a device file, under the name that alone proves it is this test's. */
-export async function openTempUpload(request: Request, t: Pick<TestInfo, 'id' | 'mime' | 'size'>, me: string): Promise<string | null> {
+export async function openTempUpload(request: Request, t: Pick<TestInfo, 'id' | 'mime' | 'size'>, me: string): Promise<{ url: string } | { error: string }> {
   try {
     const storage = storageFor('library');
     const folder = await storage.markedFolder(TEMP_MARKER, TEMP_FOLDER);
-    return await storage.startUpload({ name: tempName(t.id, t.mime), mimeType: t.mime, size: t.size, origin: new URL(request.url).origin, uploadedBy: me, parentId: folder });
-  } catch {
-    return null;
+    return { url: await storage.startUpload({ name: tempName(t.id, t.mime), mimeType: t.mime, size: t.size, origin: new URL(request.url).origin, uploadedBy: me, parentId: folder }) };
+  } catch (e) {
+    return { error: detailOf(e) };
   }
 }
 
@@ -169,8 +169,8 @@ export async function acceptTemp(db: SupabaseClient, t: TestInfo, b: Record<stri
     const same =
       info.name === tempName(t.id, t.mime) && (info.parents ?? []).includes(folder) && !info.trashed && Number(info.size) === t.size && info.appProperties?.uploadedBy === me;
     if (!same) return giveUp(db, t.id, 'TEMP_MISMATCH');
-  } catch {
-    return giveUp(db, t.id, 'TEMP_UPLOAD_FAILED');
+  } catch (e) {
+    return giveUp(db, t.id, 'TEMP_UPLOAD_FAILED', detailOf(e));
   }
   const { error } = await db.rpc('platform_test_temp', { p_key: serverKeyOrNull(), p_test: t.id, p_ref: ref });
   return error ? refuse(dbCode(error.message)) : { ref };

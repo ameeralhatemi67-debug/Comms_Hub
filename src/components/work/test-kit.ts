@@ -41,7 +41,9 @@ export async function api(url: string, init: RequestInit): Promise<Reply> {
     return { ok: false, b: { error: 'تعذّر الوصول إلى الخادم.', retry: true } };
   }
 }
-export const said = (b: Record<string, unknown>) => (typeof b.error === 'string' && b.error ? b.error : 'تعذّر إتمام التجربة.');
+/** The refusal in words, with another service's short code after it when the server knows it («DRIVE_403»), for whoever fixes it. */
+export const said = (b: Record<string, unknown>) =>
+  (typeof b.error === 'string' && b.error ? b.error : 'تعذّر إتمام التجربة.') + (typeof b.detail === 'string' && /^[A-Z0-9_]{2,40}$/.test(b.detail) ? ` (${b.detail})` : '');
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const DRIVE_CHUNK = 8 * 1024 * 1024;

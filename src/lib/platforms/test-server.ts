@@ -47,17 +47,26 @@ export type TestInfo = {
 export const dbCode = (message: string | null | undefined) => /\b([A-Z][A-Z_]{3,39})\b/.exec(message ?? '')?.[1] ?? 'PLATFORM_ERROR';
 
 const STATUS: Record<string, number> = { FIRING: 409, FORBIDDEN: 403, TEST_INVALID: 400, SCHEDULE_INVALID: 400, DIRECT_LIMIT: 429, TEST_LIMIT: 429, UPLOAD_LIMIT: 429, NOT_CONNECTED: 409, ACCOUNT_OFF: 409, UPLOAD_EXPIRED: 410, SCOPE_MISSING: 403 };
-/** A refusal as the page reads it: the words, and the code for what the page offers next. */
-export const refuse = (code: string, retry = false) =>
-  Response.json({ error: TEST_ERROR_AR[code] ?? connErrorAr(code), code, ...(retry ? { retry: true } : {}) }, { status: STATUS[code] ?? 502, headers: { 'Cache-Control': 'no-store' } });
+/** A short code another service gave (Drive's «DRIVE_403»), safe to show: never a message or a body. */
+export const detailOf = (e: unknown): string => {
+  const m = e instanceof Error ? e.message : '';
+  if (/^[A-Z0-9_]{2,40}$/.test(m)) return m;
+  return e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError') ? 'TIMEOUT' : 'UNKNOWN';
+};
+/** A refusal as the page reads it: the words, the code for what the page offers next, and another service's short code when known. */
+export const refuse = (code: string, retry = false, detail?: string) =>
+  Response.json(
+    { error: TEST_ERROR_AR[code] ?? connErrorAr(code), code, ...(retry ? { retry: true } : {}), ...(detail && /^[A-Z0-9_]{2,40}$/.test(detail) ? { detail } : {}) },
+    { status: STATUS[code] ?? 502, headers: { 'Cache-Control': 'no-store' } },
+  );
 
 /** Closes an upload that cannot go on, then refuses. */
-export async function giveUp(db: SupabaseClient, id: string, code: string) {
+export async function giveUp(db: SupabaseClient, id: string, code: string, detail?: string) {
   await db.rpc('platform_test_failed', { p_key: serverKeyOrNull(), p_test: id, p_error: code }).then(
     () => undefined,
     () => undefined,
   );
-  return refuse(code);
+  return refuse(code, false, detail);
 }
 
 export async function testInfo(db: SupabaseClient, id: string): Promise<TestInfo | null> {

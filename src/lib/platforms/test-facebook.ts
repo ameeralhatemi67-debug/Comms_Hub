@@ -90,7 +90,7 @@ export async function fbStart(request: Request, db: SupabaseClient, b: Record<st
   if (kind === 'fb_photo') return json({ test: id, phase: 'photo' });
   if (source === 'library') return reelSend(request, db, t, tok.token);
   const upload = await openTempUpload(request, { id, mime: mime!, size: size! }, me);
-  return upload ? json({ test: id, phase: 'upload', upload }) : giveUp(db, id, 'TEMP_UPLOAD_FAILED');
+  return 'url' in upload ? json({ test: id, phase: 'upload', upload: upload.url }) : giveUp(db, id, 'TEMP_UPLOAD_FAILED', upload.error);
 }
 
 /** The silent check: schedule, read back, delete. Nothing is ever shown. */

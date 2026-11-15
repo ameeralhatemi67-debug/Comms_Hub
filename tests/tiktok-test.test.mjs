@@ -167,3 +167,15 @@ test('«إعادة ضبط» in «المنصات»: a held button for the holders
   const info = read('src/lib/platforms/info.ts');
   for (const code of ['APP_IN_USE', 'APP_SHARED']) assert.ok(info.includes(`['${code}', '`), code);
 });
+
+test('a failed Drive step says Drive\'s short code, and never a message or a body', async () => {
+  const { detailOf } = await import('../src/lib/platforms/test-server.ts');
+  assert.equal(detailOf(new Error('DRIVE_403')), 'DRIVE_403');
+  assert.equal(detailOf(new Error('NO_UPLOAD_SESSION')), 'NO_UPLOAD_SESSION');
+  assert.equal(detailOf(new Error('Request had invalid authentication credentials. token=abc')), 'UNKNOWN', 'a sentence is never passed on');
+  assert.equal(detailOf(Object.assign(new Error('x'), { name: 'TimeoutError' })), 'TIMEOUT');
+  const kit = read('src/components/work/test-kit.ts');
+  assert.match(kit, /typeof b\.detail === 'string' && \/\^\[A-Z0-9_\]\{2,40\}\$\/\.test\(b\.detail\)/, 'the page shows only a code');
+  for (const f of ['src/lib/platforms/test-tiktok.ts', 'src/lib/platforms/test-facebook.ts', 'src/lib/platforms/test-instagram.ts'])
+    assert.match(read(f), /giveUp\(db, (t\.)?id, 'TEMP_UPLOAD_FAILED', (upload\.error|detailOf\(e\))\)/, f);
+});

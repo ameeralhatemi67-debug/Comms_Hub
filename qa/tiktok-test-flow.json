@@ -1,6 +1,6 @@
 {
   "script": "qa/tiktok-test-flow.cjs",
-  "run": "2026-11-15T09:10:30.211Z",
+  "run": "2026-11-15T09:58:24.645Z",
   "checks": [
     {
       "name": "it says TikTok cannot delete through applications",

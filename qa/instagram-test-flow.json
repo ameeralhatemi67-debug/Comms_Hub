@@ -1,6 +1,6 @@
 {
   "script": "qa/instagram-test-flow.cjs",
-  "run": "2026-11-15T09:12:03.142Z",
+  "run": "2026-11-15T09:59:20.367Z",
   "checks": [
     {
       "name": "a link to the account on Instagram, by its username, in a new tab",
@@ -40,7 +40,7 @@
     {
       "name": "a picture is redrawn to JPEG before it goes",
       "pass": true,
-      "detail": "لقطة.png\nمن هذا الجهاز · JPEG · 0.0 ميغابايت"
+      "detail": "PNG\nلقطة.png\nمن هذا الجهاز · JPEG · 0.0 ميغابايت"
     },
     {
       "name": "a Story asks for its own long press",
@@ -80,7 +80,7 @@
     {
       "name": "the list shows the Story and when it disappears",
       "pass": true,
-      "detail": "تجربة قصة\nقصة · تختفي 16‏/11‏/2026، 12:12 م · 15‏/11‏/2026، 12:12 م · مدير الفحص\nحذف"
+      "detail": "تجربة قصة\nقصة · تختفي 16‏/11‏/2026، 12:59 م · 15‏/11‏/2026، 12:59 م · مدير الفحص\nحذف"
     },
     {
       "name": "a post asks for a caption with counters, and alt text",

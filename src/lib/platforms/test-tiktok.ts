@@ -150,7 +150,7 @@ export async function ttStart(request: Request, db: SupabaseClient, b: Record<st
   }
   if (b.source === 'library') return send(request, db, t, tok.token, options);
   const upload = await openTempUpload(request, { id, mime, size }, me);
-  return upload ? json({ test: id, phase: 'upload', upload }) : giveUp(db, id, 'TEMP_UPLOAD_FAILED');
+  return 'url' in upload ? json({ test: id, phase: 'upload', upload: upload.url }) : giveUp(db, id, 'TEMP_UPLOAD_FAILED', upload.error);
 }
 
 /** A device file arrived in Drive: only the file this test's session made is accepted, then it is sent. */
