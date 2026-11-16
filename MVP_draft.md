@@ -4495,3 +4495,5 @@ design is rebuilt from the second reference sheet. Glow and glints are off by de
   ivory design was rebuilt as one shape (80.3).
 - A third round the same day: thinner, the tagline removed from the plaque (the flower and «هداية» only), and the bar's right end a full
   half circle holding the flower inside a fine gold ring. «اللوحة الجانبية»: الزهرة والاسم، الزهرة فقط، بلا.
+- A fourth round: the plaque takes the shape and design of the owner's attached plaque, a rounded triangle standing in front of the
+  bar's left end with its own gold rim, a gold plate behind its left side and a navy wave at its foot; its content is unchanged.

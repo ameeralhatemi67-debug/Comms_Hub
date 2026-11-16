@@ -4650,3 +4650,11 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   is a full half circle whose centre holds the flower, with a fine gold ring inside the round end; the plaque shows the flower and
   «هداية» only (the tagline is removed), with a fine gold line inside its dome. «اللوحة الجانبية»: الزهرة والاسم، الزهرة فقط، بلا.
 - **Checks.** `npm run typecheck` and `npm run build` pass; `npm test` 967 of 967; `qa/motion-ribbons.cjs` 86 of 86.
+
+### 2026-11-16: «اللوحة العاجية», the plaque given the reference's shape and design
+
+- **Note.** Change the left part's shape and design to the owner's attached plaque, keeping its content.
+- **Built.** The plaque is a rounded triangle (bowed sides, rounded top, flat bottom) standing in front of the bar's left end with its own
+  thick gold rim, a gold plate behind its left side, and a navy wave at its foot with a gold line; the bar starts behind it. Content kept:
+  the flower, «هداية», «هداية 2026».
+- **Checks.** `npm run typecheck` and `npm run build` pass; `npm test` 967 of 967; `qa/motion-ribbons.cjs` 86 of 86.
