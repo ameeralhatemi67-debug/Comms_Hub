@@ -4493,3 +4493,5 @@ entry, holds still, leaves by retracting, has a wider and taller band and one qu
 design is rebuilt from the second reference sheet. Glow and glints are off by default for both.
 - A second round of notes the same day: the plaque was too tall and narrow, and the plaque and the flower looked laid over the bar. The
   ivory design was rebuilt as one shape (80.3).
+- A third round the same day: thinner, the tagline removed from the plaque (the flower and «هداية» only), and the bar's right end a full
+  half circle holding the flower inside a fine gold ring. «اللوحة الجانبية»: الزهرة والاسم، الزهرة فقط، بلا.

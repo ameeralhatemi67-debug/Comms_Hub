@@ -4641,3 +4641,12 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   held nothing else of code). `qa/motion-ribbons.cjs` 86 of 86, with a new check: across the flower's middle row the design is opaque
   without a break (590 of 590 pixels), so plaque, bar and flower are one shape.
 - **Not checked.** The studio's inspector signed in; the live site after the push.
+
+### 2026-11-16: «اللوحة العاجية», third round of the owner's notes
+
+- **Notes.** Thinner; a better left part; no association name line under «هداية»; the flower part of the ribbon, and the ribbon's right
+  end fully round.
+- **Built** (`src/lib/motion/designs-ribbons.js`): the bar is 290 units tall (was 332) and the plaque's dome 16% lower; the bar's right end
+  is a full half circle whose centre holds the flower, with a fine gold ring inside the round end; the plaque shows the flower and
+  «هداية» only (the tagline is removed), with a fine gold line inside its dome. «اللوحة الجانبية»: الزهرة والاسم، الزهرة فقط، بلا.
+- **Checks.** `npm run typecheck` and `npm run build` pass; `npm test` 967 of 967; `qa/motion-ribbons.cjs` 86 of 86.

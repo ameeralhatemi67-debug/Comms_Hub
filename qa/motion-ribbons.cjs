@@ -222,15 +222,15 @@ const types = { '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; char
     check('the plaque text defaults to «هداية 2026»', await t.getByLabel('نص أسفل اللوحة', { exact: true }).inputValue() === 'هداية 2026');
     await tab('التصميم');
     const iv = {};
-    for (const name of ['الشعار كاملاً', 'الزهرة والاسم', 'بلا']) { await plaque(name).click(); await scrubTo(4.2); iv[name] = await read(); }
-    check('the plaque choices draw differently', diff(iv['الشعار كاملاً'], iv['الزهرة والاسم']) > .0005, diff(iv['الشعار كاملاً'], iv['الزهرة والاسم']));
-    check('«بلا» removes the plaque', iv['بلا'].left > iv['الشعار كاملاً'].left + .03, { none: iv['بلا'].left, plaque: iv['الشعار كاملاً'].left });
+    for (const name of ['الزهرة والاسم', 'الزهرة فقط', 'بلا']) { await plaque(name).click(); await scrubTo(4.2); iv[name] = await read(); }
+    check('the plaque choices draw differently', diff(iv['الزهرة والاسم'], iv['الزهرة فقط']) > .0005, diff(iv['الزهرة والاسم'], iv['الزهرة فقط']));
+    check('«بلا» removes the plaque', iv['بلا'].left > iv['الزهرة والاسم'].left + .03, { none: iv['بلا'].left, plaque: iv['الزهرة والاسم'].left });
     await tab('المحتوى');
     check('with no plaque its text field is hidden', await t.getByLabel('نص أسفل اللوحة', { exact: true }).count() === 0);
-    await tab('التصميم'); await plaque('الشعار كاملاً').click();
+    await tab('التصميم'); await plaque('الزهرة والاسم').click();
     await toggled('أيقونة الحقيبة بجانب النص الفرعي', 'the briefcase beside the subtitle switches', .0003);
     /* the flower sits half on the bar's end and half beyond it: ink to the right of the bar's end, in the bar's rows */
-    { await scrubTo(4.2); const shown = await read(); check('the flower reaches beyond the bar', shown.right > .9, shown.right); }
+    { await scrubTo(4.2); const shown = await read(); check('the round end with the flower reaches the right', shown.right > .9, shown.right); }
     /* plaque, bar and flower are one shape: across the flower's middle row the design is opaque without a break */
     { await scrubTo(4.2); const row = await stage().evaluate(cv => {
         const w = cv.width, h = cv.height, d = cv.getContext('2d').getImageData(0, 0, w, h).data; let best = { run: 0 };

@@ -1,14 +1,14 @@
 {
-  "when": "2026-11-16T08:45:38.876Z",
+  "when": "2026-11-16T09:05:43.842Z",
   "browser": "msedge",
   "exportSeconds": {
-    "rp-liquid-mp4": 2.683,
-    "rp-liquid-mov": 11.539,
-    "rp-liquid-zip": 6.242,
-    "rp-ivory-mp4": 2.278,
-    "rp-ivory-mov": 12.107,
-    "rp-ivory-zip": 5.977,
-    "png": 0.254
+    "rp-liquid-mp4": 2.937,
+    "rp-liquid-mov": 11.831,
+    "rp-liquid-zip": 7.818,
+    "rp-ivory-mp4": 1.92,
+    "rp-ivory-mov": 17.047,
+    "rp-ivory-zip": 7.355,
+    "png": 0.337
   },
   "checks": [
     {
@@ -82,32 +82,32 @@
       "name": "rp-ivory: draws real artwork at 0.2s",
       "pass": true,
       "detail": {
-        "n": 8071,
-        "colors": 83
+        "n": 6844,
+        "colors": 76
       }
     },
     {
       "name": "rp-ivory: draws real artwork at 1.2s",
       "pass": true,
       "detail": {
-        "n": 19400,
-        "colors": 108
+        "n": 16740,
+        "colors": 105
       }
     },
     {
       "name": "rp-ivory: draws real artwork at 2.2s",
       "pass": true,
       "detail": {
-        "n": 20391,
-        "colors": 137
+        "n": 18068,
+        "colors": 138
       }
     },
     {
       "name": "rp-ivory: draws real artwork at 4.2s",
       "pass": true,
       "detail": {
-        "n": 20391,
-        "colors": 139
+        "n": 18068,
+        "colors": 137
       }
     },
     {
@@ -397,14 +397,14 @@
     {
       "name": "the plaque choices draw differently",
       "pass": true,
-      "detail": 0.011433949705726405
+      "detail": 0.0066404495209479416
     },
     {
       "name": "«بلا» removes the plaque",
       "pass": true,
       "detail": {
-        "none": 0.553763440860215,
-        "plaque": 0.3924731182795699
+        "none": 0.557347670250896,
+        "plaque": 0.3960573476702509
       }
     },
     {
@@ -425,20 +425,20 @@
     {
       "name": "the briefcase beside the subtitle switches",
       "pass": true,
-      "detail": 0.14923043698884045
+      "detail": 0.11743501189858162
     },
     {
-      "name": "the flower reaches beyond the bar",
+      "name": "the round end with the flower reaches the right",
       "pass": true,
-      "detail": 0.9336917562724014
+      "detail": 0.9354838709677419
     },
     {
       "name": "plaque, bar and flower are one unbroken shape",
       "pass": true,
       "detail": {
-        "run": 589,
-        "longest": 590,
-        "y": 509
+        "run": 591,
+        "longest": 592,
+        "y": 531
       }
     },
     {
@@ -539,8 +539,8 @@
       "name": "rp-ivory: a decoded MOV frame is mostly clear with a solid design",
       "pass": true,
       "detail": {
-        "clear": 791144,
-        "solid": 106452,
+        "clear": 804625,
+        "solid": 94111,
         "total": 921600
       }
     },
@@ -549,7 +549,7 @@
       "pass": true,
       "detail": {
         "name": "rp-ivory_1280x720_24fps_png-sequence.zip",
-        "bytes": 6310707
+        "bytes": 5717126
       }
     },
     {

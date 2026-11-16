@@ -118,7 +118,7 @@ const OPTIONS: Record<string, OptionField[]> = {
     { kind: 'slider', key: 'flow', label: 'سيولة الدخول', place: 'effects', min: 0, max: 100, step: 1, unit: '٪', hint: 'تموج الذهب وتناثره عند الدخول فقط. أثناء العرض يبقى الشريط ثابتاً.' }, ...effects],
   'rp-ivory': [...shared.map(f => f.key === 'pattern' ? { ...f, paper: 'c3' } as OptionField : f),
     { kind: 'choice', key: 'plaque', label: 'اللوحة الجانبية', place: 'layout', choices: [
-      { value: 'logo', label: 'الشعار كاملاً' }, { value: 'mark', label: 'الزهرة والاسم' }, { value: 'none', label: 'بلا' }] },
+      { value: 'logo', label: 'الزهرة والاسم' }, { value: 'mark', label: 'الزهرة فقط' }, { value: 'none', label: 'بلا' }] },
     { kind: 'switch', key: 'icon', label: 'أيقونة الحقيبة بجانب النص الفرعي', place: 'layout' },
     ...effects],
 };

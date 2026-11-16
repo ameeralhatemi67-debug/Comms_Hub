@@ -468,9 +468,9 @@ const IVK = .46, IVX = 1196 - 1574 * IVK, IVY = 658 - 640 * IVK, BAR_BOT = 628;
    into the bar, and a bottom level with the bar's, so the two read as one body. */
 const PLQ_CURVE = [[58, 600], [62, 560], [88, 490], [128, 412], [175, 330], [222, 262], [262, 222], [300, 203], [370, 199], [435, 205],
   [484, 223], [516, 251], [536, 287], [548, 335], [553, 400], [555, 450]];
-const BAR = { x0: 500, x1: 1452, top: 296, bot: BAR_BOT, rad: 34 };
-const NAVY = { top: 508, bot: BAR_BOT, end: 1352, r: 40 }, FOOT = 522;                  // FOOT: the strip's top on the plaque
-const FLOWER = { x: 1462, y: 466, R: 112, weight: 1.1 };
+const BAR = { x0: 500, x1: 1574, top: 338, bot: BAR_BOT, rad: 34 };   // the right end is a full half circle
+const NAVY = { top: 536, bot: BAR_BOT, end: 1290, r: 36 }, FOOT = 548;                  // FOOT: the strip's top on the plaque
+const END_R = (BAR_BOT - 338) / 2, FLOWER = { x: 1574 - END_R, y: (BAR_BOT + 338) / 2, R: 104, weight: 1.1 };
 const TEXT_R = FLOWER.x - FLOWER.R - 16;                                           // the text keeps clear of the flower
 const RIM = 7;                                                                     // the gold rim's width outside the body
 
@@ -489,21 +489,9 @@ function smoothOpen(pts, seg = 8) {
 }
 const PLQ = (() => {
   const corner = []; for (let i = 1; i < 10; i++) { const u = i / 10, v = 1 - u; corner.push([v * v * 110 + 2 * v * u * 58 + u * u * 58, v * v * BAR_BOT + 2 * v * u * BAR_BOT + u * u * 600]); }
-  return [...smoothOpen(PLQ_CURVE), [556, BAR_BOT], [110, BAR_BOT], ...corner];
+  const low = ([x, y]) => [x, BAR_BOT - (BAR_BOT - y) * .84];             // thinner than the sheet, as the owner asked
+  return [...smoothOpen(PLQ_CURVE).map(low), [556, BAR_BOT], [110, BAR_BOT], ...corner];
 })();
-/* The flower's body: each capsule's outline at the outer edge of its gold line, so the lobes are the shape's edge. */
-function flowerBody(cx, cy, R) {
-  const r = EMBLEM.r * R + EMBLEM.stroke * R * FLOWER.weight / 2, h = EMBLEM.half * R;
-  const caps = [];
-  for (let k = 0; k < 4; k++) {
-    const a = k * Math.PI / 4, ux = Math.sin(a), uy = -Math.cos(a), one = [];
-    for (let i = 0; i <= 20; i++) { const q = a - Math.PI * i / 20; one.push([cx + ux * h + Math.cos(q) * r, cy + uy * h + Math.sin(q) * r]); }
-    for (let i = 0; i <= 20; i++) { const q = a - Math.PI - Math.PI * i / 20; one.push([cx - ux * h + Math.cos(q) * r, cy - uy * h + Math.sin(q) * r]); }
-    caps.push(one);
-  }
-  return caps;
-}
-
 /* A briefcase, the profession's sign, about its centre, in the sheet's units. */
 function briefcase(c, x, y, s, style, width) {
   c.save(); c.translate(x, y); c.scale(s, s); c.strokeStyle = style; c.lineWidth = width / s; c.lineJoin = 'round'; c.lineCap = 'round';
@@ -546,24 +534,21 @@ function drawIvory(ctx, P, t) {
 
   /* the bar's length: the text's, with room around it, or the sheet's; the plaque moves with the bar's left end */
   unit = 1;
-  const tSize0 = 104, ssize = 54, titleW = widthOf(c, P.title, tSize0, tf), subW = hasSub ? widthOf(c, P.subtitle, ssize, sf) + (iconOn ? 100 : 0) : 0;
+  const tSize0 = 96, ssize = 50, titleW = widthOf(c, P.title, tSize0, tf), subW = hasSub ? widthOf(c, P.subtitle, ssize, sf) + (iconOn ? 100 : 0) : 0;
   const need = Math.max(titleW + 130, subW + 150), area = P.span === 'full' ? 742 : clamp(need, 600, 980);
   const dx = (TEXT_R - area) - 594, bx0 = BAR.x0 + dx, divX = 594 + dx;
   const iv = x => IVX + x * IVK;
   c.save();
-  const mir = place(c, P, { x0: iv(plaqueOn ? 30 + dx : bx0 - 10), x1: iv(1580), y0: IVY + 190 * IVK, y1: IVY + 642 * IVK }, 1196, 658);
+  const mir = place(c, P, { x0: iv(plaqueOn ? 30 + dx : bx0 - 10), x1: iv(1590), y0: IVY + 255 * IVK, y1: IVY + 642 * IVK }, 1196, 658);
   c.translate(IVX, IVY); c.scale(IVK, IVK); unit = IVK;
   c.translate(0, (1 - ph.rise) * 26);
 
   /* the one shape: plaque, bar and flower */
   const plaque = PLQ.map(([x, y]) => [x + dx, y]);
-  const barPts = roundPoly([[bx0, BAR.top], [BAR.x1, BAR.top], [BAR.x1, BAR.bot], [bx0, BAR.bot]], [BAR.rad, BAR.rad, BAR.rad, BAR.rad], 10);
-  const flower = flowerBody(FLOWER.x, FLOWER.y, FLOWER.R);
-  const body = new Path2D(), flowerPath = new Path2D();       // body: plaque and bar; the flower joins it as its lines are drawn
+  const barPts = [...arcPts(FLOWER.x, FLOWER.y, END_R, -Math.PI / 2, Math.PI / 2, 40), ...roundPoly([[FLOWER.x, BAR.bot], [bx0, BAR.bot], [bx0, BAR.top], [FLOWER.x, BAR.top]], [0, BAR.rad, BAR.rad, 0], 10)];
+  const body = new Path2D();                                   // plaque and bar, one body; the flower sits in the bar's round end
   if (plaqueOn) addPoly(body, plaque);
   addPoly(body, barPts);
-  for (const cap of flower) addPoly(flowerPath, cap);
-  const fa = clamp(ph.flowerP * 3);
   const rimStyle = metalBevel(c, 0, BAR.top - 110, 0, BAR.bot + 40, M);
   const ivory = (() => { const g = c.createLinearGradient(0, 200, 0, 660); g.addColorStop(0, shade(P.c3, 255, .6)); g.addColorStop(.5, P.c3); g.addColorStop(1, shade(P.c3, 0, .05)); return g; })();
   const shadowsOn = P.dropShadow !== false;
@@ -571,7 +556,7 @@ function drawIvory(ctx, P, t) {
 
   const paint = x => {
     /* depth: a soft shadow under everything, the gold plate behind the plaque's leaning side */
-    if (shadowsOn) { x.save(); shadowOn(x, 'rgba(0,0,0,.26)', 30, 12); x.fillStyle = P.c3; x.fill(body); x.globalAlpha *= fa; x.fill(flowerPath); x.restore(); }
+    if (shadowsOn) { x.save(); shadowOn(x, 'rgba(0,0,0,.26)', 30, 12); x.fillStyle = P.c3; x.fill(body); x.restore(); }
     if (plaqueOn) { const back = new Path2D(); addPoly(back, plaque.map(([px0, py]) => [px0 - 14, py + 5])); x.fillStyle = metalBevel(x, 0, 200, 0, 660, M); x.fill(back); }
     /* the rim: every part stroked and filled in gold, then the ivory laid over, so only the outer edge stays gold */
     x.save(); x.strokeStyle = rimStyle; x.fillStyle = rimStyle; x.lineWidth = RIM * 2; x.lineJoin = 'round';
@@ -606,21 +591,24 @@ function drawIvory(ctx, P, t) {
     x.restore();
     x.restore();
     /* the flower: its body ivory over the bar's end, its lines in the metal */
-    x.save(); x.globalAlpha *= fa; x.fillStyle = ivory; x.fill(flowerPath); x.restore();
+    /* a fine gold ring inside the round end, the flower within it */
+    x.save(); x.globalAlpha *= clamp(ph.flowerP * 2); x.strokeStyle = alphaOf(M[2], .6); x.lineWidth = 2; x.beginPath(); x.arc(FLOWER.x, FLOWER.y, END_R - 16, 0, TAU); x.stroke(); x.restore();
     emblemStroke(x, FLOWER.x, FLOWER.y, FLOWER.R, { draw: ph.flowerP, style: metalBevel(x, FLOWER.x - FLOWER.R, FLOWER.y - FLOWER.R, FLOWER.x + FLOWER.R * .5, FLOWER.y + FLOWER.R, M), weight: FLOWER.weight });
     /* the divider beside the plaque */
     if (plaqueOn && ph.divP > .01) {
-      const hh = 70 * ph.divP, my = (BAR.top + NAVY.top) / 2 + 2;
+      const hh = 62 * ph.divP, my = (BAR.top + NAVY.top) / 2 + 2;
       x.save(); x.globalAlpha *= ph.textA; x.strokeStyle = metalBevel(x, 0, my - hh, 0, my + hh, M); x.lineWidth = 3; x.lineCap = 'round'; x.beginPath(); x.moveTo(divX, my - hh); x.lineTo(divX, my + hh); x.stroke(); x.restore();
     }
     /* the plaque's logo and its words */
     if (plaqueOn) {
       const lx = 338 + dx, mark = P.plaque === 'mark', gold = mixHex(M[1], M[2], .6);
-      emblemStroke(x, lx + 6, mark ? 330 : 302, 64, { draw: ph.logoE, style: P.c2 || '#6c7881', weight: 1.05 });
-      if (ph.logoT > 0) {
+      /* a fine gold line inside the plaque's dome, following its edge */
+      x.save(); const inner = new Path2D(); addPoly(inner, plaque); x.clip(inner); x.beginPath(); x.rect(0, 0, 520 + dx, FOOT - 8); x.rect(0, 0, 2000, BAR.top - 3); x.clip();
+      linePath(x, plaque, true); x.lineJoin = 'round'; x.strokeStyle = alphaOf(M[2], .55); x.lineWidth = 28; x.stroke(); x.strokeStyle = ivory; x.lineWidth = 25; x.stroke(); x.restore();
+      emblemStroke(x, lx + 4, mark ? 420 : 352, mark ? 74 : 58, { draw: ph.logoE, style: P.c2 || '#6c7881', weight: 1.05 });
+      if (ph.logoT > 0 && !mark) {
         x.save(); x.globalAlpha *= ph.logoT;
-        upright(x, lx, mark ? 448 : 410, mir, u => drawLogo(u, 'wordmark', gold, 0, 0, 228));
-        if (!mark) upright(x, lx - 6, 470, mir, u => drawLogo(u, 'tagline', gold, 0, 0, 252));
+        upright(x, lx, 466, mir, u => drawLogo(u, 'wordmark', gold, 0, 0, 216));
         x.restore();
       }
       if (P.kicker && ph.kickA > 0) {
