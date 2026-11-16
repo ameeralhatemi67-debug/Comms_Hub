@@ -4621,4 +4621,7 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     place; the same saved progress as before (publish, redirect, youtube); the summary first at the end and from «التفاصيل»; phone,
     evening and English. The other platforms' checks are unchanged and pass.
   - Another session's uncommitted motion changes were in the working tree while these ran; the build and the tests included them.
-- **Not checked.** Signed in on the live site. Committed on local main; not pushed or deployed.
+- **Live.** `bcd1ac1` pushed at the owner's word and deployed to production (Vercel, ready in about 30 seconds).
+  `qa/platform-setup-live.cjs` 13 of 13 on the live site, signed out, in `qa/platform-setup-live.json`: it now also finds the page's
+  styles (its list, its pictures, its viewer) in the live CSS and two of the guides' pictures served as PNG.
+- **Not checked.** Signed in on the live site: the director's own run through both guides.

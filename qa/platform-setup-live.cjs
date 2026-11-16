@@ -30,6 +30,12 @@ const env = Object.fromEntries(
     const css = (await Promise.all(seen.sheets.map((u) => fetch(u).then((r) => r.text())))).join('\n');
     check('the styles of both pages are out', css.includes('.pf-body') && css.includes('.ac-row'), `${css.length} bytes`);
     check('and the old ones are gone', !/\.(st-plat|wk-acccard)(?![-\w])/.test(css));
+    // The YouTube and TikTok guides shown as one page (MVP_draft.md 67.10): its styles, and the pictures it draws, from the site itself.
+    check('the styles of the guide shown as one page are out, its list, its pictures and its viewer', css.includes('.gdoc-toc') && css.includes('.gdoc-zoom') && css.includes('dialog.gdoc-view'));
+    for (const p of ['/guides/google/branding.png', '/guides/tiktok/verify-file.png']) {
+      const r = await fetch(`${site}${p}`);
+      check(`the guide's picture ${p} is served as a picture`, r.ok && (r.headers.get('content-type') ?? '').includes('image/png'), `${r.status} ${r.headers.get('content-type')}`);
+    }
 
     await tab.goto(`${site}/channels`);
     await tab.waitForLoadState('networkidle');

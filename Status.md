@@ -28,13 +28,14 @@ related:
 
 ## The YouTube and TikTok setup guides shown as one page, 2026-11-16
 
-- **Done, committed on local main, not pushed.** `MVP_draft.md` section 67.10, the director's choice of the draft's layout C: the list of
+- **Done and live (`bcd1ac1`).** `MVP_draft.md` section 67.10, the director's choice of the draft's layout C: the list of
   steps with its parts on one side, every step in order on the other, each picture drawn small (at most 400 pixels) under the actions it
   shows and opened at its own size on a click. Only the YouTube and TikTok guides; the others keep the step sheet. Saving, the keys and
   reviews are unchanged.
-- **Checks.** Typecheck and build pass; `npm test` 967 of 967; `qa/platforms-flow.cjs` 142 of 142.
-- **Not checked.** Signed in on the live site, after a deployment.
-- **Next.** Push to deploy when the owner says; the director then tries both guides signed in. Moving another guide is adding it to
+- **Checks.** Typecheck and build pass; `npm test` 967 of 967; `qa/platforms-flow.cjs` 142 of 142; on the live site
+  `qa/platform-setup-live.cjs` 13 of 13 (the page's styles and the guides' pictures are out).
+- **Not checked.** Signed in on the live site.
+- **Next.** The director tries both guides signed in. Moving another guide is adding it to
   `WHOLE_GUIDES` with its parts and places.
 
 ## Two new Repine designs, «الذهب السائل» and «اللوحة العاجية», revised 2026-11-16

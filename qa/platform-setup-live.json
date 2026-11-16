@@ -1,6 +1,6 @@
 {
   "script": "qa/platform-setup-live.cjs",
-  "run": "2026-11-05T10:41:20.108Z",
+  "run": "2026-11-16T08:34:24.728Z",
   "checks": [
     {
       "name": "the page really runs next 16.4.3",
@@ -10,12 +10,27 @@
     {
       "name": "the styles of both pages are out",
       "pass": true,
-      "detail": "345720 bytes"
+      "detail": "354047 bytes"
     },
     {
       "name": "and the old ones are gone",
       "pass": true,
       "detail": ""
+    },
+    {
+      "name": "the styles of the guide shown as one page are out, its list, its pictures and its viewer",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the guide's picture /guides/google/branding.png is served as a picture",
+      "pass": true,
+      "detail": "200 image/png"
+    },
+    {
+      "name": "the guide's picture /guides/tiktok/verify-file.png is served as a picture",
+      "pass": true,
+      "detail": "200 image/png"
     },
     {
       "name": "«حسابات المنصات» stays behind the sign-in",
@@ -54,7 +69,7 @@
     }
   ],
   "notes": [],
-  "total": 10,
-  "passed": 10,
+  "total": 13,
+  "passed": 13,
   "failed": 0
 }
