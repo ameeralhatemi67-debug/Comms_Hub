@@ -38,14 +38,13 @@ related:
 - **Next.** The director tries both guides signed in. Moving another guide is adding it to
   `WHOLE_GUIDES` with its parts and places.
 
-## Two new Repine designs, «الذهب السائل» and «اللوحة العاجية», revised 2026-11-16
+## Two new Repine designs, «الذهب السائل» and «اللوحة العاجية», revised twice 2026-11-16
 
-- **Done.** `MVP_draft.md` section 80 (80.7 the revision). After the owner's notes: Liquid Gold is still and clean while shown, leaves by
-  retracting into its disc, has a wider and taller band and one quiet light; Ivory Plaque is rebuilt from the second reference sheet (logo
-  plaque joined to the bar, flower half on its end, briefcase subtitle).
-- **Checks.** Typecheck passes and `npm test` 960 of 960 on the committed content alone; the build passes; `qa/motion-ribbons.cjs` 85 of 85 (every frame, every option, the stillness
-  and the exit, MP4, MOV, ZIP and PNG downloads decoded by ffmpeg).
-- **Waiting.** The owner's look at the revised designs. Not checked: the studio's inspector signed in, the live site after the push.
+- **Done.** `MVP_draft.md` section 80. Liquid Gold: still and clean while shown, its own exit, a wider band, one quiet light. Ivory
+  Plaque: rebuilt as one shape from the reference (plaque, bar and flower with one gold rim, one navy strip, the flower as the bar's end).
+- **Checks.** Typecheck, build and `npm test` 967 of 967 pass; `qa/motion-ribbons.cjs` 86 of 86 (every frame, every option, the stillness,
+  the exit, one unbroken shape, MP4, MOV, ZIP and PNG downloads decoded by ffmpeg).
+- **Waiting.** The owner's look at the rebuilt ivory design. Not checked: the studio's inspector signed in, the live site after the push.
 
 ## Director's notes, step 5: YouTube's four choices in the work cycle, 2026-11-05
 

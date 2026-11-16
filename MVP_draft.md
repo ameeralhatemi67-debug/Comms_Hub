@@ -4440,18 +4440,22 @@ a pattern, and more. Section 57's inventory becomes twenty-eight templates: eigh
 
 ## 80.3 «اللوحة العاجية» (`rp-ivory`)
 
-- Drawn after the owner's second reference sheet (2026-11-16), in that sheet's own coordinates, so its proportions hold.
-- **The plaque** is a rounded triangle with a broad domed top, backed by a gold plate, joined to the bar's left end (it overlaps it). It
-  carries the whole Hedayah logo (the flower in the logo's grey, «هداية» and the association's name in the metal) and, on a navy band at
-  its foot, «نص أسفل اللوحة», «هداية 2026» by default, its numbers in the metal. «اللوحة الجانبية»: الشعار كاملاً، الزهرة والاسم، بلا.
-- **The bar** is ivory with a gold rule and a faint pattern toward its right end; a gold divider beside the plaque; the title centred on
-  the ivory; a navy band with a slanted left end and a gold edge for the subtitle, with a gold briefcase beside it («أيقونة الحقيبة»).
-- **The flower** sits half on the bar's right end and half beyond it, in the metal, never as a separate badge.
-- **Entry.** The plaque appears and its logo writes itself, the gold rule draws the bar out of the plaque with the ivory behind it, the
-  flower writes itself at the end, the navy band slides out, the title and the subtitle are uncovered. **Exit.** The text fades, the
-  flower fades, the band and the bar retract into the plaque, the plaque fades.
+- The owner's second reference sheet (2026-11-16), cleaned up: drawn in the sheet's own coordinates, so its proportions hold.
+- **One shape.** Plaque, bar and flower are one body with one gold rim, never pieces laid over one another.
+  - **The plaque** leans like the sheet's: a slanted left side, a broad flat dome rising above the bar, an upright right side going into
+    the bar, its bottom level with the bar's. It carries the whole Hedayah logo (the flower in the logo's grey, «هداية» and the
+    association's name in the metal), backed by a gold plate along its leaning side.
+  - **The navy strip** runs from the plaque's foot into the bar under the title, flush with the bottom edge: «نص أسفل اللوحة» on the
+    plaque («هداية 2026» by default, its numbers in the metal), the subtitle with a gold briefcase («أيقونة الحقيبة») in the bar.
+  - **The flower** is the bar's right end, half on the bar and half beyond it: its body is the shape's ivory and its lobes are the shape's
+    edge there, the bar's rim running into them.
+- A gold divider beside the plaque, the title centred on the ivory, a faint pattern toward the flower.
+- «اللوحة الجانبية»: الشعار كاملاً، الزهرة والاسم، بلا (without the plaque, the strip starts with a slanted end in the bar).
+- **Entry.** The plaque fades in and rises, its logo writes itself; the shape is uncovered toward the flower with a soft edge; the
+  flower's lines write themselves as its body fades in; the strip slides out; the title and the subtitle are uncovered.
+  **Exit.** The text fades, the strip withdraws, the shape is covered back into the plaque, the plaque fades.
 - **While shown.** Still, except the quiet light on the flower if wanted.
-- **Colours.** The ivory, the navy band, the title, the text on the navy, the plaque's logo, and the custom metal.
+- **Colours.** The ivory, the navy strip, the title, the text on the navy, the plaque's logo, and the custom metal.
 
 ## 80.4 Design options
 
@@ -4487,3 +4491,5 @@ The first versions were judged noisy. Liquid Gold was too liquid and dripping fo
 narrow, its shine excessive; the ivory design did not follow the reference closely enough. The revision above: Liquid Gold keeps its
 entry, holds still, leaves by retracting, has a wider and taller band and one quiet light; drops are removed with their switch. The ivory
 design is rebuilt from the second reference sheet. Glow and glints are off by default for both.
+- A second round of notes the same day: the plaque was too tall and narrow, and the plaque and the flower looked laid over the bar. The
+  ivory design was rebuilt as one shape (80.3).

@@ -231,6 +231,16 @@ const types = { '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; char
     await toggled('أيقونة الحقيبة بجانب النص الفرعي', 'the briefcase beside the subtitle switches', .0003);
     /* the flower sits half on the bar's end and half beyond it: ink to the right of the bar's end, in the bar's rows */
     { await scrubTo(4.2); const shown = await read(); check('the flower reaches beyond the bar', shown.right > .9, shown.right); }
+    /* plaque, bar and flower are one shape: across the flower's middle row the design is opaque without a break */
+    { await scrubTo(4.2); const row = await stage().evaluate(cv => {
+        const w = cv.width, h = cv.height, d = cv.getContext('2d').getImageData(0, 0, w, h).data; let best = { run: 0 };
+        for (let y = Math.round(h * .55); y < Math.round(h * .95); y += 2) {
+          let x0 = -1, x1 = -1, run = 0, longest = 0;
+          for (let x = 0; x < w; x++) { const a = d[(y * w + x) * 4 + 3]; if (a > 200) { if (x0 < 0) x0 = x; x1 = x; run++; longest = Math.max(longest, run); } else run = 0; }
+          if (x1 - x0 > best.run) best = { run: x1 - x0, longest, y };
+        }
+        return best; });
+      check('plaque, bar and flower are one unbroken shape', row.longest >= row.run - 2, row); }
     await t.getByRole('button', { name: 'إعادة ضبط هذا التصميم' }).click();
     await tab('الألوان');
     check('the ivory design has its five colours and the metal', await t.locator('.ms-colors input[type=color]').count() === 5 && await t.locator('.ms-pick-metal').count() === 5);

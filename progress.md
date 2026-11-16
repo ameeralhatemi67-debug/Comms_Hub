@@ -4625,3 +4625,19 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   `qa/platform-setup-live.cjs` 13 of 13 on the live site, signed out, in `qa/platform-setup-live.json`: it now also finds the page's
   styles (its list, its pictures, its viewer) in the live CSS and two of the guides' pictures served as PNG.
 - **Not checked.** Signed in on the live site: the director's own run through both guides.
+
+### 2026-11-16: «اللوحة العاجية» rebuilt as one shape after the owner's second notes
+
+- **The owner's notes.** Still wrong: too tall and squashed; the Hedayah flower looked like an overlay, and the plaque like its own
+  element, not part of the design. "Make this same design but clean up its mistakes, as this is AI generated." `MVP_draft.md` 80.3.
+- **Built.** In `src/lib/motion/designs-ribbons.js`:
+  - The plaque's outline is traced from the reference (a slanted left side, a broad flat dome, an upright right side) instead of a
+    symmetric rounded triangle, and its bottom is level with the bar's.
+  - Plaque, bar and flower are one body: every part is stroked and filled in gold and the ivory is laid over it, so one rim runs around
+    the whole outline. The flower's body is the capsules' outer outline (`flowerBody`), so its lobes are the shape's edge.
+  - The navy runs from the plaque's foot into the bar as one strip, flush with the bottom.
+  - The entry uncovers the whole shape from the plaque with a soft edge (one layer, `masked`), and the flower's body fades in with its lines.
+- **Checks.** `npm run typecheck` passes; `npm test` 967 of 967; `npm run build` passes, all on exactly the content committed (the folder
+  held nothing else of code). `qa/motion-ribbons.cjs` 86 of 86, with a new check: across the flower's middle row the design is opaque
+  without a break (590 of 590 pixels), so plaque, bar and flower are one shape.
+- **Not checked.** The studio's inspector signed in; the live site after the push.
