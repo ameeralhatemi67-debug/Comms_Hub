@@ -13,7 +13,7 @@ const common = { value: 82, decimals: 0, label: 'أثر الحملة', prefix: '
   ratio: '9:16', glow: true, showVerse: true, showLogo: true, showContact: false,
   showSocial: false, showWave: true, particles: true, bgIn: false,
   metal: 'gold', shine: true, shineSpeed: 1, pattern: 'none', patternAmt: 30, font: 'plex', span: 'full',
-  side: 'right', size: 100, lift: 0, dropShadow: true, flow: 60, drips: true, plaque: 'wordmark' } satisfies Params;
+  side: 'right', size: 100, lift: 0, dropShadow: true, flow: 60, plaque: 'logo', icon: true } satisfies Params;
 
 /* The ribbons' metal is chosen by name; this colour is used only when «مخصص» is chosen. */
 const CUSTOM_METAL: ColorField = { key: 'accent', label: 'لون المعدن المخصص', when: p => p.metal === 'custom' };
@@ -46,11 +46,12 @@ const meta: Record<string, Meta> = {
   'rp-crescent': { name: 'الهلال المضيء', badge: 'new', colors: ['لون اللافتة الليلية', 'لون الهلال'],
     blurb: 'هلال يرسم نفسه وتشتعل نجمة في جوفه، وتنفتح منه لافتة ليلية بالعنوان. مناسب لرمضان والأعياد.' },
   'rp-liquid': { name: 'الذهب السائل', badge: 'new',
-    blurb: 'قطرة ذهب منصهر تسقط وتتناثر قرصاً يُكتب فيه شعار هداية، ثم يسيل الذهب شريطاً حي الحواف يبرد لوحاً زجاجياً، ويقطر منه النص الفرعي.',
+    blurb: 'قطرة ذهب منصهر تسقط وتتناثر قرصاً يُكتب فيه شعار هداية، ثم يسيل الذهب شريطاً يبرد لوحاً زجاجياً ثابتاً نظيفاً، ويخرج منه النص الفرعي، ويعود الشريط إلى القرص عند الخروج.',
     colorFields: [{ key: 'main', label: 'لون اللوح الزجاجي' }, { key: 'text', label: 'لون العنوان' }, { key: 'c1', label: 'لون النص الفرعي' }, CUSTOM_METAL] },
   'rp-ivory': { name: 'اللوحة العاجية', badge: 'new',
-    blurb: 'شارة عاجية يُرسم فيها شعار هداية، يمتد منها إطار ذهبي يحمل لوحاً عاجياً منقوشاً، ويخرج شريط كحلي للنص الفرعي، وتنبثق في الطرف لوحة بموجة كحلية.',
-    colorFields: [{ key: 'c3', label: 'لون العاج' }, { key: 'main', label: 'لون الشريط والموجة' }, { key: 'c1', label: 'لون العنوان' }, { key: 'text', label: 'لون النص الفرعي' }, CUSTOM_METAL] },
+    blurb: 'لوحة تحمل شعار هداية كاملاً، يمتد منها لوح عاجي بإطار ذهبي للعنوان وشريط كحلي للنص الفرعي، وزهرة هداية نصفها على طرف اللوح ونصفها خارجه.',
+    colorFields: [{ key: 'c3', label: 'لون العاج' }, { key: 'main', label: 'لون الشريط الكحلي' }, { key: 'c1', label: 'لون العنوان' }, { key: 'text', label: 'لون النص على الكحلي' },
+      { key: 'c2', label: 'لون شعار اللوحة', when: p => p.plaque !== 'none' }, CUSTOM_METAL] },
   'fr-lattice': { name: 'القوس المشربي', blurb: 'زخرفة علوية مشبّكة تهبط من الأعلى ولوحة سفلية ممزقة الحواف ترتفع، والفيديو يملأ ما بينهما.',
     colors: ['الزخرفة', 'اللوحة', 'الذهبي', 'النص'] },
   'fr-watercolor': { name: 'الورق المائي', blurb: 'ورق محبب وإطار مرسوم بالفرشاة مع غرز وأغصان، ومصحف على حامله وبطاقة اسم مرسومة.',
@@ -86,7 +87,7 @@ const repineTexts = (id: string): TextField[] => [
   { key: 'subtitle', label: 'النص الفرعي', max: 90, group: 'main', ...(RIBBON_IDS.has(id) ? { hint: 'اتركه فارغاً لإخفائه' } : {}) },
   ...(id === 'rp-editorial' ? [{ key: 'kicker', label: 'الوسم فوق الشريط', max: 24, group: 'main' } as TextField] : []),
   ...(id === 'rp-liquid' ? [{ key: 'kicker', label: 'وسم فوق الشريط', max: 24, group: 'main', hint: 'اتركه فارغاً لإخفائه' } as TextField] : []),
-  ...(id === 'rp-ivory' ? [{ key: 'kicker', label: 'نص اللوحة الجانبية', max: 12, group: 'main', when: (p: Params) => p.plaque === 'kicker' } as TextField] : []),
+  ...(id === 'rp-ivory' ? [{ key: 'kicker', label: 'نص أسفل اللوحة', max: 16, group: 'main', hint: 'الأرقام تظهر بلون المعدن.', when: (p: Params) => p.plaque !== 'none' } as TextField] : []),
 ];
 
 /* ---- design options of the ribbons (designs-ribbons.js) ---- */
@@ -94,7 +95,7 @@ const RIBBON_IDS = new Set<string>(RIBBONS.map((g: { id: string }) => g.id));
 const shared: OptionField[] = [
   { kind: 'choice', key: 'metal', label: 'المعدن', place: 'colors', look: 'metal', choices: [
     { value: 'gold', label: 'ذهبي' }, { value: 'silver', label: 'فضي' }, { value: 'rose', label: 'وردي' }, { value: 'bronze', label: 'نحاسي' }, { value: 'custom', label: 'مخصص' }] },
-  { kind: 'switch', key: 'shine', label: 'لمعة تدور حول المعدن', place: 'shine' },
+  { kind: 'switch', key: 'shine', label: 'لمعة هادئة على زهرة هداية', place: 'shine' },
   { kind: 'slider', key: 'shineSpeed', label: 'سرعة اللمعة', place: 'shine', min: .25, max: 3, step: .05, decimals: 2, times: true, when: p => p.shine },
   { kind: 'choice', key: 'pattern', label: 'النقش', place: 'surface', look: 'pattern', choices: [
     { value: 'none', label: 'بلا' }, { value: 'emblem', label: 'زخرفة هداية' }, { value: 'girih', label: 'نجمة ثمانية' }, { value: 'rings', label: 'دوائر متشابكة' },
@@ -108,17 +109,17 @@ const shared: OptionField[] = [
   { kind: 'slider', key: 'lift', label: 'الارتفاع عن الحافة السفلية', place: 'layout', min: 0, max: 60, step: 1, unit: '٪', hint: 'نسبة من ارتفاع الإطار.' },
 ];
 const effects: OptionField[] = [
-  { kind: 'switch', key: 'glow', label: 'توهج حول الشعار', place: 'effects' },
+  { kind: 'switch', key: 'glow', label: 'توهج خفيف حول الزهرة', place: 'effects' },
   { kind: 'switch', key: 'particles', label: 'لمعات متطايرة', place: 'effects' },
   { kind: 'switch', key: 'dropShadow', label: 'ظل تحت التصميم', place: 'effects', hint: 'يفصل التصميم عن المقاطع الفاتحة.' },
 ];
 const OPTIONS: Record<string, OptionField[]> = {
   'rp-liquid': [...shared,
-    { kind: 'slider', key: 'flow', label: 'تموج السائل', place: 'effects', min: 0, max: 100, step: 1, unit: '٪', hint: 'صفر يجعل الحواف ساكنة بعد أن يستقر الذهب.' },
-    { kind: 'switch', key: 'drips', label: 'قطرات تتساقط', place: 'effects' }, ...effects],
+    { kind: 'slider', key: 'flow', label: 'سيولة الدخول', place: 'effects', min: 0, max: 100, step: 1, unit: '٪', hint: 'تموج الذهب وتناثره عند الدخول فقط. أثناء العرض يبقى الشريط ثابتاً.' }, ...effects],
   'rp-ivory': [...shared.map(f => f.key === 'pattern' ? { ...f, paper: 'c3' } as OptionField : f),
     { kind: 'choice', key: 'plaque', label: 'اللوحة الجانبية', place: 'layout', choices: [
-      { value: 'wordmark', label: 'هداية مكتوبة' }, { value: 'emblem', label: 'الشعار' }, { value: 'kicker', label: 'نص قصير' }, { value: 'none', label: 'بلا' }] },
+      { value: 'logo', label: 'الشعار كاملاً' }, { value: 'mark', label: 'الزهرة والاسم' }, { value: 'none', label: 'بلا' }] },
+    { kind: 'switch', key: 'icon', label: 'أيقونة الحقيبة بجانب النص الفرعي', place: 'layout' },
     ...effects],
 };
 const frameTexts = (id: string): TextField[] => [

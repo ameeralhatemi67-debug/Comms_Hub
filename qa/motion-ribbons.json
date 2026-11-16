@@ -1,14 +1,14 @@
 {
-  "when": "2026-11-16T07:33:31.312Z",
+  "when": "2026-11-16T08:13:43.963Z",
   "browser": "msedge",
   "exportSeconds": {
-    "rp-liquid-mp4": 2.852,
-    "rp-liquid-mov": 14.614,
-    "rp-liquid-zip": 7.154,
-    "rp-ivory-mp4": 1.718,
-    "rp-ivory-mov": 18.432,
-    "rp-ivory-zip": 7.539,
-    "png": 0.278
+    "rp-liquid-mp4": 4.198,
+    "rp-liquid-mov": 18.839,
+    "rp-liquid-zip": 8.5,
+    "rp-ivory-mp4": 2.834,
+    "rp-ivory-mov": 18.112,
+    "rp-ivory-zip": 7.869,
+    "png": 0.321
   },
   "checks": [
     {
@@ -40,36 +40,36 @@
       "name": "rp-liquid: draws real artwork at 0.2s",
       "pass": true,
       "detail": {
-        "n": 244,
-        "colors": 19
+        "n": 218,
+        "colors": 18
       }
     },
     {
       "name": "rp-liquid: draws real artwork at 1.2s",
       "pass": true,
       "detail": {
-        "n": 10233,
-        "colors": 180
+        "n": 12341,
+        "colors": 161
       }
     },
     {
       "name": "rp-liquid: draws real artwork at 2.2s",
       "pass": true,
       "detail": {
-        "n": 13812,
-        "colors": 199
+        "n": 18281,
+        "colors": 194
       }
     },
     {
       "name": "rp-liquid: draws real artwork at 4.2s",
       "pass": true,
       "detail": {
-        "n": 14104,
-        "colors": 223
+        "n": 18332,
+        "colors": 193
       }
     },
     {
-      "name": "rp-liquid: all 265 frames draw without an error",
+      "name": "rp-liquid: all 259 frames draw without an error",
       "pass": true,
       "detail": []
     },
@@ -82,36 +82,36 @@
       "name": "rp-ivory: draws real artwork at 0.2s",
       "pass": true,
       "detail": {
-        "n": 7472,
-        "colors": 66
+        "n": 6655,
+        "colors": 83
       }
     },
     {
       "name": "rp-ivory: draws real artwork at 1.2s",
       "pass": true,
       "detail": {
-        "n": 15102,
-        "colors": 135
+        "n": 16004,
+        "colors": 133
       }
     },
     {
       "name": "rp-ivory: draws real artwork at 2.2s",
       "pass": true,
       "detail": {
-        "n": 21748,
-        "colors": 190
+        "n": 20167,
+        "colors": 150
       }
     },
     {
       "name": "rp-ivory: draws real artwork at 4.2s",
       "pass": true,
       "detail": {
-        "n": 21756,
-        "colors": 208
+        "n": 20157,
+        "colors": 148
       }
     },
     {
-      "name": "rp-ivory: all 259 frames draw without an error",
+      "name": "rp-ivory: all 247 frames draw without an error",
       "pass": true,
       "detail": []
     },
@@ -155,8 +155,8 @@
       "name": "«فضي» turns the metal silver",
       "pass": true,
       "detail": {
-        "gold": 24.308718166985884,
-        "silver": -18.263224984066284
+        "gold": 5.825691074641513,
+        "silver": -23.162830024001746
       }
     },
     {
@@ -168,8 +168,8 @@
       "name": "a custom metal colour is drawn",
       "pass": true,
       "detail": {
-        "silver": -18.263224984066284,
-        "red": 25.367312194083848
+        "silver": -23.162830024001746,
+        "red": 8.460934518292351
       }
     },
     {
@@ -180,7 +180,7 @@
     {
       "name": "the panel colour changes the panel",
       "pass": true,
-      "detail": 0.023594713816570842
+      "detail": 0.033651773235714694
     },
     {
       "name": "«سرعة اللمعة» shows while the light is on",
@@ -188,22 +188,22 @@
       "detail": ""
     },
     {
-      "name": "«لمعة تدور حول المعدن» flips",
+      "name": "«لمعة هادئة على زهرة هداية» flips",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "«لمعة تدور حول المعدن» flips",
+      "name": "«لمعة هادئة على زهرة هداية» flips",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "the light around the metal switches off and on",
+      "name": "the quiet light on the emblem switches off and on",
       "pass": true,
-      "detail": 0.006956811098648949
+      "detail": 0.00047400119292059686
     },
     {
-      "name": "«لمعة تدور حول المعدن» flips",
+      "name": "«لمعة هادئة على زهرة هداية» flips",
       "pass": true,
       "detail": ""
     },
@@ -213,7 +213,15 @@
       "detail": ""
     },
     {
-      "name": "«لمعة تدور حول المعدن» flips",
+      "name": "Liquid Gold is still while it is shown (no ripple, no drops, no drift)",
+      "pass": true,
+      "detail": {
+        "moved": 0,
+        "diff": 0.0012466138582786876
+      }
+    },
+    {
+      "name": "«لمعة هادئة على زهرة هداية» flips",
       "pass": true,
       "detail": ""
     },
@@ -225,12 +233,12 @@
     {
       "name": "pattern «بلا» and «نجمة ثمانية» differ",
       "pass": true,
-      "detail": 0.007617335239581312
+      "detail": 0.006290066432943972
     },
     {
       "name": "pattern «نجمة ثمانية» and «تموجات» differ",
       "pass": true,
-      "detail": 0.00852269140945528
+      "detail": 0.01156556840267761
     },
     {
       "name": "«وضوح النقش» hides with no pattern",
@@ -240,43 +248,43 @@
     {
       "name": "the title font changes the title",
       "pass": true,
-      "detail": 0.014367567366745673
+      "detail": 0.014945288720678082
     },
     {
       "name": "«ثابت» draws the band across the width",
       "pass": true,
       "detail": {
-        "auto": 0.5394265232974911,
-        "full": 0.16129032258064516
+        "auto": 0.3835125448028674,
+        "full": 0.11648745519713262
       }
     },
     {
       "name": "«يسار» moves the design to the left",
       "pass": true,
       "detail": {
-        "left": 0.24528442995922095,
-        "right": 0.7537887469766551
+        "left": 0.33328747193800873,
+        "right": 0.6658069756001804
       }
     },
     {
       "name": "«وسط» centres it",
       "pass": true,
-      "detail": 0.5366621625907952
+      "detail": 0.528176161286216
     },
     {
       "name": "«الحجم» at 60% draws it smaller",
       "pass": true,
       "detail": {
-        "small": 0.2383512544802867,
-        "full": 0.3960573476702508
+        "small": 0.3207885304659498,
+        "full": 0.5358422939068099
       }
     },
     {
       "name": "the height lifts it",
       "pass": true,
       "detail": {
-        "lifted": 0.3844298732398632,
-        "base": 0.7844541512685854
+        "lifted": 0.37891034317716055,
+        "base": 0.7793284792455085
       }
     },
     {
@@ -292,49 +300,78 @@
     {
       "name": "the drop shadow switches",
       "pass": true,
-      "detail": 0.03648818373600872
+      "detail": 0.026232995455372006
     },
     {
-      "name": "«توهج حول الشعار» flips",
+      "name": "«توهج خفيف حول الزهرة» flips",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "«توهج حول الشعار» flips",
+      "name": "«توهج خفيف حول الزهرة» flips",
       "pass": true,
       "detail": ""
     },
     {
       "name": "the glow switches",
       "pass": true,
-      "detail": 0.24020383144306306
+      "detail": 0.17778179524940232
     },
     {
-      "name": "«تموج السائل» changes the edge",
-      "pass": true,
-      "detail": 0.05658691923458549
-    },
-    {
-      "name": "«قطرات تتساقط» flips",
+      "name": "there is no drops switch any more",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "«قطرات تتساقط» flips",
+      "name": "«سيولة الدخول» shapes the entry",
       "pass": true,
-      "detail": ""
+      "detail": 0.05531516353163963
     },
     {
-      "name": "drops fall from the band while it is shown",
+      "name": "«سيولة الدخول» leaves the shown band unchanged",
       "pass": true,
-      "detail": 0.01132532795966917
+      "detail": {
+        "moved": 0,
+        "diff": 0.0012436538677178318
+      }
+    },
+    {
+      "name": "the entry starts with a drop above the disc",
+      "pass": true,
+      "detail": {
+        "drop": 0.43630573248407645,
+        "shown": 0.6464968152866242
+      }
+    },
+    {
+      "name": "the exit retracts the band toward the disc",
+      "pass": true,
+      "detail": {
+        "shown": [
+          0.3835125448028674,
+          0.6464968152866242
+        ],
+        "leaving": [
+          0.6684587813620072,
+          0.6464968152866242
+        ]
+      }
+    },
+    {
+      "name": "the exit ends with the disc alone, fading, nothing above it",
+      "pass": true,
+      "detail": {
+        "leaving": 7904,
+        "closing": 2784,
+        "top": 0.6656050955414012
+      }
     },
     {
       "name": "a new title is drawn",
       "pass": true,
       "detail": {
-        "before": 0.5412186379928315,
-        "after": 0.44802867383512546
+        "before": 0.3835125448028674,
+        "after": 0.30824372759856633
       }
     },
     {
@@ -348,38 +385,60 @@
       "detail": ""
     },
     {
-      "name": "the side plaque text is hidden until «نص قصير»",
+      "name": "the plaque text is offered with the plaque",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "the side plaque choices draw differently",
+      "name": "the plaque text defaults to «هداية 2026»",
       "pass": true,
-      "detail": [
-        0.0059437795969239605,
-        0.002930511998034664
-      ]
+      "detail": ""
+    },
+    {
+      "name": "the plaque choices draw differently",
+      "pass": true,
+      "detail": 0.007805666719518713
     },
     {
       "name": "«بلا» removes the plaque",
       "pass": true,
       "detail": {
-        "none": 0.5232974910394266,
-        "plaque": 0.3333333333333333
+        "none": 0.553763440860215,
+        "plaque": 0.3942652329749104
       }
     },
     {
-      "name": "«نص قصير» shows its text field",
+      "name": "with no plaque its text field is hidden",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "the ivory design has its four colours and the metal",
+      "name": "«أيقونة الحقيبة بجانب النص الفرعي» flips",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "rp-liquid: MP4 on green decodes at 1280x720 with 139 frames",
+      "name": "«أيقونة الحقيبة بجانب النص الفرعي» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the briefcase beside the subtitle switches",
+      "pass": true,
+      "detail": 0.1786940508358327
+    },
+    {
+      "name": "the flower reaches beyond the bar",
+      "pass": true,
+      "detail": 0.9336917562724014
+    },
+    {
+      "name": "the ivory design has its five colours and the metal",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-liquid: MP4 on green decodes at 1280x720 with 134 frames",
       "pass": true,
       "detail": {
         "name": "rp-liquid_1280x720_24fps_greenscreen.mp4",
@@ -388,8 +447,8 @@
         "width": 1280,
         "height": 720,
         "pix_fmt": "yuv420p",
-        "nb_read_frames": "139",
-        "frames": 139
+        "nb_read_frames": "134",
+        "frames": 134
       }
     },
     {
@@ -406,16 +465,16 @@
         "width": 1280,
         "height": 720,
         "pix_fmt": "yuva444p12le",
-        "nb_read_frames": "139",
-        "frames": 139
+        "nb_read_frames": "134",
+        "frames": 134
       }
     },
     {
       "name": "rp-liquid: a decoded MOV frame is mostly clear with a solid design",
       "pass": true,
       "detail": {
-        "clear": 807408,
-        "solid": 56331,
+        "clear": 787732,
+        "solid": 88967,
         "total": 921600
       }
     },
@@ -424,19 +483,19 @@
       "pass": true,
       "detail": {
         "name": "rp-liquid_1280x720_24fps_png-sequence.zip",
-        "bytes": 20491725
+        "bytes": 14879646
       }
     },
     {
       "name": "rp-liquid: the ZIP holds one PNG per frame",
       "pass": true,
       "detail": {
-        "files": 139,
-        "frames": 139
+        "files": 134,
+        "frames": 134
       }
     },
     {
-      "name": "rp-ivory: MP4 on green decodes at 1280x720 with 134 frames",
+      "name": "rp-ivory: MP4 on green decodes at 1280x720 with 125 frames",
       "pass": true,
       "detail": {
         "name": "rp-ivory_1280x720_24fps_greenscreen.mp4",
@@ -445,8 +504,8 @@
         "width": 1280,
         "height": 720,
         "pix_fmt": "yuv420p",
-        "nb_read_frames": "134",
-        "frames": 134
+        "nb_read_frames": "125",
+        "frames": 125
       }
     },
     {
@@ -463,16 +522,16 @@
         "width": 1280,
         "height": 720,
         "pix_fmt": "yuva444p12le",
-        "nb_read_frames": "134",
-        "frames": 134
+        "nb_read_frames": "125",
+        "frames": 125
       }
     },
     {
       "name": "rp-ivory: a decoded MOV frame is mostly clear with a solid design",
       "pass": true,
       "detail": {
-        "clear": 734828,
-        "solid": 89745,
+        "clear": 791112,
+        "solid": 102157,
         "total": 921600
       }
     },
@@ -481,15 +540,15 @@
       "pass": true,
       "detail": {
         "name": "rp-ivory_1280x720_24fps_png-sequence.zip",
-        "bytes": 20720003
+        "bytes": 7484969
       }
     },
     {
       "name": "rp-ivory: the ZIP holds one PNG per frame",
       "pass": true,
       "detail": {
-        "files": 134,
-        "frames": 134
+        "files": 125,
+        "frames": 125
       }
     },
     {
@@ -508,8 +567,8 @@
       "name": "PNG: the design is on the left and silver, as chosen",
       "pass": true,
       "detail": {
-        "cx": 0.2608400172069272,
-        "rb": -22.57442273534636
+        "cx": 0.3313533763582589,
+        "rb": -29.047579245161707
       }
     },
     {

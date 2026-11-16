@@ -64,8 +64,11 @@ test('ten Repine designs; the two new ones carry Arabic names and their options'
     for (const key of ['metal', 'shine', 'shineSpeed', 'pattern', 'patternAmt', 'font', 'span', 'side', 'size', 'lift', 'dropShadow', 'glow', 'particles'])
       assert.ok(g.options.some(o => o.key === key), `${id} offers ${key}`);
   }
-  assert.ok(graphicById('rp-liquid').options.some(o => o.key === 'flow') && graphicById('rp-liquid').options.some(o => o.key === 'drips'));
-  assert.ok(graphicById('rp-ivory').options.some(o => o.key === 'plaque'));
+  assert.ok(graphicById('rp-liquid').options.some(o => o.key === 'flow'));
+  assert.ok(!graphicById('rp-liquid').options.some(o => o.key === 'drips'), 'no drops: the owner asked for a clean band (2026-11-16)');
+  assert.ok(graphicById('rp-ivory').options.some(o => o.key === 'plaque') && graphicById('rp-ivory').options.some(o => o.key === 'icon'));
+  assert.deepEqual(graphicById('rp-ivory').options.find(o => o.key === 'plaque').choices.map(c => c.value), ['logo', 'mark', 'none']);
+  for (const id of ['rp-liquid', 'rp-ivory']) assert.equal(graphicById(id).defaults.glow, false, `${id}: no glow unless asked`);
   assert.equal(graphicById('rp-gold').options, undefined, 'the older designs are unchanged');
 });
 
@@ -88,9 +91,12 @@ test('fields that matter only with another choice are shown only with it', () =>
   assert.equal(custom.when({ ...g.defaults, metal: 'custom' }), true);
   const speed = g.options.find(o => o.key === 'shineSpeed');
   assert.equal(speed.when({ ...g.defaults, shine: false }), false);
-  const iv = graphicById('rp-ivory'), kicker = iv.texts.find(t => t.key === 'kicker');
-  assert.equal(kicker.when({ ...iv.defaults, plaque: 'wordmark' }), false);
-  assert.equal(kicker.when({ ...iv.defaults, plaque: 'kicker' }), true);
+  const iv = graphicById('rp-ivory'), kicker = iv.texts.find(t => t.key === 'kicker'), logo = iv.colors.find(c => c.key === 'c2');
+  assert.equal(kicker.when({ ...iv.defaults, plaque: 'logo' }), true);
+  assert.equal(kicker.when({ ...iv.defaults, plaque: 'none' }), false);
+  assert.equal(logo.when({ ...iv.defaults, plaque: 'mark' }), true);
+  assert.equal(logo.when({ ...iv.defaults, plaque: 'none' }), false);
+  assert.equal(iv.defaults.kicker, 'هداية 2026');
 });
 
 test('a studio clip keeps the options it changed, and only those', () => {

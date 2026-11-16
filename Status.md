@@ -26,14 +26,14 @@ related:
 
 # Communication Department Hub — Current Status
 
-## Two new Repine designs, «الذهب السائل» and «اللوحة العاجية», 2026-11-16
+## Two new Repine designs, «الذهب السائل» and «اللوحة العاجية», revised 2026-11-16
 
-- **Done.** `MVP_draft.md` section 80. The Hedayah emblem drawn as true vector strokes (`src/lib/motion/emblem.js`), two lower thirds
-  (`src/lib/motion/designs-ribbons.js`), and the tab «التصميم» with the metal, the running light, patterns, fonts, side, size, height
-  and effects, also in the studio's inspector. A long settings tab now scrolls inside its column instead of under the downloads.
-- **Checks.** Typecheck and build pass; `npm test` 960 of 960; `qa/motion-ribbons.cjs` 77 of 77 (every frame, every option, MP4, MOV,
-  ZIP and PNG downloads decoded by ffmpeg).
-- **Not checked.** The studio's inspector signed in, and the live site after the push deploys.
+- **Done.** `MVP_draft.md` section 80 (80.7 the revision). After the owner's notes: Liquid Gold is still and clean while shown, leaves by
+  retracting into its disc, has a wider and taller band and one quiet light; Ivory Plaque is rebuilt from the second reference sheet (logo
+  plaque joined to the bar, flower half on its end, briefcase subtitle).
+- **Checks.** Typecheck passes and `npm test` 960 of 960 on the committed content alone; the build passes; `qa/motion-ribbons.cjs` 85 of 85 (every frame, every option, the stillness
+  and the exit, MP4, MOV, ZIP and PNG downloads decoded by ffmpeg).
+- **Waiting.** The owner's look at the revised designs. Not checked: the studio's inspector signed in, the live site after the push.
 
 ## Director's notes, step 5: YouTube's four choices in the work cycle, 2026-11-05
 

@@ -9,7 +9,7 @@ export type Params = {
   showSocial: boolean; showWave: boolean; particles: boolean; bgIn: boolean;
   /* design options of the lower thirds in designs-ribbons.js; other designs ignore them */
   metal: string; shine: boolean; shineSpeed: number; pattern: string; patternAmt: number; font: string; span: string;
-  side: string; size: number; lift: number; dropShadow: boolean; flow: number; drips: boolean; plaque: string;
+  side: string; size: number; lift: number; dropShadow: boolean; flow: number; plaque: string; icon: boolean;
 };
 export type TextKey = 'label' | 'prefix' | 'suffix' | 'title' | 'subtitle' | 'kicker' | 'reciter' | 'support' | 'phone' | 'handle' | 'web';
 export type ColorKey = 'color' | 'text' | 'main' | 'accent' | 'c1' | 'c2' | 'c3' | 'c4';
@@ -19,7 +19,7 @@ type When = { when?: (p: Params) => boolean };
 export type TextField = When & { key: TextKey; label: string; max: number; ltr?: boolean; hint?: string; placeholder?: string; group?: 'main' | 'contact' | 'social'; compact?: boolean };
 export type ColorField = When & { key: ColorKey; label: string };
 export type ToggleField = { key: ToggleKey; label: string };
-export type OptionKey = 'metal' | 'shine' | 'shineSpeed' | 'pattern' | 'patternAmt' | 'font' | 'span' | 'side' | 'size' | 'lift' | 'dropShadow' | 'flow' | 'drips' | 'plaque' | 'glow' | 'particles';
+export type OptionKey = 'metal' | 'shine' | 'shineSpeed' | 'pattern' | 'patternAmt' | 'font' | 'span' | 'side' | 'size' | 'lift' | 'dropShadow' | 'flow' | 'plaque' | 'icon' | 'glow' | 'particles';
 /** Where an option sits: «الألوان», or a group of «التصميم». */
 export type OptionPlace = 'colors' | 'shine' | 'surface' | 'layout' | 'effects';
 type OptionBase = When & { key: OptionKey; label: string; hint?: string; place: OptionPlace };

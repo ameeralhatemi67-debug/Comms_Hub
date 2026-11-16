@@ -4396,31 +4396,42 @@ a pattern, and more. Section 57's inventory becomes twenty-eight templates: eigh
 - **Entry.** A drop of molten metal falls and splashes into a disc; the emblem writes itself inside the disc's dark glass; metal flows
   out into a band with a round front; the band cools into a glass panel from the disc outward, with a hot edge where it turns; the title
   is uncovered from the emblem's side; the subtitle drips out of the band's underside as a metal pill; an optional tag rises above.
-- **While shown.** The edges ripple, bright bands flow away from the disc, drops gather under the band or the subtitle and fall, glints
-  rise. With «حركة العرض» at zero, or «تموج السائل» at zero, the edge is still once the metal has settled.
-- **Exit.** The entry in reverse, into the disc and back up into the drop.
+- **While shown.** Still and clean, for professional work: no ripple, no drops, no drifting highlights. The only movement is the quiet
+  light on the emblem («لمعة هادئة على زهرة هداية»), and glints if asked for. The metal is liquid only while it arrives.
+- **Exit.** Its own movement, not the entry in reverse: the text fades, the subtitle withdraws into the band, the band retracts into the
+  disc, and the disc closes a little and fades. No drop rises.
+- **Size.** The band is 112 units tall and at least 480 long, with room around the title.
 - **Colours.** The glass panel, the title, the subtitle (on the metal), and the custom metal.
 
 ## 80.3 «اللوحة العاجية» (`rp-ivory`)
 
-- A reading of the reference: an ivory badge with a double gold ring carries the emblem; a gold rule draws the ivory bar out of it along
-  both edges and the ivory follows; a navy band with a gold edge slides out for the subtitle; the title is uncovered on the ivory; a
-  domed side plaque, backed by a gold plate, pops at the far end with a navy wave that moves, carrying «هداية» written (or the emblem,
-  a short text, or nothing, which also removes the divider).
-- **Colours.** The ivory, the band and wave, the title, the subtitle, and the custom metal.
+- Drawn after the owner's second reference sheet (2026-11-16), in that sheet's own coordinates, so its proportions hold.
+- **The plaque** is a rounded triangle with a broad domed top, backed by a gold plate, joined to the bar's left end (it overlaps it). It
+  carries the whole Hedayah logo (the flower in the logo's grey, «هداية» and the association's name in the metal) and, on a navy band at
+  its foot, «نص أسفل اللوحة», «هداية 2026» by default, its numbers in the metal. «اللوحة الجانبية»: الشعار كاملاً، الزهرة والاسم، بلا.
+- **The bar** is ivory with a gold rule and a faint pattern toward its right end; a gold divider beside the plaque; the title centred on
+  the ivory; a navy band with a slanted left end and a gold edge for the subtitle, with a gold briefcase beside it («أيقونة الحقيبة»).
+- **The flower** sits half on the bar's right end and half beyond it, in the metal, never as a separate badge.
+- **Entry.** The plaque appears and its logo writes itself, the gold rule draws the bar out of the plaque with the ivory behind it, the
+  flower writes itself at the end, the navy band slides out, the title and the subtitle are uncovered. **Exit.** The text fades, the
+  flower fades, the band and the bar retract into the plaque, the plaque fades.
+- **While shown.** Still, except the quiet light on the flower if wanted.
+- **Colours.** The ivory, the navy band, the title, the text on the navy, the plaque's logo, and the custom metal.
 
 ## 80.4 Design options
 
 - **«الألوان».** «المعدن»: ذهبي، فضي، وردي، نحاسي، مخصص, as round metal swatches; «لون المعدن المخصص» shows only with «مخصص».
   «استعادة الألوان الأصلية» restores the metal too.
 - **«التصميم»**, a tab of its own, in four groups:
-  - «اللمعة»: «لمعة تدور حول المعدن» (on by default), and «سرعة اللمعة» while it is on.
+  - «اللمعة»: «لمعة هادئة على زهرة هداية» (on by default: one short light along the flower, nothing else shines), and «سرعة اللمعة»
+    while it is on.
   - «النقش والخط»: «النقش» with eight choices drawn as swatches (بلا، زخرفة هداية، نجمة ثمانية، دوائر متشابكة، تموجات، نقاط، خطوط مائلة،
     ملمس ناعم), «وضوح النقش» unless none, and «خط العنوان» (بلكس، ريم الكوفي، رقعة، خط النظام), the site's own fonts.
   - «الموضع والحجم»: «طول الشريط» (على قدر النص، ثابت), «مكان التصميم» (يمين، وسط، يسار; the left mirrors the shapes and keeps every
     text, the wordmark and the emblem upright), «الحجم» 60 to 120%, «الارتفاع عن الحافة السفلية» 0 to 60% of the frame, and for the
-    ivory design «اللوحة الجانبية».
-  - «المؤثرات»: for the liquid design «تموج السائل» and «قطرات تتساقط»; for both «توهج حول الشعار», «لمعات متطايرة», «ظل تحت التصميم».
+    ivory design «اللوحة الجانبية» and «أيقونة الحقيبة بجانب النص الفرعي».
+  - «المؤثرات»: for the liquid design «سيولة الدخول» (the entry's ripple and splash only); for both «توهج خفيف حول الزهرة» and
+    «لمعات متطايرة» (both off by default) and «ظل تحت التصميم».
 - The design stays inside the frame whatever its size and side.
 - Options are data on the template (`Graphic.options`), drawn by one component (`src/components/motion-options.tsx`) on the template page
   and in the studio's inspector, and stored by a studio clip like any other parameter (only what differs from the template).
@@ -4434,3 +4445,10 @@ Unchanged from section 57: MP4 on a key colour, transparent MOV (ProRes 4444), a
 
 `tests/motion-ribbons.test.mjs` (the emblem against the mask, the options against the defaults and the studio's kept parameters) and
 `qa/motion-ribbons.cjs` (the real page on a fixture: every frame, every option, every download decoded by ffmpeg).
+
+## 80.7 Revision after the owner's notes, 2026-11-16
+
+The first versions were judged noisy. Liquid Gold was too liquid and dripping for professional work, its exit poor, its text area
+narrow, its shine excessive; the ivory design did not follow the reference closely enough. The revision above: Liquid Gold keeps its
+entry, holds still, leaves by retracting, has a wider and taller band and one quiet light; drops are removed with their switch. The ivory
+design is rebuilt from the second reference sheet. Glow and glints are off by default for both.

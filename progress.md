@@ -4565,3 +4565,28 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     ffprobe and ffmpeg; the single PNG is on the left and silver as chosen; nothing wider than a phone screen; no console or page errors.
   - `npm run build` passes (compiled successfully).
 - **Not checked.** The studio's inspector with a signed-in person (it uses the same option component); the live site after deployment.
+
+### 2026-11-16: the two Repine designs cleaned up after the owner's notes
+
+- **The owner's notes.** Both designs were noisy and not clean. Liquid Gold: too liquid and dripping, the exit bad (the entry good), the
+  text area too narrow, too much shine; stop the drops in the band. Ivory Plaque: follow the new reference sheet; the flower half on the
+  bar and half off it, not an extension; the plaque joined to the bar; less shine; professional overall. `MVP_draft.md` 80.2 to 80.4 and 80.7.
+- **Liquid Gold.** The entry is kept. While shown the band is still: no ripple, no drops, no drifting highlights (`liquidPhases`,
+  `src/lib/motion/designs-ribbons.js`). The exit is its own movement: the text fades, the subtitle withdraws, the band retracts into the
+  disc, the disc fades. The band is 112 units tall (was 94) and at least 480 long (was 300). The only light is a short one along the flower,
+  at 70%; the lights along the band and the subtitle, the wet streak and the strong glow are gone. «قطرات تتساقط» is removed; «تموج السائل»
+  became «سيولة الدخول» and touches the entry only.
+- **Ivory Plaque.** Rebuilt in the reference sheet's own coordinates (1600 x 900, scaled by 0.46): a domed rounded-triangle plaque with
+  the whole logo and «هداية 2026» (numbers in the metal) joined to the bar's left end; the title centred; a navy band with a gold
+  briefcase for the subtitle; the flower half on the bar's end. New: «اللوحة الجانبية» (الشعار كاملاً، الزهرة والاسم، بلا),
+  «أيقونة الحقيبة», «لون شعار اللوحة», «نص أسفل اللوحة». Its own exit: the text and flower fade, the bar retracts into the plaque.
+- **Also.** Glow and glints are off by default for both; an emblem's draw-on no longer leaves a dot at its first instant.
+- **Checks.** On exactly the committed content, in a clean worktree: `npm run typecheck` passes and `npm test` 960 of 960. In the shared
+  folder, which also held another session's uncommitted setup-guide work: `npm test` 967 of 967 and `npm run build` passes (the build was
+  not run in the clean worktree, whose linked dependencies Turbopack refuses). `qa/motion-ribbons.cjs` 85 of 85 in
+  `qa/motion-ribbons.json`, now also: Liquid Gold is the same picture at two moments of the showcase (no visible change), «سيولة الدخول»
+  changes the entry and not the showcase, the exit retracts toward the disc with nothing above it, the ivory flower reaches past the bar,
+  the briefcase switches, the plaque choices draw; every frame of both designs and every download (MP4, MOV, ZIP, PNG) decoded by ffmpeg.
+  The same moment drawn twice can differ by one or two levels where a pattern is first drawn (the canvas's rounding, not the design), so the
+  stillness checks count only visible changes.
+- **Not checked.** The studio's inspector signed in; the live site after the push.

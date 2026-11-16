@@ -44,7 +44,7 @@ export function emblemStroke(c, cx, cy, R, { draw = 1, style = '#ffffff', weight
   c.save(); c.globalAlpha *= alpha; c.strokeStyle = style; c.lineWidth = EMBLEM.stroke * R * weight; c.lineCap = 'round'; c.lineJoin = 'round';
   if (draw >= 1) { emblemPath(c, cx, cy, R, rot); c.stroke(); c.restore(); return; }
   for (let k = 0; k < 4; k++) {
-    const q = part(draw, k); if (q <= 0) continue;
+    const q = part(draw, k); if (per * q < 1) continue;           // a round cap on a dash of no length would leave a dot
     c.beginPath(); capsulePath(c, cx, cy, R, k, rot); c.setLineDash([per * q, per]); c.stroke();
   }
   c.restore();
