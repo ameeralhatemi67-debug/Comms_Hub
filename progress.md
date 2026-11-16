@@ -4666,3 +4666,18 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   triangle; a fine gold inner line follows it; the navy band floats on the foot between a rising wave above and a gold wave below, with
   ivory beneath; a gold plate behind the left side and its own rim as before. Content unchanged.
 - **Checks.** `npm run typecheck` and `npm run build` pass; `npm test` 967 of 967; `qa/motion-ribbons.cjs` 86 of 86.
+
+### 2026-11-16: «اللوحة العاجية» deleted; «البطاقة العاجية» and «الهوية الليلية» added
+
+- **The owner's word.** Delete «اللوحة العاجية»; make two new designs, one in its colours and one of my own; both show the whole Hedayah
+  logo, a main text and two side texts, one of them «هداية 2026», editable (to 2027 later).
+- **Built** (`src/lib/motion/designs-ribbons.js`, `catalog.ts`): `fullLogo` draws the whole logo (the flower as vector strokes, «هداية»
+  and the association's name from the site's masks). «البطاقة العاجية» (`rp-identity`): an ivory card with a gold rim holds the logo; a
+  navy bar (title) and an ivory strip (subtitle) run out of it with a slanted far end; «هداية 2026» on a gold tab above the bar.
+  «الهوية الليلية» (`rp-night`): a dark navy panel with the logo on a white tile, a gold rule, «هداية 2026» in gold above the title, the
+  subtitle muted, a gold line drawn under them. Both still while shown, each with its own exit. «النص الجانبي» is the side text (24
+  characters), empty to hide. The ivory plaque, its options (`plaque`, `icon`) and their parameters are removed. 29 templates, 11 Repine.
+- **Checks.** `npm run typecheck` and `npm run build` pass; `npm test` 967 of 967; `qa/motion-ribbons.cjs` 105 of 105 (every frame of the
+  three designs, the side text set to «هداية 2027» and emptied, stillness, every option of Liquid Gold, MP4, MOV, ZIP and PNG downloads
+  of all three decoded by ffmpeg). The page's canvas can round letter edges a level apart between two moments; the stillness check of the
+  identity designs allows that and nothing visible.

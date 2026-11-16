@@ -1,10 +1,10 @@
-// Browser check of the two new Repine designs, «الذهب السائل» and «اللوحة العاجية» (MVP_draft.md section 80), in Edge: the real
+// Browser check of the new Repine designs, «الذهب السائل», «البطاقة العاجية» and «الهوية الليلية» (MVP_draft.md section 80), in Edge: the real
 // «قوالب الحركة» page on a fixture (qa/fixtures/motion-ribbons.tsx), with the site's own fonts and brand marks.
 //   1. The rail: ten Repine designs, the two new ones under their Arabic names, each drawing real artwork through its build.
 //   2. «التصميم»: its groups; every option changes the picture the way it says (metal, custom colour, the light, the
 //      pattern, the font, the band's length, the side, the size, the height, the effects; the liquid's entry, the
-//      ivory's plaque and briefcase), and fields that depend on a choice appear only with it. Liquid Gold is still while
-//      shown and leaves by retracting into its disc (owner's notes of 2026-11-16); the ivory's flower reaches past the bar.
+//      and fields that depend on a choice appear only with it. Liquid Gold is still while shown and leaves by retracting into
+//      its disc (owner's notes of 2026-11-16). The two identity designs carry the whole logo and an editable side text.
 //   3. Text: a new title and an empty subtitle change the picture.
 //   4. Downloads, both designs: MP4 on green, transparent MOV (ProRes 4444), a PNG sequence in ZIP and a single PNG, decoded
 //      by ffprobe and ffmpeg; the single PNG carries the chosen options (silver, on the left).
@@ -94,20 +94,19 @@ const types = { '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; char
     const option = name => t.getByRole('radio', { name, exact: true });
     /** The share of samples that changed visibly: the canvas may round a pattern's first drawing one or two levels apart. */
     const moved = (a, b2, tol = 6) => { let n = 0; for (let i = 0; i < a.cells.length; i++) if (Math.abs(a.cells[i] - b2.cells[i]) > tol) n++; return n / a.cells.length; };
-    const plaque = name => t.getByRole('radiogroup', { name: 'اللوحة الجانبية' }).getByRole('radio', { name, exact: true });
     const setSlider = async (name, v) => { await t.getByRole('slider', { name, exact: true }).evaluate((el, val) => { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, val); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, String(v)); };
 
     /* ---- the rail ---- */
-    await t.getByRole('button', { name: 'تصاميم ريبين (10)', exact: true }).click();
+    await t.getByRole('button', { name: 'تصاميم ريبين (11)', exact: true }).click();
     await t.waitForTimeout(200);
-    check('Repine: ten designs on the rail', await t.locator('.ms-tile').count() === 10);
-    for (const [id, name] of [['rp-liquid', 'الذهب السائل'], ['rp-ivory', 'اللوحة العاجية']]) {
+    check('Repine: eleven designs on the rail, the ivory plaque gone', await t.locator('.ms-tile').count() === 11 && await t.locator('[data-template="rp-ivory"]').count() === 0);
+    for (const [id, name] of [['rp-liquid', 'الذهب السائل'], ['rp-identity', 'البطاقة العاجية'], ['rp-night', 'الهوية الليلية']]) {
       check(`${id} named ${name}`, (await t.locator(`[data-template="${id}"] .ms-tile-name b`).textContent()) === name);
       check(`${id} marked new`, (await t.locator(`[data-template="${id}"] em`).textContent()) === 'جديد');
     }
     await t.getByRole('radio', { name: 'شفاف', exact: true }).click();
 
-    for (const id of ['rp-liquid', 'rp-ivory']) {
+    for (const id of ['rp-liquid', 'rp-identity', 'rp-night']) {
       await pick(id);
       for (const [at, min] of [[.2, 1], [1.2, 30], [2.2, 60], [4.2, 80]]) {
         await scrubTo(at); const ink = await read();
@@ -215,38 +214,29 @@ const types = { '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; char
     await t.getByRole('button', { name: 'إعادة ضبط هذا التصميم' }).click();
     check('reset restores the title', await t.getByLabel('العنوان', { exact: true }).inputValue() === 'أثر يمتد');
 
-    /* ---- the ivory design ---- */
-    await pick('rp-ivory'); await scrubTo(4.2);
-    await tab('المحتوى');
-    check('the plaque text is offered with the plaque', await t.getByLabel('نص أسفل اللوحة', { exact: true }).count() === 1);
-    check('the plaque text defaults to «هداية 2026»', await t.getByLabel('نص أسفل اللوحة', { exact: true }).inputValue() === 'هداية 2026');
-    await tab('التصميم');
-    const iv = {};
-    for (const name of ['الزهرة والاسم', 'الزهرة فقط', 'بلا']) { await plaque(name).click(); await scrubTo(4.2); iv[name] = await read(); }
-    check('the plaque choices draw differently', diff(iv['الزهرة والاسم'], iv['الزهرة فقط']) > .0005, diff(iv['الزهرة والاسم'], iv['الزهرة فقط']));
-    check('«بلا» removes the plaque', iv['بلا'].left > iv['الزهرة والاسم'].left + .03, { none: iv['بلا'].left, plaque: iv['الزهرة والاسم'].left });
-    await tab('المحتوى');
-    check('with no plaque its text field is hidden', await t.getByLabel('نص أسفل اللوحة', { exact: true }).count() === 0);
-    await tab('التصميم'); await plaque('الزهرة والاسم').click();
-    await toggled('أيقونة الحقيبة بجانب النص الفرعي', 'the briefcase beside the subtitle switches', .0003);
-    /* the flower sits half on the bar's end and half beyond it: ink to the right of the bar's end, in the bar's rows */
-    { await scrubTo(4.2); const shown = await read(); check('the round end with the flower reaches the right', shown.right > .9, shown.right); }
-    /* plaque, bar and flower are one shape: across the flower's middle row the design is opaque without a break */
-    { await scrubTo(4.2); const row = await stage().evaluate(cv => {
-        const w = cv.width, h = cv.height, d = cv.getContext('2d').getImageData(0, 0, w, h).data; let best = { run: 0 };
-        for (let y = Math.round(h * .55); y < Math.round(h * .95); y += 2) {
-          let x0 = -1, x1 = -1, run = 0, longest = 0;
-          for (let x = 0; x < w; x++) { const a = d[(y * w + x) * 4 + 3]; if (a > 200) { if (x0 < 0) x0 = x; x1 = x; run++; longest = Math.max(longest, run); } else run = 0; }
-          if (x1 - x0 > best.run) best = { run: x1 - x0, longest, y };
-        }
-        return best; });
-      check('plaque, bar and flower are one unbroken shape', row.longest >= row.run - 2, row); }
-    await t.getByRole('button', { name: 'إعادة ضبط هذا التصميم' }).click();
-    await tab('الألوان');
-    check('the ivory design has its five colours and the metal', await t.locator('.ms-colors input[type=color]').count() === 5 && await t.locator('.ms-pick-metal').count() === 5);
-    await scrubTo(4.2); await t.getByRole('radio', { name: 'مشهد', exact: true }).click(); await t.waitForTimeout(100);
-    await t.locator('.ms-workbench').screenshot({ path: path.join(out, 'ivory-workbench.png') });
-    await t.getByRole('radio', { name: 'شفاف', exact: true }).click();
+    /* ---- the two identity designs: the whole logo, a title and two side texts, «هداية 2026» editable ---- */
+    for (const [id, colours] of [['rp-identity', 5], ['rp-night', 5]]) {
+      await pick(id); await scrubTo(4.2);
+      await tab('المحتوى');
+      check(`${id}: a title, a subtitle and a side text`, await t.getByLabel('العنوان', { exact: true }).count() === 1 && await t.getByLabel('النص الفرعي', { exact: true }).count() === 1 && await t.getByLabel('النص الجانبي', { exact: true }).count() === 1);
+      check(`${id}: the side text starts as «هداية 2026»`, await t.getByLabel('النص الجانبي', { exact: true }).inputValue() === 'هداية 2026');
+      const before = await read();
+      await t.getByLabel('النص الجانبي', { exact: true }).fill('هداية 2027'); await t.waitForTimeout(800); await scrubTo(4.2);
+      { const after = await read(); check(`${id}: «هداية 2027» is drawn in its place`, moved(before, after) > 0, { moved: moved(before, after) }); }
+      await t.getByLabel('النص الجانبي', { exact: true }).fill(''); await t.waitForTimeout(800); await scrubTo(4.2);
+      { const after = await read(); check(`${id}: an empty side text takes it away`, moved(before, after) > moved(before, before) && diff(before, after) > .0001, { moved: moved(before, after) }); }
+      await t.getByRole('button', { name: 'إعادة ضبط هذا التصميم' }).click(); await scrubTo(4.2);
+      await tab('التصميم'); await flip('لمعة هادئة على زهرة هداية');
+      { await scrubTo(4); await read();
+        await scrubTo(4); const a = await read(); await scrubTo(6.4); const b2 = await read(); const w2 = Math.ceil((await stage().evaluate(cv => cv.width)) / 2); let bx = [1e9, -1, 1e9, -1]; a.cells.forEach((v, i) => { if (Math.abs(v - b2.cells[i]) > 6) { const x = i % w2, y = Math.floor(i / w2); bx = [Math.min(bx[0], x), Math.max(bx[1], x), Math.min(bx[2], y), Math.max(bx[3], y)]; } });
+        check(`${id}: still while it is shown, with the light off (text edges may round apart)`, moved(a, b2) < .002, { moved: moved(a, b2), box: bx, w2 }); }
+      await flip('لمعة هادئة على زهرة هداية');
+      await tab('الألوان');
+      check(`${id}: its colours and the metal`, await t.locator('.ms-colors input[type=color]').count() === colours && await t.locator('.ms-pick-metal').count() === 5);
+      await scrubTo(4.2); await t.getByRole('radio', { name: 'مشهد', exact: true }).click(); await t.waitForTimeout(100);
+      await t.locator('.ms-workbench').screenshot({ path: path.join(out, `${id}-workbench.png`) });
+      await t.getByRole('radio', { name: 'شفاف', exact: true }).click();
+    }
 
     /* ---- downloads ---- */
     const probe = file => JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-count_frames', '-select_streams', 'v:0', '-show_entries', 'stream=codec_name,codec_tag_string,width,height,nb_read_frames,pix_fmt', '-of', 'json', file]).toString()).streams[0];
@@ -264,7 +254,7 @@ const types = { '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; char
       await t.locator('.ms-result').waitFor();
       return { file, name: dl.suggestedFilename(), data: fs.readFileSync(file) };
     };
-    for (const id of ['rp-liquid', 'rp-ivory']) {
+    for (const id of ['rp-liquid', 'rp-identity', 'rp-night']) {
       await pick(id); await tab('التوقيت');
       const hold = t.getByRole('slider', { name: 'مدة العرض', exact: true });
       await hold.evaluate(el => { const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, '1'); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); });

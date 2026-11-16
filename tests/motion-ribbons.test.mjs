@@ -52,13 +52,16 @@ test('the vector emblem is the emblem of public/motion/logo_src-emblem.png', () 
   assert.ok(ink > 100000, 'the mask was read');
 });
 
-test('ten Repine designs; the two new ones carry Arabic names and their options', () => {
+const NEW = ['rp-liquid', 'rp-identity', 'rp-night'];
+test('eleven Repine designs; the new ones carry Arabic names and their options; the ivory plaque is gone', () => {
   const repine = catalog.filter(g => g.category === 'repine');
-  assert.equal(repine.length, 10);
-  assert.equal(catalog.length, 28);
+  assert.equal(repine.length, 11);
+  assert.equal(catalog.length, 29);
   assert.equal(graphicById('rp-liquid').name, 'الذهب السائل');
-  assert.equal(graphicById('rp-ivory').name, 'اللوحة العاجية');
-  for (const id of ['rp-liquid', 'rp-ivory']) {
+  assert.equal(graphicById('rp-identity').name, 'البطاقة العاجية');
+  assert.equal(graphicById('rp-night').name, 'الهوية الليلية');
+  assert.equal(graphicById('rp-ivory'), undefined, "deleted at the owner's word, 2026-11-16");
+  for (const id of NEW) {
     const g = graphicById(id);
     assert.equal(g.badge, 'new');
     for (const key of ['metal', 'shine', 'shineSpeed', 'pattern', 'patternAmt', 'font', 'span', 'side', 'size', 'lift', 'dropShadow', 'glow', 'particles'])
@@ -66,9 +69,13 @@ test('ten Repine designs; the two new ones carry Arabic names and their options'
   }
   assert.ok(graphicById('rp-liquid').options.some(o => o.key === 'flow'));
   assert.ok(!graphicById('rp-liquid').options.some(o => o.key === 'drips'), 'no drops: the owner asked for a clean band (2026-11-16)');
-  assert.ok(graphicById('rp-ivory').options.some(o => o.key === 'plaque') && graphicById('rp-ivory').options.some(o => o.key === 'icon'));
-  assert.deepEqual(graphicById('rp-ivory').options.find(o => o.key === 'plaque').choices.map(c => c.value), ['logo', 'mark', 'none']);
-  for (const id of ['rp-liquid', 'rp-ivory']) assert.equal(graphicById(id).defaults.glow, false, `${id}: no glow unless asked`);
+  for (const id of ['rp-identity', 'rp-night']) {
+    const g = graphicById(id);
+    assert.deepEqual(g.texts.map(f => f.key), ['title', 'subtitle', 'kicker'], `${id}: a title and two side texts`);
+    assert.equal(g.defaults.kicker, 'هداية 2026', `${id}: the side text starts as «هداية 2026» and stays editable`);
+    assert.ok(g.texts.find(f => f.key === 'kicker').max >= 12);
+  }
+  for (const id of NEW) assert.equal(graphicById(id).defaults.glow, false, `${id}: no glow unless asked`);
   assert.equal(graphicById('rp-gold').options, undefined, 'the older designs are unchanged');
 });
 
@@ -91,16 +98,11 @@ test('fields that matter only with another choice are shown only with it', () =>
   assert.equal(custom.when({ ...g.defaults, metal: 'custom' }), true);
   const speed = g.options.find(o => o.key === 'shineSpeed');
   assert.equal(speed.when({ ...g.defaults, shine: false }), false);
-  const iv = graphicById('rp-ivory'), kicker = iv.texts.find(t => t.key === 'kicker'), logo = iv.colors.find(c => c.key === 'c2');
-  assert.equal(kicker.when({ ...iv.defaults, plaque: 'logo' }), true);
-  assert.equal(kicker.when({ ...iv.defaults, plaque: 'none' }), false);
-  assert.equal(logo.when({ ...iv.defaults, plaque: 'mark' }), true);
-  assert.equal(logo.when({ ...iv.defaults, plaque: 'none' }), false);
-  assert.equal(iv.defaults.kicker, 'هداية 2026');
+  for (const id of ['rp-identity', 'rp-night']) assert.equal(graphicById(id).colors.find(c => c.key === 'accent').when({ ...graphicById(id).defaults, metal: 'custom' }), true);
 });
 
 test('a studio clip keeps the options it changed, and only those', () => {
-  const g = graphicById('rp-ivory');
+  const g = graphicById('rp-identity');
   const p = motionParams(g, { metal: 'silver', side: 'left', size: 90, shine: false, pattern: 7 }, '16:9');
   assert.equal(p.metal, 'silver'); assert.equal(p.side, 'left'); assert.equal(p.size, 90); assert.equal(p.shine, false);
   assert.equal(p.pattern, g.defaults.pattern, 'a value of the wrong kind is ignored');

@@ -211,8 +211,8 @@ test('sources: added once per file and version, and dropped when nothing uses th
   assert.deepEqual(pruned.sources.map((s) => s.id), [vid]);
 });
 
-test('all 28 templates work as clips: their length is the template\'s, and the clip length sets the showcase', () => {
-  assert.equal(motionCatalog.length, 28);
+test('all 29 templates work as clips: their length is the template\'s, and the clip length sets the showcase', () => {
+  assert.equal(motionCatalog.length, 29);
   for (const g of motionCatalog) {
     for (const ratio of ['9:16', '16:9']) {
       const p = motionParams(g, {}, ratio);

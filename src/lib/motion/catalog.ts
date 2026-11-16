@@ -13,7 +13,7 @@ const common = { value: 82, decimals: 0, label: 'أثر الحملة', prefix: '
   ratio: '9:16', glow: true, showVerse: true, showLogo: true, showContact: false,
   showSocial: false, showWave: true, particles: true, bgIn: false,
   metal: 'gold', shine: true, shineSpeed: 1, pattern: 'none', patternAmt: 30, font: 'plex', span: 'full',
-  side: 'right', size: 100, lift: 0, dropShadow: true, flow: 60, plaque: 'logo', icon: true } satisfies Params;
+  side: 'right', size: 100, lift: 0, dropShadow: true, flow: 60 } satisfies Params;
 
 /* The ribbons' metal is chosen by name; this colour is used only when «مخصص» is chosen. */
 const CUSTOM_METAL: ColorField = { key: 'accent', label: 'لون المعدن المخصص', when: p => p.metal === 'custom' };
@@ -48,10 +48,14 @@ const meta: Record<string, Meta> = {
   'rp-liquid': { name: 'الذهب السائل', badge: 'new',
     blurb: 'قطرة ذهب منصهر تسقط وتتناثر قرصاً يُكتب فيه شعار هداية، ثم يسيل الذهب شريطاً يبرد لوحاً زجاجياً ثابتاً نظيفاً، ويخرج منه النص الفرعي، ويعود الشريط إلى القرص عند الخروج.',
     colorFields: [{ key: 'main', label: 'لون اللوح الزجاجي' }, { key: 'text', label: 'لون العنوان' }, { key: 'c1', label: 'لون النص الفرعي' }, CUSTOM_METAL] },
-  'rp-ivory': { name: 'اللوحة العاجية', badge: 'new',
-    blurb: 'لوحة تحمل شعار هداية كاملاً، يمتد منها لوح عاجي بإطار ذهبي للعنوان وشريط كحلي للنص الفرعي، وزهرة هداية نصفها على طرف اللوح ونصفها خارجه.',
-    colorFields: [{ key: 'c3', label: 'لون العاج' }, { key: 'main', label: 'لون الشريط الكحلي' }, { key: 'c1', label: 'لون العنوان' }, { key: 'text', label: 'لون النص على الكحلي' },
-      { key: 'c2', label: 'لون شعار اللوحة', when: p => p.plaque !== 'none' }, CUSTOM_METAL] },
+  'rp-identity': { name: 'البطاقة العاجية', badge: 'new',
+    blurb: 'بطاقة عاجية بإطار ذهبي تحمل شعار هداية كاملاً، يخرج منها شريط كحلي للعنوان وشريط عاجي للنص الفرعي، ولسان ذهبي للنص الجانبي.',
+    colorFields: [{ key: 'c3', label: 'لون العاج' }, { key: 'main', label: 'لون الشريط الكحلي' }, { key: 'text', label: 'لون العنوان' }, { key: 'c1', label: 'لون النص الفرعي' },
+      { key: 'c2', label: 'لون زهرة الشعار' }, CUSTOM_METAL] },
+  'rp-night': { name: 'الهوية الليلية', badge: 'new',
+    blurb: 'لوح كحلي داكن هادئ، في طرفه بطاقة بيضاء بشعار هداية كاملاً، وخط ذهبي يفصلها عن النص الجانبي والعنوان والنص الفرعي، وخط ذهبي يرسم نفسه تحتها.',
+    colorFields: [{ key: 'main', label: 'لون اللوح' }, { key: 'c3', label: 'لون بطاقة الشعار' }, { key: 'text', label: 'لون العنوان' }, { key: 'c1', label: 'لون النص الفرعي' },
+      { key: 'c2', label: 'لون زهرة الشعار' }, CUSTOM_METAL] },
   'fr-lattice': { name: 'القوس المشربي', blurb: 'زخرفة علوية مشبّكة تهبط من الأعلى ولوحة سفلية ممزقة الحواف ترتفع، والفيديو يملأ ما بينهما.',
     colors: ['الزخرفة', 'اللوحة', 'الذهبي', 'النص'] },
   'fr-watercolor': { name: 'الورق المائي', blurb: 'ورق محبب وإطار مرسوم بالفرشاة مع غرز وأغصان، ومصحف على حامله وبطاقة اسم مرسومة.',
@@ -87,7 +91,7 @@ const repineTexts = (id: string): TextField[] => [
   { key: 'subtitle', label: 'النص الفرعي', max: 90, group: 'main', ...(RIBBON_IDS.has(id) ? { hint: 'اتركه فارغاً لإخفائه' } : {}) },
   ...(id === 'rp-editorial' ? [{ key: 'kicker', label: 'الوسم فوق الشريط', max: 24, group: 'main' } as TextField] : []),
   ...(id === 'rp-liquid' ? [{ key: 'kicker', label: 'وسم فوق الشريط', max: 24, group: 'main', hint: 'اتركه فارغاً لإخفائه' } as TextField] : []),
-  ...(id === 'rp-ivory' ? [{ key: 'kicker', label: 'نص أسفل اللوحة', max: 16, group: 'main', hint: 'الأرقام تظهر بلون المعدن.', when: (p: Params) => p.plaque !== 'none' } as TextField] : []),
+  ...(id === 'rp-identity' || id === 'rp-night' ? [{ key: 'kicker', label: 'النص الجانبي', max: 24, group: 'main', hint: 'مثل «هداية 2026». اتركه فارغاً لإخفائه.' } as TextField] : []),
 ];
 
 /* ---- design options of the ribbons (designs-ribbons.js) ---- */
@@ -116,11 +120,8 @@ const effects: OptionField[] = [
 const OPTIONS: Record<string, OptionField[]> = {
   'rp-liquid': [...shared,
     { kind: 'slider', key: 'flow', label: 'سيولة الدخول', place: 'effects', min: 0, max: 100, step: 1, unit: '٪', hint: 'تموج الذهب وتناثره عند الدخول فقط. أثناء العرض يبقى الشريط ثابتاً.' }, ...effects],
-  'rp-ivory': [...shared.map(f => f.key === 'pattern' ? { ...f, paper: 'c3' } as OptionField : f),
-    { kind: 'choice', key: 'plaque', label: 'اللوحة الجانبية', place: 'layout', choices: [
-      { value: 'logo', label: 'الزهرة والاسم' }, { value: 'mark', label: 'الزهرة فقط' }, { value: 'none', label: 'بلا' }] },
-    { kind: 'switch', key: 'icon', label: 'أيقونة الحقيبة بجانب النص الفرعي', place: 'layout' },
-    ...effects],
+  'rp-identity': [...shared.map(f => f.key === 'pattern' ? { ...f, paper: 'main' } as OptionField : f), ...effects],
+  'rp-night': [...shared, ...effects],
 };
 const frameTexts = (id: string): TextField[] => [
   ...(id === 'fr-broadcast' ? [

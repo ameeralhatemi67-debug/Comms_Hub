@@ -1,18 +1,21 @@
 {
-  "when": "2026-11-16T09:56:38.700Z",
+  "when": "2026-11-16T10:51:31.023Z",
   "browser": "msedge",
   "exportSeconds": {
-    "rp-liquid-mp4": 3.902,
-    "rp-liquid-mov": 17.405,
-    "rp-liquid-zip": 8.668,
-    "rp-ivory-mp4": 2.472,
-    "rp-ivory-mov": 16.902,
-    "rp-ivory-zip": 7.452,
-    "png": 0.322
+    "rp-liquid-mp4": 2.786,
+    "rp-liquid-mov": 11.667,
+    "rp-liquid-zip": 6.293,
+    "rp-identity-mp4": 1.387,
+    "rp-identity-mov": 11.978,
+    "rp-identity-zip": 5.438,
+    "rp-night-mp4": 1.454,
+    "rp-night-mov": 11.899,
+    "rp-night-zip": 5.488,
+    "png": 0.336
   },
   "checks": [
     {
-      "name": "Repine: ten designs on the rail",
+      "name": "Repine: eleven designs on the rail, the ivory plaque gone",
       "pass": true,
       "detail": ""
     },
@@ -27,12 +30,22 @@
       "detail": ""
     },
     {
-      "name": "rp-ivory named اللوحة العاجية",
+      "name": "rp-identity named البطاقة العاجية",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "rp-ivory marked new",
+      "name": "rp-identity marked new",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-night named الهوية الليلية",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-night marked new",
       "pass": true,
       "detail": ""
     },
@@ -79,44 +92,86 @@
       "detail": ""
     },
     {
-      "name": "rp-ivory: draws real artwork at 0.2s",
+      "name": "rp-identity: draws real artwork at 0.2s",
       "pass": true,
       "detail": {
-        "n": 7274,
-        "colors": 98
+        "n": 7505,
+        "colors": 63
       }
     },
     {
-      "name": "rp-ivory: draws real artwork at 1.2s",
+      "name": "rp-identity: draws real artwork at 1.2s",
       "pass": true,
       "detail": {
-        "n": 17469,
-        "colors": 137
+        "n": 10972,
+        "colors": 112
       }
     },
     {
-      "name": "rp-ivory: draws real artwork at 2.2s",
+      "name": "rp-identity: draws real artwork at 2.2s",
       "pass": true,
       "detail": {
-        "n": 18857,
-        "colors": 148
+        "n": 18703,
+        "colors": 143
       }
     },
     {
-      "name": "rp-ivory: draws real artwork at 4.2s",
+      "name": "rp-identity: draws real artwork at 4.2s",
       "pass": true,
       "detail": {
-        "n": 18857,
-        "colors": 148
+        "n": 18703,
+        "colors": 144
       }
     },
     {
-      "name": "rp-ivory: all 247 frames draw without an error",
+      "name": "rp-identity: all 247 frames draw without an error",
       "pass": true,
       "detail": []
     },
     {
-      "name": "rp-ivory: its thumbnail is drawn",
+      "name": "rp-identity: its thumbnail is drawn",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-night: draws real artwork at 0.2s",
+      "pass": true,
+      "detail": {
+        "n": 4662,
+        "colors": 49
+      }
+    },
+    {
+      "name": "rp-night: draws real artwork at 1.2s",
+      "pass": true,
+      "detail": {
+        "n": 13787,
+        "colors": 115
+      }
+    },
+    {
+      "name": "rp-night: draws real artwork at 2.2s",
+      "pass": true,
+      "detail": {
+        "n": 22239,
+        "colors": 159
+      }
+    },
+    {
+      "name": "rp-night: draws real artwork at 4.2s",
+      "pass": true,
+      "detail": {
+        "n": 22239,
+        "colors": 158
+      }
+    },
+    {
+      "name": "rp-night: all 247 frames draw without an error",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "rp-night: its thumbnail is drawn",
       "pass": true,
       "detail": ""
     },
@@ -385,64 +440,108 @@
       "detail": ""
     },
     {
-      "name": "the plaque text is offered with the plaque",
+      "name": "rp-identity: a title, a subtitle and a side text",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "the plaque text defaults to «هداية 2026»",
+      "name": "rp-identity: the side text starts as «هداية 2026»",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "the plaque choices draw differently",
-      "pass": true,
-      "detail": 0.006061222234712042
-    },
-    {
-      "name": "«بلا» removes the plaque",
+      "name": "rp-identity: «هداية 2027» is drawn in its place",
       "pass": true,
       "detail": {
-        "none": 0.5286738351254481,
-        "plaque": 0.3906810035842294
+        "moved": 0.00012556217610665935
       }
     },
     {
-      "name": "with no plaque its text field is hidden",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "«أيقونة الحقيبة بجانب النص الفرعي» flips",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "«أيقونة الحقيبة بجانب النص الفرعي» flips",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "the briefcase beside the subtitle switches",
-      "pass": true,
-      "detail": 0.13333829703151756
-    },
-    {
-      "name": "the round end with the flower reaches the right",
-      "pass": true,
-      "detail": 0.9354838709677419
-    },
-    {
-      "name": "plaque, bar and flower are one unbroken shape",
+      "name": "rp-identity: an empty side text takes it away",
       "pass": true,
       "detail": {
-        "run": 604,
-        "longest": 605,
-        "y": 531
+        "moved": 0.004834143780106386
       }
     },
     {
-      "name": "the ivory design has its five colours and the metal",
+      "name": "«لمعة هادئة على زهرة هداية» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-identity: still while it is shown, with the light off (text edges may round apart)",
+      "pass": true,
+      "detail": {
+        "moved": 0.0009245942058763099,
+        "box": [
+          277,
+          438,
+          255,
+          262
+        ],
+        "w2": 558
+      }
+    },
+    {
+      "name": "«لمعة هادئة على زهرة هداية» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-identity: its colours and the metal",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-night: a title, a subtitle and a side text",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-night: the side text starts as «هداية 2026»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-night: «هداية 2027» is drawn in its place",
+      "pass": true,
+      "detail": {
+        "moved": 0.00014268429103029472
+      }
+    },
+    {
+      "name": "rp-night: an empty side text takes it away",
+      "pass": true,
+      "detail": {
+        "moved": 0.0009360089491587334
+      }
+    },
+    {
+      "name": "«لمعة هادئة على زهرة هداية» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-night: still while it is shown, with the light off (text edges may round apart)",
+      "pass": true,
+      "detail": {
+        "moved": 0,
+        "box": [
+          1000000000,
+          -1,
+          1000000000,
+          -1
+        ],
+        "w2": 558
+      }
+    },
+    {
+      "name": "«لمعة هادئة على زهرة هداية» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-night: its colours and the metal",
       "pass": true,
       "detail": ""
     },
@@ -504,10 +603,10 @@
       }
     },
     {
-      "name": "rp-ivory: MP4 on green decodes at 1280x720 with 125 frames",
+      "name": "rp-identity: MP4 on green decodes at 1280x720 with 125 frames",
       "pass": true,
       "detail": {
-        "name": "rp-ivory_1280x720_24fps_greenscreen.mp4",
+        "name": "rp-identity_1280x720_24fps_greenscreen.mp4",
         "codec_name": "h264",
         "codec_tag_string": "avc1",
         "width": 1280,
@@ -518,12 +617,12 @@
       }
     },
     {
-      "name": "rp-ivory: MP4 decodes completely",
+      "name": "rp-identity: MP4 decodes completely",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "rp-ivory: transparent MOV is ProRes 4444 with alpha",
+      "name": "rp-identity: transparent MOV is ProRes 4444 with alpha",
       "pass": true,
       "detail": {
         "codec_name": "prores",
@@ -536,24 +635,81 @@
       }
     },
     {
-      "name": "rp-ivory: a decoded MOV frame is mostly clear with a solid design",
+      "name": "rp-identity: a decoded MOV frame is mostly clear with a solid design",
       "pass": true,
       "detail": {
-        "clear": 801698,
-        "solid": 97331,
+        "clear": 787894,
+        "solid": 94969,
         "total": 921600
       }
     },
     {
-      "name": "rp-ivory: PNG sequence in ZIP",
+      "name": "rp-identity: PNG sequence in ZIP",
       "pass": true,
       "detail": {
-        "name": "rp-ivory_1280x720_24fps_png-sequence.zip",
-        "bytes": 7042001
+        "name": "rp-identity_1280x720_24fps_png-sequence.zip",
+        "bytes": 6402026
       }
     },
     {
-      "name": "rp-ivory: the ZIP holds one PNG per frame",
+      "name": "rp-identity: the ZIP holds one PNG per frame",
+      "pass": true,
+      "detail": {
+        "files": 125,
+        "frames": 125
+      }
+    },
+    {
+      "name": "rp-night: MP4 on green decodes at 1280x720 with 125 frames",
+      "pass": true,
+      "detail": {
+        "name": "rp-night_1280x720_24fps_greenscreen.mp4",
+        "codec_name": "h264",
+        "codec_tag_string": "avc1",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "yuv420p",
+        "nb_read_frames": "125",
+        "frames": 125
+      }
+    },
+    {
+      "name": "rp-night: MP4 decodes completely",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-night: transparent MOV is ProRes 4444 with alpha",
+      "pass": true,
+      "detail": {
+        "codec_name": "prores",
+        "codec_tag_string": "ap4h",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "yuva444p12le",
+        "nb_read_frames": "125",
+        "frames": 125
+      }
+    },
+    {
+      "name": "rp-night: a decoded MOV frame is mostly clear with a solid design",
+      "pass": true,
+      "detail": {
+        "clear": 765434,
+        "solid": 107470,
+        "total": 921600
+      }
+    },
+    {
+      "name": "rp-night: PNG sequence in ZIP",
+      "pass": true,
+      "detail": {
+        "name": "rp-night_1280x720_24fps_png-sequence.zip",
+        "bytes": 6304847
+      }
+    },
+    {
+      "name": "rp-night: the ZIP holds one PNG per frame",
       "pass": true,
       "detail": {
         "files": 125,

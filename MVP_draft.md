@@ -4416,7 +4416,7 @@ Instagram test's temporary copy and address:
 
 Owner request: two new designs in «تصاميم ريبين» of «قوالب الحركة» (section 57), one more moving and liquid, one a reading of the owner's
 reference sheet; the Hedayah emblem drawn correctly in both; options for a light running around the metal, gold or silver, colours, text,
-a pattern, and more. Section 57's inventory becomes twenty-eight templates: eight numbers, ten Repine, ten frames.
+a pattern, and more. Section 57's inventory becomes twenty-nine templates: eight numbers, eleven Repine, ten frames.
 
 ## 80.1 The emblem
 
@@ -4438,24 +4438,18 @@ a pattern, and more. Section 57's inventory becomes twenty-eight templates: eigh
 - **Size.** The band is 112 units tall and at least 480 long, with room around the title.
 - **Colours.** The glass panel, the title, the subtitle (on the metal), and the custom metal.
 
-## 80.3 «اللوحة العاجية» (`rp-ivory`)
+## 80.3 «البطاقة العاجية» (`rp-identity`) and «الهوية الليلية» (`rp-night`)
 
-- The owner's second reference sheet (2026-11-16), cleaned up: drawn in the sheet's own coordinates, so its proportions hold.
-- **One shape.** Plaque, bar and flower are one body with one gold rim, never pieces laid over one another.
-  - **The plaque** leans like the sheet's: a slanted left side, a broad flat dome rising above the bar, an upright right side going into
-    the bar, its bottom level with the bar's. It carries the whole Hedayah logo (the flower in the logo's grey, «هداية» and the
-    association's name in the metal), backed by a gold plate along its leaning side.
-  - **The navy strip** runs from the plaque's foot into the bar under the title, flush with the bottom edge: «نص أسفل اللوحة» on the
-    plaque («هداية 2026» by default, its numbers in the metal), the subtitle with a gold briefcase («أيقونة الحقيبة») in the bar.
-  - **The flower** is the bar's right end, half on the bar and half beyond it: its body is the shape's ivory and its lobes are the shape's
-    edge there, the bar's rim running into them.
-- A gold divider beside the plaque, the title centred on the ivory, a faint pattern toward the flower.
-- «اللوحة الجانبية»: الشعار كاملاً، الزهرة والاسم، بلا (without the plaque, the strip starts with a slanted end in the bar).
-- **Entry.** The plaque fades in and rises, its logo writes itself; the shape is uncovered toward the flower with a soft edge; the
-  flower's lines write themselves as its body fades in; the strip slides out; the title and the subtitle are uncovered.
-  **Exit.** The text fades, the strip withdraws, the shape is covered back into the plaque, the plaque fades.
-- **While shown.** Still, except the quiet light on the flower if wanted.
-- **Colours.** The ivory, the navy strip, the title, the text on the navy, the plaque's logo, and the custom metal.
+«اللوحة العاجية» was deleted at the owner's word (2026-11-16) after four rounds; these two replace it. Both carry the whole Hedayah logo
+(the flower, «هداية» and the association's name), a title, a subtitle, and «النص الجانبي», «هداية 2026» by default, editable or empty.
+- **«البطاقة العاجية»** keeps the ivory plaque's colours: an ivory card with a gold rim holds the logo; a navy bar for the title and an
+  ivory strip for the subtitle run out of it, cut on a slant at their far end; the side text sits on a gold tab above the bar. Entry: the
+  card appears and its flower writes itself, the bar and the strip open out of it, the tab drops in, the text is uncovered. Exit: the text
+  and the tab fade, the strip and the bar close into the card, the card fades.
+- **«الهوية الليلية»** is a new design: a dark navy panel with the logo on a white tile at its end, a fine gold rule, the side text in gold
+  above the white title, the subtitle muted, and a gold line that draws itself under them. The panel opens out of the tile and closes into it.
+- Both are still while shown, except the quiet light on the logo's flower if wanted. Colours: the card or panel, the bar, the title, the
+  subtitle, the logo's flower, and the custom metal. Options: those of 80.4 without the plaque's.
 
 ## 80.4 Design options
 

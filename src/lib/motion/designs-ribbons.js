@@ -6,15 +6,16 @@
    - Liquid Gold (rp-liquid): a drop of molten metal falls and splashes into a disc, the emblem writes itself inside it,
      metal flows out into a band, the band cools into a dark glass panel and the subtitle comes out of its underside.
      It is liquid only while it arrives: shown, it is still and clean; it leaves by retracting into the disc.
-   - Ivory Plaque (rp-ivory): the owner's reference sheet of 2026-11-16, cleaned up. Plaque, bar and Hedayah flower are
-     one shape with one gold rim: the plaque carries the whole logo, the title sits on the ivory, a navy ribbon runs from
-     the plaque's foot into the bar for the subtitle and its briefcase, and the flower is the bar's right end.
+   - Ivory Identity Card (rp-identity) and Night Identity (rp-night), which replace the Ivory Plaque by the owner's word of
+     2026-11-16: both carry the whole Hedayah logo (flower, «هداية», the association's name), a title, a subtitle and a
+     side text («هداية 2026» by default). The first keeps the ivory, navy and gold of the plaque; the second is a dark panel
+     with the logo on a white tile.
 
    Mirroring («يسار») flips the shapes only: text, the wordmark and anything with a direction are drawn upright. Every
    length that the canvas reads in device pixels (blur, shadow offset, pattern tiles) is scaled by the render scale,
    the design's own size and its drawing unit, so the preview, the thumbnails and every export size look the same. */
 import { kit } from './renderers.js';
-import { emblemStroke, emblemShine, EMBLEM } from './emblem.js';
+import { emblemStroke, emblemShine } from './emblem.js';
 
 const { EZ, S, TAU, clamp, lerp, frac, rnd, shade, hexToRgb, sparkle, drawLogo, rstate, rtotal } = kit;
 const W = 1280, H = 720;
@@ -456,203 +457,220 @@ function drawLiquid(ctx, P, t) {
 }
 
 /* =========================================================
-   IVORY PLAQUE (the owner's reference sheet of 2026-11-16)
-   Drawn in the sheet's own coordinates (1600 x 900) and scaled into the frame by IVK, so it keeps the sheet's
-   proportions. The plaque, the bar and the Hedayah flower are one shape: one ivory body, one gold rim around all of
-   it, one navy ribbon that runs from the plaque's foot into the bar. The plaque leans like the sheet's (a slanted
-   left side, an upright right side, a broad dome) and carries the whole logo; the flower is the bar's right end,
-   half on the bar and half beyond it, its lobes the edge of the shape there.
+   THE FULL LOGO
+   The whole Hedayah logo as the association draws it: the flower (vector, emblem.js, so it can write itself), «هداية»
+   and the association's name (the site's own masks), stacked and centred. `w` is the logo's width; it is 1.16 w tall.
    ========================================================= */
-const IVK = .46, IVX = 1196 - 1574 * IVK, IVY = 658 - 640 * IVK, BAR_BOT = 628;
-/* The plaque, as on the owner's sheet: a broad rounded triangle, the outline around three circles (a wide dome on top, two
-   round feet), standing in front of the bar's left end with its own gold rim and a gold plate behind its left side. */
-const PLQ_CIRCLES = [[300, 394, 152], [128, 556, 82], [472, 556, 82]];
-function hullOfCircles(circles, inset = 0) {
-  const pts = [];
-  for (const [cx, cy, r] of circles) for (let i = 0; i < 96; i++) { const a = i / 96 * TAU; pts.push([cx + Math.cos(a) * (r - inset), cy + Math.sin(a) * (r - inset)]); }
-  pts.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
-  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lower = [], upper = [];
-  for (const q of pts) { while (lower.length > 1 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop(); lower.push(q); }
-  for (const q of pts.slice().reverse()) { while (upper.length > 1 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop(); upper.push(q); }
-  return [...lower.slice(0, -1), ...upper.slice(0, -1)];
-}
-const PLQ = hullOfCircles(PLQ_CIRCLES), PLQ_IN = hullOfCircles(PLQ_CIRCLES, 15);
-const BAR = { x0: 420, x1: 1574, top: 338, bot: BAR_BOT, rad: 34 };   // the right end is a full half circle
-const NAVY = { top: 536, bot: BAR_BOT, end: 1290, r: 36 }, FOOT = 548;                  // FOOT: the strip's top on the plaque
-const END_R = (BAR_BOT - 338) / 2, FLOWER = { x: 1574 - END_R, y: (BAR_BOT + 338) / 2, R: 104, weight: 1.1 };
-const TEXT_R = FLOWER.x - FLOWER.R - 16;                                           // the text keeps clear of the flower
-const RIM = 7;                                                                     // the gold rim's width outside the body
-/* A briefcase, the profession's sign, about its centre, in the sheet's units. */
-function briefcase(c, x, y, s, style, width) {
-  c.save(); c.translate(x, y); c.scale(s, s); c.strokeStyle = style; c.lineWidth = width / s; c.lineJoin = 'round'; c.lineCap = 'round';
-  const rect = (x0, y0, w, h, r) => { c.beginPath(); c.moveTo(x0 + r, y0); c.arcTo(x0 + w, y0, x0 + w, y0 + h, r); c.arcTo(x0 + w, y0 + h, x0, y0 + h, r); c.arcTo(x0, y0 + h, x0, y0, r); c.arcTo(x0, y0, x0 + w, y0, r); c.closePath(); c.stroke(); };
-  rect(-31, -15, 62, 42, 7);
-  c.beginPath(); c.moveTo(-11, -15); c.lineTo(-11, -22); c.arcTo(-11, -26, -7, -26, 4); c.lineTo(7, -26); c.arcTo(11, -26, 11, -22, 4); c.lineTo(11, -15); c.stroke();
-  c.beginPath(); c.moveTo(-31, 4); c.lineTo(-7, 4); c.moveTo(7, 4); c.lineTo(31, 4); c.stroke();
-  rect(-7, -1, 14, 10, 2);
+const LOGO_H = 1.16;
+function fullLogo(c, cx, top, w, { flower = '#6c7881', gold = '#c4953b', draw = 1, words = 1, mir = false } = {}) {
+  const R = w * .32;
+  emblemStroke(c, cx, top + R, R, { draw, style: flower });
+  if (words <= 0) return;
+  c.save(); c.globalAlpha *= words;
+  const ww = w * .98, wh = ww * 249 / 900, tw = w * .94, th = tw * 165 / 900;
+  upright(c, cx, top + 2 * R + w * .04 + wh / 2, mir, u => drawLogo(u, 'wordmark', gold, 0, 0, ww));
+  upright(c, cx, top + 2 * R + w * .04 + wh + w * .035 + th / 2, mir, u => drawLogo(u, 'tagline', gold, 0, 0, tw));
   c.restore();
 }
 /* Upright text or signs at (x, y), under the mirror too. */
 function upright(c, x, y, mir, fn) { c.save(); c.translate(x, y); if (mir) c.scale(-1, 1); fn(c); c.restore(); }
-/* A line of words and numbers, centred, the numbers in their own colour (as «هداية 2026» on the sheet). */
-function sayRuns(c, str, size, f, color, numColor) {
+/* A line of words and numbers anchored at its right end, the numbers in their own colour (as «هداية 2026»). */
+function sayRuns(c, str, size, f, color, numColor, align = 'right') {
   const words = String(str || '').trim().split(/\s+/).filter(Boolean); if (!words.length) return;
   c.font = `${f.weight} ${size}px ${f.family}`; c.textBaseline = 'alphabetic'; c.textAlign = 'right';
   const gap = c.measureText(' ').width, widths = words.map(w => { c.direction = isAr(w) ? 'rtl' : 'ltr'; return c.measureText(w).width; });
-  let x = (widths.reduce((a, v) => a + v, 0) + gap * (words.length - 1)) / 2;
+  const total = widths.reduce((a, v) => a + v, 0) + gap * (words.length - 1);
+  let x = align === 'center' ? total / 2 : align === 'left' ? total : 0;
   words.forEach((w, i) => { c.direction = isAr(w) ? 'rtl' : 'ltr'; c.fillStyle = /\d|[٠-٩]/.test(w) ? numColor : color; c.fillText(w, x, 0); x -= widths[i] + gap; });
 }
+const KICK_FONT = { family: FAMILY.plex, weight: 700 };
+const rrPts = (x0, y0, x1, y1, r) => roundPoly([[x0, y0], [x1, y0], [x1, y1], [x0, y1]], [r, r, r, r], 10);
 
-/* Every moment as one set of values: the entry by the build, the exit by its own steps. `reach` uncovers the shape
-   from the plaque toward the flower. */
-function ivoryPhases(s) {
-  const { b } = s;
+/* =========================================================
+   IVORY IDENTITY CARD (rp-identity): the colours of the ivory design, a calmer form
+   An ivory card holds the whole logo with a gold rim; a navy bar for the title and an ivory strip for the subtitle run out
+   of it, cut on a slant at their far end; «هداية 2026» sits on a gold tab above the bar. Still while shown.
+   ========================================================= */
+const IC = { x: 1012, top: 430, bot: 652, w: 178, rad: 18, barTop: 466, barBot: 552, stripBot: 600, slant: 26 };
+
+function identityPhases(s) {
+  const { b, m } = s;
   if (s.dir === 'out') {
     const e = 1 - b;
-    return { plaqueA: 1 - EZ.inOut(S(e, .72, 1)), rise: 1, logoE: 1, logoT: 1, kickA: 1, reach: 1 - EZ.inOut(S(e, .24, .72)), flowerP: 1,
-      bandP: 1 - EZ.inOut(S(e, .1, .42)), divP: 1 - S(e, 0, .2), textA: 1 - S(e, 0, .2), txP: 1, subTx: 1, patP: 1, built: 1 - S(e, 0, .15) };
+    return { cardA: 1 - EZ.inOut(S(e, .62, 1)), cardS: 1 - .04 * S(e, .62, 1), draw: 1, words: 1, bar: 1 - EZ.inOut(S(e, .2, .6)),
+      strip: 1 - EZ.inOut(S(e, .12, .5)), kick: 1 - EZ.inOut(S(e, 0, .25)), textA: 1 - S(e, 0, .2), txP: 1, subP: 1, built: 1 - S(e, 0, .15) };
   }
-  return { plaqueA: S(b, 0, .16), rise: EZ.out(S(b, 0, .26)), logoE: EZ.inOut(S(b, .08, .36)), logoT: S(b, .2, .4), kickA: S(b, .26, .44),
-    reach: EZ.inOut(S(b, .22, .56)), flowerP: EZ.inOut(S(b, .42, .78)), bandP: EZ.outQ(S(b, .46, .72)), divP: EZ.out(S(b, .5, .66)),
-    textA: 1, txP: S(b, .56, .82), subTx: S(b, .66, .9), patP: S(b, .5, .85), built: S(b, .85, 1) };
+  return { cardA: S(b, 0, .14), cardS: .92 + .08 * EZ.back(S(b, 0, .24), m * .4), draw: EZ.inOut(S(b, .08, .4)), words: S(b, .22, .44),
+    bar: EZ.inOut(S(b, .28, .6)), strip: EZ.inOut(S(b, .36, .68)), kick: EZ.out(S(b, .62, .82)), textA: 1, txP: S(b, .5, .78), subP: S(b, .6, .88),
+    built: S(b, .85, 1) };
 }
 
-function drawIvory(ctx, P, t) {
+function drawIdentity(ctx, P, t) {
   const s = rstate(P, t); if (s.b < .0006) return;
-  const M = metalOf(P), c = ctx, ph = ivoryPhases(s);
-  const tf = titleFont(P), sf = subFont(P), plaqueOn = P.plaque !== 'none', hasSub = Boolean(P.subtitle && P.subtitle.trim()), iconOn = P.icon !== false;
-
-  /* the bar's length: the text's, with room around it, or the sheet's; the plaque moves with the bar's left end */
+  const M = metalOf(P), c = ctx, ph = identityPhases(s);
   unit = 1;
-  const tSize0 = 96, ssize = 50, titleW = widthOf(c, P.title, tSize0, tf), subW = hasSub ? widthOf(c, P.subtitle, ssize, sf) + (iconOn ? 100 : 0) : 0;
-  const need = Math.max(titleW + 130, subW + 150), area = P.span === 'full' ? 742 : clamp(need, 600, 980);
-  const dx = (TEXT_R - area) - 594, bx0 = BAR.x0 + dx, divX = 594 + dx;
-  const iv = x => IVX + x * IVK;
+  const tf = titleFont(P), sf = subFont(P), hasSub = Boolean(P.subtitle && P.subtitle.trim()), hasKick = Boolean(P.kicker && P.kicker.trim());
+  const tSize0 = 44, ssize = 23, ks = 19;
+  const tR = IC.x - 30, titleW = widthOf(c, P.title, tSize0, tf), subW = hasSub ? widthOf(c, P.subtitle, ssize, sf) : 0;
+  const L = P.span === 'full' ? 230 : clamp(tR - Math.max(titleW, subW, 300) - 60, 230, tR - 340);
   c.save();
-  const mir = place(c, P, { x0: iv(plaqueOn ? 36 + dx : bx0 - 10), x1: iv(1590), y0: IVY + 225 * IVK, y1: IVY + 642 * IVK }, 1196, 658);
-  c.translate(IVX, IVY); c.scale(IVK, IVK); unit = IVK;
-  c.translate(0, (1 - ph.rise) * 26);
+  const mir = place(c, P, { x0: L - 10, x1: IC.x + IC.w + 10, y0: IC.top - 6, y1: IC.bot + 14 }, IC.x + IC.w, 646);
+  const shadowsOn = P.dropShadow !== false, plate = metalBevel(c, 0, IC.top, 0, IC.bot, M);
+  const ivory = (y0, y1) => { const g = c.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, shade(P.c3, 255, .6)); g.addColorStop(1, shade(P.c3, 0, .05)); return g; };
 
-  /* the one shape: plaque, bar and flower */
-  const plaque = PLQ.map(([x, y]) => [x + dx, y]);
-  const barPts = [...arcPts(FLOWER.x, FLOWER.y, END_R, -Math.PI / 2, Math.PI / 2, 40), ...roundPoly([[FLOWER.x, BAR.bot], [bx0, BAR.bot], [bx0, BAR.top], [FLOWER.x, BAR.top]], [0, BAR.rad, BAR.rad, 0], 10)];
-  const body = new Path2D(), face = new Path2D(), back = new Path2D();   // the bar's body; the plaque stands in front of its left end
-  addPoly(body, barPts); addPoly(face, plaque); addPoly(back, plaque.map(([px0, py]) => [px0 - 16, py + 6]));
-  const rimStyle = metalBevel(c, 0, BAR.top - 110, 0, BAR.bot + 40, M);
-  const ivory = (() => { const g = c.createLinearGradient(0, 200, 0, 660); g.addColorStop(0, shade(P.c3, 255, .6)); g.addColorStop(.5, P.c3); g.addColorStop(1, shade(P.c3, 0, .05)); return g; })();
-  const shadowsOn = P.dropShadow !== false;
-  const reachX = lerp(plaqueOn ? 545 + dx : bx0 + 60, 1620, ph.reach);
-
-  const paint = x => {
-    /* depth: a soft shadow under everything, the gold plate behind the plaque's leaning side */
-    if (shadowsOn) { x.save(); shadowOn(x, 'rgba(0,0,0,.26)', 30, 12); x.fillStyle = P.c3; x.fill(body); x.restore(); }
-    /* the rim: every part stroked and filled in gold, then the ivory laid over, so only the outer edge stays gold */
-    x.save(); x.strokeStyle = rimStyle; x.fillStyle = rimStyle; x.lineWidth = RIM * 2; x.lineJoin = 'round';
-    linePath(x, barPts, true); x.stroke();
-    x.fill(body); x.restore();
-    x.fillStyle = ivory; x.fill(body);
-    x.save(); x.clip(body);
-    /* a faint pattern toward the flower */
-    const amt = clamp((Number(P.patternAmt) || 0) / 100) * ph.patP;
-    if (P.pattern && P.pattern !== 'none' && amt > 0) {
-      const pbox = { x: bx0, y: BAR.top, w: BAR.x1 - bx0, h: BAR.bot - BAR.top };
-      masked(x, 'pattern', pbox, y => { y.save(); y.globalAlpha = .8 * amt; fillPattern(y, P.pattern, M[2], pbox); y.restore(); }, y => {
-        const g2 = y.createRadialGradient(BAR.x1 - 150, BAR.top + 20, 10, BAR.x1 - 150, BAR.top + 20, 520);
-        g2.addColorStop(0, 'rgba(0,0,0,1)'); g2.addColorStop(.6, 'rgba(0,0,0,.35)'); g2.addColorStop(1, 'rgba(0,0,0,0)'); return g2;
-      });
-    }
-    /* the navy ribbon: the plaque's foot, rising into the bar's band under the title */
-    /* flush with the body's bottom edge, so the plaque's foot and the band are one strip */
-    const end = NAVY.end, r = NAVY.r, low = BAR_BOT + 40;
-    const topY = () => NAVY.top;
-    const startX = plaqueOn ? 440 + dx : bx0 + 70;
-    const edge = []; for (let px0 = startX; px0 <= end - r; px0 += 6) edge.push([px0, topY(px0)]);
-    const ribbon = [...edge, ...arcPts(end - r, NAVY.top + r, r, -Math.PI / 2, 0, 10), [end, low], [startX, low]];
-    if (!plaqueOn) { ribbon.push([startX - 58, low]); edge.unshift([startX - 58 * (low - NAVY.top) / (NAVY.bot - NAVY.top), low]); }   // a slanted left end, as on the sheet
-    const navyReach = plaqueOn ? lerp(545 + dx, end + 10, ph.bandP) : lerp(startX, end + 10, ph.bandP);
-    x.save(); x.beginPath(); x.rect(-200, 0, navyReach + 200, 900); x.clip();
-    const navy = new Path2D(); addPoly(navy, ribbon);
-    const ng = x.createLinearGradient(0, NAVY.top, 0, 660); ng.addColorStop(0, shade(P.main, 255, .08)); ng.addColorStop(1, shade(P.main, 0, .25)); x.fillStyle = ng; x.fill(navy);
-    linePath(x, edge); x.strokeStyle = metalBevel(x, 0, NAVY.top - 4, 0, 590, M); x.lineWidth = 4.5; x.lineCap = 'round'; x.lineJoin = 'round'; x.stroke();
-    x.restore();
-    x.restore();
-    /* the flower: its body ivory over the bar's end, its lines in the metal */
-    /* a fine gold ring inside the round end, the flower within it */
-    x.save(); x.globalAlpha *= clamp(ph.flowerP * 2); x.strokeStyle = alphaOf(M[2], .6); x.lineWidth = 2; x.beginPath(); x.arc(FLOWER.x, FLOWER.y, END_R - 16, 0, TAU); x.stroke(); x.restore();
-    emblemStroke(x, FLOWER.x, FLOWER.y, FLOWER.R, { draw: ph.flowerP, style: metalBevel(x, FLOWER.x - FLOWER.R, FLOWER.y - FLOWER.R, FLOWER.x + FLOWER.R * .5, FLOWER.y + FLOWER.R, M), weight: FLOWER.weight });
-    /* the divider beside the plaque */
-    if (plaqueOn && ph.divP > .01) {
-      const hh = 62 * ph.divP, my = (BAR.top + NAVY.top) / 2 + 2;
-      x.save(); x.globalAlpha *= ph.textA; x.strokeStyle = metalBevel(x, 0, my - hh, 0, my + hh, M); x.lineWidth = 3; x.lineCap = 'round'; x.beginPath(); x.moveTo(divX, my - hh); x.lineTo(divX, my + hh); x.stroke(); x.restore();
-    }
-    /* the plaque's logo and its words */
-    if (plaqueOn) {
-      const lx = 300 + dx, mark = P.plaque === 'mark', gold = mixHex(M[1], M[2], .6), plate = metalBevel(x, 0, 250, 0, 640, M);
-      /* the plaque in front of the bar: a gold plate behind its left side, the ivory face, a navy wave at its foot, a gold rim */
-      if (shadowsOn) { x.save(); shadowOn(x, 'rgba(0,0,0,.3)', 24, 10); x.fillStyle = M[1]; x.fill(back); x.restore(); }
-      x.fillStyle = plate; x.fill(back);
-      x.fillStyle = ivory; x.fill(face);
-      x.save(); x.clip(face);
-      /* the navy band floats on the foot: a wave rising to the right above it, a gold wave below it, ivory beneath */
-      const wave = [], under = [];
-      for (let px0 = 40 + dx; px0 <= 560 + dx; px0 += 6) { const u = (px0 - 40 - dx) / 520; wave.push([px0, 534 - 44 * u + 7 * Math.sin(u * Math.PI)]); under.push([px0, 588 + 40 * sm(u) - 6 * Math.sin(u * Math.PI)]); }
-      const sea = new Path2D(); addPoly(sea, [...wave, ...under.slice().reverse()]);
-      const ng = x.createLinearGradient(0, FOOT - 10, 0, 640); ng.addColorStop(0, shade(P.main, 255, .08)); ng.addColorStop(1, shade(P.main, 0, .25)); x.fillStyle = ng; x.fill(sea);
-      for (const line of [wave, under]) { linePath(x, line); x.strokeStyle = plate; x.lineWidth = 5; x.lineCap = 'round'; x.stroke(); }
-      x.restore();
-      linePath(x, plaque, true); x.strokeStyle = plate; x.lineWidth = 11; x.lineJoin = 'round'; x.stroke();
-      linePath(x, plaque, true); x.strokeStyle = alphaOf(M[4], .5); x.lineWidth = 1.5; x.stroke();
-      linePath(x, PLQ_IN.map(([px0, py]) => [px0 + dx, py]), true); x.strokeStyle = alphaOf(M[2], .5); x.lineWidth = 1.5; x.stroke();   // the fine inner line
-      emblemStroke(x, lx, mark ? 386 : 320, mark ? 72 : 58, { draw: ph.logoE, style: P.c2 || '#6c7881', weight: 1.05 });
-      if (ph.logoT > 0 && !mark) {
-        x.save(); x.globalAlpha *= ph.logoT;
-        upright(x, lx, 428, mir, u => drawLogo(u, 'wordmark', gold, 0, 0, 226));
-        x.restore();
-      }
-      if (P.kicker && ph.kickA > 0) {
-        const kf = { family: FAMILY.plex, weight: 700 }, ks = fit(x, P.kicker, 44, kf, 290);
-        x.save(); x.globalAlpha *= ph.kickA; upright(x, 300 + dx, 558 + ks * .36, mir, u => sayRuns(u, P.kicker, ks, kf, P.text, M[3])); x.restore();
-      }
-    }
-  };
-
-  c.save(); c.globalAlpha *= ph.plaqueA;
-  if (ph.reach < 1) {                                        // uncovered from the plaque toward the flower, with a soft edge
-    masked(c, 'ivory', { x: -40, y: 150, w: 1680, h: 560 }, paint, x => {
-      const g = x.createLinearGradient(reachX, 0, reachX + 70, 0); g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)'); return g;
-    });
-  } else paint(c);
-  c.restore();
-
-  /* the title and the subtitle */
-  const tL = divX + 26, cx = (tL + TEXT_R) / 2;
-  c.save(); c.globalAlpha *= ph.textA;
-  {
-    const size = fit(c, P.title, tSize0, tf, TEXT_R - tL - 40), base = (BAR.top + NAVY.top) / 2 + size * .37;
-    reveal(c, { x: tL, y: BAR.top + 6, w: TEXT_R - tL, h: NAVY.top - BAR.top - 10 }, ph.txP, x => upright(x, cx, base, mir, u => {
-      u.font = `${tf.weight} ${size}px ${tf.family}`; u.fillStyle = P.c1; u.textAlign = 'center'; u.textBaseline = 'alphabetic'; u.direction = isAr(P.title) ? 'rtl' : 'ltr'; u.fillText(P.title, 0, 0);
-    }), 140);
-  }
-  if (hasSub && ph.bandP > .3) {
-    const left = plaqueOn ? 660 + dx : bx0 + 110, room = NAVY.end - left - 70, iconW = iconOn ? 100 : 0;
-    const size = fit(c, P.subtitle, ssize, sf, room - iconW), textW = widthOf(c, P.subtitle, size, sf), total = textW + iconW;
-    const scx = clamp(cx, left + 20 + total / 2, NAVY.end - 40 - total / 2), base = (NAVY.top + NAVY.bot) / 2 + size * .36;
-    reveal(c, { x: left - 40, y: NAVY.top, w: NAVY.end - left + 40, h: NAVY.bot - NAVY.top }, ph.subTx, x => upright(x, scx, base, mir, u => {
-      u.font = `${sf.weight} ${size}px ${sf.family}`; u.fillStyle = P.text; u.textAlign = 'center'; u.textBaseline = 'alphabetic'; u.direction = isAr(P.subtitle) ? 'rtl' : 'ltr';
-      u.fillText(P.subtitle, -total / 2 + textW / 2, 0);
-      if (iconOn) briefcase(u, total / 2 - 33, -size * .36, .95, metalBevel(u, 0, -size * .36 - 26, 0, -size * .36 + 26, M), 4);
-    }), 120);
-  }
-  c.restore();
-
-  /* the quiet light on the flower, and glints if asked for */
-  if (ph.built > 0 && ph.reach >= 1) {
-    c.save(); c.globalAlpha *= ph.plaqueA;
-    if (P.glow) { const R = FLOWER.R, g = c.createRadialGradient(FLOWER.x, FLOWER.y, R * .5, FLOWER.x, FLOWER.y, R * 1.5); g.addColorStop(0, alphaOf(M[3], 0)); g.addColorStop(.7, alphaOf(M[3], .18 * ph.built)); g.addColorStop(1, alphaOf(M[3], 0)); c.fillStyle = g; c.fillRect(FLOWER.x - R * 1.6, FLOWER.y - R * 1.6, R * 3.2, R * 3.2); }
-    if (P.shine) emblemShine(c, FLOWER.x, FLOWER.y, FLOWER.R, { phase: shinePhase(P, t, 8), len: .1, color: M[4], glow: 4, blur: dev(), weight: FLOWER.weight, alpha: .65 * ph.built });
-    if (P.particles) [[-.72, -.72], [.78, .38], [-.2, .96]].forEach(([u, v], i) => { const k = Math.max(0, Math.sin(t * (1 + .2 * i) + i * 2.3)) ** 12; sparkle(c, FLOWER.x + u * FLOWER.R, FLOWER.y + v * FLOWER.R, 6 + 8 * k, '#ffffff', k * ph.built); });
+  /* the navy bar and the ivory strip, running out of the card toward the left */
+  const slantPts = (x0, y0, y1) => [[x0 + IC.slant, y0], [IC.x + 30, y0], [IC.x + 30, y1], [x0, y1]];
+  const reachBar = lerp(IC.x, L, ph.bar), reachStrip = lerp(IC.x, L + 14, ph.strip);
+  c.save(); c.globalAlpha *= ph.cardA;
+  if (ph.strip > .001) {
+    const strip = new Path2D(); addPoly(strip, slantPts(L + 14, IC.barBot - 2, IC.stripBot));
+    c.save(); if (ph.strip < 1) { c.beginPath(); c.rect(reachStrip - 2, 0, 1400, 720); c.clip(); }
+    if (shadowsOn) { c.save(); shadowOn(c, 'rgba(0,0,0,.25)', 18, 7); c.fillStyle = P.c3; c.fill(strip); c.restore(); }
+    c.fillStyle = ivory(IC.barBot, IC.stripBot); c.fill(strip);
+    linePath(c, [[L + 14, IC.stripBot], [IC.x + 10, IC.stripBot]]); c.strokeStyle = plate; c.lineWidth = 2.5; c.stroke();
     c.restore();
   }
+  if (ph.bar > .001) {
+    const bar = new Path2D(); addPoly(bar, slantPts(L, IC.barTop, IC.barBot));
+    c.save(); if (ph.bar < 1) { c.beginPath(); c.rect(reachBar - 2, 0, 1400, 720); c.clip(); }
+    if (shadowsOn) { c.save(); shadowOn(c, 'rgba(0,0,0,.3)', 20, 8); c.fillStyle = P.main; c.fill(bar); c.restore(); }
+    const g = c.createLinearGradient(0, IC.barTop, 0, IC.barBot); g.addColorStop(0, shade(P.main, 255, .1)); g.addColorStop(1, shade(P.main, 0, .25)); c.fillStyle = g; c.fill(bar);
+    const amt = clamp((Number(P.patternAmt) || 0) / 100);
+    if (P.pattern && P.pattern !== 'none' && amt > 0) {
+      const box = { x: L, y: IC.barTop, w: IC.x - L + 30, h: IC.barBot - IC.barTop };
+      masked(c, 'pattern', box, x => { x.save(); x.clip(bar); x.globalAlpha = .5 * amt; fillPattern(x, P.pattern, M[3], box); x.restore(); }, x => {
+        const g2 = x.createLinearGradient(IC.x, 0, L, 0); g2.addColorStop(0, 'rgba(0,0,0,.15)'); g2.addColorStop(1, 'rgba(0,0,0,1)'); return g2; });
+    }
+    linePath(c, [[IC.x + 10, IC.barTop], [L + IC.slant, IC.barTop], [L, IC.barBot]]); c.strokeStyle = plate; c.lineWidth = 3; c.lineJoin = 'round'; c.stroke();
+    c.restore();
+  }
+  /* the gold tab with «هداية 2026» above the bar's far end */
+  if (hasKick && ph.kick > .01) {
+    const kw = widthOf(c, P.kicker, ks, KICK_FONT) + 40, kh = 32, kx = L + IC.slant + 6, ky = IC.barTop - kh + 2 + (1 - ph.kick) * 14;
+    c.save(); c.globalAlpha *= ph.kick;
+    const tab = new Path2D(); addPoly(tab, roundPoly([[kx, ky], [kx + kw, ky], [kx + kw, ky + kh], [kx, ky + kh]], [10, 10, 0, 0], 8));
+    if (shadowsOn) { c.save(); shadowOn(c, 'rgba(0,0,0,.25)', 10, 3); c.fillStyle = M[2]; c.fill(tab); c.restore(); }
+    c.fillStyle = metalBevel(c, 0, ky, 0, ky + kh, M); c.fill(tab);
+    upright(c, kx + kw / 2, ky + kh / 2 + ks * .36, mir, u => sayRuns(u, P.kicker, ks, KICK_FONT, shade(P.main, 0, .2), shade(P.main, 0, .45), 'center'));
+    c.restore();
+  }
+  /* the card with the whole logo */
+  const cx = IC.x + IC.w / 2, cy = (IC.top + IC.bot) / 2;
+  c.save(); c.translate(cx, cy); c.scale(ph.cardS, ph.cardS); c.translate(-cx, -cy);
+  const card = new Path2D(); addPoly(card, rrPts(IC.x, IC.top, IC.x + IC.w, IC.bot, IC.rad));
+  if (shadowsOn) { c.save(); shadowOn(c, 'rgba(0,0,0,.32)', 24, 10); c.fillStyle = P.c3; c.fill(card); c.restore(); }
+  c.fillStyle = ivory(IC.top, IC.bot); c.fill(card);
+  linePath(c, rrPts(IC.x, IC.top, IC.x + IC.w, IC.bot, IC.rad), true); c.strokeStyle = plate; c.lineWidth = 4; c.stroke();
+  linePath(c, rrPts(IC.x + 8, IC.top + 8, IC.x + IC.w - 8, IC.bot - 8, IC.rad - 7), true); c.strokeStyle = alphaOf(M[2], .45); c.lineWidth = 1.2; c.stroke();
+  const lw = 132, ltop = cy - lw * LOGO_H / 2;
+  fullLogo(c, cx, ltop, lw, { flower: P.c2 || '#6c7881', gold: mixHex(M[1], M[2], .55), draw: ph.draw, words: ph.words, mir });
+  if (P.shine && ph.built > 0) emblemShine(c, cx, ltop + lw * .32, lw * .32, { phase: shinePhase(P, t, 8), len: .1, color: '#ffffff', glow: 3, blur: dev(), alpha: .45 * ph.built });
+  c.restore();
+  c.restore();
+
+  /* the title on the bar, the subtitle on the strip */
+  c.save(); c.globalAlpha *= ph.textA * ph.cardA;
+  { const size = fit(c, P.title, tSize0, tf, tR - L - 50);
+    reveal(c, { x: L, y: IC.barTop, w: tR - L + 12, h: IC.barBot - IC.barTop }, ph.txP, x => say(x, P.title, tR, (IC.barTop + IC.barBot) / 2 + size * .36, size, tf, P.text, mir)); }
+  if (hasSub) { const size = fit(c, P.subtitle, ssize, sf, tR - L - 60);
+    reveal(c, { x: L + 14, y: IC.barBot, w: tR - L, h: IC.stripBot - IC.barBot }, ph.subP, x => say(x, P.subtitle, tR, (IC.barBot + IC.stripBot) / 2 + size * .36, size, sf, P.c1, mir)); }
+  c.restore();
+  if (P.particles && ph.built > 0) [[IC.x + 10, IC.top + 12], [IC.x + IC.w - 12, IC.bot - 14], [L + IC.slant, IC.barTop]].forEach(([x, y], i) => {
+    const k = Math.max(0, Math.sin(t * (1 + .2 * i) + i * 2.3)) ** 12; sparkle(c, x, y, 4 + 6 * k, '#ffffff', k * ph.built); });
+  c.restore();
+  unit = 1;
+}
+
+/* =========================================================
+   NIGHT IDENTITY (rp-night): a new design
+   A deep navy panel, quiet and modern, with the whole logo on a white tile set into its right end. A fine gold rule
+   stands between the logo and the words: «هداية 2026» in gold above the title, the title in white, the subtitle muted,
+   and a gold line under them that draws itself. The panel opens out of the tile and closes back into it.
+   ========================================================= */
+const NI = { right: 1192, top: 448, bot: 648, rad: 24, tile: { x: 1036, top: 460, bot: 636, w: 144, rad: 16 }, rule: 1012 };
+
+function nightPhases(s) {
+  const { b, m } = s;
+  if (s.dir === 'out') {
+    const e = 1 - b;
+    return { tileA: 1 - EZ.inOut(S(e, .64, 1)), tileS: 1 - .05 * S(e, .64, 1), draw: 1, words: 1, open: 1 - EZ.inOut(S(e, .22, .66)), rule: 1 - S(e, 0, .2),
+      kick: 1 - S(e, 0, .2), textA: 1 - S(e, 0, .2), txP: 1, subP: 1, line: 1 - EZ.inOut(S(e, 0, .25)), built: 1 - S(e, 0, .15) };
+  }
+  return { tileA: S(b, 0, .14), tileS: .86 + .14 * EZ.back(S(b, 0, .24), m * .4), draw: EZ.inOut(S(b, .08, .4)), words: S(b, .22, .44),
+    open: EZ.inOut(S(b, .26, .6)), rule: EZ.out(S(b, .46, .62)), kick: EZ.out(S(b, .52, .72)), textA: 1, txP: S(b, .56, .8), subP: S(b, .64, .88),
+    line: EZ.inOut(S(b, .7, .96)), built: S(b, .85, 1) };
+}
+
+function drawNight(ctx, P, t) {
+  const s = rstate(P, t); if (s.b < .0006) return;
+  const M = metalOf(P), c = ctx, ph = nightPhases(s), T = NI.tile;
+  unit = 1;
+  const tf = titleFont(P), sf = subFont(P), hasSub = Boolean(P.subtitle && P.subtitle.trim()), hasKick = Boolean(P.kicker && P.kicker.trim());
+  const tSize0 = 46, ssize = 22, ks = 20, tR = NI.rule - 24;
+  const textW = Math.max(widthOf(c, P.title, tSize0, tf), hasSub ? widthOf(c, P.subtitle, ssize, sf) : 0, hasKick ? widthOf(c, P.kicker, ks, KICK_FONT) : 0, 280);
+  const L = P.span === 'full' ? 220 : clamp(tR - textW - 56, 220, tR - 330);
+  c.save();
+  const mir = place(c, P, { x0: L - 10, x1: NI.right + 10, y0: NI.top - 6, y1: NI.bot + 14 }, NI.right, 646);
+  const shadowsOn = P.dropShadow !== false, gold = metalBevel(c, 0, NI.top, 0, NI.bot, M);
+  const panelPts = rrPts(L, NI.top, NI.right, NI.bot, NI.rad), panel = new Path2D(); addPoly(panel, panelPts);
+  const reach = lerp(T.x + 20, L - 4, ph.open);
+
+  c.save(); c.globalAlpha *= ph.tileA;
+  /* the panel, opening out of the tile */
+  if (ph.open > .001) {
+    c.save(); if (ph.open < 1) { c.beginPath(); c.rect(reach, 0, 1400, 720); c.clip(); }
+    if (shadowsOn) { c.save(); shadowOn(c, 'rgba(0,0,0,.4)', 26, 10); c.fillStyle = P.main; c.fill(panel); c.restore(); }
+    const g = c.createLinearGradient(0, NI.top, 0, NI.bot); g.addColorStop(0, shade(P.main, 255, .1)); g.addColorStop(1, shade(P.main, 0, .3)); c.fillStyle = g; c.fill(panel);
+    c.save(); c.clip(panel);
+    const amt = clamp((Number(P.patternAmt) || 0) / 100);
+    if (P.pattern && P.pattern !== 'none' && amt > 0) {
+      const box = { x: L, y: NI.top, w: NI.right - L, h: NI.bot - NI.top };
+      masked(c, 'pattern', box, x => { x.save(); x.globalAlpha = .45 * amt; fillPattern(x, P.pattern, M[3], box); x.restore(); }, x => {
+        const g2 = x.createLinearGradient(T.x, 0, L, 0); g2.addColorStop(0, 'rgba(0,0,0,0)'); g2.addColorStop(.4, 'rgba(0,0,0,.2)'); g2.addColorStop(1, 'rgba(0,0,0,1)'); return g2; });
+    }
+    const gl = c.createLinearGradient(0, NI.top, 0, NI.top + 60); gl.addColorStop(0, 'rgba(255,255,255,.08)'); gl.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gl; c.fillRect(L, NI.top, NI.right - L, 60);
+    c.restore();
+    linePath(c, panelPts, true); c.strokeStyle = alphaOf(M[3], .55); c.lineWidth = 1.5; c.stroke();
+    c.restore();
+  }
+  /* the gold rule between the logo and the words */
+  if (ph.rule > .01) {
+    const my = (NI.top + NI.bot) / 2, hh = 64 * ph.rule;
+    c.save(); c.globalAlpha *= ph.textA; c.strokeStyle = gold; c.lineWidth = 2.5; c.lineCap = 'round'; c.beginPath(); c.moveTo(NI.rule, my - hh); c.lineTo(NI.rule, my + hh); c.stroke(); c.restore();
+  }
+  /* the white tile with the whole logo */
+  const cx = T.x + T.w / 2, cy = (T.top + T.bot) / 2;
+  c.save(); c.translate(cx, cy); c.scale(ph.tileS, ph.tileS); c.translate(-cx, -cy);
+  const tile = new Path2D(); addPoly(tile, rrPts(T.x, T.top, T.x + T.w, T.bot, T.rad));
+  if (shadowsOn) { c.save(); shadowOn(c, 'rgba(0,0,0,.35)', 16, 5); c.fillStyle = P.c3; c.fill(tile); c.restore(); }
+  const tg = c.createLinearGradient(0, T.top, 0, T.bot); tg.addColorStop(0, shade(P.c3, 255, .7)); tg.addColorStop(1, shade(P.c3, 0, .04)); c.fillStyle = tg; c.fill(tile);
+  linePath(c, rrPts(T.x, T.top, T.x + T.w, T.bot, T.rad), true); c.strokeStyle = gold; c.lineWidth = 2.5; c.stroke();
+  const lw = 112, ltop = cy - lw * LOGO_H / 2;
+  fullLogo(c, cx, ltop, lw, { flower: P.c2 || '#6c7881', gold: mixHex(M[1], M[2], .55), draw: ph.draw, words: ph.words, mir });
+  if (P.shine && ph.built > 0) emblemShine(c, cx, ltop + lw * .32, lw * .32, { phase: shinePhase(P, t, 8), len: .1, color: '#ffffff', glow: 3, blur: dev(), alpha: .45 * ph.built });
+  c.restore();
+  c.restore();
+
+  /* «هداية 2026», the title, the subtitle and the gold line under them */
+  const kY = NI.top + 48, tY = NI.top + 106, sY = NI.top + 146, lineY = NI.top + 166;
+  c.save(); c.globalAlpha *= ph.textA * ph.tileA;
+  if (hasKick && ph.kick > .01) {
+    c.save(); c.globalAlpha *= ph.kick;                       // anchored at the rule, growing away from the logo on either side
+    upright(c, tR + (1 - ph.kick) * 18, kY, mir, u => sayRuns(u, P.kicker, ks, KICK_FONT, M[3], M[4], mir ? 'left' : 'right'));
+    c.restore();
+  }
+  { const size = fit(c, P.title, tSize0, tf, tR - L - 40);
+    reveal(c, { x: L, y: tY - size, w: tR - L + 12, h: size * 1.4 }, ph.txP, x => say(x, P.title, tR, tY, size, tf, P.text, mir)); }
+  if (hasSub) { const size = fit(c, P.subtitle, ssize, sf, tR - L - 40);
+    reveal(c, { x: L, y: sY - size, w: tR - L + 12, h: size * 1.5 }, ph.subP, x => say(x, P.subtitle, tR, sY, size, sf, P.c1, mir)); }
+  if (ph.line > .001) {
+    const len = Math.min(tR - L - 30, textW) * ph.line;
+    c.save(); c.strokeStyle = metalBevel(c, 0, lineY - 2, 0, lineY + 2, M); c.lineWidth = 2.5; c.lineCap = 'round'; c.beginPath(); c.moveTo(tR, lineY); c.lineTo(tR - len, lineY); c.stroke();
+    c.fillStyle = M[3]; c.beginPath(); c.arc(tR - len, lineY, 3.2, 0, TAU); c.fill(); c.restore();
+  }
+  c.restore();
+  if (P.particles && ph.built > 0) [[T.x - 6, T.top + 10], [T.x + T.w, T.bot - 12], [tR, lineY]].forEach(([x, y], i) => {
+    const k = Math.max(0, Math.sin(t * (1 + .2 * i) + i * 2.3)) ** 12; sparkle(c, x, y, 4 + 6 * k, '#ffffff', k * ph.built); });
   c.restore();
   unit = 1;
 }
@@ -662,7 +680,10 @@ export const RIBBONS = [
   { id: 'rp-liquid', name: 'Liquid Gold', raw: true, draw: drawLiquid, timing: P => ({ total: rtotal(P) }),
     defaults: { ...BASE, tIn: 3.2, title: 'أثر يمتد', subtitle: 'مركز الاتصال المؤسسي', kicker: '', main: '#11233a', text: '#fbf3df', c1: '#22180a', accent: '#c9993f',
       metal: 'gold', pattern: 'emblem', patternAmt: 18, font: 'plex', span: 'auto', flow: 60 } },
-  { id: 'rp-ivory', name: 'Ivory Plaque', raw: true, draw: drawIvory, timing: P => ({ total: rtotal(P) }),
+  { id: 'rp-identity', name: 'Ivory Identity Card', raw: true, draw: drawIdentity, timing: P => ({ total: rtotal(P) }),
     defaults: { ...BASE, tIn: 2.8, title: 'أثر يمتد', subtitle: 'مركز الاتصال المؤسسي', kicker: 'هداية 2026', main: '#3b4b59', text: '#f7f2e7', c1: '#34424e', c2: '#6c7881', c3: '#f8f4eb', accent: '#c9993f',
-      metal: 'gold', pattern: 'girih', patternAmt: 35, font: 'plex', span: 'auto', plaque: 'logo', icon: true } },
+      metal: 'gold', pattern: 'emblem', patternAmt: 20, font: 'plex', span: 'auto' } },
+  { id: 'rp-night', name: 'Night Identity', raw: true, draw: drawNight, timing: P => ({ total: rtotal(P) }),
+    defaults: { ...BASE, tIn: 2.8, title: 'أثر يمتد', subtitle: 'مركز الاتصال المؤسسي', kicker: 'هداية 2026', main: '#10202f', text: '#ffffff', c1: '#aebdcb', c2: '#6c7881', c3: '#ffffff', accent: '#c9993f',
+      metal: 'gold', pattern: 'girih', patternAmt: 18, font: 'plex', span: 'auto' } },
 ];
