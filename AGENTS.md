@@ -398,6 +398,15 @@ English, SIL Open Font License) are served by the site from `@fontsource`, never
 Its rules are held by `supabase/tests/studio_*_rules.sql`, `tests/studio-*.test.mjs` and the fixture checks
 `qa/studio-*.cjs`.
 
+The Hedayah emblem in a motion template is drawn as vector strokes by `src/lib/motion/emblem.js`, by owner request of 2026-11-16
+(`MVP_draft.md` section 80, recorded in `progress.md`): four interlaced capsules at the proportions measured from
+`public/motion/logo_src-emblem.png`, held to that mask by `tests/motion-ribbons.test.mjs`. Never draw the emblem by eye, and never change
+its numbers without the test. A template's design options (the metal, the running light, the pattern, the font, the side, the size...)
+are data in `Graphic.options` (`src/lib/motion/types.ts`), drawn by `src/components/motion-options.tsx` on the template page and in the
+studio's inspector; a new option's parameter goes into the shared defaults in `catalog.ts`, or the studio drops it from saved clips.
+A mirrored design flips shapes only: text, the wordmark and anything with a direction stay upright. `qa/motion-ribbons.cjs` sweeps every
+frame and decodes every download.
+
 The desktop application is real too, by owner directive of 2026-10-20 (`Desktop_App_Plan.md`, accepted
 with the answers of its section 11.1; `MVP_draft.md` section 63; recorded in `progress.md`). It is an
 Electron application in `desktop/`, with its own `package.json` and lockfile like `bridge/whatsapp/`,

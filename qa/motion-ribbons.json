@@ -1,0 +1,526 @@
+{
+  "when": "2026-11-16T07:33:31.312Z",
+  "browser": "msedge",
+  "exportSeconds": {
+    "rp-liquid-mp4": 2.852,
+    "rp-liquid-mov": 14.614,
+    "rp-liquid-zip": 7.154,
+    "rp-ivory-mp4": 1.718,
+    "rp-ivory-mov": 18.432,
+    "rp-ivory-zip": 7.539,
+    "png": 0.278
+  },
+  "checks": [
+    {
+      "name": "Repine: ten designs on the rail",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-liquid named الذهب السائل",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-liquid marked new",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-ivory named اللوحة العاجية",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-ivory marked new",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-liquid: draws real artwork at 0.2s",
+      "pass": true,
+      "detail": {
+        "n": 244,
+        "colors": 19
+      }
+    },
+    {
+      "name": "rp-liquid: draws real artwork at 1.2s",
+      "pass": true,
+      "detail": {
+        "n": 10233,
+        "colors": 180
+      }
+    },
+    {
+      "name": "rp-liquid: draws real artwork at 2.2s",
+      "pass": true,
+      "detail": {
+        "n": 13812,
+        "colors": 199
+      }
+    },
+    {
+      "name": "rp-liquid: draws real artwork at 4.2s",
+      "pass": true,
+      "detail": {
+        "n": 14104,
+        "colors": 223
+      }
+    },
+    {
+      "name": "rp-liquid: all 265 frames draw without an error",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "rp-liquid: its thumbnail is drawn",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-ivory: draws real artwork at 0.2s",
+      "pass": true,
+      "detail": {
+        "n": 7472,
+        "colors": 66
+      }
+    },
+    {
+      "name": "rp-ivory: draws real artwork at 1.2s",
+      "pass": true,
+      "detail": {
+        "n": 15102,
+        "colors": 135
+      }
+    },
+    {
+      "name": "rp-ivory: draws real artwork at 2.2s",
+      "pass": true,
+      "detail": {
+        "n": 21748,
+        "colors": 190
+      }
+    },
+    {
+      "name": "rp-ivory: draws real artwork at 4.2s",
+      "pass": true,
+      "detail": {
+        "n": 21756,
+        "colors": 208
+      }
+    },
+    {
+      "name": "rp-ivory: all 259 frames draw without an error",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "rp-ivory: its thumbnail is drawn",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the liquid design has the tabs content, colours, design, timing, motion",
+      "pass": true,
+      "detail": [
+        "المحتوى",
+        "الألوان",
+        "التصميم",
+        "التوقيت",
+        "الحركة"
+      ]
+    },
+    {
+      "name": "«التصميم» groups",
+      "pass": true,
+      "detail": [
+        "اللمعة",
+        "النقش والخط",
+        "الموضع والحجم",
+        "المؤثرات"
+      ]
+    },
+    {
+      "name": "metal choices with swatches",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the custom metal colour is hidden until «مخصص»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«فضي» turns the metal silver",
+      "pass": true,
+      "detail": {
+        "gold": 24.308718166985884,
+        "silver": -18.263224984066284
+      }
+    },
+    {
+      "name": "«مخصص» shows its colour",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a custom metal colour is drawn",
+      "pass": true,
+      "detail": {
+        "silver": -18.263224984066284,
+        "red": 25.367312194083848
+      }
+    },
+    {
+      "name": "restoring the colours restores the metal",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the panel colour changes the panel",
+      "pass": true,
+      "detail": 0.023594713816570842
+    },
+    {
+      "name": "«سرعة اللمعة» shows while the light is on",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«لمعة تدور حول المعدن» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«لمعة تدور حول المعدن» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the light around the metal switches off and on",
+      "pass": true,
+      "detail": 0.006956811098648949
+    },
+    {
+      "name": "«لمعة تدور حول المعدن» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«سرعة اللمعة» hides with the light off",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«لمعة تدور حول المعدن» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "eight patterns with drawn swatches",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "pattern «بلا» and «نجمة ثمانية» differ",
+      "pass": true,
+      "detail": 0.007617335239581312
+    },
+    {
+      "name": "pattern «نجمة ثمانية» and «تموجات» differ",
+      "pass": true,
+      "detail": 0.00852269140945528
+    },
+    {
+      "name": "«وضوح النقش» hides with no pattern",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the title font changes the title",
+      "pass": true,
+      "detail": 0.014367567366745673
+    },
+    {
+      "name": "«ثابت» draws the band across the width",
+      "pass": true,
+      "detail": {
+        "auto": 0.5394265232974911,
+        "full": 0.16129032258064516
+      }
+    },
+    {
+      "name": "«يسار» moves the design to the left",
+      "pass": true,
+      "detail": {
+        "left": 0.24528442995922095,
+        "right": 0.7537887469766551
+      }
+    },
+    {
+      "name": "«وسط» centres it",
+      "pass": true,
+      "detail": 0.5366621625907952
+    },
+    {
+      "name": "«الحجم» at 60% draws it smaller",
+      "pass": true,
+      "detail": {
+        "small": 0.2383512544802867,
+        "full": 0.3960573476702508
+      }
+    },
+    {
+      "name": "the height lifts it",
+      "pass": true,
+      "detail": {
+        "lifted": 0.3844298732398632,
+        "base": 0.7844541512685854
+      }
+    },
+    {
+      "name": "«ظل تحت التصميم» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«ظل تحت التصميم» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the drop shadow switches",
+      "pass": true,
+      "detail": 0.03648818373600872
+    },
+    {
+      "name": "«توهج حول الشعار» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«توهج حول الشعار» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the glow switches",
+      "pass": true,
+      "detail": 0.24020383144306306
+    },
+    {
+      "name": "«تموج السائل» changes the edge",
+      "pass": true,
+      "detail": 0.05658691923458549
+    },
+    {
+      "name": "«قطرات تتساقط» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«قطرات تتساقط» flips",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "drops fall from the band while it is shown",
+      "pass": true,
+      "detail": 0.01132532795966917
+    },
+    {
+      "name": "a new title is drawn",
+      "pass": true,
+      "detail": {
+        "before": 0.5412186379928315,
+        "after": 0.44802867383512546
+      }
+    },
+    {
+      "name": "an empty subtitle takes its drop away",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reset restores the title",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the side plaque text is hidden until «نص قصير»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the side plaque choices draw differently",
+      "pass": true,
+      "detail": [
+        0.0059437795969239605,
+        0.002930511998034664
+      ]
+    },
+    {
+      "name": "«بلا» removes the plaque",
+      "pass": true,
+      "detail": {
+        "none": 0.5232974910394266,
+        "plaque": 0.3333333333333333
+      }
+    },
+    {
+      "name": "«نص قصير» shows its text field",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the ivory design has its four colours and the metal",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-liquid: MP4 on green decodes at 1280x720 with 139 frames",
+      "pass": true,
+      "detail": {
+        "name": "rp-liquid_1280x720_24fps_greenscreen.mp4",
+        "codec_name": "h264",
+        "codec_tag_string": "avc1",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "yuv420p",
+        "nb_read_frames": "139",
+        "frames": 139
+      }
+    },
+    {
+      "name": "rp-liquid: MP4 decodes completely",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-liquid: transparent MOV is ProRes 4444 with alpha",
+      "pass": true,
+      "detail": {
+        "codec_name": "prores",
+        "codec_tag_string": "ap4h",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "yuva444p12le",
+        "nb_read_frames": "139",
+        "frames": 139
+      }
+    },
+    {
+      "name": "rp-liquid: a decoded MOV frame is mostly clear with a solid design",
+      "pass": true,
+      "detail": {
+        "clear": 807408,
+        "solid": 56331,
+        "total": 921600
+      }
+    },
+    {
+      "name": "rp-liquid: PNG sequence in ZIP",
+      "pass": true,
+      "detail": {
+        "name": "rp-liquid_1280x720_24fps_png-sequence.zip",
+        "bytes": 20491725
+      }
+    },
+    {
+      "name": "rp-liquid: the ZIP holds one PNG per frame",
+      "pass": true,
+      "detail": {
+        "files": 139,
+        "frames": 139
+      }
+    },
+    {
+      "name": "rp-ivory: MP4 on green decodes at 1280x720 with 134 frames",
+      "pass": true,
+      "detail": {
+        "name": "rp-ivory_1280x720_24fps_greenscreen.mp4",
+        "codec_name": "h264",
+        "codec_tag_string": "avc1",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "yuv420p",
+        "nb_read_frames": "134",
+        "frames": 134
+      }
+    },
+    {
+      "name": "rp-ivory: MP4 decodes completely",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rp-ivory: transparent MOV is ProRes 4444 with alpha",
+      "pass": true,
+      "detail": {
+        "codec_name": "prores",
+        "codec_tag_string": "ap4h",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "yuva444p12le",
+        "nb_read_frames": "134",
+        "frames": 134
+      }
+    },
+    {
+      "name": "rp-ivory: a decoded MOV frame is mostly clear with a solid design",
+      "pass": true,
+      "detail": {
+        "clear": 734828,
+        "solid": 89745,
+        "total": 921600
+      }
+    },
+    {
+      "name": "rp-ivory: PNG sequence in ZIP",
+      "pass": true,
+      "detail": {
+        "name": "rp-ivory_1280x720_24fps_png-sequence.zip",
+        "bytes": 20720003
+      }
+    },
+    {
+      "name": "rp-ivory: the ZIP holds one PNG per frame",
+      "pass": true,
+      "detail": {
+        "files": 134,
+        "frames": 134
+      }
+    },
+    {
+      "name": "PNG: 1280x720 with transparency",
+      "pass": true,
+      "detail": {
+        "codec_name": "png",
+        "codec_tag_string": "[0][0][0][0]",
+        "width": 1280,
+        "height": 720,
+        "pix_fmt": "rgba",
+        "nb_read_frames": "1"
+      }
+    },
+    {
+      "name": "PNG: the design is on the left and silver, as chosen",
+      "pass": true,
+      "detail": {
+        "cx": 0.2608400172069272,
+        "rb": -22.57442273534636
+      }
+    },
+    {
+      "name": "phone: nothing wider than the screen",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no console or page errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

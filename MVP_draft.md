@@ -4376,3 +4376,61 @@ Instagram test's temporary copy and address:
   until the app is audited.
 - **Meta's «App not active».** The guide's step «أضف من سيربطون الحسابات» and the connection's notes say what it means: the app is in
   development mode and the person signing in has no role on it, or Meta has paused the app until its «Required actions» are done.
+
+# 80. Two Repine designs around the true Hedayah emblem, and design options, 2026-11-16
+
+Owner request: two new designs in «تصاميم ريبين» of «قوالب الحركة» (section 57), one more moving and liquid, one a reading of the owner's
+reference sheet; the Hedayah emblem drawn correctly in both; options for a light running around the metal, gold or silver, colours, text,
+a pattern, and more. Section 57's inventory becomes twenty-eight templates: eight numbers, ten Repine, ten frames.
+
+## 80.1 The emblem
+
+- The emblem is four interlaced capsules (a straight band with a half circle at each end) turned 0, 45, 90 and 135 degrees about one
+  centre; their ends are the eight lobes. It is drawn as vector strokes (`src/lib/motion/emblem.js`) at the proportions measured from the
+  site's own mask (`public/motion/logo_src-emblem.png`), never redrawn by eye: a four-lobed or otherwise approximate mark is wrong.
+- Drawn as strokes, it can write itself on, take any metal, and carry a light that traces each lobe in turn. The tinted mask
+  (`drawLogo`) stays for the older designs and the wordmark.
+
+## 80.2 «الذهب السائل» (`rp-liquid`)
+
+- **Entry.** A drop of molten metal falls and splashes into a disc; the emblem writes itself inside the disc's dark glass; metal flows
+  out into a band with a round front; the band cools into a glass panel from the disc outward, with a hot edge where it turns; the title
+  is uncovered from the emblem's side; the subtitle drips out of the band's underside as a metal pill; an optional tag rises above.
+- **While shown.** The edges ripple, bright bands flow away from the disc, drops gather under the band or the subtitle and fall, glints
+  rise. With «حركة العرض» at zero, or «تموج السائل» at zero, the edge is still once the metal has settled.
+- **Exit.** The entry in reverse, into the disc and back up into the drop.
+- **Colours.** The glass panel, the title, the subtitle (on the metal), and the custom metal.
+
+## 80.3 «اللوحة العاجية» (`rp-ivory`)
+
+- A reading of the reference: an ivory badge with a double gold ring carries the emblem; a gold rule draws the ivory bar out of it along
+  both edges and the ivory follows; a navy band with a gold edge slides out for the subtitle; the title is uncovered on the ivory; a
+  domed side plaque, backed by a gold plate, pops at the far end with a navy wave that moves, carrying «هداية» written (or the emblem,
+  a short text, or nothing, which also removes the divider).
+- **Colours.** The ivory, the band and wave, the title, the subtitle, and the custom metal.
+
+## 80.4 Design options
+
+- **«الألوان».** «المعدن»: ذهبي، فضي، وردي، نحاسي، مخصص, as round metal swatches; «لون المعدن المخصص» shows only with «مخصص».
+  «استعادة الألوان الأصلية» restores the metal too.
+- **«التصميم»**, a tab of its own, in four groups:
+  - «اللمعة»: «لمعة تدور حول المعدن» (on by default), and «سرعة اللمعة» while it is on.
+  - «النقش والخط»: «النقش» with eight choices drawn as swatches (بلا، زخرفة هداية، نجمة ثمانية، دوائر متشابكة، تموجات، نقاط، خطوط مائلة،
+    ملمس ناعم), «وضوح النقش» unless none, and «خط العنوان» (بلكس، ريم الكوفي، رقعة، خط النظام), the site's own fonts.
+  - «الموضع والحجم»: «طول الشريط» (على قدر النص، ثابت), «مكان التصميم» (يمين، وسط، يسار; the left mirrors the shapes and keeps every
+    text, the wordmark and the emblem upright), «الحجم» 60 to 120%, «الارتفاع عن الحافة السفلية» 0 to 60% of the frame, and for the
+    ivory design «اللوحة الجانبية».
+  - «المؤثرات»: for the liquid design «تموج السائل» and «قطرات تتساقط»; for both «توهج حول الشعار», «لمعات متطايرة», «ظل تحت التصميم».
+- The design stays inside the frame whatever its size and side.
+- Options are data on the template (`Graphic.options`), drawn by one component (`src/components/motion-options.tsx`) on the template page
+  and in the studio's inspector, and stored by a studio clip like any other parameter (only what differs from the template).
+
+## 80.5 Downloads
+
+Unchanged from section 57: MP4 on a key colour, transparent MOV (ProRes 4444), a PNG sequence in ZIP and a single PNG, at 720p, 1080p or
+4K and 24, 30 or 60 frames a second. Every option shown in the preview is in the file.
+
+## 80.6 Checks
+
+`tests/motion-ribbons.test.mjs` (the emblem against the mask, the options against the defaults and the studio's kept parameters) and
+`qa/motion-ribbons.cjs` (the real page on a fixture: every frame, every option, every download decoded by ffmpeg).

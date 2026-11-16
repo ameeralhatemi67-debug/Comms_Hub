@@ -24,6 +24,8 @@ import { SPEED_MAX, SPEED_MIN, isHold, retimed, speedAt } from '@/lib/studio/spe
 import { COVER_MODES, COVER_SHAPES } from '@/lib/studio/cover';
 import { EXTRA_SHAPES_MAX, setShapes, shapesOf } from '@/lib/studio/reframe';
 import { ColorInput, Segmented, Slider, Switch, TextInput } from '../motion-controls';
+import { DesignOptions } from '../motion-options';
+import { shown } from '@/lib/motion/types';
 import { DesktopOnly } from './compact';
 import { FontPicker } from './font-picker';
 
@@ -236,12 +238,14 @@ export function MotionControls({ item, ratio, onParams, onLength, disabled, time
     <>
       <p className="st-hint">{g.blurb}</p>
       {g.value && <Slider label={g.value.label} value={p.value} min={g.value.min} max={g.value.max} step={g.value.step} onChange={(v) => set('value', v)} disabled={disabled} box boxMax={g.value.boxMax} />}
-      {g.texts.filter((f) => showGroup(f.group)).map((f) => (
+      {g.texts.filter((f) => showGroup(f.group) && shown(f, p)).map((f) => (
         <TextInput key={f.key} label={f.label} value={String(p[f.key] ?? '')} max={f.max} ltr={f.ltr} placeholder={f.placeholder} hint={f.hint} disabled={disabled} onChange={(v) => set(f.key, v, 'نص القالب')} />
       ))}
-      {g.colors.map((c) => (
+      <DesignOptions colors fields={g.options} p={p} onChange={(k, v) => set(k, v, 'لون القالب')} disabled={disabled} />
+      {g.colors.filter((c) => shown(c, p)).map((c) => (
         <ColorInput key={c.key} label={c.label} value={String(p[c.key])} onChange={(v) => set(c.key, v, 'لون القالب')} disabled={disabled} />
       ))}
+      <DesignOptions flat fields={g.options} p={p} onChange={(k, v) => set(k, v, 'تصميم القالب')} disabled={disabled} />
       {g.toggles.map((tg) => (
         <Switch key={tg.key} label={tg.label} checked={toggleOn(tg.key)} onChange={(v) => set(tg.key, v)} disabled={disabled} />
       ))}

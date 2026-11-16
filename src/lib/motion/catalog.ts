@@ -1,6 +1,7 @@
 import { GRAPHICS, REPINE, FRAMES } from './renderers.js';
 import { EXTRA_NUMBERS, EXTRA_REPINE, EXTRA_FRAMES } from './designs.js';
-import type { Graphic, Params, Category, TextField, ColorField, ToggleField, ColorKey, ToggleKey } from './types';
+import { RIBBONS } from './designs-ribbons.js';
+import type { Graphic, Params, Category, TextField, ColorField, ToggleField, ColorKey, ToggleKey, OptionField } from './types';
 
 /* One shared set of defaults. Each design overrides what it needs. Contact details start empty and hidden:
    the sample numbers inside the source designs belong to another organization. */
@@ -10,9 +11,13 @@ const common = { value: 82, decimals: 0, label: 'أثر الحملة', prefix: '
   main: '#17634b', accent: '#c9ac70', c1: '#183e33', c2: '#c9ac70', c3: '#f4f6f2', c4: '#ffffff',
   speed: 1, hold: 1.5, tIn: 2.6, tHold: 4, tOut: 1.2, mIn: 60, mOut: 50, mIdle: 60,
   ratio: '9:16', glow: true, showVerse: true, showLogo: true, showContact: false,
-  showSocial: false, showWave: true, particles: true, bgIn: false } satisfies Params;
+  showSocial: false, showWave: true, particles: true, bgIn: false,
+  metal: 'gold', shine: true, shineSpeed: 1, pattern: 'none', patternAmt: 30, font: 'plex', span: 'full',
+  side: 'right', size: 100, lift: 0, dropShadow: true, flow: 60, drips: true, plaque: 'wordmark' } satisfies Params;
 
-type Meta = { name: string; blurb: string; badge?: 'new' | 'updated'; colors?: string[]; label?: string; reciter?: string };
+/* The ribbons' metal is chosen by name; this colour is used only when «مخصص» is chosen. */
+const CUSTOM_METAL: ColorField = { key: 'accent', label: 'لون المعدن المخصص', when: p => p.metal === 'custom' };
+type Meta = { name: string; blurb: string; badge?: 'new' | 'updated'; colors?: string[]; colorFields?: ColorField[]; label?: string; reciter?: string };
 const meta: Record<string, Meta> = {
   'count-up': { name: 'العد التصاعدي', label: 'مستفيد من الحملة', blurb: 'رقم كبير يتصاعد حتى القيمة النهائية، ثم يخرج نبضة حلقية عند الوصول.' },
   'odometer': { name: 'العداد الدوار', label: 'إجمالي المشاهدات', blurb: 'خانات تدور مثل عداد ميكانيكي وتستقر على الرقم بالتتابع.' },
@@ -40,6 +45,12 @@ const meta: Record<string, Meta> = {
     blurb: 'مخطوطة تنفتح من أسطوانتها، يُكتب عليها العنوان بالحبر ويُختم طرفها بختم الشعار.' },
   'rp-crescent': { name: 'الهلال المضيء', badge: 'new', colors: ['لون اللافتة الليلية', 'لون الهلال'],
     blurb: 'هلال يرسم نفسه وتشتعل نجمة في جوفه، وتنفتح منه لافتة ليلية بالعنوان. مناسب لرمضان والأعياد.' },
+  'rp-liquid': { name: 'الذهب السائل', badge: 'new',
+    blurb: 'قطرة ذهب منصهر تسقط وتتناثر قرصاً يُكتب فيه شعار هداية، ثم يسيل الذهب شريطاً حي الحواف يبرد لوحاً زجاجياً، ويقطر منه النص الفرعي.',
+    colorFields: [{ key: 'main', label: 'لون اللوح الزجاجي' }, { key: 'text', label: 'لون العنوان' }, { key: 'c1', label: 'لون النص الفرعي' }, CUSTOM_METAL] },
+  'rp-ivory': { name: 'اللوحة العاجية', badge: 'new',
+    blurb: 'شارة عاجية يُرسم فيها شعار هداية، يمتد منها إطار ذهبي يحمل لوحاً عاجياً منقوشاً، ويخرج شريط كحلي للنص الفرعي، وتنبثق في الطرف لوحة بموجة كحلية.',
+    colorFields: [{ key: 'c3', label: 'لون العاج' }, { key: 'main', label: 'لون الشريط والموجة' }, { key: 'c1', label: 'لون العنوان' }, { key: 'text', label: 'لون النص الفرعي' }, CUSTOM_METAL] },
   'fr-lattice': { name: 'القوس المشربي', blurb: 'زخرفة علوية مشبّكة تهبط من الأعلى ولوحة سفلية ممزقة الحواف ترتفع، والفيديو يملأ ما بينهما.',
     colors: ['الزخرفة', 'اللوحة', 'الذهبي', 'النص'] },
   'fr-watercolor': { name: 'الورق المائي', blurb: 'ورق محبب وإطار مرسوم بالفرشاة مع غرز وأغصان، ومصحف على حامله وبطاقة اسم مرسومة.',
@@ -72,9 +83,44 @@ const numberTexts = (): TextField[] => [
 ];
 const repineTexts = (id: string): TextField[] => [
   { key: 'title', label: 'العنوان', max: 60, group: 'main' },
-  { key: 'subtitle', label: 'النص الفرعي', max: 90, group: 'main' },
+  { key: 'subtitle', label: 'النص الفرعي', max: 90, group: 'main', ...(RIBBON_IDS.has(id) ? { hint: 'اتركه فارغاً لإخفائه' } : {}) },
   ...(id === 'rp-editorial' ? [{ key: 'kicker', label: 'الوسم فوق الشريط', max: 24, group: 'main' } as TextField] : []),
+  ...(id === 'rp-liquid' ? [{ key: 'kicker', label: 'وسم فوق الشريط', max: 24, group: 'main', hint: 'اتركه فارغاً لإخفائه' } as TextField] : []),
+  ...(id === 'rp-ivory' ? [{ key: 'kicker', label: 'نص اللوحة الجانبية', max: 12, group: 'main', when: (p: Params) => p.plaque === 'kicker' } as TextField] : []),
 ];
+
+/* ---- design options of the ribbons (designs-ribbons.js) ---- */
+const RIBBON_IDS = new Set<string>(RIBBONS.map((g: { id: string }) => g.id));
+const shared: OptionField[] = [
+  { kind: 'choice', key: 'metal', label: 'المعدن', place: 'colors', look: 'metal', choices: [
+    { value: 'gold', label: 'ذهبي' }, { value: 'silver', label: 'فضي' }, { value: 'rose', label: 'وردي' }, { value: 'bronze', label: 'نحاسي' }, { value: 'custom', label: 'مخصص' }] },
+  { kind: 'switch', key: 'shine', label: 'لمعة تدور حول المعدن', place: 'shine' },
+  { kind: 'slider', key: 'shineSpeed', label: 'سرعة اللمعة', place: 'shine', min: .25, max: 3, step: .05, decimals: 2, times: true, when: p => p.shine },
+  { kind: 'choice', key: 'pattern', label: 'النقش', place: 'surface', look: 'pattern', choices: [
+    { value: 'none', label: 'بلا' }, { value: 'emblem', label: 'زخرفة هداية' }, { value: 'girih', label: 'نجمة ثمانية' }, { value: 'rings', label: 'دوائر متشابكة' },
+    { value: 'waves', label: 'تموجات' }, { value: 'dots', label: 'نقاط' }, { value: 'hatch', label: 'خطوط مائلة' }, { value: 'grain', label: 'ملمس ناعم' }] },
+  { kind: 'slider', key: 'patternAmt', label: 'وضوح النقش', place: 'surface', min: 5, max: 100, step: 1, unit: '٪', when: p => p.pattern !== 'none' },
+  { kind: 'choice', key: 'font', label: 'خط العنوان', place: 'surface', choices: [
+    { value: 'plex', label: 'بلكس' }, { value: 'kufi', label: 'ريم الكوفي' }, { value: 'ruqaa', label: 'رقعة' }, { value: 'system', label: 'خط النظام' }] },
+  { kind: 'choice', key: 'span', label: 'طول الشريط', place: 'layout', choices: [{ value: 'auto', label: 'على قدر النص' }, { value: 'full', label: 'ثابت' }] },
+  { kind: 'choice', key: 'side', label: 'مكان التصميم', place: 'layout', hint: 'اليسار يعكس الأشكال ويبقي النص مقروءاً.', choices: [{ value: 'right', label: 'يمين' }, { value: 'center', label: 'وسط' }, { value: 'left', label: 'يسار' }] },
+  { kind: 'slider', key: 'size', label: 'الحجم', place: 'layout', min: 60, max: 120, step: 1, unit: '٪' },
+  { kind: 'slider', key: 'lift', label: 'الارتفاع عن الحافة السفلية', place: 'layout', min: 0, max: 60, step: 1, unit: '٪', hint: 'نسبة من ارتفاع الإطار.' },
+];
+const effects: OptionField[] = [
+  { kind: 'switch', key: 'glow', label: 'توهج حول الشعار', place: 'effects' },
+  { kind: 'switch', key: 'particles', label: 'لمعات متطايرة', place: 'effects' },
+  { kind: 'switch', key: 'dropShadow', label: 'ظل تحت التصميم', place: 'effects', hint: 'يفصل التصميم عن المقاطع الفاتحة.' },
+];
+const OPTIONS: Record<string, OptionField[]> = {
+  'rp-liquid': [...shared,
+    { kind: 'slider', key: 'flow', label: 'تموج السائل', place: 'effects', min: 0, max: 100, step: 1, unit: '٪', hint: 'صفر يجعل الحواف ساكنة بعد أن يستقر الذهب.' },
+    { kind: 'switch', key: 'drips', label: 'قطرات تتساقط', place: 'effects' }, ...effects],
+  'rp-ivory': [...shared.map(f => f.key === 'pattern' ? { ...f, paper: 'c3' } as OptionField : f),
+    { kind: 'choice', key: 'plaque', label: 'اللوحة الجانبية', place: 'layout', choices: [
+      { value: 'wordmark', label: 'هداية مكتوبة' }, { value: 'emblem', label: 'الشعار' }, { value: 'kicker', label: 'نص قصير' }, { value: 'none', label: 'بلا' }] },
+    ...effects],
+};
 const frameTexts = (id: string): TextField[] => [
   ...(id === 'fr-broadcast' ? [
     { key: 'kicker', label: 'وسم البث', max: 20, group: 'main' } as TextField,
@@ -90,7 +136,7 @@ const frameTexts = (id: string): TextField[] => [
 
 function build(source: any, category: Category): Graphic {
   const m = meta[source.id];
-  const colors: ColorField[] = category === 'numbers'
+  const colors: ColorField[] = m.colorFields ? m.colorFields : category === 'numbers'
     ? [{ key: 'color', label: 'لون الحركة' }, { key: 'text', label: 'لون الرقم' }]
     : category === 'repine'
       ? [{ key: 'main', label: m.colors![0] }, { key: 'accent', label: m.colors![1] }]
@@ -105,12 +151,12 @@ function build(source: any, category: Category): Graphic {
     id: source.id, name: m.name, blurb: m.blurb, category, badge: m.badge, defaults, raw: source.raw, draw: source.draw, timing: source.timing, dims: source.dims, winBox: source.winBox,
     value: source.value ? { ...source.value, label: 'القيمة' } : undefined,
     texts: category === 'numbers' ? numberTexts() : category === 'repine' ? repineTexts(source.id) : frameTexts(source.id),
-    colors, toggles,
+    colors, toggles, options: OPTIONS[source.id],
   };
 }
 
 export const catalog: Graphic[] = [
   ...[...GRAPHICS, ...EXTRA_NUMBERS].map(g => build(g, 'numbers')),
-  ...[...REPINE, ...EXTRA_REPINE].map(g => build(g, 'repine')),
+  ...[...REPINE, ...EXTRA_REPINE, ...RIBBONS].map(g => build(g, 'repine')),
   ...[...FRAMES.filter((g: any) => !['fr-portal', 'fr-broadcast'].includes(g.id)), ...EXTRA_FRAMES].map(g => build(g, 'frames')),
 ];

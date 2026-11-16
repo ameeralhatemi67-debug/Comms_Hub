@@ -2,15 +2,16 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Activity, ChevronLeft, ChevronRight, Layers, Palette, RotateCcw, Timer, Type, Upload } from 'lucide-react';
+import { Activity, ChevronLeft, ChevronRight, Layers, Palette, RotateCcw, Sparkles, Timer, Type, Upload } from 'lucide-react';
 import { Title, Tabs } from './ui';
 import { catalog } from '@/lib/motion/catalog';
 import { loadAssets, timingOf } from '@/lib/motion/renderers.js';
 import { planExport } from '@/lib/motion/export.js';
-import type { Category, Graphic, Params, ToggleKey } from '@/lib/motion/types';
+import { shown, type Category, type Graphic, type Params, type ToggleKey } from '@/lib/motion/types';
 import { ColorInput, Segmented, Slider, Switch, TextInput } from './motion-controls';
 import { Stage, paint, settledTime, type Backdrop, type WinMode } from './motion-stage';
 import { ExportPanel } from './motion-export';
+import { DesignOptions } from './motion-options';
 import { MotionTabs } from './studio/motion-tabs';
 import './motion-studio.css';
 
@@ -23,12 +24,15 @@ const intro: Record<Category, string> = {
 const ratios = [{ value: '9:16', hint: 'ستوري وريلز' }, { value: '4:5', hint: 'منشور' }, { value: '1:1', hint: 'مربع' }, { value: '16:9', hint: 'أفقي' }];
 const backdrops: { value: Backdrop; label: string }[] = [{ value: 'scene', label: 'مشهد' }, { value: 'alpha', label: 'شفاف' }, { value: 'dark', label: 'داكن' }, { value: 'light', label: 'فاتح' }];
 const windows: { value: WinMode; label: string }[] = [{ value: 'sample', label: 'عينة' }, { value: 'video', label: 'مقطعي' }, { value: 'green', label: 'أخضر' }, { value: 'alpha', label: 'شفاف' }];
-type TabId = 'content' | 'colors' | 'elements' | 'timing' | 'motion';
+type TabId = 'content' | 'colors' | 'design' | 'elements' | 'timing' | 'motion';
 const tabMeta: Record<TabId, { label: string; icon: typeof Type }> = {
-  content: { label: 'المحتوى', icon: Type }, colors: { label: 'الألوان', icon: Palette }, elements: { label: 'العناصر', icon: Layers },
+  content: { label: 'المحتوى', icon: Type }, colors: { label: 'الألوان', icon: Palette }, design: { label: 'التصميم', icon: Sparkles }, elements: { label: 'العناصر', icon: Layers },
   timing: { label: 'التوقيت', icon: Timer }, motion: { label: 'الحركة', icon: Activity },
 };
-const tabsFor = (c: Category): TabId[] => c === 'numbers' ? ['content', 'colors', 'timing'] : c === 'repine' ? ['content', 'colors', 'timing', 'motion'] : ['content', 'colors', 'elements', 'timing', 'motion'];
+const tabsFor = (g: Graphic): TabId[] => {
+  const c = g.category, base: TabId[] = c === 'numbers' ? ['content', 'colors', 'timing'] : c === 'repine' ? ['content', 'colors', 'timing', 'motion'] : ['content', 'colors', 'elements', 'timing', 'motion'];
+  return g.options?.some(o => o.place !== 'colors') ? [...base.slice(0, 2), 'design', ...base.slice(2)] : base;
+};
 
 /* Thumbnails paint one at a time so the stage itself is never kept waiting behind them. */
 const queue: (() => void)[] = []; let draining = false;
@@ -92,7 +96,7 @@ export default function MotionStudio() {
   const g = catalog.find(item => item.id === picked[category])!;
   const p = drafts[g.id] || g.defaults;
   const items = catalog.filter(item => item.category === category);
-  const tabs = tabsFor(category), activeTab = tabs.includes(tab) ? tab : 'content';
+  const tabs = tabsFor(g), activeTab = tabs.includes(tab) ? tab : 'content';
   const frames = category === 'frames';
 
   const init = () => { setAssetError(''); loadAssets().then(() => setAssetsReady(true)).catch(() => setAssetError('تعذر تحميل شعار هداية والآيات. تحقق من الاتصال ثم أعد المحاولة.')); };
@@ -114,13 +118,14 @@ export default function MotionStudio() {
     setVideo(v); setVideoName(file.name); setWin('video');
   };
   const reset = () => { setDrafts(previous => { const next = { ...previous }; delete next[g.id]; return next; }); restart(); };
-  const resetColors = () => setDrafts(previous => ({ ...previous, [g.id]: { ...(previous[g.id] || g.defaults), ...Object.fromEntries(g.colors.map(c => [c.key, g.defaults[c.key]])) } }));
+  const colorKeys = [...g.colors.map(c => c.key), ...(g.options ?? []).filter(o => o.place === 'colors').map(o => o.key)];
+  const resetColors = () => setDrafts(previous => ({ ...previous, [g.id]: { ...(previous[g.id] || g.defaults), ...Object.fromEntries(colorKeys.map(k => [k, g.defaults[k]])) } }));
   const plan = assetsReady ? planExport(g, p, { shortSide: 1080, fps: 30 }) : null;
   const total = timingOf(g, p).total / p.speed;
 
   const content = <>
     {g.value && <Slider label={g.value.label} value={p.value} min={g.value.min} max={g.value.max} step={g.value.step} box boxMax={g.value.boxMax} onChange={v => update('value', v, 'soon')} />}
-    {g.texts.filter(t => (t.group === 'main' || !t.group) && !t.compact).map(t => <TextInput key={t.key} label={t.label} value={String(p[t.key])} max={t.max} hint={t.hint} placeholder={t.placeholder} ltr={t.ltr} onChange={v => update(t.key, v, 'soon')} />)}
+    {g.texts.filter(t => (t.group === 'main' || !t.group) && !t.compact && shown(t, p)).map(t => <TextInput key={t.key} label={t.label} value={String(p[t.key])} max={t.max} hint={t.hint} placeholder={t.placeholder} ltr={t.ltr} onChange={v => update(t.key, v, 'soon')} />)}
     {category === 'numbers' && <div className="ms-pair">{g.texts.filter(t => t.compact).map(t => <TextInput key={t.key} label={t.label} value={String(p[t.key])} max={t.max} placeholder={t.placeholder} onChange={v => update(t.key, v, 'soon')} />)}</div>}
     {frames && g.toggles.some(t => t.key === 'showContact') && <fieldset className="ms-group"><legend>معلومات التواصل</legend>
       <Switch label="إظهار عبارة ورقم التواصل" checked={p.showContact} onChange={v => update('showContact', v, 'soon')} />
@@ -132,9 +137,14 @@ export default function MotionStudio() {
     </fieldset>}
   </>;
   const colorsTab = <>
-    <div className="ms-colors">{g.colors.map(c => <ColorInput key={c.key} label={c.label} value={String(p[c.key])} onChange={v => update(c.key, v)} />)}</div>
+    <DesignOptions colors fields={g.options} p={p} onChange={(k, v) => update(k, v as never)} />
+    <div className="ms-colors">{g.colors.filter(c => shown(c, p)).map(c => <ColorInput key={c.key} label={c.label} value={String(p[c.key])} onChange={v => update(c.key, v)} />)}</div>
     {category === 'numbers' && <Switch label="التوهج حول الأرقام" checked={p.glow} onChange={v => update('glow', v)} hint="أوقفه إذا ظهر هالة خضراء عند إزالة اللون الأخضر" />}
     <button type="button" className="ms-link" onClick={resetColors}><RotateCcw />استعادة الألوان الأصلية</button>
+  </>;
+  const designTab = <>
+    <DesignOptions fields={g.options} p={p} onChange={(k, v) => update(k, v as never)} />
+    <p className="ms-tip">الخيارات تظهر في المعاينة فوراً، وتُحفظ في الملف المنزَّل كما تراها.</p>
   </>;
   const elementsTab = <div className="ms-switches">{g.toggles.filter(t => t.key !== 'showContact' && t.key !== 'showSocial').map(t => <Switch key={t.key} label={t.label} checked={Boolean(p[t.key as ToggleKey])} onChange={v => update(t.key as ToggleKey, v)} />)}</div>;
   const timingTab = <>
@@ -155,7 +165,7 @@ export default function MotionStudio() {
     <Slider label="حركة الخروج" value={p.mOut} min={0} max={100} step={1} unit="٪" onChange={v => update('mOut', v)} onCommit={restart} />
     <Slider label="حركة العرض (الهدوء الحي)" value={p.mIdle} min={0} max={100} step={1} unit="٪" onChange={v => update('mIdle', v)} hint="تمايل خفيف ولمعان أثناء بقاء التصميم على الشاشة." />
   </>;
-  const panels: Record<TabId, React.ReactNode> = { content, colors: colorsTab, elements: elementsTab, timing: timingTab, motion: motionTab };
+  const panels: Record<TabId, React.ReactNode> = { content, colors: colorsTab, design: designTab, elements: elementsTab, timing: timingTab, motion: motionTab };
 
   return <div className="ms">
     <Title title="استوديو الحركة" sub={start.work ? `مفتوح من العمل ${start.work} بقالب مقترح. ${intro[category]}` : intro[category]}>

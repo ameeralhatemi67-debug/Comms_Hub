@@ -2134,13 +2134,22 @@ FRAMES.forEach(g => { g.raw = true; g.draw = (ctx, P, t) => g.impl.draw(ctx, P, 
 function safeArc(ctx, x, y, radius, start, end, counterclockwise) {
   ctx.arc(x, y, Math.max(0, radius), start, end, counterclockwise);
 }
+/* The site's own fonts that the lower thirds of designs-ribbons.js offer for a title. They are loaded before a design is
+   drawn, so a thumbnail or the first frame of an export never falls back to another font. Best effort: a font that does
+   not load leaves the system font, never an error, and the wait is capped. */
+const FONT_FACES = ['700 40px "IBM Plex Sans Arabic"', '600 40px "IBM Plex Sans Arabic"', '600 40px "Reem Kufi"', '700 40px "Aref Ruqaa"'];
+function loadFonts() {
+  if (typeof document === 'undefined' || !document.fonts) return Promise.resolve();
+  const all = Promise.all(FONT_FACES.map(f => document.fonts.load(f, 'هداية Hedayah 2026').catch(() => [])));
+  return Promise.race([all, new Promise(resolve => setTimeout(resolve, 4000))]);
+}
 export async function loadAssets() {
-  await Promise.all(Object.entries({...LOGO_SRC, ...VERSE_SRC}).map(([key, src]) => new Promise((resolve, reject) => {
+  await Promise.all([loadFonts(), ...Object.entries({...LOGO_SRC, ...VERSE_SRC}).map(([key, src]) => new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => { LOGO[key] = image; resolve(); };
     image.onerror = () => reject(new Error('تعذر تحميل عناصر التصميم. أعد المحاولة.'));
     image.src = src;
-  })));
+  }))]);
 }
 /* Shared drawing kit for the extra designs in designs.js (same helpers the source designs use). */
 export const kit = {

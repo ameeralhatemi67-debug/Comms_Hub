@@ -6,7 +6,7 @@ tags:
   - document/progress
   - knowledge/dated
 created: 2026-08-18
-updated: 2026-11-05
+updated: 2026-11-16
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -4529,3 +4529,39 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   «نشر مباشر» from Home with TikTok.
 - **Changed after it.** The draft's success message names where the draft is («Inbox», «System notifications»). `npm test` 955 of 955,
   `qa/tiktok-test-flow.cjs` 50 of 50. Not pushed.
+
+### 2026-11-16: two new Repine designs, «الذهب السائل» and «اللوحة العاجية», with the Hedayah emblem drawn true and design options
+
+- **The owner's request.** Two new lower thirds in «تصاميم ريبين»: one more moving and liquid («liquid gold»), one a reading of the owner's
+  reference sheet; the Hedayah emblem corrected in both (the reference's right-hand mark had four lobes); options for a light that runs
+  around the gold, gold or silver, colours, text, a texture or pattern, and more; downloads must work. `MVP_draft.md` section 80.
+- **The emblem, measured.** The white mask the site ships (`public/motion/logo_src-emblem.png`) is exactly four interlaced capsules at 0,
+  45, 90 and 135 degrees: cap radius 104.75, half length 269 and stroke 20.625 of its 768 pixels, centre (384, 384.5). Drawn at those
+  numbers, more than 97.5% of the mask's ink coincides (`tests/motion-ribbons.test.mjs` decodes the PNG and measures it). The vector
+  emblem is `src/lib/motion/emblem.js`: it writes itself on capsule by capsule, takes any metal, and carries one light that traces each
+  lobe in turn.
+- **The designs** (`src/lib/motion/designs-ribbons.js`, catalogued in `src/lib/motion/catalog.ts`):
+  - «الذهب السائل» (`rp-liquid`): a drop falls and splashes into a disc, the emblem writes itself, metal flows out into a band whose edge
+    ripples, the band cools into a glass panel from the disc outward, the subtitle drips from its underside, drops gather and fall while
+    it is shown. Optional tag above the band.
+  - «اللوحة العاجية» (`rp-ivory`): an ivory badge with a double gold ring carries the emblem, a gold rule draws the ivory bar out of it, a
+    navy band slides out for the subtitle, and a domed side plaque with a moving navy wave pops at the far end with «هداية» written
+    (or the emblem, a short text, or nothing).
+- **Design options**, a new tab «التصميم» (and the metal in «الألوان»): metal (gold, silver, rose, bronze, any colour), the running light
+  and its speed, eight patterns with drawn swatches and their strength, the title's font (the site's IBM Plex Sans Arabic, Reem Kufi,
+  Aref Ruqaa, or the system font), the band's length (to the text or fixed), right, centre or left (mirrored, text upright), size
+  60 to 120%, height above the bottom edge, glow, glints, drop shadow; the liquid's ripple and drops. Options are data
+  (`Graphic.options`, `src/lib/motion/types.ts`), drawn by one component (`src/components/motion-options.tsx`) on the template page and
+  in the studio's inspector, and kept by a studio clip like any parameter.
+- **Fixed on the way.** A long settings tab ran past the sticky settings column and under the download section, so its last controls
+  could not be reached; the column now scrolls with its tab bar pinned (`motion-studio.css`). Fonts are loaded with the brand marks
+  (`loadAssets`), so thumbnails and the first exported frame never fall back.
+- **Checks.**
+  - `npm run typecheck` passes; `npm test` 960 of 960 (the timeline test now counts 28 templates).
+  - `qa/motion-ribbons.cjs` (Edge, the real page on a fixture with the site's fonts) 77 of 77, in `qa/motion-ribbons.json`: every frame of
+    both designs at 30 a second draws without an error (265 and 259 frames); every option changes the picture the way it says; dependent
+    fields appear only with their choice; for both designs an MP4 on green (h264, 139 and 134 frames), a transparent MOV (ProRes 4444,
+    `yuva444p12le`, a decoded frame mostly clear with a solid design) and a PNG sequence in ZIP (one PNG per frame), all decoded by
+    ffprobe and ffmpeg; the single PNG is on the left and silver as chosen; nothing wider than a phone screen; no console or page errors.
+  - `npm run build` passes (compiled successfully).
+- **Not checked.** The studio's inspector with a signed-in person (it uses the same option component); the live site after deployment.
