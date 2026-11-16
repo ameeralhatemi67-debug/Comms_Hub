@@ -464,27 +464,24 @@ function drawLiquid(ctx, P, t) {
    half on the bar and half beyond it, its lobes the edge of the shape there.
    ========================================================= */
 const IVK = .46, IVX = 1196 - 1574 * IVK, IVY = 658 - 640 * IVK, BAR_BOT = 628;
-/* The plaque, as on the owner's sheet: a rounded triangle with sides that bow outward, a top rounded like a dome and a flat
-   bottom, standing in front of the bar's left end with its own gold rim and a gold plate behind its left side. */
-const PLQ_PTS = [[300, 232], [350, 240], [392, 268], [430, 320], [470, 400], [508, 490], [538, 568], [536, 610], [500, 628], [300, 628],
-  [100, 628], [64, 610], [62, 568], [92, 490], [130, 400], [170, 320], [208, 268], [250, 240]];
+/* The plaque, as on the owner's sheet: a broad rounded triangle, the outline around three circles (a wide dome on top, two
+   round feet), standing in front of the bar's left end with its own gold rim and a gold plate behind its left side. */
+const PLQ_CIRCLES = [[300, 394, 152], [128, 556, 82], [472, 556, 82]];
+function hullOfCircles(circles, inset = 0) {
+  const pts = [];
+  for (const [cx, cy, r] of circles) for (let i = 0; i < 96; i++) { const a = i / 96 * TAU; pts.push([cx + Math.cos(a) * (r - inset), cy + Math.sin(a) * (r - inset)]); }
+  pts.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lower = [], upper = [];
+  for (const q of pts) { while (lower.length > 1 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop(); lower.push(q); }
+  for (const q of pts.slice().reverse()) { while (upper.length > 1 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop(); upper.push(q); }
+  return [...lower.slice(0, -1), ...upper.slice(0, -1)];
+}
+const PLQ = hullOfCircles(PLQ_CIRCLES), PLQ_IN = hullOfCircles(PLQ_CIRCLES, 15);
 const BAR = { x0: 420, x1: 1574, top: 338, bot: BAR_BOT, rad: 34 };   // the right end is a full half circle
 const NAVY = { top: 536, bot: BAR_BOT, end: 1290, r: 36 }, FOOT = 548;                  // FOOT: the strip's top on the plaque
 const END_R = (BAR_BOT - 338) / 2, FLOWER = { x: 1574 - END_R, y: (BAR_BOT + 338) / 2, R: 104, weight: 1.1 };
 const TEXT_R = FLOWER.x - FLOWER.R - 16;                                           // the text keeps clear of the flower
 const RIM = 7;                                                                     // the gold rim's width outside the body
-
-const PLQ = (() => {                                       // a closed Catmull-Rom curve through the points
-  const out = [], n = PLQ_PTS.length;
-  for (let i = 0; i < n; i++) {
-    const p0 = PLQ_PTS[(i + n - 1) % n], p1 = PLQ_PTS[i], p2 = PLQ_PTS[(i + 1) % n], p3 = PLQ_PTS[(i + 2) % n];
-    for (let k = 0; k < 8; k++) {
-      const u = k / 8, u2 = u * u, u3 = u2 * u;
-      out.push([0, 1].map(j => .5 * (2 * p1[j] + (p2[j] - p0[j]) * u + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * u2 + (3 * p1[j] - p0[j] - 3 * p2[j] + p3[j]) * u3)));
-    }
-  }
-  return out;
-})();
 /* A briefcase, the profession's sign, about its centre, in the sheet's units. */
 function briefcase(c, x, y, s, style, width) {
   c.save(); c.translate(x, y); c.scale(s, s); c.strokeStyle = style; c.lineWidth = width / s; c.lineJoin = 'round'; c.lineCap = 'round';
@@ -596,22 +593,25 @@ function drawIvory(ctx, P, t) {
       x.fillStyle = plate; x.fill(back);
       x.fillStyle = ivory; x.fill(face);
       x.save(); x.clip(face);
-      const wave = []; for (let px0 = 60 + dx; px0 <= 540 + dx; px0 += 6) { const u = (px0 - 60 - dx) / 480; wave.push([px0, FOOT + 4 - 26 * sm(u) + 8 * Math.sin(u * Math.PI)]); }
-      const sea = new Path2D(); addPoly(sea, [...wave, [540 + dx, 700], [60 + dx, 700]]);
+      /* the navy band floats on the foot: a wave rising to the right above it, a gold wave below it, ivory beneath */
+      const wave = [], under = [];
+      for (let px0 = 40 + dx; px0 <= 560 + dx; px0 += 6) { const u = (px0 - 40 - dx) / 520; wave.push([px0, 534 - 44 * u + 7 * Math.sin(u * Math.PI)]); under.push([px0, 588 + 40 * sm(u) - 6 * Math.sin(u * Math.PI)]); }
+      const sea = new Path2D(); addPoly(sea, [...wave, ...under.slice().reverse()]);
       const ng = x.createLinearGradient(0, FOOT - 10, 0, 640); ng.addColorStop(0, shade(P.main, 255, .08)); ng.addColorStop(1, shade(P.main, 0, .25)); x.fillStyle = ng; x.fill(sea);
-      linePath(x, wave); x.strokeStyle = plate; x.lineWidth = 5; x.lineCap = 'round'; x.stroke();
+      for (const line of [wave, under]) { linePath(x, line); x.strokeStyle = plate; x.lineWidth = 5; x.lineCap = 'round'; x.stroke(); }
       x.restore();
       linePath(x, plaque, true); x.strokeStyle = plate; x.lineWidth = 11; x.lineJoin = 'round'; x.stroke();
       linePath(x, plaque, true); x.strokeStyle = alphaOf(M[4], .5); x.lineWidth = 1.5; x.stroke();
-      emblemStroke(x, lx, mark ? 420 : 350, mark ? 72 : 56, { draw: ph.logoE, style: P.c2 || '#6c7881', weight: 1.05 });
+      linePath(x, PLQ_IN.map(([px0, py]) => [px0 + dx, py]), true); x.strokeStyle = alphaOf(M[2], .5); x.lineWidth = 1.5; x.stroke();   // the fine inner line
+      emblemStroke(x, lx, mark ? 386 : 320, mark ? 72 : 58, { draw: ph.logoE, style: P.c2 || '#6c7881', weight: 1.05 });
       if (ph.logoT > 0 && !mark) {
         x.save(); x.globalAlpha *= ph.logoT;
-        upright(x, lx, 462, mir, u => drawLogo(u, 'wordmark', gold, 0, 0, 210));
+        upright(x, lx, 428, mir, u => drawLogo(u, 'wordmark', gold, 0, 0, 226));
         x.restore();
       }
       if (P.kicker && ph.kickA > 0) {
         const kf = { family: FAMILY.plex, weight: 700 }, ks = fit(x, P.kicker, 44, kf, 290);
-        x.save(); x.globalAlpha *= ph.kickA; upright(x, 300 + dx, (FOOT - 4 + BAR_BOT) / 2 + ks * .36, mir, u => sayRuns(u, P.kicker, ks, kf, P.text, M[3])); x.restore();
+        x.save(); x.globalAlpha *= ph.kickA; upright(x, 300 + dx, 558 + ks * .36, mir, u => sayRuns(u, P.kicker, ks, kf, P.text, M[3])); x.restore();
       }
     }
   };

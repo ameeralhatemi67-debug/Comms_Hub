@@ -4658,3 +4658,11 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   thick gold rim, a gold plate behind its left side, and a navy wave at its foot with a gold line; the bar starts behind it. Content kept:
   the flower, «هداية», «هداية 2026».
 - **Checks.** `npm run typecheck` and `npm run build` pass; `npm test` 967 of 967; `qa/motion-ribbons.cjs` 86 of 86.
+
+### 2026-11-16: «اللوحة العاجية», the plaque drawn as the reference's exactly
+
+- **Note.** The plaque had become a plain triangle; make it the reference's design exactly.
+- **Built.** The outline is the hull of three circles (a wide dome on top, two round feet), so it is the reference's broad rounded
+  triangle; a fine gold inner line follows it; the navy band floats on the foot between a rising wave above and a gold wave below, with
+  ivory beneath; a gold plate behind the left side and its own rim as before. Content unchanged.
+- **Checks.** `npm run typecheck` and `npm run build` pass; `npm test` 967 of 967; `qa/motion-ribbons.cjs` 86 of 86.
