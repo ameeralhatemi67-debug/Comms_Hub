@@ -3523,6 +3523,41 @@ director starts from the first step.
   Nobody has followed the new steps from the start on a fresh TikTok account.
 - **Unchanged.** Every rule of the database. Saved progress keeps its ids; a saved `details` still counts.
 
+## 67.10 A guide shown as one page, 2026-11-16
+
+The owner found the guides' words and pictures good and their layout hard to follow. A draft with three layouts, built from the real
+guides, was put to the director, who chose the whole guide on one page, with one note: the pictures smaller, with a way to zoom in. It is
+built for YouTube (the Google guide) and TikTok; every other guide keeps the step sheet of 67.2 and 67.6 until it is moved.
+
+- **Where.** `WHOLE_GUIDES` in `src/lib/guide-layout.ts` names the guides drawn this way. The page is `src/components/settings/guide-doc.tsx`,
+  inside the same sheet (`platform-sheet.tsx`). Saving a step, the keys and a review are the sheet's, unchanged: the keys form is one hook
+  (`src/components/settings/keys-form.tsx`) for both layouts, and the page saves nothing itself.
+- **The page.** On one side the list of steps: how far («أُنجز 6 وبقي 6», «اكتملت الخطوات»), the saved word or the failed save, «قبل البدء»,
+  then the guide's parts with their steps, a check once done, dashed while still to do, and the step being read marked. On the other side
+  one section for «قبل البدء» (the guide's own intro, how many steps and pictures, the platform's page, the guide's notes) and one section per
+  step, in order. The list comes first in the document, so the sides follow the language; no side is named. On a phone the list folds above
+  the steps.
+- **A step's section.** Its number and part («الخطوة 3 من 12 · المؤسسة والتطبيق»), its name and the condition when it has one, why, a button
+  to the platform's page, then its actions: each picture right under the last action it shows, each value to copy and each field of the keys
+  under the action that asks for it. An action a picture rings carries the pictures' amber number, and the legend («رقم الحلقة هو رقم العمل في
+  القائمة», the red ring, «اضغط الصورة لتكبيرها») is said once per step. The section ends with its own button: the step's word, «متابعة» when
+  done, the review's three, or «فحص وحفظ».
+- **Pictures.** Drawn at most 400 pixels wide (`SHOT_MAX`), never above their own size. A click opens the step's pictures over the sheet, one
+  at a time at their own size, with the step's name and «الصورة 1 من 2», «السابقة», «التالية», the arrow keys (in Arabic the left arrow goes
+  on) and «إغلاق». At either end the button is marked, not disabled, so the focus never leaves the viewer. Escape closes the picture
+  alone. On a phone the picture takes the whole screen.
+- **Opening and moving.** The page opens where the person stopped (the saved step, the keys, the review), at its top when nothing was
+  started, and on the summary from «التفاصيل». A step done goes on to the next one not done; a step picked from the list is gone to and saved
+  as the step reached, as before. The last step is given room below it, so it too can be brought to the top. When every step is done the summary («يوتيوب جاهزة», the secret, the accounts, «خيارات متقدمة») comes first
+  and stays while the person reads the steps.
+- **The parts** (`phases` in `src/lib/setup-guides.ts`). YouTube: «المشروع والواجهات», «شاشة الموافقة», «معرّف العميل», «النشر». TikTok:
+  «المؤسسة والتطبيق», «بيئة التجربة», «المفتاح والسر», «المراجعة».
+- **Where a piece goes** (data in `src/lib/setup-guides.ts`, the rule in `layoutStep`). A picture goes with the last action its rings point at,
+  or with `at` when it rings none (Google's menu and contact pictures, TikTok's organization page and its website without the slash), or
+  else follows the picture before it. A value to copy goes under `copyAt` or its own `at`, else under the first action that says «أدناه»,
+  else after the actions. A field of the keys goes under its place in `fieldsAt`, else after the actions.
+- **Unchanged.** The words, the pictures, the step ids, what is implied, saved progress and every rule of the database.
+
 ---
 
 # 68. «ورقة الكتابة» and the writing documents, 2026-11-02

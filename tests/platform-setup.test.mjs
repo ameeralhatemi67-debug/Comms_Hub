@@ -173,7 +173,11 @@ test('every app has its labels, and the two pages the steps send people to exist
 test('the sheet saves no secret: the progress call carries the two plain fields, and the page never asks for a password to add an account', () => {
   const sheet = readFileSync('src/components/settings/platform-sheet.tsx', 'utf8');
   assert.match(sheet, /rpc\('platform_setup_save', \{ p_key: p\.key, p_done: nextDone, p_step: nextAt, p_fields: nextFields \}\)/);
-  assert.match(sheet, /onSaved\(\{ app_id: id\.trim\(\), \.\.\.\(config\.trim\(\) \? \{ config_id: config\.trim\(\) \} : \{\}\) \}\)/);
+  // The keys form is one, for the step sheet and the guide shown as one page (MVP_draft.md 67.10).
+  const keys = readFileSync('src/components/settings/keys-form.tsx', 'utf8');
+  assert.match(keys, /onSaved\(\{ app_id: id\.trim\(\), \.\.\.\(config\.trim\(\) \? \{ config_id: config\.trim\(\) \} : \{\}\) \}\)/);
+  assert.match(keys, /setSecret\(''\)/);
+  assert.doesNotMatch(readFileSync('src/components/settings/guide-doc.tsx', 'utf8'), /platform_setup_save|\/api\/platforms\/app/, 'the page draws; the sheet saves');
   const accounts = readFileSync('src/components/work/channels.tsx', 'utf8') + readFileSync('src/components/work/connect.tsx', 'utf8');
   assert.doesNotMatch(accounts, /type="password"/);
   assert.match(accounts, /لا يطلب الموقع كلمة مرورك أبداً/);
@@ -188,9 +192,14 @@ test('the steps sit first in the document in both sheets, so they follow the pag
   const css = readFileSync('src/app/work.css', 'utf8');
   const rules = css.slice(css.indexOf('.pf-body{'), css.indexOf('.pf-steps{'));
   assert.doesNotMatch(rules, /row-reverse|\bleft\b|\bright\b/);
+  // The guide shown as one page: its list of steps comes before the steps, and its layout names no side either.
+  const doc = readFileSync('src/components/settings/guide-doc.tsx', 'utf8');
+  assert.ok(doc.indexOf('className="gdoc-toc"') > 0 && doc.indexOf('className="gdoc-toc"') < doc.indexOf('className="gdoc-main"'));
+  const gdoc = css.slice(css.indexOf('.gdoc{'), css.indexOf('.gdoc-zoom{'));
+  assert.doesNotMatch(gdoc, /row-reverse|\bleft\b|\bright\b/);
 });
 
 test('no emoji in anything these pages say', () => {
-  const all = ['src/lib/platforms/setup.ts', 'src/components/settings/platform-sheet.tsx', 'src/components/sheet.tsx', 'src/components/settings/platforms.tsx', 'src/components/work/channels.tsx'].map((f) => readFileSync(f, 'utf8')).join('');
+  const all = ['src/lib/platforms/setup.ts', 'src/lib/guide-layout.ts', 'src/components/settings/platform-sheet.tsx', 'src/components/settings/guide-doc.tsx', 'src/components/settings/keys-form.tsx', 'src/components/sheet.tsx', 'src/components/settings/platforms.tsx', 'src/components/work/channels.tsx'].map((f) => readFileSync(f, 'utf8')).join('');
   assert.doesNotMatch(all, /\p{Extended_Pictographic}/u);
 });

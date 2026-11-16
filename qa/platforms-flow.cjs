@@ -2,13 +2,15 @@
 // components (qa/fixtures/platforms-flow.tsx), with stand-ins for the database and the site's routes, because the pages
 // need a signed-in person and no bypass is allowed. It reads what the components asked the database and the routes to do.
 //   1. «المنصات»: every state on its own line, what needs the reader first, the menu.
-//   2. The sheet: the steps and their links, saved at each step, closing and coming back, a secret never in the progress.
-//   3. Arabic and English: the steps change sides by themselves.
+//   2. TikTok's guide shown as one page (MVP_draft.md 67.10): it opens where the person stopped, the keys under their actions,
+//      saved at each step, closing and coming back, a secret never in the progress.
+//   3. Arabic and English: the steps change sides by themselves, in the step sheet and in the guide shown as one page.
 //   4. Reviews, adding a platform with steps and without, a viewer, a refused save.
 //   5. «حسابات المنصات»: what needs attention, the filter, an account's sheet, the publisher.
 //   6. «إضافة حساب»: no password anywhere, the sign-in and its return, one at a time where a platform works so.
-//   7. Phone and evening: nothing sideways, the current step alone above its input.
-//   8. The YouTube guide: thirteen steps, English set apart and read in order, the pictures load and enlarge, progress unchanged.
+//   7. Phone and evening: nothing sideways, the list of steps folded above the steps.
+//   8. The YouTube guide shown as one page: thirteen steps in four parts, English set apart and read in order, the pictures small
+//      under their actions and full size on a click, the values and the keys in place, progress unchanged.
 // What this cannot check: the rules (supabase/tests/platform_setup_rules.sql) and a real platform's own pages.
 // Usage: node qa/platforms-flow.cjs   (writes qa/platforms-flow.json, screenshots in qa/artifacts/platforms-flow/)
 const fs = require('node:fs');
@@ -43,6 +45,46 @@ const sides = (t) =>
     const b = document.querySelector('dialog[open] .pf-input').getBoundingClientRect();
     return { side: Math.round(a.left), input: Math.round(b.left), sideRight: Math.round(a.right), inputRight: Math.round(b.right) };
   });
+// A guide shown as one page (MVP_draft.md 67.10): the section being read is the first whose bottom is below the top of what scrolls.
+const reading = (t) =>
+  t.evaluate(() => {
+    const main = document.querySelector('dialog[open] .gdoc-main');
+    if (!main) return null;
+    const box = getComputedStyle(main).overflowY === 'visible' ? document.querySelector('dialog[open] .gdoc') : main;
+    const top = box.getBoundingClientRect().top;
+    return [...main.querySelectorAll('.gdoc-sec')].find((e) => e.getBoundingClientRect().bottom > top + 60)?.dataset.step ?? null;
+  });
+const docSides = (t) =>
+  t.evaluate(() => {
+    const a = document.querySelector('dialog[open] .gdoc-toc').getBoundingClientRect();
+    const b = document.querySelector('dialog[open] .gdoc-main').getBoundingClientRect();
+    return { list: Math.round(a.left), main: Math.round(b.left), above: a.bottom <= b.top + 1 };
+  });
+// A long smooth scroll takes a moment: wait until what scrolls has stopped.
+const settle = (t) =>
+  t.evaluate(
+    () =>
+      new Promise((done) => {
+        const main = document.querySelector('dialog[open] .gdoc-main');
+        const box = main && getComputedStyle(main).overflowY === 'visible' ? document.querySelector('dialog[open] .gdoc') : main;
+        if (!box) return done();
+        let last = -1;
+        let same = 0;
+        let n = 0;
+        const tick = () => {
+          same = box.scrollTop === last ? same + 1 : 0;
+          last = box.scrollTop;
+          if (same >= 3 || ++n > 80) done();
+          else setTimeout(tick, 60);
+        };
+        setTimeout(tick, 120);
+      }),
+  );
+// Pictures load lazily, as a person scrolls: bring a step's last picture into view, then wait for all of them.
+const loadPics = async (t, id) => {
+  await t.evaluate((i) => [...document.querySelectorAll(`dialog[open] .gdoc-sec[data-step="${i}"] img`)].filter((e) => !e.complete).at(-1)?.scrollIntoView({ block: 'center' }), id);
+  await t.waitForFunction((i) => [...document.querySelectorAll(`dialog[open] .gdoc-sec[data-step="${i}"] img`)].every((e) => e.complete && e.naturalWidth > 0), id);
+};
 
 (async () => {
   let fixture;
@@ -136,28 +178,42 @@ const sides = (t) =>
     await t.keyboard.press('Escape');
     check('Escape closes the menu', (await t.locator('.pf-menu').count()) === 0);
 
-    // ---------- 2. the sheet ----------
+    // ---------- 2. the sheet: TikTok's guide shown as one page (MVP_draft.md section 67.10) ----------
     await row(t, 'tiktok').locator('.pf-btn').click();
     await sheet(t).waitFor();
-    await t.waitForTimeout(300);
+    await t.waitForTimeout(400);
     await t.screenshot({ path: path.join(out, '03-sheet-keys.png') });
     let text = await sheet(t).innerText();
-    check('it opens where the person stopped, with the bar and the saved word', text.includes('الخطوة 9 من 12') && text.includes('انسخ المفتاح والسر') && text.includes('يُحفظ تقدمك'), text.slice(0, 120));
-    check('the bar shows how far', (await t.locator('.pf-bar').getAttribute('aria-valuenow')) === '50');
+    check('it opens where the person stopped, at the keys, with how far and the saved word', (await reading(t)) === 'keys' && text.includes('الخطوة 9 من 12') && text.includes('انسخ المفتاح والسر') && text.includes('يُحفظ تقدمك') && text.includes('أُنجز 6 وبقي 6'), JSON.stringify({ at: await reading(t), head: text.slice(0, 120) }));
+    check('the list marks the step being read', (await t.locator('dialog[open] .gdoc-ti.cur').getAttribute('data-to')) === 'keys');
     check('the app id kept from before is there; the secret is not', (await sheet(t).getByLabel('مفتاح العميل (Client key)').inputValue()) === 'client-key-saved' && (await sheet(t).getByLabel('سر العميل (Client secret)').inputValue()) === '');
-    const cur = await t.locator('.pf-step.cur .pf-link').getAttribute('href');
-    check('the step links to the platform, in a new tab', cur === 'https://developers.tiktok.com/apps/' && (await t.locator('.pf-step.cur .pf-link').getAttribute('target')) === '_blank' && (await t.locator('.pf-step.cur .pf-link').getAttribute('rel')) === 'noopener noreferrer');
-    const s = await sides(t);
-    check('in Arabic the steps are on the right and the input on the left', s.side > s.input, JSON.stringify(s));
+    const keyPlace = await t.evaluate(() => {
+      const sec = document.querySelector('dialog[open] .gdoc-sec[data-step="keys"]');
+      const li = (n) => sec.querySelector(`.gdoc-acts > li[value="${n}"]`);
+      return { id: !!li(2)?.querySelector('input:not([type=password])'), secret: !!li(3)?.querySelector('input[type=password]'), more: !!li(4)?.querySelector('details.pf-more'), button: sec.querySelector('.gdoc-bar .pf-btn')?.innerText };
+    });
+    check("each field of the keys sits under the action that names it, and the button is the step's own", keyPlace.id && keyPlace.secret && keyPlace.more && keyPlace.button === 'فحص وحفظ', JSON.stringify(keyPlace));
+    const keyLink = sheet(t).locator('.gdoc-sec[data-step="keys"] .gdoc-link');
+    check('the step links to the platform, in a new tab', (await keyLink.getAttribute('href')) === 'https://developers.tiktok.com/apps/' && (await keyLink.getAttribute('target')) === '_blank' && (await keyLink.getAttribute('rel')) === 'noopener noreferrer');
+    const s = await docSides(t);
+    check('in Arabic the list of steps is on the right and the steps on the left', s.list > s.main, JSON.stringify(s));
+    const verify = await t.evaluate(() => {
+      const sec = document.querySelector('dialog[open] .gdoc-sec[data-step="verify"]');
+      const parts = [...sec.querySelectorAll('.gdoc-part')].map((p) => ({ acts: [...p.querySelectorAll('.gdoc-acts > li')].map((l) => l.value), shots: p.querySelectorAll('.gdoc-shot').length }));
+      return { parts, copy: sec.querySelector('.gdoc-acts > li[value="3"] .gdoc-copy-v')?.innerText ?? '' };
+    });
+    check("TikTok's address proof: each picture under the action it shows, the three last ones under the file and the button, the address under the action that pastes it", JSON.stringify(verify.parts) === JSON.stringify([{ acts: [1], shots: 1 }, { acts: [2], shots: 1 }, { acts: [3], shots: 1 }, { acts: [4, 5], shots: 3 }]) && /^http:\/\/127\.0\.0\.1:\d+\/$/.test(verify.copy), JSON.stringify(verify));
 
     // A refused pair stops there, and nothing is saved.
     await sheet(t).getByLabel('سر العميل (Client secret)').fill('refused-secret');
     await sheet(t).getByRole('button', { name: 'فحص وحفظ' }).click();
-    await sheet(t).locator('.pf-note.bad').waitFor();
-    check('a pair the platform refuses stays on the step, and says why', (await sheet(t).locator('.pf-note.bad').innerText()).includes('رفضت المنصة') && (await sheet(t).innerText()).includes('الخطوة 9 من 12'));
+    await sheet(t).locator('.gdoc-sec[data-step="keys"] .pf-note.bad').waitFor();
+    check('a pair the platform refuses stays on the step, and says why', (await sheet(t).locator('.gdoc-sec[data-step="keys"] .pf-note.bad').innerText()).includes('رفضت المنصة') && (await calls(t, 'platform_setup_save')).length === 0);
     await sheet(t).getByLabel('سر العميل (Client secret)').fill(SECRET);
     await sheet(t).getByRole('button', { name: 'فحص وحفظ' }).click();
-    await t.waitForFunction(() => document.querySelector('dialog[open]')?.innerText.includes('الخطوة 11 من 12'));
+    await t.waitForFunction(() => window.__db.calls.filter((c) => c.name === 'platform_setup_save').at(-1)?.args.p_step === 'review');
+    await settle(t);
+    check('accepted keys go on to the next step not done: the review, step 11 of 12', (await reading(t)) === 'review', await reading(t));
     const after = await calls(t);
     check('the secret went to the route that checks it', after.some((c) => c.name === '/api/platforms/app' && c.args.secret === SECRET && c.args.provider === 'tiktok'));
     const saves = await calls(t, 'platform_setup_save');
@@ -171,11 +227,13 @@ const sides = (t) =>
     check('closing says progress is kept, and the row moved on', (await t.locator('.ml-hint').innerText()).includes('حُفظ تقدمك: 10 من 12'), await chip(t, 'tiktok'));
     await row(t, 'tiktok').locator('.pf-btn').first().click();
     await sheet(t).waitFor();
-    check('coming back opens the same step', (await sheet(t).innerText()).includes('الخطوة 11 من 12') && (await sheet(t).innerText()).includes('قدّم التطبيق للمراجعة'));
-    await sheet(t).locator('.pf-step-btn', { hasText: 'سجّل عنوان العودة' }).click();
-    check('any step can be opened', (await sheet(t).locator('.pf-input').innerText()).includes('عنوان العودة'));
-    const copy = await sheet(t).locator('.pf-copy input').inputValue();
-    check('an address to copy is filled in from the site, whole', /^http:\/\/127\.0\.0\.1:\d+\/api\/platforms\/callback\/tiktok$/.test(copy), copy);
+    await t.waitForTimeout(400);
+    check('coming back opens the same step', (await reading(t)) === 'review' && (await sheet(t).innerText()).includes('قدّم التطبيق للمراجعة'), await reading(t));
+    await sheet(t).locator('.gdoc-ti[data-to="redirect"]').click();
+    await settle(t);
+    check('any step can be opened from the list', (await reading(t)) === 'redirect' && (await calls(t, 'platform_setup_save')).at(-1).args.p_step === 'redirect', await reading(t));
+    const copy = await sheet(t).locator('.gdoc-sec[data-step="redirect"] .gdoc-acts > li[value="2"] .gdoc-copy-v').innerText();
+    check('an address to copy is filled in from the site, whole, under the action that pastes it', /^http:\/\/127\.0\.0\.1:\d+\/api\/platforms\/callback\/tiktok$/.test(copy), copy);
     await t.keyboard.press('Escape');
     await t.locator('dialog.pf-sheet').waitFor({ state: 'detached' });
     check('Escape closes the sheet', true);
@@ -248,7 +306,7 @@ const sides = (t) =>
     await t.evaluate(() => (window.__refuse = 'platform_setup_save'));
     await row(t, 'youtube').locator('.pf-btn').first().click();
     await sheet(t).waitFor();
-    await sheet(t).getByRole('button', { name: 'سجّلت العنوان' }).click();
+    await sheet(t).locator('.gdoc-sec[data-step="redirect"] .gdoc-bar .pf-btn').click();
     await sheet(t).locator('.pf-saved.bad').waitFor();
     check('a save that fails says so at once', (await sheet(t).locator('.pf-saved.bad').innerText()).includes('تعذّر حفظ التقدم'));
     await t.keyboard.press('Escape');
@@ -257,12 +315,20 @@ const sides = (t) =>
     const ltr = await fresh();
     await ltr.goto(`${base}?dir=ltr`);
     await ltr.waitForSelector('.pf-row');
-    await row(ltr, 'youtube').locator('.pf-btn').first().click();
+    await row(ltr, 'linkedin').locator('.pf-btn').first().click();
     await sheet(ltr).waitFor();
     await ltr.waitForTimeout(300);
     await ltr.screenshot({ path: path.join(out, '05-sheet-english.png') });
     const e = await sides(ltr);
     check('in English the same sheet has the steps on the left and the input on the right, with nothing else changed', e.side < e.input, JSON.stringify(e));
+    await ltr.keyboard.press('Escape');
+    await ltr.locator('dialog.pf-sheet').waitFor({ state: 'detached' });
+    await row(ltr, 'youtube').locator('.pf-btn').first().click();
+    await sheet(ltr).waitFor();
+    await ltr.waitForTimeout(400);
+    await ltr.screenshot({ path: path.join(out, '05b-guide-english.png') });
+    const el = await docSides(ltr);
+    check('in English the guide shown as one page has its list on the left, by itself', el.list < el.main && (await fits(ltr)), JSON.stringify(el));
     await ltr.context().close();
 
     const view = await fresh();
@@ -403,12 +469,16 @@ const sides = (t) =>
     await sheet(m).waitFor();
     await m.waitForTimeout(300);
     await m.screenshot({ path: path.join(out, '12-phone-sheet.png') });
-    const stacked = await m.evaluate(() => {
-      const a = document.querySelector('dialog[open] .pf-side').getBoundingClientRect();
-      const b = document.querySelector('dialog[open] .pf-input').getBoundingClientRect();
-      return { above: a.bottom <= b.top + 1, wide: b.right - b.left, steps: [...document.querySelectorAll('dialog[open] .pf-step')].filter((e) => e.offsetParent).length };
-    });
-    check('phone: the current step alone, above its input', stacked.above && stacked.steps === 1 && stacked.wide > 340, JSON.stringify(stacked));
+    const stacked = { ...(await docSides(m)), at: await reading(m), folded: await m.evaluate(() => !document.querySelector('dialog[open] .gdoc-toc-list').open), wide: await m.evaluate(() => document.querySelector('dialog[open] .gdoc-main').getBoundingClientRect().width), body: await m.evaluate(() => { const b = document.querySelector('dialog[open] .gdoc'); return b.scrollWidth <= b.clientWidth + 1; }) };
+    check('phone: the list of steps is folded above the steps, which open where the person stopped, with nothing sideways', stacked.above && stacked.folded && stacked.at === 'keys' && stacked.wide > 340 && stacked.body && (await fits(m)), JSON.stringify(stacked));
+    await m.locator('dialog[open] .gdoc-toc-list > summary').click();
+    await m.locator('dialog[open] .gdoc-ti[data-to="verify"]').click();
+    await settle(m);
+    const reachedVerify = await reading(m);
+    await loadPics(m, 'verify');
+    const phonePics = await m.evaluate(() => [...document.querySelectorAll('dialog[open] .gdoc-sec[data-step="verify"] .gdoc-shot')].every((f) => f.getBoundingClientRect().right <= window.innerWidth + 1 && f.getBoundingClientRect().left >= -1));
+    await m.screenshot({ path: path.join(out, '12b-phone-verify.png') });
+    check('phone: a step picked from the opened list is reached, and its pictures stay inside the screen', reachedVerify === 'verify' && phonePics, reachedVerify);
     await m.goto(`${base}?page=accounts`);
     await m.waitForSelector('.ac-row');
     await m.screenshot({ path: path.join(out, '13-phone-accounts.png'), fullPage: true });
@@ -426,181 +496,221 @@ const sides = (t) =>
     const ink = await d.evaluate(() => [getComputedStyle(document.querySelector('dialog[open]')).backgroundColor, getComputedStyle(document.querySelector('dialog[open] h2')).color]);
     check('evening: the sheet follows the theme', ink[0] !== 'rgb(255, 255, 255)' && ink[0] !== ink[1], ink.join(' / '));
     await d.context().close();
-    // ---------- 8. the YouTube guide: words, pictures and progress (MVP_draft.md section 67.5) ----------
+    // ---------- 8. the YouTube guide shown as one page: words, pictures and progress (MVP_draft.md sections 67.5 and 67.10) ----------
     const y = await fresh();
     await y.goto(base);
     await y.waitForSelector('.pf-row');
     await row(y, 'youtube').locator('.pf-btn').first().click();
     await sheet(y).waitFor();
-    await y.waitForTimeout(300);
+    await y.waitForTimeout(400);
     text = await sheet(y).innerText();
-    check('YouTube opens where the stored secret leaves it: the address to register, step 10 of 13', text.includes('الخطوة 10 من 13') && (await sheet(y).locator('.pf-step.cur').getAttribute('data-step')) === 'redirect', text.slice(0, 80));
-    const yIds = await sheet(y).locator('.pf-step').evaluateAll((l) => l.map((e) => e.dataset.step));
-    check('thirteen steps, one action each, under the ids the saved progress knows', JSON.stringify(yIds) === JSON.stringify(['project', 'youtube', 'drive', 'consent', 'branding', 'audience', 'contact', 'testusers', 'client', 'redirect', 'redirect_drive', 'keys', 'publish']), yIds.join(','));
-    const stray = () =>
-      y.evaluate(() => {
+    check('YouTube opens where the stored secret leaves it: the address to register, step 10 of 13', (await reading(y)) === 'redirect' && text.includes('الخطوة 10 من 13'), JSON.stringify({ at: await reading(y) }));
+    const yIds = await sheet(y).locator('.gdoc-sec[data-step]').evaluateAll((l) => l.map((e) => e.dataset.step).filter((s) => s !== 'top' && s !== 'finish'));
+    check('thirteen steps on one page, one action each, under the ids the saved progress knows', JSON.stringify(yIds) === JSON.stringify(['project', 'youtube', 'drive', 'consent', 'branding', 'audience', 'contact', 'testusers', 'client', 'redirect', 'redirect_drive', 'keys', 'publish']), yIds.join(','));
+    const toc = await y.evaluate(() => ({ parts: [...document.querySelectorAll('dialog[open] .gdoc-phl')].map((e) => e.innerText.trim()), items: [...document.querySelectorAll('dialog[open] .gdoc-ph .gdoc-ti')].map((e) => e.dataset.to), first: document.querySelector('dialog[open] .gdoc-toc-list .gdoc-ti')?.innerText.trim() }));
+    check('the list names its four parts and holds the thirteen steps in order, after «قبل البدء»', JSON.stringify(toc.parts) === JSON.stringify(['المشروع والواجهات', 'شاشة الموافقة', 'معرّف العميل', 'النشر']) && JSON.stringify(toc.items) === JSON.stringify(yIds) && toc.first === 'قبل البدء', JSON.stringify(toc));
+    const top = await y.evaluate(() => {
+      const sec = document.querySelector('dialog[open] .gdoc-sec[data-step="top"]');
+      return { text: sec.innerText, notes: sec.querySelectorAll('.gd-info').length };
+    });
+    check('«قبل البدء» says who the guide is for, how many steps and pictures, and its notes', top.text.includes('قبل أن تبدأ') && top.text.includes('للمدير') && top.text.includes('13') && top.text.includes('9') && top.notes === 8, JSON.stringify({ notes: top.notes }));
+    const stray = (id) =>
+      y.evaluate((i) => {
         const bad = [];
-        for (const root of document.querySelectorAll('dialog[open] .pf-side, dialog[open] .pf-input')) {
-          const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-          for (let n = w.nextNode(); n; n = w.nextNode()) if (!n.parentElement.closest('bdi') && /[A-Za-z]/.test(n.textContent)) bad.push(n.textContent.trim().slice(0, 50));
-        }
+        const w = document.createTreeWalker(document.querySelector(`dialog[open] .gdoc-sec[data-step="${i}"]`), NodeFilter.SHOW_TEXT);
+        for (let n = w.nextNode(); n; n = w.nextNode()) if (!n.parentElement.closest('bdi, [dir="ltr"]') && /[A-Za-z]/.test(n.textContent)) bad.push(n.textContent.trim().slice(0, 50));
         return bad;
-      });
-    const reversed = () =>
-      y.evaluate(() => {
+      }, id);
+    const reversed = (id) =>
+      y.evaluate((i) => {
         const bad = [];
-        for (const el of document.querySelectorAll('dialog[open] .gd-todo li, dialog[open] .pf-step-text p, dialog[open] figcaption')) {
+        for (const el of document.querySelectorAll(`dialog[open] .gdoc-sec[data-step="${i}"] :is(.gdoc-act > p, .gdoc-why, figcaption)`)) {
           const b = [...el.querySelectorAll('bdi')];
-          for (let i = 0; i + 1 < b.length; i++) {
-            const r1 = b[i].getBoundingClientRect();
-            const r2 = b[i + 1].getBoundingClientRect();
+          for (let k = 0; k + 1 < b.length; k++) {
+            const r1 = b[k].getBoundingClientRect();
+            const r2 = b[k + 1].getBoundingClientRect();
             if (Math.abs(r1.top - r2.top) < 4 && !(r1.left > r2.left)) bad.push(el.textContent.trim().slice(0, 50));
           }
         }
         return bad;
-      });
+      }, id);
     const walked = [];
     for (let i = 0; i < yIds.length; i++) {
-      await sheet(y).locator('.pf-step-btn').nth(i).click();
-      await y.waitForTimeout(60);
-      await y.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
-      const info = await y.evaluate(() => {
-        const inp = document.querySelector('dialog[open] .pf-input');
-        const imgs = [...inp.querySelectorAll('.gd-shot img')];
+      await sheet(y).locator(`.gdoc-ti[data-to="${yIds[i]}"]`).click();
+      await settle(y);
+      const at = await reading(y);
+      await y.screenshot({ path: path.join(out, `20-youtube-${String(i + 1).padStart(2, '0')}-${yIds[i]}.png`) });
+      await loadPics(y, yIds[i]);
+      const info = await y.evaluate((id) => {
+        const sec = document.querySelector(`dialog[open] .gdoc-sec[data-step="${id}"]`);
+        const imgs = [...sec.querySelectorAll('img')];
+        const inPart = [...sec.querySelectorAll('.gdoc-shot')].every((f) => {
+          const here = new Set([...f.closest('.gdoc-part').querySelectorAll('.gdoc-acts > li')].map((l) => l.value));
+          return f.dataset.rings.split(' ').filter((r) => r && r !== 'x').every((r) => here.has(Number(r)));
+        });
         return {
-          h3: inp.querySelector('h3')?.innerText ?? '',
-          todo: inp.querySelectorAll('.gd-todo li').length,
+          h3: sec.querySelector('h3')?.innerText ?? '',
+          acts: sec.querySelectorAll('.gdoc-acts > li').length,
           imgs: imgs.length,
-          loaded: imgs.every((e) => e.naturalWidth > 0 && e.naturalWidth === Number(e.getAttribute('width')) && e.naturalHeight === Number(e.getAttribute('height'))),
-          raw: /[«»`]/.test(document.querySelector('dialog[open] .pf-body').innerText),
-          ltr: [...document.querySelectorAll('dialog[open] .pf-body bdi')].every((e) => e.getAttribute('dir') === 'ltr'),
-          side: document.querySelector('dialog[open] .pf-step.cur')?.dataset.step,
+          loaded: imgs.every((e) => e.naturalWidth === Number(e.getAttribute('width')) && e.naturalHeight === Number(e.getAttribute('height'))),
+          small: imgs.every((e) => e.getBoundingClientRect().width <= Math.min(400, e.naturalWidth) + 1),
+          inPart,
+          raw: /[«»`]/.test(sec.innerText),
+          ltr: [...sec.querySelectorAll('bdi')].every((e) => e.getAttribute('dir') === 'ltr'),
           wide: document.documentElement.scrollWidth <= window.innerWidth + 1,
         };
-      });
+      }, yIds[i]);
       walked.push({ id: yIds[i], ...info });
-      await y.screenshot({ path: path.join(out, `20-youtube-${String(i + 1).padStart(2, '0')}-${yIds[i]}.png`) });
-      const lost = await stray();
-      const flipped = await reversed();
-      check(`youtube step ${i + 1} (${yIds[i]}): its actions are listed, English is isolated, and the order reads right to left`, info.todo >= 1 && info.side === yIds[i] && !info.raw && info.ltr && lost.length === 0 && flipped.length === 0 && info.wide, JSON.stringify({ ...info, lost, flipped }));
-      check(`youtube step ${i + 1} (${yIds[i]}): every picture loads at its own size`, info.loaded, JSON.stringify(info));
+      const lost = await stray(yIds[i]);
+      const flipped = await reversed(yIds[i]);
+      check(`youtube step ${i + 1} (${yIds[i]}): reached from the list, its actions are listed, English is isolated, and the order reads right to left`, at === yIds[i] && info.acts >= 1 && !info.raw && info.ltr && lost.length === 0 && flipped.length === 0 && info.wide, JSON.stringify({ at, ...info, lost, flipped }));
+      check(`youtube step ${i + 1} (${yIds[i]}): every picture loads at its own size, is drawn small, and sits under the actions it shows`, info.loaded && info.small && info.inPart, JSON.stringify(info));
     }
     check('the pictures are where the steps put them: 1 in the menu step, 1 each in the Branding and contact steps, 2 for test users, 2 for the client, 1 for each address', JSON.stringify(walked.map((s) => s.imgs)) === JSON.stringify([0, 0, 0, 1, 1, 0, 1, 2, 2, 1, 1, 0, 0]), JSON.stringify(walked.map((s) => s.imgs)));
-    check('the step that was too crowded is now three small ones, each with its own title', ['افتح شاشة الموافقة', 'اكتب اسم التطبيق وبريد الدعم', 'اختر نوع المستخدمين', 'اكتب بريد التواصل وأنهِ الإعداد'].every((x) => walked.some((s) => s.h3.includes(x))), walked.map((s) => s.h3).join(' | '));
+    check('the step that was too crowded is three small ones, each with its own title', ['افتح شاشة الموافقة', 'اكتب اسم التطبيق وبريد الدعم', 'اختر نوع المستخدمين', 'اكتب بريد التواصل وأنهِ الإعداد'].every((x) => walked.some((s) => s.h3.includes(x))), walked.map((s) => s.h3).join(' | '));
 
-    // The look of a step (MVP_draft.md 67.6): a segment per step, one card per step with its button kept in view, a copy button on every
-    // value to type, pictures numbered and explained, the steps still to do dimmed.
-    const bar = await y.evaluate(() => {
-      const b = document.querySelector('dialog[open] .pf-bar');
-      const seg = [...b.querySelectorAll('i')];
-      return { n: seg.length, done: seg.filter((e) => e.className === 'done').length, cur: seg.filter((e) => e.className === 'cur').length, tall: seg.every((e) => e.getBoundingClientRect().height >= 6 && e.getBoundingClientRect().width > 10), counts: document.querySelector('dialog[open] .pf-prog-count')?.innerText ?? '' };
-    });
-    check('the progress strip is one segment per step: the done ones filled, one marks where you are, and it says how many are done and left', bar.n === 13 && bar.done === 11 && bar.cur === 1 && bar.tall && /^أُنجز 11 وبقي 2$/.test(bar.counts), JSON.stringify(bar));
-    await sheet(y).locator('.pf-step-btn').nth(8).click();
-    await y.waitForTimeout(80);
+    // The look of a step: its number (a check once done), what it says when done, its own button, the actions a picture rings in the
+    // pictures' amber, the pictures numbered, and the steps still to do drawn dashed in the list.
     const card = await y.evaluate(() => {
-      const c = document.querySelector('dialog[open] .pf-input .pf-card');
-      const lis = [...c.querySelectorAll('.gd-todo li')].map((li) => li.querySelector('.gd-seen')?.innerText.trim() ?? '');
-      const cap = [...c.querySelectorAll('figcaption')].map((f) => ({ order: f.querySelector('.gd-order')?.innerText ?? '', rings: [...f.querySelectorAll('.gd-legend .gd-ring')].map((r) => r.innerText) }));
-      const up = document.querySelector('dialog[open] .pf-step.up .pf-step-btn');
-      const here = document.querySelector('dialog[open] .pf-step.cur .pf-step-btn');
-      return { n: c.dataset.card, head: c.querySelector('.pf-card-head h3')?.innerText, done: c.classList.contains('done'), note: c.querySelector('.pf-note.ok')?.innerText ?? '', btn: c.querySelector('.pf-card-foot .pf-btn.pri')?.innerText, lis, cap, upInk: getComputedStyle(up).color, hereInk: getComputedStyle(here).color, upDashed: getComputedStyle(up.querySelector('.pf-num')).borderStyle };
+      const c = document.querySelector('dialog[open] .gdoc-sec[data-step="client"]');
+      const up = document.querySelector('dialog[open] .gdoc-ti:not(.done):not(.cur)[data-to="redirect"] .gdoc-ti-n');
+      const ok = document.querySelector('dialog[open] .gdoc-ti[data-to="client"] .gdoc-ti-n');
+      return {
+        done: c.classList.contains('done'),
+        check: !!c.querySelector('.gdoc-num svg'),
+        note: c.querySelector('.gdoc-head .pf-note.ok')?.innerText ?? '',
+        btn: c.querySelector('.gdoc-bar .pf-btn.pri')?.innerText,
+        ringed: [...c.querySelectorAll('.gdoc-acts > li')].map((l) => l.classList.contains('ringed')),
+        amber: getComputedStyle(c.querySelector('.gdoc-acts > li.ringed .gdoc-n')).backgroundColor,
+        order: [...c.querySelectorAll('figcaption .gd-order')].map((e) => e.innerText),
+        upDashed: getComputedStyle(up).borderStyle,
+        okSolid: getComputedStyle(ok).borderStyle,
+      };
     });
-    check('a step is one card: its number and name, what it says when it is already done, and the button that goes on', card.n === '9' && card.head === 'أنشئ معرّف العميل' && card.done && /^أنجزت هذه الخطوة/.test(card.note) && card.btn === 'متابعة', JSON.stringify(card));
-    check('an action a picture shows says which picture; the pictures are numbered and say what their rings mean', JSON.stringify(card.lis) === JSON.stringify(['في الصورة 1', 'في الصورة 2', '', '']) && card.cap[0].order === 'الصورة 1 من 2' && card.cap[1].order === 'الصورة 2 من 2' && card.cap[0].rings[0] === '1' && card.cap[1].rings[0] === '2', JSON.stringify(card));
-    check('the steps still to do are dimmed and drawn dashed, and the one you are on is not', card.upInk !== card.hereInk && card.upDashed === 'dashed', JSON.stringify(card));
+    check('a done step has its check, says so, and its button reads «متابعة»', card.done && card.check && /^أنجزت هذه الخطوة/.test(card.note) && card.btn === 'متابعة', JSON.stringify(card));
+    check('the actions a picture shows carry the pictures\' amber number; the pictures are numbered', JSON.stringify(card.ringed) === '[true,true,false,false]' && card.amber === 'rgb(255, 179, 0)' && JSON.stringify(card.order) === '["الصورة 1 من 2","الصورة 2 من 2"]', JSON.stringify(card));
+    check('in the list, the steps still to do are dashed and the done ones are not', card.upDashed === 'dashed' && card.okSolid === 'solid', JSON.stringify(card));
     await y.evaluate(() => {
       window.__copied = [];
       Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (v) => void window.__copied.push(v) }, configurable: true });
     });
-    await sheet(y).locator('.gd-copy').first().click();
-    const copied = await y.evaluate(() => ({ got: window.__copied, label: document.querySelector('dialog[open] .gd-copy').getAttribute('aria-label') }));
+    await sheet(y).locator('.gdoc-sec[data-step="client"] .gd-copy').first().click();
+    const copied = await y.evaluate(() => ({ got: window.__copied, label: document.querySelector('dialog[open] .gdoc-sec[data-step="client"] .gd-copy').getAttribute('aria-label') }));
     check('a value to type has its own copy button, and it copies the value exactly', copied.got.length === 1 && copied.got[0] === 'Comms Hub Web' && copied.label === 'نُسخ Comms Hub Web', JSON.stringify(copied));
-    await sheet(y).locator('.pf-step-btn').nth(4).click();
-    check('a picture that says "do not" explains the red ring', (await sheet(y).locator('figcaption .gd-ring.x').count()) === 1 && (await sheet(y).locator('figcaption .gd-order').count()) === 0);
-    await sheet(y).locator('.pf-step-btn').nth(3).click();
-    check('a single picture with no numbered rings says nothing it does not need', (await sheet(y).locator('figcaption .gd-legend').count()) === 0 && (await sheet(y).locator('.gd-seen').count()) === 0);
-    await sheet(y).locator('.pf-step-btn').nth(7).click();
-    check('a step that does not apply to everyone says so, in the list and on its card', (await sheet(y).locator('.pf-step[data-step="testusers"] .pf-tag').innerText()).includes('External') && (await sheet(y).locator('.pf-card .pf-tag').innerText()).includes('External'));
-    const foot = async () =>
-      y.evaluate(() => {
-        const inp = document.querySelector('dialog[open] .pf-input').getBoundingClientRect();
-        const f = document.querySelector('dialog[open] .pf-card-foot').getBoundingClientRect();
-        const c = document.querySelector('dialog[open] .pf-card').getBoundingClientRect();
-        return { inView: f.bottom <= inp.bottom + 1 && f.top >= inp.top, tall: c.bottom > inp.bottom + 40, bottomGap: Math.round(inp.bottom - f.bottom) };
-      });
-    const f1 = await foot();
-    await y.locator('dialog[open] .pf-input').evaluate((e) => (e.scrollTop = e.scrollHeight));
-    const f2 = await foot();
-    check('the button that says a step is done stays in view while its pictures scroll, and sits on the bottom edge', f1.inView && f1.tall && f1.bottomGap <= 1 && f2.inView, JSON.stringify([f1, f2]));
-    await sheet(y).locator('.pf-step-btn').nth(9).click();
-    check('a step not yet done has no "done" note and keeps its own button', (await sheet(y).locator('.pf-card .pf-note.ok').count()) === 0 && (await sheet(y).locator('.pf-card-foot .pf-btn.pri').innerText()) === 'سجّلت العنوان');
+    const legend = (id) => y.evaluate((i) => { const l = document.querySelector(`dialog[open] .gdoc-sec[data-step="${i}"] .gdoc-legend`); return l ? { x: l.querySelectorAll('.gd-ring.x').length, num: l.querySelectorAll('.gd-ring:not(.x)').length, zoom: l.innerText.includes('اضغط الصورة لتكبيرها') } : null; }, id);
+    const lb = await legend('branding');
+    const lc = await legend('consent');
+    check('a step whose picture says "do not" explains the red ring once, and every step with pictures says a click enlarges them', lb && lb.x === 1 && lb.num === 1 && lb.zoom && lc && lc.x === 0 && lc.num === 0 && lc.zoom && (await legend('project')) === null, JSON.stringify({ lb, lc }));
+    check('a step that does not apply to everyone says so, in the list and in its head', (await sheet(y).locator('.gdoc-ti[data-to="testusers"] .pf-tag').innerText()).includes('External') && (await sheet(y).locator('.gdoc-sec[data-step="testusers"] .gdoc-head .pf-tag').innerText()).includes('External'));
+    check('a step not yet done has no "done" note and keeps its own button', (await sheet(y).locator('.gdoc-sec[data-step="redirect"] .pf-note.ok').count()) === 0 && (await sheet(y).locator('.gdoc-sec[data-step="redirect"] .gdoc-bar .pf-btn.pri').innerText()) === 'سجّلت العنوان');
 
-    // The picture: rounded by the page, enlarged on a click, and blurred where it was private (the files hold no text to read).
-    await sheet(y).locator('.pf-step-btn').nth(4).click();
-    const fig = sheet(y).locator('.gd-shot').first();
-    const radius = await fig.locator('.gd-zoom').evaluate((e) => [getComputedStyle(e).borderRadius, getComputedStyle(e).overflow]);
-    check('the corners are rounded and the picture is clipped to them', radius[0] === '12px' && radius[1] === 'hidden', radius.join(' '));
-    const zoomBefore = await fig.locator('img').evaluate((e) => [e.clientWidth, e.naturalWidth]);
-    await fig.locator('button.gd-zoom').click();
-    const zoomed = await fig.evaluate((f) => ({ big: f.classList.contains('big'), w: f.querySelector('img').clientWidth, scroll: f.querySelector('.gd-zoom').scrollWidth > f.querySelector('.gd-zoom').clientWidth, pressed: f.querySelector('button').getAttribute('aria-pressed') }));
+    // The picture, small on the page and at its own size on a click (the director's note of 2026-11-16).
+    await sheet(y).locator('.gdoc-ti[data-to="branding"]').click();
+    await settle(y);
+    const thumb = await sheet(y).locator('.gdoc-sec[data-step="branding"] .gdoc-zoom img').evaluate((e) => [Math.round(e.getBoundingClientRect().width), e.naturalWidth]);
+    const radius = await sheet(y).locator('.gdoc-sec[data-step="branding"] .gdoc-zoom').evaluate((e) => [getComputedStyle(e).borderRadius, getComputedStyle(e).overflow, getComputedStyle(e).direction]);
+    check('a picture is drawn small, rounded and clipped to its corners, in its own direction', thumb[0] <= 400 && thumb[0] < thumb[1] && radius[0] === '12px' && radius[1] === 'hidden' && radius[2] === 'ltr', JSON.stringify({ thumb, radius }));
+    await sheet(y).locator('.gdoc-sec[data-step="branding"] .gdoc-zoom').click();
+    await y.locator('dialog.gdoc-view[open]').waitFor();
+    await y.waitForFunction(() => document.querySelector('dialog.gdoc-view[open] img')?.complete);
+    const zoomed = await y.evaluate(() => {
+      const v = document.querySelector('dialog.gdoc-view[open]');
+      const img = v.querySelector('img');
+      return { w: img.clientWidth, natural: img.naturalWidth, cap: v.querySelector('.gdoc-view-bar b').innerText, prev: v.querySelectorAll('.pf-btn')[0].getAttribute('aria-disabled') === 'true', next: v.querySelectorAll('.pf-btn')[1].getAttribute('aria-disabled') === 'true' };
+    });
     await y.screenshot({ path: path.join(out, '21-youtube-zoom.png') });
-    check('a click enlarges it to its own size, and scrolls sideways inside the frame instead of the page', zoomBefore[0] < zoomBefore[1] && zoomed.big && zoomed.w === zoomBefore[1] && zoomed.scroll && zoomed.pressed === 'true' && (await fits(y)), JSON.stringify({ zoomBefore, zoomed }));
-    await fig.locator('button.gd-zoom').click();
-    check('and a second click puts it back', !(await fig.evaluate((f) => f.classList.contains('big'))));
-    await sheet(y).locator('.pf-step-btn').nth(0).click();
-    check('a step with no picture has none to click', (await sheet(y).locator('.gd-shot').count()) === 0);
-    await sheet(y).locator('.pf-step-btn').nth(3).click();
-    check('a narrow picture is shown whole and is not a button', (await sheet(y).locator('.gd-shot button').count()) === 0 && (await sheet(y).locator('.gd-shot img').getAttribute('alt')).includes('Google Auth Platform'));
+    check('a click opens the picture over the sheet at its own size, with its step and its place', zoomed.w === zoomed.natural && zoomed.w > thumb[0] && zoomed.cap.includes('اكتب اسم التطبيق وبريد الدعم') && zoomed.cap.includes('الصورة 1 من 1') && zoomed.prev && zoomed.next, JSON.stringify(zoomed));
+    await y.keyboard.press('Escape');
+    await y.locator('dialog.gdoc-view').waitFor({ state: 'detached' });
+    check('Escape closes the picture alone, and the sheet stays open', (await y.locator('dialog.pf-sheet[open]').count()) === 1);
+    await sheet(y).locator('.gdoc-ti[data-to="testusers"]').click();
+    await settle(y);
+    await sheet(y).locator('.gdoc-sec[data-step="testusers"] .gdoc-zoom').first().click();
+    await y.locator('dialog.gdoc-view[open]').waitFor();
+    const capOf = () => y.locator('dialog.gdoc-view[open] .gdoc-view-bar b').innerText();
+    const c1 = await capOf();
+    await y.keyboard.press('ArrowLeft');
+    const c2 = await capOf();
+    await y.keyboard.press('ArrowRight');
+    const c3 = await capOf();
+    await y.locator('dialog.gdoc-view[open] .pf-btn', { hasText: 'التالية' }).click();
+    const c4 = await capOf();
+    const kept = await y.evaluate(() => ({ inside: !!document.activeElement?.closest('dialog.gdoc-view'), end: document.querySelector('dialog.gdoc-view[open] .pf-btn:nth-child(2)')?.getAttribute('aria-disabled') }));
+    await y.keyboard.press('ArrowRight');
+    const c5 = await capOf();
+    check("the step's pictures page through: the left arrow goes on in Arabic, the right one back, and «التالية» too; at the end the focus stays in the viewer", c1.includes('الصورة 1 من 2') && c2.includes('الصورة 2 من 2') && c3.includes('الصورة 1 من 2') && c4.includes('الصورة 2 من 2') && kept.inside && kept.end === 'true' && c5.includes('الصورة 1 من 2'), JSON.stringify({ caps: [c1, c2, c3, c4, c5], kept }));
+    await y.locator('dialog.gdoc-view[open] .pf-btn', { hasText: 'إغلاق' }).click();
+    await y.locator('dialog.gdoc-view').waitFor({ state: 'detached' });
 
-    // The addresses and the keys.
-    await sheet(y).locator('.pf-step-btn').nth(9).click();
-    check('the YouTube address is filled in from the site, whole, under the list of actions', /^http:\/\/127\.0\.0\.1:\d+\/api\/platforms\/callback\/google$/.test(await sheet(y).locator('.pf-copy input').inputValue()) && (await sheet(y).locator('.pf-input').evaluate((e) => e.querySelector('.gd-todo').compareDocumentPosition(e.querySelector('.pf-copy')) & Node.DOCUMENT_POSITION_FOLLOWING)) > 0);
-    await sheet(y).locator('.pf-step-btn').nth(10).click();
-    check('the Drive address is the second one', /\/api\/drive\/callback$/.test(await sheet(y).locator('.pf-copy input').inputValue()));
-    await sheet(y).locator('.pf-step-btn').nth(11).click();
-    text = await sheet(y).locator('.pf-input').innerText();
-    check('the keys step lists where to find the two values above the two fields, and holds the secret once', text.includes('Client secret') && text.includes('مرة واحدة عند إنشائه') && (await sheet(y).locator('.pf-input input[type="password"]').count()) === 1 && !text.includes(SECRET));
+    // The addresses and the keys, each under the action that asks for it.
+    const place = await y.evaluate(() => {
+      const q = (id, n, s) => document.querySelector(`dialog[open] .gdoc-sec[data-step="${id}"] .gdoc-acts > li[value="${n}"] ${s}`);
+      const keys = document.querySelector('dialog[open] .gdoc-sec[data-step="keys"]');
+      return {
+        yt: q('redirect', 3, '.gdoc-copy-v')?.innerText ?? '',
+        drive: q('redirect_drive', 2, '.gdoc-copy-v')?.innerText ?? '',
+        id: !!q('keys', 2, 'input:not([type=password])'),
+        secret: !!q('keys', 3, 'input[type=password]'),
+        passwords: document.querySelectorAll('dialog[open] input[type=password]').length,
+        held: keys.querySelector(':scope > .pf-note.ok')?.innerText ?? '',
+        text: keys.innerText,
+      };
+    });
+    check('the YouTube address is filled in from the site, whole, under the action that pastes it, and the Drive address under its own', /^http:\/\/127\.0\.0\.1:\d+\/api\/platforms\/callback\/google$/.test(place.yt) && /\/api\/drive\/callback$/.test(place.drive), JSON.stringify(place));
+    check('the keys step puts the two fields under the actions that name them, holds the secret once, and says one is kept', place.id && place.secret && place.passwords === 1 && place.held.includes('السر محفوظ في الخزنة') && place.text.includes('مرة واحدة عند إنشائه') && !place.text.includes(SECRET), JSON.stringify({ ...place, text: undefined }));
 
     // The progress is the same as before: the three steps a person confirms, then the platform is connected.
-    await sheet(y).locator('.pf-step-btn').nth(9).click();
-    await sheet(y).getByRole('button', { name: 'سجّلت العنوان' }).click();
-    await y.waitForFunction(() => document.querySelector('dialog[open]')?.innerText.includes('الخطوة 13 من 13'));
+    await sheet(y).locator('.gdoc-sec[data-step="redirect"] .gdoc-bar .pf-btn').click();
+    await y.waitForFunction(() => window.__db.calls.filter((c) => c.name === 'platform_setup_save').at(-1)?.args.p_step === 'publish');
+    await settle(y);
+    check('a step done goes on to the next one not done', (await reading(y)) === 'publish', await reading(y));
     await sheet(y).getByRole('button', { name: 'نشرته' }).click();
-    await y.waitForFunction(() => document.querySelector('dialog[open]')?.innerText.includes('اكتملت الخطوات'));
+    await y.waitForFunction(() => document.querySelector('dialog[open] .gdoc-finish')?.innerText.includes('يوتيوب جاهزة'));
+    await settle(y);
     const ySaves = await calls(y, 'platform_setup_save');
     const saved = ySaves.at(-1).args;
-    check('every saved step is one the database accepts, and only the three a person confirms are in the progress', saved.p_done.every((d) => /^[a-z0-9_]{1,30}$/.test(d)) && JSON.stringify([...saved.p_done].sort()) === JSON.stringify(['publish', 'redirect', 'youtube']) , JSON.stringify(saved.p_done));
-    check('the sheet ends as before, with its finishing page', (await sheet(y).innerText()).includes('يوتيوب جاهزة') && (await sheet(y).innerText()).includes('حساب'));
+    check('every saved step is one the database accepts, and only the three a person confirms are in the progress', saved.p_done.every((d) => /^[a-z0-9_]{1,30}$/.test(d)) && JSON.stringify([...saved.p_done].sort()) === JSON.stringify(['publish', 'redirect', 'youtube']) && saved.p_step === null, JSON.stringify(saved));
+    const fin = await y.evaluate(() => ({ text: document.querySelector('dialog[open] .gdoc-finish').innerText, first: document.querySelector('dialog[open] .gdoc-main > .gdoc-sec').dataset.step, list: document.querySelector('dialog[open] .gdoc-toc-list .gdoc-ti')?.innerText.trim(), all: document.querySelector('dialog[open] .gdoc-toc-top b').innerText }));
+    check('the page ends as the sheet did, with its finishing summary first, and the list says so', fin.first === 'finish' && fin.text.includes('يوتيوب جاهزة') && fin.text.includes('حساب') && fin.list === 'كل شيء جاهز' && fin.all === 'اكتملت الخطوات' && (await reading(y)) === 'finish', JSON.stringify({ ...fin, text: fin.text.slice(0, 60) }));
     await y.screenshot({ path: path.join(out, '22-youtube-done.png') });
+    await sheet(y).locator('.gdoc-ti[data-to="keys"]').click();
+    await settle(y);
+    check('picking a step after the end keeps the summary on the page', (await reading(y)) === 'keys' && (await y.locator('dialog[open] .gdoc-finish').count()) === 1);
     await sheet(y).getByRole('button', { name: 'إغلاق', exact: true }).click();
     await y.locator('dialog.pf-sheet').waitFor({ state: 'detached' });
     await y.waitForFunction(() => document.querySelector('.pf-row[data-platform="youtube"]')?.dataset.state === 'ok');
     check('and the row says connected: nothing the old steps proved is asked again', (await chip(y, 'youtube')) === 'متصلة', await chip(y, 'youtube'));
+    await row(y, 'youtube').getByRole('button', { name: 'التفاصيل' }).click();
+    await sheet(y).waitFor();
+    await y.waitForTimeout(400);
+    check('«التفاصيل» of a connected guide opens on its summary, with the advanced options under it', (await reading(y)) === 'finish' && (await sheet(y).locator('.gdoc-finish .st-advanced').count()) === 1, await reading(y));
     await y.context().close();
 
-    // The phone: the page never scrolls sideways, and a wide picture does inside its frame.
+    // The phone: the list folds above the steps, and nothing scrolls sideways.
     const ym = await fresh({ width: 390, height: 844 });
     await ym.goto(base);
     await ym.waitForSelector('.pf-row');
     await row(ym, 'youtube').locator('.pf-btn').first().click();
     await sheet(ym).waitFor();
-    await ym.evaluate(() => document.querySelector('dialog[open] .pf-step.cur'));
-    const phoneStep = async (id) => {
-      await ym.evaluate((i) => {
-        document.querySelector(`dialog[open] .pf-step[data-step="${i}"] .pf-step-btn`)?.click();
-      }, id);
-      await ym.waitForTimeout(80);
-    };
+    await ym.waitForTimeout(400);
+    await ym.locator('dialog[open] .gdoc-toc-list > summary').click();
     for (const id of ['branding', 'testusers', 'client', 'redirect_drive']) {
-      await phoneStep(id);
-      await ym.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
-      const phone = await ym.evaluate(() => ({ page: document.documentElement.scrollWidth <= window.innerWidth + 1, body: (() => { const b = document.querySelector('dialog[open] .pf-body'); return b.scrollWidth <= b.clientWidth + 1; })(), shots: [...document.querySelectorAll('dialog[open] .gd-shot')].every((f) => f.getBoundingClientRect().right <= window.innerWidth + 1) }));
-      check(`phone, ${id}: nothing sideways on the page, the sheet or the pictures`, phone.page && phone.body && phone.shots, JSON.stringify(phone));
+      await ym.locator(`dialog[open] .gdoc-ti[data-to="${id}"]`).click();
+      await settle(ym);
+      const reached = await reading(ym);
+      await loadPics(ym, id);
+      const phone = await ym.evaluate(() => ({ page: document.documentElement.scrollWidth <= window.innerWidth + 1, body: (() => { const b = document.querySelector('dialog[open] .gdoc'); return b.scrollWidth <= b.clientWidth + 1; })(), shots: [...document.querySelectorAll('dialog[open] .gdoc-shot')].every((f) => f.getBoundingClientRect().right <= window.innerWidth + 1) }));
+      check(`phone, ${id}: reached from the list, nothing sideways on the page, the sheet or the pictures`, reached === id && phone.page && phone.body && phone.shots, JSON.stringify({ at: reached, ...phone }));
     }
-    await phoneStep('branding');
-    await ym.locator('dialog[open] .pf-input').evaluate((e) => e.scrollIntoView());
+    await ym.locator('dialog[open] .gdoc-ti[data-to="branding"]').click();
+    await settle(ym);
     await ym.screenshot({ path: path.join(out, '23-youtube-phone.png') });
+    await ym.locator('dialog[open] .gdoc-sec[data-step="branding"] .gdoc-zoom').click();
+    await ym.locator('dialog.gdoc-view[open]').waitFor();
+    await ym.waitForTimeout(200);
+    await ym.screenshot({ path: path.join(out, '23b-youtube-phone-zoom.png') });
+    const pv = await ym.evaluate(() => { const v = document.querySelector('dialog.gdoc-view[open]').getBoundingClientRect(); return { w: Math.round(v.width), h: Math.round(v.height) }; });
+    check('phone: the picture opens over the whole screen', pv.w >= 388 && pv.h >= 840, JSON.stringify(pv));
     await ym.context().close();
 
     // Evening, and English (the page's direction changes the sides, never the pictures).
@@ -609,21 +719,23 @@ const sides = (t) =>
     await yd.waitForSelector('.pf-row');
     await row(yd, 'youtube').locator('.pf-btn').first().click();
     await sheet(yd).waitFor();
-    await sheet(yd).locator('.pf-step-btn').nth(4).click();
-    await yd.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
+    await sheet(yd).locator('.gdoc-ti[data-to="branding"]').click();
+    await settle(yd);
+    await loadPics(yd, 'branding');
     await yd.screenshot({ path: path.join(out, '24-youtube-evening.png') });
-    const chipInk = await yd.evaluate(() => { const c = document.querySelector('dialog[open] .gd-todo .gd-ui'); const s = getComputedStyle(c); return [s.backgroundColor, s.color]; });
-    check('evening: a label chip is told from the page behind it', chipInk[0] !== chipInk[1] && chipInk[1] !== 'rgb(0, 0, 0)', chipInk.join(' / '));
+    const chipInk = await yd.evaluate(() => { const c = document.querySelector('dialog[open] .gdoc-sec[data-step="branding"] .gdoc-act .gd-ui'); const s = getComputedStyle(c); return [s.backgroundColor, s.color, getComputedStyle(document.querySelector('dialog[open] .gdoc-toc')).backgroundColor]; });
+    check('evening: a label chip is told from the page behind it, and the list follows the theme', chipInk[0] !== chipInk[1] && chipInk[1] !== 'rgb(0, 0, 0)' && chipInk[2] !== 'rgb(245, 248, 241)', chipInk.join(' / '));
     await yd.context().close();
     const yl = await fresh();
     await yl.goto(`${base}?dir=ltr`);
     await yl.waitForSelector('.pf-row');
     await row(yl, 'youtube').locator('.pf-btn').first().click();
     await sheet(yl).waitFor();
-    await sheet(yl).locator('.pf-step-btn').nth(8).click();
-    await yl.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
+    await sheet(yl).locator('.gdoc-ti[data-to="client"]').click();
+    await settle(yl);
+    await loadPics(yl, 'client');
     await yl.screenshot({ path: path.join(out, '25-youtube-ltr.png') });
-    check('English direction: the pictures keep their own direction and the page does not scroll sideways', (await fits(yl)) && (await yl.evaluate(() => [...document.querySelectorAll('dialog[open] .gd-zoom')].every((e) => getComputedStyle(e).direction === 'ltr'))));
+    check('English direction: the pictures keep their own direction and the page does not scroll sideways', (await fits(yl)) && (await yl.evaluate(() => [...document.querySelectorAll('dialog[open] .gdoc-zoom')].every((e) => getComputedStyle(e).direction === 'ltr'))));
     await yl.context().close();
 
     // The X guide's price step (MVP_draft.md section 67.8): notes with the circled "!" and tables, in the sheet, on a computer and a phone.

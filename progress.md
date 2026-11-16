@@ -4590,3 +4590,35 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   The same moment drawn twice can differ by one or two levels where a pattern is first drawn (the canvas's rounding, not the design), so the
   stillness checks count only visible changes.
 - **Not checked.** The studio's inspector signed in; the live site after the push.
+
+### 2026-11-16: the YouTube and TikTok setup guides shown as one page, the director's choice
+
+- **The request.** The owner found the setup guides' words and pictures good and their layout hard to follow. A draft with three layouts,
+  built from the real guides, went to the director, who chose the whole guide on one page, with one note: smaller pictures, with a way to
+  zoom in. Built for YouTube and TikTok only, as the owner asked; every other guide keeps the step sheet. `MVP_draft.md` section 67.10.
+- **What changed.**
+  - `src/lib/guide-layout.ts` (new): `WHOLE_GUIDES` (google, tiktok), `layoutStep` (which actions each picture, value to copy and key field
+    goes under), the parts, and `SHOT_MAX` 400.
+  - `src/lib/setup-guides.ts`: `phases` for the two guides; `at` on four pictures that ring no action; `copyAt` and `at` for TikTok's
+    Production details; `fieldsAt` for the two keys steps. No word, picture or step id changed.
+  - `src/components/settings/guide-doc.tsx` (new): the page and its picture viewer. `keys-form.tsx` (new): the keys form, moved out of
+    `platform-sheet.tsx` unchanged and used by both layouts. `platform-sheet.tsx` gives the two guides the page; saving stays there.
+  - `src/app/work.css`: the `.gdoc` styles, phone and evening included.
+- **Found while checking, and fixed.** At the viewer's last picture «التالية» became disabled while it held the focus, so the focus fell
+  to the page and the arrow keys stopped: the ends are now marked (`aria-disabled`) and the arrows are heard on the document while the viewer
+  is open. The last step, picked from the list, could not reach the top, so the list marked the step before it: the last section now has
+  room below it.
+- **Checks.**
+  - `npm run typecheck` passes; `npm run build` compiles.
+  - `npm test` 967 of 967: the new `tests/guide-layout.test.mjs` (7) holds the parts, the order of actions and pictures, each picture
+    after the actions it rings, and where each value and field goes on the real guides; `tests/platform-setup.test.mjs` follows the keys
+    form into its file and holds the page's list-first order and its unnamed sides.
+  - `qa/platforms-flow.cjs` 142 of 142 (Edge, the real tab and sheet on a fixture), in `qa/platforms-flow.json`. Its TikTok and YouTube
+    parts were rewritten for the page: it opens where the person stopped; the keys sit under their actions; a refused pair stays and saves
+    nothing; the secret never reaches the progress; closing and coming back; each of YouTube's 13 steps reached from the list, its English
+    isolated and read right to left, its pictures loaded at their own size, drawn at most 400 wide and under the actions they ring; the
+    viewer at the picture's own size, paging by keys and buttons with the focus kept, Escape closing it alone; the addresses and fields in
+    place; the same saved progress as before (publish, redirect, youtube); the summary first at the end and from «التفاصيل»; phone,
+    evening and English. The other platforms' checks are unchanged and pass.
+  - Another session's uncommitted motion changes were in the working tree while these ran; the build and the tests included them.
+- **Not checked.** Signed in on the live site. Committed on local main; not pushed or deployed.

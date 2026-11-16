@@ -1,6 +1,6 @@
 {
   "script": "qa/platforms-flow.cjs",
-  "run": "2026-11-15T10:57:34.615Z",
+  "run": "2026-11-16T08:17:11.567Z",
   "checks": [
     {
       "name": "every platform has one state, worked out from what is stored",
@@ -53,12 +53,12 @@
       "detail": ""
     },
     {
-      "name": "it opens where the person stopped, with the bar and the saved word",
+      "name": "it opens where the person stopped, at the keys, with how far and the saved word",
       "pass": true,
-      "detail": "إعداد تيك توك\nتُجرى مرة واحدة. بعدها تُضاف الحسابات من «حسابات المنصات» بلا أي من هذه الخطوات.\nخطوات ناقصة · 6 من 12\nإغل"
+      "detail": "{\"at\":\"keys\",\"head\":\"إعداد تيك توك\\nتُجرى مرة واحدة. بعدها تُضاف الحسابات من «حسابات المنصات» بلا أي من هذه الخطوات.\\nخطوات ناقصة · 6 من 12\\nإغل\"}"
     },
     {
-      "name": "the bar shows how far",
+      "name": "the list marks the step being read",
       "pass": true,
       "detail": ""
     },
@@ -68,19 +68,34 @@
       "detail": ""
     },
     {
+      "name": "each field of the keys sits under the action that names it, and the button is the step's own",
+      "pass": true,
+      "detail": "{\"id\":true,\"secret\":true,\"more\":true,\"button\":\"فحص وحفظ\"}"
+    },
+    {
       "name": "the step links to the platform, in a new tab",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "in Arabic the steps are on the right and the input on the left",
+      "name": "in Arabic the list of steps is on the right and the steps on the left",
       "pass": true,
-      "detail": "{\"side\":570,\"input\":0,\"sideRight\":1056,\"inputRight\":570}"
+      "detail": "{\"list\":776,\"main\":0,\"above\":false}"
+    },
+    {
+      "name": "TikTok's address proof: each picture under the action it shows, the three last ones under the file and the button, the address under the action that pastes it",
+      "pass": true,
+      "detail": "{\"parts\":[{\"acts\":[1],\"shots\":1},{\"acts\":[2],\"shots\":1},{\"acts\":[3],\"shots\":1},{\"acts\":[4,5],\"shots\":3}],\"copy\":\"http://127.0.0.1:61774/\"}"
     },
     {
       "name": "a pair the platform refuses stays on the step, and says why",
       "pass": true,
       "detail": ""
+    },
+    {
+      "name": "accepted keys go on to the next step not done: the review, step 11 of 12",
+      "pass": true,
+      "detail": "review"
     },
     {
       "name": "the secret went to the route that checks it",
@@ -105,17 +120,17 @@
     {
       "name": "coming back opens the same step",
       "pass": true,
-      "detail": ""
+      "detail": "review"
     },
     {
-      "name": "any step can be opened",
+      "name": "any step can be opened from the list",
       "pass": true,
-      "detail": ""
+      "detail": "redirect"
     },
     {
-      "name": "an address to copy is filled in from the site, whole",
+      "name": "an address to copy is filled in from the site, whole, under the action that pastes it",
       "pass": true,
-      "detail": "http://127.0.0.1:64058/api/platforms/callback/tiktok"
+      "detail": "http://127.0.0.1:61774/api/platforms/callback/tiktok"
     },
     {
       "name": "Escape closes the sheet",
@@ -188,6 +203,11 @@
       "detail": "{\"side\":0,\"input\":486,\"sideRight\":486,\"inputRight\":1056}"
     },
     {
+      "name": "in English the guide shown as one page has its list on the left, by itself",
+      "pass": true,
+      "detail": "{\"list\":0,\"main\":280,\"above\":false}"
+    },
+    {
       "name": "a viewer sees everything, and the controls are locked with a reason",
       "pass": true,
       "detail": ""
@@ -200,7 +220,7 @@
     {
       "name": "what needs attention comes first, with why and what depends on it",
       "pass": true,
-      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-18 13:57\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
+      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-19 11:17\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
     },
     {
       "name": "accounts are grouped by platform, each one line",
@@ -210,7 +230,7 @@
     {
       "name": "a line says the state, who publishes, when, and what uses it",
       "pass": true,
-      "detail": "الحساب الرسمي\n@org_official\nمتصل حتى 4 يناير 2027\nناشر الفحص\nنشر تلقائي\nعمل واحد"
+      "detail": "الحساب الرسمي\n@org_official\nمتصل حتى 5 يناير 2027\nناشر الفحص\nنشر تلقائي\nعمل واحد"
     },
     {
       "name": "an account connected to nothing is marked, and never says connected",
@@ -353,9 +373,14 @@
       "detail": ""
     },
     {
-      "name": "phone: the current step alone, above its input",
+      "name": "phone: the list of steps is folded above the steps, which open where the person stopped, with nothing sideways",
       "pass": true,
-      "detail": "{\"above\":true,\"wide\":390,\"steps\":1}"
+      "detail": "{\"list\":0,\"main\":0,\"above\":true,\"at\":\"keys\",\"folded\":true,\"wide\":390,\"body\":true}"
+    },
+    {
+      "name": "phone: a step picked from the opened list is reached, and its pictures stay inside the screen",
+      "pass": true,
+      "detail": "verify"
     },
     {
       "name": "phone: nothing sideways on the accounts",
@@ -375,142 +400,152 @@
     {
       "name": "YouTube opens where the stored secret leaves it: the address to register, step 10 of 13",
       "pass": true,
-      "detail": "إعداد يوتيوب\nتطبيق Google واحد يخدم يوتيوب وDrive، فلا تُنشئ تطبيقين.\nخطوات ناقص"
+      "detail": "{\"at\":\"redirect\"}"
     },
     {
-      "name": "thirteen steps, one action each, under the ids the saved progress knows",
+      "name": "thirteen steps on one page, one action each, under the ids the saved progress knows",
       "pass": true,
       "detail": "project,youtube,drive,consent,branding,audience,contact,testusers,client,redirect,redirect_drive,keys,publish"
     },
     {
-      "name": "youtube step 1 (project): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "the list names its four parts and holds the thirteen steps in order, after «قبل البدء»",
       "pass": true,
-      "detail": "{\"h3\":\"أنشئ مشروعاً في Google Cloud\",\"todo\":3,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"project\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"parts\":[\"المشروع والواجهات\",\"شاشة الموافقة\",\"معرّف العميل\",\"النشر\"],\"items\":[\"project\",\"youtube\",\"drive\",\"consent\",\"branding\",\"audience\",\"contact\",\"testusers\",\"client\",\"redirect\",\"redirect_drive\",\"keys\",\"publish\"],\"first\":\"قبل البدء\"}"
     },
     {
-      "name": "youtube step 1 (project): every picture loads at its own size",
+      "name": "«قبل البدء» says who the guide is for, how many steps and pictures, and its notes",
       "pass": true,
-      "detail": "{\"h3\":\"أنشئ مشروعاً في Google Cloud\",\"todo\":3,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"project\",\"wide\":true}"
+      "detail": "{\"notes\":8}"
     },
     {
-      "name": "youtube step 2 (youtube): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 1 (project): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"فعّل واجهة YouTube Data API v3\",\"todo\":3,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"youtube\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"project\",\"h3\":\"أنشئ مشروعاً في Google Cloud\",\"acts\":3,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 2 (youtube): every picture loads at its own size",
+      "name": "youtube step 1 (project): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"فعّل واجهة YouTube Data API v3\",\"todo\":3,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"youtube\",\"wide\":true}"
+      "detail": "{\"h3\":\"أنشئ مشروعاً في Google Cloud\",\"acts\":3,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 3 (drive): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 2 (youtube): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"فعّل واجهة Google Drive API\",\"todo\":2,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"drive\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"youtube\",\"h3\":\"فعّل واجهة YouTube Data API v3\",\"acts\":3,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 3 (drive): every picture loads at its own size",
+      "name": "youtube step 2 (youtube): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"فعّل واجهة Google Drive API\",\"todo\":2,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"drive\",\"wide\":true}"
+      "detail": "{\"h3\":\"فعّل واجهة YouTube Data API v3\",\"acts\":3,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 4 (consent): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 3 (drive): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"افتح شاشة الموافقة\",\"todo\":3,\"imgs\":1,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"consent\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"drive\",\"h3\":\"فعّل واجهة Google Drive API\",\"acts\":2,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 4 (consent): every picture loads at its own size",
+      "name": "youtube step 3 (drive): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"افتح شاشة الموافقة\",\"todo\":3,\"imgs\":1,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"consent\",\"wide\":true}"
+      "detail": "{\"h3\":\"فعّل واجهة Google Drive API\",\"acts\":2,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 5 (branding): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 4 (consent): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"اكتب اسم التطبيق وبريد الدعم\",\"todo\":4,\"imgs\":1,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"branding\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"consent\",\"h3\":\"افتح شاشة الموافقة\",\"acts\":3,\"imgs\":1,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 5 (branding): every picture loads at its own size",
+      "name": "youtube step 4 (consent): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"اكتب اسم التطبيق وبريد الدعم\",\"todo\":4,\"imgs\":1,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"branding\",\"wide\":true}"
+      "detail": "{\"h3\":\"افتح شاشة الموافقة\",\"acts\":3,\"imgs\":1,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 6 (audience): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 5 (branding): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"اختر نوع المستخدمين\",\"todo\":3,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"audience\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"branding\",\"h3\":\"اكتب اسم التطبيق وبريد الدعم\",\"acts\":4,\"imgs\":1,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 6 (audience): every picture loads at its own size",
+      "name": "youtube step 5 (branding): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"اختر نوع المستخدمين\",\"todo\":3,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"audience\",\"wide\":true}"
+      "detail": "{\"h3\":\"اكتب اسم التطبيق وبريد الدعم\",\"acts\":4,\"imgs\":1,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 7 (contact): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 6 (audience): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"اكتب بريد التواصل وأنهِ الإعداد\",\"todo\":4,\"imgs\":1,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"contact\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"audience\",\"h3\":\"اختر نوع المستخدمين\",\"acts\":3,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 7 (contact): every picture loads at its own size",
+      "name": "youtube step 6 (audience): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"اكتب بريد التواصل وأنهِ الإعداد\",\"todo\":4,\"imgs\":1,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"contact\",\"wide\":true}"
+      "detail": "{\"h3\":\"اختر نوع المستخدمين\",\"acts\":3,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 8 (testusers): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 7 (contact): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"أضف بريد من سيربط القناة\",\"todo\":5,\"imgs\":2,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"testusers\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"contact\",\"h3\":\"اكتب بريد التواصل وأنهِ الإعداد\",\"acts\":4,\"imgs\":1,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 8 (testusers): every picture loads at its own size",
+      "name": "youtube step 7 (contact): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"أضف بريد من سيربط القناة\",\"todo\":5,\"imgs\":2,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"testusers\",\"wide\":true}"
+      "detail": "{\"h3\":\"اكتب بريد التواصل وأنهِ الإعداد\",\"acts\":4,\"imgs\":1,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 9 (client): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 8 (testusers): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"أنشئ معرّف العميل\",\"todo\":4,\"imgs\":2,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"client\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"testusers\",\"h3\":\"أضف بريد من سيربط القناة\",\"acts\":5,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 9 (client): every picture loads at its own size",
+      "name": "youtube step 8 (testusers): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"أنشئ معرّف العميل\",\"todo\":4,\"imgs\":2,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"client\",\"wide\":true}"
+      "detail": "{\"h3\":\"أضف بريد من سيربط القناة\",\"acts\":5,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 10 (redirect): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 9 (client): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"سجّل عنوان العودة ليوتيوب\",\"todo\":3,\"imgs\":1,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"redirect\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"client\",\"h3\":\"أنشئ معرّف العميل\",\"acts\":4,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 10 (redirect): every picture loads at its own size",
+      "name": "youtube step 9 (client): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"سجّل عنوان العودة ليوتيوب\",\"todo\":3,\"imgs\":1,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"redirect\",\"wide\":true}"
+      "detail": "{\"h3\":\"أنشئ معرّف العميل\",\"acts\":4,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 11 (redirect_drive): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 10 (redirect): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"وسجّل عنوان العودة لـ Drive\",\"todo\":3,\"imgs\":1,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"redirect_drive\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"redirect\",\"h3\":\"سجّل عنوان العودة ليوتيوب\",\"acts\":3,\"imgs\":1,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 11 (redirect_drive): every picture loads at its own size",
+      "name": "youtube step 10 (redirect): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"وسجّل عنوان العودة لـ Drive\",\"todo\":3,\"imgs\":1,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"redirect_drive\",\"wide\":true}"
+      "detail": "{\"h3\":\"سجّل عنوان العودة ليوتيوب\",\"acts\":3,\"imgs\":1,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 12 (keys): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 11 (redirect_drive): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"انسخ المعرّف والسر\",\"todo\":5,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"keys\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"redirect_drive\",\"h3\":\"وسجّل عنوان العودة لـ Drive\",\"acts\":3,\"imgs\":1,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 12 (keys): every picture loads at its own size",
+      "name": "youtube step 11 (redirect_drive): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"انسخ المعرّف والسر\",\"todo\":5,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"keys\",\"wide\":true}"
+      "detail": "{\"h3\":\"وسجّل عنوان العودة لـ Drive\",\"acts\":3,\"imgs\":1,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
-      "name": "youtube step 13 (publish): its actions are listed, English is isolated, and the order reads right to left",
+      "name": "youtube step 12 (keys): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
       "pass": true,
-      "detail": "{\"h3\":\"انشر التطبيق\",\"todo\":4,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"publish\",\"wide\":true,\"lost\":[],\"flipped\":[]}"
+      "detail": "{\"at\":\"keys\",\"h3\":\"انسخ المعرّف والسر\",\"acts\":5,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
     },
     {
-      "name": "youtube step 13 (publish): every picture loads at its own size",
+      "name": "youtube step 12 (keys): every picture loads at its own size, is drawn small, and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"h3\":\"انشر التطبيق\",\"todo\":4,\"imgs\":0,\"loaded\":true,\"raw\":false,\"ltr\":true,\"side\":\"publish\",\"wide\":true}"
+      "detail": "{\"h3\":\"انسخ المعرّف والسر\",\"acts\":5,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
+    },
+    {
+      "name": "youtube step 13 (publish): reached from the list, its actions are listed, English is isolated, and the order reads right to left",
+      "pass": true,
+      "detail": "{\"at\":\"publish\",\"h3\":\"انشر التطبيق\",\"acts\":4,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[],\"flipped\":[]}"
+    },
+    {
+      "name": "youtube step 13 (publish): every picture loads at its own size, is drawn small, and sits under the actions it shows",
+      "pass": true,
+      "detail": "{\"h3\":\"انشر التطبيق\",\"acts\":4,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
     },
     {
       "name": "the pictures are where the steps put them: 1 in the menu step, 1 each in the Branding and contact steps, 2 for test users, 2 for the client, 1 for each address",
@@ -518,29 +553,24 @@
       "detail": "[0,0,0,1,1,0,1,2,2,1,1,0,0]"
     },
     {
-      "name": "the step that was too crowded is now three small ones, each with its own title",
+      "name": "the step that was too crowded is three small ones, each with its own title",
       "pass": true,
       "detail": "أنشئ مشروعاً في Google Cloud | فعّل واجهة YouTube Data API v3 | فعّل واجهة Google Drive API | افتح شاشة الموافقة | اكتب اسم التطبيق وبريد الدعم | اختر نوع المستخدمين | اكتب بريد التواصل وأنهِ الإعداد | أضف بريد من سيربط القناة | أنشئ معرّف العميل | سجّل عنوان العودة ليوتيوب | وسجّل عنوان العودة لـ Drive | انسخ المعرّف والسر | انشر التطبيق"
     },
     {
-      "name": "the progress strip is one segment per step: the done ones filled, one marks where you are, and it says how many are done and left",
+      "name": "a done step has its check, says so, and its button reads «متابعة»",
       "pass": true,
-      "detail": "{\"n\":13,\"done\":11,\"cur\":1,\"tall\":true,\"counts\":\"أُنجز 11 وبقي 2\"}"
+      "detail": "{\"done\":true,\"check\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"ringed\":[true,true,false,false],\"amber\":\"rgb(255, 179, 0)\",\"order\":[\"الصورة 1 من 2\",\"الصورة 2 من 2\"],\"upDashed\":\"dashed\",\"okSolid\":\"solid\"}"
     },
     {
-      "name": "a step is one card: its number and name, what it says when it is already done, and the button that goes on",
+      "name": "the actions a picture shows carry the pictures' amber number; the pictures are numbered",
       "pass": true,
-      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(27, 48, 40)\",\"upDashed\":\"dashed\"}"
+      "detail": "{\"done\":true,\"check\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"ringed\":[true,true,false,false],\"amber\":\"rgb(255, 179, 0)\",\"order\":[\"الصورة 1 من 2\",\"الصورة 2 من 2\"],\"upDashed\":\"dashed\",\"okSolid\":\"solid\"}"
     },
     {
-      "name": "an action a picture shows says which picture; the pictures are numbered and say what their rings mean",
+      "name": "in the list, the steps still to do are dashed and the done ones are not",
       "pass": true,
-      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(27, 48, 40)\",\"upDashed\":\"dashed\"}"
-    },
-    {
-      "name": "the steps still to do are dimmed and drawn dashed, and the one you are on is not",
-      "pass": true,
-      "detail": "{\"n\":\"9\",\"head\":\"أنشئ معرّف العميل\",\"done\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"lis\":[\"في الصورة 1\",\"في الصورة 2\",\"\",\"\"],\"cap\":[{\"order\":\"الصورة 1 من 2\",\"rings\":[\"1\"]},{\"order\":\"الصورة 2 من 2\",\"rings\":[\"2\"]}],\"upInk\":\"rgb(82, 107, 94)\",\"hereInk\":\"rgb(27, 48, 40)\",\"upDashed\":\"dashed\"}"
+      "detail": "{\"done\":true,\"check\":true,\"note\":\"أنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\",\"btn\":\"متابعة\",\"ringed\":[true,true,false,false],\"amber\":\"rgb(255, 179, 0)\",\"order\":[\"الصورة 1 من 2\",\"الصورة 2 من 2\"],\"upDashed\":\"dashed\",\"okSolid\":\"solid\"}"
     },
     {
       "name": "a value to type has its own copy button, and it copies the value exactly",
@@ -548,24 +578,14 @@
       "detail": "{\"got\":[\"Comms Hub Web\"],\"label\":\"نُسخ Comms Hub Web\"}"
     },
     {
-      "name": "a picture that says \"do not\" explains the red ring",
+      "name": "a step whose picture says \"do not\" explains the red ring once, and every step with pictures says a click enlarges them",
       "pass": true,
-      "detail": ""
+      "detail": "{\"lb\":{\"x\":1,\"num\":1,\"zoom\":true},\"lc\":{\"x\":0,\"num\":0,\"zoom\":true}}"
     },
     {
-      "name": "a single picture with no numbered rings says nothing it does not need",
+      "name": "a step that does not apply to everyone says so, in the list and in its head",
       "pass": true,
       "detail": ""
-    },
-    {
-      "name": "a step that does not apply to everyone says so, in the list and on its card",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "the button that says a step is done stays in view while its pictures scroll, and sits on the bottom edge",
-      "pass": true,
-      "detail": "[{\"inView\":true,\"tall\":true,\"bottomGap\":0},{\"inView\":true,\"tall\":false,\"bottomGap\":25}]"
     },
     {
       "name": "a step not yet done has no \"done\" note and keeps its own button",
@@ -573,52 +593,52 @@
       "detail": ""
     },
     {
-      "name": "the corners are rounded and the picture is clipped to them",
+      "name": "a picture is drawn small, rounded and clipped to its corners, in its own direction",
       "pass": true,
-      "detail": "12px hidden"
+      "detail": "{\"thumb\":[398,755],\"radius\":[\"12px\",\"hidden\",\"ltr\"]}"
     },
     {
-      "name": "a click enlarges it to its own size, and scrolls sideways inside the frame instead of the page",
+      "name": "a click opens the picture over the sheet at its own size, with its step and its place",
       "pass": true,
-      "detail": "{\"zoomBefore\":[470,755],\"zoomed\":{\"big\":true,\"w\":755,\"scroll\":true,\"pressed\":\"true\"}}"
+      "detail": "{\"w\":755,\"natural\":755,\"cap\":\"اكتب اسم التطبيق وبريد الدعم · الصورة 1 من 1\",\"prev\":true,\"next\":true}"
     },
     {
-      "name": "and a second click puts it back",
+      "name": "Escape closes the picture alone, and the sheet stays open",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "a step with no picture has none to click",
+      "name": "the step's pictures page through: the left arrow goes on in Arabic, the right one back, and «التالية» too; at the end the focus stays in the viewer",
       "pass": true,
-      "detail": ""
+      "detail": "{\"caps\":[\"أضف بريد من سيربط القناة · الصورة 1 من 2\",\"أضف بريد من سيربط القناة · الصورة 2 من 2\",\"أضف بريد من سيربط القناة · الصورة 1 من 2\",\"أضف بريد من سيربط القناة · الصورة 2 من 2\",\"أضف بريد من سيربط القناة · الصورة 1 من 2\"],\"kept\":{\"inside\":true,\"end\":\"true\"}}"
     },
     {
-      "name": "a narrow picture is shown whole and is not a button",
+      "name": "the YouTube address is filled in from the site, whole, under the action that pastes it, and the Drive address under its own",
       "pass": true,
-      "detail": ""
+      "detail": "{\"yt\":\"http://127.0.0.1:61774/api/platforms/callback/google\",\"drive\":\"http://127.0.0.1:61774/api/drive/callback\",\"id\":true,\"secret\":true,\"passwords\":1,\"held\":\"السر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\",\"text\":\"الخطوة 12 من 13 · معرّف العميل\\nانسخ المعرّف والسر\\n\\nتظهر بعد Create نافذة فيها القيمتان.\\n\\nافتح\\nClients\\nفي\\nGoogle Cloud\\n\\nأنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\\n\\nالسر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\\n\\n1\\n\\nبعد Create تظهر نافذة فيها Client ID وClient secret.\\n\\n2\\n\\nانسخ Client ID والصقه في الحقل الأول هنا.\\n\\nمعرّف العميل (Client ID)\\n3\\n\\nانسخ Client secret والصقه في الحقل الثاني. يظهر كاملاً مرة واحدة عند إنشائه، فانسخه فوراً.\\n\\nسر العميل (Client secret)\\n4\\n\\nإن أغلقت النافذة قبل نسخه فافتح العميل من Clients وأنشئ سراً جديداً.\\n\\n5\\n\\nالصقهما هنا فقط، ولا ترسلهما إلى أحد.\\n\\nخيارات أخرى\\n\\nيسأل الموقع المنصة أولاً، ولا يحفظ شيئاً إن رفضت. السر يذهب إلى الخزنة ولا يُعرض بعد ذلك، فإن أغلقت قبل الفحص أعدت إدخاله وحده.\\n\\nاستبدال بعد الفحص\"}"
     },
     {
-      "name": "the YouTube address is filled in from the site, whole, under the list of actions",
+      "name": "the keys step puts the two fields under the actions that name them, holds the secret once, and says one is kept",
       "pass": true,
-      "detail": ""
+      "detail": "{\"yt\":\"http://127.0.0.1:61774/api/platforms/callback/google\",\"drive\":\"http://127.0.0.1:61774/api/drive/callback\",\"id\":true,\"secret\":true,\"passwords\":1,\"held\":\"السر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\"}"
     },
     {
-      "name": "the Drive address is the second one",
+      "name": "a step done goes on to the next one not done",
       "pass": true,
-      "detail": ""
-    },
-    {
-      "name": "the keys step lists where to find the two values above the two fields, and holds the secret once",
-      "pass": true,
-      "detail": ""
+      "detail": "publish"
     },
     {
       "name": "every saved step is one the database accepts, and only the three a person confirms are in the progress",
       "pass": true,
-      "detail": "[\"youtube\",\"redirect\",\"publish\"]"
+      "detail": "{\"p_key\":\"youtube\",\"p_done\":[\"youtube\",\"redirect\",\"publish\"],\"p_step\":null,\"p_fields\":{}}"
     },
     {
-      "name": "the sheet ends as before, with its finishing page",
+      "name": "the page ends as the sheet did, with its finishing summary first, and the list says so",
+      "pass": true,
+      "detail": "{\"text\":\"كل شيء جاهز\\nيوتيوب جاهزة\\n\\nانتهى الإعداد. كل حساب بعد هذا يُض\",\"first\":\"finish\",\"list\":\"كل شيء جاهز\",\"all\":\"اكتملت الخطوات\"}"
+    },
+    {
+      "name": "picking a step after the end keeps the summary on the page",
       "pass": true,
       "detail": ""
     },
@@ -628,29 +648,39 @@
       "detail": "متصلة"
     },
     {
-      "name": "phone, branding: nothing sideways on the page, the sheet or the pictures",
+      "name": "«التفاصيل» of a connected guide opens on its summary, with the advanced options under it",
       "pass": true,
-      "detail": "{\"page\":true,\"body\":true,\"shots\":true}"
+      "detail": "finish"
     },
     {
-      "name": "phone, testusers: nothing sideways on the page, the sheet or the pictures",
+      "name": "phone, branding: reached from the list, nothing sideways on the page, the sheet or the pictures",
       "pass": true,
-      "detail": "{\"page\":true,\"body\":true,\"shots\":true}"
+      "detail": "{\"at\":\"branding\",\"page\":true,\"body\":true,\"shots\":true}"
     },
     {
-      "name": "phone, client: nothing sideways on the page, the sheet or the pictures",
+      "name": "phone, testusers: reached from the list, nothing sideways on the page, the sheet or the pictures",
       "pass": true,
-      "detail": "{\"page\":true,\"body\":true,\"shots\":true}"
+      "detail": "{\"at\":\"testusers\",\"page\":true,\"body\":true,\"shots\":true}"
     },
     {
-      "name": "phone, redirect_drive: nothing sideways on the page, the sheet or the pictures",
+      "name": "phone, client: reached from the list, nothing sideways on the page, the sheet or the pictures",
       "pass": true,
-      "detail": "{\"page\":true,\"body\":true,\"shots\":true}"
+      "detail": "{\"at\":\"client\",\"page\":true,\"body\":true,\"shots\":true}"
     },
     {
-      "name": "evening: a label chip is told from the page behind it",
+      "name": "phone, redirect_drive: reached from the list, nothing sideways on the page, the sheet or the pictures",
       "pass": true,
-      "detail": "rgb(26, 45, 36) / rgb(232, 241, 234)"
+      "detail": "{\"at\":\"redirect_drive\",\"page\":true,\"body\":true,\"shots\":true}"
+    },
+    {
+      "name": "phone: the picture opens over the whole screen",
+      "pass": true,
+      "detail": "{\"w\":390,\"h\":844}"
+    },
+    {
+      "name": "evening: a label chip is told from the page behind it, and the list follows the theme",
+      "pass": true,
+      "detail": "rgb(26, 45, 36) / rgb(232, 241, 234) / rgb(19, 42, 33)"
     },
     {
       "name": "English direction: the pictures keep their own direction and the page does not scroll sideways",
@@ -684,7 +714,7 @@
     }
   ],
   "notes": [],
-  "total": 136,
-  "passed": 136,
+  "total": 142,
+  "passed": 142,
   "failed": 0
 }

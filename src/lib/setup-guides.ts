@@ -21,6 +21,8 @@ export type GuideShot = {
   caption?: string;
   /** The rings drawn on it: the number of the action in the step's list each one points at, and 'x' for what not to do. */
   rings?: string[];
+  /** The action this picture is drawn under in a guide shown as one page (src/lib/guide-layout.ts), when its rings name no action. */
+  at?: number;
 };
 
 /** A table of two columns, drawn inside a step: a price list, a list of limits. Cells are plain text; English ones are isolated by the page. */
@@ -50,8 +52,12 @@ export type GuideStep = {
   copy?: string;
   /** What the value to copy is. */
   copyLabel?: string;
-  /** More values to copy in the same step. */
-  more?: { label: string; copy: string }[];
+  /** The action the value to copy is drawn under in a guide shown as one page; otherwise the first action that says «أدناه». */
+  copyAt?: number;
+  /** More values to copy in the same step, each under its own action when `at` is given. */
+  more?: { label: string; copy: string; at?: number }[];
+  /** In a guide shown as one page, the action each field of a keys step is drawn under; a field with no place follows the actions. */
+  fieldsAt?: Partial<Record<'id' | 'secret' | 'config' | 'more', number>>;
   /** Where this step is done, on the platform's own site. */
   link?: { href: string; label: string };
   /** What the input side of the setup sheet asks; without it the step is done outside and confirmed there. */
@@ -76,6 +82,8 @@ export type Guide = {
   notes?: string[];
   /** A link to the platform's own page, and its name. */
   link?: { href: string; label: string };
+  /** The parts of a long guide shown as one page: a name and the ids of its steps, in order (MVP_draft.md section 67.10). */
+  phases?: { t: string; ids: string[] }[];
 };
 
 const DEV_FACTS = 'المعلومات هنا من وثائق المنصة الرسمية كما قُرئت في 2026-10-15، وتتغير. راجع صفحة المنصة نفسها عند التسجيل.';
@@ -387,7 +395,7 @@ export const GUIDES: Record<string, Guide> = {
           tiktokShot('org-menu', 350, 205, 'قائمة Developer Portal: My organizations وManage apps', undefined, ['2']),
           tiktokShot('org-list', 680, 108, 'أعلى صفحة My organizations من جهة اليمين: زر Create an organization', undefined, ['3']),
           tiktokShot('org-name', 945, 416, 'نافذة Create an organization: حقل Organization name وتحته أن الاسم لا يتغير، وزر Create', undefined, ['4']),
-          tiktokShot('org-page', 537, 152, 'أعلى صفحة المؤسسة: Organizations ثم اسمها، وتبويبات Overview وRoles and access وCompliance وSettings', 'اسم المؤسسة محجوب.'),
+          { ...tiktokShot('org-page', 537, 152, 'أعلى صفحة المؤسسة: Organizations ثم اسمها، وتبويبات Overview وRoles and access وCompliance وSettings', 'اسم المؤسسة محجوب.'), at: 5 },
         ],
         link: TIKTOK_PORTAL,
         ok: 'أنشأتها',
@@ -543,6 +551,7 @@ export const GUIDES: Record<string, Guide> = {
           'اترك «الصلاحيات المطلوبة» في «خيارات أخرى» فارغاً: الافتراضي هو الثلاث نفسها.',
           'اضغط «فحص وحفظ». يسأل الموقع TikTok أولاً، ولا يحفظ شيئاً إن رفض.',
         ],
+        fieldsAt: { id: 2, secret: 3, more: 4 },
         shots: [
           tiktokShot('keys-menu', 291, 325, 'قائمة التطبيق: App details مفتوحة وتحتها Credentials وBasic information', undefined, ['1']),
           tiktokShot('keys', 975, 164, 'قسم Credentials: Client key وClient secret مخفيان، وبجانب كل منهما أيقونة العين', 'لا تصوّر المفتاحين وهما ظاهران.', ['2', '3']),
@@ -564,15 +573,16 @@ export const GUIDES: Record<string, Guide> = {
         ],
         copy: '{origin}/',
         copyLabel: 'عنوان الموقع',
+        copyAt: 5,
         more: [
-          { label: 'أيقونة الموقع', copy: '{origin}/brand/comms-hub-icon-1024.png' },
-          { label: 'الوصف', copy: TIKTOK_DESCRIPTION },
-          { label: 'رابط الشروط', copy: '{origin}/terms.html' },
-          { label: 'رابط الخصوصية', copy: '{origin}/privacy.html' },
+          { label: 'أيقونة الموقع', copy: '{origin}/brand/comms-hub-icon-1024.png', at: 2 },
+          { label: 'الوصف', copy: TIKTOK_DESCRIPTION, at: 3 },
+          { label: 'رابط الشروط', copy: '{origin}/terms.html', at: 4 },
+          { label: 'رابط الخصوصية', copy: '{origin}/privacy.html', at: 4 },
         ],
         shots: [
           tiktokShot('details-category', 582, 400, 'قائمة Category مفتوحة: Books وBusiness وEducation وEntertainment وFinance', undefined, ['3']),
-          tiktokShot('details-web', 975, 326, 'Platforms وعليها Web، وحقل Web/Desktop URL بلا شرطة في آخره وتحته «This URL is not verified»', 'الحلقة الحمراء: عنوان بلا شرطة في آخره لا يطابق العنوان الموثَّق.', ['x']),
+          { ...tiktokShot('details-web', 975, 326, 'Platforms وعليها Web، وحقل Web/Desktop URL بلا شرطة في آخره وتحته «This URL is not verified»', 'الحلقة الحمراء: عنوان بلا شرطة في آخره لا يطابق العنوان الموثَّق.', ['x']), at: 5 },
         ],
         link: TIKTOK_APPS,
         ok: 'أكملتها',
@@ -607,6 +617,12 @@ export const GUIDES: Record<string, Guide> = {
       PLATFORM_FACTS,
     ],
     link: { href: 'https://developers.tiktok.com/doc/content-posting-api-get-started', label: 'وثائق Content Posting API' },
+    phases: [
+      { t: 'المؤسسة والتطبيق', ids: ['org', 'app', 'verify'] },
+      { t: 'بيئة التجربة', ids: ['sandbox', 'products', 'redirect', 'scopes', 'targets'] },
+      { t: 'المفتاح والسر', ids: ['keys'] },
+      { t: 'المراجعة', ids: ['details', 'review', 'audit'] },
+    ],
   },
   connect_meta: {
     title: 'ربط حسابك عبر Meta',
@@ -678,7 +694,7 @@ export const GUIDES: Record<string, Guide> = {
           'إن ظهرت رسالة تقول إن Google Auth Platform لم تُضبط بعد، فاضغط «Get started». ستسألك أربع شاشات بالترتيب: «App Information» ثم «Audience» ثم «Contact Information» ثم «Finish»، وهي موضوع الخطوات الثلاث التالية.',
           'وإن كانت مضبوطة من قبل فلا تضغط «Get started»: عدّل ما يلي من القائمة نفسها.',
         ],
-        shots: [shot('menu', 340, 467, 'القائمة الجانبية في Google Auth Platform: Overview وBranding وAudience وClients وData access وVerification centre وSettings', 'قائمة الصفحة التي على اليسار: منها تفتح «Branding» و«Audience» و«Clients».')],
+        shots: [{ ...shot('menu', 340, 467, 'القائمة الجانبية في Google Auth Platform: Overview وBranding وAudience وClients وData access وVerification centre وSettings', 'قائمة الصفحة التي على اليسار: منها تفتح «Branding» و«Audience» و«Clients».'), at: 1 }],
         link: { href: 'https://console.cloud.google.com/auth/branding', label: 'Google Auth Platform' },
         ok: 'فتحتها',
       },
@@ -720,7 +736,7 @@ export const GUIDES: Record<string, Guide> = {
           'اضغط «Create». بهذا ينتهي الإعداد الأول.',
           'وفي صفحة Branding تجد هذا الحقل أسفلها باسم «Developer contact information»: اكتب بريدك ثم اضغط «Save».',
         ],
-        shots: [shot('contact', 733, 198, 'أسفل صفحة Branding: Developer contact information وحقل Email addresses وزرا Save وDiscard changes', 'الحلقتان على الحقل وعلى زر «Save»، والبريد محجوب.')],
+        shots: [{ ...shot('contact', 733, 198, 'أسفل صفحة Branding: Developer contact information وحقل Email addresses وزرا Save وDiscard changes', 'الحلقتان على الحقل وعلى زر «Save»، والبريد محجوب.'), at: 4 }],
         link: { href: 'https://console.cloud.google.com/auth/branding', label: 'Branding في Google Cloud' },
         ok: 'ضبطتها',
       },
@@ -805,6 +821,7 @@ export const GUIDES: Record<string, Guide> = {
           'إن أغلقت النافذة قبل نسخه فافتح العميل من «Clients» وأنشئ سراً جديداً.',
           'الصقهما هنا فقط، ولا ترسلهما إلى أحد.',
         ],
+        fieldsAt: { id: 2, secret: 3 },
         link: { href: 'https://console.cloud.google.com/auth/clients', label: 'Clients في Google Cloud' },
       },
       {
@@ -832,6 +849,12 @@ export const GUIDES: Record<string, Guide> = {
       PLATFORM_FACTS,
     ],
     link: { href: 'https://console.cloud.google.com/', label: 'Google Cloud Console' },
+    phases: [
+      { t: 'المشروع والواجهات', ids: ['project', 'youtube', 'drive'] },
+      { t: 'شاشة الموافقة', ids: ['consent', 'branding', 'audience', 'contact', 'testusers'] },
+      { t: 'معرّف العميل', ids: ['client', 'redirect', 'redirect_drive', 'keys'] },
+      { t: 'النشر', ids: ['publish'] },
+    ],
   },
   linkedin: {
     title: 'تجهيز تطبيق LinkedIn',

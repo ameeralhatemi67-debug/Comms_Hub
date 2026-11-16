@@ -3,20 +3,24 @@
 // the other, and a bar. Every step taken is saved in the database (platform_setup_save), so closing loses nothing, on
 // any device. A secret is never part of that: it goes to the vault when the platform accepts it, through the same route
 // as the app block of «الاتصالات». The steps are the guides of src/lib/setup-guides.ts, one place for the sheet and the
-// circled "!"; the rules are the database's.
+// circled "!"; the rules are the database's. The guides in WHOLE_GUIDES are drawn as one page (guide-doc.tsx, MVP_draft.md
+// section 67.10) with the same saving, keys and review as the step sheet.
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import type { needProps } from '@/lib/kit/need';
 import { supabase } from '@/lib/supabase/client';
 import { GUIDES, resolveGuide, type GuideStep } from '@/lib/setup-guides';
+import { isWholeGuide } from '@/lib/guide-layout';
 import { expiryLineAr, expiryOf, riyadhToday } from '@/lib/integrations/expiry';
 import type { Integration } from '@/lib/integrations/rules';
-import { PROVIDER_COPY, providerOf, type ConnProvider } from '@/lib/platforms/provider';
+import { providerOf, type ConnProvider } from '@/lib/platforms/provider';
 import { CHIP_CLASS, chipOf, countAccounts, doneSteps, firstOpen, setupGuideOf, stepId, type PlatformState, type SetupRow } from '@/lib/platforms/setup';
 import type { PlatformInfo } from '@/lib/work/rules';
 import { PlatformTile } from '../platform-icon';
 import { GuideInfo, GuideShots, GuideTables, GuideTodo, Rich } from '../guide-text';
 import { CopyField, Sheet, SheetHead, SheetProgress, SheetSteps } from '../sheet';
+import { GuideDoc } from './guide-doc';
+import { useKeysForm, type KeysProps } from './keys-form';
 
 export type SheetTo = 'first' | 'keys' | 'review' | 'finish';
 type Act = (fn: string, args: Record<string, unknown>, ok: string) => Promise<boolean>;
@@ -86,6 +90,9 @@ export function PlatformSheet({
     if (to === 'review') return find('review');
     return setup?.step && ids.includes(setup.step) && !done.has(setup.step) ? setup.step : firstOpen(steps, done);
   });
+  // A guide drawn as one page opens where the person stopped, or at its top when nothing was started.
+  const [startAt] = useState<string | null>(() => (to === 'finish' ? null : to !== 'first' || setup !== null || done.size > 0 ? at : null));
+  const [finishShown, setFinishShown] = useState(to === 'finish');
   const cur = at === null ? null : (steps[ids.indexOf(at)] ?? null);
   const pct = Math.round((done.size / steps.length) * 100);
   const marks = ids.map((id) => (id === at ? 'cur' : done.has(id) ? 'done' : 'todo')) as ('done' | 'cur' | 'todo')[];
@@ -108,6 +115,7 @@ export function PlatformSheet({
     setSaved(nextDone);
     setFields(nextFields);
     setAt(next);
+    if (next === null) setFinishShown(true);
     await persist(nextDone, next, nextFields);
   };
   const close = () => {
@@ -115,16 +123,65 @@ export function PlatformSheet({
     if (guideKey && done.size > 0 && done.size < total && state !== 'ok') say(`حُفظ تقدمك: ${done.size} من ${total}. تعود إليه من سطر ${p.label_ar}.`);
     onClose();
   };
+  const keysProps = (k: Omit<KeysProps, 'provider'>): KeysProps | null => (provider ? { provider, ...k } : null);
+  const onKeysSaved = (id: string) => async (f: Fields) => {
+    if (!p.enabled) await act('platform_set_enabled', { p_key: p.key, p_on: true }, `فُعّلت ${p.label_ar}.`);
+    await onChanged();
+    await finishStep(id, { ...fields, ...f });
+  };
+  const reviewState = (id: string) => async (next: 'submitted' | 'approved') => {
+    const ok = await act('platform_set_readiness', { p_key: p.key, p_state: next, p_note: null }, next === 'submitted' ? `سُجّل أن الطلب قُدّم. يبقى الربط محدوداً إلى أن توافق المنصة.` : 'سُجّلت موافقة المنصة.');
+    if (ok) await finishStep(id);
+  };
+  const finishPanel = (
+    <FinishPanel p={p} app={app} provider={provider} accounts={accounts} hasGuide={Boolean(guideKey)} onReplace={provider ? () => setAt(find('keys')) : undefined}>
+      {children}
+    </FinishPanel>
+  );
+  const head = (
+    <SheetHead
+      tile={<PlatformTile k={p.key} />}
+      title={at === null ? p.label_ar : `إعداد ${p.label_ar}`}
+      sub={<Rich text={(guideKey && SUB[guideKey]) || (guideKey ? SUB_DEFAULT : SUB.manual)} />}
+      chip={<span className={`pf-chip ${CHIP_CLASS[state]}`}>{chipOf(state, done.size, steps.length)}</span>}
+      onClose={close}
+    />
+  );
+
+  if (guideKey && isWholeGuide(guideKey)) {
+    // The summary stays on the page once shown: picking a step from the list no longer hides it.
+    const showFinish = finishShown || at === null;
+    return (
+      <Sheet label={guide.title} onClose={close}>
+        {head}
+        <GuideDoc
+          guide={guide}
+          ids={ids}
+          done={done}
+          at={at}
+          start={startAt}
+          failed={failed}
+          finish={showFinish ? finishPanel : null}
+          keys={keysProps({ app, fields, problem: state === 'issue', canSecrets, lock, onSaved: onKeysSaved(find('keys') ?? 'keys') })}
+          submitted={p.readiness === 'submitted'}
+          bar={(s, id) =>
+            s.kind === 'review' ? (
+              <ReviewButtons step={s} submitted={p.readiness === 'submitted'} canManage={canManage} lock={lock} onSkip={() => void finishStep(id)} onState={reviewState(id)} />
+            ) : (
+              <button type="button" className="pf-btn pri" {...(canManage ? { onClick: () => void finishStep(id) } : lock(LOCKED))}>
+                {done.has(id) ? 'متابعة' : <Rich text={s.ok ?? 'تمت'} />}
+              </button>
+            )
+          }
+          onPick={open}
+        />
+      </Sheet>
+    );
+  }
 
   return (
     <Sheet label={guide.title} onClose={close}>
-      <SheetHead
-        tile={<PlatformTile k={p.key} />}
-        title={at === null ? p.label_ar : `إعداد ${p.label_ar}`}
-        sub={<Rich text={(guideKey && SUB[guideKey]) || (guideKey ? SUB_DEFAULT : SUB.manual)} />}
-        chip={<span className={`pf-chip ${CHIP_CLASS[state]}`}>{chipOf(state, done.size, steps.length)}</span>}
-        onClose={close}
-      />
+      {head}
       {guideKey && (
         <SheetProgress
           at={at === null ? 'اكتملت الخطوات' : `الخطوة ${n} من ${steps.length}`}
@@ -164,20 +221,10 @@ export function PlatformSheet({
           {cur?.kind === 'keys' && provider ? (
             <KeysPanel
               key={at}
-              provider={provider}
               step={cur}
               n={n}
               done={done.has(at!)}
-              app={app}
-              fields={fields}
-              problem={state === 'issue'}
-              canSecrets={canSecrets}
-              lock={lock}
-              onSaved={async (f) => {
-                if (!p.enabled) await act('platform_set_enabled', { p_key: p.key, p_on: true }, `فُعّلت ${p.label_ar}.`);
-                await onChanged();
-                await finishStep(at!, { ...fields, ...f });
-              }}
+              keys={keysProps({ app, fields, problem: state === 'issue', canSecrets, lock, onSaved: onKeysSaved(at!) })!}
             />
           ) : cur?.kind === 'review' ? (
             <ReviewPanel
@@ -188,17 +235,12 @@ export function PlatformSheet({
               canManage={canManage}
               lock={lock}
               onSkip={() => void finishStep(at!)}
-              onState={async (next) => {
-                const ok = await act('platform_set_readiness', { p_key: p.key, p_state: next, p_note: null }, next === 'submitted' ? `سُجّل أن الطلب قُدّم. يبقى الربط محدوداً إلى أن توافق المنصة.` : 'سُجّلت موافقة المنصة.');
-                if (ok) await finishStep(at!);
-              }}
+              onState={reviewState(at!)}
             />
           ) : cur ? (
             <StepPanel step={cur} n={n} done={done.has(at!)} canGoBack={ids.indexOf(at!) > 0} canManage={canManage} lock={lock} onDone={() => void finishStep(at!)} onBack={() => open(ids[ids.indexOf(at!) - 1])} manual={!guideKey} />
           ) : (
-            <FinishPanel p={p} app={app} provider={provider} accounts={accounts} hasGuide={Boolean(guideKey)} onReplace={provider ? () => setAt(find('keys')) : undefined}>
-              {children}
-            </FinishPanel>
+            finishPanel
           )}
         </div>
       </div>
@@ -273,31 +315,30 @@ function StepPanel({ step, n, done, canGoBack, canManage, lock, onDone, onBack, 
   );
 }
 
+/** The buttons of a review step: the platform decides, and the person says where the request is. */
+function ReviewButtons({ step, submitted, canManage, lock, onSkip, onState }: { step: GuideStep; submitted: boolean; canManage: boolean; lock: Lock; onSkip: () => void; onState: (s: 'submitted' | 'approved') => void }) {
+  return (
+    <>
+      {!submitted && (
+        <button type="button" className="pf-btn pri" {...(canManage ? { onClick: () => onState('submitted') } : lock(LOCKED))}>
+          قدّمت الطلب
+        </button>
+      )}
+      <button type="button" className={`pf-btn ${submitted ? 'pri' : ''}`} {...(canManage ? { onClick: () => onState('approved') } : lock(LOCKED))}>
+        وافقت المنصة
+      </button>
+      {step.ok && (
+        <button type="button" className="pf-btn ghost" {...(canManage ? { onClick: onSkip } : lock(LOCKED))}>
+          {step.ok}
+        </button>
+      )}
+    </>
+  );
+}
+
 function ReviewPanel({ step, n, done, submitted, canManage, lock, onSkip, onState }: { step: GuideStep; n: number; done: boolean; submitted: boolean; canManage: boolean; lock: Lock; onSkip: () => void; onState: (s: 'submitted' | 'approved') => void }) {
   return (
-    <StepCard
-      n={n}
-      eyebrow="خارج الموقع: قرار المنصة"
-      step={step}
-      done={done}
-      foot={
-        <>
-          {!submitted && (
-            <button type="button" className="pf-btn pri" {...(canManage ? { onClick: () => onState('submitted') } : lock(LOCKED))}>
-              قدّمت الطلب
-            </button>
-          )}
-          <button type="button" className={`pf-btn ${submitted ? 'pri' : ''}`} {...(canManage ? { onClick: () => onState('approved') } : lock(LOCKED))}>
-            وافقت المنصة
-          </button>
-          {step.ok && (
-            <button type="button" className="pf-btn ghost" {...(canManage ? { onClick: onSkip } : lock(LOCKED))}>
-              {step.ok}
-            </button>
-          )}
-        </>
-      }
-    >
+    <StepCard n={n} eyebrow="خارج الموقع: قرار المنصة" step={step} done={done} foot={<ReviewButtons step={step} submitted={submitted} canManage={canManage} lock={lock} onSkip={onSkip} onState={onState} />}>
       <p>لا تخبر المنصة الموقع بما قررت، فقل له أنت أين وصل الطلب.</p>
       {step.copy && <CopyField label={step.copyLabel ?? 'الرابط'} value={step.copy} />}
       {step.more?.map((m) => <CopyField key={m.label} label={m.label} value={m.copy} />)}
@@ -306,97 +347,18 @@ function ReviewPanel({ step, n, done, submitted, canManage, lock, onSkip, onStat
   );
 }
 
-function KeysPanel({ provider, step, n, done, app, fields, problem, canSecrets, lock, onSaved }: { provider: ConnProvider; step: GuideStep; n: number; done: boolean; app: Integration | undefined; fields: Fields; problem: boolean; canSecrets: boolean; lock: Lock; onSaved: (f: Fields) => Promise<void> }) {
-  const c = PROVIDER_COPY[provider];
-  const have = app?.has_secret === true;
-  const [id, setId] = useState(fields.app_id ?? (typeof app?.config?.app_id === 'string' ? app.config.app_id : ''));
-  const [config, setConfig] = useState(fields.config_id ?? (typeof app?.config?.config_id === 'string' ? app.config.config_id : ''));
-  const [secret, setSecret] = useState('');
-  const [expires, setExpires] = useState('');
-  const [scopes, setScopes] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [tail, setTail] = useState('');
-  const needsConfig = provider === 'meta';
-  const expiry = expiryOf(app?.config, riyadhToday());
-  const save = async () => {
-    setBusy(true);
-    setError('');
-    try {
-      const r = await fetch('/api/platforms/app', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, app_id: id, secret, config_id: config || undefined, scopes: scopes.trim() ? scopes.split(/[\s,]+/).filter(Boolean) : undefined, secret_expires_on: expires || undefined }),
-      });
-      const b = (await r.json()) as { error?: string; tail?: string };
-      if (!r.ok) return setError(b.error ?? 'تعذّر الحفظ.');
-      setSecret('');
-      setTail(b.tail ?? '');
-      await onSaved({ app_id: id.trim(), ...(config.trim() ? { config_id: config.trim() } : {}) });
-    } catch {
-      setError('تعذّر الوصول إلى الخادم.');
-    } finally {
-      setBusy(false);
-    }
-  };
+function KeysPanel({ step, n, done, keys }: { step: GuideStep; n: number; done: boolean; keys: KeysProps }) {
+  const k = useKeysForm(keys);
   return (
-    <StepCard
-      n={n}
-      eyebrow="ما يحتاجه الموقع منك"
-      step={step}
-      done={done}
-      foot={
-        <button
-          type="button"
-          className="pf-btn pri st-app-save"
-          disabled={busy || (canSecrets && (!id.trim() || !secret.trim() || (needsConfig && !config.trim())))}
-          {...(canSecrets ? { onClick: () => void save() } : lock('إدخال الأسرار لمن يملك «إدارة المنصات وتطبيقاتها» و«إدخال أسرار التكاملات وتجديدها».'))}
-        >
-          {busy ? 'جارٍ الفحص…' : have ? 'استبدال بعد الفحص' : 'فحص وحفظ'}
-        </button>
-      }
-    >
+    <StepCard n={n} eyebrow="ما يحتاجه الموقع منك" step={step} done={done} foot={k.button}>
       {step.todo && step.todo.length > 0 && <GuideTodo items={step.todo} shots={step.shots} />}
       {step.shots && step.shots.length > 0 && <GuideShots shots={step.shots} />}
-      {problem && !tail && <p className="pf-note bad">{expiry.state === 'expired' ? expiryLineAr(expiry) : 'رفضت المنصة المعرّف أو السر المحفوظ. أدخلهما من جديد.'}</p>}
-      {have && !problem && (
-        <p className="pf-note ok">
-          السر محفوظ في الخزنة (<bdi dir="ltr">{app?.secret_tail ?? ''}</bdi>). أدخله من جديد لتستبدله فقط.
-        </p>
-      )}
-      <label className="pf-f">
-        <Rich text={c.idLabel} />
-        <input className="ltr" value={id} autoComplete="off" disabled={!canSecrets || busy} onChange={(e) => setId(e.target.value)} />
-      </label>
-      <label className="pf-f">
-        <Rich text={c.secretLabel} />
-        <input className="ltr" type="password" value={secret} autoComplete="new-password" disabled={!canSecrets || busy} onChange={(e) => setSecret(e.target.value)} />
-      </label>
-      {needsConfig && (
-        <label className="pf-f">
-          معرّف الإعداد (Configuration ID)
-          <input className="ltr" inputMode="numeric" value={config} autoComplete="off" disabled={!canSecrets || busy} onChange={(e) => setConfig(e.target.value.replace(/\D/g, ''))} />
-        </label>
-      )}
-      <details className="pf-more">
-        <summary>خيارات أخرى</summary>
-        <label className="pf-f">
-          ينتهي السر في <small>اختياري، ويذكّرك الموقع قبله بشهر</small>
-          <input className="ltr st-app-expires" type="date" value={expires} disabled={!canSecrets || busy} onChange={(e) => setExpires(e.target.value)} />
-        </label>
-        {provider === 'tiktok' && (
-          <label className="pf-f">
-            الصلاحيات المطلوبة <small>مفصولة بفواصل، وتكون ممّا أضفته إلى التطبيق</small>
-            <input className="ltr" value={scopes} placeholder="user.info.basic,video.publish,video.upload" disabled={!canSecrets || busy} onChange={(e) => setScopes(e.target.value)} />
-          </label>
-        )}
-      </details>
-      <p className="pf-note info">يسأل الموقع المنصة أولاً، ولا يحفظ شيئاً إن رفضت. السر يذهب إلى الخزنة ولا يُعرض بعد ذلك، فإن أغلقت قبل الفحص أعدت إدخاله وحده.</p>
-      {error && (
-        <p className="pf-note bad" role="alert">
-          {error}
-        </p>
-      )}
+      {k.top}
+      {k.field.id}
+      {k.field.secret}
+      {k.field.config}
+      {k.field.more}
+      {k.after}
     </StepCard>
   );
 }
