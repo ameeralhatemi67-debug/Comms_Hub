@@ -282,6 +282,9 @@ export function TikTokTest({ a, onReconnect, mode = 'test' }: { a: AccountRow; o
           <p className="yt-sub" data-tt="lead">
             {LEAD[choice]}
           </p>
+          <p className="yt-sub" data-tt="stories">
+            القصص (Stories) غير متاحة عبر واجهة TikTok: لا نوع لها فيها، فتُنشر من تطبيق TikTok نفسه. المسودة تصل إلى الصندوق لتكملها هناك.
+          </p>
 
           <div className="yt-file">
             {ready ? (
