@@ -4701,3 +4701,29 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   «SecurityFatalError»: the version is affected by a known security advisory and the command stops to recommend an upgrade. Retried three
   times with the same result. Nothing in this change touches Next. Not worked around.
 - **Not checked.** Signed in on the live site; Instagram's roles step has no list of actions (left as the director saw it).
+
+### 2026-11-25: X's link route, the Next.js patch, and what TikTok and Instagram offer
+
+- **The request.** The owner asked for X's link route to be fully working for a test the next day, with its help, for the Instagram change to be
+  committed, and for TikTok Stories and Instagram's three kinds (post, Reel, Story) to be linked if the platforms allow. `MVP_draft.md` section 81.
+- **Next.js.** 16.4.3 made `npm run build` exit 1 (SecurityFatalError: a known advisory) after a clean compile; 16.4.6, the same minor line, builds
+  with exit 0 (`60aef7d`). The Instagram guide's own commit is `750f086`.
+- **X's link route** (`32f1648`, help in `d0c9cbd`).
+  - What X allows: the composer link (`https://x.com/intent/tweet`, read in X's docs on 2026-11-25) takes text, a url, hashtags, via, related and
+    in_reply_to, and no media; oEmbed (`publish.x.com/oembed`) answers a post's link with its author and needs no key. So the hand-off opens the
+    composer with the text and the person adds the files.
+  - Database (`20261125120000_work_cycle_x_link_route.sql`): `platform_accounts.route`, `account_add_link`, `work_run_publish` (a link account waits,
+    the work is «جارٍ النشر»), `work_link_confirm`, `account_busy` counts a work «جارٍ النشر». No existing function's behaviour for other accounts changed.
+  - Pages: `x-handoff.tsx` (work page, «إكمال النشر على X»), the send dialogs, the add-account sheet's choice between «بالرابط» and «عبر واجهة X», the account's
+    row and sheet, and `pending` treated as its own state in the calendar, analytics and lists. `/api/platforms/x-post` asks X's public lookup, advice only.
+  - Help: news, parts, buttons, rules and questions on three pages; the X guide and the platform note say the paid steps are not needed for this route.
+- **Checks.**
+  - `supabase/tests/x_link_route_rules.sql` 64 of 64 on a private database (`qa/x-link-route-rules.json`); the four older publishing rule files on the same database: work_youtube_choices 36 of 36, work_rules 135 of 135, limits 63 of 63, approval 71 of 71.
+  - `npm test` 975 of 975 (the new `tests/x-link.test.mjs` has 8); `npm run typecheck` and `npm run build` pass.
+  - `qa/x-link-flow.cjs` 25 of 25 in Edge on a fixture (the dialogs, the text and its length, the file, the composer's address, the link box refusing what is not this account's post, X's lookup as advice, «لم يُنشر», a phone).
+  - Re-run and unchanged: `qa/platforms-flow.cjs` 170 of 170, `qa/publish-choices-flow.cjs` 17 of 17, `qa/tiktok-test-flow.cjs` 50 of 50.
+- **Not applied.** The migration was not run on comms-hub: the connected Supabase connector sees the other organisation (see the note on the comms-hub account), so the owner runs the file in the SQL editor.
+- **Found, not fixed.** `qa/post-preview.cjs` could not run because its stand-in had no TikTok panel; that is fixed and it now runs, 200 of 202. The two failing checks (`channels-director` and `channels-publisher` expecting «ربط محاكى») fail with the committed `channels.tsx` too.
+- **TikTok Stories.** The Content Posting API pages read on 2026-11-25 (get started, direct post, upload video, photo post, sharing guidelines) list video and photo posts and the inbox draft, and no Story. Nothing was built; the TikTok panel and the platform note say Stories are published from the TikTok app.
+- **Instagram.** A Story, a picture post and a Reel already exist in «تجربة النشر» and «نشر مباشر» (`instagram-test.tsx`, section 72 and 76); nothing was added. They have not been tried against Meta.
+- **Not checked.** The signed-in pages on the live site; real X; the phone application's «مشاركة» to X.

@@ -26,6 +26,24 @@ related:
 
 # Communication Department Hub — Current Status
 
+## X's link route, the Next.js patch, and TikTok's Stories, 2026-11-25
+
+- **Done, committed and pushed (`f7b0fed`, `32f1648`, `d0c9cbd`, after `750f086` and `60aef7d`).** `MVP_draft.md` section 81: an X account can be added «بالرابط»
+  (no sign-in, key or app). «نشر الآن» makes its result wait and the work «جارٍ النشر»; the publisher posts on X from the hand-off (text to copy,
+  files to download or share, X's composer opened with the text, the post's link pasted back) and `work_link_confirm` accepts only a post of that
+  account's own handle, once. The help of the work page, «الموافقات والنشر» and «حسابات المنصات» says how.
+- **One step is the owner's, before the test.** Run `supabase/migrations/20261125120000_work_cycle_x_link_route.sql` in the SQL editor of comms-hub
+  (the Supabase connector here sees the other organisation, so it was not applied from here). Until it is run the pages behave as before and
+  «بالرابط» in «إضافة حساب» answers that the database needs updating.
+- **Next.js 16.4.3 to 16.4.6** (`60aef7d`): 16.4.3 made `npm run build` exit 1 with SecurityFatalError after compiling; 16.4.6 builds clean.
+- **TikTok Stories: not possible.** TikTok's Content Posting API pages (read 2026-11-25) list video and photo posts and the inbox draft, and no Story type.
+  The panel and the platform note say so. **Instagram** already offers a Story, a picture post and a Reel in «تجربة النشر» and «نشر مباشر».
+- **Checks.** Rules 64 of 64 on a private database and the four older publishing rule files unchanged; `npm test` 975 of 975; typecheck and build pass;
+  `qa/x-link-flow.cjs` 25 of 25; `qa/platforms-flow.cjs` 170 of 170.
+- **Found, not fixed.** `qa/post-preview.cjs` could not run (its stand-in lacked TikTok); fixed, and it now runs: 200 of 202, the two «ربط محاكى» checks of the
+  channels page fail with or without this change.
+- **Not checked.** Signed in on the live site; real X (the composer link, a real post's link); the phone application's «مشاركة» to X.
+
 ## The Instagram setup guide shown as one page, 2026-11-25
 
 - **Done locally, not committed.** `MVP_draft.md` section 67.11: `WHOLE_GUIDES` is now google, meta, tiktok. Instagram's nine steps and 22
