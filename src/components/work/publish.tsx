@@ -7,16 +7,19 @@
 // YouTube's four choices (MVP_draft.md 78): «نشر الآن» asks each YouTube account «عام», «غير مدرج» or «خاص», from its default;
 // «جدولة» is «مجدول», which YouTube makes public at the time. Approval does not change.
 import { useState } from 'react';
-import { CalendarDays, Check, Lock, Send, ShieldCheck, TriangleAlert, Upload } from 'lucide-react';
+import { CalendarDays, Check, ExternalLink, Lock, Send, ShieldCheck, TriangleAlert, Upload } from 'lucide-react';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { accountName, authOk, riyadhInstant, riyadhStamp, type AccountRow, type WorkRow } from '@/lib/work/rules';
 import { NOW_CHOICES, SCHEDULED_LINE, choiceSub, choiceWord, defaultChoice, nowOptions, youtubeOf, type NowChoice } from '@/lib/work/youtube-choices';
 import { useWork } from './data';
 import { Hint, Ic, Modal } from './parts';
 import { SendChecks, blocked, useCopySource, useSendChecks } from './post-preview';
+import { XHandoff } from './x-handoff';
 
 type Act = (fn: string, args: Record<string, unknown>, ok: string) => Promise<boolean>;
 const channelsOf = (w: WorkRow, accounts: AccountRow[]) => w.channels.map((c) => accounts.find((a) => a.id === c)).filter((a): a is AccountRow => !!a);
+/** Accounts of this work that are used by hand-off (X's link route, MVP_draft.md 81): nothing is sent to them, the person posts. */
+export const linkAccounts = (w: WorkRow, accounts: AccountRow[]) => channelsOf(w, accounts).filter((a) => a.route === 'link');
 export const isMailWork = (w: WorkRow, accounts: AccountRow[]) => accounts.find((a) => a.id === w.channels[0])?.platform === 'mail';
 
 /** Accounts of this work the person does not publish on (administrators publish on all). */
@@ -53,6 +56,11 @@ export function ScheduleDialog({ w, approvedParts, at: from, onClose, act }: { w
   return (
     <Modal title={w.status === 'SCHEDULED' ? 'تغيير الموعد' : `جدولة ${mail ? 'الإرسال' : 'النشر'}`} onClose={onClose}>
       <Hint i={ShieldCheck}>يُنشر ما اعتُمد بإصداراته فقط{approvedParts.length ? `: ${approvedParts.join('، ')}` : ''}.</Hint>
+      {linkAccounts(w, x.accounts).length > 0 && (
+        <Hint i={ExternalLink}>
+          {linkAccounts(w, x.accounts).map(accountName).join('، ')}: حساب X بالرابط. عند الموعد يصير العمل «جارٍ النشر» وينتظر نشرك بنفسك على X، فلا يُنشر وحده. وX نفسه يتيح الجدولة من صفحة النشر عنده إن شئت.
+        </Hint>
+      )}
       {w.proposed_at && (
         <Hint i={CalendarDays}>
           الموعد المعتمد: <b>{riyadhStamp(w.proposed_at)}</b>. موعد آخر يعيد «موعد النشر» وحده إلى المراجعة، ثم يُجدول تلقائياً عند اعتماده.
@@ -137,9 +145,15 @@ export function PublishNowDialog({ w, onClose, act }: { w: WorkRow; onClose: () 
   const src = useCopySource(w.id, w.type);
   const checks = useSendChecks(src, channelsOf(w, x.accounts));
   const stop = blocked(checks);
+  const links = linkAccounts(w, x.accounts);
   return (
     <Modal title={mail ? 'تأكيد الإرسال' : 'تأكيد النشر'} onClose={onClose}>
       <Hint warn>محاكاة: لا يصل شيء إلى المنصات ولا تُرسل رسالة. يُنشر الإصدار المعتمد فقط.</Hint>
+      {links.length > 0 && (
+        <Hint i={ExternalLink}>
+          {links.map(accountName).join('، ')}: حساب X بالرابط لا يُحاكى. بعد «نشر الآن» يصير العمل «جارٍ النشر» وتظهر حزمة النشر لتنشر منها على X بنفسك ثم تلصق رابط المنشور.
+        </Hint>
+      )}
       <div className="wk-chanlist">
         {channelsOf(w, x.accounts).map((a) => {
           const ok = authOk(a, now);
@@ -151,7 +165,7 @@ export function PublishNowDialog({ w, onClose, act }: { w: WorkRow; onClose: () 
               </span>
               <span className={`wk-cr ${ok ? 'ok' : 'bad'}`}>
                 <Ic i={ok ? Check : TriangleAlert} />
-                {ok ? 'جاهز' : 'التفويض منتهٍ: سيفشل'}
+                {a.route === 'link' ? (ok ? 'بالرابط: تنشر أنت' : 'الحساب موقوف: سيفشل') : ok ? 'جاهز' : 'التفويض منتهٍ: سيفشل'}
               </span>
               {a.platform === 'youtube' && (
                 <div className="wk-yt-pick" data-yt-now={a.id}>
@@ -189,7 +203,7 @@ export function PublishNowDialog({ w, onClose, act }: { w: WorkRow; onClose: () 
             void act(
               'work_publish',
               tubes.length ? { p_work: w.id, p_op: 'now', p_options: options } : { p_work: w.id, p_op: 'now' },
-              mail ? 'أُرسل من البريد (محاكاة).' : 'نُشر (محاكاة). النتيجة لكل حساب في صفحة العمل.',
+              mail ? 'أُرسل من البريد (محاكاة).' : links.length ? 'صار العمل «جارٍ النشر». أكمل النشر على X من صفحة العمل أو من «إكمال النشر على X».' : 'نُشر (محاكاة). النتيجة لكل حساب في صفحة العمل.',
             ).then((ok) => ok && onClose())
           }
         >
@@ -197,6 +211,26 @@ export function PublishNowDialog({ w, onClose, act }: { w: WorkRow; onClose: () 
           {mail ? 'إرسال الآن' : 'نشر الآن'}
         </button>
       </div>
+    </Modal>
+  );
+}
+
+/**
+ * X's link route (MVP_draft.md 81): the work's X accounts that wait for their publisher, each with its hand-off in one window. The window
+ * closes when one is settled, so the list it shows is always the list that is still waiting.
+ */
+export function HandoffDialog({ w, onClose, act }: { w: WorkRow; onClose: () => void; act: Act }) {
+  const x = useWork();
+  const waiting = channelsOf(w, x.accounts).filter((a) => w.results[a.id]?.pending);
+  return (
+    <Modal title={`النشر على X: ${w.title}`} wide onClose={onClose}>
+      {waiting.length === 0 && <Hint i={Check}>لا حساب ينتظر نشراً في هذا العمل.</Hint>}
+      {waiting.map((a) => (
+        <section key={a.id} className="wk-xh-sec">
+          <h4>{accountName(a)}</h4>
+          <XHandoff w={w} account={a} act={act} onDone={onClose} />
+        </section>
+      ))}
     </Modal>
   );
 }

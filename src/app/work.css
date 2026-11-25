@@ -1305,3 +1305,24 @@ button.ac-pick:hover{border-color:var(--green);background:var(--soft)}
 .wk .wk-chanrow .wk-yt-line,.wk .wk-chanrow .wk-yt-pick{grid-column:1/-1}
 .wk .wk-yt-pick{display:grid;gap:4px;justify-items:start}
 .wk .wk-vis{display:inline-block;margin-inline-start:4px;padding:0 6px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--w-ink2);font-size:11px;font-weight:600;line-height:1.6}
+/* X's link route (MVP_draft.md 81): the hand-off of a post to X, and the waiting state of an account. */
+.wk .wk-xh{display:grid;gap:10px;padding:12px;border:1px solid var(--w-line2);border-radius:var(--w-r);background:var(--surface-2)}
+.wk .wk-xh-lead{margin:0;font-size:13.5px;line-height:1.9;color:var(--muted)}
+.wk .wk-xh-steps{margin:0;padding:0;list-style:none;display:grid;gap:12px;counter-reset:xh}
+.wk .wk-xh-steps>li{display:grid;gap:6px;counter-increment:xh;padding-inline-start:30px;position:relative}
+.wk .wk-xh-steps>li::before{content:counter(xh);position:absolute;inset-inline-start:0;top:0;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--surface);border:1.5px solid var(--green);color:var(--green-text)}
+.wk .wk-xh-steps pre{margin:0;padding:8px 10px;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:13.5px;line-height:1.9;background:var(--surface);border:1px solid var(--line);border-radius:8px;max-height:11em;overflow:auto}
+.wk .wk-xh-row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.wk .wk-xh-over{color:var(--danger)}
+.wk .wk-xh-files{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.wk .wk-xh-files li{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.wk .wk-xh-note{margin:0;font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--line)}
+.wk .wk-xh-note.ok{color:var(--green-text)}
+.wk .wk-xh-note.warn{color:var(--st-warn-fg)}
+.wk .wk-xh-note.bad{color:var(--danger)}
+.wk .wk-xh-post{font-size:12.5px;overflow-wrap:anywhere}
+.wk .wk-xh-sec{display:grid;gap:8px;margin-block:8px}
+.wk .wk-xh-sec h4{margin:0}
+.wk .wk-chanrow .wk-chan-more{grid-column:1/-1}
+.wk .wk-chanrow .wk-xh-post{grid-column:1/-1}
+.wk .wk-chanrow .wait,.wk .wk-cr .wait{color:var(--st-warn-fg)}

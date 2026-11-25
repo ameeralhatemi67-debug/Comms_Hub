@@ -50,7 +50,7 @@ export type WorkRow = {
   /** What the writer gathered beside the text. Not a version. */
   research?: string | null;
   /** How each account went out; a YouTube account says its visibility (MVP_draft.md 78). */
-  results: Record<string, { ok: boolean; at: string; why: string | null; privacy?: 'public' | 'unlisted' | 'private' }>;
+  results: Record<string, { ok: boolean; at: string; why: string | null; privacy?: 'public' | 'unlisted' | 'private'; pending?: boolean; route?: 'link'; url?: string }>;
   /** YouTube's choice for each of the work's YouTube accounts, kept at «نشر الآن» (MVP_draft.md 78). Absent before the migration. */
   pub_options?: Record<string, string>;
   closed_at: string | null;
@@ -101,6 +101,8 @@ export type AccountRow = {
   scopes?: string[];
   /** A YouTube account's «الظهور الافتراضي» at «نشر الآن»; none is «عام» (MVP_draft.md 78). */
   default_privacy?: 'unlisted' | 'private' | null;
+  /** 'link' for an X account used by hand-off, with no API: the site prepares the post and the person posts it (MVP_draft.md 81). Absent before the migration. */
+  route?: 'api' | 'link';
 };
 
 export type TaskRow = {
@@ -945,8 +947,9 @@ export function partLine(p: Pick<Part, 'key' | 'ver'>, approvals: ApprovalRow[],
 }
 
 /** How an account stands now: stopped, expired, running out within six days, or connected. */
-export function accountState(a: Pick<AccountRow, 'active' | 'authorized_until'> & Partial<Pick<AccountRow, 'conn_kind' | 'conn_state'>>, nowIso: string): [string, '' | 'danger' | 'warn' | 'approved'] {
+export function accountState(a: Pick<AccountRow, 'active' | 'authorized_until'> & Partial<Pick<AccountRow, 'conn_kind' | 'conn_state' | 'route'>>, nowIso: string): [string, '' | 'danger' | 'warn' | 'approved'] {
   if (!a.active) return ['موقوف', ''];
+  if (a.route === 'link') return ['نشر بالرابط', 'approved'];
   if (a.conn_kind === 'oauth' && a.conn_state === 'needs_reconnect') return ['يحتاج ربطاً من جديد', 'danger'];
   if (a.conn_kind === 'oauth' && a.conn_state === 'error') return ['تعذّر فحص الاتصال', 'warn'];
   if (!a.authorized_until) return ['متصل', 'approved'];
@@ -1074,6 +1077,10 @@ const ERRORS: Record<string, string> = {
   LABEL_REQUIRED: 'اكتب الاسم في المركز.',
   HANDLE_REQUIRED: 'اكتب اسم الحساب على المنصة.',
   HANDLE_TAKEN: 'هذا الحساب مرتبط من قبل.',
+  HANDLE_INVALID: 'اسم حساب X حروف إنجليزية وأرقام وشرطة سفلية فقط، ولا يزيد على 15.',
+  POST_LINK_INVALID: 'هذا ليس رابط منشور على X. الرابط الصحيح شكله x.com/اسم_الحساب/status/رقم.',
+  POST_LINK_OTHER_ACCOUNT: 'هذا المنشور لحساب آخر غير الحساب المنتظَر.',
+  POST_LINK_USED: 'استُعمل هذا الرابط في عمل آخر.',
   PUBLISHER_REQUIRED: 'اختر شخصاً واحداً على الأقل ينشر عليه.',
   PLATFORM_INVALID: 'اختر منصة مفعّلة. تفعيل المنصات لمسؤول النظام من «الإعدادات».',
   RECONNECT_REAL: 'هذا الحساب مربوط بالمنصة نفسها: يُجدَّد بالزر «إعادة الربط» الذي يمرّ بتسجيل دخول المنصة.',
@@ -1101,6 +1108,8 @@ const ERRORS: Record<string, string> = {
 };
 export function workErrorText(message: string | null | undefined): string {
   const m = message ?? '';
+  // A function the database does not have yet: its migration was not run.
+  if (/Could not find the function|PGRST202/.test(m)) return 'يحتاج هذا الإجراء تحديثاً في قاعدة البيانات لم يُطبَّق بعد. أخبر مسؤول النظام.';
   // The database names the platform and the first broken limit: «COPY_OVER_LIMIT: instagram TOO_LONG».
   const over = /COPY_OVER_LIMIT:\s*(\S+)\s+([A-Z_]+)/.exec(m);
   if (over) {
@@ -1117,10 +1126,10 @@ export const WORK_ERROR_CODES = Object.keys(ERRORS);
 export const WORK_RPC = [
   'work_create', 'work_update', 'work_assign', 'work_set_restricted', 'work_close', 'work_cancel', 'work_reopen', 'work_start',
   'work_stage_act', 'work_save_plan', 'work_text_save', 'work_variant_confirm', 'work_asset_link', 'work_comment',
-  'work_submit', 'work_decide', 'work_request_move', 'work_cancel_move', 'work_schedule', 'work_publish', 'work_due_run',
+  'work_submit', 'work_decide', 'work_request_move', 'work_cancel_move', 'work_schedule', 'work_publish', 'work_due_run', 'work_link_confirm',
   'work_view_parts', 'work_view_pending', 'work_decide_block', 'work_step_impact', 'work_task_impact',
   'work_people_load', 'request_extension', 'request_folder_access', 'request_decide', 'request_withdraw',
-  'account_save', 'account_set_active', 'account_delete', 'account_reconnect', 'project_save', 'event_save', 'event_delete',
+  'account_save', 'account_add_link', 'account_set_active', 'account_delete', 'account_reconnect', 'project_save', 'event_save', 'event_delete',
   'reminder_add', 'reminder_delete', 'plan_template_save', 'plan_template_delete', 'task_create', 'notifications_read',
   'project_create', 'work_request_list',
 ] as const;

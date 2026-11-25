@@ -1,0 +1,135 @@
+{
+  "script": "qa/x-link-flow.cjs",
+  "run": "2026-11-25T20:39:44.112Z",
+  "checks": [
+    {
+      "name": "the send dialog says the link account is not simulated, and what happens instead",
+      "pass": true,
+      "detail": "تأكيد النشر\n\nمحاكاة: لا يصل شيء إلى المنصات ولا تُرسل رسالة. يُنشر الإصدار المعتمد فقط.\n\nX · الرسمي: حساب X بالرابط لا يُحاكى. بعد «نشر الآن» يصير العمل «جارٍ النشر» وتظهر حزمة النشر لتنشر منها على X "
+    },
+    {
+      "name": "the simulation notice stays for the others",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the link account says «بالرابط: تنشر أنت» and the simulated one «جاهز»",
+      "pass": true,
+      "detail": "[\"X · الرسمي\\n@t_x\\nبالرابط: تنشر أنت\",\"X · تجريبي\\n@t_sim\\nجاهز\",\"إنستغرام · الرسمي\\n@t.ig\\nجاهز\"]"
+    },
+    {
+      "name": "what is sent is as it always was, and the message says where to finish",
+      "pass": true,
+      "detail": "{\"fn\":\"work_publish\",\"args\":{\"p_work\":\"CH-601\",\"p_op\":\"now\"},\"ok\":\"صار العمل «جارٍ النشر». أكمل النشر على X من صفحة العمل أو من «إكمال النشر على X».\"}"
+    },
+    {
+      "name": "one hand-off, for the waiting account only",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says nothing is sent to X and whose account to post from",
+      "pass": true,
+      "detail": "لا يُرسل الموقع شيئاً إلى X. تنشر أنت من حسابك @t_x ثم تلصق رابط المنشور ليُسجَّل."
+    },
+    {
+      "name": "the text to copy is the work's text",
+      "pass": true,
+      "detail": "افتتاح معرض هداية اليوم في الرياض. ندعوكم لزيارتنا #هداية"
+    },
+    {
+      "name": "its length is counted as X counts it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "copying says so",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and puts the whole text on the clipboard",
+      "pass": true,
+      "detail": "افتتاح معرض هداية اليوم في الرياض. ندعوكم لزيارتنا #هداية"
+    },
+    {
+      "name": "the file is listed with a download at the approved version, recorded as a download",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "X's composer opens in a new tab with the text in the address and no other parameter",
+      "pass": true,
+      "detail": "https://x.com/intent/tweet?text=%D8%A7%D9%81%D8%AA%D8%AA%D8%A7%D8%AD%20%D9%85%D8%B9%D8%B1%D8%B6%20%D9%87%D8%AF%D8%A7%D9%8A%D8%A9%20%D8%A7%D9%84%D9%8A%D9%88%D9%85%20%D9%81%D9%8A%20%D8%A7%D9%84%D8%B1%D9%8A%D8%A7%D8%B6.%20%D9%86%D8%AF%D8%B9%D9%88%D9%83%D9%85%20%D9%84%D8%B2%D9%8A%D8%A7%D8%B1%D8%AA%D9%86%D8%A7%20%23%D9%87%D8%AF%D8%A7%D9%8A%D8%A9"
+    },
+    {
+      "name": "it says the files are added by hand in X",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the confirm button waits for a link",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a link that is not a post is refused in words, and nothing is sent",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a post of another account is refused, naming both",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "X's lookup finding another author stops it, in words",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a post X does not find is advice only: it is confirmed with the link as typed, for this work and account",
+      "pass": true,
+      "detail": "{\"fn\":\"work_link_confirm\",\"args\":{\"p_work\":\"CH-601\",\"p_account\":\"x-link\",\"p_url\":\"https://x.com/t_x/status/1234567890123456789\",\"p_ok\":true},\"ok\":\"سُجّل النشر على X · الرسمي.\"}"
+    },
+    {
+      "name": "the lookup was asked about the link only, twice",
+      "pass": true,
+      "detail": "[\"https://x.com/t_x/status/1234567890123456789\",\"https://x.com/t_x/status/1234567890123456789\"]"
+    },
+    {
+      "name": "the window closes after it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "X not answering does not stop it either, and the link is sent trimmed",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "«لم يُنشر» says so, with no link",
+      "pass": true,
+      "detail": "{\"fn\":\"work_link_confirm\",\"args\":{\"p_work\":\"CH-601\",\"p_account\":\"x-link\",\"p_url\":null,\"p_ok\":false},\"ok\":\"سُجّل أنه لم يُنشر على X · الرسمي.\"}"
+    },
+    {
+      "name": "phone: nothing sideways in the hand-off",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing was loaded from outside the fixture",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 25,
+  "passed": 25,
+  "failed": 0
+}

@@ -155,7 +155,7 @@ export function useCopySource(workId: string, type: string): CopySource | null {
     void Promise.all([
       db.from('work_texts').select('n,body').eq('work_id', workId).order('n'),
       db.from('work_variants').select('platform,n,body').eq('work_id', workId).order('n'),
-      db.from('work_assets').select('file:media_files(id,kind,name)').eq('work_id', workId),
+      db.from('work_assets').select('file:media_files(id,kind,name,current_version,approved_version)').eq('work_id', workId),
     ]).then(([t, v, a]) => {
       if (!live) return;
       setSrc({

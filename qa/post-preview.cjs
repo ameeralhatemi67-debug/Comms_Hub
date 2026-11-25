@@ -46,7 +46,7 @@ for (const m of sources) {
     .replace(/from '\.\/guide-text'/g, "from './guide-text.js'")
     .replace(/from '\.\.\/setup-guide'/g, `from '${up}mocks/setup-guide.js'`)
     // the account sheet's «تجربة النشر» panels have their own checks (qa/youtube-test-flow.cjs, instagram-, facebook-)
-    .replace(/from '\.\/(youtube-test|instagram-test|facebook-test)'/g, `from '${up}mocks/test-panels.js'`)
+    .replace(/from '\.\/(youtube-test|instagram-test|facebook-test|tiktok-test)'/g, `from '${up}mocks/test-panels.js'`)
     // the account sheet's direct posts have their own check (qa/direct-publish-flow.cjs)
     .replace(/from '\.\/direct-posts'/g, `from '${up}mocks/direct-posts.js'`)
     .replace(/from '@\/lib\/([^']+)'/g, `from '${up}lib/$1.js'`)
@@ -67,7 +67,7 @@ fs.writeFileSync(path.join(build, 'mocks', 'supabase.js'), `const chain = new Pr
 export const supabase = () => chain;`);
 fs.writeFileSync(path.join(build, 'mocks', 'setup-guide.js'), 'export const SetupGuide = () => null;');
 fs.writeFileSync(path.join(build, 'mocks', 'direct-posts.js'), 'export const DirectPosts = () => null; export const useDirectPosts = () => [];');
-fs.writeFileSync(path.join(build, 'mocks', 'test-panels.js'), ['YouTubeTest', 'InstagramTest', 'FacebookTest'].map((n) => `export const ${n} = () => null;`).join(' '));
+fs.writeFileSync(path.join(build, 'mocks', 'test-panels.js'), ['YouTubeTest', 'InstagramTest', 'FacebookTest', 'TikTokTest'].map((n) => `export const ${n} = () => null;`).join(' '));
 fs.writeFileSync(path.join(build, 'mocks', 'perm-requests.js'), 'export const usePermRequests = () => ({ list: [], status: "ready", reload: async () => {} });');
 fs.writeFileSync(path.join(build, 'mocks', 'data.js'), `export const useWork = () => globalThis.__WK.ctx;
 export const useWorkList = () => ({ items: globalThis.__WK.items, status: 'ready', reload: async () => {} });

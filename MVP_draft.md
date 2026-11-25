@@ -4507,3 +4507,38 @@ design is rebuilt from the second reference sheet. Glow and glints are off by de
   half circle holding the flower inside a fine gold ring. «اللوحة الجانبية»: الزهرة والاسم، الزهرة فقط، بلا.
 - A fourth round: the plaque takes the shape and design of the owner's attached plaque, a rounded triangle standing in front of the
   bar's left end with its own gold rim, a gold plate behind its left side and a navy wave at its foot; its content is unchanged.
+
+## 81. X's link route, 2026-11-25
+
+By the owner's directive of 2026-11-25. X's own API is paid, so an X account may also be used by hand-off: the site prepares the post
+and a person posts it on X, then gives the post's link. It is free and needs no sign-in, key, token or app. The paid API route stays as it
+was (its guide, `connect_x`, the keys step) and is not built for publishing yet; the two routes are chosen per account.
+
+- **What X allows.** The link that opens X's composer (`https://x.com/intent/tweet`, X's documented web intent) takes `text`, `url`,
+  `hashtags`, `via`, `related` and `in_reply_to`, and no media. So the link opens the composer with the text filled in, and the person
+  adds the files by hand. The site never sends anything to X.
+- **The account.** `platform_accounts.route` is `api` (every account until now) or `link` (X only). «إضافة حساب» then X asks «بالرابط» or
+  «عبر واجهة X». The link route needs the account's name on X and a name in the Hub, and the people who publish on it: no authorisation that
+  runs out, nothing to reconnect. `account_add_link` writes it (account managers only); an account row says «نشر بالرابط».
+- **«نشر الآن» and the due run.** A link account is not simulated: its result is `{ok:false, pending:true, route:'link'}` and the work is
+  «جارٍ النشر» while any account waits. The send dialogs say so before the press. The writer is told, and so are the account's other
+  publishers («للانتباه»). An account that a waiting work depends on cannot be stopped or deleted.
+- **The hand-off** (`src/components/work/x-handoff.tsx`), on the work page and from «إكمال النشر على X» on «الموافقات والنشر»:
+  1. the text to copy, with its length as X counts it (a link 23, Arabic and Latin letters 1; `src/lib/work/x-link.ts`);
+  2. the files, each with a download (recorded as a download in the library), and «مشاركة» in the phone application, which opens the phone's
+     list of apps so the file and the text reach X's own app;
+  3. «افتح X ومعك النص»: the composer, in a new tab, from the account the person is signed in to on X;
+  4. the post's link, pasted back.
+- **The confirmation** (`work_link_confirm`). Only a publisher of the work may confirm. The link must be a post of that account's own
+  handle (`x.com` or `twitter.com`, `/<handle>/status/<number>`; tracking and a photo's tail are dropped), and one link is used once. The work
+  then becomes «منشور», «نشر جزئي» or «فشل النشر» as before; «لم يُنشر» records that it was not posted and the retry sends it again.
+  X's public lookup (oEmbed, no key) is asked about the link as advice only: if X says another author, the page stops; if X does not find the
+  post or does not answer, it says so and still confirms. The database decides by the link's handle alone.
+- **What it does not do.** It cannot attach files from a link, schedule on X, or know whether a post is later deleted. A scheduled work on a
+  link account waits at its time for the person, as every scheduled work waits for a page to be open.
+- **Help.** The work page, «الموافقات والنشر» and «حسابات المنصات» say how it works (news, parts, buttons, rules and questions), and the X
+  setup guide says it is not needed for this route.
+- **Checks.** `supabase/tests/x_link_route_rules.sql` (64 on a private database, `qa/x-link-route-rules.json`) with the four older publishing rule
+  files unchanged; `tests/x-link.test.mjs`; `qa/x-link-flow.cjs` clicks through the real dialogs on a fixture.
+- **Applying it.** The migration `20261125120000_work_cycle_x_link_route.sql` is run in the SQL editor of comms-hub. Until then the pages
+  behave as before, and «بالرابط» on «إضافة حساب» answers that the database needs updating.

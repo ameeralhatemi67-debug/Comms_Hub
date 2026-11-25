@@ -165,7 +165,8 @@ export function analyse(
         line.ok++;
         ok++;
         if (line.visibility) line.visibility[r.privacy === 'unlisted' || r.privacy === 'private' ? r.privacy : 'public']++;
-      } else {
+      } else if (!r.pending) {
+        // An account waiting for its publisher's hand-off (X's link route) has neither succeeded nor failed.
         line.failed++;
         failed++;
       }

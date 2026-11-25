@@ -779,3 +779,15 @@ PowerShell here-string. Never a double-quoted PowerShell string: backtick
 sequences such as `` `n `` are consumed as escapes and silently corrupt the
 file. Three lines of `progress.md` were damaged this way and had to be
 repaired.
+
+X has a second route, by owner directive of 2026-11-25 (`MVP_draft.md` section 81, recorded in `progress.md`): **the link route.** An X account
+with `platform_accounts.route = 'link'` is never simulated and never sent to. «نشر الآن» makes its result `pending` and the work «جارٍ النشر»;
+the publisher posts on X by hand from the hand-off (`src/components/work/x-handoff.tsx`), pastes the post's link, and `work_link_confirm`
+accepts it only if it is a post of that account's own handle, used once.
+- **Nothing goes to X.** The composer link (`https://x.com/intent/tweet`) carries text only: X's web intent takes no media. Never add a token,
+  key, app or scraping to this route; the paid API is the other route, and it is chosen per account.
+- **The oEmbed lookup is advice** (`/api/platforms/x-post`, X's public address only, a post's own link only). It never blocks a
+  confirmation by itself; the database's rule is the link's handle.
+- **The pattern of a post's link** exists once in `src/lib/work/x-link.ts` and once in SQL (`x_post_parse`), held equal by `tests/x-link.test.mjs`.
+  The rules are held by `supabase/tests/x_link_route_rules.sql`, and `qa/x-link-flow.cjs` clicks through the dialogs on a fixture.
+- A waiting account is neither a success nor a failure: calendar, analytics and the lists treat `pending` as its own state.

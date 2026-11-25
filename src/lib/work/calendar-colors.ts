@@ -180,8 +180,8 @@ export function entryKey(e: CalEntry, prefs: CalPrefs, look: ColorLook = {}): st
   const v = entryValue(e, prefs.mode, look);
   return v ? keyOf(prefs.mode, v) : null;
 }
-/** A failed publish keeps its red. */
-const failed = (e: CalEntry) => e.k === 'done' && !!e.ch && !!e.w?.results[e.ch] && !e.w.results[e.ch].ok;
+/** A failed publish keeps its red. An account that waits for its publisher's hand-off (X's link route) has not failed. */
+const failed = (e: CalEntry) => e.k === 'done' && !!e.ch && !!e.w?.results[e.ch] && !e.w.results[e.ch].ok && !e.w.results[e.ch].pending;
 /** The palette colour of an entry, or null for its kind's own colour. */
 export function entryPal(e: CalEntry, prefs: CalPrefs, look: ColorLook = {}): number | null {
   if (failed(e)) return null;
@@ -204,7 +204,7 @@ export function marksOf(e: CalEntry): Mark[] {
 const palClass = (p: number | null) => (p === null ? '' : ` pal pal-${p}`);
 /** Everything after 'wk-cchip ' on a calendar chip. With DEFAULT_PREFS it is today's string. */
 export function chipClass(e: CalEntry, prefs: CalPrefs = DEFAULT_PREFS, look: ColorLook = {}): string {
-  const res = e.k === 'done' && e.ch && e.w?.results[e.ch] ? (e.w.results[e.ch].ok ? ' ok' : ' bad') : '';
+  const res = e.k === 'done' && e.ch && e.w?.results[e.ch] ? (e.w.results[e.ch].ok ? ' ok' : e.w.results[e.ch].pending ? '' : ' bad') : '';
   return `${CAL_KIND[e.k][1]}${palClass(entryPal(e, prefs, look))}${res}${marksOf(e).map((m) => ` ${m}`).join('')}`;
 }
 /** A kind's label in its colour, with no marks: Home's next days, where lateness is said in words beside it. */

@@ -44,7 +44,7 @@ import { narrowWord } from '@/lib/work/youtube-choices';
 import { queueOrder, reviewQueue } from '@/lib/work/queue';
 import { useDecisions, useWork, useWorkList, type ListItem } from './data';
 import { Av, Empty, Hint, Ic, PrioChip, StatusChip, Wid } from './parts';
-import { PublishNowDialog, ScheduleDialog, isMailWork, publishOp } from './publish';
+import { HandoffDialog, PublishNowDialog, ScheduleDialog, isMailWork, publishOp } from './publish';
 
 const DEC: Record<string, [string, string]> = { approve: ['اعتماد', 'approved'], changes: ['طلب تعديل', 'warn'], reject: ['رفض', 'danger'], withdraw: ['سحب الطلب', ''] };
 
@@ -279,7 +279,7 @@ type Act = (fn: string, args: Record<string, unknown>, ok: string) => Promise<bo
 function PublishTab({ items, dec, act }: { items: ListItem[]; dec: Dec; act: Act }) {
   const w = useWork();
   const pub = canPublish(w.role);
-  const [dlg, setDlg] = useState<{ t: 'schedule' | 'now'; w: WorkRow } | null>(null);
+  const [dlg, setDlg] = useState<{ t: 'schedule' | 'now' | 'handoff'; w: WorkRow } | null>(null);
   const nowIso = useMemo(() => new Date().toISOString(), []);
   const vis = items.filter((x) => !x.w.closed_at);
   const ready = vis.filter((x) => x.w.status === 'APPROVED');
@@ -341,9 +341,9 @@ function PublishTab({ items, dec, act }: { items: ListItem[]; dec: Dec; act: Act
               const r = y.results[c];
               const when = y.sched_at ?? y.proposed_at;
               return (
-                <span key={c} className={`wk-cr ${r ? (r.ok ? 'ok' : 'bad') : when && a && !authOk(a, when) ? 'risk' : ''}`}>
+                <span key={c} className={`wk-cr ${r ? (r.ok ? 'ok' : r.pending ? 'risk' : 'bad') : when && a && !authOk(a, when) ? 'risk' : ''}`}>
                   {accountName(a)}
-                  {r ? (r.ok ? ` · نُشر ${riyadhStamp(r.at).slice(5)}` : ` · ${r.why ?? 'فشل'}`) : when && a && !authOk(a, when) ? ' · التفويض ينتهي قبل الموعد' : ''}
+                  {r ? (r.ok ? ` · نُشر ${riyadhStamp(r.at).slice(5)}${r.route === 'link' ? ' بالرابط' : ''}` : r.pending ? ' · بانتظار نشرك على X' : ` · ${r.why ?? 'فشل'}`) : when && a && !authOk(a, when) ? ' · التفويض ينتهي قبل الموعد' : ''}
                   {r?.ok && narrowWord(r) && (
                     <span className="wk-vis" data-vis={r.privacy}>
                       {narrowWord(r)}
@@ -389,6 +389,12 @@ function PublishTab({ items, dec, act }: { items: ListItem[]; dec: Dec; act: Act
                 إلغاء الجدولة
               </button>
             </>
+          )}
+          {pub && y.status === 'PUBLISHING' && (
+            <button type="button" className="wk-btn gold" data-xh-finish={y.id} onClick={() => setDlg({ t: 'handoff', w: y })}>
+              <Ic i={Upload} />
+              إكمال النشر على X
+            </button>
           )}
           {pub && (y.status === 'PARTIAL' || y.status === 'FAILED') && (
             <button type="button" className="wk-btn gold" onClick={() => void publishOp(act, y, 'retry')}>
@@ -491,6 +497,7 @@ function PublishTab({ items, dec, act }: { items: ListItem[]; dec: Dec; act: Act
         />
       )}
       {dlg?.t === 'now' && <PublishNowDialog w={dlg.w} onClose={() => setDlg(null)} act={act} />}
+      {dlg?.t === 'handoff' && <HandoffDialog w={items.find((i) => i.w.id === dlg.w.id)?.w ?? dlg.w} onClose={() => setDlg(null)} act={act} />}
     </>
   );
 }

@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/x_link_route_rules.sql",
+  "script_md5": "0c812204517ff947af0abd4f82e746e8",
+  "migration": {
+    "file": "supabase/migrations/20261125120000_x_link_route.sql",
+    "file_md5": "f07852d600640c2a1133016799ecc3e5",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-25T20:27:37.875Z",
+  "migrations_replayed": 77,
+  "differ": [],
+  "total": 64,
+  "passed": 64
+}

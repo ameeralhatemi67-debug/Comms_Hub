@@ -539,7 +539,7 @@ function Row({ x, onSel }: { x: { e: CalEntry; chs: string[] }; onSel: (k: strin
               const r = e.k === 'done' ? e.w?.results[c] : undefined;
               const risk = !r && e.k !== 'done' && a && a.platform !== 'mail' && e.iso && !authOk(a, e.iso);
               return (
-                <span key={c} className={`wk-cr ${accountClass(c, r ? (r.ok ? 'ok' : 'bad') : risk ? 'risk' : '', prefs, look.platformOf)}`}>
+                <span key={c} className={`wk-cr ${accountClass(c, r ? (r.ok ? 'ok' : r.pending ? '' : 'bad') : risk ? 'risk' : '', prefs, look.platformOf)}`}>
                   {accountName(a)}
                   {r?.ok && narrowWord(r) && (
                     <span className="wk-vis" data-vis={r.privacy}>
@@ -678,8 +678,8 @@ export function EntryDrawer({ e, pendingKeys, stages, onClose, open, act }: { e:
                   {a?.handle && <small className="ltr">{a.handle}</small>}
                 </span>
                 {e.k === 'done' && r ? (
-                  <span className={`wk-cr ${r.ok ? 'ok' : 'bad'}`}>
-                    {r.ok ? 'نُشر (محاكاة)' : (r.why ?? 'فشل')}
+                  <span className={`wk-cr ${r.ok ? 'ok' : r.pending ? '' : 'bad'}`}>
+                    {r.ok ? (r.route === 'link' ? 'نُشر بالرابط' : 'نُشر (محاكاة)') : r.pending ? 'ينتظر نشرك على X' : (r.why ?? 'فشل')}
                     {r.ok && narrowWord(r) ? ` · ${narrowWord(r)}` : ''}
                   </span>
                 ) : (

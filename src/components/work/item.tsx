@@ -49,6 +49,7 @@ import {
   actionOwners,
   countOf,
   authOk,
+  canPublish,
   cleared,
   dayAdd,
   dayDiff,
@@ -98,6 +99,7 @@ import { useWork, useWorkDetail, type WorkDetail } from './data';
 import { Av, Empty, Hint, Ic, LibraryPicker, Modal, PrioChip, RestrictedChip, StatusChip, TYPE_ICON, Wid } from './parts';
 import { FileThumb } from '../file-thumb';
 import { PlanEditor, type EditRow } from './plan';
+import { XHandoff } from './x-handoff';
 import { PublishNowDialog, ScheduleDialog, isMailWork, publishOp } from './publish';
 import { CopyStrip, PreviewOfWork } from './post-preview';
 import { TextShow } from '../writing/doc-view';
@@ -327,7 +329,7 @@ export function WorkItemPage({ id }: { id: string }) {
           <TextPanel d={d} onEdit={setSheet} act={act} />
           <MediaPanel d={d} onAdd={() => setDlg({ t: 'lib' })} act={act} />
           <ApprovalPanel d={d} />
-          <PublishPanel d={d} />
+          <PublishPanel d={d} act={act} />
           <Comments d={d} act={act} />
           <section className="wk-pn" data-gd="log">
             <h3>
@@ -1015,9 +1017,10 @@ function ApprovalPanel({ d }: { d: WorkDetail }) {
   );
 }
 
-function PublishPanel({ d }: { d: WorkDetail }) {
+function PublishPanel({ d, act }: { d: WorkDetail; act: Act }) {
   const w = useWork();
   const x = d.w;
+  const mayPublish = canPublish(w.role) && (w.isAdmin || w.role === 'admin' || x.channels.every((c) => { const a = w.accounts.find((y) => y.id === c); return !a || a.platform === 'mail' || a.publishers.includes(w.me); }));
   if (!x.channels.length) return null;
   const mail = w.accounts.find((a) => a.id === x.channels[0])?.platform === 'mail';
   const when = x.sched_at ?? x.proposed_at;
@@ -1041,8 +1044,8 @@ function PublishPanel({ d }: { d: WorkDetail }) {
                 {a?.handle && <small className="ltr">{a.handle}</small>}
               </span>
               {r ? (
-                <span className={r.ok ? 'ok' : 'late'}>
-                  {r.ok ? `نُشر ${riyadhStamp(r.at).slice(5)}` : (r.why ?? 'فشل')}
+                <span className={r.ok ? 'ok' : r.pending ? 'wait' : 'late'}>
+                  {r.ok ? `نُشر ${riyadhStamp(r.at).slice(5)}${r.route === 'link' ? ' بالرابط' : ''}` : r.pending ? 'بانتظار نشرك على X' : (r.why ?? 'فشل')}
                   {narrowWord(r) && (
                     <span className="wk-vis" data-vis={r.privacy}>
                       {narrowWord(r)}
@@ -1053,6 +1056,16 @@ function PublishPanel({ d }: { d: WorkDetail }) {
                 <span className="late">التفويض ينتهي قبل الموعد</span>
               ) : (
                 <span className="wk-col-hint">لم يُنشر</span>
+              )}
+              {r?.ok && r.route === 'link' && r.url && (
+                <a className="wk-xh-post ltr" href={r.url} target="_blank" rel="noopener noreferrer">
+                  {r.url.replace('https://', '')}
+                </a>
+              )}
+              {r?.pending && a && (
+                <div className="wk-chan-more">
+                  {mayPublish ? <XHandoff w={x} account={a} act={act} /> : <Hint warn>ينتظر نشراً على X ينشره من يملك النشر على هذا الحساب.</Hint>}
+                </div>
               )}
             </div>
           );
@@ -1066,7 +1079,7 @@ function PublishPanel({ d }: { d: WorkDetail }) {
           </Link>
         </div>
       )}
-      <p className="wk-col-hint">{mail ? 'الإرسال في هذه المرحلة محاكاة.' : 'النشر في هذه المرحلة محاكاة: لا يصل شيء إلى المنصات.'}</p>
+      <p className="wk-col-hint">{mail ? 'الإرسال في هذه المرحلة محاكاة.' : 'النشر في هذه المرحلة محاكاة: لا يصل شيء إلى المنصات، إلا حساب X بالرابط فتنشر عليه أنت.'}</p>
     </section>
   );
 }

@@ -1,6 +1,6 @@
 {
   "script": "qa/publish-choices-flow.cjs",
-  "run": "2026-11-05T11:50:04.358Z",
+  "run": "2026-11-25T20:40:03.036Z",
   "checks": [
     {
       "name": "each YouTube channel offers «عام», «غير مدرج» and «خاص», «عام» first",
@@ -70,7 +70,7 @@
     {
       "name": "scheduling sends what it always did",
       "pass": true,
-      "detail": "{\"fn\":\"work_schedule\",\"args\":{\"p_work\":\"CH-501\",\"p_when\":\"2026-11-07T11:50:00.000Z\",\"p_mode\":\"auto\"}}"
+      "detail": "{\"fn\":\"work_schedule\",\"args\":{\"p_work\":\"CH-501\",\"p_when\":\"2026-11-27T20:40:00.000Z\",\"p_mode\":\"auto\"}}"
     },
     {
       "name": "phone: nothing sideways with the choices open",

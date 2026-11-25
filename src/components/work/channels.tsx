@@ -131,7 +131,7 @@ export function ChannelsPage({ initialOpen }: { /** Draws an account's sheet wit
     const live = w.platforms.filter((p) => has.has(p.key));
     return [...live.filter((p) => p.kind === 'social').sort((a, b) => a.sort - b.sort), ...live.filter((p) => p.kind === 'mail')];
   }, [w.platforms, w.accounts]);
-  const useOf = (id: string) => items.filter((x) => !x.w.closed_at && x.w.channels.includes(id) && !['PUBLISHED', 'PARTIAL', 'FAILED', 'PUBLISHING'].includes(x.w.status));
+  const useOf = (id: string) => items.filter((x) => !x.w.closed_at && x.w.channels.includes(id) && !['PUBLISHED', 'PARTIAL', 'FAILED'].includes(x.w.status));
   const act = async (fn: string, args: Record<string, unknown>, ok: string) => {
     const r = await w.call(fn, args);
     if (!r.ok) {
@@ -285,7 +285,7 @@ export function ChannelsPage({ initialOpen }: { /** Draws an account's sheet wit
                         <b>{a.label}</b>
                         <small className="handle">{a.platform === 'mail' ? 'صندوق القسم المشترك' : <bdi>{a.handle}</bdi>}</small>
                       </span>
-                      <span className="ac-state">{reachesNothing ? <span className={`pf-chip ${manual ? 'man' : 'none'}`}>{manual ? 'نشر يدوي' : 'ربط محاكى'}</span> : <span className={`wk-chip ${cls}`}>{label}</span>}</span>
+                      <span className="ac-state">{a.route === 'link' ? <span className="pf-chip man" data-route="link">{a.active ? 'نشر بالرابط' : 'موقوف'}</span> : reachesNothing ? <span className={`pf-chip ${manual ? 'man' : 'none'}`}>{manual ? 'نشر يدوي' : 'ربط محاكى'}</span> : <span className={`wk-chip ${cls}`}>{label}</span>}</span>
                       <span className="ac-col">{who}</span>
                       <span className="ac-col">{mode}</span>
                       <span className="ac-col">{works}</span>
@@ -465,7 +465,11 @@ function AccountSheet({
         </div>
         <div className="pf-side pf-info">
           <h3>الربط</h3>
-          {c ? (
+          {a.route === 'link' ? (
+            <p className="wk-conn" data-conn="link">
+              نشر بالرابط: لا ربط ولا تسجيل دخول. يجهّز الموقع المنشور (النص والملفات ورابط يفتح X)، وتنشر أنت من حساب <bdi>{a.handle}</bdi> ثم تلصق رابط المنشور ليُسجَّل.
+            </p>
+          ) : c ? (
             <p className={`wk-conn ${c.tone}`} data-conn={c.real ? 'oauth' : 'simulated'}>
               {c.text}
               {c.real && a.external_name ? ` · ${a.external_name}` : ''}
@@ -473,7 +477,7 @@ function AccountSheet({
           ) : (
             <p className="muted">البريد لا يحتاج ربطاً: يُضبط صندوق القسم من «الإعدادات».</p>
           )}
-          {(mgr || pub) && a.platform !== 'mail' && (
+          {(mgr || pub) && a.platform !== 'mail' && a.route !== 'link' && (
             <div className="pf-acts">
               {oauth && (
                 <button type="button" className="wk-btn sm" disabled={checking} onClick={onCheck}>
@@ -545,15 +549,21 @@ function AddAccountSheet({ first, ready, onClose, onConnect, onSimulated, act }:
   const [label, setLabel] = useState('');
   const [handle, setHandle] = useState('');
   const [busy, setBusy] = useState(false);
+  // X has two routes (MVP_draft.md 81): its own API (a paid app and a sign-in) or the link route (no sign-in: the site prepares the post, a person posts it).
+  const [route, setRoute] = useState<'api' | 'link' | null>(null);
   const provider = platform ? providerOf(platform) : null;
-  const manual = Boolean(platform) && !provider;
+  const choosing = platform === 'x' && route === null;
+  const linkRoute = platform === 'x' && route === 'link';
+  const manual = (Boolean(platform) && !provider) || linkRoute;
   const appReady = (p: ConnProvider) => (ready ? Boolean(ready[APP_INTEGRATION_TYPE[p]]) : true);
   const at = platform ? 'signin' : 'platform';
   const steps = (manual ? MANUAL_STEPS : CONNECT_STEPS).map((s) => ({ ...s, done: s.id === 'platform' && Boolean(platform) }));
   const addManual = async () => {
     setBusy(true);
     const publishers = defaultPublishers(w.people, w.me);
-    const ok = await act('account_save', { p_id: null, p: { platform, label: label.trim(), handle: handle.trim(), purpose: '', publishers, mode: 'ask' } }, `أُضيف حساب ${platformLabels[platform as Platform] ?? ''}.`);
+    const ok = linkRoute
+      ? await act('account_add_link', { p_label: label.trim(), p_handle: handle.trim(), p_publishers: publishers }, 'أُضيف حساب X للنشر بالرابط.')
+      : await act('account_save', { p_id: null, p: { platform, label: label.trim(), handle: handle.trim(), purpose: '', publishers, mode: 'ask' } }, `أُضيف حساب ${platformLabels[platform as Platform] ?? ''}.`);
     setBusy(false);
     if (ok) onClose();
   };
@@ -570,7 +580,8 @@ function AddAccountSheet({ first, ready, onClose, onConnect, onSimulated, act }:
               <h3>على أي منصة الحساب؟</h3>
               {offered.map((p: PlatformInfo) => {
                 const prov = providerOf(p.key);
-                const blocked = prov ? !appReady(prov) : false;
+                // X is never blocked here: its link route needs no app (the API route says so itself in the next step).
+                const blocked = prov && p.key !== 'x' ? !appReady(prov) : false;
                 return blocked ? (
                   <div className="ac-pick off" key={p.key}>
                     <PlatformTile k={p.key} />
@@ -587,7 +598,7 @@ function AddAccountSheet({ first, ready, onClose, onConnect, onSimulated, act }:
                     <PlatformTile k={p.key} />
                     <span className="ac-pick-text">
                       <b>{p.label_ar}</b>
-                      <small>{prov ? `تسجيل دخول عبر ${PROVIDER_NAME[prov]}` : 'نشر يدوي: بلا تسجيل دخول'}</small>
+                      <small>{p.key === 'x' ? 'بالرابط (بلا تسجيل دخول) أو عبر واجهة X المدفوعة' : prov ? `تسجيل دخول عبر ${PROVIDER_NAME[prov]}` : 'نشر يدوي: بلا تسجيل دخول'}</small>
                     </span>
                     <ChevronLeft className="ac-chev" aria-hidden="true" />
                   </button>
@@ -607,7 +618,46 @@ function AddAccountSheet({ first, ready, onClose, onConnect, onSimulated, act }:
               </details>
             </>
           )}
-          {at === 'signin' && provider && (
+          {at === 'signin' && choosing && (
+            <>
+              <span className="pf-eyebrow">X</span>
+              <h3>كيف يُنشر على هذا الحساب؟</h3>
+              <button type="button" className="ac-pick" data-route="link" onClick={() => setRoute('link')}>
+                <span className="ac-pick-text">
+                  <b>بالرابط</b>
+                  <small>مجاني وبلا ربط: يجهّز الموقع المنشور (النص والملفات ورابط يفتح X)، وتنشر أنت بنفسك ثم تلصق رابط المنشور</small>
+                </span>
+                <ChevronLeft className="ac-chev" aria-hidden="true" />
+              </button>
+              {appReady('x') ? (
+                <button type="button" className="ac-pick" data-route="api" onClick={() => setRoute('api')}>
+                  <span className="ac-pick-text">
+                    <b>عبر واجهة X</b>
+                    <small>تسجيل دخول عبر X. الواجهة مدفوعة برصيد، والنشر الحقيقي بها لم يُبنَ بعد</small>
+                  </span>
+                  <ChevronLeft className="ac-chev" aria-hidden="true" />
+                </button>
+              ) : (
+                <div className="ac-pick off" data-route="api">
+                  <span className="ac-pick-text">
+                    <b>عبر واجهة X</b>
+                    <small>مدفوعة برصيد، وإعدادها لم يكتمل</small>
+                  </span>
+                  <a className="pf-btn" href="/settings?tab=platforms">
+                    إكمال الإعداد
+                  </a>
+                </div>
+              )}
+              {!first && (
+                <div className="pf-acts">
+                  <button type="button" className="pf-btn ghost" onClick={() => setPlatform(null)}>
+                    السابق
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+          {at === 'signin' && provider && !choosing && !linkRoute && (
             <>
               <span className="pf-eyebrow">{platformLabels[platform as Platform]}</span>
               <h3>سجّل الدخول عند {PROVIDER_NAME[provider]}</h3>
@@ -638,7 +688,8 @@ function AddAccountSheet({ first, ready, onClose, onConnect, onSimulated, act }:
           {at === 'signin' && manual && (
             <>
               <span className="pf-eyebrow">{platformLabels[platform as Platform]}</span>
-              <h3>سمِّ الحساب</h3>
+              <h3>{linkRoute ? 'سمِّ الحساب للنشر بالرابط' : 'سمِّ الحساب'}</h3>
+              {linkRoute && <p className="muted">لا تسجيل دخول ولا رصيد. تكتب اسم الحساب على X، وعند النشر تفتح X من حسابك وتلصق رابط المنشور ليُسجَّل. يمكنك لاحقاً إضافة الحساب نفسه عبر الواجهة المدفوعة إن شئت.</p>}
               <label className="pf-f">
                 الاسم في المركز <small>مثلاً: الرسمي، الفعاليات</small>
                 <input value={label} maxLength={60} onChange={(e) => setLabel(e.target.value)} />
@@ -652,7 +703,7 @@ function AddAccountSheet({ first, ready, onClose, onConnect, onSimulated, act }:
                   إضافة
                 </button>
                 {!first && (
-                  <button type="button" className="pf-btn ghost" onClick={() => setPlatform(null)}>
+                  <button type="button" className="pf-btn ghost" onClick={() => (linkRoute ? setRoute(null) : setPlatform(null))}>
                     السابق
                   </button>
                 )}

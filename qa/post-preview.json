@@ -1,5 +1,5 @@
 {
-  "run": "2026-11-05T11:53:14.163Z",
+  "run": "2026-11-25T20:42:09.584Z",
   "checks": [
     {
       "name": "preview-instagram: renders",
@@ -278,7 +278,7 @@
     },
     {
       "name": "channels-director: shows «ربط محاكى»",
-      "pass": true,
+      "pass": false,
       "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.          إض"
     },
     {
@@ -353,7 +353,7 @@
     },
     {
       "name": "channels-publisher: shows «ربط محاكى»",
-      "pass": true,
+      "pass": false,
       "detail": "     حسابات المنصات  الحسابات التي ننشر عليها، ومن ينشر على كل حساب.            "
     },
     {
@@ -1015,7 +1015,7 @@
   "errors": [],
   "summary": {
     "total": 202,
-    "passed": 202,
-    "failed": 0
+    "passed": 200,
+    "failed": 2
   }
 }
