@@ -1,6 +1,6 @@
 {
   "script": "qa/platforms-flow.cjs",
-  "run": "2026-11-16T08:17:11.567Z",
+  "run": "2026-11-25T19:34:44.082Z",
   "checks": [
     {
       "name": "every platform has one state, worked out from what is stored",
@@ -85,7 +85,7 @@
     {
       "name": "TikTok's address proof: each picture under the action it shows, the three last ones under the file and the button, the address under the action that pastes it",
       "pass": true,
-      "detail": "{\"parts\":[{\"acts\":[1],\"shots\":1},{\"acts\":[2],\"shots\":1},{\"acts\":[3],\"shots\":1},{\"acts\":[4,5],\"shots\":3}],\"copy\":\"http://127.0.0.1:61774/\"}"
+      "detail": "{\"parts\":[{\"acts\":[1],\"shots\":1},{\"acts\":[2],\"shots\":1},{\"acts\":[3],\"shots\":1},{\"acts\":[4,5],\"shots\":3}],\"copy\":\"http://127.0.0.1:54083/\"}"
     },
     {
       "name": "a pair the platform refuses stays on the step, and says why",
@@ -130,7 +130,7 @@
     {
       "name": "an address to copy is filled in from the site, whole, under the action that pastes it",
       "pass": true,
-      "detail": "http://127.0.0.1:61774/api/platforms/callback/tiktok"
+      "detail": "http://127.0.0.1:54083/api/platforms/callback/tiktok"
     },
     {
       "name": "Escape closes the sheet",
@@ -188,9 +188,9 @@
       "detail": ""
     },
     {
-      "name": "the keys step of Instagram lists five actions with its three pictures, and still asks for the three values",
+      "name": "the keys step of Instagram lists five actions with its three pictures, and asks for the three values under the actions that name them",
       "pass": true,
-      "detail": "{\"todo\":5,\"imgs\":3,\"loaded\":true,\"marks\":[\"في الصورة 1\",\"في الصورة 2\",\"في الصورة 2\",\"في الصورة 3\"],\"fields\":4}"
+      "detail": "{\"todo\":5,\"imgs\":3,\"loaded\":true,\"id\":true,\"secret\":true,\"config\":true,\"inputs\":4}"
     },
     {
       "name": "a save that fails says so at once",
@@ -220,7 +220,7 @@
     {
       "name": "what needs attention comes first, with why and what depends on it",
       "pass": true,
-      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-19 11:17\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
+      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-28 22:35\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
     },
     {
       "name": "accounts are grouped by platform, each one line",
@@ -230,7 +230,7 @@
     {
       "name": "a line says the state, who publishes, when, and what uses it",
       "pass": true,
-      "detail": "الحساب الرسمي\n@org_official\nمتصل حتى 5 يناير 2027\nناشر الفحص\nنشر تلقائي\nعمل واحد"
+      "detail": "الحساب الرسمي\n@org_official\nمتصل حتى 14 يناير 2027\nناشر الفحص\nنشر تلقائي\nعمل واحد"
     },
     {
       "name": "an account connected to nothing is marked, and never says connected",
@@ -615,12 +615,12 @@
     {
       "name": "the YouTube address is filled in from the site, whole, under the action that pastes it, and the Drive address under its own",
       "pass": true,
-      "detail": "{\"yt\":\"http://127.0.0.1:61774/api/platforms/callback/google\",\"drive\":\"http://127.0.0.1:61774/api/drive/callback\",\"id\":true,\"secret\":true,\"passwords\":1,\"held\":\"السر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\",\"text\":\"الخطوة 12 من 13 · معرّف العميل\\nانسخ المعرّف والسر\\n\\nتظهر بعد Create نافذة فيها القيمتان.\\n\\nافتح\\nClients\\nفي\\nGoogle Cloud\\n\\nأنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\\n\\nالسر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\\n\\n1\\n\\nبعد Create تظهر نافذة فيها Client ID وClient secret.\\n\\n2\\n\\nانسخ Client ID والصقه في الحقل الأول هنا.\\n\\nمعرّف العميل (Client ID)\\n3\\n\\nانسخ Client secret والصقه في الحقل الثاني. يظهر كاملاً مرة واحدة عند إنشائه، فانسخه فوراً.\\n\\nسر العميل (Client secret)\\n4\\n\\nإن أغلقت النافذة قبل نسخه فافتح العميل من Clients وأنشئ سراً جديداً.\\n\\n5\\n\\nالصقهما هنا فقط، ولا ترسلهما إلى أحد.\\n\\nخيارات أخرى\\n\\nيسأل الموقع المنصة أولاً، ولا يحفظ شيئاً إن رفضت. السر يذهب إلى الخزنة ولا يُعرض بعد ذلك، فإن أغلقت قبل الفحص أعدت إدخاله وحده.\\n\\nاستبدال بعد الفحص\"}"
+      "detail": "{\"yt\":\"http://127.0.0.1:54083/api/platforms/callback/google\",\"drive\":\"http://127.0.0.1:54083/api/drive/callback\",\"id\":true,\"secret\":true,\"passwords\":1,\"held\":\"السر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\",\"text\":\"الخطوة 12 من 13 · معرّف العميل\\nانسخ المعرّف والسر\\n\\nتظهر بعد Create نافذة فيها القيمتان.\\n\\nافتح\\nClients\\nفي\\nGoogle Cloud\\n\\nأنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\\n\\nالسر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\\n\\n1\\n\\nبعد Create تظهر نافذة فيها Client ID وClient secret.\\n\\n2\\n\\nانسخ Client ID والصقه في الحقل الأول هنا.\\n\\nمعرّف العميل (Client ID)\\n3\\n\\nانسخ Client secret والصقه في الحقل الثاني. يظهر كاملاً مرة واحدة عند إنشائه، فانسخه فوراً.\\n\\nسر العميل (Client secret)\\n4\\n\\nإن أغلقت النافذة قبل نسخه فافتح العميل من Clients وأنشئ سراً جديداً.\\n\\n5\\n\\nالصقهما هنا فقط، ولا ترسلهما إلى أحد.\\n\\nخيارات أخرى\\n\\nيسأل الموقع المنصة أولاً، ولا يحفظ شيئاً إن رفضت. السر يذهب إلى الخزنة ولا يُعرض بعد ذلك، فإن أغلقت قبل الفحص أعدت إدخاله وحده.\\n\\nاستبدال بعد الفحص\"}"
     },
     {
       "name": "the keys step puts the two fields under the actions that name them, holds the secret once, and says one is kept",
       "pass": true,
-      "detail": "{\"yt\":\"http://127.0.0.1:61774/api/platforms/callback/google\",\"drive\":\"http://127.0.0.1:61774/api/drive/callback\",\"id\":true,\"secret\":true,\"passwords\":1,\"held\":\"السر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\"}"
+      "detail": "{\"yt\":\"http://127.0.0.1:54083/api/platforms/callback/google\",\"drive\":\"http://127.0.0.1:54083/api/drive/callback\",\"id\":true,\"secret\":true,\"passwords\":1,\"held\":\"السر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\"}"
     },
     {
       "name": "a step done goes on to the next one not done",
@@ -688,6 +688,146 @@
       "detail": ""
     },
     {
+      "name": "nine steps on one page, under the ids the saved progress knows",
+      "pass": true,
+      "detail": "accounts,ig_add,app,usecase,config,redirect,skip,roles,keys"
+    },
+    {
+      "name": "the list names its three parts and holds the nine steps in order",
+      "pass": true,
+      "detail": "{\"parts\":[\"حافظة الأعمال\",\"التطبيق والإعداد\",\"المعرّف والسر\"],\"items\":[\"accounts\",\"ig_add\",\"app\",\"usecase\",\"config\",\"redirect\",\"skip\",\"roles\",\"keys\"],\"first\":\"كل شيء جاهز\"}"
+    },
+    {
+      "name": "«قبل البدء» says who the guide is for and counts nine steps and twenty-two pictures",
+      "pass": true,
+      "detail": "قبل أن تبدأ\nتجهيز تطبيق Meta لإنستغرام\n\nللمدير. تُجرى مرة واحدة على مسار Meta ال"
+    },
+    {
+      "name": "instagram step 1 (accounts): reached from the list, its actions are listed, English is isolated",
+      "pass": true,
+      "detail": "{\"at\":\"accounts\",\"acts\":3,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
+    },
+    {
+      "name": "instagram step 1 (accounts): every picture loads at its own size, is drawn small, and sits under the actions it shows",
+      "pass": true,
+      "detail": "{\"acts\":3,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
+    },
+    {
+      "name": "instagram step 2 (ig_add): reached from the list, its actions are listed, English is isolated",
+      "pass": true,
+      "detail": "{\"at\":\"ig_add\",\"acts\":5,\"imgs\":4,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
+    },
+    {
+      "name": "instagram step 2 (ig_add): every picture loads at its own size, is drawn small, and sits under the actions it shows",
+      "pass": true,
+      "detail": "{\"acts\":5,\"imgs\":4,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
+    },
+    {
+      "name": "instagram step 3 (app): reached from the list, its actions are listed, English is isolated",
+      "pass": true,
+      "detail": "{\"at\":\"app\",\"acts\":5,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
+    },
+    {
+      "name": "instagram step 3 (app): every picture loads at its own size, is drawn small, and sits under the actions it shows",
+      "pass": true,
+      "detail": "{\"acts\":5,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
+    },
+    {
+      "name": "instagram step 4 (usecase): reached from the list, its actions are listed, English is isolated",
+      "pass": true,
+      "detail": "{\"at\":\"usecase\",\"acts\":5,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
+    },
+    {
+      "name": "instagram step 4 (usecase): every picture loads at its own size, is drawn small, and sits under the actions it shows",
+      "pass": true,
+      "detail": "{\"acts\":5,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
+    },
+    {
+      "name": "instagram step 5 (config): reached from the list, its actions are listed, English is isolated",
+      "pass": true,
+      "detail": "{\"at\":\"config\",\"acts\":5,\"imgs\":5,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
+    },
+    {
+      "name": "instagram step 5 (config): every picture loads at its own size, is drawn small, and sits under the actions it shows",
+      "pass": true,
+      "detail": "{\"acts\":5,\"imgs\":5,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
+    },
+    {
+      "name": "instagram step 6 (redirect): reached from the list, its actions are listed, English is isolated",
+      "pass": true,
+      "detail": "{\"at\":\"redirect\",\"acts\":3,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
+    },
+    {
+      "name": "instagram step 6 (redirect): every picture loads at its own size, is drawn small, and sits under the actions it shows",
+      "pass": true,
+      "detail": "{\"acts\":3,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
+    },
+    {
+      "name": "instagram step 7 (skip): reached from the list, its actions are listed, English is isolated",
+      "pass": true,
+      "detail": "{\"at\":\"skip\",\"acts\":3,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
+    },
+    {
+      "name": "instagram step 7 (skip): every picture loads at its own size, is drawn small, and sits under the actions it shows",
+      "pass": true,
+      "detail": "{\"acts\":3,\"imgs\":2,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
+    },
+    {
+      "name": "instagram step 8 (roles): reached from the list, its actions are listed, English is isolated",
+      "pass": true,
+      "detail": "{\"at\":\"roles\",\"acts\":0,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
+    },
+    {
+      "name": "instagram step 8 (roles): every picture loads at its own size, is drawn small, and sits under the actions it shows",
+      "pass": true,
+      "detail": "{\"acts\":0,\"imgs\":0,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
+    },
+    {
+      "name": "instagram step 9 (keys): reached from the list, its actions are listed, English is isolated",
+      "pass": true,
+      "detail": "{\"at\":\"keys\",\"acts\":5,\"imgs\":3,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
+    },
+    {
+      "name": "instagram step 9 (keys): every picture loads at its own size, is drawn small, and sits under the actions it shows",
+      "pass": true,
+      "detail": "{\"acts\":5,\"imgs\":3,\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true}"
+    },
+    {
+      "name": "the pictures are where the steps put them: 2, 4, 2, 2, 5, 2, 2, none, 3",
+      "pass": true,
+      "detail": "[2,4,2,2,5,2,2,0,3]"
+    },
+    {
+      "name": "the sections to leave alone: webhooks under actions 1 and 2, the review under action 3",
+      "pass": true,
+      "detail": "[{\"acts\":[1,2],\"shots\":[\"skip-webhooks.png\"]},{\"acts\":[3],\"shots\":[\"skip-review.png\"]}]"
+    },
+    {
+      "name": "the redirect address is filled in from the site, whole, under the action that pastes it",
+      "pass": true,
+      "detail": "http://127.0.0.1:54083/api/platforms/callback/meta"
+    },
+    {
+      "name": "phone, instagram ig_add: reached from the list, nothing sideways on the page, the sheet or the pictures",
+      "pass": true,
+      "detail": "{\"at\":\"ig_add\",\"page\":true,\"body\":true,\"shots\":true}"
+    },
+    {
+      "name": "phone, instagram config: reached from the list, nothing sideways on the page, the sheet or the pictures",
+      "pass": true,
+      "detail": "{\"at\":\"config\",\"page\":true,\"body\":true,\"shots\":true}"
+    },
+    {
+      "name": "phone, instagram skip: reached from the list, nothing sideways on the page, the sheet or the pictures",
+      "pass": true,
+      "detail": "{\"at\":\"skip\",\"page\":true,\"body\":true,\"shots\":true}"
+    },
+    {
+      "name": "phone, instagram keys: reached from the list, nothing sideways on the page, the sheet or the pictures",
+      "pass": true,
+      "detail": "{\"at\":\"keys\",\"page\":true,\"body\":true,\"shots\":true}"
+    },
+    {
       "name": "the price step of X has two notes with the circled \"!\" and four tables: the short one open, the three long ones folded",
       "pass": true,
       "detail": "{\"notes\":2,\"icons\":2,\"tables\":4,\"open\":[true,false,false,false],\"rows\":[3,12,16,19],\"first\":\"Post: Create $0.015 per request\",\"stray\":[],\"wide\":true}"
@@ -714,7 +854,7 @@
     }
   ],
   "notes": [],
-  "total": 142,
-  "passed": 142,
+  "total": 170,
+  "passed": 170,
   "failed": 0
 }

@@ -4681,3 +4681,23 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   three designs, the side text set to «هداية 2027» and emptied, stillness, every option of Liquid Gold, MP4, MOV, ZIP and PNG downloads
   of all three decoded by ffmpeg). The page's canvas can round letter edges a level apart between two moments; the stillness check of the
   identity designs allows that and nothing visible.
+
+### 2026-11-25: the Instagram setup guide shown as one page
+
+- **The request.** The owner asked for the Instagram guide in the one-page layout the director chose on 2026-11-16, as YouTube's and
+  TikTok's already are. `MVP_draft.md` section 67.11.
+- **What changed.**
+  - `src/lib/guide-layout.ts`: `WHOLE_GUIDES` gains `meta`.
+  - `src/lib/setup-guides.ts` (the `meta` guide): `phases` (three parts), `at` 2 and 3 on the two pictures that ring only the red mark,
+    `copyAt` 2 on the redirect address, `fieldsAt` for the three keys. No word, picture or step id changed.
+  - `src/components/settings/keys-form.tsx`: the Configuration ID label goes through the shared English-isolation rule (found by the new
+    browser check: it was the one bare English run on the page).
+  - `tests/guide-layout.test.mjs`: Instagram's parts, pictures, value and fields; `qa/platforms-flow.cjs`: the connected-Instagram part
+    now follows the page, and a new section 9 walks all nine steps (desktop and phone).
+- **Checks.**
+  - `npm run typecheck` passes. `npm test` 967 of 967 (the layout test still has 7 tests, now covering three guides).
+  - `qa/platforms-flow.cjs` 170 of 170 in Edge, in `qa/platforms-flow.json`; screenshots in `qa/artifacts/platforms-flow/30-32`.
+- **Failed.** `npm run build` exits 1. It compiles, type-checks and generates 45 of 45 pages, then Next.js 16.4.3 stops with
+  «SecurityFatalError»: the version is affected by a known security advisory and the command stops to recommend an upgrade. Retried three
+  times with the same result. Nothing in this change touches Next. Not worked around.
+- **Not checked.** Signed in on the live site; Instagram's roles step has no list of actions (left as the director saw it).

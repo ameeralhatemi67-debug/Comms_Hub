@@ -85,7 +85,7 @@ export function useKeysForm({ provider, app, fields, problem, canSecrets, lock, 
       ),
       config: needsConfig ? (
         <label className="pf-f">
-          معرّف الإعداد (Configuration ID)
+          <Rich text="معرّف الإعداد (Configuration ID)" />
           <input className="ltr" inputMode="numeric" value={config} autoComplete="off" disabled={!canSecrets || busy} onChange={(e) => setConfig(e.target.value.replace(/\D/g, ''))} />
         </label>
       ) : null,

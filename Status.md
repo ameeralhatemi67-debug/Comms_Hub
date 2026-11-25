@@ -26,6 +26,18 @@ related:
 
 # Communication Department Hub — Current Status
 
+## The Instagram setup guide shown as one page, 2026-11-25
+
+- **Done locally, not committed.** `MVP_draft.md` section 67.11: `WHOLE_GUIDES` is now google, meta, tiktok. Instagram's nine steps and 22
+  pictures sit in three parts, the two «leave alone» pictures under their own actions, the redirect address under action 2, the three keys
+  under the actions that name them. Facebook, X and LinkedIn keep the step sheet.
+- **Checks.** Typecheck passes; `npm test` 967 of 967; `qa/platforms-flow.cjs` 170 of 170 (28 new Instagram checks, on a fixture).
+- **Not passing: `npm run build`.** It compiles, type-checks and generates all 45 pages, then exits 1 with Next's own «SecurityFatalError»:
+  Next.js 16.4.3 is flagged by a security advisory and the command stops to recommend an upgrade. Nothing here changed Next. A deploy that
+  builds with the same command may be refused too. The owner decides on the upgrade.
+- **Not checked.** Signed in on the live site; the page after a deploy.
+- **Open idea (not built).** X with two routes, the paid API and a link hand-off; see the discussion of 2026-11-25.
+
 ## The YouTube and TikTok setup guides shown as one page, 2026-11-16
 
 - **Done and live (`bcd1ac1`).** `MVP_draft.md` section 67.10, the director's choice of the draft's layout C: the list of

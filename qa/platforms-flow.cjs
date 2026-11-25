@@ -11,6 +11,8 @@
 //   7. Phone and evening: nothing sideways, the list of steps folded above the steps.
 //   8. The YouTube guide shown as one page: thirteen steps in four parts, English set apart and read in order, the pictures small
 //      under their actions and full size on a click, the values and the keys in place, progress unchanged.
+//   9. The Instagram guide shown as one page (67.11): nine steps in three parts, every picture under the action it shows, the two
+//      sections to leave alone under their own actions, the three keys under the actions that name them, a phone.
 // What this cannot check: the rules (supabase/tests/platform_setup_rules.sql) and a real platform's own pages.
 // Usage: node qa/platforms-flow.cjs   (writes qa/platforms-flow.json, screenshots in qa/artifacts/platforms-flow/)
 const fs = require('node:fs');
@@ -286,20 +288,22 @@ const loadPics = async (t, id) => {
     await sheet(t).locator('.st-advanced > summary').click();
     await t.waitForTimeout(150);
     await t.screenshot({ path: path.join(out, '04-details.png') });
-    text = await sheet(t).locator('.pf-input').innerText();
+    text = await sheet(t).locator('.gdoc-finish').innerText();
     check('a connected platform opens its summary, with the rest folded under «خيارات متقدمة»', text.includes('إنستغرام جاهزة') && text.includes('في الخزنة') && text.includes('حدود المنشور') && text.includes('تعديل') && text.includes('سجل المنصة'));
     await sheet(t).locator('.st-info > summary').click();
     check('the facts say when they were read from the platform', (await sheet(t).locator('.st-info').innerText()).includes('روجعت من وثائق المنصة الرسمية في 2026-11-01'));
-    // The keys step of the Instagram guide carries its own pictures (MVP_draft.md section 67.7), drawn inside the keys card.
+    // The keys step of the Instagram guide, shown as one page (MVP_draft.md sections 67.7 and 67.11): its three pictures under the actions
+    // they show, and each of the three values asked for under the action that names it.
     await sheet(t).getByRole('button', { name: 'استبدال السر' }).click();
-    await t.waitForFunction(() => document.querySelectorAll('dialog[open] .pf-card .gd-shot img').length === 3);
-    await t.waitForFunction(() => [...document.querySelectorAll('dialog[open] .gd-shot img')].every((e) => e.complete));
+    await settle(t);
+    await loadPics(t, 'keys');
     const keys = await t.evaluate(() => {
-      const c = document.querySelector('dialog[open] .pf-input .pf-card');
-      const imgs = [...c.querySelectorAll('.gd-shot img')];
-      return { todo: c.querySelectorAll('.gd-todo li').length, imgs: imgs.length, loaded: imgs.every((e) => e.naturalWidth > 0 && e.naturalWidth === Number(e.getAttribute('width'))), marks: [...c.querySelectorAll('.gd-seen')].map((e) => e.innerText.trim()), fields: c.querySelectorAll('input').length };
+      const c = document.querySelector('dialog[open] .gdoc-sec[data-step="keys"]');
+      const imgs = [...c.querySelectorAll('.gdoc-shot img')];
+      const at = (n, s) => !!c.querySelector(`.gdoc-acts > li[value="${n}"] ${s}`);
+      return { todo: c.querySelectorAll('.gdoc-acts > li').length, imgs: imgs.length, loaded: imgs.every((e) => e.naturalWidth > 0 && e.naturalWidth === Number(e.getAttribute('width'))), id: at(2, 'input:not([type=password])'), secret: at(3, 'input[type=password]'), config: at(4, 'input[inputmode=numeric]'), inputs: c.querySelectorAll('input').length };
     });
-    check('the keys step of Instagram lists five actions with its three pictures, and still asks for the three values', keys.todo === 5 && keys.imgs === 3 && keys.loaded && keys.marks.join('|') === 'في الصورة 1|في الصورة 2|في الصورة 2|في الصورة 3' && keys.fields >= 3, JSON.stringify(keys));
+    check('the keys step of Instagram lists five actions with its three pictures, and asks for the three values under the actions that name them', keys.todo === 5 && keys.imgs === 3 && keys.loaded && keys.id && keys.secret && keys.config && (await reading(t)) === 'keys', JSON.stringify(keys));
     await t.keyboard.press('Escape');
     await t.locator('dialog.pf-sheet').waitFor({ state: 'detached' });
 
@@ -737,6 +741,88 @@ const loadPics = async (t, id) => {
     await yl.screenshot({ path: path.join(out, '25-youtube-ltr.png') });
     check('English direction: the pictures keep their own direction and the page does not scroll sideways', (await fits(yl)) && (await yl.evaluate(() => [...document.querySelectorAll('dialog[open] .gdoc-zoom')].every((e) => getComputedStyle(e).direction === 'ltr'))));
     await yl.context().close();
+
+    // ---------- 9. the Instagram guide shown as one page (MVP_draft.md section 67.11) ----------
+    const ig = await fresh();
+    await ig.goto(base);
+    await ig.waitForSelector('.pf-row');
+    await row(ig, 'instagram').getByRole('button', { name: 'التفاصيل' }).click();
+    await sheet(ig).waitFor();
+    await ig.waitForTimeout(400);
+    const igIds = await sheet(ig).locator('.gdoc-sec[data-step]').evaluateAll((l) => l.map((e) => e.dataset.step).filter((s) => s !== 'top' && s !== 'finish'));
+    check('nine steps on one page, under the ids the saved progress knows', JSON.stringify(igIds) === JSON.stringify(['accounts', 'ig_add', 'app', 'usecase', 'config', 'redirect', 'skip', 'roles', 'keys']), igIds.join(','));
+    const igToc = await ig.evaluate(() => ({ parts: [...document.querySelectorAll('dialog[open] .gdoc-phl')].map((e) => e.innerText.trim()), items: [...document.querySelectorAll('dialog[open] .gdoc-ph .gdoc-ti')].map((e) => e.dataset.to), first: document.querySelector('dialog[open] .gdoc-toc-list .gdoc-ti')?.innerText.trim() }));
+    check('the list names its three parts and holds the nine steps in order', JSON.stringify(igToc.parts) === JSON.stringify(['حافظة الأعمال', 'التطبيق والإعداد', 'المعرّف والسر']) && JSON.stringify(igToc.items) === JSON.stringify(igIds), JSON.stringify(igToc));
+    const igTop = await ig.evaluate(() => document.querySelector('dialog[open] .gdoc-sec[data-step="top"]').innerText);
+    check('«قبل البدء» says who the guide is for and counts nine steps and twenty-two pictures', igTop.includes('للمدير') && igTop.includes('9') && igTop.includes('22'), igTop.slice(0, 80));
+    const igStray = (id) =>
+      ig.evaluate((i) => {
+        const bad = [];
+        const w = document.createTreeWalker(document.querySelector(`dialog[open] .gdoc-sec[data-step="${i}"]`), NodeFilter.SHOW_TEXT);
+        for (let n = w.nextNode(); n; n = w.nextNode()) if (!n.parentElement.closest('bdi, [dir="ltr"]') && /[A-Za-z]/.test(n.textContent)) bad.push(n.textContent.trim().slice(0, 50));
+        return bad;
+      }, id);
+    const igWalked = [];
+    for (let i = 0; i < igIds.length; i++) {
+      await sheet(ig).locator(`.gdoc-ti[data-to="${igIds[i]}"]`).click();
+      await settle(ig);
+      const at = await reading(ig);
+      await ig.screenshot({ path: path.join(out, `30-instagram-${String(i + 1).padStart(2, '0')}-${igIds[i]}.png`) });
+      await loadPics(ig, igIds[i]);
+      const info = await ig.evaluate((id) => {
+        const sec = document.querySelector(`dialog[open] .gdoc-sec[data-step="${id}"]`);
+        const imgs = [...sec.querySelectorAll('img')];
+        const inPart = [...sec.querySelectorAll('.gdoc-shot')].every((f) => {
+          const here = new Set([...f.closest('.gdoc-part').querySelectorAll('.gdoc-acts > li')].map((l) => l.value));
+          return f.dataset.rings.split(' ').filter((r) => r && r !== 'x').every((r) => here.has(Number(r)));
+        });
+        return {
+          acts: sec.querySelectorAll('.gdoc-acts > li').length,
+          imgs: imgs.length,
+          loaded: imgs.every((e) => e.naturalWidth === Number(e.getAttribute('width')) && e.naturalHeight === Number(e.getAttribute('height'))),
+          small: imgs.every((e) => e.getBoundingClientRect().width <= Math.min(400, e.naturalWidth) + 1),
+          inPart,
+          // A guillemet around English is a chip and has gone; one around Arabic is the site's own wording and stays (guide-text.ts).
+          raw: /`|«[^«»؀-ۿ]*»/.test(sec.innerText),
+          ltr: [...sec.querySelectorAll('bdi')].every((e) => e.getAttribute('dir') === 'ltr'),
+          wide: document.documentElement.scrollWidth <= window.innerWidth + 1,
+        };
+      }, igIds[i]);
+      igWalked.push({ id: igIds[i], ...info });
+      const lost = await igStray(igIds[i]);
+      check(`instagram step ${i + 1} (${igIds[i]}): reached from the list, its actions are listed, English is isolated`, at === igIds[i] && (info.acts >= 1 || igIds[i] === 'roles') && !info.raw && info.ltr && lost.length === 0 && info.wide, JSON.stringify({ at, ...info, lost }));
+      check(`instagram step ${i + 1} (${igIds[i]}): every picture loads at its own size, is drawn small, and sits under the actions it shows`, info.loaded && info.small && info.inPart, JSON.stringify(info));
+    }
+    check('the pictures are where the steps put them: 2, 4, 2, 2, 5, 2, 2, none, 3', JSON.stringify(igWalked.map((s) => s.imgs)) === JSON.stringify([2, 4, 2, 2, 5, 2, 2, 0, 3]), JSON.stringify(igWalked.map((s) => s.imgs)));
+    // The two pictures of what to leave alone sit under the sections they show, not both after the first.
+    const skipParts = await ig.evaluate(() => [...document.querySelectorAll('dialog[open] .gdoc-sec[data-step="skip"] .gdoc-part')].map((p) => ({ acts: [...p.querySelectorAll('.gdoc-acts > li')].map((l) => l.value), shots: [...p.querySelectorAll('.gdoc-shot img')].map((i) => i.getAttribute('src').split('/').pop()) })));
+    check('the sections to leave alone: webhooks under actions 1 and 2, the review under action 3', JSON.stringify(skipParts) === JSON.stringify([{ acts: [1, 2], shots: ['skip-webhooks.png'] }, { acts: [3], shots: ['skip-review.png'] }]), JSON.stringify(skipParts));
+    const igCopy = await ig.evaluate(() => {
+      const li = document.querySelector('dialog[open] .gdoc-sec[data-step="redirect"] .gdoc-acts > li[value="2"] .gdoc-copy-v');
+      return li?.innerText ?? '';
+    });
+    check('the redirect address is filled in from the site, whole, under the action that pastes it', /^http:\/\/127\.0\.0\.1:\d+\/api\/platforms\/callback\/meta$/.test(igCopy), igCopy);
+    await ig.screenshot({ path: path.join(out, '31-instagram-keys.png') });
+    await ig.context().close();
+    const igm = await fresh({ width: 390, height: 844 });
+    await igm.goto(base);
+    await igm.waitForSelector('.pf-row');
+    await row(igm, 'instagram').getByRole('button', { name: 'التفاصيل' }).click();
+    await sheet(igm).waitFor();
+    await igm.waitForTimeout(400);
+    await igm.locator('dialog[open] .gdoc-toc-list > summary').click();
+    for (const id of ['ig_add', 'config', 'skip', 'keys']) {
+      await igm.locator(`dialog[open] .gdoc-ti[data-to="${id}"]`).click();
+      await settle(igm);
+      const reached = await reading(igm);
+      await loadPics(igm, id);
+      const phone = await igm.evaluate(() => ({ page: document.documentElement.scrollWidth <= window.innerWidth + 1, body: (() => { const b = document.querySelector('dialog[open] .gdoc'); return b.scrollWidth <= b.clientWidth + 1; })(), shots: [...document.querySelectorAll('dialog[open] .gdoc-shot')].every((f) => f.getBoundingClientRect().right <= window.innerWidth + 1 && f.getBoundingClientRect().left >= -1) }));
+      check(`phone, instagram ${id}: reached from the list, nothing sideways on the page, the sheet or the pictures`, reached === id && phone.page && phone.body && phone.shots, JSON.stringify({ at: reached, ...phone }));
+    }
+    await igm.locator('dialog[open] .gdoc-ti[data-to="ig_add"]').click();
+    await settle(igm);
+    await igm.screenshot({ path: path.join(out, '32-instagram-phone.png') });
+    await igm.context().close();
 
     // The X guide's price step (MVP_draft.md section 67.8): notes with the circled "!" and tables, in the sheet, on a computer and a phone.
     const xs = await fresh();

@@ -290,6 +290,7 @@ export const GUIDES: Record<string, Guide> = {
         ],
         copy: '{redirect}',
         copyLabel: 'عنوان العودة',
+        copyAt: 2,
         shots: [metaShot('redirect-url', 975, 140, 'قسم Redirect URL: حقل Register a new redirect URL وزر Save', 'النص الباهت «https://yourdomain.com/auth/callback» مثال فقط: الصق عنواننا مكانه.', ['2', '3']),
           metaShot('redirect-saved', 975, 256, 'قسم Redirect URL بعد الحفظ: العنوان في القائمة المنسدلة ورسالة «Redirect URL saved»', 'بعد «Save» يظهر العنوان في القائمة، وتظهر رسالة النجاح.'),
         ],
@@ -307,8 +308,8 @@ export const GUIDES: Record<string, Guide> = {
           'في «4. Complete App Review» تقول Meta إن لك تخطّيه إن كنت تبني لحسابات تملكها فقط. لا تضغط «Go to app review».',
         ],
         shots: [
-          metaShot('skip-webhooks', 975, 477, 'قسما «2. Generate access tokens» و«3. Configure webhooks»: زر Add account وحقلا Callback URL وVerify token', undefined, ['x']),
-          metaShot('skip-review', 975, 221, 'قسم «4. Complete App Review»: عبارة أن لك تخطّيه إن كنت تبني لحسابات تملكها فقط وزر Go to app review', 'العبارة في الصورة هي كلام Meta نفسها.', ['x']),
+          { ...metaShot('skip-webhooks', 975, 477, 'قسما «2. Generate access tokens» و«3. Configure webhooks»: زر Add account وحقلا Callback URL وVerify token', undefined, ['x']), at: 2 },
+          { ...metaShot('skip-review', 975, 221, 'قسم «4. Complete App Review»: عبارة أن لك تخطّيه إن كنت تبني لحسابات تملكها فقط وزر Go to app review', 'العبارة في الصورة هي كلام Meta نفسها.', ['x']), at: 3 },
         ],
         ok: 'تركتها',
       },
@@ -340,6 +341,7 @@ export const GUIDES: Record<string, Guide> = {
           metaShot('basic-keys', 975, 74, 'صفحة App settings ثم Basic: حقل App ID وحقل App secret المخفي وزر Show', 'المعرّف محجوب. السر مخفي حتى تضغط «Show».', ['2', '3']),
           metaShot('config-id', 650, 75, 'الإعداد Instagram API (unified login): سطر Configuration ID وبجانبه أيقونة النسخ', 'المعرّف محجوب.', ['4']),
         ],
+        fieldsAt: { id: 2, secret: 3, config: 4 },
         link: META_APPS,
       },
     ],
@@ -354,6 +356,11 @@ export const GUIDES: Record<string, Guide> = {
       PLATFORM_FACTS,
     ],
     link: META_APPS,
+    phases: [
+      { t: 'حافظة الأعمال', ids: ['accounts', 'ig_add'] },
+      { t: 'التطبيق والإعداد', ids: ['app', 'usecase', 'config', 'redirect', 'skip', 'roles'] },
+      { t: 'المعرّف والسر', ids: ['keys'] },
+    ],
   },
   facebook: {
     title: 'تجهيز تطبيق Meta لفيسبوك',

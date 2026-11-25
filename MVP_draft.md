@@ -3558,6 +3558,22 @@ built for YouTube (the Google guide) and TikTok; every other guide keeps the ste
   else after the actions. A field of the keys goes under its place in `fieldsAt`, else after the actions.
 - **Unchanged.** The words, the pictures, the step ids, what is implied, saved progress and every rule of the database.
 
+## 67.11 The Instagram guide moved to the one page, 2026-11-25
+
+At the owner's word, the Instagram guide (`meta` in `src/lib/setup-guides.ts`, nine steps and 22 pictures) is drawn as one page like
+YouTube's and TikTok's. `WHOLE_GUIDES` is now `google`, `meta`, `tiktok`; Facebook, X and LinkedIn keep the step sheet.
+
+- **The parts** (the names the director saw in the draft of 2026-11-16): «حافظة الأعمال» (the two steps in the business portfolio),
+  «التطبيق والإعداد» (the app, the use case, the configuration, the redirect address, what to leave alone, the roles), «المعرّف والسر».
+- **Where a piece goes.** Every picture but two rings an action. The two that ring only the red mark (webhooks, App Review) take `at` 2
+  and 3 of «اترك الأقسام التي تحت الإعداد», so each sits under the action about it. The redirect address is under action 2 (`copyAt`). The
+  keys step puts «App ID» under action 2, «App secret» under 3 and the Configuration ID under 4 (`fieldsAt`); «خيارات أخرى» follows.
+- **A label that was not isolated.** The Configuration ID field's label is drawn through the same rule as the other labels, so its English
+  keeps its own direction on the page.
+- **Unchanged.** Every word, picture and step id of the guide, what is implied, saved progress, the keys form and the database.
+- **Not changed on purpose.** The roles step still has no list of actions (only the explanation of «App not active»), as the director saw
+  it in the draft. Writing it as actions needs Meta's own labels for adding a person, which no picture of ours shows yet.
+
 ---
 
 # 68. «ورقة الكتابة» and the writing documents, 2026-11-02

@@ -229,7 +229,7 @@ addresses. English inside Arabic follows `src/lib/guide-text.ts`: a label on the
 backticks, and every other run of English is isolated by the page. A step added to a guide whose platform may already be connected
 is `implied`, so the stored secret proves it and a connected platform never falls back to «خطوات ناقصة»; the ids of the steps a
 person confirmed are never renamed.
-Since 2026-11-16 (`MVP_draft.md` 67.10, the director's choice) the guides in `WHOLE_GUIDES` (`src/lib/guide-layout.ts`: YouTube's and
+Since 2026-11-16 (`MVP_draft.md` 67.10, the director's choice) the guides in `WHOLE_GUIDES` (`src/lib/guide-layout.ts`: YouTube's, Instagram's since 2026-11-25 (67.11) and
 TikTok's) are drawn as one page by `src/components/settings/guide-doc.tsx`: every step in order under a list of its parts, each picture
 small (`SHOT_MAX`) under the actions it shows and at its own size on a click. Where a picture, a value to copy or a key field goes is
 `layoutStep` (data `at`, `copyAt`, `fieldsAt`, `phases`), held by `tests/guide-layout.test.mjs`. The page only draws: saving stays in
