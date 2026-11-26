@@ -1,0 +1,190 @@
+{
+  "script": "qa/x-link-test-flow.cjs",
+  "run": "2026-11-26T11:24:12.559Z",
+  "checks": [
+    {
+      "name": "the panel says what it is: nothing is sent to X and nothing is deleted from it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "closed, it offers one button and has asked the database for nothing but the list",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "opened, it starts on the test that publishes nothing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the account's page on X opens in a new tab, from the handle on file",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing can be recorded before a link is given",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a link that is not a post of X is refused in words, and nothing is recorded",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "another account's post is refused, naming both, and X is not even asked",
+      "pass": true,
+      "detail": "هذا المنشور لحساب آخر (@someone). المنتظَر منشور لـ @T_X."
+    },
+    {
+      "name": "X saying the post is another author's stops it, and nothing is recorded",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a post of this account is recorded as «فحص بلا نشر», with the link as given and the account's id",
+      "pass": true,
+      "detail": "[{\"fn\":\"x_link_test_record\",\"args\":{\"p_account\":\"00000000-0000-4000-8000-0000000000a1\",\"p_url\":\"https://x.com/T_X/status/223456789012\",\"p_mode\":\"existing\"}}]"
+    },
+    {
+      "name": "and it says so, with X's answer beside it, and the box is cleared",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the list shows it: the kind, who, and the post opening on X",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a post X cannot find is said, and still recorded: the handle is what decides",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "when X does not answer, it says it was not checked and records all the same, the link as X shows it, in the letters it was written",
+      "pass": true,
+      "detail": "https://x.com/t_x/status/423456789012"
+    },
+    {
+      "name": "X's lookup was asked once for each link that passed the page's own check, and for no other",
+      "pass": true,
+      "detail": "[\"https://x.com/T_X/status/123456789012\",\"  https://x.com/T_X/status/223456789012  \",\"https://x.com/T_X/status/323456789012\",\"https://twitter.com/t_x/status/423456789012?s=20\"]"
+    },
+    {
+      "name": "the test post starts from a plain text, with its length as X counts it",
+      "pass": true,
+      "detail": "تجربة نشر داخلية من المركز. يُحذف هذا المنشور بعد قليل. | 55 / 280 حرفاً بحساب X"
+    },
+    {
+      "name": "X's composer opens in a new tab with the text and no other parameter",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "editing the text changes what the composer is given",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it warns that the post is real and public, that the site does not delete it, and offers the test that posts nothing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a text longer than X allows is marked, not cut",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an empty text cannot be sent to X or recorded",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "recorded as «نشر تجريبي»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and it reminds that the test post is still on X",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the database's «TEST_LIMIT» is said in words",
+      "pass": true,
+      "detail": "بلغ هذا الحساب 20 تجربة في اليوم. أعد المحاولة غداً."
+    },
+    {
+      "name": "the database's «FORBIDDEN» is said in words",
+      "pass": true,
+      "detail": "تجربة هذا الحساب لمن يدير الحسابات ولناشري الحساب نفسه."
+    },
+    {
+      "name": "the database's «POST_LINK_OTHER_ACCOUNT» is said in words",
+      "pass": true,
+      "detail": "هذا المنشور لحساب آخر غير هذا الحساب. إن كان اسم الحساب هنا خطأً فصحّحه، وإلا فالصق رابطاً من الحساب الصحيح."
+    },
+    {
+      "name": "the database's «ACCOUNT_OFF» is said in words",
+      "pass": true,
+      "detail": "الحساب موقوف. شغّله أولاً من «خيارات أخرى»."
+    },
+    {
+      "name": "the database's «something unforeseen» is said in words",
+      "pass": true,
+      "detail": "تعذّر تسجيل التجربة. أعد المحاولة."
+    },
+    {
+      "name": "a refusal records nothing and leaves the link to be corrected",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "before the migration is run: the link is said to be fine, and that nothing was recorded",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the list is kept to the last five",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a stopped account is not tested: the panel says so and offers no form",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: neither test makes the page scroll sideways",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: the panel is drawn from the theme",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "before the migration is run the list is quietly empty and the panel still opens",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the page asked nothing of any address outside the fixture: nothing goes to X",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 36,
+  "passed": 36,
+  "failed": 0
+}

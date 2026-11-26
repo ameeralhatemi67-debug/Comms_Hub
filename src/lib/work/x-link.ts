@@ -61,6 +61,15 @@ export type PostCheck = { found: boolean | null; author: string | null };
 /** The address of X's public lookup for a post (no key, no sign-in). Only a link that passes `parsePostLink` is asked about. */
 export const oembedLink = (post: PostLink) => `https://publish.x.com/oembed?url=${encodeURIComponent(post.url)}&omit_script=1`;
 
+/** What the page says of X's lookup for this account: advice only, never a gate. */
+export type PostNote = { text: string; level: 'ok' | 'warn' | 'bad' } | null;
+export function checkNote(c: PostCheck, handle: string | null): PostNote {
+  if (c.found === false) return { level: 'warn', text: 'لم يجد X هذا المنشور. تأكد من الرابط بفتحه، فإن كان صحيحاً أكّد.' };
+  if (c.found === true && c.author && c.author.toLowerCase() !== handleOf(handle).toLowerCase()) return { level: 'bad', text: `هذا المنشور لحساب @${c.author}.` };
+  if (c.found === true) return { level: 'ok', text: 'وجد X المنشور وهو من هذا الحساب.' };
+  return { level: 'warn', text: 'لم يتحقق الموقع من المنشور عند X (لم يرد). يكفي أن الرابط لهذا الحساب.' };
+}
+
 /** The result of a work on a link account, as the pages say it. */
 export type LinkResult = { ok: boolean; pending?: boolean; route?: 'link'; url?: string; why?: string | null };
 export const isWaiting = (r: { pending?: boolean } | undefined | null) => !!r?.pending;

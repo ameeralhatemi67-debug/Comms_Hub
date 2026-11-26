@@ -1,6 +1,6 @@
 {
   "script": "qa/x-link-flow.cjs",
-  "run": "2026-11-25T20:39:44.112Z",
+  "run": "2026-11-26T11:24:23.250Z",
   "checks": [
     {
       "name": "the send dialog says the link account is not simulated, and what happens instead",

@@ -31,6 +31,7 @@ import { NOW_CHOICES, choiceSub, choiceWord, defaultChoice } from '@/lib/work/yo
 import { FacebookTest } from './facebook-test';
 import { InstagramTest } from './instagram-test';
 import { TikTokTest } from './tiktok-test';
+import { XLinkTest } from './x-link-test';
 import { YouTubeTest } from './youtube-test';
 
 const LOCKING = ['APPROVED', 'SCHEDULED', 'IN_REVIEW'];
@@ -495,6 +496,7 @@ function AccountSheet({
           {a.platform === 'instagram' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <InstagramTest a={a} onReconnect={onReconnect} />}
           {a.platform === 'facebook' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <FacebookTest a={a} onReconnect={onReconnect} />}
           {a.platform === 'tiktok' && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <TikTokTest a={a} onReconnect={onReconnect} />}
+          {a.platform === 'x' && a.route === 'link' && (mgr || (pub && a.publishers.includes(w.me))) && <XLinkTest a={a} />}
           {(a.platform === 'youtube' || a.platform === 'instagram' || a.platform === 'tiktok') && oauth && (mgr || (pub && a.publishers.includes(w.me))) && <DirectPosts a={a} />}
           {mgr && !a.fixed && (
             <details className="pf-more">

@@ -9,22 +9,14 @@ import { Check, ClipboardCopy, Download, ExternalLink, X as XIcon } from 'lucide
 import { fileAt } from '@/lib/native/files';
 import { checkFor, copyFor, publishedVersion } from '@/lib/platforms/copies';
 import { accountName, platformInfo, type AccountRow, type WorkRow } from '@/lib/work/rules';
-import { X_LIMIT, composerLink, handleOf, parsePostLink, postLinkProblem, xLength, type PostCheck } from '@/lib/work/x-link';
+import { X_LIMIT, checkNote, composerLink, handleOf, parsePostLink, postLinkProblem, xLength, type PostCheck, type PostNote } from '@/lib/work/x-link';
 import { FileThumb } from '../file-thumb';
 import { PhoneFileButtons } from '../native/phone-file';
 import { Hint, Ic } from './parts';
 import { useCopySource } from './post-preview';
 
 type Act = (fn: string, args: Record<string, unknown>, ok: string) => Promise<boolean>;
-type Note = { text: string; level: 'ok' | 'warn' | 'bad' } | null;
-
-/** What X's lookup found, said for this account. Advice only. */
-export function checkNote(c: PostCheck, handle: string | null): Note {
-  if (c.found === false) return { level: 'warn', text: 'لم يجد X هذا المنشور. تأكد من الرابط بفتحه، فإن كان صحيحاً أكّد.' };
-  if (c.found === true && c.author && c.author.toLowerCase() !== handleOf(handle).toLowerCase()) return { level: 'bad', text: `هذا المنشور لحساب @${c.author}.` };
-  if (c.found === true) return { level: 'ok', text: 'وجد X المنشور وهو من هذا الحساب.' };
-  return { level: 'warn', text: 'لم يتحقق الموقع من المنشور عند X (لم يرد). يكفي أن الرابط لهذا الحساب.' };
-}
+type Note = PostNote;
 
 export function XHandoff({ w, account, act, onDone }: { w: WorkRow; account: AccountRow; act: Act; onDone?: () => void }) {
   const src = useCopySource(w.id, w.type);

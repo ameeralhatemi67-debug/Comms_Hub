@@ -4572,3 +4572,27 @@ sends nothing. Publishing to X by the API is not built; the link route (section 
 The owner will walk Snapchat on a personal account to give the pictures for a guide like Instagram's. What Snapchat offers, the two routes, and the list of pictures to take are in
 `Snapchat_Plan.md`. In short: the Public Profile API can publish (Story, Saved Story, Spotlight) but is allowlist only, and its OAuth app is made in Ads Manager's Business Details, not the
 Developer Portal; Snap Kit (Login Kit, Creative Kit) can only sign in or hand media to the Snapchat camera. Nothing is built; Snapchat stays «نشر يدوي».
+
+## 83. «تجربة النشر بالرابط», 2026-11-26
+
+By the owner's directive of 2026-11-26. The accounts of the other platforms are tested from their sheet in «حسابات المنصات»; an X account added «بالرابط» is too. Nothing is sent to X and
+nothing is deleted from it: the test proves the one thing a wrong handle would break later, in every real publish (`work_link_confirm`), that the handle on file and the link of a post of
+that account agree.
+
+- **Where and who.** In the account's sheet, for an X account on the link route (`src/components/work/x-link-test.tsx`, drawn by `channels.tsx`), to those who manage accounts and to the
+  account's own publishers, the same who as the other tests (`x_link_test_may`).
+- **Two kinds.** «فحص بلا نشر» (the default, publishes nothing): the person opens the account on X, copies the link of any post it already made, and pastes it. «نشر تجريبي»: the person
+  edits a short plain test text (no link, no name), opens X's composer with it (the same web intent as section 81, text only), posts by hand, and pastes the post's link. The second
+  warns that the post is real and public and that the site does not delete it.
+- **What the page does.** It checks the link as the database will (`src/lib/work/x-link.ts`, the same pattern), asks X's public lookup as advice (a post of another author stops it; a
+  post X cannot find, or no answer, only says so), then calls `x_link_test_record`. A refusal is said in words (`src/lib/work/x-link-test.ts`).
+- **What the database decides** (`supabase/migrations/20261126120000_x_link_tests.sql`): the account is X on the link route and active; the person may test it; the link is a post of the
+  account's own handle (letters do not matter); 20 tests per account a day. It keeps the kind, the post's number and address as X shows it, who and when, in `x_link_tests`, which a page may
+  read (as the other tests) and never write. What X's lookup said is not kept: a page could write anything there.
+- **What it never does.** Send anything to X, delete anything from it, use up a work's link (the same post can later be given to a work), notify anyone, or run in the background.
+- **Before the migration is run.** The list is quietly empty and a good link is said to be fine but not recorded. The panel needs the route column of section 81's migration too.
+- **Help.** «حسابات المنصات» says what it is (`src/lib/help/pages.ts`, part `xltest`, and the line about the simulation).
+- **Checks.** `supabase/tests/x_link_test_rules.sql` (35 on a private database, `qa/x-link-test-rules.json`); `tests/x-link-test.test.mjs` (10, holding the limit, the kinds and every
+  refusal equal to the database's); `qa/x-link-test-flow.cjs` (36) clicks through the real panel on a fixture, and `qa/x-link-flow.cjs` (25) still passes after `checkNote` moved into `x-link.ts`.
+- **Applying it.** Run `20261125120000_work_cycle_x_link_route.sql` and then `20261126120000_x_link_tests.sql` in the SQL editor of comms-hub. On 2026-11-26 both answered 404 signed out
+  (`account_add_link`, `x_link_test_record`): neither is applied yet.

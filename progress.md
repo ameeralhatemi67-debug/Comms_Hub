@@ -4750,3 +4750,22 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Found by the older checks and fixed.** `qa/platforms-flow.cjs` failed twice: first because the calculator sat above the step's lazily loaded picture so the picture never loaded (it was moved below the picture),
   then because plain "X", "GIF" and "Quote" in the calculator were outside an isolated run (they are inside one now, and `qa/x-cost-flow.cjs` holds it).
 - **Not checked.** The signed-in page on the live site (no bypass is allowed); X's real billing, which the first real post will show in the console's «Usage»; anything on Snapchat's side, since nobody has walked it yet.
+
+### 2026-11-26: «تجربة النشر بالرابط» for an X account on the link route
+
+- **The request.** The owner asked for a test option for X's free link route, "same as how the other accounts are tested", built fully, committed and pushed.
+- **Built** (`MVP_draft.md` 83). `supabase/migrations/20261126120000_x_link_tests.sql` (`x_link_tests`, `x_link_test_may`, `x_link_test_record`: only an X account on the link route and active, only
+  those who manage accounts or the account's own publishers, only a post of the account's own handle, 20 a day; a page reads and never writes); `src/lib/work/x-link-test.ts` (words, limit, refusals, a
+  migration not yet run told apart); `src/components/work/x-link-test.tsx` (two kinds: «فحص بلا نشر», the default, and «نشر تجريبي»), drawn by `channels.tsx` in the account's sheet; `checkNote` moved from
+  `x-handoff.tsx` into `src/lib/work/x-link.ts` so both use one; help in `src/lib/help/pages.ts`. Nothing is sent to X and nothing is deleted from it.
+- **Checks run.**
+  - `supabase/tests/x_link_test_rules.sql` 35 of 35 on a private database in Docker (`qa/x-link-test-rules.json`): who may and who may not (a publisher not on the account, a member, a writer), another
+    account's post, a link that is not a post, the two kinds, the letters of the handle, a simulated X account and an Instagram one, a stopped account, the limit of twenty and the next day, that a work's link
+    is not used up, what a page may read, call and write, and that an account taken away takes its tests.
+  - `npm test` 1001 of 1001 (the new `tests/x-link-test.test.mjs` has 10 and holds the limit, the kinds and every refusal equal to the migration's); `npm run typecheck` and `npm run build` pass.
+  - `qa/x-link-test-flow.cjs` 36 of 36 in Edge on a fixture; `qa/x-link-flow.cjs` 25 of 25 and `qa/platforms-flow.cjs` 170 of 170 re-run and unchanged.
+- **Found and fixed.** `tests/work.test.mjs` wants each function a work page calls to be the first in its own `grant execute` line: the migration's grants were split. Two expressions in the new flow check
+  were wrong (the database keeps the link's own letters; four tests cannot fill a list of five) and were corrected.
+- **Not applied.** Neither `20261125120000_work_cycle_x_link_route.sql` nor this migration is on comms-hub (both answered 404 signed out on 2026-11-26); the Supabase connector here sees the other
+  organisation, so the owner runs them in the SQL editor, the first before the second. Until then the panel says a good link is fine and that nothing was recorded.
+- **Not checked.** The signed-in page on the live site; X itself (nothing was posted or looked up on a real account); the phone application.
