@@ -74,7 +74,7 @@ export function QuickActions() {
               <Ic i={Send} />
               <span>
                 <b>نشر مباشر</b>
-                <small>على يوتيوب أو إنستغرام، الآن أو في موعد، خارج دورة العمل</small>
+                <small>على يوتيوب أو إنستغرام أو TikTok، الآن أو في موعد (لا موعد لـ TikTok)، خارج دورة العمل</small>
               </span>
             </button>
           )}

@@ -105,8 +105,8 @@ export const KNOWLEDGE: Record<string, PlatformKnowledge> = {
     checked: '2026-11-01',
   },
   snapchat: {
-    can: 'ربط الملف العام (Public Profile) لحساب القسم وفحص أن الربط سليم. وتتيح Public Profile API نشر القصص وSaved Stories وSpotlight لمن تقبله Snap. وينشر الناشر اليوم بحزمة جاهزة.',
-    cannot: 'الواجهة بدعوة من Snap فقط (allowlist): قد ينجح الدخول ثم ترفض Snap قراءة الملف العام حتى تُضيف التطبيق. والنشر الحقيقي لم يُبنَ بعد، فيبقى النشر يدوياً.',
+    can: 'ربط الملف العام (Public Profile) لحساب القسم وفحص أن الربط سليم. وتتيح Public Profile API نشر القصص وSaved Stories وSpotlight لمن تقبله Snap. ويُجرَّب النشر الحقيقي من «تجربة النشر» في الحساب المربوط. أما نشر الأعمال فمحاكاة، وينشر الناشر منها اليوم بحزمة جاهزة.',
+    cannot: 'الواجهة بدعوة من Snap فقط (allowlist): قد ينجح الدخول ثم ترفض Snap قراءة الملف العام حتى تُضيف التطبيق. وما يُنشر من الأعمال لم يُوصل بسناب شات بعد، فيبقى النشر منها يدوياً بحزمة جاهزة.',
     requires: ['حساب سناب شات للقسم ببريد موثَّق', 'حساب أعمال (Organisation) في Ads Manager وملف عام (Public Profile)', 'تطبيق OAuth من «Business details» في لوحة الأعمال، لا من Developer Portal', 'للنشر: موافقة Snap على التطبيق (allowlist) عبر جهة الاتصال لديها'],
     lead: 'إعداد الربط ساعات، ومدة موافقة Snap غير معروفة.',
     connect: 'تسجيل دخول Snapchat (OAuth)، ملف عام واحد في كل دخول. الرمز ساعة ويُجدَّد بالفحص.',

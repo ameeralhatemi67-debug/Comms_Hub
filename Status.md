@@ -26,6 +26,19 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Health check of the platform connections and its fixes, 2026-11-26
+
+- **Where things stand** (`Live_Publish_Plan.md` 1): every platform has a connection, but **nothing is posted for real from the work cycle**: publishing a work only records a result in the database. Real posts exist in
+  «تجربة النشر» (YouTube, Instagram, Facebook, TikTok, Snapchat) and in «نشر مباشر» (YouTube, Instagram, TikTok; the Admin and the director), and X's link route has a person post by hand. Proven against a real platform: only
+  TikTok's sandbox. No real YouTube, Instagram or Facebook post is recorded; Instagram and Facebook wait on Meta's «App not active».
+- **Fixed:** a scheduled Instagram post that Meta published but the site could not record is no longer filed as a Meta failure (it is retried, then closed as `PUBLISHED_UNRECORDED`, never re-sent): code and tests done, the
+  notice's wording is in `20261126200000_direct_published_unrecorded.sql`, **not applied to comms-hub**; documents and words that disagreed with the code; the YouTube connect guide explains a week-old connection that ends.
+- **Left on purpose** (`Live_Publish_Plan.md` 3): re-checking approvals when a post is claimed, truthful log labels, the real firing's identity, and never losing the platform's id. They are requirements for the day a work posts
+  for real, not defects of the simulation; the advice on how to build that, and which platform first (YouTube), is in the same file and is **not a decision**.
+- **The owner's checks:** run `qa/sql/check-platform-health.sql` in the SQL editor of comms-hub (read only: which migrations are applied, which accounts are connected); one private YouTube test and a delete on «Hedayh»; the
+  Google consent screen's status (**«Testing» ends the connection after 7 days**); the Meta developer account's confirmation; the bridge computer's hours.
+- Unpushed: this work is committed locally; nothing is pushed.
+
 ## Snapchat's connection, 2026-11-26
 
 - **Built, committed (`f8f8922`) and pushed by the owner** (`MVP_draft.md` section 84): Snapchat has a setup like the other platforms (nine steps from the owner's walk, ten blurred pictures in the setup guide

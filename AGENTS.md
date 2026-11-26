@@ -229,14 +229,14 @@ addresses. English inside Arabic follows `src/lib/guide-text.ts`: a label on the
 backticks, and every other run of English is isolated by the page. A step added to a guide whose platform may already be connected
 is `implied`, so the stored secret proves it and a connected platform never falls back to «خطوات ناقصة»; the ids of the steps a
 person confirmed are never renamed.
-Since 2026-11-16 (`MVP_draft.md` 67.10, the director's choice) the guides in `WHOLE_GUIDES` (`src/lib/guide-layout.ts`: YouTube's, Instagram's since 2026-11-25 (67.11) and
-TikTok's) are drawn as one page by `src/components/settings/guide-doc.tsx`: every step in order under a list of its parts, each picture
+Since 2026-11-16 (`MVP_draft.md` 67.10, the director's choice) the guides in `WHOLE_GUIDES` (`src/lib/guide-layout.ts`: YouTube's, Instagram's since 2026-11-25 (67.11), TikTok's, and Snapchat's since 2026-11-26 (84.1)) are drawn as one page by `src/components/settings/guide-doc.tsx`: every step in order under a list of its parts, each picture
 small (`SHOT_MAX`) under the actions it shows and at its own size on a click. Where a picture, a value to copy or a key field goes is
 `layoutStep` (data `at`, `copyAt`, `fieldsAt`, `phases`), held by `tests/guide-layout.test.mjs`. The page only draws: saving stays in
 `platform-sheet.tsx`, and the keys form is one hook for both layouts (`keys-form.tsx`). Moving another guide is adding it to `WHOLE_GUIDES`
 with its parts and places.
 
-Platform accounts of Facebook, Instagram and TikTok can be connected for real, by owner
+Platform accounts of Facebook, Instagram and TikTok can be connected for real (YouTube's, LinkedIn's and X's the same way, and
+Snapchat's since 2026-11-26, `MVP_draft.md` 84), by owner
 directive of 2026-10-15 (`Platform_Connections_Setup.md`, recorded in `progress.md`): the
 platform's own sign-in, the token in Vault, the authorisation equal to the token's real expiry,
 a health check recorded in the account's row. Publishing is still a simulation. A platform

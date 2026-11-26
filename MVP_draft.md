@@ -3409,7 +3409,7 @@ Read from the platforms' official pages. These facts move: re-read them before b
 - **TikTok.** `username` needs `user.info.profile`, so the site asks for it only when the scope was granted. App review, URL verification and the posting audit are steps of their own.
 - **LinkedIn.** The site links a person. A company Page needs a separate application with the Community Management API; the steps say so and it is not built.
 - **YouTube.** The client secret is shown once, and uploads have their own daily limit of 100.
-- **Snapchat.** The Public Profile API is allowlist only, so the manual path stays.
+- **Snapchat.** The Public Profile API is allowlist only, so the manual path stays. (Superseded 2026-11-26: the connection is built (84) and so is a test publish (85); publishing a work stays a simulation, so the platform's mode stays «مهمة يدوية».)
 
 ## 67.5 The words and pictures of a guide, 2026-11-02
 
@@ -4112,12 +4112,12 @@ Publishing works stays a simulation.
 ## 76.3 The sheet
 
 - **«أين؟»**
-  - YouTube and Instagram, each with how many accounts are connected.
+  - YouTube, Instagram and TikTok, each with how many accounts are connected (TikTok since 79; its API has no schedule, so a direct TikTok post has no time).
   - Every other social platform of the registry shows «قريباً» and cannot be pressed. Mail is not a publishing platform and is not
     shown.
   - A simulated account is never offered.
 - **The account.** With one account, its form opens at once. With more, the person picks one.
-- **The form** is the «تجربة النشر» panel in its direct mode (`youtube-test.tsx`, `instagram-test.tsx`), open at once:
+- **The form** is the «تجربة النشر» panel in its direct mode (`youtube-test.tsx`, `instagram-test.tsx`, and `tiktok-test.tsx` since 79), open at once:
   - The lead says it publishes for real, outside the work cycle, is written to «سجل النشاط», and is told to the account's
     publishers and the assistant.
   - **YouTube** (section 71.2): the title starts empty, with YouTube's four choices.
@@ -4214,7 +4214,7 @@ makes the call at the time. The site still has no timer.
   - It is never dragged. «لي وحدي» shows only one's own, and a project's view shows none.
   - It warns beside a work's publication within two hours on the same account, as two works do.
   - The colours follow 75: its account in «المنصة», its author in «المسؤول».
-- **The account's sheet** on «حسابات المنصات», for YouTube and Instagram, lists the account's last five direct posts to everyone who
+- **The account's sheet** on «حسابات المنصات», for YouTube, Instagram and TikTok, lists the account's last five direct posts to everyone who
   may test the account (row level security decides). Each line says where the post stands; a published one has «فتح». The list
   only reads: cancelling and deleting stay in «نشر مباشر», which the sheet says.
 - **Where it lives.**
@@ -4571,7 +4571,7 @@ sends nothing. Publishing to X by the API is not built; the link route (section 
 
 The owner will walk Snapchat on a personal account to give the pictures for a guide like Instagram's. What Snapchat offers, the two routes, and the list of pictures to take are in
 `Snapchat_Plan.md`. In short: the Public Profile API can publish (Story, Saved Story, Spotlight) but is allowlist only, and its OAuth app is made in Ads Manager's Business Details, not the
-Developer Portal; Snap Kit (Login Kit, Creative Kit) can only sign in or hand media to the Snapchat camera. Nothing is built; Snapchat stays «نشر يدوي».
+Developer Portal; Snap Kit (Login Kit, Creative Kit) can only sign in or hand media to the Snapchat camera. Nothing is built; Snapchat stays «نشر يدوي». (Superseded the same day: section 84 built the connection and its guide, and 85 the test publish.)
 
 ## 83. «تجربة النشر بالرابط», 2026-11-26
 

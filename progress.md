@@ -4841,3 +4841,27 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not checked.** Anything against a real Snap answer, so every shape (the profile, the lists, the stats, the upload paths, the 403 for an app not allowed, `en_US` for an Arabic description, one part under 32 MB with the
   padding) is the documentation's; the migration on comms-hub (not applied); the signed-in sheet; a real Drive upload of a device file; the long press itself (the fixture reads the reason's text and clicks plainly); whether a
   30 MiB file fits the route's 60 seconds; whether Snap ever pads a Spotlight id (the pattern would refuse one).
+
+### 2026-11-26: health check of the platform connections, and its fixes
+
+- **The request.** The owner asked for a health check of every platform connection (what is built, what the UI gained, what can be tested before use, what is ready for the whole flow of a task, scheduling and a real post), and then to fix
+  the problems it found. The check was a read-only audit of the code against the documents (a read-only agent, and by hand), plus an advisory pass by Fable 5.2 that read the repository and changed nothing. The findings and the advice are in
+  `Live_Publish_Plan.md` and the top of `Status.md`.
+- **Found.** Nothing is posted for real from the work cycle (`work_run_publish` is plain SQL; the adapters serve only «تجربة النشر», «نشر مباشر» and the scheduled-Instagram run). Proven against a real platform: only TikTok's sandbox.
+- **Fixed.**
+  - **A real defect** in `src/lib/platforms/direct-due.ts`: when recording a published scheduled Instagram post failed (the database answering badly, or a thrown error), the row stayed open, and two minutes later the next run saw Meta's
+    container as already published and filed it as a generic failure with a notice saying it could not be published. Now the result is tried three times, a post that still cannot be recorded is closed as `PUBLISHED_UNRECORDED` (words
+    that say it is live, to check the account and not to post it again), a container found already published says the same, and nothing is ever sent twice. `20261126200000_direct_published_unrecorded.sql` changes only the author's notice
+    (it stops, changing nothing, if `direct_fail` is not the version it expects; it can be run again). **Not applied to comms-hub.**
+  - Words and documents that disagreed with the code: `AGENTS.md` (the one-page guides, the platforms that connect for real), `MVP_draft.md` (direct publish includes TikTok; Snapchat is no longer «not built»), Snapchat's guide and platform
+    card (they said publishing was manual and the real test unbuilt), the «نشر مباشر» menu line (now names TikTok and says it has no time), and the YouTube connect guide (a connection that ends after a week means the Google app is in «Testing»).
+  - A read-only script for the live database, `qa/sql/check-platform-health.sql` (which of fifteen platform migrations are applied, which platforms are on, which accounts are connected and how they last checked).
+- **Left on purpose, with the reason** (`Live_Publish_Plan.md` 3): re-checking approvals when a real post is claimed (a check inside `work_run_publish` would change a simulation that harms no one, could deadlock a failed work that cannot go back for
+  approval, and an exception would stop the due run for every work), truthful log labels, the real firing's identity, and keeping the platform's id first. They are requirements for building real posts, not defects of the simulation.
+- **Checks run.**
+  - The new unit test in `tests/direct-schedule.test.mjs` (14 of 14): against the old engine logic it fails and nothing else does (13 pass, 1 fails), against the fix all 14 pass.
+  - `supabase/tests/direct_schedule_rules.sql` 75 of 75 on a private Docker database (69 before, 6 new about the notice); with the migration blanked out, exactly checks 74 and 75 fail (73 of 75); `direct_publish_rules.sql` 45 of 45 unchanged.
+  - `qa/sql/check-platform-health.sql`: its fifteen migration checks 15 of 15 on a private database with every migration replayed, and its three data queries run.
+  - `npm test` 1035 of 1035; `qa/platforms-flow.cjs` 170, `snapchat-flow` 29, `snapchat-test-flow` 82, `direct-publish-flow` 59, `instagram-test-flow` 43, all passing; typecheck and build pass.
+- **Not checked.** The live database: this session's Supabase connector reaches two other projects and not comms-hub, so none was read (run the script above); anything signed in; whether the owner's Google app is in «Testing»; the bridge computer's hours;
+  Instagram's real behaviour (the fix is proven against a fake Meta that answers as the documentation says).
