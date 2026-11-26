@@ -162,11 +162,11 @@ const loadPics = async (t, id) => {
     await t.waitForSelector('.pf-row');
     await t.screenshot({ path: path.join(out, '01-platforms.png'), fullPage: true });
     const states = await t.locator('.pf-row').evaluateAll((l) => Object.fromEntries(l.map((e) => [e.dataset.platform, e.dataset.state])));
-    check('every platform has one state, worked out from what is stored', JSON.stringify(states) === JSON.stringify({ x: 'issue', youtube: 'steps', tiktok: 'steps', linkedin: 'none', instagram: 'ok', snapchat: 'manual', mail: 'mail' }), JSON.stringify(states));
-    check('the words of the chips', (await chip(t, 'x')) === 'يوجد خلل' && (await chip(t, 'linkedin')) === 'غير متصلة' && (await chip(t, 'instagram')) === 'متصلة' && (await chip(t, 'snapchat')) === 'نشر يدوي' && (await chip(t, 'tiktok')) === 'خطوات ناقصة · 6 من 12', await chip(t, 'tiktok'));
+    check('every platform has one state, worked out from what is stored', JSON.stringify(states) === JSON.stringify({ x: 'issue', youtube: 'steps', tiktok: 'steps', linkedin: 'none', snapchat: 'none', instagram: 'ok', whatsapp_status: 'manual', mail: 'mail' }), JSON.stringify(states));
+    check('the words of the chips', (await chip(t, 'x')) === 'يوجد خلل' && (await chip(t, 'linkedin')) === 'غير متصلة' && (await chip(t, 'instagram')) === 'متصلة' && (await chip(t, 'snapchat')) === 'غير متصلة' && (await chip(t, 'whatsapp_status')) === 'نشر يدوي' && (await chip(t, 'tiktok')) === 'خطوات ناقصة · 6 من 12', await chip(t, 'tiktok'));
     check('a stored secret proves the steps it proves: YouTube shows what is left of the shared Google app', (await chip(t, 'youtube')) === 'خطوات ناقصة · 11 من 13' && (await row(t, 'youtube').innerText()).includes('التالي: سجّل عنوان العودة ليوتيوب'), await chip(t, 'youtube'));
     const groups = await t.locator('.pf-group h3').allInnerTexts();
-    check('what needs the reader comes first', groups[0].includes('تحتاج منك خطوة') && groups[0].includes('4') && groups[1].includes('لا شيء مطلوب منك الآن'), groups);
+    check('what needs the reader comes first', groups[0].includes('تحتاج منك خطوة') && groups[0].includes('5') && groups[1].includes('لا شيء مطلوب منك الآن') && groups[1].includes('3'), groups);
     check('each row has the one button its state asks for', (await row(t, 'x').locator('.pf-btn').innerText()) === 'إصلاح' && (await row(t, 'tiktok').locator('.pf-btn').innerText()) === 'متابعة الإعداد' && (await row(t, 'linkedin').locator('.pf-btn').innerText()) === 'بدء الإعداد');
     check('publishing is said plainly to be a simulation', (await t.locator('.pf-sim').innerText()).includes('محاكاة'));
     check('no sideways scroll', await fits(t));
@@ -359,7 +359,7 @@ const loadPics = async (t, id) => {
     check('a line says the state, who publishes, when, and what uses it', ['الحساب الرسمي', '@org_official', 'متصل حتى', 'ناشر الفحص', 'نشر تلقائي', 'عمل واحد'].every((x) => line.includes(x)), line);
     const sim = await a.locator('.ac-row[data-account="a-yt"]').innerText();
     check('an account connected to nothing is marked, and never says connected', sim.includes('ربط محاكى') && !sim.includes('متصل'), sim);
-    const manual = await a.locator('.ac-row[data-account="a-snap"]').innerText();
+    const manual = await a.locator('.ac-row[data-account="a-wa"]').innerText();
     check('an account with no sign-in says it is manual', manual.includes('نشر يدوي') && !manual.includes('متصل'), manual);
     check('the guide marks keep their shape', await a.locator('.ac-group-head .su-hint').first().evaluate((e) => Math.abs(e.offsetWidth - e.offsetHeight) <= 1));
     check('the old wall of buttons is gone from the list', (await a.locator('.ac-row button').count()) === 0);
@@ -423,14 +423,14 @@ const loadPics = async (t, id) => {
 
     await a.locator('.wk-head .wk-btn.gold').click();
     await sheet(a).waitFor();
-    await sheet(a).locator('button.ac-pick[data-platform="snapchat"]').click();
+    await sheet(a).locator('button.ac-pick[data-platform="whatsapp_status"]').click();
     text = await sheet(a).innerText();
     check('a platform with no sign-in takes a name, in two steps', text.includes('الخطوة 2 من 2') && text.includes('سمِّ الحساب'));
     await sheet(a).getByLabel(/الاسم في المركز/).fill('الفعاليات');
     await sheet(a).getByLabel('اسم الحساب على المنصة').fill('org_events');
     await sheet(a).getByRole('button', { name: 'إضافة' }).click();
     await a.locator('dialog.pf-sheet').waitFor({ state: 'detached' });
-    check('and is added', (await calls(a, 'account_save')).at(-1).args.p.platform === 'snapchat');
+    check('and is added', (await calls(a, 'account_save')).at(-1).args.p.platform === 'whatsapp_status');
 
     await a.locator('.wk-head .wk-btn.gold').click();
     await sheet(a).waitFor();

@@ -51,14 +51,14 @@ const DAY = 86400e3;
 const SECRET = 'client-secret-0123456789';
 
 // ---- the map ---------------------------------------------------------------------------------------
-test('five providers, and every registry platform that connects names its account type', () => {
+test('the providers, and every registry platform that connects names its account type', () => {
   // Microsoft is an app like the others, but it has no platform account: OneDrive is a storage provider.
-  assert.deepEqual([...CONN_PROVIDERS], ['meta', 'tiktok', 'google', 'linkedin', 'x', 'microsoft']);
-  assert.deepEqual(Object.keys(ACCOUNT_TYPE).sort(), ['facebook', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube']);
+  assert.deepEqual([...CONN_PROVIDERS], ['meta', 'tiktok', 'google', 'linkedin', 'x', 'microsoft', 'snapchat']);
+  assert.deepEqual(Object.keys(ACCOUNT_TYPE).sort(), ['facebook', 'instagram', 'linkedin', 'snapchat', 'tiktok', 'x', 'youtube']);
   assert.equal(providerOf('youtube'), 'google');
   assert.equal(providerOf('linkedin'), 'linkedin');
   assert.equal(providerOf('x'), 'x');
-  assert.equal(providerOf('snapchat'), null, 'Snapchat stays a manual task');
+  assert.equal(providerOf('snapchat'), 'snapchat', 'Snapchat connects since 2026-11-26 (MVP_draft.md section 84)');
   for (const p of CONN_PROVIDERS) {
     assert.ok(PROVIDER_NAME[p], p);
     assert.equal(APP_INTEGRATION_TYPE[p], APP_TYPE[p], `${p}: the client and the server agree on the app type`);
@@ -69,7 +69,7 @@ test('five providers, and every registry platform that connects names its accoun
 });
 
 test('the migration lists exactly the types the code uses', () => {
-  const sql = readFileSync('supabase/migrations/20261015190000_connections_generalised.sql', 'utf8') + readFileSync('supabase/migrations/20261015210000_onedrive.sql', 'utf8');
+  const sql = readFileSync('supabase/migrations/20261015190000_connections_generalised.sql', 'utf8') + readFileSync('supabase/migrations/20261015210000_onedrive.sql', 'utf8') + readFileSync('supabase/migrations/20261126150000_snapchat_connection.sql', 'utf8');
   for (const t of [...Object.values(APP_TYPE), ...Object.values(OFFER_TYPE), ...Object.values(ACCOUNT_TYPE).map((a) => a.type)]) {
     if (['meta_app', 'tiktok_app', 'meta_user', 'tiktok_user_offer', 'meta_page', 'meta_instagram', 'tiktok_user', 'microsoft_user_offer'].includes(t)) continue;
     assert.ok(sql.includes(`''${t}''`), t);

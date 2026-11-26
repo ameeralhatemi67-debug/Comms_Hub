@@ -100,7 +100,8 @@ test('every platform the registry may hold has a card of knowledge, and says whe
     assert.ok(v.checked === null || /^\d{4}-\d{2}-\d{2}$/.test(v.checked), `${k}: a date, or null if it never was`);
     if (v.docs) assert.match(v.docs, /^https:\/\//, k);
   }
-  for (const k of ['instagram', 'facebook', 'x', 'linkedin', 'youtube', 'tiktok', 'snapchat']) assert.equal(KNOWLEDGE[k].checked, '2026-11-01', k);
+  for (const k of ['instagram', 'facebook', 'x', 'linkedin', 'youtube', 'tiktok']) assert.equal(KNOWLEDGE[k].checked, '2026-11-01', k);
+  assert.equal(KNOWLEDGE.snapchat.checked, '2026-11-26', 'Snapchat was read again when its connection was built');
   for (const k of ['whatsapp_channel', 'whatsapp_status', 'mail']) assert.equal(KNOWLEDGE[k].checked, null, k);
 });
 

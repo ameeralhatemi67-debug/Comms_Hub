@@ -25,7 +25,7 @@ const TIKTOK_API = 'https://open.tiktokapis.com/v2';
 /** user.info.basic reads the profile (health); video.publish posts directly; video.upload sends a draft. */
 export const TIKTOK_SCOPES = ['user.info.basic', 'video.publish', 'video.upload'] as const;
 
-export type Provider = 'meta' | 'tiktok' | 'google' | 'linkedin' | 'x' | 'microsoft';
+export type Provider = 'meta' | 'tiktok' | 'google' | 'linkedin' | 'x' | 'microsoft' | 'snapchat';
 export const APP_TYPE: Record<Provider, string> = {
   meta: 'meta_app',
   tiktok: 'tiktok_app',
@@ -33,6 +33,7 @@ export const APP_TYPE: Record<Provider, string> = {
   linkedin: 'linkedin_app',
   x: 'x_app',
   microsoft: 'microsoft_app',
+  snapchat: 'snapchat_app',
 };
 export const OFFER_TYPE: Record<Provider, string> = {
   meta: 'meta_user',
@@ -41,6 +42,7 @@ export const OFFER_TYPE: Record<Provider, string> = {
   linkedin: 'linkedin_user_offer',
   x: 'x_user_offer',
   microsoft: 'microsoft_user_offer',
+  snapchat: 'snapchat_user_offer',
 };
 /** The account type each registry platform connects as. */
 export const ACCOUNT_TYPE: Record<string, { provider: Provider; type: string }> = {
@@ -50,6 +52,7 @@ export const ACCOUNT_TYPE: Record<string, { provider: Provider; type: string }> 
   youtube: { provider: 'google', type: 'youtube_channel' },
   linkedin: { provider: 'linkedin', type: 'linkedin_member' },
   x: { provider: 'x', type: 'x_user' },
+  snapchat: { provider: 'snapchat', type: 'snapchat_profile' },
 };
 /** Which provider an integration type of an account (or of a passing offer) belongs to. */
 export const PROVIDER_OF_TYPE: Record<string, Provider> = {
@@ -64,6 +67,8 @@ export const PROVIDER_OF_TYPE: Record<string, Provider> = {
   linkedin_user_offer: 'linkedin',
   x_user: 'x',
   x_user_offer: 'x',
+  snapchat_profile: 'snapchat',
+  snapchat_user_offer: 'snapchat',
 };
 export const providerOf = (platform: string): Provider | null => ACCOUNT_TYPE[platform]?.provider ?? null;
 

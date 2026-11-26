@@ -1,0 +1,15 @@
+{
+  "script": "supabase/tests/snapchat_connection_rules.sql",
+  "script_md5": "06ffed12c00352a5c0d56ba44b563437",
+  "migration": {
+    "file": "supabase/migrations/20261126150000_snapchat_connection.sql",
+    "file_md5": "7f68e94f013401c5a77f1728eefd09aa",
+    "applied": "this run is on a private container and touched nothing"
+  },
+  "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
+  "run": "2026-11-26T12:13:54.862Z",
+  "migrations_replayed": 79,
+  "differ": [],
+  "total": 37,
+  "passed": 37
+}

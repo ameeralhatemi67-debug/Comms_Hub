@@ -1,4 +1,4 @@
-// The platforms' own sign-in and health for YouTube (Google), LinkedIn and X, on the same model as
+// The platforms' own sign-in and health for YouTube (Google), LinkedIn, X and Snapchat, on the same model as
 // Meta and TikTok in ./oauth.ts (Action_Plan.md B9). Server only: it handles tokens, so it is never
 // imported by a client component, never logs a response body, and returns errors as short codes.
 // Every call takes the `fetch` it should use, so tests run it against a fake platform.
@@ -321,6 +321,127 @@ export async function xAccountHealth(f: Fetch, a: { clientId: string; secret: st
     newSecret = packTokens({ ...t, access: r.access, refresh: r.refresh || t.refresh, accessExpiresAt: r.accessExpiresAt, refreshExpiresAt: rolling(now) });
   }
   const me = await xMe(f, access);
+  if ('error' in me) return fail(me.error);
+  if (a.externalId && me.id !== a.externalId) return fail('TOKEN_REFUSED');
+  return { ok: true, error: null, expiresAt: rolling(now), scopes: [], newSecret };
+}
+
+// ---------------------------------------------------------------------------
+// Snapchat: a Public Profile (the Snap Marketing API's Public Profile API; MVP_draft.md section 84)
+// ---------------------------------------------------------------------------
+// Read from Snap's own documentation on 2026-11-26 (Public Profile API «Get started» and the Marketing API's authentication page) and from the
+// owner's walk on a personal account the same day, which showed Snap's consent screen for the app before any allowlist. The Public Profile API is
+// allowlist only: the sign-in works and the token is issued, but Snap may refuse the profile call until it has allowed the app (`ACCESS_NOT_GRANTED`).
+// The two documentation pages name two token addresses; the first is tried and the second only if Snap says the first does not exist.
+const SNAP_AUTH = 'https://accounts.snapchat.com/login/oauth2/authorize';
+const SNAP_TOKEN = 'https://accounts.snapchat.com/login/oauth2/access_token';
+const SNAP_TOKEN_ALT = 'https://accounts.snapchat.com/login/oauth2/token';
+const SNAP_API = 'https://businessapi.snapchat.com/v1';
+/** The scope the Public Profile API asks: it lets the app act on the Public Profile of the person who signed in. */
+export const SNAPCHAT_SCOPES = ['snapchat-profile-api'] as const;
+
+export function snapchatAuthUrl(a: { clientId: string; redirectUri: string; state: string; scopes?: readonly string[] }): string {
+  return `${SNAP_AUTH}?${qs({ response_type: 'code', client_id: a.clientId, redirect_uri: a.redirectUri, scope: (a.scopes ?? SNAPCHAT_SCOPES).join(' '), state: a.state })}`;
+}
+
+async function snapToken(f: Fetch, form: Record<string, string>) {
+  const first = await postForm(f, SNAP_TOKEN, form);
+  if (first.status !== 404) return first;
+  return postForm(f, SNAP_TOKEN_ALT, form);
+}
+
+export async function snapchatAppCheck(f: Fetch, clientId: string, secret: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const r = await snapToken(f, { grant_type: 'authorization_code', code: 'not-a-real-code', redirect_uri: 'https://localhost/', client_id: clientId, client_secret: secret });
+  const err = String(r.body.error ?? '');
+  if (r.status === 401 || err === 'invalid_client' || err === 'unauthorized_client') return { ok: false, error: 'APP_REFUSED' };
+  if (r.status >= 500) return { ok: false, error: 'PLATFORM_DOWN' };
+  return { ok: true };
+}
+
+const snapTokens = (b: Record<string, unknown>, now: number, refreshFallback = ''): OAuthTokens | null => {
+  if (typeof b.access_token !== 'string' || !b.access_token) return null;
+  return {
+    access: b.access_token,
+    refresh: typeof b.refresh_token === 'string' ? b.refresh_token : refreshFallback,
+    subject: '',
+    scope: typeof b.scope === 'string' ? b.scope.split(/[ ,]+/).filter(Boolean) : [],
+    // The access token lasts an hour (Snap's example answer); the refresh token's own life is not stated, so a good check renews a rolling date.
+    accessExpiresAt: new Date(now + secs(b.expires_in, 3600) * 1000).toISOString(),
+    refreshExpiresAt: rolling(now),
+  };
+};
+
+export async function snapchatExchangeCode(f: Fetch, a: { clientId: string; secret: string; redirectUri: string; code: string; now?: number }): Promise<OAuthTokens> {
+  const now = a.now ?? Date.now();
+  const r = await snapToken(f, { grant_type: 'authorization_code', code: a.code, redirect_uri: a.redirectUri, client_id: a.clientId, client_secret: a.secret });
+  const t = r.status === 200 ? snapTokens(r.body, now) : null;
+  if (!t) throw new PlatformCallError(r.status === 401 || String(r.body.error ?? '') === 'invalid_client' ? 'APP_REFUSED' : 'CODE_REFUSED', 400);
+  if (!t.refresh) throw new PlatformCallError('REFRESH_MISSING', 400);
+  return t;
+}
+
+export async function snapchatRefresh(f: Fetch, a: { clientId: string; secret: string; refresh: string; now?: number }): Promise<OAuthTokens | { error: string }> {
+  const now = a.now ?? Date.now();
+  const r = await snapToken(f, { grant_type: 'refresh_token', refresh_token: a.refresh, client_id: a.clientId, client_secret: a.secret });
+  if (r.status === 200) {
+    const t = snapTokens(r.body, now, a.refresh);
+    if (t) return t;
+  }
+  const err = String(r.body.error ?? '');
+  return { error: err === 'invalid_grant' || err === 'invalid_client' || r.status === 400 || r.status === 401 ? 'TOKEN_REFUSED' : stat(r.status) };
+}
+
+export type SnapProfile = { id: string; name: string; username: string | null };
+
+/**
+ * The Public Profile in one of the API's answers. Snap wraps results in a status envelope that this site has not seen on a real call, so the profile
+ * is looked for by what it is (an object with an id and a display name), a few levels down, instead of by a fixed path.
+ */
+export function snapProfileOf(body: unknown, depth = 0): SnapProfile | null {
+  if (!body || typeof body !== 'object' || depth > 5) return null;
+  if (Array.isArray(body)) {
+    for (const x of body) {
+      const p = snapProfileOf(x, depth + 1);
+      if (p) return p;
+    }
+    return null;
+  }
+  const o = body as Record<string, unknown>;
+  if (typeof o.id === 'string' && o.id && typeof o.display_name === 'string') {
+    const handle = typeof o.snap_user_name === 'string' && o.snap_user_name ? o.snap_user_name : typeof o.username === 'string' && o.username ? o.username : null;
+    return { id: o.id, name: o.display_name || o.id, username: handle };
+  }
+  for (const v of Object.values(o)) {
+    const p = snapProfileOf(v, depth + 1);
+    if (p) return p;
+  }
+  return null;
+}
+
+/** The Public Profile of the person who signed in. A 403 is what an app Snap has not allowed yet is expected to get. */
+export async function snapchatProfile(f: Fetch, access: string): Promise<SnapProfile | { error: string }> {
+  const r = await getJson(f, `${SNAP_API}/public_profiles/my_profile`, { headers: { Authorization: `Bearer ${access}`, Accept: 'application/json' } });
+  if (r.status === 200) return snapProfileOf(r.body) ?? { error: 'NO_PROFILE' };
+  if (r.status === 401) return { error: 'TOKEN_REFUSED' };
+  if (r.status === 403) return { error: 'ACCESS_NOT_GRANTED' };
+  if (r.status === 404) return { error: 'NO_PROFILE' };
+  return { error: stat(r.status) };
+}
+
+/** One check of a Snapchat account: refresh when the hour's token has ended, then ask whose Public Profile it is. */
+export async function snapchatAccountHealth(f: Fetch, a: { clientId: string; secret: string; packed: string; externalId: string | null; now?: number }): Promise<Health> {
+  const now = a.now ?? Date.now();
+  const t = unpackTokens(a.packed);
+  if (!t || !t.refresh) return bad;
+  let access = t.access;
+  let newSecret: string | null = null;
+  if (!t.accessExpiresAt || Date.parse(t.accessExpiresAt) - 60_000 <= now) {
+    const r = await snapchatRefresh(f, { clientId: a.clientId, secret: a.secret, refresh: t.refresh, now });
+    if ('error' in r) return fail(r.error === 'TOKEN_REFUSED' ? 'TOKEN_EXPIRED' : r.error);
+    access = r.access;
+    newSecret = packTokens({ ...t, access: r.access, refresh: r.refresh || t.refresh, accessExpiresAt: r.accessExpiresAt, refreshExpiresAt: rolling(now) });
+  }
+  const me = await snapchatProfile(f, access);
   if ('error' in me) return fail(me.error);
   if (a.externalId && me.id !== a.externalId) return fail('TOKEN_REFUSED');
   return { ok: true, error: null, expiresAt: rolling(now), scopes: [], newSecret };

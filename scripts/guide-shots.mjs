@@ -2,7 +2,7 @@
 // the platform's own pages. The originals hold real addresses, names and identifiers, so they are never kept in the
 // repository: this script is given the folder that holds them, blurs everything private, draws the numbered rings that
 // say where to click, crops each picture to the part that matters and writes it to public/guides/<set>/.
-//   node scripts/guide-shots.mjs <folder with the originals> [google | meta | x | tiktok]
+//   node scripts/guide-shots.mjs <folder with the originals> [google | meta | x | tiktok | snapchat]
 // «google» (default): 1.png to 7.png, in the order of the owner's message of 2026-11-02. «meta» (the Instagram guide):
 // meta-1.png to meta-19.png, in the order of the owner's messages of 2026-11-03: the accounts page, its menu, the portfolio's
 // home, the add window, Instagram's own window and the added window (1 to 6); then the apps page, the new app's name,
@@ -12,6 +12,8 @@
 // configuration's ID (18 and 19).
 // «x» (the X guide): x-1.png, the developer console's dashboard (2026-11-03).
 // «tiktok» (the TikTok guide): tiktok-1.png to tiktok-45.png, the owner's walk through TikTok for Developers of 2026-11-15.
+// «snapchat» (the Snapchat guide and its connect guide): the owner's pictures of 2026-11-26, named by the order they were sent (1 to 4: sign-in, Ads Manager, the Public Profile; 7: the menu; 12 to 14:
+// the OAuth app; 20 and 21: the consent; 24: the created app, already blurred by the owner and blurred again here).
 // A picture wider than the sheet can show is given a `width` and is scaled to it after the crop.
 // Corners are rounded by the page (the figure clips them), so the files stay square and re-usable.
 import { mkdirSync } from 'node:fs';
@@ -24,8 +26,8 @@ if (!src) {
   process.exit(1);
 }
 const set = process.argv[3] ?? 'google';
-if (!['google', 'meta', 'x', 'tiktok'].includes(set)) {
-  console.error('the set is google, meta, x or tiktok');
+if (!['google', 'meta', 'x', 'tiktok', 'snapchat'].includes(set)) {
+  console.error('the set is google, meta, x, tiktok or snapchat');
   process.exit(1);
 }
 const out = resolve(import.meta.dirname, '..', 'public', 'guides', set);
@@ -34,7 +36,7 @@ mkdirSync(out, { recursive: true });
 const AMBER = '#ffb300';
 const RED = '#ff5a4d';
 
-/** Everything below is in the original's own pixels. `blur` boxes are [x, y, w, h]; `mend` boxes are painted over with the page colour. `set` is the folder (default google). */
+/** Everything below is in the original's own pixels. `blur` boxes are [x, y, w, h] and, optionally, the size of the squares it is made of (9 by default; more is coarser); `mend` boxes are painted over with the page colour. `set` is the folder (default google). */
 const SHOTS = [
   {
     name: 'menu',
@@ -389,6 +391,47 @@ const SHOTS = [
   { set: 'tiktok', name: 'details-category', from: 'tiktok-13.png', marks: [{ box: [32, 160, 528, 62], n: '3' }], crop: [0, 0, 582, 400], alt: 'قائمة Category مفتوحة: Books وBusiness وEducation وEntertainment وFinance' },
   { set: 'tiktok', name: 'details-web', from: 'tiktok-18.png', marks: [{ box: [36, 260, 1098, 54], n: 'x', color: RED }], width: 975, alt: 'Platforms وعليها Web، وحقل Web/Desktop URL بلا شرطة في آخره وتحته «This URL is not verified»' },
   { set: 'tiktok', name: 'review', from: 'tiktok-29.png', marks: [{ box: [38, 283, 1140, 131], n: '2' }, { box: [38, 498, 130, 54], n: '4' }], crop: [0, 80, 1208, 560], width: 975, alt: 'قسم App review: حقل الشرح بحد 1000 حرف، وزر Upload لفيديو العرض وشروطه' },
+  // The Snapchat guide (MVP_draft.md section 84): the owner's walk of 2026-11-26. The originals hold the owner's email, name, phone number, profile picture and one app's client id and
+  // secret; they stay outside the repository, and each is blurred here before it is cropped.
+  { set: 'snapchat', name: 'signin', from: '1.png', blur: [[108, 236, 212, 26]], marks: [{ box: [66, 340, 383, 58], n: '1' }], crop: [30, 28, 458, 540], alt: 'صفحة Snapchat لتسجيل الدخول: الحقل Password وزر Next، والبريد في أعلاها محجوب' },
+  {
+    set: 'snapchat',
+    name: 'business-name',
+    from: '2.png',
+    blur: [[660, 424, 580, 32], [660, 526, 400, 26], [660, 624, 300, 26]],
+    marks: [{ box: [645, 405, 612, 262], n: '2' }, { box: [905, 735, 90, 52] }],
+    crop: [590, 300, 722, 540],
+    alt: 'Welcome to Ads Manager: الحقول Business name وBusiness email address وYour name، وتحتها زر Next ورابط Skip ad creation',
+    caption: 'القيم في الحقول محجوبة: اكتب اسم قسمك وبريده واسمك.',
+  },
+  {
+    set: 'snapchat',
+    name: 'business-where',
+    from: '3.png',
+    blur: [[708, 590, 170, 28]],
+    marks: [{ box: [645, 470, 612, 66], n: '3' }, { box: [645, 840, 612, 140], n: '4' }, { box: [955, 1060, 86, 52], n: '5' }],
+    crop: [590, 420, 722, 710],
+    alt: 'Where do you do business؟: Country وCurrency ورقم الهاتف ثم الحقلان الاختياريان، والمربعان المعلَّمان مسبقاً، وزرا Back وNext',
+    caption: 'رقم الهاتف محجوب. الحلقة 4 على المربعين المعلَّمين مسبقاً: عروض Snap التسويقية بالهاتف وواتساب وبالبريد.',
+  },
+  { set: 'snapchat', name: 'public-profile', from: '4.png', blur: [[688, 336, 112, 112, 28], [808, 378, 100, 32]], marks: [{ box: [842, 527, 217, 52], n: '2' }], crop: [590, 118, 722, 616], alt: 'Complete your Public Profile: ملف الحساب، والسؤال Do you want to make this your business\'s Public Profile؟ وزر Create Public Profile', caption: 'اسم الملف وصورته محجوبان.' },
+  { set: 'snapchat', name: 'menu', from: '7.png', marks: [{ box: [28, 104, 296, 48], n: '2' }], alt: 'القائمة اليسرى Business Settings: Business Dashboard وBusiness details وMembers وAd accounts وPixels وApps وShared وUser Settings وCatalogues', caption: 'العنصر المحاط هو «Business details».' },
+  { set: 'snapchat', name: 'oauth-card', from: '12.png', marks: [{ box: [430, 158, 390, 44], n: '3' }], crop: [0, 20, 1257, 212], width: 975, alt: 'بطاقة OAuth apps في Business details: زر «+ OAuth app» والسطر You have added zero OAuth apps.' },
+  { set: 'snapchat', name: 'oauth-add', from: '12.png', marks: [{ box: [1066, 46, 144, 42], n: '1' }], crop: [0, 20, 1257, 212], width: 975, alt: 'بطاقة OAuth apps: زر «+ OAuth app» في أعلاها' },
+  { set: 'snapchat', name: 'terms', from: '13.png', blur: [[176, 108, 170, 24]], marks: [{ box: [40, 128, 28, 28], n: '2' }, { box: [554, 209, 82, 46] }], alt: 'نافذة API Terms and Conditions: مربع الموافقة على Snap Developer Terms وSnap Business Tools Terms، وزرا Cancel وSave', caption: 'اسم المؤسسة في العبارة محجوب.' },
+  { set: 'snapchat', name: 'oauth-form', from: '14.png', marks: [{ box: [72, 314, 569, 54], n: '1' }, { box: [674, 314, 575, 82], n: '2' }, { box: [1112, 51, 159, 41], n: '3' }], width: 975, alt: 'صفحة Create OAuth app: App logo وحقل App name وحقل Snap redirect URIs، وزر Create OAuth app' },
+  {
+    set: 'snapchat',
+    name: 'created',
+    from: '24.png',
+    blur: [[74, 318, 372, 38], [300, 416, 184, 26]],
+    marks: [{ box: [1138, 384, 96, 32], n: '1' }, { box: [70, 300, 380, 60], n: '2' }, { box: [1208, 50, 66, 38], n: '3' }],
+    width: 975,
+    alt: 'بعد إنشاء التطبيق: اسمه وعنوان العودة وSnap Client ID، والتحذير البرتقالي أن السر لن يظهر ثانية مع الرابط Copy key وزر Done',
+    caption: 'المعرّف والسر محجوبان في الصورة، وهكذا يجب أن تكون كل صورة تلتقطها.',
+  },
+  { set: 'snapchat', name: 'consent', from: '20.png', blur: [[198, 132, 72, 72, 24], [272, 150, 130, 42]], crop: [90, 0, 640, 605], alt: 'Continue to Comms Hub؟: ملف الحساب، وعبارة أن التطبيق سيصل إلى Public Profile APIs، وزرا Continue وCancel', caption: 'اسم الحساب وصورته محجوبان.' },
+  { set: 'snapchat', name: 'authorised', from: '21.png', alt: 'Authorisation successful: اضغط Continue للعودة إلى التطبيق' },
 ];
 
 /** A numbered ring, drawn as paths so no font is needed on the machine that makes the pictures. */
@@ -429,9 +472,9 @@ for (const s of SHOTS.filter((x) => (x.set ?? 'google') === set)) {
   const input = join(src, s.from);
   const { data, info } = await sharp(input).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const layers = [];
-  for (const [x, y, w, h] of s.blur ?? []) {
+  for (const [x, y, w, h, div = 9] of s.blur ?? []) {
     // Pixelate first, then blur: a smudge that cannot be read, and cannot be sharpened back.
-    const small = await sharp(data, { raw: info }).extract({ left: x, top: y, width: w, height: h }).resize({ width: Math.max(2, Math.round(w / 9)), kernel: 'nearest' }).raw().toBuffer({ resolveWithObject: true });
+    const small = await sharp(data, { raw: info }).extract({ left: x, top: y, width: w, height: h }).resize({ width: Math.max(2, Math.round(w / div)), kernel: 'nearest' }).raw().toBuffer({ resolveWithObject: true });
     const patch = await sharp(small.data, { raw: small.info }).resize({ width: w, height: h, fit: 'fill', kernel: 'cubic' }).blur(5).png().toBuffer();
     layers.push({ input: patch, left: x, top: y });
   }

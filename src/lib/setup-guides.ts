@@ -113,6 +113,14 @@ const TIKTOK_REVIEW =
   'the comment, duet and stitch settings and the commercial content disclosure, and asks for agreement to TikTok\'s Music Usage Confirmation. The video is sent as a file and the page shows the publish status.';
 const LINKEDIN_APPS = { href: 'https://www.linkedin.com/developers/apps', label: 'تطبيقاتي في LinkedIn' };
 const X_CONSOLE = { href: 'https://console.x.com', label: 'وحدة مطوّري X' };
+const SNAP_ACCOUNTS = { href: 'https://accounts.snapchat.com/', label: 'حساب سناب شات' };
+const SNAP_ADS = { href: 'https://ads.snapchat.com/', label: 'Snapchat Ads Manager' };
+const SNAP_BUSINESS = { href: 'https://business.snapchat.com/', label: 'لوحة أعمال Snapchat' };
+/** Where the facts of the Snapchat guide come from (MVP_draft.md section 84). */
+const SNAP_FACTS = 'المعلومات هنا من وثائق Snap الرسمية ومن تجربة فعلية على حساب في 2026-11-26، وتتغير. راجع صفحة المنصة نفسها عند التسجيل.';
+/** The request for access to the Public Profile API, as Snap asks it: the client id and the use, never the secret. */
+const SNAP_REQUEST =
+  'Hello, we are the communications department of our organisation. We would like access to the Snap Public Profile API for our organisation\'s own Public Profile, to publish our own Stories and Spotlight content from our internal communications tool. Our OAuth app was created in Business details of our Snap business account; its client ID is: (paste the Snap Client ID here). Scope: snapchat-profile-api. Please allowlist it. We have not shared the client secret.';
 /** A picture of a platform's own page (public/guides/<set>/, made by scripts/guide-shots.mjs): Google's console for «google», Meta's pages for «meta». */
 /** The prices of X's API as the developer console showed them on 2026-11-03 (MVP_draft.md section 67.8), one row per line of its pages. */
 const X_READS: [string, string][] = [
@@ -176,6 +184,7 @@ const shot = shotOf('google');
 const metaShot = shotOf('meta');
 const xShot = shotOf('x');
 const tiktokShot = shotOf('tiktok');
+const snapShot = shotOf('snapchat');
 
 export const GUIDES: Record<string, Guide> = {
   meta: {
@@ -322,6 +331,7 @@ export const GUIDES: Record<string, Guide> = {
         b: 'في «App roles» أضف كل من سيسجّل الدخول لربط الحسابات. هذا يكفي لحسابات القسم نفسه، و«App Review» لازمة فقط لخدمة حسابات لا تملكها.',
         info: [
           'إن ظهرت لمن يربط صفحة Meta «App not active» فالتطبيق في وضع التطوير وهو بلا دور عليه: أضف حسابه في فيسبوك من «App roles» ثم «Roles» دوراً «Administrator» أو «Developer»، وليقبل الدعوة من developers.facebook.com قبل أن يحاول. وإن كان له دور فافتح لوحة التطبيق وانظر في «Required actions»: Meta توقف التطبيق حتى تُكمل ما تطلبه.',
+          'وإن فتح مالك التطبيق developers.facebook.com فظهرت له «Account confirmation needed» فحساب المطوّر نفسه موقوف عند Meta، ويظهر «App not active» لكل من يحاول الربط، وبدور أو بلا دور. لا يحلّه إلا المالك بنفسه: يضغط «Confirm Account» ويكمل خطوات التحقق التي تطلبها Meta، ثم يعيد المحاولة.',
         ],
         link: META_APPS,
         ok: 'أضفتهم',
@@ -948,6 +958,142 @@ export const GUIDES: Record<string, Guide> = {
     ],
     link: X_CONSOLE,
   },
+  snapchat: {
+    title: 'تجهيز تطبيق Snapchat',
+    intro: 'للمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف العميل وسره في الموقع. يربط الموقع بها «الملف العام» (Public Profile) لحساب سناب شات الذي يسجّل الدخول. النشر على سناب شات ما زال يدوياً بحزمة جاهزة.',
+    steps: [
+      {
+        id: 'account',
+        implied: true,
+        t: 'سجّل الدخول بحساب سناب شات الذي سيملك الملف',
+        b: 'حساب سناب شات واحد يملكه القسم، ببريد موثَّق. منه تُنشأ حسابات الأعمال والملف العام وتطبيق الربط.',
+        todo: ['افتح الصفحة من الرابط، واكتب بريد الحساب ثم كلمة المرور.', 'إن لم يكن البريد موثَّقاً فوثّقه أولاً من إعدادات الحساب.'],
+        info: ['استعمل حساباً يملكه القسم لا حساباً شخصياً: من يملك حساب الأعمال يملك الملف العام ومفاتيح التطبيق.'],
+        shots: [snapShot('signin', 458, 540, 'صفحة Snapchat لتسجيل الدخول: الحقل Password وزر Next، والبريد في أعلاها محجوب', undefined, ['1'])],
+        link: SNAP_ACCOUNTS,
+        ok: 'دخلت',
+      },
+      {
+        id: 'business',
+        implied: true,
+        t: 'أنشئ حساب الأعمال في Ads Manager',
+        b: 'حساب الأعمال (Organisation) هو الذي يملك تطبيق الربط. يُنشأ بشاشتين.',
+        todo: [
+          'افتح Ads Manager من الرابط. في أول زيارة تظهر «Welcome to Ads Manager!».',
+          'اكتب في «Business name» اسم القسم، وفي «Business email address» بريده، وفي «Your name» اسمك، ثم اضغط «Next».',
+          'في «Where do you do business?» اختر «Country» و«Currency» واكتب رقم هاتف القسم. «Business website» و«VAT/Tax ID» اختياريان.',
+          'المربعان المعلَّمان مسبقاً هما موافقة على أن تتصل بك Snap بعروض تسويقية بالهاتف وواتساب وبالبريد. أزل العلامة منهما إن لم تردهما.',
+          'اضغط «Next».',
+        ],
+        info: ['لا حاجة لإنشاء إعلان: لا يدفع الموقع شيئاً لسناب شات، والتطبيق مجاني.'],
+        shots: [
+          snapShot('business-name', 722, 540, 'Welcome to Ads Manager: الحقول Business name وBusiness email address وYour name، وتحتها زر Next ورابط Skip ad creation', 'القيم في الحقول محجوبة: اكتب اسم قسمك وبريده واسمك.', ['2']),
+          snapShot('business-where', 722, 710, 'Where do you do business؟: Country وCurrency ورقم الهاتف ثم الحقلان الاختياريان، والمربعان المعلَّمان مسبقاً، وزرا Back وNext', 'رقم الهاتف محجوب. الحلقة 4 على المربعين المعلَّمين مسبقاً: عروض Snap التسويقية بالهاتف وواتساب وبالبريد.', ['3', '4', '5']),
+        ],
+        link: SNAP_ADS,
+        ok: 'أنشأته',
+      },
+      {
+        id: 'profile',
+        implied: true,
+        t: 'أنشئ الملف العام',
+        b: 'الواجهة تعمل على «الملف العام» (Public Profile) للحساب الذي يسجّل الدخول، فلا بد من ملف عام.',
+        todo: [
+          'بعد إنشاء حساب الأعمال تظهر «Complete your Public Profile» وفيها ملف حساب سناب شات الذي سجّلت به.',
+          'اضغط «Create Public Profile» ليصير هذا الملف هو الملف العام للقسم. بذلك توافق على «Commercial Content Terms».',
+        ],
+        info: ['الملف العام يراه كل مستخدمي سناب شات. أنشئه بحساب القسم، لا بحساب شخصي.'],
+        shots: [snapShot('public-profile', 722, 616, 'Complete your Public Profile: ملف الحساب، والسؤال Do you want to make this your business\'s Public Profile؟ وزر Create Public Profile', 'اسم الملف وصورته محجوبان.', ['2'])],
+        ok: 'أنشأته',
+      },
+      {
+        id: 'dashboard',
+        implied: true,
+        t: 'افتح «Business details»',
+        b: 'في لوحة الأعمال، لا في بوابة المطوّرين.',
+        todo: [
+          'افتح لوحة الأعمال من الرابط، أو اضغط «Business Dashboard» في القائمة العلوية لـ Ads Manager.',
+          'من القائمة اليسرى «Business Settings» اضغط «Business details».',
+          'انزل إلى بطاقة «OAuth apps». في حساب جديد تقول «You have added zero OAuth apps.».',
+        ],
+        info: ['لا تستعمل Snap Kit Developer Portal (kit.snapchat.com): معرّف العميل الذي يصدر منه لا يعمل مع Public Profile API، وتحذّر Snap من ذلك بنفسها.'],
+        shots: [
+          snapShot('menu', 330, 505, 'القائمة اليسرى Business Settings: Business Dashboard وBusiness details وMembers وAd accounts وPixels وApps وShared وUser Settings وCatalogues', 'العنصر المحاط هو «Business details».', ['2']),
+          snapShot('oauth-card', 975, 164, 'بطاقة OAuth apps في Business details: زر «+ OAuth app» والسطر You have added zero OAuth apps.', undefined, ['3']),
+        ],
+        link: SNAP_BUSINESS,
+        ok: 'وصلت',
+      },
+      {
+        id: 'oauth',
+        implied: true,
+        t: 'ابدأ تطبيق OAuth',
+        b: 'زر في بطاقة «OAuth apps» ثم موافقة على شروط Snap.',
+        todo: [
+          'اضغط «+ OAuth app» في بطاقة «OAuth apps».',
+          'تظهر نافذة «API Terms and Conditions»: علّم المربع، وهو موافقة باسم المؤسسة على «Snap Developer Terms» و«Snap Business Tools Terms»، ثم اضغط «Save».',
+        ],
+        info: ['من يعلّم المربع يلزم المؤسسة بشروط Snap. اقرأ الشرطين من الرابطين اللذين في النافذة قبل ذلك.'],
+        shots: [
+          snapShot('oauth-add', 975, 164, 'بطاقة OAuth apps: زر «+ OAuth app» في أعلاها', undefined, ['1']),
+          snapShot('terms', 675, 290, 'نافذة API Terms and Conditions: مربع الموافقة على Snap Developer Terms وSnap Business Tools Terms، وزرا Cancel وSave', 'اسم المؤسسة في العبارة محجوب.', ['2']),
+        ],
+        link: SNAP_BUSINESS,
+        ok: 'وصلت إلى النموذج',
+      },
+      {
+        id: 'form',
+        implied: true,
+        kind: 'copy',
+        t: 'املأ نموذج التطبيق',
+        b: 'اسم وعنوان عودة، ثم «Create OAuth app».',
+        todo: [
+          'في «App name» اكتب `Comms Hub`. «App logo» اختياري.',
+          'في «Snap redirect URIs» الصق عنوان العودة أدناه، سطراً واحداً. يجب أن يطابق تماماً.',
+          'اضغط «Create OAuth app».',
+        ],
+        copy: '{redirect}',
+        copyLabel: 'عنوان العودة',
+        shots: [snapShot('oauth-form', 975, 330, 'صفحة Create OAuth app: App logo وحقل App name وحقل Snap redirect URIs، وزر Create OAuth app', undefined, ['1', '2', '3'])],
+        ok: 'أنشأت التطبيق',
+      },
+      {
+        id: 'secret',
+        implied: true,
+        t: 'احفظ السر فوراً',
+        b: 'يظهر السر مرة واحدة هنا ولا يُعاد.',
+        todo: [
+          'تظهر صفحة فيها «Snap Client ID» و«Snap client secret key». اضغط «Copy key» وخزّن السر في مدير كلمات مرور.',
+          'انسخ «Snap Client ID» كذلك.',
+          'اضغط «Done».',
+        ],
+        info: [
+          'غطِّ السر قبل أي لقطة شاشة، ولا ترسله في محادثة أو بريد. ما يظهر في صورة يُعدّ مكشوفاً.',
+          'إن ضاع السر أو انكشف فاحذف التطبيق من «Business details» وأنشئ غيره: لا طريقة لعرض السر ثانية.',
+        ],
+        shots: [snapShot('created', 975, 367, 'بعد إنشاء التطبيق: اسمه وعنوان العودة وSnap Client ID، والتحذير البرتقالي أن السر لن يظهر ثانية مع الرابط Copy key وزر Done', 'المعرّف والسر محجوبان في الصورة، وهكذا يجب أن تكون كل صورة تلتقطها.', ['1', '2', '3'])],
+        ok: 'حفظته',
+      },
+      { id: 'keys', kind: 'keys', t: 'الصق المعرّف والسر', b: '«Snap Client ID» و«Snap client secret key». الصقهما هنا وحدهما، ولا ترسلهما إلى أحد.', link: SNAP_BUSINESS },
+      {
+        id: 'allowlist',
+        kind: 'review',
+        t: 'اطلب من Snap إضافة التطبيق',
+        b: 'الواجهة بدعوة من Snap فقط (allowlist): يُسجَّل الدخول، وقد ترفض Snap قراءة الملف حتى تُضيف التطبيق. أرسل إلى جهة الاتصال لديك في Snap معرّف العميل (لا السر) ووصفاً لاستعمالك. لا تخبر Snap الموقع بقرارها، فقل له أنت أين وصل الطلب.',
+        copy: SNAP_REQUEST,
+        copyLabel: 'نص الرسالة',
+        link: { href: 'https://developers.snap.com/api/marketing-api/Public-Profile-API/GetStarted', label: 'شرح Snap لطلب الوصول' },
+        ok: 'أكتفي بالنشر اليدوي',
+      },
+    ],
+    notes: [
+      'بعد هذه الخطوات يُربط الملف العام من «حسابات المنصات»: دخول واحد يربط ملفاً واحداً. رمز الدخول ساعة ويُجدَّد بالفحص الذي يجري حين تُفتح تلك الصفحة.',
+      'إن سجّلت الدخول ثم ظهرت عبارة أن Snap رفضت قراءة الملف العام فالتطبيق لم تُضفه Snap إلى قائمتها بعد، أو ليس للحساب ملف عام.',
+      'النشر على سناب شات ما زال يدوياً بحزمة جاهزة، وما زال النشر عبر الواجهة محاكاة. هذه الخطوات تجهّز الربط والفحص فقط.',
+      SNAP_FACTS,
+    ],
+    link: SNAP_BUSINESS,
+  },
   connect_google: {
     title: 'ربط قناة يوتيوب',
     intro: 'لمن ينشر على القناة. تنتهي بحساب «ربط حقيقي» يُفحص اتصاله فعلاً.',
@@ -986,6 +1132,23 @@ export const GUIDES: Record<string, Guide> = {
       { t: 'تأكد من الحالة', b: '«ربط حقيقي». يُجدَّد الرمز تلقائياً بالفحص الذي يجري حين تُفتح هذه الصفحة.' },
     ],
     notes: ['لربط حساب آخر سجّل خروجك من X ثم أعد الخطوات.', 'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز المدير التطبيق من «الإعدادات» ثم «المنصات».', SIMULATION],
+  },
+  connect_snapchat: {
+    title: 'ربط الملف العام على Snapchat',
+    intro: 'لمن يربط حساب القسم. تنتهي بحساب «ربط حقيقي» يُفحص اتصاله فعلاً. النشر على سناب شات يبقى يدوياً.',
+    steps: [
+      { t: 'اضغط «ربط عبر Snapchat»', b: 'تنتقل إلى صفحة سناب شات. ولا يطلب الموقع كلمة مرورك أبداً.' },
+      { t: 'اقبل «Public Profile APIs»', b: 'تسأل سناب شات «Continue to Comms Hub?» وتقول إن التطبيق سيصل إلى «Public Profile APIs». سجّل الدخول بحساب القسم واضغط «Continue».', shots: [snapShot('consent', 640, 605, 'Continue to Comms Hub؟: ملف الحساب، وعبارة أن التطبيق سيصل إلى Public Profile APIs، وزرا Continue وCancel', 'اسم الحساب وصورته محجوبان.')] },
+      { t: 'اضغط «Continue» مرة ثانية', b: 'تقول سناب شات «Authorisation successful». اضغط «Continue» للعودة إلى الموقع.', shots: [snapShot('authorised', 691, 502, 'Authorisation successful: اضغط Continue للعودة إلى التطبيق')] },
+      { t: 'عُد إلى الموقع', b: 'يظهر الملف العام باسمه، فحدّد من ينشر عليه.' },
+      { t: 'تأكد من الحالة', b: '«ربط حقيقي». يُجدَّد الرمز تلقائياً بالفحص الذي يجري حين تُفتح هذه الصفحة.' },
+    ],
+    notes: [
+      'كل دخول يربط ملفاً عاماً واحداً. لربط آخر سجّل خروجك من Snapchat ثم أعد الخطوات.',
+      'إن ظهرت عبارة «رفضت Snap قراءة الملف العام» فالتطبيق لم تُضفه Snap إلى قائمتها بعد (آخر خطوة من إعداد سناب شات)، أو ليس للحساب ملف عام.',
+      'إن ظهرت عبارة «تطبيق المطوّر غير مضبوط» فيجهّز المدير التطبيق من «الإعدادات» ثم «المنصات».',
+      SIMULATION,
+    ],
   },
   mail: {
     title: 'ربط صندوق بريد القسم (Gmail)',

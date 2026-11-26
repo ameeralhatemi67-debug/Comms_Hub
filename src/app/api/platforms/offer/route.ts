@@ -52,6 +52,14 @@ export async function GET(request: Request) {
     });
   }
 
+  if (offer.type === 'snapchat_user_offer') {
+    const c = offer.config;
+    return json({
+      provider: 'snapchat',
+      candidates: [{ platform: 'snapchat', id: String(c.profile_id ?? ''), name: String(c.name ?? 'ملف Snapchat'), handle: c.username ? `@${String(c.username)}` : null, parent: null, canPost: true }],
+    });
+  }
+
   const token = await loadSecret(g.db, id, 'قائمة صفحات للاختيار');
   if (!token) return fail(404, 'انتهت صلاحية الربط. ابدأ من جديد.');
   try {

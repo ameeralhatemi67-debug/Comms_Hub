@@ -26,7 +26,7 @@ const p = (key, over = {}) => ({ key, kind: 'social', enabled: true, readiness: 
 const app = (over = {}) => ({ has_secret: true, state: 'connected', config: {}, ...over });
 const ids = (g) => GUIDES[g].steps.map(stepId);
 const state = (key, o = {}) => platformState({ p: p(key, o.p), app: o.app, setup: o.setup, today: TODAY });
-const SETUPS = ['meta', 'facebook', 'tiktok', 'google', 'linkedin', 'x'];
+const SETUPS = ['meta', 'facebook', 'tiktok', 'google', 'linkedin', 'x', 'snapchat'];
 
 test('each state, from what is stored', () => {
   assert.equal(state('linkedin'), 'none');
@@ -39,8 +39,11 @@ test('each state, from what is stored', () => {
   assert.equal(state('x', { app: app({ config: { secret_expires_on: '2026-10-01' } }) }), 'issue');
   assert.equal(state('x', { app: app(), p: { enabled: false } }), 'off');
   assert.equal(state('linkedin', { app: app(), p: { readiness: 'submitted' } }), 'wait');
-  assert.equal(state('snapchat'), 'manual');
-  assert.equal(state('snapchat', { p: { enabled: false } }), 'off');
+  // Snapchat has a setup since 2026-11-26 (MVP_draft.md section 84): it is not set up until its app is entered, and the allowlist is a review that never holds the connection back.
+  assert.equal(state('snapchat'), 'none');
+  assert.equal(state('snapchat', { app: app() }), 'ok');
+  assert.equal(state('snapchat', { app: app(), p: { readiness: 'submitted' } }), 'wait');
+  assert.equal(state('snapchat', { app: app(), p: { enabled: false } }), 'off');
   assert.equal(platformState({ p: p('mail', { kind: 'mail' }), today: TODAY }), 'mail');
 });
 
@@ -102,14 +105,15 @@ test('«إضافة منصة» offers everything not yet on its way, those with s
   assert.ok(!keys.includes('x'), 'a connected platform is not offered');
   assert.ok(!keys.includes('mail'));
   assert.deepEqual(o.find((x) => x.key === 'facebook').kind, 'template');
-  assert.equal(o.find((x) => x.key === 'snapchat').manual, true);
+  assert.equal(o.find((x) => x.key === 'snapchat').manual, false, 'Snapchat has steps now');
+  assert.equal(o.find((x) => x.key === 'snapchat').hint, '9 خطوات');
   assert.equal(o.at(-1).kind, 'custom');
   for (const t of PLATFORM_TEMPLATES) if (t.key !== 'tiktok') assert.ok(keys.includes(t.key), t.key);
 });
 
 test('every platform with a sign-in has a setup, and every step can be followed from the sheet', () => {
-  for (const k of ['instagram', 'facebook', 'tiktok', 'youtube', 'linkedin', 'x']) assert.ok(GUIDES[setupGuideOf(k)], k);
-  assert.equal(setupGuideOf('snapchat'), null);
+  for (const k of ['instagram', 'facebook', 'tiktok', 'youtube', 'linkedin', 'x', 'snapchat']) assert.ok(GUIDES[setupGuideOf(k)], k);
+  assert.equal(setupGuideOf('whatsapp_channel'), null, 'a platform with no sign-in has no setup');
   for (const g of SETUPS) {
     const s = GUIDES[g].steps;
     assert.equal(new Set(s.map((x) => x.id)).size, s.length, `${g}: step ids are unique`);

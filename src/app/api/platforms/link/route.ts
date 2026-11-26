@@ -10,7 +10,7 @@ import { workErrorText } from '@/lib/work/rules';
 // with its own token in the vault and its real expiry as the authorisation. A simulated account
 // on the same platform and handle is upgraded in place, so its works and approvals stay. The
 // person's passing user token is removed with the last one.
-type Pick = { platform: 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'linkedin' | 'x'; id: string; label?: string };
+type Pick = { platform: 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'linkedin' | 'x' | 'snapchat'; id: string; label?: string };
 type Result = { platform: string; id: string; ok: boolean; account?: string; error?: string; missing?: string[] };
 
 const NEEDED: Record<string, string> = { facebook: 'pages_manage_posts', instagram: 'instagram_content_publish' };
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   if (!body || !isUuid(body.offer) || !Array.isArray(body.picks) || body.picks.length < 1 || body.picks.length > 20) return fail(400, 'اختر ما تربطه.');
   const picks: Pick[] = [];
   for (const p of body.picks as Record<string, unknown>[]) {
-    if (!['facebook', 'instagram', 'tiktok', 'youtube', 'linkedin', 'x'].includes(String(p.platform)) || typeof p.id !== 'string' || !/^[A-Za-z0-9_.:-]{1,120}$/.test(p.id)) return fail(400, 'اختيار غير صالح.');
+    if (!['facebook', 'instagram', 'tiktok', 'youtube', 'linkedin', 'x', 'snapchat'].includes(String(p.platform)) || typeof p.id !== 'string' || !/^[A-Za-z0-9_.:-]{1,120}$/.test(p.id)) return fail(400, 'اختيار غير صالح.');
     picks.push({ platform: p.platform as Pick['platform'], id: p.id, label: typeof p.label === 'string' ? p.label.trim().slice(0, 60) : undefined });
   }
   const publishers = Array.isArray(body.publishers) ? (body.publishers as unknown[]).filter((x): x is string => typeof x === 'string').slice(0, 30) : [];
@@ -74,12 +74,13 @@ export async function POST(request: Request) {
     return json({ results });
   }
 
-  // YouTube, LinkedIn and X: the person's own sign-in is the account's token (packed with its refresh
+  // YouTube, LinkedIn, X and Snapchat: the person's own sign-in is the account's token (packed with its refresh
   // token where the platform gives one); each pick must be what that sign-in is.
   const NEW_OFFER: Record<string, { platform: Pick['platform']; type: string }> = {
     google_user_offer: { platform: 'youtube', type: 'youtube_channel' },
     linkedin_user_offer: { platform: 'linkedin', type: 'linkedin_member' },
     x_user_offer: { platform: 'x', type: 'x_user' },
+    snapchat_user_offer: { platform: 'snapchat', type: 'snapchat_profile' },
   };
   const kind = NEW_OFFER[offerRow.type];
   if (kind) {
@@ -96,6 +97,8 @@ export async function POST(request: Request) {
         if (ch?.id) found = { id: ch.id, name: String(ch.title ?? ch.id), handle: ch.handle ? (ch.handle.startsWith('@') ? ch.handle : `@${ch.handle}`) : `yt:${ch.id}`, expires: rolling || null };
       } else if (kind.platform === 'linkedin') {
         if (typeof c.sub === 'string' && c.sub === pick.id) found = { id: c.sub, name: String(c.name ?? 'عضو LinkedIn'), handle: `li:${c.sub}`, expires: typeof c.expires_at === 'string' ? c.expires_at : t.accessExpiresAt || null };
+      } else if (kind.platform === 'snapchat') {
+        if (typeof c.profile_id === 'string' && c.profile_id === pick.id) found = { id: c.profile_id, name: String(c.name ?? 'ملف Snapchat'), handle: typeof c.username === 'string' && c.username ? `@${c.username}` : `snap:${c.profile_id}`, expires: rolling || null };
       } else if (typeof c.user_id === 'string' && c.user_id === pick.id) {
         const user = typeof c.username === 'string' && c.username ? `@${c.username}` : `x:${c.user_id}`;
         found = { id: c.user_id, name: String(c.name ?? user), handle: user, expires: rolling || null };

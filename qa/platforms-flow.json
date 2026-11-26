@@ -1,11 +1,11 @@
 {
   "script": "qa/platforms-flow.cjs",
-  "run": "2026-11-26T11:25:55.451Z",
+  "run": "2026-11-26T13:05:39.132Z",
   "checks": [
     {
       "name": "every platform has one state, worked out from what is stored",
       "pass": true,
-      "detail": "{\"x\":\"issue\",\"youtube\":\"steps\",\"tiktok\":\"steps\",\"linkedin\":\"none\",\"instagram\":\"ok\",\"snapchat\":\"manual\",\"mail\":\"mail\"}"
+      "detail": "{\"x\":\"issue\",\"youtube\":\"steps\",\"tiktok\":\"steps\",\"linkedin\":\"none\",\"snapchat\":\"none\",\"instagram\":\"ok\",\"whatsapp_status\":\"manual\",\"mail\":\"mail\"}"
     },
     {
       "name": "the words of the chips",
@@ -20,7 +20,7 @@
     {
       "name": "what needs the reader comes first",
       "pass": true,
-      "detail": "[\"تحتاج منك خطوة\\n4\",\"لا شيء مطلوب منك الآن\\n3\"]"
+      "detail": "[\"تحتاج منك خطوة\\n5\",\"لا شيء مطلوب منك الآن\\n3\"]"
     },
     {
       "name": "each row has the one button its state asks for",
@@ -85,7 +85,7 @@
     {
       "name": "TikTok's address proof: each picture under the action it shows, the three last ones under the file and the button, the address under the action that pastes it",
       "pass": true,
-      "detail": "{\"parts\":[{\"acts\":[1],\"shots\":1},{\"acts\":[2],\"shots\":1},{\"acts\":[3],\"shots\":1},{\"acts\":[4,5],\"shots\":3}],\"copy\":\"http://127.0.0.1:52533/\"}"
+      "detail": "{\"parts\":[{\"acts\":[1],\"shots\":1},{\"acts\":[2],\"shots\":1},{\"acts\":[3],\"shots\":1},{\"acts\":[4,5],\"shots\":3}],\"copy\":\"http://127.0.0.1:60911/\"}"
     },
     {
       "name": "a pair the platform refuses stays on the step, and says why",
@@ -130,7 +130,7 @@
     {
       "name": "an address to copy is filled in from the site, whole, under the action that pastes it",
       "pass": true,
-      "detail": "http://127.0.0.1:52533/api/platforms/callback/tiktok"
+      "detail": "http://127.0.0.1:60911/api/platforms/callback/tiktok"
     },
     {
       "name": "Escape closes the sheet",
@@ -220,7 +220,7 @@
     {
       "name": "what needs attention comes first, with why and what depends on it",
       "pass": true,
-      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-29 14:26\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
+      "detail": "يحتاج انتباهك\nإنستغرام · التوظيف\nينتهي 2026-11-29 16:06\nإعادة الربط\nX · الحساب الرسمي\nرفضت المنصة الرمز. أعد ربط الحساب. يعتمد عليه عمل واحد مجدول.\nإعادة الربط"
     },
     {
       "name": "accounts are grouped by platform, each one line",
@@ -615,12 +615,12 @@
     {
       "name": "the YouTube address is filled in from the site, whole, under the action that pastes it, and the Drive address under its own",
       "pass": true,
-      "detail": "{\"yt\":\"http://127.0.0.1:52533/api/platforms/callback/google\",\"drive\":\"http://127.0.0.1:52533/api/drive/callback\",\"id\":true,\"secret\":true,\"passwords\":1,\"held\":\"السر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\",\"text\":\"الخطوة 12 من 13 · معرّف العميل\\nانسخ المعرّف والسر\\n\\nتظهر بعد Create نافذة فيها القيمتان.\\n\\nافتح\\nClients\\nفي\\nGoogle Cloud\\n\\nأنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\\n\\nالسر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\\n\\n1\\n\\nبعد Create تظهر نافذة فيها Client ID وClient secret.\\n\\n2\\n\\nانسخ Client ID والصقه في الحقل الأول هنا.\\n\\nمعرّف العميل (Client ID)\\n3\\n\\nانسخ Client secret والصقه في الحقل الثاني. يظهر كاملاً مرة واحدة عند إنشائه، فانسخه فوراً.\\n\\nسر العميل (Client secret)\\n4\\n\\nإن أغلقت النافذة قبل نسخه فافتح العميل من Clients وأنشئ سراً جديداً.\\n\\n5\\n\\nالصقهما هنا فقط، ولا ترسلهما إلى أحد.\\n\\nخيارات أخرى\\n\\nيسأل الموقع المنصة أولاً، ولا يحفظ شيئاً إن رفضت. السر يذهب إلى الخزنة ولا يُعرض بعد ذلك، فإن أغلقت قبل الفحص أعدت إدخاله وحده.\\n\\nاستبدال بعد الفحص\"}"
+      "detail": "{\"yt\":\"http://127.0.0.1:60911/api/platforms/callback/google\",\"drive\":\"http://127.0.0.1:60911/api/drive/callback\",\"id\":true,\"secret\":true,\"passwords\":1,\"held\":\"السر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\",\"text\":\"الخطوة 12 من 13 · معرّف العميل\\nانسخ المعرّف والسر\\n\\nتظهر بعد Create نافذة فيها القيمتان.\\n\\nافتح\\nClients\\nفي\\nGoogle Cloud\\n\\nأنجزت هذه الخطوة من قبل. راجعها إن شئت ثم تابع.\\n\\nالسر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\\n\\n1\\n\\nبعد Create تظهر نافذة فيها Client ID وClient secret.\\n\\n2\\n\\nانسخ Client ID والصقه في الحقل الأول هنا.\\n\\nمعرّف العميل (Client ID)\\n3\\n\\nانسخ Client secret والصقه في الحقل الثاني. يظهر كاملاً مرة واحدة عند إنشائه، فانسخه فوراً.\\n\\nسر العميل (Client secret)\\n4\\n\\nإن أغلقت النافذة قبل نسخه فافتح العميل من Clients وأنشئ سراً جديداً.\\n\\n5\\n\\nالصقهما هنا فقط، ولا ترسلهما إلى أحد.\\n\\nخيارات أخرى\\n\\nيسأل الموقع المنصة أولاً، ولا يحفظ شيئاً إن رفضت. السر يذهب إلى الخزنة ولا يُعرض بعد ذلك، فإن أغلقت قبل الفحص أعدت إدخاله وحده.\\n\\nاستبدال بعد الفحص\"}"
     },
     {
       "name": "the keys step puts the two fields under the actions that name them, holds the secret once, and says one is kept",
       "pass": true,
-      "detail": "{\"yt\":\"http://127.0.0.1:52533/api/platforms/callback/google\",\"drive\":\"http://127.0.0.1:52533/api/drive/callback\",\"id\":true,\"secret\":true,\"passwords\":1,\"held\":\"السر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\"}"
+      "detail": "{\"yt\":\"http://127.0.0.1:60911/api/platforms/callback/google\",\"drive\":\"http://127.0.0.1:60911/api/drive/callback\",\"id\":true,\"secret\":true,\"passwords\":1,\"held\":\"السر محفوظ في الخزنة (••••a91f). أدخله من جديد لتستبدله فقط.\"}"
     },
     {
       "name": "a step done goes on to the next one not done",
@@ -805,7 +805,7 @@
     {
       "name": "the redirect address is filled in from the site, whole, under the action that pastes it",
       "pass": true,
-      "detail": "http://127.0.0.1:52533/api/platforms/callback/meta"
+      "detail": "http://127.0.0.1:60911/api/platforms/callback/meta"
     },
     {
       "name": "phone, instagram ig_add: reached from the list, nothing sideways on the page, the sheet or the pictures",

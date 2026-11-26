@@ -14,7 +14,7 @@ export type PlatformState = 'none' | 'steps' | 'wait' | 'ok' | 'soon' | 'issue' 
 /** Saved progress of one platform's setup. Never a secret: the database refuses any other field. */
 export type SetupRow = { key: string; done: string[]; step: string | null; fields: { app_id?: string; config_id?: string } };
 
-const GUIDE_OF: Record<string, string> = { instagram: 'meta', facebook: 'facebook', tiktok: 'tiktok', youtube: 'google', linkedin: 'linkedin', x: 'x' };
+const GUIDE_OF: Record<string, string> = { instagram: 'meta', facebook: 'facebook', tiktok: 'tiktok', youtube: 'google', linkedin: 'linkedin', x: 'x', snapchat: 'snapchat' };
 
 /** The guide of a platform's one-time setup; null for a platform with no sign-in. */
 export const setupGuideOf = (platform: string): string | null => GUIDE_OF[platform] ?? null;

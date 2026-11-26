@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { loadApp } from '@/lib/platforms/connect';
 import { META_SCOPES, metaAuthUrl, tiktokAuthUrl, TIKTOK_SCOPES } from '@/lib/platforms/oauth';
-import { googleAuthUrl, linkedinAuthUrl, pkcePair, xAuthUrl } from '@/lib/platforms/oauth2';
+import { googleAuthUrl, linkedinAuthUrl, pkcePair, snapchatAuthUrl, xAuthUrl } from '@/lib/platforms/oauth2';
 import { connectGuard, isProvider, redirectUri } from '@/lib/platforms/route';
 
 // Starts the platform's own sign-in for connecting accounts. The state value is kept in a
@@ -26,6 +26,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prov
   else if (provider === 'tiktok') url = tiktokAuthUrl({ clientKey: app.appId, redirectUri: to, state, scopes: app.scopes?.length ? app.scopes : TIKTOK_SCOPES });
   else if (provider === 'google') url = googleAuthUrl({ clientId: app.appId, redirectUri: to, state });
   else if (provider === 'linkedin') url = linkedinAuthUrl({ clientId: app.appId, redirectUri: to, state });
+  else if (provider === 'snapchat') url = snapchatAuthUrl({ clientId: app.appId, redirectUri: to, state });
   else {
     const pair = await pkcePair();
     verifier = pair.verifier;

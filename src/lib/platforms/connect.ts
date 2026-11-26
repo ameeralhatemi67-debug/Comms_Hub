@@ -13,7 +13,7 @@ import {
   type Health,
   type Provider,
 } from './oauth.ts';
-import { googleAccountHealth, linkedinAccountHealth, xAccountHealth } from './oauth2.ts';
+import { googleAccountHealth, linkedinAccountHealth, snapchatAccountHealth, xAccountHealth } from './oauth2.ts';
 
 export type AppCreds = { id: string; appId: string; secret: string; scopes: string[] | null; configId: string | null };
 
@@ -67,6 +67,7 @@ export async function checkAccount(db: SupabaseClient, f: Fetch, apps: Partial<R
     else if (provider === 'google') h = await googleAccountHealth(f, { clientId: app.appId, secret: app.secret, packed: secret, externalId: a.external_id });
     else if (provider === 'linkedin') h = await linkedinAccountHealth(f, { packed: secret, externalId: a.external_id });
     else if (provider === 'x') h = await xAccountHealth(f, { clientId: app.appId, secret: app.secret, packed: secret, externalId: a.external_id });
+    else if (provider === 'snapchat') h = await snapchatAccountHealth(f, { clientId: app.appId, secret: app.secret, packed: secret, externalId: a.external_id });
     else h = await metaAccountHealth(f, { appId: app.appId, secret: app.secret, objectId: a.external_id ?? '', token: secret, instagram: a.type === 'meta_instagram' });
     return record(h);
   } catch {

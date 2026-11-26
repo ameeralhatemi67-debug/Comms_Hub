@@ -1,6 +1,6 @@
 // Which platforms connect through which sign-in. Pure and client-safe: no token, no fetch.
-export type ConnProvider = 'meta' | 'tiktok' | 'google' | 'linkedin' | 'x' | 'microsoft';
-export const CONN_PROVIDERS: readonly ConnProvider[] = ['meta', 'tiktok', 'google', 'linkedin', 'x', 'microsoft'];
+export type ConnProvider = 'meta' | 'tiktok' | 'google' | 'linkedin' | 'x' | 'microsoft' | 'snapchat';
+export const CONN_PROVIDERS: readonly ConnProvider[] = ['meta', 'tiktok', 'google', 'linkedin', 'x', 'microsoft', 'snapchat'];
 const PROVIDER: Record<string, ConnProvider> = {
   facebook: 'meta',
   instagram: 'meta',
@@ -8,10 +8,11 @@ const PROVIDER: Record<string, ConnProvider> = {
   youtube: 'google',
   linkedin: 'linkedin',
   x: 'x',
+  snapchat: 'snapchat',
 };
 export const providerOf = (platform: string): ConnProvider | null => PROVIDER[platform] ?? null;
 /** The name of the sign-in a person is sent to, as the buttons and messages say it. */
-export const PROVIDER_NAME: Record<ConnProvider, string> = { meta: 'Meta', tiktok: 'TikTok', google: 'Google (YouTube)', linkedin: 'LinkedIn', x: 'X', microsoft: 'Microsoft (OneDrive)' };
+export const PROVIDER_NAME: Record<ConnProvider, string> = { meta: 'Meta', tiktok: 'TikTok', google: 'Google (YouTube)', linkedin: 'LinkedIn', x: 'X', microsoft: 'Microsoft (OneDrive)', snapchat: 'Snapchat' };
 /** The integration type of the app a provider's accounts are connected through. */
 export const APP_INTEGRATION_TYPE: Record<ConnProvider, string> = {
   meta: 'meta_app',
@@ -20,6 +21,7 @@ export const APP_INTEGRATION_TYPE: Record<ConnProvider, string> = {
   linkedin: 'linkedin_app',
   x: 'x_app',
   microsoft: 'microsoft_app',
+  snapchat: 'snapchat_app',
 };
 
 /** What each app is called and where its two values are found. */
@@ -59,5 +61,11 @@ export const PROVIDER_COPY: Record<ConnProvider, { name: string; idLabel: string
     idLabel: 'معرّف العميل (OAuth 2.0 Client ID)',
     secretLabel: 'سر العميل (OAuth 2.0 Client Secret)',
     where: 'من وحدة مطوّري X (console.x.com)، مفاتيح التطبيق، قسم OAuth 2.0. يظهران مرة واحدة.',
+  },
+  snapchat: {
+    name: 'تطبيق Snapchat',
+    idLabel: 'معرّف العميل (Snap Client ID)',
+    secretLabel: 'سر العميل (Snap client secret key)',
+    where: 'من لوحة أعمال Snapchat (business.snapchat.com)، «Business details» ثم «OAuth apps». يظهر السر مرة واحدة عند إنشاء التطبيق.',
   },
 };

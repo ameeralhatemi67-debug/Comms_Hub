@@ -26,6 +26,7 @@ const seed = () => ({
     row('youtube', 'يوتيوب', 4, { accepts: { video_only: true } }),
     row('tiktok', 'تيك توك', 5, { enabled: false, builtin: false, accepts: { video_only: true } }),
     row('snapchat', 'سناب شات', 6, { publish_mode: 'manual', builtin: false }),
+    row('whatsapp_status', 'حالة واتساب', 7, { publish_mode: 'manual', builtin: false }),
   ],
   ints: [app('meta_app', 'تطبيق Meta', { config: { app_id: '1234567', config_id: '987654321' } }), app('google_app', 'تطبيق Google'), app('x_app', 'تطبيق X', { state: 'error', last_error: 'APP_REFUSED' })],
   setup: [
@@ -39,7 +40,7 @@ const seed = () => ({
     account('a-ig3', 'instagram', 'التوظيف', '@org_careers', { authorized_until: later(3) }),
     account('a-x', 'x', 'الحساب الرسمي', '@org_x', { conn_state: 'needs_reconnect', conn_error: 'TOKEN_REFUSED' }),
     account('a-yt', 'youtube', 'القناة التجريبية', '@org_trial', { conn_kind: 'simulated', conn_state: 'simulated' }),
-    account('a-snap', 'snapchat', 'الحساب الرسمي', 'org_official', { conn_kind: 'simulated', conn_state: 'simulated', authorized_until: null, mode: 'ask' }),
+    account('a-wa', 'whatsapp_status', 'الحساب الرسمي', 'org_official', { conn_kind: 'simulated', conn_state: 'simulated', authorized_until: null, mode: 'ask' }),
   ],
   calls: [] as { name: string; args: Record<string, unknown> }[],
   says: [] as string[],

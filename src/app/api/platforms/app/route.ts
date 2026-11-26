@@ -1,7 +1,7 @@
 import { fail, guard } from '@/lib/drive/guard';
 import { serverKeyOrNull, vaultReachable } from '@/lib/integrations/vault';
 import { metaAppCheck, tiktokAppCheck, TIKTOK_SCOPES, connErrorAr, PlatformCallError } from '@/lib/platforms/oauth';
-import { googleAppCheck, linkedinAppCheck, xAppCheck } from '@/lib/platforms/oauth2';
+import { googleAppCheck, linkedinAppCheck, snapchatAppCheck, xAppCheck } from '@/lib/platforms/oauth2';
 import { microsoftAppCheck } from '@/lib/storage/onedrive';
 import { forgetCreds } from '@/lib/integrations/vault';
 import { isProvider, json } from '@/lib/platforms/route';
@@ -9,7 +9,7 @@ import { APP_TYPE } from '@/lib/platforms/oauth';
 import { serverClient } from '@/lib/supabase/server';
 import { expiryInputOk, riyadhToday } from '@/lib/integrations/expiry';
 
-// Enters a platform app's id and secret (Meta, TikTok, Google for YouTube and Drive, LinkedIn, X)
+// Enters a platform app's id and secret (Meta, TikTok, Google for YouTube and Drive, LinkedIn, X, Snapchat)
 // once, into the vault. The secret is write-only: it is asked of the platform first where the
 // platform can say (a pair that does not match is refused and nothing is stored), then stored,
 // and never returned. Holders of «إدارة المنصات وتطبيقاتها» and «إدخال أسرار التكاملات
@@ -21,6 +21,7 @@ const LABEL: Record<string, string> = {
   linkedin: 'تطبيق LinkedIn',
   x: 'تطبيق X',
   microsoft: 'تطبيق Microsoft (OneDrive)',
+  snapchat: 'تطبيق Snapchat',
 };
 
 export async function POST(request: Request) {
@@ -65,7 +66,9 @@ export async function POST(request: Request) {
               ? await linkedinAppCheck(fetch, appId, secret)
               : provider === 'x'
                 ? await xAppCheck(fetch, appId, secret)
-                : await microsoftAppCheck(fetch, appId, secret);
+                : provider === 'snapchat'
+                  ? await snapchatAppCheck(fetch, appId, secret)
+                  : await microsoftAppCheck(fetch, appId, secret);
     if (!checked.ok) return fail(400, connErrorAr(checked.error));
   } catch (e) {
     return fail(502, connErrorAr(e instanceof PlatformCallError ? e.code : 'UNREACHABLE'));

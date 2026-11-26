@@ -4594,5 +4594,37 @@ that account agree.
 - **Help.** «حسابات المنصات» says what it is (`src/lib/help/pages.ts`, part `xltest`, and the line about the simulation).
 - **Checks.** `supabase/tests/x_link_test_rules.sql` (35 on a private database, `qa/x-link-test-rules.json`); `tests/x-link-test.test.mjs` (10, holding the limit, the kinds and every
   refusal equal to the database's); `qa/x-link-test-flow.cjs` (36) clicks through the real panel on a fixture, and `qa/x-link-flow.cjs` (25) still passes after `checkNote` moved into `x-link.ts`.
-- **Applying it.** Run `20261125120000_work_cycle_x_link_route.sql` and then `20261126120000_x_link_tests.sql` in the SQL editor of comms-hub. On 2026-11-26 both answered 404 signed out
-  (`account_add_link`, `x_link_test_record`): neither is applied yet.
+- **Applying it.** `20261125120000_work_cycle_x_link_route.sql` was already in comms-hub (run by the owner on 2026-11-25), and `20261126120000_x_link_tests.sql` was run in its SQL editor on 2026-11-26
+  and answered «Success». Checked signed out the same day with the real argument names: every function (`account_add_link`, `work_link_confirm`, `x_post_parse`, `x_link_test_may`, `x_link_test_record`)
+  answers «permission denied» (present, and closed to the signed-out), `x_link_tests` the same, and `platform_accounts.route` reads. **How to check:** send the function's own argument names; a call with
+  `{}` answers 404 for any function that has required arguments, even when it exists (an earlier note here said «not applied» for this reason, and was wrong).
+
+## 84. Snapchat's connection, 2026-11-26
+
+By the owner's directive of 2026-11-26, after the owner walked Snapchat on a personal account to give the pictures (`Snapchat_Plan.md`). Snapchat connects as X and LinkedIn do: the department's Snap
+OAuth app is entered once in «المنصات», a person signs in at Snapchat, and the Public Profile that sign-in belongs to becomes a platform account whose token is in the vault. Publishing stays a
+simulation, and the platform's mode stays «مهمة يدوية» (a person posts from the app with a ready pack).
+
+- **What the walk showed.** Snap's sign-in and consent screens worked for the app before any allowlist: «Continue to Comms Hub?», «This app will be able to access your: Public Profile APIs», then
+  «Authorisation successful». The red banner the owner then saw on «حسابات المنصات» («ردّت المنصة بخطأ غير معروف») was the site not yet knowing Snapchat: the return address named a provider it did not have.
+- **The provider** (`src/lib/platforms/oauth2.ts`, `oauth.ts`, `provider.ts`, `route.ts`, `connect.ts`, and the routes `app`, `connect`, `callback`, `offer`, `link`). Authorize at
+  `accounts.snapchat.com/login/oauth2/authorize` with the scope `snapchat-profile-api`; the token at `.../access_token` (the second address Snap's pages name, `.../token`, only if the first answers 404);
+  the account is the Public Profile of the person who signed in (`GET businessapi.snapchat.com/v1/public_profiles/my_profile`), one per sign-in. The access token lasts an hour and the check refreshes it,
+  keeping the refresh token; a good check renews a rolling 90 days, as for X and Google. The profile is found by what it is (an id and a display name) because Snap's envelope has not been seen on a real call.
+- **What the allowlist is expected to do, and is not yet known to.** The Public Profile API is allowlist only. The sign-in passes, and `my_profile` may be refused: a 403 is `ACCESS_NOT_GRANTED`
+  («رفضت Snap قراءة الملف العام. غالباً لم تُضف التطبيق إلى قائمتها المسموحة بعد…»), a 404 or an empty answer `NO_PROFILE`. **What Snap really answers an app it has not allowed is unknown until the
+  first real connection: that connection is the test.** Nothing in the code or the tests has met Snap's API.
+- **The database** (`20261126150000_snapchat_connection.sql`): `snapchat_app`, `snapchat_user_offer` and `snapchat_profile` join the type lists of nine functions, each re-created from its own current
+  definition (the migration fails, changing nothing, if one does not carry what is expected, and leaves one already widened alone, so it can be run again); `platform_app_reset` knows «snapchat».
+  Rules 37 of 37 on a private database (`supabase/tests/snapchat_connection_rules.sql`, `qa/snapchat-connection-rules.json`).
+- **The guide.** `GUIDES.snapchat`, nine steps in the order of the walk (`account`, `business`, `profile`, `dashboard`, `oauth`, `form`, `secret`, `keys`, `allowlist`) and `connect_snapchat`; twelve pictures in
+  `public/guides/snapchat/` made by `scripts/guide-shots.mjs` (set «snapchat») from originals that are never kept, since they held the owner's email, names, phone number, picture and an app's client id
+  and secret. The steps say the app is made in «Business details» of the business dashboard and not in the Developer Portal (Snap warns that a client id from there does not work), that the secret is
+  shown once and must be covered in any picture, and that the two ticked marketing boxes may be cleared. The last step is a review: it holds nothing back, and carries the text to send Snap (the client id
+  and the scope, never the secret).
+- **States.** Snapchat is no longer «نشر يدوي»: it is «غير متصلة», then steps, then «متصلة», like the others. Its place in the add menu moves from «بلا ربط» to «تحتاج إعداداً مرة واحدة».
+- **Checks.** `tests/snapchat-connection.test.mjs` (14) against a fake platform, and the older tests that named Snapchat as manual updated; `qa/snapchat-flow.cjs` (23) walks the guide in the real sheet;
+  `qa/platforms-flow.cjs` (170) with its manual-platform example moved to WhatsApp's status.
+- **Not built.** Publishing, deleting, scheduling, Snap Kit (Login Kit, Creative Kit), and any scope beyond the Public Profile API.
+- **Before it can be tried.** Run `20261126150000_snapchat_connection.sql` in the SQL editor of comms-hub. Make a new OAuth app (the first one's secret was shown in a picture sent to a chat), add
+  Snapchat from «إضافة منصة», enter the client id and secret in its keys step, and connect from «حسابات المنصات».

@@ -74,3 +74,47 @@ is the point of the walk.
 - Snap Kit: `developers.snap.com/snap-kit/` login-kit/overview, login-kit/Tutorials/web,
   creative-kit/overview, developer-portal/developing-your-app, app-review/overview,
   app-review/submission-and-review, changelog.
+
+## 5. Walk log (the owner's pictures; no name, email or number is kept here)
+
+The originals are in the session scratchpad (`snapchat-originals/`), never in the repository; they hold a real email, name, phone number and photo and are blurred by
+`scripts/guide-shots.mjs` before any guide uses them.
+
+- **2026-11-26, S1 and S2 received.**
+  - **S1**, accounts.snapchat.com: the sign-in asks the email, then «Enter password».
+  - **S2**, ads.snapchat.com, first visit, three screens:
+    1. «Welcome to Ads Manager! What is your business name?»: «Business name», «Business email address», «Your name», button «Next», and a link «Skip ad creation».
+    2. «Where do you do business?»: «Country», «Currency» (SAR for Saudi Arabia), «Business phone number», «Business website (optional)», «VAT/Tax ID (optional)», two boxes already
+       ticked (be contacted by phone or WhatsApp with offers; be told by email of other Snap products), a line saying the person is authorised to act for the business and agrees to the
+       «Terms of Service» and «Business Services Terms», buttons «Back» and «Next». The guide should say the two ticked boxes are marketing and may be cleared.
+    3. «Complete your Public Profile»: it shows the person's own Snapchat profile and asks «Do you want to make this your business's Public Profile?» with the button
+       «Create Public Profile» (accepting the «Commercial Content Terms»). So a personal profile can be made the organisation's Public Profile. That makes it public: a choice for the owner, not a
+       step to click for the picture.
+  - After it, Ads Manager opens on its campaign builder («Create Ads», «Choose objective»), the header showing the organisation and the role «Organisation admin». That is not where the
+    OAuth app is; leave it with «Back to Manage view» or «Cancel».
+- **2026-11-26, S3 and S4 (page only) received.** This settles where the OAuth app is: Snap's Public Profile API page was right.
+  - **S3**, the Business Dashboard (business.snapchat.com, reached from Ads Manager's top menu): a top bar with «Business», a «To do» counter and the organisation with the role
+    «Organisation admin»; a left menu «Business Settings» with «Business Dashboard», «Business details», «Members», «Ad accounts», «Pixels», «Apps», «Shared», «User Settings», «Catalogues», and
+    «Billing and payments» with «Payment methods», «Transactions», «Invoices». The page says «Review your campaign progress, check in on your Public Profiles and see what's new on Snap.»
+  - **S4**, «Business details»: «Organisation info» (the name, the address, the «Organisation ID», «VAT/Tax ID (optional)»), «Billing Address Book» with «New address», **«OAuth apps» with the
+    button «+ OAuth app»** and the line «You have added zero OAuth apps.», «Conversions API tokens» with «Generate token» (not needed), and «Contact details and preferences» with the business
+    phone and two switches, «Phone call» and «WhatsApp», both on by default (marketing: the guide should say they may be turned off). «Save changes» is at the top and is not needed for the app.
+  - **Next: the form behind «+ OAuth app»** (the name, the redirect address, and the screen that shows the Client ID and the Client Secret once).
+- **2026-11-26, S5 to S7 received: the OAuth app was created** (values kept out of this file: the client ID is in the owner's Snap page, and the secret was shown once; see the note below).
+  - **«+ OAuth app»** first opens a dialog **«API Terms and Conditions»**: one box, «On behalf of <name>, I agree to the Snap Developer Terms and the Snap Business Tools Terms, which govern the
+    use of the Snap API», and the buttons «Cancel» and «Save» (off until the box is ticked). The guide should say these are Snap's terms and that the person who ticks them binds the organisation.
+  - **The form «Create OAuth app»** (a page, «Business details > Create OAuth app»): «App logo» (a round picture, optional), «App name», **«Snap redirect URIs»** («Enter one redirect URI per line. You can
+    have up to 10 redirect URIs.»), buttons «Cancel» and «Create OAuth app» (off until the fields are filled). The redirect address entered was the site's own
+    `/api/platforms/callback/snapchat`, and Snap kept it exactly.
+  - **After creating**: a page with «App name», «Snap redirect URIs», **«Snap Client ID»**, and an orange warning «Please make sure you save your Snap client secret key below. It will not be available
+    again.» with «Copy key» and «Snap client secret key: …», and the buttons «Marketing API documentation» and «Done».
+  - **The secret was visible in the picture sent to the session.** It is in the chat and in the originals' folder of the session (outside the repository). Treat this OAuth app as the walk's own: before the
+    department's real setup, make a new one (or remove this one in «Business details» and make it again), and never send a secret in a picture. The guide must say «غطِّ السر قبل أي لقطة».
+  - **Next: the authorize page** (what Snap shows for this client ID before the allowlist, S8), then the request for access (S9).
+- **Read from Snap on 2026-11-26 and worth keeping:** a client secret is shown once, at the creation of the app; creating an app needs the role «Organization Admin» and agreeing to the
+  Snap Developer Terms and the Snap Business Tools Terms; the redirect address must match the app's exactly and is sent URL-encoded; no public address for the allowlist request is given
+  on either page («contact your Snap point of contact», or «support»).
+
+- **2026-11-26, S8 received and the build done.** The authorize page showed «Continue to Comms Hub?» and «This app will be able to access your: Public Profile APIs», then «Authorisation successful», before
+  any allowlist. The connection, its guide and its pictures were built from the walk (`MVP_draft.md` 84, `progress.md`). Open: what Snap answers an app it has not allowed when the profile is asked, and
+  the contact for the allowlist request.

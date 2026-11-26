@@ -105,13 +105,13 @@ export const KNOWLEDGE: Record<string, PlatformKnowledge> = {
     checked: '2026-11-01',
   },
   snapchat: {
-    can: 'ينشر الناشر من Snapchat بحزمة جاهزة. وتتيح Public Profile API نشر القصص وSpotlight لمن تقبله Snap.',
-    cannot: 'الواجهة بدعوة من Snap فقط (allowlist)، والموقع لا يربطها. المسار اليدوي هو المسار المكتمل.',
-    requires: ['ملف عام (Public Profile) للمؤسسة', 'للواجهة: حساب أعمال في Ads Manager، وتطبيق OAuth من Business Details، وموافقة جهة الاتصال في Snap'],
-    lead: 'النشر اليدوي فوري، ومدة موافقة الواجهة غير معروفة.',
-    connect: 'لا ربط تلقائي: مهمة يدوية لمسؤول النشر بحزمة جاهزة.',
+    can: 'ربط الملف العام (Public Profile) لحساب القسم وفحص أن الربط سليم. وتتيح Public Profile API نشر القصص وSaved Stories وSpotlight لمن تقبله Snap. وينشر الناشر اليوم بحزمة جاهزة.',
+    cannot: 'الواجهة بدعوة من Snap فقط (allowlist): قد ينجح الدخول ثم ترفض Snap قراءة الملف العام حتى تُضيف التطبيق. والنشر الحقيقي لم يُبنَ بعد، فيبقى النشر يدوياً.',
+    requires: ['حساب سناب شات للقسم ببريد موثَّق', 'حساب أعمال (Organisation) في Ads Manager وملف عام (Public Profile)', 'تطبيق OAuth من «Business details» في لوحة الأعمال، لا من Developer Portal', 'للنشر: موافقة Snap على التطبيق (allowlist) عبر جهة الاتصال لديها'],
+    lead: 'إعداد الربط ساعات، ومدة موافقة Snap غير معروفة.',
+    connect: 'تسجيل دخول Snapchat (OAuth)، ملف عام واحد في كل دخول. الرمز ساعة ويُجدَّد بالفحص.',
     docs: 'https://developers.snap.com/api/marketing-api/Public-Profile-API/GetStarted',
-    checked: '2026-11-01',
+    checked: '2026-11-26',
   },
   whatsapp_channel: {
     can: 'نشر تحديث في قناة واتساب.',
@@ -226,5 +226,7 @@ export const CONN_ERROR_AR: Record<string, string> = {
   APP_REFUSED: 'رفضت المنصة المعرّف أو السر. تحقق منهما في لوحة المطوّرين.',
   CODE_REFUSED: 'رفضت المنصة رمز الدخول. ابدأ الربط من جديد.',
   REFRESH_MISSING: 'لم تُعطِ المنصة رمزاً للتجديد. أزل وصول التطبيق من حسابك على المنصة ثم أعد الربط.',
+  ACCESS_NOT_GRANTED: 'رفضت Snap قراءة الملف العام. غالباً لم تُضف التطبيق إلى قائمتها المسموحة بعد (الواجهة بدعوة فقط)، فراجع آخر خطوة في إعداد سناب شات.',
+  NO_PROFILE: 'لا ملف عام لهذا الحساب. أنشئه من Ads Manager («Complete your Public Profile») ثم أعد الربط.',
 };
 export const connErrorAr = (code: string | null | undefined) => (code ? (CONN_ERROR_AR[code] ?? 'فشل فحص الاتصال.') : '');

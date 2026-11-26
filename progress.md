@@ -4766,6 +4766,37 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - `qa/x-link-test-flow.cjs` 36 of 36 in Edge on a fixture; `qa/x-link-flow.cjs` 25 of 25 and `qa/platforms-flow.cjs` 170 of 170 re-run and unchanged.
 - **Found and fixed.** `tests/work.test.mjs` wants each function a work page calls to be the first in its own `grant execute` line: the migration's grants were split. Two expressions in the new flow check
   were wrong (the database keeps the link's own letters; four tests cannot fill a list of five) and were corrected.
-- **Not applied.** Neither `20261125120000_work_cycle_x_link_route.sql` nor this migration is on comms-hub (both answered 404 signed out on 2026-11-26); the Supabase connector here sees the other
-  organisation, so the owner runs them in the SQL editor, the first before the second. Until then the panel says a good link is fine and that nothing was recorded.
+- **Applied, and a wrong note corrected.** This entry first said neither migration was on comms-hub, from a signed-out check that sent empty arguments (PostgREST answers 404 for a function with required
+  arguments even when it exists). The owner then ran the SQL: `20261125120000_work_cycle_x_link_route.sql` was already in (its column made it fail with «column "route" already exists», changing nothing),
+  and `20261126120000_x_link_tests.sql` answered «Success». Rechecked signed out with the real argument names: `account_add_link`, `work_link_confirm`, `x_post_parse`, `x_link_test_may`,
+  `x_link_test_record` and `work_run_publish` all answer «permission denied» (present), `x_link_tests` the same, and `platform_accounts.route` reads. An earlier attempt at the owner's end had run the SQL in
+  another project (`streamer_app`) and failed at its first statement, changing nothing there.
 - **Not checked.** The signed-in page on the live site; X itself (nothing was posted or looked up on a real account); the phone application.
+
+### 2026-11-26: a signature file for the director's own TikTok app
+
+- **What.** The director is connecting TikTok from the beginning, with their own TikTok for Developers app, so the app's «Verify URL prefix» step asked for its own signature file, as the owner's sandbox and production apps each did. `public/tiktoknJkacdikD0fC4cz6T2dlwJVmevIsB8G4.txt` added (a public token only), committed alone as `3e69528` and pushed to `main` at the owner's request; no other file went with it (local `main` equalled `origin/main` before it).
+- **The content was not copied.** The file the director downloaded from TikTok reached the owner as 0 bytes. The content is the one the two existing files show, `tiktok-developers-site-verification=` followed by the token that is in the file's name (68 bytes, no line break), checked equal to both existing files' pattern before it was written. TikTok's own «Verify» is the proof that it is right.
+- **Checked.** Vercel deployment `dpl_6aRHvCYGZJupyLzGUCZ4WsPm287k` for `3e69528` is READY; the live address answered HTTP 200, `text/plain`, 68 bytes, with exactly that content, and the existing file answered the same way. No code changed, so typecheck, build and tests were not re-run.
+- **Not checked.** That TikTok accepts it (the director presses «Verify» next); the rest of the director's connection.
+
+### 2026-11-26: Snapchat's connection, its guide and its pictures
+
+- **The request.** The owner walked Snapchat on a personal account (sign-in, Ads Manager, the Public Profile, «Business details», the OAuth app, the consent) and sent the pictures; the rest was to follow the way
+  Instagram, YouTube and TikTok were done. The walk is in `Snapchat_Plan.md` and `MVP_draft.md` 84.
+- **Found by the walk.** Snap's authorize and consent screens work for the app before the allowlist. The app is made in «Business details» of the business dashboard (Snap's Public Profile page was right; the Ads API
+  page says Business Manager at business.snapchat.com, the same place). The secret was shown once, and appeared in a picture sent to the chat: that app is the walk's own, and a new one is needed for the real setup.
+- **Built.** The `snapchat` provider and its routes; `20261126150000_snapchat_connection.sql` (nine functions widened, re-runnable) with its rules; the guide `snapchat` (nine steps) and `connect_snapchat`; twelve
+  pictures (`scripts/guide-shots.mjs`, set «snapchat»), blurred, originals kept outside the repository; Snapchat's card of knowledge read again on 2026-11-26; two new error words, `ACCESS_NOT_GRANTED` and
+  `NO_PROFILE`.
+- **Checks run.**
+  - `supabase/tests/snapchat_connection_rules.sql` 37 of 37 on a private database in Docker (`qa/snapchat-connection-rules.json`): who enters the app, that the secret is returned only as a tail and read back only with the
+    server key, a Snapchat sign-in kept as a passing offer owned by the person, a profile linked with the token in the vault and the offer going with the pick, the same profile linked again being the same account, the due
+    list, a health record, the reset, the older types still accepted and an unknown one refused, no secret string in anything a person can read, and the migration run again.
+  - `npm test` 1016 of 1016 (the new `tests/snapchat-connection.test.mjs` has 14: the authorize address and scope, the app check, the two token addresses, exchange, refresh and rotation, finding the profile in an
+    envelope, each refusal as a code, health, the sweep, the guide's order and that no id or secret is in it); `npm run typecheck` and `npm run build` pass.
+  - `qa/snapchat-flow.cjs` 23 of 23 in Edge on the platforms fixture: the row, nine steps reached from the list, every picture loaded, the return address from the site, the keys form's own names with a password field,
+    the review, English isolated, a phone, the evening. `qa/platforms-flow.cjs` 170 of 170 after its manual-platform example moved from Snapchat to WhatsApp's status, `qa/x-cost-flow.cjs` 46, `qa/x-link-test-flow.cjs` 36.
+- **Not checked.** Snap's real API: the token addresses, the answer to an app that has not been allowed, the profile envelope and the refresh token's life are all read from documentation or assumed, and the first real
+  connection settles them. The signed-in pages on the live site. The migration is not applied (see the next entry's status).
+- **Left by another session in the working tree, not touched here.** `src/components/work/x-handoff.tsx` and `src/lib/work/x-link.ts` carry uncommitted changes for replying to and quoting a post on X's link route.

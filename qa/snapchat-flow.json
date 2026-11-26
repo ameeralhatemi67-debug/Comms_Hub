@@ -1,0 +1,125 @@
+{
+  "script": "qa/snapchat-flow.cjs",
+  "run": "2026-11-26T13:07:34.362Z",
+  "checks": [
+    {
+      "name": "Snapchat is a platform with a setup, not a manual one: «غير متصلة» and «بدء الإعداد»",
+      "pass": true,
+      "detail": "سناب شات\nلم يبدأ الإعداد بعد.\nغير متصلة\nبدء الإعداد"
+    },
+    {
+      "name": "nine steps, in the order the owner walked them",
+      "pass": true,
+      "detail": "[\"1\\nسجّل الدخول بحساب سناب شات الذي سيملك الملف\",\"2\\nأنشئ حساب الأعمال في Ads Manager\",\"3\\nأنشئ الملف العام\",\"4\\nافتح Business details\",\"5\\nابدأ تطبيق OAuth\",\"6\\nاملأ نموذج التطبيق\",\"7\\nاحفظ السر فوراً\",\"8\\nالصق المعرّف والسر\",\"9\\nاطلب من Snap إضافة التطبيق\"]"
+    },
+    {
+      "name": "it opens on the first step, with the sheet's title and the account link",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "step «account»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "pass": true,
+      "detail": "{\"title\":\"سجّل الدخول بحساب سناب شات الذي سيملك الملف\",\"acts\":2,\"shots\":1,\"notes\":1,\"stray\":[]}"
+    },
+    {
+      "name": "step «business»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "pass": true,
+      "detail": "{\"title\":\"أنشئ حساب الأعمال في Ads Manager\",\"acts\":5,\"shots\":2,\"notes\":1,\"stray\":[]}"
+    },
+    {
+      "name": "step «profile»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "pass": true,
+      "detail": "{\"title\":\"أنشئ الملف العام\",\"acts\":2,\"shots\":1,\"notes\":1,\"stray\":[]}"
+    },
+    {
+      "name": "step «dashboard»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "pass": true,
+      "detail": "{\"title\":\"افتح Business details\",\"acts\":3,\"shots\":2,\"notes\":1,\"stray\":[]}"
+    },
+    {
+      "name": "step «oauth»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "pass": true,
+      "detail": "{\"title\":\"ابدأ تطبيق OAuth\",\"acts\":2,\"shots\":2,\"notes\":1,\"stray\":[]}"
+    },
+    {
+      "name": "step «form»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "pass": true,
+      "detail": "{\"title\":\"املأ نموذج التطبيق\",\"acts\":3,\"shots\":1,\"notes\":0,\"stray\":[]}"
+    },
+    {
+      "name": "step «secret»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "pass": true,
+      "detail": "{\"title\":\"احفظ السر فوراً\",\"acts\":3,\"shots\":1,\"notes\":2,\"stray\":[]}"
+    },
+    {
+      "name": "step «keys»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "pass": true,
+      "detail": "{\"title\":\"الصق المعرّف والسر\",\"acts\":0,\"shots\":0,\"notes\":0,\"stray\":[]}"
+    },
+    {
+      "name": "step «allowlist»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "pass": true,
+      "detail": "{\"title\":\"اطلب من Snap إضافة التطبيق\",\"acts\":0,\"shots\":0,\"notes\":0,\"stray\":[]}"
+    },
+    {
+      "name": "the pictures are where the walk put them: sign-in, the two Ads Manager screens, the profile, the menu and the card, the terms, the form, the created app",
+      "pass": true,
+      "detail": "{\"account\":{\"title\":\"سجّل الدخول بحساب سناب شات الذي سيملك الملف\",\"acts\":2,\"shots\":1,\"notes\":1,\"pics\":1},\"business\":{\"title\":\"أنشئ حساب الأعمال في Ads Manager\",\"acts\":5,\"shots\":2,\"notes\":1,\"pics\":2},\"profile\":{\"title\":\"أنشئ الملف العام\",\"acts\":2,\"shots\":1,\"notes\":1,\"pics\":1},\"dashboard\":{\"title\":\"افتح Business details\",\"acts\":3,\"shots\":2,\"notes\":1,\"pics\":2},\"oauth\":{\"title\":\"ابدأ تطبيق OAuth\",\"acts\":2,\"shots\":2,\"notes\":1,\"pics\":2},\"form\":{\"title\":\"املأ نموذج التطبيق\",\"acts\":3,\"shots\":1,\"notes\":0,\"pics\":1},\"secret\":{\"title\":\"احفظ السر فوراً\",\"acts\":3,\"shots\":1,\"notes\":2,\"pics\":1},\"keys\":{\"title\":\"الصق المعرّف والسر\",\"acts\":0,\"shots\":0,\"notes\":0,\"pics\":0},\"allowlist\":{\"title\":\"اطلب من Snap إضافة التطبيق\",\"acts\":0,\"shots\":0,\"notes\":0,\"pics\":0}}"
+    },
+    {
+      "name": "the secret step says to cover it before any picture and what to do if it is lost",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the return address is the site's own, filled in for this platform, and offered to copy",
+      "pass": true,
+      "detail": "http://127.0.0.1:52882/api/platforms/callback/snapchat"
+    },
+    {
+      "name": "the keys form asks for the two values by Snapchat's own names, and the secret is a password field",
+      "pass": true,
+      "detail": "8\nما يحتاجه الموقع منك\nالصق المعرّف والسر\nمعرّف العميل (Snap Client ID)\nسر العميل (Snap client secret key)\nخيارات أخرى\n\nيسأل الموقع المنصة أولاً، ولا يحفظ شيئاً إن رفضت. السر يذهب إلى الخزنة ولا يُعرض بعد ذلك، فإن أغلقت قبل الفحص أعدت إدخاله وحده.\n\nفحص وحفظ"
+    },
+    {
+      "name": "the allowlist is a review: the request names the client id and the scope, says the secret was not shared, and the buttons are the review's own",
+      "pass": true,
+      "detail": "Hello, we are the communications department of our organisation. We would like access to the Snap Public Profile API for our organisation's own Public Profile, to publish our own Stories and Spotlight"
+    },
+    {
+      "name": "no id or secret of any app is on the page",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the twelve picture files are in the site and no original is",
+      "pass": true,
+      "detail": "authorised.png,business-name.png,business-where.png,consent.png,created.png,menu.png,oauth-add.png,oauth-card.png,oauth-form.png,public-profile.png,signin.png,terms.png"
+    },
+    {
+      "name": "no unblurred original (1.png to 24.png) was written beside them",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: no step scrolls sideways, pictures included",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "evening: the sheet and its pictures are drawn",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 23,
+  "passed": 23,
+  "failed": 0
+}

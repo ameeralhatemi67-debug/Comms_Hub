@@ -26,13 +26,24 @@ related:
 
 # Communication Department Hub — Current Status
 
+## Snapchat's connection, 2026-11-26
+
+- **Built and checked, not committed** (`MVP_draft.md` section 84): Snapchat now has a setup like the other platforms (nine steps from the owner's walk, twelve blurred pictures) and a real sign-in
+  that links the Public Profile of the account that signs in. Database rules 37 of 37 on a private database, unit tests 1016 of 1016, `qa/snapchat-flow.cjs` 23 of 23, build and typecheck pass.
+- **The owner's steps, in order:** run `supabase/migrations/20261126150000_snapchat_connection.sql` in the SQL editor of **comms-hub** (it can be run twice); make a new Snap OAuth app (the first one's secret
+  was shown in a picture sent to a chat); add Snapchat from «إضافة منصة» and enter the client id and secret in its keys step; connect from «حسابات المنصات».
+- **Unknown until that first connection:** what Snap answers an app it has not allowed. The consent screen worked without the allowlist; the call that reads the profile may be refused (`ACCESS_NOT_GRANTED`).
+  The allowlist request (the text is in the last step of the guide) still needs a Snap contact.
+- Another session has uncommitted edits in `x-handoff.tsx` and `x-link.ts` (reply and quote on X's link route): not part of this work.
+
 ## «تجربة النشر بالرابط» for X, 2026-11-26
 
 - **Built and checked** (`MVP_draft.md` section 83): an X account added «بالرابط» has its own «تجربة النشر بالرابط» in its sheet of «حسابات المنصات», like the other platforms. «فحص بلا نشر» takes the
   link of a post the account already made; «نشر تجريبي» opens X's composer with a plain text, the person posts by hand and pastes the link. The database records that the handle and the post agree
   (`x_link_test_record`, 20 a day, who and when); nothing is sent to X or deleted from it. Database rules 35 of 35 on a private database, unit tests 1001 of 1001, `qa/x-link-test-flow.cjs` 36 of 36.
-- **Two steps are the owner's, in this order, in the SQL editor of comms-hub:** `20261125120000_work_cycle_x_link_route.sql`, then `20261126120000_x_link_tests.sql`. Both answered 404 signed out on
-  2026-11-26, so neither is applied; until they are, a link account cannot be added and the panel only says the link is fine without recording it.
+- **Both migrations are in comms-hub:** the first since 2026-11-25, and `20261126120000_x_link_tests.sql` was run in the SQL editor on 2026-11-26 («Success»). Checked signed out with the real argument names:
+  every function answers «permission denied» (present), `x_link_tests` the same, `platform_accounts.route` reads. Not tried signed in: adding an X account «بالرابط» and its test. (An earlier line here
+  said neither was applied: the check had sent empty arguments, which makes PostgREST answer 404 for a function that exists.)
 - **Snapchat** walk: S1 to S4 received (Business Dashboard, «Business details», «OAuth apps» with «+ OAuth app»). Next is the OAuth app form (`Snapchat_Plan.md`).
 
 ## X's cost calculator and the start of Snapchat, 2026-11-26

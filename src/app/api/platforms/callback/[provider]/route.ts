@@ -16,6 +16,8 @@ import {
   linkedinExchangeCode,
   linkedinUserInfo,
   packTokens,
+  snapchatExchangeCode,
+  snapchatProfile,
   xExchangeCode,
   xMe,
 } from '@/lib/platforms/oauth2';
@@ -85,6 +87,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       secret = packTokens({ ...t, subject: me.sub });
       config = { provider, sub: me.sub, name: me.name, scopes: t.scope, expires_at: t.accessExpiresAt };
       label = 'دخول LinkedIn بانتظار الاختيار';
+    } else if (provider === 'snapchat') {
+      const t = await snapchatExchangeCode(fetch, { clientId: app.appId, secret: app.secret, redirectUri: to, code });
+      // The sign-in worked; whether Snap lets this app read the profile (its allowlist) is told by the next call, and said in words if it refuses.
+      const me = await snapchatProfile(fetch, t.access);
+      if ('error' in me) return back(me.error);
+      secret = packTokens({ ...t, subject: me.id });
+      config = { provider, profile_id: me.id, name: me.name, ...(me.username ? { username: me.username } : {}), scopes: t.scope, refresh_expires_at: t.refreshExpiresAt };
+      label = 'دخول Snapchat بانتظار الاختيار';
     } else {
       const verifier = request.cookies.get('platform_oauth_pkce')?.value;
       if (!verifier) return back('CODE_REFUSED');

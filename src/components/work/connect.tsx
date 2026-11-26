@@ -17,7 +17,7 @@ import { Sheet, SheetHead, SheetProgress, SheetSteps } from '../sheet';
 import { Hint, Ic } from './parts';
 import { staffOf } from './plan';
 
-type Candidate = { platform: 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'linkedin' | 'x'; id: string; name: string; handle: string | null; parent: string | null; canPost?: boolean };
+type Candidate = { platform: 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'linkedin' | 'x' | 'snapchat'; id: string; name: string; handle: string | null; parent: string | null; canPost?: boolean };
 type Result = { platform: string; id: string; ok: boolean; account?: string; error?: string; missing?: string[] };
 export const RECONNECT_KEY = 'hub_platform_reconnect';
 
@@ -28,6 +28,7 @@ const PROVIDER_AR: Record<ConnProvider, string> = {
   linkedin: PROVIDER_NAME.linkedin,
   x: PROVIDER_NAME.x,
   microsoft: PROVIDER_NAME.microsoft,
+  snapchat: PROVIDER_NAME.snapchat,
 };
 /** What to check when a sign-in offers nothing to connect, per provider. */
 const EMPTY_AR: Record<ConnProvider, string> = {
@@ -37,6 +38,7 @@ const EMPTY_AR: Record<ConnProvider, string> = {
   linkedin: 'لا ملف يمكن ربطه بهذا الدخول.',
   x: 'لا حساب يمكن ربطه بهذا الدخول.',
   microsoft: 'لا شيء يُربط من هنا: يُربط OneDrive من «الإعدادات» ثم «الاتصالات».',
+  snapchat: 'لا ملف عام يمكن ربطه بهذا الدخول.',
 };
 
 /** Who publishes on a new account unless changed: the publishers, or the person connecting it if there are none. */
