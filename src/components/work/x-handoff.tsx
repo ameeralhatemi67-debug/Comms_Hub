@@ -9,7 +9,7 @@ import { Check, ClipboardCopy, Download, ExternalLink, X as XIcon } from 'lucide
 import { fileAt } from '@/lib/native/files';
 import { checkFor, copyFor, publishedVersion } from '@/lib/platforms/copies';
 import { accountName, platformInfo, type AccountRow, type WorkRow } from '@/lib/work/rules';
-import { X_LIMIT, checkNote, composerLink, handleOf, parsePostLink, postLinkProblem, xLength, type PostCheck, type PostNote } from '@/lib/work/x-link';
+import { X_LIMIT, checkNote, composerLink, handleOf, parsePostLink, postLinkProblem, withRef, xLength, type PostCheck, type PostNote, type RefMode } from '@/lib/work/x-link';
 import { FileThumb } from '../file-thumb';
 import { PhoneFileButtons } from '../native/phone-file';
 import { Hint, Ic } from './parts';
@@ -17,6 +17,33 @@ import { useCopySource } from './post-preview';
 
 type Act = (fn: string, args: Record<string, unknown>, ok: string) => Promise<boolean>;
 type Note = PostNote;
+
+/** Puts the picture on the clipboard (as PNG), so pasting in X's composer attaches it. Where the browser refuses, says so and the download stays. */
+function CopyImage({ url }: { url: string }) {
+  const [state, setState] = useState<'idle' | 'done' | 'no'>('idle');
+  const copyIt = async () => {
+    try {
+      const bmp = await createImageBitmap(await (await fetch(url)).blob());
+      const c = document.createElement('canvas');
+      c.width = bmp.width;
+      c.height = bmp.height;
+      c.getContext('2d')!.drawImage(bmp, 0, 0);
+      const png = await new Promise<Blob | null>((r) => c.toBlob(r, 'image/png'));
+      if (!png) throw new Error('png');
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
+      setState('done');
+    } catch {
+      setState('no');
+    }
+    setTimeout(() => setState('idle'), 2500);
+  };
+  return (
+    <button type="button" className="wk-btn sm" data-xh="copy-image" onClick={() => void copyIt()}>
+      <Ic i={state === 'done' ? Check : ClipboardCopy} />
+      {state === 'done' ? 'نُسخت الصورة: الصقها في X' : state === 'no' ? 'تعذّر النسخ: نزّلها' : 'نسخ الصورة'}
+    </button>
+  );
+}
 
 export function XHandoff({ w, account, act, onDone }: { w: WorkRow; account: AccountRow; act: Act; onDone?: () => void }) {
   const src = useCopySource(w.id, w.type);
@@ -26,7 +53,11 @@ export function XHandoff({ w, account, act, onDone }: { w: WorkRow; account: Acc
   const [note, setNote] = useState<Note>(null);
   const [asked, setAsked] = useState(false);
   const copy = src ? copyFor(src, account.platform) : null;
-  const text = copy?.text ?? '';
+  const [refMode, setRefMode] = useState<RefMode>('none');
+  const [ref, setRef] = useState('');
+  const refOk = refMode === 'none' || Boolean(parsePostLink(ref));
+  const sent = withRef(copy?.text ?? '', refMode, ref);
+  const text = sent.text;
   const files = (copy?.files ?? []).filter((f) => f.id && publishedVersion(f));
   const length = xLength(text);
   const problem = asked ? postLinkProblem(url, account.handle) : null;
@@ -101,6 +132,7 @@ export function XHandoff({ w, account, act, onDone }: { w: WorkRow; account: Acc
                       <FileThumb of={{ asset: f.id!, version: v }} kind={f.kind} name={f.name} />
                     </span>
                     <span>{f.name ?? 'ملف'}</span>
+                    {f.kind === 'image' && <CopyImage url={path} />}
                     <PhoneFileButtons
                       small
                       inPage={false}
@@ -123,11 +155,28 @@ export function XHandoff({ w, account, act, onDone }: { w: WorkRow; account: Acc
         <li data-xh-step="open">
           <b>افتح X</b>
           <div className="wk-xh-row">
-            <a className="wk-btn primary" href={composerLink(text)} target="_blank" rel="noopener noreferrer" data-xh-open>
+            <a className="wk-btn primary" href={composerLink(text, { replyTo: sent.replyTo })} target="_blank" rel="noopener noreferrer" data-xh-open>
               <Ic i={ExternalLink} />
               افتح X ومعك النص
             </a>
           </div>
+          <details className="pf-more" data-xh="ref">
+            <summary>رد على منشور أو اقتباسه</summary>
+            <div className="wk-seg" role="group" aria-label="النوع">
+              {(['none', 'reply', 'quote'] as RefMode[]).map((m) => (
+                <button type="button" key={m} aria-pressed={refMode === m} data-xh-ref={m} onClick={() => setRefMode(m)}>
+                  {m === 'none' ? 'منشور جديد' : m === 'reply' ? 'رد' : 'اقتباس'}
+                </button>
+              ))}
+            </div>
+            {refMode !== 'none' && (
+              <>
+                <input className="wk-inp ltr" dir="ltr" value={ref} placeholder="x.com/…/status/…" aria-label="رابط المنشور المقصود" onChange={(e) => setRef(e.target.value)} />
+                {!refOk && <small className="wk-xh-over">الصق رابط منشور صحيح، وإلا يُفتح منشور جديد.</small>}
+                <small>{refMode === 'reply' ? 'يفتح X صفحة الرد على هذا المنشور. وللسلسلة (thread) رُد على منشورك السابق.' : 'يُضاف رابط المنشور إلى النص فيعرضه X كاقتباس.'}</small>
+              </>
+            )}
+          </details>
           <small>تفتح صفحة النشر في X والنص فيها جاهزاً، فتأكد أنك داخل بحساب @{handleOf(account.handle)}. أضف الملفات من زر الصور فيها ثم اضغط «Post». لا يقبل X ملفات من رابط.</small>
         </li>
         <li data-xh-step="link">

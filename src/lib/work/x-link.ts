@@ -38,7 +38,16 @@ export function xLength(text: string): number {
 }
 
 /** The link that opens X's composer with the text filled in. The person still attaches the files and presses «Post». */
-export const composerLink = (text: string) => `${X_COMPOSER}?text=${encodeURIComponent(text)}`;
+export const composerLink = (text: string, opts?: { replyTo?: string }) =>
+  `${X_COMPOSER}?text=${encodeURIComponent(text)}${opts?.replyTo && /^[0-9]{5,25}$/.test(opts.replyTo) ? `&in_reply_to=${opts.replyTo}` : ''}`;
+
+/** A reply goes through the composer's `in_reply_to`; a quote is the post's link inside the text, which X shows as a quote. */
+export type RefMode = 'none' | 'reply' | 'quote';
+export function withRef(text: string, mode: RefMode, ref: string): { text: string; replyTo?: string } {
+  const p = mode === 'none' ? null : parsePostLink(ref);
+  if (!p) return { text };
+  return mode === 'reply' ? { text, replyTo: p.id } : { text: `${text}${text ? '\n' : ''}${p.url}` };
+}
 
 export type PostLink = { handle: string; id: string; url: string };
 /** A post's link as the database reads it, or null: the account's handle, the post's number and the address kept. */

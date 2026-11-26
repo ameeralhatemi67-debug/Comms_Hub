@@ -83,3 +83,14 @@ test('the migration gives a page only what it needs: two functions, nothing for 
   assert.match(migration, /revoke all on function public\.x_post_parse\(text\)/);
   assert.doesNotMatch(migration.replace(/^--.*$/gm, ''), /service_role|vault|secret|token/i, 'no key or token in this route (its comments say so)');
 });
+
+import { withRef } from '../src/lib/work/x-link.ts';
+test('a reply goes through in_reply_to, a quote is the post\'s link in the text, and a bad link falls back to a new post', () => {
+  const ref = 'https://twitter.com/a/status/1234567890?s=20';
+  assert.equal(new URL(composerLink('نص', { replyTo: '1234567890' })).searchParams.get('in_reply_to'), '1234567890');
+  assert.deepEqual([...new URL(composerLink('نص', { replyTo: 'abc' })).searchParams.keys()], ['text'], 'only a post number is accepted');
+  assert.deepEqual(withRef('نص', 'reply', ref), { text: 'نص', replyTo: '1234567890' });
+  assert.deepEqual(withRef('نص', 'quote', ref), { text: 'نص\nhttps://x.com/a/status/1234567890' });
+  assert.deepEqual(withRef('نص', 'quote', 'nonsense'), { text: 'نص' });
+  assert.deepEqual(withRef('نص', 'none', ref), { text: 'نص' });
+});

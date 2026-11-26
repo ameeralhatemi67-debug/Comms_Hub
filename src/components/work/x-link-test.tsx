@@ -8,7 +8,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Check, ExternalLink, FlaskConical } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import type { AccountRow } from '@/lib/work/rules';
-import { X_LIMIT, checkNote, composerLink, handleOf, parsePostLink, postLinkProblem, type PostCheck, type PostNote } from '@/lib/work/x-link';
+import { X_LIMIT, checkNote, composerLink, handleOf, parsePostLink, postLinkProblem, withRef, type PostCheck, type PostNote, type RefMode } from '@/lib/work/x-link';
 import {
   X_TEST_MODE_AR,
   X_TEST_MODE_HELP_AR,
@@ -48,6 +48,9 @@ export function XLinkTest({ a }: { a: AccountRow }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<XTestMode>('existing');
   const [text, setText] = useState(X_TEST_TEXT);
+  const [refMode, setRefMode] = useState<RefMode>('none');
+  const [ref, setRef] = useState('');
+  const sent = withRef(text, refMode, ref);
   const [url, setUrl] = useState('');
   const [asked, setAsked] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -201,12 +204,23 @@ export function XLinkTest({ a }: { a: AccountRow }) {
                   </p>
                 )}
               </li>
+              <li data-xl-step="ref">
+                <b>رد أو اقتباس (اختياري)</b>
+                <div className="wk-seg" role="group" aria-label="النوع">
+                  {(['none', 'reply', 'quote'] as RefMode[]).map((m) => (
+                    <button type="button" key={m} aria-pressed={refMode === m} data-xl-ref={m} onClick={() => setRefMode(m)}>
+                      {m === 'none' ? 'منشور جديد' : m === 'reply' ? 'رد' : 'اقتباس'}
+                    </button>
+                  ))}
+                </div>
+                {refMode !== 'none' && <input className="wk-inp ltr" dir="ltr" value={ref} placeholder="x.com/…/status/…" aria-label="رابط المنشور المقصود" onChange={(e) => setRef(e.target.value)} />}
+              </li>
               <li data-xl-step="open">
                 <b>افتح X ومعك النص</b>
                 <div className="wk-xh-row">
                   <a
                     className={`wk-btn sm${textProblem ? ' off' : ''}`}
-                    href={textProblem ? undefined : composerLink(text)}
+                    href={textProblem ? undefined : composerLink(sent.text, { replyTo: sent.replyTo })}
                     aria-disabled={Boolean(textProblem)}
                     target="_blank"
                     rel="noopener noreferrer"
