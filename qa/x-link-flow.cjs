@@ -136,10 +136,12 @@ const GOOD = 'https://x.com/t_x/status/1234567890123456789';
     const file = box.locator('[data-xh-step="files"] li').first();
     check('the file is listed with a download at the approved version, recorded as a download', (await file.innerText()).includes('poster.png') && (await file.locator('a[download]').getAttribute('href')) === '/api/media/11111111-1111-4111-8111-111111111111/content?v=1&download=1');
     const open1 = box.locator('[data-xh-open]');
+    check('the open-X button waits until the person says they are signed in as the account', (await open1.getAttribute('aria-disabled')) === 'true' && (await open1.getAttribute('href')) === null);
+    await box.locator('[data-xh="signed"] input').check();
     const href = await open1.getAttribute('href');
     const u = new URL(href);
     check('X\'s composer opens in a new tab with the text in the address and no other parameter', u.origin + u.pathname === 'https://x.com/intent/tweet' && [...u.searchParams.keys()].join() === 'text' && u.searchParams.get('text').includes('افتتاح معرض هداية') && (await open1.getAttribute('target')) === '_blank' && (await open1.getAttribute('rel')).includes('noopener'), href);
-    check('it says the files are added by hand in X', (await box.locator('[data-xh-step="open"] small').innerText()).includes('أضف الملفات'));
+    check('it says the files are added by hand in X', (await box.locator('[data-xh-step="open"] > small').innerText()).includes('أضف الملفات'));
     await t.screenshot({ path: path.join(out, '02-handoff.png') });
 
     const input = box.getByLabel('رابط المنشور على X');

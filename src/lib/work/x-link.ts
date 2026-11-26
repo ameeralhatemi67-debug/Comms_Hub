@@ -61,7 +61,7 @@ export function postLinkProblem(input: string, handle: string | null | undefined
   if (!input.trim()) return 'الصق رابط المنشور بعد أن تنشره على X.';
   const p = parsePostLink(input);
   if (!p) return 'هذا ليس رابط منشور على X. الرابط الصحيح شكله x.com/اسم_الحساب/status/رقم.';
-  if (p.handle.toLowerCase() !== handleOf(handle).toLowerCase()) return `هذا المنشور لحساب آخر (@${p.handle}). المنتظَر منشور لـ @${handleOf(handle)}.`;
+  if (p.handle.toLowerCase() !== handleOf(handle).toLowerCase()) return `هذا المنشور لحساب آخر (@${p.handle}). المنتظَر منشور لـ @${handleOf(handle)}. إن نشرته من حسابك الشخصي فاحذفه من X، ثم افتح X من متصفح أو ملف تعريف سجّلت فيه بحساب @${handleOf(handle)} وأعد المحاولة.`;
   return null;
 }
 

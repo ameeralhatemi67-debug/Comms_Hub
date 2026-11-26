@@ -164,6 +164,8 @@ const li = (n) => `https://x.com/T_X/status/${n}`;
     const startText = await text.inputValue();
     check('the test post starts from a plain text, with its length as X counts it', startText.includes('تجربة نشر داخلية') && !/https?:/.test(startText) && (await panel(t).locator('[data-xl="count"]').innerText()).includes(`${[...startText].length} / 280`), `${startText} | ${await panel(t).locator('[data-xl="count"]').innerText()}`);
     const compose = panel(t).locator('[data-xl="compose"]');
+    check('the composer waits until the person says they are signed in as the account', (await compose.getAttribute('aria-disabled')) === 'true');
+    await panel(t).locator('[data-xl="signed"] input').check();
     const cu = new URL(await compose.getAttribute('href'));
     check('X\'s composer opens in a new tab with the text and no other parameter', cu.origin + cu.pathname === 'https://x.com/intent/tweet' && [...cu.searchParams.keys()].join() === 'text' && cu.searchParams.get('text') === startText && (await compose.getAttribute('target')) === '_blank');
     await text.fill('نص آخر للتجربة');

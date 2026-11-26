@@ -1,6 +1,6 @@
 {
   "script": "qa/x-link-flow.cjs",
-  "run": "2026-11-26T11:24:23.250Z",
+  "run": "2026-11-26T13:28:20.434Z",
   "checks": [
     {
       "name": "the send dialog says the link account is not simulated, and what happens instead",
@@ -54,6 +54,11 @@
     },
     {
       "name": "the file is listed with a download at the approved version, recorded as a download",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the open-X button waits until the person says they are signed in as the account",
       "pass": true,
       "detail": ""
     },
@@ -129,7 +134,7 @@
     }
   ],
   "notes": [],
-  "total": 25,
-  "passed": 25,
+  "total": 26,
+  "passed": 26,
   "failed": 0
 }

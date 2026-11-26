@@ -48,6 +48,7 @@ export function XLinkTest({ a }: { a: AccountRow }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<XTestMode>('existing');
   const [text, setText] = useState(X_TEST_TEXT);
+  const [signed, setSigned] = useState(false);
   const [refMode, setRefMode] = useState<RefMode>('none');
   const [ref, setRef] = useState('');
   const sent = withRef(text, refMode, ref);
@@ -217,11 +218,15 @@ export function XLinkTest({ a }: { a: AccountRow }) {
               </li>
               <li data-xl-step="open">
                 <b>افتح X ومعك النص</b>
+                <label className="wk-xh-row" data-xl="signed">
+                  <input type="checkbox" checked={signed} onChange={(e) => setSigned(e.target.checked)} />
+                  <span>أنا داخل في X بحساب <b className="ltr">@{handle}</b>، لا بحسابي الشخصي</span>
+                </label>
                 <div className="wk-xh-row">
                   <a
-                    className={`wk-btn sm${textProblem ? ' off' : ''}`}
-                    href={textProblem ? undefined : composerLink(sent.text, { replyTo: sent.replyTo })}
-                    aria-disabled={Boolean(textProblem)}
+                    className={`wk-btn sm${textProblem || !signed ? ' off' : ''}`}
+                    href={textProblem || !signed ? undefined : composerLink(sent.text, { replyTo: sent.replyTo })}
+                    aria-disabled={Boolean(textProblem) || !signed}
                     target="_blank"
                     rel="noopener noreferrer"
                     data-xl="compose"

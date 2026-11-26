@@ -1,6 +1,6 @@
 {
   "script": "qa/x-link-test-flow.cjs",
-  "run": "2026-11-26T11:24:12.559Z",
+  "run": "2026-11-26T13:27:59.131Z",
   "checks": [
     {
       "name": "the panel says what it is: nothing is sent to X and nothing is deleted from it",
@@ -35,7 +35,7 @@
     {
       "name": "another account's post is refused, naming both, and X is not even asked",
       "pass": true,
-      "detail": "هذا المنشور لحساب آخر (@someone). المنتظَر منشور لـ @T_X."
+      "detail": "هذا المنشور لحساب آخر (@someone). المنتظَر منشور لـ @T_X. إن نشرته من حسابك الشخصي فاحذفه من X، ثم افتح X من متصفح أو ملف تعريف سجّلت فيه بحساب @T_X وأعد المحاولة."
     },
     {
       "name": "X saying the post is another author's stops it, and nothing is recorded",
@@ -76,6 +76,11 @@
       "name": "the test post starts from a plain text, with its length as X counts it",
       "pass": true,
       "detail": "تجربة نشر داخلية من المركز. يُحذف هذا المنشور بعد قليل. | 55 / 280 حرفاً بحساب X"
+    },
+    {
+      "name": "the composer waits until the person says they are signed in as the account",
+      "pass": true,
+      "detail": ""
     },
     {
       "name": "X's composer opens in a new tab with the text and no other parameter",
@@ -184,7 +189,7 @@
     }
   ],
   "notes": [],
-  "total": 36,
-  "passed": 36,
+  "total": 37,
+  "passed": 37,
   "failed": 0
 }

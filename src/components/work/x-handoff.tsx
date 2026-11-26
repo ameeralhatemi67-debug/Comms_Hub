@@ -53,6 +53,7 @@ export function XHandoff({ w, account, act, onDone }: { w: WorkRow; account: Acc
   const [note, setNote] = useState<Note>(null);
   const [asked, setAsked] = useState(false);
   const copy = src ? copyFor(src, account.platform) : null;
+  const [signed, setSigned] = useState(false);
   const [refMode, setRefMode] = useState<RefMode>('none');
   const [ref, setRef] = useState('');
   const refOk = refMode === 'none' || Boolean(parsePostLink(ref));
@@ -154,12 +155,20 @@ export function XHandoff({ w, account, act, onDone }: { w: WorkRow; account: Acc
         )}
         <li data-xh-step="open">
           <b>افتح X</b>
+          <label className="wk-xh-row" data-xh="signed">
+            <input type="checkbox" checked={signed} onChange={(e) => setSigned(e.target.checked)} />
+            <span>أنا داخل في X بحساب المؤسسة <b className="ltr">@{handleOf(account.handle)}</b>، لا بحسابي الشخصي</span>
+          </label>
           <div className="wk-xh-row">
-            <a className="wk-btn primary" href={composerLink(text, { replyTo: sent.replyTo })} target="_blank" rel="noopener noreferrer" data-xh-open>
+            <a className={`wk-btn primary${signed ? '' : ' off'}`} href={signed ? composerLink(text, { replyTo: sent.replyTo }) : undefined} aria-disabled={!signed} target="_blank" rel="noopener noreferrer" data-xh-open>
               <Ic i={ExternalLink} />
               افتح X ومعك النص
             </a>
           </div>
+          <details className="pf-more" data-xh="wrong">
+            <summary>يفتح X بحسابي الشخصي؟</summary>
+            <small>يفتح X بالحساب المسجَّل في هذا المتصفح، ولا يستطيع الموقع تغييره. الحل الأسهل: أنشئ ملف تعريف (Profile) في Chrome أو Edge للمؤسسة وحدها، وسجّل فيه بحساب @{handleOf(account.handle)} مرة واحدة، وانشر منه دائماً. أو اطلب من مدير حساب X تفويضك (Delegate) لتبدّل إلى حساب المؤسسة من داخل X بحسابك. وإن نُشر منشور بحساب خاطئ فاحذفه من X.</small>
+          </details>
           <details className="pf-more" data-xh="ref">
             <summary>رد على منشور أو اقتباسه</summary>
             <div className="wk-seg" role="group" aria-label="النوع">
