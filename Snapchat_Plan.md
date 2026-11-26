@@ -118,3 +118,10 @@ The originals are in the session scratchpad (`snapchat-originals/`), never in th
 - **2026-11-26, S8 received and the build done.** The authorize page showed «Continue to Comms Hub?» and «This app will be able to access your: Public Profile APIs», then «Authorisation successful», before
   any allowlist. The connection, its guide and its pictures were built from the walk (`MVP_draft.md` 84, `progress.md`). Open: what Snap answers an app it has not allowed when the profile is asked, and
   the contact for the allowlist request.
+
+## 6. What the API can post, read and delete, and the test built on it (2026-11-26)
+
+Read again on 2026-11-26 from `developers.snap.com/marketing-api/Public-Profile-API/` (ProfileAssetManagement, Metrics, Profiles, GetStarted, FAQ). The owner asked for a «تجربة النشر» like the other platforms'; the contract
+and the table of what Snap offers are in `Snapchat_Test_Plan.md`, the built section is `MVP_draft.md` 85. In short: Stories, Saved Stories and Spotlights can be posted; Saved Stories and Spotlights can be deleted and a Story cannot;
+Stories, Saved Stories, Spotlights and the profile can be read, with views, viewers, shares, screenshots and subscribers (about a day late, 90 days back); all of it needs the client id allowlisted, so the test has met no real
+answer. Not built: Saved Stories, picture Stories, links and captions on a post, group messages, partnership roles, earnings, files over one 32 MB part.

@@ -1,0 +1,420 @@
+{
+  "script": "qa/snapchat-test-flow.cjs",
+  "run": "2026-11-26T17:21:26.152Z",
+  "checks": [
+    {
+      "name": "the panel is titled for Snapchat",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says Snap's API is open only to apps Snap allowed, so a check may say Snap refused",
+      "pass": true,
+      "detail": "واجهة Snap مفتوحة للتطبيقات التي أذنت لها Snap وحدها، فإلى أن تأذن للتطبيق قد يقول الفحص إن Snap رفضت. لا يمر شيء من التجارب بالمراجعة ولا يُعدّ عملاً."
+    },
+    {
+      "name": "folded until asked for, and nothing asked of the site before",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "four choices in the order the plan gives",
+      "pass": true,
+      "detail": "[\"فحص الحساب بلا نشر\",\"فحص صامت\",\"سبوتلايت\",\"قصة\"]"
+    },
+    {
+      "name": "the check without posting is the default",
+      "pass": true,
+      "detail": "[\"فحص الحساب بلا نشر\"]"
+    },
+    {
+      "name": "the check needs no file, no description and no long press, and is ready to send",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says it posts nothing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the check sends the account and the check kind and nothing else",
+      "pass": true,
+      "detail": "{\"account\":\"a-sn\",\"kind\":\"snap_check\"}"
+    },
+    {
+      "name": "it shows the profile: name, handle and subscribers",
+      "pass": true,
+      "detail": "قُرئ حساب Snapchat. لم يُنشر شيء ولم يُرفع ملف.\nالملف العام\nهداية · @hedayah.team · المشتركون: 4210\nالسبوتلايت\nالمقروء: 5 · ظاهر: 3 · ينتظر: 1 · مرفوض: 1\nالقصص\nالمقروء: 2\nأرقام الحساب الإجمالية\nالمشاهدات 52000 · المشاهدون 31000 · المشاركات 410 · لقطات الشاشة 87 · المشتركون 4210\nتصل أرقام Snap عادةً بعد نحو يوم من النشر وتعود إلى 90 يوماً. منشور حُذف فوراً لا أرقام له.\nقرأ الفحص آخر خمسة سبوتلايت وآخر قصتين."
+    },
+    {
+      "name": "it shows the Spotlights read, by status, and the Stories",
+      "pass": true,
+      "detail": "قُرئ حساب Snapchat. لم يُنشر شيء ولم يُرفع ملف.\nالملف العام\nهداية · @hedayah.team · المشتركون: 4210\nالسبوتلايت\nالمقروء: 5 · ظاهر: 3 · ينتظر: 1 · مرفوض: 1\nالقصص\nالمقروء: 2\nأرقام الحساب الإجمالية\nالمشاهدات 52000 · المشاهدون 31000 · المشاركات 410 · لقطات الشاشة 87 · المشتركون 4210\nتصل أرقام Snap عادةً بعد نحو يوم من النشر وتعود إلى 90 يوماً. منشور حُذف فوراً لا أرقام له.\nقرأ الفحص آخر خمسة سبوتلايت وآخر قصتين."
+    },
+    {
+      "name": "it shows the account's lifetime numbers",
+      "pass": true,
+      "detail": "قُرئ حساب Snapchat. لم يُنشر شيء ولم يُرفع ملف.\nالملف العام\nهداية · @hedayah.team · المشتركون: 4210\nالسبوتلايت\nالمقروء: 5 · ظاهر: 3 · ينتظر: 1 · مرفوض: 1\nالقصص\nالمقروء: 2\nأرقام الحساب الإجمالية\nالمشاهدات 52000 · المشاهدون 31000 · المشاركات 410 · لقطات الشاشة 87 · المشتركون 4210\nتصل أرقام Snap عادةً بعد نحو يوم من النشر وتعود إلى 90 يوماً. منشور حُذف فوراً لا أرقام له.\nقرأ الفحص آخر خمسة سبوتلايت وآخر قصتين."
+    },
+    {
+      "name": "it says the numbers arrive about a day late and reach back 90 days",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "it says what the server noted",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a check leaves no test row, no list and no file call",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the silent check says plainly that hiding a scheduled Spotlight is not proven",
+      "pass": true,
+      "detail": "لم يثبت أن Snap تخفي السبوتلايت المجدول عن الناس قبل موعده: قُرئ هذا من سطر واحد في وثائقها ولم يُجرَّب. إن بقي الفحص غير محذوف فاحذفه من القائمة قبل موعده."
+    },
+    {
+      "name": "and says it schedules 14 days ahead, reads it back and deletes it at once",
+      "pass": true,
+      "detail": "ينشئ سبوتلايت مجدولاً بعد 14 يوماً من مقطع تختاره، ويقرؤه من Snap، ثم يحذفه فوراً."
+    },
+    {
+      "name": "the silent check needs no long press, and waits for a file",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a silent check takes no description",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the chosen library video shows its length, read in the browser",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and its size from the library",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "one request names the silent kind and the library file, with no words and no size",
+      "pass": true,
+      "detail": "{\"account\":\"a-sn\",\"kind\":\"snap_silent\",\"source\":\"library\",\"asset\":\"f-ok\"}"
+    },
+    {
+      "name": "a library file is never uploaded by the page",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the result says it was made, read and deleted before its time",
+      "pass": true,
+      "detail": "تم الفحص: أُنشئ سبوتلايت مجدول بعد 14 يوماً، وقُرئ من Snap وحالته «أُرسل إلى Snap وينتظر»، ثم حُذف قبل موعده.\nلا يثبت هذا الفحص أن Snap تخفي السبوتلايت المجدول عن الناس قبل موعده؛ ذلك لم يُجرَّب."
+    },
+    {
+      "name": "the result does not claim nobody saw it, and says that was not tried",
+      "pass": true,
+      "detail": "تم الفحص: أُنشئ سبوتلايت مجدول بعد 14 يوماً، وقُرئ من Snap وحالته «أُرسل إلى Snap وينتظر»، ثم حُذف قبل موعده.\nلا يثبت هذا الفحص أن Snap تخفي السبوتلايت المجدول عن الناس قبل موعده؛ ذلك لم يُجرَّب."
+    },
+    {
+      "name": "the list says so, with nothing to delete",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a Spotlight says it is public and can be deleted after",
+      "pass": true,
+      "detail": "يُنشر المقطع الآن سبوتلايت علنياً: يراه كل من يزور الملف العام ويظهر في Spotlight. يمكن حذفه من القائمة بعد نشره."
+    },
+    {
+      "name": "a Spotlight takes a description, and asks for a long press with its own reason",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a device video shows its length too",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the description counts its characters, in words that read the same either way",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a description over 100 characters is refused before sending",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and sending is ready again once it fits",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the start carries the kind, the words, and the device file's size and type",
+      "pass": true,
+      "detail": "{\"account\":\"a-sn\",\"kind\":\"snap_spotlight\",\"description\":\"تجربة سبوتلايت\",\"source\":\"device\",\"size\":1936,\"mime\":\"video/mp4\"}"
+    },
+    {
+      "name": "the file goes to Drive whole, then is registered by its Drive id",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the page asks nothing more: the post is the answer of the registration",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the result says it was posted, with Snap's status, and where it can be deleted and read",
+      "pass": true,
+      "detail": "نُشر السبوتلايت على الملف العام. حالته عند Snap: أُرسل إلى Snap وينتظر.\nيمكن حذفه من القائمة أدناه، وقراءة أرقامه بعد نحو يوم."
+    },
+    {
+      "name": "the list shows it published under its description, with «قراءة الأرقام» and a held «حذف»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "reading the numbers asks the stats step of that test",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the numbers are shown in the row",
+      "pass": true,
+      "detail": "المشاهدات 128 · المشاهدون 97 · المشاركات 6 · لقطات الشاشة 2 · قُرئت 26‏/11‏/2026 8:21 م"
+    },
+    {
+      "name": "and the note that Snap's numbers arrive about a day late stands under them",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a Spotlight is deleted through the site, and the list says so, with nothing left to press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a Story warns it cannot be deleted and ends by itself after 24 hours",
+      "pass": true,
+      "detail": "لا يمكن حذف القصة: لا تتيح Snap ذلك للتطبيقات، ولا يحذفها الموقع. تبقى ظاهرة لمتابعي الحساب حتى تنتهي وحدها بعد 24 ساعة."
+    },
+    {
+      "name": "a Story takes no description, and asks for a long press with its own reason",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the Story is sent by its library id, with no words",
+      "pass": true,
+      "detail": "{\"account\":\"a-sn\",\"kind\":\"snap_story\",\"source\":\"library\",\"asset\":\"f-ok\"}"
+    },
+    {
+      "name": "the result says it ends by itself and cannot be deleted",
+      "pass": true,
+      "detail": "نُشرت القصة. يراها متابعو الحساب حتى 27‏/11‏/2026، 8:21 م ثم تنتهي وحدها.\nلا تتيح Snap حذف القصة عبر التطبيقات: تنتهي وحدها بعد 24 ساعة من نشرها."
+    },
+    {
+      "name": "the Story's row says it ends by itself, and offers neither delete nor numbers",
+      "pass": true,
+      "detail": "قصة تجربة من مركز الاتصال\nقصة · نُشرت قصة · تنتهي وحدها 27‏/11‏/2026، 8:21 م، ولا تُحذف · 26‏/11‏/2026، 8:21 م · مدير الفحص"
+    },
+    {
+      "name": "and the list says once that Snap lets no application delete a Story",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "everything the page called is the site's routes or Drive's upload",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "nothing was loaded from outside the fixture",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "the page holds no token, key, secret or Snap address",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no emoji anywhere in the panel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "English in the panel (Snap, Snapchat, MP4, Spotlight) is set apart in its own isolate",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "the English check is not vacuous: it finds a bare word and passes a bdi",
+      "pass": true,
+      "detail": "[\"كلمة Snap مكشوفة\"]"
+    },
+    {
+      "name": "a file that is not MP4: refused before sending, in words",
+      "pass": true,
+      "detail": "تقبل Snap هنا الفيديو MP4."
+    },
+    {
+      "name": "a library video that is not MP4: refused before sending, in words",
+      "pass": true,
+      "detail": "تقبل Snap هنا الفيديو MP4."
+    },
+    {
+      "name": "a video over 30 MiB: refused before sending, in words",
+      "pass": true,
+      "detail": "التجربة تقبل مقطعاً حتى 30 ميغابايت."
+    },
+    {
+      "name": "a video shorter than 5 seconds: refused before sending, in words",
+      "pass": true,
+      "detail": "المقطع أقصر من 5 ثوانٍ."
+    },
+    {
+      "name": "a video longer than 5 minutes: refused before sending, in words",
+      "pass": true,
+      "detail": "المقطع أطول من 5 دقائق."
+    },
+    {
+      "name": "none of them sent a request",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a video that fits makes sending ready again",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a part Snap would not give is said so, three times, never drawn as zero",
+      "pass": true,
+      "detail": "قُرئ حساب Snapchat. لم يُنشر شيء ولم يُرفع ملف.\nالملف العام\nهداية · المشتركون: غير متاح\nالسبوتلايت\nلم تعطِ Snap هذا الجزء.\nالقصص\nلم تعطِ Snap هذا الجزء.\nأرقام الحساب الإجمالية\nلم تعطِ Snap هذا الجزء.\nتصل أرقام Snap عادةً بعد نحو يوم من النشر، وتعود إلى 90 يوماً. منشور حُذف فوراً لا أرقام له."
+    },
+    {
+      "name": "Snap not allowing the app is said in words, with where to look",
+      "pass": true,
+      "detail": "رفضت Snap قراءة الملف العام. غالباً لم تُضف التطبيق إلى قائمتها المسموحة بعد (الواجهة بدعوة فقط)، فراجع آخر خطوة في إعداد سناب شات."
+    },
+    {
+      "name": "and it does not offer a reconnect, which would not help",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the English of that refusal is isolated",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "an expired token is said, and offers «إعادة الربط»",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and pressing it starts Snapchat's own sign-in at the site's connect route",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a refused post is said in words, with Snap's own line beside them",
+      "pass": true,
+      "detail": "رفضت Snap النشر. تأكد أن الملف MP4 وأن التطبيق مسموح له عند Snap. (snap http 403)"
+    },
+    {
+      "name": "the list keeps the refusal on the failed test",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and a failed test offers nothing to press",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a silent check Snap would not delete says so and where to delete it",
+      "pass": true,
+      "detail": "أنشأ الفحص السبوتلايت المجدول وقرأه، لكن Snap رفضت حذفه. احذفه من هنا أو من تطبيق Snapchat قبل موعده.\nإن بقي نُشر 10‏/12‏/2026، 8:21 م."
+    },
+    {
+      "name": "the list says it is not deleted yet and when it would be posted, and offers a held delete",
+      "pass": true,
+      "detail": "فحص صامت من مركز الاتصال\nفحص صامت · لم يُحذف بعد، وإن بقي نُشر 10‏/12‏/2026، 8:21 م · 26‏/11‏/2026، 8:21 م · مدير الفحص\nحذف"
+    },
+    {
+      "name": "a left-over silent check has no numbers to read",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and deleting it from the list works",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "numbers Snap has not given yet are said in words, in the row",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "while the file goes to Drive the page shows its progress and offers a cancel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a cancel closes the test",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the account's own publisher sees the panel",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a publisher who is not on the account does not",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "an account that needs reconnecting is not tested",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing sideways with the Spotlight form open",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing sideways with the check's numbers shown",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: the result is readable on its own ground, and the warning on the sheet's",
+      "pass": true,
+      "detail": "rgb(16, 48, 31) / rgb(111, 209, 155) / rgb(239, 192, 102) / rgb(14, 31, 24)"
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 82,
+  "passed": 82,
+  "failed": 0
+}

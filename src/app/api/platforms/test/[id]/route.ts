@@ -4,6 +4,7 @@ import { isUuid, json } from '@/lib/platforms/route';
 import { DEVICE_PIECE, LIBRARY_PIECE, pieceAt } from '@/lib/platforms/test-rules';
 import { fbAdvance, fbPhotoStep, fbRemove, fbUploaded } from '@/lib/platforms/test-facebook';
 import { igAdvance, igRemove, igUploaded } from '@/lib/platforms/test-instagram';
+import { snRemove, snStatsStep, snUploaded } from '@/lib/platforms/test-snapchat';
 import { ttAdvance, ttRemove, ttUploaded } from '@/lib/platforms/test-tiktok';
 import { dbCode, giveUp, libraryPiece, refuse, testInfo, youtubeToken } from '@/lib/platforms/test-server';
 import { youtubeDelete, youtubeSendPiece } from '@/lib/platforms/youtube';
@@ -14,6 +15,8 @@ export const maxDuration = 60;
 // The rest of «تجربة النشر» (MVP_draft.md sections 71 to 73).
 //   POST          Instagram, a Facebook Reel and TikTok: {step: 'uploaded', ref, ...} once a device file is in Drive, then
 //                 {step: 'advance'} each time the page asks how Meta is getting on (test-instagram.ts, test-facebook.ts).
+//                 Snapchat: {step: 'uploaded', ref} once a device file is in Drive (the post is sent then), and {step: 'stats'} to read
+//                 the numbers Snap has for a Spotlight the test posted (test-snapchat.ts).
 //   PUT           a Facebook photo: the page's form with the JPEG and its words, at most 4 MB, passed to Meta as a file.
 //   PUT ?from=N   YouTube:   one piece of the file, relayed to the upload the server opened: the page's bytes for a file from its
 //                 device (each piece exactly the agreed size, so YouTube gets 256 KiB multiples), or a piece the server
@@ -29,7 +32,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const db = await serverClient();
   const t = await testInfo(db, id);
   if (!t || !t.mine) return refuse('FORBIDDEN');
-  if (!b || (t.platform !== 'instagram' && t.platform !== 'facebook' && t.platform !== 'tiktok')) return refuse('TEST_INVALID');
+  if (!b || (t.platform !== 'instagram' && t.platform !== 'facebook' && t.platform !== 'tiktok' && t.platform !== 'snapchat')) return refuse('TEST_INVALID');
+  if (t.platform === 'snapchat') {
+    if (b.step === 'uploaded') return snUploaded(db, t, b, g.account.email);
+    if (b.step === 'stats') return snStatsStep(db, t);
+    return refuse('TEST_INVALID');
+  }
   if (t.platform === 'tiktok') {
     if (b.step === 'uploaded') return ttUploaded(request, db, t, b, g.account.email);
     if (b.step === 'advance') return ttAdvance(db, t);
@@ -106,6 +114,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   if (t.platform === 'instagram') return igRemove(db, t);
   if (t.platform === 'facebook') return fbRemove(db, t);
   if (t.platform === 'tiktok') return ttRemove(db, t);
+  if (t.platform === 'snapchat') return snRemove(db, t);
 
   if (t.state === 'uploading') {
     if (!t.mine) return refuse('FORBIDDEN');

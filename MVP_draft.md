@@ -4642,3 +4642,28 @@ The owner saw the guide drawn as the old step sheet and asked for the layout the
   unknown: the site says «رفضت Snap قراءة الملف العام…» if it is refused. The guide says so (the step's note and the guide's notes), and says it is not a reason to wait.
 - **Checks.** `tests/guide-layout.test.mjs` (7) holds the parts, where each picture, copy and key field falls, and the picture count (10); `qa/snapchat-flow.cjs` (29) clicks through the page on the fixture;
   `qa/platforms-flow.cjs` (170) is unchanged.
+
+## 85. «تجربة النشر» on Snapchat, 2026-11-26
+
+By the owner's directive of 2026-11-26, after the connection (84): a person who has connected a Snapchat account can test it from its sheet in «حسابات المنصات», like the other platforms: post, read what can be read,
+and delete after so nothing is left. The contract is `Snapchat_Test_Plan.md`. **Snap's Public Profile API is allowlist only, so nothing in this section has met a real Snap answer.** The shapes come from Snap's documentation as
+read on 2026-11-26 (`developers.snap.com/marketing-api/Public-Profile-API`, pages undated): the delete and metric names were checked by hand against the pages, the rest from a reading of them.
+
+- **What Snap's API can do.** Post a Story, a Saved Story or a Spotlight; read Stories, Saved Stories and Spotlights and their numbers (views, viewers, shares, screenshots, subscribers); delete a Saved Story or a Spotlight.
+  A Story has no delete endpoint and no id in Snap's answer: it ends by itself, after 24 hours by default. The numbers «usually synchronize after 24 hours» and reach back 90 days; there is no reach and no completion rate.
+  Group messages (a separate allowlist), partnership roles, earnings and Lenses exist and are not built here, nor are Saved Stories, picture Stories, links and captions on a post.
+- **Four choices** in the account's sheet, the first the default. «فحص الحساب بلا نشر» reads the Public Profile and its subscriber count, counts its latest Spotlights and Stories, and reads its lifetime numbers: no row, no file,
+  no long press. «فحص صامت» schedules a Spotlight 14 days ahead (Snap's `go_live_timestamp`, up to 30 days), reads it back and deletes it at once, in one request: recorded published, then deleted; if Snap refuses the delete it stays
+  published and the list offers the delete. **That Snap shows a scheduled Spotlight to nobody before its time is read from one line of its documentation and is not proven**; the panel says so. «سبوتلايت» posts one now, public,
+  with a long press, and «حذف» deletes it afterwards. «قصة» posts a Story now, with a long press, and the panel says before and after that it cannot be deleted and ends by itself.
+- **The file.** One mp4 video of at most 30 MiB (5 to 300 seconds, Snap's), from the library or the device. The server reads it (the library at the version the test began with, or the device's temporary Drive copy, as Instagram's and
+  TikTok's tests do), encrypts it with AES-256-CBC as Snap asks, creates the media, sends the one part, finalizes, and posts. The key and iv are worked out from the server key and the test's id (`snKeys`): never stored,
+  never returned, never in a page, a URL or a log. The page holds no Snap address and no token. A path Snap names for the upload is accepted only if it has the upload's own shape, under Snap's fixed address.
+- **Who and how often** are the database's, as for the others (`platform_test_may` accepts a Snapchat account; the same daily cap). The kinds are `snap_silent`, `snap_spotlight` and `snap_story` of the platform-test engine
+  (`supabase/migrations/20261126180000_platform_tests_snapchat.sql`); a Snap test is a test only (no «نشر مباشر»), and publishing works stays a simulation.
+- **The server half** is `src/lib/platforms/snapchat.ts` (Snap's calls and their errors as short codes), `snapchat-flow.ts` (the flow, free of Drive and the vault, so the tests run it against a fake Snap and a fake database) and
+  `test-snapchat.ts` (the token, the wiring, the routes' answers). The refusals have words (`TEST_ERROR_AR`, the `SN_` codes), and Snap's own code and request id follow a failure as a short line, never a message or a body.
+- **Checks.** `supabase/tests/platform_tests_snapchat_rules.sql` 173 of 173 on a private database (`qa/platform-tests-snapchat-rules.json`) with the eight older platform-test rule files unchanged; `tests/snapchat-test.test.mjs` 18;
+  `qa/snapchat-test-flow.cjs` 82 on a fixture. **The migration is not applied to comms-hub**: it is run in the SQL editor by the owner, and stops without changing anything if the platform-test functions are not the TikTok-era ones.
+- **Not known until the first real try, and the panel says so where it matters:** what Snap answers to each call for an app it has not allowed (the connection's `ACCESS_NOT_GRANTED` is the guess for a 403); whether a scheduled
+  Spotlight is hidden until its time; whether `en_US` is accepted as the description's locale for Arabic text; whether Snap accepts a single part under 32 MB with the padding; the real shape of the profile, list and stats answers.

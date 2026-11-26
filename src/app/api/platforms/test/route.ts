@@ -13,6 +13,7 @@ import {
 } from '@/lib/platforms/test-rules';
 import { fbStart } from '@/lib/platforms/test-facebook';
 import { igStart } from '@/lib/platforms/test-instagram';
+import { snStart } from '@/lib/platforms/test-snapchat';
 import { ttStart } from '@/lib/platforms/test-tiktok';
 import { dbCode, giveUp, refuse, testInfo, youtubeToken } from '@/lib/platforms/test-server';
 import { youtubeOpenUpload } from '@/lib/platforms/youtube';
@@ -23,7 +24,8 @@ export const maxDuration = 60;
 // Step 1 of «تجربة النشر» (MVP_draft.md sections 71 to 73). The database decides who may test this account and records
 // the test. For YouTube the server asks that the account's token still owns its channel, opens the upload there and keeps
 // its address; the page gets the test's id and the size of the pieces to send, never a token or an address. Instagram's
-// steps are in src/lib/platforms/test-instagram.ts, a Facebook Page's in test-facebook.ts, a TikTok account's in test-tiktok.ts. A library file is named by its
+// steps are in src/lib/platforms/test-instagram.ts, a Facebook Page's in test-facebook.ts, a TikTok account's in test-tiktok.ts, a Snapchat
+// Public Profile's (its read-only check too) in test-snapchat.ts. A library file is named by its
 // id, and its size and type are read under the person's own row level security.
 export async function POST(request: Request) {
   const g = await guard(request, { mutating: true });
@@ -34,6 +36,7 @@ export async function POST(request: Request) {
   if (account?.platform === 'instagram') return igStart(request, await serverClient(), b, g.account.email);
   if (account?.platform === 'facebook') return fbStart(request, await serverClient(), b, g.account.email);
   if (account?.platform === 'tiktok') return ttStart(request, await serverClient(), b, g.account.email);
+  if (account?.platform === 'snapchat') return snStart(request, await serverClient(), b, g.account.email);
   if (
     (b.privacy !== 'private' && b.privacy !== 'public' && b.privacy !== 'unlisted') ||
     typeof b.title !== 'string' ||

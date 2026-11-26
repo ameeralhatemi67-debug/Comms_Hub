@@ -62,6 +62,12 @@ export const HOLD = {
   ttTestPost: 'يُنشر المقطع على الحساب في TikTok فوراً، ولا يحذفه الموقع: يُحذف من تطبيق TikTok.',
   /** «نشر مباشر» on TikTok: outside the work cycle, and only TikTok's app can delete it. */
   directTikTok: 'يُنشر على الحساب في TikTok الآن، خارج دورة العمل، ويُبلَّغ ناشرو الحساب. لا يحذفه الموقع: يُحذف من تطبيق TikTok.',
+  /** «حسابات المنصات»: a public Spotlight test on a Snapchat account (Snapchat_Test_Plan.md). The account check and the silent check need none. */
+  snTestSpotlight: 'يراه كل من يزور الملف العام على Snapchat وفي Spotlight فور نشره. يمكن حذفه من القائمة بعد ذلك.',
+  /** «حسابات المنصات»: a Snapchat test Story, which cannot be deleted. */
+  snTestStory: 'يراها متابعو الحساب 24 ساعة، ولا يمكن حذفها: تنتهي وحدها.',
+  /** «حسابات المنصات»: delete a Spotlight test from Snapchat. */
+  snTestDelete: 'يُحذف السبوتلايت من الملف العام على Snapchat نهائياً، ولا يُسترجع.',
   // Permissions (Permissions_Plan.md 10, «New hold buttons»).
   /** «الحسابات»: remove a member. */
   removeMember: 'إزالة العضو تفصله عن المركز وتبقي أعماله لدى من يُسند إليه.',

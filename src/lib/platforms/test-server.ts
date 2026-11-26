@@ -14,7 +14,7 @@ import { openStored } from '../storage/index.ts';
 export type TestInfo = {
   id: string;
   account: string;
-  /** The account's platform: 'youtube', 'instagram', 'facebook' or 'tiktok'. */
+  /** The account's platform: 'youtube', 'instagram', 'facebook', 'tiktok' or 'snapchat'. */
   platform: string;
   integration: string | null;
   external_id: string | null;
@@ -26,6 +26,8 @@ export type TestInfo = {
   scheduled_for?: string | null;
   fired?: boolean;
   kind: string;
+  /** The test's title: for a Snapchat Spotlight, its description. */
+  title?: string;
   size: number;
   mime: string;
   source: 'device' | 'library';
@@ -46,7 +48,7 @@ export type TestInfo = {
 /** The short code a database refusal carries («FORBIDDEN», «TEST_LIMIT», ...). */
 export const dbCode = (message: string | null | undefined) => /\b([A-Z][A-Z_]{3,39})\b/.exec(message ?? '')?.[1] ?? 'PLATFORM_ERROR';
 
-const STATUS: Record<string, number> = { FIRING: 409, FORBIDDEN: 403, TEST_INVALID: 400, SCHEDULE_INVALID: 400, DIRECT_LIMIT: 429, TEST_LIMIT: 429, UPLOAD_LIMIT: 429, NOT_CONNECTED: 409, ACCOUNT_OFF: 409, UPLOAD_EXPIRED: 410, SCOPE_MISSING: 403 };
+const STATUS: Record<string, number> = { FIRING: 409, FORBIDDEN: 403, TEST_INVALID: 400, SCHEDULE_INVALID: 400, DIRECT_LIMIT: 429, TEST_LIMIT: 429, UPLOAD_LIMIT: 429, NOT_CONNECTED: 409, ACCOUNT_OFF: 409, UPLOAD_EXPIRED: 410, SCOPE_MISSING: 403, ACCESS_NOT_GRANTED: 403, SN_NO_DELETE: 409, SN_STATS_UNAVAILABLE: 404 };
 /** A short code another service gave (Drive's «DRIVE_403»), safe to show: never a message or a body. */
 export const detailOf = (e: unknown): string => {
   const m = e instanceof Error ? e.message : '';

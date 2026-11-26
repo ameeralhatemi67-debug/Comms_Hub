@@ -308,6 +308,25 @@ A test on TikTok is real too, and so is «نشر مباشر» to TikTok, by owne
 - The server half is `src/lib/platforms/tiktok.ts` and `test-tiktok.ts`. The rules are held by
   `supabase/tests/platform_tests_tiktok_rules.sql`, `tests/tiktok-test.test.mjs` and `qa/tiktok-test-flow.cjs`.
 
+A test on Snapchat is real too, by owner directive of 2026-11-26 (`MVP_draft.md` section 85, `Snapchat_Test_Plan.md`), from
+`src/components/work/snapchat-test.tsx`. **Snap's Public Profile API is allowlist only, so none of it has met a real Snap answer:** the
+shapes come from its documentation of 2026-11-26, and the panel and the guide say so.
+- **Four choices.** A read-only check (the default: the Public Profile, its subscriber count, its latest Spotlights and Stories, its
+  lifetime numbers; no row, no file), a silent check (a Spotlight scheduled 14 days ahead, read back, deleted at once, in one request;
+  that Snap shows a scheduled Spotlight to nobody before its time is read from one line of its documentation and is **not proven**, and the
+  words say so), a Spotlight posted now (long press, deletable) and a Story posted now (long press).
+- **A Story cannot be deleted.** Snap has no delete endpoint for one: it ends after 24 hours. Never offer a delete for it, never imply
+  one, and say so before and after. A Story has no id in Snap's answer, so its test is recorded without one.
+- **The file is encrypted for Snap by the server.** One mp4 video of at most 30 MiB, read by the server from the library or from the device's
+  temporary Drive copy, encrypted with AES-256-CBC, sent as one part. The key is worked out from the server key and the test's id
+  (`snKeys`): never stored, never returned, never in a page, a URL or a log. The page holds no Snap address and no token.
+- **Numbers come late.** Snap's stats "usually synchronize after 24 hours" and reach back 90 days, so a test deleted at once has none. The
+  page says so beside every number and never shows an empty answer as zeros.
+- The server half is `src/lib/platforms/snapchat.ts` (Snap's calls), `snapchat-flow.ts` (the flow, free of Drive and the vault so the
+  tests run it against a fake Snap and a fake database) and `test-snapchat.ts` (the wiring). The kinds are `snap_silent`,
+  `snap_spotlight` and `snap_story` of the platform-test engine (`supabase/migrations/*platform_tests_snapchat*`). The rules are held by
+  `supabase/tests/platform_tests_snapchat_rules.sql`, `tests/snapchat-test.test.mjs` and `qa/snapchat-test-flow.cjs`.
+
 «إعادة ضبط» of a platform (`platform_app_reset`, `MVP_draft.md` 79.4) forgets its app's secret, a waiting sign-in and the saved steps,
 and switches the platform off. It is refused while an account still holds a token of the app, and for YouTube, whose Google app is
 also the library's Drive.

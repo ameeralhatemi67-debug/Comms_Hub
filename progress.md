@@ -4816,3 +4816,28 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     action 2 of `form`, the keys under actions 2 and 3 with the secret as a password, the allowlist text under action 1 and the three review buttons, English isolated, a phone, the evening, no page error);
     `qa/platforms-flow.cjs` 170 of 170.
 - **Not checked.** The signed-in sheet on the live site (no bypass is allowed); Snap's real API and what it answers an app that is not allowed; nothing was committed or pushed in this entry.
+
+### 2026-11-26: «تجربة النشر» on Snapchat
+
+- **The request.** After the guide was moved to one page, the owner asked what Snap's API can post, read and delete, and then that a person who connected a Snapchat account can test it from its sheet like the other
+  platforms (post, read the numbers, delete after so nothing is left). Snap's Public Profile API was re-read on 2026-11-26 (`Snapchat_Test_Plan.md` 1); the delete and metric claims were checked by hand against the pages.
+- **What was found, and what it changed.** Snap has no delete for a Story (it ends after 24 hours) and gives a Story no id in its answer, so a Story test cannot be cleaned and is recorded without an id; a Spotlight can
+  be deleted. Its numbers arrive about a day late and reach back 90 days, so a post deleted at once has none. The whole API is allowlist only. The silent check (a Spotlight scheduled ahead, read back, deleted at once) rests
+  on one line of Snap's documentation that a scheduled Spotlight is shown to nobody before its time: **not proven**, and the panel and the spec say so.
+- **Built.** The contract (`Snapchat_Test_Plan.md`); the Snap client with the AES-256-CBC encryption Snap asks for and a media key worked out from the server key and the test id (`snapchat.ts`); the flow free of Drive
+  and the vault (`snapchat-flow.ts`); the wiring and the two routes (`test-snapchat.ts`); the shared rules and Arabic words (`test-rules.ts`); the migration `20261126180000_platform_tests_snapchat.sql` (three kinds, an MP4 of at
+  most 30 MiB, a Story that may have no id, the silent check's time, `snapchat` accepted by `platform_test_may`); the panel (`snapchat-test.tsx`) mounted in the account's sheet; three hold reasons. The platform lists in the
+  banner of «حسابات المنصات» and in its help now name Snapchat.
+- **Checks run.**
+  - `supabase/tests/platform_tests_snapchat_rules.sql` 173 of 173 on a private Docker database with all 80 migrations replayed (run by the helper, and again by me: 173 of 173); the helper's mutation check (three broken copies of the migration) made
+    3, 7 and 4 checks fail. The eight existing rule files still pass with their old counts, run by the helper before and after: `platform_tests` 95, instagram 62, facebook 48, tiktok 46, error detail 13, `direct_publish` 45,
+    `direct_schedule` 69, `work_youtube_choices` 36. The migration applied several times in a row and on a fresh replay with no error.
+  - `tests/snapchat-test.test.mjs` 18 of 18 (a fake Snap and a fake database: the encrypted part decrypts to the file with the key Snap was told, the silent check's order of calls and its refused delete, a read-back that does not match,
+    each refusal as a code with words, the rules and their parity with the migration, and the safety rules held by the sources); `npm test` 1034 of 1034 (the hold-reason test needed the new panel on its list of components).
+  - `qa/snapchat-test-flow.cjs` 82 of 82 in Edge on a fixture, with real H.264 clips of 3, 10 and 301 seconds made by the repo's FFmpeg for the length checks; I read the screenshots of the silent check and the Story. Older flows
+    unchanged: `qa/snapchat-flow.cjs` 29, `qa/platforms-flow.cjs` 170, TikTok 50, Facebook 37, Instagram 43, YouTube 68. `npm run typecheck` and `npm run build` pass.
+- **Found while checking.** My own fake Snap let a default route answer before an override, which hid two failing cases until the routing was fixed; the panel's description counter read «100 / 14» in right-to-left text and its
+  Spotlight row said «سبوتلايت» twice (both fixed by the panel's builder).
+- **Not checked.** Anything against a real Snap answer, so every shape (the profile, the lists, the stats, the upload paths, the 403 for an app not allowed, `en_US` for an Arabic description, one part under 32 MB with the
+  padding) is the documentation's; the migration on comms-hub (not applied); the signed-in sheet; a real Drive upload of a device file; the long press itself (the fixture reads the reason's text and clicks plainly); whether a
+  30 MiB file fits the route's 60 seconds; whether Snap ever pads a Spotlight id (the pattern would refuse one).

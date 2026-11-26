@@ -252,12 +252,22 @@ export const TEST_ERROR_AR: Record<string, string> = {
   TT_SPAM: 'أوقف TikTok النشر لاشتباهه بإزعاج. انتظر قبل تجربة أخرى.',
   TT_WAIT_TOO_LONG: 'أطال TikTok جلب المقطع وفحصه. ابدأ من جديد بملف أصغر.',
   TT_NO_DELETE: 'لا يسمح TikTok للتطبيقات بحذف منشور. احذفه من تطبيق TikTok نفسه.',
+  // Snapchat (MVP_draft.md section 85)
+  SN_NO_DELETE: 'لا تتيح Snap حذف القصة عبر التطبيقات: تنتهي وحدها بعد 24 ساعة من نشرها.',
+  SN_MEDIA_REFUSED: 'رفضت Snap الملف: تقبل فيديو MP4 من 5 إلى 300 ثانية.',
+  SN_MEDIA_EXPIRED: 'انتهت مهلة الملف عند Snap (24 ساعة). ابدأ التجربة من جديد.',
+  SN_UPLOAD_FAILED: 'تعذّر رفع الملف إلى Snap. أعد المحاولة بعد قليل.',
+  SN_POST_REFUSED: 'رفضت Snap النشر. تأكد أن الملف MP4 وأن التطبيق مسموح له عند Snap.',
+  SN_SILENT_MISMATCH: 'قرأ الفحص من Snap ما لا يطابق ما أنشأه، فلم يُعدّ ناجحاً. حُذف المنشور إن أمكن.',
+  SN_SILENT_NOT_DELETED: 'أنشأ الفحص السبوتلايت المجدول وقرأه، لكن Snap رفضت حذفه. احذفه من هنا أو من تطبيق Snapchat قبل موعده.',
+  SN_STATS_UNAVAILABLE: 'لم تعطِ Snap أرقاماً لهذا المنشور بعد: تصل عادةً بعد نحو يوم من نشره.',
+  SN_TOO_BIG: 'التجربة تقبل مقطعاً حتى 30 ميغابايت.',
 };
 
 // ---------------------------------------------------------------------------
 // Instagram (MVP_draft.md section 72)
 // ---------------------------------------------------------------------------
-export type TestKind = 'video' | 'story_image' | 'story_video' | 'image' | 'reel' | 'fb_silent' | 'fb_text' | 'fb_photo' | 'fb_reel' | 'tt_draft' | 'tt_post';
+export type TestKind = 'video' | 'story_image' | 'story_video' | 'image' | 'reel' | 'fb_silent' | 'fb_text' | 'fb_photo' | 'fb_reel' | 'tt_draft' | 'tt_post' | 'snap_silent' | 'snap_spotlight' | 'snap_story';
 /** What the person chooses; a Story becomes a picture or a video Story by its file. */
 export type IgChoice = 'story' | 'image' | 'reel';
 export const IG_PICTURE_MAX = 8 * 1024 * 1024;
@@ -448,4 +458,54 @@ export function ttLabel(ownBrand: boolean, branded: boolean): string | null {
   if (branded) return 'سيُوسم المنشور «شراكة مدفوعة».';
   if (ownBrand) return 'سيُوسم المنشور «محتوى ترويجي».';
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Snapchat (MVP_draft.md section 85, Snapchat_Test_Plan.md)
+// ---------------------------------------------------------------------------
+// From Snap's Public Profile API as read on 2026-11-26 (allowlist only, so none of it has met a real answer): a video is .mp4 of 5 to 300 seconds,
+// encrypted with AES-256-CBC before it is uploaded in parts of at most 32 MB; a Story ends after 24 hours and has no delete endpoint; a Spotlight can
+// be scheduled up to 30 days ahead and deleted; the numbers arrive about a day late.
+export type SnKind = 'snap_silent' | 'snap_spotlight' | 'snap_story';
+/** What the person chooses: a read-only check (no row, no file) or one of the three kinds. */
+export type SnChoice = 'check' | 'silent' | 'spotlight' | 'story';
+export const SN_KIND: Record<Exclude<SnChoice, 'check'>, SnKind> = { silent: 'snap_silent', spotlight: 'snap_spotlight', story: 'snap_story' };
+export const SN_KIND_AR: Record<string, string> = { snap_silent: 'فحص صامت', snap_spotlight: 'سبوتلايت', snap_story: 'قصة' };
+export const isSnKind = (k: string): k is SnKind => k === 'snap_silent' || k === 'snap_spotlight' || k === 'snap_story';
+/** One part of Snap's multipart upload is at most 32 MB and the encryption adds up to 16 bytes, so a test file is kept well under it. */
+export const SN_VIDEO_MAX = 30 * 1024 * 1024;
+export const SN_VIDEO_TYPE = 'video/mp4';
+export const SN_SECONDS: [number, number] = [5, 300];
+/** The test's title is the table's (100 characters); Snap allows 160 in a Spotlight's description. */
+export const SN_DESCRIPTION_MAX = 100;
+/** The silent check's Spotlight is scheduled this far ahead (Snap allows up to 30 days). */
+export const SN_SILENT_DAYS = 14;
+/** A Story posted with the default time stays this long. */
+export const SN_STORY_HOURS = 24;
+export const SN_SILENT_TITLE = 'فحص صامت من مركز الاتصال';
+export const SN_STORY_TITLE = 'قصة تجربة من مركز الاتصال';
+/** Snap's numbers: «usually synchronize after 24 hours», reaching back 90 days. */
+export const SN_STATS_NOTE = 'تصل أرقام Snap عادةً بعد نحو يوم من النشر، وتعود إلى 90 يوماً. منشور حُذف فوراً لا أرقام له.';
+
+/** What is wrong with a Snapchat test before it is sent, in words, or null. The database checks the same and more. */
+export function snProblem(t: { kind: string; size?: number | null; mime?: string | null; description: string; seconds?: number | null }): string | null {
+  if (!isSnKind(t.kind)) return 'بيانات التجربة ناقصة أو غير صالحة.';
+  if (t.mime !== SN_VIDEO_TYPE) return 'تقبل Snap هنا الفيديو MP4.';
+  if (!t.size || t.size < 1) return 'الملف فارغ.';
+  if (t.size > SN_VIDEO_MAX) return TEST_ERROR_AR.SN_TOO_BIG;
+  if (t.seconds != null && t.seconds < SN_SECONDS[0]) return 'المقطع أقصر من 5 ثوانٍ.';
+  if (t.seconds != null && t.seconds > SN_SECONDS[1]) return 'المقطع أطول من 5 دقائق.';
+  if (t.kind === 'snap_spotlight') {
+    if ([...t.description].length > SN_DESCRIPTION_MAX) return `الوصف أطول من ${SN_DESCRIPTION_MAX} حرف.`;
+    if (/[<>]/.test(t.description)) return 'الوصف لا يحمل < أو >.';
+  }
+  return null;
+}
+
+/** The list's title for a Snapchat test: the Spotlight's description, else the kind's own words. Never holds < or >. */
+export function snTitle(kind: TestKind, description: string): string {
+  if (kind === 'snap_silent') return SN_SILENT_TITLE;
+  if (kind === 'snap_story') return SN_STORY_TITLE;
+  const line = description.split(/\r?\n/).find((l) => l.trim())?.trim().replace(/[<>]/g, '') ?? '';
+  return [...line].slice(0, SN_DESCRIPTION_MAX).join('') || 'تجربة سبوتلايت من مركز الاتصال';
 }

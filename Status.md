@@ -33,9 +33,12 @@ related:
   («Success»). Database rules 37 of 37 on a private database.
 - **Since then, committed (`50abb9b`) and pushed with the owner's yes on 2026-11-26** (`MVP_draft.md` 84.1): the guide is drawn as one page like YouTube's, Instagram's and TikTok's (`WHOLE_GUIDES`), in three parts. Unit tests 1016 of 1016,
   `qa/snapchat-flow.cjs` 29 of 29, `qa/platforms-flow.cjs` 170 of 170, typecheck and build pass. The push (`f8f8922..5ddbd95`) also carried another session's `2ceb1a4` (X's link route).
-- **Not built yet: a «تجربة النشر» for Snapchat.** Snap's Public Profile API (read 2026-11-26) posts Stories, Saved Stories and Spotlights, deletes only Saved Stories and Spotlights (a Story expires), and reads stats
-  (views, viewers, shares, screenshots, subscribers; about a day late, 90 days back). All of it is allowlist-only, so none of it can be tried for real before Snap approves the client id.
-- **The owner's steps, in order:** make a new Snap OAuth app (the first one's secret was shown in a picture sent to a chat); add Snapchat from «إضافة منصة» and enter the client id and secret in its keys step;
+- **«تجربة النشر» for Snapchat: built and checked, committed locally, not pushed** (`MVP_draft.md` section 85, `Snapchat_Test_Plan.md`). In the Snapchat account's sheet: a read-only check (the profile, its
+  subscribers, its latest Spotlights and Stories, its lifetime numbers), a silent check (a Spotlight scheduled 14 days ahead, read back and deleted at once), a Spotlight and a Story (each with a long press). A Spotlight can be
+  deleted afterwards and its numbers read; **a Story cannot be deleted, Snap has no way: it ends by itself after 24 hours**, and the panel says so. Snap's numbers come about a day late. Database rules 173 of 173 on a private
+  database with the other eight platform-test rule files unchanged, unit tests 1034 of 1034 (the new file has 18), browser checks 82 of 82 for the panel and the older platform flows unchanged, typecheck and build pass.
+  **Nothing has met a real Snap answer** (the API is allowlist only), the migration is **not applied** to comms-hub, and the signed-in sheet is unchecked.
+- **The owner's steps, in order:** run `supabase/migrations/20261126180000_platform_tests_snapchat.sql` in the SQL editor of **comms-hub** (it can be run twice; it stops without changing anything if the platform-test functions are not the ones it was written against); make a new Snap OAuth app (the first one's secret was shown in a picture sent to a chat); add Snapchat from «إضافة منصة» and enter the client id and secret in its keys step;
   connect from «حسابات المنصات». The allowlist message is sent by the owner, never by the site; the connection can be tried before Snap answers.
 - **Unknown until that first connection:** what Snap answers an app it has not allowed. The consent screen worked without the allowlist; the call that reads the profile may be refused (`ACCESS_NOT_GRANTED`).
   The allowlist request (the text is in the last step of the guide) still needs a Snap contact.
