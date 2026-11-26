@@ -33,10 +33,10 @@ related:
   check of the live table on 2026-11-26 shows three test uploads of kind video, each now «deleted», and a row reaches «deleted» only after YouTube accepted the delete). Instagram and Facebook have no recorded post and wait on Meta's
   «App not active». **Unexplained:** that table holds only those three rows, so TikTok's tests of 2026-11-15 are not in it (perhaps removed with an account).
 - **Fixed:** a scheduled Instagram post that Meta published but the site could not record is no longer filed as a Meta failure (it is retried, then closed as `PUBLISHED_UNRECORDED`, never re-sent): code and tests done, the
-  notice's wording is in `20261126200000_direct_published_unrecorded.sql`, **not applied to comms-hub**; documents and words that disagreed with the code; the YouTube connect guide explains a week-old connection that ends.
+  notice's wording is in `20261126200000_direct_published_unrecorded.sql`, applied to comms-hub, confirmed 2026-11-26; documents and words that disagreed with the code; the YouTube connect guide explains a week-old connection that ends.
 - **Left on purpose** (`Live_Publish_Plan.md` 3): re-checking approvals when a post is claimed, truthful log labels, the real firing's identity, and never losing the platform's id. They are requirements for the day a work posts
   for real, not defects of the simulation; the advice on how to build that, and which platform first (YouTube), is in the same file and is **not a decision**.
-- **The owner's checks:** run `qa/sql/check-platform-health.sql` in the SQL editor of comms-hub (read only: which migrations are applied, which accounts are connected); one private YouTube test and a delete on «Hedayh»; the
+- **The owner's checks:** `qa/sql/check-platform-health.sql` was run on comms-hub: all 15 migration checks true; its account query (B2) is still unseen; one private YouTube test and a delete on «Hedayh»; the
   Google consent screen's status (**«Testing» ends the connection after 7 days**); the Meta developer account's confirmation; the bridge computer's hours.
 - Unpushed: this work is committed locally; nothing is pushed.
 
@@ -51,7 +51,7 @@ related:
   subscribers, its latest Spotlights and Stories, its lifetime numbers), a silent check (a Spotlight scheduled 14 days ahead, read back and deleted at once), a Spotlight and a Story (each with a long press). A Spotlight can be
   deleted afterwards and its numbers read; **a Story cannot be deleted, Snap has no way: it ends by itself after 24 hours**, and the panel says so. Snap's numbers come about a day late. Database rules 173 of 173 on a private
   database with the other eight platform-test rule files unchanged, unit tests 1034 of 1034 (the new file has 18), browser checks 82 of 82 for the panel and the older platform flows unchanged, typecheck and build pass.
-  **Nothing has met a real Snap answer** (the API is allowlist only), the migration is **not applied** to comms-hub, and the signed-in sheet is unchecked.
+  **Nothing has met a real Snap answer** (the API is allowlist only) and the signed-in sheet is unchecked. Its migration is applied to comms-hub (confirmed 2026-11-26 by the owner's run of `qa/sql/check-platform-health.sql`: 15 of 15 true).
 - **The owner's steps, in order:** run `supabase/migrations/20261126180000_platform_tests_snapchat.sql` in the SQL editor of **comms-hub** (it can be run twice; it stops without changing anything if the platform-test functions are not the ones it was written against); make a new Snap OAuth app (the first one's secret was shown in a picture sent to a chat); add Snapchat from «إضافة منصة» and enter the client id and secret in its keys step;
   connect from «حسابات المنصات». The allowlist message is sent by the owner, never by the site; the connection can be tried before Snap answers.
 - **Unknown until that first connection:** what Snap answers an app it has not allowed. The consent screen worked without the allowlist; the call that reads the profile may be refused (`ACCESS_NOT_GRANTED`).

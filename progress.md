@@ -4875,3 +4875,8 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
     the delete. This corrects the earlier finding that no real YouTube upload was recorded (the health check's entry above), and it settles the owner's first cheap check except for which visibility choices the three used.
   - **Unexplained:** the table holds no other row, so TikTok's tests of 2026-11-15 (a draft and a private post, `tt_draft` and `tt_post`) are not in it. A test row goes when its account is deleted; whether that happened is not known.
 - **Not seen.** Parts A, B1 and B2 of the check.
+
+### 2026-11-26 (last): Part A of the live check, run by the owner
+
+- Part A of `qa/sql/check-platform-health.sql` on comms-hub (project ref hrghmioxvgkjpnydrxrk, production): **15 of 15 true**, including «tests of Snapchat (20261126180000)» and «a post Meta published but the site could not record says so (20261126200000)». Both migrations
+  are applied. Parts B1 and B2 (which platforms are on, which accounts are connected) are still unseen.
