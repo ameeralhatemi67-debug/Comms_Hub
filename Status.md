@@ -29,8 +29,9 @@ related:
 ## Health check of the platform connections and its fixes, 2026-11-26
 
 - **Where things stand** (`Live_Publish_Plan.md` 1): every platform has a connection, but **nothing is posted for real from the work cycle**: publishing a work only records a result in the database. Real posts exist in
-  «تجربة النشر» (YouTube, Instagram, Facebook, TikTok, Snapchat) and in «نشر مباشر» (YouTube, Instagram, TikTok; the Admin and the director), and X's link route has a person post by hand. Proven against a real platform: only
-  TikTok's sandbox. No real YouTube, Instagram or Facebook post is recorded; Instagram and Facebook wait on Meta's «App not active».
+  «تجربة النشر» (YouTube, Instagram, Facebook, TikTok, Snapchat) and in «نشر مباشر» (YouTube, Instagram, TikTok; the Admin and the director), and X's link route has a person post by hand. Proven against a real platform: TikTok's sandbox (2026-11-15), and YouTube (the owner's
+  check of the live table on 2026-11-26 shows three test uploads of kind video, each now «deleted», and a row reaches «deleted» only after YouTube accepted the delete). Instagram and Facebook have no recorded post and wait on Meta's
+  «App not active». **Unexplained:** that table holds only those three rows, so TikTok's tests of 2026-11-15 are not in it (perhaps removed with an account).
 - **Fixed:** a scheduled Instagram post that Meta published but the site could not record is no longer filed as a Meta failure (it is retried, then closed as `PUBLISHED_UNRECORDED`, never re-sent): code and tests done, the
   notice's wording is in `20261126200000_direct_published_unrecorded.sql`, **not applied to comms-hub**; documents and words that disagreed with the code; the YouTube connect guide explains a week-old connection that ends.
 - **Left on purpose** (`Live_Publish_Plan.md` 3): re-checking approvals when a post is claimed, truthful log labels, the real firing's identity, and never losing the platform's id. They are requirements for the day a work posts

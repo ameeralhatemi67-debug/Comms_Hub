@@ -4865,3 +4865,13 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
   - `npm test` 1035 of 1035; `qa/platforms-flow.cjs` 170, `snapchat-flow` 29, `snapchat-test-flow` 82, `direct-publish-flow` 59, `instagram-test-flow` 43, all passing; typecheck and build pass.
 - **Not checked.** The live database: this session's Supabase connector reaches two other projects and not comms-hub, so none was read (run the script above); anything signed in; whether the owner's Google app is in «Testing»; the bridge computer's hours;
   Instagram's real behaviour (the fix is proven against a fake Meta that answers as the documentation says).
+
+### 2026-11-26 (later): what the owner's run of the two migrations and the check showed
+
+- **The owner's screenshots, in the SQL editor of the project «comms-hub» (main, production).**
+  - `20261126200000_direct_published_unrecorded.sql`: «Success. No rows returned.» It is applied (its guard looks for tables only the Hub has, so it also shows the right project this time).
+  - `20261126180000_platform_tests_snapchat.sql`: only the editor with the file's last lines was shown, **no result**, so it is **not confirmed applied**. Part A of `qa/sql/check-platform-health.sql` (fifteen lines of true or false) says.
+  - Part B3 of the check: one row, kind `video`, purpose `test`, state `deleted`, 3 rows, last created 2026-11-26. So the live table holds three YouTube test uploads, each deleted; a row reaches `deleted` only after YouTube accepted
+    the delete. This corrects the earlier finding that no real YouTube upload was recorded (the health check's entry above), and it settles the owner's first cheap check except for which visibility choices the three used.
+  - **Unexplained:** the table holds no other row, so TikTok's tests of 2026-11-15 (a draft and a private post, `tt_draft` and `tt_post`) are not in it. A test row goes when its account is deleted; whether that happened is not known.
+- **Not seen.** Parts A, B1 and B2 of the check.

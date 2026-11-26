@@ -15,7 +15,9 @@ code where they matter; the assumptions it could not check are marked.
 - **The one non-simulated outcome in the cycle** is X's link route: the account waits (`pending`), the work is «جارٍ النشر», a person posts on X by hand
   and pastes the post's link, and `work_link_confirm` accepts only a post of that account's own handle, once.
 - **Proven against a real platform, signed in:** TikTok on its sandbox (a draft reached the inbox, a private post went out, a public post was refused
-  because the app is unaudited), 2026-11-15. No real upload to YouTube, Instagram or Facebook is recorded. Instagram and Facebook are blocked by Meta's
+  because the app is unaudited), 2026-11-15; and **YouTube**: the owner's read of the live `platform_tests` table on 2026-11-26 shows three rows of kind `video`,
+  purpose `test`, state `deleted`, last created that day (a row reaches `deleted` only after YouTube accepted the delete, so the upload and the delete both worked). That table holds
+  no other row, so TikTok's tests are not in it (unexplained). No real post to Instagram or Facebook is recorded. Instagram and Facebook are blocked by Meta's
   «App not active» (the owner's developer account needs confirmation). Snapchat's API is allowlist only. LinkedIn and X's API route were never
   connected for real.
 
@@ -65,8 +67,8 @@ These are not defects while publishing is a simulation. They are required the da
 
 ## 6. Cheap things to settle first (all the owner's, all possible with the existing panels)
 
-- Run one private YouTube test on «Hedayh» signed in, then delete it (the channel needs one reconnect for delete). Then an unlisted and a scheduled test:
-  does an unaudited app keep them?
+- YouTube: a private upload and its delete are shown by the live table (3 tests, all deleted, 2026-11-26). Still open: an unlisted and a scheduled test, to see whether an
+  unaudited app keeps them (the table does not say which choices those three used).
 - Look at the Google consent screen's status: «Testing» ends the connection after 7 days (assumption: not checked for the owner's app).
 - How many hours a day the bridge computer is on, and whether `MAIL_SERVER_KEY` is set in production (assumptions).
 - The Meta developer account's confirmation, and TikTok's audit.
