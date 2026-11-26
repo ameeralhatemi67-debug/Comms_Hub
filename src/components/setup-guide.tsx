@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { CircleAlert } from 'lucide-react';
 import { GUIDES, resolveGuide, type Guide } from '@/lib/setup-guides';
 import { GuideInfo, GuideShots, GuideTables, GuideTodo, Rich } from './guide-text';
+import { GuideTool } from './guide-tool';
 import { Modal } from './ui';
 
 export function SetupGuide({
@@ -70,6 +71,7 @@ export function SetupGuide({
                     </bdi>
                   )}
                   {s.shots && s.shots.length > 0 && <GuideShots shots={s.shots} />}
+                  {s.tool && <GuideTool tool={s.tool} />}
                   {s.link && (
                     <a className="su-link" href={s.link.href} target="_blank" rel="noopener noreferrer">
                       <Rich text={s.link.label} />

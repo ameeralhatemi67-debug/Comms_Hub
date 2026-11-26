@@ -4542,3 +4542,33 @@ was (its guide, `connect_x`, the keys step) and is not built for publishing yet;
   files unchanged; `tests/x-link.test.mjs`; `qa/x-link-flow.cjs` clicks through the real dialogs on a fixture.
 - **Applying it.** The migration `20261125120000_work_cycle_x_link_route.sql` is run in the SQL editor of comms-hub. Until then the pages
   behave as before, and «بالرابط» on «إضافة حساب» answers that the database needs updating.
+
+## 82. X's cost calculator, 2026-11-26
+
+By the owner's request of 2026-11-26, so that the director can see what X's paid API would cost for a month, a few months or a year, and what an account can do through it. It decides nothing and
+sends nothing. Publishing to X by the API is not built; the link route (section 81) is free and stays the working one.
+
+- **Where.** A button «حاسبة تكلفة X» at the top of «المنصات», whatever X's state (even before it is set up), opens it in its own sheet. The same calculator is drawn inside the X guide's step
+  «اشحن رصيداً» (`tool: 'x-cost'` on the step, drawn by `src/components/guide-tool.tsx` in the setup sheet, the circled "!" and the one-page guide).
+- **What it asks.** The period (a month, two, three, six, a year, or 1 to 36 months), the number of posts per day, week or month, the share with a link, the share with pictures or video.
+  Folded under «تفاصيل أدق»: pictures per post, the cautious figure for media, deletes a month, connection checks a day, post reads a month. «ابدأ من» sets «هادئ», «معتاد» or «نشط».
+- **What it says.** The total for the period, the month, the day and the average post; one line per kind of cost with a bar and its basis (**سعر معلن**, **تقدير**, **غير مسعّر**); what the
+  links cost as a share of the bill and the bill without them; the free route at $0; the same activity over a month, three months, six and a year; how many days a balance lasts; a monthly
+  spending limit (the month and a fifth, in whole dollars); X's free credits; a folded list of what the API allows with its cost or limit; and what X does not say.
+- **The prices** are X's pay-per-use page (docs.x.com, read 2026-11-26), equal line for line to the developer console as read on 2026-11-03 (`tests/x-cost.test.mjs` holds them equal to the
+  guide's tables): Post: Create $0.015, with URL $0.200, User: Read $0.010, Posts: Read $0.005, Media Metadata $0.005. Money is counted in mills so every sum is exact, and a half cent rounds
+  up in whole numbers.
+- **What X leaves unsaid, and what the calculator takes.** The page defines no «with URL»: every post whose text holds a link is counted at $0.200. It prices no upload of a picture or video:
+  none is counted unless the reader turns on «الرقم الأحوط للوسائط» (one Media Metadata each). It does not say which line a delete falls under (Interaction: Delete $0.010 or Content: Manage
+  $0.005): the higher is taken. Each of these is on the page, with the way to settle it: after the first real post, compare the console's «Usage» with the figure.
+- **Also read on 2026-11-26.** Quote posts are not available in pay-per-use (Enterprise only). Up to 4 pictures, or one GIF, or one video, in a post. 100 posts per 15 minutes per user and
+  10,000 a day per app. Free credits (a page that says it is still rolling out): $20 after a first purchase by an eligible card, and a match of the first automatic recharge up to $50;
+  both expire after 3 months.
+- **Rules and checks.** `src/lib/platforms/x-cost.ts` (pure), `src/components/settings/x-cost.tsx`; `tests/x-cost.test.mjs` (16); `qa/x-cost-flow.cjs` (46) clicks through the button, the figures
+  to the cent (worked out again in that file), a cleared and an out-of-range field, links, a scenario, the cautious figure, the balance, the guide's step, a phone and the evening.
+
+## 82.1 Snapchat, started 2026-11-26
+
+The owner will walk Snapchat on a personal account to give the pictures for a guide like Instagram's. What Snapchat offers, the two routes, and the list of pictures to take are in
+`Snapchat_Plan.md`. In short: the Public Profile API can publish (Story, Saved Story, Spotlight) but is allowlist only, and its OAuth app is made in Ads Manager's Business Details, not the
+Developer Portal; Snap Kit (Login Kit, Creative Kit) can only sign in or hand media to the Snapchat camera. Nothing is built; Snapchat stays «نشر يدوي».

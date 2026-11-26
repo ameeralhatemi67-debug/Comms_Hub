@@ -4727,3 +4727,26 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **TikTok Stories.** The Content Posting API pages read on 2026-11-25 (get started, direct post, upload video, photo post, sharing guidelines) list video and photo posts and the inbox draft, and no Story. Nothing was built; the TikTok panel and the platform note say Stories are published from the TikTok app.
 - **Instagram.** A Story, a picture post and a Reel already exist in «تجربة النشر» and «نشر مباشر» (`instagram-test.tsx`, section 72 and 76); nothing was added. They have not been tried against Meta.
 - **Not checked.** The signed-in pages on the live site; real X; the phone application's «مشاركة» to X.
+
+### 2026-11-26: X's cost calculator, and the start of Snapchat
+
+- **The request.** The owner asked for two things: a calculator that shows the director what X's paid API costs for a month, a few months or a year, and what an account can do through it (posts, pictures,
+  links and more); and a Snapchat connection in the way of Instagram, YouTube and TikTok, walked first on the owner's personal account so the pictures for the guide can be taken. Working tree at `9b16555` plus
+  the changes below, nothing committed; `.claude/launch.json` and `validation/recheck-R01.md` were already modified before this work and are not part of it.
+- **What was read (2026-11-26).** X's pay-per-use pricing, post-cap, event-pricing, free-credits, rate-limits, create-post and media-upload pages; Snap's Public Profile API pages (Introduction, GetStarted, FAQ,
+  ProfileAssetManagement, Profiles, Announcements) and Snap Kit pages (Login Kit overview and web tutorial, Creative Kit overview, developer portal, app review, changelog). Neither site dates its pages.
+  - X's prices agree line for line with the developer console as read on 2026-11-03. X defines no «with URL», prices no media upload, and names no line for a delete or a reply; quote posts are Enterprise only.
+  - Snapchat: only the Public Profile API publishes (Story, Saved Story, Spotlight, with encrypted media upload) and it is allowlist only; its OAuth app is made in Ads Manager's Business Details, not the Developer Portal.
+    Snap Kit signs in or hands media to the Snapchat camera and publishes nothing. One page of the API says it is "read only" while two others document posting: not settled by reading.
+- **X's cost calculator** (`MVP_draft.md` 82). `src/lib/platforms/x-cost.ts` (prices in mills, whole-number rounding), `src/components/settings/x-cost.tsx`, `src/components/guide-tool.tsx`; a button «حاسبة تكلفة X» on
+  «المنصات» and `tool: 'x-cost'` on the X guide's step «اشحن رصيداً» (drawn after the picture, because the step's actions point at it). It says what it assumes where X is silent and takes the cautious side.
+- **Snapchat.** Nothing built. `Snapchat_Plan.md` holds the two routes, the picture list S1 to S7 for the owner, what is built from them, and what is still unknown (whether Snap accepts a self-owned organisation
+  for the allowlist, the review time, the refresh token's life, which token address is right).
+- **Checks run.**
+  - `npm run typecheck` and `npm run build` pass; `npm test` 991 of 991 (the new `tests/x-cost.test.mjs` has 16, and holds X's prices equal to the guide's tables).
+  - `qa/x-cost-flow.cjs` 46 of 46 in Edge on the fixture of the platforms page: the figures to the cent (worked out again in that file), a year, no posts, a cleared, a text and an out-of-range field, links, the ready scenarios,
+    the cautious figure, the balance and the limit, the listings, the same calculator in the guide's step, Escape and focus, a phone, the evening, no English letter outside an isolated run, no console error.
+  - `qa/platforms-flow.cjs` 170 of 170 after two fixes of this work (below). `tests/setup-guides.test.mjs`, `platform-setup`, `platforms`, `guide-layout` pass inside `npm test`.
+- **Found by the older checks and fixed.** `qa/platforms-flow.cjs` failed twice: first because the calculator sat above the step's lazily loaded picture so the picture never loaded (it was moved below the picture),
+  then because plain "X", "GIF" and "Quote" in the calculator were outside an isolated run (they are inside one now, and `qa/x-cost-flow.cjs` holds it).
+- **Not checked.** The signed-in page on the live site (no bypass is allowed); X's real billing, which the first real post will show in the console's «Usage»; anything on Snapchat's side, since nobody has walked it yet.

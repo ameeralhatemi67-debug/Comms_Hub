@@ -1,0 +1,240 @@
+{
+  "script": "qa/x-cost-flow.cjs",
+  "run": "2026-11-26T10:27:26.808Z",
+  "checks": [
+    {
+      "name": "the button is on «المنصات» whatever X's state",
+      "pass": true,
+      "detail": "حاسبة تكلفة X"
+    },
+    {
+      "name": "it opens in its own sheet, named for X",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the default is worked out to the cent",
+      "pass": true,
+      "detail": "$13.21 against $13.21"
+    },
+    {
+      "name": "the month, the day and the posts are beside it",
+      "pass": true,
+      "detail": "$4.40 في الشهر · $0.145 في اليوم · 182 منشوراً · متوسط المنشور $0.062"
+    },
+    {
+      "name": "the posts with a link are their own line: 46 at $0.200",
+      "pass": true,
+      "detail": "منشورات فيها رابط\nسعر معلن\n46 × $0.200\n$9.20"
+    },
+    {
+      "name": "pictures are said to have no price, not counted as free",
+      "pass": true,
+      "detail": "رفع الصور والمقاطع\nغير مسعّر\n109 × ?\nبلا سعر معلن"
+    },
+    {
+      "name": "a line with nothing in it is not drawn",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "what the links cost is said in a sentence: their share and the bill without them",
+      "pass": true,
+      "detail": "الروابط: 46 منشوراً (25% من المنشورات) تكلّف 70% من المجموع. بلا روابط يصير المجموع $4.70."
+    },
+    {
+      "name": "the free route is named beside the figure",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "every figure keeps its direction in the Arabic line",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "a year: 365 days, 730 posts",
+      "pass": true,
+      "detail": "$52.71 against $52.71"
+    },
+    {
+      "name": "the chosen period is the pressed one and the table marks it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the table gives a month, three months, six and a year for the same activity",
+      "pass": true,
+      "detail": "[\"شهر\\t$4.33\\t$4.33\",\"3 أشهر\\t$13.21\\t$4.40\",\"6 أشهر\\t$26.47\\t$4.41\",\"سنة\\t$52.71\\t$4.39\"]"
+    },
+    {
+      "name": "eighteen months, by hand",
+      "pass": true,
+      "detail": "$78.99"
+    },
+    {
+      "name": "ninety-nine months is brought to thirty-six, in the field too",
+      "pass": true,
+      "detail": "36"
+    },
+    {
+      "name": "no posts: only the checks and the deletes remain, and it says so",
+      "pass": true,
+      "detail": "لا منشورات هنا: ما تراه هو فحص الاتصال وما أضفته من بنود. | $0.650"
+    },
+    {
+      "name": "a cleared field stays empty while typing",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and returns to its figure when left",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "text is not a number: the field returns to its figure",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "five thousand a day is brought to a thousand",
+      "pass": true,
+      "detail": "1000"
+    },
+    {
+      "name": "a day and a half is allowed, and counted",
+      "pass": true,
+      "detail": "$3.36"
+    },
+    {
+      "name": "seven a week over a month is thirty posts",
+      "pass": true,
+      "detail": "$2.58"
+    },
+    {
+      "name": "no links: every post is plain, and the line of links is gone",
+      "pass": true,
+      "detail": "$1.55"
+    },
+    {
+      "name": "every post a link: thirteen times a plain post",
+      "pass": true,
+      "detail": "$12.65"
+    },
+    {
+      "name": "the busy scenario keeps the period and changes the rest",
+      "pass": true,
+      "detail": "$22.34 against $22.34"
+    },
+    {
+      "name": "the line of reads appears when there are reads",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the cautious figure adds five mills for each picture or video, and says it is an estimate",
+      "pass": true,
+      "detail": "$24.02 against $24.02"
+    },
+    {
+      "name": "a balance of fifty dollars lasts as long as the pace says",
+      "pass": true,
+      "detail": "67 | رصيد تفكر في شحنه (بالدولار)\nدولار\n\nيكفي هذا الرصيد نحو 67 يوماً (2.2 شهراً) بهذا الإنفاق.\n\nحد إنفاق شهري يُقترح وضعه في وحدة المطوّرين: $27، أي تكلفة الشهر وخُمسها زيادة. إن بلغته X أوقفت الطلبات حتى الدورة التالية.\n\nتعرض X رصيداً مجانياً لمرة واحدة: $20 بعد أول شراء رصيد ببطاقة مؤهلة، ورصيداً مجانياً مساوياً لأول شحن تلقائي حتى $50. الرصيد المجاني ينتهي بعد 3 أشهر من منحه ويُنفَق قبل رصيدك المدفوع. تقول الصفحة إن العرض ما زال يُطرح، فتحقق منه عند الشراء."
+    },
+    {
+      "name": "the limit to set in the console is the month and a fifth",
+      "pass": true,
+      "detail": "27 | رصيد تفكر في شحنه (بالدولار)\nدولار\n\nيكفي هذا الرصيد نحو 67 يوماً (2.2 شهراً) بهذا الإنفاق.\n\nحد إنفاق شهري يُقترح وضعه في وحدة المطوّرين: $27، أي تكلفة الشهر وخُمسها زيادة. إن بلغته X أوقفت الطلبات حتى الدورة التالية.\n\nتعرض X رصيداً مجانياً لمرة واحدة: $20 بعد أول شراء رصيد ببطاقة مؤهلة، ورصيداً مجانياً مساوياً لأول شحن تلقائي حتى $50. الرصيد المجاني ينتهي بعد 3 أشهر من منحه ويُنفَق قبل رصيدك المدفوع. تقول الصفحة إن العرض ما زال يُطرح، فتحقق منه عند الشراء."
+    },
+    {
+      "name": "the free credits X offers are said, with their amounts, their three months, and that the offer is still being rolled out",
+      "pass": true,
+      "detail": "رصيد تفكر في شحنه (بالدولار)\nدولار\n\nيكفي هذا الرصيد نحو 67 يوماً (2.2 شهراً) بهذا الإنفاق.\n\nحد إنفاق شهري يُقترح وضعه في وحدة المطوّرين: $27، أي تكلفة الشهر وخُمسها زيادة. إن بلغته X أوقفت الطلبات حتى الدورة التالية.\n\nتعرض X رصيداً مجانياً لمرة واحدة: $20 بعد أول شراء رصيد ببطاقة مؤهلة، ورصيداً مجانياً مساوياً لأول شحن تلقائي حتى $50. الرصيد المجاني ينتهي بعد 3 أشهر من منحه ويُنفَق قبل رصيدك المدفوع. تقول الصفحة إن العرض ما زال يُطرح، فتحقق منه عند الشراء."
+    },
+    {
+      "name": "no balance: it says so, with no division by zero",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "what the API allows is listed: links, pictures, video, replies, deletes",
+      "pass": true,
+      "detail": "منشور نصي\n$0.015\n\nPost: Create. حتى 280 حرفاً، إلا إن كان الحساب مشتركاً في X Premium.\n\nمنشور فيه رابط\n$0.200\n\nPost: Create (with URL). لا تُعرّف X في صفحاتها ما يجعل المنشور with URL: احتُسب كل منشور"
+    },
+    {
+      "name": "quoting is said to be unavailable on this plan",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "what X does not say is on the page, with the way to settle it",
+      "pass": true,
+      "detail": "ما لا تقوله\nX\n، وكيف يُحسم\nتقول صفحة الأسعار Post: Create (with URL) بلا تعريف. احتُسب كل منشور في نصه رابط بهذا السعر، وهذا أحوط من العكس.\nلا سطر في الأسعار لر"
+    },
+    {
+      "name": "English inside Arabic is isolated (the price lines and the dates)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no English letter is left outside an isolated run anywhere in the calculator, folded parts open",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "Escape closes the sheet and focus returns to its button",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the same calculator is in the step «اشحن رصيداً»",
+      "pass": true,
+      "detail": "$13.21"
+    },
+    {
+      "name": "the tables that were there are still there, four of them",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "the step lists the new action",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "and it works there",
+      "pass": true,
+      "detail": "$67.76"
+    },
+    {
+      "name": "phone: the button is on the page and the page does not scroll sideways",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: nothing in the calculator is wider than the sheet",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "phone: the sheet itself does not scroll sideways",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "evening: the figure and the bars are drawn from the theme, not from fixed colours",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no page error and nothing in the console",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "total": 46,
+  "passed": 46,
+  "failed": 0
+}

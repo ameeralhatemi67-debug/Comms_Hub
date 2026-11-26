@@ -6,7 +6,7 @@ tags:
   - document/status
   - status/active
 created: 2026-08-18
-updated: 2026-11-16
+updated: 2026-11-26
 status: active
 parent: "[[projects/ideas/Comms_Hub/Comms Hub]]"
 aliases:
@@ -25,6 +25,14 @@ related:
 ---
 
 # Communication Department Hub — Current Status
+
+## X's cost calculator and the start of Snapchat, 2026-11-26
+
+- **X's cost calculator** (`MVP_draft.md` section 82), built and checked here, not committed: «حاسبة تكلفة X» at the top of «المنصات» and inside the X guide's step «اشحن رصيداً». The director gives
+  the period, the posts, the links and the pictures and reads the cost from X's own prices (docs.x.com, 2026-11-26). X leaves three things unsaid (what makes a post «with URL», whether
+  a picture upload is billed, which line a delete uses); the calculator says so and takes the cautious side. Not checked: signed in on the live site, and X's real billing.
+- **Snapchat**: researched, nothing built (`Snapchat_Plan.md`). Only the Public Profile API can publish, and it is allowlist only, so the manual path stays. The owner takes the pictures S1 to S5 on a personal
+  account; the guide is written from them. The open question is whether Snap accepts a self-owned organisation for the allowlist, and how.
 
 ## X's link route, the Next.js patch, and TikTok's Stories, 2026-11-25
 

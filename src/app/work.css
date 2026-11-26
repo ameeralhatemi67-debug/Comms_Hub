@@ -1113,6 +1113,60 @@ button.gd-zoom:hover{background:var(--surface-2);border-color:var(--green)}
 .gd-tbl td{padding:8px 14px;border-top:1px solid var(--line);text-align:start}
 .gd-tbl td:last-child{white-space:nowrap}
 .gd-tnote{margin:0;padding:8px 14px 10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+/* X's cost calculator (MVP_draft.md section 82), in the setup sheet's step and in its own sheet */
+.pf-top-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.xc-sheet>.xc{max-width:860px;margin-inline:auto}
+.xc{display:grid;gap:16px;min-width:0;margin:8px 0 18px}
+.xc-lead{margin:0;font-size:13px;line-height:1.9;color:var(--muted)}
+.xc-scn{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:13px}
+.xc-scn>small{flex:1 1 100%;line-height:1.7}
+.xc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px 18px;min-width:0}
+.xc-f{display:grid;gap:6px;align-content:start;min-width:0}
+.xc-f>label,.xc-label{display:block;margin:0;font-size:13px;font-weight:600;color:var(--ink)}
+.xc-f>label.switch{font-weight:500}
+.xc-wide{grid-column:1/-1}
+.xc-period{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 16px}
+.xc-period .xc-f{flex:0 0 150px}
+.xc-num{display:flex;align-items:center;gap:8px}
+.xc input[type=text]{margin:0;min-height:40px;direction:ltr;text-align:left;unicode-bidi:isolate}
+.xc input[type=range]{margin:0;padding:0;border:0;min-height:30px;accent-color:var(--green)}
+.xc-pct{color:var(--green-text);font-variant-numeric:tabular-nums}
+.xc-hint{display:block;line-height:1.7}
+.xc-more{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:0 14px}
+.xc-more>summary{display:flex;align-items:center;min-height:44px;font-size:13.5px;font-weight:600;cursor:pointer}
+.xc-more[open]>summary{margin-bottom:6px}
+.xc-more>.xc-grid,.xc-more>.xc-can{padding-bottom:14px}
+.xc-result{display:grid;gap:10px;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)}
+.xc-total{margin:0;font-size:15px;color:var(--ink)}
+.xc-total b{font-size:30px;font-weight:650;color:var(--green-text);font-variant-numeric:tabular-nums}
+.xc-sub,.xc-insight,.xc-free{margin:0;font-size:13px;line-height:1.9;color:var(--muted)}
+.xc-insight{color:var(--ink)}
+.xc-lines{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:12px}
+.xc-line-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}
+.xc-bar{height:8px;margin:5px 0;border-radius:4px;background:var(--chip-bg);overflow:hidden}
+.xc-bar i{display:block;height:100%;border-radius:4px;background:var(--green)}
+.xc-lines li[data-line=link] .xc-bar i{background:var(--st-warn-fg)}
+.xc-line-fig{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--muted)}
+.xc-line-fig b{color:var(--ink);font-variant-numeric:tabular-nums}
+.xc-basis{flex:none;padding:1px 9px;border-radius:999px;background:var(--chip-bg);color:var(--chip-fg);font-size:11.5px;font-weight:600;line-height:1.7;white-space:nowrap}
+.xc-basis[data-basis=assumed]{background:var(--st-warn-bg);color:var(--st-warn-fg)}
+.xc-basis[data-basis=unlisted],.xc-basis[data-basis=none]{background:var(--st-review-bg);color:var(--st-review-fg)}
+.xc-box{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.xc-budget{display:grid;gap:8px;padding:14px}
+.xc-budget p{margin:0;font-size:13px;line-height:1.9}
+.xc-tbl{overflow:hidden}
+.xc-tbl table{width:100%;border-collapse:collapse;font-size:13px}
+.xc-tbl caption{caption-side:top;padding:10px 14px;text-align:start;font-size:13.5px;font-weight:600}
+.xc-tbl th{padding:8px 14px;border-top:1px solid var(--line);background:var(--surface-2);font-weight:600;text-align:start;color:var(--muted)}
+.xc-tbl td{padding:8px 14px;border-top:1px solid var(--line);text-align:start;white-space:nowrap}
+.xc-tbl tr[aria-current=true] td{background:var(--soft);font-weight:600}
+.xc-can{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.xc-can li{padding-top:10px;border-top:1px solid var(--line)}
+.xc-can p{margin:2px 0 0;font-size:12.5px;line-height:1.9;color:var(--muted)}
+.xc-unknown{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);font-size:13px}
+.xc-unknown>b{display:flex;align-items:center;gap:8px}
+.xc-unknown svg{width:18px;height:18px;color:var(--green-text)}
+.xc-unknown ul{margin:0;padding-inline-start:18px;display:grid;gap:6px;line-height:1.9}
 .pf-prog-count{color:var(--muted)}
 .pf-bar.seg{display:flex;gap:3px;height:8px;overflow:visible;background:transparent}
 .pf-bar.seg i{flex:1 1 0;min-width:0;width:auto;height:8px;border-radius:3px;background:var(--chip-bg);box-shadow:inset 0 0 0 1px var(--line)}

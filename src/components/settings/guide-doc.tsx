@@ -11,6 +11,7 @@ import { SHOT_MAX, layoutStep, phaseOf, phasesOf, shotCount, type CopyValue, typ
 import { plainText } from '@/lib/guide-text';
 import type { Guide, GuideShot, GuideStep } from '@/lib/setup-guides';
 import { GuideInfo, GuideTables, Rich } from '../guide-text';
+import { GuideTool } from '../guide-tool';
 import { useKeysForm, type KeysForm, type KeysProps } from './keys-form';
 
 const TOP = 'top';
@@ -335,6 +336,7 @@ function StepSection({ sid, id, guide, step, n, done, submitted, form, bar, onZo
         {laid.fields.map(field)}
         {step.info && step.info.length > 0 && <GuideInfo items={step.info} />}
         {step.tables && step.tables.length > 0 && <GuideTables tables={step.tables} />}
+        {step.tool && <GuideTool tool={step.tool} />}
         {form?.after}
         {step.kind === 'review' && submitted && <p className="pf-note info">قُدّم الطلب، وننتظر قرار المنصة.</p>}
       </div>

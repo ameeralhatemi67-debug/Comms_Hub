@@ -72,6 +72,8 @@ export type GuideStep = {
   info?: string[];
   /** Tables of figures the step refers to, drawn after the list of actions. */
   tables?: GuideTable[];
+  /** A tool drawn after the tables: X's cost calculator (src/components/settings/x-cost.tsx). */
+  tool?: 'x-cost';
 };
 export type Guide = {
   title: string;
@@ -908,7 +910,9 @@ export const GUIDES: Record<string, Guide> = {
           'اضغط «Buy Credits» واختر المبلغ. ابدأ بمبلغ صغير: النشر ما زال محاكاة في الموقع.',
           'اقرأ أسعار الطلبات في الجداول أدناه قبل أن تدفع.',
           'اللافتة الصفراء «Enable now» تفعّل الشحن التلقائي حين ينقص الرصيد. فعّله إن أردت ألا يتوقف النشر بغتة، وإلا فراقب الرصيد بنفسك.',
+          'قدّر تكلفة نشاطك بالحاسبة أدناه قبل أن تختار المبلغ.',
         ],
+        tool: 'x-cost',
         info: [
           'الأسعار من وحدة المطوّرين كما ظهرت يوم 2026-11-03، وتتغير: راجعها قبل الشحن.',
           'ما يُحاسَب عليه الموقع الآن هو فحص الاتصال فقط: يقرأ حساب X مرة، وتسمّيه X «User: Read»، أي نحو 0.010 دولار لكل فحص. أما النشر الحقيقي على X فلم يبدأ بعد.',

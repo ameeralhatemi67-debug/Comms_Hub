@@ -5,7 +5,7 @@
 // department) is folded under «خيارات متقدمة». Publishing is still a simulation for every platform, and the page says so.
 // Every rule is in the database (platform_save and its neighbours); this page explains and asks.
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ChevronDown, Plus } from 'lucide-react';
+import { Calculator, ChevronDown, Plus } from 'lucide-react';
 import { needProps } from '@/lib/kit/need';
 import { HOLD } from '@/lib/kit/hold-reasons';
 import { supabase } from '@/lib/supabase/client';
@@ -26,8 +26,11 @@ import type { PlatformInfo, PublishMode } from '@/lib/work/rules';
 import { useCaps } from '../caps';
 import { PlatformTile } from '../platform-icon';
 import { Modal } from '../ui';
+import { Rich } from '../guide-text';
 import { SetupGuide } from '../setup-guide';
+import { Sheet, SheetHead } from '../sheet';
 import { PlatformSheet, type SheetTo } from './platform-sheet';
+import { XCostCalculator } from './x-cost';
 
 type Impact = { accounts: number; active_accounts: number; open_works: number; copies: number };
 type LogRow = { id: number; at: string; kind: string; actor: string | null; actor_name: string | null; data: Record<string, unknown> };
@@ -46,6 +49,7 @@ export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; im
   const [apps, setApps] = useState<Apps>(initial?.apps ?? {});
   const [setup, setSetup] = useState<Record<string, SetupRow>>(initial?.setup ?? {});
   const [menu, setMenu] = useState(false);
+  const [calc, setCalc] = useState(false);
   const [open, setOpen] = useState<{ key: string; to: SheetTo } | null>(initial?.open ?? null);
   const [dlg, setDlg] = useState<{ t: 'add' } | { t: 'edit'; p: PlatformInfo } | { t: 'delete'; p: PlatformInfo } | null>(null);
   const canManage = caps.has('platforms.manage');
@@ -233,6 +237,11 @@ export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; im
     <div className="st-platforms">
       <div className="pf-top">
         <p className="muted">تُجهَّز كل منصة مرة واحدة، ثم تُضاف حساباتها من «حسابات المنصات».</p>
+        <div className="pf-top-acts">
+        <button type="button" className="pf-btn" data-xcost-open aria-haspopup="dialog" onClick={() => setCalc(true)}>
+          <Calculator aria-hidden="true" />
+          حاسبة تكلفة X
+        </button>
         <div className="pf-add">
           <button
             type="button"
@@ -252,6 +261,7 @@ export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; im
               {menuGroup('غير ذلك', firstOf(['custom']))}
             </div>
           )}
+        </div>
         </div>
       </div>
       <p className="wk-simnote st-simnote pf-sim">النشر على كل المنصات محاكاة في هذه المرحلة: لا يصل شيء إلى أي منصة.</p>
@@ -294,6 +304,14 @@ export function PlatformsTab({ initial }: { initial?: { list: PlatformInfo[]; im
             onDelete={() => setDlg({ t: 'delete', p: opened })}
           />
         </PlatformSheet>
+      )}
+      {calc && (
+        <Sheet label="حاسبة تكلفة X" onClose={() => setCalc(false)}>
+          <SheetHead tile={<PlatformTile k="x" />} title="حاسبة تكلفة X" sub={<Rich text="كم تكلّف واجهة X المدفوعة في شهر أو أشهر أو سنة، من أسعار X نفسها" />} onClose={() => setCalc(false)} />
+          <div className="pf-input xc-sheet">
+            <XCostCalculator />
+          </div>
+        </Sheet>
       )}
       {dlg?.t === 'add' && <AddDialog onClose={() => setDlg(null)} act={act} />}
       {dlg?.t === 'edit' && <EditDialog p={dlg.p} onClose={() => setDlg(null)} act={act} />}

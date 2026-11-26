@@ -18,6 +18,7 @@ import { CHIP_CLASS, chipOf, countAccounts, doneSteps, firstOpen, setupGuideOf, 
 import type { PlatformInfo } from '@/lib/work/rules';
 import { PlatformTile } from '../platform-icon';
 import { GuideInfo, GuideShots, GuideTables, GuideTodo, Rich } from '../guide-text';
+import { GuideTool } from '../guide-tool';
 import { CopyField, Sheet, SheetHead, SheetProgress, SheetSteps } from '../sheet';
 import { GuideDoc } from './guide-doc';
 import { useKeysForm, type KeysProps } from './keys-form';
@@ -302,7 +303,7 @@ function StepPanel({ step, n, done, canGoBack, canManage, lock, onDone, onBack, 
       {todo.length > 0 && <GuideTodo items={todo} shots={step.shots} />}
       {step.info && step.info.length > 0 && <GuideInfo items={step.info} />}
       {step.tables && step.tables.length > 0 && <GuideTables tables={step.tables} />}
-      {!hasCopy && !manual && todo.length === 0 && <p>لا يحتاج الموقع منك شيئاً هنا. أنجزها في الصفحة التي فتحتها، ثم عُد وأكّد.</p>}
+      {!hasCopy && !manual && todo.length === 0 &&<p>لا يحتاج الموقع منك شيئاً هنا. أنجزها في الصفحة التي فتحتها، ثم عُد وأكّد.</p>}
       {manual && (
         <p>
           <Rich text={step.b ?? ''} />
@@ -311,6 +312,7 @@ function StepPanel({ step, n, done, canGoBack, canManage, lock, onDone, onBack, 
       {step.copy && <CopyField label={step.copyLabel ?? 'العنوان'} value={step.copy} />}
       {step.more?.map((m) => <CopyField key={m.label} label={m.label} value={m.copy} />)}
       {step.shots && step.shots.length > 0 && <GuideShots shots={step.shots} />}
+      {step.tool && <GuideTool tool={step.tool} />}
     </StepCard>
   );
 }
