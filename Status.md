@@ -28,13 +28,16 @@ related:
 
 ## Snapchat's connection, 2026-11-26
 
-- **Built and checked, not committed** (`MVP_draft.md` section 84): Snapchat now has a setup like the other platforms (nine steps from the owner's walk, twelve blurred pictures) and a real sign-in
-  that links the Public Profile of the account that signs in. Database rules 37 of 37 on a private database, unit tests 1016 of 1016, `qa/snapchat-flow.cjs` 23 of 23, build and typecheck pass.
-- **The owner's steps, in order:** run `supabase/migrations/20261126150000_snapchat_connection.sql` in the SQL editor of **comms-hub** (it can be run twice); make a new Snap OAuth app (the first one's secret
-  was shown in a picture sent to a chat); add Snapchat from «إضافة منصة» and enter the client id and secret in its keys step; connect from «حسابات المنصات».
+- **Built, committed (`f8f8922`) and pushed by the owner** (`MVP_draft.md` section 84): Snapchat has a setup like the other platforms (nine steps from the owner's walk, ten blurred pictures in the setup guide
+  and two in the connection guide) and a real sign-in that links the Public Profile of the account that signs in. `20261126150000_snapchat_connection.sql` was run on comms-hub by the owner on 2026-11-26
+  («Success»). Database rules 37 of 37 on a private database.
+- **Since then, not committed** (`MVP_draft.md` 84.1): the guide is drawn as one page like YouTube's, Instagram's and TikTok's (`WHOLE_GUIDES`), in three parts. Unit tests 1016 of 1016, `qa/snapchat-flow.cjs`
+  29 of 29, `qa/platforms-flow.cjs` 170 of 170, typecheck and build pass. Nothing pushed.
+- **The owner's steps, in order:** make a new Snap OAuth app (the first one's secret was shown in a picture sent to a chat); add Snapchat from «إضافة منصة» and enter the client id and secret in its keys step;
+  connect from «حسابات المنصات». The allowlist message is sent by the owner, never by the site; the connection can be tried before Snap answers.
 - **Unknown until that first connection:** what Snap answers an app it has not allowed. The consent screen worked without the allowlist; the call that reads the profile may be refused (`ACCESS_NOT_GRANTED`).
   The allowlist request (the text is in the last step of the guide) still needs a Snap contact.
-- Another session has uncommitted edits in `x-handoff.tsx` and `x-link.ts` (reply and quote on X's link route): not part of this work.
+- Other sessions' uncommitted files (`.claude/launch.json`, `validation/recheck-R01.md`, `qa/x-cost-flow.json`) are not part of this work.
 
 ## «تجربة النشر بالرابط» for X, 2026-11-26
 

@@ -1,9 +1,10 @@
-// Browser check of Snapchat's setup in «المنصات» (MVP_draft.md section 84), in Edge: the real tab and sheet on the fixture of qa/platforms-flow.cjs (stand-ins for the
-// database, because the signed-in pages cannot be driven by a check and no bypass is allowed). The guide is walked as the owner walked Snapchat on 2026-11-26.
+// Browser check of Snapchat's setup in «المنصات» (MVP_draft.md sections 84 and 84.1), in Edge: the real tab and sheet on the fixture of qa/platforms-flow.cjs (stand-ins for the
+// database, because the signed-in pages cannot be driven by a check and no bypass is allowed). The guide is walked as the owner walked Snapchat on 2026-11-26, and since 2026-11-26
+// it is drawn as one page like YouTube's, Instagram's and TikTok's (src/components/settings/guide-doc.tsx, WHOLE_GUIDES).
 //   1. The row: Snapchat is no longer a manual platform; it has a setup, and says so.
-//   2. The sheet: nine steps in the order of the walk, each reachable from the list, each with its actions, and every picture loaded.
-//   3. The return address is filled in from the site and offered to copy exactly; the secret is asked of nobody but the form, as a password.
-//   4. The allowlist is a review step: its text to send names the client id and never the secret, and it holds nothing back.
+//   2. The page: nine steps in three parts, in the order of the walk, each reachable from the list, each with its actions, every picture under the action it shows.
+//   3. The return address is filled in from the site and offered to copy exactly under the action that pastes it; the keys sit under the actions that name them, the secret as a password.
+//   4. The allowlist is a review step: its text to send is the first action's, names the client id and never the secret, says the person sends it and the site sends nothing, and holds nothing back.
 //   5. English inside Arabic is isolated, and the pictures show no address, name, number or secret: each is a blurred file made by scripts/guide-shots.mjs.
 //   6. A phone: nothing sideways. Evening: drawn from the theme. No page error.
 // What this cannot check: Snap's own pages and API (nothing here has met them), the database (supabase/tests/snapchat_connection_rules.sql), and a signed-in session.
@@ -42,21 +43,50 @@ const STEPS = [
   ['keys', 'الصق المعرّف والسر'],
   ['allowlist', 'اطلب من Snap إضافة التطبيق'],
 ];
-const open = (t, i) => t.evaluate((n) => document.querySelectorAll('dialog[open] .pf-step-btn')[n]?.click(), i);
-const picturesLoaded = async (t) => {
-  await t.evaluate(() => [...document.querySelectorAll('dialog[open] .pf-input img')].forEach((e) => e.scrollIntoView({ block: 'center' })));
-  await t.waitForFunction(() => [...document.querySelectorAll('dialog[open] .pf-input img')].every((e) => e.complete && e.naturalWidth > 0));
-  return t.evaluate(() => [...document.querySelectorAll('dialog[open] .pf-input img')].map((e) => e.getAttribute('src')));
-};
-const stray = (t) =>
+// A guide shown as one page: the section being read is the first whose bottom is below the top of what scrolls.
+const reading = (t) =>
   t.evaluate(() => {
-    const c = document.querySelector('dialog[open] .pf-input .pf-card');
-    const out = [];
-    const w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT);
-    for (let n = w.nextNode(); n; n = w.nextNode()) if (!n.parentElement.closest('bdi, textarea, input, button') && /[A-Za-z]/.test(n.textContent)) out.push(n.textContent.trim().slice(0, 40));
-    return out;
+    const main = document.querySelector('dialog[open] .gdoc-main');
+    if (!main) return null;
+    const box = getComputedStyle(main).overflowY === 'visible' ? document.querySelector('dialog[open] .gdoc') : main;
+    const top = box.getBoundingClientRect().top;
+    return [...main.querySelectorAll('.gdoc-sec')].find((e) => e.getBoundingClientRect().bottom > top + 60)?.dataset.step ?? null;
   });
-
+const settle = (t) =>
+  t.evaluate(
+    () =>
+      new Promise((done) => {
+        const main = document.querySelector('dialog[open] .gdoc-main');
+        const box = main && getComputedStyle(main).overflowY === 'visible' ? document.querySelector('dialog[open] .gdoc') : main;
+        if (!box) return done();
+        let last = -1;
+        let same = 0;
+        let n = 0;
+        const tick = () => {
+          same = box.scrollTop === last ? same + 1 : 0;
+          last = box.scrollTop;
+          if (same >= 3 || ++n > 80) done();
+          else setTimeout(tick, 60);
+        };
+        setTimeout(tick, 120);
+      }),
+  );
+// Pictures load lazily, as a person scrolls: bring a step's last picture into view, then wait for all of them.
+const loadPics = async (t, id) => {
+  await t.evaluate((i) => [...document.querySelectorAll(`dialog[open] .gdoc-sec[data-step="${i}"] img`)].filter((e) => !e.complete).at(-1)?.scrollIntoView({ block: 'center' }), id);
+  await t.waitForFunction((i) => [...document.querySelectorAll(`dialog[open] .gdoc-sec[data-step="${i}"] img`)].every((e) => e.complete && e.naturalWidth > 0), id);
+};
+const stray = (t, id) =>
+  t.evaluate((i) => {
+    const bad = [];
+    const w = document.createTreeWalker(document.querySelector(`dialog[open] .gdoc-sec[data-step="${i}"]`), NodeFilter.SHOW_TEXT);
+    for (let n = w.nextNode(); n; n = w.nextNode()) if (!n.parentElement.closest('bdi, [dir="ltr"], button, input, textarea') && /[A-Za-z]/.test(n.textContent)) bad.push(n.textContent.trim().slice(0, 50));
+    return bad;
+  }, id);
+const goTo = async (t, id) => {
+  await t.locator(`dialog[open] .gdoc-ti[data-to="${id}"]`).click();
+  await settle(t);
+};
 (async () => {
   let fixture;
   const errs = [];
@@ -125,45 +155,83 @@ const stray = (t) =>
     await row(t).locator('.pf-btn').first().click();
     await sheet(t).waitFor();
 
-    // ---------- 2. the sheet: nine steps in the order of the walk ----------
-    const names = await sheet(t).locator('.pf-step-btn').allInnerTexts();
-    check('nine steps, in the order the owner walked them', STEPS.every(([, title], i) => names[i]?.includes(title.replace(/[«»]/g, ''))) && names.length === STEPS.length, names);
-    check('it opens on the first step, with the sheet\'s title and the account link', (await sheet(t).locator('.pf-title h2').innerText()).includes('سناب شات') && (await sheet(t).locator('.pf-card h3').first().innerText()).includes('سجّل الدخول بحساب سناب شات'));
+    // ---------- 2. the page: nine steps in three parts ----------
+    await t.waitForSelector('dialog[open] .gdoc');
+    await t.waitForTimeout(400);
+    const ids = await sheet(t).locator('.gdoc-sec[data-step]').evaluateAll((l) => l.map((e) => e.dataset.step).filter((x) => x !== 'top' && x !== 'finish'));
+    check('nine steps on one page, under the ids the saved progress knows, in the order the owner walked them', JSON.stringify(ids) === JSON.stringify(STEPS.map(([id]) => id)), ids.join(','));
+    const toc = await t.evaluate(() => ({ parts: [...document.querySelectorAll('dialog[open] .gdoc-phl')].map((e) => e.innerText.trim()), items: [...document.querySelectorAll('dialog[open] .gdoc-ph .gdoc-ti')].map((e) => e.dataset.to) }));
+    check('the list names its three parts and holds the nine steps in order', JSON.stringify(toc.parts) === JSON.stringify(['الحساب والملف العام', 'تطبيق الربط', 'المفاتيح وموافقة سناب شات']) && JSON.stringify(toc.items) === JSON.stringify(ids), JSON.stringify(toc));
+    const top = await t.evaluate(() => document.querySelector('dialog[open] .gdoc-sec[data-step="top"]').innerText);
+    check('«قبل البدء» says who the guide is for, counts nine steps and ten pictures, and says the connection can be tried before Snap approves', top.includes('للمدير') && top.includes('9') && top.includes('10') && top.includes('قبل موافقة Snap') && top.includes('طلب الموافقة تُرسله أنت'), top.slice(0, 120));
+    const titles = await sheet(t).locator('.gdoc-sec[data-step] h3').allInnerTexts();
+    check('each step carries the title it had in the classic sheet', STEPS.every(([, title], i) => titles.some((x) => x.replace(/[«»]/g, '').includes(title.replace(/[«»]/g, '').slice(0, 14)))), JSON.stringify(titles));
+    check('the first step opens first, with the account link', (await sheet(t).locator('.pf-title h2').innerText()).includes('سناب شات') && (await sheet(t).locator('.gdoc-sec[data-step="account"] .gdoc-link').count()) === 1);
     const shown = {};
-    for (const [i, [id, title]] of STEPS.entries()) {
-      await open(t, i);
-      await sheet(t).locator('.pf-card').waitFor();
-      const info = await sheet(t).locator('.pf-input').evaluate((c) => ({
-        title: c.querySelector('.pf-card h3')?.innerText ?? '',
-        acts: c.querySelectorAll('.gd-todo li').length,
-        shots: c.querySelectorAll('.gd-shot img').length,
-        notes: c.querySelectorAll('.gd-info').length,
-      }));
-      const pics = await picturesLoaded(t);
-      shown[id] = { ...info, pics: pics.length };
-      check(`step «${id}»: reached from the list, its actions are listed, every picture loaded, English isolated`, info.title.includes(title.replace(/[«»]/g, '').slice(0, 8)) || id === 'dashboard' && (id === 'keys' || id === 'allowlist' ? true : info.acts >= 1) && pics.every((p) => /^\/guides\/snapchat\/[a-z-]+\.png$/.test(p)) && (await stray(t)).length === 0, JSON.stringify({ ...info, stray: await stray(t) }));
+    for (const [i, [id]] of STEPS.entries()) {
+      await goTo(t, id);
+      const at = await reading(t);
+      await loadPics(t, id);
+      const info = await t.evaluate((x) => {
+        const sec = document.querySelector(`dialog[open] .gdoc-sec[data-step="${x}"]`);
+        const imgs = [...sec.querySelectorAll('img')];
+        const inPart = [...sec.querySelectorAll('.gdoc-shot')].every((f) => {
+          const here = new Set([...f.closest('.gdoc-part').querySelectorAll('.gdoc-acts > li')].map((l) => l.value));
+          return f.dataset.rings.split(' ').filter((r) => r && r !== 'x').every((r) => here.has(Number(r)));
+        });
+        return {
+          acts: sec.querySelectorAll('.gdoc-acts > li').length,
+          imgs: imgs.length,
+          srcs: imgs.map((e) => e.getAttribute('src')),
+          loaded: imgs.every((e) => e.naturalWidth === Number(e.getAttribute('width')) && e.naturalHeight === Number(e.getAttribute('height'))),
+          small: imgs.every((e) => e.getBoundingClientRect().width <= Math.min(400, e.naturalWidth) + 1),
+          inPart,
+          raw: /`|«[^«»؀-ۿ]*»/.test(sec.innerText),
+          ltr: [...sec.querySelectorAll('bdi')].every((e) => e.getAttribute('dir') === 'ltr'),
+          wide: document.documentElement.scrollWidth <= window.innerWidth + 1,
+        };
+      }, id);
+      const lost = await stray(t, id);
+      shown[id] = info;
+      check(`step ${i + 1} (${id}): reached from the list, its actions are listed, English is isolated, every picture loads at its own size, is drawn small and sits under the actions it shows`, at === id && info.acts >= 1 && !info.raw && info.ltr && lost.length === 0 && info.wide && info.loaded && info.small && info.inPart && info.srcs.every((p) => /^\/guides\/snapchat\/[a-z-]+\.png$/.test(p)), JSON.stringify({ at, ...info, lost }));
     }
     const expectedPictures = { account: 1, business: 2, profile: 1, dashboard: 2, oauth: 2, form: 1, secret: 1, keys: 0, allowlist: 0 };
-    check('the pictures are where the walk put them: sign-in, the two Ads Manager screens, the profile, the menu and the card, the terms, the form, the created app', JSON.stringify(Object.fromEntries(Object.entries(shown).map(([k, v]) => [k, v.shots]))) === JSON.stringify(expectedPictures), JSON.stringify(shown));
-    check('the secret step says to cover it before any picture and what to do if it is lost', await (async () => { await open(t, 6); const x = await sheet(t).locator('.pf-input').innerText(); return x.includes('غطِّ السر') && x.includes('احذف التطبيق'); })());
+    check('the pictures are where the walk put them: sign-in, the two Ads Manager screens, the profile, the menu and the card, the button and the terms, the form, the created app', JSON.stringify(Object.fromEntries(Object.entries(shown).map(([k, v]) => [k, v.imgs]))) === JSON.stringify(expectedPictures), JSON.stringify(Object.fromEntries(Object.entries(shown).map(([k, v]) => [k, v.imgs]))));
+    const parts = (id) => t.evaluate((x) => [...document.querySelectorAll(`dialog[open] .gdoc-sec[data-step="${x}"] .gdoc-part`)].map((p) => ({ acts: [...p.querySelectorAll('.gdoc-acts > li')].map((l) => l.value), shots: [...p.querySelectorAll('.gdoc-shot img')].map((i) => i.getAttribute('src').split('/').pop()) })), id);
+    check('the two Ads Manager screens sit under the actions that fill them, and the button and its terms under their own', JSON.stringify(await parts('business')) === JSON.stringify([{ acts: [1, 2], shots: ['business-name.png'] }, { acts: [3, 4, 5], shots: ['business-where.png'] }]) && JSON.stringify(await parts('oauth')) === JSON.stringify([{ acts: [1], shots: ['oauth-add.png'] }, { acts: [2], shots: ['terms.png'] }]), JSON.stringify([await parts('business'), await parts('oauth')]));
+    await goTo(t, 'secret');
+    const secretText = await sheet(t).locator('.gdoc-sec[data-step="secret"]').innerText();
+    check('the secret step says to cover it before any picture and what to do if it is lost', secretText.includes('غطِّ السر') && secretText.includes('احذف التطبيق'));
 
     // ---------- 3. the return address and the keys ----------
-    await open(t, 5);
-    const given = await sheet(t).locator('.pf-copy input').first().inputValue();
-    check('the return address is the site\'s own, filled in for this platform, and offered to copy', given === `${base.replace(/\/$/, '')}/api/platforms/callback/snapchat` && (await sheet(t).locator('.pf-copy button').first().innerText()).includes('نسخ'), given);
-    await open(t, 7);
-    const keys = await sheet(t).locator('.pf-input').innerText();
-    check('the keys form asks for the two values by Snapchat\'s own names, and the secret is a password field', keys.includes('Snap Client ID') && keys.includes('Snap client secret key') && (await sheet(t).locator('.pf-input input[type="password"]').count()) >= 1, keys.slice(0, 300));
+    await goTo(t, 'form');
+    const given = await t.evaluate(() => document.querySelector('dialog[open] .gdoc-sec[data-step="form"] .gdoc-acts > li[value="2"] .gdoc-copy-v')?.innerText ?? '');
+    check('the return address is the site\'s own, filled in for this platform, whole, under the action that pastes it', given === `${base.replace(/\/$/, '')}/api/platforms/callback/snapchat`, given);
+    check('the form step offers a button to copy it', (await sheet(t).locator('.gdoc-sec[data-step="form"] .gd-copy').count()) >= 1);
+    await goTo(t, 'keys');
+    const keys = await t.evaluate(() => {
+      const sec = document.querySelector('dialog[open] .gdoc-sec[data-step="keys"]');
+      const li = (n) => sec.querySelector(`.gdoc-acts > li[value="${n}"]`);
+      return { todo: sec.querySelectorAll('.gdoc-acts > li').length, id: !!li(2)?.querySelector('input:not([type=password])'), secret: !!li(3)?.querySelector('input[type=password]'), button: sec.querySelector('.gdoc-bar .pf-btn')?.innerText ?? '', text: sec.innerText };
+    });
+    check('the keys step lists four actions, asks for the two values by Snapchat\'s own names under the actions that name them, the secret as a password, and ends on «فحص وحفظ»', keys.todo === 4 && keys.id && keys.secret && keys.text.includes('Snap Client ID') && keys.text.includes('Snap client secret key') && keys.button.includes('فحص وحفظ'), JSON.stringify({ ...keys, text: keys.text.slice(0, 160) }));
     await t.screenshot({ path: path.join(out, '02-keys.png') });
 
     // ---------- 4. the allowlist ----------
-    await open(t, 8);
-    const review = await sheet(t).locator('.pf-input').innerText();
-    const request = await sheet(t).locator('.pf-copy input').first().inputValue();
-    check('the allowlist is a review: the request names the client id and the scope, says the secret was not shared, and the buttons are the review\'s own', request.includes('client ID') && request.includes('snapchat-profile-api') && request.includes('not shared the client secret') && !/secret key|secret:/i.test(request) && review.includes('قدّمت الطلب') && review.includes('وافقت المنصة') && review.includes('أكتفي بالنشر اليدوي'), request.slice(0, 200));
+    await goTo(t, 'allowlist');
+    const al = await t.evaluate(() => {
+      const sec = document.querySelector('dialog[open] .gdoc-sec[data-step="allowlist"]');
+      return {
+        request: sec.querySelector('.gdoc-acts > li[value="1"] .gdoc-copy-v')?.innerText ?? '',
+        text: sec.innerText,
+        buttons: [...sec.querySelectorAll('.gdoc-bar .pf-btn')].map((b) => b.innerText.trim()),
+      };
+    });
+    check('the allowlist is a review: its text to send is the first action\'s and names the client id and the scope, says the secret was not shared, and the buttons are the review\'s own', al.request.includes('client ID') && al.request.includes('snapchat-profile-api') && al.request.includes('not shared the client secret') && !/secret key|secret:/i.test(al.request) && JSON.stringify(al.buttons) === JSON.stringify(['قدّمت الطلب', 'وافقت المنصة', 'أكتفي بالنشر اليدوي']), JSON.stringify({ buttons: al.buttons, request: al.request.slice(0, 160) }));
+    check('it says plainly that the person sends the text and the site sends nothing to Snap, and that the connection can be tried before approval', al.text.includes('الموقع لا يرسل شيئاً إلى Snap') && al.text.includes('أرسله أنت') && al.text.includes('لا تنتظر الموافقة لتجرّب الربط'), al.text.slice(0, 200));
     check('no id or secret of any app is on the page', !/56b82922|65d5f482|SECRETMARK/.test(await sheet(t).innerText()));
     await t.screenshot({ path: path.join(out, '03-allowlist.png') });
-    await open(t, 6);
+    await goTo(t, 'secret');
     await t.screenshot({ path: path.join(out, '01-secret.png') });
     await t.keyboard.press('Escape');
     await t.context().close();
@@ -178,12 +246,16 @@ const stray = (t) =>
     const xm = await fresh({ width: 390, height: 844 });
     await row(xm).locator('.pf-btn').first().click();
     await sheet(xm).waitFor();
+    await xm.waitForSelector('dialog[open] .gdoc');
+    await xm.waitForTimeout(400);
+    await xm.locator('dialog[open] .gdoc-toc-list > summary').click();
     let sideways = 0;
-    for (const [i] of STEPS.entries()) {
-      await open(xm, i);
-      await sheet(xm).locator('.pf-card').waitFor();
-      await picturesLoaded(xm);
-      if (!(await fits(xm)) || !(await xm.evaluate(() => { const b = document.querySelector('dialog[open] .pf-body'); return b.scrollWidth <= b.clientWidth + 1; }))) sideways++;
+    for (const [id] of STEPS) {
+      if (!(await xm.locator(`dialog[open] .gdoc-ti[data-to="${id}"]`).isVisible())) await xm.locator('dialog[open] .gdoc-toc-list > summary').click();
+      await goTo(xm, id);
+      await loadPics(xm, id);
+      const phone = await xm.evaluate(() => ({ page: document.documentElement.scrollWidth <= window.innerWidth + 1, body: (() => { const b = document.querySelector('dialog[open] .gdoc'); return b.scrollWidth <= b.clientWidth + 1; })(), shots: [...document.querySelectorAll('dialog[open] .gdoc-shot')].every((f) => f.getBoundingClientRect().right <= window.innerWidth + 1 && f.getBoundingClientRect().left >= -1) }));
+      if (!phone.page || !phone.body || !phone.shots) sideways++;
     }
     await xm.screenshot({ path: path.join(out, '04-phone.png') });
     check('phone: no step scrolls sideways, pictures included', sideways === 0, sideways);
@@ -191,10 +263,12 @@ const stray = (t) =>
     const ev = await fresh(undefined, '?dark');
     await row(ev).locator('.pf-btn').first().click();
     await sheet(ev).waitFor();
-    await open(ev, 5);
-    await picturesLoaded(ev);
+    await ev.waitForSelector('dialog[open] .gdoc');
+    await ev.waitForTimeout(400);
+    await goTo(ev, 'form');
+    await loadPics(ev, 'form');
     await ev.screenshot({ path: path.join(out, '05-evening.png') });
-    check('evening: the sheet and its pictures are drawn', (await sheet(ev).locator('.gd-shot img').count()) === 1);
+    check('evening: the page and its pictures are drawn', (await sheet(ev).locator('.gdoc-sec[data-step="form"] .gdoc-shot img').count()) === 1);
     await ev.context().close();
 
     check('no page error and nothing in the console', errs.length === 0, errs.slice(0, 3).join(' | '));

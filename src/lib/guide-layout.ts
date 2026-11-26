@@ -5,7 +5,7 @@
 import type { Guide, GuideShot, GuideStep } from './setup-guides.ts';
 
 /** The guides drawn as one page. The others keep the step sheet until they are moved. */
-export const WHOLE_GUIDES: readonly string[] = ['google', 'meta', 'tiktok'];
+export const WHOLE_GUIDES: readonly string[] = ['google', 'meta', 'tiktok', 'snapchat'];
 export const isWholeGuide = (key: string | null | undefined) => !!key && WHOLE_GUIDES.includes(key);
 
 /** A picture is drawn at most this wide on the page, and opens at its own size on a click (the director's note of 2026-11-16). */

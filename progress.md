@@ -4800,3 +4800,19 @@ The owner asked in a new session to finish A8, the last phase of `Android_Build_
 - **Not checked.** Snap's real API: the token addresses, the answer to an app that has not been allowed, the profile envelope and the refresh token's life are all read from documentation or assumed, and the first real
   connection settles them. The signed-in pages on the live site. The migration is not applied (see the next entry's status).
 - **Left by another session in the working tree, not touched here.** `src/components/work/x-handoff.tsx` and `src/lib/work/x-link.ts` carry uncommitted changes for replying to and quoting a post on X's link route.
+
+### 2026-11-26: Snapchat's guide drawn as one page
+
+- **The request.** The owner saw the Snapchat guide in the old step sheet and asked for the one-page layout the director chose for YouTube, Instagram and TikTok (`MVP_draft.md` 67.10). The owner also asked who sends the
+  allowlist message and whether the connection can be tried before Snap approves (`MVP_draft.md` 84.1).
+- **Built.** `'snapchat'` joins `WHOLE_GUIDES`; three parts with Arabic-only names («الحساب والملف العام», «تطبيق الربط», «المفاتيح وموافقة سناب شات»); the keys step has four actions with its two fields under the
+  second and third; the allowlist step has three actions with the text to send under the first, saying the person sends it and the site sends nothing to Snap; one note on trying the connection before approval. The
+  nine step ids are unchanged, so saved progress still reads.
+- **Found while checking.** The first part name ended in the English word «Snap», which the step's heading draws as plain text, so the browser check's English-isolation test failed on two steps; the name is now Arabic.
+- **Checks run.**
+  - `npm run typecheck` and `npm run build` pass; `npm test` 1016 of 1016, with `tests/guide-layout.test.mjs` (7) extended: the list of one-page guides, the parts, where each picture, copy and key field falls, and the
+    picture count (10).
+  - `qa/snapchat-flow.cjs` rewritten for the one-page selectors, 29 of 29 in Edge on the platforms fixture (the row, nine steps and three parts, every picture loaded and under its action, the return address under
+    action 2 of `form`, the keys under actions 2 and 3 with the secret as a password, the allowlist text under action 1 and the three review buttons, English isolated, a phone, the evening, no page error);
+    `qa/platforms-flow.cjs` 170 of 170.
+- **Not checked.** The signed-in sheet on the live site (no bypass is allowed); Snap's real API and what it answers an app that is not allowed; nothing was committed or pushed in this entry.

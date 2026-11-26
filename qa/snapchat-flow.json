@@ -1,6 +1,6 @@
 {
   "script": "qa/snapchat-flow.cjs",
-  "run": "2026-11-26T13:07:34.362Z",
+  "run": "2026-11-26T13:29:45.645Z",
   "checks": [
     {
       "name": "Snapchat is a platform with a setup, not a manual one: «غير متصلة» and «بدء الإعداد»",
@@ -8,64 +8,84 @@
       "detail": "سناب شات\nلم يبدأ الإعداد بعد.\nغير متصلة\nبدء الإعداد"
     },
     {
-      "name": "nine steps, in the order the owner walked them",
+      "name": "nine steps on one page, under the ids the saved progress knows, in the order the owner walked them",
       "pass": true,
-      "detail": "[\"1\\nسجّل الدخول بحساب سناب شات الذي سيملك الملف\",\"2\\nأنشئ حساب الأعمال في Ads Manager\",\"3\\nأنشئ الملف العام\",\"4\\nافتح Business details\",\"5\\nابدأ تطبيق OAuth\",\"6\\nاملأ نموذج التطبيق\",\"7\\nاحفظ السر فوراً\",\"8\\nالصق المعرّف والسر\",\"9\\nاطلب من Snap إضافة التطبيق\"]"
+      "detail": "account,business,profile,dashboard,oauth,form,secret,keys,allowlist"
     },
     {
-      "name": "it opens on the first step, with the sheet's title and the account link",
+      "name": "the list names its three parts and holds the nine steps in order",
+      "pass": true,
+      "detail": "{\"parts\":[\"الحساب والملف العام\",\"تطبيق الربط\",\"المفاتيح وموافقة سناب شات\"],\"items\":[\"account\",\"business\",\"profile\",\"dashboard\",\"oauth\",\"form\",\"secret\",\"keys\",\"allowlist\"]}"
+    },
+    {
+      "name": "«قبل البدء» says who the guide is for, counts nine steps and ten pictures, and says the connection can be tried before Snap approves",
+      "pass": true,
+      "detail": "قبل أن تبدأ\nتجهيز تطبيق Snapchat\n\nللمدير. تُجرى مرة واحدة، وتنتهي بإدخال معرّف العميل وسره في الموقع. يربط الموقع بها «ا"
+    },
+    {
+      "name": "each step carries the title it had in the classic sheet",
+      "pass": true,
+      "detail": "[\"تجهيز تطبيق Snapchat\",\"سجّل الدخول بحساب سناب شات الذي سيملك الملف\",\"أنشئ حساب الأعمال في Ads Manager\",\"أنشئ الملف العام\",\"افتح Business details\",\"ابدأ تطبيق OAuth\",\"املأ نموذج التطبيق\",\"احفظ السر فوراً\",\"الصق المعرّف والسر\",\"اطلب من Snap إضافة التطبيق\"]"
+    },
+    {
+      "name": "the first step opens first, with the account link",
       "pass": true,
       "detail": ""
     },
     {
-      "name": "step «account»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "name": "step 1 (account): reached from the list, its actions are listed, English is isolated, every picture loads at its own size, is drawn small and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"title\":\"سجّل الدخول بحساب سناب شات الذي سيملك الملف\",\"acts\":2,\"shots\":1,\"notes\":1,\"stray\":[]}"
+      "detail": "{\"at\":\"account\",\"acts\":2,\"imgs\":1,\"srcs\":[\"/guides/snapchat/signin.png\"],\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
     },
     {
-      "name": "step «business»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "name": "step 2 (business): reached from the list, its actions are listed, English is isolated, every picture loads at its own size, is drawn small and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"title\":\"أنشئ حساب الأعمال في Ads Manager\",\"acts\":5,\"shots\":2,\"notes\":1,\"stray\":[]}"
+      "detail": "{\"at\":\"business\",\"acts\":5,\"imgs\":2,\"srcs\":[\"/guides/snapchat/business-name.png\",\"/guides/snapchat/business-where.png\"],\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
     },
     {
-      "name": "step «profile»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "name": "step 3 (profile): reached from the list, its actions are listed, English is isolated, every picture loads at its own size, is drawn small and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"title\":\"أنشئ الملف العام\",\"acts\":2,\"shots\":1,\"notes\":1,\"stray\":[]}"
+      "detail": "{\"at\":\"profile\",\"acts\":2,\"imgs\":1,\"srcs\":[\"/guides/snapchat/public-profile.png\"],\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
     },
     {
-      "name": "step «dashboard»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "name": "step 4 (dashboard): reached from the list, its actions are listed, English is isolated, every picture loads at its own size, is drawn small and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"title\":\"افتح Business details\",\"acts\":3,\"shots\":2,\"notes\":1,\"stray\":[]}"
+      "detail": "{\"at\":\"dashboard\",\"acts\":3,\"imgs\":2,\"srcs\":[\"/guides/snapchat/menu.png\",\"/guides/snapchat/oauth-card.png\"],\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
     },
     {
-      "name": "step «oauth»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "name": "step 5 (oauth): reached from the list, its actions are listed, English is isolated, every picture loads at its own size, is drawn small and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"title\":\"ابدأ تطبيق OAuth\",\"acts\":2,\"shots\":2,\"notes\":1,\"stray\":[]}"
+      "detail": "{\"at\":\"oauth\",\"acts\":2,\"imgs\":2,\"srcs\":[\"/guides/snapchat/oauth-add.png\",\"/guides/snapchat/terms.png\"],\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
     },
     {
-      "name": "step «form»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "name": "step 6 (form): reached from the list, its actions are listed, English is isolated, every picture loads at its own size, is drawn small and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"title\":\"املأ نموذج التطبيق\",\"acts\":3,\"shots\":1,\"notes\":0,\"stray\":[]}"
+      "detail": "{\"at\":\"form\",\"acts\":3,\"imgs\":1,\"srcs\":[\"/guides/snapchat/oauth-form.png\"],\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
     },
     {
-      "name": "step «secret»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "name": "step 7 (secret): reached from the list, its actions are listed, English is isolated, every picture loads at its own size, is drawn small and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"title\":\"احفظ السر فوراً\",\"acts\":3,\"shots\":1,\"notes\":2,\"stray\":[]}"
+      "detail": "{\"at\":\"secret\",\"acts\":3,\"imgs\":1,\"srcs\":[\"/guides/snapchat/created.png\"],\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
     },
     {
-      "name": "step «keys»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "name": "step 8 (keys): reached from the list, its actions are listed, English is isolated, every picture loads at its own size, is drawn small and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"title\":\"الصق المعرّف والسر\",\"acts\":0,\"shots\":0,\"notes\":0,\"stray\":[]}"
+      "detail": "{\"at\":\"keys\",\"acts\":4,\"imgs\":0,\"srcs\":[],\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
     },
     {
-      "name": "step «allowlist»: reached from the list, its actions are listed, every picture loaded, English isolated",
+      "name": "step 9 (allowlist): reached from the list, its actions are listed, English is isolated, every picture loads at its own size, is drawn small and sits under the actions it shows",
       "pass": true,
-      "detail": "{\"title\":\"اطلب من Snap إضافة التطبيق\",\"acts\":0,\"shots\":0,\"notes\":0,\"stray\":[]}"
+      "detail": "{\"at\":\"allowlist\",\"acts\":3,\"imgs\":0,\"srcs\":[],\"loaded\":true,\"small\":true,\"inPart\":true,\"raw\":false,\"ltr\":true,\"wide\":true,\"lost\":[]}"
     },
     {
-      "name": "the pictures are where the walk put them: sign-in, the two Ads Manager screens, the profile, the menu and the card, the terms, the form, the created app",
+      "name": "the pictures are where the walk put them: sign-in, the two Ads Manager screens, the profile, the menu and the card, the button and the terms, the form, the created app",
       "pass": true,
-      "detail": "{\"account\":{\"title\":\"سجّل الدخول بحساب سناب شات الذي سيملك الملف\",\"acts\":2,\"shots\":1,\"notes\":1,\"pics\":1},\"business\":{\"title\":\"أنشئ حساب الأعمال في Ads Manager\",\"acts\":5,\"shots\":2,\"notes\":1,\"pics\":2},\"profile\":{\"title\":\"أنشئ الملف العام\",\"acts\":2,\"shots\":1,\"notes\":1,\"pics\":1},\"dashboard\":{\"title\":\"افتح Business details\",\"acts\":3,\"shots\":2,\"notes\":1,\"pics\":2},\"oauth\":{\"title\":\"ابدأ تطبيق OAuth\",\"acts\":2,\"shots\":2,\"notes\":1,\"pics\":2},\"form\":{\"title\":\"املأ نموذج التطبيق\",\"acts\":3,\"shots\":1,\"notes\":0,\"pics\":1},\"secret\":{\"title\":\"احفظ السر فوراً\",\"acts\":3,\"shots\":1,\"notes\":2,\"pics\":1},\"keys\":{\"title\":\"الصق المعرّف والسر\",\"acts\":0,\"shots\":0,\"notes\":0,\"pics\":0},\"allowlist\":{\"title\":\"اطلب من Snap إضافة التطبيق\",\"acts\":0,\"shots\":0,\"notes\":0,\"pics\":0}}"
+      "detail": "{\"account\":1,\"business\":2,\"profile\":1,\"dashboard\":2,\"oauth\":2,\"form\":1,\"secret\":1,\"keys\":0,\"allowlist\":0}"
+    },
+    {
+      "name": "the two Ads Manager screens sit under the actions that fill them, and the button and its terms under their own",
+      "pass": true,
+      "detail": "[[{\"acts\":[1,2],\"shots\":[\"business-name.png\"]},{\"acts\":[3,4,5],\"shots\":[\"business-where.png\"]}],[{\"acts\":[1],\"shots\":[\"oauth-add.png\"]},{\"acts\":[2],\"shots\":[\"terms.png\"]}]]"
     },
     {
       "name": "the secret step says to cover it before any picture and what to do if it is lost",
@@ -73,19 +93,29 @@
       "detail": ""
     },
     {
-      "name": "the return address is the site's own, filled in for this platform, and offered to copy",
+      "name": "the return address is the site's own, filled in for this platform, whole, under the action that pastes it",
       "pass": true,
-      "detail": "http://127.0.0.1:52882/api/platforms/callback/snapchat"
+      "detail": "http://127.0.0.1:60985/api/platforms/callback/snapchat"
     },
     {
-      "name": "the keys form asks for the two values by Snapchat's own names, and the secret is a password field",
+      "name": "the form step offers a button to copy it",
       "pass": true,
-      "detail": "8\nما يحتاجه الموقع منك\nالصق المعرّف والسر\nمعرّف العميل (Snap Client ID)\nسر العميل (Snap client secret key)\nخيارات أخرى\n\nيسأل الموقع المنصة أولاً، ولا يحفظ شيئاً إن رفضت. السر يذهب إلى الخزنة ولا يُعرض بعد ذلك، فإن أغلقت قبل الفحص أعدت إدخاله وحده.\n\nفحص وحفظ"
+      "detail": ""
     },
     {
-      "name": "the allowlist is a review: the request names the client id and the scope, says the secret was not shared, and the buttons are the review's own",
+      "name": "the keys step lists four actions, asks for the two values by Snapchat's own names under the actions that name them, the secret as a password, and ends on «فحص وحفظ»",
       "pass": true,
-      "detail": "Hello, we are the communications department of our organisation. We would like access to the Snap Public Profile API for our organisation's own Public Profile, to publish our own Stories and Spotlight"
+      "detail": "{\"todo\":4,\"id\":true,\"secret\":true,\"button\":\"فحص وحفظ\",\"text\":\"الخطوة 8 من 9 · المفاتيح وموافقة سناب شات\\n8\\nالصق المعرّف والسر\\n\\nSnap Client ID وSnap client secret key. الصقهما هنا وحدهما، ولا ترسلهما إلى أحد.\\n\\nافتح لوحة أعما\"}"
+    },
+    {
+      "name": "the allowlist is a review: its text to send is the first action's and names the client id and the scope, says the secret was not shared, and the buttons are the review's own",
+      "pass": true,
+      "detail": "{\"buttons\":[\"قدّمت الطلب\",\"وافقت المنصة\",\"أكتفي بالنشر اليدوي\"],\"request\":\"Hello, we are the communications department of our organisation. We would like access to the Snap Public Profile API for our organisation's own Public Profile, \"}"
+    },
+    {
+      "name": "it says plainly that the person sends the text and the site sends nothing to Snap, and that the connection can be tried before approval",
+      "pass": true,
+      "detail": "الخطوة 9 من 9 · المفاتيح وموافقة سناب شات\n9\nاطلب من Snap إضافة التطبيق\n\nالواجهة بدعوة من Snap فقط (allowlist): يُسجَّل الدخول، وقد ترفض Snap قراءة الملف حتى تُضيف التطبيق. أرسل إلى جهة الاتصال لديك في"
     },
     {
       "name": "no id or secret of any app is on the page",
@@ -108,7 +138,7 @@
       "detail": "0"
     },
     {
-      "name": "evening: the sheet and its pictures are drawn",
+      "name": "evening: the page and its pictures are drawn",
       "pass": true,
       "detail": ""
     },
@@ -119,7 +149,7 @@
     }
   ],
   "notes": [],
-  "total": 23,
-  "passed": 23,
+  "total": 29,
+  "passed": 29,
   "failed": 0
 }

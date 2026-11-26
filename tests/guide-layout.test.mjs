@@ -22,10 +22,10 @@ const fieldsAt = (laid) => {
   return at;
 };
 
-test('the guides drawn as one page are YouTube\'s, Instagram\'s and TikTok\'s, and only they', () => {
-  assert.deepEqual([...WHOLE_GUIDES].sort(), ['google', 'meta', 'tiktok']);
+test('the guides drawn as one page are YouTube\'s, Instagram\'s, TikTok\'s and Snapchat\'s, and only they', () => {
+  assert.deepEqual([...WHOLE_GUIDES].sort(), ['google', 'meta', 'snapchat', 'tiktok']);
   for (const k of WHOLE_GUIDES) assert.ok(GUIDES[k], k);
-  assert.ok(isWholeGuide('google') && isWholeGuide('meta') && isWholeGuide('tiktok') && !isWholeGuide('facebook') && !isWholeGuide('x') && !isWholeGuide('linkedin') && !isWholeGuide(null));
+  assert.ok(isWholeGuide('google') && isWholeGuide('meta') && isWholeGuide('tiktok') && isWholeGuide('snapchat') && !isWholeGuide('facebook') && !isWholeGuide('x') && !isWholeGuide('linkedin') && !isWholeGuide(null));
 });
 
 test('the parts of a guide shown as one page hold every step once, in the guide\'s own order, under a name', () => {
@@ -41,6 +41,8 @@ test('the parts of a guide shown as one page hold every step once, in the guide\
   assert.deepEqual(phasesOf(GUIDES.tiktok).map((p) => p.t), ['المؤسسة والتطبيق', 'بيئة التجربة', 'المفتاح والسر', 'المراجعة']);
   assert.deepEqual(phasesOf(GUIDES.meta).map((p) => p.t), ['حافظة الأعمال', 'التطبيق والإعداد', 'المعرّف والسر']);
   assert.deepEqual(phasesOf(GUIDES.meta)[1].steps.map((s) => s.id), ['app', 'usecase', 'config', 'redirect', 'skip', 'roles']);
+  assert.deepEqual(phasesOf(GUIDES.snapchat).map((p) => p.t), ['الحساب والملف العام', 'تطبيق الربط', 'المفاتيح وموافقة سناب شات']);
+  assert.deepEqual(phasesOf(GUIDES.snapchat).map((p) => p.steps.map((s) => s.id)), [['account', 'business', 'profile'], ['dashboard', 'oauth', 'form', 'secret'], ['keys', 'allowlist']]);
 });
 
 test('every action and every picture is drawn once and in order, and each picture comes after every action its rings point at', () => {
@@ -91,6 +93,12 @@ test('the pictures fall where a reader needs them', () => {
   assert.deepEqual(parts('meta', 'skip'), [[[1, 2], ['skip-webhooks.png']], [[3], ['skip-review.png']]], 'a picture of what not to do is drawn under the action about it');
   assert.deepEqual(parts('meta', 'roles'), [], 'a step with no actions and no pictures has no parts');
   assert.deepEqual(parts('meta', 'keys'), [[[1], ['basic-menu.png']], [[2, 3], ['basic-keys.png']], [[4], ['config-id.png']], [[5], []]]);
+  // Snapchat: the two Ads Manager screens, the menu and the card, the terms after the button that opens them.
+  assert.deepEqual(parts('snapchat', 'business'), [[[1, 2], ['business-name.png']], [[3, 4, 5], ['business-where.png']]]);
+  assert.deepEqual(parts('snapchat', 'dashboard'), [[[1, 2], ['menu.png']], [[3], ['oauth-card.png']]]);
+  assert.deepEqual(parts('snapchat', 'oauth'), [[[1], ['oauth-add.png']], [[2], ['terms.png']]]);
+  assert.deepEqual(parts('snapchat', 'form'), [[[1, 2, 3], ['oauth-form.png']]]);
+  assert.deepEqual(parts('snapchat', 'keys'), [[[1, 2, 3, 4], []]], 'the keys step has actions and fields, no picture');
   assert.deepEqual(parts('google', 'consent'), [[[1], ['menu.png']], [[2, 3], []]]);
   assert.deepEqual(parts('google', 'contact'), [[[1, 2, 3, 4], ['contact.png']]]);
   assert.deepEqual(parts('google', 'testusers'), [[[1, 2], ['test-users.png']], [[3, 4], ['add-users.png']], [[5], []]]);
@@ -104,6 +112,8 @@ test('a value to copy sits under the action that asks for it', () => {
   assert.deepEqual(at('tiktok', 'redirect'), { 'عنوان العودة': 2 });
   assert.deepEqual(at('meta', 'redirect'), { 'عنوان العودة': 2 });
   assert.deepEqual(at('tiktok', 'review'), { 'شرح المراجعة': 2 });
+  assert.deepEqual(at('snapchat', 'form'), { 'عنوان العودة': 2 });
+  assert.deepEqual(at('snapchat', 'allowlist'), { 'نص الرسالة': 1 }, 'the text to send is the first action\'s: the site sends nothing, the person does');
   assert.deepEqual(at('google', 'redirect'), { 'عنوان العودة ليوتيوب': 3 });
   assert.deepEqual(at('google', 'redirect_drive'), { 'عنوان العودة لـ Drive': 2 });
   // Every action a value is drawn under says where it is.
@@ -122,12 +132,16 @@ test('the fields of the keys sit under the actions that name them', () => {
   assert.deepEqual(keys('google'), { id: 2, secret: 3, more: 'after' });
   assert.deepEqual(keys('tiktok'), { id: 2, secret: 3, more: 4 });
   assert.deepEqual(keys('meta'), { id: 2, secret: 3, config: 4, more: 'after' });
+  assert.deepEqual(keys('snapchat'), { id: 2, secret: 3, more: 'after' });
   const metaKeys = GUIDES.meta.steps.find((s) => s.id === 'keys').todo;
   assert.match(metaKeys[1], /الحقل الأول/);
   assert.match(metaKeys[2], /الحقل الثاني/);
   assert.match(metaKeys[3], /الحقل الثالث/);
   assert.match(GUIDES.google.steps.find((s) => s.id === 'keys').todo[1], /الحقل الأول/);
   assert.match(GUIDES.tiktok.steps.find((s) => s.id === 'keys').todo[2], /الحقل الثاني/);
+  assert.match(GUIDES.snapchat.steps.find((s) => s.id === 'keys').todo[1], /الحقل الأول/);
+  assert.match(GUIDES.snapchat.steps.find((s) => s.id === 'keys').todo[2], /الحقل الثاني/);
+  assert.match(GUIDES.snapchat.steps.find((s) => s.id === 'keys').todo[3], /فحص وحفظ/);
   assert.match(GUIDES.tiktok.steps.find((s) => s.id === 'keys').todo[3], /خيارات أخرى/);
   assert.deepEqual(fieldsAt(layoutStep(GUIDES.facebook.steps.find((s) => s.kind === 'keys'), { keys: ['id', 'secret', 'config', 'more'] })), { id: 'after', secret: 'after', config: 'after', more: 'after' }, 'with no places, the fields follow');
 });
@@ -143,4 +157,5 @@ test('a step with pictures and no actions is one part of pictures; a picture is 
   assert.equal(shotCount(GUIDES.google), 9);
   assert.equal(shotCount(GUIDES.tiktok), 29);
   assert.equal(shotCount(GUIDES.meta), 22);
+  assert.equal(shotCount(GUIDES.snapchat), 10);
 });

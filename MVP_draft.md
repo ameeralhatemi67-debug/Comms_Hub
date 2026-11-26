@@ -4623,8 +4623,22 @@ simulation, and the platform's mode stays «مهمة يدوية» (a person post
   shown once and must be covered in any picture, and that the two ticked marketing boxes may be cleared. The last step is a review: it holds nothing back, and carries the text to send Snap (the client id
   and the scope, never the secret).
 - **States.** Snapchat is no longer «نشر يدوي»: it is «غير متصلة», then steps, then «متصلة», like the others. Its place in the add menu moves from «بلا ربط» to «تحتاج إعداداً مرة واحدة».
-- **Checks.** `tests/snapchat-connection.test.mjs` (14) against a fake platform, and the older tests that named Snapchat as manual updated; `qa/snapchat-flow.cjs` (23) walks the guide in the real sheet;
-  `qa/platforms-flow.cjs` (170) with its manual-platform example moved to WhatsApp's status.
+- **Checks.** `tests/snapchat-connection.test.mjs` (14) against a fake platform, and the older tests that named Snapchat as manual updated; `qa/snapchat-flow.cjs` (29) walks the guide in the real sheet
+  (84.1: as one page); `qa/platforms-flow.cjs` (170) with its manual-platform example moved to WhatsApp's status.
 - **Not built.** Publishing, deleting, scheduling, Snap Kit (Login Kit, Creative Kit), and any scope beyond the Public Profile API.
-- **Before it can be tried.** Run `20261126150000_snapchat_connection.sql` in the SQL editor of comms-hub. Make a new OAuth app (the first one's secret was shown in a picture sent to a chat), add
-  Snapchat from «إضافة منصة», enter the client id and secret in its keys step, and connect from «حسابات المنصات».
+- **Before it can be tried.** `20261126150000_snapchat_connection.sql` was run on comms-hub by the owner on 2026-11-26 («Success»). Make a new OAuth app (the first one's secret was shown in a picture sent
+  to a chat), add Snapchat from «إضافة منصة», enter the client id and secret in its keys step, and connect from «حسابات المنصات».
+
+### 84.1 One page, and who sends the request (2026-11-26)
+
+The owner saw the guide drawn as the old step sheet and asked for the layout the director chose for YouTube, Instagram and TikTok (67.10), and asked two things about the allowlist request.
+
+- **One page.** `'snapchat'` joins `WHOLE_GUIDES` (`src/lib/guide-layout.ts`). The nine steps keep their ids, so progress already saved still reads. Three parts, each name in Arabic only (the part's name is drawn as plain
+  text in the step's heading, where an English word would not be isolated): «الحساب والملف العام» (`account`, `business`, `profile`), «تطبيق الربط» (`dashboard`, `oauth`, `form`, `secret`) and «المفاتيح وموافقة سناب شات»
+  (`keys`, `allowlist`). The return address is the second action of `form`; the keys step has four actions and its two fields sit under the second and the third (`fieldsAt`); ten pictures, each under the action it shows.
+- **Who sends the request.** The site sends nothing to Snap. The last step is a review step: its first action is to copy the text, its second says the person sends it to their Snap contact by whatever way that contact
+  uses, and its third says to press «قدّمت الطلب» after sending and «وافقت المنصة» when Snap answers. The buttons only record where the request stands, as for every platform's review.
+- **Testing needs no approval.** The sign-in works before any allowlist (the owner's walk, 84), so the connection can be tried at once. What Snap answers when the profile is read for an app it has not allowed is still
+  unknown: the site says «رفضت Snap قراءة الملف العام…» if it is refused. The guide says so (the step's note and the guide's notes), and says it is not a reason to wait.
+- **Checks.** `tests/guide-layout.test.mjs` (7) holds the parts, where each picture, copy and key field falls, and the picture count (10); `qa/snapchat-flow.cjs` (29) clicks through the page on the fixture;
+  `qa/platforms-flow.cjs` (170) is unchanged.
