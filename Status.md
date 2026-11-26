@@ -31,8 +31,10 @@ related:
 - **Built, committed (`f8f8922`) and pushed by the owner** (`MVP_draft.md` section 84): Snapchat has a setup like the other platforms (nine steps from the owner's walk, ten blurred pictures in the setup guide
   and two in the connection guide) and a real sign-in that links the Public Profile of the account that signs in. `20261126150000_snapchat_connection.sql` was run on comms-hub by the owner on 2026-11-26
   («Success»). Database rules 37 of 37 on a private database.
-- **Since then, committed locally (`50abb9b`), not pushed** (`MVP_draft.md` 84.1): the guide is drawn as one page like YouTube's, Instagram's and TikTok's (`WHOLE_GUIDES`), in three parts. Unit tests 1016 of 1016,
-  `qa/snapchat-flow.cjs` 29 of 29, `qa/platforms-flow.cjs` 170 of 170, typecheck and build pass. The live site shows the old layout until it is pushed.
+- **Since then, committed (`50abb9b`) and pushed with the owner's yes on 2026-11-26** (`MVP_draft.md` 84.1): the guide is drawn as one page like YouTube's, Instagram's and TikTok's (`WHOLE_GUIDES`), in three parts. Unit tests 1016 of 1016,
+  `qa/snapchat-flow.cjs` 29 of 29, `qa/platforms-flow.cjs` 170 of 170, typecheck and build pass. The push (`f8f8922..5ddbd95`) also carried another session's `2ceb1a4` (X's link route).
+- **Not built yet: a «تجربة النشر» for Snapchat.** Snap's Public Profile API (read 2026-11-26) posts Stories, Saved Stories and Spotlights, deletes only Saved Stories and Spotlights (a Story expires), and reads stats
+  (views, viewers, shares, screenshots, subscribers; about a day late, 90 days back). All of it is allowlist-only, so none of it can be tried for real before Snap approves the client id.
 - **The owner's steps, in order:** make a new Snap OAuth app (the first one's secret was shown in a picture sent to a chat); add Snapchat from «إضافة منصة» and enter the client id and secret in its keys step;
   connect from «حسابات المنصات». The allowlist message is sent by the owner, never by the site; the connection can be tried before Snap answers.
 - **Unknown until that first connection:** what Snap answers an app it has not allowed. The consent screen worked without the allowlist; the call that reads the profile may be refused (`ACCESS_NOT_GRANTED`).
