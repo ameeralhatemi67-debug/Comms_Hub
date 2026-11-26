@@ -13,6 +13,9 @@
 //   advance  Meta's status, asked a few times within this call; once ready the address ends, the post is published, its link
 //            read and the result recorded, and the temporary copy goes to Drive's trash. Still preparing: the lease ends and the
 //            next call asks again. A container still preparing after half an hour is given up.
+// A post that Meta published and the database could not be told about is never called a failure of Meta's: the result is tried a few
+// times, and if it still cannot be recorded the row says PUBLISHED_UNRECORDED (the post is live, look at the account, do not send it
+// again). The same word closes a post whose container Meta already shows as published when a later call takes it.
 import { igContainerStatus, igCreateContainer, igMedia, igPublish, igPublishingLimit, type IgPost } from './instagram.ts';
 import type { Fetch } from './oauth.ts';
 import { IG_LINK_MINUTES, igProblem, type TestKind } from './test-rules.ts';
@@ -50,6 +53,9 @@ export const DUE_BUDGET_MS = 40_000;
 export const DUE_POLL_MS = 3_000;
 /** A container Meta is still preparing this long after the post was first taken is given up. */
 export const DUE_WAIT_MAX_MS = 30 * 60_000;
+/** A published post's result is tried this many times against the database, waiting a little longer between each. */
+export const DUE_RECORD_TRIES = 3;
+export const DUE_RECORD_WAIT_MS = 500;
 
 const quiet = <T>(p: PromiseLike<T>) => Promise.resolve(p).then(() => undefined, () => undefined);
 
@@ -102,7 +108,8 @@ export async function fireOne(d: DueDeps, it: DueItem, until: number): Promise<D
   for (;;) {
     const s = await igContainerStatus(d.fetch, { token: it.token, id: container });
     if ('error' in s) return PASSING.has(s.error) ? later() : fail(s.error);
-    if (s.state === 'published') return fail('PLATFORM_ERROR');
+    // Published by an earlier call whose result could not be recorded: the post is live and its id is lost, so it is never sent again.
+    if (s.state === 'published') return fail('PUBLISHED_UNRECORDED');
     if (s.state === 'ready') break;
     if (now() + DUE_POLL_MS >= until) return later();
     await sleep(DUE_POLL_MS);
@@ -115,7 +122,18 @@ export async function fireOne(d: DueDeps, it: DueItem, until: number): Promise<D
   const permalink = 'error' in m ? null : m.permalink;
   // Made through this account's own publishing address; its owner is checked when Meta names it.
   const owner = 'error' in m ? user : (m.owner ?? user);
-  const { data: state } = await call('direct_fire_done', { p_post: p.id, p_owner: owner, p_url: permalink });
+  // The post is live now. Recording it is tried a few times: a database that answers badly for a moment must not turn it into a failure.
+  let state: string | null = null;
+  for (let i = 0; i < DUE_RECORD_TRIES && state === null; i++) {
+    try {
+      const r = await call('direct_fire_done', { p_post: p.id, p_owner: owner, p_url: permalink });
+      if (!r.error && typeof r.data === 'string') state = r.data;
+    } catch {
+      // The network or the database: asked again.
+    }
+    if (state === null && i < DUE_RECORD_TRIES - 1) await sleep(DUE_RECORD_WAIT_MS * (i + 1));
+  }
+  if (state === null) return fail('PUBLISHED_UNRECORDED');
   await d.trash(it.temp_ref);
   return state === 'published' ? 'published' : 'failed';
 }

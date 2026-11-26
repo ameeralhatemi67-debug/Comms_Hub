@@ -3,6 +3,7 @@
 -- server, with its key alone and no session, fires only a due scheduled Instagram direct post, under a lease, reading the token once
 -- and writing that to the account's events; that it publishes only on the account's own Instagram; that it is written to «سجل النشاط»
 -- under its author and told, late or on time; that a post a day late, or on an account that is off, is given up and its author told;
+-- that a post Meta published and the site could not record is closed as PUBLISHED_UNRECORDED and its author is told it is live, not that it failed;
 -- and what a page may read and call. Only throwaway accounts (@t.test) are touched; the server key and the vault's token are
 -- throwaways inside the transaction. One transaction, rolled back at the end. Result: qa/direct-schedule-rules.json.
 begin;
@@ -200,6 +201,23 @@ set local role authenticated;
 select pg_temp.who('00000000-0000-0000-0000-0000000000a2');
 select pg_temp.c('69 the server''s view says what a post is for and when it is due', (select (x->>'purpose') || ' ' || (x->>'fired') || ' ' || (x->>'scheduled_for' is not null)::text
   from (select public.platform_test_get('k-sched-run-only', pg_temp.g('p1')::uuid) x) q), 'direct true true');
+
+-- 6. A post Meta published that the site could not record -------------------------------------------------------------------
+set local role authenticated;
+select pg_temp.who('00000000-0000-0000-0000-0000000000a2');
+select pg_temp.t('70 an eighth waits', $q$ select pg_temp.waiting('p8') $q$, 'ok');
+reset role;
+update public.platform_tests set scheduled_for = now() - interval '1 minute' where id = pg_temp.g('p8')::uuid;
+set local role anon;
+select pg_temp.nobody();
+select pg_temp.c('71 claimed', jsonb_array_length(public.direct_fire_claim('k-sched-run-only'))::text, '1');
+select pg_temp.t('72 the server says it was published and could not be recorded', $q$ select public.direct_fire_failed('k-sched-run-only', pg_temp.g('p8')::uuid, 'PUBLISHED_UNRECORDED') $q$, 'ok');
+reset role;
+select pg_temp.c('73 closed with that reason', (select state || ' ' || error from public.platform_tests where id = pg_temp.g('p8')::uuid), 'failed PUBLISHED_UNRECORDED');
+select pg_temp.c('74 its author is told it was published, that it was not recorded, and not to post it again', (select count(*)::text from public.notifications n
+  where n.recipient = 'dir@t.test' and n.tier = 'attention' and n.body like 'نُشر «قصة مجدولة» على إنستغرام · حساب الفحص لكن تعذّر تسجيله هنا.%' and n.body like '%ولا تُعد نشره.'), '1');
+select pg_temp.c('75 and is not told that it failed to publish: only the four earlier closings said so', (select count(*)::text from public.notifications n
+  where n.recipient = 'dir@t.test' and n.tier = 'attention' and n.body like 'تعذّر نشر «%'), '4');
 
 select n, k, v, expect from r where v is distinct from expect
 union all select 0, 'TOTAL', count(*)::text, (count(*) filter (where v is not distinct from expect))::text || ' passed' from r

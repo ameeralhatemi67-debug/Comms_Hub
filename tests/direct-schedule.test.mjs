@@ -16,7 +16,7 @@ import {
   lateMinutes,
   scheduleProblem,
 } from '../src/lib/platforms/test-rules.ts';
-import { DUE_BUDGET_MS, DUE_POLL_MS, DUE_WAIT_MAX_MS, dueItem, runDue } from '../src/lib/platforms/direct-due.ts';
+import { DUE_BUDGET_MS, DUE_POLL_MS, DUE_RECORD_TRIES, DUE_WAIT_MAX_MS, dueItem, runDue } from '../src/lib/platforms/direct-due.ts';
 import { DUE_KICK_GAP_MS, DUE_PATH, kickDue } from '../src/lib/platforms/due-kick.ts';
 import { calEntries, directPlace, entryTitle, grouped } from '../src/lib/work/planning.ts';
 import { HOLD } from '../src/lib/kit/hold-reasons.ts';
@@ -156,6 +156,42 @@ test('an advance step publishes a ready container; one preparing for half an hou
   assert.equal((await runDue(d2)).failed, 1);
   assert.deepEqual(old.calls.at(-1), ['direct_fire_failed', { p_key: 'k-test', p_test: item().id, p_error: 'WAIT_TOO_LONG' }]);
   assert.deepEqual(trashed, ['driveTemp_e1_000001']);
+});
+
+test("a published post whose result cannot be recorded is never called a failure of Meta's, and is never sent twice", async () => {
+  const published = (seen) => seen.filter((x) => x.url.endsWith('/media_publish')).length;
+  // The database answers badly twice, then well: the post is recorded as published, after exactly the tries it needed.
+  let n = 0;
+  const flaky = fakeDb([item()], { direct_fire_done: () => (++n < DUE_RECORD_TRIES ? { data: null, error: { message: 'canceling statement' } } : { data: 'published', error: null }) });
+  const m1 = fakeMeta();
+  const { d: d1, trashed: t1 } = deps(flaky, m1);
+  assert.deepEqual(await runDue(d1), { state: 'ran', claimed: 1, published: 1, waiting: 0, failed: 0 });
+  assert.equal(flaky.calls.filter(([fn]) => fn === 'direct_fire_done').length, DUE_RECORD_TRIES);
+  assert.equal(published(m1.seen), 1);
+  assert.deepEqual(t1, ['driveTemp_e1_000001']);
+  // The database never answers (an error each time, or an exception): the row says the post is live and unrecorded, once, with no second send.
+  for (const answer of [() => ({ data: null, error: { message: 'down' } }), () => { throw new Error('network'); }]) {
+    const dead = fakeDb([item()], { direct_fire_done: answer });
+    const m2 = fakeMeta();
+    const { d: d2, trashed: t2 } = deps(dead, m2);
+    assert.deepEqual(await runDue(d2), { state: 'ran', claimed: 1, published: 0, waiting: 0, failed: 1 });
+    assert.equal(dead.calls.filter(([fn]) => fn === 'direct_fire_done').length, DUE_RECORD_TRIES, 'tried a few times, not for ever');
+    assert.deepEqual(dead.calls.find(([fn]) => fn === 'direct_fire_failed')[1], { p_key: 'k-test', p_test: item().id, p_error: 'PUBLISHED_UNRECORDED' });
+    assert.equal(published(m2.seen), 1, 'Meta was asked to publish once');
+    assert.deepEqual(t2, ['driveTemp_e1_000001']);
+  }
+  // A later call that takes the post and finds Meta's container already published (the earlier call died before it could say so) says the same
+  // and publishes nothing.
+  const later = fakeDb([item({ step: 'advance', container: '17900000000000001' })]);
+  const m3 = fakeMeta({ status: ['PUBLISHED'] });
+  const { d: d3 } = deps(later, m3);
+  assert.deepEqual(await runDue(d3), { state: 'ran', claimed: 1, published: 0, waiting: 0, failed: 1 });
+  assert.equal(published(m3.seen), 0, 'a published container is never published again');
+  assert.deepEqual(later.calls.find(([fn]) => fn === 'direct_fire_failed')[1].p_error, 'PUBLISHED_UNRECORDED');
+  assert.ok(!later.calls.some(([fn]) => fn === 'direct_fire_done'));
+  // It has words, and they say the post exists: look at the account and do not post it again.
+  assert.match(TEST_ERROR_AR.PUBLISHED_UNRECORDED, /نُشر المنشور/);
+  assert.match(TEST_ERROR_AR.PUBLISHED_UNRECORDED, /لا تُعد النشر/);
 });
 
 test('Meta refusing fails the post with its reason; Meta unreachable waits for the next call; the daily limit stops it', async () => {

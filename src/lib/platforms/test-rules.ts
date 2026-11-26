@@ -225,6 +225,7 @@ export const TEST_ERROR_AR: Record<string, string> = {
   PROCESSING_FAILED: 'تعذّر على إنستغرام تجهيز الملف. جرّب ملفاً آخر.',
   CONTAINER_EXPIRED: 'انتهت مهلة تجهيز المنشور عند إنستغرام. ابدأ التجربة من جديد.',
   WAIT_TOO_LONG: 'أطال إنستغرام تجهيز الملف. ابدأ التجربة من جديد بملف أقصر.',
+  PUBLISHED_UNRECORDED: 'نُشر المنشور عند إنستغرام لكن تعذّر تسجيله هنا. افتح حساب إنستغرام وتأكد منه، ولا تُعد النشر.',
   TEMP_UPLOAD_FAILED: 'تعذّر رفع الملف إلى المساحة المؤقتة في Google Drive.',
   TEMP_MISMATCH: 'الملف المرفوع لا يطابق هذه التجربة.',
   DRIVE_NOT_CONNECTED: 'لم يُربط Google Drive بعد، وفيه يُحفظ الملف مؤقتاً.',

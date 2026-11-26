@@ -1,15 +1,15 @@
 {
   "script": "supabase/tests/direct_schedule_rules.sql",
-  "script_md5": "a8b2d6b86f1a13e78e16e49043ecfe29",
+  "script_md5": "bb43d16b088d644ae87a955f18d951ef",
   "migration": {
-    "file": "supabase/migrations/20261105210000_direct_schedule.sql",
-    "file_md5": "d73e9f7c41be8770b7ae56dbb0eaf02b",
+    "file": "supabase/migrations/20261126200000_direct_published_unrecorded.sql",
+    "file_md5": "332a386055f8c5dee3f24bd666930917",
     "applied": "this run is on a private container and touched nothing"
   },
   "how": "A private Docker container of public.ecr.aws/supabase/postgres:17.11.0.004, no published port, removed after the run; every migration replayed in order.",
-  "run": "2026-11-05T10:55:44.041Z",
-  "migrations_replayed": 72,
+  "run": "2026-11-26T18:53:27.586Z",
+  "migrations_replayed": 81,
   "differ": [],
-  "total": 69,
-  "passed": 69
+  "total": 75,
+  "passed": 75
 }
